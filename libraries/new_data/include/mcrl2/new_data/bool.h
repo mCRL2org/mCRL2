@@ -377,7 +377,7 @@ namespace mcrl2 {
       }
 
       /// \brief Add sort, constructors, mappings and equations for bool_
-      /// \param specification A specification
+      /// \param specification a specification
       inline
       void add_bool__to_specification(data_specification& specification)
       {
@@ -385,6 +385,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(boost::make_iterator_range(bool__generate_constructors_code()));
          specification.add_system_defined_mappings(boost::make_iterator_range(bool__generate_functions_code()));
          specification.add_system_defined_equations(boost::make_iterator_range(bool__generate_equations_code()));
+
       }
     } // namespace sort_bool_
 

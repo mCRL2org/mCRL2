@@ -18,9 +18,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/data_expression_utility.h"
 #include "mcrl2/new_data/variable.h"
-#include "mcrl2/new_data/utility.h"
 
 namespace mcrl2 {
 

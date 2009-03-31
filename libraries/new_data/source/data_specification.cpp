@@ -207,27 +207,14 @@ namespace mcrl2 {
       if (sort == sort_real_::real_())
       {
         sort_real_::add_real__to_specification(*this);
-        if (m_sorts.find(sort_int_::int_()) == m_sorts.end())
-        {
-          import_system_defined_sort(sort_int_::int_());
-        }
       }
       else if (sort == sort_int_::int_())
       {
         sort_int_::add_int__to_specification(*this);
-        if (m_sorts.find(sort_nat::nat()) == m_sorts.end())
-        {
-          import_system_defined_sort(sort_nat::nat());
-        }
       }
       else if (sort == sort_nat::nat())
       {
-        add_system_defined_sort(sort_nat::natpair());
         sort_nat::add_nat_to_specification(*this);
-        if (m_sorts.find(sort_pos::pos()) == m_sorts.end())
-        {
-          sort_pos::add_pos_to_specification(*this);
-        }
       }
       else if (sort == sort_pos::pos())
       {

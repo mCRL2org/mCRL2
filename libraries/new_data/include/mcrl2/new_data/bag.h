@@ -1053,7 +1053,7 @@ namespace mcrl2 {
       }
 
       /// \brief Add sort, constructors, mappings and equations for bag
-      /// \param specification A specification
+      /// \param specification a specification
       /// \param the sort of elements stored by the container
       inline
       void add_bag_to_specification(data_specification& specification, sort_expression const& element)
@@ -1062,6 +1062,13 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(boost::make_iterator_range(bag_generate_constructors_code(element)));
          specification.add_system_defined_mappings(boost::make_iterator_range(bag_generate_functions_code(element)));
          specification.add_system_defined_equations(boost::make_iterator_range(bag_generate_equations_code(element)));
+
+         sort_nat::add_nat_to_specification(specification);
+         sort_set_::add_set__to_specification(specification, element);
+         sort_fbag::add_fbag_to_specification(specification, element);
+         sort_bool_::add_bool__to_specification(specification);
+         sort_pos::add_pos_to_specification(specification);
+         sort_fset::add_fset_to_specification(specification, element);
       }
     } // namespace sort_bag
 

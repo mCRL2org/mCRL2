@@ -17,6 +17,8 @@
 #include "mcrl2/new_data/variable.h"
 #include "mcrl2/new_data/abstraction.h"
 #include "mcrl2/new_data/expression_traits.h"
+#include "mcrl2/new_data/bool.h"
+#include "mcrl2/new_data/utility.h"
 
 namespace mcrl2 {
 

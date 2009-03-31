@@ -355,29 +355,37 @@ void test_constructor()
 
 void compare_for_equality(data_specification const& left, data_specification const& right)
 {
-  BOOST_CHECK(left == right);
+  if (!(detail::data_specification_to_aterm_data_spec(left) == detail::data_specification_to_aterm_data_spec(right))) {
+    BOOST_CHECK(left == right);
 
-  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
-            << "Specification detailed comparison:" << std::endl;
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
+              << "Specification detailed comparison:" << std::endl;
 
-  if (left.sorts() != right.sorts()) {
-    std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
-    std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
-  }
-  if (left.constructors() != right.constructors()) {
-    std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-    std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
-  }
-  if (left.mappings() != right.mappings()) {
-    std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
-    std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
-  }
-  if (left.equations() != right.equations()) {
-    std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
-    std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
-  }
+    if (left.sorts() != right.sorts()) {
+      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+    }
+    if (left.constructors() != right.constructors()) {
+      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
+      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+    }
+    if (left.mappings() != right.mappings()) {
+      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+    }
+    if (left.equations() != right.equations()) {
+      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+    }
 
-  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+  }
+}
+
+template < typename ForwardTraversalIterator, typename Expression >
+bool search(boost::iterator_range< ForwardTraversalIterator > const& range, Expression const& expression)
+{
+  return std::find(range.begin(), range.end(), expression) != range.end();
 }
 
 void test_system_defined()
@@ -385,9 +393,9 @@ void test_system_defined()
   data_specification specification(parse_data_specification(
     "sort S;"
     "map f: Set(S);"));
-std::clog << "Sorts (left) " << pp(specification.sorts()) << std::endl;
 
-  BOOST_CHECK(boost::distance(specification.sorts()) == 3); // S, Set(S), Bool
+  BOOST_CHECK(search(specification.sorts(), sort_set_::set_(basic_sort("S"))));
+  BOOST_CHECK(search(specification.sorts(), sort_fset::fset(basic_sort("S"))));
 
   specification = parse_data_specification(
     "sort D = Set(Nat);"

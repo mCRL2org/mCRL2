@@ -1682,7 +1682,7 @@ namespace mcrl2 {
       }
 
       /// \brief Add sort, constructors, mappings and equations for real_
-      /// \param specification A specification
+      /// \param specification a specification
       inline
       void add_real__to_specification(data_specification& specification)
       {
@@ -1690,6 +1690,11 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(boost::make_iterator_range(real__generate_constructors_code()));
          specification.add_system_defined_mappings(boost::make_iterator_range(real__generate_functions_code()));
          specification.add_system_defined_equations(boost::make_iterator_range(real__generate_equations_code()));
+
+         sort_int_::add_int__to_specification(specification);
+         sort_bool_::add_bool__to_specification(specification);
+         sort_pos::add_pos_to_specification(specification);
+         sort_nat::add_nat_to_specification(specification);
       }
     } // namespace sort_real_
 

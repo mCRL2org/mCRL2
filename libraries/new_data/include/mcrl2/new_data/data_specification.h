@@ -343,7 +343,6 @@ namespace mcrl2 {
       inline
       void add_sort(const sort_expression& s)
       {
-        assert(std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end());
         // add aliases as names for sort expressions that are non-aliases
         m_sorts.insert((s.is_alias() && alias(s).reference().is_basic_sort()) ?
            alias(alias(s).name(), find_referenced_sort(alias(s).reference())) : s);
@@ -375,7 +374,6 @@ namespace mcrl2 {
       void add_constructor(const function_symbol& f)
       {
         constructors_const_range cs(constructors());
-        assert(std::count(cs.begin(), cs.end(), f) == 0);
         assert(std::find(m_mappings.begin(), m_mappings.end(), f) == m_mappings.end());
         m_constructors.insert(std::make_pair(f.sort().target_sort(), f));
         make_system_defined_complete(f.sort().target_sort());
@@ -428,7 +426,6 @@ namespace mcrl2 {
       inline
       void add_equation(const data_equation& e)
       {
-        assert(std::count(m_equations.begin(), m_equations.end(), e) == 0);
         m_equations.insert(e);
       }
 

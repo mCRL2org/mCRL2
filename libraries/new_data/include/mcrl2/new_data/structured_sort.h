@@ -31,7 +31,6 @@
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/standard.h"
 #include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/data_expression_utility.h"
 
 namespace mcrl2 {
 

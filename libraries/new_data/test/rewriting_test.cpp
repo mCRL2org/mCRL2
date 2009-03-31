@@ -308,15 +308,12 @@ void list_rewrite_test() {
 
 void set_rewrite_test() {
   using namespace mcrl2::new_data::sort_set_;
+  using namespace mcrl2::new_data::sort_fset;
   using namespace mcrl2::new_data::sort_nat;
   using namespace mcrl2::new_data::sort_bool_;
 
   data_specification specification = parse_data_specification(
     "sort A = Set(Nat);"
-    "map  s, s1, s2 : Set(Nat);"
-    "eqn  s = {1, 2};"
-    "     s1 = {1};"
-    "     s2 = {2};"
   );
 
   new_data::rewriter R(specification);
@@ -327,9 +324,9 @@ void set_rewrite_test() {
   data_expression p1(R(pos2nat(parse_data_expression("1"))));
   data_expression p2(R(pos2nat(parse_data_expression("2"))));
 
-  data_expression s(R(new_data::function_symbol("s", set_nat)));
-  data_expression s1(R(new_data::function_symbol("s1", set_nat)));
-  data_expression s2(R(new_data::function_symbol("s2", set_nat)));
+  data_expression s1(R(fsetinsert(nat(), p1, fset_empty(nat()))));
+  data_expression s2(R(fsetinsert(nat(), p2, fset_empty(nat()))));
+  data_expression s(R(fsetinsert(nat(), p1, s2)));
 
   data_rewrite_test(R, setin(nat(), p0, s), false_());
   data_rewrite_test(R, setin(nat(), p1, s), true_());
@@ -351,15 +348,12 @@ void set_rewrite_test() {
 
 void bag_rewrite_test() {
   using namespace mcrl2::new_data::sort_bag;
+  using namespace mcrl2::new_data::sort_fbag;
   using namespace mcrl2::new_data::sort_nat;
   using namespace mcrl2::new_data::sort_bool_;
 
   data_specification specification = parse_data_specification(
     "sort A = Bag(Nat);"
-    "map  s, s1, s2 : Bag(Nat);"
-    "eqn  s = {1:1, 2:2};"
-    "     s1 = {1:1};"
-    "     s2 = {2:2};"
   );
 
   new_data::rewriter R(specification);
@@ -370,9 +364,9 @@ void bag_rewrite_test() {
   data_expression p1(R(pos2nat(parse_data_expression("1"))));
   data_expression p2(R(pos2nat(parse_data_expression("2"))));
 
-  data_expression s(R(new_data::function_symbol("s", bag_nat)));
-  data_expression s1(R(new_data::function_symbol("s1", bag_nat)));
-  data_expression s2(R(new_data::function_symbol("s2", bag_nat)));
+  data_expression s1(R(fbaginsert(nat(), p1, p1, fbag_empty(nat()))));
+  data_expression s2(R(fbaginsert(nat(), p2, p2, fbag_empty(nat()))));
+  data_expression s(R(fbaginsert(nat(), p1, p1, s2)));
 
   data_rewrite_test(R, bagin(nat(), p0, s), false_());
   data_rewrite_test(R, bagin(nat(), p1, s), true_());

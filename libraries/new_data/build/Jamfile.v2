@@ -11,6 +11,7 @@ mcrl2-library new_data
          [ glob source/detail/prover/*.cpp ]
          [ glob source/detail/enumerate/*.cpp ]
        : <library>/libraries//core
+         <use>/site-config//boost
          <use>/libraries/utilities//exception
          <include>../include
          <library>/site-config//cvc

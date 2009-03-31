@@ -2034,7 +2034,7 @@ namespace mcrl2 {
       }
 
       /// \brief Add sort, constructors, mappings and equations for nat
-      /// \param specification A specification
+      /// \param specification a specification
       inline
       void add_nat_to_specification(data_specification& specification)
       {
@@ -2042,6 +2042,10 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(boost::make_iterator_range(nat_generate_constructors_code()));
          specification.add_system_defined_mappings(boost::make_iterator_range(nat_generate_functions_code()));
          specification.add_system_defined_equations(boost::make_iterator_range(nat_generate_equations_code()));
+
+         sort_bool_::add_bool__to_specification(specification);
+         sort_pos::add_pos_to_specification(specification);
+         specification.add_system_defined_sort(natpair());
       }
     } // namespace sort_nat
 

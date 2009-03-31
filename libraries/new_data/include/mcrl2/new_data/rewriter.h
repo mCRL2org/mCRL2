@@ -64,14 +64,19 @@ namespace new_data {
 
       ATermAppl implement(data_specification const& specification) const
       {
-        for (data_specification::aliases_const_range r(specification.aliases()); !r.empty(); r.advance_begin(1))
+        atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
+
+        // Convert to data specification again to get the additional aliases that have been introduced (legacy)
+        data_specification  specification_with_more_aliases(result);
+
+        for (data_specification::aliases_const_range r(specification_with_more_aliases.aliases()); !r.empty(); r.advance_begin(1))
         {
           m_substitution_context = (r.front().reference().is_container_sort()) ?
             core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context) :
             core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
         }
 
-        return detail::data_specification_to_aterm_data_spec(specification);
+        return result;
       }
 
       /// \brief Performs data implementation before rewriting
