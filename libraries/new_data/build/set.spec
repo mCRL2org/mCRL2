@@ -58,5 +58,5 @@ eqn {}  =  @set(@false_, @fset_empty);
     @or_(@false_, f)  =  f;
     @or_(f, @true_)  =  @true_;
     @or_(@true_, f)  =  @true_;
-    
+
 

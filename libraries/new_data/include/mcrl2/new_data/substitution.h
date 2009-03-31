@@ -180,7 +180,13 @@ namespace mcrl2 {
         /// \param[in] v the variable for which to give the associated expression
         /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
         expression_type operator()(variable_type const& v) const {
-          return lookup(v);
+          typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
+
+          if (i == m_map.end()) {
+            return expression_type(v);
+          }
+
+          return i->second;
         }
 
         /** \brief Apply substitution to an expression

@@ -320,26 +320,28 @@ void set_rewrite_test() {
 
   sort_expression set_nat(sort_set_::set_(nat()));
 
+  data_expression empty(R(emptyset(nat())));
+
   data_expression p0(R(parse_data_expression("0")));
   data_expression p1(R(pos2nat(parse_data_expression("1"))));
   data_expression p2(R(pos2nat(parse_data_expression("2"))));
 
-  data_expression s1(R(fsetinsert(nat(), p1, fset_empty(nat()))));
-  data_expression s2(R(fsetinsert(nat(), p2, fset_empty(nat()))));
-  data_expression s(R(fsetinsert(nat(), p1, s2)));
+  data_expression s1(R(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat())))));
+  data_expression s2(R(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat())))));
+  data_expression s(R(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat()))))));
 
   data_rewrite_test(R, setin(nat(), p0, s), false_());
   data_rewrite_test(R, setin(nat(), p1, s), true_());
   data_rewrite_test(R, setin(nat(), p2, s), true_());
 
-  data_rewrite_test(R, setunion_(nat(), s, emptyset(nat())), s);
+  data_rewrite_test(R, setunion_(nat(), s, empty), s);
   data_rewrite_test(R, setunion_(nat(), s1, s2), s);
 
-  data_rewrite_test(R, setintersection(nat(), s, emptyset(nat())), R(emptyset(nat())));
+  data_rewrite_test(R, setintersection(nat(), s, empty), empty);
   data_rewrite_test(R, setintersection(nat(), s, s1), s1);
   data_rewrite_test(R, setintersection(nat(), s, s2), s2);
 
-  data_rewrite_test(R, setdifference(nat(), s, emptyset(nat())), s);
+  data_rewrite_test(R, setdifference(nat(), s, empty), s);
   data_rewrite_test(R, setdifference(nat(), s, s1), s2);
   data_rewrite_test(R, setdifference(nat(), s, s2), s1);
 
@@ -350,6 +352,7 @@ void bag_rewrite_test() {
   using namespace mcrl2::new_data::sort_bag;
   using namespace mcrl2::new_data::sort_fbag;
   using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::new_data::sort_pos;
   using namespace mcrl2::new_data::sort_bool_;
 
   data_specification specification = parse_data_specification(
@@ -360,13 +363,15 @@ void bag_rewrite_test() {
 
   sort_expression bag_nat(sort_bag::bag(nat()));
 
+  data_expression empty(R(emptybag(nat())));
+
   data_expression p0(R(parse_data_expression("0")));
   data_expression p1(R(pos2nat(parse_data_expression("1"))));
   data_expression p2(R(pos2nat(parse_data_expression("2"))));
 
-  data_expression s1(R(fbaginsert(nat(), p1, p1, fbag_empty(nat()))));
-  data_expression s2(R(fbaginsert(nat(), p2, p2, fbag_empty(nat()))));
-  data_expression s(R(fbaginsert(nat(), p1, p1, s2)));
+  data_expression s1(R(bagfbag(nat(), fbaginsert(nat(), p1, pos("1"), fbag_empty(nat())))));
+  data_expression s2(R(bagfbag(nat(), fbaginsert(nat(), p2, pos("2"), fbag_empty(nat())))));
+  data_expression s(R(bagfbag(nat(), fbaginsert(nat(), p1, pos("1"), fbaginsert(nat(), p2, pos("2"), fbag_empty(nat()))))));
 
   data_rewrite_test(R, bagin(nat(), p0, s), false_());
   data_rewrite_test(R, bagin(nat(), p1, s), true_());
@@ -376,14 +381,14 @@ void bag_rewrite_test() {
   data_rewrite_test(R, bagcount(nat(), p1, s), p1);
   data_rewrite_test(R, bagcount(nat(), p2, s), p2);
 
-  data_rewrite_test(R, bagjoin(nat(), s, emptybag(nat())), s);
+  data_rewrite_test(R, bagjoin(nat(), s, empty), s);
   data_rewrite_test(R, bagjoin(nat(), s1, s2), s);
 
-  data_rewrite_test(R, bagintersect(nat(), s, emptybag(nat())), R(emptybag(nat())));
+  data_rewrite_test(R, bagintersect(nat(), s, empty), empty);
   data_rewrite_test(R, bagintersect(nat(), s, s1), s1);
   data_rewrite_test(R, bagintersect(nat(), s, s2), s2);
 
-  data_rewrite_test(R, bagdifference(nat(), s, emptybag(nat())), s);
+  data_rewrite_test(R, bagdifference(nat(), s, empty), s);
   data_rewrite_test(R, bagdifference(nat(), s, s1), s2);
   data_rewrite_test(R, bagdifference(nat(), s, s2), s1);
 }
