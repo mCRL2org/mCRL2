@@ -654,21 +654,13 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
         }
         if ( ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_glcanvas == FindFocus() ) )
         {
-	      if (!m_statusbar->GetStatusText().IsEmpty()) {
-		    m_statusbar->PopStatusText();
-	      }
-          if ( m_statusbar->GetStatusText() != wxEmptyString ) {
-            m_statusbar->PopStatusText();
-            m_statusbar->PushStatusText( status_text );
-          }
-          else
-          {
-            m_statusbar->PushStatusText( status_text );
-          }
+          if ( m_statusbar->GetStatusText() == wxEmptyString ) m_statusbar->PopStatusText();
+          m_statusbar->PushStatusText( status_text );
         }
       }
       else
       {
+        if ( m_statusbar->GetStatusText() == wxEmptyString ) m_statusbar->PopStatusText();
         m_statusbar->PushStatusText(wxEmptyString);
       }
     }
@@ -676,6 +668,7 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
     {
       if ( ( m_statusbar->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) && ( m_glcanvas == FindFocus() ) )
       {
+        if ( m_statusbar->GetStatusText() == wxEmptyString ) m_statusbar->PopStatusText();
         m_statusbar->PopStatusText();
       }
     }

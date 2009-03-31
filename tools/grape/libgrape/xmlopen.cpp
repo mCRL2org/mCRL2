@@ -1876,7 +1876,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                     }
                     else
                     {
-                      /* invalid node name! */
+                      // invalid node name! 
 /*                      return false;
                     }
 
@@ -1893,7 +1893,7 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                 } 
                 else
                 {
-                  /* invalid! NB: onchannelcommunication */
+                  // invalid! NB: onchannelcommunication 
 //                  return false;
                 }
 
