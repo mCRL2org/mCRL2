@@ -49,7 +49,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
  
   // create sizer
   wxSizer *condition_sizer = new wxBoxSizer(wxHORIZONTAL);
-  condition_sizer->Add( text);
+  condition_sizer->Add( text );
   condition_sizer->Add( m_condition_input );
   vsizer->Add( condition_sizer );
   

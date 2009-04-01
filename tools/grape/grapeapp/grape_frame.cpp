@@ -654,7 +654,7 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
         }
         if ( ( m_statusbar->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) || ( m_glcanvas == FindFocus() ) )
         {
-          while ( !m_statusbar->GetStatusText().IsEmpty() ) m_statusbar->PopStatusText();
+          if ( m_statusbar->GetStatusText() == wxEmptyString ) m_statusbar->PopStatusText();
           m_statusbar->PushStatusText( status_text );
         }
       }
