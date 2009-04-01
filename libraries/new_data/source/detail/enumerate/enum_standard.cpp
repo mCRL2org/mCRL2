@@ -15,6 +15,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/new_data/alias.h"
 #include "mcrl2/new_data/detail/enum/standard.h"
 
 #include "workarounds.h" // DECL_A
@@ -387,7 +388,6 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                         fs_reset();
                 } else {
                         ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
-std::clog << "SORT " << atermpp::aterm(sort) << std::endl;
                         if ( ATisEmpty(l) )
                         {
                                 gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);
@@ -612,7 +612,14 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool cl
         info.constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(data_spec,0),0)),50);
         for (ATermList sorts=ATLgetArgument(ATAgetArgument(data_spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
         {
+          if (mcrl2::new_data::sort_expression(ATgetFirst(sorts)).is_alias())
+          {
+                ATtablePut(info.constructors,reinterpret_cast< ATerm >(static_cast< ATermAppl >(mcrl2::new_data::alias(atermpp::aterm_appl(ATgetFirst(sorts))).name())),(ATerm) ATmakeList0());
+          }
+          else
+          {
                 ATtablePut(info.constructors,ATgetFirst(sorts),(ATerm) ATmakeList0());
+          }
         }
         for (ATermList conss = ATLgetArgument(ATAgetArgument(data_spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
         {

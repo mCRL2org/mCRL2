@@ -27,7 +27,7 @@ namespace mcrl2 {
           BOOST_ASSERT((boost::is_convertible< variable_type, expression_type >::value));
 
           s(e) == e;
-          s(v) == v;
+          s(v) == static_cast< expression_type >(v);
         }
       };
 

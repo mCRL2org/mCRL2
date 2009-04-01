@@ -344,10 +344,12 @@ namespace mcrl2 {
       void add_sort(const sort_expression& s)
       {
         // add aliases as names for sort expressions that are non-aliases
-        m_sorts.insert((s.is_alias() && alias(s).reference().is_basic_sort()) ?
-           alias(alias(s).name(), find_referenced_sort(alias(s).reference())) : s);
-        add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
-        add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+        m_sorts.insert(s);
+        if (!s.is_alias())
+        {
+          add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
+          add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+        }
         make_system_defined_complete(s);
       }
 

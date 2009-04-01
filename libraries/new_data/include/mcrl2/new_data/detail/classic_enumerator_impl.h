@@ -97,7 +97,7 @@ namespace mcrl2 {
                                expression_type const& c, substitution_type const& s, Evaluator const& e) :
                              m_shared_context(context), m_evaluator(e), m_condition(c), m_substitution(s) {
 
-            m_evaluator(c); // adds the proper rewrite rules (for lecacy Enumerator/Rewriter)
+            m_evaluator(c); // adds the proper rewrite rules (for legacy Enumerator/Rewriter)
           }
 
           bool initialise(std::set< variable_type > const& v) {
@@ -121,8 +121,7 @@ namespace mcrl2 {
             }
 
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(variables,
-                  converter.translate(m_condition))));
+                        m_shared_context->m_enumerator.findSolutions(variables, converter.translate(m_condition))));
 
             while (increment()) {
               if (Selector::test(m_evaluator(m_condition, m_substitution))) {
@@ -164,9 +163,8 @@ namespace mcrl2 {
 
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
-std::clog << "ASSIGNMENT " << *i << std::endl;
-                m_substitution[static_cast< variable_type >(converter.translate((*i)(1)))] =
-                               converter.translate((*i)(2));
+                m_substitution[static_cast< variable_type >((*i)(0))] =
+                               converter.translate((*i)(1));
               }
 
               if (Selector::test(m_evaluator(m_condition, m_substitution))) {
@@ -212,7 +210,7 @@ std::clog << "ASSIGNMENT " << *i << std::endl;
             /// Limitations in EnumeratorStandard force passing a rewriter
             Evaluator evaluator(specification);
 
-            // e.get_rewriter() is not required but at this moment new_data::rewriter is currently the only model of Evaluator
+            // e.get_rewriter() is not required but at this moment new_data::rewriter the only model of Evaluator
             create(target, boost::shared_ptr< shared_context_type >(
                   new shared_context_type(specification, evaluator.get_rewriter())), v, c, evaluator, s);
           }
@@ -224,7 +222,7 @@ std::clog << "ASSIGNMENT " << *i << std::endl;
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
-            if ((v.empty() && !Selector::test(target->m_evaluator(c))) || !target->initialise(v)) {
+            if (v.empty() || !target->initialise(v)) {
               target.reset();
             }
           }

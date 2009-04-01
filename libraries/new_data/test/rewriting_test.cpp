@@ -427,16 +427,16 @@ void structured_sort_rewrite_test() {
 
   new_data::structured_sort ls(boost::make_iterator_range(constructors));
 
-  specification.add_sort(ls);
-
+  specification.add_sort(alias(basic_sort("D"), ls));
+std::clog << "S" << new_data::pp(specification) << std::endl;
   new_data::rewriter R(specification);
 
   data_expression c0(constructors[0].constructor_function(ls));
   data_expression c1(constructors[1].constructor_function(ls));
   data_expression a(application(constructors[2].constructor_function(ls), true_()));
   data_expression b(application(constructors[3].constructor_function(ls), false_()));
-  data_expression n0(pos2nat(parse_data_expression("0")));
-  data_expression n1(pos2nat(parse_data_expression("1")));
+  data_expression n0(nat("0"));
+  data_expression n1(nat("1"));
   data_expression c(application(constructors[4].constructor_function(ls), n0, n1));
 
   // recogniser tests

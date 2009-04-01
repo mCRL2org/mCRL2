@@ -12,7 +12,7 @@
 #ifndef TIPI_VISITORS_H__
 #define TIPI_VISITORS_H__
 
-#include <iostream>
+#include <iosfwd>
 #include <sstream>
 
 #include <boost/mpl/or.hpp>
@@ -20,7 +20,6 @@
 #include <boost/type_traits/is_same.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include "tipi/detail/utility/generic_visitor.hpp"
 

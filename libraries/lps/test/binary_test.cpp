@@ -34,12 +34,12 @@ void test_case_1()
   specification s0 = mcrl22lps(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
+
   summand_list summands1 = s1.process().summands();
+  variable_list parameters1 = s1.process().process_parameters();
 
   int bool_param_count = 0;
-  for (variable_list::iterator i = s1.process().process_parameters().begin();
-       i != s1.process().process_parameters().end();
-       ++i)
+  for (variable_list::iterator i = parameters1.begin(); i != parameters1.end(); ++i)
   {
     BOOST_CHECK(i->sort() == sort_bool_::bool_());
     if (i->sort() == sort_bool_::bool_())

@@ -1155,7 +1155,7 @@ wxArrayString infer_process_references(wxXmlNode *p_diagram)
   for(wxXmlNode *ref = ref_list->GetChildren(); ref != 0; ref = ref->GetNext())
   {
     wxString ref_id = get_child_value(ref, _T("propertyof"));
-    refs.Add(ref_id);
+    if (ref_id != _T("-1")) refs.Add(ref_id);
   }
   return refs;
 }
@@ -1819,7 +1819,7 @@ arr_channel_comm architecture_diagram_mcrl2_communication(wxXmlNode *p_doc_root,
     }
 
     // get process references
-    wxXmlNode *proc_refs = get_child(objects, _T("processreferencelist"));
+//TODO: remove    wxXmlNode *proc_refs = get_child(objects, _T("processreferencelist"));
 
     for(wxXmlNode *child = channel_comms->GetChildren(); child != 0; child = child->GetNext())
     {
@@ -2370,7 +2370,7 @@ arr_renamed infer_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode
               vis_ren.m_new.set_name( vis_name );
 //              cerr << "1 action found: " << vis_name.ToAscii() << " ";
               vis_ren.m_new.set_parameters( p_communications[i].m_channels[j].m_channel.get_parameters() );
-/*              for (unsigned int k=0; k<p_communications[i].m_channels[j].m_channel.get_parameters().GetCount(); ++k)
+              for (unsigned int k=0; k<p_communications[i].m_channels[j].m_channel.get_parameters().GetCount(); ++k)
               {
                 if (k>0)
                 {
@@ -2792,7 +2792,7 @@ wxString architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_i
   }
   if(p_verbose)
   {
-    int unique_channel_comm_counter = 0;
+//TODO: remove    int unique_channel_comm_counter = 0;
     for(unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
     {
 //      cerr << "comms: " << p_channel_comms.GetCount() << endl;

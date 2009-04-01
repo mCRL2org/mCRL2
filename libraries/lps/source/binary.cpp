@@ -183,6 +183,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
   for (variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     variable par = *i;
+
     if (!sort_bool_::is_bool_(par) && specification.data().is_certainly_finite(par.sort()))
     {
       //Get all constructors for par

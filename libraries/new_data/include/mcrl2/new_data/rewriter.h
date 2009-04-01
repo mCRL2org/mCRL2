@@ -72,7 +72,7 @@ namespace new_data {
 
         for (data_specification::aliases_const_range r(specification_with_more_aliases.aliases()); !r.empty(); r.advance_begin(1))
         {
-          m_substitution_context = (r.front().reference().is_container_sort()) ?
+          m_substitution_context = (r.front().reference().is_container_sort() || r.front().reference().is_structured_sort()) ?
             core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context) :
             core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
         }
