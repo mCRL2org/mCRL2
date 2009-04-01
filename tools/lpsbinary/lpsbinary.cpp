@@ -11,246 +11,129 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lpsbinary"
-#define AUTHOR "Jeroen Keiren"
-
-//C++
-#include <cstdio>
-#include <exception>
-
 #include "mcrl2/lps/binary.h"
 
-//Aterms
-#include <mcrl2/atermpp/aterm.h>
-
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace std;
-using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief structure that holds all options available for the tool.
-///
-struct tool_options {
-  std::string input_file; ///< Name of the file to read input from
-  std::string output_file; ///< Name of the file to write output to (or stdout)
-  RewriteStrategy strategy; ///< Rewrite strategy to use
-};
-
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-
-//Forward declaration because do_binary() is called within squadt_interactor class
-int do_binary(const tool_options& options);
-
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
+class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 {
-  private:
+  protected:
 
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
-    static const char*  lps_file_for_output; ///< file used to write the output to
-
-    static const char*  option_rewrite_strategy;
+    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
   public:
 
+    binary_tool()
+      : super(
+          "lpsbinary",
+          "Jeroen Keiren",
+          "replace finite sort variables by vectors of boolean variables in an LPS",
+          "Replace finite sort variables by vectors of boolean variables in the LPS in "
+          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
+          "If OUTFILE is not present, stdout is used"
+        )
+    {}
+
+    bool run()
+    {
+      specification lps_specification;
+      lps_specification.load(m_input_filename);
+
+      mcrl2::new_data::rewriter r(create_rewriter(lps_specification.data()));
+
+      // apply binary on lps_specification and save the output to a binary file
+      specification result = binary(lps_specification, r);
+
+      result.save(m_output_filename);
+
+      return true;
+    }
+
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  protected:
+
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+    void set_capabilities(tipi::tool::capabilities& c) const
+    {
+      c.add_input_configuration("main-input",
+          tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+    }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
+    void user_interactive_configuration(tipi::configuration& c)
+    {
+      using namespace tipi;
+      using namespace tipi::layout;
+      using namespace tipi::layout::elements;
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
+      /* Create display */
+      tipi::tool_display d;
+
+      layout::vertical_box& m = d.create< vertical_box >();
+
+      add_rewrite_option(d, m);
+
+      button& okay_button = d.create< button >().set_label("OK");
+
+      m.append(d.create< label >().set_text(" ")).
+        append(okay_button, layout::right);
+
+      send_display_layout(d.manager(m));
+
+      okay_button.await_change();
+
+      // let squadt_tool update configuration for rewriter and input/output files
+      update_configuration(c);
+    }
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+    bool check_configuration(tipi::configuration const& c) const
+    {
+      return c.input_exists("main-input") ||
+             c.input_exists("main-output") ||
+             c.option_exists("rewrite-strategy");
+    }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-};
+    bool perform_task(tipi::configuration& c)
+    {
+      using namespace tipi;
+      using namespace tipi::layout;
+      using namespace tipi::layout::elements;
 
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-const char* squadt_interactor::lps_file_for_output = "lps_out";
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
-const char* squadt_interactor::option_rewrite_strategy = "rewrite_strategy";
+      /* Create display */
+      tipi::tool_display d;
 
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& capabilities) const
-{
-  // The tool has only one main input combination
-  capabilities.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-}
+      send_display_layout(d.manager(d.create< vertical_box >().
+                    append(d.create< label >().set_text("Binary in progress"), layout::left)));
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& configuration)
-{
-  using namespace tipi;
-  using namespace tipi::layout;
-  using namespace tipi::layout::elements;
+      //Perform declustering
+      bool result = run() == 0;
 
-  /* Set defaults where the supplied configuration does not have values */
-  if (!configuration.output_exists(lps_file_for_output)) {
-    configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
-  }
+      send_display_layout(d.manager(d.create< vertical_box >().
+                    append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
-  /* Create display */
-  tipi::tool_display d;
-
-  // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > strategy_selector(d);
-
-  layout::vertical_box& m = d.create< vertical_box >();
-
-  m.append(d.create< label >().set_text("Rewrite strategy")).
-    append(d.create< horizontal_box >().
-                append(strategy_selector.associate(GS_REWR_INNER, "Inner")).
-#ifdef MCRL2_INNERC_AVAILABLE
-                append(strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
-#endif
-#ifdef MCRL2_JITTYC_AVAILABLE
-                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
-                append(strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
-#else
-                append(strategy_selector.associate(GS_REWR_JITTY, "Jitty")));
-#endif
-
-  button& okay_button = d.create< button >().set_label("OK");
-
-  m.append(d.create< label >().set_text(" ")).
-    append(okay_button, layout::right);
-
-  if (configuration.option_exists(option_rewrite_strategy)) {
-    strategy_selector.set_selection(
-        configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
-  }
-  else {
-  }
-
-  send_display_layout(d.manager(m));
-
-  okay_button.await_change();
-
-  if (!configuration.option_exists(option_rewrite_strategy)) {
-    configuration.add_option(option_rewrite_strategy);
-  }
-
-  configuration.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-}
-
-//bool squadt_interactor::extract_task_options(tipi::configuration const& configuration,
-
-bool squadt_interactor::check_configuration(tipi::configuration const& configuration) const
-{
-  bool result = true;
-
-  result |= configuration.input_exists(lps_file_for_input);
-  result |= configuration.input_exists(lps_file_for_output);
-  result |= configuration.option_exists(option_rewrite_strategy);
-
-  return result;
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& configuration)
-{
-  using namespace tipi;
-  using namespace tipi::layout;
-  using namespace tipi::layout::elements;
-
-  tool_options options;
-  options.input_file  = configuration.get_input(lps_file_for_input).location();
-  options.output_file = configuration.get_output(lps_file_for_output).location();
-  options.strategy    = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
-
-  /* Create display */
-  tipi::tool_display d;
-
-  send_display_layout(d.manager(d.create< vertical_box >().
-                append(d.create< label >().set_text("Binary in progress"), layout::left)));
-
-  //Perform declustering
-  bool result = do_binary(options) == 0;
-
-  send_display_layout(d.manager(d.create< vertical_box >().
-                append(d.create< label >().set_text(std::string("Binary ") + ((result) ? "succeeded" : "failed")), layout::left)));
-
-  return result;
-}
-
+      return result;
+    }
 #endif //ENABLE_SQUADT_CONNECTIVITY
-
-///Reads a specification from input_file,
-///applies binary to it and writes the result to output_file.
-int do_binary(const tool_options& options)
-{
-  specification lps_specification;
-  lps_specification.load(options.input_file);
-  // apply binary on lps_specification and save the output to a binary file
-
-  Rewriter* r = createRewriter(lps_specification.data(), options.strategy);
-
-  specification result;
-  result = binary(lps_specification, *r);
-
-  result.save(options.output_file);
-
-  return 0;
-}
-
-///Parses command line and sets settings from command line switches
-bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR,
-                            "replace finite sort variables by vectors of boolean variables in an LPS",
-                            "[OPTION]... [INFILE [OUTFILE]]\n",
-                            "Replace finite sort variables by vectors of boolean variables in the LPS in\n"
-                            "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used.\n"
-                            "If OUTFILE is not present, stdout is used\n");
-
-  clinterface.add_rewriting_options();
-
-  command_line_parser parser(clinterface, ac, av);
-
-  if (parser.continue_execution()) {
-    t_options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        t_options.input_file = parser.arguments[0];
-      }
-      if (1 < parser.arguments.size()) {
-        t_options.output_file = parser.arguments[1];
-      }
-    }
-  }
-
-  return parser.continue_execution();
-}
+};
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
-    tool_options options;
-
-    if (parse_command_line(argc,argv, options)) {
-      return do_binary(options);
-    }
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return binary_tool().execute(argc, argv);
 }

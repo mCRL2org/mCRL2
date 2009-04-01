@@ -23,6 +23,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 #include "boost/weak_ptr.hpp"
+#include "boost/tuple/tuple.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/foreach.hpp"
 
