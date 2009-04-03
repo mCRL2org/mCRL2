@@ -189,6 +189,7 @@ void test5()
     data_expression_with_variables e = v.back();
     v.pop_back();
     atermpp::vector<data_expression_with_variables> z = datae.enumerate(e);
+
     for (atermpp::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
     {
       data_expression b = datar(greater(*i, three));

@@ -95,13 +95,11 @@ namespace mcrl2 {
                 add_generic_and_check(actual_sort);
               }
               else {
-                function_symbol_vector constructors_s(m_specification.constructors(actual_sort));
-
-                for (function_symbol_vector::const_iterator i = constructors_s.begin(); i != constructors_s.end(); ++i)
+                for (data_specification::constructors_const_range r(m_specification.constructors(actual_sort)); !r.empty(); r.advance_begin(1))
                 {
-                  if (i->sort().is_function_sort())
+                  if (r.front().sort().is_function_sort())
                   {
-                    function_sort f_sort(i->sort());
+                    function_sort f_sort(r.front().sort());
 
                     for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
                     {
@@ -340,12 +338,10 @@ namespace mcrl2 {
           return is_certainly_finite(actual_sort);
         }
 
-        function_symbol_vector fl(constructors(actual_sort));
-
-        for (function_symbol_vector::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        for (data_specification::constructors_const_range r(constructors(actual_sort)); !r.empty(); r.advance_begin(1))
         {
           dependent_sorts.clear();
-          dependent_sorts.add(i->sort().target_sort());
+          dependent_sorts.add(r.front().sort().target_sort());
           for (detail::dependent_sort_helper::const_iterator j = dependent_sorts.begin(); j != dependent_sorts.end(); ++j)
           {
             if (!is_certainly_finite(*j))
@@ -355,7 +351,7 @@ namespace mcrl2 {
           }
         }
 
-        return !fl.empty();
+        return !constructors(actual_sort).empty();
       }
       else if (s.is_container_sort())
       {

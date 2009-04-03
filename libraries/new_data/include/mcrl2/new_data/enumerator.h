@@ -124,7 +124,7 @@ class data_enumerator
       {
         return i->second;
       }
-      m_constructors[s] = m_data->constructors(s);
+      m_constructors[s] = boost::copy_range< std::vector<function_symbol> >(m_data->constructors(s));
       return m_constructors[s];
     }
 
@@ -173,8 +173,7 @@ class data_enumerator
 
           variable_list w(convert< variable_list >(variables));
 
-          result.push_back(data_expression_with_variables((*m_rewriter)(application(*i,
-                convert< data_expression_list >(w))), w));
+          result.push_back(data_expression_with_variables(application(*i, convert< data_expression_list >(w)), w));
         }
         else {
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
@@ -202,6 +201,7 @@ class data_enumerator
       }
 
       atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
+
       core::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;
     }

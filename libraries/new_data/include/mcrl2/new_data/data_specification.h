@@ -285,11 +285,9 @@ namespace mcrl2 {
       /// Time complexity of this operation is constant.
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
-      function_symbol_vector constructors(const sort_expression& s) const
+      constructors_const_range constructors(const sort_expression& s) const
       {
-        boost::iterator_range< constructors_const_iterator > constructor_range(m_constructors.equal_range(s.is_basic_sort() ? find_referenced_sort(s) : s));
-
-        return boost::copy_range< function_symbol_vector >(constructor_range);
+        return boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(s.is_basic_sort() ? find_referenced_sort(s) : s));
       }
 
       /// \brief Gets all mappings in this specification
@@ -375,9 +373,12 @@ namespace mcrl2 {
       inline
       void add_constructor(const function_symbol& f)
       {
-        constructors_const_range cs(constructors());
         assert(std::find(m_mappings.begin(), m_mappings.end(), f) == m_mappings.end());
-        m_constructors.insert(std::make_pair(f.sort().target_sort(), f));
+        constructors_const_range range(m_constructors.equal_range(f.sort().target_sort()));
+        if (std::find(range.begin(), range.end(), f) == range.end())
+        {
+          m_constructors.insert(std::make_pair(f.sort().target_sort(), f));
+        }
         make_system_defined_complete(f.sort().target_sort());
       }
 

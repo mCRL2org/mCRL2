@@ -160,7 +160,7 @@ namespace mcrl2 {
         // The resulting new_data::data_expression_list.
         data_expression_vector ces;
         // For each constructor of sort s...
-        function_symbol_vector constructors_s(d.constructors(s));
+        function_symbol_vector constructors_s(boost::copy_range< function_symbol_vector >(d.constructors(s)));
         for (function_symbol_vector::const_iterator i(constructors_s.begin()); i != constructors_s.end(); ++i)
         {
                 if (i->sort().is_function_sort())
