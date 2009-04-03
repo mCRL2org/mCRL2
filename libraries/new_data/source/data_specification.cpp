@@ -451,7 +451,7 @@ namespace mcrl2 {
           basic_sort main_identifier(i->name());
 
           // update aliases
-          for (atermpp::set< sort_expression >::const_iterator c = m_sorts.begin(), ca = m_sorts.begin(); ca++ != m_sorts.end(); c = ca)
+          for (atermpp::set< sort_expression >::iterator c = m_sorts.begin(), ca = m_sorts.begin(); ca++ != m_sorts.end(); c = ca)
           {
             if (c->is_alias())
             {
