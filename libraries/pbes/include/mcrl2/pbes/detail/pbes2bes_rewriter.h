@@ -95,6 +95,7 @@ namespace detail {
     /// \param sigma A substitution function
     void check_result(term_type x, term_type result, pbes2bes_substitution_function& sigma)
     {
+/*
       if (result == term_type())
       {
         return;
@@ -116,6 +117,7 @@ namespace detail {
           break;
         }
       }
+*/
     }
 
     /// \brief Visit propositional_variable node
@@ -309,7 +311,7 @@ namespace detail {
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
         {
-          std::cerr << core::pp(x) << "   " << sigma.to_string() << " -> " << core::pp(result) << std::endl;
+          std::cerr << core::pp(x) << "   " << to_string(sigma) << " -> " << core::pp(result) << std::endl;
         }
         return result;
       }

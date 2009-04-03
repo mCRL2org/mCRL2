@@ -22,7 +22,6 @@
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/expression_traits.h"
 #include "mcrl2/new_data/mutable_substitution_adapter.h"
-#include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
