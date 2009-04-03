@@ -3,6 +3,7 @@ project libraries/new_data/test
        <use>/site-config//boost
        <library>/libraries//new_data
        <library>/libraries//core
+       <toolset>msvc:<asynch-exceptions>on
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
    ;
