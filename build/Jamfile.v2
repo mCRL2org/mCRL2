@@ -306,7 +306,7 @@ if $(WX_CPPFLAGS) {
           : $(WX_GL_LDFLAGS)
           :
           :
-          : $(wx-requirements)
+          : <library>opengl $(wx-requirements)
           ;
 }
 

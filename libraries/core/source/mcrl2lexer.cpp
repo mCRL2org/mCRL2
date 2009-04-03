@@ -94,7 +94,8 @@ typedef unsigned int flex_uint32_t;
 
 /* begin standard C++ headers. */
 #include <iostream> 
-#include <errno.h>
+#include <stdexcept> 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 /* end standard C++ headers. */
@@ -2151,8 +2152,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 
 void yyFlexLexer::LexerError( yyconst char msg[] )
 {
-    	std::cerr << msg << std::endl;
-	exit( YY_EXIT_FAILURE );
+	throw std::runtime_error(msg);
 }
 
 /* Redefine yyless() so it works in section 3 code. */
