@@ -48,12 +48,15 @@ class Sorts
     bool basic_sortOccursInSort_expression(mcrl2::new_data::sort_expression s, mcrl2::new_data::basic_sort b );
     mcrl2::core::identifier_string generateFreshProcessParameterName(std::string str);
     std::set<mcrl2::core::identifier_string> process_parameter_names;
-    void updateLPS(mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector);
+    void updateLPS(mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector, mcrl2::new_data::function_symbol Detmap, mcrl2::new_data::function_symbol_vector AffectedMappings);
   
     //Needed for additional process parameter in the LPS 
     mcrl2::new_data::sort_expression_vector affectedSorts;
     mcrl2::new_data::data_expression substituteVariable(mcrl2::new_data::data_expression var, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector AffectedConstructors);
     std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj;
+
+    mcrl2::new_data::data_expression detectUnfoldVariable(mcrl2::new_data::data_expression de, std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > i, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap );
+    mcrl2::new_data::data_expression_vector unfoldConstructor( mcrl2::new_data::data_expression de, mcrl2::new_data::function_symbol_vector AffectedMappings, mcrl2::new_data::function_symbol Detmap);
 
 };
 

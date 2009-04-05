@@ -401,7 +401,7 @@ mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::str
   return idstr;
 }
 
-void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors)
+void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, function_symbol_vector AffectedMappings)
 {
    /* Get process parameters from lps */
    mcrl2::new_data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -459,21 +459,213 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 	print.h:  std::string mcrl2::core::pp(Term, mcrl2::core::t_pp_format) [with Term = atermpp::vector<mcrl2::new_data::variable, std::allocator<mcrl2::new_data::variable> >]
    */
 
-   for(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector >::iterator 
-                        i =  proc_par_to_proc_par_inj.begin();
-                        i != proc_par_to_proc_par_inj.end();
-                        ++i              
-      )
-   {
-     data_expression de = m_lps.summands().begin() -> condition();
-     cout << pp( //mcrl2::lps::linear_process(
-                  atermpp::replace( de , i -> first , substituteVariable( i->first , Cmap, AffectedConstructors ) ) ) 
-  //          )  
-          << endl;
+  mcrl2::lps::summand_list s = m_lps.summands();
+  for(mcrl2::lps::summand_list::iterator j = s.begin()
+                                     ; j != s.end()
+                                     ; ++j)
+  //Traversing summands
+  {
+    mcrl2::new_data::assignment_list ass = j-> assignments();
 
-   }
+    //Create new lefthand assignment_list 
+    mcrl2::new_data::data_expression_vector new_ass_left; 
+    for(mcrl2::new_data::assignment_list::iterator k = ass.begin()
+                                                 ; k != ass.end() 
+                                                 ; ++k)
+    {
+      if (proc_par_to_proc_par_inj.find( k-> lhs() ) != proc_par_to_proc_par_inj.end() )
+      {
+        for ( mcrl2::new_data::variable_vector::iterator l =  proc_par_to_proc_par_inj[ k -> lhs() ].begin()
+                                                       ; l != proc_par_to_proc_par_inj[ k -> lhs() ].end()
+                                                       ; ++l )
+        {
+         new_ass_left.push_back( *l );
+        }
+      } else {  
+        new_ass_left.push_back( k-> lhs() );
+      }
+    }
+    //Create new righthand assignment_list 
 
+    //Unfold pararameters
+    mcrl2::new_data::data_expression_vector new_ass_right; 
+    for(mcrl2::new_data::assignment_list::iterator k = ass.begin()
+                                                 ; k != ass.end() 
+                                                 ; ++k)
+    {
+      new_ass_right = unfoldConstructor(k -> rhs(), AffectedMappings, Detmap );     
+    }
+
+    //Replace unfold variables
+    mcrl2::new_data::data_expression_vector new_ass_right1; 
+    for(mcrl2::new_data::data_expression_vector::iterator k = new_ass_right.begin()
+                                                        ; k != new_ass_right.end() 
+                                                        ; ++k)
+    {
+      new_ass_right1.push_back( detectUnfoldVariable( *k, proc_par_to_proc_par_inj, AffectedConstructors, Cmap ) );
+    }
+  
+    assert( new_ass_left.size() == new_ass_right1.size() );
+    mcrl2::new_data::assignment_vector new_ass; 
+ 
+    while (!new_ass_left.empty())
+    {
+      new_ass.push_back( mcrl2::new_data::assignment( new_ass_left.front(), new_ass_right1.front() ) );
+      new_ass_left.erase( new_ass_left.begin() );
+      new_ass_right.erase( new_ass_right.begin() );
+    }
+    mcrl2::lps::summand t = set_assignments( *j, mcrl2::new_data::assignment_list( new_ass.begin(), new_ass.end() ) );
+    cout << pp( t ) <<endl;
+  }
 }   
+
+
+mcrl2::new_data::data_expression Sorts::detectUnfoldVariable(mcrl2::new_data::data_expression de, std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > i, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
+{
+  if( de.is_application() )
+  {
+    mcrl2::new_data::application ap = mcrl2::new_data::application( de );
+    mcrl2::new_data::data_expression_vector tmp_result;
+    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
+    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> j = args.begin()
+       ; j != args.end()
+       ; ++j
+    ) 
+    {
+      mcrl2::new_data::data_expression uc =  detectUnfoldVariable(*j , i, AffectedConstructors, Cmap );
+      tmp_result.push_back( uc );
+    }
+    return mcrl2::new_data::data_expression(mcrl2::new_data::application( ap.head(), data_expression_list(tmp_result.begin(), tmp_result.end())));
+  }
+
+  if( de.is_variable()  )
+  {
+    mcrl2::new_data::variable var = mcrl2::new_data::variable(de);
+    /* each process parameter associated with proces parameter*/
+
+    if (i.find(var) != i.end())
+    {
+      mcrl2::new_data::variable_vector tmpi = i[var] ;
+      mcrl2::new_data::data_expression_vector dev;
+      dev.push_back( i[var].front() );             
+      for( mcrl2::new_data::function_symbol_vector::iterator m = AffectedConstructors.begin()
+       						    ; m != AffectedConstructors.end()
+       						    ; ++m )
+      {
+        gsDebugMsg("%s\n", pp(*m).c_str() );
+        bool b = false;
+        if (m -> sort().is_basic_sort())
+        {
+          dev.push_back( *m );
+          b = true;
+        }
+        if (m -> sort().is_function_sort())
+        {
+          function_sort::domain_range dom = function_sort( m -> sort() ). domain();
+          data_expression_vector arg;
+    
+          for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
+          {
+             if (n -> is_basic_sort())
+             {
+       	for (mcrl2::new_data::variable_vector::iterator o = tmpi.begin()
+       						      ; o != tmpi.end()
+       						      ; ++o)
+       	{
+       	  if (o -> sort() == *n )
+       	  {
+       	    arg.push_back( *o );
+       	    tmpi.erase( o );
+       	    break;
+       	  }
+       	} 
+             } else {
+         	     gsDebugMsg("Unsupported sort expressions\n");
+       	     assert(false);
+             }
+          }
+          dev.push_back( mcrl2::new_data::application( *m, arg ) ); 
+          cout << pp( var ) << " --> "<< pp ( mcrl2::new_data::application( Cmap, dev  ) ) << endl;
+          b = true;
+        }
+        /* If the following assertion fails a non-supported sort is encountered*/ 
+        assert( b );
+      }
+      return mcrl2::new_data::data_expression(mcrl2::new_data::application( Cmap, dev  ));
+    } else {
+      return de;
+    }
+  }
+
+  cerr << "Unsupported data expression for unfolding" << endl;
+  assert(false);
+  return de;
+}
+
+mcrl2::new_data::data_expression_vector Sorts::unfoldConstructor( data_expression de, function_symbol_vector am, function_symbol Detmap )
+{
+  mcrl2::new_data::data_expression_vector result;
+  //  cout << "unfoldConstructor " << de << endl; 
+
+  if (de.is_variable())
+  {
+    result.push_back(de);
+    return result;
+  }
+
+  if (de.is_application() )
+  {
+    mcrl2::new_data::data_expression_vector tmp_result;
+    mcrl2::new_data::application ap = mcrl2::new_data::application( de );
+    /* data_expression_vector instead of 'boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> >' */
+    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
+    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> i = args.begin()
+       ; i != args.end()
+       ; ++i
+    ) 
+    {
+      mcrl2::new_data::data_expression_vector uc = unfoldConstructor( *i, am, Detmap);
+      tmp_result.insert( tmp_result.end(), uc.begin(), uc.end() );
+    }
+
+    /* Determine if function symbol occurs in the affected mappings */
+    mcrl2::new_data::function_symbol_vector::iterator index;
+    index = std::find( am.begin(), am.end(), ap.head() );
+ 
+    if ( index == am.end() )
+    {
+      /* Unfold parameter if function symbol occurs  */
+      /* size of unfold parameter must be equal to 1 */
+      data_expression_vector new_ass;
+
+      /* reconstruct unfold from constructor application */
+      mcrl2::new_data::application rec_ap = mcrl2::new_data::application( ap.head(), tmp_result );    
+  
+      /* Det function */
+      new_ass.push_back( mcrl2::new_data::application( Detmap, rec_ap ) ) ;
+
+      for(function_symbol_vector::iterator i = am.begin(); i != am.end(); ++i )
+      {
+         new_ass.push_back( mcrl2::new_data::application( *i, rec_ap ) ) ;
+      }
+
+      result = new_ass;
+    } else {
+      result.push_back( mcrl2::new_data::application( ap.head(), tmp_result ) );
+    }
+    return result;
+  }
+
+  if (de.is_function_symbol() )
+  {
+    result.push_back(de);
+    return result;
+  }
+
+  cerr << "\n unfoldConstructor cannot unfold: "<< de << endl;
+  assert(false);
+  return result;
+}
 
 mcrl2::new_data::data_expression Sorts::substituteVariable( data_expression var,
                                                             function_symbol Cmap,
@@ -545,6 +737,6 @@ void Sorts::algorithm()
 
    /*----------------*/
 
-   updateLPS(Cmap, k);  
+   updateLPS(Cmap, k, Detmap, m);  
 
 }
