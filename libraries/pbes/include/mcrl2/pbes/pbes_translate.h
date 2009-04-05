@@ -647,12 +647,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       propositional_variable_instantiation init(Xe, new_data::sort_real_::real_(0) + fi + pi + Par(Xf, new_data::variable_list(), f));
 
       // add sort real to data_spec (if needed)
-      new_data::data_specification          data_spec = spec.data();
-      new_data::data_specification::sorts_const_range sorts(spec.data().sorts());
-      if (std::find(sorts.begin(), sorts.end(), new_data::sort_real_::real_()) == sorts.end())
-      {
-        data_spec.add_sort(new_data::sort_real_::real_());
-      }
+      new_data::data_specification data_spec(spec.data());
+      data_spec.add_sort(new_data::sort_real_::real_());
 
       pbes<> result(data_spec, e, free_variables(spec), init);
       result.normalize();

@@ -33,10 +33,10 @@ namespace pbes_system {
   {
     static unsigned int depth;
   };
-  
+
   template <class T>
   unsigned int pbes_expression_builder_indentation<T>::depth = 0;
-    
+
   inline
   std::string pbes_expression_builder_indent()
   {

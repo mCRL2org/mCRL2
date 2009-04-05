@@ -25,7 +25,6 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 
@@ -48,11 +47,6 @@ namespace pbes_system {
     result = core::type_check_pbes_spec(result);
     if (result == NULL) {
       throw mcrl2::runtime_error("type checking failed");
-    }
-
-    result = new_data::detail::implement_data_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("data implementation failed");
     }
 
     p = pbes<Container>(result);
