@@ -277,7 +277,7 @@ namespace detail {
       /// \param data_spec A data specification
       /// \param rewriter_strategy A rewriter strategy
       /// \param print_rewriter_output If true, rewriter output is printed to standard error
-      pbes2bes_rewriter(new_data::data_specification& data_spec, new_data::rewriter::strategy rewriter_strategy = new_data::rewriter::jitty, bool print_rewriter_output = false)
+      pbes2bes_rewriter(new_data::data_specification const& data_spec, new_data::rewriter::strategy rewriter_strategy = new_data::rewriter::jitty, bool print_rewriter_output = false)
        :
          datar(data_spec, rewriter_strategy),
          datarv(data_spec),

@@ -261,7 +261,7 @@ class pbes
     /// \param data A data specification
     /// \param equations A sequence of pbes equations
     /// \param initial_state A propositional variable instantiation
-    pbes(new_data::data_specification data,
+    pbes(new_data::data_specification const& data,
          const Container& equations,
          propositional_variable_instantiation initial_state)
       :
@@ -278,7 +278,7 @@ class pbes
     /// \param equations A sequence of pbes equations
     /// \param free_variables A sequence of free variables
     /// \param initial_state A propositional variable instantiation
-    pbes(new_data::data_specification data,
+    pbes(new_data::data_specification const& data,
          const Container& equations,
          const atermpp::set<new_data::variable>& free_variables,
          propositional_variable_instantiation initial_state)

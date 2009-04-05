@@ -94,7 +94,7 @@ namespace pbes_system {
       /// \param rewriter_strategy A strategy for the data rewriter
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
-      pbes2bes_algorithm(new_data::data_specification data_spec, new_data::rewriter::strategy rewriter_strategy = new_data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
+      pbes2bes_algorithm(new_data::data_specification const& data_spec, new_data::rewriter::strategy rewriter_strategy = new_data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
         : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
