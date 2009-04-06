@@ -63,7 +63,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
 
 // specialisation for new_data::enumerator
 template <>
-void enumerate< enumerator >(data_specification const& d,
+void enumerate< data_enumerator< > >(data_specification const& d,
                                             std::set< variable > const& v,
                                               data_expression const& c, size_t t) {
   struct stack {

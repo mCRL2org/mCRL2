@@ -57,7 +57,7 @@ namespace mcrl2 {
         /// \brief The type of objects that represent expressions
        typedef typename substitution_type::expression_type                               expression_type;
 
-      private:
+      protected:
 
         typedef typename enumerator_type::shared_context_type              shared_context_type;
 

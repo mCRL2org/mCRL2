@@ -35,47 +35,139 @@ namespace new_data {
 
   /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
   /// and data_expression_with_variables.
-  template < typename Expression >
+  template < typename Term >
   class basic_rewriter
+  {
+    protected:
+      /// \brief The wrapped Rewriter.
+      boost::shared_ptr<detail::Rewriter> m_rewriter;
+
+    public:
+
+      /// \brief The term type of the rewriter.
+      typedef Term term_type;
+
+      /// \brief The strategy of the rewriter.
+      enum strategy
+      {
+        innermost                  = detail::GS_REWR_INNER   ,  /** \brief Innermost */
+#ifdef MCRL2_INNERC_AVAILABLE
+        innermost_compiling        = detail::GS_REWR_INNERC  ,  /** \brief Compiling innermost */
+#endif
+        jitty                      = detail::GS_REWR_JITTY   ,  /** \brief JITty */
+#ifdef MCRL2_JITTYC_AVAILABLE
+        jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
+#endif
+        innermost_prover           = detail::GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
+#ifdef MCRL2_INNERC_AVAILABLE
+        innermost_compiling_prover = detail::GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+        jitty_prover               = detail::GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
+        jitty_compiling_prover     = detail::GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
+#else
+        jitty_prover               = detail::GS_REWR_JITTY_P    /** \brief JITty + Prover */
+#endif
+      };
+
+    protected:
+
+      /// \brief Constructor.
+      /// \param r A rewriter
+      basic_rewriter(boost::shared_ptr<detail::Rewriter> const& r) :
+          m_rewriter(r)
+      {}
+
+      /// \brief Copy Constructor
+      basic_rewriter(basic_rewriter const& other) :
+          m_rewriter(other.m_rewriter)
+      {}
+
+      /// \brief Constructor.
+      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
+          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(d), static_cast< detail::RewriteStrategy >(s)))
+      {}
+
+    public:
+
+      /// \brief Adds an equation to the rewrite rules.
+      /// \param eq The equation that is added.
+      /// \return Returns true if the operation succeeded.
+      bool add_rule(const data_equation& eq)
+      {
+        return m_rewriter->addRewriteRule(eq);
+      }
+
+      /// \brief Removes an equation from the rewrite rules.
+      /// \param eq The equation that is removed.
+      void remove_rule(const data_equation& eq)
+      {
+        m_rewriter->removeRewriteRule(eq);
+      }
+  };
+
+  /// \brief Rewriter class for the mCRL2 Library. It only works for terms of type data_expression
+  /// and data_expression_with_variables.
+  template <>
+  class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm >
   {
     template < typename CompatibleExpression >
     friend class basic_rewriter;
     friend class enumerator;
 
+    public:
+      /// \brief The variable type of the rewriter.
+      typedef core::term_traits< data_expression >::variable_type variable_type;
+
     protected:
-      /// \brief for data implementation/reconstruction
-      mutable atermpp::aterm_appl         m_specification;
-
       /// \brief for data implementation
-      mutable atermpp::aterm_list         m_substitution_context;
+      mutable atermpp::aterm_list                                                  m_substitution_context;
 
-      /// \brief The wrapped Rewriter.
-      boost::shared_ptr<detail::Rewriter> m_rewriter;
+      /// \brief for data reconstruction 
+      mutable mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm_appl > m_reconstruction_context;
+
+      /// \brief for data implementation/reconstruction
+      mutable atermpp::aterm_appl                                                  m_specification;
 
     protected:
 
       /// \brief Copy constructor for conversion between derived types
       template < typename CompatibleExpression >
       basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
+                       basic_rewriter< atermpp::aterm >(other),
                        m_specification(other.m_specification),
                        m_substitution_context(other.m_substitution_context),
-                       m_rewriter(other.m_rewriter)
-      {
-      }
+                       m_reconstruction_context(other.m_substitution_context)
+      {}
 
       ATermAppl implement(data_specification const& specification) const
       {
         atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
+
+        std::set< sort_expression > known_aliases(convert< std::set< sort_expression > >(specification.aliases()));
 
         // Convert to data specification again to get the additional aliases that have been introduced (legacy)
         data_specification  specification_with_more_aliases(result);
 
         for (data_specification::aliases_const_range r(specification_with_more_aliases.aliases()); !r.empty(); r.advance_begin(1))
         {
-          m_substitution_context = (r.front().reference().is_container_sort() || r.front().reference().is_structured_sort()) ?
-            core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context) :
-            core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
+          if (r.front().reference().is_container_sort() || r.front().reference().is_structured_sort())
+          {
+            m_substitution_context   = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context);
+
+            // only for sorts that have been introduced for conversion to ATerm
+            if (known_aliases.find(r.front()) == known_aliases.end())
+            {
+              m_reconstruction_context[r.front().name()] = r.front().reference();
+            }
+          }
+          else
+          {
+            m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
+          }
         }
+
+        m_substitution_context.protect();
 
         return result;
       }
@@ -135,45 +227,18 @@ namespace new_data {
            detail::reconstruct_exprs(reinterpret_cast< ATerm >(
            static_cast< ATermAppl >(expression)), m_specification)));
 
-        return atermpp::aterm_appl(reconstructed);
+        return data_expression(atermpp::replace(reconstructed, m_reconstruction_context));
       }
 
     public:
-      /// \brief The variable type of the rewriter.
-      typedef typename core::term_traits< Expression >::variable_type variable_type;
-
-      /// \brief The term type of the rewriter.
-      typedef Expression term_type;
-
-      /// \brief The strategy of the rewriter.
-      enum strategy
-      {
-        innermost                  = detail::GS_REWR_INNER   ,  /** \brief Innermost */
-#ifdef MCRL2_INNERC_AVAILABLE
-        innermost_compiling        = detail::GS_REWR_INNERC  ,  /** \brief Compiling innermost */
-#endif
-        jitty                      = detail::GS_REWR_JITTY   ,  /** \brief JITty */
-#ifdef MCRL2_JITTYC_AVAILABLE
-        jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
-#endif
-        innermost_prover           = detail::GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
-#ifdef MCRL2_INNERC_AVAILABLE
-        innermost_compiling_prover = detail::GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
-#endif
-#ifdef MCRL2_JITTYC_AVAILABLE
-        jitty_prover               = detail::GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
-        jitty_compiling_prover     = detail::GS_REWR_JITTYC_P   /** \brief Compiling JITty + Prover*/
-#else
-        jitty_prover               = detail::GS_REWR_JITTY_P    /** \brief JITty + Prover */
-#endif
-      };
 
       /// \brief Constructor.
       /// \param r A rewriter
-      basic_rewriter(basic_rewriter const& r)
-        : m_specification(r.m_specification),
+      basic_rewriter(basic_rewriter const& r) :
+          basic_rewriter< atermpp::aterm >(r),
           m_substitution_context(r.m_substitution_context),
-          m_rewriter(r.m_rewriter)
+          m_reconstruction_context(r.m_reconstruction_context),
+          m_specification(r.m_specification)
       {
         m_substitution_context.protect();
         m_specification.protect();
@@ -182,28 +247,11 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty)
-        : m_substitution_context(ATmakeList0())
+      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
+          basic_rewriter< atermpp::aterm >(d, s),
+          m_specification(implement(d))
       {
-        m_specification = implement(d);
-        m_rewriter.reset(detail::createRewriter(m_specification, static_cast< detail::RewriteStrategy >(s)));
-        m_substitution_context.protect();
         m_specification.protect();
-      }
-
-      /// \brief Adds an equation to the rewrite rules.
-      /// \param eq The equation that is added.
-      /// \return Returns true if the operation succeeded.
-      bool add_rule(const data_equation& eq)
-      {
-        return m_rewriter->addRewriteRule(eq);
-      }
-
-      /// \brief Removes an equation from the rewrite rules.
-      /// \param eq The equation that is removed.
-      void remove_rule(const data_equation& eq)
-      {
-        m_rewriter->removeRewriteRule(eq);
       }
 
       /// \brief Returns a reference to the Rewriter object that is used for the implementation.
@@ -226,15 +274,15 @@ namespace new_data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter(data_specification const& d = data_specification(), strategy s = jitty)
-        : basic_rewriter<data_expression>(d, s)
+      rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
+         basic_rewriter<data_expression>(d, s)
       { }
 
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter(rewriter const& r)
-        : basic_rewriter<data_expression>(static_cast< basic_rewriter< data_expression > const& >(r))
+      rewriter(rewriter const& r) :
+         basic_rewriter<data_expression>(r)
       { }
 
       /// \brief Rewrites a data expression.
@@ -258,27 +306,27 @@ namespace new_data {
   };
 
   /// \brief Rewriter that operates on data expressions.
-  class rewriter_with_variables: public basic_rewriter<data_expression_with_variables>
+  class rewriter_with_variables: public basic_rewriter<data_expression>
   {
+      /// \brief The term type of the rewriter.
+      typedef data_expression term_type;
+
+      /// \brief The variable type of the rewriter.
+      typedef core::term_traits< data_expression_with_variables >::variable_type variable_type;
+
     public:
 
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter_with_variables(data_specification const& d = data_specification(), strategy s = jitty)
-        : basic_rewriter<data_expression_with_variables>(d, s)
+      rewriter_with_variables(data_specification const& d = data_specification(), strategy s = jitty) :
+          basic_rewriter<data_expression>(d, s)
       { }
 
       /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
       /// \param r A data rewriter
-      rewriter_with_variables(basic_rewriter< data_expression_with_variables > const& r)
-        : basic_rewriter<data_expression_with_variables>(r)
-      {}
-
-      /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
-      /// \param r A data rewriter
-      rewriter_with_variables(basic_rewriter< data_expression > const& r)
-        : basic_rewriter<data_expression_with_variables>(r)
+      rewriter_with_variables(basic_rewriter< data_expression > const& r) :
+          basic_rewriter<data_expression>(r)
       {}
 
       /// \brief Rewrites a data expression.
