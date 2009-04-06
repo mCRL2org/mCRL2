@@ -631,6 +631,10 @@ class pg_solver_tool: public input_tool
 
     bool run()
     {
+      // TODO: make command line parameter for strategy
+      arg_spm_lifting_strategy = "maxmeasure";
+      arg_winners_file = "-";
+
       if (mcrl2::core::gsVerbose)
       {
         std::clog << "pgsolver parameters:" << std::endl;
@@ -682,11 +686,16 @@ class pg_solver_tool: public input_tool
       if (!arg_spm_lifting_strategy.empty())
       {
         LiftingStatistics stats(game);
-        info( "SPM lifting strategy:      %12s",
-              arg_spm_lifting_strategy.c_str() );
-      
+        if (mcrl2::core::gsVerbose)
+        {
+          info( "SPM lifting strategy:      %12s",
+                arg_spm_lifting_strategy.c_str() );
+        } 
         double solve_time = time_used();
-        info("Starting solve...");
+        if (mcrl2::core::gsVerbose)
+        {
+          info("Starting solve...");
+        }
       
         // Allocate data structures
         ParityGameSolver *solver = NULL;
