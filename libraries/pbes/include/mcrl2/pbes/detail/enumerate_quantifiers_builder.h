@@ -216,7 +216,7 @@ namespace detail {
         {
           PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << sigma_.to_string() << " dependencies = " << print_term_container(v_) << std::endl;
+  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << to_string(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
           if (stop_(c))
           {
@@ -268,7 +268,7 @@ namespace detail {
                   << (tr::is_false(stop_value) ? "forall " : "exists ")
                   << core::pp(x) << ". "
                   << core::pp(phi)
-                  << sigma.to_string() << std::endl;
+                  << to_string(sigma) << std::endl;
       }
 
       /// \brief Returns a string representation of D[i]

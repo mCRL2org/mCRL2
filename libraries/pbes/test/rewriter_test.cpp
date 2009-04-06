@@ -94,6 +94,7 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
   if (R1(expr(expr1)) != R2(expr(expr2)))
   {
     BOOST_CHECK(R1(expr(expr1)) == R2(expr(expr2)));
+    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
   }
   else
   {
@@ -102,7 +103,7 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
   std::cout << "expr1    " << core::pp(expr(expr1)) << std::endl;
   std::cout << "expr2    " << core::pp(expr(expr2)) << std::endl;
   std::cout << "R(expr1) " << ppp(R1(expr(expr1))) << std::endl;
-  std::cout << "R(expr2) " << ppp(R2(expr(expr2))) << std::endl;
+  std::cout << "R(expr2) " << ppp(R2(expr(expr2))) << std::endl << std::endl;
 }
 
 template <typename Rewriter>
@@ -121,6 +122,7 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
   if (R1(d1, sigma) != R2(d2))
   {
     BOOST_CHECK(R1(d1, sigma) == R2(d2));
+    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
   }
   else
   {
@@ -130,7 +132,7 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
   std::cout << "d2            " << core::pp(d2) << std::endl;
   std::cout << "sigma         " << substitutions << std::endl;
   std::cout << "R1(d1, sigma) " << ppp(R1(d1, sigma)) << std::endl;
-  std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl;
+  std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl << std::endl;
 }
 
 template <typename Rewriter>
