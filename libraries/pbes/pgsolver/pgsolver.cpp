@@ -608,14 +608,14 @@ class pg_solver_tool: public input_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.
-        add_option("edge-direction",
-          make_optional_argument("NAME", "successor"),
-          "Use the edge direction NAME:\n"
-          "  'successor' (default), or\n"
-          "  'predecessor'\n"
-          "  'bidirectional'",
-          'e');
+//      desc.
+//        add_option("edge-direction",
+//          make_optional_argument("NAME", "successor"),
+//          "Use the edge direction NAME:\n"
+//          "  'successor' (default), or\n"
+//          "  'predecessor'\n"
+//          "  'bidirectional'",
+//          'e');
     }
 
   public:
@@ -624,7 +624,7 @@ class pg_solver_tool: public input_tool
           "pgsolver",
           "Michael Weber, Maks Verver, Wieger Wesselink",
           "Solve a PBES using a parity game solver",
-          "Reads a file containing a PBES, instantiates it into a BES, and applies a"
+          "Reads a file containing a PBES, instantiates it into a BES, and applies a\n"
           "parity game solver to it. If INFILE is not present, standard input is used."
         )
     {}
