@@ -15,6 +15,7 @@
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/mutable_substitution_adapter.h"
 #include "mcrl2/new_data/detail/concepts.h"
+#include "mcrl2/new_data/detail/data_expression_with_variables.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -88,12 +89,27 @@ void test_mutable_substitution_adapter()
   BOOST_CHECK(h(y) == x);
 }
 
+void test_mutable_substitution()
+{
+  using namespace mcrl2::new_data::detail;
+
+  mutable_substitution<variable, data_expression_with_variables> sigma;
+  variable v("v", sort_nat::nat());
+  data_expression e = v;
+
+  data_expression_with_variables e1;
+  e1 = e;
+
+  sigma[v] = e;
+}
+
 int test_main(int a, char**aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
 
   test1();
   test_mutable_substitution_adapter();
+  test_mutable_substitution();
 
   return EXIT_SUCCESS;
 }
