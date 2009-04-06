@@ -124,7 +124,7 @@ namespace new_data {
       mutable atermpp::aterm_list                                                  m_substitution_context;
 
       /// \brief for data reconstruction 
-      mutable mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm_appl > m_reconstruction_context;
+      mutable mutable_substitution< atermpp::aterm_appl, atermpp::aterm_appl > m_reconstruction_context;
 
       /// \brief for data implementation/reconstruction
       mutable atermpp::aterm_appl                                                  m_specification;
