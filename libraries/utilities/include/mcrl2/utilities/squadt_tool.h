@@ -20,6 +20,13 @@ namespace mcrl2 {
       /// \brief Dummy class for tools that can use a squadt interactor but squadt connectivity is not enabled.
       template < typename Tool >
       struct squadt_tool : public Tool {
+        /// \brief Constructor.
+        squadt_tool(const std::string& name,
+                      const std::string& author,
+                      const std::string& what_is,
+                      const std::string& tool_description)
+          : Tool(name, author, what_is, tool_description)
+        {}
       };
     } // namespace tools
   } // namespace utilities
