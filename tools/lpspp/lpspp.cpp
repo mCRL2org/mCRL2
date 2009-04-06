@@ -130,7 +130,7 @@ void print_specification_file_name(t_tool_options const& tool_options)
   }
 
   new_data::data_specification data_spec(ATAgetArgument(spec, 0));
-  ATsetArgument(spec, atermpp::aterm((new_data::detail::data_specification_to_aterm_data_spec(data_spec))), 0);
+  spec = ATsetArgument(spec, atermpp::aterm((new_data::detail::data_specification_to_aterm_data_spec(data_spec))), 0);
 
   //open output file for writing or set to stdout
   FILE *output_stream    = NULL;
