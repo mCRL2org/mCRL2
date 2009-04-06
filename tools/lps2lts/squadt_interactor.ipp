@@ -16,7 +16,6 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/exception.h"
 #include "lps2lts.h"
 #include "exploration.h"
@@ -209,7 +208,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   mcrl2::utilities::squadt::radio_button_helper< exploration_strategy > exploration_strategy_selector(d);
 
   // Helper for rewrite strategy selection
-  mcrl2::utilities::squadt::radio_button_helper< RewriteStrategy >      rewrite_strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper< mcrl2::new_data::rewriter::strategy > rewrite_strategy_selector(d);
 
   // Helper for rewrite strategy selection
   mcrl2::utilities::squadt::radio_button_helper< mcrl2::lts::lts_type > lts_type_selector(d);
@@ -223,15 +222,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
                 append(exploration_strategy_selector.associate(es_random, "random"))).
     append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().set_default_margins(margins(0,5,0,5)).
-                append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::innermost, "Inner")).
 #ifdef MCRL2_INNERC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::innermost_compiling, "Innerc")).
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)).
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")));
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty, "Jitty", true)).
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty_compiling, "Jittyc")));
 #else
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty", true)));
+                append(rewrite_strategy_selector.associate(mcrl2::new_data::rewriter::jitty, "Jitty", true)));
 #endif
 
   if ( make_lts )
@@ -302,7 +301,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c)
   }
   if (c.option_exists(option_rewrite_strategy)) {
     rewrite_strategy_selector.set_selection(
-        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+        c.get_option_argument< mcrl2::new_data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
   if (c.option_exists(option_exploration_strategy)) {
     exploration_strategy_selector.set_selection(
@@ -473,7 +472,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
     lgopts.removeunused = configuration.get_option_argument< bool >(option_removeunused);
   }
 
-  lgopts.strat      = configuration.get_option_argument< RewriteStrategy >(option_rewrite_strategy);
+  lgopts.strat      = configuration.get_option_argument< mcrl2::new_data::rewriter::strategy >(option_rewrite_strategy);
   lgopts.expl_strat = configuration.get_option_argument< exploration_strategy >(option_exploration_strategy);
 
   lgopts.detect_deadlock  = configuration.get_option_argument< bool >(option_detect_deadlock);

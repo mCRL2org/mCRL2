@@ -99,7 +99,7 @@ class specification: public atermpp::aterm_appl
     /// \param action_labels A sequence of action labels
     /// \param lps A linear process
     /// \param initial_process A process initializer
-    specification(new_data::data_specification  data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
+    specification(new_data::data_specification const& data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
       :
         m_data(data),
         m_action_labels(action_labels),
@@ -131,7 +131,7 @@ class specification: public atermpp::aterm_appl
       init_term(atermpp::aterm_appl(t));
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());                                               
+      assert(is_well_typed());
       //if (!is_well_typed())
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
@@ -150,7 +150,7 @@ class specification: public atermpp::aterm_appl
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());                                               
+      assert(is_well_typed());
       //if (!is_well_typed())
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::save())");

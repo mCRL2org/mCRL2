@@ -91,9 +91,11 @@ namespace mcrl2 {
     }
 
     /// \brief Convert container with expressions to a new container with expressions
-    template < typename TargetContainer, typename SourceContainer >
+    template < typename TargetContainer >
     TargetContainer convert(ATermList l) {
-      return convert< TargetContainer >(atermpp::aterm_list(l));
+      return detail::converter< TargetContainer,
+               atermpp::term_list< typename TargetContainer::value_type > >::
+                        convert(atermpp::term_list< typename TargetContainer::value_type >(l));
     }
 
   } // namespace new_data

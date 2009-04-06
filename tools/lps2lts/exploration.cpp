@@ -15,11 +15,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/enum.h"
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/trace.h"
 #include "squadt_interactor.h"
 #include "exploration.h"
@@ -95,21 +93,22 @@ static void cleanup_representation();
 
 bool initialise_lts_generation(lts_generation_options *opts)
 {
+  using namespace mcrl2;
+
   gsVerboseMsg("initialising...\n");
 
   lgopts = opts;
 
   lg_error = false;
 
-  ATermAppl Spec = (ATermAppl) load_aterm(lgopts->specification);
-  if (!gsIsLinProcSpec(Spec)) {
-    throw mcrl2::runtime_error(((lgopts->specification.empty())?"stdin":("'" + lgopts->specification + "'")) + " does not contain an LPS");
-  }
+  lps::specification lps_specification;
+
+  lps_specification.load(lgopts->specification);
 
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    Spec = removeUnusedData(Spec);
+    lps_specification = lps::specification(removeUnusedData(lps_specification));
   }
 
   basefilename = strdup(lgopts->specification.c_str());
@@ -147,7 +146,9 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
 
-  nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
+  mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > > enumerator_factory(lps_specification.data(), new_data::rewriter(lps_specification.data(), lgopts->strat));
+
+  nstate = createNextState(lps_specification,!lgopts->usedummies,lgopts->stateformat, enumerator_factory);
 
   if ( lgopts->priority_action != "" )
   {
@@ -168,7 +169,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
-    lts_opts.spec = Spec;
+    lts_opts.spec = lps_specification;
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
     lgopts->outformat = mcrl2::lts::lts_none;

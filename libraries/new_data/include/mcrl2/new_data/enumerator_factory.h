@@ -71,6 +71,13 @@ namespace mcrl2 {
       public:
 
         /// \brief Constructor with data specification
+        enumerator_factory(enumerator_factory const& other) :
+               m_internal_evaluator(other.m_evaluator),
+               m_evaluator(m_internal_evaluator),
+               m_enumeration_context(other.m_enumeration_context) {
+        }
+
+        /// \brief Constructor with data specification
         enumerator_factory(data_specification const& specification, Evaluator const& evaluator) :
                m_internal_evaluator(evaluator), m_evaluator(m_internal_evaluator),
                m_enumeration_context(new shared_context_type(specification, m_evaluator.get_rewriter())) {
