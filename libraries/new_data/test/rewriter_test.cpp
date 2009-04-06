@@ -98,7 +98,7 @@ void test2()
   BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  mutable_map_substitution<variable, data_expression> sigma;
+  mutable_substitution<variable, data_expression> sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -110,7 +110,7 @@ void test2()
 
 void test3()
 {
-  typedef mutable_map_substitution<variable, data_expression_with_variables> substitution_function;
+  typedef mutable_substitution<variable, data_expression_with_variables> substitution_function;
 
   data_specification data_spec = parse_data_specification(
     "map dummy1:Pos;  \n"
@@ -171,7 +171,7 @@ void parse_substitutions(std::string text, std::string data_spec, SubstitutionFu
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string data_spec, std::string substitutions)
 {
-  mutable_map_substitution<variable, data_expression> sigma;
+  mutable_substitution<variable, data_expression> sigma;
   parse_substitutions(substitutions, data_spec, sigma);
   data_expression d1 = parse_data_expression(expr1, "", data_spec);
   data_expression d2 = parse_data_expression(expr2, "", data_spec);

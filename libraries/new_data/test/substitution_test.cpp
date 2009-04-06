@@ -37,10 +37,10 @@ void test1()
 
   using mcrl2::new_data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, data_expression > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, variable > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, data_expression > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, variable > >));
 
-  mutable_map_substitution< variable, data_expression > s;
+  mutable_substitution< variable, data_expression > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -67,13 +67,13 @@ void test1()
 
 void test_mutable_substitution_adapter()
 {
-  mutable_map_substitution<variable, data_expression> f;
+  mutable_substitution<variable, data_expression> f;
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
   f[x] = y;
   
-  mutable_substitution_adapter<mutable_map_substitution<variable, data_expression> > g(f);
+  mutable_substitution_adapter<mutable_substitution<variable, data_expression> > g(f);
   BOOST_CHECK(g(x) == y);
 
   assignment a(y, z);

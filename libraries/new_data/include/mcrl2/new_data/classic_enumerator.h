@@ -173,7 +173,7 @@ namespace mcrl2 {
         }
     };
 
-    template < typename MutableSubstitution = mutable_map_substitution< >,
+    template < typename MutableSubstitution = mutable_substitution< >,
                typename Evaluator = rewriter,
                typename Selector = selectors::select_not< false > >
     class classic_enumerator;

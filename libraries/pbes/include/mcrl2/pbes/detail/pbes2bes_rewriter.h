@@ -29,7 +29,7 @@ namespace pbes_system {
 namespace detail {
 
   /// \brief The substitution function used by the pbes2bes rewriter.
-  typedef new_data::mutable_map_substitution<new_data::variable, new_data::data_expression_with_variables> pbes2bes_substitution_function;
+  typedef new_data::mutable_substitution<new_data::variable, new_data::data_expression_with_variables> pbes2bes_substitution_function;
 
   /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// As a side effect propositional variable instantiations are being renamed

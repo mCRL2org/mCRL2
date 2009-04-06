@@ -147,7 +147,7 @@ void enumerate< detail::Enumerator >(data_specification const& d,
 void empty_test() {
   using namespace mcrl2::new_data::selectors;
 
-  typedef classic_enumerator< mutable_map_substitution< >, new_data::rewriter, select_not< false > >  enumerator_type;
+  typedef classic_enumerator< mutable_substitution< >, new_data::rewriter, select_not< false > >  enumerator_type;
 
   // test manual construction of evaluator with rewriter
   new_data::rewriter evaluator;
@@ -242,7 +242,7 @@ void mutually_recursive_test(const size_t count) {
 void check_concepts() {
   using namespace mcrl2::new_data::concepts;
 
-  BOOST_CONCEPT_ASSERT((Evaluator< rewriter, mutable_map_substitution< > >));
+  BOOST_CONCEPT_ASSERT((Evaluator< rewriter, mutable_substitution< > >));
 
   BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
 }

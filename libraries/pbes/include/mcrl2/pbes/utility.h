@@ -332,7 +332,7 @@ inline pbes_expression give_the_instantiated_rhs(
 
   new_data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
 
-  new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> sigma;
+  new_data::mutable_substitution<new_data::variable, new_data::data_expression> sigma;
   for(new_data::variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
   {
@@ -457,7 +457,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                    const new_data::data_specification &data,
                    const new_data::rewriter& r,
                    const bool use_internal_rewrite_format,
-                   new_data::mutable_map_substitution<new_data::variable, new_data::data_expression> &sigma)
+                   new_data::mutable_substitution<new_data::variable, new_data::data_expression> &sigma)
 {
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;

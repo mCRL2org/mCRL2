@@ -36,14 +36,14 @@ namespace new_data {
       typedef typename Substitution::const_iterator iterator;
 
       /// \brief Wrapper class for internal storage and substitution updates using operator()
-      typedef typename mutable_map_substitution<variable_type, expression_type>::assignment assignment;
+      typedef typename mutable_substitution<variable_type, expression_type>::assignment assignment;
 
     protected:
       /// \brief The wrapped substitution
       const Substitution& f_;
 
       /// \brief An additional mutable substitution
-      mutable_map_substitution<variable_type, expression_type> g_;
+      mutable_substitution<variable_type, expression_type> g_;
 
     public:
       /// \brief Constructor
@@ -126,12 +126,12 @@ namespace new_data {
       }
   };
 
-  /// \brief Specialization for mutable_map_substitution.
+  /// \brief Specialization for mutable_substitution.
   template <typename Variable, typename Expression, template < class Substitution > class SubstitutionProcedure >
-  class mutable_substitution_adapter<mutable_map_substitution<Variable, Expression, SubstitutionProcedure > >
+  class mutable_substitution_adapter<mutable_substitution<Variable, Expression, SubstitutionProcedure > >
   {
     protected:
-      typedef mutable_map_substitution<Variable, Expression, SubstitutionProcedure> substitution_type;
+      typedef mutable_substitution<Variable, Expression, SubstitutionProcedure> substitution_type;
 
     public:
       /// \brief type used to represent variables
@@ -150,10 +150,10 @@ namespace new_data {
       typedef typename substitution_type::assignment assignment;
 
     protected:
-      mutable_map_substitution<Variable, Expression>& g_;
+      mutable_substitution<Variable, Expression>& g_;
 
     public:
-      mutable_substitution_adapter(mutable_map_substitution<Variable, Expression>& g)
+      mutable_substitution_adapter(mutable_substitution<Variable, Expression>& g)
         : g_(g)
       {}
 

@@ -428,7 +428,7 @@ namespace mcrl2 {
 
     void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     {
-      typedef mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm_appl > substitution_type;
+      typedef mutable_substitution< atermpp::aterm_appl, atermpp::aterm_appl > substitution_type;
 
       m_sorts        = detail::aterm_sort_spec_to_sort_expression_set(atermpp::arg1(term));
       m_constructors = detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(term));
@@ -478,7 +478,7 @@ namespace mcrl2 {
     }
 
     namespace detail {
-      // mutable_map_substitution is used because at present there is no other decent method to accomplish the same
+      // mutable_substitution is used because at present there is no other decent method to accomplish the same
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
       {
         struct local {
@@ -525,7 +525,7 @@ namespace mcrl2 {
         sorts_set sorts = boost::copy_range< sorts_set >(s.aliases());
 
         // Sort expression substitutions for substituting parts of the sorts of expressions
-        mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm_appl > renamings;
+        mutable_substitution< atermpp::aterm_appl, atermpp::aterm_appl > renamings;
 
         // remove structured sorts and container sorts
         for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))

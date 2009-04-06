@@ -16,7 +16,6 @@
 #include "boost/type_traits/is_same.hpp"
 
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/new_data/expression_traits.h"
 #include "mcrl2/new_data/replace.h"
 
 namespace mcrl2 {
@@ -71,7 +70,12 @@ namespace mcrl2 {
     template < typename Variable = new_data::variable,
                typename Expression = new_data::data_expression,
                template < typename Substitution > class SubstitutionProcedure = textual_substitution >
-    class mutable_map_substitution;
+    class substitution;
+
+    template < typename Variable = new_data::variable,
+               typename Expression = new_data::data_expression,
+               template < typename Substitution > class SubstitutionProcedure = textual_substitution >
+    class mutable_substitution;
 
     /** \brief Generic substitution class (model of Substitution)
      *
@@ -82,14 +86,14 @@ namespace mcrl2 {
      * \arg Expression type used to represent expressions
      * \arg SubstitutionProcedure procedure parametrised with a model of Substitution that is used for applying a substitution
      *
-     * Model of ModifiableSubstitution.
+     * Model of Substitution.
      *
      * \note the default substitution procedure is term substitution that does
      * not take into account binders. In special cases one would typically a
      * need full-blown capture avoiding substitution procedure.
      **/
     template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
-    class mutable_map_substitution {
+    class substitution {
 
       public:
 
@@ -105,43 +109,9 @@ namespace mcrl2 {
         /// \brief Iterator type for non-constant element access
         typedef typename atermpp::map< variable_type, expression_type >::const_iterator iterator;
 
-        /// \brief Wrapper class for internal storage and substitution updates using operator()
-        class assignment {
-
-          private:
-
-            Variable                                        m_variable;
-
-            atermpp::map< variable_type, expression_type >& m_map;
-
-          public:
-
-            assignment(variable_type const& v, atermpp::map< variable_type, expression_type >& m) : m_variable(v), m_map(m) {
-            }
-
-            /** \brief Assigns expression on the right-hand side
-             * \param[in] e the expression to associate to the variable for the owning substitution object
-             * \code
-             *  template< typename E, typename V >
-             *  void example(V const& v, E const& e) {
-             *    substitution< E, V > s;         // substitution
-             *
-             *    s[v] = e;
-             *
-             *    assert(s(v) == e);
-             * \endcode
-             **/
-            void operator=(expression_type const& e) {
-              m_map[m_variable] = e;
-            }
-        };
-
-      private:
+      protected:
 
         atermpp::map< variable_type, expression_type > m_map;
-
-        /// \brief traits class instance for expression_type
-        typedef typename mcrl2::core::term_traits< expression_type >               expression_traits;
 
         expression_type const& lookup(variable_type const& v) const {
           typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
@@ -154,7 +124,6 @@ namespace mcrl2 {
         }
 
       public:
-
 
         /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
         const_iterator begin() const {
@@ -210,30 +179,7 @@ namespace mcrl2 {
          * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
         expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
-          return SubstitutionProcedure< mutable_map_substitution >::apply(*this, e);
-        }
-
-        /** \brief Update substitution for a single variable
-         *
-         * \param[in] v the variable for which to update the value
-         * 
-         * \code
-         *  template< typename E, typename V >
-         *  void example(V const& v, E const& e) {
-         *    substitution< E, V > s;         // substitution
-         *
-         *    std::cout << s(x) << std::endl; // prints x
-         *
-         *    s[v] = e;
-         *
-         *    std::cout << s(x) << std::endl; // prints e
-         *  }
-         * \endcode
-         *
-         * \return expression assignment for variable v, effect 
-         **/
-        assignment operator[](variable_type const& v) {
-          return assignment(v, m_map);
+          return SubstitutionProcedure< substitution >::apply(*this, e);
         }
 
         /** \brief Comparison operation between substitutions
@@ -241,7 +187,7 @@ namespace mcrl2 {
          * \param[in] other object of another substitution object
          * \return whether the substitution expressed by this object is equivalent to <|other|>
          **/
-        bool operator==(mutable_map_substitution const& other) const {
+        bool operator==(substitution const& other) const {
           const_iterator i = m_map.begin();
           const_iterator j = other.m_map.begin();
 
@@ -283,6 +229,118 @@ namespace mcrl2 {
           }
 
           return true;
+        }
+    };
+
+    /** \brief Generic substitution class (model of Substitution)
+     *
+     * Objects of this type represent mutable substitutions that can be applied
+     * to expressions in order to generate new expressions. 
+     *
+     * \arg Variable type used to represent variables
+     * \arg Expression type used to represent expressions
+     * \arg SubstitutionProcedure procedure parametrised with a model of Substitution that is used for applying a substitution
+     *
+     * Model of MutableSubstitution.
+     *
+     * \note the default substitution procedure is term substitution that does
+     * not take into account binders. In special cases one would typically a
+     * need full-blown capture avoiding substitution procedure.
+     **/
+    template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
+    class mutable_substitution : public substitution< Variable, Expression, SubstitutionProcedure > {
+
+      public:
+
+        /// \brief type used to represent variables
+        typedef Variable    variable_type;
+
+        /// \brief type used to represent expressions
+        typedef Expression  expression_type;
+
+        /// \brief Wrapper class for internal storage and substitution updates using operator()
+        class assignment {
+
+          private:
+
+            variable_type                                   m_variable;
+            atermpp::map< variable_type, expression_type >& m_map;
+
+          public:
+
+            assignment(variable_type v, atermpp::map< variable_type, expression_type >& m) :
+                m_variable(v), m_map(m)
+            {
+            }
+
+            /** \brief Assigns expression on the right-hand side
+             * \param[in] e the expression to associate to the variable for the owning substitution object
+             * \code
+             *  template< typename E, typename V >
+             *  void example(V const& v, E const& e) {
+             *    substitution< E, V > s;         // substitution
+             *
+             *    s[v] = e;
+             *
+             *    assert(s(v) == e);
+             * \endcode
+             **/
+            void operator=(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e)
+            {
+              if (e != m_variable) {
+                m_map[m_variable] = e;
+              }
+              else {
+                m_map.erase(e);
+              }
+            }
+
+            /** \brief Assigns expression on the right-hand side
+             * \param[in] e the expression to associate to the variable for the owning substitution object
+             * \code
+             *  template< typename E, typename V >
+             *  void example(V const& v, V const& e) {
+             *    substitution< E, V > s;         // substitution
+             *
+             *    s[v] = e;
+             *
+             *    assert(s(v) == e);
+             * \endcode
+             **/
+            void operator=(variable_type const& v)
+            {
+              if (v != m_variable) {
+                m_map[m_variable] = v;
+              }
+              else {
+                m_map.erase(v);
+              }
+            }
+        };
+
+      public:
+
+        /** \brief Update substitution for a single variable
+         *
+         * \param[in] v the variable for which to update the value
+         * 
+         * \code
+         *  template< typename E, typename V >
+         *  void example(V const& v, E const& e) {
+         *    substitution< E, V > s;         // substitution
+         *
+         *    std::cout << s(x) << std::endl; // prints x
+         *
+         *    s[v] = e;
+         *
+         *    std::cout << s(x) << std::endl; // prints e
+         *  }
+         * \endcode
+         *
+         * \return expression assignment for variable v, effect 
+         **/
+        assignment operator[](variable_type const& v) {
+          return assignment(v, this->m_map);
         }
     };
 
