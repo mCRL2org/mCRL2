@@ -13,6 +13,13 @@
 #include "mcrl2/lps/linear_process.h"
 #include <boost/range/iterator_range.hpp>
 
+namespace mcrl2 {
+  namespace lps {
+    typedef atermpp::vector< mcrl2::lps::summand >     summand_vector;
+  }
+}
+
+
 class Sorts 
 {
   public:
@@ -55,7 +62,7 @@ class Sorts
     mcrl2::new_data::data_expression substituteVariable(mcrl2::new_data::data_expression var, mcrl2::new_data::function_symbol Cmap, mcrl2::new_data::function_symbol_vector AffectedConstructors);
     std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj;
 
-    mcrl2::new_data::data_expression detectUnfoldVariable(mcrl2::new_data::data_expression de, std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > i, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap );
+    std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> detectUnfoldVariable(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > i, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap );
     mcrl2::new_data::data_expression_vector unfoldConstructor( mcrl2::new_data::data_expression de, mcrl2::new_data::function_symbol_vector AffectedMappings, mcrl2::new_data::function_symbol Detmap);
 
 };

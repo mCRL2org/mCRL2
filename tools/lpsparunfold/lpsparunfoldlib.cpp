@@ -459,15 +459,26 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 	print.h:  std::string mcrl2::core::pp(Term, mcrl2::core::t_pp_format) [with Term = atermpp::vector<mcrl2::new_data::variable, std::allocator<mcrl2::new_data::variable> >]
    */
 
+  /* Reconstruct summands */
+  /* NOTE: list has no push_back function */
+  mcrl2::lps::summand_vector new_summands;
+
   mcrl2::lps::summand_list s = m_lps.summands();
   for(mcrl2::lps::summand_list::iterator j = s.begin()
                                      ; j != s.end()
                                      ; ++j)
-  //Traversing summands
-  {
-    mcrl2::new_data::assignment_list ass = j-> assignments();
 
-    //Create new lefthand assignment_list 
+  //Traversing summands for process unfolding
+  {
+    /***    
+      Actions & Conditions are not implemented yet
+    ***/
+
+    /***
+      Assignments
+    ***/
+    mcrl2::new_data::assignment_list ass = j-> assignments();
+    //Create new left-hand assignment_list 
     mcrl2::new_data::data_expression_vector new_ass_left; 
     for(mcrl2::new_data::assignment_list::iterator k = ass.begin()
                                                  ; k != ass.end() 
@@ -485,9 +496,8 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
         new_ass_left.push_back( k-> lhs() );
       }
     }
-    //Create new righthand assignment_list 
-
-    //Unfold pararameters
+    //Create new right-hand assignment_list 
+    //Unfold parameters
     mcrl2::new_data::data_expression_vector new_ass_right; 
     for(mcrl2::new_data::assignment_list::iterator k = ass.begin()
                                                  ; k != ass.end() 
@@ -496,117 +506,91 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
       new_ass_right = unfoldConstructor(k -> rhs(), AffectedMappings, Detmap );     
     }
 
-    //Replace unfold variables
-    mcrl2::new_data::data_expression_vector new_ass_right1; 
-    for(mcrl2::new_data::data_expression_vector::iterator k = new_ass_right.begin()
-                                                        ; k != new_ass_right.end() 
-                                                        ; ++k)
-    {
-      new_ass_right1.push_back( detectUnfoldVariable( *k, proc_par_to_proc_par_inj, AffectedConstructors, Cmap ) );
-    }
-  
-    assert( new_ass_left.size() == new_ass_right1.size() );
+    assert( new_ass_left.size() == new_ass_right.size() );
     mcrl2::new_data::assignment_vector new_ass; 
- 
     while (!new_ass_left.empty())
     {
-      new_ass.push_back( mcrl2::new_data::assignment( new_ass_left.front(), new_ass_right1.front() ) );
+      new_ass.push_back( mcrl2::new_data::assignment( new_ass_left.front(), new_ass_right.front() ) );
       new_ass_left.erase( new_ass_left.begin() );
       new_ass_right.erase( new_ass_right.begin() );
     }
-    mcrl2::lps::summand t = set_assignments( *j, mcrl2::new_data::assignment_list( new_ass.begin(), new_ass.end() ) );
-    cout << pp( t ) <<endl;
+    new_summands.push_back(set_assignments( *j, mcrl2::new_data::assignment_list( new_ass.begin(), new_ass.end() ) ) );
   }
+  //Replace unfold variables in summands
+  std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> unfold_var_map = detectUnfoldVariable(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
+  mcrl2::lps::summand_list  new_summand_list = mcrl2::lps::summand_list( new_summands.begin(), new_summands.end() );
+  for( std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>::iterator i = unfold_var_map.begin()
+                                                                                            ; i != unfold_var_map.end()
+                                                                                            ; ++i)
+  {
+    new_summand_list = replace( new_summand_list, i->first, i->second );
+  }
+  
+  mcrl2::lps::linear_process new_lps = mcrl2::lps::linear_process(m_lps.free_variables(),mcrl2::new_data::variable_list(new_process_parameters.begin(), new_process_parameters.end()), new_summand_list);
+
+  gsVerboseMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
+  assert( new_lps.is_well_typed());
+  return;
+    
 }   
 
 
-mcrl2::new_data::data_expression Sorts::detectUnfoldVariable(mcrl2::new_data::data_expression de, std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > i, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
+std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sorts::detectUnfoldVariable(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
 {
-  if( de.is_application() )
-  {
-    mcrl2::new_data::application ap = mcrl2::new_data::application( de );
-    mcrl2::new_data::data_expression_vector tmp_result;
-    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
-    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> j = args.begin()
-       ; j != args.end()
-       ; ++j
-    ) 
-    {
-      mcrl2::new_data::data_expression uc =  detectUnfoldVariable(*j , i, AffectedConstructors, Cmap );
-      tmp_result.push_back( uc );
-    }
-    return mcrl2::new_data::data_expression(mcrl2::new_data::application( ap.head(), data_expression_list(tmp_result.begin(), tmp_result.end())));
-  }
+   std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> result;
+   data_expression_vector dev;  
 
-  if( de.is_variable()  )
-  {
-    mcrl2::new_data::variable var = mcrl2::new_data::variable(de);
-    /* each process parameter associated with proces parameter*/
+   for(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin() 
+      ; i != proc_par_to_proc_par_inj.end()
+      ; ++i) 
+   {
 
-    if (i.find(var) != i.end())
-    {
-      mcrl2::new_data::variable_vector tmpi = i[var] ;
-      mcrl2::new_data::data_expression_vector dev;
-      dev.push_back( i[var].front() );             
-      for( mcrl2::new_data::function_symbol_vector::iterator m = AffectedConstructors.begin()
-       						    ; m != AffectedConstructors.end()
-       						    ; ++m )
-      {
-        gsDebugMsg("%s\n", pp(*m).c_str() );
-        bool b = false;
-        if (m -> sort().is_basic_sort())
-        {
-          dev.push_back( *m );
-          b = true;
-        }
-        if (m -> sort().is_function_sort())
-        {
-          function_sort::domain_range dom = function_sort( m -> sort() ). domain();
-          data_expression_vector arg;
+     for( mcrl2::new_data::function_symbol_vector::iterator m = AffectedConstructors.begin()
+      						    ; m != AffectedConstructors.end()
+      						    ; ++m )
+     {
+       if (m -> sort().is_basic_sort())
+       {
+         dev.push_back( *m );
+       }
+
+       if (m -> sort().is_function_sort())
+       {
+         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
+         data_expression_vector arg;
     
-          for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
-          {
-             if (n -> is_basic_sort())
-             {
-       	for (mcrl2::new_data::variable_vector::iterator o = tmpi.begin()
-       						      ; o != tmpi.end()
+         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
+         {
+           if (n -> is_basic_sort())
+           {
+             for (mcrl2::new_data::variable_vector::iterator o = i->second.begin()
+       	  					      ; o != i->second.end()
        						      ; ++o)
-       	{
-       	  if (o -> sort() == *n )
-       	  {
-       	    arg.push_back( *o );
-       	    tmpi.erase( o );
-       	    break;
-       	  }
-       	} 
-             } else {
-         	     gsDebugMsg("Unsupported sort expressions\n");
+       	     {
+       	       if (o -> sort() == *n )
+       	       {
+       	         arg.push_back( *o );
+       	         break;
+       	       }
+       	     } 
+           } else {
+             gsDebugMsg("Unsupported sort expressions\n");
        	     assert(false);
-             }
-          }
-          dev.push_back( mcrl2::new_data::application( *m, arg ) ); 
-          cout << pp( var ) << " --> "<< pp ( mcrl2::new_data::application( Cmap, dev  ) ) << endl;
-          b = true;
-        }
-        /* If the following assertion fails a non-supported sort is encountered*/ 
-        assert( b );
-      }
-      return mcrl2::new_data::data_expression(mcrl2::new_data::application( Cmap, dev  ));
-    } else {
-      return de;
-    }
-  }
+           }
+         }
+         dev.push_back( mcrl2::new_data::application( *m, arg ) ); 
+       }
 
-  cerr << "Unsupported data expression for unfolding" << endl;
-  assert(false);
-  return de;
+     } 
+     gsVerboseMsg( "parameters substitution: %s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::new_data::application( Cmap, dev  ) ).c_str());
+     result.insert( std::pair<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>(i -> first,  mcrl2::new_data::application( Cmap, dev ) ) );
+   }
+  return result ;
 }
 
 mcrl2::new_data::data_expression_vector Sorts::unfoldConstructor( data_expression de, function_symbol_vector am, function_symbol Detmap )
 {
   mcrl2::new_data::data_expression_vector result;
-  //  cout << "unfoldConstructor " << de << endl; 
-
   if (de.is_variable())
   {
     result.push_back(de);
@@ -679,9 +663,11 @@ mcrl2::new_data::data_expression Sorts::substituteVariable( data_expression var,
                                          ; i != AffectedConstructors.end() 
                                          ; ++i )
       {
+        bool b = false;
         if ( i->sort().is_basic_sort() )
         {
           new_args.push_back( *i );
+          b = true;
         }
 
         if ( i->sort().is_function_sort() )
@@ -703,7 +689,10 @@ mcrl2::new_data::data_expression Sorts::substituteVariable( data_expression var,
             }   
           }
           new_args.push_back( application( *i, instantiate_domain )  );
+          b = true; 
         }
+
+        assert(b);
       }
       data_expression new_expr = application(Cmap, new_args );
       return new_expr;
