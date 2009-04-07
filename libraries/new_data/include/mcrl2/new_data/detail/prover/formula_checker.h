@@ -15,7 +15,11 @@
 #include "aterm2.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/detail/bdd_prover.h"
-#include "mcrl2/utilities/bdd2dot.h"
+#include "mcrl2/new_data/detail/prover/bdd2dot.h"
+
+namespace mcrl2 {
+  namespace new_data {
+    namespace detail {
 
   /// \brief The class formula checker takes a data specification in mCRL2 format and a list of expressions
   /// \brief of sort Bool in the mCRL2 format and determines whether or not these expersions are tautologies or
@@ -59,7 +63,7 @@
 class Formula_Checker {
   private:
     /// \brief BDD based prover.
-    BDD_Prover f_bdd_prover;
+    mcrl2::new_data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that outputs BDDs in dot format.
     BDD2Dot f_bdd2dot;
@@ -88,7 +92,7 @@ class Formula_Checker {
     /// to 0, no time limit will be enforced
     Formula_Checker(
       mcrl2::new_data::data_specification a_data_spec,
-      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::detail::jitty,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,
@@ -105,5 +109,9 @@ class Formula_Checker {
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
     void check_formulas(ATermList a_formulas);
 };
+
+    } // namespace detail
+  } // namespace new_data
+} // namespace mcrl2
 
 #endif

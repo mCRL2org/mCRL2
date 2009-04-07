@@ -31,7 +31,7 @@ namespace mcrl2 {
   namespace new_data {
     namespace detail {
 
-RewriterProver::RewriterProver(ATermAppl DataSpec, RewriteStrategy strat)
+RewriterProver::RewriterProver(ATermAppl DataSpec, mcrl2::new_data::rewriter::strategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();

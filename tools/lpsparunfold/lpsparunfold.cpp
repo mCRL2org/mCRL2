@@ -30,8 +30,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h" 
-#include "mcrl2/utilities/command_line_messaging.h" 
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/core/print.h"
 
 
@@ -70,7 +70,7 @@ bool parse_command_line(int ac, char** av) {
 
   return parser.continue_execution();
 }
-        
+
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 

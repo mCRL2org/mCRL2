@@ -15,9 +15,10 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/formula_checker.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/prover/bdd_path_eliminator.h"
+#include "mcrl2/new_data/detail/prover/formula_checker.h"
+#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/messaging.h"
@@ -68,7 +69,7 @@ using namespace mcrl2::new_data::detail;
       std::string f_dot_file_name;
 
       /// \brief The rewrite strategy used by the rewriter.
-      RewriteStrategy f_strategy;
+      mcrl2::new_data::rewriter::strategy f_strategy;
 
       /// \brief The maximal number of seconds spent on proving a single confluence condition.
       size_t f_time_limit;
@@ -88,7 +89,7 @@ using namespace mcrl2::new_data::detail;
       ///  LPS or PBES, the data specification of this LPS or PBES is
       ///  returned;
       ///  if infilename is empty, a minimal data specification is returned
-      mcrl2::data::data_specification load_specification(const std::string &infilename);
+      mcrl2::new_data::data_specification load_specification(const std::string &infilename);
 
     public:
       /// \brief Constructor setting all flags to their default values.
@@ -109,7 +110,7 @@ using namespace mcrl2::new_data::detail;
     Form_Check::Form_Check() {
       f_counter_example = false;
       f_witness = false;
-      f_strategy = GS_REWR_JITTY;
+      f_strategy = mcrl2::new_data::rewriter::jitty;
       f_time_limit = 0;
       f_path_eliminator = false;
       f_solver_type = solver_type_ario;
@@ -163,7 +164,7 @@ using namespace mcrl2::new_data::detail;
           f_time_limit = parser.option_argument_as< size_t >("time-limit");
         }
 
-        f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+        f_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
 
         if (parser.options.count("smt-solver")) {
           f_path_eliminator = true;
@@ -187,7 +188,7 @@ using namespace mcrl2::new_data::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
+    mcrl2::new_data::data_specification Form_Check::load_specification(const std::string &infilename)
     {
       ATermAppl raw_specification;
       if (infilename.empty()) {
@@ -202,7 +203,7 @@ using namespace mcrl2::new_data::detail;
         }
         raw_specification = ATAgetArgument(raw_specification, 0);
       }
-      mcrl2::data::data_specification spec(raw_specification);
+      mcrl2::new_data::data_specification spec(raw_specification);
       return spec;
     }
 
@@ -215,11 +216,11 @@ using namespace mcrl2::new_data::detail;
     void Form_Check::check_formula() {
 
       //Load data specification
-      mcrl2::data::data_specification spec = load_specification(f_spec_file_name);
+      mcrl2::new_data::data_specification spec = load_specification(f_spec_file_name);
 
       // typechecking and data implementation use a specification before data
       // implementation.
-      ATermAppl v_reconstructed_spec = reconstruct_spec(spec);
+      ATermAppl v_reconstructed_spec = mcrl2::new_data::detail::data_specification_to_aterm_data_spec(remove_all_system_defined(spec));
 
       ATermAppl f_formula;
       //parse formula
@@ -252,7 +253,7 @@ using namespace mcrl2::new_data::detail;
       }
 
       //update spec with the contents of v_reconstructed_spec
-      spec = mcrl2::data::data_specification(v_reconstructed_spec);
+      spec = mcrl2::new_data::data_specification(v_reconstructed_spec);
 
       //check formula
       Formula_Checker v_formula_checker(

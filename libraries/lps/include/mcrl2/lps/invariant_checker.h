@@ -15,7 +15,7 @@
 #define INVARIANT_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/detail/bdd_prover.h"
 #include "mcrl2/new_data/detail/prover/bdd2dot.h"
 
@@ -83,7 +83,7 @@ class Invariant_Checker {
     /// to 0, no time limit will be enforced
     Invariant_Checker(
       ATermAppl a_lps,
-      mcrl2::new_data::detail::RewriteStrategy a_rewrite_strategy = mcrl2::new_data::detail::GS_REWR_JITTY,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,

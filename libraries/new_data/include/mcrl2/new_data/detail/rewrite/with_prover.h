@@ -14,7 +14,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/new_data/detail/bdd_prover.h>
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 
 namespace mcrl2 {
   namespace new_data {
@@ -23,10 +23,10 @@ namespace mcrl2 {
 class RewriterProver: public Rewriter
 {
 	public:
-		RewriterProver(ATermAppl DataSpec, RewriteStrategy strat);
+		RewriterProver(ATermAppl DataSpec, mcrl2::new_data::rewriter::strategy strat);
 		~RewriterProver();
 
-		RewriteStrategy getStrategy();
+		mcrl2::new_data::detail::RewriteStrategy getStrategy();
 
 		ATermAppl rewrite(ATermAppl Term);
 

@@ -958,8 +958,8 @@ NextState *createNextState(
   bool allow_free_vars,
   int state_format,
   mcrl2::new_data::rewriter::strategy rewrite_strategy,
-  mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy,
-  NextStateStrategy strategy
+  NextStateStrategy strategy,
+  mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy
 )
 {
   return

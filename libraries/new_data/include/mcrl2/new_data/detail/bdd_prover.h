@@ -14,7 +14,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/detail/prover.h"
 #include "mcrl2/new_data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
@@ -148,7 +148,7 @@ class BDD_Prover: public Prover {
     /// precondition: the argument passed as parameter a_lps is an LPS
     BDD_Prover(
       ATermAppl data_spec,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
@@ -157,7 +157,7 @@ class BDD_Prover: public Prover {
 
     BDD_Prover(
       mcrl2::new_data::data_specification const&,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,

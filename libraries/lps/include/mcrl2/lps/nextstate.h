@@ -17,6 +17,7 @@
 #include "mcrl2/new_data/classic_enumerator.h"
 #include "mcrl2/new_data/enumerator_factory.h"
 #include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/lps/specification.h"
 
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
@@ -258,8 +259,8 @@ NextState *createNextState(
 		bool allow_free_vars = true,
 		int state_format = GS_STATE_VECTOR,
 		mcrl2::new_data::rewriter::strategy rewrite_strategy = mcrl2::new_data::rewriter::jitty,
-		mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy = mcrl2::new_data::detail::ENUM_STANDARD,
-		NextStateStrategy strategy = nsStandard
+		NextStateStrategy strategy = nsStandard,
+		mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy = mcrl2::new_data::detail::ENUM_STANDARD
 		);
 
 #endif

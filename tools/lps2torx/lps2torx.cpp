@@ -226,11 +226,10 @@ struct lps2torx_tool {
     torx_data td(10000);
 
     NextState *nstate = createNextState(
-      Spec,
+      mcrl2::lps::specification(Spec),
       !usedummies,
-      strategy,
-      ENUM_STANDARD,
-      stateformat
+      stateformat,
+      strategy
     );
 
     ATerm initial_state = nstate->getInitialState();

@@ -423,7 +423,7 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      ATermAppl a_lps, mcrl2::new_data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
     ):
       f_disjointness_checker(ATAgetArgument(a_lps, 2)),

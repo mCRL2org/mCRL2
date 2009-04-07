@@ -13,7 +13,7 @@
 
 #include "aterm2.h"
 #include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/detail/prover/manipulator.h"
 #include "mcrl2/new_data/detail/prover/info.h"
 #include "mcrl2/new_data/detail/prover/utilities.h"
@@ -86,7 +86,7 @@ class Prover {
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(
       ATermAppl a_data_spec,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0
     );
 

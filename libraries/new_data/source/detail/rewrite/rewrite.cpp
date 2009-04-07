@@ -240,16 +240,16 @@ Rewriter *createRewriter(ATermAppl DataSpec, RewriteStrategy Strategy)
 			return new RewriterCompilingJitty(DataSpec);
 #endif
 		case GS_REWR_INNER_P:
-			return new RewriterProver(DataSpec,GS_REWR_INNER);
+			return new RewriterProver(DataSpec,mcrl2::new_data::rewriter::innermost);
 		case GS_REWR_JITTY_P:
-			return new RewriterProver(DataSpec,GS_REWR_JITTY);
+			return new RewriterProver(DataSpec,mcrl2::new_data::rewriter::jitty);
 #ifdef MCRL2_INNERC_AVAILABLE
 		case GS_REWR_INNERC_P:
-			return new RewriterProver(DataSpec,GS_REWR_INNERC);
+			return new RewriterProver(DataSpec,new_data::rewriter::innermost_compiling);
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
 		case GS_REWR_JITTYC_P:
-			return new RewriterProver(DataSpec,GS_REWR_JITTYC);
+			return new RewriterProver(DataSpec,new_data::rewriter::jitty_compiling);
 #endif
 		default:
 			return NULL;
