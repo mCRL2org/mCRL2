@@ -78,16 +78,19 @@ namespace pbes_system {
       /// It is a mapping from X to iocc(X).
       std::map<string_type, atermpp::set<propositional_variable_type> > m_edges;
 
+      /// \brief The parameters of the propositional variable declarations.
+      std::map<string_type, std::vector<variable_type> > m_parameters;
+
       /// \brief Puts all parameters of the same sort in the same equivalence set.
       std::vector<std::set<variable_type> > compute_equivalence_sets(const propositional_variable_decl_type& X) const
       {
         std::map<sort_expression, std::set<variable_type> > m;
-        for (variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
+        for (typename variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
         {
           m[i->sort()].insert(*i);
         }
         std::vector<std::set<variable_type> > result;
-        for (std::map<sort_expression, std::set<variable_type> >::iterator i = m.begin(); i != m.end(); ++i)
+        for (typename std::map<sort_expression, std::set<variable_type> >::iterator i = m.begin(); i != m.end(); ++i)
         {
           if (i->second.size() > 1)
           {
@@ -104,7 +107,7 @@ namespace pbes_system {
         {
           std::clog << core::pp(i->first) << " -> [ ";
           const std::vector<std::set<variable_type> >& v = i->second;
-          for (std::vector<std::set<variable_type> >::const_iterator j = v.begin(); j != v.end(); ++j)
+          for (typename std::vector<std::set<variable_type> >::const_iterator j = v.begin(); j != v.end(); ++j)
           {
             if (j != v.begin())
             {
@@ -123,6 +126,19 @@ namespace pbes_system {
         {
           std::clog << core::pp(i->first) << " -> " << detail::print_pp_set(i->second) << std::endl;
         }
+      }
+
+      /// \brief Returns true if the vertex X should propagate its values to Y
+      bool evaluate_guard(const string_type& X, const propositional_variable_type& Y)
+      {
+        return true;
+      }
+
+      /// \brief Returns the index of the element x in the sequence v
+      template <typename VariableContainer>
+      unsigned int index_of(const variable_type& x, const VariableContainer& v)
+      {
+        return std::find(v.begin(), v.end(), x) - v.begin();
       }
 
     public:
@@ -147,170 +163,94 @@ namespace pbes_system {
       {
         m_vertices.clear();
         m_edges.clear();
+        std::set<string_type> todo;
 
-        // compute the edges and vertices of the graph
+        // compute the edges and vertices of the graph, and initialize the todo list
         for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type name = i->variable().name();
           m_edges[name] = find_all_propositional_variable_instantiations(i->formula());
           m_vertices[name] = compute_equivalence_sets(i->variable());
-        }
-
-        std::clog << "--- vertices ---" << std::endl;
-        print_vertices();
-        std::clog << std::endl;
-        std::clog << "--- edges ---" << std::endl;
-        print_edges();
-      }
-
-/*
-        // initialize the todo list of vertices that need to be processed
-        std::set<propositional_variable_decl_type> todo;
-        std::set<propositional_variable_decl_type> visited;
-        std::set<propositional_variable_type> inst = find_all_propositional_variable_instantiations(p.initial_state());
-        for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
-        {
-          data_term_sequence_type e = i->parameters();
-          vertex& u = m_vertices[i->name()];
-          u.update(e, constraint_map(), m_data_rewriter);
-          todo.push_back(u.variable);
-          visited.insert(u.variable);
+          const variable_sequence_type& param = i->variable().parameters();
+          m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
+          todo.insert(name);
         }
 
         if (mcrl2::core::gsDebug)
         {
-          std::cerr << "\n--- initial vertices ---" << std::endl;
+          std::clog << "--- vertices ---" << std::endl;
           print_vertices();
-          std::cerr << "\n--- edges ---" << std::endl;
+          std::clog << std::endl;
+          std::clog << "--- edges ---" << std::endl;
           print_edges();
         }
 
         // propagate constraints over the edges until the todo list is empty
         while (!todo.empty())
         {
-#ifdef MCRL2_PBES_EQELM_DEBUG
-std::cerr << "\n<todo list>" << core::pp(propositional_variable_list(todo.begin(), todo.end())) << std::endl;
-#endif
-          propositional_variable_decl_type var = todo.front();
+          string_type X = *todo.begin();
+          todo.erase(X);
 
-          // remove all occurrences of var from todo
-          todo.erase(std::remove(todo.begin(), todo.end(), var), todo.end());
-
-          const vertex& u = m_vertices[var.name()];
-          std::vector<edge>& u_edges = m_edges[var.name()];
-          variable_sequence_type Xparams = u.variable.parameters();
-
-          for (typename std::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
+          if (mcrl2::core::gsDebug)
           {
-            const edge& e = *ei;
-            vertex& v = m_vertices[e.target.name()];
-#ifdef MCRL2_PBES_EQELM_DEBUG
-std::cerr << "\n<updating edge>" << e.to_string() << std::endl;
-std::cerr << "  <source vertex       >" << u.to_string() << std::endl;
-std::cerr << "  <target vertex before>" << v.to_string() << std::endl;
-#endif
-
-            term_type value = m_pbes_rewriter(new_data::variable_map_replace(e.condition, u.constraints));
-#ifdef MCRL2_PBES_EQELM_DEBUG
-std::cerr << "\nEvaluated condition " << core::pp(new_data::variable_map_replace(e.condition, u.constraints)) << " to " << core::pp(value) << std::endl;
-#endif
-            if (!tr::is_false(value) && !tr::is_true(value))
+            std::clog << "todo element X = " << core::pp(X) << std::endl;
+            std::clog << "todo list = " << detail::print_pp_set(todo) << std::endl;
+            std::clog << "--- vertices ---" << std::endl;
+            print_vertices();
+          }
+          
+          // create a substitution function that corresponds to cX
+          std::map<variable_type, data_term_type> vX;
+          const std::vector<std::set<variable_type> >& cX = m_vertices[X];
+          for (typename std::vector<std::set<variable_type> >::const_iterator i = cX.begin(); i != cX.end(); ++i)
+          {
+            const std::set<variable_type>& s = *i;
+            for (typename std::set<variable_type>::const_iterator j = ++s.begin(); j != s.end(); ++j)
             {
-#ifdef MCRL2_PBES_EQELM_DEBUG
-std::cerr << "\nCould not evaluate condition " << core::pp(new_data::variable_map_replace(e.condition, u.constraints)) << " to true or false";
-#endif
+              vX[*j] = *s.begin();
             }
-            if (!tr::is_false(value))
+          }
+
+          const atermpp::set<propositional_variable_type>& edges = m_edges[X];
+          for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+          {
+            const propositional_variable_type& Ye = *i;
+
+            if (evaluate_guard(X, Ye))
             {
-              bool changed = v.update(e.target.parameters(), u.constraints, m_data_rewriter);
-              if (changed)
+              const string_type& Y = Ye.name();
+              std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
+
+              std::vector<std::set<variable_type> >& cY = m_vertices[Y];
+              std::vector<std::set<variable_type> > cY1;
+              for (typename std::vector<std::set<variable_type> >::iterator j = cY.begin(); j != cY.end(); ++j)
               {
-                todo.push_back(v.variable);
-                visited.insert(v.variable);
+                std::set<variable_type>& equiv = *j; // an equivalence set              
+                atermpp::map<data_term_type, std::set<variable_type> > w;
+                for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
+                {
+                  unsigned int p = index_of(*k, m_parameters[Y]);
+                  w[m_data_rewriter(data_variable_map_replace(e[p], vX))].insert(*k);
+                }
+                if (w.size() > 1)
+                {
+                  todo.insert(Y);
+                }
+                for (typename std::map<data_term_type, std::set<variable_type> >::iterator i = w.begin(); i != w.end(); ++i)
+                {
+                  if (i->second.size() > 1)
+                  {
+                    cY1.push_back(i->second);
+                  }
+                }
               }
-            }
-#ifdef MCRL2_PBES_EQELM_DEBUG
-std::cerr << "  <target vertex after >" << v.to_string() << std::endl;
-#endif
-          }
-        }
-
-        if (mcrl2::core::gsDebug)
-        {
-          std::cerr << "\n--- final vertices ---" << std::endl;
-          print_vertices();
-        }
-
-        // compute the redundant parameters and the redundant equations
-        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-        {
-          string_type name = i->variable().name();
-          vertex& v = m_vertices[name];
-          if (v.constraints.empty())
-          {
-            if (visited.find(i->variable()) == visited.end())
-            {
-              m_redundant_equations.insert(i->variable());
-            }
-          }
-          else
-          {
-            std::vector<int> r = v.constant_parameter_indices();
-            if (!r.empty())
-            {
-              m_redundant_parameters[name] = r;
+              cY = cY1;
             }
           }
         }
-
-        // Apply the constraints to the equations.
-        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-        {
-          string_type name = i->variable().name();
-          vertex& v = m_vertices[name];
-
-          if (!v.constraints.empty())
-          {
-            *i = pbes_equation(
-              i->symbol(),
-              i->variable(),
-              new_data::variable_map_replace(i->formula(), v.constraints)
-            );
-          }
-        }
-
-        // remove the redundant parameters and variables/equations
-        remove_parameters(p, m_redundant_parameters);
-        if (remove_redundant_equations)
-        {
-          remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
-        }
-
-        // print the parameters and equation that are removed
-        if (mcrl2::core::gsVerbose)
-        {
-          std::cerr << "\nremoved the following constant parameters:" << std::endl;
-          std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
-          for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
-          {
-            for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-            {
-              std::cerr << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
-            }
-          }
-
-          if (remove_redundant_equations)
-          {
-            std::cerr << "\nremoved the following equations:" << std::endl;
-            const std::set<propositional_variable_decl_type> r = redundant_equations();
-            for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
-            {
-              std::cerr << "  equation " << core::pp(i->name()) << std::endl;
-            }
-          }
-        }
-      }
-*/
+       std::clog << "--- result ---" << std::endl;
+       print_vertices();
+     }
   };
 
 } // namespace pbes_system
