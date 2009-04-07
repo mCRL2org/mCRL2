@@ -63,7 +63,7 @@ StringTemplateFile::StringTemplateFile(string filename)
 	string fmtline;
 	while(getline(f, fmtline))
 	{
-		//matches <key> = <value> where <key> must be a word and <value> is everything after the '='.\
+		//matches <key> = <value> where <key> must be a word and <value> is everything after the '='.
 		//supports comments starting with f.ex. #
 		sregex rex = bos >> *_s >> (s1= +_w) >> *_s >> '=' >> !_s >> (s2= *_) >> !(as_xpr('\r')) >> eos;
 		smatch matches;

@@ -323,6 +323,7 @@ namespace lysa
 		case NATURAL1:
 		case NATURAL01:
 			d.insert(1);
+                default: break;
 		}
 		if((def_set==ZERO) || (def_set >= NATURAL01))
 		{

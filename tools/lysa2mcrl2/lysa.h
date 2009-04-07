@@ -86,7 +86,7 @@ namespace lysa
     int current_line;
     int current_col;
 
-    ProcessInfo(lysa_options options) : options(options), _calculus(Unknown) {};
+    ProcessInfo(lysa_options options) : _calculus(Unknown), options(options) {};
     Calculus calculus() { return _calculus; };
     void set_calculus(Calculus c);
     void override_calculus(Calculus c);
@@ -159,11 +159,11 @@ namespace lysa
 
     
     IndexDef(E_ptr i, E_ptr s) : 
-      set(static_pointer_cast<String>(s)->s), 
-      index(process_info->options.prefix + static_pointer_cast<String>(i)->s) {};
-    IndexDef(E_ptr i, E_ptr s, E_ptr iset) : 
-      set(static_pointer_cast<String>(s)->s), 
       index(process_info->options.prefix + static_pointer_cast<String>(i)->s),
+      set(static_pointer_cast<String>(s)->s) {} ;
+    IndexDef(E_ptr i, E_ptr s, E_ptr iset) : 
+      index(process_info->options.prefix + static_pointer_cast<String>(i)->s),
+      set(static_pointer_cast<String>(s)->s), 
       iset(static_pointer_cast<Iset>(iset)) {};
     virtual operator string();
   };
@@ -239,7 +239,7 @@ namespace lysa
     bool isASym;
 
     Ciphertext(bool isASym, E_ptr t, E_ptr k, E_ptr a) : 
-    terms(static_pointer_cast<Terms>(t)), key(static_pointer_cast<Term>(k)), isASym(isASym), anno(static_pointer_cast<Annotation>(a)) {};
+    terms(static_pointer_cast<Terms>(t)), key(static_pointer_cast<Term>(k)), anno(static_pointer_cast<Annotation>(a)), isASym(isASym) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
   };
@@ -365,7 +365,7 @@ namespace lysa
     shared_ptr<Annotation> anno;
 
     Decrypt(E_ptr c, E_ptr t, E_ptr k, E_ptr a, E_ptr p) : 
-    ciphertext(static_pointer_cast<Name>(c)), terms(static_pointer_cast<PMatchTerms>(t)), key(static_pointer_cast<Term>(k)), anno(static_pointer_cast<Annotation>(a)), proc(static_pointer_cast<Proc>(p)) {};
+    ciphertext(static_pointer_cast<Name>(c)), terms(static_pointer_cast<PMatchTerms>(t)), key(static_pointer_cast<Term>(k)), proc(static_pointer_cast<Proc>(p)), anno(static_pointer_cast<Annotation>(a)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
   };
@@ -379,9 +379,9 @@ namespace lysa
     shared_ptr<IndexDefs> index_defs;
 
     New(E_ptr n, bool isASym, E_ptr p) : 
-    name(static_pointer_cast<Name>(n)), index_defs(new IndexDefs()), isASym(isASym), proc(static_pointer_cast<Proc>(p)) {};
+    isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(new IndexDefs()) {};
     New(E_ptr n, bool isASym, E_ptr id, E_ptr p) :
-    name(static_pointer_cast<Name>(n)), index_defs(static_pointer_cast<IndexDefs>(id)), isASym(isASym), proc(static_pointer_cast<Proc>(p)) {};
+    isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(static_pointer_cast<IndexDefs>(id)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
   };

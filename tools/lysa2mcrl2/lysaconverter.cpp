@@ -104,7 +104,7 @@ namespace lysa
 					process << name << "(";
 
 					//draw indices
-					for(int i=0; i!=d_is.size(); i++)
+					for(unsigned int i=0; i!=d_is.size(); i++)
 					{
 						if(i) process << ", ";
 						process << ds[i][d_is[i]];
@@ -116,11 +116,11 @@ namespace lysa
 				//update indices; we increment each index linearly, looping back and incrementing the next
 				//upon overflow. much like how digital clocks and sports set/point counters work. or numbers, if
 				//all domains would have 10 elements.
-				for(int i=0;;)
+				for(unsigned int i=0;;)
 				{
 					d_is[i]++;
 					//overflow? then increase the next index instead.
-					if(d_is[i] == ds[i].size())
+					if(d_is[i] == (int) ds[i].size())
 					{
 						d_is[i] = 0;
 						i++;
@@ -672,7 +672,7 @@ namespace lysa
       {
         StringTemplate st(templates.get("anno"));
         bool b = false;
-			  Cryptopoint_list& cps = *(anno.dest_orig);
+			  //Cryptopoint_list& cps = *(anno.dest_orig);
 			  BOOST_FOREACH(shared_ptr<Cryptopoint> cp, *anno.dest_orig)
 			  {
 				  if(b++) st["destorig"] << ", ";
@@ -711,7 +711,7 @@ namespace lysa
 		//save in list of all cryptopoints
 		if(cryptopoints.count(cp.name))
 		{
-			if(cryptopoints[cp.name]!=cp.indices->size())
+			if(cryptopoints[cp.name]!= (int) cp.indices->size())
 			{
 				throw "crypto-point '" + (string)cp + "' redefined with wrong amount of indices";
 			}
