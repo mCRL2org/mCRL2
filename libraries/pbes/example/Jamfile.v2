@@ -17,6 +17,7 @@ exe bessolve     : bessolve.cpp : ;
 exe pbes_rewrite : pbes_rewrite.cpp : ;
 exe pbesparelm   : pbesparelm.cpp : ;
 exe pbesconstelm : pbesconstelm.cpp : ;
+exe pbeseqelm    : pbeseqelm.cpp : ;
 exe pbes2bes     : pbes2bes.cpp : ;
 
 install dist
@@ -28,6 +29,7 @@ install dist
      pbes_rewrite
      pbesparelm
      pbesconstelm
+     pbeseqelm
      pbes2bes
    :
    ;
