@@ -168,7 +168,7 @@ tool_options parse_command_line(int ac, char** av) {
 
   if(!parser.continue_execution())
   {
-	exit(EXIT_FAILURE);
+	exit(EXIT_SUCCESS);
   }
 
   return options;
