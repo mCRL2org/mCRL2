@@ -54,7 +54,7 @@ void StringTemplate::finalise()
   }
   //removes dangling commas, right next to a bracket.
   sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
-  subject = regex_replace(subject, rex, "$1$2");
+  subject = regex_replace(subject, rex, std::string("$1$2"));
 }
 
 StringTemplateFile::StringTemplateFile(string filename)
