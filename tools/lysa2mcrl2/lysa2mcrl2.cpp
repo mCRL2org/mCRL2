@@ -49,60 +49,62 @@ struct tool_options : public lysa::lysa_options {
 };
 
 tool_options parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "Convert Typed LySa to mCRL2", "[OPTION]... [INFILE [OUTFILE]]\n",
-		"Converts a security protocol specified in Typed LySa in INFILE into an mCRL2 "
-		"specification in OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
-		"present, stdin is used.");
+  interface_description clinterface(av[0], NAME, AUTHOR,
+    "Convert Typed LySa to mCRL2",
+    "[OPTION]... [INFILE [OUTFILE]]\n",
+    "Converts a security protocol specified in Typed LySa in INFILE into an mCRL2 process "
+    "specification in OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not "
+    "present, stdin is used.");
 
-	clinterface.add_option("no-attacker", 
-		"Produces an mCRL2 specification without support for a symbolic attacker. "
-		"This makes the specification significantly simpler and the state space significantly "
+  clinterface.add_option("no-attacker", 
+    "Produces a specification without support for a symbolic attacker. "
+    "This makes the specification significantly simpler and the state space significantly "
     "smaller. However, no Dolev-Yao attacker is included so no outside attacks will be "
     "found. Changes the default values of -p and -f.", 
-		'n');
+    'n');
 
-	clinterface.add_option("preamble", 
-		make_mandatory_argument("FILENAME"), 
-		"Prepend the mCRL2 preamble in FILENAME, instead of using the built-in preamble. "
-		"The preamble contains all mCRL2 code that is not directly dependent on  the input "
-		"protocol, including all data expressions (except the Name and Ciphertext sorts), "
-		"the attacker process and auxiliary processes. Defaults to preamble.mcrl2 (or "
+  clinterface.add_option("preamble", 
+    make_mandatory_argument("FILENAME"), 
+    "Prepend the mCRL2 preamble in FILENAME, instead of using the built-in preamble. "
+    "The preamble contains all mCRL2 code that is not directly dependent on the input "
+    "protocol, including all data expressions (except the Name and Ciphertext sorts), "
+    "the attacker process and auxiliary processes. Defaults to preamble.mcrl2 (or "
     "preamble_straightforward.mcrl2 if -n is present).", 
-		'p');
+    'p');
 
-	clinterface.add_option("fmt-file", 
-		make_mandatory_argument("FILENAME"), 
-		"Use the format strings in FILENAME to build mCRL2 expressions. Defaults to "
+  clinterface.add_option("fmt-file", 
+    make_mandatory_argument("FILENAME"), 
+    "Use the format strings in FILENAME to build mCRL2 expressions. Defaults to "
     "symbolic.fmt (or straightforward.fmt is -n is present).",
-		'f');
+    'f');
 
-	clinterface.add_option("attacker-index", 
-		make_mandatory_argument("NUM"), 
-		"Assume that the attacker may be a legitimate (but dishonest) agent participating "
-		"in the protocol, corresponding to meta-level index number NUM. The effect of setting "
-		"this option is that the attacker's crypto-point CPDY is added to all dest/orig "
-		"clauses where one or more of the current meta-variables equal NUM. This option "
-		"corresponds to the attackerIndex option of the LySa tool.",
-		'a');
+  clinterface.add_option("attacker-index", 
+    make_mandatory_argument("NUM"), 
+    "Assume that the attacker may be a legitimate (but dishonest) agent participating "
+    "in the protocol, corresponding to meta-level index number NUM. The effect of setting "
+    "this option is that the attacker's crypto-point CPDY is added to all dest/orig "
+    "clauses where one or more of the current meta-variables equal NUM. This option "
+    "corresponds to the attackerIndex option of the LySa tool.",
+    'a');
 
-	clinterface.add_option("prefix-idents", 
-		make_optional_argument("PREFIX", "_"), 
-		"Prefixes all identifiers found in the Typed LySa process in INPUT with an "
-		"underscore or with PREFIX to prevent clashes with mCRL2 keywords or "
-		"identifiers used in the preamble", 
-		'i');
+  clinterface.add_option("prefix-idents", 
+    make_optional_argument("PREFIX", "_"), 
+    "Prefixes all identifiers found in the Typed LySa process in INPUT with an "
+    "underscore or with PREFIX to prevent clashes with mCRL2 keywords or "
+    "identifiers used in the preamble", 
+    'i');
 
   clinterface.add_option("zero-action",
-		make_optional_argument("ACTION", "zero"), 
+    make_optional_argument("ACTION", "zero"), 
     "Generates ACTION before deadlocking when Typed LySa's empty process (0) is "
     "encountered. Defaults to 'zero' when specified without argument. This is a "
     "valid action in the supplied preambles.",
-		'z');
+    'z');
 
   clinterface.add_option("lysa",
     "Converts a Typed LySa process to LySa and not to mCRL2. Makes all other non-standard "
     "options illegal.",
-		'l');
+    'l');
 
   command_line_parser parser(clinterface, ac, av);
 	
