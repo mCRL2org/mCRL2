@@ -55,7 +55,7 @@ grape_frame::grape_frame( const wxString &p_filename )
   m_logpanel = new grape_logpanel(m_splitter);
   m_splitter->SetSplitMode(wxSPLIT_HORIZONTAL);
   m_splitter->SplitHorizontally(m_glcanvas, m_logpanel);
-  show_log_panel();
+  m_splitter->SetSashPosition( 5000 );
   m_statusbar = new wxStatusBar(this);
   m_menubar = new grape_menubar();
 
@@ -138,6 +138,8 @@ grape_frame::grape_frame( const wxString &p_filename )
     m_help_controller->AddBook( wxFileName( filename ) );
   }
 
+  m_splitter->Unsplit();
+
   // show frame;
   Show();
 
@@ -209,20 +211,6 @@ wxCommandProcessor * grape_frame::get_event_handler( void )
 grape_clipboard * grape_frame::get_clipboard( void )
 {
   return m_clipboard;
-}
-
-void grape_frame::show_log_panel()
-{
-  int height_w1, height_w2;
-  m_splitter->GetWindow1()->GetClientSize( 0, &height_w1 );
-  m_splitter->GetWindow2()->GetClientSize( 0, &height_w2 );
-  m_splitter->SetSashPosition( height_w1 + height_w2 - 100 );
-}
-
-void grape_frame::hide_log_panel()
-{
-  // be sure to hit the bottom of the window
-  m_splitter->SetSashPosition( 5000 );
 }
 
 wxFileName grape_frame::get_filename( void ) const

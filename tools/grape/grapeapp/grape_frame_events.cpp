@@ -370,8 +370,6 @@ void grape_frame::event_splitter_dclick( wxSplitterEvent& WXUNUSED(p_event) )
 {
   int height;
   m_splitter->GetWindow2()->GetClientSize( 0, &height );
-  // if the log panel has a height > 1, it means the panel is shown
-  height > 1 ? hide_log_panel() : show_log_panel();
 }
 
 void grape_frame::event_window_close( wxCloseEvent &p_event )
