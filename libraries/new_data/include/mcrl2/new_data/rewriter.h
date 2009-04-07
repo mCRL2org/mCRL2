@@ -121,13 +121,13 @@ namespace new_data {
 
     protected:
       /// \brief for data implementation
-      mutable atermpp::aterm_list                                                  m_substitution_context;
+      mutable atermpp::aterm_list                                      m_substitution_context;
 
       /// \brief for data reconstruction 
-      mutable mutable_substitution< atermpp::aterm_appl, atermpp::aterm_appl > m_reconstruction_context;
+      mutable mutable_substitution< sort_expression, sort_expression > m_reconstruction_context;
 
       /// \brief for data implementation/reconstruction
-      mutable atermpp::aterm_appl                                                  m_specification;
+      mutable atermpp::aterm_appl                                      m_specification;
 
     protected:
 

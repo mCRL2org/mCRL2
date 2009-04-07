@@ -285,35 +285,14 @@ namespace mcrl2 {
              *    assert(s(v) == e);
              * \endcode
              **/
-            void operator=(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e)
+            template < typename AssignableToExpression >
+            void operator=(AssignableToExpression const& e)
             {
               if (e != m_variable) {
                 m_map[m_variable] = e;
               }
               else {
-                m_map.erase(e);
-              }
-            }
-
-            /** \brief Assigns expression on the right-hand side
-             * \param[in] e the expression to associate to the variable for the owning substitution object
-             * \code
-             *  template< typename E, typename V >
-             *  void example(V const& v, V const& e) {
-             *    substitution< E, V > s;         // substitution
-             *
-             *    s[v] = e;
-             *
-             *    assert(s(v) == e);
-             * \endcode
-             **/
-            void operator=(variable_type const& v)
-            {
-              if (v != m_variable) {
-                m_map[m_variable] = v;
-              }
-              else {
-                m_map.erase(v);
+                m_map.erase(m_variable);
               }
             }
         };
