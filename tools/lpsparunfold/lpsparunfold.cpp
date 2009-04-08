@@ -43,6 +43,11 @@
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
+#include "lpsparunfold.h"
+
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 
 using namespace std;
@@ -52,117 +57,79 @@ using namespace mcrl2::core;
 using namespace mcrl2::lps;
 using namespace mcrl2::new_data;
 
-/* Name of the file to read input from (or standard input if empty) */
-std::string file_name;
+using namespace mcrl2;
+using namespace mcrl2::utilities::tools;
 
-bool parse_command_line(int ac, char** av) {
-  interface_description clinterface(av[0], NAME, AUTHOR, "[OPTION]... [INFILE]\n",
-                           "Unfolds complex sorts of a linear process specification (LPS) in INFILE." ,  "");
+//class parunfold_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class parunfold_tool: public input_output_tool
+{
+  protected:
 
-  command_line_parser parser(clinterface, ac, av);
+    //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef input_output_tool super;
 
-  if (0 < parser.arguments.size()) {
-    file_name = parser.arguments[0];
-  }
-  if (1 < parser.arguments.size()) {
-    parser.error("too many file arguments");
-  }
+    lps::t_parunfold_options m_parunfold_opts; ///< Options of the algorithm
 
-  return parser.continue_execution();
-}
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("index", make_mandatory_argument("NUM"), "unfolds process parameter at given index", 'i');
+    }
 
-// SQuADT protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
-  private:
-
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      if (0 == parser.options.count("index"))
+      {
+        cerr << "Index of process parameter is not specified." << endl;
+        abort(); 
+      }
+      m_parunfold_opts.index = parser.option_argument_as< int >("index");
+      
+    }
 
   public:
 
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+    parunfold_tool()
+      : super(
+          "lpsparunfold",
+          "Frank Stappers",
+          "unfolds process parameter of an LPS",
+          "Unfolds the given process paramters of the linear process specification (LPS) "
+          "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
+          "used. If OUTFILE is not present, stdout is used."
+        )
+    {}
 
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
+    ///Reads a specification from input_file,
+    ///applies instantiation of sums to it and writes the result to output_file.
+    bool run()
+    {
+      lps::specification lps_specification;
 
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+       lps_specification.load(m_input_filename);
 
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
+       linear_process lps = lps_specification.process();
+
+       data_specification data_spec = lps_specification.data();
+
+       Sorts sorts( data_spec, lps );
+
+       //lps::specification result = sorts.algorithm();
+       sorts.algorithm( m_parunfold_opts.index );
+
+       //result.save(m_output_filename);
+       cerr<< "The following assertion will be removed upon tool finalization" <<endl;
+       assert(false);
+
+       return true;
+    }
+
 };
-
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-}
-
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  bool result = true;
-
-  result &= c.input_exists(lps_file_for_input);
-
-  return (result);
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& c) {
-  using namespace tipi;
-  using namespace tipi::layout;
-  using namespace tipi::layout::elements;
- 
-  specification lps_specification;
-
-  lps_specification.load(c.get_input(lps_file_for_input).location());
-
-  linear_process lps = lps_specification.process();
-
-  /* Create display */
-  tipi::tool_display d;
-
-  layout::horizontal_box& m = d.create< horizontal_box >().set_default_margins(margins(0, 5, 0, 5));
-
-  send_display_layout(d.manager(m));
-
-  return true;
-}
-#endif
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
-    if (parse_command_line(argc,argv))
-    {
-
-      specification lps_specification;
-  
-      lps_specification.load(file_name);
-      linear_process lps = lps_specification.process();
-      data_specification data_spec = lps_specification.data();
-      Sorts sorts( data_spec, lps );
-      //Debug-hack
-      sorts.unfoldParameter = basic_sort( "Frame" );
-      sorts.algorithm();
-  
-      assert(false);
-    }
-    return EXIT_SUCCESS;
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-  }
-  return EXIT_FAILURE;
+  return parunfold_tool().execute(argc, argv);
 }

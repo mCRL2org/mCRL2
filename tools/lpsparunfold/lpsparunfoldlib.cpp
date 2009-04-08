@@ -14,6 +14,10 @@ using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 
+/* Remarks
+ replace on vectors does not work
+*/
+
 Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process lps)
 {
   m_data_specification = s;
@@ -22,6 +26,7 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
                                                              i != s.sorts().end();
                                                              ++i){
     sortSet.insert(*i);
+    cout << *i << endl;
     if (i->is_basic_sort()) {
       sort_names.insert( (basic_sort(*i)).name() );
     }
@@ -401,7 +406,7 @@ mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::str
   return idstr;
 }
 
-void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, function_symbol_vector AffectedMappings)
+void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, function_symbol_vector AffectedMappings, int parameter_at_index)
 {
    /* Get process parameters from lps */
    mcrl2::new_data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -421,9 +426,10 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
    mcrl2::new_data::variable_vector new_process_parameters;
    for(mcrl2::new_data::variable_list::iterator i = lps_proc_pars.begin();
                                                 i != lps_proc_pars.end();
-                                                ++i)
+                                                ++i) 
    {
-     if( i->sort() == unfoldParameter)
+     //if( i->sort() == unfoldParameter)
+     if( std::distance( lps_proc_pars.begin(), i ) == parameter_at_index )
      {
        gsVerboseMsg("unfold parameter %s found at index %d\n", i->name().c_str(), std::distance( lps_proc_pars.begin(), i ) );
        gsDebugMsg("  Inject process parameters\n");
@@ -463,6 +469,12 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
   /* NOTE: list has no push_back function */
   mcrl2::lps::summand_vector new_summands;
 
+
+  //Prepare parameter substitution
+  std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> parsub = parameterSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
+  //Prepare variable substitution
+  std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> varsub = variableSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
+
   mcrl2::lps::summand_list s = m_lps.summands();
   for(mcrl2::lps::summand_list::iterator j = s.begin()
                                      ; j != s.end()
@@ -470,13 +482,11 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
   //Traversing summands for process unfolding
   {
-    /***    
-      Actions & Conditions are not implemented yet
-    ***/
 
     /***
       Assignments
     ***/
+     
     mcrl2::new_data::assignment_list ass = j-> assignments();
     //Create new left-hand assignment_list 
     mcrl2::new_data::data_expression_vector new_ass_left; 
@@ -503,7 +513,28 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
                                                  ; k != ass.end() 
                                                  ; ++k)
     {
-      new_ass_right = unfoldConstructor(k -> rhs(), AffectedMappings, Detmap );     
+      if (std::distance( ass.begin(), k ) == parameter_at_index)
+      {
+        mcrl2::new_data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedMappings, Detmap );
+
+        //Replace unfold parameters in affected assignments
+        mcrl2::new_data::data_expression_vector new_ins;
+        for( std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>::iterator i = parsub.begin()
+												  ; i != parsub.end()
+												  ; ++i)
+	{
+          for(mcrl2::new_data::data_expression_vector::iterator l = ins.begin()
+                                                              ; l != ins.end()
+                                                              ; ++l )
+          {
+	    new_ins.push_back(replace(*l, i->first, i->second ));
+          }
+	}
+        
+        new_ass_right.insert(new_ass_right.end(), new_ins.begin(), new_ins.end());
+      } else {
+        new_ass_right.push_back( k-> rhs() );
+      }
     }
 
     assert( new_ass_left.size() == new_ass_right.size() );
@@ -514,36 +545,88 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
       new_ass_left.erase( new_ass_left.begin() );
       new_ass_right.erase( new_ass_right.begin() );
     }
-    new_summands.push_back(set_assignments( *j, mcrl2::new_data::assignment_list( new_ass.begin(), new_ass.end() ) ) );
-  }
-  //Replace unfold variables in summands
-  std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> unfold_var_map = detectUnfoldVariable(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
-  mcrl2::lps::summand_list  new_summand_list = mcrl2::lps::summand_list( new_summands.begin(), new_summands.end() );
-  for( std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>::iterator i = unfold_var_map.begin()
-                                                                                            ; i != unfold_var_map.end()
-                                                                                            ; ++i)
-  {
-    new_summand_list = replace( new_summand_list, i->first, i->second );
+
+    mcrl2::lps::summand new_summand = set_assignments( *j, mcrl2::new_data::assignment_list( new_ass.begin(), new_ass.end() ) );
+    for( std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>::iterator i = varsub.begin()
+	                     								      ; i != varsub.end()
+											      ; ++i)
+    {
+      new_summand = atermpp::replace( new_summand, i->first , i->second );
+    }
+   
+    new_summands.push_back( new_summand );
   }
   
-  mcrl2::lps::linear_process new_lps = mcrl2::lps::linear_process(m_lps.free_variables(),mcrl2::new_data::variable_list(new_process_parameters.begin(), new_process_parameters.end()), new_summand_list);
+  mcrl2::lps::linear_process new_lps = mcrl2::lps::linear_process(m_lps.free_variables(),mcrl2::new_data::variable_list(new_process_parameters.begin(), new_process_parameters.end()), mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
   gsVerboseMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
   assert( new_lps.is_well_typed());
   return;
     
 }   
-
-
-std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sorts::detectUnfoldVariable(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
+std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sorts::variableSubstitution(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
 {
    std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> result;
-   data_expression_vector dev;  
+   data_expression de;
 
    for(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin() 
       ; i != proc_par_to_proc_par_inj.end()
       ; ++i) 
    {
+     for( mcrl2::new_data::function_symbol_vector::iterator m = AffectedConstructors.begin()
+      						    ; m != AffectedConstructors.end()
+      						    ; ++m )
+     {
+       if (m -> sort().is_function_sort())
+       {
+         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
+         data_expression_vector arg;
+    
+         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
+         {
+           if (n -> is_basic_sort())
+           {
+             for (mcrl2::new_data::variable_vector::iterator o = i->second.begin()
+       	  					      ; o != i->second.end()
+       						      ; ++o)
+       	     {
+       	       if (o -> sort() == *n )
+       	       {
+       	         arg.push_back( *o );
+       	         break;
+       	       }
+       	     } 
+           } else {
+             cerr << "Unsupported sort expression:" << *n << endl ;
+       	     assert(false);
+           }
+         }
+         de = mcrl2::new_data::application( *m, arg ) ; 
+       }
+     }
+     gsVerboseMsg( "variable substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( de ).c_str());
+     result.insert( std::pair<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>(i -> first,  de ) );
+   }
+  return result ;
+}
+
+std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sorts::parameterSubstitution(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector > proc_par_to_proc_par_inj, mcrl2::new_data::function_symbol_vector AffectedConstructors, mcrl2::new_data::function_symbol Cmap )
+{
+   std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> result;
+   data_expression_vector dev;
+
+
+   mcrl2::new_data::variable prev;
+   for(std::map<mcrl2::new_data::variable, mcrl2::new_data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin() 
+      ; i != proc_par_to_proc_par_inj.end()
+      ; ++i) 
+   {
+     if (prev != i->first)
+     {
+       dev.clear();
+     }
+
+     dev.push_back( data_expression( i->second.front() ));  
 
      for( mcrl2::new_data::function_symbol_vector::iterator m = AffectedConstructors.begin()
       						    ; m != AffectedConstructors.end()
@@ -574,15 +657,14 @@ std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sor
        	       }
        	     } 
            } else {
-             gsDebugMsg("Unsupported sort expressions\n");
+             cerr << "Unsupported sort expression:" << *n << endl ;
        	     assert(false);
            }
          }
          dev.push_back( mcrl2::new_data::application( *m, arg ) ); 
        }
-
      } 
-     gsVerboseMsg( "parameters substitution: %s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::new_data::application( Cmap, dev  ) ).c_str());
+     gsVerboseMsg( "parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::new_data::application( Cmap, dev  ) ).c_str());
      result.insert( std::pair<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>(i -> first,  mcrl2::new_data::application( Cmap, dev ) ) );
    }
   return result ;
@@ -590,117 +672,51 @@ std::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> Sor
 
 mcrl2::new_data::data_expression_vector Sorts::unfoldConstructor( data_expression de, function_symbol_vector am, function_symbol Detmap )
 {
-  mcrl2::new_data::data_expression_vector result;
-  if (de.is_variable())
-  {
-    result.push_back(de);
-    return result;
-  }
-
-  if (de.is_application() )
-  {
-    mcrl2::new_data::data_expression_vector tmp_result;
-    mcrl2::new_data::application ap = mcrl2::new_data::application( de );
-    /* data_expression_vector instead of 'boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> >' */
-    boost::iterator_range<mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> > args = ap.arguments();
-    for(mcrl2::new_data::detail::term_list_random_iterator<mcrl2::new_data::data_expression> i = args.begin()
-       ; i != args.end()
-       ; ++i
-    ) 
-    {
-      mcrl2::new_data::data_expression_vector uc = unfoldConstructor( *i, am, Detmap);
-      tmp_result.insert( tmp_result.end(), uc.begin(), uc.end() );
-    }
-
-    /* Determine if function symbol occurs in the affected mappings */
-    mcrl2::new_data::function_symbol_vector::iterator index;
-    index = std::find( am.begin(), am.end(), ap.head() );
- 
-    if ( index == am.end() )
+    mcrl2::new_data::data_expression_vector result;
     {
       /* Unfold parameter if function symbol occurs  */
       /* size of unfold parameter must be equal to 1 */
       data_expression_vector new_ass;
 
-      /* reconstruct unfold from constructor application */
-      mcrl2::new_data::application rec_ap = mcrl2::new_data::application( ap.head(), tmp_result );    
-  
       /* Det function */
-      new_ass.push_back( mcrl2::new_data::application( Detmap, rec_ap ) ) ;
+      new_ass.push_back( mcrl2::new_data::application( Detmap, de ) ) ;
 
       for(function_symbol_vector::iterator i = am.begin(); i != am.end(); ++i )
       {
-         new_ass.push_back( mcrl2::new_data::application( *i, rec_ap ) ) ;
+         new_ass.push_back( mcrl2::new_data::application( *i, de ) ) ;
       }
 
       result = new_ass;
-    } else {
-      result.push_back( mcrl2::new_data::application( ap.head(), tmp_result ) );
-    }
+    } 
     return result;
-  }
-
-  if (de.is_function_symbol() )
-  {
-    result.push_back(de);
-    return result;
-  }
-
-  cerr << "\n unfoldConstructor cannot unfold: "<< de << endl;
-  assert(false);
-  return result;
 }
 
-mcrl2::new_data::data_expression Sorts::substituteVariable( data_expression var,
-                                                            function_symbol Cmap,
-                                                            function_symbol_vector AffectedConstructors
-                                                          )
+mcrl2::new_data::basic_sort Sorts::getSortOfProcessParameter(int parameter_at_index)
 {
-      /* Reconstruct Unfold parameter */
-      data_expression_vector new_args ;
-      new_args.push_back( proc_par_to_proc_par_inj[ var ][0] );
-      for(function_symbol_vector::iterator i =  AffectedConstructors.begin()
-                                         ; i != AffectedConstructors.end() 
-                                         ; ++i )
-      {
-        bool b = false;
-        if ( i->sort().is_basic_sort() )
-        {
-          new_args.push_back( *i );
-          b = true;
-        }
+  mcrl2::new_data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
+  mcrl2::new_data::variable_vector lps_proc_pars = mcrl2::new_data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
+  if(    (int(lps_proc_pars.size()) <= parameter_at_index) ) 
+  {
+    cerr << "Given index out of bounce. Index value should be less or equal than " << lps_proc_pars.size()-1 <<"." << endl; 
+    abort(); 
+  }
 
-        if ( i->sort().is_function_sort() )
-        {
-          data_expression_vector instantiate_domain;
-          function_sort::domain_range dcr = function_sort(i->sort()).domain();
-          for (function_sort::domain_const_range::iterator j  = dcr.begin()
-                                                         ; j != dcr.end() 
-                                                         ; j++ )
-          {
-            for(mcrl2::new_data::variable_vector::iterator k =  proc_par_to_proc_par_inj[ var ].begin() 
-                                                         ; k != proc_par_to_proc_par_inj[ var ].end()
-                                                         ; ++k )
-            {
-              if( *j == k->sort() )
-              {
-                instantiate_domain.push_back( *k );
-              } 
-            }   
-          }
-          new_args.push_back( application( *i, instantiate_domain )  );
-          b = true; 
-        }
+  if (parameter_at_index < 0 ) 
+  {
+    cerr << "Given index out of bounce. Index value should be greater or equal than 0. " << endl;  
+    abort(); 
+  }
 
-        assert(b);
-      }
-      data_expression new_expr = application(Cmap, new_args );
-      return new_expr;
+  if (!lps_proc_pars[parameter_at_index].sort().is_basic_sort() )
+  {
+    cerr << "Process parameter at given index is no basic sort: " << lps_proc_pars[parameter_at_index].sort()  << endl;  
+  }
+ 
+  return basic_sort(lps_proc_pars[parameter_at_index].sort()); 
 }
 
 
-
-void Sorts::algorithm()
+void Sorts::algorithm(int parameter_at_index)
 {
    /* Var Dec */
    function_symbol_vector m;
@@ -709,9 +725,11 @@ void Sorts::algorithm()
    function_symbol_vector set_of_ProjectorFunctions;
    function_symbol Cmap;
    function_symbol Detmap;
-//   variable_list data_equation_variables;
-//   data_equation_list data_equations;
    std::pair< variable_vector , data_equation_vector > data_specification;
+
+   unfoldParameter = getSortOfProcessParameter( parameter_at_index );
+
+
    /*   Alg */
    /*     1 */ sort_new = generateFreshSort( unfoldParameter.name() );
    /*     2 */ k = determineAffectedConstructors();
@@ -726,6 +744,6 @@ void Sorts::algorithm()
 
    /*----------------*/
 
-   updateLPS(Cmap, k, Detmap, m);  
+   updateLPS(Cmap, k, Detmap, m, parameter_at_index);  
 
 }
