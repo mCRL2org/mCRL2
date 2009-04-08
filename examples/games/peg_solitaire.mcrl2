@@ -1,4 +1,4 @@
-% This file describes the well known solitaire pin game.
+% This file describes the well known peg solitaire game.
 % The question is to show how from a board that
 % has the shape:
 %
@@ -46,11 +46,11 @@
 % We currently use the following commands to explore the state
 % space:
 %
-% mcrl22lps -n solitaire.mcrl2 temps.lps
+% mcrl22lps -n -D peg_solitaire.mcrl2 temps.lps
 % lpsuntime temps.lps temps1.lps
 % lpssuminst temps1.lps temps2.lps
 % lpsrewr temps2.lps temps3.lps
-% lps2lts -vRjittyc -r -t -aready temps3.lps
+% lps2lts -vrjittyc -ftree -t -aready temps3.lps
 %
 % It is expected that the speed of state space generation will
 % increase a factor 10, after applying lpsstructelm to replace
@@ -65,6 +65,11 @@
 % used.
 %
 % Jan Friso Groote, 4/1/2007.
+%
+% On 3/4/2009 Jaco van de Pol analyzed this example using symbolic
+% state space exploration. He found a stupid copy/paste mistake
+% that has now been repaired. Using ltsmin the necessary time was
+% appr. a half hour and memory requirements were approximately 8GB.
 
 
 sort Piece = struct empty | pin | unused;
@@ -106,12 +111,12 @@ var p:Pos;
     pc:Piece;
 
 eqn setPiece(1,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(pc,p2,p3,p4,p5,p6,p7);
-    setPiece(2,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p2,pc,p3,p4,p5,p6,p7);
-    setPiece(3,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p3,p2,pc,p4,p5,p6,p7);
-    setPiece(4,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p4,p2,p3,pc,p5,p6,p7);
-    setPiece(5,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p5,p2,p3,p4,pc,p6,p7);
-    setPiece(6,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p6,p2,p3,p4,p5,pc,p7);
-    setPiece(7,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p7,p2,p3,p4,p5,p6,pc);
+    setPiece(2,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,pc,p3,p4,p5,p6,p7);
+    setPiece(3,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,p2,pc,p4,p5,p6,p7);
+    setPiece(4,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,p2,p3,pc,p5,p6,p7);
+    setPiece(5,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,p2,p3,p4,pc,p6,p7);
+    setPiece(6,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,p2,p3,p4,p5,pc,p7);
+    setPiece(7,pc,row(p1,p2,p3,p4,p5,p6,p7))=row(p1,p2,p3,p4,p5,p6,pc);
 
     getPiece(1,row(p1,p2,p3,p4,p5,p6,p7))=p1;
     getPiece(2,row(p1,p2,p3,p4,p5,p6,p7))=p2;

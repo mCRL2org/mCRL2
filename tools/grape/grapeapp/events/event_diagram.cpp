@@ -34,6 +34,20 @@ using namespace grape::mcrl2gen;
 
 using namespace std;
 
+void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
+{
+  if (is_valid)
+  {
+    // display message in statusbar
+    if ( p_main_frame->get_statusbar()->GetStatusText() == wxEmptyString ) p_main_frame->get_statusbar()->PopStatusText();
+    p_main_frame->get_statusbar()->PushStatusText( p_main_frame->get_logpanel()->GetValue() );  
+  } 
+  else
+  {
+    // display message in box
+    wxMessageBox( _T("Error messages: \n")+p_main_frame->get_logpanel()->GetValue(), _T("Error"), wxOK | wxICON_ERROR );
+  }    
+}
 
 grape_event_select_diagram::grape_event_select_diagram(grape_frame *p_main_frame, const wxString &p_diagram_name)
 : grape_event_base(p_main_frame, false, _T("diagram select"))
@@ -873,9 +887,14 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
     if (!validate_architecture_diagram(export_doc, diagram_id))
     {
       cerr << "+mcrl2 conversion failed: architecture diagram is not valid." << endl;
+      display_message(m_main_frame, false);
       return false;
     }
-    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true)) return false;
+    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true))
+    { 
+      display_message(m_main_frame, false);
+      return false;
+    }
   }
   else if(proc_diag != 0)
   {
@@ -883,10 +902,18 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
     if (!validate_process_diagram(export_doc, diagram_id))
     {
       cerr << "+mcrl2 conversion failed: process diagram is not valid." << endl;
+      display_message(m_main_frame, false);
       return false;
     }
-    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true)) return false;
+    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true))
+    {
+      display_message(m_main_frame, false);
+      return false;
+    }
   }
+  
+  display_message(m_main_frame, true);
+  
   return true;
 }
 
@@ -916,8 +943,8 @@ bool grape_event_validate_specification::Do(void)
   wxXmlDocument validate_doc = xml_convert(*validate_spec, empty_filename, 2, false);
   convert_spaces(validate_doc);
 
-  validate(validate_doc);
-
+  display_message(m_main_frame, validate(validate_doc));
+    
   return true;
 }
 
@@ -952,17 +979,20 @@ bool grape_event_validate_diagram::Do(void)
   d_id.Printf(_T("%u"), diagram_id);
 
   // determine type of diagram to validate
+  bool is_valid;
   architecture_diagram *arch_dia = dynamic_cast<architecture_diagram*>(dia);
   process_diagram *proc_dia = dynamic_cast<process_diagram*>(dia);
   if(arch_dia != 0)
   {
-    validate_architecture_diagram(validate_doc, d_id);
+    is_valid = validate_architecture_diagram(validate_doc, d_id);
   }
   else if(proc_dia != 0)
   {
-    validate_process_diagram(validate_doc, d_id);
+    is_valid = validate_process_diagram(validate_doc, d_id);
   }
 
+  display_message(m_main_frame, is_valid);
+    
   return true;
 }
 

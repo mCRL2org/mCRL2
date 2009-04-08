@@ -1,0 +1,34 @@
+project libraries/pbes/pgsolver
+   : requirements
+       <use>/site-config//boost
+       <source>/libraries//core
+       <source>/libraries//lps
+       <source>/libraries//pbes
+       <include>.
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <define>MCRL2_REVISION=\"\\\"0\\\"\"
+       <define>WITH_MCRL2
+   ;
+
+SOURCES = FocusListLiftingStrategy.cc
+          Graph.cc
+          LiftingStrategy.cc
+          LinearLiftingStrategy.cc
+          MaxMeasureLiftingStrategy.cc
+          ParityGame.cc
+          ParityGame_IO.cc
+          PredecessorLiftingStrategy.cc
+          SmallProgressMeasures.cc
+          logging.c
+          timing.c
+        ;
+
+lib pg : $(SOURCES) ;
+
+exe pgsolver : pgsolver.cpp pg : ;
+
+install dist
+   :
+     pgsolver
+   :
+   ;

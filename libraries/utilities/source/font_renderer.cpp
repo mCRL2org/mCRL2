@@ -354,7 +354,7 @@ namespace mcrl2 {
              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
              startpos = startpos + addpos;
           }
-          else
+          else  
           {
             if (findid <= startpos + addpos)
             {
@@ -365,9 +365,11 @@ namespace mcrl2 {
               temps = temps.substr(findid+1);
             }
           }
-
-          // print dots if there are more lines and we are at the bottem of our bounding box
-          if (((!((y - 2*CHARHEIGHT*scale >= yBot-yTop) && (y - 2*CHARHEIGHT*scale <= 0))) && ((subs.length() >= 3) || (subs.find_first_of('\n') >= 0))))
+      
+          bool moretext = startpos >= s.length();
+          bool lastlineinbox = (y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop);          
+          // print dots if there are more lines and we are at the bottem of our bounding box    
+          if ( !moretext && lastlineinbox ) 
           {
             subs = subs.substr(0, subs.length()-3);
             subs = subs.append("...");
@@ -415,13 +417,14 @@ namespace mcrl2 {
             }
           }
 
+          // display text
           draw_text(subs, transx, transy , scale, al_right, al_center);
-
+                    
+          // break if we are outside the boundingbox
+          if ((y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop)) break;
+          
           // calculate new y position
           y = y - CHARHEIGHT*scale;
-
-          // break if we are outside the boundingbox
-          if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
         }
       }
 

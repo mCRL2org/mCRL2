@@ -442,16 +442,6 @@ namespace grape
         void grape_event_timer( wxTimerEvent &p_event );
 
         /**
-         * Makes the log panel visible, with a height of 100 pixels.
-         */
-        void show_log_panel();
-
-        /**
-         * Hides the log panel. Still reachable at the bottom of the screen.
-        */
-        void hide_log_panel();
-
-        /**
          * Gives the current filename.
          */
         wxFileName get_filename( void ) const;
