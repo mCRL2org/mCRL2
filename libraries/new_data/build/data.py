@@ -280,8 +280,9 @@ class function_declaration_list():
         code  = ""
         code += "      /// \\brief Constructor for function symbol %s\n" % (escape(fullname))
         sortparams_list = string.split(sortparams, ", ")
-        for s in sortparams_list:
-          code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
+        if sortparams_list <> ['']:
+          for s in sortparams_list:
+            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         code += "      /// \\return Function symbol %s\n" % (escape(name))
         code += "      inline\n"
         code += "      function_symbol %s(%s)\n" % (name, sortparams)
@@ -296,11 +297,13 @@ class function_declaration_list():
         code  = ""
         code += "      ///\\brief Constructor for function symbol %s\n" % (escape(fullname))
         sortparams_list = string.split(sortparams, ", ")
-        for s in sortparams_list:
-          code += "       /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
+        if sortparams_list <> ['']:
+          for s in sortparams_list:
+            code += "       /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         domainparams_list = string.split(domainparams, ", ")
-        for d in domainparams_list:
-          code += "      /// \\param %s A data expression\n" % (escape(s[len("const data_expression& "):]))
+        if domainparams_list <> ['']:
+          for s in domainparams_list:
+            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         code += "      ///\\return Function symbol %s\n" % (escape(name))
         code += "      inline\n"
         code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
@@ -332,11 +335,13 @@ class function_declaration_list():
         code  = ""
         code += "      /// \\brief Application of function symbol %s\n" % (escape(fullname))
         formsortparams_list = string.split(formsortparams, ", ")
-        for s in formsortparams_list:
-          code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
+        if formsortparams_list <> ['']:
+          for s in formsortparams_list:
+            code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         formparams_list = string.split(formparams, ", ")
-        for d in formparams_list:
-          code += "      /// \\param %s A data expression\n" % (escape(d[len("const data_expression& "):]))
+        if formparams_list <> ['']:
+          for d in formparams_list:
+            code += "      /// \\param %s A data expression\n" % (escape(d[len("const data_expression& "):]))
         code += "      /// \\return Application of %s to a number of arguments\n" % (escape(fullname))
         code += "      inline\n"
         code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)

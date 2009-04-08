@@ -40,7 +40,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol true
-      /// \param  A sort expression
       /// \return Function symbol true_
       inline
       function_symbol true_()
@@ -63,7 +62,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol false
-      /// \param  A sort expression
       /// \return Function symbol false_
       inline
       function_symbol false_()
@@ -97,7 +95,6 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol !
-      /// \param  A sort expression
       /// \return Function symbol not_
       inline
       function_symbol not_()
@@ -120,7 +117,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol !
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of ! to a number of arguments
       inline
@@ -144,7 +140,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol &&
-      /// \param  A sort expression
       /// \return Function symbol and_
       inline
       function_symbol and_()
@@ -167,7 +162,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol &&
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of && to a number of arguments
@@ -192,7 +186,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ||
-      /// \param  A sort expression
       /// \return Function symbol or_
       inline
       function_symbol or_()
@@ -215,7 +208,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol ||
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of || to a number of arguments
@@ -240,7 +232,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol =>
-      /// \param  A sort expression
       /// \return Function symbol implies
       inline
       function_symbol implies()
@@ -263,7 +254,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol =>
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of => to a number of arguments

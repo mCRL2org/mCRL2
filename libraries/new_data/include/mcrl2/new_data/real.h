@@ -53,7 +53,6 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol \@cReal
-      /// \param  A sort expression
       /// \return Function symbol creal
       inline
       function_symbol creal()
@@ -76,7 +75,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@cReal
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@cReal to a number of arguments
@@ -101,7 +99,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Pos2Real
-      /// \param  A sort expression
       /// \return Function symbol pos2real
       inline
       function_symbol pos2real()
@@ -124,7 +121,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Pos2Real
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Pos2Real to a number of arguments
       inline
@@ -148,7 +144,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Nat2Real
-      /// \param  A sort expression
       /// \return Function symbol nat2real
       inline
       function_symbol nat2real()
@@ -171,7 +166,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Nat2Real
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Nat2Real to a number of arguments
       inline
@@ -195,7 +189,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Int2Real
-      /// \param  A sort expression
       /// \return Function symbol int2real
       inline
       function_symbol int2real()
@@ -218,7 +211,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Int2Real
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Int2Real to a number of arguments
       inline
@@ -242,7 +234,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Real2Pos
-      /// \param  A sort expression
       /// \return Function symbol real2pos
       inline
       function_symbol real2pos()
@@ -265,7 +256,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Real2Pos
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Real2Pos to a number of arguments
       inline
@@ -289,7 +279,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Real2Nat
-      /// \param  A sort expression
       /// \return Function symbol real2nat
       inline
       function_symbol real2nat()
@@ -312,7 +301,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Real2Nat
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Real2Nat to a number of arguments
       inline
@@ -336,7 +324,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol Real2Int
-      /// \param  A sort expression
       /// \return Function symbol real2int
       inline
       function_symbol real2int()
@@ -359,7 +346,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol Real2Int
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of Real2Int to a number of arguments
       inline
@@ -383,9 +369,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol min
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol minimum
       inline
       function_symbol minimum(const sort_expression& s0, const sort_expression& s1)
@@ -430,7 +415,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol min
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of min to a number of arguments
@@ -455,9 +439,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol max
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol maximum
       inline
       function_symbol maximum(const sort_expression& s0, const sort_expression& s1)
@@ -526,7 +509,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol max
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of max to a number of arguments
@@ -551,8 +533,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol abs
-       /// \param  A sort expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
       ///\return Function symbol abs
       inline
       function_symbol abs(const sort_expression& s0)
@@ -597,7 +578,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol abs
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of abs to a number of arguments
       inline
@@ -621,8 +601,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol -
-       /// \param  A sort expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
       ///\return Function symbol negate
       inline
       function_symbol negate(const sort_expression& s0)
@@ -667,7 +646,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol -
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of - to a number of arguments
       inline
@@ -691,8 +669,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol succ
-       /// \param  A sort expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
       ///\return Function symbol succ
       inline
       function_symbol succ(const sort_expression& s0)
@@ -737,7 +714,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol succ
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of succ to a number of arguments
       inline
@@ -761,8 +737,7 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol pred
-       /// \param  A sort expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
       ///\return Function symbol pred
       inline
       function_symbol pred(const sort_expression& s0)
@@ -807,7 +782,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol pred
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of pred to a number of arguments
       inline
@@ -831,9 +805,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol +
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol plus
       inline
       function_symbol plus(const sort_expression& s0, const sort_expression& s1)
@@ -886,7 +859,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol +
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of + to a number of arguments
@@ -911,9 +883,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol -
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol minus
       inline
       function_symbol minus(const sort_expression& s0, const sort_expression& s1)
@@ -958,7 +929,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol -
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of - to a number of arguments
@@ -983,9 +953,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol *
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol times
       inline
       function_symbol times(const sort_expression& s0, const sort_expression& s1)
@@ -1030,7 +999,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol *
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of * to a number of arguments
@@ -1055,9 +1023,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol exp
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol exp
       inline
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
@@ -1102,7 +1069,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol exp
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of exp to a number of arguments
@@ -1127,9 +1093,8 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor for function symbol /
-       /// \param  A sort expression
-      /// \param  A data expression
-      /// \param  A data expression
+      /// \param s0 A sort expression
+      /// \param s1 A sort expression
       ///\return Function symbol divides
       inline
       function_symbol divides(const sort_expression& s0, const sort_expression& s1)
@@ -1154,7 +1119,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol /
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of / to a number of arguments
@@ -1179,7 +1143,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol floor
-      /// \param  A sort expression
       /// \return Function symbol floor
       inline
       function_symbol floor()
@@ -1202,7 +1165,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol floor
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of floor to a number of arguments
       inline
@@ -1226,7 +1188,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ceil
-      /// \param  A sort expression
       /// \return Function symbol ceil
       inline
       function_symbol ceil()
@@ -1249,7 +1210,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol ceil
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of ceil to a number of arguments
       inline
@@ -1273,7 +1233,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol round
-      /// \param  A sort expression
       /// \return Function symbol round
       inline
       function_symbol round()
@@ -1296,7 +1255,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol round
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \return Application of round to a number of arguments
       inline
@@ -1320,7 +1278,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@redfrac
-      /// \param  A sort expression
       /// \return Function symbol redfrac
       inline
       function_symbol redfrac()
@@ -1343,7 +1300,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@redfrac
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@redfrac to a number of arguments
@@ -1368,7 +1324,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@redfracwhr
-      /// \param  A sort expression
       /// \return Function symbol redfracwhr
       inline
       function_symbol redfracwhr()
@@ -1391,7 +1346,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@redfracwhr
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \param arg2 A data expression
@@ -1417,7 +1371,6 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@redfrachlp
-      /// \param  A sort expression
       /// \return Function symbol redfrachlp
       inline
       function_symbol redfrachlp()
@@ -1440,7 +1393,6 @@ namespace mcrl2 {
       }
 
       /// \brief Application of function symbol \@redfrachlp
-      /// \param  A sort expression
       /// \param arg0 A data expression
       /// \param arg1 A data expression
       /// \return Application of \@redfrachlp to a number of arguments
