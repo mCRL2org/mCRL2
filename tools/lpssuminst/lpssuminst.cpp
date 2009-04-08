@@ -21,13 +21,11 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 
-//class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
-class suminst_tool: public input_output_tool
+class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 {
   protected:
 
-    //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
-    typedef input_output_tool super;
+    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
     lps::t_suminst_options m_suminst_opts; ///< Options of the algorithm
 
@@ -66,7 +64,7 @@ class suminst_tool: public input_output_tool
 
        lps_specification.load(m_input_filename);
 
-       //mcrl2::new_data::rewriter r = create_rewriter(lps_specification.data());
+       mcrl2::new_data::rewriter r = create_rewriter(lps_specification.data());
 
        lps::specification result = instantiate_sums(lps_specification, r, m_suminst_opts);
 
