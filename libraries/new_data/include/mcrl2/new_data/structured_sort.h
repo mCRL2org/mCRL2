@@ -570,6 +570,10 @@ namespace mcrl2 {
           return result;
         }
 
+        /// \brief Generate equations for the projection functions of this sort, assuming
+        ///        that this sort is referred to with s.
+        /// \param s A sort expression
+        /// \return A vector of equations for the projection functions of this sort.
         inline
         data_equation_vector projection_equations(const sort_expression& s) const
         {
@@ -609,6 +613,10 @@ namespace mcrl2 {
           return result;
         }
 
+        /// \brief Generate equations for the recognisers of this sort, assuming
+        ///        that this sort is referred to with s.
+        /// \param s A sort expression
+        /// \return A vector of equations for the recognisers of this sort.
         inline
         data_equation_vector recogniser_equations(const sort_expression& s) const
         {

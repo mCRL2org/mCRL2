@@ -245,6 +245,7 @@ namespace mcrl2 {
 
     namespace sort_bool_{
       /// \brief Constructs expression of type Bool from an integral type
+      /// \param b A Boolean
       inline data_expression bool_(bool b) {
         return (b) ? sort_bool_::true_() : sort_bool_::false_();
       }
@@ -262,6 +263,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Pos from a string
+      /// \param n A string
       inline data_expression pos(std::string const& n) {
         using namespace mcrl2::core::detail;
 
@@ -301,6 +303,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Nat from a string
+      /// \param n A string
       inline data_expression nat(std::string const& n) {
 //// Temporary measure
 //        if (n == "0") {
@@ -328,6 +331,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Int from a string
+      /// \param n A string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
       inline data_expression int_(std::string const& n) {
 //// Temporary measure
@@ -349,6 +353,7 @@ namespace mcrl2 {
       //}
 
       /// \brief Constructs expression of type pos from an integral type
+      /// \param t An expression of type T
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       real_(T t) {
@@ -362,6 +367,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type Real from a string
+      /// \param n A string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
       inline data_expression real_(std::string const& n) {
 //// Temporary measure
@@ -371,6 +377,8 @@ namespace mcrl2 {
     }
 
     /// \brief Construct numeric expression from a string representing a number in decimal notation
+    /// \param s A sort expression
+    /// \param n A string
     /// \pre n is of the form [0...9]+
     inline data_expression number(sort_expression const& s, std::string const& n)
     {
