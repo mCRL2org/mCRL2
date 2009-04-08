@@ -62,19 +62,8 @@ void visualchannel_communication::draw( void )
 
 bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
 {
-  bool result = false;
-  channel_communication* comm = static_cast<channel_communication*>( m_object );
-
-  //for all communications
-  for ( unsigned int i = 0; i < comm->count_channel(); ++i )
-  {
-    channel* chan = comm->get_attached_channel( i );
-    // test is inside line
-    result = result || is_inside_line( m_object->get_coordinate(), chan->get_coordinate(), p_coord );
-  }
-
   // return inside test
-  return result || is_inside_ellipse( m_object->get_coordinate(), 0.05f, 0.05f, p_coord);
+  return is_inside_ellipse( m_object->get_coordinate(), 0.05f, 0.05f, p_coord);
 }
 
 grape_direction visualchannel_communication::is_on_border( libgrape::coordinate &p_coord )
