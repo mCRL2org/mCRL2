@@ -830,6 +830,7 @@ namespace mcrl2 {
       return new_specification;
     }
 
+    /// \brief Compares data specifications for equality
     inline
     bool operator==(const data_specification& x, const data_specification& y)
     {

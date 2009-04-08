@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/enumerator_factory.h
+/// \file mcrl2/new_data/enumerator_factory.h
 /// \brief Template class for convenient creation of data enumerators
 
 #ifndef _MCRL2_DATA_ENUMERATOR_FACTORY__HPP_
@@ -66,6 +66,11 @@ namespace mcrl2 {
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
         enumerator_factory() {
+        }
+
+        enumerator_factory(boost::shared_ptr< shared_context_type > const& context, Evaluator const& evaluator) :
+               m_evaluator(evaluator),
+               m_enumeration_context(context) {
         }
 
       public:

@@ -125,6 +125,7 @@ namespace mcrl2 {
       return convert< assignment_list >(make_assignment_vector(lhs, rhs));
     }
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
   /// \brief Function object that applies a substitution to the right hand side of an assignment
@@ -132,11 +133,11 @@ namespace detail {
   struct assignment_substitute_rhs
   {
     const UnaryFunction& f;
-    
+
     assignment_substitute_rhs(const UnaryFunction& f_)
       : f(f_)
     {}
-    
+
     assignment operator()(const assignment& a) const
     {
       return assignment(a.lhs(), f(a.rhs()));
@@ -144,7 +145,7 @@ namespace detail {
   };
 
 } // namespace detail
-
+/// \endcond
     /// \brief Applies a substitution function to data expressions appearing in the right hand
     /// sides of assignments.
     /// \param l                         A sequence of assignments

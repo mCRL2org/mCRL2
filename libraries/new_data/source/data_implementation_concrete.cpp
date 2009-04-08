@@ -39,6 +39,7 @@ using namespace atermpp;
 
  namespace mcrl2 {
   namespace new_data {
+     /// \cond INTERNAL_DOCS
      namespace detail {
 
 //local declarations
@@ -1342,5 +1343,6 @@ void split_sort_decls(ATermList sort_decls, ATermList *p_sort_ids,
 }
 
     } // namespace detail
+    /// \endcond
   }   // namespace core
 }     // namespace mcrl2

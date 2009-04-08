@@ -25,7 +25,7 @@ namespace mcrl2 {
     class data_expression;
     class variable;
 
-    /// \brief INTERNAL_DOCS
+    /// \cond INTERNAL_DOCS
     namespace detail {
       class inaccessible {
 

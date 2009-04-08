@@ -35,7 +35,6 @@ namespace mcrl2 {
       // Does not contain iterator specific state information. Used for
       // both performance and for making the iterators Multi Pass such that
       // they can be used with Boost.Graph.
-      template < typename Substitution >
       class classic_enumerator_context {
 
         template < typename MutableSubstitution, typename Evaluator, typename Selector >
@@ -67,7 +66,7 @@ namespace mcrl2 {
           typedef MutableSubstitution                               substitution_type;
           typedef typename MutableSubstitution::expression_type     expression_type;
           typedef typename MutableSubstitution::variable_type       variable_type;
-          typedef classic_enumerator_context< MutableSubstitution > shared_context_type;
+          typedef classic_enumerator_context                        shared_context_type;
 
         private:
 
