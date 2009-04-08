@@ -46,6 +46,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol []
+      /// \param s A sort expression
       /// \return Function symbol nil
       inline
       function_symbol nil(const sort_expression& s)
@@ -68,6 +69,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol |>
+      /// \param s A sort expression
       /// \return Function symbol cons_
       inline
       function_symbol cons_(const sort_expression& s)
@@ -89,17 +91,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol |>
-      ///\return Application of |> to a number of arguments
+      /// \brief Application of function symbol |>
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of |> to a number of arguments
       inline
       application cons_(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(cons_(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of |>
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol cons_ to a
+      /// \brief Recogniser for application of |>
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol cons_ to a
       ///     number of arguments
       inline
       bool is_cons__application(const data_expression& e)
@@ -124,6 +129,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol in
+      /// \param s A sort expression
       /// \return Function symbol in
       inline
       function_symbol in(const sort_expression& s)
@@ -145,17 +151,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol in
-      ///\return Application of in to a number of arguments
+      /// \brief Application of function symbol in
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of in to a number of arguments
       inline
       application in(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(in(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of in
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol in to a
+      /// \brief Recogniser for application of in
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol in to a
       ///     number of arguments
       inline
       bool is_in_application(const data_expression& e)
@@ -168,6 +177,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol #
+      /// \param s A sort expression
       /// \return Function symbol count
       inline
       function_symbol count(const sort_expression& s)
@@ -189,17 +199,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol #
-      ///\return Application of # to a number of arguments
+      /// \brief Application of function symbol #
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of # to a number of arguments
       inline
       application count(const sort_expression& s, const data_expression& arg0)
       {
         return application(count(s),arg0);
       }
 
-      ///\brief Recogniser for application of #
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol count to a
+      /// \brief Recogniser for application of #
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol count to a
       ///     number of arguments
       inline
       bool is_count_application(const data_expression& e)
@@ -212,6 +224,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol <|
+      /// \param s A sort expression
       /// \return Function symbol snoc
       inline
       function_symbol snoc(const sort_expression& s)
@@ -233,17 +246,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol <|
-      ///\return Application of <| to a number of arguments
+      /// \brief Application of function symbol <|
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of <| to a number of arguments
       inline
       application snoc(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(snoc(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of <|
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol snoc to a
+      /// \brief Recogniser for application of <|
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol snoc to a
       ///     number of arguments
       inline
       bool is_snoc_application(const data_expression& e)
@@ -256,6 +272,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ++
+      /// \param s A sort expression
       /// \return Function symbol concat
       inline
       function_symbol concat(const sort_expression& s)
@@ -277,17 +294,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol ++
-      ///\return Application of ++ to a number of arguments
+      /// \brief Application of function symbol ++
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of ++ to a number of arguments
       inline
       application concat(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(concat(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of ++
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol concat to a
+      /// \brief Recogniser for application of ++
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol concat to a
       ///     number of arguments
       inline
       bool is_concat_application(const data_expression& e)
@@ -300,6 +320,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol .
+      /// \param s A sort expression
       /// \return Function symbol element_at
       inline
       function_symbol element_at(const sort_expression& s)
@@ -321,17 +342,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol .
-      ///\return Application of . to a number of arguments
+      /// \brief Application of function symbol .
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of . to a number of arguments
       inline
       application element_at(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(element_at(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of .
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol element_at to a
+      /// \brief Recogniser for application of .
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol element_at to a
       ///     number of arguments
       inline
       bool is_element_at_application(const data_expression& e)
@@ -344,6 +368,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol head
+      /// \param s A sort expression
       /// \return Function symbol head
       inline
       function_symbol head(const sort_expression& s)
@@ -365,17 +390,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol head
-      ///\return Application of head to a number of arguments
+      /// \brief Application of function symbol head
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of head to a number of arguments
       inline
       application head(const sort_expression& s, const data_expression& arg0)
       {
         return application(head(s),arg0);
       }
 
-      ///\brief Recogniser for application of head
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol head to a
+      /// \brief Recogniser for application of head
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol head to a
       ///     number of arguments
       inline
       bool is_head_application(const data_expression& e)
@@ -388,6 +415,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol tail
+      /// \param s A sort expression
       /// \return Function symbol tail
       inline
       function_symbol tail(const sort_expression& s)
@@ -409,17 +437,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol tail
-      ///\return Application of tail to a number of arguments
+      /// \brief Application of function symbol tail
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of tail to a number of arguments
       inline
       application tail(const sort_expression& s, const data_expression& arg0)
       {
         return application(tail(s),arg0);
       }
 
-      ///\brief Recogniser for application of tail
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol tail to a
+      /// \brief Recogniser for application of tail
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol tail to a
       ///     number of arguments
       inline
       bool is_tail_application(const data_expression& e)
@@ -432,6 +462,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol rhead
+      /// \param s A sort expression
       /// \return Function symbol rhead
       inline
       function_symbol rhead(const sort_expression& s)
@@ -453,17 +484,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol rhead
-      ///\return Application of rhead to a number of arguments
+      /// \brief Application of function symbol rhead
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of rhead to a number of arguments
       inline
       application rhead(const sort_expression& s, const data_expression& arg0)
       {
         return application(rhead(s),arg0);
       }
 
-      ///\brief Recogniser for application of rhead
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol rhead to a
+      /// \brief Recogniser for application of rhead
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol rhead to a
       ///     number of arguments
       inline
       bool is_rhead_application(const data_expression& e)
@@ -476,6 +509,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol rtail
+      /// \param s A sort expression
       /// \return Function symbol rtail
       inline
       function_symbol rtail(const sort_expression& s)
@@ -497,17 +531,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol rtail
-      ///\return Application of rtail to a number of arguments
+      /// \brief Application of function symbol rtail
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of rtail to a number of arguments
       inline
       application rtail(const sort_expression& s, const data_expression& arg0)
       {
         return application(rtail(s),arg0);
       }
 
-      ///\brief Recogniser for application of rtail
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol rtail to a
+      /// \brief Recogniser for application of rtail
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol rtail to a
       ///     number of arguments
       inline
       bool is_rtail_application(const data_expression& e)
@@ -755,7 +791,7 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for list
       /// \param specification a specification
-      /// \param the sort of elements stored by the container
+      /// \param element the sort of elements stored by the container
       inline
       void add_list_to_specification(data_specification& specification, sort_expression const& element)
       {

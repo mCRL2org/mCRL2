@@ -40,6 +40,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol true
+      /// \param  A sort expression
       /// \return Function symbol true_
       inline
       function_symbol true_()
@@ -62,6 +63,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol false
+      /// \param  A sort expression
       /// \return Function symbol false_
       inline
       function_symbol false_()
@@ -95,6 +97,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol !
+      /// \param  A sort expression
       /// \return Function symbol not_
       inline
       function_symbol not_()
@@ -116,17 +119,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol !
-      ///\return Application of ! to a number of arguments
+      /// \brief Application of function symbol !
+      /// \param  A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of ! to a number of arguments
       inline
       application not_(const data_expression& arg0)
       {
         return application(not_(),arg0);
       }
 
-      ///\brief Recogniser for application of !
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol not_ to a
+      /// \brief Recogniser for application of !
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol not_ to a
       ///     number of arguments
       inline
       bool is_not__application(const data_expression& e)
@@ -139,6 +144,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol &&
+      /// \param  A sort expression
       /// \return Function symbol and_
       inline
       function_symbol and_()
@@ -160,17 +166,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol &&
-      ///\return Application of && to a number of arguments
+      /// \brief Application of function symbol &&
+      /// \param  A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of && to a number of arguments
       inline
       application and_(const data_expression& arg0, const data_expression& arg1)
       {
         return application(and_(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of &&
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol and_ to a
+      /// \brief Recogniser for application of &&
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol and_ to a
       ///     number of arguments
       inline
       bool is_and__application(const data_expression& e)
@@ -183,6 +192,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol ||
+      /// \param  A sort expression
       /// \return Function symbol or_
       inline
       function_symbol or_()
@@ -204,17 +214,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol ||
-      ///\return Application of || to a number of arguments
+      /// \brief Application of function symbol ||
+      /// \param  A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of || to a number of arguments
       inline
       application or_(const data_expression& arg0, const data_expression& arg1)
       {
         return application(or_(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of ||
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol or_ to a
+      /// \brief Recogniser for application of ||
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol or_ to a
       ///     number of arguments
       inline
       bool is_or__application(const data_expression& e)
@@ -227,6 +240,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol =>
+      /// \param  A sort expression
       /// \return Function symbol implies
       inline
       function_symbol implies()
@@ -248,17 +262,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol =>
-      ///\return Application of => to a number of arguments
+      /// \brief Application of function symbol =>
+      /// \param  A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of => to a number of arguments
       inline
       application implies(const data_expression& arg0, const data_expression& arg1)
       {
         return application(implies(),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of =>
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol implies to a
+      /// \brief Recogniser for application of =>
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol implies to a
       ///     number of arguments
       inline
       bool is_implies_application(const data_expression& e)

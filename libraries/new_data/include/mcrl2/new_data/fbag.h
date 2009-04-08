@@ -64,6 +64,7 @@ namespace mcrl2 {
       } // namespace detail
 
       /// \brief Constructor for function symbol \@fbag_empty
+      /// \param s A sort expression
       /// \return Function symbol fbag_empty
       inline
       function_symbol fbag_empty(const sort_expression& s)
@@ -86,6 +87,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_cons
+      /// \param s A sort expression
       /// \return Function symbol fbag_cons
       inline
       function_symbol fbag_cons(const sort_expression& s)
@@ -107,17 +109,21 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_cons
-      ///\return Application of \@fbag_cons to a number of arguments
+      /// \brief Application of function symbol \@fbag_cons
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_cons to a number of arguments
       inline
       application fbag_cons(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(fbag_cons(s),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of \@fbag_cons
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbag_cons to a
+      /// \brief Recogniser for application of \@fbag_cons
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag_cons to a
       ///     number of arguments
       inline
       bool is_fbag_cons_application(const data_expression& e)
@@ -142,6 +148,7 @@ namespace mcrl2 {
         return result;
       }
       /// \brief Constructor for function symbol \@fbag_insert
+      /// \param s A sort expression
       /// \return Function symbol fbaginsert
       inline
       function_symbol fbaginsert(const sort_expression& s)
@@ -163,17 +170,21 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_insert
-      ///\return Application of \@fbag_insert to a number of arguments
+      /// \brief Application of function symbol \@fbag_insert
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_insert to a number of arguments
       inline
       application fbaginsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(fbaginsert(s),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of \@fbag_insert
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbaginsert to a
+      /// \brief Recogniser for application of \@fbag_insert
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbaginsert to a
       ///     number of arguments
       inline
       bool is_fbaginsert_application(const data_expression& e)
@@ -186,6 +197,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_cinsert
+      /// \param s A sort expression
       /// \return Function symbol fbagcinsert
       inline
       function_symbol fbagcinsert(const sort_expression& s)
@@ -207,17 +219,21 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_cinsert
-      ///\return Application of \@fbag_cinsert to a number of arguments
+      /// \brief Application of function symbol \@fbag_cinsert
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_cinsert to a number of arguments
       inline
       application fbagcinsert(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(fbagcinsert(s),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of \@fbag_cinsert
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagcinsert to a
+      /// \brief Recogniser for application of \@fbag_cinsert
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagcinsert to a
       ///     number of arguments
       inline
       bool is_fbagcinsert_application(const data_expression& e)
@@ -230,6 +246,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_count
+      /// \param s A sort expression
       /// \return Function symbol fbagcount
       inline
       function_symbol fbagcount(const sort_expression& s)
@@ -251,17 +268,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_count
-      ///\return Application of \@fbag_count to a number of arguments
+      /// \brief Application of function symbol \@fbag_count
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@fbag_count to a number of arguments
       inline
       application fbagcount(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(fbagcount(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of \@fbag_count
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagcount to a
+      /// \brief Recogniser for application of \@fbag_count
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagcount to a
       ///     number of arguments
       inline
       bool is_fbagcount_application(const data_expression& e)
@@ -274,6 +294,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_in
+      /// \param s A sort expression
       /// \return Function symbol fbagin
       inline
       function_symbol fbagin(const sort_expression& s)
@@ -295,17 +316,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_in
-      ///\return Application of \@fbag_in to a number of arguments
+      /// \brief Application of function symbol \@fbag_in
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@fbag_in to a number of arguments
       inline
       application fbagin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(fbagin(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of \@fbag_in
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagin to a
+      /// \brief Recogniser for application of \@fbag_in
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagin to a
       ///     number of arguments
       inline
       bool is_fbagin_application(const data_expression& e)
@@ -318,6 +342,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_lte
+      /// \param s A sort expression
       /// \return Function symbol fbaglte
       inline
       function_symbol fbaglte(const sort_expression& s)
@@ -339,17 +364,21 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_lte
-      ///\return Application of \@fbag_lte to a number of arguments
+      /// \brief Application of function symbol \@fbag_lte
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \return Application of \@fbag_lte to a number of arguments
       inline
       application fbaglte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
       {
         return application(fbaglte(s),arg0, arg1, arg2);
       }
 
-      ///\brief Recogniser for application of \@fbag_lte
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbaglte to a
+      /// \brief Recogniser for application of \@fbag_lte
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbaglte to a
       ///     number of arguments
       inline
       bool is_fbaglte_application(const data_expression& e)
@@ -362,6 +391,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_join
+      /// \param s A sort expression
       /// \return Function symbol fbagjoin
       inline
       function_symbol fbagjoin(const sort_expression& s)
@@ -383,17 +413,22 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_join
-      ///\return Application of \@fbag_join to a number of arguments
+      /// \brief Application of function symbol \@fbag_join
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_join to a number of arguments
       inline
       application fbagjoin(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(fbagjoin(s),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of \@fbag_join
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagjoin to a
+      /// \brief Recogniser for application of \@fbag_join
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagjoin to a
       ///     number of arguments
       inline
       bool is_fbagjoin_application(const data_expression& e)
@@ -406,6 +441,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_inter
+      /// \param s A sort expression
       /// \return Function symbol fbagintersect
       inline
       function_symbol fbagintersect(const sort_expression& s)
@@ -427,17 +463,22 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_inter
-      ///\return Application of \@fbag_inter to a number of arguments
+      /// \brief Application of function symbol \@fbag_inter
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_inter to a number of arguments
       inline
       application fbagintersect(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(fbagintersect(s),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of \@fbag_inter
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagintersect to a
+      /// \brief Recogniser for application of \@fbag_inter
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagintersect to a
       ///     number of arguments
       inline
       bool is_fbagintersect_application(const data_expression& e)
@@ -450,6 +491,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag_diff
+      /// \param s A sort expression
       /// \return Function symbol fbagdifference
       inline
       function_symbol fbagdifference(const sort_expression& s)
@@ -471,17 +513,22 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag_diff
-      ///\return Application of \@fbag_diff to a number of arguments
+      /// \brief Application of function symbol \@fbag_diff
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \param arg2 A data expression
+      /// \param arg3 A data expression
+      /// \return Application of \@fbag_diff to a number of arguments
       inline
       application fbagdifference(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
       {
         return application(fbagdifference(s),arg0, arg1, arg2, arg3);
       }
 
-      ///\brief Recogniser for application of \@fbag_diff
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbagdifference to a
+      /// \brief Recogniser for application of \@fbag_diff
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbagdifference to a
       ///     number of arguments
       inline
       bool is_fbagdifference_application(const data_expression& e)
@@ -494,6 +541,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fbag2fset
+      /// \param s A sort expression
       /// \return Function symbol fbag2fset
       inline
       function_symbol fbag2fset(const sort_expression& s)
@@ -515,17 +563,20 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fbag2fset
-      ///\return Application of \@fbag2fset to a number of arguments
+      /// \brief Application of function symbol \@fbag2fset
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \param arg1 A data expression
+      /// \return Application of \@fbag2fset to a number of arguments
       inline
       application fbag2fset(const sort_expression& s, const data_expression& arg0, const data_expression& arg1)
       {
         return application(fbag2fset(s),arg0, arg1);
       }
 
-      ///\brief Recogniser for application of \@fbag2fset
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fbag2fset to a
+      /// \brief Recogniser for application of \@fbag2fset
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fbag2fset to a
       ///     number of arguments
       inline
       bool is_fbag2fset_application(const data_expression& e)
@@ -538,6 +589,7 @@ namespace mcrl2 {
       }
 
       /// \brief Constructor for function symbol \@fset2fbag
+      /// \param s A sort expression
       /// \return Function symbol fset2fbag
       inline
       function_symbol fset2fbag(const sort_expression& s)
@@ -559,17 +611,19 @@ namespace mcrl2 {
         return false;
       }
 
-      ///\brief Application of function symbol \@fset2fbag
-      ///\return Application of \@fset2fbag to a number of arguments
+      /// \brief Application of function symbol \@fset2fbag
+      /// \param s A sort expression
+      /// \param arg0 A data expression
+      /// \return Application of \@fset2fbag to a number of arguments
       inline
       application fset2fbag(const sort_expression& s, const data_expression& arg0)
       {
         return application(fset2fbag(s),arg0);
       }
 
-      ///\brief Recogniser for application of \@fset2fbag
-      ///\param e A data expression
-      ///\return true iff e is an application of function symbol fset2fbag to a
+      /// \brief Recogniser for application of \@fset2fbag
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol fset2fbag to a
       ///     number of arguments
       inline
       bool is_fset2fbag_application(const data_expression& e)
@@ -907,7 +961,7 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for fbag
       /// \param specification a specification
-      /// \param the sort of elements stored by the container
+      /// \param element the sort of elements stored by the container
       inline
       void add_fbag_to_specification(data_specification& specification, sort_expression const& element)
       {

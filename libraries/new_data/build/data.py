@@ -7,7 +7,7 @@ import copy
 
 # Escape an initial @ sign is present. Needed for doxygen code extraction
 def escape(s):
-  if s[0] == "@":
+  if len(s) > 0 and s[0] == "@":
     return "\\%s" % (s)
   else:
     return s
@@ -279,6 +279,9 @@ class function_declaration_list():
       def function_constructor(self, fullname, name, sortparams, sort):
         code  = ""
         code += "      /// \\brief Constructor for function symbol %s\n" % (escape(fullname))
+        sortparams_list = string.split(sortparams, ", ")
+        for s in sortparams_list:
+          code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         code += "      /// \\return Function symbol %s\n" % (escape(name))
         code += "      inline\n"
         code += "      function_symbol %s(%s)\n" % (name, sortparams)
@@ -292,6 +295,12 @@ class function_declaration_list():
       def polymorphic_function_constructor(self, fullname, name, sortparams, comma, domainparams, targetsort, sort):
         code  = ""
         code += "      ///\\brief Constructor for function symbol %s\n" % (escape(fullname))
+        sortparams_list = string.split(sortparams, ", ")
+        for s in sortparams_list:
+          code += "       /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
+        domainparams_list = string.split(domainparams, ", ")
+        for d in domainparams_list:
+          code += "      /// \\param %s A data expression\n" % (escape(s[len("const data_expression& "):]))
         code += "      ///\\return Function symbol %s\n" % (escape(name))
         code += "      inline\n"
         code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
@@ -321,8 +330,14 @@ class function_declaration_list():
 
       def function_application(self, fullname, name, formsortparams, comma, formparams, actsortparams, actparams):
         code  = ""
-        code += "      ///\\brief Application of function symbol %s\n" % (escape(fullname))
-        code += "      ///\\return Application of %s to a number of arguments\n" % (escape(fullname))
+        code += "      /// \\brief Application of function symbol %s\n" % (escape(fullname))
+        formsortparams_list = string.split(formsortparams, ", ")
+        for s in formsortparams_list:
+          code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
+        formparams_list = string.split(formparams, ", ")
+        for d in formparams_list:
+          code += "      /// \\param %s A data expression\n" % (escape(d[len("const data_expression& "):]))
+        code += "      /// \\return Application of %s to a number of arguments\n" % (escape(fullname))
         code += "      inline\n"
         code += "      application %s(%s%s%s)\n" % (name, formsortparams, comma, formparams)
         code += "      {\n"
@@ -332,9 +347,9 @@ class function_declaration_list():
 
       def function_application_recogniser(self, fullname, name):
         code  = ""
-        code += "      ///\\brief Recogniser for application of %s\n" % (escape(fullname))
-        code += "      ///\\param e A data expression\n"
-        code += "      ///\\return true iff e is an application of function symbol %s to a\n" % (escape(name))
+        code += "      /// \\brief Recogniser for application of %s\n" % (escape(fullname))
+        code += "      /// \\param e A data expression\n"
+        code += "      /// \\return true iff e is an application of function symbol %s to a\n" % (escape(name))
         code += "      ///     number of arguments\n"
         code += "      inline\n"
         code += "      bool is_%s_application(const data_expression& e)\n" % (name)
@@ -1815,7 +1830,7 @@ class specification():
     if self.defines_container():
       code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
       code += "      /// \\param specification a specification\n"
-      code += "      /// \\param the sort of elements stored by the container\n"
+      code += "      /// \\param element the sort of elements stored by the container\n"
       code += "      inline\n"
       code += "      void add_%s_to_specification(data_specification& specification, sort_expression const& element)\n" % (self.namespace)
       code += "      {\n"
