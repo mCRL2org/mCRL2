@@ -21,9 +21,9 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
-//#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/print_utility.h"
 
 namespace mcrl2 {
@@ -193,6 +193,40 @@ namespace pbes_system {
         return result;
       }
 
+      /// \brief Chooses one parameter for every equivalence class, and
+      /// removes the others. All occurrences of the removed parameters
+      /// are replaced by the chosen parameter.
+      template <typename Container>
+      void apply_equivalence_relations(pbes<Container>& p)
+      {
+        // first apply the substitutions to the equations
+        for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          string_type X = i->variable().name();
+          std::map<variable_type, data_term_type> replacements = compute_substitution(X);
+          if (!X.empty())
+          {
+            *i = pbes_equation(i->symbol(), i->variable(), data::data_variable_map_replace(i->formula(), replacements));
+          }
+        }
+
+        // then remove parameters
+        std::map<string_type, std::vector<int> > to_be_removed;
+        for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          string_type X = i->variable().name();
+          const std::vector<std::set<variable_type> >& eq = m_vertices[X];
+          for (typename std::vector<std::set<variable_type> >::const_iterator j = eq.begin(); j != eq.end(); ++j)
+          {
+            for (typename std::set<variable_type>::const_iterator k = ++j->begin(); k != j->end(); ++k)
+            {  
+              to_be_removed[X].push_back(index_of(*k, m_parameters[X]));
+            }
+          }
+        }
+        remove_parameters(p, to_be_removed);
+      }
+
     public:
 
       /// \brief Constructor.
@@ -204,9 +238,9 @@ namespace pbes_system {
 
       /// \brief Runs the eqelm algorithm
       /// \param p A pbes
-      /// \param use_initial_state If true, the computation is started from the initial state
+      /// \param ignore_initial_state If true, the initial state is ignored.
       template <typename Container>
-      void run(pbes<Container>& p, bool use_initial_state = false)
+      void run(pbes<Container>& p, bool ignore_initial_state = false)
       {
         m_vertices.clear();
         m_edges.clear();
@@ -223,7 +257,7 @@ namespace pbes_system {
           todo.insert(name);
         }
 
-        if (use_initial_state)
+        if (!ignore_initial_state)
         {
           todo.clear();
           propositional_variable_type kappa = p.initial_state();
@@ -277,9 +311,10 @@ namespace pbes_system {
             }
           }
         }
-       std::clog << "--- result ---" << std::endl;
-       print_vertices();
-     }
+        apply_equivalence_relations(p);
+        std::clog << "--- result ---" << std::endl;
+        print_vertices();
+      }
   };
 
 } // namespace pbes_system
