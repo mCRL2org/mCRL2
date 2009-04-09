@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/substitution.h"
+#include "mcrl2/new_data/map_substitution_adapter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -53,7 +54,7 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      new_data::data_expression rc = r(new_data::variable_map_replace(i->condition(), replacements));
+      new_data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
       if (rc == false_())
       {
         continue;
@@ -94,7 +95,7 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
   namespace opt = new_data::lazy;
 
   // create a mapping from process parameters to initial values
-  new_data::mutable_substitution< new_data::variable, new_data::data_expression > replacements;
+  atermpp::map<new_data::variable, new_data::data_expression> replacements;
   new_data::data_expression_list::iterator j = init.begin();
   for (new_data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {
@@ -107,7 +108,7 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      new_data::data_expression rc = r(i->condition(), replacements);
+      new_data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
 
       if (rc == false_())
       {
@@ -121,7 +122,7 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
           new_data::data_expression d  = j->lhs();  // process parameter
           new_data::data_expression g  = j->rhs();  // assigned value
           new_data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
-          if (r(x, replacements) == true_())
+          if (r(x, make_map_substitution_adapter(replacements)) == true_())
           {
             replacements.erase(k);
             has_changed = true;
