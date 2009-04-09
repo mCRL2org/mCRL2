@@ -141,6 +141,58 @@ namespace pbes_system {
         return std::find(v.begin(), v.end(), x) - v.begin();
       }
 
+      /// \brief Propagate the equivalence relations in vertex X over the edge Ye.
+      void update_equivalence_classes(const string_type& X,
+                                      const propositional_variable_type& Ye,
+                                      const std::map<variable_type, data_term_type>& vX,
+                                      std::set<string_type>& todo
+                                     )
+      {
+        const string_type& Y = Ye.name();
+        std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
+
+        std::vector<std::set<variable_type> >& cY = m_vertices[Y];
+        std::vector<std::set<variable_type> > cY1;
+        for (typename std::vector<std::set<variable_type> >::iterator j = cY.begin(); j != cY.end(); ++j)
+        {
+          std::set<variable_type>& equiv = *j; // an equivalence set              
+          atermpp::map<data_term_type, std::set<variable_type> > w;
+          for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
+          {
+            unsigned int p = index_of(*k, m_parameters[Y]);
+            w[m_data_rewriter(data_variable_map_replace(e[p], vX))].insert(*k);
+          }
+          if (w.size() > 1)
+          {
+            todo.insert(Y);
+          }
+          for (typename std::map<data_term_type, std::set<variable_type> >::iterator i = w.begin(); i != w.end(); ++i)
+          {
+            if (i->second.size() > 1)
+            {
+              cY1.push_back(i->second);
+            }
+          }
+        }
+        cY = cY1;
+      }
+
+      /// \brief Computes a substitution that corresponds to the equivalence relations in X
+      std::map<variable_type, data_term_type> compute_substitution(const string_type& X)
+      {
+        std::map<variable_type, data_term_type> result;
+        const std::vector<std::set<variable_type> >& cX = m_vertices[X];
+        for (typename std::vector<std::set<variable_type> >::const_iterator i = cX.begin(); i != cX.end(); ++i)
+        {
+          const std::set<variable_type>& s = *i;
+          for (typename std::set<variable_type>::const_iterator j = ++s.begin(); j != s.end(); ++j)
+          {
+            result[*j] = *s.begin();
+          }
+        }
+        return result;
+      }
+
     public:
 
       /// \brief Constructor.
@@ -152,14 +204,9 @@ namespace pbes_system {
 
       /// \brief Runs the eqelm algorithm
       /// \param p A pbes
-      /// \param name_generator A generator for fresh identifiers
-      /// \param remove_redundant_equations If true, redundant equations are removed from the PBES
-      /// The call \p name_generator() should return an identifier that doesn't appear
-      /// in the pbes \p p
-      /// \param compute_conditions If true, propagation conditions are computed. Note
-      /// that the currently implementation has exponential behavior.
+      /// \param use_initial_state If true, the computation is started from the initial state
       template <typename Container>
-      void run(pbes<Container>& p, bool compute_conditions = false, bool remove_redundant_equations = false)
+      void run(pbes<Container>& p, bool use_initial_state = false)
       {
         m_vertices.clear();
         m_edges.clear();
@@ -174,6 +221,24 @@ namespace pbes_system {
           const variable_sequence_type& param = i->variable().parameters();
           m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
           todo.insert(name);
+        }
+
+        if (use_initial_state)
+        {
+          todo.clear();
+          propositional_variable_type kappa = p.initial_state();
+          string_type X = kappa.name();
+          std::map<variable_type, data_term_type> vX = compute_substitution(X);
+          std::set<propositional_variable_type> edges = find_all_propositional_variable_instantiations(kappa);
+          for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+          {
+            // propagate the equivalence relations in X over the edge Ye
+            const propositional_variable_type& Ye = *i;
+            if (evaluate_guard(X, Ye))
+            {
+              update_equivalence_classes(X, Ye, vX, todo);
+            }
+          }
         }
 
         if (mcrl2::core::gsDebug)
@@ -200,51 +265,15 @@ namespace pbes_system {
           }
           
           // create a substitution function that corresponds to cX
-          std::map<variable_type, data_term_type> vX;
-          const std::vector<std::set<variable_type> >& cX = m_vertices[X];
-          for (typename std::vector<std::set<variable_type> >::const_iterator i = cX.begin(); i != cX.end(); ++i)
-          {
-            const std::set<variable_type>& s = *i;
-            for (typename std::set<variable_type>::const_iterator j = ++s.begin(); j != s.end(); ++j)
-            {
-              vX[*j] = *s.begin();
-            }
-          }
-
+          std::map<variable_type, data_term_type> vX = compute_substitution(X);
           const atermpp::set<propositional_variable_type>& edges = m_edges[X];
           for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
           {
+            // propagate the equivalence relations in X over the edge Ye
             const propositional_variable_type& Ye = *i;
-
             if (evaluate_guard(X, Ye))
             {
-              const string_type& Y = Ye.name();
-              std::vector<data_term_type> e(Ye.parameters().begin(), Ye.parameters().end());
-
-              std::vector<std::set<variable_type> >& cY = m_vertices[Y];
-              std::vector<std::set<variable_type> > cY1;
-              for (typename std::vector<std::set<variable_type> >::iterator j = cY.begin(); j != cY.end(); ++j)
-              {
-                std::set<variable_type>& equiv = *j; // an equivalence set              
-                atermpp::map<data_term_type, std::set<variable_type> > w;
-                for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
-                {
-                  unsigned int p = index_of(*k, m_parameters[Y]);
-                  w[m_data_rewriter(data_variable_map_replace(e[p], vX))].insert(*k);
-                }
-                if (w.size() > 1)
-                {
-                  todo.insert(Y);
-                }
-                for (typename std::map<data_term_type, std::set<variable_type> >::iterator i = w.begin(); i != w.end(); ++i)
-                {
-                  if (i->second.size() > 1)
-                  {
-                    cY1.push_back(i->second);
-                  }
-                }
-              }
-              cY = cY1;
+              update_equivalence_classes(X, Ye, vX, todo);
             }
           }
         }

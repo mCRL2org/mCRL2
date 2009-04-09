@@ -38,14 +38,19 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
+    /// \brief If true, the computation is started from the initial state.
+    bool m_use_initial_state;
+
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
+      m_use_initial_state = parser.options.count("use-initial-state") > 0;
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
+      desc.add_option("use-initial-state", "start the computation from the initial state", 'i');
     }
 
   public:
@@ -85,7 +90,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
           my_pbes_rewriter pbesr(datar);
           pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          algorithm.run(p);
+          algorithm.run(p, m_use_initial_state);
           break;
         }
         case quantifier_all:
@@ -98,7 +103,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
           pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          algorithm.run(p);
+          algorithm.run(p, m_use_initial_state);
           break;
         }
         default:
