@@ -299,7 +299,7 @@ VOIDCDECL mark_phase()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  fprintf(stderr,"Mark memory 1\n");
+  // fprintf(stderr,"Mark memory 1\n");
   mark_memory(start, stop,ATtrue);
 
   /* Traverse protected terms */
@@ -314,28 +314,28 @@ VOIDCDECL mark_phase()
     }
   }
 
-  fprintf(stderr,"Mark memory 2\n");
+  // fprintf(stderr,"Mark memory 2\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
     mark_memory((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
-  fprintf(stderr,"Mark memory 3\n");
+  // fprintf(stderr,"Mark memory 3\n");
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
     if (pblock->protsize>0)
       mark_memory(pblock->term, &pblock->term[pblock->protsize],ATfalse);
   }
   
-  fprintf(stderr,"Mark memory 4\n");
+  // fprintf(stderr,"Mark memory 4\n");
   at_mark_young = ATfalse;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
 
-  fprintf(stderr,"Mark memory 5\n");
+  // fprintf(stderr,"Mark memory 5\n");
   AT_markProtectedSymbols();
 
-  fprintf(stderr,"Mark memory 6\n");
+  // fprintf(stderr,"Mark memory 6\n");
   /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
     AT_markSymbol(at_parked_symbol);
