@@ -423,10 +423,10 @@ VOIDCDECL mark_phase_young()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  fprintf(stderr,"Mark memory young 1\n");
+  // fprintf(stderr,"Mark memory young 1\n");
   mark_memory_young(start, stop,ATtrue);
 
-  fprintf(stderr,"Mark memory young 2\n");
+  // fprintf(stderr,"Mark memory young 2\n");
   /* Traverse protected terms */
   for(i=0; i<at_prot_table_size; i++) {
     ProtEntry *cur = at_prot_table[i];
@@ -439,12 +439,12 @@ VOIDCDECL mark_phase_young()
     }
   }
 
-  fprintf(stderr,"Mark memory young 3\n");
+  // fprintf(stderr,"Mark memory young 3\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
     mark_memory_young((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
-  fprintf(stderr,"Mark memory young 4\n");
+  // fprintf(stderr,"Mark memory young 4\n");
   unsigned int count=0;
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
   { if (pblock->protsize>0)
@@ -454,16 +454,16 @@ VOIDCDECL mark_phase_young()
 
   }
   
-  fprintf(stderr,"Mark memory young 5 %d\n",count);
+  // fprintf(stderr,"Mark memory young 5 %d\n",count);
   at_mark_young = ATtrue;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
     
-  fprintf(stderr,"Mark memory young 6\n");
+  // fprintf(stderr,"Mark memory young 6\n");
   AT_markProtectedSymbols_young();
-  fprintf(stderr,"Mark memory young 7\n");
+  // fprintf(stderr,"Mark memory young 7\n");
 
    /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
