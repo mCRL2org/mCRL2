@@ -136,31 +136,39 @@ ATerm *stack_top()
 
 static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
 {
-  ATerm *cur, real_term;
-    /*fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);*/
-    /* Traverse the stack */
-  for(cur=start; cur<stop; cur++) 
-  { assert(check_term || AT_isPotentialTerm(*cur));
-    if ((!check_term) || (AT_isPotentialTerm(*cur)))  // CHANGED BY JFG
-    { if (check_term)
+  ATerm *cur;
+  // fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);
+  /* Traverse the stack */
+  if (check_term)
+  { ATerm real_term;
+    for(cur=start; cur<stop; cur++) 
+    { if(AT_isPotentialTerm(*cur)) 
       { real_term = AT_isInsideValidTerm(*cur);
-      }
-      else 
-      { real_term=*cur;
-        assert(NULL!=AT_isInsideValidTerm(*cur));
-      }
-
-      if (real_term != NULL) 
-      { if(!IS_MARKED((real_term)->header)) 
-        { AT_markTerm(real_term);
-            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));*/
-            /*nb_cell_in_stack++;*/
+        if (real_term != NULL) 
+        { if(!IS_MARKED((real_term)->header)) 
+          {
+            assert(AT_isValidTerm(real_term));
+            AT_markTerm(real_term);
+              /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));
+ *   */
+              /*nb_cell_in_stack++;*/
+          }
         }
+      } 
+      else if (AT_isValidSymbol((Symbol)*cur)) 
+      {
+          /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
+        AT_markSymbol((Symbol)*cur);
+          /*nb_cell_in_stack++;*/
       }
-    } else if (AT_isValidSymbol((Symbol)*cur)) {
-        /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
-      AT_markSymbol((Symbol)*cur);
-        /*nb_cell_in_stack++;*/
+    }
+  }
+  else 
+  { for(cur=start; cur<stop; cur++)
+    { if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      { assert(AT_isValidTerm(*cur));
+        AT_markTerm(*cur);
+      }
     }
   }
 }
@@ -170,32 +178,39 @@ static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED 
 
 static void mark_memory_young(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
 {
-  ATerm *cur, real_term;
+  ATerm *cur;
+  // fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);
 
-    /*fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);*/
-    /* Traverse the stack */
-  for(cur=start; cur<stop; cur++) 
-  { assert(check_term || AT_isPotentialTerm(*cur));
-    if ((!check_term) || (AT_isPotentialTerm(*cur)))     // CHANGED BY JFG
-    { if (check_term)
+  if (check_term)
+  { ATerm real_term;
+    for(cur=start; cur<stop; cur++) 
+    { if(AT_isPotentialTerm(*cur)) 
       { real_term = AT_isInsideValidTerm(*cur);
-      }
-      else 
-      { real_term=*cur;
-        assert(NULL!=AT_isInsideValidTerm(*cur));
-      }
-
-      if (real_term != NULL) {
-        if(!IS_MARKED(real_term->header)) {
-          AT_markTerm_young(real_term);
-            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));*/
-            /*nb_cell_in_stack++;*/
+        if (real_term != NULL) 
+        { if(!IS_MARKED(real_term->header)) 
+          { 
+            assert(AT_isValidTerm(real_term));
+            AT_markTerm_young(real_term);
+                /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));  */
+                /*nb_cell_in_stack++;*/
+          }
         }
+      } 
+      else if (AT_isValidSymbol((Symbol)*cur)) 
+      {
+            /*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
+          AT_markSymbol_young((Symbol)*cur);
+            /*nb_cell_in_stack++;*/
       }
-    } else if (AT_isValidSymbol((Symbol)*cur)) {
-        /*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
-      AT_markSymbol_young((Symbol)*cur);
-        /*nb_cell_in_stack++;*/
+    }
+  }
+  else 
+  { 
+    for(cur=start; cur<stop; cur++) 
+    { if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      { assert(AT_isValidTerm(*cur));
+        AT_markTerm_young(*cur);
+      }
     }
   }
 }
