@@ -30,8 +30,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+//#include "mcrl2/utilities/command_line_interface.h"
+//#include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/core/print.h"
 
 
@@ -61,12 +61,12 @@ using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 
 //class parunfold_tool: public squadt_tool< rewriter_tool<input_output_tool> >
-class parunfold_tool: public input_output_tool
+class parunfold_tool: public  rewriter_tool<input_output_tool>
 {
   protected:
 
     //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
-    typedef input_output_tool super;
+    typedef rewriter_tool<input_output_tool> super;
 
     lps::t_parunfold_options m_parunfold_opts; ///< Options of the algorithm
 

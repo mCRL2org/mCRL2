@@ -10,28 +10,58 @@
 #include <iterator>
 #include <mcrl2/lps/linear_process.h>
 
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/enumerator.h"
+/*#include "mcrl2/new_data/nat.h"
+#include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/new_data/detail/sort_utility.h"
+#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/new_data/identifier_generator.h" */
+
+
 using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 
 /* Remarks
- replace on vectors does not work
+- replace on vectors does not work
+- vector pretty print does not work
+- alias::name() [basic_sort] is results in a basic sort, therefore differs form basic_sort::name() [string]
 */
 
 Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process lps)
 {
+
   m_data_specification = s;
   m_lps = lps;
   for (data_specification::sorts_const_range::const_iterator i =  s.sorts().begin();
                                                              i != s.sorts().end();
                                                              ++i){
-    sortSet.insert(*i);
-    //cout << *i << endl;
+
     if (i->is_basic_sort()) {
       sort_names.insert( (basic_sort(*i)).name() );
     }
-   };
 
+    if (i->is_alias())
+    {
+      sort_names.insert( (alias( *i ).name()).name());
+      if (m_data_specification.find_referenced_sort( *i).is_basic_sort())
+        sort_names.insert( basic_sort(m_data_specification.find_referenced_sort( *i)).name() );
+    }
+
+    if (i->is_structured_sort()) {
+      cout << *i << endl;
+
+      // Create constructors
+      deriveConstrutorsFromStructuredSort( *i );
+      // Create projector mapping functions
+
+      // Create recongnisers mapping functions    
+
+      abort();
+    }
+  };
   gsVerboseMsg("Specification has %d sorts\n", sortSet.size() );
 
   {
@@ -41,6 +71,7 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
                                                                       i != fsl.end();
                                                                       ++i){
       consSet.insert(*i);
+      cout << *i << endl;
       mapping_and_constructor_names.insert( i -> name() );
     };
     gsVerboseMsg("Specification has %d constructors\n", consSet.size() );
@@ -53,11 +84,17 @@ Sorts::Sorts(mcrl2::new_data::data_specification s, mcrl2::lps::linear_process l
                                                                   i != fsl.end();
                                                                   ++i){
       mapSet.insert(*i);
+      mapping_and_constructor_names.insert( i -> name() );
     };
     gsVerboseMsg("Specification has %d mappings \n", mapSet.size() );
   }
 };
 
+void Sorts::deriveConstrutorsFromStructuredSort( mcrl2::new_data::structured_sort ss )
+{
+  
+  return;
+}
 
 mcrl2::new_data::basic_sort Sorts::generateFreshSort( std::string str )
 {
@@ -65,7 +102,8 @@ mcrl2::new_data::basic_sort Sorts::generateFreshSort( std::string str )
   mcrl2::new_data::postfix_identifier_generator generator = mcrl2::new_data::postfix_identifier_generator ("");
   generator.add_identifiers( sort_names );
   mcrl2::core::identifier_string nstr = generator( str );
-  gsVerboseMsg("Generated a fresh sort: %s\n", string(str).c_str() );
+  gsVerboseMsg("Generated a fresh sort for %s\n", string(str).c_str() );
+  gsDebugMsg("Generated sort: \t%s\n", string(nstr).c_str() );
   sort_names.insert(nstr);
   return basic_sort( std::string(nstr) );
 }
@@ -84,23 +122,9 @@ mcrl2::core::identifier_string Sorts::generateFreshConMapFuncName(std::string st
 
 function_symbol_vector Sorts::determineAffectedConstructors()
 {
-  using namespace mcrl2::new_data;
-
-  function_symbol_vector k;
-  for( std::set<mcrl2::new_data::function_symbol>::iterator i = consSet.begin();
-                                                            i != consSet.end();
-                                                            ++i){
-    if( i->sort().is_function_sort() ){
-      if (function_sort( i->sort()).codomain() == unfoldParameter ){
-        k.push_back(*i) ;
-      }
-    }
-    if( i->sort().is_basic_sort() ){
-      if (basic_sort( i->sort() ) == unfoldParameter ){
-        k.push_back(*i) ;
-      }
-    }
-  }
+  data_specification::constructors_const_range t = m_data_specification.constructors( unfoldParameter );
+  function_symbol_vector k = function_symbol_vector( t.begin(), t.end() );    
+  
   gsDebugMsg("k:\t");
   gsVerboseMsg("%s has %d constructor function(s)\n", unfoldParameter.name().c_str() , k.size() );
 
@@ -109,6 +133,7 @@ function_symbol_vector Sorts::determineAffectedConstructors()
 
 bool Sorts::basic_sortOccursInSort_expression( mcrl2::new_data::sort_expression s, mcrl2::new_data::basic_sort b )
 {
+
   using namespace mcrl2::new_data;
 
   if( s.is_basic_sort() )
@@ -139,7 +164,7 @@ bool Sorts::basic_sortOccursInSort_expression( mcrl2::new_data::sort_expression 
   if( s.is_structured_sort() )
   {
     gsVerboseMsg("No structs are yet supported");
-    assert("false");
+    abort();
   }
 
   return false;
@@ -158,13 +183,10 @@ function_symbol_vector Sorts::determineAffectedMappings()
       m.push_back( *i );
       gsDebugMsg("\t%s: %s\n", i->name().c_str(), i->sort().to_string().c_str()  );
     };
-    /* Leuk private functies...
-    atermpp::set<sort_expression> x; 
-    m_data_specification.dependent_sorts( *i, x  );
-    */
   }
   gsDebugMsg("m:\t");
   gsVerboseMsg("%s has %d mapping function(s)\n", unfoldParameter.name().c_str() , m.size() );
+//  function_symbol_vector t = m_data_specification.mappings( unfoldParameter ); // <- Wrong result 
 
   return m;
 }
@@ -178,6 +200,7 @@ function_symbol_vector Sorts::newSorts( mcrl2::new_data::function_symbol_vector 
 
   for( function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i  )
   {
+
     std::string prefix = "c_";
     mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
     set_of_new_sorts.push_back( function_symbol( fresh_name , sort_new ) );
@@ -352,38 +375,6 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
            variable y = sort_vars[*j].at( sort_index[*j]);
            sort_index[*j] = sort_index[*j]+1;
            dal.push_back(y);
-
-           // New sort detected //
-           /*if(type_var_list.find( *j ) != type_var_list.end())
-           {
-             istr = generator( dstr );
-             data_expression v = variable( istr, basic_sort( *j ) );
-             vars.push_back( v );
-             type_var_list[ *j ].push_back( v );
-             type_var_count[ *j ] = 1 ;
-
-             dal.push_back( v ); 
-           } 
-           // Sort detected that already exists //
-           else*/
-/*           {
-             // If insufficient variables for sorts are available add a new variable //
-             if (type_var_count[ *j ] == int( type_var_list[ *j ].size() ) )
-             {
-               cout << "x" << endl;
-               istr = generator( dstr );
-               data_expression v = variable( istr, basic_sort( *j ) );
-               vars.push_back( v );
-               type_var_list[ *j ].push_back( v );
-               type_var_count[ *j ] = ++type_var_count[ *j ] ;
-               dal.push_back( v );
-             } 
-             // Reuse if variables if sufficiant variables are available //
-             else {
-               cout << "y" << endl;
-               dal.push_back(type_var_list[ *j ].at(type_var_count[ *j ] - 1));
-             } 
-           } */
          } else {
            gsVerboseMsg("Expected only basic sorts in a domain");
            assert(false);
@@ -746,6 +737,8 @@ mcrl2::new_data::basic_sort Sorts::getSortOfProcessParameter(int parameter_at_in
 
 void Sorts::algorithm(int parameter_at_index)
 {
+   unfoldParameter = m_data_specification.find_referenced_sort(getSortOfProcessParameter( parameter_at_index ));
+
    /* Var Dec */
    function_symbol_vector m;
    function_symbol_vector k;
@@ -754,7 +747,6 @@ void Sorts::algorithm(int parameter_at_index)
    function_symbol Cmap;
    function_symbol Detmap;
 
-   unfoldParameter = getSortOfProcessParameter( parameter_at_index );
 
 
    /*   Alg */
