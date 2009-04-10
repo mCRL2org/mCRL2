@@ -1240,7 +1240,7 @@ void AT_collect()
 #endif
   FILE *file = gc_f;
   unsigned int size;
-  fprintf(stderr,"begin AT collect phase\n");
+  // fprintf(stderr,"begin AT collect phase\n");
 
   /* snapshot*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
