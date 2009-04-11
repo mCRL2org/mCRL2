@@ -54,41 +54,42 @@ namespace atermpp
       /// \param term A term
       aterm_base(ATerm term)
         : m_term(term)
-      {
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
       }
 
       /// \brief Constructor.
       /// \param term A sequence of terms
       aterm_base(ATermList term)
         : m_term(reinterpret_cast<ATerm>(term))
-      {}
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
+      }
 
       /// \brief Constructor.
       /// \param term An integer term
       aterm_base(ATermInt term)
         : m_term(reinterpret_cast<ATerm>(term))
-      {
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
       }
 
       /// \brief Constructor.
       /// \param term A real-valued term
       aterm_base(ATermReal term)
         : m_term(reinterpret_cast<ATerm>(term))
-      {
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
       }
 
       /// \brief Constructor.
       /// \param term A term containing binary data
       aterm_base(ATermBlob term)
         : m_term(reinterpret_cast<ATerm>(term))
-      {
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
       }
 
       /// \brief Constructor.
       /// \param term A term
       aterm_base(ATermAppl term)
         : m_term(reinterpret_cast<ATerm>(term))
-      {
+      { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
       }
 
       /// \brief Constructor.

@@ -302,7 +302,9 @@ namespace atermpp {
   template <typename Term>
   inline
   term_list<Term> operator+(term_list<Term> l, Term t)
-  { return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); }
+  { assert(t.type() != AT_FREE); 
+    return term_list<Term>(ATappend(l, aterm_traits<Term>::term(t))); 
+  }
 
   /// \brief Appends an element to a list.
   /// \param t A term

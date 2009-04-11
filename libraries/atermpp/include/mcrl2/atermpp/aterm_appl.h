@@ -148,6 +148,7 @@ namespace atermpp
       term_appl<Term>& operator=(ATermAppl t)
       {
         m_term = reinterpret_cast<ATerm>(t);
+        assert(ATgetType(m_term) != AT_FREE);
         return *this;
       }
 
