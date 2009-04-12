@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 #include <algorithm>
+#include <boost/bind.hpp>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/find.h"
@@ -26,10 +27,8 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::new_data;
 using namespace mcrl2::new_data::sort_bool_;
 
-int test_main(int argc, char** argv)
+void test_fresh_variable_generator()
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   variable d("d", basic_sort("D"));
   variable d0("d0", basic_sort("D"));
   variable d00("d00", basic_sort("D"));
@@ -61,6 +60,20 @@ int test_main(int argc, char** argv)
   x = generator(f);
   BOOST_CHECK(x == variable("f00", basic_sort("F")));
 
+  atermpp::vector<data_expression> v;
+  variable p("p", basic_sort("P"));
+  variable q("q", basic_sort("P"));
+  v.push_back(p);
+  v.push_back(q);
+  std::for_each(v.begin(), v.end(), boost::bind(&fresh_variable_generator::add_to_context<data_expression>, boost::ref(generator), _1));
+  x = generator(p);
+  BOOST_CHECK(x == variable("p00", basic_sort("P")));
+  x = generator(q);
+  BOOST_CHECK(x == variable("q00", basic_sort("P")));
+}
+
+void test_fresh_variables()
+{
   variable_vector w = make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
   std::set<std::string> context;
   context.insert("e");
@@ -70,6 +83,14 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d_01", basic_sort("D"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e_01", basic_sort("E"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f_01", basic_sort("F"))) != w1.end());
+}
+
+int test_main(int argc, char** argv)
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
+
+  test_fresh_variable_generator();
+  test_fresh_variables();
 
   return 0;
 }
