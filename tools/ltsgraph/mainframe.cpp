@@ -38,6 +38,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_EXIT, MainFrame::onQuit)
   EVT_CLOSE(MainFrame::onClose)
   EVT_MENU(myID_TOGGLE_POSITIONING, MainFrame::onTogglePositioning)
+  EVT_MENU(myID_TOGGLE_VECTOR, MainFrame::onToggleVector)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
@@ -90,6 +91,7 @@ void MainFrame::setupMenuBar()
   toolsMenu->AppendRadioItem(myID_COLOUR,
     wxT("&Colour\tC"),wxT("Colouring tool"));
   toolsMenu->AppendSeparator();
+  toolsMenu->Append(myID_TOGGLE_VECTOR, wxT("Toggle state &vector display \tCTRL-V"));
   toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("&Toggle optimisation... \tCTRL-T"),
                     wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
@@ -292,6 +294,12 @@ void MainFrame::onTogglePositioning(wxCommandEvent&)
 {
   app->getAlgorithm(0)->toggle();
 }
+
+void MainFrame::onToggleVector(wxCommandEvent&)
+{
+  app->toggleVectorSelected();
+}
+
 
 void MainFrame::onInfo(wxCommandEvent& /* event */)
 {

@@ -41,12 +41,14 @@ class State
     void lock();
     void drag();
     void stopDrag();
+    void setShowStateVector(const bool value);
 
     // Getters
     bool isInitialState() const;
     bool isSelected() const;
     bool isLocked() const;
     bool isDragged() const;
+    bool getShowStateVector() const;
 
     Utils::Vect getPosition() const;
     double getX() const;
@@ -84,6 +86,7 @@ class State
     bool selected;
     bool locked;
     bool dragged;
+    bool showStateVector;
 
     double outCurve;
 

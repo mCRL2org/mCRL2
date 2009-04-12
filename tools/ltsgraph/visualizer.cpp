@@ -185,6 +185,24 @@ void Visualizer::drawState(State* s)
 
   glPopName();
   glPopName();
+
+  // Draw state vector
+  bool showStateVector = s->getShowStateVector();
+  if(showStateVector) {
+    std::stringstream vectorstr;
+   std::map<std::string, std::string>::iterator it;
+   std::map<std::string, std::string> stateParameters = s->getParameters();
+
+    for(it = stateParameters.begin(); it != stateParameters.end(); ++it) {
+     vectorstr << it->first <<": " << it->second << "\n";
+    } 
+
+    fr->draw_wrapped_text(vectorstr.str(), x + rad * 2, width,  
+          height - y, y, (rad - 2 * pixelSize) / 24.0f,
+          mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
+
+  }
+
 }
 
 void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)

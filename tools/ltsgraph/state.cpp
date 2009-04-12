@@ -20,6 +20,7 @@ State::State(unsigned int _value, bool _isInitialState)
   selected = false;
   dragged = false;
   locked = false;
+  showStateVector = false;
   outCurve = 0.0;
 
   pos.x = 0;
@@ -36,6 +37,17 @@ bool State::isInitialState() const
 {
   return isInitial;
 }
+
+bool State::getShowStateVector() const
+{
+  return showStateVector;
+}
+
+void State::setShowStateVector(const bool value)
+{
+  showStateVector = value;
+}
+
 
 void State::addOutTransition(Transition* ot)
 {

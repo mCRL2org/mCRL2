@@ -251,6 +251,15 @@ void LTSGraph::display()
   }
 }
 
+void LTSGraph::toggleVectorSelected() {
+  if(selectedState != NULL)
+  {
+    selectedState->setShowStateVector(
+      !selectedState->getShowStateVector());
+  }
+  display();
+}
+
 void LTSGraph::moveObject(double x, double y)
 {
   if(selectedState != NULL)

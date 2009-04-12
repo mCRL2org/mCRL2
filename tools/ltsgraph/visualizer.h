@@ -49,6 +49,7 @@ class Visualizer
     bool showHandles;
     bool showTransLabels;
     bool showStateLabels;
+    bool showStateVector;
 
 
     void drawStates(bool inSelectMode);
