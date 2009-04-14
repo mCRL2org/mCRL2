@@ -49,7 +49,7 @@ namespace tools {
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
       {
-      	input_tool::parse_options(parser);
+        input_tool::parse_options(parser);
         if (1 < parser.arguments.size())
         {
           m_output_filename = parser.arguments[1];

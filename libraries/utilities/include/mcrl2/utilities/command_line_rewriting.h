@@ -22,9 +22,11 @@ namespace mcrl2 {
 
       is.readsome(strategy, 9);
 
-      s = static_cast< new_data::rewriter::strategy >(static_cast< size_t >(RewriteStrategyFromString(strategy)));
+      size_t new_s = static_cast< size_t >(RewriteStrategyFromString(strategy));
 
-      if (static_cast< size_t >(s) == static_cast< size_t >(GS_REWR_INVALID)) {
+      s = static_cast< new_data::rewriter::strategy >(new_s);
+
+      if (static_cast< size_t >(new_s) == static_cast< size_t >(GS_REWR_INVALID)) {
         is.setstate(std::ios_base::failbit);
       }
 
