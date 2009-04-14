@@ -24,7 +24,7 @@ class Sorts
 {
   public:
     //Following line needs the include <boost/range/iterator_range.hpp>
-    Sorts( mcrl2::new_data::data_specification s, mcrl2::lps::linear_process lps);
+    Sorts( mcrl2::new_data::data_specification const& s, mcrl2::lps::linear_process const& lps);
     Sorts( ){ };
     ~Sorts(){};
     void algorithm(int parameter_at_index);

@@ -11,28 +11,12 @@
 #define NAME "lpsparunfold"
 #define AUTHOR "Frank Stappers"
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-#endif
-
-//C++
-#include <exception>
-#include <cstdio>
-#include <set>
-
-//Boost
-#include <boost/lexical_cast.hpp>
+// C++
+#include <iostream>
 
 //mCRL2
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-//#include "mcrl2/utilities/command_line_interface.h"
-//#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/core/print.h"
 
 
 //LPS framework
@@ -43,18 +27,12 @@
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
-#include "lpsparunfold.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
-
-using namespace std;
-using namespace atermpp;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::lps;
 using namespace mcrl2::new_data;
 
 using namespace mcrl2;
@@ -68,7 +46,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
     typedef rewriter_tool<input_output_tool> super;
 
-    lps::t_parunfold_options m_parunfold_opts; ///< Options of the algorithm
+    int m_index; ///< Options of the algorithm
 
     void add_options(interface_description& desc)
     {
@@ -79,13 +57,16 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (0 == parser.options.count("index"))
+
+      if (parser.continue_execution())
       {
-        cerr << "Index of process parameter is not specified." << endl;
-        abort(); 
+        if (0 == parser.options.count("index"))
+        {
+          parser.error("Index of process parameter is not specified.");
+        }
+
+        m_index = parser.option_argument_as< int >("index");
       }
-      m_parunfold_opts.index = parser.option_argument_as< int >("index");
-      
     }
 
   public:
@@ -107,22 +88,22 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     {
       lps::specification lps_specification;
 
-       lps_specification.load(m_input_filename);
+      lps_specification.load(m_input_filename);
 
-       linear_process lps = lps_specification.process();
+      lps::linear_process lps = lps_specification.process();
 
-       data_specification data_spec = lps_specification.data();
+      data_specification data_spec = lps_specification.data();
 
-       Sorts sorts( data_spec, lps );
+      Sorts sorts( data_spec, lps );
 
-       //lps::specification result = sorts.algorithm();
-       sorts.algorithm( m_parunfold_opts.index );
+      //lps::specification result = sorts.algorithm();
+      sorts.algorithm( m_index );
 
-       //result.save(m_output_filename);
-       cerr<< "The following assertion will be removed upon tool finalization" <<endl;
-       assert(false);
+      //result.save(m_output_filename);
+      std::cerr << "The following assertion will be removed upon tool finalization" << std::endl;
+      assert(false);
 
-       return true;
+      return true;
     }
 
 };
