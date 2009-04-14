@@ -29,11 +29,10 @@
 // mCRL2 core/detail libraries
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
-#include "mcrl2/core/data_implementation.h"
 
 // mCRL2 utility libraries
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/sort_info.h"
+//#include "mcrl2/utilities/sort_info.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
@@ -1381,7 +1380,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
 
                   // De rest van dit block kan weg
 /*                  ATermAppl data_type_spec = datatype_spec;
-                  ATermAppl a_implemented_data_expr = implement_data_data_expr( a_type_checked_action_param_expr, data_type_spec );
+                  ATermAppl a_implemented_data_expr = implement_data_expr( a_type_checked_action_param_expr, data_type_spec );
                   if (a_implemented_data_expr == 0 )
                   {
                     // ERROR: action parameter is not valid
@@ -1391,7 +1390,7 @@ label grape::mcrl2gen::parse_transition_label(wxXmlNode *p_process_diagram, list
                     return label;
                   }
                   data_expression data_expr = data_expression( a_implemented_data_expr );
-                  sort_identifier sort_expr = data_expr.sort();
+                  basic_sort sort_expr = data_expr.sort();
                   string sort_expr_string = string(sort_expr.name());
                   action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
 */

@@ -25,10 +25,12 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/new_data/detail/sequence_algorithm.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
@@ -54,7 +56,7 @@ class specification: public atermpp::aterm_appl
 {
   protected:
     /// \brief The data specification of the specification
-    data::data_specification m_data;
+    new_data::data_specification m_data;
 
     /// \brief The action specification of the specification
     action_label_list m_action_labels;
@@ -97,7 +99,7 @@ class specification: public atermpp::aterm_appl
     /// \param action_labels A sequence of action labels
     /// \param lps A linear process
     /// \param initial_process A process initializer
-    specification(data::data_specification  data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
+    specification(new_data::data_specification const& data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
       :
         m_data(data),
         m_action_labels(action_labels),
@@ -106,7 +108,7 @@ class specification: public atermpp::aterm_appl
     {
       m_term = reinterpret_cast<ATerm>(
         core::detail::gsMakeLinProcSpec(
-          data,
+          new_data::detail::data_specification_to_aterm_data_spec(data),
           core::detail::gsMakeActSpec(action_labels),
           lps,
           initial_process
@@ -129,7 +131,7 @@ class specification: public atermpp::aterm_appl
       init_term(atermpp::aterm_appl(t));
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());                                               
+      assert(is_well_typed());
       //if (!is_well_typed())
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
@@ -148,7 +150,7 @@ class specification: public atermpp::aterm_appl
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());                                               
+      assert(is_well_typed());
       //if (!is_well_typed())
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::save())");
@@ -165,7 +167,7 @@ class specification: public atermpp::aterm_appl
 
     /// \brief Returns the data specification.
     /// \return The data specification.
-    data::data_specification data() const
+    new_data::data_specification data() const
     { return m_data; }
 
     /// \brief Returns a sequence of action labels.
@@ -195,37 +197,37 @@ class specification: public atermpp::aterm_appl
     /// </ul>
     bool is_well_typed() const
     {
-      std::set<data::sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
-      std::set<action_label> declared_labels = mcrl2::data::detail::make_set(action_labels());
+      std::set<new_data::sort_expression> declared_sorts = mcrl2::new_data::detail::make_set(data().sorts());
+      std::set<action_label> declared_labels = mcrl2::new_data::detail::make_set(action_labels());
 
       // check 1)
       for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
       {
-        if (!(mcrl2::data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
+        if (!(mcrl2::new_data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
         {
-          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << mcrl2::core::pp(i->summation_variables()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
+          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << new_data::pp(i->summation_variables()) << " are not declared in the data specification " << new_data::pp(data().sorts()) << std::endl;
           return false;
         }
       }
 
       // check 2)
-      if (!(mcrl2::data::detail::check_variable_sorts(process().process_parameters(), declared_sorts)))
+      if (!(mcrl2::new_data::detail::check_variable_sorts(process().process_parameters(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << mcrl2::core::pp(process().process_parameters()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << new_data::pp(process().process_parameters()) << " are not declared in the data specification " << new_data::pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 3)
-      if (!(mcrl2::data::detail::check_variable_sorts(process().free_variables(), declared_sorts)))
+      if (!(mcrl2::new_data::detail::check_variable_sorts(process().free_variables(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << mcrl2::core::pp(process().free_variables()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << new_data::pp(process().free_variables()) << " are not declared in the data specification " << new_data::pp(data().sorts()) << std::endl;
         return false;
       }
 
       // check 4)
       if (!(detail::check_action_label_sorts(action_labels(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << mcrl2::core::pp(action_labels()) << " are not declared in the data specification " << mcrl2::core::pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << mcrl2::core::pp(action_labels()) << " are not declared in the data specification " << new_data::pp(data().sorts()) << std::endl;
         return false;
       }
 
@@ -266,7 +268,7 @@ class specification: public atermpp::aterm_appl
 /// \param data A data specification
 /// \return The modified specification
 inline
-specification set_data_specification(specification spec, data::data_specification data)
+specification set_data_specification(specification spec, new_data::data_specification data)
 {
   return specification(data,
                        spec.action_labels(),
@@ -323,11 +325,11 @@ specification set_initial_process(specification spec, process_initializer initia
 inline
 specification repair_free_variables(const specification& spec)
 {
-  data::data_variable_list fv1 = spec.process().free_variables();
-  data::data_variable_list fv2 = spec.initial_process().free_variables();
-  std::set<data::data_variable> freevars(fv1.begin(), fv1.end());
+  new_data::variable_list fv1 = spec.process().free_variables();
+  new_data::variable_list fv2 = spec.initial_process().free_variables();
+  std::set<new_data::variable> freevars(fv1.begin(), fv1.end());
   freevars.insert(fv2.begin(), fv2.end());
-  data::data_variable_list new_free_vars(freevars.begin(), freevars.end());
+  new_data::variable_list new_free_vars(freevars.begin(), freevars.end());
 
   linear_process      new_process = set_free_variables(spec.process(), new_free_vars);
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());

@@ -13,7 +13,7 @@
 #define MCRL2_LPS_LIN_TYPES_H
 
 #include <string>
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 
 //Type definitions for all linearisers
 
@@ -40,7 +40,7 @@ struct t_lin_options {
   t_phase end_phase;
   bool pretty;
   bool noalpha;
-  RewriteStrategy rewrite_strategy;
+  mcrl2::new_data::basic_rewriter< mcrl2::new_data::data_expression >::strategy rewrite_strategy;
   std::string infilename;
   std::string outfilename;
 
@@ -60,7 +60,7 @@ struct t_lin_options {
       end_phase(phNone),
       pretty(false),
       noalpha(false),
-      rewrite_strategy(GS_REWR_JITTY)
+      rewrite_strategy(mcrl2::new_data::basic_rewriter< mcrl2::new_data::data_expression >::jitty)
   {}
 };
 

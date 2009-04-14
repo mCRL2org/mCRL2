@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <boost/bind.hpp>
-#include "mcrl2/data/data.h"
+#include "mcrl2/new_data/data.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
@@ -34,20 +34,20 @@ namespace detail {
   atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<int>& to_be_removed)
   {
     int index = 0;
-    std::vector<Term> result;
+    atermpp::vector<Term> result;
     std::vector<int>::const_iterator j = to_be_removed.begin();
-    for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, index++)
+    for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
     {
       if (j != to_be_removed.end() && index == *j)
       {
-        j++;
+        ++j;
       }
       else
       {
         result.push_back(*i);
       }
     }
-    return atermpp::term_list<Term>(result.begin(), result.end());
+    return new_data::convert< atermpp::term_list< Term > >(result);
   }
 
 } // namespace detail

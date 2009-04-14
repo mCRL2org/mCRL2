@@ -1,0 +1,20 @@
+[section: Data variables, data operations and function applications]
+
+There are three special types of data expressions that derive from the
+class `data_expression`. We have `data_variable`, `data_application`
+and `data_operation`.
+
+[/ Function application
+Data expressions are higher order expressions, meaning that they can
+be applied as a function to an argument with the right sort. This is
+not supported by the library, but a way to achieve it is as follows:
+
+    data_expression x;
+    data_expression y;
+    data_application z(plus, atermpp::make_list(x, y));
+
+Here `plus` is a predefined standard function, and `make_list` is a
+function to make a list from its arguments..
+]
+
+[endsect] [/ Data variables, data operations and function applications]

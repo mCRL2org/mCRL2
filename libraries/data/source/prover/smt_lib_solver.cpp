@@ -18,7 +18,6 @@
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;

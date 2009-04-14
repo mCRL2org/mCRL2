@@ -203,6 +203,7 @@ namespace mcrl2 {
 
         protected:
 
+          /// \brief Override for wxApp::OnExit
           inline virtual int OnExit() {
             return wxApp::OnExit();
           }

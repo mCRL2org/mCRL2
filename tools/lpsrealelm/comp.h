@@ -18,7 +18,7 @@
 #include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
+#include "mcrl2/new_data/detail/data_implementation_concrete.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -26,6 +26,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace mcrl2::data::data_expr;
+using namespace mcrl2::new_data::detail;
 
 /// \brief Name for the sort Comp.
 /// Comp is used as sort indicating relative order in lpsrealelm.
@@ -172,9 +173,10 @@ data_specification add_comp_sort(const data_specification& s)
   t_data_decls data_decls;
   initialize_data_decls(&data_decls);
   ATermList substitutions = ATmakeList0();
+  ATermList new_equations = ATmakeList0();
 
   // Implement Comp as structured sort, reusing data implementation
-  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls);
+  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls, true, &new_equations);
 
   // Add declarations in data_decls to the specification
   sort_expression_list sorts = ATconcat(s.sorts(), data_decls.sorts);

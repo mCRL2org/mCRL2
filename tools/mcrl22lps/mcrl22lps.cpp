@@ -29,8 +29,8 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
 #include "mcrl2/core/alpha.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -40,6 +40,7 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::new_data::detail;
 
 //Functions used by the main program
 static bool parse_command_line(int argc, char *argv[], t_lin_options& options);
@@ -468,7 +469,7 @@ static bool parse_command_line(int argc, char *argv[], t_lin_options& options)
     options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
     options.add_delta               = 0 < parser.options.count("delta");
     options.pretty                  = 0 < parser.options.count("pretty");
-    options.rewrite_strategy        = parser.option_argument_as< RewriteStrategy >("rewriter");
+    options.rewrite_strategy        = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
     options.lin_method = lmRegular;
 
     if (0 < parser.options.count("check-only")) {
@@ -590,8 +591,8 @@ ATermAppl linearise_file(t_lin_options &lin_options)
     }
   }
   //implement standard data types and type constructors on the result
-  gsVerboseMsg("implementing standard data types and type constructors...\n");
-  result = implement_data_proc_spec(result);
+//  gsVerboseMsg("implementing standard data types and type constructors...\n");
+//  result = implement_data_proc_spec(result);
   if (result == NULL)
   {
     gsErrorMsg("data implementation failed\n");

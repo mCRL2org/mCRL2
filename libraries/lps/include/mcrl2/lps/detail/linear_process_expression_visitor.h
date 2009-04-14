@@ -28,7 +28,7 @@ namespace detail {
   {
     /// \brief The traits class for process expressions.
     typedef core::term_traits<process_expression> tr;
-    
+
     /// \brief The process equation that is checked.
     process_equation eqn;
 
@@ -52,14 +52,14 @@ namespace detail {
       {
         return false;
       }
-      data::data_assignment_list a1 = a.assignments();
-      data::data_variable_list v = eqn.variables1();
+      new_data::assignment_list a1 = a.assignments();
+      new_data::variable_list v = eqn.variables1();
       if (a1.size() != v.size())
       {
         return false;
       }
-      data::data_assignment_list::iterator i;
-      data::data_variable_list::iterator j;
+      new_data::assignment_list::iterator i;
+      new_data::variable_list::iterator j;
       for (i = a1.begin(), j = v.begin(); i != a1.end(); i++, j++)
       {
         if (i->lhs() != *j)
@@ -70,60 +70,60 @@ namespace detail {
       return true;
     }
 
-    bool is_process_variable(const process_expression& x)           
+    bool is_process_variable(const process_expression& x)
     {
       return tr::is_process(x)
           || tr::is_process_assignment(x)
           ;
     }
-    
-    bool is_timed_deadlock(const process_expression& x)           
+
+    bool is_timed_deadlock(const process_expression& x)
     {
       return tr::is_delta(x)
           || tr::is_at_time(x)
           ;
     }
-    
-    bool is_multiaction(const process_expression& x)              
+
+    bool is_multiaction(const process_expression& x)
     {
       return tr::is_tau(x)
           || tr::is_sync(x)
           || tr::is_action(x)
           ;
     }
-    
-    bool is_timed_multiaction(const process_expression& x)        
+
+    bool is_timed_multiaction(const process_expression& x)
     {
       return tr::is_at_time(x)
           || is_multiaction(x);
     }
-    
-    bool is_action_prefix(const process_expression& x)            
+
+    bool is_action_prefix(const process_expression& x)
     {
       return tr::is_seq(x)
           || is_timed_multiaction(x);
     }
-    
-    bool is_conditional_deadlock(const process_expression& x)     
+
+    bool is_conditional_deadlock(const process_expression& x)
     {
       return tr::is_if_then(x)
           || is_timed_deadlock(x);
     }
-    
+
     bool is_conditional_action_prefix(const process_expression& x)
     {
       return tr::is_if_then(x)
           || is_action_prefix(x);
     }
-    
-    bool is_alternative(const process_expression& x)              
+
+    bool is_alternative(const process_expression& x)
     {
       return tr::is_sum(x)
           || is_conditional_action_prefix(x)
           || is_conditional_deadlock(x)
           ;
     }
-    
+
     bool is_linear_process_term(const process_expression& x)
     {
       return tr::is_choice(x)
@@ -133,14 +133,14 @@ namespace detail {
 
     /// \brief Visit process node
     /// \return The result of visiting the node
-    bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+    bool visit_process(const process_expression& x, const process_identifier pi, const new_data::data_expression_list& v)
     {
       return continue_recursion;
     }
 
     /// \brief Visit process_assignment node
     /// \return The result of visiting the node
-    bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::data_assignment_list& v)
+    bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const new_data::assignment_list& v)
     {
       process_assignment a = x;
       if (!check_process_assignment(a))
@@ -152,7 +152,7 @@ namespace detail {
 
     /// \brief Visit sum node
     /// \return The result of visiting the node
-    bool visit_sum(const process_expression& x, const data::data_variable_list& v, const process_expression& right)
+    bool visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right)
     {
       if (!is_alternative(right))
       {
@@ -214,7 +214,7 @@ namespace detail {
 
     /// \brief Visit at_time node
     /// \return The result of visiting the node
-    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at_time(const process_expression& x, const process_expression& left, const new_data::data_expression& d)
     {
       if (!is_multiaction(left) && !tr::is_delta(left))
       {
@@ -245,7 +245,7 @@ namespace detail {
 
     /// \brief Visit if_then node
     /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const process_expression& x, const new_data::data_expression& d, const process_expression& right)
     {
       if (!is_action_prefix(right) && !is_timed_deadlock(right))
       {
@@ -256,12 +256,12 @@ namespace detail {
 
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const process_expression& x, const new_data::data_expression& d, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
     }
-  
+
     /// \brief Visit binit node
     /// \return The result of visiting the node
     bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)

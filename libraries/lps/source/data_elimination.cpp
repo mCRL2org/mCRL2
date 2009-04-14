@@ -10,12 +10,12 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/data/data_expression.h>
-#include <mcrl2/data/data_elimination.h>
+#include <mcrl2/new_data/data_expression.h>
+#include <mcrl2/new_data/data_elimination.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/data_elimination.h>
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 
 namespace mcrl2
 {
@@ -55,8 +55,8 @@ specification remove_unused_data(specification spec, bool keep_basis)
 
 	add_used(spec.initial_process().state(),elim);
 
-	data_variable_list::iterator vb = spec.initial_process().free_variables().begin();
-	data_variable_list::iterator ve = spec.initial_process().free_variables().end();
+	variable_list::iterator vb = spec.initial_process().free_variables().begin();
+	variable_list::iterator ve = spec.initial_process().free_variables().end();
 	for (; vb != ve; vb++)
 	{
 		elim.keep_sort(vb->sort());
@@ -72,8 +72,8 @@ specification remove_unused_data(specification spec, bool keep_basis)
 	summand_list::iterator e = l.summands().end();
 	for (; b != e; b++)
 	{
-		data_variable_list::iterator sb = (*b).summation_variables().begin();
-		data_variable_list::iterator se = (*b).summation_variables().end();
+		variable_list::iterator sb = (*b).summation_variables().begin();
+		variable_list::iterator se = (*b).summation_variables().end();
 		for (; sb != se; sb++)
 		{
 			elim.keep_sort(sb->sort());
@@ -96,8 +96,8 @@ specification remove_unused_data(specification spec, bool keep_basis)
 			elim.keep_data_from_expr((*b).time());
 		}
 
-		data_assignment_list::iterator nb = (*b).assignments().begin();
-		data_assignment_list::iterator ne = (*b).assignments().end();
+		assignment_list::iterator nb = (*b).assignments().begin();
+		assignment_list::iterator ne = (*b).assignments().end();
 		for (; nb != ne; nb++)
 		{
 			elim.keep_data_from_expr((*nb).rhs());

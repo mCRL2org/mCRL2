@@ -11,7 +11,8 @@
 
 #include "boost.hpp" // precompiled headers
 
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
 #define NAME "pbes2bes"
@@ -38,12 +39,10 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 
 // SQuADT protocol interface
-//[pbes2bes_tool
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <mcrl2/utilities/mcrl2_squadt_interface.h>
 #endif
 
-//<-
 using namespace mcrl2;
 using utilities::command_line_parser;
 using utilities::interface_description;
@@ -52,10 +51,8 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 
 /// The pbes2bes tool.
-//->
 class pbes2bes_tool: public rewriter_tool<input_output_tool>
 {
-//<-
   protected:
     typedef rewriter_tool<input_output_tool> super;
 
@@ -280,13 +277,11 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     {
       m_output_filename = filename;
     }
-//->
 };
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcrl2_tool_interface
 {
-//<-
   private:
     static const char*  pbes_file_for_input;  ///< file containing an LPS
     static const char*  pbes_file_for_output; ///< file used to write the output to
@@ -309,40 +304,32 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
 
       return true;
     }
-//->
+
   public:
-//<-
+
     /** \brief constructor */
     squadt_pbes2bes_tool() {
       static bool initialised = initialise_types();
 
       static_cast< void > (initialised); // harmless, and prevents unused variable warnings
     }
+
     /** \brief configures tool capabilities */
-//->
     void set_capabilities(tipi::tool::capabilities&) const;
 
-//<-
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-//->
     void user_interactive_configuration(tipi::configuration&);
 
-//<-
     /** \brief check an existing configuration object to see if it is usable */
-//->
     bool check_configuration(tipi::configuration const&) const;
 
-//<-
     /** \brief performs the task specified by a configuration */
-//->
     bool perform_task(tipi::configuration&);
 
-//<-
     /// \brief Run the tool with the given command line options.
     /// \param argc Number of command line arguments
     /// \param argv Command line arguments
     /// \return The execution result
-//->
     int execute(int argc, char** argv)
     {
       if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
@@ -351,7 +338,7 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       return pbes2bes_tool::execute(argc, argv);
     }
 };
-//<-
+
 const char* squadt_pbes2bes_tool::pbes_file_for_input  = "pbes_in";
 const char* squadt_pbes2bes_tool::pbes_file_for_output = "pbes_out";
 const char* squadt_pbes2bes_tool::option_transformation_strategy = "transformation_strategy";
@@ -438,8 +425,8 @@ bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
   static std::string strategies[] = { "lazy", "finite" };
   static std::string formats[]    = { "pbes", "internal", "cwi" };
 
-  input_filename() = c.get_input(pbes_file_for_input).location();
-  output_filename() = c.get_output(pbes_file_for_output).location();
+  m_input_filename = c.get_input(pbes_file_for_input).location();
+  m_output_filename = c.get_output(pbes_file_for_output).location();
   set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
   set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
   bool result = run();
@@ -448,12 +435,11 @@ bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
 
   return result;
 }
-//->
 #endif // ENABLE_SQUADT_CONNECTIVITY
 
-//<-
+//Main Program
+//------------
 /// \brief Main program for pbes2bes
-//->
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -472,4 +458,3 @@ int main(int argc, char* argv[])
 
   return EXIT_FAILURE;
 }
-//]

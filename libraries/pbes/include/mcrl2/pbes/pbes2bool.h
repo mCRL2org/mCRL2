@@ -5,7 +5,7 @@
 
 #include <string>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 
 /// \brief Strategies for the pbes2bool algorithm.
 enum transformation_strategy {
@@ -43,7 +43,7 @@ struct t_tool_options
    bool opt_precompile_pbes;
 
    /// \brief The rewrite strategy
-   RewriteStrategy rewrite_strategy;
+   mcrl2::new_data::rewriter::strategy rewrite_strategy;
 
    /// \brief The hashtable option
    bool opt_use_hashtables;
@@ -71,7 +71,7 @@ struct t_tool_options
      : opt_outputformat("none"),
        opt_strategy(lazy),
        opt_precompile_pbes(false),
-       rewrite_strategy(GS_REWR_JITTY),
+       rewrite_strategy(mcrl2::new_data::rewriter::jitty),
        opt_use_hashtables(false),
        opt_construct_counter_example(false),
        opt_store_as_tree(false),

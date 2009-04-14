@@ -15,11 +15,12 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/sort_utility.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/new_data/detail/sort_utility.h"
+#include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/pbes/find.h"
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
@@ -82,15 +83,15 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	}
 	else if (is_forall(p))
 	{ // p = forall(data_expression_list, pbes_expression)
-		data_variable_list data_vars = var(p);
+		variable_list data_vars = var(p);
 		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
 
 		//Remove data_vars which does not occur in expr
-		data_variable_list occured_data_vars;
-		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+		variable_list occured_data_vars;
+		for (variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
 			if (occurs_inL(expr, *i)) // The var occurs in expr
-				occured_data_vars = push_back(occured_data_vars, *i);
+				occured_data_vars = push_front(occured_data_vars, *i);
 		}
 
 		// If no data_vars
@@ -103,7 +104,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				result = expr;
 
 			//If the forall  has only finite data variables, make a conjunction out of it.
-			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+			else if (data.is_certainly_finite(boost::make_iterator_range(get_sorts(data_vars))))
 			{
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_and(and_list.begin(), and_list.end());
@@ -116,20 +117,20 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				exit(1);
 			}
 			else
-				result = forall(data_vars, expr);
+				result = pbes_expr::forall(data_vars, expr);
 		}
 	}
 	else if (is_exists(p))
 	{ // p = exists(data_expression_list, pbes_expression)
-		data_variable_list data_vars = var(p);
+		variable_list data_vars = var(p);
 		pbes_expression expr = pbes_expression_rewrite(arg(p), data, rewriter);
 
 		//Remove data_vars which does not occur in expr
-		data_variable_list occured_data_vars;
-		for (data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+		variable_list occured_data_vars;
+		for (variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
 		{
 			if (occurs_inL(expr, *i)) // The var occurs in expr
-				occured_data_vars = push_back(occured_data_vars, *i);
+				occured_data_vars = push_front(occured_data_vars, *i);
 		}
 
 		//If no data_vars remaining
@@ -141,7 +142,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			if (is_true(expr) || is_false(expr))
 				result = expr;
 			//If the exists  has only finite data variables, make a conjunction out of it.
-			else if (check_finite_list(data.constructors(), get_sorts(data_vars)))
+			else if (data.is_certainly_finite(boost::make_iterator_range(get_sorts(data_vars))))
 			{
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_or(or_list.begin(), or_list.end());
@@ -154,22 +155,25 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				exit(1);
 			}
 			else
-				result = exists(data_vars, expr);
+				result = pbes_expr::exists(data_vars, expr);
 		}
 	}
 	else if (is_propositional_variable_instantiation(p))
 	{ // p is a propositional variable
 		propositional_variable_instantiation propvar = p;
 		identifier_string name = propvar.name();
-		data_expression_list parameters = rewriter->rewriteList(propvar.parameters());
+                data_expression_list propvar_parameters(propvar.parameters());
+		data_expression_list parameters(atermpp::term_list_iterator< mcrl2::new_data::data_expression >(
+                                         rewriter->rewriteList(atermpp::term_list< mcrl2::new_data::data_expression >(propvar_parameters.begin(), propvar_parameters.end()))),
+                                                atermpp::term_list_iterator< mcrl2::new_data::data_expression >());
 		result = pbes_expression(propositional_variable_instantiation(name, parameters));
 	}
 	else
 	{ // p is a data_expression
-		data_expression d = rewriter->rewrite(p);
-		if (data_expr::is_true(d))
+		data_expression d(rewriter->rewrite(p));
+		if (d == sort_bool_::true_())
 			result = true_();
-		else if (data_expr::is_false(d))
+		else if (d == sort_bool_::false_())
 			result = false_();
 		else
 			result = val(d);
@@ -178,18 +182,18 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 	return result;
 }
 
-bool has_propvarinsts(std::set< propositional_variable_instantiation > propvars, data_variable_list data_vars)
+bool has_propvarinsts(std::set< propositional_variable_instantiation > propvars, variable_list data_vars)
 {
 	bool result = false;
 	for (std::set< propositional_variable_instantiation >::iterator pvi = propvars.begin(); pvi != propvars.end(); pvi++)
 	{
 		for (data_expression_list::iterator del = pvi->parameters().begin(); del != pvi->parameters().end(); del++)
 		{
-			for (data_variable_list::iterator dvl = data_vars.begin(); dvl != data_vars.end(); dvl++)
+			for (variable_list::iterator dvl = data_vars.begin(); dvl != data_vars.end(); dvl++)
 			{
-				if (is_data_variable(*del))
+				if (data_expression(*del).is_variable())
 				{
-					if (data_variable(*del) == *dvl)
+					if (variable(*del) == *dvl)
 						result = true;
 				}
 			}
@@ -198,12 +202,12 @@ bool has_propvarinsts(std::set< propositional_variable_instantiation > propvars,
 	return result;
 }
 
-bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional_variable_instantiation > pvilist)
+bool element_in_propvarinstlist(variable_list vars, std::set< propositional_variable_instantiation > pvilist)
 {
 	bool result = false;
- 	for (std::set< propositional_variable_instantiation >::iterator pvi = pvilist.begin(); pvi != pvilist.end(); pvi++)
+	for (std::set< propositional_variable_instantiation >::iterator pvi = pvilist.begin(); pvi != pvilist.end(); pvi++)
 	{
-		for (data_variable_list::iterator dvl = vars.begin(); dvl != vars.end(); dvl++)
+		for (variable_list::iterator dvl = vars.begin(); dvl != vars.end(); dvl++)
 		{
 			if (occurs_inL(*dvl, *pvi))
 			{
@@ -215,23 +219,23 @@ bool element_in_propvarinstlist(data_variable_list vars, std::set< propositional
 }
 
 ///\return variable v occurs in l.
-bool occurs_inL(atermpp::aterm_appl l, data_variable v)
+bool occurs_inL(atermpp::aterm_appl l, variable v)
 {
-  return find_if(l, mcrl2::data::detail::compare_data_variable(v)) != atermpp::aterm_appl();
+  return atermpp::find_if(l, mcrl2::new_data::detail::compare_variable(v)) != atermpp::aterm_appl();
 }
 
-pbes_expression_list get_all_possible_expressions(data_variable_list data_vars, pbes_expression pbexp, data_specification data)
+pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_expression pbexp, data_specification data)
 {
 	// Create a pbes_expression for each possible instantiations of the variables and put those in a list.
 	atermpp::set< pbes_expression > set_result;
 	set_result.insert(pbexp);
-	for (data_variable_list::iterator vars = data_vars.begin(); vars != data_vars.end(); vars++)
+	for (variable_list::iterator vars = data_vars.begin(); vars != data_vars.end(); vars++)
 	{
 		atermpp::set< pbes_expression > intermediate;
 		for (atermpp::set< pbes_expression >::iterator exp = set_result.begin(); exp != set_result.end(); exp++)
 		{
-			data_expression_list enumerations = enumerate_constructors(data.constructors(), vars->sort());
-			for (data_expression_list::iterator enums = enumerations.begin(); enums != enumerations.end(); enums++)
+			data_expression_vector enumerations = enumerate_constructors(data, vars->sort());
+			for (data_expression_vector::iterator enums = enumerations.begin(); enums != enumerations.end(); enums++)
 			{
 				pbes_expression toAdd = *exp;
 				toAdd = toAdd.substitute(make_substitution(*vars, *enums));

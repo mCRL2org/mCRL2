@@ -17,6 +17,7 @@
 #include <sstream>
 #include <boost/format.hpp>
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/find.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 
@@ -58,7 +59,7 @@ class identifier_generator
     template <typename Term>
     void add_to_context(Term t)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         add_identifier(*i);
@@ -81,7 +82,7 @@ class identifier_generator
     template <typename Term>
     void remove_from_context(Term t)
     {
-      std::set<core::identifier_string> s = find_identifiers(t);
+      std::set<core::identifier_string> s = core::find_identifiers(t);
       for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
       {
         remove_identifier(*i);

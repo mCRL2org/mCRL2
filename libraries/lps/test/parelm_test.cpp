@@ -21,7 +21,7 @@
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 
 using namespace mcrl2;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 const std::string case_1(
@@ -110,8 +110,8 @@ void test_parelm(const std::string& spec_text, const std::string& expected_resul
     s0 = mcrl22lps(spec_text);
   }
   specification s1 = parelm(s0);
-  data_variable_list v0 = s0.process().process_parameters();
-  data_variable_list v1 = s1.process().process_parameters();
+  variable_list v0 = s0.process().process_parameters();
+  variable_list v1 = s1.process().process_parameters();
 
   // create a set of strings set1 that contains the names of expected removed parameters
   std::vector<std::string> removed = core::regex_split(expected_result, "\\s");
@@ -120,7 +120,7 @@ void test_parelm(const std::string& spec_text, const std::string& expected_resul
 
   // create a set of strings set2 that contains the names of actually removed parameters
   std::set<std::string> set2;
-  for (data_variable_list::iterator i = v0.begin(); i != v0.end(); i++)
+  for (variable_list::iterator i = v0.begin(); i != v0.end(); i++)
   {
     if (std::find(v1.begin(), v1.end(), *i) == v1.end())
     {

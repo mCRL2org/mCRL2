@@ -2,6 +2,5 @@ project toolset/lpspp ;
 
 tool lpspp
        : lpspp.cpp
-         /libraries//core
-         /libraries/utilities//command_line_interfacing
+         /libraries//new_data
        ;

@@ -38,8 +38,8 @@
 
 //sort expression
 <SortExpr>    ::= <SortId>
-                | SortCons(<SortConsType>, <SortExpr>)                   [- di]
-                | SortStruct(<StructCons>+)                              [- di]
+                | SortCons(<SortConsType>, <SortExpr>)                   
+                | SortStruct(<StructCons>+)                              
                 | SortArrow(<SortExpr>+, <SortExpr>)
                 | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
@@ -48,11 +48,11 @@
 <SortId>       ::= SortId(<String>)
 
 //sort constructor type
-<SortConsType> ::= SortList                                              [- di]
-                 | SortSet                                               [- di]
-                 | SortBag                                               [- di]
-                 | SortFSet                                              [. di]
-                 | SortFBag                                              [. di]
+<SortConsType> ::= SortList                                             
+                 | SortSet                                             
+                 | SortBag                                            
+                 | SortFSet
+                 | SortFBag
 
 //constructor declaration of a structured sort
 <StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
@@ -73,8 +73,8 @@
                  | <DataVarId>                                           [+ tc]
                  | <OpId>                                                [+ tc]
                  | DataAppl(<DataExpr>, <DataExpr>+)
-                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>)   [- di]
-                 | Whr(<DataExpr>, <WhrDecl>+)                           [- di]
+                 | Binder(<BindingOperator>, <DataVarId>+, <DataExpr>) 
+                 | Whr(<DataExpr>, <WhrDecl>+)                        
 
 //data variable identifier
 <DataVarId>    ::= DataVarId(<String>, <SortExpr>)
@@ -121,7 +121,7 @@
 
 //sort declaration
 <SortDecl>     ::= <SortId>
-                 | SortRef(<String>, <SortExpr>)                         [- di]
+                 | SortRef(<String>, <SortExpr>)                     
 
 //data equation
 <DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,

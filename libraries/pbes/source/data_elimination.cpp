@@ -10,12 +10,12 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/data/data_expression.h>
-#include <mcrl2/data/data_elimination.h>
+#include <mcrl2/new_data/data_expression.h>
+#include <mcrl2/new_data/data_elimination.h>
 #include <mcrl2/pbes/pbes.h>
 #include <mcrl2/pbes/data_elimination.h>
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
 
@@ -48,7 +48,7 @@ static void add_used(pbes_expression expr, data_elimination &elim)
 		add_used(right(expr),elim);
 	} else if ( is_forall(expr) || is_exists(expr) )
 	{
-		add_used(make_data_expression_list(var(expr)),elim);
+		add_used(var(expr),elim);
 		add_used(arg(expr),elim);
 	} else if ( is_propositional_variable_instantiation(expr) )
 	{
@@ -67,8 +67,8 @@ pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
 
 	add_used(spec.initial_state(),elim);
 
-	atermpp::set<data_variable>::iterator vb = spec.free_variables().begin();
-	atermpp::set<data_variable>::iterator ve = spec.free_variables().end();
+	atermpp::set<variable>::iterator vb = spec.free_variables().begin();
+	atermpp::set<variable>::iterator ve = spec.free_variables().end();
 	for (; vb != ve; vb++)
 	{
 		elim.keep_sort(vb->sort());
@@ -78,8 +78,8 @@ pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
 	atermpp::vector<pbes_equation>::iterator e = spec.equations().end();
 	for (; b != e; b++)
 	{
-		data_variable_list::iterator sb = (*b).variable().parameters().begin();
-		data_variable_list::iterator se = (*b).variable().parameters().end();
+		variable_list::iterator sb = (*b).variable().parameters().begin();
+		variable_list::iterator se = (*b).variable().parameters().end();
 		for (; sb != se; sb++)
 		{
 			elim.keep_sort(sb->sort());

@@ -20,7 +20,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system;
 
 std::string t1 =
@@ -178,7 +178,7 @@ std::string x14 = "";
 
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
-  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<pbes_expression, new_data::rewriter> my_pbes_rewriter;
 
   std::cout << "----------------------------------" << std::endl;
   std::cout << pbes_spec << std::endl;
@@ -190,25 +190,25 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   core::gsSetVerboseMsg();
 
   // data rewriter
-  data::rewriter datar(q.data());
+  new_data::rewriter datar(q.data());
 
   // pbes rewriter
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  pbes_constelm_algorithm<pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
   algorithm.run(q, compute_conditions, remove_equations);
-  std::map<propositional_variable, std::vector<data_variable> > removed_parameters = algorithm.redundant_parameters();
+  std::map<propositional_variable, std::vector<variable> > removed_parameters = algorithm.redundant_parameters();
   std::set<propositional_variable> removed_equations = algorithm.redundant_equations();
 
   std::set<std::string> lines1;
-  for (std::map<propositional_variable, std::vector<data_variable> >::const_iterator i = removed_parameters.begin(); i != removed_parameters.end(); ++i)
+  for (std::map<propositional_variable, std::vector<variable> >::const_iterator i = removed_parameters.begin(); i != removed_parameters.end(); ++i)
   {
     std::string line = core::pp(i->first.name());
     std::set<std::string> v;
-    for (std::vector<data_variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
+    for (std::vector<variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
     {
       v.insert(core::pp(*j));
     }

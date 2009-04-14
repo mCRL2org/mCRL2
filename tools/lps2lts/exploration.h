@@ -16,10 +16,9 @@
 
 #include <boost/bind.hpp>
 
-#include <aterm2.h>
+#include "aterm2.h"
 #include "lts.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/rewrite.h"
 #include "mcrl2/lts/lts.h"
 
 #include "workarounds.h"
@@ -51,7 +50,7 @@ struct lts_generation_options {
                              unsigned long long) {
   }
 
-  RewriteStrategy strat;
+  mcrl2::new_data::rewriter::strategy strat;
   bool usedummies;
   bool removeunused;
   int stateformat;
@@ -77,7 +76,7 @@ struct lts_generation_options {
 };
 
 inline lts_generation_options::lts_generation_options() :
-    strat(GS_REWR_JITTY),
+    strat(mcrl2::new_data::rewriter::jitty),
     usedummies(true),
     removeunused(true),
     stateformat(GS_STATE_VECTOR),

@@ -13,9 +13,9 @@
 #define MCRL2_LPS_ACTION_H
 
 #include <cassert>
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 
 namespace mcrl2 {
@@ -32,7 +32,7 @@ class action: public atermpp::aterm_appl
     action_label m_label;
 
     /// \brief The arguments of the action
-    data::data_expression_list m_arguments;
+    new_data::data_expression_list m_arguments;
 
   public:
     /// \brief Constructor.
@@ -48,13 +48,13 @@ class action: public atermpp::aterm_appl
       assert(core::detail::check_rule_Action(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
-      m_arguments = data::data_expression_list(*i);
+      m_arguments = *i;
     }
 
     /// \brief Constructor.
     /// \param label An action label
     /// \param arguments A sequence of data expressions
-    action(const action_label& label, const data::data_expression_list& arguments)
+    action(const action_label& label, const new_data::data_expression_list& arguments)
      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
        m_label(label),
        m_arguments(arguments)
@@ -69,7 +69,7 @@ class action: public atermpp::aterm_appl
 
     /// \brief Returns the arguments of the action.
     /// \return The arguments of the action.
-    data::data_expression_list arguments() const
+    new_data::data_expression_list arguments() const
     {
       return m_arguments;
     }
@@ -110,13 +110,13 @@ bool equal_signatures(const action& a, const action& b)
   if (a.label() != b.label())
     return false;
 
-  const data::data_expression_list& a_args = a.arguments();
-  const data::data_expression_list& b_args = b.arguments();
+  const new_data::data_expression_list& a_args = a.arguments();
+  const new_data::data_expression_list& b_args = b.arguments();
 
   if (a_args.size() != b_args.size())
     return false;
 
-  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::new_data::detail::equal_data_expression_sort());
 }
 
 } // namespace lps

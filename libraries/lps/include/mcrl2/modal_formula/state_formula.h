@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
-#include "mcrl2/data/data_variable.h"
+#include "mcrl2/new_data/variable.h"
 
 namespace mcrl2 {
 
@@ -159,10 +159,10 @@ namespace state_frm
   /// \param p A modal formula
   /// \return The value <tt>exists l.p</tt>
   inline
-  state_formula exists(data::data_variable_list l, state_formula p)
+  state_formula exists(new_data::variable_list l, state_formula p)
   {
     assert(!l.empty());
-    return state_formula(core::detail::gsMakeStateExists(l, p));
+    return state_formula(core::detail::gsMakeStateExists(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Make a universal quantification
@@ -171,10 +171,10 @@ namespace state_frm
   /// \param p A modal formula
   /// \return The value <tt>forall l.p</tt>
   inline
-  state_formula forall(data::data_variable_list l, state_formula p)
+  state_formula forall(new_data::variable_list l, state_formula p)
   {
     assert(!l.empty());
-    return state_formula(core::detail::gsMakeStateForall(l, p));
+    return state_formula(core::detail::gsMakeStateForall(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Returns must applied to r and p
@@ -209,7 +209,7 @@ namespace state_frm
   /// \param t A data expression
   /// \return yaled(t)
   inline
-  state_formula yaled_timed(data::data_expression t)
+  state_formula yaled_timed(new_data::data_expression t)
   {
     return state_formula(core::detail::gsMakeStateYaledTimed(t));
   }
@@ -226,7 +226,7 @@ namespace state_frm
   /// \param t A data expression
   /// \return delay(t)
   inline
-  state_formula delay_timed(data::data_expression t)
+  state_formula delay_timed(new_data::data_expression t)
   {
     return state_formula(core::detail::gsMakeStateDelayTimed(t));
   }
@@ -236,9 +236,9 @@ namespace state_frm
   /// \param l A sequence of data expressions
   /// \return a variable with the given name and arguments
   inline
-  state_formula var(core::identifier_string name, data::data_expression_list l)
+  state_formula var(core::identifier_string name, new_data::data_expression_list l)
   {
-    return state_formula(core::detail::gsMakeStateVar(name, l));
+    return state_formula(core::detail::gsMakeStateVar(name, atermpp::term_list< new_data::data_expression >(l.begin(), l.end())));
   }
 
   /// \brief Returns a mu expression
@@ -247,9 +247,9 @@ namespace state_frm
   /// \param p A modal formula
   /// \return a mu expression
   inline
-  state_formula mu(core::identifier_string name, data::data_assignment_list l, state_formula p)
+  state_formula mu(core::identifier_string name, new_data::assignment_list l, state_formula p)
   {
-    return state_formula(core::detail::gsMakeStateMu(name, l, p));
+    return state_formula(core::detail::gsMakeStateMu(name, atermpp::term_list< new_data::assignment >(l.begin(), l.end()), p));
   }
 
   /// \brief Returns a nu expression
@@ -258,9 +258,9 @@ namespace state_frm
   /// \param p A modal formula
   /// \return a nu expression
   inline
-  state_formula nu(core::identifier_string name, data::data_assignment_list l, state_formula p)
+  state_formula nu(core::identifier_string name, new_data::assignment_list l, state_formula p)
   {
-    return state_formula(core::detail::gsMakeStateNu(name, l, p));
+    return state_formula(core::detail::gsMakeStateNu(name, atermpp::term_list< new_data::assignment >(l.begin(), l.end()), p));
   }
 
   /// \brief Returns true if the term t is a data expression
@@ -375,7 +375,7 @@ namespace state_frm
   /// \param t A modal formula
   /// \return The argument of a data expression
   inline
-  data::data_expression val(state_formula t)
+  new_data::data_expression val(state_formula t)
   {
     assert(core::detail::gsIsDataExpr(t));
     return t;
@@ -428,17 +428,19 @@ namespace state_frm
   /// \param t A modal formula
   /// \return The variables of a quantification expression
   inline
-  data::data_variable_list var(state_formula t)
+  new_data::variable_list var(state_formula t)
   {
     assert(core::detail::gsIsStateExists(t) || core::detail::gsIsStateForall(t));
-    return atermpp::list_arg1(t);
+    return new_data::variable_list(
+      atermpp::term_list_iterator< new_data::variable >(atermpp::list_arg1(t)),
+      atermpp::term_list_iterator< new_data::variable >());
   }
 
   /// \brief Returns the time of a delay or yaled expression
   /// \param t A modal formula
   /// \return The time of a delay or yaled expression
   inline
-  data::data_expression time(state_formula t)
+  new_data::data_expression time(state_formula t)
   {
     assert(core::detail::gsIsStateDelayTimed(t) || core::detail::gsIsStateYaledTimed(t));
     return atermpp::arg1(t);
@@ -461,20 +463,24 @@ namespace state_frm
   /// \param t A modal formula
   /// \return The parameters of a variable expression
   inline
-  data::data_expression_list param(state_formula t)
+  new_data::data_expression_list param(state_formula t)
   {
     assert(core::detail::gsIsStateVar(t));
-    return atermpp::list_arg2(t);
+    return new_data::data_expression_list(
+      atermpp::term_list_iterator< new_data::data_expression >(atermpp::list_arg2(t)),
+      atermpp::term_list_iterator< new_data::data_expression >());
   }
 
   /// \brief Returns the parameters of a mu or nu expression
   /// \param t A modal formula
   /// \return The parameters of a mu or nu expression
   inline
-  data::data_assignment_list ass(state_formula t)
+  new_data::assignment_list ass(state_formula t)
   {
     assert(core::detail::gsIsStateMu(t) || core::detail::gsIsStateNu(t));
-    return atermpp::list_arg2(t);
+    return new_data::assignment_list(
+      atermpp::term_list_iterator< new_data::assignment >(atermpp::list_arg2(t)),
+      atermpp::term_list_iterator< new_data::assignment >());
   }
 
   /// \brief Returns the regular formula of a must or may expression

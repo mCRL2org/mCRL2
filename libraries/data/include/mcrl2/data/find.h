@@ -24,16 +24,6 @@ namespace mcrl2 {
 
 namespace data {
 
-/// \brief Returns the set of all identifier strings occurring in the term t
-/// \param t A term
-/// \return The set of all identifier strings occurring in the term t
-template <typename Term>
-std::set<core::identifier_string> find_identifiers(Term t)
-{
-  std::set<core::identifier_string> result;
-  find_all_if(atermpp::aterm_traits<Term>::term(t), core::is_identifier_string, std::inserter(result, result.end()));
-  return result;
-}
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param t A term

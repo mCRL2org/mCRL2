@@ -38,9 +38,9 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/new_data/detail/rewrite.h"
+// #include "mcrl2/new_data/data_operators.h"
+#include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/pbes/pbes2bool.h"
 
 //ATERM-specific
@@ -157,6 +157,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
+  using namespace mcrl2;
 
   if (!c.option_exists(option_precompile)) {
     c.add_option(option_precompile).set_argument_value< 0 >(false);
@@ -174,7 +175,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_unused_data).set_argument_value< 0 >(true);
   }
   if (!c.option_exists(option_rewrite_strategy)) {
-    c.add_option(option_rewrite_strategy).set_argument_value< 0 >(GS_REWR_JITTY);
+    c.add_option(option_rewrite_strategy).set_argument_value< 0 >(new_data::rewriter::jitty);
   }
   if (!c.option_exists(option_transformation_strategy)) {
     c.add_option(option_transformation_strategy).set_argument_value< 0 >(lazy);
@@ -190,7 +191,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < bes_output_format > format_selector(d);
 
   // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < RewriteStrategy > rewrite_strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < new_data::rewriter::strategy > rewrite_strategy_selector(d);
 
   // Helper for strategy selection
   mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
@@ -205,15 +206,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
-                append(rewrite_strategy_selector.associate(GS_REWR_INNER, "Inner")).
+                append(rewrite_strategy_selector.associate(new_data::rewriter::innermost, "Inner")).
 #ifdef MCRL2_INNERC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_INNERC, "Innerc")).
+                append(rewrite_strategy_selector.associate(new_data::rewriter::innermost_compiling, "Innerc")).
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")).
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTYC, "Jittyc")),
+                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty, "Jitty")).
+                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty_compiling, "Jittyc")),
 #else
-                append(rewrite_strategy_selector.associate(GS_REWR_JITTY, "Jitty")),
+                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty, "Jitty")),
 #endif
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Output format : ")).
@@ -255,7 +256,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
   if (c.option_exists(option_rewrite_strategy)) {
     rewrite_strategy_selector.set_selection(
-        c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0));
+        c.get_option_argument< new_data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
 
   send_display_layout(d.manager(m));
@@ -306,6 +307,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
 }
 
 bool squadt_interactor::perform_task(tipi::configuration& c) {
+  using namespace mcrl2;
   // static std::string strategies[] = { "lazy", "fly" };
   static std::string formats[]    = { "none", "vasy", "cwi", "pbes" };
 
@@ -316,7 +318,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
   tool_options.opt_store_as_tree             = c.get_option_argument< bool >(option_tree);
   tool_options.opt_data_elm                  = c.get_option_argument< bool >(option_unused_data);;
   tool_options.opt_use_hashtables            = c.get_option_argument< bool >(option_hash_table);;
-  tool_options.rewrite_strategy              = c.get_option_argument< RewriteStrategy >(option_rewrite_strategy, 0);
+  tool_options.rewrite_strategy              = c.get_option_argument< new_data::rewriter::strategy >(option_rewrite_strategy, 0);
 
   if (tool_options.opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     tool_options.opt_counter_example_file = c.get_output_name(".txt").c_str();
@@ -348,6 +350,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 //---------------------------
 bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
 {
+  using namespace mcrl2;
   interface_description clinterface(av[0], NAME, AUTHOR,
       "determine whether a PBES is valid by translating it to a BES",
       "[OPTION]... [INFILE [OUTFILE]]\n",
@@ -469,7 +472,7 @@ bool parse_command_line(int ac, char** av, t_tool_options& tool_options)
       }
     }
 
-    tool_options.rewrite_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+    tool_options.rewrite_strategy = parser.option_argument_as< new_data::rewriter::strategy >("rewriter");
   }
 
   return parser.continue_execution();

@@ -20,10 +20,11 @@
 //LPS Framework
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/standard.h"
+#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/new_data/replace.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
@@ -31,9 +32,8 @@
 
 // For Aterm library extension functions
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
-using namespace mcrl2::data::data_expr;
 
 namespace mcrl2 {
 
@@ -90,17 +90,17 @@ namespace lps {
   /// the specified map of replacements.
   ///
   static inline
-  data_assignment_list sumelm_data_assignment_list_replace(const data_assignment_list& t,
+  assignment_vector sumelm_assignment_list_replace(const assignment_list& t,
                          const std::map<data_expression, data_expression>& replacements)
   {
-    data_assignment_list result;
+    assignment_vector result;
 
-    for (data_assignment_list::iterator i = t.begin(); i != t.end(); ++i)
+    for (assignment_list::const_iterator i = t.begin(); i != t.end(); ++i)
     {
-      result = push_front(result, data_assignment(i->lhs(), sumelm_replace(i->rhs(), replacements)));
+      result.push_back(assignment(i->lhs(), sumelm_replace(i->rhs(), replacements)));
     }
 
-    return reverse(result);
+    return result;
   }
 
   /// Adds replacement lhs := rhs to the specified map of replacements.
@@ -127,8 +127,8 @@ namespace lps {
   static inline
   data_expression lhs(const data_expression t)
   {
-    assert(is_and(t) || is_equal_to(t));
-    return *(static_cast<const data_application&>(t).arguments().begin());
+    assert(sort_bool_::is_and__application(t) || is_equal_to_application(t));
+    return *(application(t).arguments().begin());
   }
 
   ///\pre is_and(t) || is_equal_to(t)
@@ -136,8 +136,8 @@ namespace lps {
   static inline
   data_expression rhs(const data_expression t)
   {
-    assert(is_and(t) || is_equal_to(t));
-    return *(++static_cast<const data_application&>(t).arguments().begin());
+    assert(sort_bool_::is_and__application(t) || is_equal_to_application(t));
+    return *(++application(t).arguments().begin());
   }
 
   ///\pre is_equal_to(t); t is of form a == b
@@ -145,24 +145,22 @@ namespace lps {
   static inline
   data_expression swap_equality(const data_expression t)
   {
-    assert(is_equal_to(t));
-    return data::data_expr::equal_to(rhs(t), lhs(t));
+    assert(is_equal_to_application(t));
+    return new_data::equal_to(rhs(t), lhs(t));
   }
 
   ///Apply substitution to the righthand sides of the assignments in dl
   static inline
-  data_assignment_list substitute_rhs(const data_assignment_list& dl, const data_assignment& substitution)
+  assignment_vector substitute_rhs(const assignment_list& dl, const assignment& substitution)
   {
-    data_assignment_list result;
+    assignment_vector result;
 
-    for(data_assignment_list::iterator i = dl.begin(); i != dl.end(); ++i)
+    for(assignment_list::const_iterator i = dl.begin(); i != dl.end(); ++i)
     {
-      data_expression rhs = i->rhs();
-      rhs = rhs.substitute(substitution);
-      result = push_front(result, data_assignment(i->lhs(), rhs));
+      result.push_back(assignment(i->lhs(), substitute(substitution, i->rhs())));
     }
 
-    return reverse(result);
+    return result;
   }
 
   ////////////////////////////////////////////////////////////
@@ -174,39 +172,50 @@ namespace lps {
   static inline
   lps::summand remove_unused_variables(const lps::summand& summand_)
   {
+    struct local {
+      static bool is_variable(atermpp::aterm p) {
+        return data_expression(p).is_variable();
+      }
+    };
+
     //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
     int num_removed = 0;
     lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
-    data_variable_list new_summation_variables;
+    variable_vector new_summation_variables;
 
     // Construct a set with all variables occurring in the summand.
     // This reduces the running time from O(|summand| * |summation variables|)
     // to O(|summand| + |summation variables|)
     atermpp::set<data_expression> occurring_vars;
-    partial_find_all_if(summand_.condition(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-    partial_find_all_if(summand_.actions(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-    partial_find_all_if(summand_.time(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
-    partial_find_all_if(summand_.assignments(), is_data_variable, is_sort_expression, inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.condition(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.actions(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    partial_find_all_if(summand_.time(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
 
-    for(data_variable_list::iterator i = summand_.summation_variables().begin(); i != summand_.summation_variables().end(); ++i)
+    assignment_list assignments(summand_.assignments());
+
+    for (assignment_list::const_iterator i(assignments.begin()); i != assignments.end(); ++i)
     {
-      data_variable v = *i;
+      partial_find_all_if(*i, boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    }
 
+    variable_vector summation_variables(new_data::make_variable_vector(summand_.summation_variables()));
+
+    for (variable_vector::const_iterator i = summation_variables.begin();
+                                       i != summation_variables.end(); ++i)
+    {
       //Check whether variable occurs in other terms of summand
       //If variable occurs leave the variable, so add variable to new list
-      if (occurring_vars.find(v) != occurring_vars.end())
+      if (occurring_vars.find(*i) != occurring_vars.end())
       {
-        new_summation_variables = push_front(new_summation_variables, v);
+        new_summation_variables.push_back(*i);
       } else {
         ++num_removed;
       }
       //else remove the variable, i.e. do not add it to the new list (skip)
     }
 
-    new_summation_variables = reverse(new_summation_variables);
-
-    new_summand = set_summation_variables(summand_, new_summation_variables);
+    new_summand = set_summation_variables(summand_, new_data::make_variable_list(new_summation_variables));
     gsVerboseMsg("Removed %d summation variables\n", num_removed);
 
     return new_summand;
@@ -230,22 +239,22 @@ namespace lps {
     // In all cases not explicitly handled we return the original working_condition
     data_expression result = working_condition;
 
-    if (is_and(working_condition))
+    if (sort_bool_::is_and__application(working_condition))
     {
       //Recursively apply sum elimination on lhs and rhs
       //Note that recursive application provides for progress because lhs and rhs split the working condition.
       data_expression a,b;
       a = recursive_substitute_equalities(summand_, lhs(working_condition), substitutions);
       b = recursive_substitute_equalities(summand_, rhs(working_condition), substitutions);
-      result = optimized::and_(a,b);
+      result = lazy::and_(a,b);
     }
 
-    else if (is_equal_to(working_condition))
+    else if (is_equal_to_application(working_condition))
     {
       //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
       //is always the same.
-      if (!is_data_variable(lhs(working_condition)) && is_data_variable(rhs(working_condition)) &&
-          find_data_variable(summand_.summation_variables(), rhs(working_condition)))
+      if (!lhs(working_condition).is_variable() && rhs(working_condition).is_variable() &&
+          new_data::search_variable(summand_.summation_variables(), rhs(working_condition)))
       {
         working_condition = swap_equality(working_condition);
       }
@@ -254,29 +263,29 @@ namespace lps {
       //apply substitution lhs := rhs in actions, time and assignments.
       //substitution in condition is accounted for on return path of recursion,
       //substitution in summation_variables is done in calling function.
-      if (is_data_variable(lhs(working_condition)))
+      if (lhs(working_condition).is_variable())
       {
-        if (find_data_variable(summand_.summation_variables(), data_variable(lhs(working_condition))) &&
-            !find_data_expression(rhs(working_condition), lhs(working_condition)))
+        if (new_data::search_variable(summand_.summation_variables(), variable(lhs(working_condition))) &&
+            !search_data_expression(rhs(working_condition), lhs(working_condition)))
         {
           if (substitutions.count(lhs(working_condition)) == 0)
           {
             // apply all previously added substitutions to the rhs.
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
-            result = true_();
-          } else if (is_data_variable(rhs(working_condition)) &&
-                     find_data_variable(summand_.summation_variables(), data_variable(rhs(working_condition)))) {
+            result = sort_bool_::true_();
+          } else if (rhs(working_condition).is_variable() &&
+                     new_data::search_variable(summand_.summation_variables(), variable(rhs(working_condition)))) {
             // check whether the converse is possible
             if (substitutions.count(rhs(working_condition)) == 0) {
               sumelm_add_replacement(substitutions, rhs(working_condition), substitutions[lhs(working_condition)]);
-              result = true_();
+              result = sort_bool_::true_();
             }
           } else if (substitutions.count(substitutions[lhs(working_condition)]) == 0 &&
-                       is_data_variable(substitutions[lhs(working_condition)]) &&
-                       find_data_variable(summand_.summation_variables(), data_variable(substitutions[lhs(working_condition)]))) {
+                       substitutions[lhs(working_condition)].is_variable() &&
+                       new_data::search_variable(summand_.summation_variables(), variable(substitutions[lhs(working_condition)]))) {
             sumelm_add_replacement(substitutions, substitutions[lhs(working_condition)], rhs(working_condition));
             sumelm_add_replacement(substitutions, lhs(working_condition), rhs(working_condition));
-            result = true_();
+            result = sort_bool_::true_();
           }
         }
       }
@@ -304,7 +313,7 @@ namespace lps {
                               new_summand.is_delta(),
                               sumelm_replace(new_summand.actions(), substitutions),
                               sumelm_replace(new_summand.time(), substitutions),
-                              sumelm_data_assignment_list_replace(new_summand.assignments(), substitutions));
+                              new_data::make_assignment_list(sumelm_assignment_list_replace(new_summand.assignments(), substitutions)));
     //Take the summand with substitution, and remove the summation variables that are now not needed
     new_summand = remove_unused_variables(new_summand);
     return new_summand;
@@ -324,9 +333,10 @@ namespace lps {
 
     int index = 0;
     // Apply sum elimination on each of the summands in the summand_ list.
-    for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+    for (lps::summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
     {
       gsVerboseMsg("Summand %d: ", ++index);
+
       new_summand_list = push_front(new_summand_list, substitute_equalities(*i));
     }
     new_summand_list = reverse(new_summand_list);

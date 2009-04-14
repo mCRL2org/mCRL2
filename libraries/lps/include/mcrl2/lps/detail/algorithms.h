@@ -24,7 +24,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -79,7 +79,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::implement_data_proc_spec(spec);
+    ATermAppl result = new_data::detail::implement_data_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -95,7 +95,8 @@ namespace detail {
     ATermAppl result = linearise_std(spec, options);
     if (result == NULL)
       throw mcrl2::runtime_error("linearisation error");
-    return atermpp::aterm_appl(result);
+
+    return set_data_specification(specification(atermpp::aterm_appl(result)), specification(atermpp::aterm_appl(result)).data());
   }
 
   /// \brief Reads a state formula from an input stream
@@ -133,7 +134,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = core::implement_data_state_frm(formula, spec);
+    ATermAppl result = new_data::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;

@@ -5,7 +5,6 @@ tool chi2mcrl2
          chiparser.cpp
          chilexer.cpp
          translate.cpp
-         /libraries//core
-         /libraries/utilities//command_line_interfacing
+         /libraries//new_data
        : <squadt-connectivity>implemented
        ;

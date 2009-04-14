@@ -18,9 +18,9 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -33,13 +33,11 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 
-//[pbes_constelm_tool
 class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
-  //<-
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
-  //->
+
     bool m_compute_conditions;
     bool m_remove_redundant_equations;
 
@@ -57,13 +55,12 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
-  //<-
   public:
     pbes_constelm_tool()
       : super(
           "pbesconstelm",
           "Wieger Wesselink",
-          "Remove constant parameters from a PBES",
+          "remove constant parameters from a PBES",
           "Reads a file containing a PBES, and applies constant parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."
         )
@@ -84,30 +81,30 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       p.load(m_input_filename);
 
       // data rewriter
-      data::rewriter datar = create_rewriter(p.data());
+      new_data::rewriter datar = create_rewriter(p.data());
 
       // pbes rewriter
       switch (rewriter_type())
       {
         case simplify:
         {
-          typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
+          typedef simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          pbes_constelm_algorithm<pbes_system::pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          new_data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
           break;
         }
         case quantifier_all:
         case quantifier_finite:
         {
-          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > my_pbes_rewriter;
           bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
-          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, name_generator);
-          data::rewriter_with_variables datarv(datar);
+          new_data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          new_data::data_enumerator<> datae(p.data(), datar, name_generator);
+          new_data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          pbes_constelm_algorithm<pbes_system::pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
           break;
         }
@@ -120,9 +117,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 
       return true;
     }
-  //->
 };
-//]
 
 int main(int argc, char* argv[])
 {

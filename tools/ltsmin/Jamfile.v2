@@ -4,8 +4,7 @@ tool ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
-         /libraries//core
+         /libraries//new_data
          /libraries//svc
-         /libraries/utilities//command_line_interfacing
        : <status>deprecated
        ;

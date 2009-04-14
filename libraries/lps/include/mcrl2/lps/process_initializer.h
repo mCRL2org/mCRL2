@@ -16,11 +16,11 @@
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_assignment_functional.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/assignment_functional.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
-#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/new_data/detail/sequence_algorithm.h"
 
 namespace mcrl2 {
 
@@ -32,10 +32,10 @@ class process_initializer: public atermpp::aterm_appl
 {
   protected:
     /// \brief The free variables of the initializer
-    data::data_variable_list   m_free_variables;
+    new_data::variable_list   m_free_variables;
 
     /// \brief The assignments of the initializer
-    data::data_assignment_list m_assignments;
+    new_data::assignment_list m_assignments;
 
   public:
     /// \brief Constructor.
@@ -44,10 +44,12 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    process_initializer(data::data_variable_list free_variables,
-                        data::data_assignment_list assignments
+    process_initializer(new_data::variable_list free_variables,
+                        new_data::assignment_list assignments
                        )
-     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(free_variables, assignments)),
+     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(
+         free_variables,
+         assignments)),
        m_free_variables(free_variables),
        m_assignments(assignments)
     {
@@ -61,26 +63,26 @@ class process_initializer: public atermpp::aterm_appl
       assert(core::detail::check_term_LinearProcessInit(m_term));
       atermpp::aterm_appl::iterator i   = t.begin();
       m_free_variables = *i++;
-      m_assignments    = *i;
+      m_assignments = *i;
     }
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    data::data_variable_list free_variables() const
+    new_data::variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    data::data_assignment_list assignments() const
+    new_data::assignment_list assignments() const
     {
       return m_assignments;
     }
 
     /// \brief Returns the initial state of the LPS.
     /// \return The initial state of the LPS.
-    data::data_expression_list state() const
+    new_data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
@@ -105,13 +107,13 @@ class process_initializer: public atermpp::aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (mcrl2::data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), data::detail::data_assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , data::detail::data_assignment_lhs())
+      if (mcrl2::new_data::detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), new_data::detail::assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , new_data::detail::assignment_lhs())
               )
          )
       {
-        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << mcrl2::core::pp(m_assignments) << " don't have unique left hand sides." << std::endl;
+        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
         return false;
       }
 

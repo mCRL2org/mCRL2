@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/core/data_implementation.h>
+#include <mcrl2/new_data/detail/data_implementation.h>
 #include <mcrl2/core/detail/struct.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/core/aterm_ext.h>
@@ -24,6 +24,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 using namespace mcrl2::data;
+using namespace mcrl2::new_data::detail;
 
 
 //Prototype
@@ -187,7 +188,7 @@ static bool is_used(ATermAppl expr, ATermIndexedSet s)
 static void add_basis(ATermTable used_data)
 {
 	/* Add sorts/functions that should always be available */
-	data_specification data(implement_data_data_spec(gsMakeEmptyDataSpec()));
+	data_specification data(implement_data_spec(gsMakeEmptyDataSpec()));
 	for (sort_expression_list::iterator i = data.sorts().begin(); i != data.sorts().end(); i++)
 	{
 		add_used_sort(*i,used_data);

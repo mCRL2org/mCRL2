@@ -26,7 +26,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/data.h"
@@ -81,7 +81,7 @@ namespace detail {
   inline
   ATermAppl implement_process_specification(ATermAppl spec)
   {
-    ATermAppl result = core::implement_data_proc_spec(spec);
+    ATermAppl result = new_data::detail::implement_data_proc_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("process data implementation error");
     return result;
@@ -117,7 +117,7 @@ namespace detail {
   inline
   ATermAppl implement_data_specification(ATermAppl spec)
   {
-    ATermAppl result = core::implement_data_data_spec(spec);
+    ATermAppl result = new_data::detail::implement_data_spec(spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;

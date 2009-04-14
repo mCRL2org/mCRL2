@@ -21,7 +21,7 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/trace.h"
@@ -36,7 +36,7 @@ using namespace mcrl2::trace;
 StandardSimulator::StandardSimulator()
 {
     use_dummies = false;
-    rewr_strat = GS_REWR_JITTY;
+    rewr_strat = mcrl2::new_data::rewriter::jitty;
 
     state_vars = ATmakeList0();
     ATprotectList(&state_vars);
@@ -95,7 +95,7 @@ void StandardSimulator::LoadSpec(ATermAppl spec)
 
     delete nextstategen;
     delete nextstate;
-    nextstate = createNextState(spec,!use_dummies,GS_STATE_VECTOR,rewr_strat);
+    nextstate = createNextState(mcrl2::lps::specification(spec),!use_dummies,GS_STATE_VECTOR,rewr_strat);
     nextstategen = NULL;
     initial_state = nextstate->getInitialState();
 

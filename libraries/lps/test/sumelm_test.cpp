@@ -17,7 +17,7 @@
 #include <mcrl2/lps/mcrl22lps.h>
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 /*
@@ -40,8 +40,8 @@ void test_case_1()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
-    BOOST_CHECK(find_all_data_variables(i->actions()).empty());
+    BOOST_CHECK(find_all_variables(i->condition()).empty());
+    BOOST_CHECK(find_all_variables(i->actions()).empty());
   }
 }
 
@@ -83,7 +83,7 @@ void test_case_3()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+    BOOST_CHECK(find_all_variables(i->condition()).empty());
   }
 }
 
@@ -104,7 +104,7 @@ void test_case_4()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+    BOOST_CHECK(find_all_variables(i->condition()).empty());
   }
 }
 
@@ -122,15 +122,15 @@ void test_case_5()
   specification s0 = mcrl22lps(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
-  std::set<data_variable> parameters = find_all_data_variables(s1.process().process_parameters());
+  std::set<variable> parameters = mcrl2::new_data::find_all_variables(s1.process().process_parameters());
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<data_variable> condition_vars = find_all_data_variables(i->condition());
-    for (std::set<data_variable>::iterator j = condition_vars.begin()
+    std::set<variable> condition_vars = find_all_variables(i->condition());
+    for (std::set<variable>::iterator j = condition_vars.begin()
         ; j != condition_vars.end()
         ; ++j)
     {
@@ -139,8 +139,8 @@ void test_case_5()
 
     if (i->has_time())
     {
-      std::set<data_variable> time_vars = find_all_data_variables(i->time());
-      for (std::set<data_variable>::iterator j = time_vars.begin()
+      std::set<variable> time_vars = find_all_variables(i->time());
+      for (std::set<variable>::iterator j = time_vars.begin()
           ; j != time_vars.end()
           ; ++j)
       {
@@ -175,6 +175,11 @@ void test_case_6()
   }
   BOOST_CHECK(sumvar_count == 1);
   BOOST_CHECK(s0 == s1);
+
+  if (!(s0 == s1) || sumvar_count != 1) {
+    std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
+              << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
+  }
 }
 
 /*
@@ -240,7 +245,7 @@ void test_case_8()
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(find_all_data_variables(i->condition()).empty());
+      BOOST_CHECK(find_all_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);
@@ -286,13 +291,18 @@ void test_case_10()
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    BOOST_CHECK(i->condition() != data_expr::true_());
+    BOOST_CHECK(i->condition() != sort_bool_::true_());
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
     }
   }
   BOOST_CHECK(sumvar_count == 0);
+
+  if (!(s0 == s1)) {
+    std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
+              << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
+  }
 }
 
 int test_main(int ac, char** av)

@@ -42,10 +42,11 @@
 //LPS-Framework
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/data_operators.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/replace.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/data_elimination.h"
 
@@ -64,8 +65,9 @@
 
 using namespace std;
 using atermpp::make_substitution;
+using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 using bes::bes_expression;
@@ -76,7 +78,7 @@ static void calculate_bes(pbes<> pbes_spec,
                           t_tool_options tool_options,
                           bes::equations &bes_equations,
                           atermpp::indexed_set &variable_index,
-                          Rewriter *rewriter);
+                          const rewriter &r);
 
 //Post: tool_options.infilename contains a PBES ("" indicates stdin)
 //Ret:  The BES generated from the PBES
@@ -109,21 +111,22 @@ static bool is_pair(ATerm t);
 static void print_tree_rec(const char c,
                            ATerm t,
                            const bool opt_precompile_pbes,
-                           Rewriter *rewriter,
+                           const rewriter &r,
                            ostream &f)
 {
   if (is_pair(t))
-  { print_tree_rec(',',ATgetArgument(t,0),opt_precompile_pbes,rewriter,f);
-    print_tree_rec(',',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
+  { print_tree_rec(',',ATgetArgument(t,0),opt_precompile_pbes,r,f);
+    print_tree_rec(',',ATgetArgument(t,1),opt_precompile_pbes,r,f);
   }
   else
   { if (opt_precompile_pbes)
-    { data_expression t1(rewriter->fromRewriteFormat((ATerm)t));
-      f << c << pp(t1);
+    { assert(0); // Precompiling is not longer possible.
+      // data_expression t1(r.fromRewriteFormat((ATerm)t));
+      // f << c << core::pp(t1);
     }
     else
     { data_expression t1(t);
-      f << c << pp(t1);
+      f << c << core::pp(t1);
     }
   }
 }
@@ -134,7 +137,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
                                       atermpp::indexed_set &variable_index,
                                       vector<bool> &already_printed,
                                       bool opt_precompile_pbes,
-                                      Rewriter *rewriter,
+                                      const rewriter &r,
                                       const bool opt_store_as_tree,
                                       ostream &f)
 {
@@ -145,7 +148,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
     }
     else
     { f << ATgetName(ATgetAFun(ATgetArgument(t,0)));
-      print_tree_rec('(',ATgetArgument(t,1),opt_precompile_pbes,rewriter,f);
+      print_tree_rec('(',ATgetArgument(t,1),opt_precompile_pbes,r,f);
     }
   }
   else
@@ -159,11 +162,12 @@ static void print_counter_example_rec(bes::variable_type current_var,
           t!=tl.end(); t++)
     { f << (t==tl.begin()?"(":",");
       if (opt_precompile_pbes)
-      { ATermAppl term=*t;
-        f << pp(rewriter->fromRewriteFormat((ATerm)term));
+      { assert(0); // Precompiling does not work anymore.
+        // ATermAppl term=*t;
+        // f << core::pp(rewriter->fromRewriteFormat((ATerm)term));
       }
       else
-      { f << pp(*t);
+      { f << core::pp(*t);
       }
     }
     f << ")";
@@ -183,7 +187,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
       print_counter_example_rec((*walker).get_variable(),indent+"  ",
                             bes_equations,variable_index,already_printed,
                             opt_precompile_pbes,
-                            rewriter,
+                            r,
                             opt_store_as_tree,f);
     }
   }
@@ -192,7 +196,7 @@ static void print_counter_example_rec(bes::variable_type current_var,
 static void print_counter_example(bes::equations &bes_equations,
                                   atermpp::indexed_set &variable_index,
                                   const bool opt_precompile_pbes,
-                                  Rewriter *rewriter,
+                                  const rewriter &r,
                                   const bool opt_store_as_tree,
                                   const string filename)
 { ofstream f;
@@ -201,7 +205,7 @@ static void print_counter_example(bes::equations &bes_equations,
   { // Print the counterexample to cout.
     cout << "Below the justification for this outcome is listed\n1: ";
     print_counter_example_rec(2,"  ",bes_equations,variable_index,already_printed,
-                       opt_precompile_pbes,rewriter,opt_store_as_tree,cout);
+                       opt_precompile_pbes,r,opt_store_as_tree,cout);
   }
   if (f!=NULL)
   {
@@ -210,7 +214,7 @@ static void print_counter_example(bes::equations &bes_equations,
       ofstream f(filename.c_str());
       f << "Below the justification for this outcome is listed\n1: ";
       print_counter_example_rec(2,"  ",bes_equations,variable_index,already_printed,
-                       opt_precompile_pbes,rewriter,opt_store_as_tree,f);
+                       opt_precompile_pbes,r,opt_store_as_tree,f);
       f.close();
     }
     catch (std::exception& e)
@@ -226,7 +230,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
-                              Rewriter *rewriter);
+                              const rewriter &r);
 
 static bool solve_bes(const t_tool_options &,
                       bes::equations &,
@@ -252,9 +256,9 @@ void process(t_tool_options const& tool_options)
   if (!pbes_spec.instantiate_free_variables())
   { std::cerr << "Fail to instantiate all free variables in the pbes.\n";
     std::cerr << "Remaining free variables are: ";
-    for(atermpp::set <data_variable>::iterator i=pbes_spec.free_variables().begin() ;
+    for(atermpp::set <variable>::iterator i=pbes_spec.free_variables().begin() ;
         i!=pbes_spec.free_variables().end() ; i++ )
-    { std::cerr << pp(*i) << " ";
+    { std::cerr << core::pp(*i) << " ";
     }
     std::cerr << "\n";
     exit(1);
@@ -277,11 +281,9 @@ void process(t_tool_options const& tool_options)
   bes::equations bes_equations;
 
   data_specification data = pbes_spec.data();
-  Rewriter *rewriter = createRewriter(data,tool_options.rewrite_strategy);
-  assert(rewriter != 0);
+  const rewriter r(data,tool_options.rewrite_strategy);
 
-
-  calculate_bes(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
+  calculate_bes(pbes_spec, tool_options,bes_equations,variable_index,r);
   if (!tool_options.opt_construct_counter_example)
   { variable_index.reset();
   }
@@ -306,12 +308,11 @@ void process(t_tool_options const& tool_options)
     { print_counter_example(bes_equations,
                             variable_index,
                             tool_options.opt_precompile_pbes,
-                            rewriter,
+                            r,
                             tool_options.opt_store_as_tree,
                             tool_options.opt_counter_example_file);
     }
   }
-  delete rewriter;
 }
 
 //function calculate_bes
@@ -320,7 +321,7 @@ void calculate_bes(pbes<> pbes_spec,
                    t_tool_options tool_options,
                    bes::equations &bes_equations,
                    atermpp::indexed_set &variable_index,
-                   Rewriter *rewriter)
+                   const rewriter &r)
 {
   if (!pbes_spec.is_well_typed())
   {
@@ -333,7 +334,7 @@ void calculate_bes(pbes<> pbes_spec,
     exit(1);
   }
 
-  do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index,rewriter);
+  do_lazy_algorithm(pbes_spec, tool_options,bes_equations,variable_index,r);
   //return new pbes
   return;
 }
@@ -369,22 +370,28 @@ static unsigned int largest_power_of_2_smaller_than(int i)
   return j;
 }
 
+
+// This function sets the variables in substitution sigma given that the terms are stored
+// in a tree structure.
 static void assign_variables_in_tree(
                       ATerm t,
-                      data_variable_list::iterator &var_iter,
-                      Rewriter *rewriter,
+                      variable_list::iterator &var_iter,
+                      new_data::mutable_substitution<new_data::variable, new_data::data_expression> &sigma, 
+                      // const rewriter &r,
                       const bool opt_precompile_pbes)
 { if (is_pair(t))
-  { assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes);
-    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
+  { assign_variables_in_tree(ATgetArgument(t,0),var_iter,sigma,opt_precompile_pbes);
+    assign_variables_in_tree(ATgetArgument(t,1),var_iter,sigma,opt_precompile_pbes);
   }
   else
   {
     if (opt_precompile_pbes)
-    { rewriter->setSubstitutionInternal(*var_iter,t);
+    { assert(0); // Precompiling does not work
+      // rewriter->setSubstitutionInternal(*var_iter,t);
     }
     else
-    { rewriter->setSubstitution(*var_iter,(ATermAppl)t);
+    { // r->setSubstitution(*var_iter,(ATermAppl)t);
+      sigma[*var_iter]=new_data::data_expression(t);
     }
     var_iter++;
   }
@@ -449,7 +456,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
                    const bes::variable_type current_variable,
                    const bool opt_store_as_tree,
                    const bool opt_precompile_pbes,
-                   Rewriter *rewriter)
+                   const rewriter &r)
 {
   if (is_propositional_variable_instantiation(p))
   {
@@ -466,7 +473,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     }
     else
     {
-      if (strategy>lazy)
+      if (strategy>::lazy)
       { bes_expression b=bes_equations.get_rhs(pr.first);
         if (bes::is_true(b) )
         {
@@ -497,14 +504,14 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   { bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
-                            opt_precompile_pbes,rewriter);
+                            opt_precompile_pbes,r);
     if (is_false(b1))
     { return b1;
     }
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
-                            opt_precompile_pbes,rewriter);
+                            opt_precompile_pbes,r);
     if (is_false(b2))
     { return b2;
     }
@@ -526,7 +533,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     bes::bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
-                            opt_precompile_pbes,rewriter);
+                            opt_precompile_pbes,r);
     if (bes::is_true(b1))
     { return b1;
     }
@@ -534,7 +541,7 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
     bes::bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                             construct_counter_example,bes_equations,current_variable,opt_store_as_tree,
-                            opt_precompile_pbes,rewriter);
+                            opt_precompile_pbes,r);
     if (bes::is_true(b2))
     { return b2;
     }
@@ -560,11 +567,12 @@ static bes::bes_expression add_propositional_variable_instantiations_to_indexed_
   }
 
   if (opt_precompile_pbes)
-  { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " <<
-                     pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) << "\n";
+  { assert(0); // Precompilation is not longer possible.
+    // cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " <<
+    //                  core::pp(rewriter->fromRewriteFormat((ATerm)(ATermAppl)p)) << "\n";
   }
   else
-  { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << pp(p) << "\n";
+  { cerr << "Unexpected expression. Most likely because expression fails to rewrite to true or false: " << core::pp(p) << "\n";
     abort();
   }
   exit(1);
@@ -583,7 +591,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                               t_tool_options tool_options,
                               bes::equations &bes_equations,
                               atermpp::indexed_set &variable_index,
-                              Rewriter *rewriter)
+                              const rewriter &r)
 {
 
   // Verbose msg: doing naive algorithm
@@ -615,7 +623,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   }
   // Data rewriter
   pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
-                     rewriter,
+                     r,
                      tool_options.opt_precompile_pbes);
   variable_index.put((tool_options.opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
@@ -653,7 +661,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                 eqi->variable(),
                 pbes_expression_rewrite_and_simplify(
                               eqi->formula(),
-                rewriter,
+                r,
                 tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
@@ -698,6 +706,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
     {
 
       pbes_equation current_pbeq;
+      new_data::mutable_substitution<new_data::variable, new_data::data_expression> sigma;
 
       // Add the required substitutions
       if (tool_options.opt_store_as_tree)
@@ -716,9 +725,9 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
            // the right hand side of t are the parameters, in a tree structure.
 
            t=ATgetArgument(t,1);
-           data_variable_list::iterator iter=current_pbeq.variable().parameters().begin();
+           variable_list::iterator iter=current_pbeq.variable().parameters().begin();
            assign_variables_in_tree(t,iter,
-                                    rewriter,tool_options.opt_precompile_pbes);
+                                    sigma,tool_options.opt_precompile_pbes);
          }
 
       }
@@ -734,17 +743,19 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
 
         data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
 
-        for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+        for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
         {
           assert(elist!=current_variable_instantiation.parameters().end());
 
           if (tool_options.opt_precompile_pbes)
-          { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
+          { assert(0); // precompilation is no longer possible.
+            // rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
           }
           else
           {
-            rewriter->setSubstitution(*vlist,*elist);
+            // r->setSubstitution(*vlist,*elist);
+            sigma[*vlist]=*elist;
           }
           elist++;
         }
@@ -752,7 +763,7 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
       }
 
       pbes_expression new_pbes_expression = pbes_expression_substitute_and_rewrite(
-                                current_pbeq.formula(), data, rewriter,tool_options.opt_precompile_pbes);
+                                current_pbeq.formula(), data, r,tool_options.opt_precompile_pbes,sigma);
       bes::bes_expression new_bes_expression=
            add_propositional_variable_instantiations_to_indexed_set_and_translate(
                         new_pbes_expression,
@@ -765,12 +776,13 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
                         variable_to_be_processed,
                         tool_options.opt_store_as_tree,
                         tool_options.opt_precompile_pbes,
-                        rewriter);
+                        r);
 
-      for(data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+      /* No need to clear up sigma, as it was locally declared.
+      for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-      { rewriter->clearSubstitution(*vlist);
-      }
+      { r->clearSubstitution(*vlist);
+      } */
 
 
       if (tool_options.opt_strategy>=on_the_fly_with_fixed_points)
@@ -1727,14 +1739,14 @@ static void save_bes_in_pbes_format(
     }
   }
 
-  pbes<> p1(p.data(),eqns,atermpp::set<data_variable>(),propositional_variable_instantiation("X1"));
+  pbes<> p1(p.data(),eqns,atermpp::set<variable>(),propositional_variable_instantiation("X1"));
   p1.save(outfilename);
 }
 
 //function save_rhs_in_pbes
 //---------------------------
 static pbes_expression generate_rhs_as_formula(bes_expression b)
-{ 
+{
   if (bes::is_true(b))
   { return true_();
   }

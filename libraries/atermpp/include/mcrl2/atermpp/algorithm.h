@@ -12,6 +12,8 @@
 #ifndef MCRL2_ATERMPP_ALGORITHM_H
 #define MCRL2_ATERMPP_ALGORITHM_H
 
+#include "boost/type_traits/add_reference.hpp"
+
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -28,7 +30,7 @@ namespace atermpp
   template <typename UnaryFunction, typename Term>
   UnaryFunction for_each(Term t, UnaryFunction op)
   {
-    return detail::for_each_impl(aterm_traits<Term>::term(t), op);
+    return detail::for_each_impl< typename boost::add_reference< UnaryFunction >::type >(aterm_traits<Term>::term(t), op);
   }
 
   /// \brief Finds a subterm of t that matches a given predicate.
@@ -39,7 +41,7 @@ namespace atermpp
   aterm_appl find_if(Term t, MatchPredicate match)
   {
     try {
-      detail::find_if_impl(aterm_traits<Term>::term(t), match);
+      detail::find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match);
     }
     catch (detail::found_term_exception e) {
       return e.t;
@@ -58,7 +60,7 @@ namespace atermpp
   aterm_appl partial_find_if(Term t, MatchPredicate match, StopPredicate stop)
   {
     try {
-      detail::partial_find_if_impl(aterm_traits<Term>::term(t), match, stop);
+      detail::partial_find_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, stop);
     }
     catch (detail::found_term_exception e) {
       return e.t;
@@ -75,7 +77,7 @@ namespace atermpp
   void find_all_if(Term t, MatchPredicate match, OutputIterator destBegin)
   {
     OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-    detail::find_all_if_impl(aterm_traits<Term>::term(t), match, i);
+    detail::find_all_if_impl< typename boost::add_reference< MatchPredicate >::type >(aterm_traits<Term>::term(t), match, i);
   }
 
   /// \brief Finds all subterms of t that match a given predicate, and writes the found terms
@@ -90,7 +92,8 @@ namespace atermpp
   void partial_find_all_if(Term t, MatchPredicate match, StopPredicate stop, OutputIterator destBegin)
   {
     OutputIterator i = destBegin; // we make a copy, since a reference to an iterator is needed
-    detail::partial_find_all_if_impl(aterm_traits<Term>::term(t), match, stop, i);
+    detail::partial_find_all_if_impl< typename boost::add_reference< MatchPredicate >::type,
+                                      typename boost::add_reference< StopPredicate >::type >(aterm_traits<Term>::term(t), match, stop, i);
   }
 
   /// \brief Replaces each subterm x of t by r(x). The ReplaceFunction r has
@@ -104,7 +107,7 @@ namespace atermpp
   template <typename Term, typename ReplaceFunction>
   Term replace(Term t, ReplaceFunction r)
   {
-    ATerm x = detail::replace_impl(aterm_traits<Term>::term(t), r);
+    ATerm x = detail::replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
     return Term(reinterpret_cast<ATermAppl>(x));
   }
 
@@ -133,7 +136,7 @@ namespace atermpp
   template <typename Term, typename ReplaceFunction>
   Term bottom_up_replace(Term t, ReplaceFunction r)
   {
-    ATerm x = detail::bottom_up_replace_impl(aterm_traits<Term>::term(t), r);
+    ATerm x = detail::bottom_up_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
     return Term(reinterpret_cast<ATermAppl>(x));
   }
 
@@ -164,7 +167,7 @@ namespace atermpp
   template <typename Term, typename ReplaceFunction>
   Term partial_replace(Term t, ReplaceFunction r)
   {
-    ATerm x = detail::partial_replace_impl(aterm_traits<Term>::term(t), r);
+    ATerm x = detail::partial_replace_impl< typename boost::add_reference< ReplaceFunction >::type >(aterm_traits<Term>::term(t), r);
     return Term(reinterpret_cast<ATermAppl>(x));
   }
 

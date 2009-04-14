@@ -19,13 +19,13 @@ namespace lps {
   class deadlock
   {
     protected:
-      /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
+      /// \brief The time of the deadlock. If <tt>m_time == new_data::data_expression()</tt>
       /// the multi action has no time.
-      data::data_expression m_time;
+      new_data::data_expression m_time;
 
     public:
       /// \brief Constructor
-      deadlock(data::data_expression time = core::detail::gsMakeNil())
+      deadlock(new_data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
         : m_time(time)
       {}
 
@@ -33,19 +33,19 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != data::data_expression();
+        return m_time != new_data::data_expression();
       }
-  
+
       /// \brief Returns the time.
       /// \return The time.
-      const data::data_expression& time() const
+      const new_data::data_expression& time() const
       {
         return m_time;
       }
 
       /// \brief Returns the time.
       /// \return The time.
-      data::data_expression& time()
+      new_data::data_expression& time()
       {
         return m_time;
       }
@@ -59,7 +59,7 @@ namespace lps {
       template <typename Substitution>
       deadlock substitute(Substitution f)
       {
-        return deadlock(m_time.substitute(f));
+        return deadlock(substitute(f, m_time));
       }
 
       /// \brief Returns a string representation of the deadlock

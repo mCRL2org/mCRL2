@@ -273,7 +273,7 @@ namespace detail {
     /// \param x A term
     /// \param sigma A substitution function
     /// \return The rewrite result
-    term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+    term_type operator()(const term_type& x, SubstitutionFunction sigma)
     {
       return visit(x, sigma);
     }

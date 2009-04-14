@@ -15,9 +15,9 @@
 #define INVARIANT_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/bdd_prover.h"
-#include "mcrl2/utilities/bdd2dot.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/detail/bdd_prover.h"
+#include "mcrl2/new_data/detail/prover/bdd2dot.h"
 
   /// The class Invariant_Checker is initialized with an LPS using the constructor Invariant_Checker::Invariant_Checker.
   /// After initialization, the function Invariant_Checker::check_invariant can be called any number of times to check
@@ -64,7 +64,7 @@
 
 class Invariant_Checker {
   private:
-    BDD_Prover f_bdd_prover;
+    mcrl2::new_data::detail::BDD_Prover f_bdd_prover;
     BDD2Dot f_bdd2dot;
     ATermAppl f_init;
     ATermList f_summands;
@@ -83,10 +83,10 @@ class Invariant_Checker {
     /// to 0, no time limit will be enforced
     Invariant_Checker(
       ATermAppl a_lps,
-      RewriteStrategy a_rewrite_strategy = GS_REWR_JITTY,
+      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,

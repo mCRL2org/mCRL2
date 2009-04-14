@@ -13,7 +13,7 @@ project status
 
 build-project ../libraries/atermpp/test ;            # test-suite atermpp
 build-project ../libraries/core/test ;               # test-suite core
-build-project ../libraries/data/test ;               # test-suite data
+build-project ../libraries/new_data/test ;           # test-suite new_data
 build-project ../libraries/lps/test ;                # test-suite lps
 build-project ../libraries/lts/test ;                # test-suite lts
 build-project ../libraries/pbes/test ;               # test-suite pbes

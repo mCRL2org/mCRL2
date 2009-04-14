@@ -23,8 +23,8 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 
@@ -47,11 +47,6 @@ namespace pbes_system {
     result = core::type_check_pbes_spec(result);
     if (result == NULL) {
       throw mcrl2::runtime_error("type checking failed");
-    }
-
-    result = core::implement_data_pbes_spec(result);
-    if (result == NULL) {
-      throw mcrl2::runtime_error("data implementation failed");
     }
 
     p = pbes<Container>(result);
@@ -79,7 +74,7 @@ namespace pbes_system {
   /// for types like Pos and Nat are generated or not.
   /// \return The parsed expression and the data specification that was used.
   inline
-  std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
+  std::pair<atermpp::vector<pbes_expression>, new_data::data_specification> parse_pbes_expressions(std::string text, std::string data_spec = "")
   {
     std::string unique_prefix("UNIQUE_PREFIX");
     int unique_prefix_index = 0;
@@ -220,7 +215,7 @@ namespace pbes_system {
   /// \param data_spec A data specification
   /// \param sigma A substitution function
   template <typename SubstitutionFunction>
-  void parse_substitutions(std::string text, data::data_specification data_spec, SubstitutionFunction& sigma)
+  void parse_substitutions(std::string text, new_data::data_specification data_spec, SubstitutionFunction& sigma)
   {
     std::vector<std::string> substitutions = core::split(text, ";");
     for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
@@ -231,8 +226,8 @@ namespace pbes_system {
         continue;
       }
       std::string spec = core::pp(data_spec);
-      data::data_variable v = data::parse_data_variable(words[0], spec);
-      data::data_expression e = data::parse_data_expression(words[1], "", spec);
+      new_data::variable v = new_data::parse_variable(words[0], spec);
+      new_data::data_expression e = new_data::parse_data_expression(words[1], "", spec);
       sigma[v] = e;
     }
   }
@@ -253,7 +248,7 @@ namespace pbes_system {
     std::string datavar_text;
     for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
     {
-      data::data_variable v = i->first;
+      new_data::variable v = i->first;
       datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + core::pp(v) + ": " + core::pp(v.sort());
     }
 

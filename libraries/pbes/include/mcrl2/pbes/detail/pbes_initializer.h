@@ -16,8 +16,8 @@
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/utility.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 #include "mcrl2/pbes/propositional_variable.h"
 
@@ -33,7 +33,7 @@ class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
     /// \brief The free variables of the PBES initializer
-    data::data_variable_list   m_free_variables;
+    new_data::variable_list   m_free_variables;
 
     /// \brief The value of the PBES initializer
     propositional_variable_instantiation m_variable;
@@ -45,7 +45,7 @@ class pbes_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    pbes_initializer(data::data_variable_list free_variables,
+    pbes_initializer(new_data::variable_list free_variables,
                         propositional_variable_instantiation variable
                        )
      : atermpp::aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
@@ -67,7 +67,7 @@ class pbes_initializer: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    data::data_variable_list free_variables() const
+    new_data::variable_list free_variables() const
     {
       return m_free_variables;
     }

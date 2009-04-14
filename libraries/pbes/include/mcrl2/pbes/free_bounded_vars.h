@@ -14,9 +14,9 @@
 
 #include <set>
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/find.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/find.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/util.h"
 
@@ -24,11 +24,11 @@ std::set<std::string> context;
 
 // auxiliary function that replaces all variables
 // from the given list bv with new variables
-mcrl2::pbes_system::pbes_expression newnames(mcrl2::pbes_system::pbes_expression p, mcrl2::data::data_variable_list bv)
+mcrl2::pbes_system::pbes_expression newnames(mcrl2::pbes_system::pbes_expression p, mcrl2::new_data::variable_list bv)
 {
   if (bv.empty()) return p;
-  mcrl2::data::data_variable_list newbv = fresh_variables(bv,context,"%d");
-  for (mcrl2::data::data_variable_list::iterator x = newbv.begin(); x != newbv.end(); x++)
+  mcrl2::new_data::variable_list newbv = fresh_variables(bv,context,"%d");
+  for (mcrl2::new_data::variable_list::const_iterator x = newbv.begin(); x != newbv.end(); x++)
     context.insert(x->name());
   //  std::cout<<"\nNEWNAMES bv="<< pp(bv).c_str()<<" , newbv=" << pp(newbv).c_str()<<"\n";
   return p.substitute(make_list_substitution(bv, newbv));
@@ -48,10 +48,10 @@ mcrl2::pbes_system::pbes_expression newnames(mcrl2::pbes_system::pbes_expression
 /// As side effect, two variable lists are returned:
 /// the free and the bounded occurences
 mcrl2::pbes_system::pbes_expression remove_double_variables_rec
-(mcrl2::pbes_system::pbes_expression p, mcrl2::data::data_variable_list* fv, mcrl2::data::data_variable_list* bv)
+(mcrl2::pbes_system::pbes_expression p, mcrl2::new_data::variable_list* fv, mcrl2::new_data::variable_list* bv)
 {
   using namespace mcrl2;
-  using namespace mcrl2::data;
+  using namespace mcrl2::new_data;
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::pbes_system::pbes_expr;
   using namespace mcrl2::pbes_system::accessors;
@@ -59,10 +59,10 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
   //  std::cout<<"RDV: start "<<pp(p).c_str()<<"\n";
 
   if ((is_and(p)) || (is_or(p)) || (is_imp(p))) {
-    data_variable_list fvl,fvr,bvl,bvr;
+    variable_list fvl,fvr,bvl,bvr;
     pbes_expression pleft = remove_double_variables_rec(left(p),&fvl,&bvl);
     pbes_expression pright = remove_double_variables_rec(right(p),&fvr,&bvr);
-    data_variable_list toreplace = intersect(bvl,fvr);
+    variable_list toreplace = intersect(bvl,fvr);
     dunion(toreplace,intersect(bvl,bvr));
     pbes_expression pleft_ok = newnames(pleft,toreplace);
     toreplace = intersect(bvr,fvl);
@@ -78,7 +78,7 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
   }
   else if ((is_forall(p))||(is_exists(p))) {
     pbes_expression punder = remove_double_variables_rec(arg(p),fv,bv);
-    data_variable_list qv = var(p);
+    variable_list qv = var(p);
     // if the quantifier is useless, dump it
     if (intersect(qv,*fv).empty()) return punder;
     if (!intersect(qv,*bv).empty()) return punder;
@@ -92,8 +92,8 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
   }
   else if (is_data(p)){
     // fill in the list of occuring variables
-    std::set<data_variable> setfv = find_all_data_variables(p);
-    for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
+    std::set<variable> setfv = find_all_variables(p);
+    for (std::set<variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
       *fv = push_back(*fv,*i);
     //    std::cout<<"RDV: end " <<pp(p).c_str()<<"\n";
     return p;
@@ -118,9 +118,9 @@ mcrl2::pbes_system::pbes_expression remove_double_variables_rec
 /// the free and the bounded occurences
 mcrl2::pbes_system::pbes_expression remove_double_variables(mcrl2::pbes_system::pbes_expression p)
 {
-  mcrl2::data::data_variable_list fv;
-  mcrl2::data::data_variable_list bv;
-  context = mcrl2::data::detail::find_variable_name_strings(p);
+  mcrl2::new_data::variable_list fv;
+  mcrl2::new_data::variable_list bv;
+  context = mcrl2::new_data::detail::find_variable_name_strings(p);
   return (remove_double_variables_rec(p,&fv,&bv));
 }
 

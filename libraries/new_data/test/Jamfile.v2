@@ -1,0 +1,35 @@
+project libraries/new_data/test
+   : requirements
+       <use>/site-config//boost
+       <library>/libraries//new_data
+       <library>/libraries//core
+       <toolset>msvc:<asynch-exceptions>on
+       <source>/site-config//boost_program_options
+       <source>/site-config//boost_filesystem
+   ;
+
+include $(TOP)/build/testing/header_test.jam ;
+
+test-suite new_data
+    :
+      [ run sort_expression_test.cpp ]
+      [ run data_expression_test.cpp ]
+      #[ run data_reconstruct_expr_test.cpp ]
+      [ run data_reconstruct_spec_test.cpp ]
+      [ run data_equation_test.cpp ]
+      [ run data_specification_test.cpp ]
+      [ run bool_test.cpp ]
+      [ run find_test.cpp ]
+      [ run replace_test.cpp ]
+      [ run data_utility_test.cpp ]
+      [ run compatibility_test.cpp ]
+      [ run parser_test.cpp ]
+      [ run implement_data_types_test.cpp ]
+      [ run rewriter_test.cpp ]
+      [ run rewriting_test.cpp ]
+      [ run utility_test.cpp ]
+      [ run enumerator_test.cpp ]
+      [ run classic_enumerator_test.cpp ]
+      [ run substitution_test.cpp ]
+      [ compile-headers ../include ]
+    ;

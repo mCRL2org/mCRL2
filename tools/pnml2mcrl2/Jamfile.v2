@@ -2,8 +2,7 @@ project toolset/pnml2mcrl2 ;
 
 tool pnml2mcrl2
        : pnml2mcrl2.cpp
-         /libraries//core
-         /libraries/utilities//command_line_interfacing
+         /libraries//new_data
        : <library>/libraries//ticpp
          <squadt-connectivity>implemented
        ;

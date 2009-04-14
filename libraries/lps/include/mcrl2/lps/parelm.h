@@ -23,9 +23,9 @@
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/iota.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_assignment_functional.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/assignment_functional.h"
+#include "mcrl2/new_data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -38,20 +38,26 @@ namespace lps {
 /// \param last End of a sequence of summands
 /// \return The data variables that appear in the condition, action or time of the summands in the sequence [first, last).
 template <typename Iterator>
-std::set<data::data_variable> transition_variables(Iterator first, Iterator last)
+std::set<new_data::variable> transition_variables(Iterator first, Iterator last)
 {
-  std::set<data::data_variable> result;
+  struct local {
+    static bool is_variable(atermpp::aterm p) {
+      return new_data::data_expression(p).is_variable();
+    }
+  };
+
+  std::set<new_data::variable> result;
   for (Iterator i = first; i != last; ++i)
   {
     //if (i->is_delta())
     //{
     //  continue;
     //}
-    atermpp::find_all_if(i->condition(), data::is_data_variable, std::inserter(result, result.end()));
-    atermpp::find_all_if(i->actions(), data::is_data_variable, std::inserter(result, result.end()));
+    atermpp::find_all_if(i->condition(), local::is_variable, std::inserter(result, result.end()));
+    atermpp::find_all_if(i->actions(), local::is_variable, std::inserter(result, result.end()));
     if (i->has_time())
     {
-      atermpp::find_all_if(i->time(), data::is_data_variable, std::inserter(result, result.end()));
+      atermpp::find_all_if(i->time(), local::is_variable, std::inserter(result, result.end()));
     }
   }
   return result;
@@ -61,12 +67,16 @@ std::set<data::data_variable> transition_variables(Iterator first, Iterator last
 /// \param p A linear process
 /// \return A set of insignificant process parameters
 inline                                                              
-std::set<data::data_variable> compute_insignificant_parameters(const linear_process& p)
+std::set<new_data::variable> compute_insignificant_parameters(const linear_process& p)
 {
-  std::set<data::data_variable> process_parameters(p.process_parameters().begin(), p.process_parameters().end());
+  new_data::variable_list      process_parameter_list(p.process_parameters());
+
+  std::set<new_data::variable> process_parameters(process_parameter_list.begin(), process_parameter_list.end());
+
+  summand_list summands(p.summands());
 
   // significant variables may not be removed by parelm
-  std::set<data::data_variable> significant_variables = transition_variables(p.summands().begin(), p.summands().end());
+  std::set<new_data::variable> significant_variables = transition_variables(summands.begin(), summands.end());
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
   std::clog << "<todo list>";
@@ -78,31 +88,32 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
 #endif
 
   // recursively extend the set of significant variables
-  std::set<data::data_variable> todo = significant_variables;
+  std::set<new_data::variable> todo = significant_variables;
   while (!todo.empty())
   {
-    data::data_variable x = *todo.begin();
+    new_data::variable x = *todo.begin();
     todo.erase(todo.begin());
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
     std::clog << "<handling todo element>" << core::pp(x) << std::endl;
 #endif
 
-    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {
       if (!i->is_delta())
       {
-        data::data_assignment_list::iterator j = std::find_if(i->assignments().begin(), i->assignments().end(), data::detail::has_left_hand_side(x));
-        if (j != i->assignments().end())
+        new_data::assignment_list assignments(i->assignments());
+        new_data::assignment_list::iterator j = std::find_if(assignments.begin(), assignments.end(), new_data::detail::has_left_hand_side(x));
+        if (j != assignments.end())
         {
-          std::set<data::data_variable> new_variables = data::detail::set_difference(data::find_all_data_variables(j->rhs()), significant_variables);
+          std::set<new_data::variable> new_variables = new_data::detail::set_difference(new_data::find_all_variables(j->rhs()), significant_variables);
           todo.insert(new_variables.begin(), new_variables.end());
           significant_variables.insert(new_variables.begin(), new_variables.end());
         }
       }
     }
   }
-  return data::detail::set_difference(process_parameters, significant_variables);
+  return new_data::detail::set_difference(process_parameters, significant_variables);
 }
 
 /// \brief Removes zero or more insignificant parameters from the specification spec.
@@ -111,11 +122,11 @@ std::set<data::data_variable> compute_insignificant_parameters(const linear_proc
 inline
 specification parelm(const specification& spec)
 {
-  std::set<data::data_variable> to_be_removed = compute_insignificant_parameters(spec.process());
+  std::set<new_data::variable> to_be_removed = compute_insignificant_parameters(spec.process());
 
   // logging statements
   mcrl2::core::gsVerboseMsg("parelm removed %d process parameters: ", to_be_removed.size());
-  for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  for (std::set<new_data::variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }
@@ -132,20 +143,22 @@ specification parelm(const specification& spec)
 inline
 specification parelm2(const specification& spec)
 {
-  std::vector<data::data_variable> process_parameters(spec.process().process_parameters().begin(), spec.process().process_parameters().end());
+  new_data::variable_vector process_parameters(new_data::make_variable_vector(spec.process().process_parameters()));
 
   // create a mapping m from process parameters to integers
-  std::map<data::data_variable, int> m;
+  std::map<new_data::variable, int> m;
   int index = 0;
-  for (std::vector<data::data_variable>::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  for (new_data::variable_vector::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
     m[*i] = index++;
   }
 
+  summand_list summands(spec.process().summands());
+
   // compute the initial set v of significant variables
-  std::set<data::data_variable> tvars = transition_variables(spec.process().summands().begin(), spec.process().summands().end());
+  std::set<new_data::variable> tvars = transition_variables(summands.begin(), summands.end());
   std::vector<int> v;
-  for (std::set<data::data_variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
+  for (std::set<new_data::variable>::iterator i = tvars.begin(); i != tvars.end(); ++i)
   {
     v.push_back(m[*i]);
   }
@@ -154,15 +167,17 @@ specification parelm2(const specification& spec)
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS> graph;
   typedef boost::graph_traits<graph>::vertex_descriptor vertex_descriptor;
   graph G(process_parameters.size());
-  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     if (!i->is_delta())
     {
-      for (data::data_assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      new_data::assignment_list assignments(i->assignments());
+
+      for (new_data::assignment_list::iterator j = assignments.begin(); j != assignments.end(); ++j)
       {
         int j0 = m[j->lhs()];
-        std::set<data::data_variable> vars = data::find_all_data_variables(j->rhs());
-        for (std::set<data::data_variable>::iterator k = vars.begin(); k != vars.end(); ++k)
+        std::set<new_data::variable> vars = new_data::find_all_variables(j->rhs());
+        for (std::set<new_data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
         {
           int k0 = m[*k];
           boost::add_edge(j0, k0, G);
@@ -178,7 +193,7 @@ specification parelm2(const specification& spec)
   core::detail::iota(q.begin(), q.end(), 0);
   std::vector<int> s;
   std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
-  std::set<data::data_variable> to_be_removed;
+  std::set<new_data::variable> to_be_removed;
   for (std::vector<int>::iterator i = s.begin(); i != s.end(); ++i)
   {
     to_be_removed.insert(process_parameters[*i]);
@@ -186,7 +201,7 @@ specification parelm2(const specification& spec)
 
   // logging statements
   mcrl2::core::gsVerboseMsg("parelm removed %d process parameters: ", to_be_removed.size());
-  for (std::set<data::data_variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+  for (std::set<new_data::variable>::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
   {
     mcrl2::core::gsVerboseMsg("%s:%s ", mcrl2::core::pp(*i).c_str(), mcrl2::core::pp(i->sort()).c_str());
   }

@@ -19,6 +19,7 @@
 #include "mcrl2/lps/process_expression_builder.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
 #include "mcrl2/lps/mcrl22lps.h"
 
@@ -113,10 +114,10 @@ void test_process(std::string text)
   specification sp = parse_linear_process_specification(text);
   std::cout << "<spec>" << core::pp(sp) << std::endl;
 
-  //std::cout << core::pp(spec.data()) << std::endl
+  //std::cout << core::pp(new_data::detail::data_specification_to_aterm_data_spec(spec.data())) << std::endl
   //          << core::pp(spec.actions()) << std::endl
-  //          << core::pp(spec.equations()) << std::endl
-  //          << core::pp(spec.init()) << std::endl;
+  //          << new_data::pp(spec.equations()) << std::endl
+  //          << new_data::pp(spec.init()) << std::endl;
   for (process_equation_list::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
   {
     visit_process_expression(i->expression());

@@ -263,6 +263,7 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
   ATermAppl Result=NULL;
+
   gsDebugMsg ("type checking phase started\n");
   gstcDataInit();
 
@@ -1026,6 +1027,7 @@ void gstcDataInit(void){
   body.proc_freevars=ATtableCreate(63,50);
   body.proc_pars=ATtableCreate(63,50);
   body.proc_bodies=ATtableCreate(63,50);
+  body.equations = ATmakeList0();
   ATprotectList(&body.equations);
 
   //Creation of operation identifiers for system defined operations.

@@ -17,7 +17,7 @@
 #include <mcrl2/lps/mcrl22lps.h>
 
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 ///sum d:D should be unfolded
@@ -31,8 +31,10 @@ void test_case_1(const t_suminst_options& opts)
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  rewriter r(s0.data(), opts.strategy);
+  specification s1 = instantiate_sums(s0, r, opts);
+std::clog << pp(s0) << std::endl;
+std::clog << pp(s1) << std::endl;
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -54,8 +56,8 @@ void test_case_2(const t_suminst_options& opts)
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  rewriter r(s0.data(), opts.strategy);
+  specification s1 = instantiate_sums(s0, r, opts);
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -77,8 +79,8 @@ void test_case_3(const t_suminst_options& opts)
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  rewriter r(s0.data(), opts.strategy);
+  specification s1 = instantiate_sums(s0, r, opts);
   summand_list summands1 = s1.process().summands();
   bool sum_occurs = false;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -106,8 +108,8 @@ void test_case_4(const t_suminst_options& opts)
   new_opts.tau_only = true;
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), new_opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, new_opts);
+  rewriter r(s0.data(), opts.strategy);
+  specification s1 = instantiate_sums(s0, r, new_opts);
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
@@ -143,8 +145,8 @@ void test_case_5(const t_suminst_options& opts)
   );
 
   specification s0 = mcrl22lps(text);
-  Rewriter* r = createRewriter(s0.data(), opts.strategy);
-  specification s1 = instantiate_sums(s0, *r, opts);
+  rewriter r(s0.data(), opts.strategy);
+  specification s1 = instantiate_sums(s0, r, opts);
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;

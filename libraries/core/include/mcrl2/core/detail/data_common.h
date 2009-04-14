@@ -157,6 +157,16 @@ inline ATermAppl set_data_decls(ATermAppl spec, t_data_decls data_decls)
 /// \return spec in which the data declarations from data_decls are added
 ATermAppl add_data_decls(ATermAppl spec, t_data_decls data_decls);
 
+/// Adds sort_expr to the specification
+inline
+ATermAppl add_sort_expression(ATermAppl spec, ATermAppl sort_expr)
+{
+  assert(gsIsSortExpr(sort_expr));
+  t_data_decls data_decls = get_data_decls(spec);
+  data_decls.sorts = ATinsert(data_decls.sorts, (ATerm) sort_expr);
+  return set_data_decls(spec, data_decls);
+}
+
 // --------------------
 // Auxiliary functions
 // --------------------

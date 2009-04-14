@@ -31,14 +31,15 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/data_common.h"
-#include "mcrl2/core/detail/data_implementation_concrete.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
 
@@ -47,6 +48,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2;
 
 #define STRINGLENGTH 256
@@ -66,7 +68,7 @@ static bool allowFreeDataVariablesInProcesses;
 static bool nodeltaelimination;
 static bool add_delta;
 
-static Rewriter *rewr = NULL;
+static std::auto_ptr< mcrl2::new_data::rewriter > rewr;
 
 /* PREAMBLE */
 
@@ -86,7 +88,6 @@ typedef struct specificationbasictype {
                                        init clause */
             ATermAppl init;      /* storage place for initial process */
 } specificationbasictype;
-
 
 typedef struct localstring {
   std::string s;
@@ -127,7 +128,7 @@ static ATermList construct_renaming(ATermList pars1, ATermList pars2,
                 ATermList *pars3, ATermList *pars4,const bool unique=true);
 static void alphaconversion(ATermAppl procId, ATermList parameters);
 static ATermAppl fresh_name(const std::string &name);
-static void insertequation(ATermAppl eqn, specificationbasictype *spec);
+static void insertequation(ATermAppl eqn, specificationbasictype *spec, bool add_to_spec = false);
 static ATermList replaceArgumentsByAssignments(ATermList args,ATermList pars);
 static ATermAppl RewriteTerm(ATermAppl t);
 static ATermAppl transform_process_assignment_to_process(ATermAppl procId);
@@ -363,11 +364,14 @@ static localstring *new_string(const std::string &s)
 
 
 static long addObject(ATermAppl o, ATbool *isnew)
-{ return ATindexedSetPut(objectIndexTable,(ATerm)o,isnew);
+{
+  return ATindexedSetPut(objectIndexTable,(ATerm)o,isnew);
 }
 
+static long existsObjectIndex(ATermAppl o);
 static long objectIndex(ATermAppl o)
 {
+  assert(existsObjectIndex(o) >= 0);
   long result=ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
   assert(result>=0); /* object index must always return the index
                         of an existing object, because at the
@@ -380,7 +384,31 @@ static long existsObjectIndex(ATermAppl o)
 { /* returns negative number if object does not exists,
      otherwise a number >=0, indicating the index of the
      object */
-  return ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+  if (gsIsDataVarId(o))
+  {
+    return ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+  }
+  else
+  { // Hack to deal with unknown sorts in constructors/mappings (Jeroen & Jeroen)
+    long result = ATindexedSetGetIndex(objectIndexTable,(ATerm)o);
+
+    if (result < 0)
+    {
+      ATbool is_new = ATfalse;
+
+      result = addObject(o, &is_new);
+
+      newobject(result);
+
+      objectdata[result].objectname=o;
+      objectdata[result].object=sorttype;
+      objectdata[result].constructor=0;
+
+      assert(is_new);
+    }
+
+    return result;
+  }
 }
 
 static void removeObject(ATermAppl o)
@@ -402,11 +430,16 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
       (sortterm==gsMakeSortExprInt())||
       (sortterm==gsMakeSortExprNat())||
       (sortterm==gsMakeSortExprPos())||
-      (gsIsSortId(sortterm)))
+      (gsIsSortId(sortterm))||
+      (gsIsSortCons(sortterm)))
   { return sortterm;
   }
   if (gsIsSortArrow(sortterm))
   { return getTargetSort(ATAgetArgument(sortterm,1));
+  }
+  if (gsIsSortRef(sortterm))
+  {
+    return ATAgetArgument(sortterm,0);
   }
 
   gsErrorMsg("expected a sortterm %T",sortterm);
@@ -432,6 +465,10 @@ static int existsort(ATermAppl sortterm)
 /* Delivers 0 if sort does not exist. Otherwise 1
    indicating that the sort exists */
 {
+  // Temporary measure to support the use of sort references with
+  // a structured sort as a right hand side.
+  return 1;
+
   /* if (sortterm==gsMakeSortExprBool()) return 1;
      if (sortterm==gsMakeSortExprInt()) return 1;
      if (sortterm==gsMakeSortExprNat()) return 1;
@@ -442,6 +479,14 @@ static int existsort(ATermAppl sortterm)
   }
   if (gsIsSortId(sortterm))
   {
+    if (gsIsSortExprPos(sortterm) ||
+        gsIsSortExprNat(sortterm) ||
+        gsIsSortExprInt(sortterm) ||
+        gsIsSortExprReal(sortterm) ||
+        gsIsSortExprBool(sortterm))
+    {
+      return 1;
+    }
     long n=0;
 
     n=existsObjectIndex(sortterm);
@@ -451,6 +496,14 @@ static int existsort(ATermAppl sortterm)
     }
     if (objectdata[n].object==sorttype) return 1;
     return 0;
+  }
+  if (gsIsSortRef(sortterm))
+  {
+    return 1;
+  }
+  if (gsIsSortCons(sortterm))
+  {
+    return existsort(ATAgetArgument(sortterm, 1));
   }
 
   gsErrorMsg("expected a sortterm (1) %T\n",sortterm);
@@ -468,29 +521,29 @@ static int existsorts(ATermList sorts)
 //#endif
 
 //prototype
-static void insertsort(ATermAppl sorts, specificationbasictype *spec);
+static void insertsort(ATermAppl sorts, specificationbasictype *spec, bool add_to_spec = false);
 
-static void insertsorts(ATermList sorts, specificationbasictype *spec)
+static void insertsorts(ATermList sorts, specificationbasictype *spec, bool add_to_spec = false)
 {
   for( ; !ATisEmpty(sorts) ; sorts=ATgetNext(sorts))
   {
-    insertsort(ATAgetFirst(sorts),spec);
+    insertsort(ATAgetFirst(sorts),spec, false);
   }
   return;
 }
 
-static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
+static void insertsort(ATermAppl sortterm, specificationbasictype *spec, bool add_to_spec)
 {
 
-  spec->sorts=ATinsertA(spec->sorts,sortterm);
+  if (add_to_spec) spec->sorts=ATinsertA(spec->sorts,sortterm);
 
   /* if (sortterm==gsMakeSortExprBool()) return;
      if (sortterm==gsMakeSortExprInt()) return;
      if (sortterm==gsMakeSortExprNat()) return;
      if (sortterm==gsMakeSortExprPos()) return; */
   if (gsIsSortArrow(sortterm))
-  { insertsorts(ATLgetArgument(sortterm,0),spec);
-    insertsort(ATAgetArgument(sortterm,1),spec);
+  { insertsorts(ATLgetArgument(sortterm,0),spec, add_to_spec);
+    insertsort(ATAgetArgument(sortterm,1),spec, add_to_spec);
     return;
   }
   /* if (gsIsSortExprList(sortterm))
@@ -505,7 +558,7 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
   { gsErrorMsg("SortBag is not an implemented sort\n");
     exit(1);
   } */
-  if (gsIsSortId(sortterm))
+  if (gsIsSortId(sortterm) || gsIsSortCons(sortterm))
 
   {
     long n=0;
@@ -516,8 +569,8 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     n=addObject(sortterm,&isnew);
 
     if (isnew==0)
-    { gsErrorMsg("sort %T is added twice\n",sortterm);
-      exit(1);
+    { gsDebugMsg("sort %T is added twice\n",sortterm);
+      return;
     }
 
     newobject(n);
@@ -527,9 +580,14 @@ static void insertsort(ATermAppl sortterm, specificationbasictype *spec)
     objectdata[n].constructor=0;
     return;
   }
+  if (gsIsSortRef(sortterm))
+  {
+    return;
+  }
   gsErrorMsg("expected a sortterm (2)  %T\n",sortterm);
   exit(1);
 }
+
 
 static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 { ATbool isnew=ATfalse;
@@ -570,8 +628,9 @@ static long insertConstructorOrFunction(ATermAppl constructor,objecttype type)
 
 static long insertconstructor(
                ATermAppl constructor,
-               specificationbasictype *spec)
-{ spec->funcs=ATinsertA(spec->funcs,constructor);
+               specificationbasictype *spec,
+               bool add_to_spec = false)
+{ if (add_to_spec) spec->funcs=ATinsertA(spec->funcs,constructor);
   return insertConstructorOrFunction(constructor,func);
 }
 
@@ -579,52 +638,55 @@ static long insertconstructor(
 static bool hasif(ATermAppl sort,
                specificationbasictype *spec)
 {
-  /* A system defined sort always has a constructor */
-  if (ATisEqual(sort, gsMakeSortExprBool()) ||
-      ATisEqual(sort, gsMakeSortExprPos())  ||
-      ATisEqual(sort, gsMakeSortExprNat())  ||
-      ATisEqual(sort, gsMakeSortExprInt())  ||
-      ATisEqual(sort, gsMakeSortExprReal()))
-    return true;
+  return true;
 
-  /* sort is not system defined, see if there is an if on sort in spec */
-  return (ATindexOf(spec->maps, (ATerm) gsMakeOpIdIf(sort), 0) != -1);
+//  /* A system defined sort always has a constructor */
+//  if (ATisEqual(sort, gsMakeSortExprBool()) ||
+//      ATisEqual(sort, gsMakeSortExprPos())  ||
+//      ATisEqual(sort, gsMakeSortExprNat())  ||
+//      ATisEqual(sort, gsMakeSortExprInt())  ||
+//      ATisEqual(sort, gsMakeSortExprReal()))
+//    return true;
+//
+//  /* sort is not system defined, see if there is an if on sort in spec */
+//  return (ATindexOf(spec->maps, (ATerm) gsMakeOpIdIf(sort), 0) != -1);
 }
 
 
 static long insertmapping(
                ATermAppl mapping,
-               specificationbasictype *spec)
-{ spec->maps=ATinsertA(spec->maps,mapping);
+               specificationbasictype *spec,
+               bool add_to_spec = false)
+{ if (add_to_spec) spec->maps=ATinsertA(spec->maps,mapping);
   return insertConstructorOrFunction(mapping,_map);
 }
 
-static void insertequation(ATermAppl eqn, specificationbasictype *spec)
+static void insertequation(ATermAppl eqn, specificationbasictype *spec, bool add_to_spec)
 {
-  if (mayrewrite) rewr->addRewriteRule(eqn);
-  spec->eqns=ATinsertA(spec->eqns,eqn);
+  if (mayrewrite) rewr->add_rule(mcrl2::new_data::data_equation(eqn));
+  if (add_to_spec) spec->eqns=ATinsertA(spec->eqns,eqn);
 }
 
 ///\return The declarations from data_decls are inserted in spec using the
 ///     insertsort, insertconstructor, insertmapping and insertequation functions
 ///     (in the same order)
-static void insert_data_decls(t_data_decls data_decls, specificationbasictype *spec)
+static void insert_data_decls(t_data_decls data_decls, specificationbasictype *spec, bool add_to_spec = false)
 {
   // insert sorts using insertsort (reversed to keep the order the same)
   for (ATermList l = ATreverse(data_decls.sorts); !ATisEmpty(l); l = ATgetNext(l)) {
-    insertsort(ATAgetFirst(l), spec);
+    insertsort(ATAgetFirst(l), spec, add_to_spec);
   }
   // insert constructors using insertconstructor (reversed to keep the order the same)
   for (ATermList l = ATreverse(data_decls.cons_ops); !ATisEmpty(l); l = ATgetNext(l)) {
-    insertconstructor(ATAgetFirst(l), spec);
+    insertconstructor(ATAgetFirst(l), spec, add_to_spec);
   }
   // insert mappings using insertmappings (reversed to keep the order the same)
   for (ATermList l = ATreverse(data_decls.ops); !ATisEmpty(l); l = ATgetNext(l)) {
-    insertmapping(ATAgetFirst(l), spec);
+    insertmapping(ATAgetFirst(l), spec, add_to_spec);
   }
   // insert equations using insertequations (reversed to keep the order the same)
   for (ATermList l = ATreverse(data_decls.data_eqns); !ATisEmpty(l); l = ATgetNext(l)) {
-    insertequation(ATAgetFirst(l), spec);
+    insertequation(ATAgetFirst(l), spec, add_to_spec);
   }
 }
 
@@ -654,10 +716,6 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
   }
   //add sort Nat, if needed
   if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr) || gsIsSortExprNat(sort_expr)) {
-    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNatPair(), 0) == -1) {
-      impl_standard_functions_sort(gsMakeSortIdNatPair(), &data_decls);
-      impl_sort_nat_pair(&data_decls);
-    }
     if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
       impl_standard_functions_sort(gsMakeSortIdNat(), &data_decls);
       impl_sort_nat(&data_decls, false);
@@ -666,12 +724,52 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
   //add sort Pos, if needed
   if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
     impl_standard_functions_sort(gsMakeSortIdPos(), &data_decls);
-    impl_sort_pos(&data_decls);
+    ATermList new_equations = ATmakeList0();
+    impl_sort_pos(&data_decls, &new_equations);
   }
   //add generated declarations to spec
-  insert_data_decls(data_decls, spec);
+  insert_data_decls(data_decls, spec, false);
 }
 
+// Temporary measure, the rest of the code relies on the declarations of Pos, Nat, Int, Real
+// being found when needed.
+//static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictype *spec)
+//{
+//  if (gsIsSortExprReal(sort_expr))
+//  {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
+//      insertsort(gsMakeSortExprReal(), spec);
+//      sort_expr = gsMakeSortIdInt();
+//    }
+//  }
+//  if (gsIsSortExprInt(sort_expr))
+//  {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+//      insertsort(gsMakeSortExprInt(), spec);
+//      sort_expr = gsMakeSortIdNat();
+//    }
+//  }
+//  if (gsIsSortExprNat(sort_expr))
+//  {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+//      insertsort(gsMakeSortExprNat(), spec);
+//      sort_expr = gsMakeSortIdPos();
+//    }
+//  }
+//  if (gsIsSortExprPos(sort_expr))
+//  {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+//      insertsort(gsMakeSortExprPos(), spec);
+//      sort_expr = gsMakeSortIdBool();
+//    }
+//  }
+//  if (gsIsSortExprBool(sort_expr))
+//  {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdBool(), 0) == -1) {
+//      insertsort(gsMakeSortExprBool(), spec);
+//    }
+//  }
+//}
 
 static ATermList getnames(ATermAppl multiAction)
 { ATermList result=ATempty;
@@ -854,7 +952,7 @@ static int upperpowerof2(int i)
 static ATermAppl RewriteTerm(ATermAppl t)
 {
   // gsfprintf(stderr,"Rewrite %P\n",t);
-  if (mayrewrite) t=rewr->rewrite(t);
+  if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::new_data::data_expression(t)));
   return t;
 }
 
@@ -1020,7 +1118,11 @@ static specificationbasictype *create_spec(ATermAppl t)
   spec->eqns = ATempty;
   ATermAppl data_spec = ATAgetArgument(t,0);
   t_data_decls data_decls = get_data_decls(data_spec);
-  insert_data_decls(data_decls, spec);
+  t_data_decls data_decls_copy = get_data_decls(
+                           implement_data_spec(data_spec));
+  subtract_data_decls(&data_decls_copy, &data_decls);
+  insert_data_decls(data_decls_copy, spec, false);
+  insert_data_decls(data_decls, spec, true);
 
   spec->acts = ATLgetArgument(ATAgetArgument(t,1),0);
   storeact(spec->acts);
@@ -2372,6 +2474,7 @@ static ATermAppl newprocess(
     warningNumber=warningNumber*2;
   }
   parameters=parameters_that_occur_in_body(parameters, body);
+
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
   insertProcDeclaration(
              p,
@@ -4058,17 +4161,7 @@ static stacklisttype *new_stack(
       ATermAppl ss_stack = gsMakeSortStruct(
         ATmakeList2((ATerm) sc_emptystack, (ATerm) sc_push));
       //add data declarations for structured sort
-      ATermList substs = ATmakeList0();
-      t_data_decls data_decls;
-      initialize_data_decls(&data_decls);
-      impl_standard_functions_sort(stack->opns->stacksort, &data_decls);
-      impl_sort_struct(ss_stack, stack->opns->stacksort, &substs, &data_decls, false);
-      //data_decls.sorts contains precisely one sort, namely stack->opns->stacksort
-      assert(ATgetLength(data_decls.sorts) == 1);
-      assert(ATisEqual(ATAgetFirst(data_decls.sorts), stack->opns->stacksort));
-      //insert data declarations in spec
-      insert_data_decls(data_decls, spec);
-
+      insertsort(gsMakeSortRef(gsGetName(stack->opns->stacksort), ss_stack), spec, true);
       //add stack variable
       stack->stackvar = gsMakeDataVarId(fresh_name(s3), stack->opns->stacksort);
       ATprotectAppl(&(stack->stackvar));
@@ -4593,7 +4686,7 @@ static ATermAppl dummyterm(
   {
     snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
     ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
-    insertmapping(dummymapping,spec);
+    insertmapping(dummymapping,spec,true);
     return dummymapping;
   }
   return NULL;
@@ -5104,20 +5197,13 @@ static enumeratedtype *create_enumeratedtype
       ATermAppl sort_struct = gsMakeSortStruct(struct_conss);
 
       //add declaration of standard functions
-      ATermList substs = ATmakeList0();
-      t_data_decls data_decls;
-      initialize_data_decls(&data_decls);
-      impl_standard_functions_sort(sort_id, &data_decls);
-      impl_sort_struct(sort_struct, sort_id, &substs, &data_decls, false);
-      //data_decls.sorts contains precisely one sort, namely sort_id
-      assert(ATgetLength(data_decls.sorts) == 1);
-      assert(ATisEqual(ATAgetFirst(data_decls.sorts), sort_id));
-      //insert data declarations in spec
-      insert_data_decls(data_decls, spec);
+      insertsort(gsMakeSortRef(ATAgetArgument(sort_id, 0), sort_struct), spec, true);
 
       //store new declarations in return value w
       w->sortId = sort_id;
-      w->elementnames = data_decls.cons_ops;
+      w->elementnames = new_data::convert< new_data::function_symbol_list >(
+                new_data::structured_sort(new_data::sort_expression(sort_struct)).
+                                        constructor_functions(new_data::sort_expression(sort_id)));
     }
 
     w->functions=ATempty;
@@ -5176,7 +5262,8 @@ static void define_equations_for_case_function(
               gsMakeNil(),
               gsMakeDataAppl(functionname,ATinsertA(xxxterm,v)),
               v1),
-              spec);
+              spec,
+              true);
 
   auxvars=vars;
 
@@ -5187,7 +5274,8 @@ static void define_equations_for_case_function(
            gsMakeNil(),
            gsMakeDataAppl(functionname,ATinsertA(args,ATAgetFirst(w))),
            ATAgetFirst(auxvars)),
-           spec);
+           spec,
+           true);
 
     auxvars=ATgetNext(auxvars);
   }
@@ -5245,7 +5333,7 @@ static void create_case_function_on_enumeratedtype(
   casefunction=gsMakeOpId(
                       fresh_name(scratch1),
                       newsort);
-  insertmapping(casefunction,spec);
+  insertmapping(casefunction,spec,true);
   e->functions=ATinsertA(e->functions,casefunction);
 
   define_equations_for_case_function(e,casefunction,sort,spec);
@@ -9267,9 +9355,10 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   add_delta = lin_options.add_delta;
   //initialise local data structures
   initialize_data();
+
   if (mayrewrite) {
-    rewr = createRewriter(mcrl2::data::data_specification(),
-                          lin_options.rewrite_strategy);
+    rewr.reset(new mcrl2::new_data::rewriter(
+                new_data::data_specification(), lin_options.rewrite_strategy));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
@@ -9313,7 +9402,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   //clean up
   uninitialize_data();
   uninitialize_symbols();
-  delete rewr;
+  rewr.release();
 
   return result;
 }
@@ -9335,7 +9424,6 @@ void lin_std_initialize_global_variables()
   allowFreeDataVariablesInProcesses = false;
   nodeltaelimination = false;
   add_delta = false;
-  rewr = NULL;
   time_operators_used=0;
   seq_varnames=NULL;
   objectIndexTable=NULL;

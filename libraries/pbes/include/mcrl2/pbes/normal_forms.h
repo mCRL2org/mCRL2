@@ -15,13 +15,6 @@
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-using namespace mcrl2::core;
-using namespace mcrl2::data;
-using namespace mcrl2::pbes_system;
-using namespace mcrl2::pbes_system::pbes_expr;
-using namespace mcrl2::pbes_system::accessors;
-
-
 //auxiliary function that composes two prenex forms into a new prenex form
 static pbes_expression join
 (pbes_expression left, pbes_expression right, bool op)
@@ -103,14 +96,14 @@ struct pbes_expression_prenex_builder: public pbes_expression_builder<pbes_expre
   }
 
   pbes_expression visit_forall
-  (const pbes_expression& f, const data_variable_list& variables, const pbes_expression& expression)
+  (const pbes_expression& f, const variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr;
     return forall(variables, visit(expression));
   }
 
   pbes_expression visit_exists
-  (const pbes_expression& f, const data_variable_list& variables, const pbes_expression& expression)
+  (const pbes_expression& f, const variable_list& variables, const pbes_expression& expression)
   {
     using namespace pbes_expr;
     return exists(variables, visit(expression));

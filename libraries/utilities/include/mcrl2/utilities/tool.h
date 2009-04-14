@@ -31,20 +31,17 @@ namespace tools {
   class tool
   {
     protected:
-      /// \brief The name of the tool
+      /// The name of the tool
       std::string m_name;
 
-      /// \brief The name of the developer(s)
+      /// The name of the developer(s)
       std::string m_author;
 
-      /// \brief One-line "what is" description of the tool
+      /// One-line "what is" description of the tool
       std::string m_what_is;
 
-      /// \brief The description of the tool
-      std::string m_description;
-
-      /// \brief The synopsis of the tool
-      std::string m_synopsis;
+      /// The description of the tool
+      std::string m_tool_description;
 
       /// \brief Add options to an interface description.
       /// \param desc An interface description
@@ -63,95 +60,30 @@ namespace tools {
       virtual void check_positional_options(const command_line_parser& parser)
       {}
 
+      /// \brief Returns the synopsis of the tool
+      /// \return The string "[OPTION]...\n"
+      virtual std::string synopsis() const
+      {
+        return "[OPTION]...\n";
+      }
+
     public:
       /// \brief Constructor.
       tool(const std::string& name,
-           const std::string& author,
-           const std::string& what_is,
-           const std::string& description,
-           std::string synopsis = "[OPTION]...\n"
-          )
-        : m_name       (name),
-          m_author     (author),
-          m_what_is    (what_is),
-          m_description(description),
-          m_synopsis   (synopsis)
+                  const std::string& author,
+                  const std::string& what_is,
+                  const std::string& tool_description
+                 )
+        : m_name            (name),
+          m_author          (author),
+          m_what_is         (what_is),
+          m_tool_description(tool_description)
       {
       }
 
       /// \brief Destructor.
       virtual ~tool()
       {}
-
-      /// \brief Returns the name of the tool
-      /// \return The name of the tool
-      const std::string& name() const
-      {
-        return m_name;
-      }
-
-      /// \brief Returns the name of the tool
-      /// \return A reference to the name of the tool
-      std::string& name()
-      {
-        return m_name;
-      }
-
-      /// \brief Returns the author(s) of the tool
-      /// \return The author(s) of the tool
-      const std::string& author() const
-      {
-        return m_author;
-      }
-
-      /// \brief Returns the author(s) of the tool
-      /// \return A reference to the author(s) of the tool
-      std::string& author()
-      {
-        return m_author;
-      }
-
-      /// \brief Returns a one-line description of the tool
-      /// \return The 'what-is' description of the tool
-      const std::string& what_is() const
-      {
-        return m_what_is;
-      }
-
-      /// \brief Returns a one-line description of the tool
-      /// \return A reference to the 'what-is' description of the tool
-      std::string& what_is()
-      {
-        return m_what_is;
-      }
-
-      /// \brief Returns the description of the tool
-      /// \return The description of the tool
-      const std::string& description() const
-      {
-        return m_description;
-      }
-
-      /// \brief Returns the description of the tool
-      /// \return A reference to the description of the tool
-      std::string& description()
-      {
-        return m_description;
-      }
-
-      /// \brief Returns the synopsis of the tool
-      /// \return The synopsis of the tool
-      const std::string& synopsis() const
-      {
-        return m_synopsis;
-      }
-
-      /// \brief Returns the synopsis of the tool
-      /// \return A reference to the synopsis of the tool
-      std::string& synopsis()
-      {
-        return m_synopsis;
-      }
 
       /// \brief Run the tool. The options must be set manually.
       /// \return True if the tool execution was successful.
@@ -164,7 +96,7 @@ namespace tools {
       int execute(int argc, char* argv[])
       {
         try {
-          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_description);
+          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
           check_positional_options(parser);

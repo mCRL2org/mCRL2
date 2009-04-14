@@ -37,9 +37,10 @@
 #include "mcrl2/utilities/input_tool.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
@@ -85,7 +86,7 @@ class info_tool {
 
       /// If PBES can be loaded from file_name, then
       /// - Show if PBES is closed and if it is well formed
-      ///	- Show number of equations
+      ///       - Show number of equations
       /// - Show number of mu's / nu's.
       /// - Show which predicate variables have mu's and which predicate variables have nu's
       /// - Show predicate variables and their type
@@ -113,7 +114,7 @@ class info_tool {
 
       for (atermpp::vector<pbes_equation>::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
       {
-         // - Store data_variables
+         // - Store variables
          predvar_data.push_back(fp_i->variable());
 
          // Check on mu or nu
@@ -122,7 +123,7 @@ class info_tool {
            // If fp is mu:
            // - Increase #mu's
            // - Store predicate variable in mu-list and common list
-           // - Store data_variables
+           // - Store variables
            mu++;
            if (opt_full)
              predvar_mu.push_back(fp_i->variable().name());
@@ -148,7 +149,7 @@ class info_tool {
       // Check if errors occurred in reading PBEs
       if (fp_errors != 0)
       {
-      	cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
+        cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
       }
 
       // Show if PBES is closed and well formed
@@ -165,8 +166,8 @@ class info_tool {
         cout << "   (";
       for (vector<identifier_string>::iterator i = predvar_mu.begin(); i != predvar_mu.end(); i++)
       {
-      	cout << *i << ((mu_done == size_mu) ? ")" : ", ");
-     	mu_done++;
+        cout << *i << ((mu_done == size_mu) ? ")" : ", ");
+        mu_done++;
       }
       cout << endl;
 
@@ -175,41 +176,40 @@ class info_tool {
       int size_nu = predvar_nu.size();
       int nu_done = 1;
       if (size_nu > 0)
-      	cout << "   (";
+        cout << "   (";
       for (vector<identifier_string>::iterator i = predvar_nu.begin(); i != predvar_nu.end(); i++)
       {
-      	cout << *i << ((mu_done == size_mu) ? ")" : ", ");
-      	nu_done++;
+        cout << *i << ((mu_done == size_mu) ? ")" : ", ");
+        nu_done++;
       }
       cout << endl;
 
      // Show binding variables with their signature
       if (opt_full)
       {
-      	int nr_predvar = 1;
-      	string sort_bool = "Bool";
-      	for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
-      	{
-      	  int bv_size = pv_i->parameters().size();
-      	  int nr_sorts = 1;
-      	  if (nr_predvar == 1)
-      	    cout << "Predicate variables: " << pv_i->name() << " :: ";
-      	  else
-      	    cout << "                     " << pv_i->name() << " :: ";
-      	  for (atermpp::term_list<data_variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
-      	  {
-      	    cout << pp(dv_i->sort());
-      	    if (nr_sorts < bv_size)
-      	    {
-      	      cout << " x ";
-      	      nr_sorts++;
-      	    }
-      	    else
-      	      cout << " -> " << pp(sort_expression(sort_bool));
-      	    }
-      	  cout << endl;
-      	  nr_predvar++;
-      	}
+        int nr_predvar = 1;
+        for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
+        {
+          int bv_size = pv_i->parameters().size();
+          int nr_sorts = 1;
+          if (nr_predvar == 1)
+            cout << "Predicate variables: " << pv_i->name() << " :: ";
+          else
+            cout << "                     " << pv_i->name() << " :: ";
+          for (atermpp::term_list<variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
+          {
+            cout << core::pp(dv_i->sort());
+            if (nr_sorts < bv_size)
+            {
+              cout << " x ";
+              nr_sorts++;
+            }
+            else
+              cout << " -> " << core::pp(sort_bool_::bool_());
+            }
+          cout << endl;
+          nr_predvar++;
+        }
       }
     }
 

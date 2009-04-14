@@ -18,7 +18,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 
-using namespace ::mcrl2::utilities;
 using namespace mcrl2::core;
 
 namespace mcrl2 {

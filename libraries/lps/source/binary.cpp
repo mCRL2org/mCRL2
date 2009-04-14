@@ -17,27 +17,27 @@
 #include <mcrl2/atermpp/table.h>
 
 //LPS Framework
-#include <mcrl2/data/data.h>
-#include <mcrl2/data/utility.h>
-#include <mcrl2/data/data_operation.h>
+#include <mcrl2/new_data/data.h>
+#include <mcrl2/new_data/utility.h>
+#include <mcrl2/new_data/function_symbol.h>
 #include <mcrl2/lps/linear_process.h>
-#include <mcrl2/data/sort_utility.h>
+#include <mcrl2/new_data/detail/sort_utility.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/detail/specification_utility.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/core/aterm_ext.h>
 //Enumerator
-#include <mcrl2/data/detail/enum/standard.h>
-#include <mcrl2/lps/nextstate.h>
+#include <mcrl2/new_data/classic_enumerator.h>
+#include <mcrl2/new_data/enumerator_factory.h>
 
 #include <mcrl2/lps/binary.h>
 
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2::lps;
-using namespace mcrl2::data::data_expr;
 
 namespace mcrl2 {
 
@@ -49,7 +49,7 @@ namespace lps {
 
 ///\pre n>0
 ///\return ceil(log_2(n))
-int log2(int n)
+unsigned int log2(unsigned int n)
 {
   int result = 0;
   if (n == 0)
@@ -67,30 +67,25 @@ int log2(int n)
 }
 
 ///\return 2^n
-int powerof2_(int n)
+unsigned int powerof2_(unsigned int n)
 {
-  int result = 1;
-  for ( ; n>0; --n)
-  {
-    result = result * 2;
-  }
-
-  return result;
+  assert(n < sizeof(int));
+  return 1 << n;
 }
 
 ///\pre cl is a list of constructors
 ///\return all sorts s in sl that are finite and not bool
-sort_expression_list get_finite_sorts_not_bool(const data_operation_list& cl, const sort_expression_list& sl)
+///\deprecated this function does not seem to be used
+sort_expression_vector get_finite_sorts_not_bool(const new_data::data_specification& d, const sort_expression_list& sl)
 {
-  sort_expression_list result;
-  for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
+  sort_expression_vector result;
+  for(sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    if (!is_bool(*i) && is_finite(cl, *i))
+    if (!sort_bool_::is_bool_(*i) && d.is_certainly_finite(*i))
     {
-      result = push_front(result, *i);
+      result.push_back(*i);
     }
   }
-  reverse(result);
   return result;
 }
 
@@ -120,7 +115,7 @@ data_expression_list split_at(data_expression_list& list, unsigned int n)
 
 ///\pre enumerated_elements.size() <= 2^new_parameters.size()
 ///\return if then else tree from enumerated_elements in terms of new_parameters
-data_expression make_if_tree(const data_variable_list& new_parameters,
+data_expression make_if_tree(const variable_list& new_parameters,
                              const data_expression_list& enumerated_elements)
 {
   //gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
@@ -172,53 +167,38 @@ data_expression make_if_tree(const data_variable_list& new_parameters,
 // a mapping variable -> enumerated elements is stored in enumerated_elements_table
 /// \return data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
-data_variable_list replace_enumerated_parameters(const lps::specification& specification,
-                                                 EnumeratorStandard& enumerator,
+variable_list replace_enumerated_parameters(const lps::specification& specification,
+                                                 new_data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
                                                  table& new_parameters_table,
                                                  table& enumerated_elements_table)
 {
-  data_variable_list result;
-  data_variable_list process_parameters = specification.process().process_parameters();
+  variable_list result;
+  variable_list process_parameters = specification.process().process_parameters();
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
 
   fresh_variable_generator generator = fresh_variable_generator(aterm(specification));
-  generator.set_sort(sort_expr::bool_());
+  generator.set_sort(sort_bool_::bool_());
 
   // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
-  for (data_variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
+  for (variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
-    data_variable par = *i;
-    if (!is_bool(par) && is_finite(specification.data().constructors(), par.sort()))
+    variable par = *i;
+
+    if (!sort_bool_::is_bool_(par) && specification.data().is_certainly_finite(par.sort()))
     {
       //Get all constructors for par
-      aterm_list pl;
-      pl = push_front(pl, aterm(par)); //Needed because findSolutions wants a list
-      EnumeratorSolutions* sols = enumerator.findSolutions(pl, aterm(par), false, NULL);
-      ATermList sol;
+      variable_list new_pars; // List to store new parameters
+      data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-
-      data_variable_list new_pars; // List to store new parameters
-      data_expression_list enumerated_elements; // List to store enumerated elements of a parameter
-      int j = 0;
-      while (sols->next(&sol))
+      for (classic_enumerator< > j(classic_enumerator_factory.make(par)); j != classic_enumerator< >(); ++j)
       {
-        aterm_list solution = aterm_list(sol);
-
-        for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
-        {
-          ++j;
-          data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(ATgetArgument(ATerm(*i),1))));
-          enumerated_elements = push_front(enumerated_elements, res);
-        }
-
+        enumerated_elements.push_back((*j)(par));
       }
-      // j = enumerated_elements.size()
-      enumerated_elements = reverse(enumerated_elements);
 
-      enumerated_elements_table.put(par , enumerated_elements); // Store enumerated elements for easy retrieval later on.
+      enumerated_elements_table.put(par, make_data_expression_list(enumerated_elements)); // Store enumerated elements for easy retrieval later on.
 
       //Calculate the number of booleans needed to encode par
-      int n = log2(j);
+      int n = log2(enumerated_elements.size());
       // n = ceil(log_2(j)), so also 2^n <= j
       gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
 
@@ -264,8 +244,8 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
                                                                  table& enumerated_elements_table)
 {
   gsDebugMsg("replace enumerated parameters in data expression\n");
-  data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
-  for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
+  variable_list orig_parameters = variable_list(new_parameters_table.table_keys());
+  for (variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   {
     gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
     expression = data_expression(bottom_up_replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i))));
@@ -274,18 +254,18 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
 }
 
 ///Replace all occurrences of variables of a finite sort != bool with a vector of boolean variables
-data_variable_list replace_enumerated_parameters_in_data_variables(const data_variable_list& list,
+variable_list replace_enumerated_parameters_in_variables(const variable_list& list,
                                                                    table& new_parameters_table,
                                                                    table& enumerated_elements_table)
 {
   gsDebugMsg("replace enumerated parameters in data variables\n");
-  data_variable_list result;
-  for (data_variable_list::iterator i = list.begin(); i != list.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = list.begin(); i != list.end(); ++i)
   {
     aterm t = new_parameters_table.get(*i);
     if (t != NULL) // *i is not of a finite type, therefore it hasn't been stored in the tables.
     {
-      data_variable_list new_variables = data_variable_list(t);
+      variable_list new_variables = variable_list(t);
       result = new_variables + result;
     }
     else
@@ -297,28 +277,30 @@ data_variable_list replace_enumerated_parameters_in_data_variables(const data_va
   return result;
 }
 
-///Calculate the new assignments for parameter, this returns a data_assignment_list with || expressions as the
+///Calculate the new assignments for parameter, this returns a assignment_list with || expressions as the
 ///righthandsides.
-data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_assignment& argument,
+assignment_list replace_enumerated_parameter_in_assignment(const assignment& argument,
                                                                      const data_expression& parameter,
-                                                                     data_variable_list new_parameters,
+                                                                     variable_list new_parameters,
                                                                      const data_expression_list& enumerated_elements)
 {
   gsDebugMsg("replace enumerated parameter %s in data assigment %s\n", parameter.to_string().c_str(), argument.to_string().c_str());
-  data_assignment_list result;
+  assignment_list result;
   data_expression arg = argument.rhs();
 
   // Iterate over the parameters, i.e. the bools in which we encode
   for (int i = new_parameters.size(); i > 0; --i)
   {
-    data_expression r = false_(); // We make a big || expression, so start with unit false
+    data_expression r = sort_bool_::false_(); // We make a big || expression, so start with unit false
     data_expression_list elts = enumerated_elements; // Copy the enumerated elements, as these are needed for each iteration.
 
     // Make sure all elements get encoded.
     while (!elts.empty())
     {
+      int count(powerof2_(i-1));
+
       // Iterate over the elements that get the boolean value new_parameters.front() == false
-      for(int j = 0; j < powerof2_(i-1); ++j)
+      for(int j = 0; j < count; ++j)
       {
         if (!elts.empty())
         {
@@ -327,33 +309,33 @@ data_assignment_list replace_enumerated_parameter_in_data_assignment(const data_
       }
 
       // Iterate over the elements that get the boolean value new_parameters.front() == true
-      for(int j = 0; j < powerof2_(i-1); ++j)
+      for(int j = 0; j < count; ++j)
       {
         if (!elts.empty())
         {
-          r = optimized::or_(r, data::data_expr::equal_to(arg, elts.front()));
+          r = lazy::or_(r, new_data::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }
     }
 
-    result = push_front(result, data_assignment(new_parameters.front(), r));
+    result = push_front(result, assignment(new_parameters.front(), r));
     new_parameters = pop_front(new_parameters);
   }
 
   return result;
 }
 
-///Replace all assignments in which the lefthandside == parameter with a vector of boolean assignments.
-data_assignment_list replace_enumerated_parameter_in_data_assignments(const data_assignment_list& list,
+///Replace all assignments in which the left-hand side == parameter with a vector of boolean assignments.
+assignment_list replace_enumerated_parameter_in_assignments(const assignment_list& list,
                                                                       const data_expression& parameter,
-                                                                      const data_variable_list& new_parameters,
+                                                                      const variable_list& new_parameters,
                                                                       const data_expression_list& enumerated_elements)
 {
   gsDebugMsg("replace enumerated parameter %s in data assignments %s\n", parameter.to_string().c_str(), list.to_string().c_str());
-  data_assignment_list result;
+  assignment_list result;
 
-  for (data_assignment_list::iterator i = list.begin(); i != list.end(); ++i)
+  for (assignment_list::iterator i = list.begin(); i != list.end(); ++i)
   {
     if (i->lhs() != parameter)
     {
@@ -361,7 +343,7 @@ data_assignment_list replace_enumerated_parameter_in_data_assignments(const data
     }
     else
     {
-      result = result + replace_enumerated_parameter_in_data_assignment(*i, parameter, new_parameters, enumerated_elements);
+      result = result + replace_enumerated_parameter_in_assignment(*i, parameter, new_parameters, enumerated_elements);
     }
   }
 
@@ -369,24 +351,24 @@ data_assignment_list replace_enumerated_parameter_in_data_assignments(const data
 }
 
 ///Replace all assignments of finite sorts != bool with a vector of boolean assignments.
-data_assignment_list replace_enumerated_parameters_in_data_assignments(const data_assignment_list& list,
+assignment_list replace_enumerated_parameters_in_assignments(const assignment_list& list,
                                                                        table& new_parameters_table,
                                                                        table& enumerated_elements_table)
 {
-  gsDebugMsg("replace_enumerated_parameters_in_data_assignments %s\n", list.to_string().c_str());
-  data_assignment_list result, temp;
+  gsDebugMsg("replace_enumerated_parameters_in_assignments %s\n", list.to_string().c_str());
+  assignment_list result, temp;
   // First replace right-hand-sides
-  for (data_assignment_list::iterator i = list.begin(); i != list.end(); ++i)
+  for (assignment_list::iterator i = list.begin(); i != list.end(); ++i)
   {
-    result = push_front(result, data_assignment(i->lhs(),replace_enumerated_parameters_in_data_expression(i->rhs(), new_parameters_table, enumerated_elements_table)));
+    result = push_front(result, assignment(i->lhs(),replace_enumerated_parameters_in_data_expression(i->rhs(), new_parameters_table, enumerated_elements_table)));
   }
 
   result = reverse(result);
 
-  data_variable_list orig_parameters = data_variable_list(new_parameters_table.table_keys());
-  for (data_variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
+  variable_list orig_parameters = variable_list(new_parameters_table.table_keys());
+  for (variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   {
-    result = replace_enumerated_parameter_in_data_assignments(result, *i, new_parameters_table.get(*i), enumerated_elements_table.get(*i));
+    result = replace_enumerated_parameter_in_assignments(result, *i, new_parameters_table.get(*i), enumerated_elements_table.get(*i));
   }
 
   return result;
@@ -398,8 +380,8 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
                                                      table& enumerated_elements_table)
 {
   gsDebugMsg("replace enumerated parameters in action labels\n");
-  data_variable_list orig_parms = data_variable_list(new_parameters_table.table_keys());
-  for (data_variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
+  variable_list orig_parms = variable_list(new_parameters_table.table_keys());
+  for (variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
   {
     list = bottom_up_replace(list, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)));
   }
@@ -421,7 +403,7 @@ summand replace_enumerated_parameters_in_summand(const summand& summand_,
                        summand_.is_delta(),
                        replace_enumerated_parameters_in_actions(summand_.actions(), new_parameters_table, enumerated_elements_table),
                        replace_enumerated_parameters_in_data_expression(summand_.time(), new_parameters_table, enumerated_elements_table),
-                       replace_enumerated_parameters_in_data_assignments(summand_.assignments(), new_parameters_table, enumerated_elements_table));
+                       replace_enumerated_parameters_in_assignments(summand_.assignments(), new_parameters_table, enumerated_elements_table));
 
   return result;
 }
@@ -451,7 +433,7 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
   linear_process result;
 
   result = linear_process(lps.free_variables(),
-               replace_enumerated_parameters_in_data_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table),
+               replace_enumerated_parameters_in_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table),
                replace_enumerated_parameters_in_summands(lps.summands(), new_parameters_table, enumerated_elements_table));
 
   return result;
@@ -466,7 +448,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
   lps::specification result;
 
   // Compute new initial assignments
-  data_assignment_list initial_assignments = replace_enumerated_parameters_in_data_assignments(specification.initial_process().assignments(), new_parameters_table, enumerated_elements_table);
+  assignment_list initial_assignments = replace_enumerated_parameters_in_assignments(specification.initial_process().assignments(), new_parameters_table, enumerated_elements_table);
   process_initializer initial_process(specification.initial_process().free_variables(), initial_assignments);
 
   // Compute new specification
@@ -481,7 +463,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
 ///Takes the specification in specification, applies binary to it,
 ///and returns the new specification.
 specification binary(const lps::specification& spec,
-                     Rewriter& r)
+                     rewriter& r)
 {
   gsVerboseMsg("Executing binary...\n");
   specification result = spec;
@@ -490,11 +472,11 @@ specification binary(const lps::specification& spec,
   table new_parameters_table(128, 50);
   table enumerated_elements_table(128,50);
 
-  EnumeratorStandard enumerator = EnumeratorStandard(spec.data(), &r);
+  new_data::enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
 
   // This needs to be done in a counter-intuitive order because of the well-typedness checks
   // (they make sure we can't build up an intermediate result!)
-  data_variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
+  variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
   result = set_lps(result, set_process_parameters(result.process(), new_process_parameters));
   gsDebugMsg("Finished processing\n");

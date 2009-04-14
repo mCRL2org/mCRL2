@@ -2,7 +2,7 @@
 /// using the MCRL2_NO_SOUNDNESS_CHECKS flag!
 
 #include "mcrl2/pbes/pbes_expression_builder.h"
-#include "mcrl2/data/detail/optimized_rewriter.h"
+#include "mcrl2/new_data/detail/optimized_rewriter.h"
 
 namespace lps {
 

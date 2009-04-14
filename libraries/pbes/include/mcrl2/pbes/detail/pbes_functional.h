@@ -14,7 +14,7 @@
 
 #include <functional>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/new_data/data.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2 {
@@ -43,7 +43,7 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
 };
 
 /// \brief Function object that returns the name of the binding variable of a pbes equation
-struct pbes_equation_variable_name: public std::unary_function<data::data_variable, core::identifier_string>
+struct pbes_equation_variable_name: public std::unary_function<new_data::variable, core::identifier_string>
 {
   /// \brief Function call operator
   /// \param e A PBES equation

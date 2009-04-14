@@ -33,8 +33,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include <mcrl2/core/data_implementation.h>
-#include <mcrl2/core/data_reconstruct.h>
+#include <mcrl2/new_data/detail/data_implementation.h>
+#include <mcrl2/new_data/detail/data_reconstruct.h>
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -46,6 +46,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
+using namespace mcrl2::new_data::detail;
 
 char help_message[] = "At the prompt any mCRL2 data expression can be given. This term will be "
                       "rewritten to normal form and printed. Also, one can assign values to declared "
@@ -260,7 +261,7 @@ static ATermAppl parse_term(string &term_string, data_specification &spec, ATerm
 
   gsDebugMsg("type checked: %T\n",term);
 
-  term = implement_data_data_expr(term,reconstructed_spec);
+  term = implement_data_expr(term,reconstructed_spec);
   if ( refresh_specification(spec,data_specification(reconstructed_spec)) )
   {
     spec = data_specification(reconstructed_spec);
@@ -291,7 +292,7 @@ static data_specification load_specification(const string &infilename)
   ATermAppl raw_specification;
   if (infilename.empty()) {
     //use empty data specification
-    raw_specification = implement_data_data_spec(gsMakeEmptyDataSpec());
+    raw_specification = implement_data_spec(gsMakeEmptyDataSpec());
   } else {
     //load data specification from file infilename
     gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());

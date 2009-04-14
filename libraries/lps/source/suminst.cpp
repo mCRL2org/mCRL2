@@ -12,23 +12,22 @@
 #include "boost.hpp" // precompiled headers
 
 //Aterms
-#include <mcrl2/atermpp/algorithm.h>
-#include <mcrl2/atermpp/aterm.h>
-#include <mcrl2/atermpp/table.h>
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/table.h"
 
 //LPS Framework
-#include <mcrl2/data/data_operation.h>
-#include <mcrl2/lps/linear_process.h>
-#include <mcrl2/lps/specification.h>
-#include <mcrl2/data/sort_utility.h>
-#include <mcrl2/data/find.h>
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/new_data/detail/sort_utility.h"
+#include "mcrl2/new_data/find.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/new_data/detail/data_functional.h"
 
 //Enumerator
-#include <mcrl2/data/detail/enum/standard.h>
-#include <mcrl2/lps/nextstate.h>
+#include "mcrl2/new_data/classic_enumerator.h"
+#include "mcrl2/new_data/enumerator_factory.h"
 
 #include <mcrl2/lps/suminst.h>
 
@@ -36,7 +35,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
@@ -48,11 +47,11 @@ namespace lps {
 // Helper functions
 /////
 
-///\return a list of all data_variables of sort s in vl
-data_variable_list get_occurrences(const data_variable_list& vl, const sort_expression& s)
+///\return a list of all variables of sort s in vl
+variable_list get_occurrences(const variable_list& vl, const sort_expression& s)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (i->sort() == s)
     {
@@ -63,11 +62,11 @@ data_variable_list get_occurrences(const data_variable_list& vl, const sort_expr
   return result;
 }
 
-///\return the list of all data_variables in vl, which are unequal to v
-data_variable_list filter(const data_variable_list& vl, const data_variable& v)
+///\return the list of all variables in vl, which are unequal to v
+variable_list filter(const variable_list& vl, const variable& v)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::const_iterator i = vl.begin(); i != vl.end(); ++i)
   {
     if (!(*i == v))
     {
@@ -78,12 +77,12 @@ data_variable_list filter(const data_variable_list& vl, const data_variable& v)
 }
 
 ///\return the list of all date_variables in vl, that are not in rl
-data_variable_list filter(const data_variable_list& vl, const data_variable_list& rl)
+variable_list filter(const variable_list& vl, const std::set< variable >& rl)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  variable_list result;
+  for (variable_list::const_iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (!find_data_variable(rl, *i))
+    if (rl.find(*i) == rl.end())
     {
       result = push_front(result, *i);
     }
@@ -94,32 +93,39 @@ data_variable_list filter(const data_variable_list& vl, const data_variable_list
 
 ///\pre fl is a list of constructors
 ///\return a list of finite sorts in sl
-sort_expression_list get_finite_sorts(const data_operation_list& fl, const sort_expression_list& sl)
+std::set< sort_expression > get_finite_sorts(const new_data::data_specification& d, const sort_expression_list& sl)
 {
-  sort_expression_list result;
+  std::set< sort_expression > result;
   for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
   {
-    if (is_finite(fl, *i))
+    if (i->is_alias()) {
+      alias ai(*i);
+
+      if (d.is_certainly_finite(ai.reference()))
+      {
+        result.insert(ai.name());
+        result.insert(ai.reference());
+      }
+    }
+    else if (d.is_certainly_finite(*i))
     {
-      result = push_front(result, *i);
+      result.insert(*i);
     }
   }
-  reverse(result);
   return result;
 }
 
 ///\return a list of all variables of a sort that occurs in sl
-data_variable_list get_variables(const data_variable_list& vl, const sort_expression_list& sl)
+std::set< variable > get_variables(const variable_list& vl, std::set< sort_expression > const& sl)
 {
-  data_variable_list result;
-  for (data_variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
+  std::set< variable > result;
+  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
   {
-    if (find_sort_expression(sl, i->sort()))
+    if (sl.find(i->sort()) != sl.end())
     {
-      result = push_front(result, *i);
+      result.insert(*i);
     }
   }
-  result = reverse(result);
   return result;
 }
 
@@ -131,24 +137,25 @@ data_variable_list get_variables(const data_variable_list& vl, const sort_expres
 ///\pre specification is the specification belonging to summand
 ///\post the instantiated version of summand has been appended to result
 ///\return none
-void instantiate_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, EnumeratorStandard& enumerator, const t_suminst_options& o)
+void instantiate_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, enumerator_factory< classic_enumerator< > >& enumerator_factory, const t_suminst_options& o)
 {
-  int nr_summands = 0; // Counter for the nummer of new summands, used for verbose output
+  int nr_summands = 0; // Counter for the number of new summands, used for verbose output
 
   gsVerboseMsg("initialization...");
 
-  data_variable_list variables; // The variables we need to consider in instantiating
+  std::set< variable > variables; // The variables we need to consider in instantiating
   if (o.finite_only)
   {
     // Only consider finite variables
-    variables = get_variables(summand_.summation_variables(), get_finite_sorts(specification.data().constructors(), specification.data().sorts()));
+    variables = get_variables(summand_.summation_variables(),
+                get_finite_sorts(specification.data(), make_sort_expression_list(specification.data().sorts())));
   }
   else
   {
-    variables = summand_.summation_variables();
+    variables = new_data::convert< std::set< variable > >(summand_.summation_variables());
   }
 
-  if (aterm_get_length(variables) == 0)
+  if (variables.size() == 0)
   {
     // Nothing to be done, return original summand
     gsVerboseMsg("No summation variables in this summand\n");
@@ -158,85 +165,60 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
   {
     // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
     // because we only need to calculate it once.
-    data_variable_list new_vars = filter(summand_.summation_variables(), variables);
-
-    ATermList vars = ATermList(variables);
-
-    ATerm expr = enumerator.getRewriter()->toRewriteFormat(aterm_appl(summand_.condition()));
+    variable_list new_vars = filter(summand_.summation_variables(), variables);
 
     // Solutions
-    EnumeratorSolutions* sols = enumerator.findSolutions(vars, expr, false);
-
     gsVerboseMsg("processing...");
-    // sol is a solution in internal rewriter format
-    ATermList sol;
-    bool error = false; // Flag enumerator error to break loop.
-    while (sols->next(&sol) && !error)
-    {
-      if (sols->errorOccurred())
+
+    try {
+      for (classic_enumerator< > i(enumerator_factory.make(variables)); i != classic_enumerator<>(); ++i)
       {
-        // If an error occurs in enumerating, remove all summands that
-        // have been added to result thus far, and re-add the original.
-        // This prevents problems e.g. in case of a sort without constructors.
-        gsDebugMsg("An error occurred in enumeration, removing already added summands\n");
-        error = true;
+        assignment_list substitutions;
 
-        for (int i = 0; i < nr_summands; ++i);
+        // Translate internal rewriter solution to lps assignment_list
+        for (classic_enumerator<>::substitution_type::const_iterator s(i->begin()); s != i->end(); ++s)
         {
-          result = pop_front(result);
-        }
-        nr_summands = 0;
-      }
-      else
-      {
-        data_assignment_list substitutions;
-        // Convenience cast, so that the iterator, and the modifications from the atermpp library can be used
-        aterm_list solution = aterm_list(sol);
-
-        // Translate internal rewriter solution to lps data_assignment_list
-        for (aterm_list::iterator i = solution.begin(); i != solution.end(); ++i)
-        {
-          // lefthandside of substitution
-          data_variable var = data_variable(ATgetArgument(ATerm(*i), 0));
-
-          // righthandside of substitution in internal rewriter format
-          ATerm arg = ATgetArgument(ATerm(*i),1);
-
-          // righthandside of substitution in lps format
-          data_expression res = data_expression(aterm_appl(enumerator.getRewriter()->fromRewriteFormat(arg)));
-
           // Substitution to be performed
-          data_assignment substitution = data_assignment(var, res);
-          substitutions = push_front(substitutions, substitution);
+          substitutions = push_front(substitutions, assignment(s->first, s->second));
         }
         gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
 
         summand s = summand(new_vars,
-                                    summand_.condition().substitute(assignment_list_substitution(substitutions)),
-                                    summand_.is_delta(),
-                                    summand_.actions().substitute(assignment_list_substitution(substitutions)),
-                                    summand_.time().substitute(assignment_list_substitution(substitutions)),
-                                    summand_.assignments().substitute(assignment_list_substitution(substitutions))
-                                    );
+                substitute(assignment_list_substitution(substitutions), summand_.condition()),
+                summand_.is_delta(),
+                substitute(assignment_list_substitution(substitutions), summand_.actions()),
+                substitute(assignment_list_substitution(substitutions), summand_.time()),
+                substitute(assignment_list_substitution(substitutions), summand_.assignments())
+                );
 
         result = push_front(result, s);
         ++nr_summands;
       }
-    }
 
-    gsVerboseMsg("done...\n");
-    if (nr_summands == 0 && sols->errorOccurred())
+      gsVerboseMsg("done...\n");
+      if (nr_summands == 0)
+      {
+        gsVerboseMsg("All valuations for the variables in the condition of this summand reduce to false; removing this summand\n");
+      }
+      else
+      {
+        gsVerboseMsg("Replaced with %d summands\n", nr_summands);
+      }
+    }
+    catch (mcrl2::runtime_error const&)
     {
+      // If an error occurs in enumerating, remove all summands that
+      // have been added to result thus far, and re-add the original.
+      // This prevents problems e.g. in case of a sort without constructors.
+      gsDebugMsg("An error occurred in enumeration, removing already added summands\n");
+
+      while (nr_summands-- != 0)
+      {
+        result = pop_front(result);
+      }
+
       gsVerboseMsg("Cannot expand this summand, keeping the original\n");
       result = push_front(result, summand_);
-    }
-    else if (nr_summands == 0)
-    {
-      gsVerboseMsg("All valuations for the variables in the condition of this summand reduce to false; removing this summand\n");
-    }
-    else
-    {
-      gsVerboseMsg("Replaced with %d summands\n", nr_summands);
     }
   }
 }
@@ -245,7 +227,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
 ///and returns the instantiated summand list
 lps::summand_list instantiate_summands(const lps::specification& specification,
                                      const lps::summand_list& sl,
-                                     EnumeratorStandard& enumerator,
+                                     enumerator_factory< classic_enumerator< > >& enumerator,
                                      const t_suminst_options& o)
 {
   lps::summand_list result;
@@ -274,7 +256,7 @@ lps::summand_list instantiate_summands(const lps::specification& specification,
 
 ///Takes the specification in specification, instantiates it,
 ///and returns the instantiateed specification.
-lps::specification instantiate_sums(const lps::specification& specification, Rewriter& r, const t_suminst_options& o)
+lps::specification instantiate_sums(const lps::specification& specification, rewriter& r, const t_suminst_options& o)
 {
   gsVerboseMsg("Instantiating...\n");
   lps::linear_process lps = specification.process();
@@ -282,7 +264,7 @@ lps::specification instantiate_sums(const lps::specification& specification, Rew
   gsVerboseMsg("Input: %d summands.\n", lps.summands().size());
 
   // Some use of internal format because we need it for the rewriter
-  EnumeratorStandard enumerator = EnumeratorStandard(specification.data(), &r);
+  enumerator_factory< classic_enumerator< > > enumerator(specification.data(), r);
 
   lps::summand_list sl = instantiate_summands(specification, lps.summands(), enumerator, o);
   lps = set_summands(lps, sl);

@@ -15,8 +15,10 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/bdd_prover.h"
+#include "mcrl2/new_data/detail/bdd_prover.h"
 
+using namespace mcrl2::new_data;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -42,10 +44,10 @@ using namespace mcrl2::core::detail;
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
 
     Invariant_Eliminator::Invariant_Eliminator(
-      ATermAppl a_lps, RewriteStrategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      ATermAppl a_lps, mcrl2::new_data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_simplify_all
     ):
-      f_bdd_prover(mcrl2::data::data_specification(ATAgetArgument(a_lps, 0)), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(ATAgetArgument(a_lps, 0), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_lps = a_lps;
       f_simplify_all = a_simplify_all;

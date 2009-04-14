@@ -11,16 +11,85 @@
 #ifndef _NEXTSTATE_STANDARD_H
 #define _NEXTSTATE_STANDARD_H
 
-#include <aterm2.h>
-#include <mcrl2/lps/nextstate.h>
-#include <mcrl2/data/enum.h>
+#include "aterm2.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/new_data/enumerator_factory.h"
 
 class NextStateStandard;
 
+//
+// inherits from rewriter only for data implementation/reconstruction
+struct legacy_rewriter : public mcrl2::new_data::rewriter
+{
+  legacy_rewriter(mcrl2::new_data::rewriter const& other) :
+                                 mcrl2::new_data::rewriter(other) {
+  }
+
+  ATerm translate(ATermAppl t)
+  {
+    return m_rewriter->toRewriteFormat(implement(static_cast< mcrl2::new_data::data_expression >(t)));
+  }
+
+  ATermAppl translate(ATerm t)
+  {
+    return reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat(t)));
+  }
+
+  ATerm operator()(ATerm const& t) const
+  {
+    return m_rewriter->rewriteInternal(t);
+  }
+
+  ATermList operator()(ATermList const& t) const
+  {
+    return m_rewriter->rewriteInternalList(t);
+  }
+
+  ATerm internally_associated_value(ATermAppl t) const
+  {
+    return m_rewriter->getSubstitutionInternal(t);
+  }
+
+  void set_internally_associated_value(ATermAppl t, ATerm e)
+  {
+    m_rewriter->setSubstitutionInternal(t, e);
+  }
+
+  void set_internally_associated_value(ATermAppl t, ATermAppl e)
+  {
+    m_rewriter->setSubstitution(t, e);
+  }
+
+  void clear_internally_associated_value(ATermAppl t)
+  {
+    m_rewriter->clearSubstitution(t);
+  }
+};
+
+// serves to extract the rewriter object, which used to be an implementation
+// detail of the enumerator that was exposed through its interface
+template < typename Enumerator >
+struct legacy_enumerator_factory : public mcrl2::new_data::enumerator_factory< Enumerator > {
+
+  legacy_enumerator_factory(mcrl2::new_data::enumerator_factory< Enumerator > const& other) :
+                                         mcrl2::new_data::enumerator_factory< Enumerator >(other)
+  {
+  }
+
+  mcrl2::new_data::rewriter const& get_evaluator() const
+  {
+    return this->m_evaluator;
+  }
+};
+
 struct ns_info {
 	NextStateStandard *parent;
-	Enumerator *enum_obj;
-	Rewriter *rewr_obj;
+
+        typedef mcrl2::new_data::classic_enumerator< mcrl2::new_data::mutable_substitution< >,
+                 mcrl2::new_data::rewriter, mcrl2::new_data::selectors::select_not< false > > enumerator_type;
+
+        legacy_enumerator_factory< enumerator_type > m_enumerator_factory;
+        legacy_rewriter                              m_rewriter;
 
 	int num_summands;
 	ATermAppl *summands;
@@ -32,6 +101,27 @@ struct ns_info {
 	int statelen;
 	AFun stateAFun;
 	unsigned int *current_id;
+
+        mcrl2::new_data::mutable_substitution< > m_substitution;
+
+        enumerator_type get_sols(ATermList v, ATerm c) {
+//          return m_enumerator_factory.make(variables, mcrl2::new_data::data_expression(c));
+          return m_enumerator_factory.make(
+                        mcrl2::new_data::convert< std::set< mcrl2::new_data::variable > >(v), mcrl2::new_data::data_expression(c));
+        }
+
+        ATermAppl export_term(ATerm term) {
+          return m_rewriter.get_rewriter().fromRewriteFormat(term);
+        }
+
+        ATerm import_term(ATermAppl term) {
+          return m_rewriter.get_rewriter().toRewriteFormat(term);
+        }
+
+        ns_info(mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > > const& factory) :
+           m_enumerator_factory(factory),
+           m_rewriter(legacy_enumerator_factory< mcrl2::new_data::classic_enumerator< > >(factory).get_evaluator()) {
+        }
 };
 
 class NextStateGeneratorStandard : public NextStateGenerator
@@ -63,7 +153,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
 		ATerm *stateargs;
 
-		EnumeratorSolutions *sols;
+                ns_info::enumerator_type valuations;
 
 		void set_substitutions();
 
@@ -77,7 +167,7 @@ class NextStateStandard : public NextState
 {
 	friend class NextStateGeneratorStandard;
 	public:
-		NextStateStandard(ATermAppl spec, bool allow_free_vars, int state_format, Enumerator *e, bool clean_up_enumerator);
+		NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator<> > const& e);
 		~NextStateStandard();
 
 		void prioritise(const char *action);
@@ -94,9 +184,6 @@ class NextStateStandard : public NextState
 		ATermAppl makeStateVector(ATerm state);
 		ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
 
-		Rewriter *getRewriter();
-		Enumerator* getEnumerator();
-
 	private:
 		ns_info info;
 		unsigned int next_id;
@@ -104,7 +191,6 @@ class NextStateStandard : public NextState
 
 		bool stateAFun_made;
 
-		bool clean_up_enum_obj;
 		bool usedummies;
 
 		AFun smndAFun;

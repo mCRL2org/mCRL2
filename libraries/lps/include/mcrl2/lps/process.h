@@ -17,7 +17,8 @@
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/algorithms.h"
 
@@ -79,8 +80,8 @@ namespace lps {
         assert(core::detail::check_term_ProcVarId(m_term));
       }
 
-      process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, sorts))
+      process_identifier(core::identifier_string name, new_data::sort_expression_list sorts)
+        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list< new_data::sort_expression >(sorts.begin(), sorts.end())))
       {}
 
       core::identifier_string name() const
@@ -89,10 +90,12 @@ namespace lps {
         return arg1(*this);
       }
 
-      data::sort_expression_list sorts() const
+      new_data::sort_expression_list sorts() const
       {
         using namespace atermpp;
-        return list_arg2(*this);
+        return new_data::sort_expression_list(
+          atermpp::term_list_iterator< new_data::sort_expression >(list_arg2(*this)),
+          atermpp::term_list_iterator< new_data::sort_expression >());
       }
   };
 
@@ -114,14 +117,20 @@ namespace lps {
         assert(core::detail::check_term_ProcEqn(m_term));
       }
 
-      process_equation(data::data_variable_list variables1, process_identifier name, data::data_variable_list variables2, process_expression expression)
-        : atermpp::aterm_appl(core::detail::gsMakeProcEqn(variables1, name, variables2, expression))
+      process_equation(new_data::variable_list variables1, process_identifier name, new_data::variable_list variables2, process_expression expression)
+        : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
+                                atermpp::term_list< new_data::variable >(variables1.begin(), variables1.end()),
+                                name,
+                                atermpp::term_list< new_data::variable >(variables2.begin(), variables2.end()),
+                                expression))
       {}
 
-      data::data_variable_list variables1() const
+      new_data::variable_list variables1() const
       {
         using namespace atermpp;
-        return list_arg1(*this);
+        return new_data::variable_list(
+          atermpp::term_list_iterator< new_data::variable >(list_arg1(*this)),
+          atermpp::term_list_iterator< new_data::variable >());
       }
 
       process_identifier name() const
@@ -130,10 +139,12 @@ namespace lps {
         return arg2(*this);
       }
 
-      data::data_variable_list variables2() const
+      new_data::variable_list variables2() const
       {
         using namespace atermpp;
-        return list_arg3(*this);
+        return new_data::variable_list(
+          atermpp::term_list_iterator< new_data::variable >(list_arg3(*this)),
+          atermpp::term_list_iterator< new_data::variable >());
       }
 
       process_expression expression() const
@@ -159,14 +170,17 @@ namespace lps {
         assert(core::detail::check_term_ProcessInit(m_term));
       }
 
-      process_initialization(data::data_variable_list variables, process_expression expression)
-        : atermpp::aterm_appl(core::detail::gsMakeProcessInit(variables, expression))
+      process_initialization(new_data::variable_list variables, process_expression expression)
+        : atermpp::aterm_appl(core::detail::gsMakeProcessInit(
+              atermpp::term_list< new_data::variable >(variables.begin(), variables.end()), expression))
       {}
 
-      data::data_variable_list variables() const
+      new_data::variable_list variables() const
       {
         using namespace atermpp;
-        return list_arg1(*this);
+        return new_data::variable_list(
+          atermpp::term_list_iterator< new_data::variable >(list_arg1(*this)),
+          atermpp::term_list_iterator< new_data::variable >());
       }
 
       process_expression expression() const
@@ -189,11 +203,13 @@ namespace lps {
         assert(core::detail::check_term_ProcSpec(m_term));
       }
 
-      process_specification(data::data_specification data, action_label_list action_labels, process_equation_list equations, process_initialization init)
-        : atermpp::aterm_appl(core::detail::gsMakeProcSpec(data, core::detail::gsMakeActSpec(action_labels), core::detail::gsMakeProcEqnSpec(equations), init))
+      process_specification(new_data::data_specification data, action_label_list action_labels, process_equation_list equations, process_initialization init)
+        : atermpp::aterm_appl(core::detail::gsMakeProcSpec(
+                                new_data::detail::data_specification_to_aterm_data_spec(data),
+                                core::detail::gsMakeActSpec(action_labels), core::detail::gsMakeProcEqnSpec(equations), init))
       {}
 
-      data::data_specification data() const
+      new_data::data_specification data() const
       {
         using namespace atermpp;
         return arg1(*this);
@@ -334,8 +350,9 @@ namespace lps {
         assert(core::detail::check_term_Process(m_term));
       }
 
-      process(const process_identifier pi, const data::data_expression_list& v)
-        : process_expression(core::detail::gsMakeProcess(pi, v))
+      process(const process_identifier pi, const new_data::data_expression_list& v)
+        : process_expression(core::detail::gsMakeProcess(pi,
+                        atermpp::term_list< new_data::data_expression >(v.begin(), v.end())))
       {}
 
       process_identifier identifier() const
@@ -344,10 +361,12 @@ namespace lps {
         return arg1(*this);
       }
 
-      data::data_expression_list expressions() const
+      new_data::data_expression_list expressions() const
       {
         using namespace atermpp;
-        return list_arg2(*this);
+        return new_data::data_expression_list(
+          atermpp::term_list_iterator< new_data::data_expression >(list_arg2(*this)),
+          atermpp::term_list_iterator< new_data::data_expression >());
       }
   };
 
@@ -364,8 +383,9 @@ namespace lps {
         assert(core::detail::check_term_ProcessAssignment(m_term));
       }
 
-      process_assignment(const process_identifier& pi, const data::data_assignment_list& v)
-        : process_expression(core::detail::gsMakeProcessAssignment(pi, v))
+      process_assignment(const process_identifier& pi, const new_data::assignment_list& v)
+        : process_expression(core::detail::gsMakeProcessAssignment(pi,
+                        atermpp::term_list< new_data::data_expression >(v.begin(), v.end())))
       {}
 
       process_identifier identifier() const
@@ -374,10 +394,12 @@ namespace lps {
         return arg1(*this);
       }
 
-      data::data_assignment_list assignments() const
+      new_data::assignment_list assignments() const
       {
         using namespace atermpp;
-        return list_arg2(*this);
+        return new_data::assignment_list(
+          atermpp::term_list_iterator< new_data::assignment >(list_arg2(*this)),
+          atermpp::term_list_iterator< new_data::assignment >());
       }
   };
 
@@ -430,14 +452,16 @@ namespace lps {
         assert(core::detail::check_term_Sum(m_term));
       }
 
-      sum(const data::data_variable_list& v, const process_expression& right)
-        : process_expression(core::detail::gsMakeSum(v, right))
+      sum(const new_data::variable_list& v, const process_expression& right)
+        : process_expression(core::detail::gsMakeSum(atermpp::term_list< new_data::variable >(v.begin(), v.end()), right))
       {}
 
-      data::data_variable_list variables() const
+      new_data::variable_list variables() const
       {
         using namespace atermpp;
-        return list_arg1(*this);
+        return new_data::variable_list(
+          atermpp::term_list_iterator< new_data::variable >(list_arg1(*this)),
+          atermpp::term_list_iterator< new_data::variable >());
       }
 
       process_expression expression() const
@@ -640,7 +664,7 @@ namespace lps {
         assert(core::detail::check_term_AtTime(m_term));
       }
 
-      at_time(const process_expression& left, const data::data_expression& d)
+      at_time(const process_expression& left, const new_data::data_expression& d)
         : process_expression(core::detail::gsMakeAtTime(left, d))
       {}
 
@@ -650,7 +674,7 @@ namespace lps {
         return arg1(*this);
       }
 
-      data::data_expression time() const
+      new_data::data_expression time() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -700,11 +724,11 @@ namespace lps {
         assert(core::detail::check_term_IfThen(m_term));
       }
 
-      if_then(const data::data_expression& d, const process_expression& right)
+      if_then(const new_data::data_expression& d, const process_expression& right)
         : process_expression(core::detail::gsMakeIfThen(d, right))
       {}
 
-      data::data_expression condition() const
+      new_data::data_expression condition() const
       {
         using namespace atermpp;
         return arg1(*this);
@@ -730,11 +754,11 @@ namespace lps {
         assert(core::detail::check_term_IfThenElse(m_term));
       }
 
-      if_then_else(const data::data_expression& d, const process_expression& left, const process_expression& right)
+      if_then_else(const new_data::data_expression& d, const process_expression& left, const process_expression& right)
         : process_expression(core::detail::gsMakeIfThenElse(d, left, right))
       {}
 
-      data::data_expression condition() const
+      new_data::data_expression condition() const
       {
         using namespace atermpp;
         return arg1(*this);

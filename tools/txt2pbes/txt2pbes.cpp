@@ -22,7 +22,7 @@
 //mCRL2 specific
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
@@ -30,6 +30,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
+using namespace mcrl2::new_data::detail;
 
 struct t_tool_options
 {

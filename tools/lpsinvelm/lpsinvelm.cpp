@@ -17,25 +17,25 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/data_implementation.h"
-#include "mcrl2/core/data_reconstruct.h"
-#include "mcrl2/data/prover/bdd_path_eliminator.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
+#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_proving.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
+#include "mcrl2/utilities/command_line_proving.h"
 
-using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::new_data::detail;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction
@@ -99,7 +99,7 @@ using namespace mcrl2::core;
       SMT_Solver_Type f_solver_type;
 
       /// \brief The rewrite strategy used by the rewriter.
-      RewriteStrategy f_strategy;
+      mcrl2::new_data::rewriter::strategy f_strategy;
 
       /// \brief The flag indicating whether or not induction should be applied.
       bool f_apply_induction;
@@ -151,7 +151,7 @@ using namespace mcrl2::core;
       f_simplify_all = false;
       f_all_violations = false;
       f_counter_example = false;
-      f_strategy = GS_REWR_JITTY;
+      f_strategy = mcrl2::new_data::rewriter::jitty;
       f_time_limit = 0;
       f_path_eliminator = false;
       f_solver_type = solver_type_ario;
@@ -161,6 +161,8 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     bool LPS_Inv_Elm::get_options(int argc, char* argv[]) {
+      using namespace mcrl2::utilities;
+
       interface_description clinterface(argv[0], NAME, AUTHOR,
         "check invariants and use these to simplify or eliminate summands of an LPS",
         "[OPTION]... --invariant=INVFILE [INFILE [OUTFILE]]\n",
@@ -235,7 +237,7 @@ using namespace mcrl2::core;
           f_time_limit = parser.option_argument_as< size_t >("time-limit");
         }
 
-        f_strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
+        f_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
 
         if (parser.options.count("smt-solver")) {
           f_path_eliminator = true;
@@ -302,7 +304,7 @@ using namespace mcrl2::core;
       }
 
       //data implement the invariant formula
-      f_invariant = implement_data_data_expr(f_invariant,f_reconstructed_spec);
+      f_invariant = implement_data_expr(f_invariant,f_reconstructed_spec);
       if(!f_invariant){
         gsErrorMsg("Data implementation of the invariant formula failed.\n");
         exit(1);

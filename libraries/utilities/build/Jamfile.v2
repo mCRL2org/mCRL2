@@ -33,15 +33,11 @@ obj command_line_interfacing
       ;
 
 mcrl2-library utilities
-      : source/info.cpp            # Temporary?
-        source/bdd2dot.cpp         # Temporary?
-        source/manipulator.cpp     # Temporary?
-        source/command_line_interface.cpp
+      : source/command_line_interface.cpp
       : <use>/site-config//boost
-        <library>/libraries//atermpp
-        <include>../../core/include      # Circular dependency
-        <include>../../data/include      # Circular dependency
       :
       : <include>../include
         <use>/site-config//boost
       ;
+
+alias exception : : : : <include>../include ;

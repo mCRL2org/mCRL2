@@ -14,7 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/parse.h"
@@ -22,7 +22,7 @@
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 
 using namespace mcrl2;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 std::string case_1 =
@@ -249,10 +249,10 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
   {
     s0 = mcrl22lps(spec_text);
   }
-  data::rewriter datar(s0.data());
+  new_data::rewriter datar(s0.data());
   specification s1 = constelm(s0, datar, true);
-  data_variable_list v0 = s0.process().process_parameters();
-  data_variable_list v1 = s1.process().process_parameters();
+  variable_list v0 = s0.process().process_parameters();
+  variable_list v1 = s1.process().process_parameters();
 
   // create a set of strings set1 that contains the names of expected removed parameters
   std::vector<std::string> removed = core::regex_split(expected_result, "\\s");
@@ -261,14 +261,14 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
 
   // create a set of strings set2 that contains the names of actually removed parameters
   std::set<std::string> set2;
-  for (data_variable_list::iterator i = v0.begin(); i != v0.end(); i++)
+  for (variable_list::const_iterator i = v0.begin(); i != v0.end(); i++)
   {
     if (std::find(v1.begin(), v1.end(), *i) == v1.end())
     {
       set2.insert(i->name());
     }
   }
-  
+
   // check if the parelm result is correct
   if (set1 != set2)
   {

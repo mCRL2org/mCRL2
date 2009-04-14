@@ -59,7 +59,7 @@ state_formula normalize(state_formula f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::data_expr::not_(f);
+      return new_data::sort_bool_::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {
@@ -73,9 +73,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return and_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return exists(var(f), normalize(not_(arg(f))));
+      return state_frm::exists(var(f), normalize(not_(arg(f))));
     } else if (is_exists(f)) {
-      return forall(var(f), normalize(not_(arg(f))));
+      return state_frm::forall(var(f), normalize(not_(arg(f))));
     } else if (is_must(f)) {
       return may(act(f), normalize(not_(arg(f))));
     } else if (is_may(f)) {
@@ -113,9 +113,9 @@ state_formula normalize(state_formula f)
     } else if (is_imp(f)) {
       return or_(normalize(left(f)), normalize(not_(right(f))));
     } else if (is_forall(f)) {
-      return forall(var(f), normalize(arg(f)));
+      return state_frm::forall(var(f), normalize(arg(f)));
     } else if (is_exists(f)) {
-      return exists(var(f), normalize(arg(f)));
+      return state_frm::exists(var(f), normalize(arg(f)));
     } else if (is_must(f)) {
       return must(act(f), normalize(arg(f)));
     } else if (is_may(f)) {

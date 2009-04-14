@@ -17,12 +17,11 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/data_implementation.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/term_traits.h"
-#include "mcrl2/pbes/utility.h"
-#include "mcrl2/pbes/gauss.h"
+#include "mcrl2/new_data/detail/data_implementation.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/expression_traits.h"
+#include "mcrl2/new_data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
@@ -166,9 +165,9 @@ namespace pbes_system {
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        typedef data::rewriter_map<std::map<variable_type, data_term_type> > substitution_map;
-        substitution_map sigma;
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_map> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
+        typedef new_data::mutable_substitution<variable_type, data_term_type> substitution_function;
+        substitution_function sigma;
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
@@ -181,10 +180,11 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, SubstitutionFunction> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
-        term_type result = r(x, sigma);
+        typedef new_data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
+        detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
+        term_type result = r(x, substitution_function(sigma));
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << std::endl;
 #endif
@@ -223,7 +223,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()));
+        return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()));
       }
 
       /// \brief Rewrites a pbes expression.
@@ -231,84 +231,9 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction& sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        return m_rewriter(pbes_expression_with_variables(x, data::data_variable_list()), sigma);
-      }
-  };
-
-  /// \brief The simplifying pbes rewriter used in pbes2bool.
-  class simplify_rewriter_jfg
-  {
-    data::rewriter datar;
-
-    public:
-      /// \brief Constructor
-      /// \param data A data specification
-      simplify_rewriter_jfg(const data::data_specification& data)
-        : datar(data)
-      { }
-
-      /// \brief Rewrites a pbes expression.
-      /// \param p A PBES expression
-      /// \return The rewrite result.
-      pbes_expression operator()(pbes_expression p)
-      {
-        return pbes_expression_rewrite_and_simplify(p, datar.get_rewriter());
-      }
-  };
-
-  /// \brief The substituting pbes rewriter used in pbes2bool.
-  class substitute_rewriter_jfg
-  {
-    data::rewriter& datar_;
-    const data::data_specification& data_spec;
-
-    public:
-      /// \brief Constructor
-      /// \param datar A data rewriter
-      /// \param data A data specification
-      substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
-        : datar_(datar), data_spec(data)
-      { }
-
-      /// \brief Rewrites a pbes expression.
-      /// \param p A PBES expression
-      /// \return The rewrite result.
-      pbes_expression operator()(pbes_expression p)
-      {
-        return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
-      }
-  };
-
-  /// \brief A pbes rewriter that uses a bdd based prover internally.
-  class pbessolve_rewriter
-  {
-    data::rewriter datar_;
-    const data::data_specification& data_spec;
-    int n;
-    data_variable_list fv;
-    boost::shared_ptr<BDD_Prover> prover;
-
-    public:
-      /// \brief Constructor
-      /// \param datar A data rewriter
-      /// \param data A data specification
-      /// \param rewrite_strategy A rewrite strategy
-      /// \param solver_type An SMT solver type
-      pbessolve_rewriter(const data::rewriter& datar, const data::data_specification& data, RewriteStrategy rewrite_strategy, SMT_Solver_Type solver_type)
-        : datar_(datar),
-          data_spec(data),
-          n(0),
-          prover(new BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
-      { }
-
-      /// \brief Rewrites a pbes expression.
-      /// \param p A PBES expression
-      /// \return The rewrite result.
-      pbes_expression operator()(pbes_expression p)
-      {
-        return pbes_expression_simplify(p, &n, &fv, prover.get());
+        return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()), sigma);
       }
   };
 

@@ -7,7 +7,7 @@ project libraries/trace
 
 mcrl2-library trace
        : source/trace.cpp
-       : <library>/libraries//core
+       : <library>/libraries//new_data
          <library>/libraries//utilities
        :
        : <include>../include

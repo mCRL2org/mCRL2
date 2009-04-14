@@ -322,6 +322,7 @@ void CheckRewriteRule(ATermAppl DataEqn)
 	} catch ( ATermAppl var )
 	{
 		// This should never occur if DataEqn is a valid data equation
+		gsMessage("Data Equation: %T\n", DataEqn);
 		assert(0);
 		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
 	}

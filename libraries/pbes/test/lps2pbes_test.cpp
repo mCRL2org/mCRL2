@@ -27,7 +27,7 @@
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
@@ -274,13 +274,13 @@ action act(std::string name, data_expression_list parameters)
 void test_multi_actions(action_list a, action_list b, data_expression expected_result = data_expression())
 {
   data_expression result = equal_multi_actions(a, b);
-  std::cout << pp(result) << std::endl;
+  std::cout << mcrl2::core::pp(result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
 }
 
 void test_equal_multi_actions()
 {
-  namespace d = data_expr;
+  namespace d = new_data;
 
   data_expression d1 = nat("d1");
   data_expression d2 = nat("d2");
@@ -298,13 +298,13 @@ void test_equal_multi_actions()
   action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
   action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
 
-  test_multi_actions( a1,  a1, d::true_());
+  test_multi_actions( a1,  a1, d::sort_bool_::true_());
   test_multi_actions( a1,  a2, d::equal_to(d1, d2));
-  test_multi_actions(a11, a11, d::true_());
-  test_multi_actions(a12, a21, d::true_());
+  test_multi_actions(a11, a11, d::sort_bool_::true_());
+  test_multi_actions(a12, a21, d::sort_bool_::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));
-  test_multi_actions(a1, a12,  d::false_());
-  test_multi_actions(a1, b1,   d::false_());
+  test_multi_actions(a1, a12,  d::sort_bool_::false_());
+  test_multi_actions(a1, b1,   d::sort_bool_::false_());
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 }

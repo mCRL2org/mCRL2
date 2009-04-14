@@ -24,7 +24,7 @@
 #include <iostream>
 #include <aterm2.h>
 #include <mcrl2/atermpp/set.h>
-#include <mcrl2/data/data_specification.h>
+#include <mcrl2/new_data/data_specification.h>
 #include <mcrl2/lps/specification.h>
 
 #ifdef USE_BCG
@@ -862,12 +862,12 @@ namespace lts
       /** \brief Return the mCRL2 data specification of this LTS.
        * \return The mCRL2 data specification of this LTS.
        * \pre    This LTS has an mCRL2 data specification. */
-      data::data_specification get_data_specification();
+      new_data::data_specification get_data_specification();
 
       /** \brief Set the mCRL2 data specification of this LTS.
        * \param[in] spec  The mCRL2 data specification for this LTS.
        * \pre             This is an mCRL2 LTS. */
-      void set_data_specification(data::data_specification spec);
+      void set_data_specification(new_data::data_specification spec);
 
       /** \brief Sorts the transitions using a sort style.
        * \param[in] ts The sort style to use. */

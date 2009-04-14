@@ -16,6 +16,7 @@
 #include <fstream>
 #include <string>
 #include <utility>
+#include <algorithm>
 
 //PBESsolve dedicated libraries
 #include "mcrl2/pbes/gauss.h"
@@ -28,17 +29,17 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/complement.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_utility.h"
+#include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/sort_utility.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/print.h"
 
 
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/data_expression.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 
@@ -53,23 +54,19 @@
 //#define use_prover
 #define use_rewriter
 
+namespace mcrl2 {
+
 int PESdeep=0; // for debug, the depth of pbes_expression_simplify calls
 
 using namespace pbes_expr;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 
 sort_instantiator si;
-
-// some extra needed functions on data_variable_lists and data_expressions
-bool var_in_list(data_variable vx, data_variable_list y);
-data_variable_list intersect(data_variable_list x, data_variable_list y);
-data_variable_list substract(data_variable_list x, data_variable_list y);
-data_variable_list dunion(data_variable_list x, data_variable_list y);
-void dunion(data_variable_list *x, data_variable_list y);
 
 /// \brief Returns the head of the data expression t.
 /// \return The head of the data expression.
@@ -134,9 +131,9 @@ atermpp::vector<pbes_equation> pbes_solver::solve()
   data_specification ds = pbes_spec.data();
   sort_expression_list finite_sorts;
   sort_expression_list sl = ds.sorts();
-  si.set_data_operation_list(ds.constructors());
+  si.set_function_symbol_list(ds.constructors());
   for (sort_expression_list::iterator i = sl.begin(); i != sl.end(); i++)
-    if (is_finite(ds.constructors(), (*i)))
+    if (ds.is_certainly_finite(*i))
       finite_sorts = push_front(finite_sorts,(*i));
   si.instantiate_sorts(finite_sorts);
 
@@ -241,7 +238,7 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
       // rewrite approx_...
       //	 approx_ = pbes_expression_prove(approx_,rewriter,prover);
       int nq = 0;
-      data_variable_list fv;
+      variable_list fv;
       approx_ = pbes_expression_simplify(approx_, &nq, &fv, prover);
 
 #ifdef pbes_expression_prove_with_quantifiers
@@ -298,7 +295,7 @@ pbes_equation pbes_solver::solve_equation(pbes_equation e)
 // from generic_parameters with the corresponding data expressions
 // from actual_parameters
 pbes_expression pbes_expression_instantiate(pbes_expression solX,
-						   data_variable_list generic_parameters,
+						   variable_list& generic_parameters,
 						   data_expression_list actual_parameters)
 //================================================
 {
@@ -424,26 +421,24 @@ data_expression pbes_to_data(pbes_expression e)
 //======================================================================
 {
  using namespace pbes_expr;
- namespace dname = mcrl2::data::data_expr;
- namespace sname = mcrl2::data::sort_expr;
 
 #ifdef debug2
  gsVerboseMsg("P2D: %s\n",pp(e).c_str());
 #endif
  if (is_data(e)) return e; //  of data_expression(aterm_appl(e)) ??;
- else if (is_true(e)) return dname::true_();
- else if(is_false(e)) return dname::false_();
- else if (is_and(e))
-	return dname::and_(pbes_to_data(left(e)),pbes_to_data(right(e)));
- else if (is_or(e))
-	return dname::or_(pbes_to_data(left(e)),pbes_to_data(right(e)));
+ else if (sort_bool_::is_true__function_symbol(e)) return sort_bool_::true_();
+ else if(sort_bool_::is_true__function_symbol(e)) return sort_bool_::false_();
+ else if (sort_bool_::is_and__application(e))
+	return sort_bool_::and_(pbes_to_data(left(e)),pbes_to_data(right(e)));
+ else if (sort_bool_::is_or__application(e))
+	return sort_bool_::or_(pbes_to_data(left(e)),pbes_to_data(right(e)));
  /*
  else if (is_forall(e))
    {
      aterm_appl x =
        gsMakeBinder(gsMakeForall(),var(e),pbes_to_data(arg(e)));
      return (gsMakeDataExprExists(x));
-     //implement_data_data_expr(x,spec);
+     //implement_data_expr(x,spec);
      // (if implement, then there is no way back anymore!)
    }
  else if (is_exists(e))
@@ -453,8 +448,8 @@ data_expression pbes_to_data(pbes_expression e)
      return (gsMakeDataExprExists(x));
    }
  */
- else if (is_not(e))
-   return dname::not_(pbes_to_data(arg(e)));
+ else if (sort_bool_::is_not__application(e))
+   return sort_bool_::not_(pbes_to_data(arg(e)));
  else
    if (is_propositional_variable_instantiation(e))
      // transform it to a data variable with parameters
@@ -469,7 +464,7 @@ data_expression pbes_to_data(pbes_expression e)
        if (parameters.empty())
 	 {
 	   vname+=":Bool";
-	   data_variable v = data_variable(vname);
+	   variable v = variable(vname);
 	   return data_expression(v);
 	 }
        else
@@ -479,12 +474,12 @@ data_expression pbes_to_data(pbes_expression e)
        gsVerboseMsg("P2D: sorts %s\n", pp(sorts).c_str());
 #endif
 
-	   sort_expression vsort = gsMakeSortArrowList(sorts, sname::bool_());
+	   sort_expression vsort = gsMakeSortArrowList(sorts, sort_bool_::bool_());
 #ifdef debug2
        gsVerboseMsg("P2D: new sort %s\n", pp(vsort).c_str());
 #endif
 
-       data_variable v = data_variable(vname,vsort); // not good!!
+       variable v = variable(vname,vsort); // not good!!
        data_expression res = gsMakeDataApplList(v, parameters);
 #ifdef debug2
        gsVerboseMsg("P2D: new data expression %s\n", pp(res).c_str());
@@ -505,7 +500,7 @@ data_expression pbes_to_data(pbes_expression e)
     if (parameters.empty())
     {
     sort_expression vsort = gsMakeSortIdBool();
-    data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
+    variable v = variable(gsMakeDataVarId(vname, vsort));
     return data_expression(v);
     }
     else
@@ -513,8 +508,8 @@ data_expression pbes_to_data(pbes_expression e)
     std::cerr<<"A";
     sort_expression_list sorts = apply(parameters, gsGetSort);
     std::cerr<<"B";
-    sort_expression vsort = gsMakeSortArrowList(sorts, sname::bool_());
-    data_variable v = data_variable(gsMakeDataVarId(vname, vsort));
+    sort_expression vsort = gsMakeSortArrowList(sorts, sort_bool_::bool_());
+    variable v = variable(gsMakeDataVarId(vname, vsort));
     return gsMakeDataApplList(v, parameters);
     }
     }
@@ -536,14 +531,12 @@ data_expression pbes_to_data(pbes_expression e)
  pbes_expression data_to_pbes_lazy(data_expression d)
 //======================================================================
 {
- namespace dname = mcrl2::data::data_expr;
  namespace pname = pbes_expr;
- namespace sname = mcrl2::data::sort_expr;
 
- if (dname::is_true(d))
-   return pname::true_();
- else if (dname::is_false(d))
-   return pname::false_();
+ if (sort_bool_::is_true__function_symbol(d))
+   return sort_bool_::true_();
+ else if (sort_bool_::is_false__function_symbol(d))
+   return sort_bool_::false_();
 
  // if d doesn't contain any predicate variables,
  // leave it as it is
@@ -559,10 +552,10 @@ data_expression pbes_to_data(pbes_expression e)
 #endif
 
 
- if (is_data_variable(DEPRECATED_FUNCTION_HEAD(d)))
+ if (is_variable(DEPRECATED_FUNCTION_HEAD(d)))
 	// d is either a predicate or a data variable with arguments (?)
 	{
-	 std::string varname = data_variable(DEPRECATED_FUNCTION_HEAD(d)).name();
+	 std::string varname = variable(DEPRECATED_FUNCTION_HEAD(d)).name();
 #ifdef debug2
 	 gsVerboseMsg("head is data var, varname=%s\n ",varname.c_str());
 #endif
@@ -574,10 +567,10 @@ data_expression pbes_to_data(pbes_expression e)
 	 else
 		return d;
 	}
- else if (is_data_variable(d))
+ else if (is_variable(d))
    // d is either a predicate or a data variable without arguments (?)
    {
-     std::string varname = data_variable(d).name();
+     std::string varname = variable(d).name();
      gsVerboseMsg("head is data var, varname=%s ",varname.c_str());
      if (varname.at(varname.size()-1) == PREDVAR_MARK)
        return
@@ -608,19 +601,18 @@ data_expression pbes_to_data(pbes_expression e)
      gsVerboseMsg("Sub pbes_expressions are: %s, %s, %s\n",
 		  pp(ptest).c_str(),pp(ptrue).c_str(),pp(pfalse).c_str());
 #endif
-     // Below both dname and pname are used,
      // because the translation is lazy and therefore
      // the pbes_expression "true"
      // will in fact be "true".
      // pname::is_true( val(true) ) returns false... Suggest change?!
      /*
-     if ((dname::is_true(ptest)) || (pname::is_true(ptest)))
+     if ((sort_bool_::is_true__function_symbol(ptest)) || (pname::is_true(ptest)))
        return ptrue;
-     if ((dname::is_false(ptest)) || (pname::is_false(ptest)))
+     if ((sort_bool_::is_false__function_symbol(ptest)) || (pname::is_false(ptest)))
        return pfalse;
-     if (((dname::is_true(ptrue)) || (pname::is_true(ptrue)) )
+     if (((sort_bool_::is_true__function_symbol(ptrue)) || (pname::is_true(ptrue)) )
 	 &&
-	 ((dname::is_false(pfalse)) || (pname::is_false(pfalse))))
+	 ((sort_bool_::is_false__function_symbol(pfalse)) || (pname::is_false(pfalse))))
        return ptest;
      */
      // gsErrorMsg("ERROR\n");exit(1);
@@ -630,7 +622,7 @@ data_expression pbes_to_data(pbes_expression e)
        //return(or_(and_(ptest,ptrue),and_(complement(ptest),pfalse)));
        return(or_(and_(ptest,ptrue),and_(not_(ptest),pfalse)));
    }
- else if ((dname::is_and(d)) || (dname::is_or(d))){
+ else if ((sort_bool_::is_and__application(d)) || (sort_bool_::is_or__application(d))){
    data_expression_list::iterator i = DEPRECATED_FUNCTION_ARGUMENTS(d).begin();
    data_expression d1 = *i; i++;
    data_expression d2 = *i;
@@ -655,15 +647,13 @@ data_expression pbes_to_data(pbes_expression e)
 
   // arg1 is not reliable
 
- namespace dname = mcrl2::data::data_expr;
  namespace pname = pbes_expr;
- namespace sname = mcrl2::data::sort_expr;
 
  data_expression head = DEPRECATED_FUNCTION_HEAD(d);
- if (is_data_variable(head))
+ if (is_variable(head))
 	// d is either a predicate or a data variable
 	{
-	 std::string varname = data_variable(head).name();
+	 std::string varname = variable(head).name();
 	 if (varname.at(varname.size()-1) == PREDVAR_MARK)
 		return
 			propositional_variable_instantiation
@@ -671,12 +661,12 @@ data_expression pbes_to_data(pbes_expression e)
 	 else
 		return d;
     }
- else if (dname::is_true(d)) return pname::true_();
- else if (dname::is_false(d)) return pname::false_();
- else if (dname::is_and(d))
+ else if (sort_bool_::is_true__function_symbol(d)) return pname::true_();
+ else if (sort_bool_::is_false__function_symbol(d)) return pname::false_();
+ else if (sort_bool_::is_and__application(d))
 	return pname::and_(data_to_pbes_greedy(arg1(d)),
 										 data_to_pbes_greedy(arg2(d)));
- else if (dname::is_or(d))
+ else if (sort_bool_::is_or__application(d))
 	return pname::and_(data_to_pbes_greedy(arg1(d)),
 										 data_to_pbes_greedy(arg2(d)));
 
@@ -802,7 +792,7 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 
 //======================================================================
  pbes_expression pbes_expression_simplify
- (pbes_expression expr, int* nq, data_variable_list *fv, BDD_Prover* prover)
+ (pbes_expression expr, int* nq, variable_list& fv, BDD_Prover* prover)
 //======================================================================
 {
   PESdeep++;
@@ -811,7 +801,7 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 	       PESdeep,pp(expr).c_str());
 #endif
 
-  *fv = data_variable_list();
+  fv = variable_list(); // fv is sorted before return
   *nq = 0;
   pbes_expression expr_simplified;
 
@@ -819,11 +809,11 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
     {
       // simplify left and right
       int nqlhs, nqrhs;
-      data_variable_list fvlhs,fvrhs;
-      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,&fvlhs,prover);
-      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,&fvrhs,prover);
+      variable_list fvlhs,fvrhs;
+      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,fvrhs,prover);
       *nq = nqlhs + nqrhs;
-      *fv = fvlhs+fvrhs;
+      std::set_union(fvlhs.begin(), fvlhs.end(), fvrhs.begin(), fvrhs.end(), fv.begin());
       expr_simplified = and_(slhs,srhs);
       // (and_ already checks whether one of the sides is trivial T/F)
     }
@@ -831,28 +821,28 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
     {
       // simplify left and right
       int nqlhs, nqrhs;
-      data_variable_list fvlhs,fvrhs;
-      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,&fvlhs,prover);
-      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,&fvrhs,prover);
+      variable_list fvlhs,fvrhs;
+      pbes_expression slhs = pbes_expression_simplify(left(expr),&nqlhs,fvlhs,prover);
+      pbes_expression srhs = pbes_expression_simplify(right(expr),&nqrhs,fvrhs,prover);
       *nq = nqlhs + nqrhs;
-      *fv = dunion(fvlhs,fvrhs);
+      std::set_union(fvlhs.begin(), fvlhs.end(), fvrhs.begin(), fvrhs.end(), fv.begin());
       expr_simplified = or_(slhs,srhs);
     }
   else if (is_forall(expr) || is_exists(expr))
     {
       // simlify under quantifier
       int nq_under;
-      data_variable_list fv_under;
+      variable_list fv_under;
       pbes_expression s_under =
-	pbes_expression_simplify(arg(expr),&nq_under,&fv_under, prover);
+	pbes_expression_simplify(arg(expr),&nq_under,fv_under, prover);
       // dit heeft waarschijnlijk geen zin:
       //      if (nq_under==0)
       //s_under = pbes_expression_prove(s_under,prover);
 
       // compute the list of actually bounded variables
       // (i.e., eliminate from the var those vars that do not occur free in s_under)
-      data_variable_list new_quant_vars = intersect(var(expr),fv_under);
-      *fv = substract(fv_under, new_quant_vars); // !! too inefficient?
+      std::set_intersection(fv_under.begin(), fv_under.end(), var(expr).begin(), var(expr).end(), new_quant_vars.end());
+      std::set_difference(fv_under.begin(), fv_under.end(), new_quant_vars.begin(), new_quant_vars.end(), fv.end());
 
       // if any quantified vars left, try to eliminate them by enumeration
       if (!new_quant_vars.empty()){
@@ -921,8 +911,10 @@ pbes_expression pbes_expression_prove(pbes_expression e, BDD_Prover* prover)
 
 #ifdef debug
   gsVerboseMsg("PBES_EXPRESSION_SIMPLIFY %d end:     %s\n %d quantifiers, free vars: %s\n",
-	       PESdeep,pp(expr_simplified).c_str(),*nq, pp(*fv).c_str());
+	       PESdeep,pp(expr_simplified).c_str(),*nq, new_data::pp(fv).c_str());
 #endif
+
+  std::sort(fv.begin(), fv.end());
 
   PESdeep--;
    return expr_simplified;
@@ -943,10 +935,9 @@ data_expression data_expression_simplify_if()
 
 //======================================================================
 data_expression data_expression_simplify
-(data_expression d, data_variable_list *fv, BDD_Prover *prover)
+(data_expression d, variable_list *fv, BDD_Prover *prover)
 //======================================================================
 {
-  namespace dname = mcrl2::data::data_expr;
 
   data_expression e = d;
 
@@ -963,12 +954,12 @@ data_expression data_expression_simplify
       data_expression d2 = *i;
       i++;
       data_expression d3 = *i;
-      if (dname::is_true(d1)) return data_expression_simplify(d2,fv,prover);
-      if (dname::is_false(d1)) return data_expression_simplify(d3,fv,prover);
-      if ((dname::is_true(d2)) && (dname::is_false(d3)))
+      if (sort_bool_::is_true__function_symbol(d1)) return data_expression_simplify(d2,fv,prover);
+      if (sort_bool_::is_false__function_symbol(d1)) return data_expression_simplify(d3,fv,prover);
+      if ((sort_bool_::is_true__function_symbol(d2)) && (sort_bool_::is_false__function_symbol(d3)))
 	return data_expression_simplify(d1,fv,prover);
-      if ((dname::is_true(d3)) && (dname::is_false(d2)))
-	return (dname::not_(data_expression_simplify(d1,fv,prover)));
+      if ((sort_bool_::is_true__function_symbol(d3)) && (sort_bool_::is_false__function_symbol(d2)))
+	return (sort_bool_::not_(data_expression_simplify(d1,fv,prover)));
     }
 
      // call prover
@@ -987,8 +978,8 @@ data_expression data_expression_simplify
 #endif
 
   // fill in the list of occuring variables
-  std::set<data_variable> setfv = find_all_data_variables(d);
-  for (std::set<data_variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
+  std::set<variable> setfv = find_all_variables(d);
+  for (std::set<variable>::iterator i=setfv.begin(); i!=setfv.end();i++)
     *fv = push_back(*fv,*i);
   return f;
 }
@@ -1008,8 +999,8 @@ data_expression data_expression_simplify
 
 //======================================================================
 pbes_expression enumerate_rec(bool forall,
-			      data_variable_list vars,
-			      data_variable_list::iterator v,
+			      variable_list vars,
+			      variable_list::iterator v,
 			      data_expression_list instance,
 			      pbes_expression p,
 			      BDD_Prover *prover)
@@ -1050,7 +1041,7 @@ pbes_expression enumerate_rec(bool forall,
   for (; i != domain.end(); i++)
     {
       //  gsVerboseMsg("---- %s = %s", pp(v->name()).c_str(), pp(*i).c_str());
-      data_variable_list::iterator vv = v; vv++;
+      variable_list::iterator vv = v; vv++;
       pbes_expression p_i = enumerate_rec(forall,vars,vv,instance+(*i),p, prover);
       if (forall)
 	{ // check whether we can stop immediately
@@ -1088,7 +1079,7 @@ pbes_expression enumerate_rec(bool forall,
 
 //======================================================================
 pbes_expression enumerate_finite_domains
-(bool forall, data_variable_list *var, pbes_expression p, BDD_Prover *prover)
+(bool forall, variable_list& variables, pbes_expression p, BDD_Prover *prover)
 //======================================================================
 
 // - instantiate all finite domain variables from var
@@ -1097,9 +1088,9 @@ pbes_expression enumerate_finite_domains
 // - in the end, var will only contain the infinite-domain variables
 {
   // make a separate list of finite domain variables
-  data_variable_list finite_domain_vars;
-  data_variable_list::iterator v = var->begin();
-  for ( ; v != var->end(); v++)
+  variable_list finite_domain_vars;
+
+  for (variable_list::iterator v = var->begin(); v != var->end(); v++)
     {
       sort_expression vsort = v->sort();
 
@@ -1110,7 +1101,9 @@ pbes_expression enumerate_finite_domains
     }
 
   // eliminate the finite vars from the var list
-  *var = substract((*var), finite_domain_vars);
+  variable_list temporary;
+  std::set_difference(var.begin(), var.end(), finite_domain_vars.begin(), finite_domain_vars.end(), temporary.end());
+  variables.swap(temporary);
 
 #ifdef debug
   gsVerboseMsg("ENUMERATE_FINITE_DOMAINS: finite vars %s, infinte vars %s\n",
@@ -1290,13 +1283,12 @@ bool pbes_expression_compare
 
 
 //======================================================================
-void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
+void free_vars_and_no_quants(data_expression d, int* nq, variable_list *fv)
 // fills in the number of quantifiers and the list of free vars in expression d
 //!! can be more efficient if we assume there are no quantifiers in data expressions
 //======================================================================
 {
 
-  using namespace data_expr;
 
   data_expression head = DEPRECATED_FUNCTION_HEAD(d);
   data_expression_list args = DEPRECATED_FUNCTION_ARGUMENTS(d);
@@ -1305,19 +1297,19 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
   //       pp(d).c_str(),pp(head).c_str(),pp(args).c_str());
 
   // data variable?
-  if (is_data_variable(d)) {
-    *fv = push_back((*fv),(data_variable)head);
+  if (is_variable(d)) {
+    fv.push_back(variable(head));
     *nq = 0;
   }
   // quantifier?
   else if (gsIsBinder(head))
     {
       int nq_under;
-      data_variable_list fv_under;
-      data_variable_list qvars = list_arg1(head);
+      variable_list fv_under;
+      variable_list qvars(atermpp::term_list_iterator< variable >(list_arg1(head)), atermpp::term_list_iterator< variable >());
       free_vars_and_no_quants(arg2(d),&nq_under, &fv_under);
       *nq = nq_under + 1;
-      *fv = substract(fv_under,qvars);
+      std::set_difference(fv_under.begin, fv_under.end(), qvars.begin(), qvars.end(), fv.end());
     }
 
   // number, function or operator?
@@ -1326,16 +1318,17 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
       // collect free variables from all subexpressions
       *nq = 0;
       int nqsub;
-      data_variable_list fvsub;
-      while (!args.empty()){
-	free_vars_and_no_quants(args.front(),&nqsub,&fvsub);
-	args = pop_front(args);
-	dunion(fv,fvsub);
+      variable_list fvsub;
+      while (data_expression_list::const_iterator i = args.begin(); i != args.end(); ++i){
+	free_vars_and_no_quants(*i,&nqsub,&fvsub);
+        variable_list temporary;
+        std::set_union(fv.begin(), fv.end(), fvsub.begin(), fvsub.end(), temporary.end());
+        fv.swap(temporary);
 	*nq = *nq + nqsub;
       }
       /*
       int nqlhs, nqrhs;
-      data_variable_list fvlhs,fvrhs;
+      variable_list fvlhs,fvrhs;
       free_vars_and_no_quants(args.front(),&nqlhs,&fvlhs);
       args = pop_front(args);
       if (!args.empty())
@@ -1353,4 +1346,5 @@ void free_vars_and_no_quants(data_expression d, int* nq, data_variable_list *fv)
     }
 }
 
+}
 

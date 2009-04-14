@@ -38,6 +38,13 @@ namespace tools {
         }
       }
 
+      /// \brief Returns the synopsis of the tool.
+      /// \return The string "[OPTION]... [INFILE [OUTFILE]]\n"
+      std::string synopsis() const
+      {
+        return "[OPTION]... [INFILE [OUTFILE]]\n";
+      }
+
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       void parse_options(const command_line_parser& parser)
@@ -54,10 +61,9 @@ namespace tools {
       input_output_tool(const std::string& name,
                  const std::string& author,
                  const std::string& what_is,
-                 const std::string& tool_description,
-                 std::string synopsis = "[OPTION]... [INFILE [OUTFILE]]\n"
+                 const std::string& tool_description
                 )
-        : input_tool(name, author, what_is, tool_description, synopsis)
+        : input_tool(name, author, what_is, tool_description)
       {
       }
 

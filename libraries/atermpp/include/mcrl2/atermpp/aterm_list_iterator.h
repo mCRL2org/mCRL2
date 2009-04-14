@@ -47,6 +47,12 @@ class term_list_iterator: public boost::iterator_facade<
       : m_list(l)
     {}
 
+    /// \brief For efficient conversion of iterator ranges
+    ATermList list() const
+    {
+      return m_list;
+    }
+
  private:
     friend class boost::iterator_core_access;
 

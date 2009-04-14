@@ -23,6 +23,7 @@
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -1734,22 +1735,22 @@ bool lts::has_data_specification()
          !gsIsNil(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-data::data_specification lts::get_data_specification()
+new_data::data_specification lts::get_data_specification()
 {
   assert(has_data_specification());
 
-  return data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
+  return new_data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-void lts::set_data_specification(data::data_specification spec)
+void lts::set_data_specification(new_data::data_specification spec)
 {
   assert( type == lts_mcrl2 );
 
   if ( extra_data == NULL )
   {
-    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) spec, (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::new_data::detail::data_specification_to_aterm_data_spec(spec), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
   } else {
-    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) spec,0);
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::new_data::detail::data_specification_to_aterm_data_spec(spec),0);
   }
 }
 

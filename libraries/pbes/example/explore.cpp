@@ -14,9 +14,9 @@
 
 
 //Rewriter
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewrite.h"
 
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;

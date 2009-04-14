@@ -14,30 +14,33 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/data/data_operation.h"
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
 int test_main(int argc, char** argv )
 {
+  using mcrl2::new_data::make_vector;
+  using mcrl2::core::pp;
+
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  sort_expression X("X");
-  sort_expression Y("Y");
+  sort_expression X(basic_sort("X"));
+  sort_expression Y(basic_sort("Y"));
 
   action_label aX(identifier_string("a"),  make_list(X));
   action_label aY(identifier_string("a"),  make_list(Y));
   action_label aXY(identifier_string("a"), make_list(X, Y));
   action_label bX(identifier_string("b"),  make_list(X));
 
-  data_expression x_X = data_variable("x:X");
-  data_expression y_X = data_variable("y:X");
-  data_expression y_Y = data_variable("y:Y");
+  data_expression x_X = variable("x", X);
+  data_expression y_X = variable("y", X);
+  data_expression y_Y = variable("y", Y);
 
   action a1(aX, make_list(x_X));
   action a2(aX, make_list(y_X));

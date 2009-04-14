@@ -20,7 +20,8 @@
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/variable.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -31,11 +32,12 @@
 #include "mcrl2/pbes/complement.h"
 
 using namespace mcrl2;
-using atermpp::make_list;
+using new_data::make_vector;
 using core::identifier_string;
-using data::data_expression;
-using data::data_variable;
-using data::multiset_identifier_generator;
+using new_data::data_expression;
+using new_data::variable;
+using new_data::basic_sort;
+using new_data::multiset_identifier_generator;
 using modal::detail::mcf2statefrm;
 using modal::state_formula;
 using lps::mcrl22lps;
@@ -216,10 +218,10 @@ void test_free_variables()
   pbes<> p;
   std::stringstream s(TEXT);
   s >> p;
-  atermpp::set<data_variable> freevars = p.free_variables();
+  atermpp::set<variable> freevars = p.free_variables();
   std::cout << freevars.size() << std::endl;
   BOOST_CHECK(freevars.size() == 3);
-  for (atermpp::set< data_variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
+  for (atermpp::set< variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
   {
     std::cout << "<var>" << mcrl2::core::pp(*i) << std::endl;
   }
@@ -245,21 +247,21 @@ void test_free_variables()
 
 void test_quantifier_rename_builder()
 {
+  using namespace pbes_system;
   using namespace pbes_system::pbes_expr;
-  namespace d = data::data_expr;
 
-  data_variable mN("m:N");
-  data_variable nN("n:N");
+  variable mN("m", basic_sort("N"));
+  variable nN("n", basic_sort("N"));
 
-  pbes_expression f = d::equal_to(mN, nN);
-  pbes_expression g = d::not_equal_to(mN, nN);
+  pbes_expression f = new_data::equal_to(mN, nN);
+  pbes_expression g = new_data::not_equal_to(mN, nN);
 
   multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
   pbes_expression p1 =
   and_(
-    forall(make_list(nN), exists(make_list(nN), f)),
-    forall(make_list(mN), exists(make_list(mN, nN), g))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), f)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), g))
   );
   pbes_expression q1 = make_quantifier_rename_builder(generator).visit(p1);
   std::cout << "p1 = " << mcrl2::core::pp(p1) << std::endl;
@@ -267,10 +269,10 @@ void test_quantifier_rename_builder()
 
   pbes_expression p2 =
   and_(
-    forall(make_list(nN), exists(make_list(nN), p1)),
-    forall(make_list(mN), exists(make_list(mN, nN), q1))
+    pbes_expr::forall(make_list(nN), pbes_expr::exists(make_list(nN), p1)),
+    pbes_expr::forall(make_list(mN), pbes_expr::exists(make_list(mN, nN), q1))
   );
-  pbes_expression q2 = rename_quantifier_variables(p2, make_list(data_variable("n00:N"), data_variable("n01:N")));
+  pbes_expression q2 = rename_quantifier_variables(p2, make_list(variable("n00", basic_sort("N")), variable("n01", basic_sort("N"))));
   std::cout << "p2 = " << mcrl2::core::pp(p2) << std::endl;
   std::cout << "q2 = " << mcrl2::core::pp(q2) << std::endl;
 
@@ -280,10 +282,10 @@ void test_quantifier_rename_builder()
 void test_complement_method_builder()
 {
   using namespace pbes_system::pbes_expr;
-  namespace d = data::data_expr;
+  namespace d = new_data::sort_bool_;
 
-  data_variable X("x", data::sort_expr::bool_());
-  data_variable Y("y", data::sort_expr::bool_());
+  variable X("x", new_data::sort_bool_::bool_());
+  variable Y("y", new_data::sort_bool_::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
@@ -296,9 +298,8 @@ void test_complement_method_builder()
 void test_pbes_expression()
 {
   namespace p = pbes_system::pbes_expr;
-  namespace d = data::data_expr;
 
-  data_variable x1("x1:X");
+  variable x1("x1", basic_sort("X"));
   pbes_expression e = x1;
   data_expression x2 = mcrl2::pbes_system::accessors::val(e);
   BOOST_CHECK(x1 == x2);

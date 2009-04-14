@@ -15,15 +15,15 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort_utility.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/detail/sort_utility.h"
+#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/data_implementation.h" // implement_data_data::data_expr
 
 // JFG:
-#include "mcrl2/data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 
 namespace mcrl2 {
 
@@ -34,37 +34,39 @@ namespace pbes_system {
 // to conform to the standard use in the library.
 
 
-static data::data_expression initialize_internal_true(data::data_expression &t,Rewriter *r)
+/* Obsolete, as internal format should become standard, 
+   and not give rise to any special treatment 
+static new_data::data_expression initialize_internal_true(new_data::data_expression &t,const new_data::rewriter& r)
 {
-  t=(data::data_expression)r->toRewriteFormat(data::data_expr::true_());
+  t=(new_data::data_expression)r.toRewriteFormat(new_data::sort_bool_::true_());
   ATprotect((ATerm*)(&t));
   return t;
 }
 
-static bool is_true_in_internal_rewrite_format(data::data_expression d,Rewriter *rewriter)
-{ static data::data_expression internal_true=initialize_internal_true(internal_true,rewriter);
+static bool is_true_in_internal_rewrite_format(new_data::data_expression d,const new_data::rewriter& r)
+{ static new_data::data_expression internal_true=initialize_internal_true(internal_true,r);
   return d==internal_true;
 }
 
 
-static data::data_expression initialize_internal_false(data::data_expression &t,Rewriter *r)
+static new_data::data_expression initialize_internal_false(new_data::data_expression &t,const new_data::rewriter& r)
 {
-  t=(data::data_expression)r->toRewriteFormat(data::data_expr::false_());
+  t=(new_data::data_expression)r.toRewriteFormat(new_data::sort_bool_::false_());
   ATprotect((ATerm*)(&t));
   return t;
 }
 
-static bool is_false_in_internal_rewrite_format(data::data_expression d,Rewriter *rewriter)
-{ static data::data_expression internal_false=initialize_internal_false(internal_false,rewriter);
+static bool is_false_in_internal_rewrite_format(new_data::data_expression d,const new_data::rewriter& r)
+{ static new_data::data_expression internal_false=initialize_internal_false(internal_false,r);
   return d==internal_false;
-}
+} */
 
 
-struct compare_data_variableL
+struct compare_variableL
 {
   atermpp::aterm v;
 
-  compare_data_variableL(data::data_variable v_)
+  compare_variableL(new_data::variable v_)
     : v(atermpp::aterm_appl(v_))
   {}
 
@@ -76,9 +78,9 @@ struct compare_data_variableL
 
 //  variable v occurs in l.
 //
-static bool occurs_in_varL(atermpp::aterm_appl l, data::data_variable v)
+static bool occurs_in_varL(atermpp::aterm_appl l, new_data::variable v)
 {
-  return find_if(l, compare_data_variableL(v)) != atermpp::aterm();
+  return find_if(l, compare_variableL(v)) != atermpp::aterm();
 }
 
 
@@ -95,7 +97,7 @@ static bool occurs_in_varL(atermpp::aterm_appl l, data::data_variable v)
 
 inline pbes_expression pbes_expression_rewrite_and_simplify(
                    pbes_expression p,
-                   Rewriter *rewriter,
+                   const new_data::rewriter& r,
                    const bool yield_internal_rewriter_format=false)
 {
   using namespace pbes_system::pbes_expr;
@@ -113,56 +115,57 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   else if (is_pbes_and(p))
   { // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),rewriter,yield_internal_rewriter_format);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),r,yield_internal_rewriter_format);
     if (is_pbes_false(l))
     { result = false_();
     }
     else
-    { pbes_expression r = pbes_expression_rewrite_and_simplify(right(p),rewriter,yield_internal_rewriter_format);
+    { pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p),r,yield_internal_rewriter_format);
       //Options for left and right
-      if (is_pbes_false(r))
+      if (is_pbes_false(rt))
       { result = false_();
       }
       else if (is_pbes_true(l))
-      { result = r;
+      { result = rt;
       }
-      else if (is_pbes_true(r))
+      else if (is_pbes_true(rt))
       { result = l;
       }
-      else result = and_(l,r);
+      else result = and_(l,rt);
     }
   }
   else if (is_pbes_or(p))
   { // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),rewriter,yield_internal_rewriter_format);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p),r,yield_internal_rewriter_format);
     if (is_pbes_true(l))
     { result = true_();
     }
     else
-    { pbes_expression r = pbes_expression_rewrite_and_simplify(right(p),rewriter,yield_internal_rewriter_format);
-      if (is_pbes_true(r))
+    { pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p),r,yield_internal_rewriter_format);
+      if (is_pbes_true(rt))
       { result = true_();
       }
       else if (is_pbes_false(l))
-      { result = r;
+      { result = rt;
       }
-      else if (is_pbes_false(r))
+      else if (is_pbes_false(rt))
       { result = l;
       }
-      else result = or_(l,r);
+      else result = or_(l,rt);
     }
   }
   else if (is_pbes_forall(p))
-  { // p = forall(data::data_expression_list, pbes_expression)
-    data::data_variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),rewriter,yield_internal_rewriter_format);
+  { // p = forall(new_data::data_expression_list, pbes_expression)
+    new_data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),r,yield_internal_rewriter_format);
     //Remove data_vars which do not occur in expr
-    data::data_variable_list occurred_data_vars;
-    for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+    new_data::variable_list occurred_data_vars;
+    for (new_data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
       if (occurs_in_varL(expr, *i)) // The var occurs in expr
-      { occurred_data_vars = push_front(occurred_data_vars, *i);
+      {
+        occurred_data_vars = push_front(occurred_data_vars, *i);
       }
     }
 
@@ -171,19 +174,20 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     { result = expr;
     }
     else
-    { result=forall(occurred_data_vars,expr);
+    { result=pbes_expr::forall(occurred_data_vars,expr);
     }
   }
   else if (is_pbes_exists(p))
-  { // p = exists(data::data_expression_list, pbes_expression)
-    data::data_variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),rewriter,yield_internal_rewriter_format);
+  { // p = exists(new_data::data_expression_list, pbes_expression)
+    new_data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p),r,yield_internal_rewriter_format);
     //Remove data_vars which does not occur in expr
-    data::data_variable_list occurred_data_vars;
-    for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+    new_data::variable_list occurred_data_vars;
+    for (new_data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
       if (occurs_in_varL(expr, *i)) // The var occurs in expr
-      { occurred_data_vars = push_front(occurred_data_vars, *i);
+      {
+         occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
       }
     }
 
@@ -191,53 +195,61 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     if (occurred_data_vars.empty())
       result = expr;
     else
-    { result=exists(occurred_data_vars,expr);
+    { result=pbes_expr::exists(occurred_data_vars,expr);
     }
   }
   else if (is_propositional_variable_instantiation(p))
   { // p is a propositional variable
     propositional_variable_instantiation propvar = p;
     core::identifier_string name = propvar.name();
-    data::data_expression_list parameters;
+    new_data::data_expression_list current_parameters(propvar.parameters());
+    new_data::data_expression_list parameters;
     if (yield_internal_rewriter_format)
-    {
-      for( data::data_expression_list::iterator l=propvar.parameters().begin();
-           l!=propvar.parameters().end(); l++)
+    { assert(0); // internal format cannot be used anymore.
+      /* for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
+           l != current_parameters.end(); ++l)
       {
-        parameters=push_front(parameters,
-                              (data::data_expression)rewriter->rewriteInternal(
-                                rewriter->toRewriteFormat(*l)));
+        parameters = atermpp::push_front(parameters, r(*l));
+        / * parameters = atermpp::push_front(parameters, new_data::data_expression(r.rewriteInternal(
+                                r.toRewriteFormat(*l))));  * /
       }
-      parameters=reverse(parameters);
+      parameters = atermpp::reverse(parameters); */
     }
     else
-    { parameters=rewriter->rewriteList(propvar.parameters());
+    {
+      for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
+           l != current_parameters.end(); ++l)
+      {
+        parameters = atermpp::push_front(parameters, r(*l));
+      }
+      parameters = atermpp::reverse(parameters);
     }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
-  { // p is a data::data_expression
+  { // p is a new_data::data_expression
 
     if (yield_internal_rewriter_format)
     {
-    data::data_expression d = (data::data_expression)rewriter->rewriteInternal(rewriter->toRewriteFormat(p));
-      if (is_true_in_internal_rewrite_format(d,rewriter))
+      assert(0); // internal rewriter format is not used any longer.
+      /* new_data::data_expression d = (new_data::data_expression)r.rewriteInternal(r.toRewriteFormat(p));
+      if (is_true_in_internal_rewrite_format(d,r))
       { result = true_();
       }
-      else if (is_false_in_internal_rewrite_format(d,rewriter))
+      else if (is_false_in_internal_rewrite_format(d,r))
       { result = false_();
       }
       else
       { result = d;
-      }
+      } */
     }
     else
     {
-      data::data_expression d = rewriter->rewrite(p);
-      if (data::data_expr::is_true(d))
+      new_data::data_expression d(r(p));
+      if (d == new_data::sort_bool_::true_())
       { result = true_();
       }
-      else if (data::data_expr::is_false(d))
+      else if (d == new_data::sort_bool_::false_())
       { result = false_();
       }
       else
@@ -299,7 +311,7 @@ template <typename Container>
 inline pbes_expression give_the_instantiated_rhs(
                    const propositional_variable_instantiation current_variable_instantiation,
                    pbes<Container> pbes_spec,
-                   Rewriter *rewriter,
+                   const new_data::rewriter& r,
                    const bool use_internal_rewriter_format=false)
 {
   Container eqsys = pbes_spec.equations();
@@ -318,19 +330,23 @@ inline pbes_expression give_the_instantiated_rhs(
     }
   }
 
-  data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
+  new_data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
 
-  for(data::data_variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
+  new_data::mutable_substitution<new_data::variable, new_data::data_expression> sigma;
+  for(new_data::variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
   {
     assert(elist!=current_variable_instantiation.parameters().end());
 
     if (use_internal_rewriter_format)
-    { rewriter->setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
+    { assert(0); // Internal format is not treated separately.
+      /* r.setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
+ *    */
     }
     else
     {
-      rewriter->setSubstitution(*vlist,*elist);
+      // r.setSubstitution(*vlist,*elist);
+      sigma[*vlist]=*elist;
     }
     elist++;
   }
@@ -338,8 +354,9 @@ inline pbes_expression give_the_instantiated_rhs(
   return  pbes_expression_substitute_and_rewrite(
                                 current_pbeq.formula(),
                                 pbes_spec.data(),
-                                rewriter,
-                                use_internal_rewriter_format);
+                                r,
+                                use_internal_rewriter_format,
+                                sigma);
 }
 
 
@@ -426,7 +443,7 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 /// also. The function pbes_expression_substitute_and_rewrite will continue substituting
 /// \brief Constructors for quantified variables until there are no variables left, or
 /// until there are only quantifications over non constructor sorts. In the last case,
-/// the function will halt with an exit(1). For every 100 new variables being used
+/// the function will throw an exception. For every 100 new variables being used
 /// in new quantifications, a message is printed.
 ///   The data_specification is needed to determine the constructors of a certain
 /// sort. The rewriter is used to perform the rewriting steps. The rewriter can
@@ -437,9 +454,10 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 
 inline pbes_expression pbes_expression_substitute_and_rewrite(
                    const pbes_expression &p,
-                   const data::data_specification &data,
-                   Rewriter *rewriter,
-                   const bool use_internal_rewrite_format)
+                   const new_data::data_specification &data,
+                   const new_data::rewriter& r,
+                   const bool use_internal_rewrite_format,
+                   new_data::mutable_substitution<new_data::variable, new_data::data_expression> &sigma)
 {
   // std::cerr << "SUBSTANDREWR " << pp(p) << "\n";
   using namespace pbes_system::pbes_expr;
@@ -450,24 +468,24 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   { // p = and(left, right)
     //Rewrite left and right as far as possible
     pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
-                               data, rewriter,use_internal_rewrite_format);
+                               data, r,use_internal_rewrite_format,sigma);
     if (is_pbes_false(l))
     { result = false_();
     }
     else
-    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p),
-                 data, rewriter,use_internal_rewrite_format);
+    { pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
+                 data, r,use_internal_rewrite_format,sigma);
       //Options for left and right
-      if (is_pbes_false(r))
+      if (is_pbes_false(rt))
       { result = false_();
       }
       else if (is_pbes_true(l))
-      { result = r;
+      { result = rt;
       }
-      else if (is_pbes_true(r))
+      else if (is_pbes_true(rt))
       { result = l;
       }
-      else result = and_(l,r);
+      else result = and_(l,rt);
     }
   }
   else if (is_pbes_or(p))
@@ -476,25 +494,25 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
     // std::cerr << "SUB&REWR OR: " << pp(p) << "\n";
     pbes_expression l = pbes_expression_substitute_and_rewrite(left(p),
-                 data, rewriter,use_internal_rewrite_format);
+                 data, r,use_internal_rewrite_format,sigma);
     // std::cerr << "SUB&REWR OR LEFT: " << pp(left) << "\n";
     if (is_pbes_true(l))
     { result = true_();
     }
     else
-    { pbes_expression r = pbes_expression_substitute_and_rewrite(right(p),
-                 data, rewriter,use_internal_rewrite_format);
+    { pbes_expression rt = pbes_expression_substitute_and_rewrite(right(p),
+                 data, r,use_internal_rewrite_format,sigma);
       // std::cerr << "SUB&REWR OR RIGHT: " << pp(right) << "\n";
-      if (is_pbes_true(r))
+      if (is_pbes_true(rt))
       { result = true_();
       }
       else if (is_pbes_false(l))
-      { result = r;
+      { result = rt;
       }
-      else if (is_pbes_false(r))
+      else if (is_pbes_false(rt))
       { result = l;
       }
-      else result = or_(l,r);
+      else result = or_(l,rt);
     }
    // std::cerr << "SUB&REWR OR RESULT: " << pp(result) << "\n";
   }
@@ -509,8 +527,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_pbes_forall(p))
   {
 
-    data::data_variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, rewriter,use_internal_rewrite_format);
+    new_data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format,sigma);
 
     // If no data_vars
     if (data_vars.empty())
@@ -523,21 +541,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
          in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
-      data::fresh_variable_generator variable_generator;
+      new_data::fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
       variable_generator.set_context(expr);
       variable_generator.set_hint("x");
-      data::data_variable_list new_data_vars;
+      new_data::variable_list new_data_vars;
       atermpp::set < pbes_expression > conjunction_set;
       distribute_and(expr,conjunction_set);
       bool constructor_sorts_found=true;
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
-        for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+        for (new_data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (!is_constructorsort(i->sort(),data))
+          if (!new_data::detail::is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
-                new_data_vars=push_front(new_data_vars,*i);
+             new_data_vars = atermpp::push_front(new_data_vars, *i);
           }
           else
           {
@@ -550,48 +568,48 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                data::data_operation_list func=data.constructors(i->sort());
-                for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
+                for (new_data::data_specification::constructors_const_range rf(data.constructors(i->sort())); !rf.empty(); rf.advance_begin(1))
                 {
-                  data::sort_expression_list dsorts;
-                  if (f->sort().is_arrow())
+                  boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
+                  if (rf.front().sort().is_function_sort())
                   {
-                    data::sort_arrow sa=f->sort();
-                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                    new_data::function_sort sa=rf.front().sort();
+                    assert(!sa.codomain().is_function_sort()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
                                                            // This code must be replaced by enumerator code,
                                                            // developed by Wieger.
-                    dsorts=sa.argument_sorts();
+                    dsorts=sa.domain();
                   }
                   // else dsorts is empty.
 
                   // XXXXXXXXXXXXXX argument_sorts(), result_sort()  =source(f->sort());
-                  data::data_variable_list function_arguments;
-                  for( data::sort_expression_list::iterator s=dsorts.begin() ;
-                       s!=dsorts.end() ; s++ )
+                  new_data::variable_list function_arguments;
+                  for( new_data::sort_expression_list::const_iterator s=dsorts.begin() ;
+                       s!=dsorts.end() ; ++s )
                   { variable_generator.set_sort(*s);
-                    constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
-                    data::data_variable new_data_variable=variable_generator();
-                    no_variables++;
+                    constructor_sorts_found=constructor_sorts_found || new_data::detail::is_constructorsort(*s,data);
+                    new_data::variable new_variable=variable_generator();
+                    ++no_variables;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
-                      { std::cerr << "Vars: " << mcrl2::core::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                      { std::cerr << "Vars: " << mcrl2::new_data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars=push_front(new_data_vars,new_data_variable);
-                    function_arguments=push_front(function_arguments,new_data_variable);
+                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
+                    function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,d);
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
-                  rewriter->clearSubstitution(*i);
-                  if (pbes_expr::is_pbes_false(r)) /* the resulting expression is false, so we can terminate */
+                  pbes_expression d(core::detail::gsMakeDataApplList(rf.front(), new_data::convert< new_data::variable_list >(function_arguments)));
+                  sigma[*i]=d;
+                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma));
+                  sigma[*i] = *i; // erase *i
+                  if (pbes_expr::is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
                   {
                     return pbes_expr::false_();
                   }
                   else
-                  { new_conjunction_set.insert(r);
+                  {
+                    new_conjunction_set.insert(rt);
                   }
                 }
               }
@@ -600,19 +618,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           }
         }
         data_vars=new_data_vars;
-        new_data_vars=data::data_variable_list();
+        new_data_vars=new_data::variable_list();
       }
 
       if (!new_data_vars.empty())
       {
-        if (use_internal_rewrite_format)
-        { std::cerr << "Cannot eliminate universal quantifiers of variables " << mcrl2::core::pp(new_data_vars) << std::endl;
+        std::string message("Cannot eliminate universal quantifiers of variables ");
+
+        message.append(new_data::pp(new_data_vars));
+
+        if (!use_internal_rewrite_format)
+        {
+          message.append(" in ").append(mcrl2::core::pp(p));
         }
-        else
-        { std::cerr << "Cannot eliminate universal quantifiers of variables " << mcrl2::core::pp(new_data_vars) << " in " << mcrl2::core::pp(p) << std::endl;
-        }
-        std::cerr << "Aborting\n";
-        exit(1);
+
+        throw mcrl2::runtime_error(message);
       }
       result=make_conjunction(conjunction_set);
     }
@@ -620,8 +640,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   else if (is_pbes_exists(p))
   {
     // std::cerr << "EXISTS_: " << pp(p) << "\n";
-    data::data_variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, rewriter,use_internal_rewrite_format);
+    new_data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format,sigma);
     // std::cerr << "REWRITTEN EXPR " << pp(expr) << "\n";
     // If no data_vars
     if (data_vars.empty())
@@ -634,21 +654,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
          in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
-      data::fresh_variable_generator variable_generator;
+      new_data::fresh_variable_generator variable_generator;
       unsigned int no_variables=0;
       variable_generator.set_context(expr);
       variable_generator.set_hint("x");
-      data::data_variable_list new_data_vars;
+      new_data::variable_list new_data_vars;
       atermpp::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
       bool constructor_sorts_found=true;
       for( ; constructor_sorts_found ; )
       { constructor_sorts_found=false;
-        for (data::data_variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+        for (new_data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (!is_constructorsort(i->sort(),data))
+          if (!new_data::detail::is_constructorsort(i->sort(),data))
           { /* The sort of variable i is not a constructor sort.  */
-                new_data_vars=push_front(new_data_vars,*i);
+             new_data_vars = atermpp::push_front(new_data_vars, *i);
           }
           else
           {
@@ -661,49 +681,49 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                data::data_operation_list func=data.constructors(i->sort());
-                for (data::data_operation_list::iterator f=func.begin() ; f!=func.end(); f++)
+                for (new_data::data_specification::constructors_const_range rf(data.constructors(i->sort())); !rf.empty(); rf.advance_begin(1))
                 {
-                  data::sort_expression_list dsorts;
-                  if (f->sort().is_arrow())
+                  boost::iterator_range< new_data::sort_expression_list::const_iterator > dsorts;
+                  if (rf.front().sort().is_function_sort())
                   {
-                    data::sort_arrow sa=f->sort();
-                    assert(!sa.result_sort().is_arrow()); // In case the function f has a sort A->(B->C),
+                    new_data::function_sort sa=rf.front().sort();
+                    assert(!sa.codomain().is_function_sort()); // In case the function f has a sort A->(B->C),
                                                            // then the function below does not work correctly.
                                                            // This code must be replaced by enumerator code,
                                                            // developed by Wieger.
-                    dsorts=sa.argument_sorts();
+                    dsorts=sa.domain();
                   }
                   // else dsorts is empty.
 
                   // std::cerr << "Function " << f->name() << " Domain sorts " << dsorts << std::endl;
-                  data::data_variable_list function_arguments;
-                  for( data::sort_expression_list::iterator s=dsorts.begin() ;
-                       s!=dsorts.end() ; s++ )
+                  new_data::variable_list function_arguments;
+                  for( new_data::sort_expression_list::const_iterator s=dsorts.begin() ;
+                       s!=dsorts.end() ; ++s )
                   { variable_generator.set_sort(*s);
-                    constructor_sorts_found=constructor_sorts_found || is_constructorsort(*s,data);
-                    data::data_variable new_data_variable=variable_generator();
-                    no_variables++;
+                    constructor_sorts_found=constructor_sorts_found || new_data::detail::is_constructorsort(*s,data);
+                    new_data::variable new_variable=variable_generator();
+                    ++no_variables;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
-                      { std::cerr << "Vars: " << mcrl2::core::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                      { std::cerr << "Vars: " << mcrl2::new_data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
-                    new_data_vars=push_front(new_data_vars,new_data_variable);
-                    function_arguments=push_front(function_arguments,new_data_variable);
+                    new_data_vars = atermpp::push_front(new_data_vars, new_variable);
+                    function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(*f,reverse(function_arguments)));
-                  rewriter->setSubstitution(*i,d);
+                  pbes_expression d(core::detail::gsMakeDataApplList(rf.front(),new_data::convert< new_data::variable_list >(function_arguments)));
+                  // r.setSubstitution(*i,d);
+                  sigma[*i]=d;
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";
-                  pbes_expression r(pbes_expression_substitute_and_rewrite(*t,data,rewriter,use_internal_rewrite_format));
-                  rewriter->clearSubstitution(*i);
-                  if (pbes_expr::is_pbes_true(r)) /* the resulting expression is true, so we can terminate */
+                  pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma));
+                  sigma[*i] = *i; // erase *i
+                  if (pbes_expr::is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   { // std::cerr << "Return true\n";
                     return pbes_expr::true_();
                   }
                   else
-                  { new_disjunction_set.insert(r);
+                  { new_disjunction_set.insert(rt);
                   }
                 }
               }
@@ -712,19 +732,21 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           }
         }
         data_vars=new_data_vars;
-        new_data_vars=data::data_variable_list();
+        new_data_vars=new_data::variable_list();
       }
 
       if (!new_data_vars.empty())
       {
-        if (use_internal_rewrite_format)
-        { std::cerr << "Cannot eliminate existential quantifiers of variables " << mcrl2::core::pp(new_data_vars) << " in " << mcrl2::core::pp(p) << std::endl;
+        std::string message("Cannot eliminate existential quantifiers of variables ");
+
+        message.append(new_data::pp(new_data_vars));
+
+        if (!use_internal_rewrite_format)
+        {
+          message.append(" in ").append(mcrl2::core::pp(p));
         }
-        else
-        { std::cerr << "Cannot eliminate existential quantifiers of variables " << mcrl2::core::pp(new_data_vars) << std::endl;
-        }
-        std::cerr << "Aborting\n";
-        exit(1);
+
+        throw mcrl2::runtime_error(message);
       }
       result=make_disjunction(disjunction_set);
     }
@@ -734,40 +756,56 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   { // p is a propositional variable
     propositional_variable_instantiation propvar = p;
     core::identifier_string name = propvar.name();
-    data::data_expression_list parameters;
+    new_data::data_expression_list current_parameters(propvar.parameters());
+    new_data::data_expression_list parameters;
     if (use_internal_rewrite_format)
-    { parameters = rewriter->rewriteInternalList(propvar.parameters());
+    { assert(0);  // Treating the internal format separately is obsolete.
+      /* atermpp::term_list< new_data::data_expression > expressions(r.rewriteInternalList(
+        atermpp::term_list< new_data::data_expression >(current_parameters.begin(), current_parameters.end())));
+        parameters=new_data::data_expression_list(expressions.begin(), expressions.end()); 
+      */
     }
     else
-    { parameters = rewriter->rewriteList(propvar.parameters());
+    { 
+      for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
+           l != current_parameters.end(); ++l)
+      {
+        parameters = atermpp::push_front(parameters, r(*l,sigma));
+      }
+      parameters = atermpp::reverse(parameters);
+
+      /* atermpp::term_list< new_data::data_expression > expressions(r.rewriteList(
+        atermpp::term_list< new_data::data_expression >(current_parameters.begin(), current_parameters.end())));
+      parameters=new_data::data_expression_list(expressions.begin(), expressions.end()); */
     }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
   else
-  { // p is a data::data_expression
+  { // p is a new_data::data_expression
     if (use_internal_rewrite_format)
     {
-      data::data_expression d = (data::data_expression)rewriter->rewriteInternal((atermpp::aterm)p);
-      if (is_true_in_internal_rewrite_format(d,rewriter))
+      assert(0); // Internal format is not used any longer.
+      /* new_data::data_expression d = (new_data::data_expression)r.rewriteInternal((atermpp::aterm)p);
+      if (is_true_in_internal_rewrite_format(d,r))
       { result = pbes_expr::true_();
       }
-      else if (is_false_in_internal_rewrite_format(d,rewriter))
+      else if (is_false_in_internal_rewrite_format(d,r))
       { result = pbes_expr::false_();
       }
       else
       {
         result = d;
-      }
+      } */
     }
     else
     {
-      data::data_expression d = rewriter->rewrite(p);
+      new_data::data_expression d(r(p,sigma));
       // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
       // ATfprintf(stderr,"FORMAT: %t\n",(ATermAppl)(d));
-      if (data::data_expr::is_true(d))
+      if (d == new_data::sort_bool_::true_())
       { result = pbes_expr::true_();
       }
-      else if (data::data_expr::is_false(d))
+      else if (d == new_data::sort_bool_::false_())
       { result = pbes_expr::false_();
       }
       else

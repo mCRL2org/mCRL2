@@ -14,17 +14,16 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/data/sort_identifier.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
+using namespace mcrl2::new_data;
+using namespace mcrl2::new_data::detail;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -96,8 +95,8 @@ void test1()
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
 
-  // cout << mcrl2::core::pp(data_application(plus, make_list(n4, n5))) << endl;
-  BOOST_CHECK(r(data_application(plus, make_list(n4, n5))) == r(data_application(plus, make_list(n2, n7))));
+  // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
+  BOOST_CHECK(r(application(plus, n4, n5)) == r(application(plus, n2, n7)));
   specification spec1=rewrite_lps(spec,r);
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
   BOOST_CHECK(spec1.process().summands().size()==1);

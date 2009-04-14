@@ -13,13 +13,12 @@ mcrl2-library core
          source/print.cpp
          source/print_c.cpp
          source/messaging.cpp
-         source/data_implementation_concrete.cpp
          source/data_common.cpp
-         source/data_reconstruct.cpp
          source/alpha.cpp
          source/aterm_ext.cpp
          source/numeric_string.cpp
        : <library>/libraries//atermpp
+         <include>../../new_data/include
          <include>../include
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic

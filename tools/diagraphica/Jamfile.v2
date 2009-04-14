@@ -4,7 +4,6 @@ tool diagraphica
       : [ glob *.cpp ]
         /libraries/utilities//spinctrlfloat
         /libraries/utilities//colorbutton
-        /libraries/utilities//command_line_interfacing
         /libraries//core
         /libraries//lts
         /libraries//ticpp

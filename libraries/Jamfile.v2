@@ -2,7 +2,7 @@ project libraries ;
 
 # returns the list of mcrl2 library components
 rule mcrl2-library-components ( ) {
-  return aterm atermpp svc core data utilities lps lts trace pbes ;
+  return aterm atermpp svc core new_data utilities lps lts trace pbes ;
 }
 
 for library in [ mcrl2-library-components ] {

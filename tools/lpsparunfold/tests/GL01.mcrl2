@@ -1,0 +1,23 @@
+%Example from GL01
+
+sort Frame, D, Bit;
+cons frame: D#Bit -> Frame;
+     void : Frame;
+     d1: D;
+     d2: D;
+     b0: Bit;
+     b1: Bit;
+map  data: Frame -> D;
+     bit: Frame -> Bit;
+var  d:D;
+     b:Bit; 
+eqn  data(frame(d,b)) = d;
+     bit(frame(d,b))  = b;
+     data(void)       = d1;
+     bit(void)        = b0;
+
+proc P(f: Frame)=
+      sum d0:D. ((data(f) == d2) || (bit(f) == b0 ))-> tau . P(frame(d0, bit(f)))
+    + sum b:Bit.(b == b0) -> tau . P(frame(data(f),b));
+
+init P(frame(d1,b0));

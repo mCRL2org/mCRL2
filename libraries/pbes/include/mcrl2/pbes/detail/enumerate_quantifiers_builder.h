@@ -26,7 +26,7 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/core/sequence.h"
 #include "mcrl2/core/detail/join.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/find.h"
 
@@ -43,13 +43,13 @@ namespace detail {
   /// \param finite_variables A sequence of data variables
   /// \param infinite_variables A sequence of data variables
   inline
-  void split_finite_variables(data::data_variable_list variables, const data::data_specification& data, data::data_variable_list& finite_variables, data::data_variable_list& infinite_variables)
+  void split_finite_variables(new_data::variable_list variables, const new_data::data_specification& data, new_data::variable_list& finite_variables, new_data::variable_list& infinite_variables)
   {
-    std::vector<data::data_variable> finite;
-    std::vector<data::data_variable> infinite;
-    for (data::data_variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+    std::vector<new_data::variable> finite;
+    std::vector<new_data::variable> infinite;
+    for (new_data::variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
     {
-      if (data.is_finite(i->sort()))
+      if (data.is_certainly_finite(i->sort()))
       {
         finite.push_back(*i);
       }
@@ -58,8 +58,8 @@ namespace detail {
         infinite.push_back(*i);
       }
     }
-    finite_variables = data::data_variable_list(finite.begin(), finite.end());
-    infinite_variables = data::data_variable_list(infinite.begin(), infinite.end());
+    finite_variables = new_data::variable_list(finite.begin(), finite.end());
+    infinite_variables = new_data::variable_list(infinite.begin(), infinite.end());
   }
 
   /// \brief Returns a string representation of a container
@@ -146,8 +146,8 @@ namespace detail {
       template <typename SubstitutionFunction>
       struct sequence_assign
       {
-        typedef typename SubstitutionFunction::variable_type variable_type;
-        typedef typename SubstitutionFunction::term_type     term_type;
+        typedef typename SubstitutionFunction::variable_type   variable_type;
+        typedef typename SubstitutionFunction::expression_type term_type;
 
         SubstitutionFunction& sigma_;
 
@@ -216,7 +216,7 @@ namespace detail {
         {
           PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << sigma_.to_string() << " dependencies = " << print_term_container(v_) << std::endl;
+  std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << to_string(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
           if (stop_(c))
           {
@@ -268,7 +268,7 @@ namespace detail {
                   << (tr::is_false(stop_value) ? "forall " : "exists ")
                   << core::pp(x) << ". "
                   << core::pp(phi)
-                  << sigma.to_string() << std::endl;
+                  << to_string(sigma) << std::endl;
       }
 
       /// \brief Returns a string representation of D[i]
@@ -373,7 +373,8 @@ namespace detail {
             bool is_constant = true;
 
             D[k].erase(std::find(D[k].begin(), D[k].end(), y));
-            for (typename variable_sequence_type::iterator i = y.variables().begin(); i != y.variables().end(); ++i)
+            variable_sequence_type variables(y.variables());
+            for (typename variable_sequence_type::iterator i = variables.begin(); i != variables.end(); ++i)
             {
               dependencies.erase(*i);
             }
@@ -407,7 +408,9 @@ namespace detail {
                 }
                 else
                 {
-                  for (typename variable_sequence_type::iterator j = i->variables().begin(); j != i->variables().end(); ++j)
+                  variable_sequence_type variables(i->variables());
+
+                  for (typename variable_sequence_type::iterator j = variables.begin(); j != variables.end(); ++j)
                   {
                     dependencies.erase(*j);
                   }
@@ -424,7 +427,7 @@ namespace detail {
           // remove the added substitutions from sigma
           for (typename variable_sequence_type::const_iterator j = x.begin(); j != x.end(); ++j)
           {
-            sigma.erase(*j);
+            sigma[*j] = *j; // erase *j
           }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
   std::cerr << "<return>stop early: " << core::pp(stop_value) << std::endl;
@@ -435,7 +438,7 @@ namespace detail {
         // remove the added substitutions from sigma
         for (typename variable_sequence_type::const_iterator i = x.begin(); i != x.end(); ++i)
         {
-          sigma.erase(*i);
+          sigma[*i] = *i; // erase *i
         }
         term_type result = join(A.begin(), A.end());
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
@@ -516,8 +519,8 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list finite;
-        data::data_variable_list infinite;
+        new_data::variable_list finite;
+        new_data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {
@@ -545,8 +548,8 @@ namespace detail {
       }
       else
       {
-        data::data_variable_list finite;
-        data::data_variable_list infinite;
+        new_data::variable_list finite;
+        new_data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {

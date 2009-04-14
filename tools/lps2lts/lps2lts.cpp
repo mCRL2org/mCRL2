@@ -143,7 +143,7 @@ bool parse_command_line(int ac, char** av, lts_generation_options& options) {
     options.removeunused    = parser.options.count("unused-data") == 0;
     options.detect_deadlock = parser.options.count("deadlock");
     options.outinfo         = parser.options.count("no-info") == 0;
-    options.strat           = parser.option_argument_as< RewriteStrategy >("rewriter");
+    options.strat           = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
 
     if (parser.options.count("dummy")) {
       if (parser.options.count("dummy") > 1) {

@@ -13,15 +13,15 @@
 #include <iterator>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/new_data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
 
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -80,7 +80,8 @@ void test_lps_rename()
 
   for (summand_list::iterator i = q.summands().begin(); i != q.summands().end(); ++i)
   {
-    for (data_variable_list::iterator j = i->summation_variables().begin(); j != i->summation_variables().end(); ++j)
+    variable_list summation_variables(i->summation_variables());
+    for (variable_list::iterator j = summation_variables.begin(); j != summation_variables.end(); ++j)
     {
       BOOST_CHECK(std::find(forbidden_names.begin(), forbidden_names.end(), j->name()) == forbidden_names.end());
     }

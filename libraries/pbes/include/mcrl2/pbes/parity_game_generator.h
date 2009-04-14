@@ -19,8 +19,9 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/new_data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 
@@ -57,25 +58,25 @@ namespace pbes_system {
       typedef core::term_traits<pbes_expression> tr;
 
       /// \brief Substitution function type used by the PBES rewriter.
-      typedef data::rewriter_map<std::map<data::data_variable, data::data_expression_with_variables> > substitution_function;
+      typedef new_data::mutable_substitution<new_data::variable, new_data::data_expression_with_variables> substitution_function;
 
       /// \brief The PBES that is being solved.
       const pbes<>& m_pbes;
 
       /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
-      data::number_postfix_generator generator;
+      new_data::number_postfix_generator generator;
 
       /// \brief Data rewriter.
-      data::rewriter datar;
+      new_data::rewriter datar;
 
       /// \brief Data enumerator.
-      data::data_enumerator<> datae;
+      new_data::data_enumerator<> datae;
 
       /// \brief Data rewriter that operates on data expressions with variables.
-      data::rewriter_with_variables datarv;
+      new_data::rewriter_with_variables datarv;
 
       /// \brief PBES rewriter.
-      pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R;
+      pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > R;
 
       /// \brief Maps propositional variables to corresponding PBES equations.
       std::map<core::identifier_string, atermpp::vector<pbes_equation>::const_iterator > m_pbes_equation_index;
@@ -124,12 +125,12 @@ namespace pbes_system {
       /// \param v A sequence of data variables
       /// \param e A sequence of data expressions
       /// \return A sugstitution function.
-      substitution_function make_substitution(data::data_variable_list v, data::data_expression_list e)
+      substitution_function make_substitution(new_data::variable_list v, new_data::data_expression_list e)
       {
         assert(v.size() == e.size());
         substitution_function sigma;
-        data::data_variable_list::iterator i = v.begin();
-        data::data_expression_list::iterator j = e.begin();
+        new_data::variable_list::iterator i = v.begin();
+        new_data::data_expression_list::iterator j = e.begin();
         for (; i != v.end(); ++i, ++j)
         {
           sigma[*i] = *j;

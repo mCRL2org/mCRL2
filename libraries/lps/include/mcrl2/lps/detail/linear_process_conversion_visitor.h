@@ -35,10 +35,10 @@ namespace detail {
     process_equation m_equation;
 
     /// \brief Contains intermediary results.
-    data::data_variable_list m_sum_variables;
+    new_data::variable_list m_sum_variables;
 
     /// \brief Contains intermediary results.
-    data::data_assignment_list m_next_state;
+    new_data::assignment_list m_next_state;
 
     /// \brief Contains intermediary results.
     multi_action m_multi_action;
@@ -51,9 +51,9 @@ namespace detail {
 
     /// \brief True if m_multi_action was changed.
     bool m_multi_action_changed;
-    
+
     /// \brief Contains intermediary results.
-    data::data_expression m_condition;
+    new_data::data_expression m_condition;
 
     /// \brief Contains intermediary results.
     summand m_summand;
@@ -72,14 +72,14 @@ namespace detail {
 
     void clear_summand()
     {
-      m_sum_variables = data::data_variable_list();
+      m_sum_variables = new_data::variable_list();
       m_summand = summand();
       m_deadlock = deadlock();
       m_deadlock_changed = false;
       m_multi_action = multi_action();
       m_multi_action_changed = false;
-      m_condition = data::data_expr::true_();
-      m_next_state = data::data_assignment_list();
+      m_condition = new_data::sort_bool_::true_();
+      m_next_state = new_data::assignment_list();
     }
 
     void add_summand()
@@ -88,7 +88,7 @@ namespace detail {
       {
         if ( (m_multi_action != multi_action()) || m_multi_action_changed)
         {
-          if (m_next_state == data::data_assignment_list())
+          if (m_next_state == new_data::assignment_list())
           {
             throw unsupported_linear_process();
           }
@@ -138,7 +138,7 @@ namespace detail {
 
     /// \brief Visit action node
     /// \return The result of visiting the node
-    bool visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
+    bool visit_action(const process_expression& x, const action_label& l, const new_data::data_expression_list& v)
     {
       m_multi_action = multi_action(x);
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
@@ -147,7 +147,7 @@ namespace detail {
 
     /// \brief Visit sum node
     /// \return The result of visiting the node
-    bool visit_sum(const process_expression& x, const data::data_variable_list& v, const process_expression& right)
+    bool visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right)
     {
       visit(right);
       m_sum_variables = m_sum_variables + v;
@@ -210,7 +210,7 @@ namespace detail {
 
     /// \brief Visit at_time node
     /// \return The result of visiting the node
-    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at_time(const process_expression& x, const process_expression& left, const new_data::data_expression& d)
     {
       visit(left);
       if (tr::is_delta(x))
@@ -232,14 +232,14 @@ namespace detail {
     {
       visit(left);
       process p = right;
-      m_next_state = data::make_assignment_list(m_equation.variables2(), p.expressions());
+      m_next_state = new_data::make_assignment_list(m_equation.variables2(), p.expressions());
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
     }
 
     /// \brief Visit if_then node
     /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const process_expression& x, const new_data::data_expression& d, const process_expression& right)
     {
       visit(right);
       m_condition = d;
@@ -249,12 +249,12 @@ namespace detail {
 
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const process_expression& x, const new_data::data_expression& d, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
     }
-  
+
     /// \brief Visit binit node
     /// \return The result of visiting the node
     bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
@@ -278,7 +278,7 @@ namespace detail {
       throw non_linear_process();
       return continue_recursion;
     }
-    
+
     /// \brief Visit choice node
     /// \return The result of visiting the node
     bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
@@ -323,26 +323,26 @@ namespace detail {
     /// Throws \p non_linear_process if the process is not linear.
     specification convert(const process_specification& p)
     {
-      data::data_variable_list m_process_parameters;
+      new_data::variable_list m_process_parameters;
       result.clear();
 
       for (process_equation_list::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-        data::data_variable_list parameters = i->variables2();
-        if (m_process_parameters != data::data_variable_list() && m_process_parameters != parameters)
+        new_data::variable_list parameters = i->variables2();
+        if (m_process_parameters != new_data::variable_list() && m_process_parameters != parameters)
         {
           std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
         }
         m_process_parameters = parameters;
         convert(*i);
       }
-      linear_process lp(data::data_variable_list(), m_process_parameters, summand_list(result.begin(), result.end()));
+      linear_process lp(new_data::variable_list(), m_process_parameters, summand_list(result.begin(), result.end()));
       if (!tr::is_process(p.init().expression()))
       {
         std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
       }
       process q = p.init().expression();
-      process_initializer init(p.init().variables(), data::make_assignment_list(m_process_parameters, q.expressions()));
+      process_initializer init(p.init().variables(), new_data::make_assignment_list(m_process_parameters, q.expressions()));
       return specification(p.data(), p.action_labels(), lp, init);
     }
   };
