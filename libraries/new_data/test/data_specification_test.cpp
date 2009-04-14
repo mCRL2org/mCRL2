@@ -428,6 +428,18 @@ void test_system_defined()
   compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
 }
 
+void test_copy()
+{
+  data_specification specification(parse_data_specification(
+    "sort D = struct d(bla : Bool)?is_d;"
+    "sort S;"
+    "map f: Set(S);"));
+
+  data_specification other(specification);
+
+  BOOST_CHECK(other == specification);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -439,6 +451,7 @@ int test_main(int argc, char** argv)
   test_is_certainly_finite();
   test_constructor();
   test_system_defined();
+  test_copy();
 
   return EXIT_SUCCESS;
 }
