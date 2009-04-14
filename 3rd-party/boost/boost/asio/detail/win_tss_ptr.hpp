@@ -2,7 +2,7 @@
 // win_tss_ptr.hpp
 // ~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,6 +24,7 @@
 
 #if defined(BOOST_WINDOWS)
 
+#include <boost/asio/error.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 
@@ -40,15 +41,22 @@ class win_tss_ptr
   : private noncopyable
 {
 public:
+#if defined(UNDER_CE)
+  enum { out_of_indexes = 0xFFFFFFFF };
+#else
+  enum { out_of_indexes = TLS_OUT_OF_INDEXES };
+#endif
+
   // Constructor.
   win_tss_ptr()
   {
     tss_key_ = ::TlsAlloc();
-    if (tss_key_ == TLS_OUT_OF_INDEXES)
+    if (tss_key_ == out_of_indexes)
     {
       DWORD last_error = ::GetLastError();
       boost::system::system_error e(
-          boost::system::error_code(last_error, boost::system::native_ecat),
+          boost::system::error_code(last_error,
+            boost::asio::error::get_system_category()),
           "tss");
       boost::throw_exception(e);
     }

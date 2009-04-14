@@ -1,21 +1,29 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/option.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/option.hpp
+/// \brief Type used to represent an option in a configuration (protocol concept)
 
-#ifndef TIPI_OPTION_H
-#define TIPI_OPTION_H
+#ifndef _TIPI_CONFIGURATION_OPTION_HPP__
+#define _TIPI_CONFIGURATION_OPTION_HPP__
 
-#include <vector>
-#include <string>
-
-#include <boost/any.hpp>
-#include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/call_traits.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_enum.hpp>
+#include <boost/type_traits/is_pod.hpp>
+#include <boost/type_traits/is_floating_point.hpp>
+#include <boost/type_traits/is_integral.hpp>
+#include <boost/type_traits/remove_const.hpp>
+#include <boost/type_traits/remove_reference.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include "tipi/basic_datatype.hpp"
-#include "tipi/parameter.hpp"
 
 #ifndef NDEBUG
 # include <typeinfo>
@@ -23,10 +31,56 @@
 
 namespace tipi {
 
-  class configuration;
+  /// \cond INTERNAL_DOCS
+  namespace detail {
+    template < typename S, typename E = void >
+    struct guess_type {
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_enum< S >::type >::type > {
+      typedef datatype::enumeration< S > type;
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_floating_point< S >::type >::type > {
+      typedef datatype::real_range< S, true, true > type;
+    };
+
+    template < typename S >
+    struct guess_type< S, typename boost::enable_if< typename boost::is_integral< S >::type >::type > {
+      typedef datatype::integer_range< S > type;
+    };
+
+    template < >
+    struct guess_type< bool, void > {
+      typedef datatype::boolean type;
+    };
+
+    template < >
+    struct guess_type< std::string, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< const char*, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< char*, void > {
+      typedef datatype::string type;
+    };
+
+    template < >
+    struct guess_type< char* const, void > {
+      typedef datatype::string type;
+    };
+  }
+  /// \endcond
 
   /** \brief Describes a single option (or option instance) the basic building block of a tool configuration */
-  class option : public tipi::parameter {
+  class configuration::option : public configuration::parameter {
     friend class tipi::configuration;
 
     template < typename R, typename S >
@@ -35,15 +89,12 @@ namespace tipi {
     private:
 
       /** \brief Type for argument to value mapping */
-      typedef std::pair < datatype::basic_datatype::sptr, std::string > type_value_pair;
+      typedef std::pair < boost::shared_ptr< datatype::basic_datatype >, std::string > type_value_pair;
 
       /** \brief Container for lists of arguments to lists of value mapping */
       typedef std::vector < type_value_pair >                           type_value_list;
 
     public:
-
-      /** \brief Convenience type to hide the shared pointer wrapping */
-      typedef boost::shared_ptr < option >  sptr;
 
       /** \brief Iterator over the argument values */
       class argument_iterator {
@@ -58,17 +109,30 @@ namespace tipi {
 
         public:
 
-          /** \brief Constructor */
-          inline argument_iterator(type_value_list::const_iterator, type_value_list::const_iterator);
+          /** \brief Constructor
+           * \param b the iterator from which to start
+           * \param e the iterator with which to end
+           **/
+          inline argument_iterator(type_value_list::const_iterator& b, type_value_list::const_iterator& e) : iterator(b), end(e) {
+          }
 
           /** \brief Whether the iterator has moved past the end of the sequence */
-          inline bool valid() const;
+          inline bool valid() const {
+            return (iterator != end);
+          }
 
           /** \brief Advances to the next element */
-          inline void operator++();
+          inline void operator++() {
+            ++iterator;
+          }
 
           /** \brief Returs a functor that, when invoked, returns a value */
-          inline boost::any operator*() const;
+          template < typename T >
+          inline T operator*() const {
+            tipi::datatype::basic_datatype* p = (*iterator).first.get();
+
+            return (p->evaluate< T >((*iterator).second));
+          }
       };
 
     private:
@@ -87,70 +151,105 @@ namespace tipi {
       bool takes_arguments() const;
 
       /** \brief Returns the value of the first argument */
-      boost::any get_value(size_t const&) const;
-
-      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
-      boost::iterator_range< type_value_list::const_iterator > get_value_iterator() const;
-
-      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
-      boost::iterator_range< type_value_list::iterator > get_value_iterator();
-
-      /** \brief Append to the type (option takes an additional argument of the specified type) */
-      void append_type(datatype::basic_datatype::sptr const&);
-
-      /** \brief Append to the type (option takes an additional argument of the specified type) */
-      template < typename S >
-      void append_type();
-
-      /** \brief Append type and instance ... */
-      template < typename S, typename T >
-      void append_argument(S const&, T const&);
-
-      /** \brief Append type and instance ... */
-      template < typename S, typename T >
-      void append_argument(T const&);
-
-      /** \brief Special function to set/replace the value first argument ... */
-      template < unsigned int n, typename S, typename T >
-      void set_argument_value(T const&, bool = true);
-
-      /** \brief Replace an argument (type and instance) ... */
       template < typename T >
-      void replace_argument(unsigned int const& n, datatype::basic_datatype::sptr, T const&);
+      T get_value(size_t const&) const;
 
-      /** \brief Assigns a value to the n-th argument of the option */
-      void bind_argument(const size_t n, std::string const&);
+      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
+      inline boost::iterator_range< type_value_list::const_iterator > get_value_iterator() const {
+        return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
+      }
+
+      /** \brief Gets an iterator that in order of appearance returns the values for each argument */
+      inline boost::iterator_range< type_value_list::iterator > get_value_iterator() {
+        return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
+      }
+
+      /**
+       * \brief Append type and instance ...
+       * \param[in] t smart pointer to the data type definition
+       * \param[in] d data that must be an instance of the chosen data type
+       **/
+      template < typename S, typename T >
+      inline void append_argument(boost::shared_ptr< S > const& t, typename boost::call_traits< const T >::param_type d) {
+        m_arguments.push_back(std::make_pair(t, convert(*t, d)));
+      }
+
+      /**
+       * \brief Append type and instance ...
+       * \param[in] d data that must be an instance of the chosen data type
+       **/
+      template < typename T >
+      inline void append_argument(typename boost::enable_if< typename boost::is_enum< T >::type, const T >::type d) {
+        boost::shared_ptr< datatype::basic_datatype > p(new datatype::enumeration< T >);
+
+        append_argument< datatype::basic_datatype, T >(p, d);
+      }
+
+      /**
+       * \brief Special function to set/replace the value of an argument ...
+       * \param[in] t pointer to the data type definition
+       * \param[in] b whether or not to add if the argument is already present
+       **/
+      template < unsigned int n, typename S, typename T >
+      inline typename boost::enable_if< typename boost::is_pod< T >::type, void >::type
+      set_argument_value(const T t, bool b = true) {
+        if (n < m_arguments.size()) {
+          if (b) {
+            if (dynamic_cast< S const* > (m_arguments[n].first.get())) {
+              m_arguments[n].second = convert(*m_arguments[n].first,t);
+            }
+            else {
+              boost::shared_ptr< S > a_type(new S);
+
+              m_arguments[n] = std::make_pair(a_type, convert(*a_type,t));
+            }
+          }
+        }
+        else {
+          append_argument< S, T >(boost::shared_ptr< S >(new S), t);
+        }
+      }
+
+      /**
+       * \brief Special function to set/replace the value of an argument ...
+       * \param[in] t pointer to the data type definition
+       * \param[in] b whether or not to add if the argument is already present
+       **/
+      template < unsigned int n, typename T >
+      inline void set_argument_value(const T t, bool b = true) {
+        typedef typename detail::guess_type< typename boost::remove_const<
+                typename boost::remove_reference< T >::type >::type >::type guessed_type;
+
+        if (n < m_arguments.size()) {
+          if (b) {
+            if (dynamic_cast< guessed_type const* > (m_arguments[n].first.get())) {
+              m_arguments[n].second = convert(*m_arguments[n].first, t);
+            }
+            else {
+              boost::shared_ptr< guessed_type > a_type(new guessed_type);
+
+              m_arguments[n] = std::make_pair(a_type, convert(*a_type,t));
+            }
+          }
+        }
+        else {
+          append_argument< guessed_type, T >(boost::shared_ptr< guessed_type >(new guessed_type), t);
+        }
+      }
+
+      /** \brief Special function to set/replace the value of an argument ... */
+      template < unsigned int n, typename S, typename T >
+      inline typename boost::disable_if< typename boost::is_pod< T >::type, void >::type
+      set_argument_value(T const&, bool = true);
 
       /** \brief Clears the list of arguments */
       void clear();
   };
 
-  /**
-   * \param b the iterator from which to start
-   * \param e the iterator with which to end
-   **/
-  inline option::argument_iterator::argument_iterator
-          (type_value_list::const_iterator b, type_value_list::const_iterator e) : iterator(b), end(e) {
+  inline configuration::option::option() {
   }
 
-  inline bool option::argument_iterator::valid() const {
-    return (iterator != end);
-  }
-
-  inline void option::argument_iterator::operator++() {
-    ++iterator;
-  }
-
-  inline boost::any option::argument_iterator::operator*() const {
-    tipi::datatype::basic_datatype* p = (*iterator).first.get();
-
-    return (p->evaluate((*iterator).second));
-  }
-
-  inline option::option() {
-  }
-
-  inline bool option::takes_arguments() const {
+  inline bool configuration::option::takes_arguments() const {
     return (m_arguments.size() != 0);
   }
 
@@ -158,42 +257,11 @@ namespace tipi {
    * \param[in] n the argument of which to return the value
    * \pre the option must have at least n arguments
    **/
-  inline boost::any option::get_value(size_t const& n) const {
+  template < typename T >
+  inline T configuration::option::get_value(size_t const& n) const {
     assert(n < m_arguments.size());
 
-    return (m_arguments[n].first->evaluate(m_arguments[0].second));
-  }
-
-  inline boost::iterator_range < option::type_value_list::const_iterator > option::get_value_iterator() const {
-    return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
-  }
-
-  inline boost::iterator_range < option::type_value_list::iterator > option::get_value_iterator() {
-    return (boost::make_iterator_range(m_arguments.begin(), m_arguments.end()));
-  }
-
-  inline void option::append_type(datatype::basic_datatype::sptr const& t) {
-    assert(t.get() != 0);
-
-    m_arguments.push_back(std::make_pair(t, ""));
-  }
-
-  template < typename S >
-  inline void option::append_type() {
-    boost::shared_ptr < S > p(new S);
-
-    m_arguments.push_back(std::make_pair(p, ""));
-  }
-
-  /**
-   * \param[in] t smart pointer to the data type definition
-   * \param[in] d data that must be an instance of the chosen data type
-   **/
-  template < typename S, typename T >
-  inline void option::append_argument(S const& t, T const& d) {
-    assert(t.get() != 0);
-
-    append_argument(boost::static_pointer_cast < tipi::datatype::basic_datatype > (t), t->convert(d));
+    return tipi::datatype::convert< T >(*m_arguments[n].first, m_arguments[n].second);
   }
 
   /**
@@ -201,80 +269,30 @@ namespace tipi {
    * \param[in] d data that must be an instance of the chosen data type
    **/
   template < >
-  inline void option::append_argument(datatype::basic_datatype::sptr const& t, std::string const& d) {
-    assert(t.get() != 0);
+  inline void configuration::option::append_argument< datatype::basic_datatype, const std::string >(
+    boost::shared_ptr< datatype::basic_datatype > const& t, boost::call_traits< const std::string >::param_type d) {
 
     assert(t->validate(d));
 
     m_arguments.push_back(std::make_pair(t, d));
   }
 
-  /**
-   * \param[in] d data that must be an instance of the chosen data type
-   **/
-  template < typename S, typename T >
-  inline void option::append_argument(T const& d) {
-    boost::shared_ptr < S > p(new S);
-
-    append_argument(p, d);
-  }
-
-  /**
-   * \param[in] t pointer to the data type definition
-   * \param[in] b whether or not to add if the argument is already present
-   **/
   template < unsigned int n, typename S, typename T >
-  void option::set_argument_value(T const& t, bool b) {
+  inline typename boost::disable_if< typename boost::is_pod< T >::type, void >::type
+  configuration::option::set_argument_value(T const& t, bool b) {
     if (n < m_arguments.size()) {
       if (b) {
         assert(typeid(S) == typeid(*m_arguments[n].first));
 
-        m_arguments[n].second = m_arguments[n].first->convert(t);
+        m_arguments[n].second = convert(*m_arguments[n].first, t);
       }
     }
     else {
-      append_argument< S >(t);
+      append_argument< S, T >(boost::shared_ptr< S >(new S), t);
     }
   }
 
-  /**
-   * \param[in] n the index of the element to replace
-   * \param[in] t pointer to the data type definition
-   * \param[in] d data that is valid w.r.t. the data type
-   **/
-  template < typename T >
-  inline void option::replace_argument(unsigned int const& n, datatype::basic_datatype::sptr t, T const& d) {
-    assert(t.get() != 0);
-
-    replace_argument(n, t, t->convert(d));
-  }
-
-  /**
-   * \param[in] n the index of the element to replace
-   * \param[in] t pointer to the data type definition
-   * \param[in] d data that is valid w.r.t. the data type
-   **/
-  template < >
-  inline void option::replace_argument(unsigned int const& n, datatype::basic_datatype::sptr t, std::string const& d) {
-    assert(t.get() != 0);
-    assert(0 <= n && n < m_arguments.size());
-    assert(t->validate(d));
-
-    m_arguments[n] = std::make_pair(t, d);
-  }
-
-  /**
-   * \param[in] i the index of the element to replace
-   * \param[in] d data that is valid w.r.t. the data type
-   **/
-  inline void option::bind_argument(const size_t i, std::string const& d) {
-    assert(0 <= i && i < m_arguments.size());
-    assert(m_arguments[i].first->validate(d));
-
-    m_arguments[i].second = d;
-  }
-
-  inline void option::clear() {
+  inline void configuration::option::clear() {
     m_arguments.clear();
   }
 }

@@ -18,12 +18,13 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/begin.hpp>
 #include <boost/range/end.hpp>
-#include <boost/range/result_iterator.hpp>
+#include <boost/range/iterator.hpp>
+#include <boost/range/as_literal.hpp>
 
 #include <boost/algorithm/string/detail/find_iterator.hpp>
 
 /*! \file
-    Defines find iterator classes. Find iterator repeatly applies a Finder
+    Defines find iterator classes. Find iterator repeatedly applies a Finder
     to the specified input string to search for matches. Dereferencing
     the iterator yields the current match or a range between the last and the current
     match depending on the iterator used.
@@ -56,12 +57,6 @@ namespace boost {
         private:
             // facade support
             friend class ::boost::iterator_core_access;
-
-            // base type
-            typedef iterator_facade<
-                find_iterator<IteratorT>,
-                const iterator_range<IteratorT>,
-                forward_traversal_tag> facade_type;
 
         private:
         // typedefs
@@ -116,10 +111,12 @@ namespace boost {
             find_iterator(
                     RangeT& Col,
                     FinderT Finder ) :
-                detail::find_iterator_base<IteratorT>(Finder,0),
-                m_Match(begin(Col),begin(Col)),
-                m_End(end(Col))
+                detail::find_iterator_base<IteratorT>(Finder,0)
             {
+                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(as_literal(Col));
+                m_Match=make_iterator_range(::boost::begin(lit_col), ::boost::begin(lit_col));
+                m_End=::boost::end(lit_col);
+
                 increment();
             }
 
@@ -182,13 +179,13 @@ namespace boost {
          */
         template<typename RangeT, typename FinderT>
         inline find_iterator< 
-            BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>
+            BOOST_STRING_TYPENAME range_iterator<RangeT>::type>
         make_find_iterator(
             RangeT& Collection,
             FinderT Finder)
         {
-            return find_iterator<BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>(
-                begin(Collection), end(Collection), Finder);
+            return find_iterator<BOOST_STRING_TYPENAME range_iterator<RangeT>::type>(
+                Collection, Finder);
         }
 
 //  split iterator -----------------------------------------------//
@@ -216,12 +213,6 @@ namespace boost {
         private:
             // facade support
             friend class ::boost::iterator_core_access;
-
-            // base type
-            typedef iterator_facade<
-                find_iterator<IteratorT>,
-                iterator_range<IteratorT>,
-                forward_traversal_tag> facade_type;
 
         private:
         // typedefs
@@ -280,11 +271,13 @@ namespace boost {
                     RangeT& Col,
                     FinderT Finder ) :
                 detail::find_iterator_base<IteratorT>(Finder,0),
-                m_Match(begin(Col),begin(Col)),
-                m_Next(begin(Col)),
-                m_End(end(Col)),
                 m_bEof(false)
             {
+                iterator_range<BOOST_STRING_TYPENAME range_iterator<RangeT>::type> lit_col(as_literal(Col));
+                m_Match=make_iterator_range(::boost::begin(lit_col), ::boost::begin(lit_col));
+                m_Next=::boost::begin(lit_col);
+                m_End=::boost::end(lit_col);
+
                 increment();
             }
 
@@ -358,13 +351,13 @@ namespace boost {
          */
         template<typename RangeT, typename FinderT>
         inline split_iterator< 
-            BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>
+            BOOST_STRING_TYPENAME range_iterator<RangeT>::type>
         make_split_iterator(
             RangeT& Collection,
             FinderT Finder)
         {
-            return split_iterator<BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>(
-                begin(Collection), end(Collection), Finder);
+            return split_iterator<BOOST_STRING_TYPENAME range_iterator<RangeT>::type>(
+                Collection, Finder);
         }
 
 

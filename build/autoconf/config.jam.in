@@ -3,55 +3,27 @@ rule import_user_config {
   import toolset ;
 
   # For C/C++ programs
-  toolset.using @BJAM_CXX@ ;
+  toolset.using @BJAM_CXX@ : : : @TOOLSET_FLAGS@ ;
 }
 
-# Build specific settings
-BUILD_VARIANT      = "@BUILD_VARIANT@" ;
-LINK_VARIANT       = [ MATCH link=(.*) : [ modules.peek : ARGV ] ] ;
-
-if ! $(LINK_VARIANT) {
-  LINK_VARIANT = "@LINK_VARIANT@" ;
-}
-
-if ! [ MATCH (address-model).* : [ modules.peek : ARGV ] ] {
-  ADDRESS_MODEL = "@ADDRESS_MODEL@" ;
-}
-
-if ! ( "@OPTIMISATIONS@" = "disable" ) {
-  OPTIMISATIONS = <optimization>speed ;
-}
-else {
-  OPTIMISATIONS = <optimization>off ;
-}
-
-BUILD_EXTRA = "@BUILD_EXTRA@" ;
+# Build specific settings (Boost Build v2 default command line arguments)
+BUILD_OPTIONS  = pch=off @BUILD_OPTIONS@ ;
 
 # Library specific variables
-WX_CPPFLAGS        = "@WX_CPPFLAGS@" ;
-WX_BASE_LDFLAGS    = "@WX_BASE_LDFLAGS@" ;
-WX_GL_LDFLAGS      = "@WX_GL_LDFLAGS@" ;
+WX_CPPFLAGS        = @WX_CPPFLAGS@ ;
+WX_BASE_LDFLAGS    = @WX_BASE_LDFLAGS@ ;
+WX_GL_LDFLAGS      = @WX_GL_LDFLAGS@ ;
+WX_TYPE            = @WX_TYPE@ ;
 
-OPENGL_NAME        = "@OPENGL_NAME@" ;
-OPENGL_IPATH       = "@OPENGL_IPATH@" ;
-OPENGL_LPATH       = "@OPENGL_LPATH@" ;
+OPENGL_NAME        = @OPENGL_NAME@ ;
+OPENGL_IPATH       = @OPENGL_IPATH@ ;
+OPENGL_LPATH       = @OPENGL_LPATH@ ;
 
-CADP_HEADERS       = "@CADP_HEADERS@" ;
-CADP_LIBRARIES     = "@CADP_LIBRARIES@" ;
+CADP_HEADERS       = @CADP_HEADERS@ ;
+CADP_LIBRARIES     = @CADP_LIBRARIES@ ;
 
-BOOST_INCLUDE_PATH = "@BOOST_INCLUDE_PATH@" ;
-BOOST_LIBRARY_PATH = "@BOOST_LIBRARY_PATH@" ;
+CVC                = @CVC@ ;
+DL                 = @DL@ ;
 
-prefix      = [ MATCH "^--prefix=(.+)" : [ modules.peek : ARGV ] ] ;
-exec_prefix = [ MATCH "^--exec-prefix=(.+)" : [ modules.peek : ARGV ] ] ;
-
-# Installation related variables
-prefix      ?= "@PREFIX_DIR@" ;
-exec_prefix ?= "@EXEC_PREFIX_DIR@" ;
-
-BIN_DIR         = "@BIN_DIR@" ;
-LIB_DIR         = "@LIB_DIR@" ;
-DATA_DIR        = "@DATA_DIR@" ;
-INCLUDE_DIR     = "@INCLUDE_DIR@" ;
-MAN_DIR         = "@MAN_DIR@" ;
-
+BOOST_INCLUDE_PATH = @BOOST_INCLUDE_PATH@ ;
+BOOST_LIBRARY_PATH = @BOOST_LIBRARY_PATH@ ;

@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/void.hpp,v $
-// $Date: 2004/09/02 15:40:42 $
-// $Revision: 1.9 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #include <boost/mpl/void_fwd.hpp>
 #include <boost/mpl/bool.hpp>

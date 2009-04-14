@@ -11,9 +11,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/aux_/config/has_xxx.hpp,v $
-// $Date: 2004/09/03 15:56:56 $
-// $Revision: 1.3 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #include <boost/mpl/aux_/config/overload_resolution.hpp>
 #include <boost/mpl/aux_/config/workaround.hpp>

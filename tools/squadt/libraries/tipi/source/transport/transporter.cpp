@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/transport/transporter.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include <algorithm>
 #include <functional>
@@ -11,78 +15,109 @@
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 
-#define IMPORT_STATIC_DEFINITIONS
-#include "transport/detail/basics.hpp"
-#include <transport/detail/transceiver.tcc>
-#include "transport/detail/socket_listener.hpp"
-#include "transport/detail/direct_transceiver.hpp"
-#include "transport/detail/socket_transceiver.hpp"
+#include <tipi/detail/transport/detail/transporter.ipp>
+#include <tipi/detail/transport/detail/transceiver.ipp>
+#include <tipi/detail/transport/detail/socket_listener.hpp>
+#include <tipi/detail/transport/detail/direct_transceiver.hpp>
+#include <tipi/detail/transport/detail/socket_transceiver.hpp>
 
 namespace transport {
 
-  using namespace transceiver;
-  using namespace listener;
-
-  transporter::~transporter() {
-    using namespace boost;
-
+  /**
+   * \param[in] d the data to be sent
+   **/
+  void transporter_impl::send(const std::string& d) {
     boost::recursive_mutex::scoped_lock l(lock);
 
-    /* Disconnect all peers */
-    disconnect();
-  
-    /* Clean up listeners */
-    for (listener_list::iterator i = listeners.begin(); i != listeners.end(); ++i) {
-      (*i)->shutdown();
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      (*i)->send(d);
     }
   }
 
   /**
-   * \param p the peer to connect to
+   * \param[in] s stream that contains the data to be sent
    **/
-  void transporter::connect(transporter& p) {
-    basic_transceiver::ptr t(new direct_transceiver(this));
-
-    boost::recursive_mutex::scoped_lock pl(p.lock);
-    p.connections.push_back(t);
-
+  void transporter_impl::send(std::istream& s) {
     boost::recursive_mutex::scoped_lock l(lock);
-    connections.push_back(basic_transceiver::ptr(new direct_transceiver(&p, reinterpret_cast < direct_transceiver* > (t.get()))));
+
+    for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
+      (*i)->send(s);
+    }
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in,out] t the transporter to relay the connection to
+   * \param[in] c the transceiver that represents the local end point of the connection
    **/
-  void transporter::connect(const ip_address_t& a, port_t const& p) {
-    basic_transceiver::ptr c = socket_transceiver::create(this);
+  void transporter_impl::relay_connection(transporter* t, basic_transceiver* c) {
+    assert(t != 0);
 
     boost::recursive_mutex::scoped_lock l(lock);
+    boost::recursive_mutex::scoped_lock tl(t->impl->lock);
 
-    reinterpret_cast < socket_transceiver* > (c.get())->connect(a, p);
+    t->impl->associate(t->impl,c);
+  }
+
+  size_t transporter_impl::number_of_connections() const {
+    return connections.size();
+  }
+
+  transporter_impl::~transporter_impl() {
+    boost::recursive_mutex::scoped_lock l(lock);
+
+    /* Shutdown listeners */
+    for (listener_list::iterator i = listeners.begin(); i != listeners.end(); ++i) {
+      (*i)->shutdown();
+    }
+
+    /* Disconnect all peers */
+    disconnect();
+  }
+
+  /**
+   * \param[in] t shared pointer for the local object
+   * \param[in] p the peer to connect to
+   **/
+  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, boost::shared_ptr < transporter_impl >& p) {
+    boost::recursive_mutex::scoped_lock pl(p->lock);
+    p->connections.push_back(c);
+
+    boost::recursive_mutex::scoped_lock l(lock);
+    connections.push_back(basic_transceiver::ptr(new direct_transceiver(p, boost::dynamic_pointer_cast< direct_transceiver > (c))));
+  }
+
+  /**
+   * \param[in] a an address
+   * \param[in] p a port
+   **/
+  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const boost::asio::ip::address& a, short int const& p) {
+    boost::recursive_mutex::scoped_lock l(lock);
+
+    boost::dynamic_pointer_cast < socket_transceiver > (c)->connect(a, p);
 
     connections.push_back(c);
   }
 
   /**
-   * \param h a hostname
-   * \param p a port
+   * \param[in] h a hostname
+   * \param[in] p a port
    **/
-  void transporter::connect(const std::string& h, port_t const& p) {
-    basic_transceiver::ptr c = socket_transceiver::create(this);
-
+  void transporter_impl::connect(boost::shared_ptr < basic_transceiver > const& c, const std::string& h, short int const& p) {
     boost::recursive_mutex::scoped_lock l(lock);
 
-    reinterpret_cast < socket_transceiver* > (c.get())->connect(h, p);
+    boost::dynamic_pointer_cast < socket_transceiver > (c)->connect(h, p);
 
     connections.push_back(c);
   }
 
   /**
-   * \param t the connection to associate with this transporter
+   * \param[in] t the connection to associate with this transporter
    **/
-  void transporter::associate(const basic_transceiver::ptr& t) {
+  void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, const basic_transceiver::ptr& t) {
+    assert(c.get() == this);
+
     boost::recursive_mutex::scoped_lock l(lock);
 
     const basic_transceiver* p = t.get();
@@ -94,68 +129,75 @@ namespace transport {
     if (i == connections.end()) {
       connections.push_back(t);
 
-      t->owner = this;
+      t->owner = c;
     }
   }
 
   /**
-   * \param t the transceiver that identifies the connection to be severed
+   * \param[in] t the transceiver that identifies the connection to be severed
    *
    * \return a shared pointer to the transceiver that is removed
    **/
-  basic_transceiver::ptr transporter::disassociate(basic_transceiver* t) {
-    basic_transceiver::ptr p;
-
-    assert(t->owner == this);
-
+  boost::shared_ptr< basic_transceiver > transporter_impl::disassociate(basic_transceiver* t) {
     boost::recursive_mutex::scoped_lock l(lock);
 
-    connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
-                    boost::bind(std::equal_to< const basic_transceiver* >(), t,
-                            boost::bind(&basic_transceiver::ptr::get, _1)));
+    if (t->owner.lock().get() != 0) {
+      assert(t->owner.lock().get() == this);
 
-    if (i != connections.end()) {
-      p = *i;
+      for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
+        if (i->get() == t) {
+          boost::shared_ptr< basic_transceiver > target(*i);
 
-      connections.erase(i);
+          connections.erase(i);
 
-      t->owner = 0;
+          t->owner.reset();
+
+          on_disconnect(target.get());
+
+          return target;
+        }
+      }
     }
 
-    return (p);
+    return boost::shared_ptr< basic_transceiver >();
   }
 
   /**
-   * \param t the transceiver that identifies the connection to be associated
+   * \param[in] t the transceiver that identifies the connection to be associated
    * \pre t->owner != 0 && t->owner != this
    **/
-  void transporter::associate(basic_transceiver* t) {
-    assert(t->owner != 0);
+  void transporter_impl::associate(boost::shared_ptr < transporter_impl > const& c, basic_transceiver* t) {
+    assert(c.get() == this);
 
-    if (t->owner != this) {
+    boost::shared_ptr < transporter_impl > cc(t->owner.lock());
+
+    assert(cc.get() != 0);
+
+    if (t->owner.lock().get() != this) {
       boost::recursive_mutex::scoped_lock l(lock);
-      boost::recursive_mutex::scoped_lock ll(t->owner->lock);
+      boost::recursive_mutex::scoped_lock ll(cc->lock);
 
-      for (connection_list::iterator i = t->owner->connections.begin(); i != t->owner->connections.end(); ++i) {
+      for (connection_list::iterator i = cc->connections.begin(); i != cc->connections.end(); ++i) {
         if (t == (*i).get()) {
           connections.push_back(*i);
-          t->owner->connections.erase(i);
+
+          cc->connections.erase(i);
 
           break;
         }
       }
 
-      t->owner = this;
+      t->owner = c;
     }
   }
 
-  void transporter::disconnect() {
+  void transporter_impl::disconnect() {
     boost::recursive_mutex::scoped_lock l(lock);
 
     for (connection_list::const_iterator i = connections.begin(); i != connections.end(); ++i) {
       basic_transceiver* p = (*i).get();
 
-      p->owner = 0;
+      p->owner.reset();
 
       p->disconnect(*i);
     }
@@ -164,58 +206,53 @@ namespace transport {
   }
 
   /**
-   * \param n the number of the connection that is to be closed
+   * \param[in] t the local endpoint (transceiver) to disconnect
+   * \return whether a connection was broken (otherwise it did not exist)
    **/
-  void transporter::disconnect(size_t n) {
-    assert(n < connections.size());
+  bool transporter_impl::disconnect(basic_transceiver const& t) {
+    for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
+      if ((*i).get() == &t) {
+        (*i)->owner.reset();
+        (*i)->disconnect(*i);
 
-    boost::recursive_mutex::scoped_lock l(lock);
+        connections.erase(i);
 
-    connection_list::iterator i = connections.begin();
-  
-    while (0 < n) {
-      assert(i != connections.end());
-
-      --n;
-
-      ++i;
+        return true;
+      }
     }
 
-    (*i)->owner = 0;
-    (*i)->disconnect(*i);
-
-    connections.erase(i);
+    return false;
   }
 
   /**
-   * \param m the directly connected peer
+   * \param[in] m the directly connected peer
+   * \return whether a connection was broken (otherwise it did not exist)
    **/
-  void transporter::disconnect(transporter& m) {
+  bool transporter_impl::disconnect(transporter_impl const* m) {
     using namespace boost;
 
     boost::recursive_mutex::scoped_lock l(lock);
 
-    const transporter* p = &m;
+    for (connection_list::iterator i = connections.begin(); i != connections.end(); ++i) {
+      if ((*i)->get_owner() == m) {
+        (*i)->owner.reset();
+        (*i)->disconnect(*i);
 
-    connection_list::iterator i = std::find_if(connections.begin(), connections.end(),
-                      bind(std::equal_to< const transporter* >(), p,
-                                      bind(&basic_transceiver::get_owner,
-                                                      bind(&basic_transceiver::ptr::get, _1))));
+        connections.erase(i);
 
-    if (i != connections.end()) {
-      (*i)->owner = 0;
-      (*i)->disconnect(*i);
-
-      connections.erase(i);
+        return true;
+      }
     }
+
+    return false;
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in] a an address
+   * \param[in] p a port
    **/
-  void transporter::add_listener(const ip_address_t& a, port_t const& p) {
-    basic_listener::ptr new_listener(new socket_listener(*this, a, p));
+  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, const boost::asio::ip::address& a, short int const& p) {
+    basic_listener::ptr new_listener(new socket_listener(c, a, p));
 
     listeners.push_back(new_listener);
 
@@ -223,11 +260,11 @@ namespace transport {
   }
 
   /**
-   * \param a an address
-   * \param p a port
+   * \param[in] a an address
+   * \param[in] p a port
    **/
-  void transporter::add_listener(const host_name_t& a, port_t const& p) {
-    basic_listener::ptr new_listener(new socket_listener(*this, boost::asio::ip::address_v4::from_string(a), p));
+  void transporter_impl::add_listener(boost::shared_ptr < transporter_impl > const& c, std::string const& a, short int const& p) {
+    basic_listener::ptr new_listener(new socket_listener(c, boost::asio::ip::address_v4::from_string(a), p));
 
     listeners.push_back(new_listener);
 
@@ -235,9 +272,9 @@ namespace transport {
   }
 
   /**
-   * \param n the number of the listener that is to be removed
+   * \param[in] n the number of the listener that is to be removed
    **/
-  void transporter::remove_listener(size_t n) {
+  void transporter_impl::remove_listener(size_t n) {
     assert(n < listeners.size());
 
     listener_list::iterator i = listeners.begin();
@@ -255,7 +292,119 @@ namespace transport {
     }
   }
 
-  host_name_t transporter::get_local_host() {
+  transporter::transporter(boost::shared_ptr < transporter_impl > const& c) : impl(c) {
+  }
+
+  size_t transporter::number_of_listeners() const {
+    return (impl->listeners.size());
+  }
+
+  size_t transporter::number_of_connections() const {
+    boost::recursive_mutex::scoped_lock l(impl->lock);
+
+    return (impl->connections.size());
+  }
+
+  /**
+   * \param[in] p the peer to connect to
+   **/
+  void transporter::connect(transporter& p) {
+    boost::shared_ptr < basic_transceiver > c(new direct_transceiver(impl));
+
+    impl->connect(c,p.impl);
+  }
+
+  /**
+   * \param[in] a a hostname or IP address
+   * \param[in] p a port
+   **/
+  void transporter::connect(std::string const& a, short int const& p) {
+    basic_transceiver::ptr c(socket_transceiver::create(impl));
+
+    try {
+      if (a.empty()) {
+        impl->connect(c,boost::asio::ip::address_v4::loopback(),p);
+      }
+      else {
+        impl->connect(c,boost::asio::ip::address::from_string(a),p);
+      }
+    }
+    catch (...) {
+      impl->connect(c,a,p);
+    }
+  }
+
+  void transporter::disconnect() {
+    impl->disconnect();
+  }
+
+  /**
+   * \param[in] t the local endpoint to disconnect from
+   **/
+  bool transporter::disconnect(basic_transceiver const& t) {
+    return impl->disconnect(t);
+  }
+
+  /**
+   * \param[in] m the local transporter to disconnect from
+   **/
+  bool transporter::disconnect(transporter& m) {
+    return impl->disconnect(m.impl.get());
+  }
+
+  /**
+   * \param[in] a a hostname or IP address
+   * \param[in] p a port
+   **/
+  void transporter::add_listener(std::string const& a, short int const& p) {
+    try {
+      if (a.empty()) {
+        impl->add_listener(impl, boost::asio::ip::address_v4::any(), p);
+      }
+      else {
+        impl->add_listener(impl, boost::asio::ip::address::from_string(a), p);
+      }
+    }
+    catch (...) {
+      if (a.empty()) {
+        impl->add_listener(impl, boost::asio::ip::address_v4::loopback(), p);
+      }
+      else {
+        impl->add_listener(impl, a, p);
+      }
+    }
+  }
+
+  /**
+   * \param[in] n the number of the listener that is to be removed
+   **/
+  void transporter::remove_listener(size_t n) {
+    impl->remove_listener(n);
+  }
+
+  /**
+   * \param[in] d the data to be sent
+   **/
+  void transporter::send(const std::string& d) {
+    impl->send(d);
+  }
+
+  /**
+   * \param[in] s stream that contains the data to be sent
+   **/
+  void transporter::send(std::istream& s) {
+    impl->send(s);
+  }
+
+  /**
+   * \param[in,out] t the transporter to relay the connection to
+   * \param[in] c the transceiver that represents the local end point of the connection
+   **/
+  void transporter::relay_connection(transporter* t, basic_transceiver* c) {
+    impl->relay_connection(t,c);
+  }
+
+  std::string transporter::get_local_host() {
     return (socket_transceiver::get_local_host());
   }
 }

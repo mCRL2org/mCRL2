@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,15 +12,15 @@
 #define _SQUADT_LPS2LTS_H
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
 
-class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
+class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface {
   friend class status_display;
   friend class storage_configuration;
 
   public:
     squadt_interactor();
-  
+
   public:
 
     class status_display;
@@ -26,7 +28,7 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
 
   private:
 
-    static const char*  option_as_aut;
+    static const char*  option_lts_type;
     static const char*  option_out_info;
 
     static const char*  option_usedummies;
@@ -35,21 +37,21 @@ class squadt_interactor: public mcrl2::utilities::squadt::tool_interface {
 
     static const char*  option_rewrite_strategy;
     static const char*  option_exploration_strategy;
-      
+
     static const char*  option_detect_deadlock;
     static const char*  option_detect_actions;
     static const char*  option_trace;
     static const char*  option_max_traces;
     static const char*  option_error_trace;
-      
+
     static const char*  option_confluence_reduction;
     static const char*  option_confluent_tau;
-      
+
     static const char*  option_max_states;
-      
+
     static const char*  option_bithashing;
     static const char*  option_bithashsize;
-      
+
     static const char*  option_init_tsize;
 
     static const char* lps_file_for_input;

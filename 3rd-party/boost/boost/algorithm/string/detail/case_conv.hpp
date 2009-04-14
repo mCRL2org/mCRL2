@@ -21,6 +21,11 @@ namespace boost {
 
 //  case conversion functors -----------------------------------------------//
 
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
+#pragma warning(push)
+#pragma warning(disable:4512) //assignment operator could not be generated
+#endif
+
             // a tolower functor
             template<typename CharT>
             struct to_lowerF : public std::unary_function<CharT, CharT>
@@ -60,6 +65,53 @@ namespace boost {
             private:
                 const std::locale& m_Loc;
             };
+
+#if BOOST_WORKAROUND(BOOST_MSVC, >= 1400)
+#pragma warning(pop)
+#endif
+
+// algorithm implementation -------------------------------------------------------------------------
+
+            // Transform a range
+            template<typename OutputIteratorT, typename RangeT, typename FunctorT>
+            OutputIteratorT transform_range_copy(
+                OutputIteratorT Output,
+                const RangeT& Input,
+                FunctorT Functor)
+            {
+                return std::transform( 
+                    ::boost::begin(Input), 
+                    ::boost::end(Input), 
+                    Output,
+                    Functor);
+            }
+
+            // Transform a range (in-place)
+            template<typename RangeT, typename FunctorT>
+            void transform_range(
+                const RangeT& Input,
+                FunctorT Functor)
+            {
+                std::transform( 
+                    ::boost::begin(Input), 
+                    ::boost::end(Input), 
+                    ::boost::begin(Input),
+                    Functor);
+            }
+
+            template<typename SequenceT, typename RangeT, typename FunctorT>
+            inline SequenceT transform_range_copy( 
+                const RangeT& Input, 
+                FunctorT Functor)
+            {
+                return SequenceT(
+                    make_transform_iterator(
+                        ::boost::begin(Input),
+                        Functor),
+                    make_transform_iterator(
+                        ::boost::end(Input), 
+                        Functor));
+            }
 
         } // namespace detail
     } // namespace algorithm

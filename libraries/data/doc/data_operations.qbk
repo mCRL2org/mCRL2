@@ -1,0 +1,80 @@
+[section: Operations on data expressions]
+
+Let =m= and =n= be data expressions of type =Nat=, =Pos=, =Int= or =Real=,
+let =b= and =c= be data expressions of type =Bool=, and let =x=
+and =y= be two data expressions with the same sort. Then the following
+operations are supported:
+
+[table Operations on all data types
+    [[Expression] [Meaning]]
+    [ [ `equal_to(x, y)    ` or [^ x == y ]            ] [equality                  ]]
+    [ [ `not_equal_to(x, y)` or [^ x != y ]            ] [inequality                ]]
+    [ [ `if_(b, x, y)      `                           ] [conditional expression    ]]
+]
+
+[table Operations on boolean types
+    [[Expression] [Meaning]]
+    [ [ `not_(b)     ` or [^ !b          ]       ] [negation                  ]]
+    [ [ `and_(b, c)  ` or [^ b && c      ]       ] [conjunction               ]]
+    [ [ `or_(b, c)   ` or [^ b || c      ]       ] [disjunction               ]]
+    [ [ `imp(b, c)   `                           ] [implication               ]]
+    [ [ `forall(x, b)`                           ] [universal quantification  ]]
+    [ [ `exists(x, b)`                           ] [existential quantification]]
+]
+
+[table Operations on numbers
+    [[Expression] [Meaning]]
+    [ [ `less_equal(m, n)   ` or [^ m <= n ]           ] [ less than or equal     ]]
+    [ [ `less(m, n)         ` or [^ m < n ]            ] [ less than              ]]
+    [ [ `greater_equal(m, n)` or [^ m > n ]            ] [ greater than or equal  ]]
+    [ [ `greater(m, n)      ` or [^ m >= n ]           ] [ greater than           ]]
+    [ [ `abs(m)             `                          ] [ absolute value         ]]
+    [ [ `min_(m, n)         `                          ] [ minimum                ]]
+    [ [ `max_(m, n)         `                          ] [ maximum                ]]
+    [ [ `negate(m)          ` or [^ -m ]               ] [ negation               ]]
+    [ [ `succ(m)            `                          ] [ successor              ]]
+    [ [ `pred(m)            `                          ] [ predecessor            ]]
+    [ [ `plus(m, n)         ` or [^ m + n ]            ] [ addition               ]]
+    [ [ `minus(m, n)        ` or [^ m - n ]            ] [ subtraction            ]]
+    [ [ `multiplies(m, n)   ` or [^ m * n ]            ] [ multiplication         ]]
+    [ [ `divides(m, n)      ` or [^ m / n ]            ] [ integer div            ]]
+    [ [ `modulus(m, n)      ` or [^ m % n ]            ] [ integer mod            ]]
+    [ [ `exp(m, n)          `                          ] [ exponentiation         ]]
+]
+
+Note that many names of the operations match those of similar operations in the standard
+=C++= header `<functional>`. For example =negate=, =plus=, =minus= etc.
+
+[table Operations on lists
+    [[Expression] [Meaning]]
+    [ [ not yet available ] [ construction               ]]
+    [ [ not yet available ] [ element test               ]]
+    [ [ not yet available ] [ length                     ]]
+    [ [ not yet available ] [ cons                       ]]
+    [ [ not yet available ] [ snoc                       ]]
+    [ [ not yet available ] [ concatenation              ]]
+    [ [ not yet available ] [ element at position        ]]
+    [ [ not yet available ] [ first element              ]]
+    [ [ not yet available ] [ list without first element ]]
+    [ [ not yet available ] [ last element               ]]
+    [ [ not yet available ] [ list without last element  ]]
+]
+
+[table Operations on sets and bags
+    [[Expression] [Meaning]]
+    [ [ not yet available ] [ set enumeration            ]]
+    [ [ not yet available ] [ bag enumeration            ]]
+    [ [ not yet available ] [ comprehension              ]]
+    [ [ not yet available ] [ element test               ]]
+    [ [ not yet available ] [ bag multiplicity           ]]
+    [ [ not yet available ] [ subset / subbag            ]]
+    [ [ not yet available ] [ proper subset / subbag     ]]
+    [ [ not yet available ] [ union                      ]]
+    [ [ not yet available ] [ difference                 ]]
+    [ [ not yet available ] [ intersection               ]]
+    [ [ not yet available ] [ set complement             ]]
+    [ [ not yet available ] [ convert set to bag         ]]
+    [ [ not yet available ] [ convert bag to set         ]]
+]
+
+[endsect] [/ Operations on data expressions]

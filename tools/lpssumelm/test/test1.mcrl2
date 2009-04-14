@@ -1,9 +1,0 @@
-% lpssumelm Test Case 1 -- sum variable does nog occur in summand
-%
-% Sum variable y does not occur in the summand, and can therefore be
-% removed.
-act a,b;
-
-proc X = sum y:Int . a . b . X;
-
-init X;

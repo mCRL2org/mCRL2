@@ -1,19 +1,18 @@
 // Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/manipulator.h
-/// \brief Add your file description here.
-
-// Interface to classes ATerm_Manipulator, AM_Jitty and AM_Inner
-// file: manipulator.h
+/// \file mcrl2/utilities/manipulator.h
+/// \brief Interface to classes ATerm_Manipulator, AM_Jitty and AM_Inner
 
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
-#include "librewrite.h"
+#include "mcrl2/data/rewrite.h"
 #include "info.h"
 
 /// \brief Base class for classes that provide functionality to modify or create

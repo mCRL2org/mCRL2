@@ -1,18 +1,15 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./settingsframe.h
 
-// --- settingsframe.h ----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
 #ifndef SETTINGSFRAME_H
 #define SETTINGSFRAME_H
-
-#include <vector>
-using namespace std;
 
 #include <wx/wx.h>
 #include <wx/notebook.h>
@@ -20,6 +17,9 @@ using namespace std;
 #include "popupframe.h"
 #include "mcrl2/utilities/colorbutton.h"
 #include "mcrl2/utilities/spinctrlfloat.h"
+
+using mcrl2::utilities::wx::wxColorButton;
+using mcrl2::utilities::wx::wxSpinCtrlFloat;
 
 class SettingsFrame : public PopupFrame
 {
@@ -49,7 +49,7 @@ protected:
     void onCheckBox( wxCommandEvent &e );
     void onComboBox( wxCommandEvent &e );
     void onSpinCtrl( wxSpinEvent &e );
-    
+
 private:
     // -- utility functions -----------------------------------------
     void updateSettingsGeneral();
@@ -74,13 +74,14 @@ private:
     wxScrolledWindow* panelNotebook;
     wxBoxSizer*       sizerNotebook;
     wxNotebook*       notebook;
-    
+    wxButton*	      submitButton;
+
     wxScrolledWindow* panelGeneral;
     wxColorButton*    buttonColorBG;
     wxColorButton*    buttonColorTxt;
     wxComboBox*       comboBoxSizeTxt;
     wxSpinCtrlFloat*  spinCtrlAnimSpd;
-    
+
     wxScrolledWindow* panelClustTree;
     wxCheckBox*       checkBoxShowCT;
     wxCheckBox*       checkBoxAnnotateCT;
@@ -89,7 +90,7 @@ private:
     wxScrolledWindow* panelBarTree;
     wxCheckBox*       checkBoxShowBT;
     wxSpinCtrlFloat*  spinCtrlMagnBT;
-    
+
     wxScrolledWindow* panelArcDiagram;
     wxCheckBox*       checkBoxShowNodes;
     wxCheckBox*       checkBoxShowArcs;
@@ -108,20 +109,21 @@ private:
     enum
     {
         ID_PANEL_GENERAL,
+	ID_BUTTON_SUBMIT,
         ID_BUTTON_COL_BG,
         ID_BUTTON_COL_TXT,
         ID_COMBO_BOX_SIZE_TXT,
         ID_SPIN_CTRL_ANIM_SPD,
-        
+
         ID_PANEL_CLUST_TREE,
         ID_CHECK_BOX_SHOW_CT,
         ID_CHECK_BOX_ANNOTATE_CT,
         ID_COMBO_BOX_COL_MAP,
-        
+
         ID_PANEL_BAR_TREE,
         ID_CHECK_BOX_SHOW_BT,
         ID_SPIN_CTRL_MAGN_BT,
-        
+
         ID_PANEL_ARC_DIAGRAM,
         ID_CHECK_BOX_SHOW_NODES,
         ID_CHECK_BOX_SHOW_ARCS,
@@ -133,10 +135,10 @@ private:
 
         ID_PANEL_TRACE,
         ID_CHECK_BOX_USE_SHADING,
-        
-        ID_PANEL_DGRM_EDITOR,
+
+        ID_PANEL_DGRM_EDITOR
     };
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

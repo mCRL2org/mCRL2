@@ -1,0 +1,14 @@
+% This is an mCRL2 process specification showing that the representation of
+% rational numbers is exact. It divides a number by 2, and does this 500 times.
+% When a number after division by 2 is greater than the number itself an error
+% is generated... and this does not occur.
+%
+% Aad Mathijssen, February 2009.
+
+act  a: Real;
+     error;
+
+proc P(n: Nat, r: Real) = (n < 500)  -> a(r) . P(n+1, r/2)
+                        + (r/2 >= r) -> error . delta;
+
+init P(0, 1);

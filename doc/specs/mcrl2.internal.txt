@@ -1,19 +1,18 @@
 // Author(s): Aad Mathijssen
+// $Date$
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-// Date: 29-06-2007
 // This document describes the internal format of the mCRL2 language and the
 // corresponding mu-calculus formulas. Here:
 // - the following phases of implementation are distinguised:
 //   tc : type checking
 //   di : data implementation
-//   lin: linearisation
 //   rft: regular formula translation
 // - [+p]/[-p] at the end of a branch means that this branch is added/removed at
-//   the end of phase p 
+//   the end of phase p
 // - [.p] at the end of a branch means that this branch is only used in phase p
 // - <String> is an arbitrary non-empty string excluding the keywords:
 //     sort cons map var eqn act proc init
@@ -32,13 +31,6 @@
 // - for non-terminal N, N*/N+ represents an ATermList with zero/one or more N's
 // - each c(a_0, ..., a_n), where c is an alphabetical string, represents an
 //   ATermAppl with c as its unquoted head and a_0, ..., a_n as its arguments
-// - a number of restrictions apply to the Assignment's, which we denote by A,
-//   of a Linear process summand:
-//   + the lhs of an element of A should be declared by the linear process
-//   + A may not contain duplicate lhs's
-//   + the lhs's of A should obey the order in which they are declared 
-// - the DataVarId's of the Assignment's of an LinearProcessInit should be 
-//   identical to the DataVarId's of the corresponding Linear Process
 
 
 //Sort expressions
@@ -48,7 +40,7 @@
 <SortExpr>    ::= <SortId>
                 | SortCons(<SortConsType>, <SortExpr>)                   [- di]
                 | SortStruct(<StructCons>+)                              [- di]
-                | SortArrow(<SortExpr>+, <SortExpr>)                
+                | SortArrow(<SortExpr>+, <SortExpr>)
                 | SortUnknown                                            [. tc]
                 | SortsPossible(<SortExpr>+)                             [. tc]
 
@@ -59,6 +51,8 @@
 <SortConsType> ::= SortList                                              [- di]
                  | SortSet                                               [- di]
                  | SortBag                                               [- di]
+                 | SortFSet                                              [. di]
+                 | SortFBag                                              [. di]
 
 //constructor declaration of a structured sort
 <StructCons>   ::= StructCons(<String>, <StructProj>*, <StringOrNil>)
@@ -89,7 +83,7 @@
 <OpId>         ::= OpId(<String>, <SortExpr>)
 
 //binding operator
-<BindingOperator> 
+<BindingOperator>
                ::= SetBagComp                                            [- tc]
                  | SetComp                                               [+ tc]
                  | BagComp                                               [+ tc]
@@ -98,8 +92,13 @@
                  | Lambda
 
 //where clause declaration
-<WhrDecl>      ::= WhrDecl(<String>, <DataExpr>)                         [- tc]
-                 | <DataVarIdInit>                                       [+ tc]  
+<WhrDecl>      ::= <IdInit>                                              [- tc]
+                 | <DataVarIdInit>                                       [+ tc]
+
+//data variable identifier and initialisation
+<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
+
+<IdInit>       ::= IdInit(<String>, <DataExpr>)
 
 //Data specifications
 //-------------------
@@ -133,8 +132,8 @@
                  | Nil
 
 
-//Multi-actions
-//-------------
+//Multiactions
+//------------
 
 //multiaction
 <MultAct>      ::= MultAct(<ParamIdOrAction>*)
@@ -157,11 +156,13 @@
 
 //process expression
 <ProcExpr>     ::= <ParamId>                                             [- tc]
+                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
                  | <Action>                                              [+ tc]
                  | Process(<ProcVarId>, <DataExpr>*)                     [+ tc]
+                 | ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)      [+ tc]
                  | Delta
-                 | Tau 
-                 | Sum(<DataVarId>+, <ProcExpr>) 
+                 | Tau
+                 | Sum(<DataVarId>+, <ProcExpr>)
                  | Block(<String>*, <ProcExpr>)
                  | Hide(<String>*, <ProcExpr>)
                  | Rename(<RenameExpr>*, <ProcExpr>)
@@ -170,8 +171,8 @@
                  | Sync(<ProcExpr>, <ProcExpr>)
                  | AtTime(<ProcExpr>, <DataExpr>)
                  | Seq(<ProcExpr>, <ProcExpr>)
-                 | IfThen(<DataExpr>, <ProcExpr>) 
-                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>) 
+                 | IfThen(<DataExpr>, <ProcExpr>)
+                 | IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
                  | BInit(<ProcExpr>, <ProcExpr>)
                  | Merge(<ProcExpr>, <ProcExpr>)
                  | LMerge(<ProcExpr>, <ProcExpr>)
@@ -184,42 +185,55 @@
 <MultActName>  ::= MultActName(<String>+)
 
 //renaming expression
-<RenameExpr>   ::= RenameExpr(<String>, <String>) 
+<RenameExpr>   ::= RenameExpr(<String>, <String>)
 
 //communication expression
 <CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
 
 
-//mCRL2 specifications
-//--------------------
+//Process specifications
+//----------------------
 
-//specification
-<Spec>         ::= SpecV1(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
+//process specification
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
 
 //process equations or linear processes
-<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)                               [-lin]
-                 | LinearProcess(<DataVarId>*, <DataVarId>*, 
-                    <LinearProcessSummand>*)                             [+lin]
+<ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)
 
 //process equation
 <ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
-
-//Linear process summand
-<LinearProcessSummand>   
-               ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, 
-                    <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
 
 //multiaction or delta
 <MultActOrDelta>
                ::= <MultAct>
                  | Delta
 
-//process expressions or data expression
-<Init>         ::= ProcessInit(<DataVarId>*, <ProcExpr>)                 [-lin]
-                 | LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)     [+lin]
+//process initialisation
+<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)
+
+
+//Linear process specifications
+//-----------------------------
+
+//process specification
+<LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <LinearProcess>,
+                      <LinearProcessInit>)
+
+//process equations or linear processes
+<LinearProcess> ::= LinearProcess(<DataVarId>*, <DataVarId>*,
+                      <LinearProcessSummand>*)
+
+//Linear process summand
+<LinearProcessSummand>
+                ::= LinearProcessSummand(<DataVarId>*, <DataExpr>,
+                      <MultActOrDelta>, <DataExprOrNil>, <DataVarIdInit>*)
+
+//process initialisation
+<LinearProcessInit>
+                ::= LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
 
 
 //Mu-calculus formulas
@@ -245,9 +259,6 @@
                  | StateNu(<String>, <DataVarIdInit>*, <StateFrm>)
                  | StateMu(<String>, <DataVarIdInit>*, <StateFrm>)
 
-//data variable identifier and initialisation
-<DataVarIdInit>::= DataVarIdInit(<DataVarId>, <DataExpr>)
-
 //regular formula
 <RegFrm>       ::= <ActFrm>
                  | RegNil                                                [-rft]
@@ -270,45 +281,84 @@
                  | ActAt(<ActFrm>, <DataExpr>)
 
 
-//LPS action rewrite specifications
-//---------------------------------
+//LPS action rename specifications
+//--------------------------------
 
 //Action rename rules
-<ActionRenameRules>     ::= ActionRenameRules(<ActionRenameRule>*)
+<ActionRenameRules>
+               ::= ActionRenameRules(<ActionRenameRule>*)
 
-// Action rename rule
-<ActionRenameRule>      ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>, <ParamId>, <ProcExpr>)
+//Action rename rule
+<ActionRenameRule>
+               ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
+                     <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
-// Action rename file specification
-<ActionRename>          ::= ActionRename(<DataSpec>, <ActSpec>, <ActionRenameRules>)
+//Right-hand side of an action rename rule
+<ActionRenameRuleRHS>
+               ::= <ParamId>                                             [- tc]
+                 | <Action>                                              [+ tc]
+                 | Delta
+                 | Tau
+
+//Action rename specification
+<ActionRenameSpec>
+               ::= ActionRenameSpec(<DataSpec>, <ActSpec>, <ActionRenameRules>)
 
 
 //PBES's
 //------
 
-// PBES equation system
-<PBES>         ::= PBES(<DataSpec>, <PBEqn>*, <PropVarInst>)
+//PBES specification
+<PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
 
-// propositional variable instantiation
-<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+//parameterized boolean equation specification
+<PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
 
-// parameterized boolean equation
+//parameterized boolean initialization
+<PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
+
+//parameterized boolean equation
 <PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)
 
-// fixpoint symbol
+//fixpoint symbol
 <FixPoint>     ::= Mu
                  | Nu
 
-// propositional variable declaration
+//propositional variable declaration
 <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
 
-// parameterized boolean expression
+//parameterized boolean expression
 <PBExpr>       ::= <DataExpr>
                  | PBESTrue
                  | PBESFalse
+                 | PBESNot(<PBExpr>)
                  | PBESAnd(<PBExpr>, <PBExpr>)
                  | PBESOr(<PBExpr>, <PBExpr>)
+                 | PBESImp(<PBExpr>, <PBExpr>)
                  | PBESForall(<DataVarId>+, <PBExpr>)
                  | PBESExists(<DataVarId>+, <PBExpr>)
                  | <PropVarInst>
 
+//propositional variable instantiation
+<PropVarInst>  ::= PropVarInst(<String>, <DataExpr>*)
+
+//Boolean expressions
+//-------------------
+
+// BES specification (equations + initialization)
+<BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
+
+// boolean equation
+<BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
+
+// boolean variable
+<BooleanVariable>   ::= BooleanVariable(<String>)
+
+// boolean expression
+<BooleanExpression> ::= BooleanTrue
+                      | BooleanFalse
+                      | <BooleanVariable>
+                      | BooleanNot(<BooleanExpression>)
+                      | BooleanAnd(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanOr(<BooleanExpression>, <BooleanExpression>)
+                      | BooleanImp(<BooleanExpression>, <BooleanExpression>)

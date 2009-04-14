@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,8 +12,8 @@
 #define ATERM_DEBUG_ALLOCATOR
 
 #include <vector>
-#include "atermpp/atermpp.h"
-#include "atermpp/aterm_allocator.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_allocator.h"
 
 using namespace std;
 using namespace atermpp;
@@ -44,10 +46,9 @@ void on_destroy(A* p)
   cout << "inside on_destroy(A*)" << endl;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   aterm_appl t0 = make_term("f(g(x,y),h(x),f(y,z(u,v)))");
   aterm_appl t1 = make_term("f(a)");

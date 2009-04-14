@@ -1,15 +1,8 @@
 project svc
        : source-location ../source
-       : build-dir $(BUILD_TOP)
-       : requirements
-          <toolset>darwin:<cflags>-std=c99
-          <toolset>gcc:<cflags>-std=c99
-          <include>../include/svc
-       : usage-requirements
-          <include>../include/svc
        ;
 
-alias svc.main
+mcrl2-library svc
        : blocklist.c
          code.c
          compress.c
@@ -19,28 +12,10 @@ alias svc.main
          ptable.c
          svc1.c
          svc2.c
-       : <toolset>darwin:<cflags>"-fno-common"
-         <use>/libraries/aterm//headers
-       : <threading>single
-       ;
-
-lib svc
-       : svc.main
-       : <link>static
-       :
        : <library>/libraries//aterm
+         <toolset>darwin:<cflags>"-fno-common"
+         <include>../include
+       :
+       : <include>../include
+         <toolset>darwin:<cflags>"-fno-common"
        ;
-
-alias svc
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias svc.alias
-       : svc.main
-       : <use>headers
-       ;
-
-alias headers : : : : <include>../include <use>/libraries/aterm//headers ;
-
-explicit svc.main svc.alias ;

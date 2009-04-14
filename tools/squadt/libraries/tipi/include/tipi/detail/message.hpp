@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/detail/message.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/detail/message.hpp
 
 #ifndef TIPI_MESSAGE_H
 #define TIPI_MESSAGE_H
@@ -13,7 +17,7 @@
 #include <ostream>
 #include <sstream>
 
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace transport {
   namespace transceiver {
@@ -30,7 +34,7 @@ namespace tipi {
 
     /**
      * \brief Base class for messages M is a type for message characterisation
-     * 
+     *
      * \attention M should be an enumeration type for message identifiers with
      *   a value D that is used as the default message type identifier
      *   a value A that is used as any (the wildcard) message type
@@ -45,21 +49,24 @@ namespace tipi {
       public:
 
         /** \brief Type for message identification */
-        typedef M                                                type_identifier_t;
+        typedef M                                                message_type;
 
         /** \brief Type for message originator identification */
         typedef const transport::transceiver::basic_transceiver* end_point;
 
         /** \brief The type identifier for messages of which the type is not known */
-        static const M                                           message_unknown;
+        inline static message_type unknown() {
+          return D;
+        }
 
-        /** \brief The type identifier for messages of any type */
-        static const M                                           message_any;
+        inline static message_type any() {
+          return A;
+        }
 
       private:
 
         /** \brief The message type */
-        type_identifier_t m_type;
+        message_type      m_type;
 
         /** \brief Identifier for the origin of this message */
         end_point         m_originator;
@@ -78,21 +85,21 @@ namespace tipi {
       public:
 
         /** \brief Generates an XML text string for the message */
-        inline message(type_identifier_t t, end_point o = 0);
+        inline message(message_type t, end_point o = 0);
 
         /** \brief Generates an XML text string for the message */
         template < typename T >
-        inline message(T const&, type_identifier_t t, end_point o = 0);
+        inline message(T const&, message_type t, end_point o = 0);
 
         /** \brief Copy constructor */
         inline message(message const&);
 
         /** \brief Returns the message type */
-        inline type_identifier_t get_type() const;
- 
+        inline message_type get_type() const;
+
         /** \brief Returns the message originator information */
         inline end_point get_originator() const;
- 
+
         /** \brief Returns the content without formatting */
         inline std::string to_string() const;
 
@@ -108,21 +115,13 @@ namespace tipi {
         /** \brief Generates an XML text string for the message */
         inline void set_content(std::istream&);
     };
- 
-    /** \brief The type identifier for messages of which the type is not known */
-//    template < class M, M D, M A >
-//    const M message< M, D, A >::message_unknown = D;
-
-    /** \brief The type identifier for messages of any type */
-//    template < class M, M D, M A >
-//    const M message< M, D, A >::message_any     = A;
 
     /**
      * \param o message originator identifier
      * \param t a message type identifier
      **/
     template < class M, M D, M A >
-    inline message< M, D, A >::message(type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
+    inline message< M, D, A >::message(const message_type t, end_point o) : m_type(t), m_originator(o) {
     }
 
     template < class M, M D, M A >
@@ -144,7 +143,7 @@ namespace tipi {
      **/
     template < class M, M D, M A >
     template < typename T >
-    inline message< M, D, A >::message(T const& c, type_identifier_t t, end_point o) : m_type(t), m_originator(o) {
+    inline message< M, D, A >::message(T const& c, const message_type t, end_point o) : m_type(t), m_originator(o) {
       set_content(c);
     }
 
@@ -158,7 +157,7 @@ namespace tipi {
     inline typename message< M, D, A >::end_point message< M, D, A >::get_originator() const {
       return (m_originator);
     }
- 
+
     template < class M, M D, M A >
     inline std::string message< M, D, A >::to_string() const {
       return (m_content);
@@ -175,9 +174,9 @@ namespace tipi {
     template < class M, M D, M A >
     inline void message< M, D, A >::set_content(std::istream& c) {
       std::ostringstream temporary;
- 
+
       temporary << c.rdbuf();
- 
+
       m_content = temporary.str();
     }
 

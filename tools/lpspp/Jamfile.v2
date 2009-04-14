@@ -1,14 +1,7 @@
-project toolset/lpspp
-       : source-location .
-       : build-dir $(BUILD_TOP)/lpspp
-       ;
+project toolset/lpspp ;
 
-exe lpspp
+tool lpspp
        : lpspp.cpp
-         /libraries//mcrl2_basic
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+         /libraries//core
+         /libraries/utilities//command_line_interfacing
        ;
-
-install-binaries install
-       : lpspp ;

@@ -1,4 +1,6 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Muck van Weerdenburg, Bert Lisser
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,24 +8,22 @@
 //
 /// \file liblts_bisim.cpp
 
-#include "print/messaging.h"
-#include "libstruct.h"
-#include "lts/liblts.h"
-#include "lts/detail/bsim.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/detail/bsim.h"
 
-#ifdef __cplusplus
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
-#endif
 
-int traceLevel = 0, optimal = 0, classes = 0; 
+int traceLevel = 0, optimal = 0, classes = 0;
 
 namespace mcrl2
 {
 namespace lts
 {
 
-bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector<string> *tau_actions)
+bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector<string> const*tau_actions)
 {
   if ( add_class_to_state )
   {
@@ -39,12 +39,12 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector
   }
 
   set_tau_actions(tau_actions);
-  int initState = ReadData(l); 
-  
+  int initState = ReadData(l);
+
   if ( branching )
   {
     SCC();
-    ReduceBranching();  
+    ReduceBranching();
   } else {
     Reduce();
   }
@@ -59,12 +59,12 @@ bool bisimulation_reduce(lts &l, bool branching, bool add_class_to_state, vector
   return true;
 }
 
-bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> *tau_actions)
+bool bisimulation_compare(lts &l1, lts &l2, bool branching, vector<string> const*tau_actions)
 {
   int init1, init2;
   set_tau_actions(tau_actions);
   ReadCompareData(l1, &init1, l2, &init2);
-  
+
   bool equal = false;
   if ( branching )
   {

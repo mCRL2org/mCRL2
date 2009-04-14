@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,61 +9,45 @@
 /// \file algorithm_test.cpp
 /// \brief Add your file description here.
 
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/algorithm.cpp
-// date          : 19/09/06
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
 #include <iostream>
 #include <iterator>
 #include <set>
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/aterm_string.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_real.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_string.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_real.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/vector.h"
 
 using namespace std;
 using namespace atermpp;
 
-bool is_appl(aterm t)
-{
-  return t.type() == AT_APPL;
-}
-
 // function object to test if it is an aterm_appl with function symbol "f"
 struct is_f
 {
-  bool operator()(aterm t) const
+  bool operator()(aterm_appl t) const
   {
-    return is_appl(t) && aterm_appl(t).function().name() == "f";
+    return t.function().name() == "f";
   }
 };
 
 void test_algorithm()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
+  aterm_appl b = make_term("h(g(x),p(a(x,y),q(g(z))))");
 
-  aterm t = find_if(aterm(a), is_f());
+  aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == make_term("f(y)"));
-  
-  atermpp::vector<aterm> v;
-  find_all_if(aterm(a), is_f(), back_inserter(v));
+  aterm_appl t1 = find_if(b, is_f());
+  BOOST_CHECK(t1 == aterm_appl());
+
+  atermpp::vector<aterm_appl> v;
+  find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));
 }
@@ -69,11 +55,11 @@ void test_algorithm()
 struct for_each_proc
 {
   std::set<std::string>& m_names;
-  
+
   for_each_proc(std::set<std::string>& names)
     : m_names(names)
   {}
-  
+
   bool operator()(aterm_appl t)
   {
     m_names.insert(t.function().name());
@@ -128,10 +114,9 @@ void test_operators()
   }
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_algorithm();
   test_operators();

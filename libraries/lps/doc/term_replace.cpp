@@ -1,7 +1,8 @@
 #include <cassert>
-#include "atermpp/algorithm.h"     // replace
-#include "atermpp/make_list.h"
+#include "mcrl2/atermpp/algorithm.h"     // replace
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/core/aterm_ext.h"
 
 using namespace lps;
 using namespace atermpp;
@@ -23,20 +24,18 @@ struct replace_variables
   replace_variables(const data_variable& src_, const data_variable& dest_)
     : src(src_), dest(dest_)
   {}
-  
+
   aterm_appl operator()(aterm_appl t)
   {
     return atermpp::replace(t, src, dest);
   }
 };
 
-int main()
+int main(int argc, char **argv)
 {
-  using namespace lps::data_expr;
+  MCRL2_ATERM_INIT(argc, argv)
 
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  using namespace lps::data_expr;
 
   data_variable d("d:D");
   data_variable d0("d0:D");
@@ -59,9 +58,9 @@ int main()
 
   // replace using a list of substitutions
   data_variable_list src  = make_list(d, e);
-  data_variable_list dest = make_list(d0, e0); 
+  data_variable_list dest = make_list(d0, e0);
   t = d_e.substitute(make_list_substitution(src, dest));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   // use atermpp::replace directly
   t = atermpp::replace(d_e, d, d0);
@@ -76,7 +75,7 @@ int main()
   data_assignment b(e, e0);
   data_assignment_list l = make_list(a, b);
   t = d_e.substitute(assignment_list_substitution(l));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   return 0;
 }

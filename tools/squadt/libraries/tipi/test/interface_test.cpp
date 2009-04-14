@@ -1,3 +1,11 @@
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include <sstream>
 #include <iostream>
 #include <cstdio>
@@ -7,7 +15,7 @@
 #include <boost/test/unit_test_log.hpp>
 #include <boost/test/unit_test_monitor.hpp>
 
-#include <tipi/detail/basic_messenger.tcc>
+#include <tipi/detail/basic_messenger.ipp>
 #include "tipi/tool.hpp"
 #include "tipi/controller.hpp"
 
@@ -72,15 +80,15 @@ void tool_capabilities_exchange() {
   tipi::controller::communicator cc;
   tipi::tool::communicator       tc;
 
-  tipi::tool::capabilities&      tcp = tc.get_tool_capabilities();
+  tipi::tool::capabilities&      tcp = tc.get_capabilities();
 
-  tcp.add_input_combination(0, "text/aut", "Testing");
+  tcp.add_input_configuration(0, "text/aut", "Testing");
 
   tc.connect(cc);
 
   cc.request_tool_capabilities();
 
-  tipi::messenger::message_ptr m = cc.await_message(tipi::reply_tool_capabilities);
+  boost::shared_ptr< const tipi::message > m = cc.await_message(tipi::reply_tool_capabilities);
 
   cc.disconnect();
 
@@ -111,7 +119,7 @@ void report_exchange() {
 
   c.send_message(m);
 
-  tipi::messenger::message_ptr p(d.await_message(tipi::unknown));
+  boost::shared_ptr< tipi::message > p(d.await_message(tipi::unknown));
 
   BOOST_CHECK(p->to_string() == std::string("<report></report>"));
 
@@ -134,7 +142,7 @@ void report_exchange() {
   config->add_input(input_file, "text/mcrl2", "examples/abp.mcrl2");
   config->add_output(output_file, "text/plain", "/etc/passwd");
 
-  tipi::option::ptr t = config->get_option(f_option);
+  tipi::configuration::option::ptr t = config->get_option(f_option);
 
   /* The option has a URI as argument */
 //  t.append_argument(tipi::datatype::uri, std::string("/bin/bash"));

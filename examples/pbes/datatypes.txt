@@ -1,0 +1,11 @@
+% The following PBES shows how user-defined types can be used in PBESs.
+
+sort D = struct d1 | d2;
+
+map  invert: D -> D;
+eqn  invert(d1) = d2;
+     invert(d2) = d1;
+
+pbes nu X(d: D) = val(d == d1) && X(invert(d));
+
+init X(d1);

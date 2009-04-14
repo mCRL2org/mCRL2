@@ -4,9 +4,9 @@
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
  * Use, modification and distribution is subject to the 
  * Boost Software License, Version 1.0. (See accompanying
- * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
+ * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2004/02/26 18:26:47 $
+ * $Date: 2008-11-01 11:34:04 +0100 (Sat, 01 Nov 2008) $
  */
 
 
@@ -14,7 +14,9 @@
 #include "boost/limits.hpp" //work around compilers without limits
 #include "boost/date_time/special_defs.hpp"
 #include "boost/date_time/locale_config.hpp"
-#include <iostream>
+#ifndef BOOST_DATE_TIME_NO_LOCALE
+#  include <ostream>
+#endif
 
 namespace boost {
 namespace date_time {

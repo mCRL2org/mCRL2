@@ -1,0 +1,3 @@
+map f : struct c(p: Pos);
+
+init delta;

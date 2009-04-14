@@ -2,7 +2,7 @@
 // select_reactor.hpp
 // ~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <boost/config.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <boost/asio/detail/pop_options.hpp>
 
@@ -51,6 +52,11 @@ class select_reactor
   : public boost::asio::detail::service_base<select_reactor<Own_Thread> >
 {
 public:
+  // Per-descriptor data.
+  struct per_descriptor_data
+  {
+  };
+
   // Constructor.
   select_reactor(boost::asio::io_service& io_service)
     : boost::asio::detail::service_base<
@@ -105,9 +111,19 @@ public:
     timer_queues_.clear();
   }
 
+  // Initialise the task, but only if the reactor is not in its own thread.
+  void init_task()
+  {
+    if (!Own_Thread)
+    {
+      typedef task_io_service<select_reactor<Own_Thread> > task_io_service_type;
+      use_service<task_io_service_type>(this->get_io_service()).init_task();
+    }
+  }
+
   // Register a socket with the reactor. Returns 0 on success, system error
   // code on failure.
-  int register_descriptor(socket_type descriptor)
+  int register_descriptor(socket_type, per_descriptor_data&)
   {
     return 0;
   }
@@ -115,7 +131,8 @@ public:
   // Start a new read operation. The handler object will be invoked when the
   // given descriptor is ready to be read, or an error has occurred.
   template <typename Handler>
-  void start_read_op(socket_type descriptor, Handler handler)
+  void start_read_op(socket_type descriptor, per_descriptor_data&,
+      Handler handler, bool /*allow_speculative_read*/ = true)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     if (!shutdown_)
@@ -126,7 +143,8 @@ public:
   // Start a new write operation. The handler object will be invoked when the
   // given descriptor is ready to be written, or an error has occurred.
   template <typename Handler>
-  void start_write_op(socket_type descriptor, Handler handler)
+  void start_write_op(socket_type descriptor, per_descriptor_data&,
+      Handler handler, bool /*allow_speculative_write*/ = true)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     if (!shutdown_)
@@ -137,7 +155,8 @@ public:
   // Start a new exception operation. The handler object will be invoked when
   // the given descriptor has exception information, or an error has occurred.
   template <typename Handler>
-  void start_except_op(socket_type descriptor, Handler handler)
+  void start_except_op(socket_type descriptor,
+      per_descriptor_data&, Handler handler)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     if (!shutdown_)
@@ -145,18 +164,74 @@ public:
         interrupter_.interrupt();
   }
 
+  // Wrapper for connect handlers to enable the handler object to be placed
+  // in both the write and the except operation queues, but ensure that only
+  // one of the handlers is called.
+  template <typename Handler>
+  class connect_handler_wrapper
+  {
+  public:
+    connect_handler_wrapper(socket_type descriptor,
+        boost::shared_ptr<bool> completed,
+        select_reactor<Own_Thread>& reactor, Handler handler)
+      : descriptor_(descriptor),
+        completed_(completed),
+        reactor_(reactor),
+        handler_(handler)
+    {
+    }
+
+    bool perform(boost::system::error_code& ec,
+        std::size_t& bytes_transferred)
+    {
+      // Check whether one of the handlers has already been called. If it has,
+      // then we don't want to do anything in this handler.
+      if (*completed_)
+      {
+        completed_.reset(); // Indicate that this handler should not complete.
+        return true;
+      }
+
+      // Cancel the other reactor operation for the connection.
+      *completed_ = true;
+      reactor_.enqueue_cancel_ops_unlocked(descriptor_);
+
+      // Call the contained handler.
+      return handler_.perform(ec, bytes_transferred);
+    }
+
+    void complete(const boost::system::error_code& ec,
+        std::size_t bytes_transferred)
+    {
+      if (completed_.get())
+        handler_.complete(ec, bytes_transferred);
+    }
+
+  private:
+    socket_type descriptor_;
+    boost::shared_ptr<bool> completed_;
+    select_reactor<Own_Thread>& reactor_;
+    Handler handler_;
+  };
+
   // Start new write and exception operations. The handler object will be
   // invoked when the given descriptor is ready for writing or has exception
-  // information available, or an error has occurred.
+  // information available, or an error has occurred. The handler will be called
+  // only once.
   template <typename Handler>
-  void start_write_and_except_ops(socket_type descriptor, Handler handler)
+  void start_connect_op(socket_type descriptor,
+      per_descriptor_data&, Handler handler)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     if (!shutdown_)
     {
-      bool interrupt = write_op_queue_.enqueue_operation(descriptor, handler);
-      interrupt = except_op_queue_.enqueue_operation(descriptor, handler)
-        || interrupt;
+      boost::shared_ptr<bool> completed(new bool(false));
+      connect_handler_wrapper<Handler> wrapped_handler(
+          descriptor, completed, *this, handler);
+      bool interrupt = write_op_queue_.enqueue_operation(
+          descriptor, wrapped_handler);
+      interrupt = except_op_queue_.enqueue_operation(
+          descriptor, wrapped_handler) || interrupt;
       if (interrupt)
         interrupter_.interrupt();
     }
@@ -165,7 +240,7 @@ public:
   // Cancel all operations associated with the given descriptor. The
   // handlers associated with the descriptor will be invoked with the
   // operation_aborted error.
-  void cancel_ops(socket_type descriptor)
+  void cancel_ops(socket_type descriptor, per_descriptor_data&)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     cancel_ops_unlocked(descriptor);
@@ -174,8 +249,8 @@ public:
   // Enqueue cancellation of all operations associated with the given
   // descriptor. The handlers associated with the descriptor will be invoked
   // with the operation_aborted error. This function does not acquire the
-  // select_reactor's mutex, and so should only be used from within a reactor
-  // handler.
+  // select_reactor's mutex, and so should only be used when the reactor lock is
+  // already held.
   void enqueue_cancel_ops_unlocked(socket_type descriptor)
   {
     pending_cancellations_.push_back(descriptor);
@@ -183,7 +258,7 @@ public:
 
   // Cancel any operations that are running against the descriptor and remove
   // its registration from the reactor.
-  void close_descriptor(socket_type descriptor)
+  void close_descriptor(socket_type descriptor, per_descriptor_data&)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
     cancel_ops_unlocked(descriptor);
@@ -230,7 +305,10 @@ public:
   std::size_t cancel_timer(timer_queue<Time_Traits>& timer_queue, void* token)
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
-    return timer_queue.cancel_timer(token);
+    std::size_t n = timer_queue.cancel_timer(token);
+    if (n > 0)
+      interrupter_.interrupt();
+    return n;
   }
 
 private:
@@ -243,19 +321,16 @@ private:
 
     // Dispatch any operation cancellations that were made while the select
     // loop was not running.
-    read_op_queue_.dispatch_cancellations();
-    write_op_queue_.dispatch_cancellations();
-    except_op_queue_.dispatch_cancellations();
+    read_op_queue_.perform_cancellations();
+    write_op_queue_.perform_cancellations();
+    except_op_queue_.perform_cancellations();
+    for (std::size_t i = 0; i < timer_queues_.size(); ++i)
+      timer_queues_[i]->dispatch_cancellations();
 
     // Check if the thread is supposed to stop.
     if (stop_thread_)
     {
-      // Clean up operations. We must not hold the lock since the operations may
-      // make calls back into this reactor.
-      lock.unlock();
-      read_op_queue_.cleanup_operations();
-      write_op_queue_.cleanup_operations();
-      except_op_queue_.cleanup_operations();
+      complete_operations_and_timers(lock);
       return;
     }
 
@@ -264,12 +339,7 @@ private:
     if (!block && read_op_queue_.empty() && write_op_queue_.empty()
         && except_op_queue_.empty() && all_timer_queues_are_empty())
     {
-      // Clean up operations. We must not hold the lock since the operations may
-      // make calls back into this reactor.
-      lock.unlock();
-      read_op_queue_.cleanup_operations();
-      write_op_queue_.cleanup_operations();
-      except_op_queue_.cleanup_operations();
+      complete_operations_and_timers(lock);
       return;
     }
 
@@ -311,30 +381,28 @@ private:
     {
       // Exception operations must be processed first to ensure that any
       // out-of-band data is read before normal data.
-      except_op_queue_.dispatch_descriptors(except_fds,
-          boost::system::error_code());
-      read_op_queue_.dispatch_descriptors(read_fds,
-          boost::system::error_code());
-      write_op_queue_.dispatch_descriptors(write_fds,
-          boost::system::error_code());
-      except_op_queue_.dispatch_cancellations();
-      read_op_queue_.dispatch_cancellations();
-      write_op_queue_.dispatch_cancellations();
+      except_op_queue_.perform_operations_for_descriptors(
+          except_fds, boost::system::error_code());
+      read_op_queue_.perform_operations_for_descriptors(
+          read_fds, boost::system::error_code());
+      write_op_queue_.perform_operations_for_descriptors(
+          write_fds, boost::system::error_code());
+      except_op_queue_.perform_cancellations();
+      read_op_queue_.perform_cancellations();
+      write_op_queue_.perform_cancellations();
     }
     for (std::size_t i = 0; i < timer_queues_.size(); ++i)
+    {
       timer_queues_[i]->dispatch_timers();
+      timer_queues_[i]->dispatch_cancellations();
+    }
 
     // Issue any pending cancellations.
     for (size_t i = 0; i < pending_cancellations_.size(); ++i)
       cancel_ops_unlocked(pending_cancellations_[i]);
     pending_cancellations_.clear();
 
-    // Clean up operations. We must not hold the lock since the operations may
-    // make calls back into this reactor.
-    lock.unlock();
-    read_op_queue_.cleanup_operations();
-    write_op_queue_.cleanup_operations();
-    except_op_queue_.cleanup_operations();
+    complete_operations_and_timers(lock);
   }
 
   // Run the select loop in the thread.
@@ -415,6 +483,22 @@ private:
       interrupter_.interrupt();
   }
 
+  // Clean up operations and timers. We must not hold the lock since the
+  // destructors may make calls back into this reactor. We make a copy of the
+  // vector of timer queues since the original may be modified while the lock
+  // is not held.
+  void complete_operations_and_timers(
+      boost::asio::detail::mutex::scoped_lock& lock)
+  {
+    timer_queues_for_cleanup_ = timer_queues_;
+    lock.unlock();
+    read_op_queue_.complete_operations();
+    write_op_queue_.complete_operations();
+    except_op_queue_.complete_operations();
+    for (std::size_t i = 0; i < timer_queues_for_cleanup_.size(); ++i)
+      timer_queues_for_cleanup_[i]->complete_timers();
+  }
+
   // Mutex to protect access to internal data.
   boost::asio::detail::mutex mutex_;
 
@@ -435,6 +519,10 @@ private:
 
   // The timer queues.
   std::vector<timer_queue_base*> timer_queues_;
+
+  // A copy of the timer queues, used when cleaning up timers. The copy is
+  // stored as a class data member to avoid unnecessary memory allocation.
+  std::vector<timer_queue_base*> timer_queues_for_cleanup_;
 
   // The descriptors that are pending cancellation.
   std::vector<socket_type> pending_cancellations_;

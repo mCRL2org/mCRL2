@@ -1,4 +1,4 @@
-AC_INIT([mCRL2 toolset],[0.2],[bug@mcrl2.org])
+AC_INIT([mCRL2 toolset],[1.0],[http://www.mcrl2.org/issuetracker])
 AC_CONFIG_AUX_DIR(build/autoconf)
 AC_CONFIG_SRCDIR([boost-build.jam])
 AC_CANONICAL_HOST
@@ -16,6 +16,7 @@ R_SLDFLAGS="-shared"
 # Default toolset to use with Boost.Build
 BJAM_CXX="gcc"
 BJAM=build/bin/bjam
+BUILD_OPTIONS="--no-display-notice"
 
 # Setting host OS
 case $host in
@@ -39,12 +40,28 @@ case $host in
     HOST_OS="BSD"
     ;;
   *-*-darwin*)
+    case $host in
+      arm-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=arm"
+      ;;
+      i386-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=x86"
+      ;;
+      powerpc-*-*)
+        BUILD_OPTIONS="${BUILD_OPTIONS} architecture=power"
+      ;;
+    esac
     HOST_OS="MACOSX"
     R_CFLAGS="-Wno-unused -O3"
     R_CXXFLAGS="-Wno-unused -O3"
     R_LDFLAGS="-bundle -undefined dynamic_lookup"
     R_SLDFLAGS=""
     BJAM_CXX="darwin"
+    TOOLSET_FLAGS="<linker-type>darwin"
+    ;;
+  *-sun-*)
+    HOST_OS="SUNOS"
+    TOOLSET_FLAGS="<linker-type>sun"
     ;;
   *)
     HOST_OS="UNKNOWN"
@@ -52,6 +69,7 @@ case $host in
 esac
 AC_SUBST([BJAM])
 AC_SUBST([BJAM_CXX])
+AC_SUBST([TOOLSET_FLAGS])
 AC_SUBST([HOST_OS])
 
 # Default is 32 bits, test is probably very incomplete
@@ -70,11 +88,22 @@ case $host in
     ;;
 esac
 
-AC_SUBST([ADDRESS_MODEL],[])
+BUILD_OPTIONS="${BUILD_OPTIONS} address-model=${ADDRESS_MODEL}"
 
 # Checks for programs.
 AC_PROG_CPP
 AC_PROG_CXX
+
+#check if the g++ compiler works
+AC_CACHE_CHECK([whether the C++ compiler works], [avahi_cv_sys_cxx_works], [
+    AC_LANG_PUSH([C++])
+    AC_COMPILE_IFELSE([int main() { }], [avahi_cv_sys_cxx_works=yes],
+        [avahi_cv_sys_cxx_works=no])
+    AC_LANG_POP([C++])
+    ])
+[ if [ "x$avahi_cv_sys_cxx_works" = "xno" ]; then ]
+    AC_MSG_FAILURE([The C++ compiler does not work. Please (re)install the C++ compiler])
+[ fi ]
 
 # Check for compatible flex
 AC_CHECK_PROG([FLEX], [flex], [flex], [])
@@ -125,11 +154,10 @@ if test -n $BISON; then
 fi
 
 # Set flags
-CPPFLAGS=""
+R_CFLAGS="${R_CFLAGS} -std=c99"
+R_CXXFLAGS="${R_CXXFLAGS} -std=c++98"
 CFLAGS="-std=c99"
 CXXFLAGS="-std=c++98"
-LDFLAGS=""
-BFLAGS=""
 
 # Check for C99 standard
 AC_MSG_CHECKING([for C99 standard])
@@ -164,23 +192,12 @@ AC_RUN_IFELSE(
 )
 AC_LANG_POP(C++)
 
-# Add standard compatibility check flags for runtime compilation
-R_CFLAGS="$R_CFLAGS $CFLAGS"
-R_CXXFLAGS="$R_CXXFLAGS $CXXFLAGS"
-
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
   [optimisation],
   AS_HELP_STRING([--disable-optimisation],
                  [disables compile-time optimisation])
 )
-if test "x$enable_optimisation" = xno; then
- OPTIMISATIONS="disable"
- BUILD_EXTRA="optimization=speed $BUILD_EXTRA"
-else
- OPTIMISATIONS="enable"
-fi
-AC_SUBST([OPTIMISATIONS],[])
 
 # Check for debug/profile options
 AC_ARG_ENABLE(
@@ -193,12 +210,18 @@ if test "x$enable_debug" = xyes; then
   CXXFLAGS="$CXXFLAGS -g -Wall $OFLAGS -W"
   BFLAGS="-t $BFLAGS"
   BUILD_VARIANT="debug"
-  BUILD_EXTRA="debug-symbols=on runtime-debugging=on $BUILD_EXTRA"
+  BUILD_OPTIONS="${BUILD_OPTIONS} debug-symbols=on runtime-debugging=on"
+  if test "x$enable_optimisation" = xyes; then
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=speed"
+  fi
 else
   CPPFLAGS="-DNDEBUG $CPPFLAGS"
   CFLAGS="$CFLAGS $OFLAGS -w"
   CXXFLAGS="$CXXFLAGS $OFLAGS -w"
   BUILD_VARIANT="release"
+  if test "x$enable_optimisation" = xno; then
+   BUILD_OPTIONS="${BUILD_OPTIONS} optimization=off"
+  fi
 fi
 AC_SUBST([BFLAGS],[])
 
@@ -208,20 +231,20 @@ AC_ARG_ENABLE(
 )
 if test "x$enable_profile" = xyes; then
   BUILD_VARIANT="profile"
-  BUILD_EXTRA="profiling=on $BUILD_EXTRA"
+  BUILD_OPTIONS="profiling=on ${BUILD_OPTIONS}"
   CPPFLAGS="-pg $CPPFLAGS"
   LDFLAGS="-pg $LDFLAGS"
 fi
 
 # Check for debug/profile options
-AC_ARG_WITH(
+AC_ARG_ENABLE(
   [static],
   AS_HELP_STRING([--enable-static],[produce and link to static libraries])
 )
 if test "x$enable_static" = xyes; then
-  LINK_VARIANT="static"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=static"
 else
-  LINK_VARIANT="shared"
+  BUILD_OPTIONS="${BUILD_OPTIONS} link=shared"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -231,7 +254,7 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_experimental" = xyes; then
-  BUILD_EXTRA="--enable-experimental $BUILD_EXTRA"
+  BUILD_OPTIONS="--enable-experimental $BUILD_OPTIONS"
 fi
 
 # Check whether symbol table stripping from binaries is requested
@@ -241,8 +264,11 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_deprecated" = xyes; then
-  BUILD_EXTRA="--enable-deprecated $BUILD_EXTRA"
+  BUILD_OPTIONS="--enable-deprecated $BUILD_OPTIONS"
 fi
+
+AC_CHECK_LIB([dl], [dlopen], DL=dl, )
+AC_SUBST([DL],[])
 
 # Check whether optimization must be suppressed
 AC_ARG_ENABLE(
@@ -251,7 +277,7 @@ AC_ARG_ENABLE(
   ])
 )
 if test "x$enable_squadt_support" = xno; then
-  BUILD_EXTRA="--disable-squadt-support $BUILD_EXTRA"
+  BUILD_OPTIONS="--disable-squadt-support $BUILD_OPTIONS"
 fi
 
 # Check for ATerm library and header files
@@ -336,9 +362,12 @@ AC_ARG_WITH(
   [cadp],
   AS_HELP_STRING([--with-cadp=prefix],[try this for the CADP prefix directory])  
 )
+if test ! ${with_cadp}; then
+  with_cadp="${CADP}"
+fi
+AC_MSG_CHECKING([for CADP in $with_cadp])
 USE_BCG=no
 if test ${with_cadp}; then
-  AC_MSG_CHECKING([for CADP in $with_cadp])
   AC_COMPILE_IFELSE(
      [
       #include <$with_cadp/incl/bcg_user.h>
@@ -359,8 +388,53 @@ if test ${with_cadp}; then
          USE_BCG=yes
        ])
      ])
-  AC_MSG_RESULT($USE_BCG)
 fi
+AC_MSG_RESULT($USE_BCG)
+
+#AC_ARG_WITH(
+#  [cvc],
+#  AS_HELP_STRING([--with-cvc=prefix],[try this for the CVC3 prefix directory])  
+#)
+#USE_CVC3=no
+#if test ${with_cvc}; then
+#  AC_MSG_CHECKING([for CVC3 (with GMP) in $with_cvc])
+#  CPPFLAGS="-I${with_cvc}/include/cvc3"
+#  AC_LANG_PUSH(C++)
+#  AC_COMPILE_IFELSE(
+#     [
+#      #include <$with_cvc/include/cvc3/vc.h>
+#     ],
+#     [
+#       LIBS="-L${with_cvc}/lib -lcvc3"
+#       AC_LINK_IFELSE(
+#       [
+#        #include <$with_cvc/include/cvc3/vc.h>
+#     
+#        int main() {
+#          return (0);
+#        }
+#       ],
+#       [],
+#       [
+#         LIBS="-L${with_cvc}/lib -lcvc3 -lgmp"
+#         AC_LINK_IFELSE(
+#         [
+#          #include <$with_cvc/include/cvc3/vc.h>
+#      
+#          int main() {
+#            return (0);
+#          }
+#         ],
+#         [
+#           USE_CVC="$with_cvc"
+#           USE_CVC3=yes
+#         ])
+#       ])
+#     ])
+#  AC_LANG_POP()
+#  AC_MSG_RESULT($USE_CVC3)
+#fi
+AC_SUBST([USE_CVC],[])
 
 # Check for Boost C++ library
 AC_ARG_WITH(
@@ -375,19 +449,34 @@ if test $with_boost; then
       #include "$with_boost/include/boost/version.hpp"
      ],
      [
-       BOOST_INCLUDE_PATH=$with_boost/include
-       BOOST_LIBRARY_PATH=$with_boost/lib
-       AC_MSG_RESULT(yes)
+       AC_RUN_IFELSE(
+       [
+        #include "$with_boost/include/boost/version.hpp"
+      
+        int main() {
+          return !(103500 <= BOOST_VERSION);
+        }
+       ],
+       [
+        BOOST_INCLUDE_PATH=$with_boost/include
+        BOOST_LIBRARY_PATH=$with_boost/lib
+        AC_MSG_RESULT(yes)
+       ],
+       [
+         AC_MSG_RESULT(not usable)
+         USE_BOOST=builtin
+       ],
+       [
+         AC_MSG_RESULT(no (safe default))
+         USE_BOOST=builtin
+       ]
+       )
      ],
      [
-       AC_MSG_RESULT(no)
+       AC_MSG_RESULT(no (or not usable))
        USE_BOOST=builtin
      ])
 else 
-  AC_CHECK_HEADER(boost/version.hpp,
-           [BOOST_INCLUDE_PATH=default
-            BOOST_LIBRARY_PATH=], [], [])
-  
   USE_BOOST=builtin
 fi
 
@@ -395,13 +484,9 @@ AC_SUBST([BOOST_INCLUDE_PATH],[])
 AC_SUBST([BOOST_LIBRARY_PATH],[])
 
 # Check for OpenGL
-AC_ARG_WITH([OpenGL],
+AC_ARG_WITH([opengl],
             AS_HELP_STRING([--with-opengl=DIR], [OpenGL/Mesa installation directory]))
 AC_MSG_CHECKING([for OpenGL])
-if test $with_opengl; then
-  CFLAGS="-I$with_opengl/include"
-  LDFLAGS="-L$with_opengl/lib"
-fi
 
 case $host in
   *-*-mingw32*)
@@ -422,65 +507,71 @@ esac
 if test "$USE_OPENGL"; then
   AC_MSG_RESULT([yes])
 else
-  LIBS=$OPENGL_NAME
-  USE_OPENGL=$with_opengl
-  AC_COMPILE_IFELSE(AC_LANG_PROGRAM([
-                   #include <GL/gl.h>
-                   #include <GL/glu.h>],
-                  [glPointSize(1.0f);]),
-                  USE_OPENGL="yes")
-
-  if test $USE_OPENGL; then
-    AC_MSG_RESULT([yes])
-
-    if test $with_opengl; then
-      USE_OPENGL="yes ($with_opengl)"
-      AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
-      AC_SUBST([OPENGL_LPATH],[$with_opengl/lib])
-    fi
+  LIBS=-l$OPENGL_NAME
+  if test $with_opengl; then
+    CFLAGS="-I$with_opengl/include"
+    LDFLAGS="-L$with_opengl/lib"
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([
+        #include <GL/gl.h>
+        #include <GL/glu.h>],
+        [ glPointSize(1.0f); ]),
+        USE_OPENGL="yes ($with_opengl)"
+        AC_SUBST([OPENGL_IPATH],[$with_opengl/include])
+        AC_SUBST([OPENGL_LPATH],[$with_opengl/lib]),
+        AC_MSG_ERROR(["Problem with finding OpenGL header files or libraries in path: `$with_opengl'"])
+     )
   else
+    AC_LINK_IFELSE(
+      AC_LANG_PROGRAM([
+        #include <GL/gl.h>
+        #include <GL/glu.h>],
+        [ glPointSize(1.0f); ]),
+      USE_OPENGL="yes",
+    )
+  fi
+  if test "$USE_OPENGL"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
     USE_OPENGL="no"
     OPENGL_NAME=""
-    AC_MSG_RESULT([no])
   fi
   LIBS=""
 fi
 AC_SUBST([OPENGL_NAME],[])
 
-# Check for xsltproc
-AC_ARG_WITH(
-  [xsltproc],
-  AS_HELP_STRING([--with-xsltproc=prefix],[try this for the xsltproc prefix install directory])
-)
-if test $with_xsltproc; then
-  AC_CHECK_PROG([XSLTPROC],[xsltproc],[$with_xsltproc/xsltproc],[],[$with_xsltproc])
-else 
-  AC_CHECK_PROG([XSLTPROC],[xsltproc],[xsltproc])
-fi
-if test -z $XSLTPROC; then
-  AC_MSG_NOTICE(documentation cannot be built because xsltproc was not found.)
-fi
-AC_SUBST([XSLTPROC],[])
-
 # Check for wxWidgets
 AC_ARG_WITH(
-  [wx],
-  AS_HELP_STRING([--with-wx=DIR],[use wxWidgets configuration program wx-config in DIR])
+  [wx-config],
+  AS_HELP_STRING([--with-wx-config=FILE],[use FILE for wxWidgets configuration program wx-config])
 )
-if test $with_wx; then
-  AC_CHECK_PROG([WX_CONFIG],[wx-config],[$with_wx/wx-config],[],[$with_wx])
-else 
+if test "$with_wx_config"; then
+  if test $($with_wx_config --version 2>/dev/null); then
+    WX_CONFIG="$with_wx_config"
+  fi
+else
   AC_CHECK_PROG([WX_CONFIG],[wx-config],[wx-config])
+  if test -z $WX_CONFIG; then
+    AC_CHECK_PROG([WX_CONFIG],[wx-config-2.8],[wx-config-2.8])
+  fi
 fi
-if test $WX_CONFIG; then
+if test "$WX_CONFIG"; then
   USE_WX="yes ($($WX_CONFIG --prefix))"
   WX_CPPFLAGS="$($WX_CONFIG --cppflags)"
-  WX_BASE_LDFLAGS="$($WX_CONFIG --libs core,base,html)"
-  WX_GL_LDFLAGS="$($WX_CONFIG --libs core,base,html,gl)"
+  if test -z "$($WX_CONFIG --static=no 2>/dev/null)"; then
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=no --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="shared"
+  else
+    WX_BASE_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,adv)"
+    WX_GL_LDFLAGS="$($WX_CONFIG --static=yes --libs core,base,gl,xml,html,adv)"
+    WX_TYPE="static"
+  fi
 else
   USE_WX=no
 fi
-AC_SUBST([WX_CONFIG],[])
+AC_SUBST([WX_TYPE],[])
 AC_SUBST([WX_CPPFLAGS],[])
 AC_SUBST([WX_BASE_LDFLAGS],[])
 AC_SUBST([WX_GL_LDFLAGS],[])
@@ -497,7 +588,6 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strdup])
-
 #evaluate some location variables for use with Boost Build
 if test "x$prefix" = xNONE
 then
@@ -508,16 +598,12 @@ then
   exec_prefix='${prefix}'
 fi
 
-AC_SUBST([BUILD_VARIANT],[])
-AC_SUBST([LINK_VARIANT],[])
-AC_SUBST([BUILD_EXTRA])
-
 if test "$BUILD_ATERM" = "builtin"; then
   eval "eval IATERM_CPPFLAGS=\\\"${includedir}/mcrl2/aterm\\\""
   if test "$ADDRESS_MODEL" = "64"; then
-    AC_SUBST([IATERM_CPPFLAGS],["-DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""])
+    AC_SUBST([IATERM_CPPFLAGS],["-m64 -DAT_64BIT -I\\\"${IATERM_CPPFLAGS}\\\""])
   else
-    AC_SUBST([IATERM_CPPFLAGS],["-I\\\"${IATERM_CPPFLAGS}\\\""])
+    AC_SUBST([IATERM_CPPFLAGS],["-m32 -I\\\"${IATERM_CPPFLAGS}\\\""])
   fi
 
   eval "eval IATERM_LDFLAGS=\\\"${libdir}/mcrl2\\\""
@@ -527,40 +613,39 @@ else
   AC_SUBST([IATERM_LDFLAGS],["${ATERM_LDFLAGS} -lATerm"])
 fi
 
-PREFIX_DIR="${prefix}"
-eval EXEC_PREFIX_DIR="${exec_prefix}"
+# Set install path related settings
+BUILD_OPTIONS="$BUILD_OPTIONS --prefix=\"${prefix}\" variant=${BUILD_VARIANT}"
 
-prefix="\$(prefix)"
+eval "eval includedir=${includedir}"
+if test ! "${prefix}/include" = "${includedir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --includedir=\"${includedir}\""
+fi
+eval "eval bindir=${bindir}"
+if test ! "${prefix}/bin" = "${bindir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --bindir=\"${bindir}\""
+fi
+eval "eval libdir=${libdir}"
+if test ! "${prefix}/lib" = "${libdir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --libdir=\"${libdir}\""
+fi
+eval "eval datadir=${datadir}"
+if test ! "${prefix}/share" = "${datadir}"; then
+  BUILD_OPTIONS="$BUILD_OPTIONS --datadir=\"${datadir}\""
+fi
 
-eval DATA_DIR="${datadir}/mcrl2"
-eval INCLUDE_DIR="${includedir}/mcrl2"
-eval MAN_DIR="${mandir}"
-eval "eval BIN_DIR=${bindir}"
-eval "eval LIB_DIR=${libdir}/mcrl2"
-
-includedir="$includedir/mcrl2"
-datadir="$datadir/mcrl2"
-libdir="$libdir/mcrl2"
-
-AC_SUBST([PREFIX_DIR],[])
-AC_SUBST([EXEC_PREFIX_DIR],[])
-AC_SUBST([DATA_DIR],[])
-AC_SUBST([LIB_DIR],[])
-AC_SUBST([BIN_DIR],[])
-AC_SUBST([INCLUDE_DIR],[])
-AC_SUBST([MAN_DIR],[])
+AC_SUBST([BUILD_OPTIONS])
 
 # Runtime compilation flags
-AC_SUBST([R_CFLAGS],[])
+AC_SUBST([R_CFLAGS],["$R_CFLAGS"])
 AC_SUBST([R_SCFLAGS],["$R_SCFLAGS"])
-AC_SUBST([R_CXXFLAGS],[])
+AC_SUBST([R_CXXFLAGS],["$R_CXXFLAGS"])
 AC_SUBST([R_SCXXFLAGS],["$R_SCXXFLAGS"])
 AC_SUBST([R_CPPFLAGS],["$CPPFLAGS"])
 AC_SUBST([R_LDFLAGS],["$R_LDFLAGS"])
 AC_SUBST([R_SLDFLAGS],["$R_SLDFLAGS"])
 
 AC_MSG_RESULT([
-   Configured $BUILD_VARIANT variant-build using libraries:
+   Configured $BUILD_VARIANT build using libraries:
 
      ATerm         :  $BUILD_ATERM
      Boost         :  $USE_BOOST
@@ -579,6 +664,6 @@ fi
 
 AC_CONFIG_FILES([build/Makefile:build/autoconf/Makefile.in
                  build/config.jam:build/autoconf/config.jam.in
-                 tools/setup.h:build/autoconf/setup.h.in])
+                 libraries/utilities/include/mcrl2/setup.h:build/autoconf/setup.h.in])
 AC_OUTPUT
 

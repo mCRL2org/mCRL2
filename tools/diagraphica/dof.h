@@ -1,40 +1,38 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./dof.h
-
-// --- dof.h --------------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef DOF_H
 #define DOF_H
 
 #include <cstddef>
 #include <string>
-#include <set>
 #include <vector>
-using namespace std;
 #include "attribute.h"
 
 class DOF
 {
 public:
 	// -- constructors and destructor -------------------------------
-    DOF( 
+    DOF(
         const int &idx,
-        const string &lbl );
+        const std::string &lbl );
     DOF( const DOF &dof );
 	virtual ~DOF();
-	
-    // -- set functions ---------------------------------------------
+
+    // -- std::set functions ---------------------------------------------
     void setIndex( const int &idx );
-    void setLabel( const string &lbl );
+    void setLabel( const std::string &lbl );
     void setMin( const double &m );
     void setMax( const double &m );
     void setMinMax( const double &mn, const double &mx );
-    void setValue( 
+    void setValue(
         const int &idx,
         const double &val );
     void addValue( const double &val );
@@ -42,15 +40,15 @@ public:
     void setDir( const int &dr );
     void setAttribute( Attribute* a );
     void setTextStatus( const int &status );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
-    string getLabel();
+    std::string getLabel();
     double getMin();
     double getMax();
     int getSizeValues();
     double getValue( const int &idx );
-    void getValues( vector< double > &vals );
+    void getValues( std::vector< double > &vals );
     int getDir();
     Attribute* getAttribute();
     int getTextStatus();
@@ -61,18 +59,18 @@ public:
         ID_TEXT_NONE,
         ID_TEXT_ALL,
         ID_TEXT_ATTR,
-        ID_TEXT_VAL,
+        ID_TEXT_VAL
     };
-    
+
 protected:
     // -- data members ----------------------------------------------
 	int    index;    // index in attribute
-    string label;
+    std::string label;
     /*
     double min;
     double max;
     */
-    vector< double > values;
+    std::vector< double > values;
     int    dir;
     Attribute* attr; // association
     int    textStatus;

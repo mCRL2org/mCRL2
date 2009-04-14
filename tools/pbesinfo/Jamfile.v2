@@ -1,14 +1,7 @@
-project toolset/pbesinfo
-       : build-dir $(BUILD_TOP)/pbesinfo
-       ;
+project toolset/pbesinfo ;
 
-exe pbesinfo
+tool pbesinfo
        : pbesinfo.cpp
-         /libraries//mcrl2_basic
          /libraries//lps
-         /site-config//boost_program_options
-       : <include>.
+         /libraries//pbes
        ;
-
-install-binaries install
-       : pbesinfo ;

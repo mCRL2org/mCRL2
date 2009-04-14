@@ -1,16 +1,18 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file glcanvas.cpp
-/// \brief Add your file description here.
+/// \brief Implements the OpenGL canvas
 
-#include <cmath>
-#include <iostream>
-#include <wx/image.h>
+#include "wx.hpp" // precompiled headers
+
 #include "glcanvas.h"
+#include <wx/image.h>
 #include "ids.h"
 #include "icons/zoom_cursor.xpm"
 #include "icons/zoom_cursor_mask.xpm"
@@ -18,6 +20,10 @@
 #include "icons/pan_cursor_mask.xpm"
 #include "icons/rotate_cursor.xpm"
 #include "icons/rotate_cursor_mask.xpm"
+#include "mediator.h"
+#include "settings.h"
+#include "visualizer.h"
+#include "tr/tr.h"
 
 using namespace Utils;
 using namespace IDs;
@@ -67,27 +73,28 @@ void GLCanvas::initialize() {
   SetCurrent();
 
   glDepthFunc(GL_LEQUAL);
+  glLoadIdentity();
 
   GLfloat gray[] = { 0.35f,0.35f,0.35f,1.0f };
   GLfloat light_pos[] = { 50.0f,50.0f,50.0f,1.0f };
   glLightfv(GL_LIGHT0,GL_AMBIENT,gray);
   glLightfv(GL_LIGHT0,GL_DIFFUSE,gray);
   glLightfv(GL_LIGHT0,GL_POSITION,light_pos);
-  
+
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_COLOR_MATERIAL);
-  
+
   GLfloat light_col[] = { 0.2f,0.2f,0.2f };
   glMaterialfv(GL_FRONT,GL_SPECULAR,light_col);
   glMaterialf(GL_FRONT,GL_SHININESS,8.0f);
   glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
 
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  
+
   RGB_Color c = settings->getRGB(BackgroundColor);
   glClearColor(c.r/255.0f,c.g/255.0f,c.b/255.0f,1.0f);
   glClearDepth(1.0);
@@ -138,35 +145,43 @@ void GLCanvas::notify(SettingID s) {
   }
 }
 
-void GLCanvas::setActiveTool(int t) {
+void GLCanvas::setActiveTool(int t)
+{
   activeTool = t;
   currentTool = t;
   setMouseCursor();
 }
 
-void GLCanvas::display(bool coll_caller) {
-  // coll_caller indicates whether the caller of display() is the 
+void GLCanvas::display(bool coll_caller, bool selecting)
+{
+  // coll_caller indicates whether the caller of display() is the
   // getPictureData() method. While collecting data, only this method is allowed
   // to call display(); else the collected data may be corrupted.
-  if (collectingData && !coll_caller) {
+  if (collectingData && !coll_caller)
+  {
     return;
   }
-  
-  // next check is for preventing infinite recursive calls to display(), which 
+
+  // next check is for preventing infinite recursive calls to display(), which
   // happened on the Mac during startup of the application
-  if (displayAllowed) {
+  if (displayAllowed)
+  {
     displayAllowed = false;
-    if (!collectingData) {
+    if (!collectingData)
+    {
       mediator->notifyRenderingStarted();
     }
 
-    SetCurrent();
-    
+    if (!selecting)
+    {
+      SetCurrent();
+    }
+
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    
+
     glPushMatrix();
-      glLoadIdentity(); 
-        
+      glLoadIdentity();
+
       if (!lightRenderMode || settings->getBool(NavLighting)) {
         glEnable(GL_NORMALIZE);
         glEnable(GL_LIGHTING);
@@ -182,13 +197,13 @@ void GLCanvas::display(bool coll_caller) {
       } else {
         glShadeModel(GL_FLAT);
       }
-      
+
       if (settings->getBool(DisplayWireframe)) {
         glPolygonMode(GL_FRONT,GL_LINE);
       } else {
         glPolygonMode(GL_FRONT,GL_FILL);
       }
-     
+
       // apply panning, zooming and rotating transformations
       glTranslatef(moveVector.x,moveVector.y,moveVector.z - startPosZ);
       glRotatef(angleY,1.0f,0.0f,0.0f);
@@ -202,35 +217,34 @@ void GLCanvas::display(bool coll_caller) {
       // end up in the current origin
       float halfHeight = visualizer->getHalfStructureHeight();
       glTranslatef(0.0f,0.0f,-halfHeight);
-      
+
       if (simulating) {
-        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(), 
+        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(),
           sim->getChosenTrans());
-      } 
+      }
       if (!lightRenderMode || settings->getBool(NavShowStates)) {
 
-        if (settings->getBool(DisplayStates)) {         
-          if (!simulating)
-          {
-            // Identify that we are drawing states
-            glPushName(STATE);
-          }
-
+        if (settings->getBool(DisplayStates)) {
+          // Identify that we are drawing states
+          glPushName(STATE);
           visualizer->drawStates(simulating);
-          if (!simulating) 
-          {
-            glPopName();
-          }
+          glPopName();
         }
       }
-      
+
+      // Disable lighting while drawing transitions, otherwise their colours
+      // change with the viewpoint
+      glDisable(GL_NORMALIZE);
+      glDisable(GL_LIGHTING);
+      glDisable(GL_LIGHT0);
+
       visualizer->drawTransitions(
           settings->getBool(DisplayTransitions)
             && (!lightRenderMode || settings->getBool(NavShowTransitions)),
           settings->getBool(DisplayBackpointers)
             && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
-      
-      if (simulating) 
+
+      if (simulating)
       {
         // Draw transitions followed during simulation and the possible
         // transitions going out of the current state.
@@ -239,8 +253,15 @@ void GLCanvas::display(bool coll_caller) {
           !lightRenderMode || settings->getBool(NavShowTransitions),
           !lightRenderMode || settings->getBool(NavShowBackpointers),
           sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
-      }  
-      
+      }
+
+      // Enable lighting again, if required
+      if (!lightRenderMode || settings->getBool(NavLighting)) {
+        glEnable(GL_NORMALIZE);
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+      }
+
       if (!lightRenderMode || settings->getBool(NavTransparency)) {
         // determine current viewpoint in world coordinates
         glPushMatrix();
@@ -268,9 +289,9 @@ void GLCanvas::display(bool coll_caller) {
       glPopName();
       glDepthMask(GL_TRUE);
       glDisable(GL_BLEND);
-      
+
       // do not show the picture in the canvas if we are collecting data
-      if (!collectingData) {
+      if (!collectingData && !selecting) {
         SwapBuffers();
       }
     glPopMatrix();
@@ -362,7 +383,7 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /*event*/) {
 void GLCanvas::onMouseDown(wxMouseEvent& event) {
 
   lightRenderMode = true;
-  
+
   determineCurrentTool(event);
   if (currentTool==myID_ZOOM || currentTool==myID_PAN ||
       currentTool==myID_ROTATE) {
@@ -386,7 +407,7 @@ void GLCanvas::onMouseUp(wxMouseEvent& event) {
 
 void GLCanvas::onMouseDClick(wxMouseEvent& event) {
   lightRenderMode = true;
-  if (currentTool == myID_SELECT) 
+  if (currentTool == myID_SELECT)
   {
     pickObjects(event.GetX(), event.GetY(), true);
   }
@@ -404,7 +425,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event) {
 	      oldMouseY = newMouseY;
         display();
 	      break;
-	
+
       case myID_PAN :
 	      moveVector.x -= 0.0015f*(startPosZ-moveVector.z)*(oldMouseX-newMouseX);
 	      moveVector.y += 0.0015f*(startPosZ-moveVector.z)*(oldMouseY-newMouseY);
@@ -412,7 +433,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event) {
 	      oldMouseY = newMouseY;
 	      display();
 	      break;
-	
+
       case myID_ROTATE :
 	      angleX -= 0.5f*(oldMouseX-newMouseX);
 	      angleY -= 0.5f*(oldMouseY-newMouseY);
@@ -424,7 +445,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event) {
 	      oldMouseY = newMouseY;
 	      display();
 	      break;
-	
+
       default : break;
     }
   }
@@ -438,112 +459,48 @@ void GLCanvas::onMouseWheel(wxMouseEvent& event) {
   display();
 }
 
-unsigned char* GLCanvas::getPictureData(int w_res,int h_res) {
-  /* collect the contents of the GLCanvas in an array of bytes; every byte is
-   * the R-, G-, or B-value of a pixel; order of returned data is from
-   * bottomleft to topright corner of canvas, row major.
-   *
-   * The user wants a picture of w_res * h_res pixels, but the canvas is w_block
-   * * h_block pixels and we can only read the contents of the canvas. So, we
-   * resize the viewport to w_res * h_res and read the viewport data in blocks
-   * of size w_block * h_block. Because in general (w_res MOD w_block) and
-   * (h_res MOD h_block) need not be 0, we also have to read a few remaining strips
-   * of viewport data. Afterwards, we "stitch" all these blocks of data together
-   * to obtain one big picture.
-   */
+unsigned char* GLCanvas::getPictureData(int w_res,int h_res)
+{
   int w_block,h_block;
   GetClientSize(&w_block,&h_block);
-
-  int W = w_res / w_block;     /* number of blocks in X direction */
-  int H = h_res / h_block;     /* number of blocks in Y direction */
-  int w_rem = w_res % w_block; /* number of pixels remaining in X direction */
-  int h_rem = h_res % h_block; /* number of pixels remaining in Y direction */
-
-  int M = W;		       /* number of blocks in X incl.remaining strip */
-  if (w_rem > 0) ++M;
-  int N = H;		       /* number of blocks in Y incl.remaining strip */
-  if (h_rem > 0) ++N;
-  unsigned char** pixel_ptrs = (unsigned char**)malloc(M*N*sizeof(unsigned
-        char*)); /* pointers to the blocks of data */
 
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-  /* COLLECT ALL DATA */
-  
-  // calling display() first seems to solve the problem that sometimes the
-  // collected data gets corrupted because of a pending repaint of the part of 
-  // the canvas that was underneath the Save Picture dialog window...
-  //display();
-  
-  // ... still, just to be sure, it's wise to apply mutual exclusion here
+  TRcontext *tr_context = trNew();
+  trTileSize(tr_context, w_block, h_block, 0);
+  trImageSize(tr_context, w_res, h_res);
+
+  unsigned char* pixdata = (unsigned char*)malloc(w_res * h_res * 3 *
+      sizeof(unsigned char));
+  if (pixdata == NULL)
+  {
+    trDelete(tr_context);
+    return NULL;
+  }
+
+  trImageBuffer(tr_context, GL_RGB, GL_UNSIGNED_BYTE, pixdata);
+  trRowOrder(tr_context, TR_TOP_TO_BOTTOM);
+  trPerspective(tr_context, 60.0f,
+      (GLfloat)(w_block)/(GLfloat)(h_block), nearPlane, farPlane);
+
   collectingData = true;
-  int bx,by; /* x and y coordinate of lower left corner of current block */
-  int bw,bh; /* width and height of current block */
-  int i,j;
-  by = 0;
-  bh = h_block;
-  for (j = 0; j < N; ++j) {
-    if (j == H) {
-      bh = h_rem;
-    }
-    bx = 0;
-    bw = w_block;
-    for (i = 0; i < M; ++i) {
-      if (i == W) {
-        bw = w_rem;
-      }
-      pixel_ptrs[i*N+j] = (unsigned char*)malloc(3*bw*bh*sizeof(unsigned char));
-      glViewport(-bx,-by,w_res,h_res);
-      // we do not want other methods to call display() while collecting data, 
-      // so we call display(true): 'true' indicates that we are the method that 
-      // is collecting data and are thus allowed to call display() 
-      display(true);
-      glReadPixels(0,0,bw,bh,GL_RGB,GL_UNSIGNED_BYTE,pixel_ptrs[i*N+j]);
-      bx += w_block;
-    }
-    by += h_block;
+  int more = 1;
+  while (more)
+  {
+    trBeginTile(tr_context);
+    display(true);
+    more = trEndTile(tr_context);
   }
   collectingData = false;
-  
-  /* RESET VIEW */
+
+  // RESET VIEW
 
   glViewport(0,0,w_block,h_block);
+  reshape();
   display();
 
-  /* STITCH COLLECTED DATA TOGETHER */
-  
-  unsigned char* pixels = 
-    (unsigned char*)malloc(3*w_res*h_res*sizeof(unsigned char));
-  
-  int r,offset;
-  offset = 0;
-  bh = h_block;
-  for (j = 0; j < N; ++j) {
-    if (j == H) {
-      bh = h_rem;
-    }
-    for (r = 0; r < bh; ++r) {
-      bw = w_block;
-      for (i = 0; i < M; ++i) {
-	      if (i == W) {
-          bw = w_rem;
-        }
-        memcpy(pixels+offset,pixel_ptrs[i*N+j]+3*r*bw,3*bw);
-        offset += 3*bw;
-      }
-    }
-  }
-  
-  /* CLEAN UP */
-
-  for (int j=0; j<N; ++j) {
-    for (int i=0; i<M; ++i) {
-      free(pixel_ptrs[i*N+j]);
-    }
-  }
-  free(pixel_ptrs);
-  return pixels;
+  return pixdata;
 }
 
 // Implementation of simulation header
@@ -551,12 +508,12 @@ void GLCanvas::refresh() {
   if (sim != NULL) {
     if (sim->getStarted()) {
 
-      if (selectedType != SIMSTATE) 
+      if (selectedType != SIMSTATE)
       {
         // Removed all selections that are not states of the simulation.
         mediator->deselect();
       }
-      
+
       simulating = true;
       display();
     }
@@ -569,7 +526,7 @@ void GLCanvas::refresh() {
 
       simulating = false;
       display();
-    } 
+    }
   }
 }
 
@@ -587,7 +544,7 @@ void GLCanvas::selChange() {
 }
 
 
-void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
+void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC) {
   // This method selects the object clicked.
   //
   // The buffer content per hit is encoded as follows:
@@ -604,23 +561,26 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
   float curMinDepth = 2000000;
   float minDepth = 0;
   GLuint names;
-  bool stateSelected = false; // Gives the selection of states precedence over 
+  bool stateSelected = false; // Gives the selection of states precedence over
                               // the selection of clusters.
 
   // Choose the nearest object and store it.
-  for(GLint j=0; j < hits; ++j) 
+  for(GLint j=0; j < hits; ++j)
   {
+
     names = *buffer;
     buffer++; // buffer points to the minimal z value of the hit.
     minDepth = static_cast<float>(*buffer)/0x7fffffff;
     buffer++; // skip maximal z value of his (no interest)
     buffer++; // buffer points to the first name on the stack
-  
+
     GLuint objType = *buffer;
 
-    for (unsigned int k = 0; k < names; k++) 
+
+
+    for (unsigned int k = 0; k < names; k++)
     {
-      if (minDepth < curMinDepth && (!stateSelected || objType == STATE || 
+      if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
           objType == SIMSTATE))
       {
         selectedObject[k] = *buffer;
@@ -631,38 +591,38 @@ void GLCanvas::processHits(const GLint hits, GLuint buffer[], bool doubleC) {
     if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
         objType == SIMSTATE) && names > 0)
     {
-      stateSelected = true;
+      stateSelected = objType == STATE || objType == SIMSTATE;
       curMinDepth = minDepth;
     }
-    
+
+
   }
 
   selectedType = static_cast<PickState>(selectedObject[0]);
+
+  mediator->deselect();
   switch (selectedType) {
-    case STATE: 
+    case STATE:
       mediator->selectStateByID(selectedObject[1]);
       break;
-    case CLUSTER: 
-      //printf("Cluster selected \n");
-      //std::cerr << "Rank: " << selectedObject[1] << std::endl;
-      //std::cerr << "Position in rank: " << selectedObject[2] << std::endl;
-      //mediator->selectCluster(selectedObject[1], selectedObject[2]);
+    case CLUSTER:
+      mediator->selectCluster(selectedObject[1], selectedObject[2]);
       break;
+
     case SIMSTATE:
       mediator->selectStateByID(selectedObject[1]);
       // As part of selectStateByID, a simulation follow-up state was selected
       // if we caught a double click, follow to this state.
-      if (doubleC) 
+      if (doubleC)
       {
         sim->followTrans();
       }
       break;
     default:
-      //printf("Nothing selected.\n");
       selectedType = PICKNONE;
-      mediator->deselect();
       break;
   }
+  visualizer->notify(Selection);
 }
 
 
@@ -674,32 +634,37 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
   // * The maximal depth of the hit object
   // * The identifier of the type of object clicked
   // * Up to two numbers indicating the object selected
-  GLsizei bufsize = mediator->getNumberOfObjects() * 6; 
+  GLsizei bufsize = mediator->getNumberOfObjects() * 6;
   if(GetContext()) {
-    GLuint selectBuf[bufsize];
+    GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
 
     glGetIntegerv(GL_VIEWPORT, viewport);
-
     glSelectBuffer(bufsize, selectBuf);
     // Swith to selection mode
     glRenderMode(GL_SELECT);
+
     glInitNames();
     // Create new projection transformation
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glLoadIdentity();
-    // Create 3x3 pixel picking region near cursor location
-    gluPickMatrix((GLdouble) x, (GLdouble)  viewport[3] - y, 
-                  3.0, 3.0, viewport);
 
-    int width,height;
+    glLoadIdentity();
+
+    // Create 3x3 pixel picking region near cursor location
+    gluPickMatrix((GLdouble) x, (GLdouble)  viewport[3] - y,
+                  3.0, 3.0, viewport);
+        int width,height;
     GetClientSize(&width,&height);
-    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),0.1, 1000);
-    glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to 
+    gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),
+                   nearPlane, farPlane);
+
+
+    glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to
                                 // calculate rotations etc.
-    display();
+
+    display(false, true);
     glPopMatrix();
     glFlush();
 
@@ -708,5 +673,42 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC) {
     display();
     mediator->deselect();
     processHits(hits, selectBuf, doubleC);
+    free(selectBuf);
   }
+}
+
+void GLCanvas::startForceDirected() {
+  stop_force_directed = false;
+  visualizer->forceDirectedInit();
+  while (!stop_force_directed) {
+    if (GetContext()) {
+      SetCurrent();
+    }
+    visualizer->forceDirectedStep();
+    display();
+    wxTheApp->Yield(true);
+  }
+  /*
+  int n = 0;
+  while (n < 10) {
+    if (GetContext()) {
+      SetCurrent();
+    }
+    #include <iostream>
+    using namespace std;
+    cerr << "------- Iteration " << n << " ---------" << endl;
+    ++n;
+    visualizer->forceDirectedStep();
+    display();
+    wxTheApp->Yield(true);
+  }*/
+}
+
+void GLCanvas::stopForceDirected() {
+  stop_force_directed = true;
+}
+
+void GLCanvas::resetStatePositions() {
+  visualizer->resetStatePositions();
+  display();
 }

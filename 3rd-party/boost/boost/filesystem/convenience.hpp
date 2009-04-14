@@ -1,7 +1,7 @@
 //  boost/filesystem/convenience.hpp  ----------------------------------------//
 
-//  © Copyright Beman Dawes, 2002-2005
-//  © Copyright Vladimir Prus, 2002
+//  Copyright Beman Dawes, 2002-2005
+//  Copyright Vladimir Prus, 2002
 //  Use, modification, and distribution is subject to the Boost Software
 //  License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
@@ -14,7 +14,7 @@
 #define BOOST_FILESYSTEM_CONVENIENCE_HPP
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/cerrno.hpp>
+#include <boost/system/error_code.hpp>
 #include <vector>
 #include <stack>
 
@@ -45,25 +45,27 @@ namespace boost
            if ( !ph.empty() && !is_directory(ph) )
                boost::throw_exception( basic_filesystem_error<Path>(
                  "boost::filesystem::create_directories", ph,
-                 boost::system::error_code(EEXIST, boost::system::errno_ecat) ) );
+                 make_error_code( boost::system::errc::file_exists ) ) );
            return false;
          }
 
          // First create branch, by calling ourself recursively
-         create_directories(ph.branch_path());
+         create_directories(ph.parent_path());
          // Now that parent's path exists, create the directory
          create_directory(ph);
          return true;
      }
 
+# ifndef BOOST_FILESYSTEM_NO_DEPRECATED
+
     BOOST_FS_FUNC_STRING extension(const Path& ph)
     {
       typedef BOOST_FS_TYPENAME Path::string_type string_type;
-      string_type leaf = ph.leaf();
+      string_type filename = ph.filename();
 
-      BOOST_FS_TYPENAME string_type::size_type n = leaf.rfind('.');
+      BOOST_FS_TYPENAME string_type::size_type n = filename.rfind('.');
       if (n != string_type::npos)
-        return leaf.substr(n);
+        return filename.substr(n);
       else
         return string_type();
     }
@@ -71,14 +73,17 @@ namespace boost
     BOOST_FS_FUNC_STRING basename(const Path& ph)
     {
       typedef BOOST_FS_TYPENAME Path::string_type string_type;
-      string_type leaf = ph.leaf();
-      BOOST_FS_TYPENAME string_type::size_type n = leaf.rfind('.');
-      return leaf.substr(0, n);
+      string_type filename = ph.filename();
+      BOOST_FS_TYPENAME string_type::size_type n = filename.rfind('.');
+      return filename.substr(0, n);
     }
+
 
     BOOST_FS_FUNC(Path) change_extension( const Path & ph,
       const BOOST_FS_TYPENAME Path::string_type & new_extension )
-      { return ph.branch_path() / (basename(ph) + new_extension); }
+      { return ph.parent_path() / (basename(ph) + new_extension); }
+
+# endif
 
 # ifndef BOOST_FILESYSTEM_NARROW_ONLY
 
@@ -89,6 +94,7 @@ namespace boost
     inline bool create_directories(const wpath& ph)
       { return create_directories<wpath>(ph); }
 
+# ifndef BOOST_FILESYSTEM_NO_DEPRECATED
     inline std::string extension(const path& ph)
       { return extension<path>(ph); }
     inline std::wstring extension(const wpath& ph)
@@ -103,6 +109,7 @@ namespace boost
       { return change_extension<path>( ph, new_ex ); }
     inline wpath change_extension( const wpath & ph, const std::wstring& new_ex )
       { return change_extension<wpath>( ph, new_ex ); }
+# endif
 
 # endif
 
@@ -188,6 +195,7 @@ namespace boost
 
       bool equal( const basic_recursive_directory_iterator & rhs ) const
         { return m_imp == rhs.m_imp; }
+
     };
 
     typedef basic_recursive_directory_iterator<path> recursive_directory_iterator;
@@ -204,6 +212,8 @@ namespace boost
       : m_imp( new detail::recur_dir_itr_imp<Path> )
     {
       m_imp->m_stack.push( basic_directory_iterator<Path>( dir_path ) );
+      if ( m_imp->m_stack.top () == basic_directory_iterator<Path>() )
+        { m_imp.reset (); }
     }
 
     template<class Path>
@@ -212,8 +222,10 @@ namespace boost
         system::error_code & ec )
       : m_imp( new detail::recur_dir_itr_imp<Path> )
     {
-      m_imp->m_stack.push( basic_directory_iterator<Path>( dir_path, std::nothrow ) );
       m_imp->m_no_throw = true;
+      m_imp->m_stack.push( basic_directory_iterator<Path>( dir_path, ec ) );
+      if ( m_imp->m_stack.top () == basic_directory_iterator<Path>() )
+        { m_imp.reset (); }
     }
 
     //  increment
@@ -224,15 +236,28 @@ namespace boost
       
       static const basic_directory_iterator<Path> end_itr;
 
-      if ( m_imp->m_no_push ) m_imp->m_no_push = false;
+      if ( m_imp->m_no_push )
+        { m_imp->m_no_push = false; }
       else if ( is_directory( m_imp->m_stack.top()->status() ) )
       {
         system::error_code ec;
+#if BOOST_WORKAROUND(__CODEGEARC__, BOOST_TESTED_AT(0x610))
+        if( m_imp->m_no_throw ) {
+            m_imp->m_stack.push(
+                basic_directory_iterator<Path>( *m_imp->m_stack.top(), ec )
+            );
+        }
+        else {
+            m_imp->m_stack.push(
+                basic_directory_iterator<Path>( *m_imp->m_stack.top() )
+            );
+        }
+#else
         m_imp->m_stack.push(
           m_imp->m_no_throw
             ? basic_directory_iterator<Path>( *m_imp->m_stack.top(), ec )
-            : basic_directory_iterator<Path>( *m_imp->m_stack.top() )
-          );
+            : basic_directory_iterator<Path>( *m_imp->m_stack.top() ) );
+#endif
         if ( m_imp->m_stack.top() != end_itr )
         {
           ++m_imp->m_level;
@@ -258,8 +283,17 @@ namespace boost
       BOOST_ASSERT( m_imp.get() && "pop on end iterator" );
       BOOST_ASSERT( m_imp->m_level > 0 && "pop with level < 1" );
 
-      m_imp->m_stack.pop();
-      --m_imp->m_level;
+      static const basic_directory_iterator<Path> end_itr;
+
+      do
+      {
+        m_imp->m_stack.pop();
+        --m_imp->m_level;
+      }
+      while ( !m_imp->m_stack.empty()
+        && ++m_imp->m_stack.top() == end_itr );
+
+      if ( m_imp->m_stack.empty() ) m_imp.reset(); // done, so make end iterator
     }
 
   } // namespace filesystem

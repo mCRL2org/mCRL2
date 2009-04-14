@@ -1,0 +1,76 @@
+% This file contains an mCRL2 specification for testing operations
+% on sets and bags.
+
+% The element sort is represented by E. Change the specification of
+% this sort to start experimenting.
+
+sort E = struct e1 | e2 | e3;
+
+% Test set operations
+
+act  insert_s: E;
+     insert_t: E;
+     ts1_set_equals_st: Bool;
+     ts2_set_lt_st: Bool;
+     ts3_set_lte_st: Bool;
+     ts4_set_union_st: Set(E);
+     ts5_set_inter_st: Set(E);
+     ts6_set_diff_st: Set(E);
+     ts7_set_compl_s: Set(E);
+     ts8_set_compl_t: Set(E);
+     ts9_set2bag_st: Bag(E) # Bag(E);
+
+proc Test_sets(sets_only: Bool, max_count: Nat) = Test_sets({}, {}, sets_only, max_count);
+     Test_sets(s,t: Set(E), sets_only: Bool, max_count: Nat) =
+       sum e: E. (insert_s(e) . Test_sets({e} + s, t, sets_only, max_count) +
+                  insert_t(e) . Test_sets(s, {e} + t, sets_only, max_count)
+                 )
+     + ts1_set_equals_st(s == t) . delta
+     + ts2_set_lt_st(s <  t) . delta
+     + ts3_set_lte_st(s <= t) . delta
+     + ts4_set_union_st(s + t) . delta
+     + ts5_set_inter_st(s * t) . delta
+     + ts6_set_diff_st(s - t) . delta
+     + ts7_set_compl_s(!s) . Test_sets(!s, t, sets_only, max_count)
+     + ts8_set_compl_t(!t) . Test_sets(s, !t, sets_only, max_count)
+     + (!sets_only) -> ts9_set2bag_st(Set2Bag(s), Set2Bag(t)) . Test_bags(Set2Bag(s), Set2Bag(t), sets_only, max_count) <> delta
+     ;
+
+% Test bag operations
+
+act  insert_b: E;
+     insert_c: E;
+     tb1_bag_equals_bc: Bool;
+     tb2_bag_lt_bc: Bool;
+     tb3_bag_lte_bc: Bool;
+     tb4_bag_join_bc: Bag(E);
+     tb5_bag_inter_bc: Bag(E);
+     tb6_bag_diff_bc: Bag(E);
+     tb7_bag2set_bc: Set(E) # Set(E);
+
+proc Test_bags(bags_only: Bool, max_count: Nat) = Test_bags({}, {}, bags_only, max_count);
+     Test_bags(b: Bag(E), c: Bag(E), bags_only: Bool, max_count: Nat) =
+       sum e: E. (count(e, b) < max_count) -> insert_b(e) . Test_bags({e:1} + b, c, bags_only, max_count) <> delta
+     + sum e: E. (count(e, c) < max_count) -> insert_c(e) . Test_bags(b, {e:1} + c, bags_only, max_count) <> delta
+     + tb1_bag_equals_bc(b == c) . delta
+     + tb2_bag_lt_bc(b <  c) . delta
+     + tb3_bag_lte_bc(b <= c) . delta
+     + tb4_bag_join_bc(b + c) . delta
+     + tb5_bag_inter_bc(b * c) . delta
+     + tb6_bag_diff_bc(b - c) . delta
+     + (!bags_only) -> tb7_bag2set_bc(Bag2Set(b), Bag2Set(c)) . Test_sets(Bag2Set(b), Bag2Set(c), bags_only, max_count) <> delta
+     ;
+
+% Test set add/remove process
+
+act  add, remove: E;
+proc Test_set_add_remove(s: Set(E)) =
+       sum e: E. add(e)    . Test_set_add_remove({e} + s)
+     + sum e: E. remove(e) . Test_set_add_remove(s - {e})
+     ;
+
+% Initial process (to test set and bag operations)
+
+%init Test_set_add_remove({x:E | x == e2});
+%init Test_set_add_remove({});
+init Test_sets(false, 2);

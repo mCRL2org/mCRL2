@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./parser.h
-
-// --- parser.h -----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef PARSER_H
 #define PARSER_H
@@ -17,13 +17,20 @@
 #include <map>
 #include <string>
 #include <vector>
-using namespace std;
 #include "colleague.h"
 #include "diagram.h"
 #include "dof.h"
 #include "graph.h"
 #include "tinyxml.h"
 #include "utils.h"
+
+template <class T>
+inline std::string to_string (const T& t)
+{
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
 
 class Mediator;
 
@@ -35,64 +42,63 @@ public:
     virtual ~Parser();
 
     // -- parsing functions -----------------------------------------
-    int getFileSize( const string &path );
-    
+    int getFileSize( const std::string &path );
+
     // fsm files
-    void parseFSMFile( 
-        const string &path,
+    void parseFSMFile(
+        const std::string &path,
         Graph* graph );
     void writeFSMFile(
-        const string &path,
+        const std::string &path,
         Graph* graph );
 
     // dgc files
     void parseAttrConfig(
-        const string &path,
+        const std::string &path,
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains );
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains );
     void writeAttrConfig(
-        const string &path,
+        const std::string &path,
         Graph* graph );
 
     // dgd files
     void parseDiagram(
-        const string &path,
+        const std::string &path,
         Graph* graph,
         Diagram* dgrmOld,
         Diagram* dgrmNew );
     void writeDiagram(
-        const string &path,
+        const std::string &path,
         Graph* graph,
         Diagram* diagram );
-            
+
 private:
     // -- private utility functions ---------------------------------
     // fsm files
-    void parseStateVarDescr( 
-        const string &nextLine,
+    void parseStateVarDescr(
+        const std::string &nextLine,
         Graph* graph );
-    void parseStates( 
-        const string &nextLine,
+    void parseStates(
+        const std::string &nextLine,
         Graph* graph );
-    void parseTransitions( 
-        const int &lineNumber,
-        const string &nextLine,
+    void parseTransitions(
+        const std::string &nextLine,
         Graph* graph );
 
     // dgc files
     void parseAttrConfig(
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains,
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
         TiXmlElement* curNode );
     void parseAttr(
         Graph* graph,
-        map< int, int > &attrIdxFrTo,
-        map< int, vector< string > > &attrCurDomains,
-        map< int, map< int, int  > > &attrOrigToCurDomains,
+        std::map< int, int > &attrIdxFrTo,
+        std::map< int, std::vector< std::string > > &attrCurDomains,
+        std::map< int, std::map< int, int  > > &attrOrigToCurDomains,
         TiXmlElement* curNode );
 
     // dgd files
@@ -108,7 +114,7 @@ private:
         TiXmlElement* curNode );
 
     // -- data members ----------------------------------------------
-    string delims;
+    std::string delims;
 };
 
 #endif

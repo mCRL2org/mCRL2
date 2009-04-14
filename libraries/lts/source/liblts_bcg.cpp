@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,16 +9,13 @@
 /// \file liblts_bcg.cpp
 
 #include <string>
-#include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "lts/liblts.h"
-#include "setup.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/lts/lts.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
 
-#ifdef MCRL2_BCG
+#ifdef USE_BCG
 
 #include <bcg_user.h>
 
@@ -81,7 +80,7 @@ bool p_lts::read_from_bcg(string const& filename)
   unsigned int from,label,to;
   BCG_OT_ITERATE_PLN(bcg_graph,from,label,to)
   {
-   p_add_transition(from,label,to); 
+   p_add_transition(from,label,to);
   }
   BCG_OT_END_ITERATE;
 
@@ -115,9 +114,24 @@ bool p_lts::write_to_bcg(string const& filename)
 
   char *buf = NULL;
   unsigned int buf_size = 0;
+  bool warn_non_i = true;
+  bool warn_i = true;
   for (unsigned int i=0; i<ntransitions; i++)
   {
     string label_str = p_label_value_str(transitions[i].label);
+    if ( taus[transitions[i].label] )
+    {
+      if ( warn_non_i && (label_str != "i") )
+      {
+        gsWarningMsg("LTS contains silent steps that are not labelled 'i'; saving as BCG means they are replaced by 'i'.\n");
+        warn_non_i = false;
+      }
+      label_str = "i";
+    } else if ( warn_i && (label_str == "i") )
+    {
+      gsWarningMsg("LTS contains label 'i' without being marked as silent step; saving as BCG means it is assumed to be a silent step.\n");
+      warn_i = false;
+    }
     if ( label_str.size() > buf_size )
     {
       if ( buf_size == 0 )

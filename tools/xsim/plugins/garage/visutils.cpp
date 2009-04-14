@@ -1,10 +1,14 @@
 // Author(s): Aad Mathijssen and Hannes Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visutils.cpp
+
+#include "wx.hpp" // precompiled headers
 
 // ---------------------------------
 //
@@ -18,7 +22,7 @@
 //    to invoke them on.
 // Some last minute hacks were put
 //    in for a better presentation,
-//    so the coding style is 
+//    so the coding style is
 //    somewhat poor.
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -234,7 +238,7 @@ void VisUtils::drawHalfBayNA( int row,
 // ---------------------------------------
 // This function renders the half cell
 //    (row, col+size) as not available.
-//    
+//
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 {
   // Set color
@@ -418,7 +422,7 @@ void VisUtils::drawHalfBay( int row,
       lftX += diff;
   else if ( col == 9 && side == 1 )
       rgtX -= diff;
-  
+
   glBegin( GL_POLYGON );
     glVertex3f( lftX, botY, 0.0 );
     glVertex3f( rgtX, botY, 0.0 );
@@ -432,7 +436,7 @@ void VisUtils::drawHalfBay( int row,
     glColor3f( gridColor.red,
                gridColor.green,
                gridColor.blue  );
-      
+
     // Draw top edge
     glBegin( GL_POLYGON );
       glVertex3f( lftX, topY, 0.0 );
@@ -453,7 +457,7 @@ void VisUtils::drawHalfBay( int row,
     glColor3f( gridColor.red,
                gridColor.green,
                gridColor.blue  );
-    
+
     // Draw border
     if ( side == 0 )
     {
@@ -495,7 +499,7 @@ void VisUtils::drawHalfBay( int row,
 
 		if ( row == 0 )
 		{
-			
+
 			if ( col != 5 && col != 6 )
 			{
 				glLineStipple( 3, 0xAAAA );

@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/store_visitor.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include <sstream>
 #include <fstream>
@@ -10,16 +14,16 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
-#include "tipi/visitors.hpp"
 #include "tipi/report.hpp"
+#include "tipi/detail/visitors.hpp"
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/tool/capabilities.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/detail/layout_manager.hpp"
-#include <tipi/utility/generic_visitor.tcc>
-#include "tipi/display.hpp"
+#include "tipi/layout_elements.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/tool_display.hpp"
 #include "tipi/common.hpp"
 
 namespace tipi {
@@ -38,7 +42,8 @@ namespace tipi {
     protected:
 
       /** \brief Writes to stream */
-      store_visitor_impl(std::ostream&);
+      store_visitor_impl(std::ostream& o) : out(o) {
+      }
   };
 
   class store_visitor_path_impl : public ::utility::visitor< store_visitor_impl > {
@@ -51,56 +56,19 @@ namespace tipi {
     public:
 
       /** \brief Writes to file */
-      store_visitor_path_impl(boost::filesystem::path const&);
-  };
-
-  class store_visitor_string_impl : public ::utility::visitor< store_visitor_impl > {
-
-    private:
-
-      /** \brief Storage for temporary std::ostream object */
-      std::ostringstream  m_help_stream;
-
-      /** \brief Storage for character data */
-      std::string&        m_target_string;
-
-    public:
-
-      /** \brief Constructor for writing to string */
-      store_visitor_string_impl(std::string&);
-
-      /** \brief Destructor */
-      ~store_visitor_string_impl();
-  };
-
-  inline store_visitor_string_impl::store_visitor_string_impl(std::string& s) :
-                                ::utility::visitor< store_visitor_impl >(m_help_stream),
-                                m_target_string(s) {
-  }
-
-  inline store_visitor_string_impl::~store_visitor_string_impl() {
-    m_target_string.assign(m_help_stream.str());
-  }
-
-  inline store_visitor_path_impl::store_visitor_path_impl(boost::filesystem::path const& p) :
+      store_visitor_path_impl(boost::filesystem::path const& p) :
                                 ::utility::visitor< store_visitor_impl >(m_help_stream),
                                 m_help_stream(p.string().c_str(), std::ios_base::out) {
 
-  }
+        m_help_stream.exceptions(std::ofstream::failbit|std::ofstream::badbit);
+      }
+  };
 
-  inline store_visitor_impl::store_visitor_impl(std::ostream& o) : out(o) {
-  }
-  /// \endcond
-  
   /** \brief Maps alignment to a string */
   static const char* alignment_to_text[6] = {"top","middle","bottom","left","center","right"};
 
   /** \brief Maps visibility to a string */
   static const char* visibility_to_text[3] = {"visible","hidden","none"};
-
-  store_visitor::store_visitor(std::string& s) :
-        ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_string_impl(s))) {
-  }
 
   store_visitor::store_visitor(boost::filesystem::path const& p) :
         ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new store_visitor_path_impl(p))) {
@@ -109,9 +77,11 @@ namespace tipi {
   store_visitor::store_visitor(std::ostream& o) :
         ::utility::visitor_interface< store_visitor_impl >(boost::shared_ptr < ::utility::visitor< store_visitor_impl > > (new ::utility::visitor< store_visitor_impl >(o))) {
   }
+  /// \endcond
 }
 
 namespace utility {
+  /// \cond INTERNAL_DOCS
 
   /**
    * \param[in] o the tipi::message object to store
@@ -119,50 +89,70 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::message const& o) {
-    out << "<message-meta type=\"" << o.m_type << "\">"
-        << "<![CDATA[";
+    out << "<message type=\"" << o.m_type << "\">";
 
     size_t i = 0;
-    size_t j = o.m_content.find(']', 0); 
+    size_t j = o.m_content.find(']', 0);
+    bool   f = true;
 
     while (j < o.m_content.size() - 3) {
       if (o.m_content[++j] == ']') {
         if (o.m_content[++j] == '>') {
+          if (f) {
+            out << "<![CDATA[";
+
+            f = false;
+          }
+
           out << o.m_content.substr(i,j - i) << "]]><![CDATA[>";
 
           i = ++j;
         }
       }
 
-      j = o.m_content.find(']', j); 
+      j = o.m_content.find(']', j);
     }
 
-    out << o.m_content.substr(i) << "]]></message-meta>";
+    if (!o.m_content.substr(i).empty()) {
+      if (f) {
+        out << "<![CDATA[";
+
+        f = false;
+      }
+
+      out << o.m_content.substr(i);
+    }
+
+    if (!f) {
+      out << "]]>";
+    }
+
+    out << "</message>";
   }
 
   /**
-   * \param[in] o the tipi::object object to store
+   * \param[in] o the tipi::configuration::object object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::object const& o) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::configuration::object const& o) {
     if (!o.m_location.empty()) {
       out << " location=\"" << o.m_location << "\"";
     }
 
-    out << " mime-type=\"" << o.m_mime_type << "\"";
+    out << " format=\"" << o.m_mime_type << "\"";
   }
 
   /**
-   * \param[in] o the tipi::option object to store
+   * \param[in] o the tipi::configuration::option object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::option const& o) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::configuration::option const& o) {
     out << ">";
 
     if (o.takes_arguments()) {
-      BOOST_FOREACH(tipi::option::type_value_list::value_type i, o.m_arguments) {
+      BOOST_FOREACH(tipi::configuration::option::type_value_list::value_type i, o.m_arguments) {
         do_visit(*i.first, i.second);
       }
     }
@@ -177,7 +167,7 @@ namespace utility {
     out << "<configuration";
 
     if (c.m_fresh) {
-      out << " fresh=\"true\"";
+      out << " interactive=\"true\"";
     }
 
     if (!c.m_output_prefix.empty()) {
@@ -190,17 +180,17 @@ namespace utility {
     for (tipi::configuration::position_list::const_iterator i = c.m_positions.begin(); i != c.m_positions.end(); ++i) {
       if (c.is_option(**i)) {
         out << "<option id=\"" << c.get_identifier(**i) << "\"";
-    
-        do_visit(static_cast < tipi::option const& >(**i));
+
+        do_visit(static_cast < tipi::configuration::option const& >(**i));
 
         out << "</option>";
       }
       else {
         out << "<object id=\"" << c.get_identifier(**i) << "\" type=\""
             << std::string((c.is_input(**i)) ? "in" : "out") << "put\"";
-     
-        do_visit(static_cast < tipi::object const& >(**i));
-     
+
+        do_visit(static_cast < tipi::configuration::object const& >(**i));
+
         out << "/>";
       }
     }
@@ -216,8 +206,8 @@ namespace utility {
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::boolean const& e, std::string const& s) {
     out << "<boolean";
-    
-    if (s.compare(tipi::datatype::boolean::true_string) == 0) {
+
+    if (s.compare("true") == 0) {
       out << " value=\"" << s << "\"";
     }
 
@@ -230,26 +220,14 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::integer const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_integer_range const& e, std::string const& s) {
     out << "<integer";
 
     if (!s.empty()) {
-      out << " value=\"" << std::dec << s << "\"";
+      out << " value=\"" << s << "\"";
     }
 
-    if (e.m_minimum != tipi::datatype::integer::implementation_minimum) {
-      out << " minimum=\"" << e.m_minimum << "\"";
-    }
-      
-    if (e.m_maximum != tipi::datatype::integer::implementation_maximum) {
-      out << " maximum=\"" << e.m_maximum << "\"";
-    }
-
-    if (e.m_default_value != e.m_minimum) {
-      out << " default=\"" << e.m_default_value << "\"";
-    }
-
-    out << "/>";
+    out << " range=\"" << e << "\"/>";
   }
 
   /**
@@ -258,26 +236,14 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::real const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_real_range const& e, std::string const& s) {
     out << "<real";
 
     if (!s.empty()) {
-      out << " value=\"" << std::dec << s << "\"";
+      out << " value=\"" << s << "\"";
     }
 
-    if (e.m_minimum != tipi::datatype::real::implementation_minimum) {
-      out << " minimum=\"" << e.m_minimum << "\"";
-    }
-      
-    if (e.m_maximum != tipi::datatype::real::implementation_maximum) {
-      out << " maximum=\"" << e.m_maximum << "\"";
-    }
-
-    if (e.m_default_value != e.m_minimum) {
-      out << " default=\"" << e.m_default_value << "\"";
-    }
-
-    out << "/>";
+    out << " range=\"" << e << "\"/>";
   }
 
   /**
@@ -286,20 +252,17 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::enumeration const& e, std::string const& s) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::basic_enumeration const& e, std::string const& s) {
     out << "<enumeration";
-   
+
     if (!s.empty()) {
       out << " value=\"" << s << "\"";;
-    }
-    else if (e.m_default_value != 0) {
-      out << " default=\"" << e.m_default_value << "\"";
     }
 
     out << ">";
 
-    for (std::vector < std::string >::const_iterator i = e.m_values.begin(); i != e.m_values.end(); ++i) {
-      out << "<element value=\"" << *i << "\"/>";
+    for (tipi::datatype::basic_enumeration::const_iterator_range i = e.values(); i.first != i.second; ++i.first) {
+      out << "<element value=\"" << i.first->first << "\"><![CDATA[" << i.first->second << "]]></element>";
     }
 
     out << "</enumeration>";
@@ -312,19 +275,17 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::datatype::string const& e, std::string const& s) {
-    assert(!boost::regex_search(s, boost::regex("]]>")));
+    using namespace boost::xpressive;
+
+    assert(!regex_search(s, sregex(as_xpr("]]>"))));
 
     out << "<string";
 
     if (e.m_minimum_length != 0) {
       out << " minimum-length=\"" << e.m_minimum_length << "\"";
     }
-    if (e.m_maximum_length != tipi::datatype::string::implementation_maximum_length) {
+    if (e.m_maximum_length != boost::integer_traits< size_t >::const_max) {
       out << " maximum-length=\"" << e.m_maximum_length << "\"";
-    }
-
-    if (!e.m_default_value.empty()) {
-      out << " default=\"" << e.m_default_value << "\"";
     }
 
     if (!s.empty()) {
@@ -340,22 +301,39 @@ namespace utility {
    **/
   template <>
   template <>
+  void visitor< tipi::store_visitor_impl >::visit(tipi::tool::capabilities::input_configuration const& c) {
+    using tipi::tool::capabilities;
+
+    out << "<input-configuration category=\"" << c.get_category() << "\">";
+
+    for (capabilities::input_configuration::object_map::const_iterator j = c.m_object_map.begin(); j != c.m_object_map.end(); ++j) {
+      out << "<object id=\"" << j->first << "\" format=\"" << j->second << "\"/>";
+    }
+
+    out << "</input-configuration>";
+  }
+
+  /**
+   * \param[in] c the tipi::tool::capabilities object to store
+   **/
+  template <>
+  template <>
   void visitor< tipi::store_visitor_impl >::visit(tipi::tool::capabilities const& c) {
+    using tipi::tool::capabilities;
+
     out << "<capabilities>"
         << "<protocol-version major=\"" << (unsigned short) c.m_protocol_version.major
         << "\" minor=\"" << (unsigned short) c.m_protocol_version.minor << "\"/>";
 
-    for (tipi::tool::capabilities::input_combination_list::const_iterator i = c.m_input_combinations.begin(); i != c.m_input_combinations.end(); ++i) {
-      out << "<input-configuration category=\"" << (*i).m_category
-          << "\" format=\"" << (*i).m_mime_type
-          << "\" identifier=\"" << (*i).m_identifier << "\"/>";
+    for (capabilities::input_configuration_list::const_iterator i = c.m_input_configurations.begin(); i != c.m_input_configurations.end(); ++i) {
+      visit(*(*i));
     }
 
-    for (tipi::tool::capabilities::output_combination_list::const_iterator i = c.m_output_combinations.begin(); i != c.m_output_combinations.end(); ++i) {
-      out << "<output-configuration format=\"" << (*i).m_mime_type
-          << "\" identifier=\"" << (*i).m_identifier << "\"/>";
+    for (capabilities::output_configuration_list::const_iterator i = c.m_output_configurations.begin(); i != c.m_output_configurations.end(); ++i) {
+      out << "<output-configuration format=\"" << (*i)->get_format()
+          << "\" id=\"" << (*i)->m_identifier << "\"/>";
     }
- 
+
     out << "</capabilities>";
   }
 
@@ -368,15 +346,15 @@ namespace utility {
     out << "<report type=\"" << c.m_report_type << "\">";
 
     /* Include description */
-    if (!c.description.empty()) {
+    if (!c.m_description.empty()) {
       const std::string pattern("]]>");
 
       /* Sanity check... (todo better would be to use Base-64 or some other encoding) */
-      if (std::search(c.description.begin(), c.description.end(), pattern.begin(), pattern.end()) != c.description.end()) {
+      if (std::search(c.m_description.begin(), c.m_description.end(), pattern.begin(), pattern.end()) != c.m_description.end()) {
         throw std::runtime_error("Illegal instance of ']]>' found");
       }
 
-      out << "<description><![CDATA[" << c.description << "]]></description>";
+      out << "<description><![CDATA[" << c.m_description << "]]></description>";
     }
 
     out << "</report>";
@@ -400,7 +378,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::label const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::label const& c, ::tipi::display::element_identifier const& id) {
     out << "<label id=\"" << id << "\"><![CDATA[" << c.m_text << "]]></label>";
   }
 
@@ -410,8 +388,8 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::button const& c, tipi::layout::element_identifier const& id) {
-    out << "<button id=\"" << id << "\" label=\"" << c.m_label << "\"/>";
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::button const& c, ::tipi::display::element_identifier const& id) {
+    out << "<button id=\"" << id << "\"><![CDATA[" << c.m_label << "]]></button>";
   }
 
   /**
@@ -420,18 +398,15 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, tipi::layout::element_identifier const& id) {
-    out << "<radio-button id=\"" << id << "\" label=\"" << c.m_label
-        << "\" connected=\"" << c.m_connection;
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::radio_button const& c, ::tipi::display::element_identifier const& id) {
+    out << "<radio-button id=\"" << id
+        << "\" connected=\"" << reinterpret_cast< tipi::display::element_identifier > (c.m_connection);
 
     if (c.m_selected) {
       out << "\" selected=\"" << c.m_selected;
     }
-    if (c.m_first) {
-      out << "\" first=\"true";
-    }
 
-    out << "\"/>";
+    out << "\"><![CDATA[" << c.m_label << "]]></radio-button>";
   }
 
   /**
@@ -440,8 +415,8 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::checkbox const& c, tipi::layout::element_identifier const& id) {
-    out << "<checkbox id=\"" << id << "\" label=\"" << c.m_label << "\" status=\"" << c.m_status << "\"/>";
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::checkbox const& c, ::tipi::display::element_identifier const& id) {
+    out << "<checkbox id=\"" << id << "\" checked=\"" << c.m_status << "\"><![CDATA[" << c.m_label << "]]></checkbox>";
   }
 
   /**
@@ -450,7 +425,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::progress_bar const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::progress_bar const& c, ::tipi::display::element_identifier const& id) {
     out << "<progress-bar id=\"" << id << "\" minimum=\"" << c.m_minimum
         << "\" maximum=\"" << c.m_maximum << "\" current=\"" << c.m_current <<  "\"/>";
   }
@@ -461,7 +436,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::text_field const& c, tipi::layout::element_identifier const& id) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::elements::text_field const& c, ::tipi::display::element_identifier const& id) {
     out << "<text-field id=\"" << id << "\">"
         << "<text><![CDATA[" << c.m_text << "]]></text>";
 
@@ -479,10 +454,10 @@ namespace utility {
     out << "<properties "
         << "horizontal-alignment=\"" << tipi::alignment_to_text[c.m_alignment_horizontal]
         << "\" vertical-alignment=\"" << tipi::alignment_to_text[c.m_alignment_vertical]
-        << "\" margin-top=\"" << c.m_margin.top
-        << "\" margin-left=\"" << c.m_margin.left
-        << "\" margin-bottom=\"" << c.m_margin.bottom
-        << "\" margin-right=\"" << c.m_margin.right;
+        << "\" margin-top=\"" << c.m_margin.m_top
+        << "\" margin-left=\"" << c.m_margin.m_left
+        << "\" margin-bottom=\"" << c.m_margin.m_bottom
+        << "\" margin-right=\"" << c.m_margin.m_right;
 
     if (c.m_grow) {
       out << "\" grow=\"" << c.m_grow;
@@ -510,25 +485,25 @@ namespace utility {
     if (c0.m_alignment_vertical != c1.m_alignment_vertical) {
       out << " vertical-alignment=\"" << tipi::alignment_to_text[c0.m_alignment_vertical] << "\"";
     }
-    if (c0.m_margin.top != c1.m_margin.top) {
-      out << " margin-top=\"" << c0.m_margin.top << "\"";
+    if (c0.m_margin.m_top != c1.m_margin.m_top) {
+      out << " margin-top=\"" << c0.m_margin.m_top << "\"";
     }
-    if (c0.m_margin.left != c1.m_margin.left) {
-      out << " margin-left=\"" << c0.m_margin.left << "\"";
+    if (c0.m_margin.m_left != c1.m_margin.m_left) {
+      out << " margin-left=\"" << c0.m_margin.m_left << "\"";
     }
-    if (c0.m_margin.bottom != c1.m_margin.bottom) {
-      out << " margin-bottom=\"" << c0.m_margin.bottom << "\"";
+    if (c0.m_margin.m_bottom != c1.m_margin.m_bottom) {
+      out << " margin-bottom=\"" << c0.m_margin.m_bottom << "\"";
     }
-    if (c0.m_margin.right != c1.m_margin.right) {
-      out << " margin-right=\"" << c0.m_margin.right << "\"";
+    if (c0.m_margin.m_right != c1.m_margin.m_right) {
+      out << " margin-right=\"" << c0.m_margin.m_right << "\"";
     }
-    if (!c1.m_grow && c0.m_grow) {
+    if (c1.m_grow != c0.m_grow) {
       out << " grow=\"" << c0.m_grow << "\"";
     }
-    if (!c1.m_enabled && c0.m_enabled) {
+    if (c1.m_enabled != c0.m_enabled) {
       out << " enabled=\"" << c0.m_enabled << "\"";
     }
-    if (!c1.m_visible && c0.m_visible) {
+    if (c1.m_visible != c0.m_visible) {
       out << " visibility=\"" << tipi::visibility_to_text[c0.m_visible] << "\"";
     }
 
@@ -536,63 +511,84 @@ namespace utility {
   }
 
   /**
+   * \internal
    * \param[in] c a tipi::layout::box object as reference
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::box const& c) {
-    tipi::layout::properties const* current_properties = &tipi::layout::manager::default_properties;
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::vertical_box const& c, ::tipi::display const& d) {
+    static tipi::layout::properties default_properties;
+
+    tipi::layout::properties const* current_properties = &default_properties;
+
+    out << "<box-layout-manager variant=\"vertical\" id=\"" << d.find(&c) << "\">";
 
     for (tipi::layout::vertical_box::children_list::const_iterator i = c.m_children.begin(); i != c.m_children.end(); ++i) {
       if ((i->layout_properties) != *current_properties) {
-        visit(*current_properties, (i->layout_properties));
+        visit((i->layout_properties), *current_properties);
 
         current_properties = &(i->layout_properties);
       }
 
-      do_visit(*(i->layout_element), (i->identifier));
+      try {
+        do_visit< const tipi::layout::element, const tipi::display::element_identifier>(
+                                                *(i->layout_element), d.find(i->layout_element));
+      }
+      catch (...) {
+        // Assume element is a layout manager
+        do_visit(*(i->layout_element), d);
+      }
     }
-  }
-
-  /**
-   * \param[in] c a tipi::layout::vertical_box object as reference
-   * \param[in] id the identifier for the manager
-   **/
-  template <>
-  template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::vertical_box const& c, tipi::layout::element_identifier const& id) {
-    out << "<box-layout-manager variant=\"vertical\" id=\"" << id << "\">";
-
-    visit(static_cast < tipi::layout::box const& > (c));
 
     out << "</box-layout-manager>";
   }
 
   /**
-   * \param[in] c a tipi::layout::vertical_box object to store
-   * \param[in] id the identifier for the manager
+   * \internal
+   * \param[in] c a tipi::layout::box object as reference
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::horizontal_box const& c, tipi::layout::element_identifier const& id) {
-    out << "<box-layout-manager variant=\"horizontal\" id=\"" << id << "\">";
+  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::horizontal_box const& c, ::tipi::display const& d) {
+    static tipi::layout::properties default_properties;
 
-    visit(static_cast < tipi::layout::box const& > (c));
+    tipi::layout::properties const* current_properties = &default_properties;
+
+    out << "<box-layout-manager variant=\"horizontal\" id=\"" << d.find(&c) << "\">";
+
+    for (tipi::layout::horizontal_box::children_list::const_iterator i = c.m_children.begin(); i != c.m_children.end(); ++i) {
+      if ((i->layout_properties) != *current_properties) {
+        visit((i->layout_properties), *current_properties);
+
+        current_properties = &(i->layout_properties);
+      }
+
+      try {
+        do_visit< const tipi::layout::element, const tipi::display::element_identifier>(
+                                                *(i->layout_element), d.find(i->layout_element));
+      }
+      catch (...) {
+        // Assume element is a layout manager
+        do_visit(*(i->layout_element), d);
+      }
+    }
 
     out << "</box-layout-manager>";
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to store
+   * \param[in] c a tipi::tool_display object to store
    **/
   template <>
   template <>
-  void visitor< tipi::store_visitor_impl >::visit(tipi::layout::tool_display const& c) {
+  void visitor< tipi::store_visitor_impl >::visit(tipi::tool_display const& c) {
     out << "<display-layout visible=\"" << c.m_visible << "\">"
         << "<layout-manager>";
 
-    if (c.m_manager.get() != 0) {
-      do_visit(*c.m_manager, static_cast < tipi::layout::element_identifier const& > (0));
+    if (c.manager() != 0) {
+      do_visit(*c.manager(), static_cast < tipi::display const& > (c));
     }
 
     out << "</layout-manager>"
@@ -604,28 +600,29 @@ namespace utility {
   bool visitor< tipi::store_visitor_impl >::initialise() {
     register_visit_method< const tipi::message >();
     register_visit_method< const tipi::datatype::boolean, const std::string >();
-    register_visit_method< const tipi::datatype::integer, const std::string >();
-    register_visit_method< const tipi::datatype::real, const std::string >();
-    register_visit_method< const tipi::datatype::enumeration, const std::string >();
+    register_visit_method< const tipi::datatype::basic_integer_range, const std::string >();
+    register_visit_method< const tipi::datatype::basic_real_range, const std::string >();
+    register_visit_method< const tipi::datatype::basic_enumeration, const std::string >();
     register_visit_method< const tipi::datatype::string, const std::string >();
-    register_visit_method< const tipi::object >();
-    register_visit_method< const tipi::option >();
+    register_visit_method< const tipi::configuration::object >();
+    register_visit_method< const tipi::configuration::option >();
     register_visit_method< const tipi::configuration >();
     register_visit_method< const tipi::controller::capabilities >();
     register_visit_method< const tipi::tool::capabilities >();
+    register_visit_method< const tipi::tool::capabilities::input_configuration >();
     register_visit_method< const tipi::report >();
-    register_visit_method< const tipi::layout::tool_display >();
-    register_visit_method< const tipi::layout::elements::button, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::checkbox, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::label, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::progress_bar, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::radio_button, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::elements::text_field, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::horizontal_box, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::vertical_box, const tipi::layout::element_identifier >();
-    register_visit_method< const tipi::layout::box >();
+    register_visit_method< const tipi::tool_display >();
+    register_visit_method< const tipi::layout::elements::button, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::checkbox, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::label, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::progress_bar, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::radio_button, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::elements::text_field, const ::tipi::display::element_identifier >();
+    register_visit_method< const tipi::layout::horizontal_box, const ::tipi::display >();
+    register_visit_method< const tipi::layout::vertical_box, const ::tipi::display >();
     register_visit_method< const tipi::layout::properties >();
 
     return true;
   }
+  /// \endcond
 }

@@ -1,16 +1,7 @@
-project toolset/lpsinfo
-       : build-dir $(BUILD_TOP)/lpsinfo
-       ;
+project toolset/lpsinfo ;
 
-exe lpsinfo
+tool lpsinfo
        : lpsinfo.cpp
-         /libraries//mcrl2_basic
          /libraries//lps
-         /site-config//boost_program_options
-       : <include>.
-         <squadt-connectivity>implemented
-       ;
-
-install-binaries install
-       : lpsinfo
+       : <squadt-connectivity>implemented
        ;

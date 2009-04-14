@@ -1,16 +1,18 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./corrlplot.cpp
 
-// --- corrlplot.cpp ------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "corrlplot.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 
@@ -114,22 +116,22 @@ void CorrlPlot::visualize( const bool &inSelectMode )
             selectBuf,
             2.0,
             2.0 );
-        
+
         //setScalingTransf();
         //drawNumberPlot( inSelectMode );
         drawPlot( inSelectMode );
-        
+
         finishSelectMode(
             hits,
-            selectBuf );        
+            selectBuf );
     }
     else
     {
         clear();
         //setScalingTransf();
-        drawAxes( 
+        drawAxes(
             inSelectMode,
-            "x-label", 
+            "x-label",
             "y-label" );
         drawLabels( inSelectMode );
         drawPlot( inSelectMode );
@@ -155,13 +157,13 @@ void CorrlPlot::drawAxes(
     canvas->getSize( w, h );
     // get size of 1 pixel
     pix = canvas->getPixelSize();
-    
+
     // calc size of bounding box
     xLft = -0.5*w+20*pix;
     xRgt =  0.5*w-10*pix;
     yTop =  0.5*h-10*pix;
     yBot = -0.5*h+20*pix;
-            
+
     // rendering mode
     if ( inSelectMode != true )
     {
@@ -173,7 +175,7 @@ void CorrlPlot::drawAxes(
         VisUtils::enableLineAntiAlias();
         VisUtils::drawLine( xLft, xRgt, yBot, yTop );
         VisUtils::disableLineAntiAlias();
-        
+
         // x- & y-axis
         VisUtils::setColorMdGray();
         VisUtils::drawLine( xLft, xLft, yBot, yTop );
@@ -191,7 +193,7 @@ void CorrlPlot::drawLabels( const bool &inSelectMode )
     double pix;
     double scaling;
     string min, max;
-    
+
     // get size of sides
     canvas->getSize( w, h );
     // get size of 1 pixel
@@ -201,7 +203,7 @@ void CorrlPlot::drawLabels( const bool &inSelectMode )
 
     // color
     VisUtils::setColorBlack();
-    
+
     if ( mapXToY.size() > 0 )
     {
         // x-axis label
@@ -223,7 +225,7 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
 {
     double x, y, rad;
     double pix;
-    
+
     // selection mode
     if ( inSelectMode == true )
     {
@@ -249,7 +251,7 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
     {
         ColorRGB col;
         pix   = canvas->getPixelSize();
-    
+
         for ( size_t i = 0; i < positions.size(); ++i )
         {
             for ( size_t j = 0; j < positions[i].size(); ++j )
@@ -260,9 +262,9 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
 
                 VisUtils::mapColorCoolGreen( col );
                 col.a = 0.35;
-                
+
                 VisUtils::setColor( col );
-                
+
                 VisUtils::enableBlending();
                 //VisUtils::fillCirc( x, y, rad, 21);
                 VisUtils::fillEllipse( x, y, rad, rad, 21);
@@ -277,7 +279,7 @@ void CorrlPlot::drawPlot( const bool &inSelectMode )
                 //VisUtils::drawCirc( x, y, rad, 21);
                 VisUtils::drawEllipse( x, y, rad, rad, 21);
                 VisUtils::disableLineAntiAlias();
-                
+
                 VisUtils::setColorBlack();
                 VisUtils::fillRect( x-pix, x+pix, y+pix, y-pix );
             }
@@ -296,7 +298,7 @@ void CorrlPlot::drawDiagram( const bool &inSelectMode )
     vector< Attribute* > attrs;
     attrs.push_back( graph->getAttribute( attrIdx1 ) );
     attrs.push_back( graph->getAttribute( attrIdx2 ) );
-    
+
     vector< double > vals;
     vals.push_back( attrValIdx1Dgrm );
     vals.push_back( attrValIdx2Dgrm );
@@ -304,7 +306,7 @@ void CorrlPlot::drawDiagram( const bool &inSelectMode )
     glPushMatrix();
     glTranslatef( posDgrm.x, posDgrm.y, 0.0 );
     glScalef( scaleDgrm, scaleDgrm, scaleDgrm );
-    
+
     // drop shadow
     VisUtils::setColorMdGray();
     VisUtils::fillRect(
@@ -321,7 +323,7 @@ void CorrlPlot::drawDiagram( const bool &inSelectMode )
 
     VisUtils::setColorBlack();
     VisUtils::drawLabelRight( texCharId, -0.98, 1.1, scaleTxt, msgDgrm );
-    
+
     glPopMatrix();
 }
 
@@ -355,7 +357,7 @@ void CorrlPlot::handleMouseLeaveEvent()
 // ------------------------------------
 {}
 */
-    
+
 
 // -- utility data functions ----------------------------------------
 
@@ -395,7 +397,7 @@ void CorrlPlot::calcMaxNumber()
         for ( int i = 0; i < sizeX; ++i )
             maxNumX.push_back( 0 );
         }
-        
+
         {
         for ( int i = 0; i < sizeY; ++i )
             maxNumY.push_back( 0 );
@@ -450,9 +452,9 @@ void CorrlPlot::setScalingTransf()
     glLoadIdentity();
     double f = canvas->getScaleFactor();
     glScalef( f, f, f );
-    glTranslatef( 
-        canvas->getXTranslation(), 
-        canvas->getYTranslation(), 
+    glTranslatef(
+        canvas->getXTranslation(),
+        canvas->getYTranslation(),
         0.0 );
 }
 
@@ -480,12 +482,12 @@ void CorrlPlot::displTooltip(
     msgDgrm.append( Utils::dblToStr( number[xIdx][ yIdx ] ) );
     msgDgrm.append( " nodes; " );
     // percentage
-    msgDgrm.append( Utils::dblToStr( 
+    msgDgrm.append( Utils::dblToStr(
             Utils::perc( number[xIdx][ yIdx ], graph->getSizeNodes() ) ) );
     msgDgrm.append( "%" );
-        
+
     if ( diagram == NULL )
-    {   
+    {
         // show tooltip
         canvas->showToolTip( msgDgrm );
     }
@@ -495,7 +497,7 @@ void CorrlPlot::displTooltip(
         double xM, yM;
         double xD, yD;
         canvas->getWorldCoords( xMouseCur, yMouseCur, xM, yM );
-        
+
         if ( xM < 0 )
             xD = xM+1.0*scaleDgrm;
         else
@@ -522,7 +524,7 @@ void CorrlPlot::calcPositions()
 {
     // update flag
     geomChanged = false;
-    
+
     if ( mapXToY.size() > 0 )
     {
         double w, h, pix;
@@ -532,7 +534,7 @@ void CorrlPlot::calcPositions()
         double x, y, radius;
         double maxArea, area;
         Position2D pos;
-        
+
         // get size of canvas & 1 pixel
         canvas->getSize( w, h );
         pix = canvas->getPixelSize();
@@ -550,11 +552,11 @@ void CorrlPlot::calcPositions()
         // calc intervals per axis
         if ( numX > 1 )
             fracX = ( 1.0/(double)(numX) )*( xRgt-xLft );
-        else 
+        else
             fracX = 1.0;
-        
+
         if ( numY > 1)
-            fracY = ( 1.0/(double)(numY) )*( yTop-yBot ); 
+            fracY = ( 1.0/(double)(numY) )*( yTop-yBot );
         else
             fracY = 1.0;
 
@@ -571,11 +573,11 @@ void CorrlPlot::calcPositions()
             maxRadius = maxRadHintPx*pix;
             yTop -= (maxRadius-10*pix);
             if ( numY > 1)
-                fracY = ( 1.0/(double)(numY) )*( yTop-yBot ); 
+                fracY = ( 1.0/(double)(numY) )*( yTop-yBot );
             else
                 fracY = 1.0;
         }
-        
+
         for ( size_t i = 0; i < mapXToY.size(); ++i )
         {
             vector< Position2D > tempPos;
@@ -587,7 +589,7 @@ void CorrlPlot::calcPositions()
             {
                 // fraction of total number
                 frac = (double)number[i][j]/(double)maxNumber;
-                
+
                 // radius
                 maxArea = PI*maxRadius*maxRadius;
                 area    = frac*maxArea;
@@ -596,7 +598,7 @@ void CorrlPlot::calcPositions()
                 if ( radius < minRadHintPx*pix )
                     radius = minRadHintPx*pix;
                 radii[i].push_back( radius );
-                
+
                 x = xLft + 0.5*fracX + i*fracX;
                 y = yBot + 0.5*fracY + mapXToY[i][j]*fracY;
                 pos.x = x;
@@ -627,8 +629,8 @@ void CorrlPlot::clearPositions()
 
 
 // -------------------------
-void CorrlPlot::processHits( 
-    GLint hits, 
+void CorrlPlot::processHits(
+    GLint hits,
     GLuint buffer[] )
 // -------------------------
 {
@@ -636,7 +638,7 @@ void CorrlPlot::processHits(
     int    number;
     int    name1;
     int    name2;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )

@@ -1,8 +1,0 @@
-@INCLUDE_PATH = ../../../doc/doxy
-@INCLUDE = Doxymaster
-PROJECT_NAME           = Rewrite
-OUTPUT_DIRECTORY       = ../../../build/doxy
-HTML_OUTPUT            = rewrite
-INPUT                  = ../include ../source
-HTML_HEADER            = ../../../doc/doxy/Doxyheader.html
-HTML_FOOTER            = ../../../doc/doxy/Doxyfooter.html

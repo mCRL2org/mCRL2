@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./diagrameditor.h
-
-// --- diagrameditor.h ----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef DIAGRAMEDITOR_H
 #define DIAGRAMEDITOR_H
@@ -14,6 +14,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
+#include <string>
+#include <vector>
 #include "colorchooser.h"
 #include "dof.h"
 #include "diagram.h"
@@ -34,6 +36,7 @@ public:
     void setDiagram( Diagram* dgrm );
 
     void setEditModeSelect();
+    void setEditModeNote();
     void setEditModeDOF();
     void setEditModeRect();
     void setEditModeEllipse();
@@ -47,6 +50,9 @@ public:
     void setFillCol();
     void setLineCol();
 
+    void handleIntersection();
+    void translatePoints( double &x1, double &y1, double &x2, double &y2, double givenX1, double givenY1, double givenX2, double givenY2 );
+    bool isAnyShapeSelected();
     void handleDOFSel( const int &DOFIdx );
     void handleDOFSetTextStatus(
         const int &DOFIdx,
@@ -70,41 +76,46 @@ public:
         const double &y );
     void handleDOFOpaClear(
         const int &idx );
-    void setLinkDOFAttr( 
-        const int &DOFIdx, 
+    void setLinkDOFAttr(
+        const int &DOFIdx,
         const int &attrIdx );
     void clearLinkDOFAttr( const int &DOFIdx );
     void clearLinkAttrDOF( const int &attrIdx );
-    
+
+    // -- helper functions ------------------------------------------
+    virtual void printMouseVariables();
+
     // -- get functions ---------------------------------------------
     Diagram* getDiagram();
     int getEditMode();
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
+    void reGenText();
 
     // -- event handlers --------------------------------------------
     void handleMouseLftDownEvent(
         const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
     void handleMouseLftDClickEvent(
         const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
-    void handleKeyUpEvent( const int &keyCode );
-    
-    void handleHits( const vector< int > &ids );
+    void handleKeyUpEvent( const int &keyCode, const int &specialKey );
+    void handleKeyDownEvent( const int &keyCode, const int &specialKey );
+
+    void handleHits( const std::vector< int > &ids );
     void handleHitDiagramOnly();
     void handleHitShape( const int &shapeIdx );
-    void handleHitShapeHandle( 
+    void handleHitShapeHandle(
         const int &shapeIdx,
         const int &handleId );
 
@@ -115,37 +126,47 @@ public:
         const int &y,
         const vector< int > &data );
     */
+    void handleShowVariable( const std::string &variable, const int &variableId );
+    void handleShowNote( const std::string &variable, const int &shapeId );
+    void handleAddText( std::string &variable, int &shapeId );
+    void handleTextSize( int &textSize, int &shapeId );
+    void handleSetTextSize( int &textSize, int &shapeId );
     void handleCut();
     void handleCopy();
+    void clearClipBoard();
     void handlePaste();
     void handleDelete();
+    void handleSelectAll();
     void handleBringToFront();
     void handleSendToBack();
     void handleBringForward();
     void handleSendBackward();
     void handleEditDOF();
-    
+    void handleSetDOF( const int &attrIdx );
+    void handleCheckedVariable( const int &idDOF, const int &variableId );
+
     // -- public utility functions ----------------------------------
     void deselectAll();
-    
+
     // -- public constants ------------------------------------------
     enum
     {
         EDIT_MODE_SELECT,
+        EDIT_MODE_NOTE,
         EDIT_MODE_DOF,
         EDIT_MODE_RECT,
         EDIT_MODE_ELLIPSE,
         EDIT_MODE_LINE,
         EDIT_MODE_ARROW,
-        EDIT_MODE_DARROW,
+        EDIT_MODE_DARROW
     };
 
 protected:
     // -- private utility functions ---------------------------------
     void displShapeEdtOptions( Shape *s );
     void displDOFInfo( Shape* s );
-    
-    void handleDragCtr( Shape* s );
+
+    void handleDragCtr( Shape* s, double &xDrag, double &yDrag );
     void handleDragTopLft( Shape* s );
     void handleDragLft( Shape* s );
     void handleDragBotLft( Shape* s );
@@ -170,8 +191,8 @@ protected:
     void handleDragDOFAglEnd( Shape* s );
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
@@ -179,12 +200,19 @@ protected:
     int editMode;
     int drgBegIdx1;
     int drgBegIdx2;
+    int lastSelectedShapeId;
+    bool selection;
 
     double xDrgDist;
     double yDrgDist;
-    
+    double selectedX1, selectedX2, selectedY1, selectedY2;
+
     Shape* clipBoardShape; // composition
+    std::vector < Shape* > clipBoardList;
     double xPaste, yPaste;
+
+    // -- static variables ------------------------------------------
+    static int szeTxt;
 };
 
 #endif

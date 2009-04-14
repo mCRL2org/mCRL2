@@ -1,86 +1,47 @@
 project libraries/utilities
-       : source-location ../source
-       : build-dir $(BUILD_TOP)
+       : source-location ..
        : requirements
-          <include>../include
-       : usage-requirements
           <include>../include
        ;
 
-include $(TOP)/build/config.jam ;
-
 alias spinctrlfloat : spinctrlfloat.o ;
 alias colorbutton   : colorbutton.o ;
+alias font_renderer : font_renderer.o ;
 
-obj spinctrlfloat.o : spinctrlfloat.cpp : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
-obj colorbutton.o   : colorbutton.cpp   : <cxxflags>"$(WX_CPPFLAGS)" <include>../include/mcrl2/utilities ;
+wx-requirements = <pch>on:<source>/site-config//wx.pch <include>../include/mcrl2/utilities ;
 
-# Dummy for when squadt support is not desired
-alias squadt_interface.main
-      : squadt_interface.cpp
-      : <threading>multi
-        <use>/libraries/tipi//tool_interface
-        <use>/libraries/mcrl2_basic//headers
-        <define>ENABLE_SQUADT_CONNECTIVITY
+obj spinctrlfloat.o : source/spinctrlfloat.cpp : $(wx-requirements) <use>/site-config//wx_base ;
+obj colorbutton.o   : source/colorbutton.cpp   : $(wx-requirements) <use>/site-config//wx_base ;
+obj font_renderer.o : source/font_renderer.cpp : $(wx-requirements) <use>/site-config//wx_gl ;
+
+# mCRL2 specific tool for SQuADt interface
+obj squadt_interface
+      : source/squadt_interface.cpp
+      : <use>/libraries/tipi//tool
       :
-      : <library>/libraries/tipi//tool_interface
+      : <library>/libraries/tipi//tool
+        <toolset>darwin:<framework>Carbon
         <define>ENABLE_SQUADT_CONNECTIVITY
+        <include>../include
       ;
 
-# mCRL2 Tool for SQuADt interface
-lib mtsi
-      : squadt_interface.main
+obj command_line_interfacing
+      : source/command_line_interface.cpp
+      : <use>/site-config//boost
+      :
+      : <include>../include
       ;
 
-alias squadt_interface
-      : mtsi
-      : <link>static
+mcrl2-library utilities
+      : source/info.cpp            # Temporary?
+        source/bdd2dot.cpp         # Temporary?
+        source/manipulator.cpp     # Temporary?
+        source/command_line_interface.cpp
+      : <use>/site-config//boost
+        <library>/libraries//atermpp
+        <include>../../core/include      # Circular dependency
+        <include>../../data/include      # Circular dependency
+      :
+      : <include>../include
+        <use>/site-config//boost
       ;
-
-alias squadt_interface
-      : /libraries//utilities
-      : <link>shared
-      ;
-
-alias squadt_interface.alias
-      : squadt_interface.main
-      : <use>headers
-      ;
-
-alias utilities.main
-      : aterm_ext.cpp
-        numeric_string.cpp
-        expression_info.cpp # Temporary?
-        sort_info.cpp       # Temporary?
-        info.cpp            # Temporary?
-        bdd2dot.cpp         # Temporary?
-        bdd_info.cpp        # Temporary?
-        bdd_manipulator.cpp # Temporary?
-        manipulator.cpp     # Temporary?
-        utilities.cpp       # Temporary?
-      : <use>/libraries/aterm//headers
-        <use>/libraries/mcrl2_basic//headers
-        <use>/libraries/rewrite//headers
-#        <wx>yes:<source>spinctrlfloat.o
-#        <wx>yes:<source>colorbutton.o
-#        <wx>yes:<library>/site-config//wx_base
-        <squadt-support>yes,<link>shared:<source>squadt_interface.main
-      ;
-
-lib utilities
-      : utilities.main 
-      : <link>static
-        <library>/libraries//aterm
-      ;
-
-alias utilities
-      : /libraries//mcrl2
-      : <link>shared
-        <squadt-support>yes:<use>squadt_interface.main
-      ;
-
-alias utilities.alias
-      : utilities.main
-      ;
-
-alias headers : : <use>/boost//headers : : <use>/boost//headers ;

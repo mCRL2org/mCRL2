@@ -1,111 +1,107 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/action_label.h
-/// \brief Add your file description here.
+/// \brief The class action_label.
 
 #ifndef MCRL2_LPS_ACTION_LABEL_H
 #define MCRL2_LPS_ACTION_LABEL_H
 
 #include <cassert>
-#include "atermpp/atermpp.h"
-#include "mcrl2/basic/identifier_string.h"
-#include "mcrl2/data/sort.h"
-#include "mcrl2/basic/detail/soundness_checks.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/detail/soundness_checks.h"
+
+namespace mcrl2 {
 
 namespace lps {
-
-using atermpp::aterm_appl;
-using atermpp::term_list;
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
 /// \brief Represents a label of an action.
-///
 // <ActId>        ::= ActId(<String>, <SortExpr>*)
-class action_label: public aterm_appl
+class action_label: public atermpp::aterm_appl
 {
   protected:
-    identifier_string m_name;
-    sort_list m_sorts;
+    /// \brief The name of the label
+    core::identifier_string m_name;
+
+    /// \brief The sorts of the label
+    data::sort_expression_list m_sorts;
 
   public:
+    /// \brief Constructor.
     action_label()
-      : aterm_appl(detail::constructActId())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructActId())
     {}
 
-    action_label(aterm_appl t)
-     : aterm_appl(t)
+    /// \brief Constructor.
+    /// \param t A term
+    action_label(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
-      assert(detail::check_rule_ActId(m_term));
-      aterm_appl::iterator i = t.begin();
+      assert(core::detail::check_rule_ActId(m_term));
+      atermpp::aterm_appl::iterator i = t.begin();
       m_name  = *i++;
       m_sorts = *i;
     }
 
-    action_label(const identifier_string& name, const sort_list &sorts)
-     : aterm_appl(gsMakeActId(name, sorts)),
+    /// \brief Constructor.
+    /// \param name A
+    /// \param sorts A sequence of sort expressions
+    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
+     : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
     {}
 
-    /// Returns the name of the action label.
-    ///
-    identifier_string name() const
+    /// \brief Returns the name of the action label.
+    /// \return The name of the action label.
+    core::identifier_string name() const
     {
       return m_name;
     }
 
-    /// Returns the sorts of the action label
-    ///
-    sort_list sorts() const
+    /// \brief Returns the sorts of the action label
+    /// \return The sorts of the action label
+    data::sort_expression_list sorts() const
     {
       return m_sorts;
     }
 
-    /// Applies a substitution to this action label and returns the result
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action_label substitute(Substitution f)
     {
       return action_label(f(*this));
-    }     
+    }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_label_list
-/// \brief singly linked list of action labels
-typedef term_list<action_label> action_label_list;
+/// \brief Read-only singly linked list of action labels
+typedef atermpp::term_list<action_label> action_label_list;
 
 /// \brief Returns true if the term t is an action label
+/// \param t A term
+/// \return True if the term t is an action label
 inline
-bool is_action_label(aterm_appl t)
+bool is_action_label(atermpp::aterm_appl t)
 {
-  return gsIsActId(t);
-};
+  return core::detail::gsIsActId(t);
+}
 
 } // namespace lps
 
-/// INTERNAL ONLY
-namespace atermpp
-{
-using lps::action_label;
-
-template<>
-struct aterm_traits<action_label>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(action_label t)   { t.protect(); }
-  static void unprotect(action_label t) { t.unprotect(); }
-  static void mark(action_label t)      { t.mark(); }
-  static ATerm term(action_label t)     { return t.term(); }
-  static ATerm* ptr(action_label& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_ACTION_LABEL_H

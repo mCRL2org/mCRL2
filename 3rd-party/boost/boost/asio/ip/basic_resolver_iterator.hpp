@@ -2,7 +2,7 @@
 // basic_resolver_iterator.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -81,9 +81,7 @@ public:
       {
         using namespace std; // For memcpy.
         typename InternetProtocol::endpoint endpoint;
-        endpoint.resize(
-            static_cast<boost::asio::detail::socket_addr_len_type>(
-              address_info->ai_addrlen));
+        endpoint.resize(static_cast<std::size_t>(address_info->ai_addrlen));
         memcpy(endpoint.data(), address_info->ai_addr,
             address_info->ai_addrlen);
         iter.values_->push_back(

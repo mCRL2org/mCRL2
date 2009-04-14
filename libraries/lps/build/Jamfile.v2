@@ -1,82 +1,26 @@
 project lps
-       : source-location ..
-       : build-dir $(BUILD_TOP)
-       : requirements
-          <include>../include
-       : usage-requirements
-          <include>../include
+       : source-location ../source
        ;
 
-alias lps
+
+
+mcrl2-library lps
+       : lin_std.cpp
+         binary.cpp
+         sumelm.cpp
+         suminst.cpp
+         untime.cpp
+         nextstate.cpp
+         nextstate_standard.cpp
+         confluence_checker.cpp
+         disjointness_checker.cpp
+         invariant_checker.cpp
+         invariant_eliminator.cpp
+         data_elimination.cpp
+       : <library>/libraries//data
+         <include>../include
+         <use>/site-config//boost
        :
-       : <dependency>data-specification
-       :
-       : <dependency>/boost//headers
-         <dependency>data-specification
+       : <include>../include
+         <use>/site-config//boost
        ;
-
-alias lps.alias : lps ;
-
-alias data-specification
-       :
-       : <link>static
-         <use>/libraries/atermpp//headers
-       :
-       : <use>/boost//headers
-         <use>/libraries//atermpp
-       ;
-
-alias data-specification
-       :
-       : <link>shared
-         <use>/libraries/atermpp//headers
-       :
-       : <use>/boost//headers
-         <use>/libraries/atermpp//headers
-       ;
-
-# The functionality provided by this library belongs in the LPS framework
-alias dataelm.main
-       : source/libdataelm.cpp
-         /tools/mcrl22lps//lin_std.o
-       : <use>/libraries/parser//headers
-         <use>/libraries/rewrite//headers
-         <use>/libraries/lps//headers
-       : <threading>single
-       ;
-
-lib dataelm
-       : dataelm.main
-         /libraries//parser
-         /libraries//rewrite
-       : <link>static
-       :
-       : <library>/libraries//parser
-         <library>/libraries//rewrite
-         <use>/libraries/lps//headers
-       ;
-
-alias dataelm
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias dataelm.alias
-       : dataelm.main
-       :
-       :
-       : <use>/libraries/parser//headers
-         <use>/libraries/rewrite//headers
-         <use>/libraries/lps//headers
-       ;
-
-# This target must not be used, it exists solely for the parser library which should not depend on the lps framework
-alias headers
-       :
-       :
-       :
-       : <use>/libraries/atermpp//headers
-         <use>/boost//headers
-       ;
-
-explicit dataelm.main dataelm.alias lps.alias ;

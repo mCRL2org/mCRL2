@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./distrplot.h
-
-// --- distrplot.h --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef DISTRPLOT_H
 #define DISTRPLOT_H
@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
+#include <string>
 #include "diagram.h"
 #include "graph.h"
 #include "utils.h"
@@ -34,18 +34,18 @@ public:
     // -- set data functions ----------------------------------------
     void setValues(
         const int &idx,
-        const vector< int > &num );
+        const std::vector< int > &num );
     void clearValues();
 
 	void setDiagram( Diagram* dgrm );
-	        
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void drawAxes( const bool &inSelectMode );
     void drawLabels( const bool &inSelectMode );
     void drawPlot( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -54,11 +54,11 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void calcMaxNumber();
-    
+
     // -- utility drawing functions ---------------------------------
     // ***
     //void clear();
@@ -69,27 +69,27 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
     // data
     int              attrIdx;
-    vector< int >    number;
+    std::vector< int >    number;
     int              maxNumber;
     // vis settings
     int    minHgtHintPx; // height cannot be smaller than this
     int    maxWthHintPx; // width cannot be greater than this
     double width;        // actual width calculated & used for every bar
-    vector< Position2D > positions;
+    std::vector< Position2D > positions;
 	// diagram
 	Diagram*   diagram;        // association, user-defined diagram
     double     scaleDgrm;      // scale factor for diagram
     Position2D posDgrm;        // positions of diagram
     bool       showDgrm;       // show or hide diagram
     int        attrValIdxDgrm; // value idx of attribute associated with diagram
-    string     msgDgrm;        // message to show with diagram
+    std::string     msgDgrm;        // message to show with diagram
 };
 
 #endif

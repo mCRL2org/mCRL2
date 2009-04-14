@@ -1,0 +1,134 @@
+===============================================================================
+Changes between toolset releases July 2008 and January 2009:
+===============================================================================
+
+ General:
+   - compatible with LTSmin toolset 1.1 van de Universiteit Twente
+   - added support for importing LTSes from DOT format
+   - extended mCRL2 LTS storage format to include extra information such data
+     and parameter specifications. This new format uses the .lts suffix.
+   - support for rational numbers (as part of sort Real):
+     + rational numbers can be created using the division operator /
+     + rational numbers can be converted to integers by means of functions
+       floor, ceil and round
+   - comparison operations <, <=, >= and > are now defined on all standard
+     data types (including structured sorts)
+   - sets and bags data structures have been reimplementated to better support
+     the use of finite sets and bags. By guaranteeing a unique representation
+     of finite sets/bags it is now no longer a problem to generate state spaces
+     of processes with finite sets/bags as parameters, for instance.
+   - numerous small improvements to tools and underlying infrastructure
+   - lots of bug fixes
+
+ Renamed tools:
+   - formcheck is now called formulacheck
+
+ New functionality:
+   - ltsgraph is completely reimplemented and now uses OpenGL for rendering
+   - ltsgraph, ltsview, diagraphica now support all LTS formats supported by
+     the LTS library
+
+ New tools:
+   - pbesparelm: removes unused parameters from a PBES.
+   - pbesconstelm: removes constant parameters from a PBES.
+
+===============================================================================
+Changes between toolset releases January 2008 and July 2008:
+===============================================================================
+
+ General:
+   - improved command line interfaces and help information:
+     + simplified interfaces of most tools, especially mcrl22lps, lps2lts,
+       lps2torx, ltscompare, ltsmin, ltsconvert, tracepp and formcheck
+     + improved consistency among tools
+     + adherence to the GNU standard for command line interfaces
+     + removed the undocumented feature that the argument '-' can be used
+       for reading from standard input in or writing to standard output
+     + improved error handling of loading and saving binary files
+   - added manual pages for tools
+   - changed SVC library license from the
+     GNU General Public License, version 2 (or newer), to the
+     GNU Lesser General Public License, version 2.1 (or newer).
+   - libraries and header files are installed
+   - improvements to existing tool and library documentation
+   - improved regression testing
+   - lots of bug fixes
+
+ Added tools:
+   - txt2pbes: translates a textual PBES specification to the binary format
+
+ Removed tools:
+   - pbes2bes: most functionality is incorporated in pbes2bool
+
+ Renamed tools:
+   - lpsdecluster is now called lpssuminst
+   - lpsformcheck is now called formcheck
+
+ Performance improvements:
+   - improved performance of lpspp and pbespp for specifications
+     involving many variable declarations
+   - improved average case performance of div and mod calculations by
+     a factor of 2
+   - increased power of enumeration involving conditions on list length,
+     e.g. enumerating all lists l such that #l == 2 or #l <= 2
+   - lpssuminst: summands with a false condition are filtered out
+   - lpssumelm: more time-efficient on specifications involving large
+     conditions
+   - squadt: more time-efficient initialisation process
+
+ New functionality:
+   - ltsview: added new option for marking states: mark separately for
+     every mark rule
+   - ltscompare: added comparison using simulation preorder/equivalence
+   - ltsconvert: added minimisation modulo simulation equivalence
+   - pbes2bool, lpsactionrename, diagraphica: functional improvements
+   - lpssuminst: added (option -t/--tau) which only instantiates tau summands
+   - formcheck: now also works with PBESes or without a context specification
+
+ Notes:
+   - LPS or PBES files produced with the previous release cannot be used
+     anymore. They need to be regenerated using the tools in this release.
+   - SQuADT specific:
+     + The tool catalog must be regenerated to add newly connected tools;
+       to do this manually remove .squadt/tool_catalog in the home directory.
+     + Old project files cannot be loaded due to a limitation of the old
+       format, automatic conversion is not possible so projects must be
+       recreated manually.
+
+===============================================================================
+Changes between toolset releases July 2007 and January 2008:
+===============================================================================
+
+ General:
+   - Numerous bug fixes.
+   - Added documentation for all libraries and tools on the website.
+
+ Added tools:
+   - chi2mcrl2: translates a subset of Chi to mCRL2
+   - lpsactionrename: selectively renames or hides actions in linear processes
+   - pbesrewr: applies the rewriter to simplify data expressions in PBESes
+
+ Removed tools:
+   - lpsdataelm (its functionality has been integrated in other tools)
+
+ New functionality:
+   - Added full support for the verification of modal formulas with data using
+     lps2pbes and pbes2bool.
+   - Improved handling of time in the lineariser (mcrl22lps). Sometimes this
+     slows the lineariser down. Added flags to suppress time if needed.
+   - Improvement of the output of the pretty printers (lpspp and pbespp) that
+     print linear processes and parameterised boolean equation systems.
+   - Added simulation support to ltsview and improved its layout.
+   - Functionality of sim is the same as that of xsim (as far as allowed with
+     a command line interface).
+   - Migrated from CVC Lite to CVC3 as supported external SMT-solver.
+
+ Notes:
+   - LPS or PBES files produced with the previous release cannot be used
+     anymore. They need to be regenerated using the tools in this release.
+   - SQuADT specific:
+     + The tool catalog must be regenerated to add newly connected tools;
+       to do this manually remove .squadt/tool_catalog in the home directory.
+     + Old project files cannot be loaded due to a limitation of the old
+       format, automatic conversion is not possible so projects must be
+       recreated manually.

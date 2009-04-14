@@ -4,9 +4,9 @@
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
  * Use, modification and distribution is subject to the 
  * Boost Software License, Version 1.0. (See accompanying
- * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
+ * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2004/07/18 18:36:18 $
+ * $Date: 2008-06-24 10:35:07 +0200 (Tue, 24 Jun 2008) $
  */
 
 #include "boost/date_time/constrained_value.hpp"
@@ -31,7 +31,7 @@ namespace gregorian {
   //! Exception that flags that a weekday number is incorrect
   struct bad_weekday : public std::out_of_range
   {
-    bad_weekday() : std::out_of_range(std::string("Weekday os out of range 0..6")) {}
+    bad_weekday() : std::out_of_range(std::string("Weekday is out of range 0..6")) {}
   };
   typedef CV::simple_exception_policy<unsigned short, 0, 6, bad_weekday> greg_weekday_policies;
   typedef CV::constrained_value<greg_weekday_policies> greg_weekday_rep;

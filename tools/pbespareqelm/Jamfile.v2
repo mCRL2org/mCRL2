@@ -1,0 +1,7 @@
+project toolset/pbespareqelm ;
+
+tool pbespareqelm
+       : pbespareqelm.cpp
+         /libraries//pbes
+       : <status>experimental
+       ;

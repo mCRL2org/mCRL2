@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,28 +9,14 @@
 /// \file algorithm.cpp
 /// \brief Add your file description here.
 
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/algorithm.cpp
-// date          : 19/09/06
-// version       : 1.0
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
 #include <iostream>
 #include <iterator>
 #include <cassert>
 #include <vector>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 using namespace std;
 using namespace atermpp;
@@ -56,9 +44,9 @@ void test_find()
 {
   aterm_appl a = make_term("h(g(x),f(y),p(a(x,y),q(f(z))))");
 
-  aterm t = find_if(a, is_f());
+  aterm_appl t = find_if(a, is_f());
   assert(t == make_term("f(y)"));
-  
+
   vector<aterm> v;
   find_all_if(a, is_f(), back_inserter(v));
   assert(v.front() == make_term("f(y)"));
@@ -74,10 +62,9 @@ void test_replace()
   assert(c == make_term("x"));
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find();
   test_replace();

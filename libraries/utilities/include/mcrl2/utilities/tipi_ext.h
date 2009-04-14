@@ -1,11 +1,13 @@
 // Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/tipi_ext.h
-/// \brief Add your file description here.
+/// \file mcrl2/utilities/tipi_ext.h
+/// \brief Convenience functions for working with the tipi library
 
 #ifndef SQUADT_UTILITY_H_
 #define SQUADT_UTILITY_H_
@@ -13,59 +15,29 @@
 #include <memory>
 #include <string>
 
-#include <tipi/tool.hpp>
 
+#include "tipi/report.hpp"
+#include "tipi/tool_display.hpp"
+#include "tipi/configuration.hpp"
+#include "tipi/tool/capabilities.hpp"
+#include "tipi/display.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/layout_elements.hpp"
+
+/**
+ * \brief mCRL2 toolset related functionality
+ **/
 namespace mcrl2 {
+  /**
+   * \brief Utility functionality that does not fit in other mCRL2 libraries
+   **/
   namespace utilities {
     namespace squadt {
-
-#ifdef __WXWINDOWS__
-      /** 
-       * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
-       **/
-      class entry_wrapper {
-#ifdef __WINDOWS__
-      private:
- 
-        HINSTANCE        hInstance;
-        HINSTANCE        hPrevInstance;
-        wxCmdLineArgType lpCmdLine;
-        int              nCmdShow;
- 
-      public:
- 
-        entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
-          hInstance     = hc;
-          hPrevInstance = hp;
-          lpCmdLine     = lp;
-          nCmdShow      = ns;
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
-        }
-#else
-      private:
- 
-        int&    argc;
-        char**& argv;
- 
-      public:
- 
-        entry_wrapper(int& ac, char**& av) : argc(ac), argv(av) {
-        }
- 
-        bool perform_entry() {
-          return (wxEntry(argc, argv) == 0);
-        }
-#endif
-      };
-#endif
 
       /** \brief Helper function for showing/hiding an element based on widget state changes */
       template < typename T >
       void change_visibility_on_toggle(T& r, tipi::layout::manager* m, tipi::layout::element*& c);
-  
+
       /** \brief Helper function for showing/hiding an element based on radio_button widget state changes */
       template <>
       inline void change_visibility_on_toggle(tipi::layout::elements::radio_button& r, tipi::layout::manager* m, tipi::layout::element*& c) {
@@ -76,7 +48,7 @@ namespace mcrl2 {
           m->hide(c);
         }
       }
-  
+
       /** \brief Helper function for showing/hiding an element based on checkbox widget state changes */
       template <>
       inline void change_visibility_on_toggle(tipi::layout::elements::checkbox& r, tipi::layout::manager* m, tipi::layout::element*& c) {
@@ -87,138 +59,137 @@ namespace mcrl2 {
           m->hide(c);
         }
       }
-  
-      /** Helper class to project the selected radio button in a group to instances of a type T */
+
+      /** \brief Helper class to work with tipi::radio_buttons
+       *
+       * A group of tipi::radio_button objects behave as a single control. The
+       * tipi::radio_button interface also contains a function to return the
+       * radio_button in the group that is selected. A very common use is to
+       * map the radio buttons to the values of an enumerated type.
+       *
+       * This class helps to project the radio buttons in a group to instances
+       * of a type T. For convenience it also takes over creation of the
+       * radio_buttons in the group. So creation of the radio button and
+       * association to a value of an enumerated type go hand-in-hand.
+       **/
       template < typename T >
       class radio_button_helper {
-  
-        typedef tipi::layout::elements::radio_button radio_button;
-  
+
         private:
-  
-          std::map < radio_button const*, T > selector;
-  
-        public:
-  
+
+          /** \brief Associates radio buttons with values */
+          typedef std::map < tipi::layout::elements::radio_button const*, T > button_to_value_map;
+
+        private:
+
+          /** \brief Associates buttons with values */
+          button_to_value_map                   selector;
+
+          /** \brief The display for which to create the radio button objects */
+          tipi::display&                        display;
+
           /** \brief The first button in the group */
-          radio_button* first;
-  
+          tipi::layout::elements::radio_button* first;
+
         public:
-  
+
           /** \brief constructor */
-          template < typename M >
-          radio_button_helper(M const&, T const&, radio_button*);
-  
-          /** \brief constructor */
-          template < typename M >
-          radio_button_helper(M const&, T const&, std::string const&);
-  
+          radio_button_helper(tipi::display&);
+
           /** \brief associate a radio button with a layout manager and a value */
-          template < typename M >
-          void associate(M const&, T const&, radio_button*);
-  
-          /** \brief associate a radio button with a layout manager and a value */
-          template < typename M >
-          radio_button& associate(M const&, T const&, std::string const&, bool = false);
-  
-          /** \brief gets the button associated with a value */
-          radio_button& get_button(T const&);
-  
+          tipi::layout::elements::radio_button& associate(T const&, std::string const&, bool = false);
+
+          /** \brief gets the first button associated with a value */
+          tipi::layout::elements::radio_button& get_button(T const&);
+
           /** \brief sets the selection for the group of radio buttons */
           void set_selection(T const&);
-  
+
           /** \brief get the value for the selected radio button */
           T get_selection();
-  
+
           /** \brief gets the label of the selected radio button */
           std::string get_selection_label() const;
       };
-  
+
       /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] r pointer to the radio button to attach
-       * \param[in] v the value to associate the button with
+       * \param[in] d the display for which the radio button objects will be created
        **/
       template < typename T >
-      template < typename M >
-      inline radio_button_helper< T >::radio_button_helper(M const& l, T const& v, radio_button* r) {
-        first = r;
-  
-        associate(l, v, r);
+      inline radio_button_helper< T >::radio_button_helper(tipi::display& d) : display(d), first(0) {
       }
-  
+
       /**
-       * \param[in] l the layout manager to which the button should be attached
        * \param[in] v the value to associate the button with
+       * \param[in] s the label of the radio button
+       * \param[in] b whether the new button should be selected
        **/
       template < typename T >
-      template < typename M >
-      inline radio_button_helper< T >::radio_button_helper(M const& l, T const& v, std::string const& s) {
-        first = new radio_button(s);
-  
-        associate(l, v, first);
+      inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(T const& v, std::string const& s, bool b) {
+        using tipi::layout::elements::radio_button;
+
+        radio_button& button = display.create< radio_button >();
+
+        if (first == 0) {
+          first = &button;
+        }
+        else {
+          first->connect(button);
+        }
+
+        if (b) {
+          button.select();
+        }
+
+        button.set_label(s);
+
+        selector[&button] = v;
+
+        return button;
       }
-  
+
       /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] r pointer to the radio button to attach
-       * \param[in] v the value to associate the button with
+       * \pre there must be a button that is associated with the value
+       * \param[in] t the value for which to find the associated button
        **/
-      template < typename T >
-      template < typename M >
-      inline void radio_button_helper< T >::associate(M const& l, T const& v, radio_button* r) {
-        l->add(r);
-  
-        selector[r] = v;
-      }
-  
-      /**
-       * \param[in] l the layout manager to which the button should be attached
-       * \param[in] v the value to associate the button with
-       **/
-      template < typename T >
-      template < typename M >
-      inline tipi::layout::elements::radio_button& radio_button_helper< T >::associate(M const& l, T const& v, std::string const& s, bool b) {
-        radio_button* button = new radio_button(s, first, b);
-  
-        l->add(button);
-  
-        selector[button] = v;
-  
-        return (*button);
-      }
-  
       template < typename T >
       inline tipi::layout::elements::radio_button& radio_button_helper< T >::get_button(T const& t) {
-        for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+        using tipi::layout::elements::radio_button;
+
+        for (typename button_to_value_map::const_iterator i = selector.begin(); i != selector.end(); ++i) {
           if (i->second == t) {
             return const_cast < radio_button& > (*(i->first));
           }
         }
-  
-        return *this;
+
+        return *first;
       }
-  
+
+      /**
+       * \param[in] t the value for which to select the associated button
+       **/
       template < typename T >
       inline void radio_button_helper< T >::set_selection(T const& t) {
-        for (typename std::map < radio_button const*, T >::iterator i = selector.begin(); i != selector.end(); ++i) {
+        using tipi::layout::elements::radio_button;
+
+        for (typename button_to_value_map::const_iterator i = selector.begin(); i != selector.end(); ++i) {
           if (i->second == t) {
             const_cast < radio_button* > (i->first)->select();
           }
         }
       }
-  
+
       template < typename T >
       inline T radio_button_helper< T >::get_selection() {
-        return (selector[first->get_selected()]);
+        return selector[&first->selected()];
       }
-  
+
       template < typename T >
       std::string radio_button_helper< T >::get_selection_label() const {
-        return (first->get_selected()->get_label());
+        return first->selected().get_label();
       }
     }
   }
 }
- 
+
 #endif

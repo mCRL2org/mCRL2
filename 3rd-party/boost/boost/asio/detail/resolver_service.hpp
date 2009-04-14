@@ -2,7 +2,7 @@
 // resolver_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -214,7 +214,7 @@ public:
       start_work_thread();
       work_io_service_->post(
           resolve_query_handler<Handler>(
-            impl, query, this->io_service(), handler));
+            impl, query, this->get_io_service(), handler));
     }
   }
 
@@ -310,7 +310,7 @@ public:
       start_work_thread();
       work_io_service_->post(
           resolve_endpoint_handler<Handler>(
-            impl, endpoint, this->io_service(), handler));
+            impl, endpoint, this->get_io_service(), handler));
     }
   }
 
@@ -330,7 +330,7 @@ private:
   void start_work_thread()
   {
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
-    if (work_thread_ == 0)
+    if (!work_thread_)
     {
       work_thread_.reset(new boost::asio::detail::thread(
             work_io_service_runner(*work_io_service_)));

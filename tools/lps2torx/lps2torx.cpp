@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,33 +8,40 @@
 //
 /// \file lps2torx.cpp
 
-#define NAME "lps2torx"
-#define VERSION "0.1"
+#include "boost.hpp" // precompiled headers
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
-#include <getopt.h>
-#include <aterm2.h>
-#include <assert.h>
+#define NAME "lps2torx"
+#define AUTHOR "Muck van Weerdenburg"
+
+#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
+#include <climits>
+#include <cstring>
+#include <cassert>
 #include <iostream>
 #include <sstream>
-#include "libstruct.h"
-#include "libprint.h"
-#include "libnextstate.h"
-#include "libenum.h"
-#include "librewrite.h"
-#include "mcrl2/libdataelm.h"
-#include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include <aterm2.h>
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/enum.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/lps/data_elimination.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/command_line_rewriting.h"
 
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::data;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
-          
+
 void print_torx_action(ostream &os, ATermAppl mact)
 {
   if ( is_tau(mact) )
@@ -49,7 +58,7 @@ void print_torx_action(ostream &os, ATermAppl mact)
     }
   }
 }
-  
+
 typedef struct {
   int action;
   int state;
@@ -124,279 +133,210 @@ class torx_data
     }
 };
 
-static void print_help_suggestion(FILE *f, char *Name)
-{
-  fprintf(f,"Try '%s --help' for more information.\n",Name);
-}
+struct lps2torx_tool {
+  bool            usedummies;
+  bool            removeunused;
+  RewriteStrategy strategy;
+  int             stateformat;
+  std::string     name_for_input;
 
-static void print_help(FILE *f, char *Name)
-{
-  fprintf(f,
-    "Usage: %s [OPTION]... [INFILE]\n"
-    "Provide a TorX explorer interface to the LPS in INFILE. If INFILE is not\n"
-    "supplied, stdin is used.\n"
-    "\n"
-    "The LPS can be explored using TorX as described in torx_explorer(5).\n"
-    "\n"
-    "Options:\n"
-    "  -h, --help              display this help message and terminate\n"
-    "      --version           display version information and terminate\n"
-    "  -q, --quiet             do not display any unrequested information\n"
-    "  -v, --verbose           display concise intermediate messages\n"
-    "  -d, --debug             display detailed intermediate messages\n"
-    "  -f, --freevar           do not replace free variables in the LPS with dummy\n"
-    "                          values\n"
-    "  -y, --dummy             replace free variables in the LPS with dummy values\n"
-    "                          (default)\n"
-    "  -u, --unused-data       do not remove unused parts of the data specification\n"
-    "  -c, --vector            store state in a vector (fastest, default)\n"
-    "  -r, --tree              store state in a tree (for memory efficiency)\n"
-    "  -RNAME, --rewriter=NAME use rewriter NAME (default 'inner')\n",
-    Name);
-}
+  bool parse_command_line(int ac, char** av) {
+    interface_description clinterface(av[0], NAME, AUTHOR,
+      "provide TorX explorer interface to an LPS",
+      "[OPTION]... INFILE\n",
+      "Provide a TorX explorer interface to the LPS in INFILE. "
+      "\n\n"
+      "The LPS can be explored using TorX as described in torx_explorer(5).");
 
-static void print_version(FILE *f)
-{
-  fprintf(f,NAME " " VERSION " (revision %s)\n", REVISION);
-}
+    clinterface.add_rewriting_options();
+
+    clinterface.
+      add_option("dummy", make_mandatory_argument("BOOL"),
+        "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
+      add_option("unused-data",
+        "do not remove unused parts of the data specification", 'u').
+      add_option("state-format", make_mandatory_argument("NAME"),
+        "store state internally in format NAME:\n"
+        "  'vector' for a vector (fastest, default), or\n"
+        "  'tree' for a tree (for memory efficiency)"
+        , 'f');
+
+    command_line_parser parser(clinterface, ac, av);
+
+    if (parser.continue_execution()) {
+      usedummies   = true;
+      removeunused = parser.options.count("unused-data") == 0;
+      strategy     = parser.option_argument_as< RewriteStrategy >("rewriter");
+      stateformat  = GS_STATE_VECTOR;
+
+      if (parser.options.count("dummy")) {
+        if (parser.options.count("dummy") > 1) {
+          parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
+        }
+        std::string dummy_str(parser.option_argument("dummy"));
+        if (dummy_str == "yes") {
+          usedummies = true;
+        } else if (dummy_str == "no") {
+          usedummies = false;
+        } else {
+          parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
+        }
+      }
+
+      if (parser.options.count("state-format")) {
+        if (parser.options.count("state-format") > 1) {
+          parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
+        }
+        std::string state_format_str(parser.option_argument("state-format"));
+        if (state_format_str == "vector") {
+          stateformat = GS_STATE_VECTOR;
+        } else if (state_format_str == "tree") {
+          stateformat = GS_STATE_TREE;
+        } else {
+          parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
+        }
+      }
+
+      if (parser.arguments.size() == 0) {
+        parser.error("no INFILE specified");
+      } else if (parser.arguments.size() == 1) {
+        name_for_input = parser.arguments[0];
+      } else {
+        //parser.arguments.size() > 1
+        parser.error("too many file arguments");
+      }
+    }
+
+    return parser.continue_execution();
+  }
+
+  void process() {
+    std::string str_in = (name_for_input.empty())?"stdin":("'" + name_for_input + "'");
+    gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
+    ATermAppl Spec = (ATermAppl) mcrl2::core::detail::load_aterm(name_for_input);
+    if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
+      throw mcrl2::runtime_error(str_in + " does not contain an LPS");
+    }
+
+    if ( removeunused )
+    {
+      gsVerboseMsg("removing unused parts of the data specification.\n");
+      Spec = removeUnusedData(Spec);
+    }
+
+    gsVerboseMsg("initialising...\n");
+    torx_data td(10000);
+
+    NextState *nstate = createNextState(
+      Spec,
+      !usedummies,
+      stateformat,
+      createEnumerator(
+        data_specification(ATAgetArgument(Spec,0)),
+        createRewriter(data_specification(ATAgetArgument(Spec,0)),strategy),
+        true
+      ),
+      true
+    );
+
+    ATerm initial_state = nstate->getInitialState();
+
+    ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,ATfalse));
+    td.add_action_state(initial_state,dummy_action,initial_state);
+
+    gsVerboseMsg("generating state space...\n");
+
+    NextStateGenerator *nsgen = NULL;
+    bool err = false;
+    bool notdone = true;
+    while ( notdone && !cin.eof() )
+    {
+      string s;
+
+      cin >> s;
+      if ( s.size() != 1 )
+      {
+              cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
+              continue;
+      }
+
+      switch ( s[0] )
+      {
+        case 'r': // Reset
+          // R event TAB solved TAB preds TAB freevars TAB identical
+          cout << "R 0\t1\t\t\t" << endl;
+          break;
+        case 'e': // Expand
+          {
+          int index;
+          ATerm state;
+
+          cin >> index;
+          state = td.get_state( index );
+          if ( state == NULL )
+          {
+          	cout << "E0 value " << index << " not valid" << endl;
+          	break;
+          }
+
+          cout << "EB" << endl;
+          nsgen = nstate->getNextStates(state,nsgen);
+          ATermAppl Transition;
+          ATerm NewState;
+          while ( nsgen->next(&Transition,&NewState) )
+          {
+            index_pair p;
+
+            p = td.add_action_state(state,(ATerm) Transition,NewState);
+
+            // Ee event TAB visible TAB solved TAB label TAB preds TAB freevars TAB identical
+            cout << "Ee " << p.action << "\t" << (is_tau(Transition)?0:1) << "\t1\t";
+            print_torx_action(cout,Transition);
+            cout << "\t\t\t";
+            if ( p.action != p.state )
+            {
+              cout << p.state;
+            }
+            cout << endl;
+          }
+          cout << "EE" << endl;
+
+          if ( nsgen->errorOccurred() )
+          {
+            err = true;
+            notdone = false;
+          }
+          break;
+          }
+        case 'q': // Quit
+          cout << "Q" << endl;
+          notdone = false;
+          break;
+        default:
+          cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
+          break;
+      }
+    }
+    delete nsgen;
+    delete nstate;
+  }
+};
 
 int main(int argc, char **argv)
 {
-  FILE *SpecStream;
-  ATerm stackbot;
-  ATermAppl Spec;
-  #define sopts "hqvdfyucrR:"
-  struct option lopts[] = {
-    { "help",            no_argument,       NULL, 'h' },
-    { "version",         no_argument,       NULL, 0   },
-    { "quiet",           no_argument,       NULL, 'q' },
-    { "verbose",         no_argument,       NULL, 'v' },
-    { "debug",           no_argument,       NULL, 'd' },
-    { "freevar",         no_argument,       NULL, 'f' },
-    { "dummy",           no_argument,       NULL, 'y' },
-    { "unused-data",     no_argument,       NULL, 'u' },
-    { "vector",          no_argument,       NULL, 'c' },
-    { "tree",            no_argument,       NULL, 'r' },
-    { "rewriter",        required_argument, NULL, 'R' },
-    { 0, 0, 0, 0 }
-  };
+  MCRL2_ATERM_INIT(argc, argv)
 
-  ATinit(argc,argv,&stackbot);
+  try {
+    lps2torx_tool tool;
 
-  bool quiet = false;
-  bool verbose = false;
-  bool debug = false;
-  RewriteStrategy strat = GS_REWR_INNER;
-  bool usedummies = true;
-  bool removeunused = true;
-  int stateformat = GS_STATE_VECTOR;
-  int opt;
-  while ( (opt = getopt_long(argc,argv,sopts,lopts,NULL)) != -1 )
-  {
-    switch ( opt )
-    {
-      case 'h':
-        print_help(stderr, argv[0]);
-        return 0;
-      case 0:
-        print_version(stderr);
-        return 0;
-      case 'q':
-        quiet = true;
-        break;
-      case 'v':
-        verbose = true;
-        break;
-      case 'd':
-        debug = true;
-        break;
-      case 'f':
-        usedummies = false;
-        break;
-      case 'y':
-        usedummies = true;
-        break;
-      case 'u':
-        removeunused = false;
-        break;
-      case 'c':
-        stateformat = GS_STATE_VECTOR;
-        break;
-      case 'r':
-        stateformat = GS_STATE_TREE;
-        break;
-      case 'R':
-        strat = RewriteStrategyFromString(optarg);
-        if ( strat == GS_REWR_INVALID )
-        {
-          gsErrorMsg("invalid rewrite strategy '%s'\n",optarg);
-          return 1;
-        }
-        break;
-      default:
-        break;
+    if (tool.parse_command_line(argc, argv)) {
+      tool.process();
     }
   }
-  if ( quiet && verbose )
-  {
-    gsErrorMsg("options -q/--quiet and -v/--verbose cannot be used together\n");
-    return 1;
-  }
-  if ( quiet && debug )
-  {
-    gsErrorMsg("options -q/--quiet and -d/--debug cannot be used together\n");
-    return 1;
-  }
-  if ( quiet )
-    gsSetQuietMsg();
-  if ( verbose )
-    gsSetVerboseMsg();
-  if ( debug )
-    gsSetDebugMsg();
-  
-  if ( argc-optind > 1 )
-  {
-    print_help_suggestion(stderr,argv[0]);
-    return 1;
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
 
-  char *SpecFileName;
-  if ( argc-optind == 1 )
-  {
-    SpecFileName = argv[optind];
-    if ( (SpecStream = fopen(SpecFileName, "rb")) == NULL )
-    {
-      gsErrorMsg("could not open input file '%s' for reading: ", SpecFileName);
-      perror(NULL);
-      return 1;
-    }
-  } else {
-    SpecFileName = NULL;
-    SpecStream = stdin;
-  }
-  if ( SpecStream == stdin )
-    gsVerboseMsg("reading LPS from stdin\n");
-  else
-    gsVerboseMsg("reading LPS from '%s'\n", SpecFileName);
-  Spec = (ATermAppl) ATreadFromFile(SpecStream);
-  if ( Spec == NULL )
-  {
-    if ( SpecStream == stdin )
-      gsErrorMsg("could not read LPS from stdin\n");
-    else
-      gsErrorMsg("could not read LPS from '%s'\n", SpecFileName);
-    return 1;
-  }
-  assert(Spec != NULL);
-  gsEnableConstructorFunctions();
-  if (!gsIsSpecV1(Spec)) {
-    if ( SpecStream == stdin )
-      gsErrorMsg("stdin does not contain an LPS\n");
-    else
-      gsErrorMsg("'%s' does not contain an LPS\n", SpecFileName);
-    return 1;
-  }
-  assert(gsIsSpecV1(Spec));
-
-  if ( removeunused )
-  {
-    gsVerboseMsg("removing unused parts of the data specification.\n");
-    Spec = removeUnusedData(Spec);
-  }
-
-  gsVerboseMsg("initialising...\n");
-  torx_data td(10000);
-
-  NextState *nstate = createNextState(
-    Spec,
-    !usedummies,
-    stateformat,
-    createEnumerator(
-      Spec,
-      createRewriter(lps::data_specification(ATAgetArgument(Spec,0)),strat),
-      true
-    ),
-    true
-  );
-
-  ATerm initial_state = nstate->getInitialState();
-
-  ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,ATfalse));
-  td.add_action_state(initial_state,dummy_action,initial_state);
-
-  gsVerboseMsg("generating state space...\n");
-
-  NextStateGenerator *nsgen = NULL;
-  bool err = false;
-  bool notdone = true;
-  while ( notdone && !cin.eof() )
-  {
-    string s;
-
-    cin >> s;
-    if ( s.size() != 1 )
-    {
-	    cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
-	    continue;
-    }
-
-    switch ( s[0] )
-    {
-      case 'r': // Reset
-        // R event TAB solved TAB preds TAB freevars TAB identical
-        cout << "R 0\t1\t\t\t" << endl;
-        break;
-      case 'e': // Expand
-        {
-        int index;
-        ATerm state;
-        
-        cin >> index;
-        state = td.get_state( index );
-	if ( state == NULL )
-	{
-		cout << "E0 value " << index << " not valid" << endl;
-		break;
-	}
-    
-        cout << "EB" << endl;
-        nsgen = nstate->getNextStates(state,nsgen);
-        ATermAppl Transition;
-        ATerm NewState;
-        while ( nsgen->next(&Transition,&NewState) )
-        {
-          index_pair p;
-    
-          p = td.add_action_state(state,(ATerm) Transition,NewState);
-
-          // Ee event TAB visible TAB solved TAB label TAB preds TAB freevars TAB identical
-          cout << "Ee " << p.action << "\t" << (is_tau(Transition)?0:1) << "\t1\t";
-          print_torx_action(cout,Transition);
-          cout << "\t\t\t";
-          if ( p.action != p.state )
-          {
-            cout << p.state;
-          }
-          cout << endl;
-        }
-        cout << "EE" << endl;
-
-        if ( nsgen->errorOccurred() )
-        {
-          err = true;
-          notdone = false;
-        }
-        break;
-        }
-      case 'q': // Quit
-        cout << "Q" << endl;
-        notdone = false;
-        break;
-      default:
-	cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
-        break;
-    }
-  }
-  delete nsgen;
-  delete nstate;
+  return EXIT_SUCCESS;
 }

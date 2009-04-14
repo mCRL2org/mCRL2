@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,8 +8,10 @@
 //
 /// \file liblts_tau_star.cpp
 
-#include <print/messaging.h>
-#include <lts/liblts.h>
+#include "mcrl2/core/messaging.h"
+#include <mcrl2/lts/lts.h>
+
+#include "workarounds.h" // DECL_A
 
 using namespace std;
 
@@ -29,7 +33,7 @@ void p_lts::tau_star_reduce()
     unsigned int t = trans_lut[state];
     while ( t < trans_lut[state+1] )
     {
-      if ( taus[transitions[t].label] && 
+      if ( taus[transitions[t].label] &&
           (transitions[t].from != transitions[t].to) )
       {
         unsigned int to = transitions[t].to;
@@ -60,7 +64,7 @@ void p_lts::tau_star_reduce()
     t = new_trans_lut[state];
     while ( t < ntransitions )
     {
-      if ( taus[transitions[t].label] && 
+      if ( taus[transitions[t].label] &&
           (transitions[t].from != transitions[t].to) )
       {
         unsigned int to = transitions[t].to;
@@ -109,7 +113,7 @@ void p_lts::tau_star_reduce()
       {
         unsigned int t = trans_lut[i];
         while ( t < trans_lut[i+1] )
-        { 
+        {
           if ( reachable[transitions[t].to] == unknown )
           {
             reachable[transitions[t].to] = reached;
@@ -122,7 +126,7 @@ void p_lts::tau_star_reduce()
         }
         t = new_trans_lut[i];
         while ( t < new_trans_lut[i+1] )
-        { 
+        {
           if ( reachable[transitions[t].to] == unknown )
           {
             reachable[transitions[t].to] = reached;
@@ -186,7 +190,7 @@ void p_lts::tau_star_reduce()
   {
     taus[i] = false;
   }
-  
+
   FREE_A(label_map);
   FREE_A(state_map);
   FREE_A(reachable);

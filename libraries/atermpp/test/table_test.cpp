@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,9 +15,10 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/table.h"
-#include "atermpp/indexed_set.h"
+#include <map>
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/table.h"
+#include "mcrl2/atermpp/indexed_set.h"
 
 using namespace std;
 using namespace atermpp;
@@ -24,15 +27,23 @@ void test_table()
 {
   table t(100, 75);
   t.put(make_term("a"), make_term("f(a)"));
-  BOOST_CHECK(t.table_keys().size() == 1); 
+  BOOST_CHECK(t.table_keys().size() == 1);
+
+  {
+    table t1 = t;
+  }
+  table t2 = t;
+
   aterm a = t.get(make_term("a"));
   BOOST_CHECK(a = make_term("f(a)"));
+
+  std::map<int, table> x;
+  x[2] = t;
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_table();
   return 0;
 }

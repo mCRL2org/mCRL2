@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/aux_/config/static_constant.hpp,v $
-// $Date: 2004/09/07 08:51:32 $
-// $Revision: 1.4 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #if !defined(BOOST_MPL_PREPROCESSING_MODE)
 // BOOST_STATIC_CONSTANT is defined here:

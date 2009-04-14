@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./timeseries.h
-
-// --- timeseries.h -------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef TIMESERIES_H
 #define TIMESERIES_H
@@ -18,7 +18,6 @@
 #include <set>
 #include <string>
 #include <vector>
-using namespace std;
 //#include <wx/event.h>
 #include "attribute.h"
 #include "diagram.h"
@@ -38,71 +37,71 @@ public:
 
     // -- get functions ---------------------------------------------
     static bool getUseShading();
-    void getIdcsClstMarked( set< int > &idcs );
+    void getIdcsClstMarked( std::set< int > &idcs );
     void getIdcsClstMarked(
-        set< int > &idcs ,
+        std::set< int > &idcs ,
         ColorRGB &col );
     void getIdxMseOver(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
     void getCurrIdxDgrm(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
     void getAnimIdxDgrm(
         int &idxLeaf,
-        set< int > &idcsBndl,
+        std::set< int > &idcsBndl,
         ColorRGB &colLeaf );
-    void getAttrIdcs( vector< int > &idcs );
+    void getAttrIdcs( std::vector< int > &idcs );
 
     // -- set functions ---------------------------------------------
     static void setUseShading( const bool &useShd );
     static void setColorClr( const ColorRGB &col );
     static void setColorTxt( const ColorRGB &col );
     static void setSizeTxt( const int &sze );
-    
+
     void setDiagram( Diagram *dgrm );
-    void initAttributes( const vector< int > attrIdcs );
+    void initAttributes( const std::vector< int > attrIdcs );
     void clearData();
 
     void markItems( Cluster* frame );
-    void markItems( const vector< Cluster* > frames );
+    void markItems( const std::vector< Cluster* > frames );
 
     void handleSendDgrmSglToExnr();
-    
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
-    void handleMouseWheelIncEvent( 
-        const int &x, 
+    void handleMouseWheelIncEvent(
+        const int &x,
         const int &y );
-    void handleMouseWheelDecEvent( 
-        const int &x, 
+    void handleMouseWheelDecEvent(
+        const int &x,
         const int &y );
     void handleMouseLeaveEvent();
     void handleKeyDownEvent( const int &keyCode );
     void handleKeyUpEvent( const int &keyCode );
-    
+
 protected:
     // -- utility functions -----------------------------------------
     void calcSettingsGeomBased();
@@ -118,13 +117,13 @@ protected:
     void handlePrevDiagram( const int &dgrmIdx );
     void handlePlayDiagram( const int &dgrmIdx );
     void handleNextDiagram( const int &dgrmIdx );
-    
+
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
-    void processHits( 
-        GLint hits, 
+    void handleHits( const std::vector< int > &ids );
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
-    
+
     // -- utility drawing functions ---------------------------------
     void clear();
     void drawSlider( const bool &inSelectMode );
@@ -146,7 +145,7 @@ protected:
 
     void handleShowDiagram( const int &dgrmIdx );
     void handleDragDiagram( const int &dgrmIdx );
-    
+
     // -- static variables ------------------------------------------
     static ColorRGB colClr;
     static ColorRGB colTxt;
@@ -178,11 +177,11 @@ protected:
         DRAG_STATUS_ITMS,
         DRAG_STATUS_DGRM
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
-    
+    std::vector< Attribute* > attributes; // association
+
     static bool useShading;
 
     Position2D posSliderTopLft;
@@ -190,28 +189,28 @@ protected:
     double itvSlider;
     int    nodesItvSlider;
     double itvSliderPerNode;
-    
+
     Position2D posScaleTopLft;
     Position2D posScaleBotRgt;
     double minPixPerNode;      // min number of pixels per item
     double actPixPerNode;      // actual number of pixels per item
-    
+
     int    nodesWdwScale;
     double itvWdwPerNode;
     int    wdwStartIdx;
     int    nodesItvScale;      // number of nodes per marked interval
 
-    vector< Position2D > posAxesTopLft;
-    vector< Position2D > posAxesBotRgt;
-    
-    vector< vector< Position2D> > posValues;
+    std::vector< Position2D > posAxesTopLft;
+    std::vector< Position2D > posAxesBotRgt;
+
+    std::vector< std::vector< Position2D> > posValues;
 
     // interaction
     int dragStatus;
     double dragDistNodes;
 
     // selection
-    set< int > itemsMarked;
+    std::set< int > itemsMarked;
     int  shiftStartIdx;
     int  dragStartIdx;
     int  dragDir;
@@ -221,7 +220,7 @@ protected:
 
     // diagrams
     double scaleDgrm;
-    map< int, Position2D > showDgrm;
+    std::map< int, Position2D > showDgrm;
     int dragIdxDgrm; // diagram currently being dragged
     int currIdxDgrm; // currently selected diagram
     int animIdxDgrm; // diagram being animated
@@ -232,10 +231,10 @@ protected:
     // animation
     wxTimer* timerAnim;
     static int itvAnim;
-    set< int >::iterator animFrame;
-    
+    std::set< int >::iterator animFrame;
+
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

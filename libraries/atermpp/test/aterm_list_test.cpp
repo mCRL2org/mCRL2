@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,28 +9,15 @@
 /// \file aterm_list_test.cpp
 /// \brief Add your file description here.
 
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/aterm_list_test.cpp
-// date          : 04/25/05
-// version       : 0.3
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
 #include <sstream>
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/transform.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/transform.h"
+#include "mcrl2/atermpp/set_operations.h"
 
 using namespace std;
 using namespace atermpp;
@@ -66,10 +55,10 @@ void test_aterm_list()
   aterm_list q = make_term("[1,2,3,4]");
 
   aterm_list r = reverse(q); // r == [4,3,2,1]
-  BOOST_CHECK(r == make_term("[4,3,2,1]")); 
+  BOOST_CHECK(r == make_term("[4,3,2,1]"));
 
   aterm_list r1 = push_back(q, aterm(aterm_int(5)));
-  BOOST_CHECK(r1 == make_term("[1,2,3,4,5]")); 
+  BOOST_CHECK(r1 == make_term("[1,2,3,4,5]"));
 
   aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
@@ -86,25 +75,48 @@ void test_aterm_list()
   int sum = 0;
   for_each(r.begin(), r.end(), counter(sum));
   BOOST_CHECK(sum == 10);
-  
+
   aterm_list v = make_term("[1,2,3,4]");
   aterm_list w = make_term("[0,1,2,3,4]");
   BOOST_CHECK(pop_front(w) == v);
-  
+
   // test concatenation
   {
     aterm_list a = make_term("[1,2,3]");
     aterm x = make_term("0");
-    BOOST_CHECK(x + a == make_term("[0,1,2,3]"));  
-    BOOST_CHECK(a + a == make_term("[1,2,3,1,2,3]"));  
-    BOOST_CHECK(a + x == make_term("[1,2,3,0]"));  
+    BOOST_CHECK(x + a == make_term("[0,1,2,3]"));
+    BOOST_CHECK(a + a == make_term("[1,2,3,1,2,3]"));
+    BOOST_CHECK(a + x == make_term("[1,2,3,0]"));
   }
 }
 
-int test_main( int, char*[] )
+void test_set_operations()
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  aterm x = make_term("x");
+  aterm y = make_term("y");
+  aterm z = make_term("z");
+
+  aterm_list l;
+  l = push_front(l, x);
+  l = push_front(l, y);
+
+  aterm_list m;
+  m = push_front(m, z);
+  m = push_front(m, x);
+
+  aterm_list lm_union = term_list_union(l, m);
+  BOOST_CHECK(lm_union.size() == 3);
+
+  aterm_list lm_difference = term_list_difference(l, m);
+  BOOST_CHECK(lm_difference.size() == 1);
+}
+
+int test_main(int argc, char* argv[])
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
+
   test_aterm_list();
+  test_set_operations();
+
   return 0;
 }

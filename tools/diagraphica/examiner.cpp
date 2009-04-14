@@ -1,15 +1,19 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./examiner.cpp
 
-// --- examiner.cpp -------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "examiner.h"
+
+#include <iostream>
+using namespace std;
 
 
 // -- static variables ----------------------------------------------
@@ -49,8 +53,8 @@ Examiner::~Examiner()
 {
     // association
     diagram = NULL;
-    attributes.clear();    
-        
+    attributes.clear();
+
     // composition
     if ( frame != NULL )
     {
@@ -165,7 +169,7 @@ void Examiner::setColorBdl( const ColorRGB &col )
 }
 
 
-// ---------------------------------------    
+// ---------------------------------------
 void Examiner::setDiagram( Diagram *dgrm )
 // ---------------------------------------
 {
@@ -174,7 +178,7 @@ void Examiner::setDiagram( Diagram *dgrm )
 
 
 // -----------------------------------
-void Examiner::setFrame( 
+void Examiner::setFrame(
     Cluster* frme,
     const vector< Attribute*> &attrs,
     ColorRGB col )
@@ -183,10 +187,9 @@ void Examiner::setFrame(
     if ( frame != NULL )
         delete frame;
     attributes.clear();
-
     frame = new Cluster( *frme );
-    attributes = attrs;
 
+    attributes = attrs;
     colFrm = col;
 }
 
@@ -200,9 +203,9 @@ void Examiner::clrFrame()
         delete frame;
         frame = NULL;
     }
-    
+
     attributes.clear();
-    
+
     VisUtils::mapColorMdGray( colFrm );
 
     if ( 0 <= focusFrameIdx && focusFrameIdx < framesHist.size() )
@@ -224,7 +227,7 @@ void Examiner::addFrameHist(
     dataChanged = true;
 
     framesHist.push_back( new Cluster( *frme ) );
-    
+
     vector< Attribute * > v;
     attrsHist.push_back( attrs );
 }
@@ -236,7 +239,7 @@ void Examiner::clrFrameHist()
 {
     // update flag
     dataChanged = true;
-    
+
     // composition
     {
     for ( size_t i = 0; i < framesHist.size(); ++i )
@@ -264,7 +267,7 @@ void Examiner::clrFrameHistCur()
 {
     // update flag
     dataChanged = true;
-    
+
     if ( 0 <= focusFrameIdx && focusFrameIdx < framesHist.size() )
     {
         // composition
@@ -342,7 +345,7 @@ void Examiner::visualize( const bool &inSelectMode )
         calcSettingsGeomBased();
     if ( dataChanged == true )
         calcSettingsDataBased();
-    
+
     if ( inSelectMode == true )
     {
         GLint hits = 0;
@@ -363,7 +366,7 @@ void Examiner::visualize( const bool &inSelectMode )
                 drawControls( inSelectMode );
             }
         }
-        
+
         finishSelectMode(
             hits,
             selectBuf );
@@ -392,10 +395,10 @@ void Examiner::handleSizeEvent()
 // -----------------------------
 {
     Visualizer::handleSizeEvent();
-    
+
     double wth, hgt, pix;
     double bdr     = 10;
-    
+
     canvas->getSize( wth, hgt );
     pix = canvas->getPixelSize();
 
@@ -416,7 +419,7 @@ void Examiner::handleSizeEvent()
 
 // ------------------------------------
 void Examiner::handleMouseLftDownEvent(
-    const int &x, 
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -430,8 +433,8 @@ void Examiner::handleMouseLftDownEvent(
 
 
 // ----------------------------------
-void Examiner::handleMouseLftUpEvent( 
-    const int &x, 
+void Examiner::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // ----------------------------------
 {
@@ -445,8 +448,8 @@ void Examiner::handleMouseLftUpEvent(
 
 
 // --------------------------------------
-void Examiner::handleMouseLftDClickEvent( 
-    const int &x, 
+void Examiner::handleMouseLftDClickEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
@@ -460,8 +463,8 @@ void Examiner::handleMouseLftDClickEvent(
 
 
 // ------------------------------------
-void Examiner::handleMouseRgtDownEvent( 
-    const int &x, 
+void Examiner::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -475,8 +478,8 @@ void Examiner::handleMouseRgtDownEvent(
 
 
 // ----------------------------------
-void Examiner::handleMouseRgtUpEvent( 
-    const int &x, 
+void Examiner::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // ----------------------------------
 {
@@ -490,8 +493,8 @@ void Examiner::handleMouseRgtUpEvent(
 
 
 // -----------------------------------
-void Examiner::handleMouseMotionEvent( 
-    const int &x, 
+void Examiner::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // -----------------------------------
 {
@@ -509,7 +512,7 @@ void Examiner::handleKeyDownEvent( const int &keyCode )
 // ----------------------------------------------------
 {
     Visualizer::handleKeyDownEvent( keyCode );
-    
+
     if ( keyCodeDown == WXK_RIGHT || keyCodeDown == WXK_NUMPAD_RIGHT )
         handleIconRgt();
     else if ( keyCodeDown == WXK_LEFT || keyCodeDown == WXK_NUMPAD_LEFT )
@@ -554,7 +557,7 @@ void Examiner::calcPosFrame()
     double wth, hgt, pix;
     double itvHist = hgtHstPix;
     double bdr     = 10;
-    
+
     canvas->getSize( wth, hgt );
     pix = canvas->getPixelSize();
 
@@ -581,7 +584,7 @@ void Examiner::calcPosFramesHist()
     double wth, hgt, pix;
     double itvHist = hgtHstPix;
     double bdr     = 10;
-    
+
     canvas->getSize( wth, hgt );
     pix = canvas->getPixelSize();
 
@@ -637,7 +640,7 @@ void Examiner::clearFrames()
     frame = NULL;
 }
 
-        
+
 // -- hit detection -------------------------------------------------
 
 
@@ -688,7 +691,7 @@ void Examiner::handleHits( const vector< int > &ids )
                 else
                 {
                     focusFrameIdx = ids[1];
-                
+
                     ColorRGB col;
                     VisUtils::mapColorCoolRed( col );
                     setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
@@ -696,14 +699,22 @@ void Examiner::handleHits( const vector< int > &ids )
                 }
             }
             else if ( ids[ids.size()-1] == ID_ICON_CLR )
+            {
                 mediator->handleClearExnr( this );
+            }
             else if ( ids[ids.size()-1] == ID_ICON_RWND )
+            {
                 handleIconRwnd();
+            }
             else if ( ids[ids.size()-1] == ID_ICON_LFT )
+           	{
                 handleIconLft();
+            }
             else if ( ids[ids.size()-1] == ID_ICON_RGT )
+            {
                 handleIconRgt();
-            
+            }
+
         }
         else if ( mouseButton == MSE_BUTTON_DOWN &&
                   mouseSide == MSE_SIDE_RGT )
@@ -734,7 +745,7 @@ void Examiner::handleHits( const vector< int > &ids )
             else if ( ids[0] == ID_FRAME_HIST )
             {
                 focusFrameIdx = ids[1];
-                
+
                 ColorRGB col;
                 VisUtils::mapColorCoolRed( col );
                 setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
@@ -796,22 +807,22 @@ void Examiner::handleIconLft()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 )
+        if ( focusFrameIdx >= 0  && focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx != 0 )
                 focusFrameIdx -= 1;
-            
+
             dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
             dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
             if ( dRgt > 0 )
-                offset -= dRgt/pix;  
+                offset -= dRgt/pix;
             else if ( dLft > 0 )
                 offset += dLft/pix;
 
             ColorRGB col;
             VisUtils::mapColorCoolRed( col );
             setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
-            
+
             geomChanged = true;
 
             mediator->handleMarkFrameClust( this );
@@ -844,7 +855,7 @@ void Examiner::handleIconRgt()
 
     if ( framesHist.size() > 0 )
     {
-        if ( focusFrameIdx >= 0 )
+        if ( focusFrameIdx >= 0 && focusFrameIdx < framesHist.size() )
         {
             if ( focusFrameIdx < framesHist.size()-1 )
                 focusFrameIdx += 1;
@@ -859,7 +870,7 @@ void Examiner::handleIconRgt()
             ColorRGB col;
             VisUtils::mapColorCoolRed( col );
             setFrame( framesHist[focusFrameIdx], attrsHist[focusFrameIdx], col );
-            
+
             geomChanged = true;
 
             mediator->handleMarkFrameClust( this );
@@ -880,15 +891,15 @@ void Examiner::handleIconRgt()
 
 
 // ------------------------
-void Examiner::processHits( 
-    GLint hits, 
+void Examiner::processHits(
+    GLint hits,
     GLuint buffer[] )
 // ------------------------
 {
     GLuint *ptr;
     int number;
     vector< int > ids;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -974,10 +985,10 @@ void Examiner::drawFrame( const bool &inSelectMode )
         glScalef( scaleFrame, scaleFrame, scaleFrame );
 
         VisUtils::setColor( colFrm );
-        VisUtils::fillRect( 
-            -1.0 + 4*pix/scaleFrame,  1.0 + 4*pix/scaleFrame, 
+        VisUtils::fillRect(
+            -1.0 + 4*pix/scaleFrame,  1.0 + 4*pix/scaleFrame,
              1.0 - 4*pix/scaleFrame, -1.0 - 4*pix/scaleFrame );
-        
+
         vector< double > valsFrame;
         /*
         for ( int i = 0; i < attributes.size(); ++i )
@@ -1002,7 +1013,7 @@ void Examiner::drawFrame( const bool &inSelectMode )
         }
         attr = NULL;
         node = NULL;
-                
+
         diagram->visualize(
             false,
             canvas,
@@ -1041,11 +1052,11 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
             glScalef( scaleFramesHist, scaleFramesHist, scaleFramesHist );
 
             glPushName( i );
-            VisUtils::fillRect( 
-                -1.0,  1.0, 
+            VisUtils::fillRect(
+                -1.0,  1.0,
                  1.0, -1.0 );
             glPopName();
-            
+
             glPopMatrix();
         }
         glPopName();
@@ -1082,7 +1093,7 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
             }
             attr = NULL;
             node = NULL;
-            
+
             glPushMatrix();
             glTranslatef( posFramesHist[i].x, posFramesHist[i].y, 0.0 );
             glScalef( scaleFramesHist, scaleFramesHist, scaleFramesHist );
@@ -1090,24 +1101,24 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
             if ( i == focusFrameIdx )
             {
                 VisUtils::setColorCoolRed();
-                VisUtils::fillRect( 
-                    -1.0 + 4*pix/scaleFramesHist,  1.0+4*pix/scaleFramesHist, 
+                VisUtils::fillRect(
+                    -1.0 + 4*pix/scaleFramesHist,  1.0+4*pix/scaleFramesHist,
                      1.0 - 4*pix/scaleFramesHist, -1.0-4*pix/scaleFramesHist );
             }
             else
             {
                 VisUtils::setColorMdGray();
-                VisUtils::fillRect( 
-                    -1.0 + 3*pix/scaleFramesHist,  1.0+3*pix/scaleFramesHist, 
+                VisUtils::fillRect(
+                    -1.0 + 3*pix/scaleFramesHist,  1.0+3*pix/scaleFramesHist,
                      1.0 - 3*pix/scaleFramesHist, -1.0-3*pix/scaleFramesHist );
             }
-            
+
             diagram->visualize(
                 false,
                 canvas,
                 attrsHist[i],
                 valsFrame );
-            
+
             glPopMatrix();
         }
     }
@@ -1120,7 +1131,7 @@ void Examiner::drawControls( const bool &inSelectMode )
 {
     double wth, hgt, pix;
     double itvHist = hgtHstPix;
-    
+
     canvas->getSize( wth, hgt );
     pix = canvas->getPixelSize();
 
@@ -1214,7 +1225,7 @@ void Examiner::drawControls( const bool &inSelectMode )
                 dLft = 1;
             else
                 dLft = 0;
-            
+
             if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesHist.size()-1 )
                 dRgt = 1;
             else
@@ -1236,7 +1247,7 @@ void Examiner::drawControls( const bool &inSelectMode )
         VisUtils::fillRect(
             0.5*wth - 12.0*pix,      0.5*wth,
             -0.5*hgt + itvHist*pix, -0.5*hgt );
-        
+
         // lines
         VisUtils::setColorLtGray();
         VisUtils::drawLine(
@@ -1275,7 +1286,7 @@ void Examiner::drawControls( const bool &inSelectMode )
         VisUtils::disableLineAntiAlias();
 
         glPopMatrix();
-        
+
         // left
         glPushMatrix();
         glTranslatef( -6*pix, -0.5*hgt + itvHist*pix, 0.0 );
@@ -1298,7 +1309,7 @@ void Examiner::drawControls( const bool &inSelectMode )
 
         // left
         if ( dLft > 0 )
-        {    
+        {
             glPushMatrix();
             glTranslatef( -0.5*wth+6*pix, -0.5*hgt + 0.5*itvHist*pix, 0.0 );
             VisUtils::enableLineAntiAlias();

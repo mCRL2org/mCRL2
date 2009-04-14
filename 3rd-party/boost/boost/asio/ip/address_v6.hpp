@@ -2,7 +2,7 @@
 // address_v6.hpp
 // ~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -63,6 +63,17 @@ public:
   explicit address_v6(const bytes_type& bytes, unsigned long scope_id = 0)
     : scope_id_(scope_id)
   {
+#if UCHAR_MAX > 0xFF
+    for (std::size_t i = 0; i < bytes.size(); ++i)
+    {
+      if (bytes[i] > 0xFF)
+      {
+        std::out_of_range ex("address_v6 from bytes_type");
+        boost::throw_exception(ex);
+      }
+    }
+#endif // UCHAR_MAX > 0xFF
+
     using namespace std; // For memcpy.
     memcpy(addr_.s6_addr, bytes.elems, 16);
   }
@@ -166,7 +177,11 @@ public:
   address_v4 to_v4() const
   {
     if (!is_v4_mapped() && !is_v4_compatible())
-      throw std::bad_cast();
+    {
+      std::bad_cast ex;
+      boost::throw_exception(ex);
+    }
+
     address_v4::bytes_type v4_bytes = { { addr_.s6_addr[12],
       addr_.s6_addr[13], addr_.s6_addr[14], addr_.s6_addr[15] } };
     return address_v4(v4_bytes);
@@ -301,7 +316,7 @@ public:
   {
     using namespace std; // For memcmp.
     int memcmp_result = memcmp(&a1.addr_, &a2.addr_,
-        sizeof(boost::asio::detail::in6_addr_type)) < 0;
+        sizeof(boost::asio::detail::in6_addr_type));
     if (memcmp_result < 0)
       return true;
     if (memcmp_result > 0)
@@ -387,7 +402,12 @@ std::basic_ostream<Elem, Traits>& operator<<(
   boost::system::error_code ec;
   std::string s = addr.to_string(ec);
   if (ec)
-    os.setstate(std::ios_base::failbit);
+  {
+    if (os.exceptions() & std::ios::failbit)
+      boost::asio::detail::throw_error(ec);
+    else
+      os.setstate(std::ios_base::failbit);
+  }
   else
     for (std::string::iterator i = s.begin(); i != s.end(); ++i)
       os << os.widen(*i);

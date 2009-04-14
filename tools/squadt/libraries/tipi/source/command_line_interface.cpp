@@ -1,25 +1,25 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/command_line_interface.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef TIPI_COMMAND_LINE_INTERFACE_TCC
-#define TIPI_COMMAND_LINE_INTERFACE_TCC
+#include "boost.hpp" // precompiled headers
 
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
 
 #include <boost/shared_array.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "tipi/detail/command_line_interface.hpp"
-#include <tipi/detail/tool.tcc>
-#include <tipi/detail/schemes.tcc>
-#include "tipi/utility/logger.hpp"
+#include "tipi/detail/schemes.hpp"
+#include "tipi/detail/utility/logger.hpp"
 
 namespace tipi {
+  /// \cond INTERNAL_DOCS
 
   namespace command_line_interface {
 
@@ -38,11 +38,11 @@ namespace tipi {
       if (cl != 0) {
         char*  argv_store = new char[std::strlen(cl) + 1];
         int    argc       = 0;
-       
+
         std::vector < char* > arguments;
-       
+
         char* current = cl;
-       
+
         arguments.push_back(argv_store);
 
         while (*current != '\0') {
@@ -50,24 +50,30 @@ namespace tipi {
           while (*current == '\0' || *current == ' ') {
             ++current;
           }
-       
+
           if (*current != '\0') {
             char* current_argument = current;
-           
+
             while (*current != '\0' && *current != ' ') {
               if (*current == '\'') {
-                while (*current != '\0' && *current != '\'') {
+                do {
                   ++current;
                 }
+                while (*current != '\0' && *current != '\'');
 
-                ++current;
+                if (*current == '\'') {
+                  ++current;
+                }
               }
               else if (*current == '\"') {
-                while (*current != '\0' && *current != '\"') {
+                do {
                   ++current;
                 }
+                while (*current != '\0' && *current != '\"');
 
-                ++current;
+                if (*current == '\"') {
+                  ++current;
+                }
               }
               else {
                 ++current;
@@ -96,11 +102,11 @@ namespace tipi {
         // convert back to the input string
         for (int i = 0; i < argc; ++i) {
           char* c = argv[i];
-       
+
           while (c[0] != '\0') {
             *(current++) = *(c++);
           }
-       
+
           if (1 < argc - i) {
             *(current++) = ' ';
           }
@@ -115,15 +121,15 @@ namespace tipi {
     /**
      * \return The arguments for a selected scheme (e.g. hostname and port for the socket scheme), or 0
      **/
-    scheme_ptr argument_extractor::get_scheme() const {
-      return (selected_scheme);
+    boost::shared_ptr< messaging::scheme > argument_extractor::get_scheme() const {
+      return m_scheme;
     }
 
     /**
      * \return The identifier extracted from one of the command line arguments, or the default identifier
      **/
     long argument_extractor::get_identifier() const {
-      return (identifier);
+      return m_identifier;
     }
 
     /**
@@ -136,7 +142,7 @@ namespace tipi {
         size_t l = strlen(known_options[i]);
 
         if (strncmp(option, known_options[i], l) == 0) {
-          last_matched = i;
+          m_last_matched = i;
 
           return (option + l);
         }
@@ -159,40 +165,40 @@ namespace tipi {
         size_t l = strlen(known_schemes[i]);
 
         if (strncmp(option, known_schemes[i], l) == 0) {
-          last_matched = i;
+          m_last_matched = i;
 
           char* s = option + l;
 
-          if (last_matched != 0 && strncmp(s, "://", 3) != 0) {
+          if (m_last_matched != 0 && strncmp(s, "://", 3) != 0) {
             throw std::runtime_error("Parse error: expected token '://' instead of " + std::string(s));
           }
 
           char* t = s + 3;
 
-          switch (last_matched) {
+          switch (m_last_matched) {
             case 1: /* Socket scheme (host:port) */
-              selected_scheme = scheme_ptr(new socket_scheme< tipi::message >);
+              m_scheme.reset(new socket_scheme);
 
               /* Search for host/port separator */
               s = strchr(t, ':');
-             
+
               if (t != 0) {
                 /* Take everything between s and t as hostname */
                 const size_t d = s - t;
 
-                std::string& host_name = static_cast < socket_scheme< tipi::message >* > (selected_scheme.get())->host_name;
+                std::string& host_name = static_cast < socket_scheme& > (*m_scheme).host_name;
 
                 host_name.reserve(d);
                 host_name.assign(t, d);
                 host_name.resize(d);
 
                 /* The remaining string should be a port number */
-                static_cast < socket_scheme< tipi::message >* > (selected_scheme.get())->port = atol(++s);
+                static_cast < socket_scheme& > (*m_scheme).port = atol(++s);
               }
 
               break;
             default: /* Traditional scheme */
-              selected_scheme = scheme_ptr(new traditional_scheme< tipi::message >);
+              m_scheme.reset(new traditional_scheme);
               break;
           }
 
@@ -236,7 +242,7 @@ namespace tipi {
 
           char* t = s + 1;
 
-          switch (last_matched) {
+          switch (m_last_matched) {
             case 0: /* Connect option */
               /* Now s should point to a known scheme identifier */
               s = parse_scheme(t);
@@ -246,11 +252,11 @@ namespace tipi {
               }
               break;
             case 1: /* Identifier option */
-              identifier = std::atol(t);
+              m_identifier = std::atol(t);
               break;
             case 2: /* Verbosity level (log filter level) */
               utility::logger::set_default_filter_level(static_cast < utility::logger::log_level > (std::atoi(t)));
-              tipi::messenger::get_standard_logger()->set_filter_level(static_cast < utility::logger::log_level > (std::atoi(t)));
+              tipi::messenger::get_default_logger().set_filter_level(static_cast < utility::logger::log_level > (std::atoi(t)));
               break;
             default: /* Unknown option */
               break;
@@ -263,12 +269,12 @@ namespace tipi {
 
           ++j;
         }
-     
+
         ++i;
       }
 
       argc = j;
     }
   }
+  /// \endcond
 }
-#endif

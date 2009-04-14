@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,12 +14,13 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
-#include "atermpp/atermpp.h"
-#include "atermpp/deque.h"
-#include "atermpp/list.h"
-#include "atermpp/map.h"
-#include "atermpp/set.h"
-#include "atermpp/vector.h"
+#include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/deque.h"
+#include "mcrl2/atermpp/list.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/vector.h"
 #include "gc.h"               // AT_collect
 
 using namespace std;
@@ -27,14 +30,14 @@ using namespace atermpp;
 class A
 {
   template <typename T>
-  friend struct aterm_traits;
+  friend struct atermpp::aterm_traits;
 
   protected:
     ATerm x;
 
     const ATerm& term() const
     { return x; }
-    
+
     ATerm& term()
     { return x; }
 
@@ -58,7 +61,7 @@ class A
     {
       return value() < other.value();
     }
-    
+
     void protect()
     {
       ATprotect(&x);
@@ -94,10 +97,9 @@ namespace atermpp {
   };
 } // namespace atermpp
 
-int main()
+int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   // deque
   atermpp::deque<aterm_appl> d;
@@ -106,7 +108,7 @@ int main()
   d.push_front(make_term("f(3)"));
   copy(d.begin(), d.end(), ostream_iterator<aterm_appl>(cout, "\n"));
   cout << endl;
- 
+
   // vector
   atermpp::vector<aterm_appl> v;
   v.reserve(5);
@@ -145,8 +147,8 @@ int main()
     m1.insert(make_pair(i, aterm_int(i)));
   m1.insert(make_pair(1, aterm_int(2)));
 
-  AT_collect(); // force garbage collection 
-  AT_collect(); // force garbage collection 
- 
+  AT_collect(); // force garbage collection
+  AT_collect(); // force garbage collection
+
   return 0;
 }

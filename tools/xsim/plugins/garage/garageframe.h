@@ -1,4 +1,6 @@
 // Author(s): Aad Mathijssen and Hannes Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -17,28 +19,17 @@
 #ifndef APPFRAME_H
 #define APPFRAME_H
 
-
-// For compilers that support precompiled headers
-#include <wx/wxprec.h>
-// Else include 'wx/wx.h'
-#ifndef WX_PRECOMP
-  #include <wx/wx.h>
-#endif
-
-
+#include <wx/wx.h>
 #include <string>
 #include <vector>
 #include <iostream>
 #include "garagecanvas.h"
-#include "xsimbase.h"
+#include "simbase.h"
 #include "aterm2.h"
-#include "libprint_types.h"
-#include "libprint.h"
-#include "libnextstate.h"
-#include "libstruct.h"
-#include "mcrl2/utilities/aterm_ext.h"
-
-using namespace mcrl2::utilities;
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/core/aterm_ext.h"
 
 #ifndef GARAGEFRAMEDLL
 class GarageFrame : public wxFrame, public SimulatorViewInterface
@@ -47,13 +38,13 @@ class GarageFrame : public wxFrame, public SimulatorViewDLLInterface
 #endif
 {
 public:
-  GarageFrame( wxChar* title,
+  GarageFrame( wxString const& title,
                int xPos,
                int yPos,
                int width,
                int height            );
   GarageFrame( wxWindow* parent,
-               wxChar* title,
+               wxString const& title,
                int xPos,
                int yPos,
                int width,

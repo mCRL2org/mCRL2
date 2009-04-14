@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -8,19 +10,20 @@
 
 #include <string>
 #include <sstream>
-#include <svc/svc.h>
-#include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
-#include "lts/liblts.h"
+#include "aterm2.h"
+#include "svc/svc.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"
-#include "libparse.h"
-#include "typecheck.h"
-#include "dataimpl.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/data_reconstruct.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
@@ -45,7 +48,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   }
 
   creator = SVCgetCreator(&f);
-  
+
   string svc_type = SVCgetType(&f);
   if ( type == lts_mcrl )
   {
@@ -138,6 +141,45 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
 
   SVCclose(&f);
 
+  if ( type == lts_mcrl2 )
+  {
+    // Check to see if there is extra data at the end
+    FILE *g = fopen(filename.c_str(),"rb");
+    if ( (g == NULL) ||
+         (fseek(g,-(12+sizeof(unsigned long long int)),SEEK_END) != 0) )
+    {
+      gsErrorMsg("could not determine whether mCRL2 SVC has extra information; continuing without\n");
+    } else {
+      unsigned char buf[8+12];
+      if ( fread(&buf,1,8+12,g) != 8+12 )
+      {
+        gsErrorMsg("could not determine whether mCRL2 SVC has extra information; continuing without\n");
+      } else {
+        if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
+        {
+          ATerm data;
+          unsigned long long int position = 0;
+          for (unsigned int i=0; i<8; i++)
+          {
+            position = position*0x100 + buf[7-i];
+          }
+          if ( (fseek(g,position,SEEK_SET) != 0 ) ||
+               ((data = ATreadFromFile(g)) == NULL) )
+          {
+            gsErrorMsg("could not read extra information from mCRL2 LTS; continuing without\n");
+          } else {
+            gsVerboseMsg("read extra information from mCRL2 LTS\n");
+            extra_data = data;
+          }
+        }
+      }
+    }
+    if ( g != NULL )
+    {
+      fclose(g);
+    }
+  }
+
   this->type = type;
 
   return true;
@@ -190,7 +232,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
     {
       for (unsigned int i=0; i<nstates; i++)
       {
-        if ( !ATisAppl(state_values[i]) ) // XXX check validity of data terms
+        if ( !ATisAppl(state_values[i]) || strcmp(ATgetName(ATgetAFun((ATermAppl) state_values[i])),"STATE") )
         {
           gsWarningMsg("state values are not saved as they are not the in mCRL2 format\n");
 	  state_info = false;
@@ -216,12 +258,13 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
-            t = type_check_mult_act(t,*spec);
+            ATermAppl reconstructed_spec = reconstruct_spec(*spec);
+            t = type_check_mult_act(t,reconstructed_spec);
             if ( t == NULL )
             {
               gsVerboseMsg("error type checking action\n");
             } else {
-              t = implement_data_mult_act(t,*spec);
+              t = implement_data_mult_act(t,reconstructed_spec);
               if ( t == NULL )
               {
                 gsVerboseMsg("error implementing data of action\n");
@@ -231,6 +274,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
                 applied_conversion = true;
               }
             }
+            *spec = lps::specification(reconstructed_spec);
           }
         }
         if ( no_convert )
@@ -269,22 +313,22 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
 
   if ( type == lts_mcrl )
   {
-    SVCsetType(&f,"generic");
+    SVCsetType(&f,const_cast < char* > ("generic"));
   } else if ( type == lts_mcrl2 )
   {
     if ( state_info )
     {
-      SVCsetType(&f,"mCRL2+info");
+      SVCsetType(&f,const_cast < char* > ("mCRL2+info"));
     } else {
-      SVCsetType(&f,"mCRL2");
+      SVCsetType(&f,const_cast < char* > ("mCRL2"));
     }
   } else {
-      SVCsetType(&f,"unknown");
+      SVCsetType(&f,const_cast < char* > ("unknown"));
   }
 
   if ( creator == "" )
   {
-    SVCsetCreator(&f,"liblts (mCRL2)");
+    SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
   } else {
     char *s = strdup(creator.c_str());
     SVCsetCreator(&f,s);
@@ -303,6 +347,36 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
   }
 
   SVCclose(&f);
+
+  if ( type == lts_mcrl2 && ((extra_data != NULL) || applied_conversion) )
+  {
+    ATermAppl data_spec = NULL;
+    ATermList params = NULL;
+    ATermAppl act_spec = NULL;
+
+    if ( applied_conversion )
+    {
+      data_spec = spec->data();
+      act_spec = ATAgetArgument((ATermAppl) *spec,1);
+    } else {
+      data_spec = ATAgetArgument((ATermAppl) extra_data,0);
+      if ( gsIsNil(data_spec) )
+      {
+        data_spec = NULL;
+      }
+      if ( state_info && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
+      {
+        params = ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0);
+      }
+      act_spec = ATAgetArgument((ATermAppl) extra_data,2);
+      if ( gsIsNil(data_spec) )
+      {
+        act_spec = NULL;
+      }
+    }
+
+    add_extra_mcrl2_svc_data(filename,data_spec,params,act_spec);
+  }
 
   return true;
 }

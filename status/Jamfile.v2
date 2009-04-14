@@ -1,21 +1,98 @@
 # mCRL2 regression-testing Jamfile
 
 project status
-    : source-location ../test
-    : requirements <hardcode-dll-paths>true  
-      <dependency>/boost//headers
-      <define>BOOST_ALL_NO_LIB
+    : source-location .
+    : requirements <hardcode-dll-paths>true
+      <preserve-test-targets>on
+      <dependency>/site-config//boost
+      <define>"MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\""
     ;
-        
-import testing ;
 
 # Tests from Jamfiles in individual library test subdirectories
 # Please keep these in alphabetic order by test-suite name
 
-build-project ../3rd-party/svc/test ;            # test-suite svc
-build-project ../libraries/atermpp/test ;    # test-suite atermpp
-build-project ../libraries/lps/test ;        # test-suite lps
-build-project ../libraries/lts/test ;        # test-suite lts
-build-project ../libraries/parser/test ;     # test-suite parser
-build-project ../libraries/prover/test ;     # test-suite prover
+build-project ../libraries/atermpp/test ;            # test-suite atermpp
+build-project ../libraries/core/test ;               # test-suite core
+build-project ../libraries/data/test ;               # test-suite data
+build-project ../libraries/lps/test ;                # test-suite lps
+build-project ../libraries/lts/test ;                # test-suite lts
+build-project ../libraries/pbes/test ;               # test-suite pbes
+build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
+build-project ../libraries/trace/test ;              # test-suite trace
+build-project ../libraries/utilities/test ;
 build-project ../tools/mcrl22lps/test ;
+
+import set ;
+
+if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
+  use-project /tools/mcrl22lps : ../tools/mcrl22lps ;
+
+  all-tools = [ path.glob-tree $(TOP)/tools/ : Jamfile.v2 ] ;
+
+  for tool in [ MATCH .*/tools/(.*)/Jamfile.v2 : $(all-tools) ] {
+    use-project /tools/$(tool) : ../tools/$(tool) ;
+  }
+
+  local lps-tools  = [ MATCH .*/tools/(lps.*)/Jamfile.v2 : $(all-tools) ] ;
+  local pbes-tools = [ MATCH .*/tools/(pbes.*)/Jamfile.v2 : $(all-tools) ] ;
+  local lts-tools  = [ MATCH .*/tools/(lts.*)/Jamfile.v2 : $(all-tools) ] ;
+
+  lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
+  lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] ] ;
+
+  actions generate-lps {
+    $(>) $(<)
+  }
+
+  actions generate-pbes {
+    $(>[2]) --formula=$(>[3]) $(>[1]) $(<)
+  }
+
+  actions generate-lts {
+    $(>[2]) $(>[1]) $(<)
+  }
+
+  make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
+  make test.pbes : /tools/lps2pbes//lps2pbes $(TOP)/examples/modal-formulas/nodeadlock.mcf test.lps : @generate-pbes ;
+  make test.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
+  make test2.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
+
+  for tool in $(lps-tools) {
+    if $(tool) in lpsinfo lpspp {
+      tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true ] ;
+    }
+    else if $(tool) in lpsinvelm {
+      tests += [ run /tools/$(tool)//$(tool) : --invariant=$(TOP)/status/invariant.data : test.lps : <testing.preserve>true ] ;
+    }
+    else if $(tool) in lpsactionrename {
+      tests += [ run /tools/$(tool)//$(tool) : --renamefile=$(TOP)/status/rename.data : test.lps : <testing.preserve>true ] ;
+    }
+    else {
+      tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true <testing.post-pipes>/tools/lpspp//lpspp ] ;
+    }
+  }
+
+  for tool in $(pbes-tools) {
+    if $(tool) in pbessolve {
+    }
+    else {
+      tests += [ run /tools/$(tool)//$(tool) : : test.pbes : <testing.preserve>true ] ;
+    }
+  }
+
+  for tool in $(lts-tools) {
+    if $(tool) in ltsgraph {
+    }
+    else if $(tool) in ltscompare {
+      tests += [ run /tools/$(tool)//$(tool) : --equivalence=bisim : test.lts test2.lts : <testing.preserve>true ] ;
+    }
+    else if $(tool) in ltsmin {
+      tests += [ run /tools/$(tool)//$(tool) : : test.lts test2.lts : <testing.preserve>true ] ;
+    }
+    else {
+      tests += [ run /tools/$(tool)//$(tool) : : test.lts : <testing.preserve>true ] ;
+    }
+  }
+
+  test-suite command-line-interface : $(tests) ;
+}

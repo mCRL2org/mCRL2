@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./combnplot.h
-
-// --- combnplot.h --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef COMBNPLOT_H
 #define COMBNPLOT_H
@@ -15,7 +15,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
+#include <string>
 #include "diagram.h"
 #include "graph.h"
 #include "utils.h"
@@ -33,13 +33,13 @@ public:
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const vector< int > &attrIndcs,
-        vector< vector< int > > &combs,
-        vector< int > &number );
+        const std::vector< int > &attrIndcs,
+        std::vector< std::vector< int > > &combs,
+        std::vector< int > &number );
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
-        
+
     // -- set vis settings functions --------------------------------
 
     // -- visualization functions  ----------------------------------
@@ -55,7 +55,7 @@ public:
     void drawPlotCP( const bool &inSelectMode );
     void drawMousePos( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -64,7 +64,7 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void initLabels();
@@ -83,32 +83,32 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits(  
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
     enum
     {
     };
-    
+
     // data
-    vector< string >        attributeLabels;
-    vector< int >           attributeIndcs;
+    std::vector< std::string >        attributeLabels;
+    std::vector< int >           attributeIndcs;
     int                     maxAttrCard;
-    vector< vector< int > > combinations;
-    vector< int >           numberPerComb;
+    std::vector< std::vector< int > > combinations;
+    std::vector< int >           numberPerComb;
     int                     maxNumberPerComb;
 
     // bar chart
     int    minHgtHintPixBC;     // bar height cannot be less
     int    maxWthHintPixBC;     // bar width cannot be more
     double widthBC;             // actual width calculated & used for every bar
-    vector< Position2D > posBC; // top, center
+    std::vector< Position2D > posBC; // top, center
 
     // combination plot
-    vector< vector< Position2D > > posLftTop;
-    vector< vector< Position2D > > posRgtBot;
+    std::vector< std::vector< Position2D > > posLftTop;
+    std::vector< std::vector< Position2D > > posRgtBot;
 
     bool   mouseInside;
     size_t    mouseCombnIdx;
@@ -118,8 +118,8 @@ protected:
     double        scaleDgrm;       // scale factor for diagram
     Position2D    posDgrm;         // positions of diagram
     bool          showDgrm;        // show or hide diagram
-    vector< double > attrValIdcsDgrm; // value idx of attribute associated with diagram
-    string        msgDgrm;         // message to show with diagram
+    std::vector< double > attrValIdcsDgrm; // value idx of attribute associated with diagram
+    std::string        msgDgrm;         // message to show with diagram
 };
 
 #endif

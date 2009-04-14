@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/detail/schemes.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/detail/schemes.hpp
 
 #ifndef TIPI_SCHEMES_H
 #define TIPI_SCHEMES_H
@@ -18,61 +22,62 @@ namespace tipi {
   namespace messaging {
 
     /** \brief Abstract base class for container types for parsed information about schemes */
-    template < typename M >
-    class scheme : public boost::noncopyable {
+    class scheme {
+      friend class command_line_interface::argument_extractor;
+
       public:
+
+        /** \brief Builds a connection between a tool communicator and a controller communicator */
+        virtual void connect(basic_messenger< tipi::message >&) const = 0;
 
         /** \brief Destructor */
         virtual ~scheme() = 0;
- 
-        /** \brief Builds a connection between a tool communicator and a controller communicator */
-        virtual void connect(basic_messenger_impl< M >*) const = 0;
     };
- 
+
     /** \brief Derived class for the traditional scheme */
-    template < typename M >
-    class traditional_scheme : public scheme< M > {
+    class traditional_scheme : public scheme {
       friend class command_line_interface::argument_extractor;
- 
-      public:
-        inline traditional_scheme();
- 
+
+      protected:
+
         /** Builds a connection between a tool communicator and a controller communicator, using the traditional scheme */
-        inline void connect(basic_messenger_impl< M >*) const;
+        inline void connect(basic_messenger< tipi::message >&) const {
+          throw std::runtime_error("Sorry direct connection is not yet implemented");
+        }
+
+      public:
+
+        ~traditional_scheme() {
+        }
     };
- 
+
     /** \brief Derived class for the socket scheme */
-    template < typename M >
-    class socket_scheme : public scheme< M > {
+    class socket_scheme : public scheme {
       friend class command_line_interface::argument_extractor;
- 
+
       private:
+
         /** \brief IPv4 address of endpoint */
         std::string host_name;
- 
+
         /** \brief Port number */
         long int    port;
- 
-      public:
-        inline socket_scheme();
- 
+
+      protected:
+
         /** Builds a connection between a tool communicator and a controller communicator, using the socket scheme */
-        inline void connect(basic_messenger_impl< M >*) const;
+        inline void connect(basic_messenger< tipi::message >& t) const {
+          t.connect(host_name, static_cast < short int > (port));
+        }
+
+      public:
+
+        ~socket_scheme() {
+        }
     };
 
     /** \brief Destructor */
-    template < typename M >
-    inline scheme< M >::~scheme() {
-    }
- 
-    /** \brief Constructor */
-    template < typename M >
-    inline traditional_scheme< M >::traditional_scheme() {
-    }
- 
-    /** \brief Constructor */
-    template < typename M >
-    inline socket_scheme< M >::socket_scheme() {
+    inline scheme::~scheme() {
     }
   }
 }

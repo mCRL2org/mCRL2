@@ -1,0 +1,16 @@
+Follow these steps to create an FSM file for input to the visualization tools:
+
+1. Choose an mCRL2 specification in one of the examples directories.
+
+2. Assuming the file name of the specification is foo.mcrl2, create an LPS using
+   the lineariser:
+   $ mcrl22lps foo.mcrl2 foo.lps
+
+3. Now generate a state space in mCRL2 SVC format:
+   $ lps2lts foo.lps foo.svc
+
+4. Finally, convert this state space to FSM format as follows:
+   $ ltsconvert -l foo.lps foo.svc foo.fsm
+
+Supplying the LPS to ltsconvert (via the -l option) is required to obtain
+correct state parameter information in the resulting FSM file.

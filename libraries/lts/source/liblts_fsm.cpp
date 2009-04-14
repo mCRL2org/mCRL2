@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,20 +13,23 @@
 #include <iostream>
 #include <fstream>
 #include <aterm2.h>
-#include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
-#include "libparse.h"
-#include "typecheck.h"
-#include "dataimpl.h"
-#include "libprint.h"
-#include "lts/liblts.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/data_implementation.h"
+#include "mcrl2/core/data_reconstruct.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"
-#include "fsmparser.h"
+#include "liblts_fsmparser.h"
 
-#ifdef __cplusplus
-using namespace mcrl2::utilities;
-#endif
+#include "workarounds.h" // DECL_A
+
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+using namespace mcrl2;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
@@ -43,17 +48,19 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification &spec)
   {
     gsVerboseMsg("cannot parse action as mCRL2\n");
   } else {
-    t = type_check_mult_act(t,spec);
+    ATermAppl reconstructed_spec = reconstruct_spec(spec);
+    t = type_check_mult_act(t,reconstructed_spec);
     if ( t == NULL )
     {
       gsVerboseMsg("error type checking action\n");
     } else {
-      t = implement_data_mult_act(t,spec);
+      t = implement_data_mult_act(t,reconstructed_spec);
       if ( t == NULL )
       {
         gsVerboseMsg("error implementing data of action\n");
       }
     }
+    spec = lps::specification(reconstructed_spec);
   }
 
   return (ATerm) t;
@@ -64,11 +71,15 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
   unsigned int len = ATgetLength((ATermList) state);
   DECL_A(state_args,ATerm,len);
 
-  for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state))
+  for (unsigned int i=0; !ATisEmpty((ATermList) state); state=(ATerm) ATgetNext((ATermList) state),++i)
   {
     ATermAppl val = ATAgetFirst((ATermList) state);
     ATermAppl expr = ATAgetArgument(val,0);
-    ATermAppl sort = ATAgetArgument(val,1);
+    ATermAppl sort = ATAgetArgument(ATAgetArgument(val,1),1);
+
+    // typechecking and data implementation of terms needs an lps
+    // before data implementation
+    ATermAppl reconstructed_lps = reconstruct_spec(spec);
 
     std::stringstream sort_ss(ATgetName(ATgetAFun(sort)));
     sort = parse_sort_expr(sort_ss);
@@ -77,7 +88,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
       gsVerboseMsg("error parsing state argument sort\n");
       return NULL;
     }
-    sort = type_check_sort_expr(sort,spec);
+    sort = type_check_sort_expr(sort,reconstructed_lps);
     if ( sort == NULL )
     {
       gsVerboseMsg("error type checking state argument sort\n");
@@ -91,20 +102,22 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
       gsVerboseMsg("error parsing state argument\n");
       return NULL;
     }
-    expr = type_check_data_expr(expr,sort,spec);
+    expr = type_check_data_expr(expr,sort,reconstructed_lps);
     if ( expr == NULL )
     {
       gsVerboseMsg("error type checking state argument\n");
       return NULL;
     }
-    expr = implement_data_data_expr(expr,spec);
+    expr = implement_data_data_expr(expr,reconstructed_lps);
     if ( expr == NULL )
     {
       gsVerboseMsg("error implementing data of state argument\n");
       return NULL;
     }
 
-    state_args[i] = (ATerm) expr; 
+    spec = lps::specification(reconstructed_lps);
+
+    state_args[i] = (ATerm) expr;
   }
 
   ATerm r = (ATerm) ATmakeApplArray(ATmakeAFun("STATE",len,ATfalse),state_args);
@@ -126,25 +139,43 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
           return false;
         }
       }
-      for (unsigned int i=0; i<nstates; i++)
+      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-        state_values[i] = parse_mcrl2_state(state_values[i],*spec);
-        if ( label_values[i] == NULL )
+        p_remove_state_values();
+      } else {
+        for (unsigned int i=0; i<nstates; i++)
         {
-          return false;
+          state_values[i] = parse_mcrl2_state(state_values[i],*spec);
+          if ( state_values[i] == NULL )
+          {
+            return false;
+          }
         }
       }
+      extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
+              (ATerm)(ATermAppl) spec->data(),
+              (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm)(ATermList) spec->process().process_parameters()),
+              ATgetArgument((ATermAppl) *spec,1));
+      this->type = lts_mcrl2;
     } else if ( type == lts_mcrl ) {
-      for (unsigned int i=0; i<nstates; i++)
+      if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )
       {
-	ATermList m = ATmakeList0();
-        for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
+        p_remove_state_values();
+      } else {
+        for (unsigned int i=0; i<nstates; i++)
         {
-          ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
-	  m = ATinsert(m,a);
+          ATermList m = ATmakeList0();
+          for (ATermList l=ATreverse((ATermList) state_values[i]); !ATisEmpty(l); l=ATgetNext(l))
+          {
+            ATerm a = ATmake(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(l),0))));
+            m = ATinsert(m,a);
+          }
+          state_values[i] = (ATerm) m;
         }
-	state_values[i] = (ATerm) m;
       }
+      this->type = lts_mcrl;
+    } else {
+      this->type = lts_fsm;
     }
     return true;
   } else {
@@ -167,43 +198,11 @@ bool p_lts::read_from_fsm(std::string const &filename, lts_type type, lps::speci
 
 bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 {
-  // create arrays for fan in/out
-  unsigned int *in  = (unsigned int*) malloc(nstates*sizeof(unsigned int));
-  unsigned int *out = (unsigned int*) malloc(nstates*sizeof(unsigned int));
-  if( (in==NULL) || (out==NULL) )
-  {
-    gsErrorMsg("malloc failed"); 
-    exit(1);
-  }
-
-  // initialize arrays
-  for(unsigned int i=0; i<nstates; i++)
-  {
-    in[i]  = 0;
-    out[i] = 0;
-  }
-
-  // compute fan in, fan out, and edges
-  gsVerboseMsg("computing fan in/out...\n");
-  unsigned int max_in = 0;
-  unsigned int max_out = 0;
-  for(unsigned int i=0; i<ntransitions; i++)
-  {
-    if ( (++out[transitions[i].from]) > max_out )
-    {
-      max_out = out[transitions[i].from];
-    }
-    if ( (++in[transitions[i].to]) > max_in )
-    {
-      max_in = in[transitions[i].to];
-    }
-  }
-
   // determine number of state parameters
   unsigned int num_params;
   if ( (type != lts_none) && state_info && (nstates > 0) )
   {
-    if ( type == lts_mcrl )
+    if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
     {
       num_params = ATgetLength((ATermList) state_values[0]);
     } else { // type == lts_mcrl2
@@ -211,6 +210,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
   } else {
     num_params = 0;
+    gsWarningMsg("parameter names are unknown (use LTS with extra information or supply the source LPS)\n");
   }
 
   // create set per parameter containing all used values
@@ -229,20 +229,20 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     for (unsigned int i=0; i<nstates; i++)
     {
       ATermList state_pars;
-      if ( type == lts_mcrl )
+      if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
         state_pars = (ATermList) state_values[i];
       } else { // type == mcrl2
         state_pars = ATgetArguments((ATermAppl) state_values[i]);
       }
-      
+
       assert( ((unsigned int) ATgetLength(state_pars)) >= num_params );
       if ( ((unsigned int) ATgetLength(state_pars)) < num_params )
       {
         gsErrorMsg("invalid state in LTS (it does not have as much parameters as the LPS)\n");
         exit(1);
       }
-  
+
       for (unsigned int j=0; !ATisEmpty(state_pars); state_pars=ATgetNext(state_pars),j++)
       {
         ATbool is_new;
@@ -259,34 +259,34 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
 
     if ( (params == NULL) || ATisEmpty(params) )
     {
-      os << "unknown" << i << "(" << ATgetLength(vals) << ") unknown ";
+      if ( type == lts_fsm || type == lts_dot )
+      {
+        ATermAppl type = (ATermAppl) ATgetArgument(ATAgetFirst(vals),1);
+        os << ATgetName(ATgetAFun(ATgetArgument(type,0))) << "(" << ATgetLength(vals) << ") " << ATgetName(ATgetAFun(ATgetArgument(type,1))) << " ";
+      } else {
+        os << "unknown" << i << "(" << ATgetLength(vals) << ") unknown ";
+      }
     } else {
       if ( type == lts_mcrl )
       {
-	std::string s;
-	s = ATwriteToString(ATgetFirst(ATLgetFirst(params)));
-	s = s.substr(1,s.size()-3);
+        std::string s;
+        s = ATwriteToString(ATgetFirst(ATLgetFirst(params)));
+        s = s.substr(1,s.size()-3);
         os << s << "(" << ATgetLength(vals) << ") ";
-	s = ATwriteToString(ATgetFirst(ATgetNext(ATLgetFirst(params))));
-	s = s.substr(1,s.size()-2);
+        s = ATwriteToString(ATgetFirst(ATgetNext(ATLgetFirst(params))));
+        s = s.substr(1,s.size()-2);
         os << s << " ";
       } else { // type == lts_mcrl2
-        PrintPart_CXX(os,ATgetFirst(ATLgetFirst(params)),ppDefault);
+        PrintPart_CXX(os,ATgetFirst(params),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
-        PrintPart_CXX(os,ATgetFirst(ATgetNext(ATLgetFirst(params))),ppDefault);
+        PrintPart_CXX(os,ATgetArgument(ATAgetFirst(params),1),ppDefault);
         os << " ";
       }
 
       params = ATgetNext(params);
     }
 
-    if ( type == lts_mcrl )
-    {
-      for(; !ATisEmpty(vals); vals=ATgetNext(vals))
-      {
-        os << " \"" << ATwriteToString(ATgetFirst(vals)) << "\"";
-      }
-    } else if ( type == lts_mcrl2 )
+    if ( type == lts_mcrl2 )
     {
       for(; !ATisEmpty(vals); vals=ATgetNext(vals))
       {
@@ -294,27 +294,20 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
         PrintPart_CXX(os,ATgetFirst(vals),ppDefault);
         os << "\"";
       }
+    } else if ( type == lts_fsm || type == lts_dot )
+    {
+      for(; !ATisEmpty(vals); vals=ATgetNext(vals))
+      {
+        os << " " << ATwriteToString(ATgetArgument(ATAgetFirst(vals),0));
+      }
+    } else {
+      for(; !ATisEmpty(vals); vals=ATgetNext(vals))
+      {
+        os << " \"" << ATwriteToString(ATgetFirst(vals)) << "\"";
+      }
     }
     os << std::endl;;
   }
-
-  // print additional "parameters"
-  os << "fan_in(" << max_in+1 << ") Nat ";
-  for (unsigned int i=0; i<=max_in; i++)
-  {
-    os << " \"" << i << "\"";
-  }
-  os << std::endl;
-
-  os << "fan_out(" << max_out+1 << ") Nat ";
-  for (unsigned int i=0; i<=max_out; i++)
-  {
-    os << " \"" << i << "\"";
-  }
-  os << std::endl;
- 
-  os << "node_nr(0)" << std::endl;
-
 
   // print states
   gsVerboseMsg("writing states...\n");
@@ -335,7 +328,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     {
       state_pars = ATmakeList0();
     } else {
-      if ( type == lts_mcrl )
+      if ( (type == lts_mcrl) || (type == lts_fsm) || (type == lts_dot) )
       {
         state_pars = (ATermList) state_values[idx];
       } else { // type == lts_mcrl2
@@ -346,11 +339,14 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     for(unsigned int j=0; !ATisEmpty(state_pars); state_pars=ATgetNext(state_pars),j++)
     {
       ATerm val = ATgetFirst(state_pars);
-      os << ATindexedSetGetIndex(set[j],val) << " ";
+      if (j > 0) {
+        os << " ";
+      }
+      os << ATindexedSetGetIndex(set[j],val);
     }
-    os << in[idx] << " " << out[idx] << " " << i+1 << std::endl;
+    os << std::endl;
   }
-  
+
 
   // print transitions
   gsVerboseMsg("writing transitions...\n");
@@ -389,8 +385,6 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
     }
   }
   free(set);
-  free(out);
-  free(in);
 
   return true;
 }
@@ -414,19 +408,13 @@ static ATermList get_lps_params(ATerm lps)
 
   if ( lps != NULL )
   {
-    params = ATmakeList0();
-
-    if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
+    if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
     {
-      ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,5),1);
-      for (; !ATisEmpty(pars); pars=ATgetNext(pars))
-      {
-        params = ATinsert(params,(ATerm) ATmakeList2(ATgetFirst(pars),(ATerm) gsGetSort(ATAgetFirst(pars))));
-      }
-      params = ATreverse(params);
+      params = ATLgetArgument(ATAgetArgument((ATermAppl) lps,3),1);
     } else if ( ATisAppl(lps) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lps)),"spec2gen") )
     {
       ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,1),1);
+      params = ATmakeList0();
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
         params = ATinsert(params,(ATerm) ATmakeList2(ATgetArgument(ATAgetFirst(pars),0),ATgetArgument(ATAgetFirst(pars),1)));
@@ -442,60 +430,118 @@ static ATermList get_lps_params(ATerm lps)
 
 static ATermList get_lps_params(lps::linear_process &lps)
 {
-  ATermList params = ATmakeList0();
+  return lps.process_parameters();
+}
 
-  lps::data_variable_list pars = lps.process_parameters();
-  lps::data_variable_list::iterator pb = pars.begin();
-  lps::data_variable_list::iterator pe = pars.end();
-  for (; pb != pe; pb++)
+static bool isATermString(ATerm a)
+{
+  return ATisAppl(a) && (ATgetArity(ATgetAFun((ATermAppl) a)) == 0);
+}
+
+static bool ismCRL2Action(ATerm a)
+{
+  return ATisAppl(a) && (gsIsMultAct((ATermAppl) a) || is_timed_pair((ATermAppl) a));
+}
+
+static bool ismCRL2State(ATerm a)
+{
+  return ATisAppl(a) && !strcmp(ATgetName(ATgetAFun((ATermAppl) a)),"STATE");
+}
+
+static bool ismuCRLState(ATerm a)
+{
+  if ( ATisList(a) )
   {
-    ATermAppl p = *pb;
-    params = ATinsert(params,(ATerm) ATmakeList2((ATerm) p,(ATerm) gsGetSort(p)));
+    ATermList l = (ATermList) a;
+
+    for (; !ATisEmpty(l); l=ATgetNext(l))
+    {
+      if ( !ATisAppl(ATgetFirst(l)) )
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  return ATreverse(params);
+  return false;
+}
+
+static bool isFSMState(ATerm a)
+{
+  if ( ATisList(a) )
+  {
+    ATermList l = (ATermList) a;
+
+    for (; !ATisEmpty(l); l=ATgetNext(l))
+    {
+      if ( ATisAppl(ATgetFirst(l)) )
+      {
+        ATermAppl first = (ATermAppl) ATgetFirst(l);
+        AFun f = ATgetAFun(first);
+
+        if ( (ATgetArity(f) == 2) && !strcmp(ATgetName(f),"Value") && isATermString(ATgetArgument(first,0)) && ATisAppl(ATgetArgument(first,1)) )
+        {
+          ATermAppl type = (ATermAppl) ATgetArgument(first,1);
+          AFun g = ATgetAFun(type);
+
+          if ( !((ATgetArity(g) == 2) && !strcmp(ATgetName(g),"Type") && isATermString(ATgetArgument(type,0)) && isATermString(ATgetArgument(type,1))) )
+          {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  return false;
 }
 
 lts_type p_lts::fsm_get_lts_type()
 {
   if ( label_info )
   {
-    lts_type type;
+    lts_type type = lts_fsm;
     if ( nlabels > 0 )
     {
       ATerm label = label_values[0];
-      if ( ATisAppl(label) && (gsIsMultAct((ATermAppl) label) || is_timed_pair((ATermAppl) label)) )
+      if ( ismCRL2Action(label) )
       {
         type = lts_mcrl2;
-      } else if ( ATisAppl(label) && (ATgetArity(ATgetAFun((ATermAppl) label)) == 0) )
+      } else if ( !isATermString(label) )
       {
-        type = lts_mcrl;
-      } else {
         return lts_none;
       }
-    } else if ( state_info && (nstates > 0) )
+    }
+    if ( (type == lts_fsm) && state_info && (nstates > 0) )
     {
       ATerm state = state_values[0];
       // XXX better checks!
-      if ( ATisAppl(state) )
+      if ( ismCRL2State(state) )
       {
         type = lts_mcrl2;
-      } else if ( ATisList(state) )
+      } else if ( isFSMState(state) ) // first check FSM as FSM fits muCRL
+      {
+        type = lts_fsm;
+      } else if ( ismuCRLState(state) )
       {
         type = lts_mcrl;
       } else {
         return lts_none;
       }
-    } else {
-      return lts_none;
     }
 
     if ( type == lts_mcrl )
     {
       for (unsigned int i=0; i<nlabels; i++)
       {
-        ATerm label = label_values[i];
-        if ( !ATisAppl(label) || !(ATgetArity(ATgetAFun((ATermAppl) label)) == 0) )
+        if ( !isATermString(label_values[i]) )
         {
           return lts_none;
         }
@@ -504,18 +550,17 @@ lts_type p_lts::fsm_get_lts_type()
       {
         for (unsigned int i=0; i<nstates; i++)
         {
-          ATerm state = state_values[i];
-          if ( !ATisList(state) ) // XXX
+          if ( !ismuCRLState(state_values[i]) )
           {
             return lts_none;
           }
         }
       }
-    } else { // type == lts_mcrl2
+    } else if ( type == lts_mcrl2 )
+    {
       for (unsigned int i=0; i<nlabels; i++)
       {
-        ATerm label = label_values[i];
-        if ( !ATisAppl(label) || !(gsIsMultAct((ATermAppl) label) || is_timed_pair((ATermAppl) label)) )
+        if ( !ismCRL2Action(label_values[i]) )
         {
           return lts_none;
         }
@@ -524,12 +569,29 @@ lts_type p_lts::fsm_get_lts_type()
       {
         for (unsigned int i=0; i<nstates; i++)
         {
-          ATerm state = state_values[i];
-          if ( !ATisAppl(state) ) // XXX
+          if ( !ismCRL2State(state_values[i]) )
           {
             return lts_none;
           }
+        }
       }
+    } else { // type == lts_fsm
+      for (unsigned int i=0; i<nlabels; i++)
+      {
+        if ( !isATermString(label_values[i]) )
+        {
+          return lts_none;
+        }
+      }
+      if ( state_info )
+      {
+        for (unsigned int i=0; i<nstates; i++)
+        {
+          if ( !isFSMState(state_values[i]) )
+          {
+            return lts_none;
+          }
+        }
       }
     }
 
@@ -544,7 +606,7 @@ static lts_type get_lps_type(ATerm lps)
   if ( lps == NULL )
   {
     return lts_none;
-  } else if ( ATisAppl(lps) && gsIsSpecV1((ATermAppl) lps) )
+  } else if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
   {
     gsVerboseMsg("detected mCRL2 LPS\n");
     return lts_mcrl2;
@@ -561,7 +623,7 @@ static lts_type get_lps_type(ATerm lps)
 
 static bool check_type(lts_type type, ATerm lps)
 {
-  if ( (lps == NULL) || (type == lts_none) )
+  if ( (lps == NULL) || (type == lts_fsm) )
   {
     return true;
   } else {

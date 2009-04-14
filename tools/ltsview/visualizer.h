@@ -1,21 +1,27 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file visualizer.h
-/// \brief Add your file description here.
+/// \brief Header file for the visualizer
 
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 #include <vector>
-#include "mediator.h"
-#include "utils.h"
-#include "lts.h"
-#include "primitivefactory.h"
 #include "settings.h"
-#include "visobjectfactory.h"
+#include "utils.h"
+
+class Mediator;
+class PrimitiveFactory;
+class LTS;
+class VisObjectFactory;
+class State;
+class Cluster;
+class Transition;
 
 class Visualizer: public Subscriber {
   private:
@@ -23,7 +29,6 @@ class Visualizer: public Subscriber {
     float sin_obt;
     LTS* lts;
     VisObjectFactory *visObjectFactory;
-    Utils::MarkStyle markStyle;
     Mediator* mediator;
     PrimitiveFactory *primitiveFactory;
     Settings* settings;
@@ -33,52 +38,57 @@ class Visualizer: public Subscriber {
     bool update_matrices;
     bool update_abs;
 
-    void clearDFSStates(State* root);
-    void computeStateAbsPos(State* root,int rot,Utils::Point3D init);
+    void computeAbsPos();
+    void computeStateAbsPos(Cluster* root,int rot);
     void computeSubtreeBounds(Cluster* root,float &boundWidth,
                               float &boundHeight);
     void drawBackPointer(State* startState,State* endState);
     void drawForwardPointer(State* startState,State* endState);
-    void drawStates(Cluster* root,int rot, bool simulating);
-    void drawTransitions(State* root,bool disp_fp,bool disp_bp);
-    bool isMarked(Cluster* c);
-    bool isMarked(State* s);
-    bool isMarked(Transition* s);
+    void drawLoop(State* state);
+    void drawStates(Cluster* root,bool simulating);
+    void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
 
     void traverseTree(bool co);
-    void traverseTreeC(Cluster *root,bool topClosed,int rot);
-    void traverseTreeT(Cluster *root,int rot);
+    void traverseTreeC(Cluster *root, bool topClosed, int rot);
+    void traverseTreeT(Cluster *root, bool topClosed, int rot);
     void updateColors();
     float compute_cone_scale_x(float phi,float r,float x);
-  
+    void computeForces(Cluster* root);
+    void applyForces(Cluster* root, int rot);
+    void resetForces(Cluster* root);
+    void resetVelocities(Cluster* root);
+    void forceDirectedInitPos(Cluster* root);
+
+    float distance_circle_to_poly(float angle,float radius);
+
   public:
     Visualizer(Mediator* owner,Settings* ss);
     ~Visualizer();
-    
+
     void computeBoundsInfo(float &bcw,float &bch);
-    float	getHalfStructureHeight() const;
-    Utils::VisStyle	getVisStyle() const;
+    float getHalfStructureHeight() const;
+    Utils::VisStyle getVisStyle() const;
     void notify(SettingID s);
-    void setLTS(LTS *l);
-    void setMarkStyle(Utils::MarkStyle ms);
+    void setLTS(LTS *l,bool compute_ratio);
+    void notifyMarkStyleChanged();
     void setVisStyle(Utils::VisStyle vs);
 
     void drawStates(bool simulating);
     void drawSimStates(std::vector<State*> historicStates, State* currState,
                        Transition* chosenTrans);
-    void drawSimMarkedStates(Cluster* root, int rot);
-    
+
     void drawTransitions(bool draw_fp,bool draw_bp);
-    void drawSimTransitions(bool draw_fp, bool draw_bp, 
+    void drawSimTransitions(bool draw_fp, bool draw_bp,
                             std::vector<Transition*> historicTrans,
-                            std::vector<Transition*> posTrans, 
+                            std::vector<Transition*> posTrans,
                             Transition* chosenTrans);
 
     void drawStructure();
     void sortClusters(Utils::Point3D viewpoint);
-
-    
-    
+    void forceDirectedInit();
+    void forceDirectedStep();
+    void resetStatePositions();
+    void exportToText(std::string filename);
 };
 
 #endif

@@ -1,99 +1,87 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file state.cpp
-/// \brief Add your file description here.
+/// \brief Source file for State class
+
+#include "wx.hpp" // precompiled headers
 
 #include "state.h"
+#include "transition.h"
+
 using namespace std;
 using namespace Utils;
 
-State::State() {
+State::State(int aid) {
   cluster = NULL;
   rank = 0;
-  position = -1.0f;
-  marked = false;
-  visitState = DFS_WHITE;
-  id = 0;
+  positionRadius = 0.0f;
+  positionAngle = -1.0f;
+  id = aid;
   simulated = false;
   selected = false;
+  zoomLevel = 0;
 }
 
 State::~State() {
+  unsigned int i;
+  for (i = 0; i < outTransitions.size(); ++i) {
+    delete outTransitions[i];
+  }
+  for (i = 0; i < loops.size(); ++i) {
+    delete loops[i];
+  }
 }
 
-void State::addSuperior( State* s )
-{
-  superiors.insert( s );
+void State::addInTransition(Transition* trans) {
+  inTransitions.push_back(trans);
 }
 
-void State::addSubordinate( State* s )
-{
-  subordinates.insert( s );
+void State::addOutTransition(Transition* trans) {
+  outTransitions.push_back(trans);
 }
 
-void State::addComrade( State* s )
-{
-  comrades.insert( s );
+void State::addLoop(Transition* trans) {
+  loops.push_back(trans);
 }
 
-void State::addInTransition( Transition* trans )
-{
-  inTransitions.push_back( trans );
+void State::addMatchedRule(int mr) {
+  matchedRules.insert(mr);
 }
 
-void State::addOutTransition( Transition* trans )
-{
-  outTransitions.push_back( trans );
+//returns true iff an element has actually been removed
+bool State::removeMatchedRule(int mr) {
+  return (matchedRules.erase(mr) > 0);
 }
 
-void State::addLoop( Transition* trans )
-{
-  loops.push_back( trans );
+void State::getMatchedRules(std::vector< int > &mrs) {
+  mrs.assign(matchedRules.begin(),matchedRules.end());
 }
 
-void State::addParameterValue(int valindex) {
-	stateVector.push_back(valindex);
+int State::getNumMatchedRules() {
+  return matchedRules.size();
 }
 
-bool State::isDeadlock() const
-{
-  return ( outTransitions.size() + loops.size() == 0 );
+bool State::isDeadlock() const {
+  return (outTransitions.size() + loops.size() == 0);
 }
 
-bool State::isMarked() const
-{
-  return marked;
-}
-
-void State::mark()
-{
-  marked = true;
-}
-
-void State::unmark()
-{
-  marked = false;
-}
-
-bool State::isSelected() const
-{
+bool State::isSelected() const {
   return selected;
 }
 
-void State::select()
-{
+void State::select() {
   selected = true;
 }
 
-void State::deselect()
-{
+void State::deselect() {
   selected = false;
 }
-
 
 int State::getID() {
 	return id;
@@ -103,159 +91,160 @@ void State::setID(int i) {
 	id = i;
 }
 
-int State::getRank() const
-{
+int State::getRank() const {
   return rank;
 }
 
-void State::setRank( int r )
-{
+void State::setRank(int r) {
   rank = r;
 }
 
-int State::getSlot() const
-{
-  return slot;
+bool State::isCentered() const {
+  return (positionAngle < -0.9f);
 }
 
-void State::setSlot( int s )
-{
-  slot = s;
+void State::center() {
+  positionRadius = 0.0f;
+  positionAngle = -1.0f;
 }
 
-
-float State::getPosition() const
-{
-  return position;
+float State::getPositionAngle() const {
+  return positionAngle;
 }
 
-Point3D State::getPositionAbs() const
-{
+float State::getPositionRadius() const {
+  return positionRadius;
+}
+
+Point3D State::getPositionAbs() const {
   return positionAbs;
 }
 
-Point3D State::getOutgoingControl() const 
-{
+Point3D State::getOutgoingControl() const {
   return outgoingControl;
 }
 
-Point3D State::getIncomingControl() const 
-{
+Point3D State::getIncomingControl() const {
   return incomingControl;
 }
 
-void State::setPosition( float p )
+Point3D State::getLoopControl1() const
 {
-  position = p;
+  return loopControl1;
 }
 
-void State::setPositionAbs(Point3D p)
+Point3D State::getLoopControl2() const
 {
-  positionAbs = p;
+  return loopControl2;
 }
 
-void State::setOutgoingControl(Point3D p) 
-{
+void State::setPositionRadius(float r) {
+  positionRadius = r;
+}
+
+void State::setPositionAngle(float a) {
+  positionAngle = a;
+}
+
+void State::setPositionAbs(Point3D &p) {
+  positionAbs.x = p.x;
+  positionAbs.y = p.y;
+  positionAbs.z = p.z;
+}
+
+void State::setOutgoingControl(Point3D &p) {
   outgoingControl = p;
 }
 
-void State::setIncomingControl(Point3D p) 
-{
+void State::setIncomingControl(Point3D &p) {
   incomingControl = p;
 }
 
-Cluster* State::getCluster() const
+void State::setLoopControl1(Point3D &p)
 {
+  loopControl1 = p;
+}
+
+void State::setLoopControl2(Point3D &p)
+{
+  loopControl2 = p;
+}
+
+
+Cluster* State::getCluster() const {
   return cluster;
 }
 
-void State::setCluster( Cluster* c )
-{
+void State::setCluster(Cluster* c) {
   cluster = c;
 }
 
-void State::getSubordinates( set< State* > &ss ) const
-{
-  ss = subordinates;
+Transition* State::getInTransition(int i) const {
+  return inTransitions[i];
 }
 
-void State::getSuperiors( set< State* > &ss ) const
-{
-  ss = superiors;
+int State::getNumInTransitions() const {
+  return inTransitions.size();
 }
 
-void State::getComrades( set< State* > &ss ) const
-{
-  ss = comrades;
-}
-
-void State::getInTransitions( vector< Transition* > &ts ) const
-{
-  ts = inTransitions;
-}
-
-void State::getOutTransitions( vector< Transition* > &ts ) const
-{
-  ts = outTransitions;
-}
-
-Transition* State::getOutTransitioni( int i ) const
-{
+Transition* State::getOutTransition(int i) const {
   return outTransitions[i];
 }
 
-int State::getNumOutTransitions( ) const 
-{
+int State::getNumOutTransitions() const {
   return outTransitions.size();
 }
 
-void State::getLoops( vector< Transition* > & ls ) const
-{
-  ls = loops;
-}
-
-Transition* State::getLoopi(int i) const 
-{
+Transition* State::getLoop(int i) const {
   return loops[i];
 }
 
-int State::getNumberOfLoops() const
-{
+int State::getNumLoops() const {
   return loops.size();
 }
-void State::clearHierarchyInfo()
-{
-  superiors.clear();
-  subordinates.clear();
-  comrades.clear();
-}
-void State::DFSfinish() {
-  visitState = DFS_BLACK;
-}
 
-void State::DFSclear() {
-  visitState = DFS_WHITE;
-}
-
-void State::DFSvisit() {
-  visitState = DFS_GREY;
-}
-
-
-DFSState State::getVisitState() const {
-  return visitState;
-}
-
-int State::getParameterValue(int parindex) {
-  return stateVector[parindex];
-}
-
-void State::setSimulated(bool simulated)
-{
+void State::setSimulated(bool simulated) {
   this->simulated = simulated;
 }
 
-bool State::isSimulated() const
-{
+bool State::isSimulated() const {
   return simulated;
+}
+
+int State::getZoomLevel() const {
+  return zoomLevel;
+}
+
+
+void State::setZoomLevel(const int level) {
+  zoomLevel = level;
+}
+
+Point3D State::getForce() {
+  return force;
+}
+
+void State::resetForce() {
+  force.x = 0.0f;
+  force.y = 0.0f;
+  force.z = 0.0f;
+}
+
+void State::addForce(Point3D f) {
+  force.x += f.x;
+  force.y += f.y;
+  force.z += f.z;
+}
+
+Vect State::getVelocity() {
+  return velocity;
+}
+
+void State::resetVelocity() {
+  velocity.x = 0.0f;
+  velocity.y = 0.0f;
+}
+
+void State::setVelocity(Vect v) {
+  velocity = v;
 }

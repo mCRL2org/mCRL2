@@ -1,0 +1,15 @@
+% This file describes the modal formulas for property 1 used in section
+% 5.3 of Designing and understanding the behaviour of systems
+% by J.F. Groote and M.A. Reniers.
+
+[!applyBrake*.unlockDock]false
+&&
+[!atOutermost*.unlockDock]false
+&&
+[!motorOff*.unlockDock]false
+&&
+[true*.releaseBrake.!applyBrake*.unlockDock]false
+&&
+[true*.motorLeft.!atOutermost*.unlockDock]false
+&&
+[true*.(motorLeft+motorRight).!motorOff*.unlockDock]false

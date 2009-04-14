@@ -1,22 +1,22 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./bitmappanel.cpp
 
-// --- bitmappanel.cpp ----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "bitmappanel.h"
-
 
 // -- constructors and desctructor ----------------------------------
 
 
 // ---------------------------------------
-BitmapPanel::BitmapPanel( 
+BitmapPanel::BitmapPanel(
     wxWindow* parent,
     wxSize size,
     const char* const* image )
@@ -32,8 +32,8 @@ BitmapPanel::BitmapPanel(
 
     /*
     // load image
-    bitmap = new wxBitmap( 
-        path, 
+    bitmap = new wxBitmap(
+        path,
         wxBITMAP_TYPE_BMP );
     if ( bitmap->Ok() != true )
     {

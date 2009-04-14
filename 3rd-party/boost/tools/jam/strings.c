@@ -16,7 +16,15 @@
 static void assert_invariants( string* self )
 {
     int i;
-    
+
+    if ( self->value == 0 )
+    {
+        assert( self->size == 0 );
+        assert( self->capacity == 0 );
+        assert( self->opt[0] == 0 );
+        return;
+    }
+
     assert( self->size < self->capacity );
     assert( ( self->capacity <= sizeof(self->opt) ) == ( self->value == self->opt ) );
     assert( strlen( self->value ) == self->size );
@@ -49,6 +57,7 @@ void string_free( string* s )
     assert_invariants( s );
     if ( s->value != s->opt )
         BJAM_FREE( s->value );
+    string_new( s );
 }
 
 static void string_reserve_internal( string* self, size_t capacity )
@@ -97,10 +106,10 @@ void string_append( string* self, char const* rhs )
     char* p = self->value + self->size;
     char* end = self->value + self->capacity;
     assert_invariants( self );
-    
+
     while ( *rhs && p != end)
         *p++ = *rhs++;
-    
+
     if ( p != end )
     {
         *p = 0;
@@ -118,10 +127,10 @@ void string_append_range( string* self, char const* start, char const* finish )
     char* p = self->value + self->size;
     char* end = self->value + self->capacity;
     assert_invariants( self );
-    
+
     while ( p != end && start != finish )
         *p++ = *start++;
-    
+
     if ( p != end )
     {
         *p = 0;
@@ -173,7 +182,7 @@ void string_unit_test()
     int limit = sizeof(buffer) > 254 ? 254 : sizeof(buffer);
 
     string_new(s);
-    
+
     for (i = 0; i < limit; ++i)
     {
         string_push_back( s, (char)(i + 1) );
@@ -186,7 +195,7 @@ void string_unit_test()
     }
 
     string_free(s);
-    
+
 }
 #endif
 

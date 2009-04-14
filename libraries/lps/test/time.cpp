@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,16 +12,16 @@
 #include <cstdlib>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
 
-std::string SPECIFICATION = 
+std::string SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"
@@ -58,19 +60,17 @@ std::string SPECIFICATION =
 "    )                                                                      \n"
 "  );                                                                       \n";
 
-int test_main(int, char*[])
+int test_main(int argc, char** argv)
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_ATERM_INIT(argc, argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
-  BOOST_CHECK(lps.is_well_typed()); 
-  BOOST_CHECK(!lps.has_time()); 
+  BOOST_CHECK(lps.is_well_typed());
+  BOOST_CHECK(!lps.has_time());
 
   summand s = lps.summands().front();
-  BOOST_CHECK(!s.has_time()); 
+  BOOST_CHECK(!s.has_time());
 
   return 0;
 }

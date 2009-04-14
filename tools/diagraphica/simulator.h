@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./simulator.h
-
-// --- simulator.h --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef SIMULATOR_H
 #define SIMULATOR_H
@@ -14,10 +14,8 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
-#include <set>
 #include <string>
 #include <vector>
-using namespace std;
 #include <wx/event.h>
 #include <wx/timer.h>
 #include "bundle.h"
@@ -46,7 +44,7 @@ public:
     static ColorRGB getColorBdl();
 
     static int getBlendType();
-    
+
     ColorRGB getColorSel();
     int getIdxClstSel();
 
@@ -57,12 +55,12 @@ public:
     static void setColorBdl( const ColorRGB &col );
 
     static void setBlendType( const int &type );
-    
+
     void setDiagram( Diagram *dgrm );
-    void initFrameCurr( 
+    void initFrameCurr(
         Cluster* frame,
-        const vector< Attribute* > &attrs );
-    void updateFrameCurr( 
+        const std::vector< Attribute* > &attrs );
+    void updateFrameCurr(
         Cluster* frame,
         const Position2D &pos );
     void clearData();
@@ -71,25 +69,25 @@ public:
 
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
     void handleMouseLeaveEvent();
 
@@ -102,42 +100,42 @@ public:
 
 protected:
     // -- utility functions -----------------------------------------
-    void initAttributes( const vector< Attribute* > &attrs );
+    void initAttributes( const std::vector< Attribute* > &attrs );
     void initFramesPrevNext();
     void initBundles();
     void sortFramesPrevNext();
-    
+
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
     void calcIntervals();
     void calcPositions();
     void calcPosFrames();
     void calcPosBundles();
-    
+
     void handleKeyUp();
     void handleKeyRgt();
     void handleKeyDwn();
     void handleKeyLft();
     void markFrameClusts();
-    
+
     void clearAttributes();
     void clearDiagram();
     void clearFrames();
     void clearBundles();
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
-    void processHits( 
-        GLint hits, 
+    void handleHits( const std::vector< int > &ids );
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- utility drawing functions ---------------------------------
     void clear();
-    void calcColor( 
+    void calcColor(
         const int &iter,
         const int &numr,
         ColorRGB &col );
-    
+
     void drawFrameCurr( const bool &inSelectMode );
     void drawFramesPrev( const bool &inSelectMode );
     void drawFramesNext( const bool &inSelectMode );
@@ -147,12 +145,12 @@ protected:
     void drawBundlesNext( const bool &inSelectMode );
     void drawControls( const bool &inSelectMode );
     void animate();
-    
+
     // -- utility event handlers ------------------------------------
     void onTimer( wxTimerEvent &e );
-    
+
     // -- static variables ------------------------------------------
-    
+
     static ColorRGB colClr;
     static ColorRGB colTxt;
     static int      szeTxt;
@@ -177,22 +175,22 @@ protected:
         ANIM_POS,
         ANIM_BLEND,
         ID_CLEAR,
-        ID_DIAGRAM_MORE,
+        ID_DIAGRAM_MORE
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
+    std::vector< Attribute* > attributes; // association
 
     Cluster* frameCurr;            // composition
-    vector< Cluster* > framesPrev; // composition
-    vector< Cluster* > framesNext; // composition
-    vector< Bundle* >  bundles;    // composition
-    
-    vector< Bundle* >  bundlesByLbl;
-    vector< Bundle* >  bundlesPrevByLbl;
-    vector< Bundle* >  bundlesNextByLbl;
-    
+    std::vector< Cluster* > framesPrev; // composition
+    std::vector< Cluster* > framesNext; // composition
+    std::vector< Bundle* >  bundles;    // composition
+
+    std::vector< Bundle* >  bundlesByLbl;
+    std::vector< Bundle* >  bundlesPrevByLbl;
+    std::vector< Bundle* >  bundlesNextByLbl;
+
     static int itvLblPixVert;
     double scaleDgrmHori;
     double scaleDgrmVert;
@@ -207,29 +205,29 @@ protected:
     int fcsLblNextIdx;
 
     Position2D posFrameCurr;
-    vector< Position2D > posFramesPrev;
-    vector< Position2D > posFramesNext;
-    
-    vector< Position2D > posBdlLblGridPrevTopLft;
-    vector< Position2D > posBdlLblGridPrevBotRgt;
-    vector< Position2D > posBdlLblGridNextTopLft;
-    vector< Position2D > posBdlLblGridNextBotRgt;
+    std::vector< Position2D > posFramesPrev;
+    std::vector< Position2D > posFramesNext;
 
-    vector< vector< Position2D > > posBundlesPrevTopLft;
-    vector< vector< Position2D > > posBundlesPrevBotRgt;
-    vector< vector< Position2D > > posBundlesNextTopLft;
-    vector< vector< Position2D > > posBundlesNextBotRgt;
-    
+    std::vector< Position2D > posBdlLblGridPrevTopLft;
+    std::vector< Position2D > posBdlLblGridPrevBotRgt;
+    std::vector< Position2D > posBdlLblGridNextTopLft;
+    std::vector< Position2D > posBdlLblGridNextBotRgt;
+
+    std::vector< std::vector< Position2D > > posBundlesPrevTopLft;
+    std::vector< std::vector< Position2D > > posBundlesPrevBotRgt;
+    std::vector< std::vector< Position2D > > posBundlesNextTopLft;
+    std::vector< std::vector< Position2D > > posBundlesNextBotRgt;
+
     // animation
     static int itvTmrMS;
     static double pixPerMS;
     double timeTotalMS;
     double timeAlphaMS;
     int animPhase;
-    
+
     wxTimer* timerAnim;
-    bool animating;  
-    
+    bool animating;
+
     Cluster* keyFrameFr;
     Cluster* keyFrameTo;
     Position2D posKeyFrameFr;
@@ -241,7 +239,7 @@ protected:
     double opacityKeyFrameTo;
 
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

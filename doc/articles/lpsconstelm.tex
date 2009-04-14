@@ -36,7 +36,7 @@
 
 \newcommand{\tab}{\hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
 
-\font \aap cmmi10        
+\font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 \newcommand{\csvs}{new\_state\_vector\_set}
@@ -69,17 +69,17 @@ will write the output to an output file \ti{output.lps} (in the \ti{.lps} format
 
 \section{Definitions} \label{sec:def}
 
-The equation below is a \lps\ in \mcrl : 
+The equation below is a \lps\ in \mcrl :
 \begin{defn}\lps\ (LPS) \newline
 %\at werkt niet
 \begin{tabbing}
 \tab
-$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} c_i ( \ovr{d, e_i }) \rightarrow 
+$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} c_i ( \ovr{d, e_i }) \rightarrow
 (a_i^1 (\ovr{f_{i,1}}(\ovr{d,e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d,e_i}))) \at \text{ } t_i(\ovr{d,e_i})  \cdot X(\ovr{g_i}(\ovr{d,e_i})) +$ \\ \\
-\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} c_j ( \ovr{d, e_j} ) \rightarrow 
+\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} c_j ( \ovr{d, e_j} ) \rightarrow
 (a_j^1 (\ovr{f_{j,1}}(\ovr{d,e_j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{d,e_j}))) \at \text{ } t_j(\ovr{d,e_j}) + $ \\ \\
-\> \> \> $\sum_{\ovr{e_\delta:E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow 
-\delta \at \text{ } t_\delta(\ovr{d,e_\delta})$ 
+\> \> \> $\sum_{\ovr{e_\delta:E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow
+\delta \at \text{ } t_\delta(\ovr{d,e_\delta})$
 \end{tabbing}
 
 Where $I$ and $J$ are disjoint.\\
@@ -90,14 +90,14 @@ Where $I$ and $J$ are disjoint.\\
 \begin{displaymath}
 X (\ovr{d:D}) = \sum_{i \in I} \sum_{\ovr{e_i:E_i}} c_i ( \ovr{d, e_i}) \rightarrow X(\ovr{g_i}(\ovr{d,e_i}))
 \end{displaymath}\\
-If we talk about an LPS in this article we refer to Definition \ref{def:LPS}.  The different states 
-%are $\ovr{d}$ 
-of a process are represented by the data vector parameter $\ovr{d: D}$. Type $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ is of a tuple $(d_1, \ldots, d_n)$. 
+If we talk about an LPS in this article we refer to Definition \ref{def:LPS}.  The different states
+%are $\ovr{d}$
+of a process are represented by the data vector parameter $\ovr{d: D}$. Type $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ is of a tuple $(d_1, \ldots, d_n)$.
 Let $x \in \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$. The $x^{th}$ element in the tuple is notated: $\ovr{d}._x$.
-The LPS expresses that in state $\ovr{d}$ %it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and 
+The LPS expresses that in state $\ovr{d}$ %it preforms action $a$, carrying data parameter $\ovr{f_i}(\ovr{d},e_i)$ and
 it can reach the new state $\ovr{g_i}(\ovr{d,e_i})$ under the condition that $c_i(\ovr{d,e_i})$ is \ti{true}. So, for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$.
-% Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to let a action range over a data domain. 
-If we want to speak about a specific statespace, which is generated from an LPS, we can instantiate this state space with the initial state $X(\ovr{v_0})$. 
+% Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to let a action range over a data domain.
+If we want to speak about a specific statespace, which is generated from an LPS, we can instantiate this state space with the initial state $X(\ovr{v_0})$.
 
 \noindent For an more detailed explanation of \lps s  we refer to \cite{LPS_info}.
 \end{defn}
@@ -109,18 +109,18 @@ If a parameter at a certain state does not influence the behavior of an LPS at t
 
 \subsection{Assumptions}
 We make certain assumptions about \ti{free variables} which occur in an LPS, otherwise reasoning about LPS's would be to complicated. The first assumption is that the value of these variables will not influence the behavior of the LPS. Another assumption is that \ti{free variables} only occur once in an LPS. Therefore each \ti{free variable} is unique.
-Also we assume that each value of a state is either a closed term or a free variable. 
- 
-For further reading about \lps\ and free variables please refer to \cite{LPSfreevar} 
+Also we assume that each value of a state is either a closed term or a free variable.
+
+For further reading about \lps\ and free variables please refer to \cite{LPSfreevar}
 
 \section{lpsconstelm definition}\label{subsec:lpsdef}
 \subsection{lpsconstelm definition - without free variables}
 
 In this definition we do not consider free variables.
 A parameter of an LPS can be replaced by its initial value if it can be determined that this parameter remains constant throughout the run of any trace, starting at the initial state. The elimination of constant parameters does not reduce the resulting state space, however it may reduce the time and space needed to for example generate a state space from an LPS. \\
-If we have infinite time and space we can inspect each state and check whether a \pp\ changes throughout the execution of the process. For this we define the reachable state set $R$ for each state ($\ovr{v_0}$). 
+If we have infinite time and space we can inspect each state and check whether a \pp\ changes throughout the execution of the process. For this we define the reachable state set $R$ for each state ($\ovr{v_0}$).
 
-\begin{defn} Let $L$ be an LPS, where: \\ 
+\begin{defn} Let $L$ be an LPS, where: \\
 \begin{itemize}
 \item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$.
 \end{itemize}
@@ -143,7 +143,7 @@ To get $S_L(\ovr{v_0})$ we have to compute $R_L(\ovr{v_0})$. This means we have 
 
 A \pp\ of an LPS can be replaced by its constant value if it can be determined that this parameter remains constant throughout any run of the process, starting at the initial state. However if a \pp\ is initially a free variable and the \pp\ remains constant, the specific assigned value or the initial \ti{free variable} value is used.\\
 
-We define the reachable state set $R^{FV}$ for each state ($\ovr{v_0}$). 
+We define the reachable state set $R^{FV}$ for each state ($\ovr{v_0}$).
 \begin{defn} Let $L$ be an LPS, where\begin{itemize}
 \item $I$ is the set of summand indices, \\ $\ovr{E_i}$ is the set of sum variables of summand $i$, \\ $c_i$ is the condition function of summand $i$ and \\ $\ovr{g_i}$ is the next state function of summand $i$. \\
 $FV$ is the set of \ti{free variables} occurring in $L$.\\
@@ -165,11 +165,11 @@ $S_L^{FV}(\ovr{v_0}) = \lbrace j \in  \lbrace 1, \ldots, n \rbrace \vert \forall
 To get $S_L^{FV} (\ovr{v_0})$ we have to compute $R_L^{FV}(\ovr{v_0})$, and this means we have to generate the entire state space starting from state $\ovr{v_0}$. However we interested in an approximation. We take proposal 3 (Section \ref{def:sug3}) as a starting point for constructing Proposal 4 (Section \ref{def:sug4}).
 
 \section{Proposals}
-In this section we speak about different techniques to find an algorithm that find as many constant \pps\ in polynomial time. These proposals are all estimations, so we can reduce complexity of the given definitions in Section \ref{subsec:lpsdef}. Each proposal contains a small description, which describes how a certain proposal was born. 
+In this section we speak about different techniques to find an algorithm that find as many constant \pps\ in polynomial time. These proposals are all estimations, so we can reduce complexity of the given definitions in Section \ref{subsec:lpsdef}. Each proposal contains a small description, which describes how a certain proposal was born.
 
 \subsection{Proposal 1 - without free variables} \label{sec:prop1}
-Because variables can occur in non-normal forms we introduce a form function which allows us to take the normal form of such a data term. 
-We write $NF(t)$ for the normal form of data term $t$. 
+Because variables can occur in non-normal forms we introduce a form function which allows us to take the normal form of such a data term.
+We write $NF(t)$ for the normal form of data term $t$.
 Let $j \in \lbrace 1, \ldots,  n \rbrace $ and let $\ovr{d}$ be state vector. We assume $\ovr{d}._j$ is a normal form. If $\ovr{d}._j$ is equal to $NF(\ovr{g_i}(\ovr{d,e_i})._j)$ for all $i \in I$ we know argument at position $j$ is constant. Each summand has a condition $c_i$. If a condition $c_i(\ovr{d, e_i})$ does not hold, the next state $X(\ovr{g_i}(\ovr{d, e_i}))$ can not be reached. This is why we omit comparing each \pp\ in $\ovr{d} $ with such a $X(\ovr{g_i}(\ovr{d, e_i}))$.
 
  However some conditions $NF(c_i(\ovr{d,e_i}))$ might never be \ti{true}, so it useless to compare $NF(\ovr{d}._j)$ with $NF(\ovr{g_i}(\ovr{d,e_i})._j)$  if $NF(c_i(\ovr{d,e_i}))$ is not  $"true"$. \\
@@ -177,7 +177,7 @@ Let $j \in \lbrace 1, \ldots,  n \rbrace $ and let $\ovr{d}$ be state vector. We
 \begin{defn} \label{def:sug1} Let $L$ be an LPS and we define $S_L^1$:
 \begin{displaymath}
 S_L^1 =
-\lbrace   
+\lbrace
 j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (\forall_{\ovr{d}: \ovr{D}}((NF(c_i(\ovr{d,e_i})) = "true")  \Rightarrow (NF(\ovr{d}._j) = NF(\ovr{g_i}(\ovr{d,e_i})._j))))\rbrace
 \end{displaymath}
 If we take a look at Example \ref{cexample:sug1}, we see it might be possible to improve our proposal to detect more constant \pps .
@@ -206,19 +206,19 @@ we don't want to inspect all possible $\ovr{d}$'s. We want to inspect it for a s
 \end{defn}
 
 \subsection{Proposal 2 - without free variables}
-In Section \ref{sec:prop1} we see that Definition \ref{def:sug1} can be improved, if we can give a specific $\ovr{d}$. We try to improve that approximation, by giving $\ovr{d}$ a specific value in $S_L^2$. So we define: 
+In Section \ref{sec:prop1} we see that Definition \ref{def:sug1} can be improved, if we can give a specific $\ovr{d}$. We try to improve that approximation, by giving $\ovr{d}$ a specific value in $S_L^2$. So we define:
 
 \begin{defn}\label{def:sug2}  Let $L$ be an LPS
 \begin{displaymath}
 S_L^2(\ovr{d})=
-\lbrace   
+\lbrace
 j \in \lbrace 1, \ldots , n \rbrace \vert \forall_{i\in I} (NF(c_i(\ovr{d,e_i})) = "true") \Rightarrow \ovr{d}._j = NF(\ovr{g_i}(\ovr{d,e_i})._j)))\rbrace
 \end{displaymath}
-%We elimate the problem for checking each state 
+%We elimate the problem for checking each state
 We now can "instantiate" the $S^2$ with a $\ovr{d}$. If we instantiate $S^2$ with $\ovr{v_0}$, there is a problem. If we take a look at Example \ref{cexample:sug2}, we can see why:
 
-\begin{example} Let $E2$ be\label{cexample:sug2}\begin{verbatim} 
- 
+\begin{example} Let $E2$ be\label{cexample:sug2}\begin{verbatim}
+
 proc P(x,y: Nat) = (x=0) -> P(x:= 1, y:= 0) +
                    (x=1) -> P(x:= x, y:= 1);
 init P(x := 0, y:= 0);
@@ -245,7 +245,7 @@ If we use Definition \ref{def:sug2}, we get:
 \> \> \> $("false" \Rightarrow  \langle  0,  0\rangle._j = NF(\ovr{g_{2}}( \langle  0,  0\rangle)._j))$ \\
 \> \> $\rbrace $\\
 \> $\equiv$ \\
-\> \> $\lbrace j \in \lbrace 1, 2 \rbrace \vert 
+\> \> $\lbrace j \in \lbrace 1, 2 \rbrace \vert
 \langle  0,  0\rangle._j = NF(\ovr{g_1}( \langle  0,  0\rangle)._j)
 \rbrace $\\
 \> $\equiv$\\
@@ -262,7 +262,7 @@ $S_{E2}^2(\langle 0,0 \rangle) = \lbrace 2 \rbrace$. This indicates that the sec
 \subsection{Proposal 3 - without free variables}
 To overcome the problem in which only the states adjacent to the initial state are compared, we suggest this proposal. First we redefine when the next state of summands should compared to the initial state. So if we have a condition and the condition is an open term, it might be that this condition will not reduce to a normal form which is either \ti{true} or \ti{false}. In such a case, there might be an valuation of the variables in the condition for which the condition holds. If this is the case we know the condition of a particular summand might be \ti{true}, so the corresponding next state should be inspected. The summands for which the conditions are \ti{false} are not inspected. \\
 
-\begin{defn}[$\bot$] Let $x$ be a \pp . We define $\bot$ to be the value of \pp\ $x$, if $x$ is not constant. 
+\begin{defn}[$\bot$] Let $x$ be a \pp . We define $\bot$ to be the value of \pp\ $x$, if $x$ is not constant.
 \end{defn}
 
 We are interested in the largest subset of constant \pps\ so:
@@ -277,8 +277,8 @@ If $j \in X$ then $\otimes_X(\ovr{d})._j = \ovr{d}._j$.\\
 
 In order find the largest subset we give:
 
-\begin{defn} \label{def:sug3} Let $L$ be an LPS. We define: $ S_L^3(\ovr{v_0}) \subseteq \lbrace 1, \ldots, n \rbrace $ 
- as the biggest possible set such that:\\ 
+\begin{defn} \label{def:sug3} Let $L$ be an LPS. We define: $ S_L^3(\ovr{v_0}) \subseteq \lbrace 1, \ldots, n \rbrace $
+ as the biggest possible set such that:\\
 \begin{tabbing}
 \tab
 \> $\forall_{i \in I} (NF( c_i ( \ovr{\otimes_{S_L^3}(\ovr{v_0}), e_i} ) ) \not= "false" \Rightarrow \forall_{j \in S_L^3}(\ovr{v_0}._j =  NF( \ovr{g_i}(\ovr{\otimes_{S_L^3}(\ovr{v_0}), e_i} )._j))) $
@@ -287,7 +287,7 @@ In order find the largest subset we give:
 
 \begin{thm} Let $L$ be an LPS and $\ovr{d}$ a vector of \pps \label{thm:sub}
 $$S_L^3(\ovr{d}) \subseteq S_L(\ovr{d}) $$
-\end{thm} 
+\end{thm}
 \begin{flushleft}
 
 \begin{defn}[$@$] Let $\ovr{d} = (d_1, \dots d_n)$, let $j \in \lbrace 1, \ldots , \vert \ovr{d} \vert \rbrace$ and let $x$ be a value.\\
@@ -298,7 +298,7 @@ $\ovr{d}@_j(x)$ is defined as the substitution of the $j^{th}$ element of $\ovr{
 % $\ovr{\Bbb{D}}._j$ is defined as the domain of the $j^{th}$ element in vector $\ovr{d}$.
 % \end{defn}
 
-\begin{defn}[$\varphi(\ovr{d},X)$] 
+\begin{defn}[$\varphi(\ovr{d},X)$]
 $\varphi$ is a function of $\ovr{D} \times \mathcal{P}(Nat) \rightarrow \mathcal{P}(\ovr{D})$:
 \begin{displaymath}
     \varphi(\ovr{d},X) = \left \{
@@ -318,10 +318,10 @@ We do case distinction on $S_L^3(\ovr{v_0})$:\\
 
 \item[-] Let $S_L^3(\ovr{v_0})$ be empty, then $S_L^3(\ovr{v_0}) \subseteq S_L(\ovr{v_0})$ holds trivially.
 \item[-] Let $S_L^3(\ovr{v_0})$ not be empty. We prove that if there is an element in $S_L^3(\ovr{v_0})$, then this element is also in $S_L(\ovr{v_0})$. \\ \tmp
-\tmp $ j \in S_L^3(\ovr{v_0})$ \\ 
-\tmp $ \equiv $ \hspace{20pt} $\lbrace$ Def \ref{def:sug3} of $S_L^3 \rbrace$ \\ 
+\tmp $ j \in S_L^3(\ovr{v_0})$ \\
+\tmp $ \equiv $ \hspace{20pt} $\lbrace$ Def \ref{def:sug3} of $S_L^3 \rbrace$ \\
 \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I}(NF(c_i(\ovr{\otimes_{S_L^3}(\ovr{v_0}), e_i})) \neq false \Rightarrow \ovr{v_0}._k = NF(\ovr{g_i}(\otimes_{S_L^3}(\ovr{v_0}), e_i)._k) ) \rbrace$ \\
-\tmp $ \equiv $ \hspace{20pt} $\lbrace$ Property of $\ovr{\otimes_{S_L^3}(\ovr{v_0},e_i})\rbrace$ \\ 
+\tmp $ \equiv $ \hspace{20pt} $\lbrace$ Property of $\ovr{\otimes_{S_L^3}(\ovr{v_0},e_i})\rbrace$ \\
 \tmp $ j \in \lbrace k \in \lbrace 1, \ldots, n \rbrace \vert \forall_{i \in I, \ovr{e_i} \in \ovr{E_i}}(\forall_{\ovr{x} \in
  \varphi(\ovr{v_0},S_L^3)
 }(c_i(\ovr{x, e_i}) \Rightarrow \ovr{v_0}._k = \ovr{g_i}(\ovr{x, e_i})._k )) \rbrace$\\
@@ -339,17 +339,17 @@ We do case distinction on $S_L^3(\ovr{v_0})$:\\
 
 \begin{example}\label{example:proof3}
 Let $S = \lbrace 1, 2 \rbrace$.
-We have $\ovr{z} = (1, 5, 3)$. 
+We have $\ovr{z} = (1, 5, 3)$.
 % We know because of $S$ that the $3^{th}$ element is not constant and therefore is $\bot$.
 % So we redefine to $z$ to be $(1, 5, \bot)$.
 % The $3^th$ element of the vector is of type $\lbrace 1, 2, 3, 4\rbrace$, so $\bot : \lbrace 1, 2, 3, 4 \rbrace$.
 The values of the $3^{th}$ vector can range between 1 and 4.
 If we want to map this vector to a statespace, knowing that the first and the second are
-constant is, we get the following state space: 
+constant is, we get the following state space:
 $$  \varphi(\ovr{v_0},S_L^3) = \lbrace (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4) \rbrace$$
-which is a maximal statespace. 
-If we have $R_L(\ovr{z})$ (and we know this is reachable set is minimal) the maximal space space genarated would be 
-$\lbrace (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4) \rbrace$ and a minimal set might be $\lbrace (1, 5, 1), (1, 5, 4) \rbrace$. 
+which is a maximal statespace.
+If we have $R_L(\ovr{z})$ (and we know this is reachable set is minimal) the maximal space space genarated would be
+$\lbrace (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4) \rbrace$ and a minimal set might be $\lbrace (1, 5, 1), (1, 5, 4) \rbrace$.
 So:
 $R_L(\ovr{z}) \subseteq \lbrace (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 5, 4) \rbrace =  (1, 5, \bot) = \ovr{z} $\\
 \end{example}
@@ -375,13 +375,13 @@ Let $X \subseteq \lbrace 1, \ldots, n \rbrace$ of constant \pps\ of an LPS:
 
 \newcommand{\z}{(\ovr{\otimes_{S_L^4}^{FV}(\ovr{v_0}),e_i})}
 
-\noindent In order find the largest subset we give: % to the following definition: 
+\noindent In order find the largest subset we give: % to the following definition:
 \begin{defn} \label{def:sug4} Let $L$ be an LPS. We define $S_L^4$:
 \begin{tabbing}
 \tab
 $ S_L^4(\ovr{v_0}) \subseteq \lbrace 1 \ldots n  \rbrace $ \\ \\
 is the biggest subset, for which holds:\\
-% \> $\forall_{i \in I }($ \\ 
+% \> $\forall_{i \in I }($ \\
 \> $\forall_{j \in S^L_4(\ovr{v_0})}($\\
 % \> \> \> $ c_i\z \neq false \Rightarrow $ \\
 \> \>$NF(\ovr{v_0}._j) \not\in FV \Rightarrow $\\
@@ -394,7 +394,7 @@ is the biggest subset, for which holds:\\
 \> \>$ \exists_k(\forall_{i \in I} (NF(c_i\z) \neq \text{false } \wedge $\\
 \> \>$ NF(\ovr{g_i}\z._j) \not\in FV \Rightarrow $ \\
 \> \> \> $ NF(\ovr{g_i}\z._j)= k)$\\
-\> \> $)$\\ 
+\> \> $)$\\
 % \> \> \> $)$ \\
 \> $)$\\
 % \> $)$ \\
@@ -403,9 +403,9 @@ is the biggest subset, for which holds:\\
 \end{defn}
 
 If we compare Definition \ref{def:sug4} to Definition \ref{def:lps_comp_fv} we see that Theorem \ref{thm:sub_fv} holds :
-\begin{thm}\label{thm:sub_fv} Let $L$ be an LPS and $\ovr{d}$ a vector op \pps . 
+\begin{thm}\label{thm:sub_fv} Let $L$ be an LPS and $\ovr{d}$ a vector op \pps .
 $$S_L^4(\ovr{d}) \subseteq S_L^{FV}(\ovr{d}) $$
-\end{thm} 
+\end{thm}
 % \begin{flushleft}
 % We do case distinction on $S_L^3(\ovr{init})$:\\
 % \tb{Proof. \ref{thm:sub_fv}}
@@ -431,10 +431,10 @@ First the \sv\ is constructed from the initial process of the \lps. Next the set
 We keep on removing elements from $S$ until no more elements can be removed. Removing the elements is done as follows:
 First we fill in all values of the \pps , for which the index is in $S$, into the conditions. Next all conditions are rewritten and compared to \ti{false}.
 
-If the rewritten condition, in its normal form, is different from \ti{false} the condition might be \ti{true}, thus we calculate the nextstate of the current summand.  We compare each element from the \sv\ with the nextstate vector for which the indices are in $S$. If an element is not equal, the corresponding index is removed from the set $S$. 
-At value at the removed index of the \sv\ is replaced by $\bot$. 
+If the rewritten condition, in its normal form, is different from \ti{false} the condition might be \ti{true}, thus we calculate the nextstate of the current summand.  We compare each element from the \sv\ with the nextstate vector for which the indices are in $S$. If an element is not equal, the corresponding index is removed from the set $S$.
+At value at the removed index of the \sv\ is replaced by $\bot$.
 
-If no elements are removed from $S$ during the iteration, there are either no more constant \pps\ or all \pps\ are constant. If this is the case we stop the iteration. Next all occurrences in of constant \pps\ are substituted with their constant values and are constant \pps\ are removed form the list of \pps\ from the LPS. 
+If no elements are removed from $S$ during the iteration, there are either no more constant \pps\ or all \pps\ are constant. If this is the case we stop the iteration. Next all occurrences in of constant \pps\ are substituted with their constant values and are constant \pps\ are removed form the list of \pps\ from the LPS.
 
 \subsection{with free variables}
 Before describing the algorithm informally we define some rules which should hold when we use \ti{free variables}. The set  $S$ is again the set of indices of constant \pps .
@@ -457,11 +457,11 @@ If no constant \pps\ can be removed, the algorithm ends. However it is possible 
 If all \pps\ of all nextstates are equal\footnote{with respect to the extended rules on \ti{free variables}} to the current state, then there are no fake constant \pps . If the pass detects a \pp\ which is not the same in the nextstate as in the current state, the algorithm starts over with:
 \begin{itemize}
 \item $S$ without the indices of found fake constant \pps .
-\item All the \pps\ which are fake constant \pps\ are substituted with the value $\bot$. 
+\item All the \pps\ which are fake constant \pps\ are substituted with the value $\bot$.
 \end{itemize}
 If the "Free Variable Checkup" does not find fake constants the algorithm ends.
 
-\begin{example}\label{freevarcheckup} This LPS contains fake constant \pps .  $FV_x$ indicates the $x^{th}$ element in the set of $FV$. 
+\begin{example}\label{freevarcheckup} This LPS contains fake constant \pps .  $FV_x$ indicates the $x^{th}$ element in the set of $FV$.
 \begin{tabbing}
 \tabw
 \tb{act} \> a; \\
@@ -494,9 +494,9 @@ In this part we only describe the difference between the algorithm without \ti{f
               \STATE $R := R \setminus \lbrace j \rbrace$
           \ELSIF{$otherwise$}
               \STATE $skip$
-          \ENDIF 
+          \ENDIF
         \ENDFOR
-    \ENDFOR 
+    \ENDFOR
   \ENDWHILE
 \RETURN $S$
 \end{algorithmic}
@@ -518,7 +518,7 @@ In this part we only describe the difference between the algorithm without \ti{f
           \IF{$ curr._j \in FV$}
             \IF{$ g_i(curr)._j \not\in FV $}
               \STATE $ curr._j := g_i(curr)._j $
-              \IF{$ curr._j = \bot $} 
+              \IF{$ curr._j = \bot $}
                 \STATE $R:= R \setminus \lbrace j \rbrace $
 	      \ENDIF
             \ELSIF{$ g_i(curr)._j \in FV $}
@@ -531,9 +531,9 @@ In this part we only describe the difference between the algorithm without \ti{f
             \ELSIF{$ (g_i(curr)._j = curr._j) \vee (g_i(curr)._j \in FV)$}
               \STATE $skip$
             \ENDIF
-          \ENDIF 
+          \ENDIF
         \ENDFOR
-    \ENDFOR 
+    \ENDFOR
   \ENDWHILE \newline
   \algorithmiccomment{Free Variable Checkup}
   \FORALL{$ j \in R $}
@@ -574,16 +574,16 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case1.mcrl2"
 \tb{init} \> P(0);\\
 
 \line(1,0){120}\\
-\ti{Result} 
+\ti{Result}
 \> All occurrences of i should be substituted by 0 and i should be removed from the list of \\
-\> \pps . \\ 
+\> \pps . \\
 \end{tabbing}
 
 \subsection*{Case 2}
 inputfile: \verb"$DIR$/tests/lpsconstelm/case2.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} 
+\ti{info}
 \> This case is designed to detect if the \tool\ can detect a simple non constant \\
 \> \pp .\\
 \line(1,0){120}\\
@@ -592,14 +592,14 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case2.mcrl2"
 \tb{init} \> P(0);\\
 \line(1,0){120}\\
 \ti{Result} \> $i$ is not constant, therefor $i$ should not be substituted and removed. The LPS \\
-\> remains the same. \\ 
+\> remains the same. \\
 \end{tabbing}
 
 \subsection*{Case 3}
 inputfile: \verb"$DIR$/tests/lpsconstelm/case3.mcrl2"
 \begin{tabbing}
 \tabw
-\ti{info} 
+\ti{info}
 \> This case is designed to detect if the \tool\ can detect a simple non constant \\
 \> and a simple constant \pp .\\
 \line(1,0){120}\\
@@ -608,7 +608,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case3.mcrl2"
 \tb{init} \> P(0,5);\\
 \line(1,0){120}\\
 \ti{Result} \> $i$ is not constant, $i$ is not constant.$i$ is not to be removed, occurrences of \\
-\> $j$ should be substituted by 5 and $j$ should be removed from the list of \pps .\\ 
+\> $j$ should be substituted by 5 and $j$ should be removed from the list of \pps .\\
 \end{tabbing}
 
 \subsection*{Case 4}
@@ -623,7 +623,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case4.mcrl2"
           \>             \>   \> false $\rightarrow$ action(j).P(i+1, j+1);\\
 \tb{init} \> P(0,5);\\
 \line(1,0){120}\\
-\ti{Result} 
+\ti{Result}
 \> \verb"-": \> \> Only the fist summand is not false, therefor $j$ is constant and $i$ \\
 \> \> \> is not constant. All occurrences of $j$ should be substituted by 5 and \\
 \> \> \> $j$ should be removed from the list of \pps. Only the \\
@@ -651,7 +651,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case5.mcrl2"
 \tb{proc} \>  P(i : Nat, j : Singleton ) = true $\rightarrow$ action(i). P(i+1,j); \\
 \tb{init} \>  P(0,x); \\
 \line(1,0){120}\\
-\ti{Result} \> 
+\ti{Result} \>
 \verb"-": \> \> $j$ is found to be constant, so all occurrences of $j$ are substituted  \\
 \> \> \> by the value $x$\\
 \> \verb"-no-singleton" : \> \> "Singleton" has only one constructor. So all \pps\  \\
@@ -693,24 +693,24 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case7.mcrl2"
 \ti{Result} \> \verb"-": \> \> If no argument is used, all the conditions are false. So $s3, j$ and $i$ are \\
 \> \> \>  marked constant. All occurrences are substituted and removed from \\
 \> \> \> the list of \pps .\\
-\> \verb"-no-condition": \> \> If this argument is used only $j$ will be marked constant. All \\ 
+\> \verb"-no-condition": \> \> If this argument is used only $j$ will be marked constant. All \\
 \> \> \> occurrences of $j$ are substituted by 0 and $j$ is removed from the \\
 \> \> \> list of \pps .\\
 \line(1,0){120}\\
 \ti{Generated LPS} \\
-\>  \verb" var  freevar,freevar0: Nat;"\\                            
-\>  \verb" proc P(s3: Pos, j,i: Nat) = "\\                           
-\>  \verb"        (s3 == 2) ->          "\\                          
-\>  \verb"          action(i) .          "\\                         
-\>  \verb"          P(s3 := 2, j := freevar0)"\\                     
-\>  \verb"      + (s3 == 1 && 5 < i ) ->      "\\                    
-\>  \verb"          action(i) .               "\\                    
-\>  \verb"          P(s3 := 1, i := i + 1)  "\\                      
-\>  \verb"      + (s3 == 1 && i == 5) ->   "\\                       
-\>  \verb"          action(j) .          "\\                         
-\>  \verb"          P(s3 := 2, j := freevar, i := j);"\\             
-\>  \verb"                 "\\                                       
-\>  \verb" init P(s3 := 1, j := 0, i := 0);"\\  
+\>  \verb" var  freevar,freevar0: Nat;"\\
+\>  \verb" proc P(s3: Pos, j,i: Nat) = "\\
+\>  \verb"        (s3 == 2) ->          "\\
+\>  \verb"          action(i) .          "\\
+\>  \verb"          P(s3 := 2, j := freevar0)"\\
+\>  \verb"      + (s3 == 1 && 5 < i ) ->      "\\
+\>  \verb"          action(i) .               "\\
+\>  \verb"          P(s3 := 1, i := i + 1)  "\\
+\>  \verb"      + (s3 == 1 && i == 5) ->   "\\
+\>  \verb"          action(j) .          "\\
+\>  \verb"          P(s3 := 2, j := freevar, i := j);"\\
+\>  \verb"                 "\\
+\>  \verb" init P(s3 := 1, j := 0, i := 0);"\\
 \end{tabbing}
 \newpage
 \subsection*{Case 8}
@@ -718,7 +718,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case8.mcrl2"
 \begin{tabbing}
 \tabw
 \ti{info} \> This case is designed to show the short comings of the algorithm. The \tool \ \\
-	\> cannot detect equality of ($i$==5). It will detect that $i$ does not stay constant. \\ 
+	\> cannot detect equality of ($i$==5). It will detect that $i$ does not stay constant. \\
 \tb{act} \> action: Nat;\\
 \tb{proc} \> X(i: Nat)   = \>  (i \verb"<"  5) $\rightarrow$ action(i).X(i+1) +\\
            \>        \> (i == 5) $\rightarrow$ action(i).Y(i, i);\\
@@ -759,7 +759,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case8.mcrl2"
 % \> the argument \verb"-no-condition" is used.\\
 % \line(1,0){120}\\
 % \ti{Result} \> Only \pp\ $y$ is  not constant. $x$ is a fake constant. \\
-% \> So only \pp\ $y$ is subsituted with 2 and is removed from the list of \\ 
+% \> So only \pp\ $y$ is subsituted with 2 and is removed from the list of \\
 % \> \pps . \\
 % \line(1,0){120}\\
 % \ti{Generated LPS} \\
@@ -782,7 +782,7 @@ inputfile: \verb"$DIR$/tests/lpsconstelm/case8.mcrl2"
 % \end{tabbing}
 
 \newpage
-\begin{thebibliography}{99}  
+\begin{thebibliography}{99}
    \bibitem{LPS_info} unknown author \\
      \textit{Article not ready at the moment},
    \bibitem{LPSframework} J.W. Wesselink,

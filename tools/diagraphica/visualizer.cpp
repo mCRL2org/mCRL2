@@ -1,13 +1,16 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./visualizer.cpp
 
-// --- visualizer.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
+#include "wx.hpp" // precompiled headers
 
+#include <iostream> // only temporary for std::clog
 
 #include "visualizer.h"
 
@@ -16,7 +19,7 @@
 
 
 // --------------------
-Visualizer::Visualizer( 
+Visualizer::Visualizer(
     Mediator* m,
     Graph* g,
     GLCanvas* c )
@@ -68,6 +71,31 @@ void Visualizer::setClearColor(
     clearColor.a = 1.0;
 }
 
+// -- helper functions ----------------------------------------------
+void Visualizer::printMouseVariables()
+{
+    char const* mb = "DOWN";
+    char const* ms = "LEFT";
+    char const* mc = "SINGLE";
+    char const* md = "DRAG";
+
+    if(mouseButton == MSE_BUTTON_UP)
+    	mb = "UP";
+    if(mouseSide == MSE_SIDE_RGT)
+    	ms = "RIGHT";
+    else if (mouseSide == MSE_SIDE_MID)
+    	ms = "MIDDLE";
+    if(mouseClick == MSE_CLICK_DOUBLE)
+    	mc = "DOUBLE";
+    if(mouseDrag == MSE_DRAG_FALSE)
+    	md = "NOT_DRAG";
+
+    std::clog << "Mouse Button: " << mb << std::endl;
+    std::clog << "Mouse Side: " << ms << std::endl;
+    std::clog << "Mouse Click: " << mc << std::endl;
+    std::clog << "Mouse Drag: " << md << std::endl << std::endl;
+}
+
 
 // -- visualization functions ---------------------------------------
 
@@ -101,15 +129,16 @@ void Visualizer::handleSizeEvent()
 
 
 // --------------------------------------
-void Visualizer::handleMouseLftDownEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftDownEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_LFT;
     mouseClick  = MSE_CLICK_SINGLE;
-    mouseDrag   = MSE_DRAG_FALSE;
+    mouseDrag   = MSE_DRAG_TRUE;
+    if(mouseDrag == MSE_DRAG_TRUE)
 
     xMouseDragBeg = x;
     yMouseDragBeg = y;
@@ -119,11 +148,11 @@ void Visualizer::handleMouseLftDownEvent(
 
 
 // ------------------------------------
-void Visualizer::handleMouseLftUpEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
-{   
+{
     mouseButton = MSE_BUTTON_UP;
     mouseSide   = MSE_SIDE_LFT;
     if ( mouseClick != MSE_CLICK_DOUBLE )
@@ -136,8 +165,8 @@ void Visualizer::handleMouseLftUpEvent(
 
 
 // ----------------------------------------
-void Visualizer::handleMouseLftDClickEvent( 
-    const int &x, 
+void Visualizer::handleMouseLftDClickEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -154,15 +183,15 @@ void Visualizer::handleMouseLftDClickEvent(
 
 
 // --------------------------------------
-void Visualizer::handleMouseRgtDownEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
     mouseButton = MSE_BUTTON_DOWN;
     mouseSide   = MSE_SIDE_RGT;
     mouseClick  = MSE_CLICK_SINGLE;
-    mouseDrag   = MSE_DRAG_FALSE;
+    mouseDrag   = MSE_DRAG_TRUE;
 
     xMouseDragBeg = x;
     yMouseDragBeg = y;
@@ -172,8 +201,8 @@ void Visualizer::handleMouseRgtDownEvent(
 
 
 // ------------------------------------
-void Visualizer::handleMouseRgtUpEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -189,8 +218,8 @@ void Visualizer::handleMouseRgtUpEvent(
 
 
 // ----------------------------------------
-void Visualizer::handleMouseRgtDClickEvent( 
-    const int &x, 
+void Visualizer::handleMouseRgtDClickEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -198,7 +227,7 @@ void Visualizer::handleMouseRgtDClickEvent(
     mouseSide   = MSE_SIDE_RGT;
     mouseClick  = MSE_CLICK_DOUBLE;
     mouseDrag   = MSE_DRAG_FALSE;
-    
+
     xMouseDragBeg = x;
     yMouseDragBeg = y;
     xMouseCur     = x;
@@ -207,19 +236,21 @@ void Visualizer::handleMouseRgtDClickEvent(
 
 
 // -------------------------------------
-void Visualizer::handleMouseMotionEvent( 
-    const int &x, 
+void Visualizer::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // -------------------------------------
 {
     if ( mouseButton == MSE_BUTTON_DOWN )
-      {  mouseDrag  = MSE_DRAG_TRUE;
-         mouseClick = MSE_CLICK_SINGLE; 
-      }
-	else {
-		mouseDrag  = MSE_DRAG_FALSE;
-		mouseClick = -1;
-    }    
+    {
+    	 mouseDrag  = MSE_DRAG_TRUE;
+         mouseClick = MSE_CLICK_SINGLE;
+    }
+    else
+    {
+	mouseDrag  = MSE_DRAG_FALSE;
+	mouseClick = -1;
+    }
 
     xMouseCur = x;
     yMouseCur = y;
@@ -227,16 +258,16 @@ void Visualizer::handleMouseMotionEvent(
 
 
 // ---------------------------------------
-void Visualizer::handleMouseWheelIncEvent( 
-    const int &x, 
+void Visualizer::handleMouseWheelIncEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {}
 
 
 // ---------------------------------------
-void Visualizer::handleMouseWheelDecEvent( 
-    const int &x, 
+void Visualizer::handleMouseWheelDecEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {}
@@ -291,7 +322,7 @@ void Visualizer::initMouse()
     mouseSide   = MSE_SIDE_LFT;
     mouseClick  = MSE_CLICK_SINGLE;
     mouseDrag   = MSE_DRAG_FALSE;
-    
+
     xMouseDragBeg = 0.0;
     yMouseDragBeg = 0.0;
     xMouseCur     = 0.0;
@@ -343,13 +374,13 @@ void Visualizer::startSelectMode(
     else
 	    // height >= width
 		gluOrtho2D( -1, 1, (1/aspect)*(-1), (1/aspect)*1 );
-            
+
     glMatrixMode( GL_MODELVIEW );
 }
 
 
 // -------------------------------
-void Visualizer::finishSelectMode( 
+void Visualizer::finishSelectMode(
     GLint hits,
     GLuint selectBuf[] )
 // -------------------------------

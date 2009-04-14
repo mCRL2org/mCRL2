@@ -2,7 +2,7 @@
 // socket_types.hpp
 // ~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -28,13 +28,17 @@
 # endif // defined(_WINSOCKAPI_) && !defined(_WINSOCK2API_)
 # if !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)
 #  if defined(_MSC_VER) || defined(__BORLANDC__)
-#   pragma message("Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately")
-#   pragma message("Assuming _WIN32_WINNT=0x0500 (i.e. Windows 2000 target)")
+#   pragma message( \
+  "Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:\n"\
+  "- add -D_WIN32_WINNT=0x0501 to the compiler command line; or\n"\
+  "- add _WIN32_WINNT=0x0501 to your project's Preprocessor Definitions.\n"\
+  "Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).")
 #  else // defined(_MSC_VER) || defined(__BORLANDC__)
-#   warning Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately
-#   warning Assuming _WIN32_WINNT=0x0500 (i.e. Windows 2000 target)
+#   warning Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately.
+#   warning For example, add -D_WIN32_WINNT=0x0501 to the compiler command line.
+#   warning Assuming _WIN32_WINNT=0x0501 (i.e. Windows XP target).
 #  endif // defined(_MSC_VER) || defined(__BORLANDC__)
-#  define _WIN32_WINNT 0x0500
+#  define _WIN32_WINNT 0x0501
 # endif // !defined(_WIN32_WINNT) && !defined(_WIN32_WINDOWS)
 # if defined(_MSC_VER)
 #  if defined(_WIN32) && !defined(WIN32)
@@ -80,7 +84,9 @@
 #  undef BOOST_ASIO_WSPIAPI_H_DEFINED
 # endif // defined(BOOST_ASIO_WSPIAPI_H_DEFINED)
 # if !defined(BOOST_ASIO_NO_DEFAULT_LINKED_LIBS)
-#  if defined(_MSC_VER) || defined(__BORLANDC__)
+#  if defined(UNDER_CE)
+#   pragma comment(lib, "ws2.lib")
+#  elif defined(_MSC_VER) || defined(__BORLANDC__)
 #   pragma comment(lib, "ws2_32.lib")
 #   pragma comment(lib, "mswsock.lib")
 #  endif // defined(_MSC_VER) || defined(__BORLANDC__)
@@ -90,14 +96,20 @@
 # include <sys/ioctl.h>
 # include <sys/poll.h>
 # include <sys/types.h>
-# include <sys/select.h>
+# if defined(__hpux) && !defined(__HP_aCC)
+#  include <sys/time.h>
+# else
+#  include <sys/select.h>
+# endif
 # include <sys/socket.h>
 # include <sys/uio.h>
+# include <sys/un.h>
 # include <netinet/in.h>
 # include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <net/if.h>
+# include <limits.h>
 # if defined(__sun)
 #  include <sys/filio.h>
 #  include <sys/sockio.h>
@@ -116,7 +128,6 @@ const int socket_error_retval = SOCKET_ERROR;
 const int max_addr_v4_str_len = 256;
 const int max_addr_v6_str_len = 256;
 typedef sockaddr socket_addr_type;
-typedef int socket_addr_len_type;
 typedef in_addr in4_addr_type;
 typedef ip_mreq in4_mreq_type;
 typedef sockaddr_in sockaddr_in4_type;
@@ -142,6 +153,11 @@ const int shutdown_both = SD_BOTH;
 const int message_peek = MSG_PEEK;
 const int message_out_of_band = MSG_OOB;
 const int message_do_not_route = MSG_DONTROUTE;
+# if defined (_WIN32_WINNT)
+const int max_iov_len = 64;
+# else
+const int max_iov_len = 16;
+# endif
 #else
 typedef int socket_type;
 const int invalid_socket = -1;
@@ -149,14 +165,23 @@ const int socket_error_retval = -1;
 const int max_addr_v4_str_len = INET_ADDRSTRLEN;
 const int max_addr_v6_str_len = INET6_ADDRSTRLEN + 1 + IF_NAMESIZE;
 typedef sockaddr socket_addr_type;
-typedef socklen_t socket_addr_len_type;
 typedef in_addr in4_addr_type;
+# if defined(__hpux)
+// HP-UX doesn't provide ip_mreq when _XOPEN_SOURCE_EXTENDED is defined.
+struct in4_mreq_type
+{
+  struct in_addr imr_multiaddr;
+  struct in_addr imr_interface;
+};
+# else
 typedef ip_mreq in4_mreq_type;
+# endif
 typedef sockaddr_in sockaddr_in4_type;
 typedef in6_addr in6_addr_type;
 typedef ipv6_mreq in6_mreq_type;
 typedef sockaddr_in6 sockaddr_in6_type;
 typedef sockaddr_storage sockaddr_storage_type;
+typedef sockaddr_un sockaddr_un_type;
 typedef addrinfo addrinfo_type;
 typedef int ioctl_arg_type;
 typedef uint32_t u_long_type;
@@ -167,6 +192,12 @@ const int shutdown_both = SHUT_RDWR;
 const int message_peek = MSG_PEEK;
 const int message_out_of_band = MSG_OOB;
 const int message_do_not_route = MSG_DONTROUTE;
+# if defined(IOV_MAX)
+const int max_iov_len = IOV_MAX;
+# else
+// POSIX platforms are not required to define IOV_MAX.
+const int max_iov_len = 16;
+# endif
 #endif
 const int custom_socket_option_level = 0xA5100000;
 const int enable_connection_aborted_option = 1;

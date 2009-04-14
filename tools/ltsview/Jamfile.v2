@@ -1,41 +1,38 @@
-project toolset/ltsview
-  : build-dir $(BUILD_TOP)/ltsview
-  ;
+project toolset/ltsview ;
 
-alias ltsview : : <wx>no ;
-
-exe ltsview
+tool ltsview
       : cluster.cpp
         conedb.cpp
-        fileloader.cpp
-        fsmparser.cpp
         glcanvas.cpp
+        infodialog.cpp
         lts.cpp
-        ltsviewapp.cpp
+        ltsview.cpp
         mainframe.cpp
+        markmanager.cpp
+        markdialog.cpp
         markstateruledialog.cpp
         primitivefactory.cpp
         primitives.cpp
         savepicdialog.cpp
+        savevecdialog.cpp
         settings.cpp
         settingsdialog.cpp
         simulation.cpp
         simreader.cpp
+        simdialog.cpp
         state.cpp
         transition.cpp
         utils.cpp
         visobjectfactory.cpp
         visualizer.cpp
+        /libraries//tr
+        /libraries//gl2ps
         /libraries/utilities//colorbutton
+        /libraries//atermpp
         /libraries//lts
+        /libraries//trace
+        /libraries//core
         /site-config//boost_signals
-        /site-config//wx_gl
       : <squadt-connectivity>implemented
-        <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
-        <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
-        <wx>yes
-      ;
-
-install-binaries install
-      : ltsview
+        <wx>gl
       ;

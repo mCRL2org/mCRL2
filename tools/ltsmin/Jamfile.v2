@@ -1,18 +1,11 @@
-project toolset/ltsmin
-       : build-dir $(BUILD_TOP)/ltsmin
-       ;
+project toolset/ltsmin ;
 
-exe ltsmin
+tool ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
-         /libraries//mcrl2_basic
+         /libraries//core
          /libraries//svc
-       : <toolset>msvc:<library>/libraries//getopt
-       ;
-
-install-binaries install
-       : ltsmin
-       :
+         /libraries/utilities//command_line_interfacing
        : <status>deprecated
        ;

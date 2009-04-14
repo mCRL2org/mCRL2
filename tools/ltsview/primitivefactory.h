@@ -1,18 +1,22 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitivefactory.h
-/// \brief Add your file description here.
+/// \brief Header file for PrimitiveFactory class
 
 #ifndef PRIMITIVEFACTORY_H
 #define PRIMITIVEFACTORY_H
 #include <vector>
-#include "primitives.h"
-#include "conedb.h"
 #include "settings.h"
+
+class ConeDB;
+class Primitive;
+class P_ObliqueCone;
 
 class PrimitiveFactory: public Subscriber {
   public:

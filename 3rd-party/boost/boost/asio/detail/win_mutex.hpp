@@ -2,7 +2,7 @@
 // win_mutex.hpp
 // ~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,6 +24,7 @@
 
 #if defined(BOOST_WINDOWS)
 
+#include <boost/asio/error.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
 #include <boost/asio/detail/socket_types.hpp>
 #include <boost/asio/detail/scoped_lock.hpp>
@@ -49,7 +50,8 @@ public:
     if (error != 0)
     {
       boost::system::system_error e(
-          boost::system::error_code(error, boost::system::native_ecat),
+          boost::system::error_code(error,
+            boost::asio::error::get_system_category()),
           "mutex");
       boost::throw_exception(e);
     }
@@ -68,7 +70,8 @@ public:
     if (error != 0)
     {
       boost::system::system_error e(
-          boost::system::error_code(error, boost::system::native_ecat),
+          boost::system::error_code(error,
+            boost::asio::error::get_system_category()),
           "mutex");
       boost::throw_exception(e);
     }

@@ -1,15 +1,7 @@
-project lpsuntime
-       : build-dir $(BUILD_TOP)/lpsuntime
-       ;
+project lpsuntime ;
 
-exe lpsuntime
+tool lpsuntime
        : lpsuntime.cpp
-         /libraries//mcrl2_basic
          /libraries//lps
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
-         <include>.
        ;
-
-install-binaries install
-       : lpsuntime ;

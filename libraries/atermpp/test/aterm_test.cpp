@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,27 +9,13 @@
 /// \file aterm_test.cpp
 /// \brief Add your file description here.
 
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/aterm_test.cpp
-// date          : 04/25/05
-// version       : 0.3
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_int.h"
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;
@@ -41,18 +29,17 @@ void test_aterm()
   BOOST_CHECK(a != b);
   aterm c = remove_annotation(b, label);
   BOOST_CHECK(a == c);
-  
+
   aterm d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);
-  
+
   aterm e = aterm();
   BOOST_CHECK(!e);
 }
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
   test_aterm();
   return 0;
 }

@@ -1,81 +1,104 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/basic_datatype.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include "tipi/basic_datatype.hpp"
 
-#include <boost/regex.hpp>
+#include <boost/xpressive/xpressive_static.hpp>
 
 namespace tipi {
 
   namespace datatype {
 
-    /************************************************************************
-     * Implementation of Boolean
-     ************************************************************************/
+    template class integer_range< char >;
+    template class integer_range< unsigned char >;
+    template class integer_range< short >;
+    template class integer_range< unsigned short >;
+    template class integer_range< int >;
+    template class integer_range< unsigned int >;
+    template class integer_range< long int >;
+    template class integer_range< unsigned long int >;
+    template class integer_range< long long int >;
+    template class integer_range< unsigned long long int >;
+    template class real_range< float, false, false >;
+    template class real_range< float, false, true >;
+    template class real_range< float, true, false >;
+    template class real_range< float, true, true>;
+    template class real_range< double, false, false >;
+    template class real_range< double, false, true >;
+    template class real_range< double, true, false >;
+    template class real_range< double, true, true >;
+    template class real_range< long double, false, false >;
+    template class real_range< long double, false, true >;
+    template class real_range< long double, true, false >;
+    template class real_range< long double, true, true >;
 
-    const std::string boolean::true_string("true");
+    /// \cond INTERNAL_DOCS
+    enumeration< size_t >& enumeration< size_t >::do_add(const size_t v, std::string const& s) {
+      using namespace boost::xpressive;
 
-    const std::string boolean::false_string("false");
-
-    /************************************************************************
-     * Implementation of Integer
-     ************************************************************************/
-
-    /** \brief Implementation dependent limitation (minimum value) */
-    const long int integer::implementation_minimum = LONG_MIN;
-
-    /** \brief Implementation dependent limitation (maximum value) */
-    const long int integer::implementation_maximum = LONG_MAX;
-
-    /************************************************************************
-     * Implementation of Real 
-     ************************************************************************/
-
-    /** \brief Implementation dependent limitation (minimum value) */
-    const double real::implementation_minimum = DBL_MIN;
-
-    /** \brief Implementation dependent limitation (maximum value) */
-    const double real::implementation_maximum = DBL_MAX;
-
-    /************************************************************************
-     * Implementation of Enumeration
-     ************************************************************************/
-
-    /**
-     * @param[in] s any string
-     **/
-    enumeration::enumeration(std::string const& s) : m_default_value(0) {
-      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
-
-      m_values.push_back(s);
-    }
-
-    /**
-     * @param[in] s any string
-     * @param[in] b whether this element should now be marked as the default
-     **/
-    void enumeration::add_value(std::string const& s, bool b) {
-      assert(boost::regex_search(s, boost::regex("\\`[A-Za-z0-9_\\-]+\\'")));
-
-      std::vector< std::string >::iterator i = std::find(m_values.begin(), m_values.end(), s);
-
-      if (i == m_values.end()) {
-        if (b) {
-          m_default_value = m_values.size();
-        }
-
-        m_values.push_back(s);
+      if (!regex_match(s, sregex(+(set[range('0','9') | range('a','z') | range('A','Z') | '_' | '-' | '\\'])))) {
+        throw std::runtime_error(std::string("malformed value `").
+                        append(s).append("' for enumerated type."));
       }
+
+      if (m_values.find(v) == m_values.end()) {
+        m_values[v] = s;
+      }
+
+      return *this;
     }
 
-    /************************************************************************
-     * Implementation of String
-     ************************************************************************/
+    size_t enumeration< size_t >::do_evaluate(std::string const& s) const {
+      for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
+        if (i->second == s) {
+          return i->first;
+        }
+      }
 
-    const unsigned int string::implementation_maximum_length = UINT_MAX;
+      return m_values.end()->first;
+    }
+
+    bool enumeration< size_t >::do_validate(std::string const& s) const {
+      for (std::map< size_t, std::string >::const_iterator i = m_values.begin(); i != m_values.end(); ++i) {
+        if (i->second == s) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    std::auto_ptr < basic_integer_range > basic_integer_range::reconstruct(std::string const&) {
+      std::auto_ptr < basic_integer_range > new_range;
+
+      assert(false);
+
+      return new_range;
+    }
+
+    std::auto_ptr < basic_real_range > basic_real_range::reconstruct(std::string const& s) {
+      using namespace boost::xpressive;
+
+      smatch results;
+
+      regex_match(s, results, sregex((as_xpr('[') | '(') >> (s1= +_d) >> "..." >> (s2= +_d) >> (as_xpr(']') | ')')));
+
+      std::cerr << results[1] << " " << results[2] << std::endl;
+
+      std::auto_ptr < basic_real_range > new_range;
+
+      assert(false);
+
+      return new_range;
+    }
+    /// \endcond
   }
 }
 

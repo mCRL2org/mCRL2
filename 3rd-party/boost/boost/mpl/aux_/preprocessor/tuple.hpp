@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/aux_/preprocessor/tuple.hpp,v $
-// $Date: 2004/09/02 15:40:56 $
-// $Revision: 1.5 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #define BOOST_MPL_PP_TUPLE_11_ELEM_0(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10) e0
 #define BOOST_MPL_PP_TUPLE_11_ELEM_1(e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,e10) e1

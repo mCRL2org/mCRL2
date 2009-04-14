@@ -1,11 +1,13 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file conedb.cpp
-/// \brief Add your file description here.
+/// \brief Source file for the ConeDB class.
 
 #include "conedb.h"
 #include "utils.h"
@@ -34,7 +36,7 @@ void ConeDB::addTruncatedCone(float r,bool t,bool b,int c) {
     tbuckets[i].cone = c;
   } else {
     check_thashtable();
-    i = thash(k,tb,thashtable.size()-1);
+    i = thash(k,tb,(thashtable.size()-1));
 		tcone_bucket cb = { k, c, thashtable[i], tb };
     thashtable[i] = tbuckets.size();
     tbuckets.push_back(cb);
@@ -58,7 +60,7 @@ void ConeDB::check_thashtable() {
 		thashtable.assign(2*thashtable.size(),-1);
 		unsigned int i,h;
     for (i = 0; i < tbuckets.size(); ++i) {
-      h = thash(tbuckets[i].key,tbuckets[i].top_bot,thashtable.size()-1);
+      h = thash(tbuckets[i].key,tbuckets[i].top_bot,(thashtable.size()-1));
       tbuckets[i].next = thashtable[h];
       thashtable[h] = i;
     }
@@ -66,7 +68,7 @@ void ConeDB::check_thashtable() {
 }
 
 int ConeDB::find_tbucket(int k,unsigned char tb) {
-  int h = thash(k,tb,thashtable.size()-1);
+  int h = thash(k,tb,(thashtable.size()-1));
   for (h = thashtable[h]; h != -1; h = tbuckets[h].next) {
     if (tbuckets[h].key == k  &&  tbuckets[h].top_bot == tb) {
       return h;
@@ -85,7 +87,7 @@ void ConeDB::addObliqueCone(float a,float r,float s,int c) {
     obuckets[i].cone = c;
   } else {
     check_ohashtable();
-    i = ohash(k1,k2,b,ohashtable.size()-1);
+    i = ohash(k1,k2,b,(ohashtable.size()-1));
 		ocone_bucket cb = { k1, k2, b, c, ohashtable[i] };
     ohashtable[i] = obuckets.size();
     obuckets.push_back(cb);
@@ -108,7 +110,7 @@ void ConeDB::check_ohashtable() {
 		unsigned int i,h;
     for (i = 0; i < obuckets.size(); ++i) {
       h = ohash(obuckets[i].alpha,obuckets[i].radius,obuckets[i].sign,
-      					ohashtable.size()-1);
+      					(ohashtable.size()-1));
       obuckets[i].next = ohashtable[h];
       ohashtable[h] = i;
     }
@@ -116,7 +118,7 @@ void ConeDB::check_ohashtable() {
 }
 
 int ConeDB::find_obucket(int k1,int k2,bool b) {
-  int h = ohash(k1,k2,b,ohashtable.size()-1);
+  int h = ohash(k1,k2,b,(ohashtable.size()-1));
   for (h = ohashtable[h]; h != -1; h = obuckets[h].next) {
     if (obuckets[h].alpha == k1 && obuckets[h].radius == k2 && obuckets[h].sign == b) {
       return h;

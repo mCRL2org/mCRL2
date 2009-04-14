@@ -1,0 +1,7 @@
+project lpssuminst ;
+
+tool lpssuminst
+       : lpssuminst.cpp
+         /libraries//lps
+       : <squadt-connectivity>implemented
+       ;

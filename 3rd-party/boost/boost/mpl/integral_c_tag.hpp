@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/integral_c_tag.hpp,v $
-// $Date: 2004/09/28 13:56:58 $
-// $Revision: 1.2 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 
 #include <boost/mpl/aux_/adl_barrier.hpp>

@@ -1,0 +1,8 @@
+project toolset/txt2pbes
+       : requirements
+          <library>/libraries//pbes
+       ;
+
+tool txt2pbes
+       : txt2pbes.cpp
+       ;

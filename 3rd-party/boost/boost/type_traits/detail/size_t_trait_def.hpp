@@ -7,9 +7,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at 
 // http://www.boost.org/LICENSE_1_0.txt)
 
-// $Source: /cvsroot/boost/boost/boost/type_traits/detail/size_t_trait_def.hpp,v $
-// $Date: 2005/08/25 16:27:26 $
-// $Revision: 1.9 $
+// $Source$
+// $Date: 2005-08-25 18:27:28 +0200 (Thu, 25 Aug 2005) $
+// $Revision: 30670 $
 
 #include <boost/type_traits/detail/template_arity_spec.hpp>
 #include <boost/type_traits/integral_constant.hpp>

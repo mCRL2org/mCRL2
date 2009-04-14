@@ -1,19 +1,22 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./node.cpp
 
-// --- node.cpp -----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "node.h"
 
+#include <string>
 
 // -- constructors and destructors ----------------------------------
 
+using namespace std;
 
 // -------------------------
 Node::Node( const int &idx )
@@ -25,7 +28,7 @@ Node::Node( const int &idx )
 
 
 // ---------------------------
-Node::Node( 
+Node::Node(
     const int &idx,
     const vector< double > &tpl )
 // ---------------------------
@@ -49,7 +52,7 @@ Node::~Node()
 
 
 // ---------------------
-void Node::swapTupleVal( 
+void Node::swapTupleVal(
     const size_t &idx1,
     const size_t &idx2 )
 // ---------------------
@@ -67,7 +70,7 @@ void Node::swapTupleVal(
 
 
 // ---------------------
-void Node::moveTupleVal( 
+void Node::moveTupleVal(
     const size_t &idxFr,
     const size_t &idxTo )
 // ---------------------
@@ -109,7 +112,7 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
         try
         {
             vector< double > tupleNew;
-        
+
             // init new tuple
             {
             for ( size_t i = 0; i < idcsFrTo.size(); ++i )
@@ -138,12 +141,12 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
 
 
 // --------------------
-void Node::addTupleVal( 
+void Node::addTupleVal(
     const int &idx,
     const double &val )
 // --------------------
 {
-    tuple.insert( 
+    tuple.insert(
         tuple.begin() + idx,
         val );
 }

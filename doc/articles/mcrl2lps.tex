@@ -7,7 +7,7 @@
 \usepackage[ps2pdf]{hyperref} % remove for printing
 %\usepackage[active]{srcltx}
 \usepackage{mymath,mythm,mcrl}
-  
+
 \setlength{\mathindent}{0.5em}
 
 \def\YSU{\texttt{ YSU: TODO :USY\marginpar{!!!} }}
@@ -39,9 +39,9 @@
 
 \newcommand{\Vars}{\mbox{\em Vars}}
 
-\title{LPS definitions and an ATerm representation format for \mcrl\ 
+\title{LPS definitions and an ATerm representation format for \mcrl\
   with multiactions and time}
-  
+
 \author{Jan Friso Groote \and Yaroslav S. Usenko}
 
 \begin{document}
@@ -50,7 +50,7 @@
 
 \section{LPS definitions}
 
-The equation below represents a Linear Process Equation for \mcrl\ 
+The equation below represents a Linear Process Equation for \mcrl\
 with multiactions and time (MTLPS).
 \begin{gather}
 \begin{split}
@@ -83,7 +83,7 @@ parameter lists of the contained actions.
 \YSU formalize below
 
 \begin{thm}
-  Given 
+  Given
   $\mathrm{MTLPS1}=(\mathrm{mCRL2})=\mathrm{MTLPS2}$,\\
   $\mathrm{TLPS(MTLPS1)}=(\mathrm{timed\ mcrl})=\mathrm{TLPS(MTLPS2)}$.
 \end{thm}
@@ -96,7 +96,7 @@ the thesis).
 \section{Aterm format for mCRL2 after parsing}
 
 \section{Static Semantics and Well-formedness}
-\label{section:SSC} 
+\label{section:SSC}
 In this section it is defined when a specification is correctly defined.
 We use the syntactical categories from the previous section (in teletype
 font) to refer to items in a specification. If we denote a
@@ -116,7 +116,7 @@ only give an operational semantics to well-formed specifications.
 
 \subsection{Static semantics}
 A {\tt Specification} must be internally consistent. This means
-that all objects that are used must be declared exactly once and 
+that all objects that are used must be declared exactly once and
 are used such that the sorts are correct. It also means that action,
 process, constant and variable names cannot be confused.
 Furthermore, it means that communications are specified in a functional
@@ -127,14 +127,14 @@ specification that is internally consistent is called SSC
 culminate in Definition \ref{SSC-mCRL}.
 
 \subsubsection{SSC of \texttt{Specification}}
-We assume that the specification has the form 
+We assume that the specification has the form
 $\aterm{spec}(\nm{sortspec?},\nm{opspec?},\nm{eqnspec?},\nm{actspec?},\nm{proscpec?},\nm{init})$
 (an easy transformation of the input aterm brings it to this form).
-All of the parameters are optional except the last one (the minimal specification is 
+All of the parameters are optional except the last one (the minimal specification is
 $\aterm{spec}(\aterm{init}(\aterm{tau}())))$.
-Sometimes part of the specification is not used. For example, any sort specification is useless 
+Sometimes part of the specification is not used. For example, any sort specification is useless
 unless some functions are defined for them. And also functions specifications are useless if they do not
-occur in expressions. Such specifications are still considered SSC, although an implementation of the checker 
+occur in expressions. Such specifications are still considered SSC, although an implementation of the checker
 may issue a warning in such cases.
 
 Let $Sig$ be a signature and $\NV$ be a set of variables over $Sig$. We
@@ -146,12 +146,12 @@ Sort declarations:
 \item
   A {\tt SortSpec}
   $\aterm{SortSpec}([\nm{sspec}_1,\dots,\nm{sspec}_m])$ with $m\geq 1$
-  is SSC wrt.\ $Sig$ iff 
+  is SSC wrt.\ $Sig$ iff
   \begin{itemize}
   \item all $\nm{sspec}_1,\dots,\nm{sspec}_m$ are SSC wrt.\ $Sig$.
   \item Defined sort names are different: for all $i<j$, $\nm{defined\_sorts}(\nm{sspec}_i)\neq\nm{defined\_sorts}(\nm{sspec}_j)$.
   \end{itemize}
-\item 
+\item
   A {\tt SortDecl}
   $\aterm{SortDeclStandard}([n_1\cdots n_m])$ with $m\geq 1$
   is SSC wrt.\ $Sig$ iff all $n_1,\ldots,n_m$ are pairwise
@@ -165,18 +165,18 @@ Sort declarations:
   A {\tt SortDecl}
   $\aterm{SortDeclStruct}(n,[\nm{cons}_1\dots,\nm{cons}_m])$ with $m\geq 1$
   is SSC wrt.\ $Sig$ iff all \emph{constructor expressions} $\nm{cons}$ are SSC w.r.t $Sig$.
-\item 
+\item
   A {\tt ConstDecl}
   $\aterm{StructDeclCons}(n,[\nm{proj}_1\dots,\nm{proj}_m]),k)$ with $m\geq 0$
-  is SSC wrt.\ $Sig$ iff 
+  is SSC wrt.\ $Sig$ iff
   \begin{itemize}
   \item both $n$ and $k$ are not declared as function or map (or $k==nil()$)
   \item all \emph{projection expressions} $\nm{proj}$ are SSC w.r.t $Sig$.
   \end{itemize}
-\item 
+\item
   A {\tt ProjDecl}
   $\aterm{StructDeclProj}(n,\aterm{Dom}([s_1\cdots s_m]))$ with $m\geq 1$
-  is SSC wrt.\ $Sig$ iff 
+  is SSC wrt.\ $Sig$ iff
   \begin{itemize}
   \item both $n$ is not declared as function or map (or $n==nil()$)
   \item \emph{sort expressions} $s$ are SSC w.r.t $Sig$
@@ -187,11 +187,11 @@ Sort declarations:
 \begin{itemize}
 \item
   A {\tt OpSpec}\\
-  $\aterm{ConsSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$ 
+  $\aterm{ConsSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$
   or\\
-  $\aterm{MapSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$ 
+  $\aterm{MapSpec}([IdDecls([n_{11},\dots,n_{1l_1}],s_1),\dots,IdDecls([n_{m1},\dots,n_{ml_m}],s_m)])$
   with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
-  is SSC wrt.\ $Sig$ iff 
+  is SSC wrt.\ $Sig$ iff
   \begin{itemize}
   \item
     for all $1\leq i\leq m$  $n_{i1},\ldots,n_{il_i}$ are
@@ -210,7 +210,7 @@ Sort declarations:
   [\aterm{EqnSpec}(d_1,d_1')\dots\aterm{EqnSpec}(d_k,d_k')])
 \end{gather}
   with $m\geq 1$, $l_i\geq 1$, $k_i\geq 0$ for $1\leq i\leq m$
-  is SSC wrt.\ $Sig$ iff 
+  is SSC wrt.\ $Sig$ iff
   \begin{itemize}
   \item
     for all $1\leq i,j\leq m$  $n_{ij}$ are pairwise different,
@@ -236,7 +236,7 @@ with $m\geq 1$ is SSC wrt. $Sig$ iff
 \paragraph{Processes}
 \begin{itemize}
 \item
-  A {\tt ProcSpec} 
+  A {\tt ProcSpec}
   $\aterm{ProcSpec}([\aterm{ProcDecl}(n_1,\nm{vars}_1,p_1),\dots,\aterm{ProcDecl}(n_m,\nm{vars}_m,p_m)])$
   with $m\geq 1$ is SSC wrt.\ $Sig$ iff
   \begin{itemize}
@@ -254,7 +254,7 @@ with $m\geq 1$ is SSC wrt. $Sig$ iff
     x_{j}\ap S_{j}\rangle\mid 1\leq j\leq k\}$.
   \end{itemize}
 \item
-  A {\tt Init} of the form $\aterm{Init}(p)$ is SSC wrt.\ $\Sig$ 
+  A {\tt Init} of the form $\aterm{Init}(p)$ is SSC wrt.\ $\Sig$
   iff $p$ SSC wrt.\ to $\Sig$ and $\emptyset$.
 \end{itemize}
 
@@ -272,7 +272,7 @@ We say that a {\tt Process-term} $p$ is {\it SSC wrt.\ to $\Sig$ and
 $\NV$} iff one of the following hold:
 \begin{itemize}
 \item
-  $p\equiv p_1+p_2$, 
+  $p\equiv p_1+p_2$,
   $p\equiv p_1\parallel p_2$, $p\equiv p_1\leftm p_2$, $p\equiv p_1\mid
   p_2$,
   $p\equiv p_1 {\cdot} p_2$ or $p\equiv p_1\tb p_2$ and both $p_1$ and $p_2$ are SSC wrt.\ $Sig$ and $\NV$,
@@ -285,7 +285,7 @@ $\NV$} iff one of the following hold:
     $t$ is SSC wrt.\ $Sig$ and $\NV$ and $sort_{Sig,\NV}(t)=\seq{\Bool}$.
   \end{itemize}
 \item
-  $p\equiv p_1\at{t}$ and 
+  $p\equiv p_1\at{t}$ and
   \begin{itemize}
 \item
   $p_1$ is SSC wrt.\ $Sig$ and $\NV$
@@ -312,14 +312,14 @@ $\NV$} iff one of the following hold:
     for all $1\leq i< j \leq m$ $n_i\not\equiv n_j$,
   \item
     for $1\leq i\leq m$, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then $n_{i,j}\in \Sig.\nm{ActNames}$.
-  \item 
+  \item
     $p_1$ is SSC wrt.\ $Sig$ and $\NV$.
 \end{itemize}
 \item
   $p\equiv\rho_{\{n_1\rightarrow n_1',\ldots,n_m\rightarrow
     n_m'\}}p_1$ and
   \begin{itemize}
-  \item 
+  \item
     for $1\leq i\leq m$ both $n_i,n_i'\in \Sig.\nm{ActNames}$.
   \item
     for each $1\leq i<j\leq m$ it holds that $n_i\not\equiv n_j$,
@@ -333,7 +333,7 @@ $\NV$} iff one of the following hold:
   \begin{itemize}
   \item
     for $1\leq i\leq m$, if $n_i=n_{i,1}\comm\dots\comm n_{i,k}$, then $n_{i,j}\in \Sig.\nm{ActNames}$.
-  \item 
+  \item
     for $1\leq i\leq m$ either $n'_i\in \Sig.\nm{ActNames}$ or $n'_i=\tau$.
   \item
     for each $1\leq i\neq j\leq m$ it holds that $n_i\not\sqsubseteq n_j$,
@@ -357,7 +357,7 @@ $\NV$} iff one of the following hold:
     {\tt Name}}\})\cup\{\langle x\ap S\rangle\}$.
 \end{itemize}
 \item
-  $p\equiv n$ and 
+  $p\equiv n$ and
   $n=p'\in \Sig.\Proc$ for some {\tt Process-term} $p'$, or $n\in
   \Sig.\Act$.
 \item
@@ -381,9 +381,9 @@ $\NV$} iff one of the following hold:
 \item
   A {\tt SortExpr}
   $\aterm{SortBool}(),\aterm{SortPos}(),\aterm{SortNat}(),\aterm{SortInt}()$ are SSC.
-\item 
+\item
   A {\tt SortExpr}
-  $\aterm{SortList}(s),\aterm{SortSet}(s),\aterm{SortBag}(s)$ are SSC wrt.\ $Sig$ iff 
+  $\aterm{SortList}(s),\aterm{SortSet}(s),\aterm{SortBag}(s)$ are SSC wrt.\ $Sig$ iff
   sort expression $s$ is SSC wrt.\ $Sig$.
 \item
   A {\tt SortExpr}
@@ -401,11 +401,11 @@ an incorrectly typed sort.
 The context consists of two parts. The static part corresponds to the
 global information in the specification. The dynamic part contains the
 definitions of the variables, and can change depending on the scope.
-Given a context of a specification $\kappa$, we denote the static context as 
-$\nm{Sig(\kappa)}$ and the dynamic part as $\nm{Vars}(\kappa)$. 
-The static context is a tupple 
+Given a context of a specification $\kappa$, we denote the static context as
+$\nm{Sig(\kappa)}$ and the dynamic part as $\nm{Vars}(\kappa)$.
+The static context is a tupple
 \[(\nm{BasicSorts},\nm{DefinedSorts},\nm{Operations},\nm{Actions},\nm{Processes})\]
-which represents the names and types of the sorts, operations, actions and processes 
+which represents the names and types of the sorts, operations, actions and processes
 defined in the specification.
 The types of the context operatinos are defined below:
 \begin{align*}
@@ -443,8 +443,8 @@ the following holds
 
 The typing rules of the built-in data types can be defined as follows:
 As for the sort and process expressions we introduce the following functions for data
-expressions: $\nm{is\_well\_named}$ -- all ids are defined, $\nm{id\_vars}$ to identify 
-the variables, $\nm{types}$ -- all possible types the term can be, 
+expressions: $\nm{is\_well\_named}$ -- all ids are defined, $\nm{id\_vars}$ to identify
+the variables, $\nm{types}$ -- all possible types the term can be,
 $\nm{is\_well\_typed}$ -- is the term well-typed?
 
 The function $\type_\kappa$ is defined defined as (well-namedness of the arguments is assumed):
@@ -454,14 +454,14 @@ The function $\type_\kappa$ is defined defined as (well-namedness of the argumen
 \aterm{OpId}(\nm{String})            &                                                            & \nm{type}(\kappa,\nm{String})\\
 \aterm{Number}(\nm{NumberString})    &                                                            & \PNI(\nm{NumberString})\\
 \aterm{ListEnum}(d_0,\dots, d_n)     & \forall i\in\overline{0,n}~\type(d_i)\typecompat\type(d_0) & \List(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\
-\aterm{SetEnum}(d_0,\dots, d_n)      & \forall i\in\overline{0,n}~\type(d_i)\typecompat\type(d_0) & \Set(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\ 
+\aterm{SetEnum}(d_0,\dots, d_n)      & \forall i\in\overline{0,n}~\type(d_i)\typecompat\type(d_0) & \Set(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\
 \aterm{BagEnum}(\aterm{BagEnumElt}(d_0,d_0'),\\
 \t2\dots,\aterm{BagEnumElt}(d_n,d_n'))
-                                     & \forall i\in\overline{0,n}~\left(\type(d_i)\typecompat\type(d_0)\land\type(d_i')\typecompat\PN\right) 
-                                                                                                  & \Bag(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\ 
-\aterm{SetBagComp}(\aterm{IdDecl}(v,s),d) 
+                                     & \forall i\in\overline{0,n}~\left(\type(d_i)\typecompat\type(d_0)\land\type(d_i')\typecompat\PN\right)
+                                                                                                  & \Bag(\nm{minC}(\type(d_0),\dots,\type(d_n)))\\
+\aterm{SetBagComp}(\aterm{IdDecl}(v,s),d)
                                      & \wt(\kappa+(v,s),d)\land                                   & \Set(s)~\text{if}~\type_{\kappa'}(d)=\Bool \\
-                                     &\t1(\type_{\kappa'}(d)=\Bool\lor\type_{\kappa'}(d)\typecompat\PN)               & \Bag(s)~\text{if}~\type_{\kappa'}(d)\typecompat\PN\\ 
+                                     &\t1(\type_{\kappa'}(d)=\Bool\lor\type_{\kappa'}(d)\typecompat\PN)               & \Bag(s)~\text{if}~\type_{\kappa'}(d)\typecompat\PN\\
 \aterm{DataApp}(d, d_0,\dots,d_n)    & \type(d)=A_0 \dots A_n\to B\land\\
                                      & \t1\type(d_0)\typecompat A_0\land\dots\land\type(d_n)\typecompat A_n & B\\
 \aterm{Forall}([\aterm{IdsDecl}(\vect{v_0},s_0),\
@@ -470,7 +470,7 @@ The function $\type_\kappa$ is defined defined as (well-namedness of the argumen
                                      & \t1\land\type_{\kappa'}(d)=\Bool                                     &\\
 \aterm{Exists}([\aterm{IdsDecl}(\vect{v_0},s_0),
                                      & \wt(\kappa+(\vect{v_0},s_0,\dots,\vect{v_n},s_n),d)        & \Bool\\
-\t2\dots,\aterm{IdsDecl}(\vect{v_n},s_n)], d)        
+\t2\dots,\aterm{IdsDecl}(\vect{v_n},s_n)], d)
                                      & \t1\land\type_{\kappa'}(d)=\Bool                                     &\\
                    & \Bool\\
 \aterm{Lambda}([\aterm{IdsDecl}(\vect{v_0},s_0),\\
@@ -640,15 +640,15 @@ role of a variable without confusion with
 defined constants. Moreover, variables must have an unambiguous and
 declared sort.
 \begin{defn}
-Let $Sig$ be a signature. A set $\NV$ containing 
+Let $Sig$ be a signature. A set $\NV$ containing
 pairs
-$\langle x\ap S\rangle$ with $x$ and $S$ from {\tt Name}, 
+$\langle x\ap S\rangle$ with $x$ and $S$ from {\tt Name},
 is called a {\it set of variables} over $Sig$ iff for each $\langle
 x\ap S\rangle\in \NV$:
 \begin{itemize}
 \item
 for each {\tt Name} $S'$ and {\tt Process-term} $p$ it holds that
-$x\ap \rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$, 
+$x\ap \rightarrow S'\notin \Sig.\Fun\cup\Sig.\Map$,
 $x\notin\Sig.\Act$ and $x=p\notin\Sig.\Proc$,
 \item
 $S\in \Sig.Sort$,
@@ -671,9 +671,9 @@ l_i\}&
 \varkw~x_{11},\ldots,x_{1l_1}\ap  S_1~\ldots~x_{m1},\ldots,x_{ml_m}\ap S_m.
 \end{array}\right.\]
 \end{defn}
-In the following definitions we give functions yielding the sort of and the 
+In the following definitions we give functions yielding the sort of and the
 variables in a
-{\tt Data-term} $t$. 
+{\tt Data-term} $t$.
 \begin{defn}
 Let $t$ be a {\tt data-term} and $Sig$ a signature. Let $\NV$ be a set
 of variables over $Sig$. We define:
@@ -698,7 +698,7 @@ no}~S'\not\equiv S~n\ap sort_{Sig,\NV}(t_1)\times \cdots
 \perp&\mbox{otherwise}.
 \end{array}\right.\]
 \end{defn}
-If a variable or a function is not or inappropriately declared 
+If a variable or a function is not or inappropriately declared
 no answer can be obtained. In this case $\perp$ results.
 \begin{defn}
 Let $Sig$ be a signature, $\NV$ a set of
@@ -710,7 +710,7 @@ variables over $Sig$ and let $t$ be a {\tt Data-term}.
 x\ap S\rangle\in \NV,\\
 \emptyset&\mbox{if~}t\equiv n\mbox{ and }n\ap \rightarrow S\in
 \Sig.\Fun\cup\Sig.\Map,\\
-\bigcup_{1\leq i\leq m} \Var_{Sig,\NV}(t_i)&\mbox{if~}t\equiv 
+\bigcup_{1\leq i\leq m} \Var_{Sig,\NV}(t_i)&\mbox{if~}t\equiv
 n(t_1,\ldots,t_m),\\
 \{\perp\}&\mbox{otherwise}.
 \end{array}\right.\]
@@ -719,7 +719,7 @@ We call a {\tt Data-term} $t$ {\em closed} wrt.\ a signature
 $Sig$ and a set of variables $\NV$ iff $\Var_{Sig,\NV}(t)=
 \emptyset$. Note that $\Var_{Sig,\NV}(t)\subseteq\NV\cup\{\perp\}$
 for any {\tt data-term} $t$. If $\perp\in \Var_{\Sig,\NV}(t)$, then
-due  to some missing or inappropriate declaration 
+due  to some missing or inappropriate declaration
 it can not be determined what the variables of $t$ are on basis of
 $\Sig$ and $\NV$.
 
@@ -734,7 +734,7 @@ iff $S\in\Sig.\Sort$ and there exists {\tt Name}s $S_1,\ldots, S_k, f$ ($k\geq 0
 such that $f\ap S_1\times \cdots\times S_k\rightarrow S\in \Sig.\Fun$.
 \end{defn}
 \begin{defn}
-Let $E$ be a {\tt Specification} that is SSC. 
+Let $E$ be a {\tt Specification} that is SSC.
 We inductively define which sorts are {\it non empty constructor sorts} in $E$.
 A constructor sort $S$ is called {\it non empty} iff there is a function
 $f\ap S_1\times\cdots\times S_k\rightarrow S\in \Sig.\Fun$ ($k\geq 0$) such
@@ -744,9 +744,9 @@ that $E$ has {\em no empty constructor sorts} iff each constructor sort is non
 empty.
 \end{defn}
 \begin{defn}
-Let $E$ be a {\tt Specification}. $E$ is called {\it well-formed} iff 
+Let $E$ be a {\tt Specification}. $E$ is called {\it well-formed} iff
 \begin{itemize}
-\item $E$ is SSC, 
+\item $E$ is SSC,
 \item $E$ has no empty constructor sorts,
 \item There is no indirect set, bag, or list recursion. A=Set(B), B=Ref(A).
 \item There is no empty sort due to nonterminating struct recursion.
@@ -799,7 +799,7 @@ The second parameter of $\mathsf{e}$ is the boolean condition used for
 conditional term rewriting.
 
 The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
-The first parameter of $\mathsf{f}$ is the function name, appended 
+The first parameter of $\mathsf{f}$ is the function name, appended
 with its parameter types list, separated by '\#' (for constants only '\#' is appended).
 
 If the delta summand of the TLPS is present, $\delta$ has to be
@@ -830,7 +830,7 @@ i.e.\ function symbols of arity 0. The list
 of elements of sort $D$ is denoted by $D^{*}$.
 
 The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
-The first parameter of $\mathsf{f}$ is the function name, appended 
+The first parameter of $\mathsf{f}$ is the function name, appended
 with its parameter types list, separated by '\#' (for constants only '\#' is appended).
 
 The constructor of sort $\nm{InitProcSpec}$ contains the actual LPS
@@ -862,7 +862,7 @@ i.e.\ function symbols of arity 0. The list
 of elements of sort $D$ is denoted by $D^{*}$.
 
 The first parameter of $\mathsf{v}$ is the variable name, appended with '\#'.
-The first parameter of $\mathsf{f}$ is the function name, appended 
+The first parameter of $\mathsf{f}$ is the function name, appended
 with its parameter types list, separated by '\#' (for constants only '\#' is appended).
 
 The constructor of sort $\nm{InitProcSpec}$ contains the actual LPS

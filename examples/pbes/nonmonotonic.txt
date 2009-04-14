@@ -1,0 +1,5 @@
+% The following PBES is not monotonic.
+
+pbes mu X = !X;
+
+init X;

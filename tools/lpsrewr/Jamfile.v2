@@ -1,14 +1,8 @@
-project toolset/lpsrewr
-       : build-dir $(BUILD_TOP)/lpsrewr
-       ;
+project toolset/lpsrewr ;
 
-exe lpsrewr
+tool lpsrewr
        : lpsrewr.cpp
-         /libraries//mcrl2_basic
-         /libraries//rewrite
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+         /libraries//lps
+         /libraries/utilities//command_line_interfacing
+       : <squadt-connectivity>implemented
        ;
-
-install-binaries install
-       : lpsrewr ;

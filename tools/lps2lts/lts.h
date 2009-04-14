@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,16 +12,14 @@
 #define _LTS_H
 
 #include <aterm2.h>
-#include <libnextstate.h>
+#include <mcrl2/lps/nextstate.h>
+#include <mcrl2/lts/lts.h>
 
-#define OF_UNKNOWN  0
-#define OF_AUT      1
-#define OF_SVC      2
-	
 typedef struct {
-  int outformat;
+  mcrl2::lts::lts_type outformat;
   bool outinfo;
   NextState *nstate;
+  ATermAppl spec;
 } lts_options;
 
 void open_lts(const char *filename, lts_options &opts);

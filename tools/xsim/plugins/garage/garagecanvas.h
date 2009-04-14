@@ -1,4 +1,6 @@
 // Author(s): Aad Mathijssen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -25,12 +27,7 @@
 #ifndef GARAGECANVAS_H
 #define GARAGECANVAS_H
 
-// For compilers that support precompiled headers
-#include <wx/wxprec.h>
-// Else include 'wx/wx.h'
-#ifndef WX_PRECOMP
-  #include <wx/wx.h>
-#endif
+#include <wx/wx.h>
 #include <wx/glcanvas.h>
 
 #ifdef __APPLE__
@@ -40,6 +37,8 @@
   #include <GL/gl.h>
   #include <GL/glu.h>
 #endif
+
+#undef __in_range // For STLport
 
 #include "visutils.h"
 

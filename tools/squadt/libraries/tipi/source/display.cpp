@@ -1,67 +1,89 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/display.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
-#include <iostream>
-#include <functional>
-#include <utility>
+#include "boost.hpp" // precompiled headers
 
-#include <boost/bind.hpp>
-
-#include "tipi/detail/layout_manager.hpp"
-#include "tipi/detail/layout_elements.hpp"
 #include "tipi/display.hpp"
-#include "tipi/object.hpp"
-#include "tipi/tool.hpp"
 
 namespace tipi {
 
-  void display::disassociate(tipi::layout::element const* e) {
-    element_for_id::iterator i = std::find_if(m_element_by_id.begin(), m_element_by_id.end(),
-                boost::bind(std::equal_to< tipi::layout::element const* >(), e, boost::bind(&element_for_id::value_type::second, _1)));
+  /// \cond INTERNAL
+  void display_impl::associate(element_identifier const& id, boost::shared_ptr < tipi::layout::element > const& e) {
+    assert(m_element_by_id.count(id) == 0);
+
+    m_element_by_id[id] = e;
+  }
+
+  /** \brief Disassociate an id with an element */
+  void display_impl::disassociate(tipi::layout::element const* e) {
+    for (element_by_id::iterator i = m_element_by_id.begin(); i != m_element_by_id.end(); ++i) {
+      if (i->second.get() == e) {
+        m_element_by_id.erase(i);
+
+        break;
+      }
+    }
+  }
+
+  /** \brief Disassociate an id with an element */
+  void display_impl::disassociate(element_identifier const& id) {
+    element_by_id::iterator i = m_element_by_id.find(id);
 
     if (i != m_element_by_id.end()) {
       m_element_by_id.erase(i);
     }
   }
 
-  namespace layout {
+  /** \brief Find an element by its id
+   * \param[in] id the identifier of the element to find
+   * \pre the element should be in the list
+   * \throw false, when no element with this identifier is present
+   **/
+  tipi::layout::element const* display_impl::find(element_identifier id) const {
+    element_by_id::const_iterator i = m_element_by_id.find(id);
 
-    const margins       manager::default_margins;
-
-    const visibility    manager::default_visibility = visible;
-
-    const properties    manager::default_properties(middle, left, manager::default_margins, manager::default_visibility);
-
-    /**
-     * \param[in] m a mediator to synchronise an element with the associated element in a (G)UI
-     **/
-    mediator::wrapper_aptr tool_display::instantiate(mediator* m) const {
-      if (m_manager.get() != 0) {
-        return (m_manager->instantiate(m));
-      }
-
-      return mediator::wrapper_aptr();
+    if (i == m_element_by_id.end()) {
+      throw false;
     }
 
-    /**
-     * \param[in] s string data with state descriptions
-     * \param[in] elements a vector with the elements that should be updated
-     *
-     * Looks up an element by its id and calls the read_structure on this
-     * member to read its new state from the text reader.
-     *
-     * \return vector of pointers to elements that have been updated
-     **/
-    void tool_display::update(std::string const& s, std::vector < tipi::layout::element const* >& elements) {
-
-      /* Find the element that is to be changed */
-      if (m_manager.get() != 0) {
-        tipi::visitors::restore(*this, elements, s);
-      }
-    }
+    return i->second.get();
   }
+
+  /** \brief Find an element by its id
+   * \param[in] id the identifier of the element to find
+   * \pre the element should be in the list
+   * \throw false, when no element with this identifier is present
+   **/
+  tipi::layout::element* display_impl::find(element_identifier id) {
+    element_by_id::iterator i = m_element_by_id.find(id);
+
+    if (i == m_element_by_id.end()) {
+      throw false;
+    }
+
+    return i->second.get();
+  }
+
+  /** \brief Find an element by its id
+   * \pre the element should be in the list
+   * \throw false, when the element is not present
+   **/
+  display_impl::element_identifier display_impl::find(::tipi::layout::element const* e) {
+    for (element_by_id::const_iterator i = m_element_by_id.begin(); i != m_element_by_id.end(); ++i) {
+      if (i->second.get() == e) {
+        return i->first;
+
+        break;
+      }
+    }
+
+    throw false;
+  }
+  /// \endcond
 }
 

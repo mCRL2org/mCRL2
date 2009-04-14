@@ -1,13 +1,13 @@
-//  (C) Copyright Gennadiy Rozental 2005.
+//  (C) Copyright Gennadiy Rozental 2005-2008.
 //  Distributed under the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at 
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org/libs/test for the library home page.
 //
-//  File        : $RCSfile: named_params.hpp,v $
+//  File        : $RCSfile$
 //
-//  Version     : $Revision: 1.5 $
+//  Version     : $Revision: 50673 $
 //
 //  Description : facilities for named function parameters support
 // ***************************************************************************
@@ -22,6 +22,8 @@
 // Boost.Test
 #include <boost/test/utils/rtti.hpp>
 #include <boost/test/utils/assign_op.hpp>
+
+#include <boost/type_traits/remove_reference.hpp>
 
 #include <boost/test/detail/suppress_warnings.hpp>
 
@@ -64,8 +66,16 @@ report_access_to_invalid_parameter()
 
 struct nil {
     template<typename T>
+#if defined(__GNUC__) || defined(__HP_aCC) || defined(__EDG__)
     operator T() const
+#else
+    operator T const&() const
+#endif
     { report_access_to_invalid_parameter(); static T* v = 0; return *v; }
+
+    template<typename T>
+    T any_cast() const
+    { report_access_to_invalid_parameter(); static typename remove_reference<T>::type* v = 0; return *v; }
 
     template<typename Arg1>
     nil operator()( Arg1 const& )
@@ -82,6 +92,10 @@ struct nil {
     // Visitation support
     template<typename Visitor>
     void            apply_to( Visitor& V ) const {}
+
+    static nil&     inst() { static nil s_inst; return s_inst; }
+private:
+    nil() {}
 };
     
 // ************************************************************************** //
@@ -97,42 +111,36 @@ struct named_parameter_base {
 
 //____________________________________________________________________________//
 
-#if BOOST_WORKAROUND( __SUNPRO_CC, == 0x530 )
-
-struct unknown_id_helper {
-    template<typename UnknownId>
-    nil     operator[]( keyword<UnknownId,false> kw ) const { return nil(); }
-
-    template<typename UnknownId>
-    bool    has( keyword<UnknownId,false> ) const           { return false; }
-};
-
-#endif
-
-//____________________________________________________________________________//
-
 // ************************************************************************** //
 // **************             named_parameter_combine          ************** //
 // ************************************************************************** //
 
 template<typename NP, typename Rest = nil>
-struct named_parameter_combine : Rest, named_parameter_base<named_parameter_combine<NP,Rest> > {
+struct named_parameter_combine 
+: Rest
+, named_parameter_base<named_parameter_combine<NP,Rest> > {
     typedef typename NP::ref_type  res_type;
     typedef named_parameter_combine<NP,Rest> self_type;
 
     // Constructor
     named_parameter_combine( NP const& np, Rest const& r )
-    : Rest( r ), m_param( np ) {}
+    : Rest( r )
+    , m_param( np )
+    {}
 
     // Access methods
     res_type    operator[]( keyword<typename NP::id,true> kw ) const    { return m_param[kw]; }
     res_type    operator[]( keyword<typename NP::id,false> kw ) const   { return m_param[kw]; }
     using       Rest::operator[];
 
-    bool        has( keyword<typename NP::id,false> ) const             { return true; }
+    bool        has( keyword<typename NP::id,false> kw ) const          { return m_param.has( kw ); }
     using       Rest::has;
 
-#if BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3206))
+    void        erase( keyword<typename NP::id,false> kw ) const        { m_param.erase( kw ); }
+    using       Rest::erase;
+
+#if BOOST_WORKAROUND(__MWERKS__, BOOST_TESTED_AT(0x3206)) || \
+    BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x0610))
     template<typename NP>
     named_parameter_combine<NP,self_type> operator,( NP const& np ) const
     { return named_parameter_combine<NP,self_type>( np, *this ); }
@@ -156,40 +164,41 @@ private:
 } // namespace nfp_detail
 
 // ************************************************************************** //
-// **************             named_parameter_combine          ************** //
+// **************                 named_parameter              ************** //
 // ************************************************************************** //
 
 template<typename T, typename unique_id,typename ReferenceType=T&>
 struct named_parameter
 : nfp_detail::named_parameter_base<named_parameter<T, unique_id,ReferenceType> >
-#if BOOST_WORKAROUND( __SUNPRO_CC, == 0x530 )
-, nfp_detail::unknown_id_helper
-#endif
 {
+    typedef nfp_detail::nil nil_t;
     typedef T               data_type;
     typedef ReferenceType   ref_type;
     typedef unique_id       id;
 
     // Constructor
-    explicit        named_parameter( ref_type v ) : m_value( v ) {}
+    explicit        named_parameter( ref_type v ) 
+    : m_value( v )
+    , m_erased( false )
+    {}
+    named_parameter( named_parameter const& np )
+    : m_value( np.m_value )
+    , m_erased( np.m_erased )
+    {}
 
     // Access methods
-    ref_type        operator[]( keyword<unique_id,true> ) const     { return m_value; }
-    ref_type        operator[]( keyword<unique_id,false> ) const    { return m_value; }
-#if BOOST_WORKAROUND( __SUNPRO_CC, == 0x530 )
-    using           nfp_detail::unknown_id_helper::operator[];
-#else
+    ref_type        operator[]( keyword<unique_id,true> ) const     { return m_erased ? nil_t::inst().any_cast<ref_type>() :  m_value; }
+    ref_type        operator[]( keyword<unique_id,false> ) const    { return m_erased ? nil_t::inst().any_cast<ref_type>() :  m_value; }
     template<typename UnknownId>
-    nfp_detail::nil  operator[]( keyword<UnknownId,false> ) const   { return nfp_detail::nil(); }
-#endif
+    nil_t           operator[]( keyword<UnknownId,false> ) const    { return nil_t::inst(); }
 
-    bool            has( keyword<unique_id,false> ) const           { return true; }
-#if BOOST_WORKAROUND( __SUNPRO_CC, == 0x530 )
-    using           nfp_detail::unknown_id_helper::has;
-#else
+    bool            has( keyword<unique_id,false> ) const           { return !m_erased; }
     template<typename UnknownId>
     bool            has( keyword<UnknownId,false> ) const           { return false; }
-#endif
+
+    void            erase( keyword<unique_id,false> ) const         { m_erased = true; }
+    template<typename UnknownId>
+    void            erase( keyword<UnknownId,false> ) const         {}
 
     // Visitation support
     template<typename Visitor>
@@ -201,6 +210,7 @@ struct named_parameter
 private:
     // Data members
     ref_type        m_value;
+    mutable bool    m_erased;
 };
 
 //____________________________________________________________________________//
@@ -211,7 +221,7 @@ private:
 
 namespace nfp_detail {
 typedef named_parameter<char, struct no_params_type_t,char> no_params_type;
-}
+} // namespace nfp_detail
 
 namespace {
 nfp_detail::no_params_type no_params( '\0' );
@@ -294,7 +304,7 @@ optionally_assign( T& target, Source const& src )
 {
     using namespace unit_test;
 
-    assign_op( target, src, 0 );
+    assign_op( target, src, (int)0 );
 }
 
 //____________________________________________________________________________//
@@ -314,28 +324,6 @@ optionally_assign( T& target, Params const& p, Keyword k )
 } // namespace boost
 
 #include <boost/test/detail/enable_warnings.hpp>
-
-// ***************************************************************************
-//   Revision History:
-//  
-//  $Log: named_params.hpp,v $
-//  Revision 1.5  2005/12/14 05:01:13  rogeeff
-//  *** empty log message ***
-//
-//  Revision 1.4  2005/06/13 10:35:08  schoepflin
-//  Enable optionally_assign() overload workaround for Tru64/CXX-6.5 as well.
-//
-//  Revision 1.3  2005/06/05 18:10:59  grafik
-//  named_param.hpp; Work around CW not handling operator, using declaration, by using a real operator,().
-//  token_iterator_test.cpp; Work around CW-8 confused with array initialization.
-//
-//  Revision 1.2  2005/05/03 05:02:49  rogeeff
-//  como fixes
-//
-//  Revision 1.1  2005/04/12 06:48:12  rogeeff
-//  Runtime.Param library initial commit
-//
-// ***************************************************************************
 
 #endif // BOOST_TEST_NAMED_PARAM_022505GER
 

@@ -1,0 +1,74 @@
+[section: Data specifications]
+
+Data types are declared using a data specification. A data specification
+consists of a number of sort declarations. The sort declarations are
+accompanied by constructors, mappings and equations. These describe
+the properties of the sorts.
+The class `data_specification` contains such a data specification.
+Currently the functionality of a `data_specification` is very limited.
+It can not be modified, and the only way to create it is using a parser.
+An example of this is given below:
+
+    #include "mcrl2/data/data.h"
+    #include "mcrl2/data/parser.h"
+    #include <iostream>
+
+    using namespace mcrl2::core;
+    using namespace mcrl2::data;
+
+    int main(int argc, char* argv[])
+    {
+      MCRL2_ATERMPP_INIT(argc, argv)
+
+      // note that the newline characters are significant
+      data_specification data_spec = parse_data_specification(
+        "sort                      \n"
+        "  Bit   = struct b0 | b1; \n"
+        "                          \n"
+        "map                       \n"
+        "  invert: Bit -> Bit;     \n"
+        "                          \n"
+        "cons                      \n"
+        "  K: Pos;                 \n"
+        "                          \n"
+        "eqn                       \n"
+        "  invert(b1)= b0;         \n"
+        "  invert(b0)= b1;         \n"
+      );
+
+      // pretty print the data specification
+      std::cout << pp(data_spec) << "\n";
+
+      return 0;
+    }
+
+The output of this program is as follows:
+
+    sort Bit = struct b0 | b1;
+
+    cons K: Pos;
+
+    map  ==,!=: Pos # Pos -> Bool;
+         if: Bool # Pos # Pos -> Pos;
+         invert: Bit -> Bit;
+
+    var  x,y: Pos;
+         b: Bool;
+    eqn  x == x  =  true;
+         x != y  =  !(x == y);
+         if(true, x, y)  =  x;
+         if(false, x, y)  =  y;
+         if(b, x, x)  =  x;
+         invert(b1)  =  b0;
+         invert(b0)  =  b1;
+
+[important As a side effect of parsing a data specification a number of additional
+equations are added. These are used by the data rewriter.
+]
+
+[note The member function `data_specification::sorts()` returns as a list
+of plain sort expressions. Information about the kinds of sorts, for example that
+=Bit= is a structured sort, is not accessible.
+]
+
+[endsect] [/Data specifications]

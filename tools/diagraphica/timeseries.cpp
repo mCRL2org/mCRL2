@@ -1,15 +1,19 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./timeseries.cpp
 
-// --- timeseries.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "timeseries.h"
+
+#include <iostream>
+using namespace std;
 
 
 // -- static variables ----------------------------------------------
@@ -170,7 +174,7 @@ void TimeSeries::getAnimIdxDgrm(
             else
                 it = animFrame;
             nodeFr = graph->getNode( *(--it) );
-            
+
             idxLeaf = nodeTo->getCluster()->getIndex();
             for ( int i = 0; i < nodeTo->getSizeInEdges(); ++i )
             {
@@ -194,7 +198,7 @@ void TimeSeries::getAttrIdcs( vector< int > &idcs )
 {
     idcs.clear();
     for ( size_t i = 0; i < attributes.size(); ++i )
-        idcs.push_back( attributes[i]->getIndex() );   
+        idcs.push_back( attributes[i]->getIndex() );
 }
 
 
@@ -313,7 +317,7 @@ void TimeSeries::markItems( const vector< Cluster* > frames )
 
         if ( i == 0 && frame->getSizeNodes() > 0 )
             itemsMarked.clear();
-            
+
         for ( int j = 0; j < frame->getSizeNodes(); ++j )
             itemsMarked.insert( frame->getNode(j)->getIndex() );
     }
@@ -341,7 +345,7 @@ void TimeSeries::handleSendDgrmSglToExnr()
             attrs.push_back( graph->getAttribute( i ) );
     }
     mediator->addToExaminer( frame, attrs );
-    
+
     delete frame;
     frame = NULL;
     attrs.clear();
@@ -362,7 +366,7 @@ void TimeSeries::visualize( const bool &inSelectMode )
             genCharTex();
 
         // check if positions are ok
-        if ( geomChanged == true )        
+        if ( geomChanged == true )
             calcSettingsGeomBased();
         // check if data are ok
         if ( dataChanged == true )
@@ -384,10 +388,10 @@ void TimeSeries::visualize( const bool &inSelectMode )
                 selectBuf,
                 0.0125,
                 0.0125 );
-            
+
             glPushName( ID_CANVAS );
             VisUtils::fillRect( -0.5*wth, 0.5*wth, 0.5*wth, -0.5*wth );
-            
+
             if ( timerAnim->IsRunning() != true )
             {
                 drawMarkedItems( inSelectMode );
@@ -395,12 +399,12 @@ void TimeSeries::visualize( const bool &inSelectMode )
             }
             if ( dragStatus != DRAG_STATUS_ITMS )
                 drawDiagrams( inSelectMode );
-            
+
             glPopName();
-            
+
             finishSelectMode(
                 hits,
-                selectBuf );        
+                selectBuf );
         }
         else
         {
@@ -416,14 +420,14 @@ void TimeSeries::visualize( const bool &inSelectMode )
         }
     }
 }
-        
+
 
 // -- event handlers ------------------------------------------------
 
 
 // --------------------------------------
 void TimeSeries::handleMouseLftDownEvent(
-    const int &x, 
+    const int &x,
     const int &y )
 // --------------------------------------
 {
@@ -437,8 +441,8 @@ void TimeSeries::handleMouseLftDownEvent(
 
 
 // ------------------------------------
-void TimeSeries::handleMouseLftUpEvent( 
-    const int &x, 
+void TimeSeries::handleMouseLftUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -452,8 +456,8 @@ void TimeSeries::handleMouseLftUpEvent(
 
 
 // ----------------------------------------
-void TimeSeries::handleMouseLftDClickEvent( 
-    const int &x, 
+void TimeSeries::handleMouseLftDClickEvent(
+    const int &x,
     const int &y )
 // ----------------------------------------
 {
@@ -467,8 +471,8 @@ void TimeSeries::handleMouseLftDClickEvent(
 
 
 // --------------------------------------
-void TimeSeries::handleMouseRgtDownEvent( 
-    const int &x, 
+void TimeSeries::handleMouseRgtDownEvent(
+    const int &x,
     const int &y )
 // --------------------------------------
 {
@@ -482,8 +486,8 @@ void TimeSeries::handleMouseRgtDownEvent(
 
 
 // ------------------------------------
-void TimeSeries::handleMouseRgtUpEvent( 
-    const int &x, 
+void TimeSeries::handleMouseRgtUpEvent(
+    const int &x,
     const int &y )
 // ------------------------------------
 {
@@ -497,8 +501,8 @@ void TimeSeries::handleMouseRgtUpEvent(
 
 
 // -------------------------------------
-void TimeSeries::handleMouseMotionEvent( 
-    const int &x, 
+void TimeSeries::handleMouseMotionEvent(
+    const int &x,
     const int &y )
 // -------------------------------------
 {
@@ -516,8 +520,8 @@ void TimeSeries::handleMouseMotionEvent(
 
 
 // ---------------------------------------
-void TimeSeries::handleMouseWheelIncEvent( 
-    const int &x, 
+void TimeSeries::handleMouseWheelIncEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {
@@ -530,7 +534,7 @@ void TimeSeries::handleMouseWheelIncEvent(
         // zoom out
         double pix  = canvas->getPixelSize();
         double dist = posSliderBotRgt.x - posSliderTopLft.x;
-        
+
         double diff = actPixPerNode;
         actPixPerNode = (dist/pix)/(double)(nodesWdwScale-nodesItvSlider);
         diff -= actPixPerNode;
@@ -547,7 +551,7 @@ void TimeSeries::handleMouseWheelIncEvent(
             wdwStartIdx += (int)(0.5*nodesItvSlider);
 
         geomChanged = true;
-        
+
         // redraw in render mode
         visualize( false );
     }
@@ -555,13 +559,13 @@ void TimeSeries::handleMouseWheelIncEvent(
 
 
 // ---------------------------------------
-void TimeSeries::handleMouseWheelDecEvent( 
-    const int &x, 
+void TimeSeries::handleMouseWheelDecEvent(
+    const int &x,
     const int &y )
 // ---------------------------------------
 {
     Visualizer::handleMouseWheelDecEvent( x, y );
-    
+
     if ( timerAnim->IsRunning() != true )
     {
         mouseOverIdx = -1;
@@ -569,7 +573,7 @@ void TimeSeries::handleMouseWheelDecEvent(
         // zoom in
         double pix  = canvas->getPixelSize();
         double dist = posSliderBotRgt.x - posSliderTopLft.x;
-        
+
         // update pixels per node
         actPixPerNode = (dist/pix)/(double)(nodesWdwScale+nodesItvSlider);
         if ( actPixPerNode < itvSliderPerNode )
@@ -588,7 +592,7 @@ void TimeSeries::handleMouseWheelDecEvent(
         }
 
         geomChanged = true;
-    
+
         // redraw in render mode
         visualize( false );
     }
@@ -604,7 +608,7 @@ void TimeSeries::handleMouseLeaveEvent()
     // reset mouse roll-over
     mouseOverIdx = -1;
     mediator->handleMarkFrameClust( this );
-    
+
     // redraw in render mode
     visualize( false );
 }
@@ -666,7 +670,7 @@ void TimeSeries::handleKeyDownEvent( const int &keyCode )
         else
             itemsMarked.clear();
     }
-    
+
     // redraw in render mode
     visualize( false );
 }
@@ -680,7 +684,7 @@ void TimeSeries::handleKeyUpEvent( const int &keyCode )
 
     if ( keyCode == WXK_SHIFT )
     {
-        shiftStartIdx = -1;    
+        shiftStartIdx = -1;
     }
 }
 
@@ -750,11 +754,11 @@ void TimeSeries::calcPositions()
         double fact;
         double itvPx;
         double distPx;
-        
+
         nodesItvSlider = 1;
         distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
         itvSlider = 0.0;
-        
+
         while ( itvSlider == 0.0 )
         {
             fact = (double)(graph->getSizeNodes())/(double)nodesItvSlider;
@@ -770,28 +774,28 @@ void TimeSeries::calcPositions()
     }
     else
         itvSlider = cWth;
-    
+
     // calc size of visible window
     if ( graph->getSizeNodes() > 0 )
     {
         double distPx;
-        
-        distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix; 
-        
+
+        distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
+
         nodesWdwScale = int (distPx/actPixPerNode);
         if ( graph->getSizeNodes() < nodesWdwScale )
             nodesWdwScale = graph->getSizeNodes();
-        
+
         itvWdwPerNode = (posSliderBotRgt.x - posSliderTopLft.x)/(double)nodesWdwScale;
     }
     else
         nodesWdwScale = 0;
-    
+
     // calc intervals of scale
     if ( graph->getSizeNodes() > 0 )
     {
         double distPx, itvPx;
-        
+
         nodesItvScale = 1;
         distPx = (posScaleBotRgt.x - posScaleTopLft.x)/pix;
 
@@ -814,13 +818,13 @@ void TimeSeries::calcPositions()
     // calc positions of attribute grids
     posAxesTopLft.clear();
     posAxesBotRgt.clear();
-    
+
     if ( attributes.size() > 0 )
     {
-        double yDist = cHgt 
+        double yDist = cHgt
             - (6.0*ySpacePxl + 6.0)*pix // slider at top
             - (3.5*ySpacePxl + 6.0)*pix // scale at bottom
-            - 2.0*pix;                  // spacing 
+            - 2.0*pix;                  // spacing
         yItv = yDist/(double)attributes.size();
     }
     else
@@ -833,11 +837,11 @@ void TimeSeries::calcPositions()
             - (6.0*ySpacePxl + 6.0)*pix // slider at top
             - 0.5*ySpacePxl*pix         // space between attrs
             - i*yItv                    // top of interval
-            - 3.0*pix;                  // bit of a hack 
+            - 3.0*pix;                  // bit of a hack
         posAxesTopLft.push_back( pos );
 
         pos.x = posScaleBotRgt.x;
-        pos.y = yTop 
+        pos.y = yTop
             - (6.0*ySpacePxl + 6.0)*pix // slider at top
             - (i+1)*yItv;               // bot of interval
         posAxesBotRgt.push_back( pos );
@@ -860,7 +864,7 @@ void TimeSeries::calcPositions()
                 rge = 2.0*Utils::maxx( Utils::abs( attr->getLowerBound() ), Utils::abs( attr->getUpperBound() ) );
             else
                 rge = attr->getUpperBound() - attr->getLowerBound();
-            
+
             for ( int j = 0; j< graph->getSizeNodes(); ++j )
             {
                 node = graph->getNode( j );
@@ -880,7 +884,7 @@ void TimeSeries::calcPositions()
             for ( int j = 0; j< graph->getSizeNodes(); ++j )
             {
                 node = graph->getNode( j );
-                
+
                 if ( attr->getSizeCurValues() == 1 )
                     alphaHgt = 1.0;
                 else
@@ -959,7 +963,7 @@ void TimeSeries::handleRwndDiagram( const int &dgrmIdx )
 
     map< int, Position2D >::iterator it;
     it = showDgrm.find( dgrmIdx );
-    
+
     int idx = *animFrame;
     Position2D pos = it->second;
 
@@ -1059,7 +1063,7 @@ void TimeSeries::handleNextDiagram( const int &dgrmIdx )
     ++animFrame;
     if ( animFrame == itemsMarked.end() )
         animFrame = itemsMarked.begin();
-    
+
     if ( *animFrame != animIdxDgrm )
     {
         map< int, Position2D >::iterator it;
@@ -1074,7 +1078,7 @@ void TimeSeries::handleNextDiagram( const int &dgrmIdx )
         showDgrm.insert( pair< int, Position2D >( idx, pos ) );
 
         mediator->handleAnimFrameClust( this );
-        
+
         animIdxDgrm = idx;
         currIdxDgrm = idx;
     }
@@ -1117,76 +1121,6 @@ void TimeSeries::handleHits( const vector< int > &ids )
                     }
                 }
             }
-            else if ( mouseDrag == MSE_DRAG_FALSE )
-            {
-                if ( mouseSide == MSE_SIDE_LFT )
-                {
-                    if ( ids[1] == ID_SLIDER )
-                    {
-                        if ( ids.size() == 3 )
-                        {
-                            if ( ids[2] == ID_SLIDER_HDL )
-                                dragStatus = DRAG_STATUS_SLDR;
-                            else if ( ids[2] == ID_SLIDER_HDL_LFT )
-                                dragStatus = DRAG_STATUS_SLDR_LFT;
-                            else if ( ids[2] == ID_SLIDER_HDL_RGT )
-                                dragStatus = DRAG_STATUS_SLDR_RGT;
-                        }
-                        else
-                        {
-                            dragStatus = DRAG_STATUS_SLDR;
-                            handleHitSlider();
-                        }
-                    }
-                    else if ( ids[1] == ID_ITEMS )
-                    {
-                        if ( mouseClick == MSE_CLICK_SINGLE )
-                        {
-                            handleHitItems( ids[2] );
-                            dragStatus = DRAG_STATUS_ITMS;
-                        }
-                        else if ( mouseClick == MSE_CLICK_DOUBLE )
-                            handleShowDiagram( ids[2] );;
-                    }
-                    else if ( ids[1] == ID_DIAGRAM )
-                    {
-                        if ( ids.size() == 4 )
-                        {
-                            if ( ids[3] == ID_DIAGRAM_CLSE )
-                                handleShowDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_MORE )
-                            {
-                                currIdxDgrm = ids[2];
-                                mediator->handleSendDgrm( this, false, false, false, true, false );
-                            }
-                            else if ( ids[3] == ID_DIAGRAM_RWND )
-                                handleRwndDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_PREV )
-                                handlePrevDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_PLAY )
-                                handlePlayDiagram( ids[2] );
-                            else if ( ids[3] == ID_DIAGRAM_NEXT )
-                                handleNextDiagram( ids[2] );
-                        }
-                        else
-                            dragStatus = DRAG_STATUS_DGRM;
-                    }
-                }
-                else if ( mouseSide == MSE_SIDE_RGT )
-                {
-                    if ( mouseButton == MSE_BUTTON_DOWN )
-                    {
-                        /*
-                        if ( ids[1] == ID_ITEMS )
-                            *mediator << "show menu\n";
-                        else
-                        */
-                        if ( ids[1] == ID_DIAGRAM )
-                            mediator->handleSendDgrm( this, false, false, false, true, false );
-                    }
-                }
-            }
-
         }
         // mouse button up
         else
@@ -1194,8 +1128,31 @@ void TimeSeries::handleHits( const vector< int > &ids )
             dragDistNodes = 0.0;
             dragStatus = DRAG_STATUS_NONE;
 
-            if ( ids.size() > 2 && ids[1] == ID_DIAGRAM )
+            if ( mouseSide == MSE_SIDE_LFT && ids.size() > 2 && ids[1] == ID_DIAGRAM )
             {
+            	if ( ids.size() == 4 && mouseClick == MSE_CLICK_SINGLE )
+                {
+                	if ( ids[3] == ID_DIAGRAM_CLSE )
+                    {
+                       	handleShowDiagram( ids[2] );
+                    }
+                    else if ( ids[3] == ID_DIAGRAM_MORE )
+                    {
+                    	currIdxDgrm = ids[2];
+                       	mediator->handleSendDgrm( this, false, false, false, true, false );
+                    }
+                    else if ( ids[3] == ID_DIAGRAM_RWND )
+                      	handleRwndDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_PREV )
+                       	handlePrevDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_PLAY )
+                       	handlePlayDiagram( ids[2] );
+                    else if ( ids[3] == ID_DIAGRAM_NEXT )
+                       	handleNextDiagram( ids[2] );
+                }
+                else
+                	dragStatus = DRAG_STATUS_DGRM;
+
                 mouseOverIdx = -1;
                 currIdxDgrm = ids[2];
 
@@ -1207,7 +1164,7 @@ void TimeSeries::handleHits( const vector< int > &ids )
 
                     VisUtils::mapColorCoolBlue( col );
                     frame->addNode( graph->getNode( currIdxDgrm ) );
-  
+
                     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
                     {
                         //if ( graph->getAttribute( i )->getSizeCurValues() > 0 )
@@ -1221,14 +1178,53 @@ void TimeSeries::handleHits( const vector< int > &ids )
                     frame = NULL;
                 }
             }
-            else if ( ids.size() > 2 && 
+            else if ( mouseClick == MSE_CLICK_SINGLE && mouseSide == MSE_SIDE_LFT && ids[1] == ID_SLIDER )
+            {
+                if ( ids.size() == 3 )
+                {
+                	if ( ids[2] == ID_SLIDER_HDL )
+                      	dragStatus = DRAG_STATUS_SLDR;
+                    else if ( ids[2] == ID_SLIDER_HDL_LFT )
+                       	dragStatus = DRAG_STATUS_SLDR_LFT;
+                    else if ( ids[2] == ID_SLIDER_HDL_RGT )
+                       	dragStatus = DRAG_STATUS_SLDR_RGT;
+                }
+                else
+                {
+                   	dragStatus = DRAG_STATUS_SLDR;
+                    handleHitSlider();
+                }
+            }
+            else if ( mouseSide == MSE_SIDE_LFT && ids.size() > 2 &&
                       ( ids[1] == ID_ITEMS && attributes.size() > 0 ) )
             {
-                mouseOverIdx = ids[2];
-                currIdxDgrm = -1;
+            	if ( mouseClick == MSE_CLICK_SINGLE )
+                {
+                	handleHitItems( ids[2] );
+                	dragStatus = DRAG_STATUS_ITMS;
+                }
+                else if ( mouseClick == MSE_CLICK_DOUBLE )
+                {
+                	handleShowDiagram( ids[2] );
+                }
+                //mouseOverIdx = ids[2];
+                //currIdxDgrm = -1;
 
-                mediator->handleMarkFrameClust( this );
-                mediator->handleUnshowFrame();
+                //mediator->handleMarkFrameClust( this );
+                //mediator->handleUnshowFrame();
+            }
+            else if( mouseSide == MSE_SIDE_RGT && mouseClick == MSE_CLICK_SINGLE )
+            {
+               	if ( mouseButton == MSE_BUTTON_DOWN )
+                {
+                	/*
+                    if ( ids[1] == ID_ITEMS )
+                    *mediator << "show menu\n";
+                    else
+                    */
+                    if ( ids[1] == ID_DIAGRAM )
+                    	mediator->handleSendDgrm( this, false, false, false, true, false );
+                }
             }
             else
             {
@@ -1256,15 +1252,15 @@ void TimeSeries::handleHits( const vector< int > &ids )
 
 
 // --------------------------
-void TimeSeries::processHits( 
-    GLint hits, 
+void TimeSeries::processHits(
+    GLint hits,
     GLuint buffer[] )
 // --------------------------
 {
     GLuint *ptr;
     int number;
     vector< int > ids;
-    
+
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -1362,7 +1358,7 @@ void TimeSeries::drawSlider( const bool &inSelectMode )
     {
         double pix = canvas->getPixelSize();
         ColorRGB colFill, colFade;
-        
+
         // draw marked items on slider
         VisUtils::setColor( colMrk );
         if ( itvSliderPerNode < pix )
@@ -1407,26 +1403,26 @@ void TimeSeries::drawSlider( const bool &inSelectMode )
         VisUtils::drawLine(
             posSliderTopLft.x, posSliderBotRgt.x,
             posSliderTopLft.y, posSliderTopLft.y );
-        
+
         VisUtils::setColorWhite();
-        VisUtils::drawLine( 
+        VisUtils::drawLine(
             posSliderTopLft.x,
             posSliderBotRgt.x,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix + 1.0*pix);
         VisUtils::setColorLtGray();
-        VisUtils::drawLine( 
+        VisUtils::drawLine(
             posSliderTopLft.x,
             posSliderBotRgt.x,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix );
         VisUtils::setColorMdGray();
-        VisUtils::drawLine( 
+        VisUtils::drawLine(
             posSliderTopLft.x,
             posSliderBotRgt.x,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix - 1.0*pix,
             posSliderBotRgt.y - 0.5*ySpacePxl*pix - 1.0*pix);
-        
+
         // draw slider scale
         double pos = posSliderTopLft.x;
         int ctr = 0;
@@ -1484,7 +1480,7 @@ void TimeSeries::drawSlider( const bool &inSelectMode )
             posSliderTopLft.y - 2.0*pix,
             posSliderTopLft.y - 2.0*ySpacePxl*pix + 2.0*pix,
             colFade, colFade, colFill, colFill );
-        
+
         // draw slider handles
         VisUtils::setColorDkGray();
         VisUtils::fillTriangle(
@@ -1522,7 +1518,7 @@ void TimeSeries::drawSlider( const bool &inSelectMode )
     }
 }
 
-    
+
 // ---------------------------------------------------
 void TimeSeries::drawScale( const bool &inSelectMode )
 // ---------------------------------------------------
@@ -1539,7 +1535,7 @@ void TimeSeries::drawScale( const bool &inSelectMode )
             if ( beg%nodesItvScale == 0 )
                 break;
         }
-        
+
         for ( int i = beg; i <= wdwStartIdx+nodesWdwScale; i += nodesItvScale )
         {
             if ( (i/nodesItvScale)%5 == 0 )
@@ -1591,7 +1587,7 @@ void TimeSeries::drawMarkedItems( const bool &inSelectMode )
     if ( inSelectMode == true )
     {
         double pix = canvas->getPixelSize();
-        
+
         glPushName( ID_ITEMS );
         for ( int i = 0; i < nodesWdwScale; ++i )
         {
@@ -1608,7 +1604,7 @@ void TimeSeries::drawMarkedItems( const bool &inSelectMode )
     else
     {
         double pix = canvas->getPixelSize();
-        
+
         // draw selected items
         VisUtils::setColor( colMrk );
 
@@ -1625,7 +1621,7 @@ void TimeSeries::drawMarkedItems( const bool &inSelectMode )
     }
 }
 
-    
+
 // --------------------------------------------------
 void TimeSeries::drawAxes( const bool &inSelectMode )
 // --------------------------------------------------
@@ -1696,14 +1692,14 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                                 iter = value - attributes[i]->getLowerBound();
                                 numr = attributes[i]->getUpperBound()-attributes[i]->getLowerBound();
                             }
-                            
+
                             VisUtils::mapColorSeqGreen( iter/numr, colFill );
                             colFade.r = colFill.r-0.25;
                             colFade.g = colFill.g-0.25;
                             colFade.b = colFill.b-0.25;
                             colFade.a = 1.0;
-                            
-                            VisUtils::fillRect( 
+
+                            VisUtils::fillRect(
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].y,
@@ -1716,7 +1712,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                         else
                         {
                             VisUtils::setColorCoolGreen();
-                            VisUtils::fillRect( 
+                            VisUtils::fillRect(
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].y,
@@ -1736,8 +1732,8 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                             colFade.g = colFill.g-0.25;
                             colFade.b = colFill.b-0.25;
                             colFade.a = 1.0;
-                            
-                            VisUtils::fillRect( 
+
+                            VisUtils::fillRect(
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].y,
@@ -1750,7 +1746,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                         else
                         {
                             VisUtils::setColorCoolRed();
-                            VisUtils::fillRect( 
+                            VisUtils::fillRect(
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                                 posValues[i][wdwStartIdx+j].y,
@@ -1766,18 +1762,18 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                 {
                     if ( useShading == true )
                     {
-                        iter = (double)attributes[i]->mapToValue( 
-                            graph->getNode(wdwStartIdx+j)->getTupleVal( 
+                        iter = (double)attributes[i]->mapToValue(
+                            graph->getNode(wdwStartIdx+j)->getTupleVal(
                                 attributes[i]->getIndex() ) )->getIndex();
                         numr = (double)(attributes[i]->getSizeCurValues()-1);
-                                            
+
                         VisUtils::mapColorSeqGreen( iter/numr, colFill );
                         colFade.r = colFill.r-0.25;
                         colFade.g = colFill.g-0.25;
                         colFade.b = colFill.b-0.25;
                         colFade.a = 1.0;
-                        
-                        VisUtils::fillRect( 
+
+                        VisUtils::fillRect(
                             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                             posValues[i][wdwStartIdx+j].y,
@@ -1790,7 +1786,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
                     else
                     {
                         VisUtils::setColorCoolGreen();
-                        VisUtils::fillRect( 
+                        VisUtils::fillRect(
                             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode,
                             posValues[i][wdwStartIdx+j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                             posValues[i][wdwStartIdx+j].y,
@@ -1809,13 +1805,13 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
             {
                 iter = graph->getNode( wdwStartIdx+j )->getTupleVal( attributes[i]->getIndex() );
                 VisUtils::mapColorMdGray( colFill );
-                
+
                 glColor3f( colFill.r, colFill.g, colFill.b );
-                glVertex2f( 
-                    posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode, 
+                glVertex2f(
+                    posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode,
                     posValues[i][wdwStartIdx + j].y );
-                glVertex2f( 
-                    posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode, 
+                glVertex2f(
+                    posValues[i][wdwStartIdx + j].x - wdwStartIdx*itvWdwPerNode + itvWdwPerNode,
                     posValues[i][wdwStartIdx + j].y );
             }
             glEnd();
@@ -1838,7 +1834,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             map< int, Position2D >::iterator it;
             vector< double >     vals;
             vector< Attribute* > attrs;
-            
+
             it = showDgrm.find( animIdxDgrm );
             posDgrm = it->second;
             posDgrm.x -= wdwStartIdx*itvWdwPerNode;
@@ -1849,23 +1845,23 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
 
             glPushName( it->first );
             VisUtils::fillRect( - 1.0, 1.0, 1.0, -1.0 );
-            
+
             glPushName( ID_DIAGRAM_RWND );
             VisUtils::fillRect( 0.2, 0.36, -0.8, -0.98 );
             glPopName();
-            
+
             glPushName( ID_DIAGRAM_PREV );
             VisUtils::fillRect( 0.4, 0.56, -0.8, -0.98 );
             glPopName();
-            
+
             glPushName( ID_DIAGRAM_PLAY );
             VisUtils::fillRect( 0.6, 0.76, -0.8, -0.98 );
             glPopName();
-            
+
             glPushName( ID_DIAGRAM_NEXT );
             VisUtils::fillRect( 0.8, 0.96, -0.8, -0.98 );
             glPopName();
-            
+
             glPopName();
             glPopMatrix();
         }
@@ -1874,7 +1870,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             Position2D posDgrm;
             vector< double >     vals;
             vector< Attribute* > attrs;
-        
+
             map< int, Position2D >::iterator it;
             for ( it = showDgrm.begin(); it != showDgrm.end(); ++it )
             {
@@ -1891,30 +1887,30 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 glPushName( ID_DIAGRAM_CLSE );
                 VisUtils::fillRect( 0.8, 0.96, 0.96, 0.8 );
                 glPopName();
-                
+
                 glPushName( ID_DIAGRAM_MORE );
                 VisUtils::fillRect( -0.98, -0.8, -0.8, -0.98 );
                 glPopName();
-                
+
                 if ( it->first == currIdxDgrm && itemsMarked.size() > 1 )
                 {
                     glPushName( ID_DIAGRAM_RWND );
                     VisUtils::fillRect( 0.2, 0.36, -0.8, -0.98 );
                     glPopName();
-                    
+
                     glPushName( ID_DIAGRAM_PREV );
                     VisUtils::fillRect( 0.4, 0.56, -0.8, -0.98 );
                     glPopName();
-                    
+
                     glPushName( ID_DIAGRAM_PLAY );
                     VisUtils::fillRect( 0.6, 0.76, -0.8, -0.98 );
                     glPopName();
-                    
+
                     glPushName( ID_DIAGRAM_NEXT );
                     VisUtils::fillRect( 0.8, 0.96, -0.8, -0.98 );
                     glPopName();
                 }
-             
+
                 glPopName();
                 glPopMatrix();
             }
@@ -1924,7 +1920,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
     else
     {
         double     pix = canvas->getPixelSize();
-        
+
         if ( timerAnim->IsRunning() == true && animIdxDgrm >= 0 )
         {
             Position2D posPvot, posDgrm;
@@ -1932,7 +1928,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             map< int, Position2D >::iterator it;
             vector< double >     vals;
             vector< Attribute* > attrs;
-            
+
             it = showDgrm.find( animIdxDgrm );
             posDgrm = it->second;
             posDgrm.x -= wdwStartIdx*itvWdwPerNode;
@@ -1941,11 +1937,11 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
 
             aglDeg = Utils::calcAngleDg( posDgrm.x-posPvot.x, posDgrm.y-posPvot.y );
             dist   = Utils::dist( posPvot.x, posPvot.y, posDgrm.x, posDgrm.y );
-                
+
             // draw vertical line
             VisUtils::setColorCoolBlue();
             VisUtils::drawLine(
-                posPvot.x, 
+                posPvot.x,
                 posPvot.x,
                 posSliderBotRgt.y - 0.5*ySpacePxl*pix,
                 posScaleTopLft.y - 2.0*ySpacePxl*pix );
@@ -1960,7 +1956,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             VisUtils::drawTriangle( 0.0, 0.0, -pix, dist, pix, dist );
             VisUtils::disableLineAntiAlias();
             glPopMatrix();
-            
+
             glPushMatrix();
             glTranslatef( posDgrm.x, posDgrm.y, 0.0 );
             glScalef( scaleDgrm, scaleDgrm, scaleDgrm );
@@ -2000,12 +1996,12 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             vals.clear();
 
             VisUtils::enableLineAntiAlias();
-                
+
             VisUtils::setColorCoolBlue();
             VisUtils::fillRwndIcon( 0.2, 0.36, -0.8, -0.98 );
             VisUtils::setColorLtLtGray();
             VisUtils::drawRwndIcon( 0.2, 0.36, -0.8, -0.98 );
-            
+
             VisUtils::setColorCoolBlue();
             VisUtils::fillPrevIcon( 0.4, 0.56, -0.8, -0.98 );
             VisUtils::setColorLtLtGray();
@@ -2020,7 +2016,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             VisUtils::fillNextIcon( 0.8, 0.96, -0.8, -0.98 );
             VisUtils::setColorLtLtGray();
             VisUtils::drawNextIcon( 0.8, 0.96, -0.8, -0.98 );
-         
+
             VisUtils::disableLineAntiAlias();
             glPopMatrix();
         }
@@ -2030,7 +2026,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             double     aglDeg, dist;
             vector< double >     vals;
             vector< Attribute* > attrs;
-        
+
             map< int, Position2D >::iterator it;
             for ( it = showDgrm.begin(); it != showDgrm.end(); ++it )
             {
@@ -2045,11 +2041,11 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 // draw vertical line
                 VisUtils::setColorCoolBlue();
                 VisUtils::drawLine(
-                    posPvot.x, 
+                    posPvot.x,
                     posPvot.x,
                     posSliderBotRgt.y - 0.5*ySpacePxl*pix,
                     posScaleTopLft.y - 2.0*ySpacePxl*pix );
-                
+
                 // draw connector
                 VisUtils::setColorCoolBlue();
                 glPushMatrix();
@@ -2060,7 +2056,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 VisUtils::drawTriangle( 0.0, 0.0, -pix, dist, pix, dist );
                 VisUtils::disableLineAntiAlias();
                 glPopMatrix();
-            
+
                 glPushMatrix();
                 glTranslatef( posDgrm.x, posDgrm.y, 0.0 );
                 glScalef( scaleDgrm, scaleDgrm, scaleDgrm );
@@ -2093,7 +2089,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 }
                 attr = NULL;
                 node = NULL;
-                
+
                 diagram->visualize(
                     inSelectMode,
                     canvas,
@@ -2103,7 +2099,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 vals.clear();
 
                 VisUtils::enableLineAntiAlias();
-                
+
                 // close icon
                 VisUtils::setColorCoolBlue();
                 VisUtils::fillCloseIcon( 0.8, 0.96, 0.96, 0.8 );
@@ -2121,7 +2117,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                     VisUtils::fillRwndIcon( 0.2, 0.36, -0.8, -0.98 );
                     VisUtils::setColorLtLtGray();
                     VisUtils::drawRwndIcon( 0.2, 0.36, -0.8, -0.98 );
-                    
+
                     VisUtils::setColorCoolBlue();
                     VisUtils::fillPrevIcon( 0.4, 0.56, -0.8, -0.98 );
                     VisUtils::setColorLtLtGray();
@@ -2137,7 +2133,7 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                     VisUtils::setColorLtLtGray();
                     VisUtils::drawNextIcon( 0.8, 0.96, -0.8, -0.98 );
                 }
-                
+
                 VisUtils::disableLineAntiAlias();
                 glPopMatrix();
             }
@@ -2162,7 +2158,7 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
             vector< Position2D > posBotRgt;
             double txtScaling;
             size_t maxLbl = 0;
-            
+
             pos1.x = posScaleTopLft.x + (mouseOverIdx - wdwStartIdx)*itvWdwPerNode;
             pos1.y = posAxesTopLft[0].y;
             pos2.x = pos1.x;
@@ -2181,9 +2177,9 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
                 {
                     Attribute* attr = attributes[i];
                     Node* node = graph->getNode( mouseOverIdx );
-                    
+
                     lbl = attr->mapToValue( node->getTupleVal( attr->getIndex() ) )->getValue();
-                    
+
                     attr = NULL;
                     node = NULL;
                 }
@@ -2224,7 +2220,7 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
                     posBotRgt[i].x,
                     posTopLft[i].y,
                     posBotRgt[i].y );
-                
+
                 VisUtils::setColor( colTxt );
                 VisUtils::drawLabel(
                         texCharId,
@@ -2254,7 +2250,7 @@ if ( inSelectMode == true )
         {
             if ( attributes[i]->getLowerBound() < 0 )
             {
-                double tmp = Utils::maxx( 
+                double tmp = Utils::maxx(
                     Utils::abs( attributes[i]->getLowerBound() ), Utils::abs( attributes[i]->getUpperBound() ) );
                 lblTop = Utils::dblToStr( tmp );
                 lblBot = Utils::dblToStr( -tmp );
@@ -2264,7 +2260,7 @@ if ( inSelectMode == true )
                 lblTop = Utils::dblToStr( attributes[i]->getUpperBound() );
                 lblBot = Utils::dblToStr( attributes[i]->getLowerBound() );
             }
-            
+
             // min
             VisUtils::setColorWhite();
             VisUtils::drawLabel(
@@ -2313,7 +2309,7 @@ if ( inSelectMode == true )
                 szeTxt*pix/CHARHEIGHT,
                 attributes[i]->getName() );
         }
-    }    
+    }
 }
 
 
@@ -2323,10 +2319,10 @@ void TimeSeries::handleHitSlider()
 {
     double x, y;
     double distWorld;
-    
+
     canvas->getWorldCoords( xMouseCur, yMouseCur, x, y );
     distWorld = x - ( posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode );
-    
+
     dragDistNodes = distWorld/itvSliderPerNode;
 
     if ( distWorld < 0 )
@@ -2357,7 +2353,7 @@ void TimeSeries::handleDragSliderHdl()
     double x1, y1;
     double x2, y2;
     double distWorld;
-    
+
 //    draggingSlider = true;
     dragStatus = DRAG_STATUS_SLDR;
 
@@ -2422,7 +2418,7 @@ void TimeSeries::handleDragSliderHdlLft()
 
     distWindow = posSliderBotRgt.x - posSliderTopLft.x;
     pixWindow  = distWindow/pix;
-    
+
     double tempPixPerNode = pixWindow/(double)(nodesWdwScale-distNodes);
     if ( tempPixPerNode < minPixPerNode )
     {
@@ -2448,7 +2444,7 @@ void TimeSeries::handleDragSliderHdlRgt()
     double distNodes;
     double distWindow;
     double pixWindow;
-    
+
     pix  = canvas->getPixelSize();
     xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
     canvas->getWorldCoords( xMouseCur, yMouseCur, xMse, yMse );
@@ -2458,7 +2454,7 @@ void TimeSeries::handleDragSliderHdlRgt()
 
     distWorld  = xMse-xHdl;
     distNodes  = distWorld/itvSliderPerNode;
-    
+
     distWindow = posSliderBotRgt.x - posSliderTopLft.x;
     pixWindow  = distWindow/pix;
 
@@ -2492,7 +2488,7 @@ void TimeSeries::handleHitItems( const int &idx )
     if ( keyCodeDown == WXK_SHIFT )
     {
         int begIdx, endIdx;
-        
+
         // calc range of marked items
         if ( shiftStartIdx <= idx )
         {
@@ -2505,7 +2501,7 @@ void TimeSeries::handleHitItems( const int &idx )
             endIdx = shiftStartIdx;
         }
 
-        
+
         // update marked items
         itemsMarked.clear();
         for ( int i = begIdx; i <= endIdx; ++i )
@@ -2556,7 +2552,7 @@ void TimeSeries::handleDragItems( const int &idx )
         prevAnimIdx = *animFrame;
     else
         prevAnimIdx = -1;
-    
+
     dragStatus = DRAG_STATUS_ITMS;
 
     if ( dragStartIdx != idx )
@@ -2564,7 +2560,7 @@ void TimeSeries::handleDragItems( const int &idx )
         // sort indices
         int begIdx, endIdx;
         bool flag = false;
-        
+
         // shift key
         if ( keyCodeDown == WXK_SHIFT )
         {
@@ -2628,7 +2624,7 @@ void TimeSeries::handleDragItems( const int &idx )
                             itemsMarked.erase( endIdx );
                         flag = false;
                     }
-                   
+
                     for( int i = begIdx; i < endIdx; ++i )
                     {
                         it = itemsMarked.find( i );
@@ -2674,7 +2670,7 @@ void TimeSeries::handleShowDiagram( const int &dgrmIdx )
 // -----------------------------------------------------
 {
     map< int, Position2D >::iterator it;
-    
+
     it = showDgrm.find( dgrmIdx );
     // diagram doesn't exist, add it
     if ( it == showDgrm.end() )
@@ -2700,10 +2696,10 @@ void TimeSeries::handleDragDiagram( const int &dgrmIdx )
     double x2, y2;
 
     dragStatus = DRAG_STATUS_DGRM;
-    
+
     canvas->getWorldCoords( xMousePrev, yMousePrev, x1, y1 );
     canvas->getWorldCoords( xMouseCur,  yMouseCur,  x2, y2 );
-    
+
     map< int, Position2D >::iterator it;
     it = showDgrm.find( dgrmIdx );
     if ( it != showDgrm.end() )

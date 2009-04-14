@@ -1,181 +1,199 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/display.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/display.hpp
+/// \brief Abstract interface for display implementations (protocol concept)
 
-#ifndef LAYOUT_TOOL_DISPLAY_H
-#define LAYOUT_TOOL_DISPLAY_H
+#ifndef TIPI_LAYOUT_DISPLAY_H
+#define TIPI_LAYOUT_DISPLAY_H
 
-#include <iosfwd>
 #include <map>
-#include <vector>
-#include <functional>
 
-#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/integer.hpp>
 
+#include "tipi/common.hpp"
 #include "tipi/layout_base.hpp"
-#include "tipi/basic_datatype.hpp"
-#include "tipi/detail/layout_manager.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/detail/event_handlers.hpp"
 
 namespace tipi {
 
-  /** \brief Basic container class for layout elements */
+  /// \cond INTERNAL
+  class display_impl : public ::tipi::layout::basic_event_handler {
+    friend class tipi::display;
+
+      /** \brief Type for element identifiers */
+      typedef boost::uint_t< (sizeof(::tipi::layout::element*) << 3) >::least                      element_identifier;
+
+      /** \brief Type alias for a mapping from identifier to element */
+      typedef std::map < const element_identifier, boost::shared_ptr < ::tipi::layout::element > > element_by_id;
+
+    protected:
+
+      /** \brief the layout manager that contains all widgets for this display */
+      boost::shared_ptr < layout::manager > m_manager;
+
+      /** \brief Whether or not the tool display is visible to the user */
+      element_by_id                         m_element_by_id;
+
+    protected:
+
+      /** \brief Associate an element with an id */
+      void associate(element_identifier const& id, boost::shared_ptr < tipi::layout::element > const& e);
+
+      /** \brief Disassociate an id with an element */
+      void disassociate(tipi::layout::element const* e);
+
+      /** \brief Disassociate an id with an element */
+      void disassociate(element_identifier const& id);
+
+      /** \brief Find an element by its id
+       * \param[in] id the identifier of the element to find
+       * \pre the element should be in the list
+       * \throw false, when no element with this identifier is present
+       **/
+      tipi::layout::element const* find(element_identifier id) const;
+
+      /** \brief Find an element by its id
+       * \param[in] id the identifier of the element to find
+       * \pre the element should be in the list
+       * \throw false, when no element with this identifier is present
+       **/
+      tipi::layout::element* find(element_identifier id);
+
+      /** \brief Find an element by its id
+       * \pre the element should be in the list
+       * \throw false, when the element is not present
+       **/
+      element_identifier find(::tipi::layout::element const* e);
+
+    public:
+
+      inline boost::shared_ptr< layout::manager >& get_manager() {
+        return m_manager;
+      }
+
+      inline void set_manager(::tipi::layout::manager const& m) {
+        m_manager = boost::static_pointer_cast < ::tipi::layout::manager > (
+                        m_element_by_id[find(static_cast< ::tipi::layout::element const* > (&m))]);
+      }
+  };
+  /// \endcond
+
+  /**
+   * \brief Abstract container class for layout elements
+   *
+   * Elements are associated and managed by a display. The display can be used
+   * to create them and when the display is destroyed, all associated elements
+   * are destroyed as well.
+   **/
   class display : public ::utility::visitable {
     template < typename R, typename S >
     friend class ::utility::visitor;
 
-    public:
-
-      /** \brief Type alias for the abstract element class */
-      typedef tipi::layout::element                                                       element;
-
-      /** \brief Type alias for element identifiers */
-      typedef tipi::layout::element_identifier                                            element_identifier;
-
-      /** \brief Type alias for a mapping from identifier to element */
-      typedef std::map < tipi::layout::element_identifier, tipi::layout::element* >        element_for_id;
-
-    protected:
-
-      /** \brief Whether or not the tool display is visible to the user */
-      element_for_id        m_element_by_id;
-
-    protected:
-
-      /** \brief Associate an id with an element */
-      void associate(tipi::layout::element_identifier const&, tipi::layout::element*);
-
-      /** \brief Disassociate an id with an element */
-      void disassociate(tipi::layout::element const*);
-
-      /** \brief Disassociate an id with an element */
-      void disassociate(tipi::layout::element_identifier const&);
+    friend class ::tipi::tool::communicator_impl;
+    friend class ::tipi::controller::communicator_impl;
 
     public:
 
-      /** \brief Find an element by its id */
-      tipi::layout::element const* find(tipi::layout::element_identifier const&) const;
+      /** \brief Type for element identifiers */
+      typedef boost::uint_t< (sizeof(::tipi::layout::element*) << 3) >::least element_identifier;
+
+    protected:
+
+      /** \brief Pointer to implementation object (handle body idiom) */
+      boost::shared_ptr< display_impl > impl;
+
+      /** \brief Factory function for layout elements */
+      template < typename T >
+      T& create(const display::element_identifier);
+
+      /** \brief Factory function for layout elements */
+      template < typename T >
+      void create(boost::shared_ptr < ::tipi::layout::element >&, element_identifier const&);
+
+      /** \brief Copy constructor */
+      display(display const& other) : impl(other.impl) {
+      }
+
+      /** \brief Standard constructor */
+      display() : impl(new display_impl) {
+      }
+
+    public:
+
+      /** \brief Factory function for layout elements of this display */
+      template < typename T >
+      T& create();
 
       /** \brief Find the id for an element */
-      tipi::layout::element_identifier find(tipi::layout::element const*) const;
+      ::tipi::display::element_identifier find(tipi::layout::element const* element) const {
+        return impl->find(element);
+      }
 
-      /** \brief Pure virtual destructor */
-      virtual ~display() = 0;
+      /**
+       * \param[in] id the identifier of the element to find
+       * \pre the element should be in the list
+       * \throw false, when no element with this identifier is present
+       **/
+      template < typename T >
+      inline T const& find(tipi::display::element_identifier id) const {
+        return static_cast < T const& > (*impl->find(id));
+      }
+
+      /**
+       * \param[in] id the identifier of the element to find
+       * \pre the element should be in the list
+       * \throw false, when no element with this identifier is present
+       **/
+      template < typename T >
+      inline T& find(tipi::display::element_identifier id) {
+        return const_cast < T& > (*static_cast < T const* > (impl->find(id)));
+      }
   };
 
-  namespace layout {
+  template < typename T >
+  inline T& display::create() {
+    boost::shared_ptr < T > new_t(::tipi::layout::element::create< T >());
 
-    /** \brief Basic container class for controller-side layout definitions */
-    class tool_display : public tipi::display {
-      template < typename R, typename S >
-      friend class ::utility::visitor;
+    new_t->set_event_handler(*static_cast < tipi::layout::basic_event_handler* > (impl.get()));
 
-      public:
+    impl->associate(reinterpret_cast < display::element_identifier > (new_t.get()), boost::static_pointer_cast < tipi::layout::element > (new_t));
 
-        /** \brief Convenience type alias to hide the shared pointer implementation */
-        typedef boost::shared_ptr < tool_display >          sptr;
-
-        /** \brief Convenience type for passing and returning a sequence of layout elements */
-        typedef std::vector < tipi::layout::element const* > constant_elements;
-
-      private:
-
-        /** \brief the layout manager that contains all widgets for this display */
-        std::auto_ptr < layout::manager > m_manager;
-
-        /** \brief Whether or not the tool display is visible to the user */
-        bool                              m_visible;
-
-      public:
-
-        /** \brief Constructor */
-        inline tool_display();
-
-        /** \brief Constructor */
-        inline tool_display(std::auto_ptr < layout::manager >);
-
-        /** \brief Factory function */
-        inline static boost::shared_ptr < layout::tool_display > create(std::auto_ptr < layout::manager >);
-
-        /** \brief Returns whether or not the contents should be visible */
-        inline bool get_visibility() const;
-
-        /** \brief Whether or not the tool display is shown */
-        inline void show(bool);
-
-        /** \brief Get the layout manager that contains all widgets for this display */
-        inline layout::manager const* get_manager() const;
-
-        /** \brief Set the layout manager that contains all widgets for this display */
-        inline void set_manager(std::auto_ptr < layout::manager >);
-
-        /** \brief Creates a (G)UI for this tool_display */
-        mediator::wrapper_aptr instantiate(mediator* m) const;
-
-        /** \brief Update (part of) the layout structure */
-        void update(std::string const&, std::vector < tipi::layout::element const* >& elements);
-    };
-
-    inline tool_display::tool_display() : m_visible(true) {
-    }
-
-    inline tool_display::tool_display(std::auto_ptr < layout::manager > m) : m_manager(m), m_visible(true) {
-    }
-
-    inline boost::shared_ptr < layout::tool_display > tool_display::create(std::auto_ptr < layout::manager > m) {
-      boost::shared_ptr < layout::tool_display > p(new tool_display(m));
-
-      return (p);
-    }
-
-    inline layout::manager const* tool_display::get_manager() const {
-      return (m_manager.get());
-    }
-
-    inline void tool_display::set_manager(std::auto_ptr < layout::manager > m) {
-      m_manager = m;
-    }
-
-    inline bool tool_display::get_visibility() const {
-      return (m_visible);
-    }
-
-    /**
-     * \param[in] s Whether or not the tool display must be visible
-     **/
-    inline void tool_display::show(bool s) {
-      m_visible = s;
-    }
-  }
-
-  inline display::~display() {
+    return *new_t;
   }
 
   /**
-   * \pre the element should be in the list
+   * \param[in] id an identifier for the new element
    **/
-  inline tipi::layout::element const* display::find(tipi::layout::element_identifier const& id) const {
-    return visitors::search(*this, id);
+  template < typename T >
+  inline T& display::create(const display::element_identifier id) {
+    boost::shared_ptr < T > new_t(::tipi::layout::element::create< T >());
+
+    new_t->set_event_handler(*static_cast < tipi::layout::basic_event_handler* > (impl.get()));
+
+    impl->associate(id, boost::static_pointer_cast < tipi::layout::element > (new_t));
+
+    return *new_t;
   }
 
   /**
-   * \pre the element should be in the list
+   * \param[in] p a place to store the new element
+   * \param[in] id an identifier for the new element
    **/
-  inline tipi::layout::element_identifier display::find(tipi::layout::element const* e) const {
-    return visitors::search(*this, e);
-  }
+  template < typename T >
+  inline void display::create(boost::shared_ptr < ::tipi::layout::element >& p, ::tipi::display::element_identifier const& id) {
+    p = ::tipi::layout::element::create< T >();
 
-  inline void display::associate(tipi::layout::element_identifier const& id, tipi::layout::element* e) {
-    m_element_by_id[id] = e;
-  }
+    p->set_event_handler(*static_cast < tipi::layout::basic_event_handler* > (impl.get()));
 
-  inline void display::disassociate(tipi::layout::element_identifier const& id) {
-    element_for_id::iterator i = m_element_by_id.find(id);
-
-    if (i != m_element_by_id.end()) {
-      m_element_by_id.erase(i);
-    }
+    impl->associate(id, p);
   }
 }
 

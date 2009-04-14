@@ -1,0 +1,24 @@
+# input / decrypt
+decrypt        = %sum%decrypt(%ciphertext%, encrypt([%pm_terms%, %type_exprs%], %key%), encrypt([%pm_terms_updated%, %vars%], %key_updated%), %anno%).%newline%%subproc%
+receive        = %sum%read([%pm_terms%, %type_exprs%], [%pm_terms_updated%, %vars%]).%newline%%subproc%
+sum            = sum %vars%, %prime_vars%: Value.%newline%
+type_n         = any_name
+type_c         = any_ciphertext
+type_sep       = , 
+
+# proc
+dy             = DYinit([known_name, %known_names%])
+zero           = %zero_action%delta
+send           = send([%terms%]).%newline%%subproc%
+
+# data
+name           = N(%name%)
+ciphertext     = encrypt([%terms%], %key%, %anno%)
+anno_none      = AnnoNone
+anno           = at(%at%, [%destorig%]%cpdy_ai%)
+anno_s         = at_s(%at%)
+cpdy_ai        =  ++ CPDYonAttackerIndex([%indices%])
+
+# init
+init           = init allow({s, r, FAIL, zero}, comm({send|recvA->s, sendA|recv->r},%newline%  %proc%%newline%));
+attacker_index = eqn attackerIndex = %index%;

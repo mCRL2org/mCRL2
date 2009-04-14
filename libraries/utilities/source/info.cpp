@@ -1,25 +1,40 @@
 // Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file source/info.cpp
-/// \brief Add your file description here.
 
-// Implementation of classes ATerm_Info, AI_Jitty and AI_Inner
-// file: info.cpp
+#include "boost.hpp" // precompiled headers
 
 #include "aterm2.h"
-#include "librewrite.h"
-#include "libstruct.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/utilities/info.h"
 #include "mcrl2/utilities/utilities.h"
-#include "mcrl2/utilities/aterm_ext.h"
+#include "mcrl2/core/aterm_ext.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+
+inline static Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2) {
+  return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
+}
+
+inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
+  long v_address1 = reinterpret_cast < long > (a_term1);
+  long v_address2 = reinterpret_cast < long > (a_term2);;
+
+  if (v_address1 < v_address2) {
+    return compare_result_smaller;
+  }
+  if (v_address1 > v_address2) {
+    return compare_result_bigger;
+  }
+  return compare_result_equal;
+}
+
 
 // Class ATerm_Info -------------------------------------------------------------------------------
   // Class ATerm_Info - Functions declared public -------------------------------------------------

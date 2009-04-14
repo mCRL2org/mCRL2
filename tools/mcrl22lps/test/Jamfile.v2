@@ -1,14 +1,21 @@
-project toolset/mcrl22lps/test
-     : source-location .
-     ;
+project toolset/mcrl22lps/test ;
 
-alias mcrl22lps-test-tool : /tools/mcrl22lps//mcrl22lps ;
+use-project /tools/mcrl22lps : .. ;
+use-project /tools/lpspp : ../../lpspp ;
 
-# run mcrl22lps on all mcrl2 files located somewhere in $(TOP)/examples
-#
-#  the output files get the extension lps and are located in $(BUILD_TOP)
-#
+test-cases = [ glob-tree *.mcrl2 : .svn ] ;
+
+for file in $(test-cases) {
+  tests-with-files += [
+        run /tools/mcrl22lps//mcrl22lps
+              : -D
+              : $(file)
+              : <testing.preserve>true
+                <testing.post-pipes>/tools/lpspp//lpspp
+              : mcrl22lps-$(file:B) ] ;
+}
+
 test-suite mcrl22lps
-    : [ run_tool_on_examples mcrl22lps-test-tool mcrl22lps lps : : $(TOP)/examples . : mcrl2 ]
+    : $(tests-with-files)
     ;
 

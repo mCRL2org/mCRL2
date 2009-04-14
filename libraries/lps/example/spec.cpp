@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,26 +15,26 @@
 #include <fstream>
 #include <boost/format.hpp>
 
-#include "atermpp/utility.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/sort.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
-using boost::format;
+using namespace mcrl2::data;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+using namespace mcrl2::lps;
+using namespace boost;
 
-int main()
+int main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
-  
+  MCRL2_ATERMPP_INIT(argc, argv)
+
   specification spec = mcrl22lps(ABP_SPECIFICATION);
-  cout << "check_rule_Spec(spec) = " << check_rule_Spec(spec) << endl;
+  cout << "check_term_LinProcSpec(spec) = " << check_term_LinProcSpec(spec) << endl;
 
   aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");
   cout << "check_rule_OpId(f1) = " << check_rule_OpId(f1) << endl;
@@ -42,23 +44,23 @@ int main()
   cout << "check_rule_OpId(f3) = " << check_rule_OpId(f3) << endl;
 
   cout << "--- sort -----------" << endl;
-  for (sort_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
+  for (sort_expression_list::iterator i = spec.data().sorts().begin(); i != spec.data().sorts().end(); ++i)
   {
-    lps::sort s = *i;
+    sort_expression s = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
   cout << "--- map ------------" << endl;
-  for (function_list::iterator i = spec.data().mappings().begin(); i != spec.data().mappings().end(); ++i)
+  for (data_operation_list::iterator i = spec.data().mappings().begin(); i != spec.data().mappings().end(); ++i)
   {
-    function f = *i;
+    data_operation f = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
 
   cout << "--- cons -----------" << endl;
-  for (function_list::iterator i = spec.data().constructors().begin(); i != spec.data().constructors().end(); ++i)
+  for (data_operation_list::iterator i = spec.data().constructors().begin(); i != spec.data().constructors().end(); ++i)
   {
-    function f = *i;
+    data_operation f = *i;
     cout << str(format("%5s        %s") % pp(*i) % i->to_string()) << endl;
   }
   cout << endl;
@@ -84,7 +86,7 @@ int main()
   }
   cout << endl;
 
-  lps::sort D("D");
+  sort_expression D("D");
   data_variable v("d1", D);
   cout << "v  = " << pp(v) << " " << v.to_string() << endl;
 
@@ -110,7 +112,7 @@ int main()
   {
 //    cout << "summand " << pp(*i) << endl;
   }
-  
+
   summand s = spec.process().summands().front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
@@ -125,7 +127,7 @@ int main()
   o1 << lps.to_string();
 
   ofstream o2("lps2.txt");
-  o2 << lps.substitute(a).to_string(); 
+  o2 << lps.substitute(a).to_string();
 
   return 0;
 }

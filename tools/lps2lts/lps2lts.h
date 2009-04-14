@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,7 +12,6 @@
 #define _LPS2LTS_H
 
 #define NAME "lps2lts"
-#define VERSION "0.5"
 
 ATermAppl *parse_action_list(const char *s, int *len);
 

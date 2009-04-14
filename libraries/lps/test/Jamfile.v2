@@ -1,38 +1,34 @@
-import testing ;
-
 project libraries/lps/test
    : requirements
-       <use>/boost//headers
-       <source>/libraries//parser
-       <source>/libraries/parser//alpha
-       <source>/libraries//rewrite
-       <source>/libraries//mcrl2_basic
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lps
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
+       <source>/site-config//boost_system
    ;
 
-# these files should become available as part of a library
-obj lin_std.o : ../../../tools/mcrl22lps/lin_std.cpp ;
-
-exe generate_lps2pbes_result : generate_lps2pbes_result.cpp lin_std.o ;
+include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
-      [ run_with_input lps2pbes_test.cpp lin_std.o : pbes : test ]
-      [ run pbes_test.cpp lin_std.o ]
-      [ run data_expression.cpp ]
-      [ run data_test.cpp ]
-      [ run time.cpp lin_std.o ]
-      [ run data_utility_test.cpp ]
-      [ run aterm_algorithm_test.cpp lin_std.o ]
-      [ run operators.cpp ]
-      [ run sort_test.cpp ]
-      [ run replace_test.cpp ]
-    ;
-
-install dist 
-    :
-       generate_lps2pbes_result
-    :
+      #[ run pp_test.cpp ]
+      [ run constelm_test.cpp ]
+      [ run process_test.cpp ]
+      [ run action_rename_test.cpp ]
+      [ run data_specification_test.cpp ]
+      [ run linearization_test.cpp ]
+      [ run rewriter_test.cpp ]
+      [ run state_formula_test.cpp ]
+      [ run rename_test.cpp ]
+      [ run action_test.cpp ]
+      [ run time.cpp ]
+      [ run aterm_algorithm_test.cpp ]
+      [ run parelm_test.cpp ]
+      [ run lpsconfcheck_test.cpp ]
+      [ run binary_test.cpp ]
+      [ run sumelm_test.cpp ]
+      [ run suminst_test.cpp ]
+      [ run untime_test.cpp ]
+      [ compile-headers ../include ]
     ;

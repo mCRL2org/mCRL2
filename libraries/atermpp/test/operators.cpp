@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,7 +12,7 @@
 #include <iostream>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
+#include "mcrl2/atermpp/atermpp.h"
 
 using namespace std;
 using namespace atermpp;
@@ -22,17 +24,16 @@ class D: public aterm_appl
 // This program is for checking if some standard operators on aterms
 // are defined and don't lead to ambiguities.
 
-int test_main(int, char*[])
+int test_main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   aterm t      = make_term("[1,2]");
   aterm_appl a = make_term("f(x)");
   aterm_list l = make_term("[3]");
   ATerm T      = t;
-  ATermAppl A  = a; 
-  ATermList L  = l;  
+  ATermAppl A  = a;
+  ATermList L  = l;
 
   // assignment
   t = t;

@@ -1,9 +1,9 @@
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
  * Use, modification and distribution is subject to the 
  * Boost Software License, Version 1.0. (See accompanying
- * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
+ * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2003/12/03 02:28:02 $
+ * $Date: 2008-07-13 02:15:30 +0200 (Sun, 13 Jul 2008) $
  */
 
 #ifndef NO_BOOST_DATE_TIME_INLINE
@@ -14,7 +14,7 @@
 namespace boost {
 namespace date_time {
   //! Return the day of the week (0==Sunday, 1==Monday, etc)
-  /*! Converts a the year-month-day into a day of the week number
+  /*! Converts a year-month-day into a day of the week number
    */
   template<typename ymd_type_, typename date_int_type_>
   BOOST_DATE_TIME_INLINE

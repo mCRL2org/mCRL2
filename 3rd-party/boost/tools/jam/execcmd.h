@@ -5,26 +5,41 @@
  */
 
 /*
- * execcmd.h - execute a shell script
+ * execcmd.h - execute a shell script.
+ *
+ * Defines the interface to be implemented in platform specific implementation
+ * modules.
  *
  * 05/04/94 (seiwald) - async multiprocess interface
  */
 
+#ifndef EXECCMD_H
+#define EXECCMD_H
+
+#include <time.h>
+
 typedef struct timing_info
 {
-    /* double elapsed; */  /* We don't know how to get this number on Unix */
     double system;
     double user;
+    time_t start;
+    time_t end;
 } timing_info;
 
-void execcmd(
-	char *string,
-	void (*func)( void *closure, int status, timing_info* ),
-	void *closure,
-	LIST *shell );
+void exec_cmd
+(
+    char * string,
+    void (* func)( void * closure, int status, timing_info *, char *, char * ),
+    void * closure,
+    LIST * shell,
+    char * action,
+    char * target
+);
 
-int execwait();
+int exec_wait();
 
-# define EXEC_CMD_OK	0
-# define EXEC_CMD_FAIL	1
-# define EXEC_CMD_INTR	2
+#define EXEC_CMD_OK    0
+#define EXEC_CMD_FAIL  1
+#define EXEC_CMD_INTR  2
+
+#endif

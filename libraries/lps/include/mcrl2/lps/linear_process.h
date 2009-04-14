@@ -1,11 +1,13 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/linear_process.h
-/// \brief Add your file description here.
+/// \brief The class linear_process.
 
 #ifndef MCRL2_LPS_LINEAR_PROCESS_H
 #define MCRL2_LPS_LINEAR_PROCESS_H
@@ -13,83 +15,124 @@
 #include <string>
 #include <cassert>
 #include <algorithm>
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_list.h"
-#include "atermpp/algorithm.h"
-#include "atermpp/utility.h"
-#include "mcrl2/data/utility.h"        // find_variables
+#include <functional>
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/filtered_list.h"
+#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/lps/detail/free_variables.h"
+
+namespace mcrl2 {
 
 namespace lps {
 
-using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-using atermpp::aterm_appl;
-using atermpp::read_from_named_file;
+/// \cond INTERNAL_DOCS
+struct is_non_delta_summand
+{
+  /// \brief Function call operator
+  /// \param s A linear process summand
+  /// \return True if the summand is not delta
+  bool operator()(const summand& s) const
+  {
+    return !s.is_delta();
+  }
+};
+/// \endcond
+
+/// Filtered list containing non-delta summands.
+typedef atermpp::filtered_list<summand_list, is_non_delta_summand> non_delta_summand_list;
+
+class linear_process; // prototype declaration
+
+inline
+std::set<data::data_variable> compute_free_variables(const linear_process& process); // prototype declaration
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
 /// \brief linear process.
-///
-class linear_process: public aterm_appl
+class linear_process: public atermpp::aterm_appl
 {
   protected:
-    data_variable_list m_free_variables;
-    data_variable_list m_process_parameters;
-    summand_list       m_summands;
+    /// \brief The free variables of the process
+    data::data_variable_list m_free_variables;
+
+    /// \brief The process parameters of the process
+    data::data_variable_list m_process_parameters;
+
+    /// \brief The summands of the process
+    summand_list m_summands;
 
   public:
+    /// \brief Constructor.
     linear_process()
-      : aterm_appl(detail::constructLinearProcess())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcess())
     {}
 
-    linear_process(data_variable_list free_variables,
-        data_variable_list process_parameters,
+    /// \brief Constructor.
+    linear_process(data::data_variable_list free_variables,
+        data::data_variable_list process_parameters,
         summand_list       summands
        )
-     : aterm_appl(gsMakeLinearProcess(free_variables, process_parameters, summands)),
+     : atermpp::aterm_appl(core::detail::gsMakeLinearProcess(free_variables, process_parameters, summands)),
        m_free_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_summands          (summands          )
     { }
 
-    linear_process(aterm_appl lps)
-      : aterm_appl(lps)
+    /// \brief Constructor.
+    /// \param lps A term
+    linear_process(atermpp::aterm_appl lps)
+      : atermpp::aterm_appl(lps)
     {
-      assert(detail::check_term_LinearProcess(m_term));
+      assert(core::detail::check_term_LinearProcess(m_term));
 
-      // unpack LPS(.,.,.) term     
-      aterm_appl::iterator i = lps.begin();
-      m_free_variables     = data_variable_list(*i++);
-      m_process_parameters = data_variable_list(*i++);
+      // unpack LPS(.,.,.) term
+      atermpp::aterm_appl::iterator i = lps.begin();
+      m_free_variables     = data::data_variable_list(*i++);
+      m_process_parameters = data::data_variable_list(*i++);
       m_summands           = summand_list(*i);
     }
 
-    /// Returns the sequence of LPS summands.
-    ///
+    /// \brief Returns the sequence of LPS summands.
+    /// \return The sequence of LPS summands.
     summand_list summands() const
     {
       return m_summands;
     }
 
-    /// Returns the sequence of free variables.
-    ///
-    data_variable_list free_variables() const
+    /// \brief Returns the sequence of non delta summands.
+    /// \return The sequence of non delta summands.
+    non_delta_summand_list non_delta_summands() const
+    {
+      return non_delta_summand_list(m_summands, is_non_delta_summand());
+    }
+
+    /// \brief Returns the sequence of free variables.
+    /// \return The sequence of free variables.
+    data::data_variable_list free_variables() const
     {
       return m_free_variables;
     }
 
-    /// Returns the sequence of process parameters.
-    ///
-    data_variable_list process_parameters() const
+    /// \brief Returns the sequence of process parameters.
+    /// \return The sequence of process parameters.
+    data::data_variable_list process_parameters() const
     {
       return m_process_parameters;
     }
 
-    /// Returns true if time is available in at least one of the summands.
-    ///
+    /// \brief Returns true if time is available in at least one of the summands.
+    /// \return True if time is available in at least one of the summands.
     bool has_time() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       for (summand_list::iterator i = summands().begin(); i != summands().end(); ++i)
       {
         if(i->has_time()) return true;
@@ -97,80 +140,106 @@ class linear_process: public aterm_appl
       return false;
     }
 
-    /// Applies a substitution to this LPS and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
-    ///
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
-      data_variable_list d = m_free_variables    .substitute(f);
-      data_variable_list p = m_process_parameters.substitute(f);
+      data::data_variable_list d = m_free_variables    .substitute(f);
+      data::data_variable_list p = m_process_parameters.substitute(f);
       summand_list       s = m_summands          .substitute(f);
       return linear_process(d, p, s);
-    }     
+    }
 
-    /// Returns the set of free variables that appear in the process.
+    /// \brief Returns the set of free variables that appear in the process.
     /// This set is a subset of <tt>free_variables()</tt>.
-    ///
-    std::set<data_variable> find_free_variables()
+    /// \return The set of free variables that appear in the process.
+    std::set<data::data_variable> find_free_variables()
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       // TODO: the efficiency of this implementation is not optimal
-      std::set<data_variable> result;
-      std::set<data_variable> parameters = detail::make_set(process_parameters());
+      std::set<data::data_variable> result;
+      std::set<data::data_variable> parameters = mcrl2::data::detail::make_set(process_parameters());
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        std::set<data_variable> summation_variables = detail::make_set(i->summation_variables());
-        std::set<data_variable> used_variables = find_variables(make_list(i->condition(), i->actions(), i->time()));
-        std::set<data_variable> bound_variables = detail::set_union(parameters, summation_variables);
-        std::set<data_variable> free_variables = detail::set_difference(used_variables, bound_variables);
+        std::set<data::data_variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
+        std::set<data::data_variable> used_variables = data::find_all_data_variables(atermpp::make_list(i->condition(), i->actions(), i->time(), i->assignments()));
+        std::set<data::data_variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
+        std::set<data::data_variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
         result.insert(free_variables.begin(), free_variables.end());
       }
       return result;
     }
 
-    /// Returns true if
+    /// \brief Checks if the linear process is well typed
+    /// \return True if
     /// <ul>
-    /// <li>the summands are well typed</li>
+    /// <li>the free variables occurring in the process are declared in free_variables()</li>
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
-    /// <li>the names of the process parameters do not appear as the name of a summation variable</li>
+    /// <li>process parameters and summation variables have different names</li>
     /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
+    /// <li>the summands are well typed</li>
     /// </ul>
-    ///
     bool is_well_typed() const
     {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
       // check 1)
-      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      std::set<data::data_variable> declared_free_variables  = mcrl2::data::detail::make_set(free_variables());
+      std::set<data::data_variable> occurring_free_variables = compute_free_variables(*this);
+      if (!(std::includes(declared_free_variables.begin(),
+                          declared_free_variables.end(),
+                          occurring_free_variables.begin(),
+                          occurring_free_variables.end()
+                         )
+          ))
       {
-        if (!i->is_well_typed())
-          return false;
+        std::cerr << "linear_process::is_well_typed() failed: some of the free variables were not declared\n";
+        std::cerr << "declared free variables: ";
+        for (std::set<data::data_variable>::iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
+        {
+          std::cerr << mcrl2::core::pp(*i) << " ";
+        }
+        std::cerr << "\noccurring free variables: ";
+        for (std::set<data::data_variable>::iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
+        {
+          std::cerr << mcrl2::core::pp(*i) << " ";
+        }
+        std::cerr << std::endl;
+        return false;
       }
 
       // check 2)
-      if (!detail::unique_names(m_process_parameters))
+      if (!mcrl2::data::detail::unique_names(m_process_parameters))
       {
-        std::cerr << "linear_process::is_well_typed() failed: process parameters " << pp(m_process_parameters) << " don't have unique names." << std::endl;
+        std::cerr << "linear_process::is_well_typed() failed: process parameters " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!detail::unique_names(m_free_variables))
+      if (!mcrl2::data::detail::unique_names(m_free_variables))
       {
-        std::cerr << "linear_process::is_well_typed() failed: free variables " << pp(m_process_parameters) << " don't have unique names." << std::endl;
+        std::cerr << "linear_process::is_well_typed() failed: free variables " << mcrl2::core::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 4)
-      std::set<identifier_string> names;
-      for (data_variable_list::iterator i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
+      std::set<core::identifier_string> names;
+      for (data::data_variable_list::iterator i = m_process_parameters.begin(); i != m_process_parameters.end(); ++i)
       {
         names.insert(i->name());
       }
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!detail::check_variable_names(i->summation_variables(), names))
+        if (!mcrl2::data::detail::check_variable_names(i->summation_variables(), names))
         {
-          std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
+          std::cerr << "linear_process::is_well_typed() failed: some of the names of the summation variables " << mcrl2::core::pp(i->summation_variables()) << " also appear as process parameters." << std::endl;
           return false;
         }
       }
@@ -178,20 +247,56 @@ class linear_process: public aterm_appl
       // check 5)
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
-        if (!detail::check_assignment_variables(i->assignments(), m_process_parameters))
+        if (!mcrl2::data::detail::check_assignment_variables(i->assignments(), m_process_parameters))
         {
-          std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << pp(i->assignments()) << " do not appear as process parameters." << std::endl;
+          std::cerr << "linear_process::is_well_typed() failed: some left hand sides of the assignments " << mcrl2::core::pp(i->assignments()) << " do not appear as process parameters." << std::endl;
           return false;
         }
+      }
+
+      // check 6)
+      for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
       }
 
       return true;
     }
   };
 
-/// \brief Sets the free variables of l and returns the result
+/// \brief Returns the free variables that occur in the specification
+/// \param process A linear process
+/// \return The free variables that occur in the specification
 inline
-linear_process set_free_variables(linear_process l, data_variable_list free_variables)
+std::set<data::data_variable> compute_free_variables(const linear_process& process)
+{
+  std::set<data::data_variable> result;
+  std::set<data::data_variable> process_parameters = mcrl2::data::detail::make_set(process.process_parameters());
+  for (summand_list::iterator i = process.summands().begin(); i != process.summands().end(); ++i)
+  {
+    lps::detail::collect_free_variables(*i, process_parameters, std::inserter(result, result.end()));
+  }
+  return result;
+}
+
+/// \brief Returns the action labels that occur in the process
+/// \param process A linear process
+/// \return The action labels that occur in the process
+inline
+std::set<action_label> compute_action_labels(const linear_process& process)
+{
+  std::set<action_label> result;
+  atermpp::find_all_if(process, is_action_label, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \brief Sets the free variables of l and returns the result
+/// \param l A linear process
+/// \param free_variables A sequence of data variables
+/// \return The modified linear process
+inline
+linear_process set_free_variables(linear_process l, data::data_variable_list free_variables)
 {
   return linear_process(free_variables,
              l.process_parameters(),
@@ -200,8 +305,11 @@ linear_process set_free_variables(linear_process l, data_variable_list free_vari
 }
 
 /// \brief Sets the process parameters of l and returns the result
+/// \param l A linear process
+/// \param process_parameters A sequence of data variables
+/// \return The modified linear process
 inline
-linear_process set_process_parameters(linear_process l, data_variable_list process_parameters)
+linear_process set_process_parameters(linear_process l, data::data_variable_list process_parameters)
 {
   return linear_process(l.free_variables    (),
              process_parameters,
@@ -210,6 +318,9 @@ linear_process set_process_parameters(linear_process l, data_variable_list proce
 }
 
 /// \brief Sets the summands of l and returns the result
+/// \param l A linear process
+/// \param summands A sequence of summands
+/// \return The modified linear process
 inline
 linear_process set_summands(linear_process l, summand_list summands)
 {
@@ -221,22 +332,6 @@ linear_process set_summands(linear_process l, summand_list summands)
 
 } // namespace lps
 
-/// INTERNAL ONLY
-namespace atermpp
-{
-using lps::linear_process;
-
-template<>
-struct aterm_traits<linear_process>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(linear_process t)   { t.protect(); }
-  static void unprotect(linear_process t) { t.unprotect(); }
-  static void mark(linear_process t)      { t.mark(); }
-  static ATerm term(linear_process t)     { return t.term(); }
-  static ATerm* ptr(linear_process& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_LINEAR_PROCESS_H

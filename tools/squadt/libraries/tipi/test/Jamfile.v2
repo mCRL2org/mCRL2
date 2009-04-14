@@ -1,19 +1,26 @@
-project libraries/sip/test
+project libraries/tipi/test
     : requirements
-       <use>/boost//headers
-       <include>../../
+       <use>/site-config//boost
+       <toolset>msvc:<asynch-exceptions>on
+       <use>/libraries/tipi//tool
     ;
 
-import testing ;
+include $(TOP)/build/testing/header_test.jam ;
 
-unit-test basic_messenger_test :
-        basic_messenger_test.cpp
-        /libraries//transport
-        /site-config//boost_test ;
+#unit-test basic_messenger_test :
+#        basic_messenger_test.cpp
+#        /libraries//transport
+#        /site-config//boost_test ;
 
-unit-test interface_test :
-        interface_test.cpp
-        /libraries/sip//sipc
-        /libraries/sip//sipt
-        /libraries/sip//sip_common
-        /site-config//boost_test ;
+#unit-test interface_test :
+#        interface_test.cpp
+#        /libraries/sip//sipc
+#        /libraries/sip//sipt
+#        /libraries/sip//sip_common
+#        /site-config//boost_test ;
+
+test-suite tipi
+         : [ run mime_type_test.cpp : : : <library>/libraries/tipi//tool ]
+#           [ run basic_messenger_test.cpp : : : <library>/libraries/tipi//tool ]
+           [ compile-headers ../include ]
+         ;

@@ -2,7 +2,7 @@
 // socket_acceptor_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -61,6 +61,9 @@ private:
 #elif defined(BOOST_ASIO_HAS_KQUEUE)
   typedef detail::reactive_socket_service<
       Protocol, detail::kqueue_reactor<false> > service_impl_type;
+#elif defined(BOOST_ASIO_HAS_DEV_POLL)
+  typedef detail::reactive_socket_service<
+      Protocol, detail::dev_poll_reactor<false> > service_impl_type;
 #else
   typedef detail::reactive_socket_service<
       Protocol, detail::select_reactor<false> > service_impl_type;

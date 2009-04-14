@@ -5,5 +5,5 @@
 act a;
 
 proc X(i: Nat) = a.X(i);
-            
+
 init X(2);

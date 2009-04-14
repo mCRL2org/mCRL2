@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -8,27 +10,23 @@
 /// \brief Add your file description here.
 
 #include <iostream>
+#include <cassert>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
-using namespace std;
-using namespace atermpp;
-using namespace lps;
-using namespace lps::detail;
+using namespace mcrl2;
 
-int main()
+int main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
-  gsEnableConstructorFunctions(); 
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec1 = mcrl22lps(ABP_SPECIFICATION);
-  specification spec2(spec1.data(),
-                      spec1.action_labels(),
-                      spec1.process(),
-                      spec1.initial_process()
-                     );
+  lps::specification spec1 = lps::mcrl22lps(ABP_SPECIFICATION);
+  lps::specification spec2(spec1.data(),
+                           spec1.action_labels(),
+                           spec1.process(),
+                           spec1.initial_process()
+                          );
   assert(spec1 == spec2);
 
   return 0;

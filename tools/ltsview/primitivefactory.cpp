@@ -1,14 +1,20 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file primitivefactory.cpp
-/// \brief Add your file description here.
+/// \brief Source file for PrimitiveFactory class
+
+#include "wx.hpp" // precompiled headers
 
 #include "primitivefactory.h"
 #include <cmath>
+#include "conedb.h"
+#include "primitives.h"
 
 using namespace Utils;
 
@@ -22,7 +28,7 @@ PrimitiveFactory::PrimitiveFactory(Settings* ss) {
   settings = ss;
   settings->subscribe(Quality,this);
 	settings->subscribe(BranchTilt,this);
-  
+
   cos_theta = NULL;
   sin_theta = NULL;
   coneDB = new ConeDB();
@@ -119,12 +125,12 @@ void PrimitiveFactory::notify(SettingID s) {
 			break;
 	}
 }
-  
+
 void PrimitiveFactory::update_geom_tables() {
   int qlt = settings->getInt(Quality);
   cos_theta = (float*)realloc(cos_theta,2*qlt*sizeof(float));
   sin_theta = (float*)realloc(sin_theta,2*qlt*sizeof(float));
-  
+
   float d_theta = PI / qlt;
   float theta = 0.0f;
   for (int i = 0; i < 2*qlt; ++i) {

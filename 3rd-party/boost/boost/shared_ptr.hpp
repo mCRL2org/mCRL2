@@ -5,7 +5,7 @@
 //  shared_ptr.hpp
 //
 //  (C) Copyright Greg Colvin and Beman Dawes 1998, 1999.
-//  Copyright (c) 2001-2007 Peter Dimov
+//  Copyright (c) 2001-2008 Peter Dimov
 //
 //  Distributed under the Boost Software License, Version 1.0. (See
 //  accompanying file LICENSE_1_0.txt or copy at
@@ -20,18 +20,35 @@
 #include <boost/detail/shared_ptr_nmt.hpp>
 #else
 
-#include <memory>               // for std::auto_ptr
+// In order to avoid circular dependencies with Boost.TR1
+// we make sure that our include of <memory> doesn't try to
+// pull in the TR1 headers: that's why we use this header 
+// rather than including <memory> directly:
+#include <boost/config/no_tr1/memory.hpp>  // std::auto_ptr
 
 #include <boost/assert.hpp>
 #include <boost/checked_delete.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/detail/shared_count.hpp>
 #include <boost/detail/workaround.hpp>
+#include <boost/detail/sp_convertible.hpp>
+
+#if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
+#include <boost/detail/spinlock_pool.hpp>
+#include <boost/memory_order.hpp>
+#endif
 
 #include <algorithm>            // for std::swap
 #include <functional>           // for std::less
 #include <typeinfo>             // for std::bad_cast
+
+#if !defined(BOOST_NO_IOSTREAM)
+#if !defined(BOOST_NO_IOSFWD)
 #include <iosfwd>               // for std::basic_ostream
+#else
+#include <ostream>
+#endif
+#endif
 
 #ifdef BOOST_MSVC  // moved here to work around VC++ compiler crash
 # pragma warning(push)
@@ -41,8 +58,8 @@
 namespace boost
 {
 
+template<class T> class shared_ptr;
 template<class T> class weak_ptr;
-template<class T> class enable_shared_from_this;
 
 namespace detail
 {
@@ -81,43 +98,6 @@ template<> struct shared_ptr_traits<void const volatile>
 
 #endif
 
-// enable_shared_from_this support
-
-template<class T, class Y> void sp_enable_shared_from_this( shared_count const & pn, boost::enable_shared_from_this<T> const * pe, Y const * px )
-{
-    if(pe != 0) pe->_internal_weak_this._internal_assign(const_cast<Y*>(px), pn);
-}
-
-#ifdef _MANAGED
-
-// Avoid C4793, ... causes native code generation
-
-struct sp_any_pointer
-{
-    template<class T> sp_any_pointer( T* ) {}
-};
-
-inline void sp_enable_shared_from_this( shared_count const & /*pn*/, sp_any_pointer, sp_any_pointer )
-{
-}
-
-#else // _MANAGED
-
-#ifdef sgi
-// Turn off: the last argument of the varargs function "sp_enable_shared_from_this" is unnamed
-# pragma set woff 3506
-#endif
-
-inline void sp_enable_shared_from_this( shared_count const & /*pn*/, ... )
-{
-}
-
-#ifdef sgi
-# pragma reset woff 3506
-#endif
-
-#endif // _MANAGED
-
 #if !defined( BOOST_NO_SFINAE ) && !defined( BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION ) && !defined( BOOST_NO_AUTO_PTR )
 
 // rvalue auto_ptr support based on a technique by Dave Abrahams
@@ -129,12 +109,38 @@ template< class T, class R > struct sp_enable_if_auto_ptr
 template< class T, class R > struct sp_enable_if_auto_ptr< std::auto_ptr< T >, R >
 {
     typedef R type;
-}; 
+};
 
 #endif
 
 } // namespace detail
 
+// sp_accept_owner
+
+#ifdef _MANAGED
+
+// Avoid C4793, ... causes native code generation
+
+struct sp_any_pointer
+{
+    template<class T> sp_any_pointer( T* ) {}
+};
+
+inline void sp_accept_owner( sp_any_pointer, sp_any_pointer )
+{
+}
+
+inline void sp_accept_owner( sp_any_pointer, sp_any_pointer, sp_any_pointer )
+{
+}
+
+#else // _MANAGED
+
+inline void sp_accept_owner( ... )
+{
+}
+
+#endif // _MANAGED
 
 //
 //  shared_ptr
@@ -165,7 +171,7 @@ public:
     template<class Y>
     explicit shared_ptr( Y * p ): px( p ), pn( p ) // Y must be complete
     {
-        boost::detail::sp_enable_shared_from_this( pn, p, p );
+        sp_accept_owner( this, p );
     }
 
     //
@@ -174,16 +180,18 @@ public:
     // shared_ptr will release p by calling d(p)
     //
 
-    template<class Y, class D> shared_ptr(Y * p, D d): px(p), pn(p, d)
+    template<class Y, class D> shared_ptr( Y * p, D d ): px( p ), pn( p, d )
     {
-        boost::detail::sp_enable_shared_from_this( pn, p, p );
+        D * pd = static_cast<D *>( pn.get_deleter( BOOST_SP_TYPEID(D) ) );
+        sp_accept_owner( this, p, pd );
     }
 
     // As above, but with allocator. A's copy constructor shall not throw.
 
     template<class Y, class D, class A> shared_ptr( Y * p, D d, A a ): px( p ), pn( p, d, a )
     {
-        boost::detail::sp_enable_shared_from_this( pn, p, p );
+        D * pd = static_cast<D *>( pn.get_deleter( BOOST_SP_TYPEID(D) ) );
+        sp_accept_owner( this, p, pd );
     }
 
 //  generated copy constructor, assignment, destructor are fine...
@@ -208,7 +216,29 @@ public:
     }
 
     template<class Y>
-    shared_ptr(shared_ptr<Y> const & r): px(r.px), pn(r.pn) // never throws
+    shared_ptr( weak_ptr<Y> const & r, boost::detail::sp_nothrow_tag ): px( 0 ), pn( r.pn, boost::detail::sp_nothrow_tag() ) // never throws
+    {
+        if( !pn.empty() )
+        {
+            px = r.px;
+        }
+    }
+
+    template<class Y>
+#if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
+
+    shared_ptr( shared_ptr<Y> const & r, typename detail::sp_enable_if_convertible<Y,T>::type = detail::sp_empty() )
+
+#else
+
+    shared_ptr( shared_ptr<Y> const & r )
+
+#endif
+    : px( r.px ), pn( r.pn ) // never throws
+    {
+    }
+
+    shared_ptr( detail::shared_count const & c, T * p ): px( p ), pn( c ) // never throws
     {
     }
 
@@ -253,7 +283,8 @@ public:
     {
         Y * tmp = r.get();
         pn = boost::detail::shared_count(r);
-        boost::detail::sp_enable_shared_from_this( pn, tmp, tmp );
+
+        sp_accept_owner( this, tmp );
     }
 
 #if !defined( BOOST_NO_SFINAE ) && !defined( BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION )
@@ -263,7 +294,8 @@ public:
     {
         typename Ap::element_type * tmp = r.get();
         pn = boost::detail::shared_count( r );
-        boost::detail::sp_enable_shared_from_this( pn, tmp, tmp );
+
+        sp_accept_owner( this, tmp );
     }
 
 
@@ -317,10 +349,23 @@ public:
     }
 
     template<class Y>
-    shared_ptr( shared_ptr<Y> && r ): px( r.px ), pn() // never throws
+#if !defined( BOOST_SP_NO_SP_CONVERTIBLE )
+
+    shared_ptr( shared_ptr<Y> && r, typename detail::sp_enable_if_convertible<Y,T>::type = detail::sp_empty() )
+
+#else
+
+    shared_ptr( shared_ptr<Y> && r )
+
+#endif
+    : px( r.px ), pn() // never throws
     {
         pn.swap( r.pn );
         r.px = 0;
+    }
+
+    shared_ptr(detail::shared_count && c, T * p): px(p), pn( static_cast< detail::shared_count && >( c ) ) // never throws
+    {
     }
 
     shared_ptr & operator=( shared_ptr && r ) // never throws
@@ -364,6 +409,18 @@ public:
         this_type( r, p ).swap( *this );
     }
 
+    void reset( detail::shared_count const & c, T * p )
+    {
+        this_type( c, p ).swap( *this );
+    }
+
+#if defined( BOOST_HAS_RVALUE_REFS )
+    void reset( detail::shared_count && c, T * p )
+    {
+        this_type( static_cast< detail::shared_count && >( c ), p ).swap( *this );
+    }
+#endif
+
     reference operator* () const // never throws
     {
         BOOST_ASSERT(px != 0);
@@ -375,7 +432,7 @@ public:
         BOOST_ASSERT(px != 0);
         return px;
     }
-    
+
     T * get() const // never throws
     {
         return px;
@@ -383,7 +440,7 @@ public:
 
     // implicit conversion to "bool"
 
-#if defined(__SUNPRO_CC) && BOOST_WORKAROUND(__SUNPRO_CC, <= 0x530)
+#if ( defined(__SUNPRO_CC) && BOOST_WORKAROUND(__SUNPRO_CC, < 0x570) ) || defined(__CINT__)
 
     operator bool () const
     {
@@ -405,16 +462,17 @@ public:
 
 #elif \
     ( defined(__MWERKS__) && BOOST_WORKAROUND(__MWERKS__, < 0x3200) ) || \
-    ( defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ < 304) )
+    ( defined(__GNUC__) && (__GNUC__ * 100 + __GNUC_MINOR__ < 304) ) || \
+    ( defined(__SUNPRO_CC) && BOOST_WORKAROUND(__SUNPRO_CC, <= 0x590) )
 
     typedef T * (this_type::*unspecified_bool_type)() const;
-    
+
     operator unspecified_bool_type() const // never throws
     {
         return px == 0? 0: &this_type::get;
     }
 
-#else 
+#else
 
     typedef T * this_type::*unspecified_bool_type;
 
@@ -448,14 +506,19 @@ public:
         pn.swap(other.pn);
     }
 
+    detail::shared_count const & get_shared_count() const // never throws
+    {
+        return pn;
+    }
+
     template<class Y> bool _internal_less(shared_ptr<Y> const & rhs) const
     {
         return pn < rhs.pn;
     }
 
-    void * _internal_get_deleter(std::type_info const & ti) const
+    bool _internal_equiv( shared_ptr const & r ) const
     {
-        return pn.get_deleter(ti);
+        return px == r.px && pn == r.pn;
     }
 
 // Tasteless as this may seem, making all members public allows member templates
@@ -554,7 +617,9 @@ template<class T> inline T * get_pointer(shared_ptr<T> const & p)
 
 // operator<<
 
-#if defined(__GNUC__) &&  (__GNUC__ < 3)
+#if !defined(BOOST_NO_IOSTREAM)
+
+#if defined(BOOST_NO_TEMPLATED_IOSTREAMS) || ( defined(__GNUC__) &&  (__GNUC__ < 3) )
 
 template<class Y> std::ostream & operator<< (std::ostream & os, shared_ptr<Y> const & p)
 {
@@ -573,7 +638,7 @@ using std::basic_ostream;
 template<class E, class T, class Y> basic_ostream<E, T> & operator<< (basic_ostream<E, T> & os, shared_ptr<Y> const & p)
 # else
 template<class E, class T, class Y> std::basic_ostream<E, T> & operator<< (std::basic_ostream<E, T> & os, shared_ptr<Y> const & p)
-# endif 
+# endif
 {
     os << p.get();
     return os;
@@ -583,8 +648,12 @@ template<class E, class T, class Y> std::basic_ostream<E, T> & operator<< (std::
 
 #endif // __GNUC__ < 3
 
+#endif // !defined(BOOST_NO_IOSTREAM)
+
 // get_deleter
 
+namespace detail
+{
 #if ( defined(__GNUC__) && BOOST_WORKAROUND(__GNUC__, < 3) ) || \
     ( defined(__EDG_VERSION__) && BOOST_WORKAROUND(__EDG_VERSION__, <= 238) ) || \
     ( defined(__HP_aCC) && BOOST_WORKAROUND(__HP_aCC, <= 33500) )
@@ -592,17 +661,150 @@ template<class E, class T, class Y> std::basic_ostream<E, T> & operator<< (std::
 // g++ 2.9x doesn't allow static_cast<X const *>(void *)
 // apparently EDG 2.38 and HP aCC A.03.35 also don't accept it
 
-template<class D, class T> D * get_deleter(shared_ptr<T> const & p)
+template<class D> D * basic_get_deleter(shared_count const & c)
 {
-    void const * q = p._internal_get_deleter(typeid(D));
+    void const * q = c.get_deleter(BOOST_SP_TYPEID(D));
     return const_cast<D *>(static_cast<D const *>(q));
 }
 
 #else
 
-template<class D, class T> D * get_deleter(shared_ptr<T> const & p)
+template<class D> D * basic_get_deleter(shared_count const & c)
 {
-    return static_cast<D *>(p._internal_get_deleter(typeid(D)));
+    return static_cast<D *>(c.get_deleter(BOOST_SP_TYPEID(D)));
+}
+
+#endif
+
+class sp_deleter_wrapper
+{
+    detail::shared_count _deleter;
+public:
+    sp_deleter_wrapper()
+    {}
+    void set_deleter(shared_count const &deleter)
+    {
+        _deleter = deleter;
+    }
+    void operator()(const void *)
+    {
+        BOOST_ASSERT(_deleter.use_count() <= 1);
+        detail::shared_count().swap( _deleter );
+    }
+    template<typename D>
+#if defined( BOOST_MSVC ) && BOOST_WORKAROUND( BOOST_MSVC, < 1300 )
+    D* get_deleter( D* ) const
+#else
+    D* get_deleter() const
+#endif
+    {
+        return boost::detail::basic_get_deleter<D>(_deleter);
+    }
+};
+
+} // namespace detail
+
+template<class D, class T> D * get_deleter( shared_ptr<T> const & p )
+{
+    D *del = detail::basic_get_deleter<D>( p.get_shared_count() );
+
+    if( del == 0 )
+    {
+        detail::sp_deleter_wrapper *del_wrapper = detail::basic_get_deleter<detail::sp_deleter_wrapper>(p.get_shared_count());
+
+#if defined( BOOST_MSVC ) && BOOST_WORKAROUND( BOOST_MSVC, < 1300 )
+
+        if( del_wrapper ) del = del_wrapper->get_deleter( (D*)0 );
+
+#elif defined( __GNUC__ ) && BOOST_WORKAROUND( __GNUC__, < 4 )
+
+        if( del_wrapper ) del = del_wrapper->::boost::detail::sp_deleter_wrapper::get_deleter<D>();
+
+#else
+
+        if( del_wrapper ) del = del_wrapper->get_deleter<D>();
+
+#endif
+    }
+
+    return del;
+}
+
+// atomic access
+
+#if !defined(BOOST_SP_NO_ATOMIC_ACCESS)
+
+template<class T> inline bool atomic_is_lock_free( shared_ptr<T> const * /*p*/ )
+{
+    return false;
+}
+
+template<class T> shared_ptr<T> atomic_load( shared_ptr<T> const * p )
+{
+    boost::detail::spinlock_pool<2>::scoped_lock lock( p );
+    return *p;
+}
+
+template<class T> inline shared_ptr<T> atomic_load_explicit( shared_ptr<T> const * p, memory_order /*mo*/ )
+{
+    return atomic_load( p );
+}
+
+template<class T> void atomic_store( shared_ptr<T> * p, shared_ptr<T> r )
+{
+    boost::detail::spinlock_pool<2>::scoped_lock lock( p );
+    p->swap( r );
+}
+
+template<class T> inline void atomic_store_explicit( shared_ptr<T> * p, shared_ptr<T> r, memory_order /*mo*/ )
+{
+    atomic_store( p, r ); // std::move( r )
+}
+
+template<class T> shared_ptr<T> atomic_exchange( shared_ptr<T> * p, shared_ptr<T> r )
+{
+    boost::detail::spinlock & sp = boost::detail::spinlock_pool<2>::spinlock_for( p );
+
+    sp.lock();
+    p->swap( r );
+    sp.unlock();
+
+    return r; // return std::move( r )
+}
+
+template<class T> shared_ptr<T> atomic_exchange_explicit( shared_ptr<T> * p, shared_ptr<T> r, memory_order /*mo*/ )
+{
+    return atomic_exchange( p, r ); // std::move( r )
+}
+
+template<class T> bool atomic_compare_exchange( shared_ptr<T> * p, shared_ptr<T> * v, shared_ptr<T> w )
+{
+    boost::detail::spinlock & sp = boost::detail::spinlock_pool<2>::spinlock_for( p );
+
+    sp.lock();
+
+    if( p->_internal_equiv( *v ) )
+    {
+        p->swap( w );
+
+        sp.unlock();
+
+        return true;
+    }
+    else
+    {
+        shared_ptr<T> tmp( *p );
+
+        sp.unlock();
+
+        tmp.swap( *v );
+        return false;
+    }
+}
+
+template<class T> inline bool atomic_compare_exchange_explicit( shared_ptr<T> * p, shared_ptr<T> * v, shared_ptr<T> w, memory_order /*success*/, memory_order /*failure*/ )
+{
+    return atomic_compare_exchange( p, v, w ); // std::move( w )
 }
 
 #endif
@@ -611,7 +813,7 @@ template<class D, class T> D * get_deleter(shared_ptr<T> const & p)
 
 #ifdef BOOST_MSVC
 # pragma warning(pop)
-#endif    
+#endif
 
 #endif  // #if defined(BOOST_NO_MEMBER_TEMPLATES) && !defined(BOOST_MSVC6_MEMBER_TEMPLATES)
 

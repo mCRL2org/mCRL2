@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./bundle.h
-
-// --- bundle.h -----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef BUNDLE_H
 #define BUNDLE_H
@@ -14,7 +14,7 @@
 #include <cstddef>
 #include <map>
 #include <vector>
-using namespace std;
+#include <string>
 #include "edge.h"
 #include "cluster.h"
 
@@ -28,7 +28,7 @@ public:
     Bundle( const int &idx );
     Bundle( const Bundle &bdl );
     virtual ~Bundle();
-	
+
     // -- set functions ---------------------------------------------
     void setIndex( const int &idx );
     void setParent( Bundle* p );
@@ -36,11 +36,11 @@ public:
     void setInCluster( Cluster* in );
     void setOutCluster( Cluster* out );
     void addEdge( Edge* e );
-    void setEdges( const vector< Edge* > &e );
+    void setEdges( const std::vector< Edge* > &e );
     void updateLabel(
-        const string &lbl,
-        const string &status );
-    
+        const std::string &lbl,
+        const std::string &status );
+
     // -- get functions ---------------------------------------------
     int getIndex();
     Bundle* getParent();
@@ -50,14 +50,14 @@ public:
     Cluster* getOutCluster();
     int getSizeEdges();
     Edge* getEdge( const size_t &idx );
-    void getLabels( vector< string > &lbls );
-    void getLabels( 
-        vector< string > &lbls,
-        vector< string > &status );
-    void getLabels( 
-        string &separator,
-        string &lbls );
-    
+    void getLabels( std::vector< std::string > &lbls );
+    void getLabels(
+        std::vector< std::string > &lbls,
+        std::vector< std::string > &status );
+    void getLabels(
+        std::string &separator,
+        std::string &lbls );
+
     // -- clear functions -------------------------------------------
     void clearParent();
     void clearChildren();
@@ -69,11 +69,11 @@ protected:
     // -- data members ----------------------------------------------
 	int index;
     Bundle* parent;
-    vector< Bundle* > children; // association
+    std::vector< Bundle* > children; // association
     Cluster* inCluster;         // association
 	Cluster* outCluster;        // association
-    vector< Edge* > edges;      // association
-    map< string, string > labels;
+    std::vector< Edge* > edges;      // association
+    std::map< std::string, std::string > labels;
 };
 
 #endif

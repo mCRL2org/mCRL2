@@ -1,23 +1,23 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file transition.cpp
-/// \brief Add your file description here.
+/// \brief Source file for Transition class
+
+#include "wx.hpp" // precompiled headers
 
 #include "transition.h"
-using namespace Utils;
+#include "state.h"
 
 // Constructor and Destructor
 
-Transition::Transition(State* bs,State* es,int lbl) {
-  beginState = bs;
-  endState = es;
-  label = lbl;
-  backpointer = false;
-  marked = NULL;
+Transition::Transition(State* bs,State* es,int lbl)
+: beginState(bs), endState(es), label(lbl), marked(NULL) {
 }
 
 Transition::~Transition() {
@@ -40,12 +40,12 @@ int Transition::getLabel() const
 
 bool Transition::isBackpointer() const
 {
-  return backpointer;
+  return (beginState->getRank() > endState->getRank());
 }
 
-void Transition::setBackpointer( bool b )
+bool Transition::isSelfLoop() const
 {
-  backpointer = b;
+  return (beginState == endState);
 }
 
 bool Transition::isMarked() const

@@ -14,19 +14,22 @@ http://www.boost.org/LICENSE_1_0.txt)
     scripts. */
 
     #define ATOMIC_UNCOLLECTABLE
-    #define NO_SIGNALS
     #define NO_EXECUTE_PERMISSION
-    #define SILENT
     #define ALL_INTERIOR_POINTERS
+
     #define LARGE_CONFIG
+    /*
+    #define NO_SIGNALS
+    #define SILENT
+    */
     #ifndef GC_DEBUG
     #define NO_DEBUGGING
     #endif
-    
+
     #ifdef __GLIBC__
     #define __USE_GNU
     #endif
-    
+
     #include "boehm_gc/reclaim.c"
     #include "boehm_gc/allchblk.c"
     #include "boehm_gc/misc.c"
@@ -46,20 +49,18 @@ http://www.boost.org/LICENSE_1_0.txt)
     #include "boehm_gc/malloc.c"
     #include "boehm_gc/stubborn.c"
     #include "boehm_gc/checksums.c"
-    #include "boehm_gc/solaris_threads.c"
     #include "boehm_gc/pthread_support.c"
     #include "boehm_gc/pthread_stop_world.c"
     #include "boehm_gc/darwin_stop_world.c"
     #include "boehm_gc/typd_mlc.c"
     #include "boehm_gc/ptr_chck.c"
     #include "boehm_gc/mallocx.c"
-    #include "boehm_gc/solaris_pthreads.c"
     #include "boehm_gc/gcj_mlc.c"
     #include "boehm_gc/specific.c"
     #include "boehm_gc/gc_dlopen.c"
     #include "boehm_gc/backgraph.c"
     #include "boehm_gc/win32_threads.c"
-    
+
     /* Needs to be last. */
     #include "boehm_gc/finalize.c"
 

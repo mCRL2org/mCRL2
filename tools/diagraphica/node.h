@@ -1,21 +1,19 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./node.h
-
-// --- node.h -------------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef NODE_H
 #define NODE_H
 
 #include <cstddef>
 #include <map>
-#include <string>
 #include <vector>
-using namespace std;
 
 class Cluster;
 class Edge;
@@ -25,29 +23,29 @@ class Node
 public:
 	// -- constructors and destructors ------------------------------
     Node( const int &idx );
-    Node( 
+    Node(
         const int &idx,
-        const vector< double > &tpl );
+        const std::vector< double > &tpl );
 	virtual ~Node();
-	
+
     // -- set functions ---------------------------------------------
-    void swapTupleVal( 
+    void swapTupleVal(
         const size_t &idx1,
         const size_t &idx2 );
-    void moveTupleVal( 
+    void moveTupleVal(
         const size_t &idxFr,
         const size_t &idxTo );
-    void moveTupleVals( map< int, int > &idcsFrTo );
-    void addTupleVal( 
+    void moveTupleVals( std::map< int, int > &idcsFrTo );
+    void addTupleVal(
         const int &idx,
         const double &val );
     void delTupleVal( const int &idx );
     void addInEdge( Edge* e );
-    void setInEdges( const vector< Edge* > e );
+    void setInEdges( const std::vector< Edge* > e );
     void addOutEdge( Edge* e );
-    void setOutEdges( const vector< Edge* > e );
+    void setOutEdges( const std::vector< Edge* > e );
     void setCluster( Cluster* c );
-    
+
     // -- get functions ---------------------------------------------
     int getIndex();
     int getSizeTuple();
@@ -62,13 +60,13 @@ public:
     void clearInEdges();
     void clearOutEdges();
     void clearCluster();
-    
+
 protected:
     // -- data members ----------------------------------------------
     int index; // index in list of graph nodes
-    vector< double >   tuple;
-    vector< Edge* > inEdges;  // association
-	vector< Edge* > outEdges; // association
+    std::vector< double >   tuple;
+    std::vector< Edge* > inEdges;  // association
+	std::vector< Edge* > outEdges; // association
     Cluster* cluster;
 };
 

@@ -3,7 +3,7 @@
 
 #include <string>
 
-const std::string SPEC1 = 
+const std::string SPEC1 =
 "act a:Nat;                               \n"
 "                                         \n"
 "map smaller: Nat#Nat -> Bool;            \n"

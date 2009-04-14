@@ -1,15 +1,28 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./shape.cpp
 
-// --- shape.cpp ----------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
+#include "wx.hpp" // precompiled headers
 
+#ifdef __APPLE__
+    #include <GLUT/glut.h>
+#else
+	#ifdef WIN32
+		#include <windows.h>
+		#undef __in_range // for STLport on Windows
+	#endif
+    #include <GL/glu.h>
+#endif
 
 #include "shape.h"
+#include <iostream>
+using namespace std;
 
 
 // -- static variables ----------------------------------------------
@@ -18,6 +31,7 @@
 double Shape::hdlSzeHnt =  5.0;
 double Shape::minSzeHnt =  5.0;
 int Shape::segNumHnt = 24;
+ColorRGB Shape::colTxt = { 0.0, 0.0, 0.0, 1.0 };
 
 
 // -- constructors and destructor -----------------------------------
@@ -28,7 +42,7 @@ Shape::Shape(
     Mediator* m,      const int &idx,
     const double &xC, const double &yC,
     const double &xD, const double &yD,
-    const double &aC, const int &typ )
+    const double &aC, const int &typ)
     : Colleague( m )
 // -------------------------------------
 {
@@ -40,6 +54,12 @@ Shape::Shape(
     yDFC   = yD;
     xHge   = 0.0;
     yHge   = 0.0;
+    szeTxt = 12;
+    variable = "";
+    checkedVariableId = -1;
+    texturesGenerated = false;
+    lastCanvas = NULL;
+
     aglCtr = aC;
 
     // properties
@@ -63,37 +83,45 @@ Shape::Shape( const Shape &shape )
 // Copy constructor.
 // ------------------------------------------------------------------
 {
-    index  = shape.index;
-    
-    // geometry
-    xCtr   = shape.xCtr;
-    yCtr   = shape.yCtr;
-    xDFC   = shape.xDFC;
-    yDFC   = shape.yDFC;
-    xHge   = shape.xHge;
-    yHge   = shape.yHge;
-    aglCtr = shape.aglCtr;
-    
-    // properties
-    type   = shape.type;
-    mode   = shape.mode;
-    linWth = shape.linWth;
-    colLin = shape.colLin;
-    colFil = shape.colFil;
-    hdlSze = shape.hdlSze;
+	index  = shape.index;
 
-    // degrees of freedom, invoke copy constructors
-    xCtrDOF = new DOF( *shape.xCtrDOF );
-    yCtrDOF = new DOF( *shape.yCtrDOF );
-    wthDOF  = new DOF( *shape.wthDOF );
-    hgtDOF  = new DOF( *shape.hgtDOF );
-    aglDOF  = new DOF( *shape.aglDOF );
-    
-    colDOF  = new DOF( *shape.colDOF );
-    colYValues = shape.colYValues;
-    
-    opaDOF  = new DOF( *shape.opaDOF );
-    opaYValues = shape.opaYValues;
+	// geometry
+	xCtr   = shape.xCtr;
+	yCtr   = shape.yCtr;
+	xDFC   = shape.xDFC;
+	yDFC   = shape.yDFC;
+	xHge   = shape.xHge;
+	yHge   = shape.yHge;
+	aglCtr = shape.aglCtr;
+
+	// properties
+	type   = shape.type;
+	mode   = shape.mode;
+	linWth = shape.linWth;
+	colLin = shape.colLin;
+	colFil = shape.colFil;
+	hdlSze = shape.hdlSze;
+
+	// textual properties
+	variable = shape.variable;
+	variableName = shape.variableName;
+	note = shape.note;
+	checkedVariableId = shape.checkedVariableId;
+	szeTxt = shape.szeTxt;
+
+	// degrees of freedom, invoke copy constructors
+	xCtrDOF = new DOF( *shape.xCtrDOF );
+	yCtrDOF = new DOF( *shape.yCtrDOF );
+	wthDOF  = new DOF( *shape.wthDOF );
+	hgtDOF  = new DOF( *shape.hgtDOF );
+	aglDOF  = new DOF( *shape.aglDOF );
+	textDOF = new DOF( *shape.textDOF );
+
+	colDOF  = new DOF( *shape.colDOF );
+	colYValues = shape.colYValues;
+
+	opaDOF  = new DOF( *shape.opaDOF );
+	opaYValues = shape.opaYValues;
 }
 
 
@@ -103,8 +131,8 @@ Shape::~Shape()
 {
     clearDOF();
 }
-	
-    
+
+
 // -- set functions ---------------------------------------------
 
 
@@ -116,12 +144,76 @@ void Shape::setIndex( const int &idx )
 }
 
 
+// -----------------------------------
+void Shape::setCheckedId( const int &id )
+// -----------------------------------
+{
+    checkedVariableId = id;
+    texturesGenerated = false;
+}
+
+
+// ------------------------------------------
+void Shape::setVariable( const string &msg )
+// ------------------------------------------
+{
+    variable = "";
+    variable.append( msg );
+    texturesGenerated = false;
+}
+
+
+// ------------------------------------------
+void Shape::setVariableName( const string &msg )
+// ------------------------------------------
+{
+    variableName = "";
+    variableName.append( msg );
+    texturesGenerated = false;
+}
+
+
+// ------------------------------------------
+void Shape::setNote( const string &msg )
+// ------------------------------------------
+{
+    note = "";
+    note.append( msg );
+    texturesGenerated = false;
+}
+
+
+// ------------------------------------------
+void Shape::setTextSize( const int &size )
+// ------------------------------------------
+{
+    szeTxt = size;
+    texturesGenerated = false;
+}
+
+
 // --------------------------------------------------------
 void Shape::setCenter( const double &xC, const double &yC )
 // --------------------------------------------------------
 {
-    xCtr = xC;
-    yCtr = yC;
+    double xLeft, xRight, yTop, yBottom;
+    mediator->getGridCoordinates(xLeft, xRight, yTop, yBottom);
+    if(xLeft <= (xC - xDFC) && xRight >= (xC + xDFC) && yBottom <= (yC - yDFC) && yTop >= (yC + yDFC))
+    {
+    	xCtr = xC;
+    	yCtr = yC;
+    }
+    else
+    {
+	if(xLeft > (xC - xDFC))
+		xCtr = xLeft + xDFC;
+	else if(xRight < (xC + xDFC))
+		xCtr = xRight - xDFC;
+	if(yBottom > (yC - yDFC))
+		yCtr = yBottom + yDFC;
+	else if(yTop < (yC + yDFC))
+		yCtr = yTop - yDFC;
+    }
 }
 
 
@@ -217,10 +309,20 @@ void Shape::setType( const int &typ )
         setTypeArrow();
     else if ( type == TYPE_DARROW )
         setTypeDArrow();
+    else if ( type == TYPE_NOTE)
+    	setTypeNote();
 }
 
 
-// ----------------------    
+// ----------------------
+void Shape::setTypeNote()
+// ----------------------
+{
+    type = TYPE_NOTE;
+}
+
+
+// ----------------------
 void Shape::setTypeLine()
 // ----------------------
 {
@@ -282,6 +384,8 @@ void Shape::setMode( const int &mde )
         mode = MODE_EDT_DOF_COL;
     else if ( mde == MODE_EDT_DOF_OPA )
         mode = MODE_EDT_DOF_OPA;
+    else if ( mde == MODE_EDT_DOF_TEXT )
+        mode = MODE_EDT_DOF_TEXT;
 }
 
 
@@ -355,9 +459,17 @@ void Shape::setModeEdtDOFOpa()
 {
     mode = MODE_EDT_DOF_OPA;
 }
-    
 
-// ----------------------------------------  
+
+// ---------------------------
+void Shape::setModeEdtDOFText()
+// ---------------------------
+{
+    mode = MODE_EDT_DOF_TEXT;
+}
+
+
+// ----------------------------------------
 void Shape::setLineWidth( const double &w )
 // ----------------------------------------
 {
@@ -374,9 +486,9 @@ void Shape::setLineColor( const ColorRGB &c )
 
 
 // ----------------------
-void Shape::setLineColor( 
-    const double &r, 
-    const double &g, 
+void Shape::setLineColor(
+    const double &r,
+    const double &g,
     const double &b,
     const double &a )
 // ----------------------
@@ -405,9 +517,9 @@ void Shape::setFillColor( const ColorRGB &c )
 
 
 // ----------------------
-void Shape::setFillColor( 
-    const double &r, 
-    const double &g, 
+void Shape::setFillColor(
+    const double &r,
+    const double &g,
     const double &b,
     const double &a )
 // ----------------------
@@ -435,6 +547,14 @@ void Shape::setHandleSize( const double &s )
 }
 
 
+// -----------------------------------------
+void Shape::setTextures( const bool &generated)
+// -----------------------------------------
+{
+    texturesGenerated = generated;
+}
+
+
 // -- get functions -------------------------------------------------
 
 
@@ -443,6 +563,46 @@ int Shape::getIndex()
 // ------------------
 {
     return index;
+}
+
+
+// ------------------
+int Shape::getCheckedId()
+// ------------------
+{
+    return checkedVariableId;
+}
+
+
+// ------------------
+string Shape::getNote()
+// ------------------
+{
+    return note;
+}
+
+
+// ------------------
+string Shape::getVariable()
+// ------------------
+{
+    return variable;
+}
+
+
+// ------------------
+string Shape::getVariableName()
+// ------------------
+{
+    return variableName;
+}
+
+
+// ------------------
+int Shape::getTextSize()
+// ------------------
+{
+    return szeTxt;
 }
 
 
@@ -663,6 +823,14 @@ DOF* Shape::getDOFCol()
 }
 
 
+// --------------------
+DOF* Shape::getDOFText()
+// --------------------
+{
+    return textDOF;
+}
+
+
 // ----------------------------------------------------
 void Shape::getDOFColYValues( vector< double > &yVals )
 // ----------------------------------------------------
@@ -692,7 +860,7 @@ void Shape::getDOFAttrs( vector< Attribute* > &attrs )
 // ---------------------------------------------------
 // ------------------------------------------------------------------
 // This function returns a vector of pointers to all attributes
-// to which DOF's have been linked. This vector contains no 
+// to which DOF's have been linked. This vector contains no
 // duplicates.
 // ------------------------------------------------------------------
 {
@@ -707,11 +875,11 @@ void Shape::getDOFAttrs( vector< Attribute* > &attrs )
     tempAttr = yCtrDOF->getAttribute();
     if ( tempAttr != NULL )
         tempSet.insert( tempAttr );
-    
+
     tempAttr = wthDOF->getAttribute();
     if ( tempAttr != NULL )
         tempSet.insert( tempAttr );
-    
+
     tempAttr = hgtDOF->getAttribute();
     if ( tempAttr != NULL )
         tempSet.insert( tempAttr );
@@ -727,7 +895,7 @@ void Shape::getDOFAttrs( vector< Attribute* > &attrs )
     tempAttr = opaDOF->getAttribute();
     if ( tempAttr != NULL )
         tempSet.insert( tempAttr );
-    
+
     // update result
     attrs.clear();
     set< Attribute* >::iterator it;
@@ -744,7 +912,7 @@ void Shape::getDOFAttrs( vector< Attribute* > &attrs )
 
 
 // ----------------------------------------------
-void Shape::visualize( 
+void Shape::visualize(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ----------------------------------------------
@@ -760,7 +928,7 @@ void Shape::visualize(
         drawEdit( inSelectMode, canvas );
     else
         drawEditDOF( inSelectMode, canvas );
-    
+
     // clear transf
     glPopMatrix();
 }
@@ -780,7 +948,7 @@ void Shape::visualize(
     ColorRGB colRGB;
 
     double alpha;
-    
+
     xC         = xCtr;
     yC         = yCtr;
     xD         = xDFC;
@@ -789,7 +957,7 @@ void Shape::visualize(
     colRGB     = colFil;
     colHLS.l   = 0.5;
     colHLS.s   = 1.0;
-    
+
     for ( size_t i = 0; i < attrs.size(); ++i )
     {
         /*
@@ -807,7 +975,7 @@ void Shape::visualize(
 
         if ( attrs[i] == xCtrDOF->getAttribute() )
             xC = xCtr + (1-alpha)*xCtrDOF->getMin() + alpha*xCtrDOF->getMax();
-            
+
         if ( attrs[i] == yCtrDOF->getAttribute() )
             yC = yCtr + (1-alpha)*yCtrDOF->getMin() + alpha*yCtrDOF->getMax();
 
@@ -831,9 +999,9 @@ void Shape::visualize(
             double dblPtVal;
 
             dblPtVal = modf( alpha*(colDOF->getSizeValues()-1), &intPtVal );
-                
+
             if ( intPtVal < colDOF->getSizeValues()-1 )
-                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal ) 
+                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal )
                         + dblPtVal*colDOF->getValue( (int)intPtVal+1 ) )*360.0;
             else
                 colHLS.h = colDOF->getValue( (int)intPtVal )*360.0;
@@ -847,15 +1015,20 @@ void Shape::visualize(
             double dblPtVal;
 
             dblPtVal = modf( alpha*(opaDOF->getSizeValues()-1), &intPtVal );
-                
+
             if ( intPtVal < opaDOF->getSizeValues()-1 )
-                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal ) 
+                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal )
                         + dblPtVal*opaDOF->getValue( (int)intPtVal+1 ) );
             else
                 colRGB.a = opaDOF->getValue( (int)intPtVal );
         }
+
+	if( attrs[i] == textDOF->getAttribute() && attrs[i]->getSizeCurValues() > 0 )
+	{
+		variable = attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue();
+	}
     }
-    
+
     // set up transf
     glPushMatrix();
 
@@ -867,11 +1040,23 @@ void Shape::visualize(
     glTranslatef( xHge, yHge, 0.0 );
     glRotatef( aglH, 0.0, 0.0, 1.0 );
     glTranslatef( -xHge, -yHge, 0.0 );
-    
+
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
-    
-    if ( type == TYPE_RECT )
+
+
+    if( type == TYPE_NOTE)
+    {
+    	VisUtils::setColor( colRGB );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLin );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_RECT )
     {
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colRGB );
@@ -887,12 +1072,12 @@ void Shape::visualize(
     {
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colRGB );
-        VisUtils::fillEllipse( 
+        VisUtils::fillEllipse(
             0.0, 0.0,
             xD,  yD,
             segNumHnt );
         VisUtils::setColor( colLin );
-        VisUtils::drawEllipse( 
+        VisUtils::drawEllipse(
             0.0, 0.0,
             xD,  yD,
             segNumHnt );
@@ -901,7 +1086,7 @@ void Shape::visualize(
     {
         //VisUtils::setColor( colLin );
         VisUtils::setColor( colRGB );
-        VisUtils::drawLine( 
+        VisUtils::drawLine(
             -xD,  xD,
              yD, -yD );
     }
@@ -911,15 +1096,15 @@ void Shape::visualize(
 
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colRGB );
-        VisUtils::fillArrow( 
+        VisUtils::fillArrow(
             -xD,         xD,
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
-        
+
         VisUtils::setColor( colLin );
-        VisUtils::drawArrow( 
+        VisUtils::drawArrow(
             -xD,       xD,
-             yD,      -yD, 
+             yD,      -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
     else if ( type == TYPE_DARROW )
@@ -928,16 +1113,17 @@ void Shape::visualize(
 
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colRGB );
-        VisUtils::fillDArrow( 
+        VisUtils::fillDArrow(
             -xD,         xD,
-             yD,        -yD, 
+             yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
         VisUtils::setColor( colLin );
-        VisUtils::drawDArrow( 
+        VisUtils::drawDArrow(
             -xD,         xD,
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
+    drawText( canvas ); // Draw the textual values of the shape
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
@@ -945,14 +1131,214 @@ void Shape::visualize(
     glPopMatrix();
 
 }
-    
+
+
+// ----------------------------------
+void Shape::visualize(
+    GLCanvas* canvas,
+    const vector< Attribute* > attrs,
+    const vector< double > attrValIdcs,
+    const double &pixel )
+// ----------------------------------
+{
+    double xC, yC; // center, [-1,1]
+    double xD, yD; // bound dist from ctr,norm
+    double aglH;   // rotation about hinge, degrees
+    ColorHLS colHLS;
+    ColorRGB colRGB;
+
+    double alpha;
+
+    xC         = xCtr;
+    yC         = yCtr;
+    xD         = xDFC;
+    yD         = yDFC;
+    aglH       = 0.0;
+    colRGB     = colFil;
+    colHLS.l   = 0.5;
+    colHLS.s   = 1.0;
+
+    for ( size_t i = 0; i < attrs.size(); ++i )
+    {
+        /*
+        if ( attrs[i]->getSizeCurValues() == 1 )
+            alpha = 0.0;
+        else
+            alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+        */
+        if ( attrs[i]->getSizeCurValues() == 0 && attrs[i]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
+            alpha = ( attrValIdcs[i] - attrs[i]->getLowerBound() )/( attrs[i]->getUpperBound() - attrs[i]->getLowerBound() );
+        else if ( attrs[i]->getSizeCurValues() == 1 )
+            alpha = 0.0;
+        else
+            alpha = (double)attrValIdcs[i]/( (double)attrs[i]->getSizeCurValues() - 1.0 );
+
+        if ( attrs[i] == xCtrDOF->getAttribute() )
+            xC = xCtr + (1-alpha)*xCtrDOF->getMin() + alpha*xCtrDOF->getMax();
+
+        if ( attrs[i] == yCtrDOF->getAttribute() )
+            yC = yCtr + (1-alpha)*yCtrDOF->getMin() + alpha*yCtrDOF->getMax();
+
+        if ( attrs[i] == wthDOF->getAttribute() )
+            xD = xDFC + (1-alpha)*wthDOF->getMin() + alpha*wthDOF->getMax();
+
+        if ( attrs[i] == hgtDOF->getAttribute() )
+            yD = yDFC + (1-alpha)*hgtDOF->getMin() + alpha*hgtDOF->getMax();
+
+        if ( attrs[i] == aglDOF->getAttribute() )
+        {
+            if ( aglDOF->getDir() > 0 )
+                aglH = 0.0 + (1-alpha)*aglDOF->getMin() + alpha*aglDOF->getMax();
+            else
+                aglH = 360.0 - (1-alpha)*aglDOF->getMin() + alpha*aglDOF->getMax();
+        }
+
+        if ( attrs[i] == colDOF->getAttribute() )
+        {
+            double intPtVal;
+            double dblPtVal;
+
+            dblPtVal = modf( alpha*(colDOF->getSizeValues()-1), &intPtVal );
+
+            if ( intPtVal < colDOF->getSizeValues()-1 )
+                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal )
+                        + dblPtVal*colDOF->getValue( (int)intPtVal+1 ) )*360.0;
+            else
+                colHLS.h = colDOF->getValue( (int)intPtVal )*360.0;
+
+            VisUtils::hlsToRgb( colHLS, colRGB );
+        }
+
+        if ( attrs[i] == opaDOF->getAttribute() )
+        {
+            double intPtVal;
+            double dblPtVal;
+
+            dblPtVal = modf( alpha*(opaDOF->getSizeValues()-1), &intPtVal );
+
+            if ( intPtVal < opaDOF->getSizeValues()-1 )
+                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal )
+                        + dblPtVal*opaDOF->getValue( (int)intPtVal+1 ) );
+            else
+                colRGB.a = opaDOF->getValue( (int)intPtVal );
+        }
+
+	if( attrs[i] == textDOF->getAttribute() && attrs[i]->getSizeCurValues() > 0 )
+	{
+		variable = attrs[i]->getCurValue( (int) attrValIdcs[i] )->getValue();
+	}
+    }
+
+    // set up transf
+    glPushMatrix();
+
+    // move to center pos & rotate
+    glTranslatef( xC, yC, 0.0 );
+    glRotatef( aglCtr, 0.0, 0.0, 1.0 );
+
+    // move to hinge pos & rotate
+    glTranslatef( xHge, yHge, 0.0 );
+    glRotatef( aglH, 0.0, 0.0, 1.0 );
+    glTranslatef( -xHge, -yHge, 0.0 );
+
+    VisUtils::enableLineAntiAlias();
+    VisUtils::enableBlending();
+
+
+    if( type == TYPE_NOTE)
+    {
+    	VisUtils::setColor( colRGB );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLin );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_RECT )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLin );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_ELLIPSE )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillEllipse(
+            0.0, 0.0,
+            xD,  yD,
+            segNumHnt );
+        VisUtils::setColor( colLin );
+        VisUtils::drawEllipse(
+            0.0, 0.0,
+            xD,  yD,
+            segNumHnt );
+    }
+    else if ( type == TYPE_LINE )
+    {
+        //VisUtils::setColor( colLin );
+        VisUtils::setColor( colRGB );
+        VisUtils::drawLine(
+            -xD,  xD,
+             yD, -yD );
+    }
+    else if ( type == TYPE_ARROW )
+    {
+        double pix = canvas->getPixelSize();
+
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillArrow(
+            -xD,         xD,
+             yD,        -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+
+        VisUtils::setColor( colLin );
+        VisUtils::drawArrow(
+            -xD,       xD,
+             yD,      -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+    }
+    else if ( type == TYPE_DARROW )
+    {
+        double pix = canvas->getPixelSize();
+
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colRGB );
+        VisUtils::fillDArrow(
+            -xD,         xD,
+             yD,        -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+        VisUtils::setColor( colLin );
+        VisUtils::drawDArrow(
+            -xD,         xD,
+             yD,        -yD,
+             hdlSze*pix, 2*hdlSze*pix );
+    }
+    drawText( canvas, pixel ); // Draw the textual values of the shape
+    VisUtils::disableBlending();
+    VisUtils::disableLineAntiAlias();
+
+    // clear transf
+    glPopMatrix();
+}
+
 
 // ----------------------------------
 void Shape::visualize(
     GLCanvas* canvas,
     const double &opacity,
     const vector< Attribute* > attrs,
-    const vector< double > attrValIdcs )
+    const vector< double > attrValIdcs
+    )
 // ----------------------------------
 {
     double xC, yC; // center, [-1,1]
@@ -962,7 +1348,7 @@ void Shape::visualize(
     ColorRGB colRGB;
 
     double alpha = 0.0;
-    
+
     xC         = xCtr;
     yC         = yCtr;
     xD         = xDFC;
@@ -971,7 +1357,7 @@ void Shape::visualize(
     colRGB     = colFil;
     colHLS.l   = 0.5;
     colHLS.s   = 1.0;
-    
+
     for ( size_t i = 0; i < attrs.size(); ++i )
     {
         /*
@@ -999,7 +1385,7 @@ void Shape::visualize(
 
         if ( attrs[i] == xCtrDOF->getAttribute() )
             xC = xCtr + (1-alpha)*xCtrDOF->getMin() + alpha*xCtrDOF->getMax();
-            
+
         if ( attrs[i] == yCtrDOF->getAttribute() )
             yC = yCtr + (1-alpha)*yCtrDOF->getMin() + alpha*yCtrDOF->getMax();
 
@@ -1023,9 +1409,9 @@ void Shape::visualize(
             double dblPtVal;
 
             dblPtVal = modf( alpha*(colDOF->getSizeValues()-1), &intPtVal );
-                
+
             if ( intPtVal < colDOF->getSizeValues()-1 )
-                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal ) 
+                colHLS.h = ( (1.0-dblPtVal)*colDOF->getValue( (int)intPtVal )
                         + dblPtVal*colDOF->getValue( (int)intPtVal+1 ) )*360.0;
             else
                 colHLS.h = colDOF->getValue( (int)intPtVal )*360.0;
@@ -1039,18 +1425,18 @@ void Shape::visualize(
             double dblPtVal;
 
             dblPtVal = modf( alpha*(opaDOF->getSizeValues()-1), &intPtVal );
-                
+
             if ( intPtVal < opaDOF->getSizeValues()-1 )
-                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal ) 
+                colRGB.a = ( (1.0-dblPtVal)*opaDOF->getValue( (int)intPtVal )
                         + dblPtVal*opaDOF->getValue( (int)intPtVal+1 ) );
             else
                 colRGB.a = opaDOF->getValue( (int)intPtVal );
         }
     }
-    
+
     ColorRGB colFill = colRGB;
     colFill.a -= opacity;
-    
+
     ColorRGB colLine = colLin;
     colLine.a -= opacity;
 
@@ -1065,11 +1451,23 @@ void Shape::visualize(
     glTranslatef( xHge, yHge, 0.0 );
     glRotatef( aglH, 0.0, 0.0, 1.0 );
     glTranslatef( -xHge, -yHge, 0.0 );
-    
+
     VisUtils::enableLineAntiAlias();
     VisUtils::enableBlending();
-    
+
     if ( type == TYPE_RECT )
+    {
+        //VisUtils::setColor( colFil );
+        VisUtils::setColor( colFill );
+        VisUtils::fillRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+        VisUtils::setColor( colLine );
+        VisUtils::drawRect(
+            -xD,  xD,   // new
+             yD, -yD ); // new
+    }
+    else if ( type == TYPE_RECT )
     {
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colFill );
@@ -1085,12 +1483,12 @@ void Shape::visualize(
     {
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colFill );
-        VisUtils::fillEllipse( 
+        VisUtils::fillEllipse(
             0.0, 0.0,
             xD,  yD,
             segNumHnt );
         VisUtils::setColor( colLine );
-        VisUtils::drawEllipse( 
+        VisUtils::drawEllipse(
             0.0, 0.0,
             xD,  yD,
             segNumHnt );
@@ -1099,7 +1497,7 @@ void Shape::visualize(
     {
         //VisUtils::setColor( colLin );
         VisUtils::setColor( colFill );
-        VisUtils::drawLine( 
+        VisUtils::drawLine(
             -xD,  xD,
              yD, -yD );
     }
@@ -1109,15 +1507,15 @@ void Shape::visualize(
 
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colFill );
-        VisUtils::fillArrow( 
+        VisUtils::fillArrow(
             -xD,         xD,
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
-        
+
         VisUtils::setColor( colLine );
-        VisUtils::drawArrow( 
+        VisUtils::drawArrow(
             -xD,       xD,
-             yD,      -yD, 
+             yD,      -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
     else if ( type == TYPE_DARROW )
@@ -1126,23 +1524,24 @@ void Shape::visualize(
 
         //VisUtils::setColor( colFil );
         VisUtils::setColor( colFill );
-        VisUtils::fillDArrow( 
+        VisUtils::fillDArrow(
             -xD,         xD,
-             yD,        -yD, 
+             yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
         VisUtils::setColor( colLine );
-        VisUtils::drawDArrow( 
+        VisUtils::drawDArrow(
             -xD,         xD,
              yD,        -yD,
              hdlSze*pix, 2*hdlSze*pix );
     }
+    drawText( canvas ); // Draw the textual values of the shape
     VisUtils::disableBlending();
     VisUtils::disableLineAntiAlias();
 
     // clear transf
     glPopMatrix();
 }
-    
+
 
 // --------------------
 void Shape::setTransf()
@@ -1153,7 +1552,7 @@ void Shape::setTransf()
         xCtr,   yCtr,
         xDFC,   yDFC,
         xHge,   yHge,
-        aglCtr, 0.0 );    
+        aglCtr, 0.0 );
 }
 
 
@@ -1162,7 +1561,7 @@ void Shape::clrTransf()
 // --------------------
 {
     // clear transf
-    VisUtils::clrTransf();    
+    VisUtils::clrTransf();
 }
 
 
@@ -1190,18 +1589,20 @@ void Shape::initDOF()
     wthDOF  = new DOF( 2, "Width" );
     hgtDOF  = new DOF( 3, "Height" );
     aglDOF  = new DOF( 4, "Rotation" );
-    
+
     colDOF  = new DOF( 5, "Color" );
     colDOF->setMin( 0.25 );
     colDOF->setMax( 0.75 );
     colYValues.push_back( 0.0 );
     colYValues.push_back( 0.0 );
-    
+
     opaDOF  = new DOF( 6, "Opacity" );
     opaDOF->setMin( 0.25 );
     opaDOF->setMax( 0.75 );
     opaYValues.push_back( 0.0 );
     opaYValues.push_back( 0.0 );
+
+    textDOF = new DOF( 7, "Text");
 }
 
 
@@ -1215,7 +1616,7 @@ void Shape::clearDOF()
         delete xCtrDOF;
         xCtrDOF = NULL;
     }
-    
+
     if ( yCtrDOF != NULL )
     {
         delete yCtrDOF;
@@ -1267,14 +1668,20 @@ void Shape::handleHitEdtDOFAgl( const int &hdlIdx )
 
 
 // -----------------------------------------------
-void Shape::drawNormal( 
+void Shape::drawNormal(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // -----------------------------------------------
 {
     if ( inSelectMode == true )
     {
-        if ( type == TYPE_RECT )
+    	if ( type == TYPE_NOTE )
+        {
+            	VisUtils::fillRect(
+                -xDFC,  xDFC,
+                 yDFC, -yDFC );
+        }
+        else if ( type == TYPE_RECT )
         {
             VisUtils::fillRect(
                 -xDFC,  xDFC,
@@ -1282,21 +1689,21 @@ void Shape::drawNormal(
         }
         else if ( type == TYPE_ELLIPSE )
         {
-            VisUtils::fillEllipse( 
-                 0.0,  0.0, 
+            VisUtils::fillEllipse(
+                 0.0,  0.0,
                  xDFC, yDFC,
                  segNumHnt );
         }
         else if ( type == TYPE_LINE )
         {
-            VisUtils::drawLine( 
+            VisUtils::drawLine(
                 -xDFC,  xDFC,
                  yDFC, -yDFC );
         }
         else if ( type == TYPE_ARROW )
         {
             double pix = canvas->getPixelSize();
-            VisUtils::fillArrow( 
+            VisUtils::fillArrow(
                 -xDFC,       xDFC,
                  yDFC,      -yDFC,
                  hdlSze*pix, 2*hdlSze*pix );
@@ -1304,36 +1711,46 @@ void Shape::drawNormal(
         else if ( type == TYPE_DARROW )
         {
             double pix = canvas->getPixelSize();
-            VisUtils::fillDArrow( 
+            VisUtils::fillDArrow(
                 -xDFC,      xDFC,
-                 yDFC,     -yDFC, 
+                 yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
         }
     }
     else
     {
         VisUtils::enableLineAntiAlias();
-        
-        if ( type == TYPE_RECT )
+        if ( type == TYPE_NOTE )
         {
             VisUtils::setColor( colFil );
             VisUtils::fillRect(
-                -xDFC,  xDFC, 
+                -xDFC,  xDFC,
                  yDFC, -yDFC );
             VisUtils::setColor( colLin );
             VisUtils::drawRect(
-                -xDFC,  xDFC, 
+                -xDFC,  xDFC,
+                 yDFC, -yDFC );
+        }
+        else if ( type == TYPE_RECT )
+        {
+            VisUtils::setColor( colFil );
+            VisUtils::fillRect(
+                -xDFC,  xDFC,
+                 yDFC, -yDFC );
+            VisUtils::setColor( colLin );
+            VisUtils::drawRect(
+                -xDFC,  xDFC,
                  yDFC, -yDFC );
         }
         else if ( type == TYPE_ELLIPSE )
         {
             VisUtils::setColor( colFil );
-            VisUtils::fillEllipse( 
+            VisUtils::fillEllipse(
                  0.0,  0.0,
                  xDFC, yDFC,
                  segNumHnt );
             VisUtils::setColor( colLin );
-            VisUtils::drawEllipse( 
+            VisUtils::drawEllipse(
                 0.0,  0.0,
                 xDFC, yDFC,
                 segNumHnt );
@@ -1341,7 +1758,7 @@ void Shape::drawNormal(
         else if ( type == TYPE_LINE )
         {
             VisUtils::setColor( colLin );
-            VisUtils::drawLine( 
+            VisUtils::drawLine(
                 -xDFC,  xDFC,
                  yDFC, -yDFC );
         }
@@ -1350,14 +1767,14 @@ void Shape::drawNormal(
             double pix = canvas->getPixelSize();
 
             VisUtils::setColor( colFil );
-            VisUtils::fillArrow( 
+            VisUtils::fillArrow(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
             VisUtils::setColor( colLin );
-            VisUtils::drawArrow( 
+            VisUtils::drawArrow(
                 -xDFC,      xDFC,
-                 yDFC,     -yDFC, 
+                 yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
         }
         else if ( type == TYPE_DARROW )
@@ -1365,24 +1782,82 @@ void Shape::drawNormal(
             double pix = canvas->getPixelSize();
 
             VisUtils::setColor( colFil );
-            VisUtils::fillDArrow( 
+            VisUtils::fillDArrow(
                 -xDFC,      xDFC,
-                 yDFC,     -yDFC, 
+                 yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
             VisUtils::setColor( colLin );
-            VisUtils::drawDArrow( 
+            VisUtils::drawDArrow(
                 -xDFC,      xDFC,
                  yDFC,     -yDFC,
                 hdlSze*pix, 2*hdlSze*pix );
         }
-        
-        VisUtils::disableLineAntiAlias();
+	drawText( canvas ); // Draw the textual values of the shape
+	VisUtils::disableLineAntiAlias();
     }
 }
 
 
 // ---------------------------------------------
-void Shape::drawEdit( 
+void Shape::drawText( GLCanvas* canvas )
+// ---------------------------------------------
+{
+	string text = note;
+	if(text != "")
+	{
+		text.append(" ");
+		text.append( variable );
+
+		double pix = canvas->getPixelSize();
+
+		// generate textures for drawing text, if they aren't generated yet
+		if( !texturesGenerated || lastCanvas != canvas )
+		{
+			VisUtils::genCharTextures(
+				texCharId,
+				texChar );
+			texturesGenerated = true;
+			lastCanvas = canvas;
+		}
+
+		VisUtils::setColor( colTxt );
+		VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+	}
+}
+
+
+// ---------------------------------------------
+void Shape::drawText( GLCanvas* canvas, double pix )
+// ---------------------------------------------
+{
+	string text = note;
+	if( !text.empty() )
+	{
+		text.append(" ");
+		text.append( variable );
+		if( pix < 0.01 )
+			pix = 0.01;
+		else if( pix > 0.015)
+			pix = 0.01;
+
+		// generate textures for drawing text, if they aren't generated yet
+		if( texturesGenerated || lastCanvas != canvas )
+		{
+			VisUtils::genCharTextures(
+				texCharId,
+				texChar );
+			texturesGenerated = true;
+			lastCanvas = canvas;
+		}
+
+		VisUtils::setColor( colTxt );
+		VisUtils::drawLabelInBoundBox( texCharId, -xDFC, xDFC, yDFC, -yDFC, szeTxt*pix/CHARHEIGHT, text );
+	}
+}
+
+
+// ---------------------------------------------
+void Shape::drawEdit(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ---------------------------------------------
@@ -1393,7 +1868,7 @@ void Shape::drawEdit(
     if ( inSelectMode == true )
     {
         // draw shape
-        drawNormal( inSelectMode, canvas ); 
+        drawNormal( inSelectMode, canvas );
 
         glPushName( ID_HDL_CTR );
         VisUtils::fillRect( -xDFC, xDFC, yDFC, -yDFC );
@@ -1440,17 +1915,17 @@ void Shape::drawEdit(
         // draw bounding box
         VisUtils::enableLineAntiAlias();
         VisUtils::setColorMdGray();
-        VisUtils::drawRect( 
+        VisUtils::drawRect(
             -xDFC,  xDFC,
              yDFC, -yDFC );
         VisUtils::disableLineAntiAlias();
-        
-        // draw shape       
-        drawNormal( inSelectMode, canvas );        
-        
+
+        // draw shape
+        drawNormal( inSelectMode, canvas );
+
         // enable antialiasing
         VisUtils::enableLineAntiAlias();
-        
+
         // draw top connecting line
         VisUtils::setColorMdGray();
         if ( xDFC >= 0 )
@@ -1463,7 +1938,7 @@ void Shape::drawEdit(
             VisUtils::drawLine( 0.0, 0.0, yDFC, yDFC+6.0*hdlDelta );
         else
             VisUtils::drawLine( 0.0, 0.0, yDFC, yDFC-6.0*hdlDelta );
-        
+
         // draw center
         VisUtils::setColorMdGray();
         VisUtils::drawLine( -hdlDelta, hdlDelta,      0.0,       0.0 );
@@ -1546,7 +2021,7 @@ void Shape::drawEdit(
 
 
 // ------------------------------------------------
-void Shape::drawEditDOF( 
+void Shape::drawEditDOF(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ------------------------------------------------
@@ -1554,7 +2029,7 @@ void Shape::drawEditDOF(
     if ( inSelectMode == true )
     {
         // draw shape
-        drawNormal( inSelectMode, canvas ); 
+        drawNormal( inSelectMode, canvas );
 
         if ( mode == MODE_EDT_DOF_XCTR )
         {
@@ -1562,7 +2037,7 @@ void Shape::drawEditDOF(
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-                        
+
             drawEditDOFXCtr( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_YCTR )
@@ -1571,7 +2046,7 @@ void Shape::drawEditDOF(
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFYCtr( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_WTH )
@@ -1580,7 +2055,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFWth( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_HGT )
@@ -1589,7 +2064,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFWth( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFHgt( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_AGL )
@@ -1598,7 +2073,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
-            
+
             drawEditDOFAgl( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_COL )
@@ -1610,6 +2085,14 @@ void Shape::drawEditDOF(
             drawDOFAgl( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_OPA )
+        {
+            drawDOFXCtr( inSelectMode, canvas );
+            drawDOFYCtr( inSelectMode, canvas );
+            drawDOFWth( inSelectMode, canvas );
+            drawDOFHgt( inSelectMode, canvas );
+            drawDOFAgl( inSelectMode, canvas );
+        }
+        else if ( mode == MODE_EDT_DOF_TEXT )
         {
             drawDOFXCtr( inSelectMode, canvas );
             drawDOFYCtr( inSelectMode, canvas );
@@ -1623,12 +2106,12 @@ void Shape::drawEditDOF(
         // draw bounding box
         VisUtils::enableLineAntiAlias();
         VisUtils::setColorMdGray();
-        VisUtils::drawRect( 
+        VisUtils::drawRect(
             -xDFC,  xDFC,
              yDFC, -yDFC );
         VisUtils::disableLineAntiAlias();
-        
-        // draw shape       
+
+        // draw shape
         drawNormal( inSelectMode, canvas );
 
         VisUtils::enableLineAntiAlias();
@@ -1638,7 +2121,7 @@ void Shape::drawEditDOF(
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFXCtr( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_YCTR )
@@ -1647,7 +2130,7 @@ void Shape::drawEditDOF(
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFYCtr( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_WTH )
@@ -1656,7 +2139,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFWth( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_HGT )
@@ -1665,7 +2148,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFWth( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
-            
+
             drawEditDOFHgt( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_AGL )
@@ -1674,7 +2157,7 @@ void Shape::drawEditDOF(
             drawDOFYCtr( inSelectMode, canvas );
             drawDOFWth( inSelectMode, canvas );
             drawDOFHgt( inSelectMode, canvas );
-            
+
             drawEditDOFAgl( inSelectMode, canvas );
         }
         else if ( mode == MODE_EDT_DOF_COL )
@@ -1693,13 +2176,21 @@ void Shape::drawEditDOF(
             drawDOFHgt( inSelectMode, canvas );
             drawDOFAgl( inSelectMode, canvas );
         }
+        else if ( mode == MODE_EDT_DOF_TEXT )
+        {
+            drawDOFXCtr( inSelectMode, canvas );
+            drawDOFYCtr( inSelectMode, canvas );
+            drawDOFWth( inSelectMode, canvas );
+            drawDOFHgt( inSelectMode, canvas );
+            drawDOFAgl( inSelectMode, canvas );
+        }
         VisUtils::disableLineAntiAlias();
     }
 }
 
 
 // ------------------------------------------------
-void Shape::drawDOFXCtr( 
+void Shape::drawDOFXCtr(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ------------------------------------------------
@@ -1725,7 +2216,7 @@ void Shape::drawDOFXCtr(
             -hdlDOF,  hdlDOF,
              0.0,     0.0 );
         */
-        
+
         // pointing right
         if ( xEnd < xBeg )
         {
@@ -1741,7 +2232,7 @@ void Shape::drawDOFXCtr(
             VisUtils::drawLineDashed(
                  xBeg, xEnd,
                  0.0,  0.0 );
-            
+
             /*
             // start
             VisUtils::setColorWhite();
@@ -1760,12 +2251,12 @@ void Shape::drawDOFXCtr(
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                xEnd,             0.0, 
+                xEnd,             0.0,
                 xEnd+2.0*hdlDOF, -hdlDOF,
                 xEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xEnd,             0.0, 
+                xEnd,             0.0,
                 xEnd+2.0*hdlDOF, -hdlDOF,
                 xEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::drawLine(
@@ -1787,7 +2278,7 @@ void Shape::drawDOFXCtr(
             VisUtils::drawLineDashed(
                  xBeg, xEnd,
                  0.0,  0.0 );
-            
+
             /*
             // start
             VisUtils::setColorWhite();
@@ -1806,12 +2297,12 @@ void Shape::drawDOFXCtr(
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                xEnd-2.0*hdlDOF,  hdlDOF, 
+                xEnd-2.0*hdlDOF,  hdlDOF,
                 xEnd-2.0*hdlDOF, -hdlDOF,
                 xEnd,             0.0 );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xEnd-2.0*hdlDOF,  hdlDOF, 
+                xEnd-2.0*hdlDOF,  hdlDOF,
                 xEnd-2.0*hdlDOF, -hdlDOF,
                 xEnd,             0.0 );
             VisUtils::drawLine(
@@ -1819,13 +2310,13 @@ void Shape::drawDOFXCtr(
                 2.0*hdlDOF, -2.0*hdlDOF );
         }
     }
-    
+
     glPopMatrix();
 }
 
 
 // ----------------------------------------------------
-void Shape::drawEditDOFXCtr( 
+void Shape::drawEditDOFXCtr(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ----------------------------------------------------
@@ -1851,11 +2342,11 @@ void Shape::drawEditDOFXCtr(
                 hdlDOF,          -hdlDOF );
             glPopName();
             */
-            
+
             // stop
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
-                xEnd,             0.0, 
+                xEnd,             0.0,
                 xEnd+2.0*hdlDOF, -hdlDOF,
                 xEnd+2.0*hdlDOF,  hdlDOF );
             glPopName();
@@ -1871,11 +2362,11 @@ void Shape::drawEditDOFXCtr(
                 hdlDOF, -hdlDOF );
             glPopName();
             */
-            
+
             // stop
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
-                xEnd-2.0*hdlDOF,  hdlDOF, 
+                xEnd-2.0*hdlDOF,  hdlDOF,
                 xEnd-2.0*hdlDOF, -hdlDOF,
                 xEnd,             0.0 );
             glPopName();
@@ -1902,7 +2393,7 @@ void Shape::drawEditDOFXCtr(
         VisUtils::drawLine(
             -hdlDOF,  hdlDOF,
             -hdlDOF,  hdlDOF );
-        
+
         // pointing left
         if ( xEnd <= xBeg )
         {
@@ -1936,12 +2427,12 @@ void Shape::drawEditDOFXCtr(
             // stop
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                xEnd,             0.0, 
+                xEnd,             0.0,
                 xEnd+2.0*hdlDOF, -hdlDOF,
                 xEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xEnd,             0.0, 
+                xEnd,             0.0,
                 xEnd+2.0*hdlDOF, -hdlDOF,
                 xEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::drawLine(
@@ -1978,16 +2469,16 @@ void Shape::drawEditDOFXCtr(
                 xBeg,        xBeg,
                 2.0*hdlDOF, -2.0*hdlDOF );
             */
-            
+
             // stop
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                xEnd-2.0*hdlDOF,  hdlDOF, 
+                xEnd-2.0*hdlDOF,  hdlDOF,
                 xEnd-2.0*hdlDOF, -hdlDOF,
                 xEnd,             0.0 );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xEnd-2.0*hdlDOF,  hdlDOF, 
+                xEnd-2.0*hdlDOF,  hdlDOF,
                 xEnd-2.0*hdlDOF, -hdlDOF,
                 xEnd,             0.0 );
             VisUtils::drawLine(
@@ -1995,13 +2486,13 @@ void Shape::drawEditDOFXCtr(
                 2.0*hdlDOF, -2.0*hdlDOF );
         }
     }
-    
+
     glPopMatrix();
 }
 
 
 // ------------------------------------------------
-void Shape::drawDOFYCtr( 
+void Shape::drawDOFYCtr(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ------------------------------------------------
@@ -2028,7 +2519,7 @@ void Shape::drawDOFYCtr(
             -hdlDOF,  hdlDOF,
              0.0,     0.0 );
         */
-        
+
         // pointing down
         if ( yEnd < yBeg )
         {
@@ -2043,7 +2534,7 @@ void Shape::drawDOFYCtr(
             VisUtils::drawLineDashed(
                 0.0,  0.0,
                 yBeg, yEnd );
-            
+
             /*
             // start
             VisUtils::setColorWhite();
@@ -2058,16 +2549,16 @@ void Shape::drawDOFYCtr(
                 -2.0*hdlDOF, 2.0*hdlDOF,
                  yBeg,       yBeg );
             */
-            
+
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                -hdlDOF, yEnd+2.0*hdlDOF, 
+                -hdlDOF, yEnd+2.0*hdlDOF,
                  0.0,    yEnd,
                  hdlDOF, yEnd+2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                -hdlDOF, yEnd+2.0*hdlDOF, 
+                -hdlDOF, yEnd+2.0*hdlDOF,
                  0.0,    yEnd,
                  hdlDOF, yEnd+2.0*hdlDOF );
             VisUtils::drawLine(
@@ -2088,7 +2579,7 @@ void Shape::drawDOFYCtr(
             VisUtils::drawLineDashed(
                 0.0,  0.0,
                 yBeg, yEnd );
-            
+
             /*
             // start
             VisUtils::setColorWhite();
@@ -2107,13 +2598,13 @@ void Shape::drawDOFYCtr(
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                 0.0,    yEnd, 
-                -hdlDOF, yEnd-2.0*hdlDOF, 
+                 0.0,    yEnd,
+                -hdlDOF, yEnd-2.0*hdlDOF,
                  hdlDOF, yEnd-2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                 0.0,    yEnd, 
-                -hdlDOF, yEnd-2.0*hdlDOF, 
+                 0.0,    yEnd,
+                -hdlDOF, yEnd-2.0*hdlDOF,
                  hdlDOF, yEnd-2.0*hdlDOF );
             VisUtils::drawLine(
                 2.0*hdlDOF, -2.0*hdlDOF,
@@ -2126,7 +2617,7 @@ void Shape::drawDOFYCtr(
 
 
 // ----------------------------------------------------
-void Shape::drawEditDOFYCtr( 
+void Shape::drawEditDOFYCtr(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ----------------------------------------------------
@@ -2150,11 +2641,11 @@ void Shape::drawEditDOFYCtr(
                 -hdlDOF, hdlDOF,
                  yBeg,   yBeg-1.5*hdlDOF );
             glPopName();
-            
+
             // stop
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
-                -hdlDOF, yEnd+2.0*hdlDOF, 
+                -hdlDOF, yEnd+2.0*hdlDOF,
                  0.0,    yEnd,
                  hdlDOF, yEnd+2.0*hdlDOF );
             glPopName();
@@ -2170,12 +2661,12 @@ void Shape::drawEditDOFYCtr(
                 yBeg+1.5*hdlDOF,  yBeg );
             glPopName();
             */
-            
+
             // stop
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
-                 0.0,    yEnd, 
-                -hdlDOF, yEnd-2.0*hdlDOF, 
+                 0.0,    yEnd,
+                -hdlDOF, yEnd-2.0*hdlDOF,
                  hdlDOF, yEnd-2.0*hdlDOF );
             glPopName();
         }
@@ -2201,7 +2692,7 @@ void Shape::drawEditDOFYCtr(
         VisUtils::drawLine(
             -hdlDOF,  hdlDOF,
             -hdlDOF,  hdlDOF );
-        
+
         // pointing down
         if ( yEnd < yBeg )
         {
@@ -2217,7 +2708,7 @@ void Shape::drawEditDOFYCtr(
             VisUtils::drawLineDashed(
                 0.0,  0.0,
                 yBeg, yEnd );
-            
+
             /*
             // start
             VisUtils::setColorGreen();
@@ -2236,12 +2727,12 @@ void Shape::drawEditDOFYCtr(
             // stop
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                -hdlDOF, yEnd+2.0*hdlDOF, 
+                -hdlDOF, yEnd+2.0*hdlDOF,
                  0.0,    yEnd,
                  hdlDOF, yEnd+2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                -hdlDOF, yEnd+2.0*hdlDOF, 
+                -hdlDOF, yEnd+2.0*hdlDOF,
                  0.0,    yEnd,
                  hdlDOF, yEnd+2.0*hdlDOF );
             VisUtils::drawLine(
@@ -2263,7 +2754,7 @@ void Shape::drawEditDOFYCtr(
             VisUtils::drawLineDashed(
                 0.0,  0.0,
                 yBeg, yEnd );
-            
+
             /*
             // start
             VisUtils::setColorGreen();
@@ -2278,17 +2769,17 @@ void Shape::drawEditDOFYCtr(
                 2.0*hdlDOF, -2.0*hdlDOF,
                 yBeg,        yBeg );
             */
-            
+
             // stop
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                 0.0,    yEnd, 
-                -hdlDOF, yEnd-2.0*hdlDOF, 
+                 0.0,    yEnd,
+                -hdlDOF, yEnd-2.0*hdlDOF,
                  hdlDOF, yEnd-2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                 0.0,    yEnd, 
-                -hdlDOF, yEnd-2.0*hdlDOF, 
+                 0.0,    yEnd,
+                -hdlDOF, yEnd-2.0*hdlDOF,
                  hdlDOF, yEnd-2.0*hdlDOF );
             VisUtils::drawLine(
                 2.0*hdlDOF, -2.0*hdlDOF,
@@ -2301,7 +2792,7 @@ void Shape::drawEditDOFYCtr(
 
 
 // ---------------------------------------------------
-void Shape::drawEditDOFWth( 
+void Shape::drawEditDOFWth(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ---------------------------------------------------
@@ -2329,8 +2820,8 @@ void Shape::drawEditDOFWth(
             // stop
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
-                xDFC+wEnd-2.0*hdlDOF,  hdlDOF, 
-                xDFC+wEnd-2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
+                xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd,             0.0 );
             glPopName();
         }
@@ -2351,7 +2842,7 @@ void Shape::drawEditDOFWth(
             glPushName( ID_HDL_DOF_END );
             VisUtils::fillTriangle(
                 xDFC+wEnd,             0.0,
-                xDFC+wEnd+2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd+2.0*hdlDOF,  hdlDOF );
             glPopName();
         }
@@ -2388,13 +2879,13 @@ void Shape::drawEditDOFWth(
                 VisUtils::drawLineDashed(
                     xDFC, xDFC+wEnd,
                     0.0,  0.0 );
-            
+
             // draw connector between handles
             VisUtils::setColorRed();
             VisUtils::drawLineDashed(
                 xDFC+wBeg, xDFC+wEnd,
                 0.0,       0.0 );
-            
+
             /*
             // start
             VisUtils::setColorGreen();
@@ -2415,13 +2906,13 @@ void Shape::drawEditDOFWth(
             // stop
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                xDFC+wEnd-2.0*hdlDOF,  hdlDOF, 
-                xDFC+wEnd-2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
+                xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd,             0.0 );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xDFC+wEnd-2.0*hdlDOF,  hdlDOF, 
-                xDFC+wEnd-2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
+                xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd,             0.0 );
             VisUtils::drawLine(
                  xDFC+wEnd,   xDFC+wEnd,
@@ -2476,12 +2967,12 @@ void Shape::drawEditDOFWth(
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
                 xDFC+wEnd,             0.0,
-                xDFC+wEnd+2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
                 xDFC+wEnd,             0.0,
-                xDFC+wEnd+2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::drawLine(
                  xDFC+wEnd,   xDFC+wEnd,
@@ -2492,7 +2983,7 @@ void Shape::drawEditDOFWth(
 
 
 // -----------------------------------------------
-void Shape::drawDOFWth( 
+void Shape::drawDOFWth(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // -----------------------------------------------
@@ -2563,13 +3054,13 @@ void Shape::drawDOFWth(
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                xDFC+wEnd-2.0*hdlDOF,  hdlDOF, 
-                xDFC+wEnd-2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
+                xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd,             0.0 );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                xDFC+wEnd-2.0*hdlDOF,  hdlDOF, 
-                xDFC+wEnd-2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd-2.0*hdlDOF,  hdlDOF,
+                xDFC+wEnd-2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd,             0.0 );
             VisUtils::drawLine(
                  xDFC+wEnd,   xDFC+wEnd,
@@ -2600,7 +3091,7 @@ void Shape::drawDOFWth(
             VisUtils::drawLineDashed(
                 xDFC+wBeg, xDFC+wEnd,
                 0.0,       0.0 );
-            
+
             /*
             // start
             VisUtils::setColorWhite();
@@ -2622,12 +3113,12 @@ void Shape::drawDOFWth(
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
                 xDFC+wEnd,             0.0,
-                xDFC+wEnd+2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
                 xDFC+wEnd,             0.0,
-                xDFC+wEnd+2.0*hdlDOF, -hdlDOF, 
+                xDFC+wEnd+2.0*hdlDOF, -hdlDOF,
                 xDFC+wEnd+2.0*hdlDOF,  hdlDOF );
             VisUtils::drawLine(
                  xDFC+wEnd,   xDFC+wEnd,
@@ -2638,7 +3129,7 @@ void Shape::drawDOFWth(
 
 
 // ---------------------------------------------------
-void Shape::drawEditDOFHgt( 
+void Shape::drawEditDOFHgt(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ---------------------------------------------------
@@ -2703,17 +3194,17 @@ void Shape::drawEditDOFHgt(
         VisUtils::drawLine(
              0.0,    0.0,
             -hdlDOF, hdlDOF );
-        
+
         // pointing up
         if ( hBeg <= hEnd )
         {
             // draw cur height
             VisUtils::setColorRed();
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC+hdlDOF,  yDFC-hdlDOF );
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC-hdlDOF,  yDFC+hdlDOF );
 
             // draw dashed connector to cur height
@@ -2770,10 +3261,10 @@ void Shape::drawEditDOFHgt(
             // draw cur height
             VisUtils::setColorRed();
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC+hdlDOF,  yDFC-hdlDOF );
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC-hdlDOF,  yDFC+hdlDOF );
 
             // draw dashed connector to cur width
@@ -2822,14 +3313,14 @@ void Shape::drawEditDOFHgt(
                  hdlDOF, yDFC+hEnd+2.0*hdlDOF );
             VisUtils::drawLine(
                  2.0*hdlDOF, -2.0*hdlDOF,
-                 yDFC+hEnd,   yDFC+hEnd );        
+                 yDFC+hEnd,   yDFC+hEnd );
         }
     }
 }
 
 
 // -----------------------------------------------
-void Shape::drawDOFHgt( 
+void Shape::drawDOFHgt(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // -----------------------------------------------
@@ -2853,17 +3344,17 @@ void Shape::drawDOFHgt(
              0.0,    0.0,
             -hdlDOF, hdlDOF );
         */
-        
+
         // pointing up
         if ( hBeg <= hEnd )
         {
             // draw cur height
             VisUtils::setColorMdGray();
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC+hdlDOF,  yDFC-hdlDOF );
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC-hdlDOF,  yDFC+hdlDOF );
 
             // draw dashed connector to cur height
@@ -2918,10 +3409,10 @@ void Shape::drawDOFHgt(
             // draw cur height
             VisUtils::setColorMdGray();
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC+hdlDOF,  yDFC-hdlDOF );
             VisUtils::drawLine(
-                 hdlDOF,      -hdlDOF, 
+                 hdlDOF,      -hdlDOF,
                  yDFC-hdlDOF,  yDFC+hdlDOF );
 
             // draw dashed connector to cur width
@@ -2954,7 +3445,7 @@ void Shape::drawDOFHgt(
                 -2.0*hdlDOF, 2.0*hdlDOF,
                 yDFC+hBeg,   yDFC+hBeg );
             */
-            
+
             // stop
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
@@ -2968,14 +3459,14 @@ void Shape::drawDOFHgt(
                  hdlDOF, yDFC+hEnd+2.0*hdlDOF );
             VisUtils::drawLine(
                  2.0*hdlDOF, -2.0*hdlDOF,
-                 yDFC+hEnd,   yDFC+hEnd );        
+                 yDFC+hEnd,   yDFC+hEnd );
         }
     }
 }
 
 
 // ---------------------------------------------------
-void Shape::drawEditDOFAgl( 
+void Shape::drawEditDOFAgl(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ---------------------------------------------------
@@ -2992,12 +3483,12 @@ void Shape::drawEditDOFAgl(
         double aglRef, aglBeg, aglEnd;
         double xBeg, yBeg;
         double xEnd, yEnd;
-        
+
         // distance from hinge to center
         dstHgeCtr = Utils::dist( xCtr+xHge, yCtr+yHge, xCtr, yCtr );
         // distance from center to handles
         dstHgeHdl = dstHgeCtr + 0.5*Utils::maxx( Utils::abs(xDFC), Utils::abs(yDFC) );
-        
+
         if ( dstHgeCtr == 0 )
             aglRef = 0;
         else
@@ -3025,7 +3516,7 @@ void Shape::drawEditDOFAgl(
             glPushMatrix();
             glTranslatef( xBeg, yBeg, 0.0 );
             glRotatef( aglBeg, 0.0, 0.0, 1.0 );
-            
+
                 /*
                 glPushName( ID_HDL_DOF_BEG );
                 VisUtils::fillRect(
@@ -3040,7 +3531,7 @@ void Shape::drawEditDOFAgl(
                     3.0*hdlDOF, -hdlDOF,
                     4.0*hdlDOF,  0.0 );
                 glPopName();
-                
+
             glPopMatrix();
 
             // end
@@ -3072,14 +3563,14 @@ void Shape::drawEditDOFAgl(
                     0.0,    -1.5*hdlDOF );
                 glPopName();
                 */
-                
+
                 glPushName( ID_HDL_DIR );
                 VisUtils::fillTriangle(
                     3.0*hdlDOF, hdlDOF,
                     2.0*hdlDOF, 0.0,
                     4.0*hdlDOF, 0.0 );
                 glPopName();
-                
+
             glPopMatrix();
 
             // end
@@ -3089,7 +3580,7 @@ void Shape::drawEditDOFAgl(
 
                 glPushName( ID_HDL_DOF_END );
                 VisUtils::fillTriangle(
-                    hdlDOF, 2.0*hdlDOF, 
+                    hdlDOF, 2.0*hdlDOF,
                     0.0,    0.0,
                    -hdlDOF, 2.0*hdlDOF );
                 glPopName();
@@ -3103,12 +3594,12 @@ void Shape::drawEditDOFAgl(
         double aglRef, aglBeg, aglEnd;
         double xBeg, yBeg;
         double xEnd, yEnd;
-        
+
         // distance from hinge to center
         dstHgeCtr = Utils::dist( xCtr+xHge, yCtr+yHge, xCtr, yCtr );
         // distance from center to handles
         dstHgeHdl = dstHgeCtr + 0.5*Utils::maxx( Utils::abs(xDFC), Utils::abs(yDFC) );
-        
+
         if ( dstHgeCtr == 0 )
             aglRef = 0;
         else
@@ -3149,7 +3640,7 @@ void Shape::drawEditDOFAgl(
             xHge, 0.0,
             yHge, 0.0 );
         */
-        
+
         // counter clockwise rotation
         if ( aglDOF->getDir() > 0 )
         {
@@ -3164,12 +3655,12 @@ void Shape::drawEditDOFAgl(
                 xHge,      yHge,
                 aglBeg,    aglEnd,
                 dstHgeHdl, segNumHnt );
-            
+
             // start
             glPushMatrix();
             glTranslatef( xBeg, yBeg, 0.0 );
             glRotatef( aglBeg, 0.0, 0.0, 1.0 );
-            
+
             /*
             VisUtils::fillRect(
                 hdlDOF, -hdlDOF,
@@ -3202,9 +3693,9 @@ void Shape::drawEditDOFAgl(
                 2.0*hdlDOF,  0.0,
                 3.0*hdlDOF, -hdlDOF,
                 4.0*hdlDOF,  0.0 );
-            
+
             glPopMatrix();
-            
+
             // end
             glPushMatrix();
             glTranslatef( xEnd, yEnd, 0.0 );
@@ -3238,12 +3729,12 @@ void Shape::drawEditDOFAgl(
                 xHge,      yHge,
                 aglBeg,    aglEnd,
                 dstHgeHdl, segNumHnt );
-            
+
             // start
             glPushMatrix();
             glTranslatef( xBeg, yBeg, 0.0 );
             glRotatef( aglBeg, 0.0, 0.0, 1.0 );
-            
+
             /*
             VisUtils::fillRect(
                -hdlDOF,  hdlDOF,
@@ -3256,7 +3747,7 @@ void Shape::drawEditDOFAgl(
                 2.0*hdlDOF, -2.0*hdlDOF,
                 0.0,         0.0 );
             */
-            
+
             // draw starting cross
             VisUtils::setColorRed();
             VisUtils::drawLine(
@@ -3285,12 +3776,12 @@ void Shape::drawEditDOFAgl(
             glRotatef( aglEnd, 0.0, 0.0, 1.0 );
             VisUtils::setColorGreen();
             VisUtils::fillTriangle(
-                hdlDOF, 2.0*hdlDOF, 
+                hdlDOF, 2.0*hdlDOF,
                 0.0,    0.0,
                -hdlDOF, 2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                hdlDOF, 2.0*hdlDOF, 
+                hdlDOF, 2.0*hdlDOF,
                 0.0,    0.0,
                -hdlDOF, 2.0*hdlDOF );
             VisUtils::drawLine(
@@ -3305,7 +3796,7 @@ void Shape::drawEditDOFAgl(
 
 
 // -----------------------------------------------
-void Shape::drawDOFAgl( 
+void Shape::drawDOFAgl(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // -----------------------------------------------
@@ -3324,12 +3815,12 @@ void Shape::drawDOFAgl(
         double aglRef, aglBeg, aglEnd;
         double xBeg, yBeg;
         double xEnd, yEnd;
-        
+
         // distance from hinge to center
         dstHgeCtr = Utils::dist( xCtr+xHge, yCtr+yHge, xCtr, yCtr );
         // distance from center to handles
         dstHgeHdl = dstHgeCtr + 0.5*Utils::maxx( Utils::abs(xDFC), Utils::abs(yDFC) );
-        
+
         if ( dstHgeCtr == 0 )
             aglRef = 0;
         else
@@ -3356,7 +3847,7 @@ void Shape::drawDOFAgl(
             xHge, 0.0,
             yHge, 0.0 );
         */
-        
+
         // counter clockwise rotation
         if ( aglDOF->getDir() > 0 )
         {
@@ -3448,12 +3939,12 @@ void Shape::drawDOFAgl(
             glRotatef( aglEnd, 0.0, 0.0, 1.0 );
             VisUtils::setColorWhite();
             VisUtils::fillTriangle(
-                hdlDOF, 2.0*hdlDOF, 
+                hdlDOF, 2.0*hdlDOF,
                 0.0,    0.0,
                -hdlDOF, 2.0*hdlDOF );
             VisUtils::setColorMdGray();
             VisUtils::drawTriangle(
-                hdlDOF, 2.0*hdlDOF, 
+                hdlDOF, 2.0*hdlDOF,
                 0.0,    0.0,
                -hdlDOF, 2.0*hdlDOF );
             VisUtils::drawLine(

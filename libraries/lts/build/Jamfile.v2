@@ -1,51 +1,16 @@
 project lts
-       : source-location ../source
-       : build-dir $(BUILD_TOP)
+       : source-location ..
        : requirements
           <include>../include
-          <include>$(SETUP)
        : usage-requirements
-          <include>$(SETUP)
-          <include>../include
        ;
 
-alias lts.main
-       : [ glob *.cpp ]
-       : <use>/libraries/parser//headers
-         <use>/libraries/svc//headers
-         <use>/libraries/lps//headers
+mcrl2-library lts
+       : [ glob source/*.cpp ]
+       : <library>/libraries//svc
+         <library>/libraries//lps
          <library>/site-config//BCG
-       : <threading>single
-       : <library>/site-config//BCG
-       ;
-
-lib lts
-       : lts.main
-         /libraries//parser
-         /libraries//svc
-       : <link>static
        :
-       : <library>/libraries//parser
-         <library>/libraries//svc
+       : <include>../include
+         <library>/site-config//BCG
        ;
-
-alias lts
-       : /libraries//mcrl2
-       : <link>shared
-       ;
-
-alias lts.alias
-       : lts.main
-       : <use>headers
-       ;
-
-alias headers
-       :
-       :
-       :
-       : <use>/libraries/parser//headers
-         <use>/libraries/svc//headers
-       ;
-
-explicit lts.main lts.alias ;
-

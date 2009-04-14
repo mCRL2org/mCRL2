@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -7,34 +9,19 @@
 /// \file is_quoted.cpp
 /// \brief Add your file description here.
 
-// ======================================================================
-//
-// Copyright (c) 2004, 2005 Wieger Wesselink
-//
-// ----------------------------------------------------------------------
-//
-// file          : test/is_quoted.cpp
-// date          : 04/25/05
-// version       : 0.3
-//
-// author(s)     : Wieger Wesselink  <J.W.Wesselink@tue.nl>
-//
-// ======================================================================
-
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
 
-#include "atermpp/aterm.h"
-#include "atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 
 using namespace std;
 using namespace atermpp;
 
-int test_main( int, char*[] )
+int test_main(int argc, char* argv[])
 {
-  ATerm bottom_of_stack;
-  ATinit(0, 0, &bottom_of_stack);
+  MCRL2_ATERMPP_INIT(argc, argv)
   // unquoted function symbol s == "f"
   function_symbol s("\"f\"", 1, false);
   aterm_appl f(s, aterm("x"));

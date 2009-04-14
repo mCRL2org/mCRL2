@@ -1,5 +1,5 @@
 #Make rules
-all     : 
+all     :
 
 clean   :
 	rm -f *.dvi *.log *.aux *.toc *.out *.blg *.bbl *.ps *.pdf
@@ -9,7 +9,7 @@ clean   :
 	texi2dvi $^
 
 %.ps    : %.dvi
-	dvips $^
+	dvips -t a4 $^
 
 %.pdf   : %.ps
 	ps2pdf $^

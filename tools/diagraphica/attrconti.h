@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./attrconti.h
-
-// --- attrconti.h --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef ATTRCONTI_H
 #define ATTRCONTI_H
@@ -16,7 +16,6 @@
 #include <string>
 #include <map>
 #include <vector>
-using namespace std;
 #include "attribute.h"
 #include "value.h"
 
@@ -26,8 +25,8 @@ public:
     // -- constructors and destructor -------------------------------
     AttrConti(
         Mediator* m,
-        const string &nam,
-        const string &typ,
+        const std::string &nam,
+        const std::string &typ,
         const int &idx,
         const double &lwrBnd,
         const double &uprBnd );
@@ -35,10 +34,10 @@ public:
     virtual ~AttrConti();
 
     // -- set functions ---------------------------------------------
-    
+
     void clusterValues(
-        const vector< int > &indices,
-        const string &newValue );
+        const std::vector< int > &indices,
+        const std::string &newValue );
     void moveValue(
         const size_t &idxFr,
         const size_t &idxTo );
@@ -74,8 +73,8 @@ protected:
     void deleteCurMap();
 
     // -- data members ----------------------------------------------
-    vector< Value* >  curValues;  // composition, current domain
-    map< double, Value* > curMap; // composition, map to current values
+    std::vector< Value* >  curValues;  // composition, current domain
+    std::map< double, Value* > curMap; // composition, std::map to current values
 
     double lowerBound;
     double upperBound;

@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,7 +14,7 @@
 
 #include <string>
 
-const std::string ABP_SPECIFICATION = 
+const std::string ABP_SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"

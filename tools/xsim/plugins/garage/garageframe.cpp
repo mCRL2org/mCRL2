@@ -1,10 +1,14 @@
 // Author(s): Aad Mathijssen and Hannes Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file garageframe.cpp
+
+#include "wx.hpp" // precompiled headers
 
 // ---------------------------------
 //
@@ -13,8 +17,12 @@
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+#include "simbasegui.h"
 #include "garageframe.h"
 #include <sstream>
+
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 
 BEGIN_EVENT_TABLE(GarageFrame,wxFrame)
     EVT_CLOSE(GarageFrame::OnCloseWindow)
@@ -31,7 +39,7 @@ inline std::string intToString( int i )
 }
 
 // --------------------------------------------
-GarageFrame::GarageFrame( wxChar* title,
+GarageFrame::GarageFrame( wxString const& title,
                           int xPos,
                           int yPos,
                           int width,
@@ -53,7 +61,7 @@ GarageFrame::GarageFrame( wxChar* title,
 
 // --------------------------------------------
 GarageFrame::GarageFrame( wxWindow* parent,
-                          wxChar* title,
+                          wxString const& title,
                           int xPos,
                           int yPos,
                           int width,
@@ -103,8 +111,6 @@ void GarageFrame::InitialiseFrame()
   stateIndex = -1;
   simulator = NULL;
   canvas->InitialiseCanvas();
-  //enable constructor functions
-  gsEnableConstructorFunctions();
 }
 
 
@@ -297,7 +303,7 @@ void GarageFrame::UpdateState( ATerm State )
       ATermList gs_hal_elts = gsGetDataExprArgs(gs_hal);
 
       Rewriter* rewriter = nextState->getRewriter();
-  
+
       //update floor state
       ATermAppl sOccState = MakeSortId("OccState");
       ATermAppl tFree = MakeOpId("free", sOccState);
@@ -313,18 +319,18 @@ void GarageFrame::UpdateState( ATerm State )
             } else if (ATisEqual(state, tOccupied)) {
               floorState[i-1][(j-1)*2+k] = 1;
             } else {
-              std::cerr 
+              std::cerr
                 << "error: floor state of position "
                 << PrintPart_CXX((ATerm) fp, ppDefault)
-                << " cannot be shown because the term " 
+                << " cannot be shown because the term "
                 << PrintPart_CXX((ATerm) state, ppDefault)
                 << " cannot be rewritten to normal form"
                 << std::endl;
-            } 
+            }
           }
         }
       }
-  
+
       //update shuttle state
       ATermAppl tLowered =
         MakeOpId("lowered", MakeSortId("ShuttleOrientation"));
@@ -364,7 +370,7 @@ void GarageFrame::UpdateState( ATerm State )
           }
         }
       }
-  
+
       //update lift state
       ATermAppl ls = ATAelementAt(gs_hal_elts, 2);
       ATermAppl lsSort = MakeSortId("LiftState");
@@ -394,7 +400,7 @@ void GarageFrame::UpdateState( ATerm State )
         floorState[0][11] = -1;
         floorState[0][12] = -1;
       }
-  
+
       // Update canvas
       canvas->SetDataStructs(floorState, shuttleState, liftHeight, liftOccupied);
     }
@@ -408,8 +414,8 @@ void GarageFrame::OnCloseWindow( wxCloseEvent & )
 // ---------------------------------------------
 {
 #ifdef GARAGEFRAMEDLL
-  if (xsimdll != NULL) {
-    xsimdll->Remove(this, true);
+  if (simdll != NULL) {
+    simdll->Remove(this, true);
   }
 #endif
   Destroy();
@@ -424,25 +430,25 @@ void GarageFrame::OnMoveWindow( wxMoveEvent & )
 }
 
 #ifdef GARAGEFRAMEDLL
-static XSimViewsDLL *xsvdll;
+static SimViewsDLL *svdll;
 
 extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
 {
           GarageFrame *v;
           v = new GarageFrame(
-            Simulator->MainWindow(), wxT("Garage State"),-1,-1,300,200);
+            GetMainWindow(Simulator), wxT("Garage State"),-1,-1,300,200);
           v->Show();
-          v->SetXSimViewsDLL(xsvdll);
-          xsvdll->Add(v,Simulator);
+          v->SetSimViewsDLL(svdll);
+          svdll->Add(v,Simulator);
 }
 
 extern "C" __attribute__((constructor)) void SimulatorViewDLLInit()
 {
-          xsvdll = new XSimViewsDLL;
+          svdll = new SimViewsDLL;
 }
 
 extern "C" __attribute__((destructor)) void SimulatorViewDLLCleanUp()
 {
-          delete xsvdll;
+          delete svdll;
 }
 #endif

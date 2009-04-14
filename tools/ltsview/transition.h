@@ -1,19 +1,18 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file transition.h
-/// \brief Add your file description here.
+/// \brief Header file for Transition class
 
 #ifndef TRANSITION_H
 #define TRANSITION_H
-#ifndef STATE_H
-  #include "state.h"
-#else
-  class State;
-#endif
+
+class State;
 
 class Transition
 {
@@ -24,15 +23,14 @@ class Transition
     State*	getEndState() const;
     int			getLabel() const;
     bool		isBackpointer() const;
+    bool                isSelfLoop() const;
     bool		isMarked() const;
-    void		setBackpointer(bool b);
     void		setMarkedPointer(bool* bp);
 
   private:
-    bool    backpointer;
     State*  beginState;
     State*  endState;
-    int   label;
+    int     label;
     bool*   marked;
 };
 

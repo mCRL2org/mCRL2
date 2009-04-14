@@ -61,9 +61,9 @@ namespace boost
             return *this;
         }
 
-        any & operator=(const any & rhs)
+        any & operator=(any rhs)
         {
-            any(rhs).swap(*this);
+            rhs.swap(*this);
             return *this;
         }
 
@@ -127,6 +127,8 @@ namespace boost
 
             ValueType held;
 
+        private: // intentionally left unimplemented
+            holder & operator=(const holder &);
         };
 
 #ifndef BOOST_NO_MEMBER_TEMPLATE_FRIENDS

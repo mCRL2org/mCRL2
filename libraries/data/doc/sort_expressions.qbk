@@ -1,0 +1,20 @@
+[section: Sort expressions]
+
+Although there are many different kinds of sorts in the mCRL2 language, there are only
+two different kinds of sort expressions in the Data Library.
+
+[table Sort expressions
+    [[Type] [Meaning]]
+    [ [ `sort_identifier` ] [ basic sort    ]]
+    [ [ `sort_arrow`      ] [ function sort ]]
+]
+
+These two sort expressions correspond to the grammar
+
+     S ::= Sb | S x S,
+
+where =Sb= is a given set of basic sorts. In the mCRL2 language there are also structured
+sorts, lists, sets and bags. These additional sorts are converted into basic sorts and
+function sorts.
+
+[endsect] [/Sort expressions]

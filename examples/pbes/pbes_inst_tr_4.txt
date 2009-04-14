@@ -1,0 +1,11 @@
+% This file contains PBES example 4, as described in:
+%
+% A. van Dam, B. Ploeger and T.A.C. Willemse. Instantiation for
+% Parameterised Boolean Equation Systems.  Computer Science Report
+% 08-11, Eindhoven University of Technology (TU/e), 2008.
+
+pbes mu X(b: Bool, n: Nat) =
+       (forall i: Nat. val(!b) || X(!b, i)) &&
+       (val(b) || val(n == 0) || X(b, Int2Nat(n-1)));
+
+init X(true, 0);

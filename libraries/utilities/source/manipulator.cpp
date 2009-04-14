@@ -1,20 +1,20 @@
 // Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file source/manipulator.cpp
-/// \brief Add your file description here.
 
-// Implementation of classes ATerm_Manipulator, AM_Jitty and AM_Inner
-// file: manipulator.cpp
+#include "boost.hpp" // precompiled headers
 
 #include "aterm2.h"
-#include "librewrite.h"
-#include "libstruct.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/rewrite.h"
 #include "mcrl2/utilities/manipulator.h"
 #include "mcrl2/utilities/info.h"
+
+using namespace mcrl2::core;
 
 // Class ATerm_Manipulator ------------------------------------------------------------------------
   // Class ATerm_Manipulator - Functions declared public ------------------------------------------
@@ -137,6 +137,7 @@
   // Class AM_Jitty - Functions declared public ---------------------------------------------------
 
     AM_Jitty::AM_Jitty(Rewriter* a_rewriter, ATerm_Info* a_info): ATerm_Manipulator(a_rewriter, a_info) {
+      using namespace mcrl2::core::detail;
       f_true =  a_rewriter->toRewriteFormat(gsMakeOpIdTrue());
       f_false = a_rewriter->toRewriteFormat(gsMakeOpIdFalse());
       f_if_then_else = ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool())), 0);
@@ -337,6 +338,7 @@
   // Class AM_Inner - Functions declared public ---------------------------------------------------
 
     AM_Inner::AM_Inner(Rewriter* a_rewriter, ATerm_Info* a_info): ATerm_Manipulator(a_rewriter, a_info) {
+      using namespace mcrl2::core::detail;
       f_true =  a_rewriter->toRewriteFormat(gsMakeOpIdTrue());
       f_false = a_rewriter->toRewriteFormat(gsMakeOpIdFalse());
       f_if_then_else = a_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool()));
@@ -345,7 +347,7 @@
     // --------------------------------------------------------------------------------------------
 
     AM_Inner::~AM_Inner() {
-      // There's nothing to free here, since there weren't 
+      // There's nothing to free here, since there weren't
       // any new objects created in the constructor.
     }
 

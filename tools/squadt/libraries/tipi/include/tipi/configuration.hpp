@@ -1,31 +1,58 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/configuration.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/configuration.hpp
+/// \brief Type used for representing tool configurations (protocol concept)
 
-#ifndef TIPI_CONFIGURATION_H__
-#define TIPI_CONFIGURATION_H__
+#ifndef TIPI_CONFIGURATION_HPP__
+#define TIPI_CONFIGURATION_HPP__
 
+#include <vector>
+#include <string>
 #include <map>
 #include <set>
 
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
 
-#include "tipi/utility/generic_visitor.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
 
-#include "tipi/option.hpp"
-#include "tipi/object.hpp"
-#include "tipi/common.hpp"
+#include "tipi/uri.hpp"
 #include "tipi/mime_type.hpp"
 #include "tipi/tool/category.hpp"
 
 namespace tipi {
 
+  namespace controller {
+    class communicator;
+    class communicator_impl;
+  }
+  namespace tool {
+    class communicator;
+    class communicator_impl;
+  }
+
   class configuration;
+
+  class report;
+
+  namespace controller {
+    class communicator;
+    class communicator_impl;
+  }
+
+  namespace tool {
+    class communicator;
+    class communicator_impl;
+  }
 
   /** \brief This class models a tool configuration */
   class configuration : public ::utility::visitable {
@@ -41,34 +68,31 @@ namespace tipi {
 
     public:
 
-      /** \brief Type used to constrain occurrences of options within a configuration */
-      struct option_constraint {
-        unsigned short minimum; ///< \brief minimum occurrences of this option in a single configuration
-        unsigned short maximum; ///< \brief maximum occurrences of this option in a single configuration
+      /** \brief Base class for configuration atoms */
+      class parameter : public ::utility::visitable {
+
+        public:
+
+          /** \brief Parameter identifier */
+          typedef std::string identifier;
       };
 
-      /** \brief Convenience type for parameter type */
-      typedef tipi::parameter   parameter;
+      /** \brief Concrete descriptor for a data object (such as a file in the local file system) */
+      class object;
 
-      /** \brief Convenience type for option type */
-      typedef tipi::option      option;
-
-      /** \brief Convenience type for object type */
-      typedef tipi::object      object;
-
-      /** \brief Unique (named) identifier for an argument */
-      typedef std::string      parameter_identifier;
+      /** \brief Descriptor for optional functionality */
+      class option;
 
     private:
 
       /** \brief Convenience type for associating string identifiers to objects */
-      typedef std::map < parameter_identifier, size_t >              id_parameter_map;
+      typedef std::map < parameter::identifier, size_t >              id_parameter_map;
 
       /** \brief Type to model a partition over position list */
-      typedef std::set < parameter* >                                position_list_partition;
+      typedef std::set < parameter* >                                 position_list_partition;
 
       /** \brief Type for keeping the relative ordering of objects and options */
-      typedef std::vector < boost::shared_ptr < tipi::parameter > >   position_list;
+      typedef std::vector < boost::shared_ptr < parameter > >   position_list;
 
 
     public:
@@ -121,47 +145,45 @@ namespace tipi {
     private:
 
       /** \brief The list of configuration options */
-      position_list_partition m_options;
+      position_list_partition     m_options;
 
       /** \brief The list of input objects */
-      position_list_partition m_input_objects;
+      position_list_partition     m_input_objects;
 
       /** \brief The list of output objects */
-      position_list_partition m_output_objects;
+      position_list_partition     m_output_objects;
 
       /** \brief Mapping of id to option objects */
-      id_parameter_map        m_parameter_by_id;
+      id_parameter_map            m_parameter_by_id;
 
       /** \brief Sequence of identifiers of options and objects */
-      position_list           m_positions;
+      position_list               m_positions;
 
       /** \brief The selected category in which the tool operates */
-      tool_category           m_category;
+      tipi::tool::category        m_category;
 
       /** \brief Whether or not the tool accepted this configuration in the past */
-      bool                    m_fresh;
+      bool                        m_fresh;
 
       /** \brief Prefix for output objects (TODO replace when naming component is added) */
-      std::string             m_output_prefix;
-
-    private:
-
-      /** \brief Constructor */
-      inline configuration(tool_category);
+      std::string                 m_output_prefix;
 
     public:
 
-      /** \brief Default Constructor */
-      inline configuration();
+      /** \brief Constructor */
+      inline configuration(const tool::category::standard_category_type = tool::category::unknown);
+
+      /** \brief Constructor */
+      inline configuration(tool::category const&);
 
       /** \brief Returns whether the configuration is empty or not */
-      bool is_empty() const;
+      bool empty() const;
 
       /** \brief Get the state of the configuration */
-      bool is_fresh() const;
+      bool fresh() const;
 
       /** \brief Marks configuration as fresh */
-      void set_fresh(bool = true);
+      void fresh(bool);
 
       /** \brief Whether or not a parameter is an option */
       bool is_option(parameter const&) const;
@@ -172,9 +194,6 @@ namespace tipi {
       /** \brief Whether or not a parameter is an output object specifier */
       bool is_output(parameter const&) const;
 
-      /** \brief Set the prefix for output files */
-      void set_output_prefix(std::string const&);
-
       /** \brief Get the identifier for a parameter within the configuration */
       std::string get_identifier(parameter const&) const;
 
@@ -184,8 +203,14 @@ namespace tipi {
       /** \brief Get the identifier for an object within the configuration */
       std::string get_identifier(object const&) const;
 
+      /** \brief Set the prefix for output files */
+      void output_prefix(std::string const&);
+
       /** \brief Get the prefix for output files */
-      std::string get_output_prefix() const;
+      std::string output_prefix() const;
+
+      /** \brief The category in which the tool operates */
+      tipi::tool::category category() const;
 
       /** \brief Prepends the output prefix to the argument to form a valid file name */
       std::string get_input_name(std::string const&) const;
@@ -193,77 +218,71 @@ namespace tipi {
       /** \brief Prepends the output prefix to the argument to form a valid file name */
       std::string get_output_name(std::string const&) const;
 
-      /** \brief The category in which the tool operates */
-      tipi::tool::category get_category() const;
+      /** \brief Add an option to the configuration */
+      option& add_option(parameter::identifier const&, bool = true);
 
       /** \brief Add an option to the configuration */
-      option& add_option(parameter_identifier const&, bool = true);
-
-      /** \brief Add an option to the configuration */
-      option& add_option(parameter_identifier const&, boost::shared_ptr < option >&, bool = true);
+      option& add_option(parameter::identifier const&, boost::shared_ptr < option >&, bool = true);
 
       /** \brief Establishes whether an option exists (by identifier) */
-      bool option_exists(parameter_identifier const&) const;
+      bool option_exists(parameter::identifier const&) const;
 
       /** \brief Remove an option from the configuration, if it exists */
-      void remove_option(parameter_identifier const&);
+      void remove_option(parameter::identifier const&);
 
       /** \brief Get an option by its id */
-      option const& get_option(parameter_identifier const&) const;
+      option const& get_option(parameter::identifier const&) const;
 
       /** \brief Get an option by its id */
-      option& get_option(parameter_identifier const&);
-
-      /** \brief Get the value of an option argument */
-      boost::any get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
+      option& get_option(parameter::identifier const&);
 
       /** \brief Get the value of an option argument */
       template < typename T >
-      T const& get_option_argument(parameter_identifier const& id, size_t const& n = 0) const;
+      T get_option_argument(parameter::identifier const& id, size_t const& n = 0) const;
 
       /** \brief Establishes whether an input object is known by this identifier (by identifier) */
-      bool input_exists(parameter_identifier const&) const;
+      bool input_exists(parameter::identifier const&) const;
 
       /** \brief Establishes whether an output object is known by this identifier (by identifier) */
-      bool output_exists(parameter_identifier const&) const;
+      bool output_exists(parameter::identifier const&) const;
 
       /** \brief Add an input object to the configuration */
-      object& add_input(parameter_identifier const&, mime_type const&, uri const& = "");
+      object& add_input(parameter::identifier const&, mime_type const&, uri const& = "");
 
       /** \brief Add an input object to the configuration */
-      object& add_input(parameter_identifier const&, object&);
+      object& add_input(parameter::identifier const&, object&);
 
       /** \brief Add an input object to the configuration */
-      object& add_input(parameter_identifier const&, boost::shared_ptr < object >&);
+      object& add_input(parameter::identifier const&, boost::shared_ptr < object >&);
 
       /** \brief Add an output object to the configuration */
-      object& add_output(parameter_identifier const&, mime_type const&, uri const& = "");
+      object& add_output(parameter::identifier const&, mime_type const&, uri const& = "");
 
       /** \brief Add an output object to the configuration */
-      object& add_output(parameter_identifier const&, object&);
+      object& add_output(parameter::identifier const&, object&);
 
       /** \brief Add an output object to the configuration */
-      object& add_output(parameter_identifier const&, boost::shared_ptr < object >&);
+      object& add_output(parameter::identifier const&, boost::shared_ptr < object >&);
       /** \brief Get an input object by id */
-      object const& get_input(parameter_identifier const&) const;
+      object const& get_input(parameter::identifier const&) const;
 
       /** \brief Get an input object by id */
-      object& get_input(parameter_identifier const&);
+      object& get_input(parameter::identifier const&);
 
       /** \brief Get an output object by id */
-      object const& get_output(parameter_identifier const&) const;
+      object const& get_output(parameter::identifier const&) const;
 
       /** \brief Get an output object by id */
-      object& get_output(parameter_identifier const&);
+      object& get_output(parameter::identifier const&);
 
       /** \brief Remove an input object from the configuration */
       void remove_input(size_t);
 
       /** \brief Remove an input object from the configuration */
-      void remove_input(parameter_identifier const&);
+      void remove_input(parameter::identifier const&);
 
       /** \brief Remove an output object from the configuration */
-      void remove_output(parameter_identifier const&);
+      void remove_output(parameter::identifier const&);
 
       /** \brief Remove an output object from the configuration */
       void remove_output(size_t);
@@ -295,22 +314,30 @@ namespace tipi {
       /** \brief Get number of output objects */
       size_t number_of_outputs() const;
   };
+}
 
-  inline configuration::configuration() : m_fresh(true) {
+#include "tipi/option.hpp"
+#include "tipi/object.hpp"
+
+namespace tipi {
+
+  inline configuration::configuration(tool::category const& c) :
+                 m_category(c), m_fresh(true) {
   }
 
-  inline configuration::configuration(tool_category c) : m_category(c), m_fresh(true) {
+  inline configuration::configuration(const tool::category::standard_category_type c) :
+                 m_category(tool::category::standard_categories()[c]), m_fresh(true) {
   }
 
-  inline bool configuration::is_empty() const {
+  inline bool configuration::empty() const {
     return (0 == m_options.size());
   }
 
-  inline bool configuration::is_fresh() const {
+  inline bool configuration::fresh() const {
     return (m_fresh);
   }
 
-  inline void configuration::set_fresh(bool b) {
+  inline void configuration::fresh(bool b) {
     m_fresh = b;
   }
 
@@ -333,18 +360,18 @@ namespace tipi {
    * \param[in] p the string to set as output prefix
    *  \todo remove after naming component is added)
    **/
-  inline void configuration::set_output_prefix(std::string const& p) {
+  inline void configuration::output_prefix(std::string const& p) {
     m_output_prefix = p;
   }
 
   /**
    *  \todo remove after naming component is added)
    **/
-  inline std::string configuration::get_output_prefix() const {
+  inline std::string configuration::output_prefix() const {
     return (m_output_prefix);
   }
 
-  inline tipi::tool::category configuration::get_category() const {
+  inline tipi::tool::category configuration::category() const {
     return (m_category);
   }
 
@@ -353,8 +380,10 @@ namespace tipi {
    * \param[in] m the storage format the object uses
    * \param[in] l the location for the object (optional)
    * \pre no object or option is known by this identifier
+   * \throws std::runtime_error on failure
+   * \return the object corresponding with get_input(id)
    **/
-  inline object& configuration::add_input(std::string const& id, mime_type const& m, uri const& l) {
+  inline configuration::object& configuration::add_input(std::string const& id, mime_type const& m, uri const& l) {
     boost::shared_ptr < object > new_object(new object(m, l));
 
     return (add_input(id, new_object));
@@ -364,8 +393,10 @@ namespace tipi {
    * \param[in] id unique identifier for the input object
    * \param[in] o reference to object
    * \pre no object or option is known by this identifier
+   * \throws std::runtime_error on failure
+   * \return the object corresponding with get_input(id)
    **/
-  inline object& configuration::add_input(std::string const& id, object& o) {
+  inline configuration::object& configuration::add_input(std::string const& id, object& o) {
     boost::shared_ptr < object > new_object(new object(o));
 
     return (add_input(id, new_object));
@@ -376,8 +407,10 @@ namespace tipi {
    * \param[in] m the storage format the object uses
    * \param[in] l the location for the object (optional)
    * \pre no object or option is known by this identifier
+   * \throws std::runtime_error on failure
+   * \return the object corresponding with get_output(id)
    **/
-  inline object& configuration::add_output(std::string const& id, mime_type const& m, uri const& l) {
+  inline configuration::object& configuration::add_output(std::string const& id, mime_type const& m, uri const& l) {
     boost::shared_ptr < object > new_object(new object(m, l));
 
     return (add_output(id, new_object));
@@ -387,29 +420,34 @@ namespace tipi {
    * \param[in] id unique identifier for the output object
    * \param[in] o shared pointer to object
    * \pre no object or option is known by this identifier
+   * \throws std::runtime_error on failure
+   * \return the object corresponding with get_output(id)
    **/
-  inline object& configuration::add_output(std::string const& id, object& o) {
+  inline configuration::object& configuration::add_output(std::string const& id, object& o) {
     boost::shared_ptr < object > new_object(new object(o));
 
     return (add_output(id, new_object));
   }
 
   /**
-   * \param id an identifier for the option
+   * \param[in] id an identifier for the option
+   * \return whether an option identified by id is part of the configuration
    **/
   inline bool configuration::option_exists(std::string const& id) const {
     return (m_parameter_by_id.count(id) != 0);
   }
 
   /**
-   * \param id an identifier for the option
+   * \param[in] id an identifier for the option
+   * \return whether an output identified by id is part of the configuration
    **/
   inline bool configuration::input_exists(std::string const& id) const {
     return (m_parameter_by_id.count(id) != 0);
   }
 
   /**
-   * \param id an identifier for the option
+   * \param[in] id an identifier for the option
+   * \return whether an output identified by id is part of the configuration
    **/
   inline bool configuration::output_exists(std::string const& id) const {
     return (m_parameter_by_id.count(id) != 0);
@@ -418,8 +456,10 @@ namespace tipi {
   /**
    * \param[in] id unique identifier for the output object
    * \pre objects_exist(id) must hold
+   * \return reference to the input object identified by id
+   * \throws std::runtime_error if no input object corresponding to id is found
    **/
-  inline object const& configuration::get_input(std::string const& id) const {
+  inline configuration::object const& configuration::get_input(std::string const& id) const {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (*boost::static_pointer_cast< const object >(m_positions[(*m_parameter_by_id.find(id)).second]));
@@ -428,8 +468,10 @@ namespace tipi {
   /**
    * \param[in] id unique identifier for the output object
    * \pre objects_exist(id) and m_parameter_by_id[id].get() must hold
+   * \return reference to the input object identified by id
+   * \throws std::runtime_error if no input object corresponding to id is found
    **/
-  inline object& configuration::get_input(std::string const& id) {
+  inline configuration::object& configuration::get_input(std::string const& id) {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (*boost::static_pointer_cast< object >(m_positions[m_parameter_by_id[id]]));
@@ -438,8 +480,10 @@ namespace tipi {
   /**
    * \param[in] id an identifier for the object
    * \pre objects_exist(id) and m_parameter_by_id[id].get() in output_objects must hold
+   * \return reference to the output object identified by id
+   * \throws std::runtime_error if no output object corresponding to id is found
    **/
-  inline object const& configuration::get_output(std::string const& id) const {
+  inline configuration::object const& configuration::get_output(std::string const& id) const {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (*boost::static_pointer_cast< const object >(m_positions[(*m_parameter_by_id.find(id)).second]));
@@ -448,8 +492,10 @@ namespace tipi {
   /**
    * \param[in] id an identifier for the object
    * \pre objects_exist(id) must hold
+   * \return reference to the object identified by id
+   * \throws std::runtime_error if no output object corresponding to id is found
    **/
-  inline object& configuration::get_output(std::string const& id) {
+  inline configuration::object& configuration::get_output(std::string const& id) {
     assert(m_parameter_by_id.count(id) != 0);
 
     return (*boost::static_pointer_cast< object >(m_positions[m_parameter_by_id[id]]));
@@ -473,10 +519,14 @@ namespace tipi {
    * \pre option must take at least one argument and n must be smaller than the number of arguments
    * \pre option with this identifier must be part of the configuration, use
    *      option_exists member to establish this
+   * \return the value for the n-th argument of the option corresponding with id
    **/
   template < typename T >
-  inline T const& configuration::get_option_argument(std::string const& id, size_t const& n) const {
-    return boost::any_cast < T const& > (get_option_argument(id, n));
+  inline T configuration::get_option_argument(std::string const& id, size_t const& n) const {
+    option const& o = *boost::static_pointer_cast < const option > (
+        const_cast < position_list& > (m_positions)[(*m_parameter_by_id.find(id)).second]);
+
+    return o.get_value< T >(n);
   }
 }
 

@@ -1,0 +1,12 @@
+project tr
+       : source-location ..
+       : requirements
+          <include>../include/tr
+       : usage-requirements
+          <include>../include
+       ;
+
+obj tr
+       : source/tr.c
+       : <library>/site-config//opengl
+       ;

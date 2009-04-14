@@ -1,50 +1,48 @@
 project toolset/xsim
-       : build-dir $(BUILD_TOP)/xsim
+       : requirements
+          <use>/libraries//lps
+          <use>/libraries//trace
        ;
 
-alias xsim_base : : <wx>no ;
-
-lib xsim_base
-       : xsimbase.cpp
-         /libraries//trace
-         /libraries//nextstate
-         /libraries//mcrl2_basic
-         /site-config//wx_base
-       : <wx>yes
+alias sim_shared
+       : [ obj simbase.o   : simbase.cpp   ]
+         [ obj simulator.o : simulator.cpp ]
        ;
 
-alias xsim : : <wx>no ;
+alias xsim_core
+       : [ obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ]
+         sim_shared
+       ;
 
-exe xsim
+explicit sim_shared simbasegui.o xsim_core ;
+
+local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
+
+for plugin in $(plugins) {
+  alias $(plugin) : plugins/$(plugin)//xsim_$(plugin)_view ;
+}
+
+tool xsim
        : xsim.cpp
-         xsim_base
+         xsim_core
+         simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
-         /libraries//nextstate
-         /libraries//mcrl2_basic
-         /site-config//wx_base
-       : <toolset>gcc:<linkflags>"-Wl,-export-dynamic"
-         <os>NT:<linkflags>"-Wl,-subsystem:windows -mwindows"
-         <os>CYGWIN:<linkflags>"-Wl,-subsystem:windows -mwindows"
-         <squadt-connectivity>implemented
-         <wx>yes
+         /libraries//lps
+       : <squadt-connectivity>implemented
+         <wx>gl
+         <define>PLUGINDIR=\"\\\"$(PLUGIN_ROOT)\\\"\"
+         <install-plugin>$(plugins)
+         <install-rule>xsim-install
        ;
 
-exe sim
+tool sim
        : sim.cpp
-         /libraries//nextstate
-         /libraries//mcrl2_basic
-       : <toolset>msvc:<library>/libraries//getopt
+         sim_shared
+         /libraries//lps
+         /libraries//trace
+       : <install-rule>sim-install
        ;
 
-install-binaries install
-       : xsim sim 
-       : <dependency>install-plugins
-       ;
-
-local plugins  = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
-
-install-plugins install-plugins
-       : plugins/$(plugins)
-       ;
+alias install : xsim-install sim-install ;

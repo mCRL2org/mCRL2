@@ -1,7 +1,7 @@
 % Test Case 6
 %
-% The following LPS is generated:  
-% 
+% The following LPS is generated:
+%
 % proc P(s3: Pos, i,j: Nat) =
 %       (s3 == 1 && i < 5) ->
 %         act1(i) .
@@ -22,7 +22,7 @@ act act1, act2, act3: Nat;
 
 proc X(i: Nat)   = (i <  5) -> act1(i).X(i+1) +
                    (i == 5) -> act3(i).Y(i, i);
-     Y(i,j: Nat) = act2(j).Y(i,j+1);               
+     Y(i,j: Nat) = act2(j).Y(i,j+1);
 
 init X(0);
 

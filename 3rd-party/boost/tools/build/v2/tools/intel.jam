@@ -21,10 +21,14 @@ rule init ( * : * )
         toolset.using intel-linux : 
           $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
     }
+    else if [ os.name ] = MACOSX
+    {
+        toolset.using intel-darwin : 
+          $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
+    }
     else
     {
         toolset.using intel-win :
           $(1) : $(2) : $(3) : $(4) : $(5) : $(6) : $(7) : $(8) : $(9) ;
-
     }        
 }

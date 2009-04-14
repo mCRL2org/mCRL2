@@ -1,23 +1,25 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./droptarget.cpp
 
-// --- droptarget.cpp -----------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "droptarget.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 
 
 // --------------------
-DropTarget::DropTarget( 
-    wxWindow* ownr, 
+DropTarget::DropTarget(
+    wxWindow* ownr,
     Mediator* m )
     : Colleague( m )
 // --------------------
@@ -35,7 +37,7 @@ DropTarget::~DropTarget()
 
 
 // -- overridden functions from wxTextDropTarget --------------------
-  
+
 
 // -------------------------
 bool DropTarget::OnDropText(
@@ -48,7 +50,7 @@ bool DropTarget::OnDropText(
     int    srcId;
     vector< int > data;
 
-    wxStringTokenizer tkz( 
+    wxStringTokenizer tkz(
         text,         // string
         wxString( wxT(" ") ) ); // delimiters
     while( tkz.HasMoreTokens() )
@@ -60,7 +62,7 @@ bool DropTarget::OnDropText(
     // get remaining data
     for ( size_t i = 1; i < tokens.size(); ++i )
         data.push_back( Utils::strToInt( string(tokens[i].fn_str()) ));
- 
+
     mediator->handleDragDrop(
         srcId,
         owner->GetId(),

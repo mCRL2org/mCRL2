@@ -1,16 +1,7 @@
-project lpsbinary
-       : build-dir $(BUILD_TOP)/lpsbinary
-       ;
+project lpsbinary ;
 
-exe lpsbinary
+tool lpsbinary
        : lpsbinary.cpp
-         /libraries//mcrl2_basic
          /libraries//lps
-         /libraries//nextstate
-         /site-config//boost_program_options
        : <squadt-connectivity>implemented
-       ;
-
-install-binaries install
-       : lpsbinary
        ;

@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -14,9 +16,8 @@
 #include <wx/listctrl.h>
 #include <aterm2.h>
 
-#include "libnextstate.h"
-#include "librewrite.h"
-#include "xsimbase.h"
+#include "simbase.h"
+#include "simulatorgui.h"
 #include "xsimtrace.h"
 
 //----------------------------------------------------------------------------
@@ -46,7 +47,7 @@ const int ID_STOP = 10019;
 
 enum play_func_enum { FUNC_NONE, FUNC_PLAY, FUNC_RANDOM };
 
-class XSimMain: public wxFrame, public SimulatorInterface
+class XSimMain: public wxFrame, public SimulatorViewInterface
 {
 public:
     // constructors and destructors
@@ -60,54 +61,34 @@ public:
     void LoadDLL(const wxString &filename);
 
     // XXX make private and use functions?
-    bool use_dummies;
-    RewriteStrategy rewr_strat;
+    StandardSimulatorGUI *simulator;
 
-    // SimulatorInterface methods
-    virtual void Register(SimulatorViewInterface *View);
-    virtual void Unregister(SimulatorViewInterface *View);
-    virtual wxWindow *MainWindow();
-    virtual ATermList GetParameters();
-    virtual void Reset();
+    // SimulatorViewInterface methods
+    virtual void Registered(SimulatorInterface *Simulator);
+    virtual void Unregistered();
+    virtual void Initialise(ATermList Pars);
+    virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
     virtual void Reset(ATerm State);
-    virtual bool Undo();
-    virtual bool Redo();
-    virtual ATerm GetState();
-    virtual ATermList GetNextStates();
-    virtual NextState *GetNextState();
-    virtual bool ChooseTransition(unsigned int index);
-    virtual int GetTraceLength();
-    virtual int GetTracePos();
-    virtual bool SetTracePos(unsigned int pos);
-    virtual ATermList GetTrace();
-    virtual bool SetTrace(ATermList Trace, unsigned int From);
-    virtual void InitialiseViews();
-    
+    virtual void Undo(unsigned int Count);
+    virtual void Redo(unsigned int Count);
+    virtual void TraceChanged(ATermList Trace, unsigned int From);
+    virtual void TracePosChanged(ATermAppl Transition, ATerm State, unsigned int Index);
+
 private:
     // WDR: method declarations for XSimMain
     void CreateMenu();
     void CreateStatus();
     void CreateContent();
-    void traceReset(ATerm state);
-    void traceSetNext(ATermList transition);
-    ATermList traceUndo();
-    ATermList traceRedo();
     void Stopper_Enter();
     void Stopper_Exit();
     void StopAutomation();
     void SetInteractiveness(bool interactive);
-    
+
 private:
     // WDR: member variable declarations for XSimMain
     wxString base_title;
     wxTimer timer;
-    ATermList state_vars;
     ATermList state_varnames;
-    ATerm initial_state;
-    ATerm current_state;
-    ATermList next_states;
-    ATermList trace;
-    ATermList ecart;
     wxMenuBar *menu;
     wxMenuItem *openitem;
     wxMenuItem *ldtrcitem;
@@ -135,16 +116,13 @@ private:
     wxBoxSizer *bottomboxsizer;
     wxListView *transview;
     XSimTrace *tracewin;
-    viewlist views;
     bool stopped;
     int stopper_cnt;
     bool interactive;
     play_func_enum timer_func;
     int timer_interval;
-    ATermIndexedSet seen_states;
-    NextState *nextstate;
-    NextStateGenerator *nextstategen;
-    
+    ATerm current_state;
+
 private:
     // WDR: handler declarations for XSimMain
     void OnOpen( wxCommandEvent &event );
@@ -157,6 +135,7 @@ private:
     void OnFitCurrentState( wxCommandEvent &event );
     void OnTrace( wxCommandEvent &event );
     void OnLoadView( wxCommandEvent &event );
+    void OnTauPrioritisation( wxCommandEvent &event );
     void OnShowDCChanged( wxCommandEvent &event );
     void OnSetDelay( wxCommandEvent &event );
     void OnResetAndPlay( wxCommandEvent &event );
@@ -165,16 +144,17 @@ private:
     void OnPlayRandom( wxCommandEvent &event );
     void OnTimer( wxTimerEvent &event );
     void OnStop( wxCommandEvent &event );
-    void OnAbout( wxCommandEvent &event );
     void OnTraceClose( wxCloseEvent &event );
     void OnCloseWindow( wxCloseEvent &event );
     void stateOnListItemSelected( wxListEvent &event );
     void transOnListItemActivated( wxListEvent &event );
-    void UpdateSizes( wxCommandEvent &event );
-    
+    void OnResize( wxSizeEvent &event );
+    void OnMaximize( wxMaximizeEvent &event );
+    void UpdateSizes( );
+
 private:
     void SetCurrentState(ATerm state, bool showchange = false);
-    void UpdateTransitions(bool update_next_states = true);
+    void UpdateTransitions(ATermList nextstates);
 
 private:
     DECLARE_EVENT_TABLE()

@@ -1,177 +1,203 @@
-path-constant TOP             : . ;
-path-constant BUILD_TOOLS     : ./build/boost_build.v2 ; # Common build directory
-path-constant BUILD_TOP       : ./build/bin ;            # Common build directory
-path-constant BOOST_ROOT      : ./3rd-party/boost ;      # Boost prefix (packaged sources)
-path-constant SETUP           : ./tools ;                # Header file for run-time configuration
+# Author: Jeroen van der Wulp
+#
+#  Copyright (C) 2008 Eindhoven University of Technology.
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+#
+# Main build description containing custom rules to make project descriptions more compact.
+#
+#  Options:
+#
+#   Build:
+#
+#    --enable-debug                 sets: debug-symbols=on runtime-debugging=on
+#
+#    --enable-profile               sets: profiling=on
+#
+#    --enable-optimisation          sets: optimization=speed inlining=full
+#
+#    --disable-squadt-support       disables squadt support in tools
+#
+#    --enable-experimental          activates building/installing of tools that are marked experimental
+#
+#    --enable-deprecated            activates building/installing of tools that are marked deprecated
+#
+#    --no-display-notice            configuration notice message are not printed
+#
+#    --install-boost-headers        installs the Boost header files (temporary measure until Boost 1.35 has become mainstream)
+#
+#   Installation:
+#
+#    --prefix                       directory relative to which tools/libraries, documentation and examples
+#                                   are installed, unless one of the following options is also specified
+#
+#                                   Note: always do a clean build after changing the prefix!
+#
+#    --bindir                       directory where binaries are installed
+#
+#    --libdir                       directory where libraries are installed
+#
+#    --includedir                   directory where header files are installed
+#
+#    --datadir                      directory where data is installed
+#
+#    --mandir                       directory where man pages are installed
+#
+#    --destdir                      direcory that is prepended to all of the above paths for installation,
+#                                   the built takes place as-if everything would be installed according to
+#                                   be above arguments (for binary packaging)
+#
+
+import feature ;
+import path ;
+import property ;
+import regex ;
+import set ;
+import testing ;
+
+import build/man ;
+import build/install ;
+
+if [ modules.peek : OS ] = MACOSX {
+  import build/macosx/mac-bundle ;
+}
+
+# Constants for commonly used paths
+path-constant TOP : . ;
 
 # Activate header cache
-modules.poke : HCACHEFILE : $(BUILD_TOP)/.jamdeps ;
+modules.poke : HCACHEFILE : $(TOP)/build/bin/.jamdeps ;
 
-# The known sub projects
-use-project /site-config               : build ;
-use-project /boost                     : 3rd-party/boost ;
-use-project /libraries                 : libraries ;
-use-project /workarounds               : build/workarounds ;
+load-configuration $(TOP)/build config.jam ;
 
-include $(BUILD_TOOLS)/building.jam ;
+# Some sub projects
+use-project /site-config : build ;
+use-project /libraries   : libraries ;
 
+# Register individual library projects
+libraries = [ MATCH (.*)/build/Jamfile.v2 : [ glob-tree Jamfile.v2 : .svn ] ] ;
+
+for library in [ MATCH (.*libraries/[^//]*)$ : $(libraries) ]
+               [ MATCH (.*3rd-party/[^//]*)$ : $(libraries) ] {
+  local name = [ MATCH .*/([^//]*)$ : $(library) ] ;
+
+  use-project /libraries/$(name) : $(library)/build ;
+}
+
+constant      INSTALL_ROOT : [ get-install-root ] ;
+constant      PLUGIN_ROOT  : [ get-plugin-root ] ;
+constant      BUILD_TAG    : [ get-build-tag ] ;
+path-constant BOOST_ROOT   : [ get-boost-path ] ;  # Boost prefix
+
+# Top project
 project toolset
-       : build-dir $(BUILD_TOP)
+       : build-dir build/bin
        : requirements
+          <conditional>@build/install.platform-configuration
           <define>_FILE_OFFSET_BITS=64
-          <define>REVISION=\\\"$(REVISION)-$(BUILD_VARIANT)-$(LINK_VARIANT)\\\"
-          <toolset>darwin,<bundle>no:<dylib-install-location>"$(LIB_DIR)"
-          <use>/workarounds//configuration
-          <link>static,<squadt-support>yes:<threading>multi
+          <include>./build/workarounds
+          [ build/install.feature-configuration ]
        : default-build
-          <address-model>$(ADDRESS_MODEL)
-          <variant>$(BUILD_VARIANT)
-          $(OPTIMISATIONS)
-          <link>$(LINK_VARIANT)
-          $(BUILD_OPTIONS)
-          <warnings>off
+          <variant>debug
+          [ build/install.default-configuration ]
        ;
 
-include $(BUILD_TOOLS)/installing.jam ;
 
-import path ;
+# Only from the root of the source tree
+if [ path.exists ./tools ] {
+  tools = [ MATCH .*/?tools/(.*)/.* : [ glob tools/*/Jamfile.v2 ] ] ;
 
-root  = [ path.make $(TOP) ] ; 
-tools = [ MATCH $(root)/tools/(.*)/.* : [ glob $(TOP)/tools/*/Jamfile.v2 ] ] ;
+  local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
+  local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z_]+)$" : [ modules.peek : ARGV ] ] ;
 
-# Register tool projects
-for tool in $(tools) {
-  use-project /tools/$(tool) : tools/$(tool) ;
-}
+  if ! $(targets) {
+    targets = $(tools) ;
+  }
+  if $(disabled) {
+    targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
+  }
 
-# tools with new directory layout
-local ftools = [ MATCH $(root)/tools/(.*)/build/.* : [ glob $(TOP)/tools/*/build/Jamfile.v2 ] ] ;
-
-for tool in $(ftools) {
-  use-project /tools/$(tool) : tools/$(tool)/build ;
-}
-
-tools += $(ftools) ;
-
-import set ;
-import regex ;
-
-local targets  = [ set.intersection [ MATCH "^([0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] : $(tools) ] ;
-local disabled = [ MATCH "^--disable-tools=([,0-9a-zA-Z]+)$" : [ modules.peek : ARGV ] ] ;
-
-if ! $(targets) {
-  targets = $(tools) ;
-}
-if $(disabled) {
-  targets = [ set.difference $(targets) : [ regex.split "$(disabled)" "," ] ] ;
-}
-
-# Install when requested
-if ! install in [ MATCH "^-?-?(install)" : [ modules.peek : ARGV ] ] {
+  # Register tool projects
   for tool in $(targets) {
-    alias $(tool)
-          : /tools/$(tool)
-          ;
+    # Register tool projects
+    use-project /tools/$(tool) : tools/$(tool) ;
   }
 
-  if ! $(tools) in $(targets) {
-    ECHO "Building selected tools :" $(targets) ;
-
-    targets = /tools/$(targets) ;
-  }
-  else {
-    ECHO "Complete toolset build in progress!" ;
-
-    targets += /tools/$(targets) build-plugins ;
-  }
-
-  stage build
-          : $(targets)
-          : <location>$(BUILD_TOP)/tools
-            <install-type>EXE
-            <hardcode-dll-paths>true
-          ;
-
-  stage build-plugins
-          : $(plugins)
-          : <location>$(BUILD_TOP)/plugins
-            <install-type>SHARED_LIB
-          ;
-}
-else {
-  feature.set-default install : yes ;
-
-  if ! $(tools) in $(targets) {
-    ECHO "Installing selected tools :" $(targets) ;
-
+  if [ feature.defaults <install> ] != <install>yes {
+    # Introduce tool targets
     for tool in $(targets) {
-      alias $(tool)
-            : install
-            ;
+      alias $(tool) : /tools/$(targets)//install : <location>build/stage ;
     }
-   
-    alias install
-            : /tools/$(targets)//install
-              install-shared-libraries
-            ;
 
-    targets = /tools/$(targets) ;
+    if ! $(tools) in $(targets) {
+      ECHO "Building selected tools :" $(targets) ;
+    }
   }
   else {
-    ECHO "Complete toolset installation in progress!" ;
+    if ! $(tools) in $(targets) {
+      ECHO "Installing selected tools only :" $(targets) ;
 
-    # Complete install
-    alias install
-            : /tools/$(targets)//install
-              install-examples
-              install-headers
-            : <os>MACOSX,<wx>yes:<source>install-mac-bundles
-              <dll-path>$(LIB_DIR)
-              <dependency>install-shared-libraries
-            ;
+      # Introduce tool targets
+      for tool in $(targets) {
+        alias $(tool) : /tools/$(targets)//install/<link>shared : <link>shared:<source>/libraries//install/<link>shared ;
+      }
 
-    # General examples
-    stage install-examples
-            : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
-            : <location>$(DATA_DIR)
-              <install-source-root>.
-            ;
- 
-    stage install-headers
-            : /libraries/aterm//headers
-            : <location>$(INCLUDE_DIR)/aterm
-              <install-source-root>3rd-party/aterm/include
-            ;
+      alias install : $(targets) ;
+    }
+    else {
+      local boost-headers = [ MATCH --(install-boost-headers) : [ modules.peek : ARGV ] ] ;
 
-    targets = /tools/$(tools) ;
+      # Complete install
+      alias install : /tools/$(tools)//install /libraries//install examples $(boost-headers) ;
+
+      local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
+      local header-location   = [ path.join [ get-install-root ] "include" ] ;
+
+      install install-boost-headers : [ set.difference $(all-boost-headers) :
+        [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
+              : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
+
+      # General examples
+      install-data examples
+              : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
+              : <install-source-root>./examples
+                <data-sub-location>examples
+              ;
+
+      explicit install-boost-headers ;
+    }
   }
+}
 
-#  stage install-static-libraries
-#          : $(targets)
-#          : <location>$(LIB_DIR)
-#            <install-dependencies>on <install-type>STATIC_LIB
-#          ;
 
-  stage install-shared-libraries
-          : $(targets)//install
-          : <location>$(LIB_DIR)
-            <dll-path>$(LIB_DIR)
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
+# For plugins (dynamic linked libraries)
+rule plugin ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+  requirements = [ process-requirements $(requirements) ] ;
 
-  stage install-shared-libraries
-          : $(targets)
-          : <location>$(BIN_DIR)
-            <dll-path>$(LIB_DIR)
-            <os>NT
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
+  if ! <build>no in $(requirements) {
+    lib $(name) : $(sources) : $(requirements) <link>shared <toolset>darwin:<bundle>yes : $(defaults) : $(usage-requirements) ;
+  }
+  else {
+    alias $(name) ;
+  }
+}
 
-  stage install-shared-libraries
-          : $(targets)
-          : <location>$(BIN_DIR)
-            <dll-path>$(LIB_DIR)
-            <os>CYGWIN
-            <install-dependencies>on <install-type>SHARED_LIB
-          ;
+# Target for a tool in the mCRL2 toolset
+rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
+  build-requirements = <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
+                                [ process-requirements $(requirements) ] ;
+
+  if ! <build>no in $(build-requirements) {
+    exe $(name) : $(sources)
+                : $(build-requirements)
+                : $(defaults) : $(usage-requirements) ;
+
+    # generate install targets
+    install-tool $(name) : $(requirements) ;
+  }
+  else {
+    install-tool $(name) : $(build-requirements) ;
+  }
 }

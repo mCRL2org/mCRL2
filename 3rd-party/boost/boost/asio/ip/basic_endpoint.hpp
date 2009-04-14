@@ -2,7 +2,7 @@
 // basic_endpoint.hpp
 // ~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -62,23 +62,13 @@ public:
   typedef boost::asio::detail::socket_addr_type data_type;
 #endif
 
-  /// The type for the size of the endpoint structure. This type is dependent on
-  /// the underlying implementation of the socket layer.
-#if defined(GENERATING_DOCUMENTATION)
-  typedef implementation_defined size_type;
-#else
-  typedef boost::asio::detail::socket_addr_len_type size_type;
-#endif
-
   /// Default constructor.
   basic_endpoint()
     : data_()
   {
-    boost::asio::detail::sockaddr_in4_type& data
-      = reinterpret_cast<boost::asio::detail::sockaddr_in4_type&>(data_);
-    data.sin_family = AF_INET;
-    data.sin_port = 0;
-    data.sin_addr.s_addr = INADDR_ANY;
+    data_.v4.sin_family = AF_INET;
+    data_.v4.sin_port = 0;
+    data_.v4.sin_addr.s_addr = INADDR_ANY;
   }
 
   /// Construct an endpoint using a port number, specified in the host's byte
@@ -103,24 +93,20 @@ public:
     using namespace std; // For memcpy.
     if (protocol.family() == PF_INET)
     {
-      boost::asio::detail::sockaddr_in4_type& data
-        = reinterpret_cast<boost::asio::detail::sockaddr_in4_type&>(data_);
-      data.sin_family = AF_INET;
-      data.sin_port =
+      data_.v4.sin_family = AF_INET;
+      data_.v4.sin_port =
         boost::asio::detail::socket_ops::host_to_network_short(port_num);
-      data.sin_addr.s_addr = INADDR_ANY;
+      data_.v4.sin_addr.s_addr = INADDR_ANY;
     }
     else
     {
-      boost::asio::detail::sockaddr_in6_type& data
-        = reinterpret_cast<boost::asio::detail::sockaddr_in6_type&>(data_);
-      data.sin6_family = AF_INET6;
-      data.sin6_port =
+      data_.v6.sin6_family = AF_INET6;
+      data_.v6.sin6_port =
         boost::asio::detail::socket_ops::host_to_network_short(port_num);
-      data.sin6_flowinfo = 0;
+      data_.v6.sin6_flowinfo = 0;
       boost::asio::detail::in6_addr_type tmp_addr = IN6ADDR_ANY_INIT;
-      data.sin6_addr = tmp_addr;
-      data.sin6_scope_id = 0;
+      data_.v6.sin6_addr = tmp_addr;
+      data_.v6.sin6_scope_id = 0;
     }
   }
 
@@ -133,27 +119,23 @@ public:
     using namespace std; // For memcpy.
     if (addr.is_v4())
     {
-      boost::asio::detail::sockaddr_in4_type& data
-        = reinterpret_cast<boost::asio::detail::sockaddr_in4_type&>(data_);
-      data.sin_family = AF_INET;
-      data.sin_port =
+      data_.v4.sin_family = AF_INET;
+      data_.v4.sin_port =
         boost::asio::detail::socket_ops::host_to_network_short(port_num);
-      data.sin_addr.s_addr =
+      data_.v4.sin_addr.s_addr =
         boost::asio::detail::socket_ops::host_to_network_long(
             addr.to_v4().to_ulong());
     }
     else
     {
-      boost::asio::detail::sockaddr_in6_type& data
-        = reinterpret_cast<boost::asio::detail::sockaddr_in6_type&>(data_);
-      data.sin6_family = AF_INET6;
-      data.sin6_port =
+      data_.v6.sin6_family = AF_INET6;
+      data_.v6.sin6_port =
         boost::asio::detail::socket_ops::host_to_network_short(port_num);
-      data.sin6_flowinfo = 0;
+      data_.v6.sin6_flowinfo = 0;
       boost::asio::ip::address_v6 v6_addr = addr.to_v6();
       boost::asio::ip::address_v6::bytes_type bytes = v6_addr.to_bytes();
-      memcpy(data.sin6_addr.s6_addr, bytes.elems, 16);
-      data.sin6_scope_id = v6_addr.scope_id();
+      memcpy(data_.v6.sin6_addr.s6_addr, bytes.elems, 16);
+      data_.v6.sin6_scope_id = v6_addr.scope_id();
     }
   }
 
@@ -181,17 +163,17 @@ public:
   /// Get the underlying endpoint in the native type.
   data_type* data()
   {
-    return reinterpret_cast<data_type*>(&data_);
+    return &data_.base;
   }
 
   /// Get the underlying endpoint in the native type.
   const data_type* data() const
   {
-    return reinterpret_cast<const data_type*>(&data_);
+    return &data_.base;
   }
 
   /// Get the underlying size of the endpoint in the native type.
-  size_type size() const
+  std::size_t size() const
   {
     if (is_v4())
       return sizeof(boost::asio::detail::sockaddr_in4_type);
@@ -200,9 +182,9 @@ public:
   }
 
   /// Set the underlying size of the endpoint in the native type.
-  void resize(size_type size)
+  void resize(std::size_t size)
   {
-    if (size > size_type(sizeof(data_)))
+    if (size > sizeof(boost::asio::detail::sockaddr_storage_type))
     {
       boost::system::system_error e(boost::asio::error::invalid_argument);
       boost::throw_exception(e);
@@ -210,9 +192,9 @@ public:
   }
 
   /// Get the capacity of the endpoint in the native type.
-  size_type capacity() const
+  std::size_t capacity() const
   {
-    return sizeof(data_);
+    return sizeof(boost::asio::detail::sockaddr_storage_type);
   }
 
   /// Get the port associated with the endpoint. The port number is always in
@@ -222,14 +204,12 @@ public:
     if (is_v4())
     {
       return boost::asio::detail::socket_ops::network_to_host_short(
-          reinterpret_cast<const boost::asio::detail::sockaddr_in4_type&>(
-            data_).sin_port);
+          data_.v4.sin_port);
     }
     else
     {
       return boost::asio::detail::socket_ops::network_to_host_short(
-          reinterpret_cast<const boost::asio::detail::sockaddr_in6_type&>(
-            data_).sin6_port);
+          data_.v6.sin6_port);
     }
   }
 
@@ -239,12 +219,12 @@ public:
   {
     if (is_v4())
     {
-      reinterpret_cast<boost::asio::detail::sockaddr_in4_type&>(data_).sin_port
+      data_.v4.sin_port
         = boost::asio::detail::socket_ops::host_to_network_short(port_num);
     }
     else
     {
-      reinterpret_cast<boost::asio::detail::sockaddr_in6_type&>(data_).sin6_port
+      data_.v6.sin6_port
         = boost::asio::detail::socket_ops::host_to_network_short(port_num);
     }
   }
@@ -255,21 +235,15 @@ public:
     using namespace std; // For memcpy.
     if (is_v4())
     {
-      const boost::asio::detail::sockaddr_in4_type& data
-        = reinterpret_cast<const boost::asio::detail::sockaddr_in4_type&>(
-            data_);
       return boost::asio::ip::address_v4(
           boost::asio::detail::socket_ops::network_to_host_long(
-            data.sin_addr.s_addr));
+            data_.v4.sin_addr.s_addr));
     }
     else
     {
-      const boost::asio::detail::sockaddr_in6_type& data
-        = reinterpret_cast<const boost::asio::detail::sockaddr_in6_type&>(
-            data_);
       boost::asio::ip::address_v6::bytes_type bytes;
-      memcpy(bytes.elems, data.sin6_addr.s6_addr, 16);
-      return boost::asio::ip::address_v6(bytes, data.sin6_scope_id);
+      memcpy(bytes.elems, data_.v6.sin6_addr.s6_addr, 16);
+      return boost::asio::ip::address_v6(bytes, data_.v6.sin6_scope_id);
     }
   }
 
@@ -309,15 +283,17 @@ private:
   // Helper function to determine whether the endpoint is IPv4.
   bool is_v4() const
   {
-#if defined(_AIX)
-    return data_.__ss_family == AF_INET;
-#else
-    return data_.ss_family == AF_INET;
-#endif
+    return data_.base.sa_family == AF_INET;
   }
 
   // The underlying IP socket address.
-  boost::asio::detail::sockaddr_storage_type data_;
+  union data_union
+  {
+    boost::asio::detail::socket_addr_type base;
+    boost::asio::detail::sockaddr_storage_type storage;
+    boost::asio::detail::sockaddr_in4_type v4;
+    boost::asio::detail::sockaddr_in6_type v6;
+  } data_;
 };
 
 /// Output an endpoint as a string.
@@ -338,11 +314,23 @@ std::ostream& operator<<(std::ostream& os,
     const basic_endpoint<InternetProtocol>& endpoint)
 {
   const address& addr = endpoint.address();
-  if (addr.is_v4())
-    os << addr.to_string();
+  boost::system::error_code ec;
+  std::string a = addr.to_string(ec);
+  if (ec)
+  {
+    if (os.exceptions() & std::ios::failbit)
+      boost::asio::detail::throw_error(ec);
+    else
+      os.setstate(std::ios_base::failbit);
+  }
   else
-    os << '[' << addr.to_string() << ']';
-  os << ':' << endpoint.port();
+  {
+    if (addr.is_v4())
+      os << a;
+    else
+      os << '[' << a << ']';
+    os << ':' << endpoint.port();
+  }
   return os;
 }
 #else // BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))
@@ -352,11 +340,23 @@ std::basic_ostream<Elem, Traits>& operator<<(
     const basic_endpoint<InternetProtocol>& endpoint)
 {
   const address& addr = endpoint.address();
-  if (addr.is_v4())
-    os << addr.to_string();
+  boost::system::error_code ec;
+  std::string a = addr.to_string(ec);
+  if (ec)
+  {
+    if (os.exceptions() & std::ios::failbit)
+      boost::asio::detail::throw_error(ec);
+    else
+      os.setstate(std::ios_base::failbit);
+  }
   else
-    os << '[' << addr.to_string() << ']';
-  os << ':' << endpoint.port();
+  {
+    if (addr.is_v4())
+      os << a;
+    else
+      os << '[' << a << ']';
+    os << ':' << endpoint.port();
+  }
   return os;
 }
 #endif // BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))

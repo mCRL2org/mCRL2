@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,10 +13,10 @@
 #include <fstream>
 #include <assert.h>
 #include <aterm2.h>
-#include "lts/liblts.h"
-#include "print/messaging.h"
+#include "mcrl2/lts/lts.h"
+#include "mcrl2/core/messaging.h"
 
-using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 using namespace std;
 
 namespace mcrl2
@@ -44,7 +46,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   while ( *s == ' ' )
     s++;
 
-  if ( strncmp(s,"des",3) ) 
+  if ( strncmp(s,"des",3) )
     return false;
   s += 3;
 
@@ -54,7 +56,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != '(' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -69,7 +71,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -84,7 +86,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -99,7 +101,7 @@ static bool read_aut_header(char *s, char **initial_state, char **transitions, c
   if ( *s != ')' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -124,7 +126,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != '(' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -139,18 +141,27 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
+  char *end_label;
   if ( *s == '"' )
+  {
     s++;
-  *label = s;
-  while ( (*s != '"') && ( *s != '\0') )
+    *label = s;
+    while ( (*s != '"') && ( *s != '\0') )
+      s++;
+    end_label = s;
+    if ( *s != '"' )
+      return false;
     s++;
-  char *end_label = s;
-  if ( *s == '"' )
-    s++;
+  } else {
+    *label = s;
+    while ( (*s != ',') && ( *s != '\0') )
+      s++;
+    end_label = s;
+  }
 
   while ( *s == ' ' )
     s++;
@@ -158,7 +169,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ',' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -173,7 +184,7 @@ static bool read_aut_transition(char *s, char **from, char **label, char **to)
   if ( *s != ')' )
     return false;
   s++;
-  
+
   while ( *s == ' ' )
     s++;
 
@@ -196,14 +207,14 @@ bool p_lts::read_from_aut(istream &is)
   #define READ_FROM_AUT_BUF_SIZE 8196
   char buf[READ_FROM_AUT_BUF_SIZE];
   char *s1,*s2,*s3;
-  
+
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
   if ( read_aut_header(buf,&s1,&s2,&s3) )
   {
     init_state = strtoul(s1,NULL,10);
     ntrans = strtoul(s2,NULL,10);
     nstate = strtoul(s3,NULL,10);
-  } else { 
+  } else {
     gsErrorMsg("cannot parse AUT input! (invalid header)\n");
     return false;
   }

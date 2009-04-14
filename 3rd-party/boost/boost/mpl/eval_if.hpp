@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/eval_if.hpp,v $
-// $Date: 2004/11/28 01:54:10 $
-// $Revision: 1.3 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/aux_/na_spec.hpp>

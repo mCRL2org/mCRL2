@@ -9,24 +9,15 @@
 #include "aterm2.h"
 #include "debug.h"
 
-#ifdef DMALLOC
-#include <dmalloc.h>
-#endif
-
 /*}}}  */
 /*{{{  defines */
 
-#define DEFAULT_LIST_BUFFER 256
-#define RESIZE_BUFFER(n) if(n > buffer_size) resize_buffer(n)
 #define MAGIC_K	1999
 
 /*}}}  */
 /*{{{  variables */
 
-char list_id[] = "$Id: list.c 21232 2007-02-05 14:54:20Z eriks $";
-
-static unsigned int buffer_size = 0;
-static ATerm *buffer;
+char list_id[] = "$Id: list.c 23071 2007-07-02 10:06:17Z eriks $";
 
 /*}}}  */
 
@@ -41,45 +32,9 @@ void AT_initList(int argc, char *argv[])
   /* Suppress unused arguments warning */
   (void) argc;
   (void) argv;
-
-  buffer_size = DEFAULT_LIST_BUFFER;
-  buffer = (ATerm *) calloc(buffer_size, sizeof(ATerm));
-
-  if(!buffer) {
-    ATerror("AT_initLists: cannot allocate list buffer of size %d\n", 
-	    DEFAULT_LIST_BUFFER);
-  }
-
-  ATprotectArray(buffer, buffer_size);
 }
 
 /*}}}  */
-/*{{{  static void resize_buffer(int n) */
-
-/**
- * Make sure the buffer is large enough for a particular operation
- */
-
-static void resize_buffer(int n)
-{
-  int old_size = buffer_size;
-  ATunprotectArray(buffer);
-
-  buffer_size = n;
-  buffer = (ATerm *)realloc(buffer, buffer_size*sizeof(ATerm));
-
-  memset(buffer+old_size, 0, (buffer_size - old_size) * sizeof(ATerm));
-
-  if(!buffer) {
-    ATerror("resize_buffer: cannot allocate list buffer of size %d\n",
-	    DEFAULT_LIST_BUFFER);
-  }
-
-  ATprotectArray(buffer, buffer_size);
-}
-
-/*}}}  */
-
 /*{{{  ATermList ATgetTail(ATermList list, int start) */
 
 ATermList ATgetTail(ATermList list, int start)
@@ -102,7 +57,8 @@ ATermList ATgetTail(ATermList list, int start)
 
 ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 {
-  unsigned int i, size, start;
+  ATerm* buffer;
+  unsigned int i, start;
 
   if (startpos < 0) {
     start = ATgetLength(list) + startpos;
@@ -111,8 +67,10 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
     start = startpos;
   }
 
-  size = start;
-  RESIZE_BUFFER(size);
+  buffer = AT_alloc_protected(start);
+  if (!buffer) {
+    ATerror("ATreplaceTail: out of memory");
+  }
 
   for (i=0; i<start; i++) {
     buffer[i] = ATgetFirst(list);
@@ -121,8 +79,9 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 
   for (i=start; i>0; i--) {
     newtail = ATinsert(newtail, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
 
   /* Preserve annotations */
   if (AT_getAnnotations((ATerm)list) != NULL) {
@@ -142,6 +101,7 @@ ATermList ATreplaceTail(ATermList list, ATermList newtail, int startpos)
 
 ATermList ATgetPrefix(ATermList list)
 {
+  ATerm* buffer;
   unsigned int i, size = ATgetLength(list);
   ATermList result = ATmakeList0();
   
@@ -150,7 +110,11 @@ ATermList ATgetPrefix(ATermList list)
      
   size -= 1;
   
-  RESIZE_BUFFER(size);
+  buffer = AT_alloc_protected(size);
+  if (!buffer) {
+    ATerror("ATgetPrefix: out of memory");
+  }
+  
   for(i=0; i<size; i++) {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
@@ -158,8 +122,9 @@ ATermList ATgetPrefix(ATermList list)
 
   for(i=size; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
 
   return result;
 }
@@ -194,6 +159,7 @@ ATerm ATgetLast(ATermList list)
 
 ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
 {
+  ATerm* buffer;
   unsigned int i, size;
   ATermList result = ATmakeList0();
  
@@ -201,8 +167,11 @@ ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
     return result;
   
   size = end-start;
-
-  RESIZE_BUFFER(size);
+  
+  buffer = AT_alloc_protected(size);
+  if (!buffer) {
+    ATerror("ATgetSlice: out of memory");
+  }
 
   for(i=0; i<start; i++)
     list = ATgetNext(list);
@@ -214,8 +183,9 @@ ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
 
   for(i=size; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return result;
 }
@@ -229,9 +199,14 @@ ATermList ATgetSlice(ATermList list, unsigned int start, unsigned int end)
 
 ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
 {
+  ATerm* buffer;
   unsigned int i;
   ATermList result;
-  RESIZE_BUFFER(index);
+  
+  buffer = AT_alloc_protected(index);
+  if (!buffer) {
+    ATerror("ATinsertAt: out of memory");
+  }
 
   /* First collect the prefix in buffer */
   for(i=0; i<index; i++) {
@@ -245,8 +220,9 @@ ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
   /* Insert elements before 'index' */
   for(i=index; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
 
   return result;
 }
@@ -260,9 +236,14 @@ ATermList ATinsertAt(ATermList list, ATerm el, unsigned int index)
 
 ATermList ATappend(ATermList list, ATerm el)
 {
+  ATerm* buffer;
   unsigned int i, len = ATgetLength(list);
   ATermList result;
-  RESIZE_BUFFER(len);
+  
+  buffer = AT_alloc_protected(len);
+  if (!buffer) {
+    ATerror("ATappend: out of memory");
+  }
 
   /* Collect all elements of list in buffer */
   for(i=0; i<len; i++) {
@@ -275,8 +256,9 @@ ATermList ATappend(ATermList list, ATerm el)
   /* Insert elements at the front of the list */
   for(i=len; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return result;
 }
@@ -290,6 +272,7 @@ ATermList ATappend(ATermList list, ATerm el)
 
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
+  ATerm* buffer;
   unsigned int i, len = ATgetLength(list1);
   ATermList result = list2;
 
@@ -298,9 +281,12 @@ ATermList ATconcat(ATermList list1, ATermList list2)
   if(ATisEqual(list2, ATempty))
     return list1;
 
-  RESIZE_BUFFER(len);
+  buffer = AT_alloc_protected(len);
+  if (!buffer) {
+    ATerror("ATconcat: out of memory");
+  }
 
-  /* Collect the elments of list1 in buffer */
+  /* Collect the elements of list1 in buffer */
   for(i=0; i<len; i++) {
     buffer[i] = ATgetFirst(list1);
     list1 = ATgetNext(list1);
@@ -309,8 +295,9 @@ ATermList ATconcat(ATermList list1, ATermList list2)
   /* Insert elements at the front of the list */
   for(i=len; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return result;
 }
@@ -356,6 +343,7 @@ int ATindexOf(ATermList list, ATerm el, int startpos)
 
 int ATlastIndexOf(ATermList list, ATerm el, int startpos)
 {
+  ATerm* buffer;
   unsigned int i, len, start;
 
   if(startpos < 0)
@@ -365,23 +353,24 @@ int ATlastIndexOf(ATermList list, ATerm el, int startpos)
     
   len = start+1;
 
-  RESIZE_BUFFER(len);
+  buffer = AT_alloc_protected(len);
+  if (!buffer) {
+    ATerror("ATlastIndexOf: out of memory");
+  }
 
   for (i=0; i<len; i++) {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
+
   for (i=len; i>0; i--) {
     if (ATisEqual(buffer[i-1], el)) {
-      int result = i-1;
-      while (i>0) {
-	buffer[--i] = NULL;
-      }
-      assert(buffer[0] == NULL);
-      return result;
+      AT_free_protected(buffer);
+      return i-1;
     }
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
 
   return -1;
 }
@@ -414,23 +403,32 @@ ATerm ATelementAt(ATermList list, unsigned int index)
 
 ATermList ATremoveElement(ATermList list, ATerm t)
 {
+  ATerm* buffer;
   unsigned int i = 0;
   ATerm el = NULL;
   ATermList l = list;
+  
+  buffer = AT_alloc_protected_minmax(0, ATgetLength(list));
+  if (!buffer) {
+    ATerror("ATremoveElement: out of memory");
+  }
 
   while(!ATisEmpty(l)) {
     el = ATgetFirst(l);
     l = ATgetNext(l);
-    if(i >= buffer_size) 
-      resize_buffer(i*2);
+    buffer = AT_grow_protected(buffer, i+1);
+    if (!buffer) {
+      ATerror("ATremoveElement: out of memory");
+    }
     buffer[i++] = el;
     if(ATisEqual(el, t))
       break;
   }
 
-
-  if(!ATisEqual(el, t))
+  if(!ATisEqual(el, t)) {
+    AT_free_protected(buffer);
     return list;
+  }
 
   list = l; /* Skip element to be removed */
 
@@ -438,8 +436,9 @@ ATermList ATremoveElement(ATermList list, ATerm t)
      one to the tail of the list. */
   for(i-=1; i>0; i--) {
     list = ATinsert(list, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return list;
 }
@@ -453,8 +452,13 @@ ATermList ATremoveElement(ATermList list, ATerm t)
 
 ATermList ATremoveElementAt(ATermList list, unsigned int idx)
 {
+  ATerm* buffer;
   unsigned int i;
-  RESIZE_BUFFER(idx);
+  
+  buffer = AT_alloc_protected(idx);
+  if (!buffer) {
+    ATerror("ATremoveElementAt: out of memory");
+  }
 
   for(i=0; i<idx; i++) {
     buffer[i] = ATgetFirst(list);
@@ -464,8 +468,9 @@ ATermList ATremoveElementAt(ATermList list, unsigned int idx)
   list = ATgetNext(list);
   for(i=idx; i>0; i--) {
     list = ATinsert(list, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return list;
 }
@@ -479,33 +484,43 @@ ATermList ATremoveElementAt(ATermList list, unsigned int idx)
 
 ATermList ATremoveAll(ATermList list, ATerm t)
 {
+  ATerm* buffer;
   unsigned int i = 0;
   ATerm el = NULL;
   ATermList l = list;
   ATermList result = ATempty;
   ATbool found = ATfalse;
 
+  buffer = AT_alloc_protected_minmax(0, ATgetLength(list));
+  if (!buffer) {
+    ATerror("ATremoveAll: out of memory");
+  }
+
   while(!ATisEmpty(l)) {
     el = ATgetFirst(l);
     l = ATgetNext(l);
     if(!ATisEqual(el, t)) {
-      if(i >= buffer_size) 
-	resize_buffer(i*2);
+      buffer = AT_grow_protected(buffer, i+1);
+      if (!buffer) {
+        ATerror("ATremoveAll: out of memory");
+      }
       buffer[i++] = el;
     } else
       found = ATtrue;
   }
 
-  if(!found)
+  if(!found) {
+    AT_free_protected(buffer);
     return list;
+  }
 
   /* Add all elements prior to this one to the tail of the list. */
   while (i>0) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
     i--;
   }
 
+  AT_free_protected(buffer);
   return result;
 }
 
@@ -518,8 +533,13 @@ ATermList ATremoveAll(ATermList list, ATerm t)
 
 ATermList ATreplace(ATermList list, ATerm el, unsigned int idx)
 {
+  ATerm* buffer;
   unsigned int i;
-  RESIZE_BUFFER(idx);
+  
+  buffer = AT_alloc_protected(idx);
+  if (!buffer) {
+    ATerror("ATreplace: out of memory");
+  }
 
   for(i=0; i<idx; i++) {
     buffer[i] = ATgetFirst(list);
@@ -532,8 +552,9 @@ ATermList ATreplace(ATermList list, ATerm el, unsigned int idx)
   /* Add the prefix */
   for(i=idx; i>0; i--) {
     list = ATinsert(list, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return list;
 }
@@ -570,8 +591,13 @@ static int compare_terms(const ATerm *t1, const ATerm *t2)
 
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 {
+  ATerm* buffer;
   unsigned int idx, len = ATgetLength(list);
-  RESIZE_BUFFER(len);
+
+  buffer = AT_alloc_protected(len);
+  if (!buffer) {
+    ATerror("ATsort: out of memory");
+  }
 
   idx = 0;
   while (!ATisEmpty(list)) {
@@ -586,8 +612,9 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
   list = ATempty;
   for (idx=len; idx>0; idx--) {
     list = ATinsert(list, buffer[idx-1]);
-    buffer[idx-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
   
   return list;
 }
@@ -614,8 +641,14 @@ ATerm ATdictCreate()
 
 ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
 {
+  ATerm* buffer;
   unsigned int i = 0;
   ATermList pair, tmp = (ATermList)dict;
+
+  buffer = AT_alloc_protected_minmax(0, ATgetLength(tmp));
+  if (!buffer) {
+    ATerror("ATdictPut: out of memory");
+  }
 
   /* Search for the key */
   while(!ATisEmpty(tmp)) {
@@ -626,16 +659,20 @@ ATerm ATdictPut(ATerm dict, ATerm key, ATerm value)
       tmp = ATinsert(tmp, (ATerm)pair);
       while (i>0) {
 	tmp = ATinsert(tmp, buffer[i-1]);
-	buffer[i-1] = NULL;
         i--;
       }
+      AT_free_protected(buffer);
       return (ATerm)tmp;
     } else {
-      if(i >= buffer_size)
-	resize_buffer(i*2);
+      buffer = AT_grow_protected(buffer, i+1);
+      if (!buffer) {
+        ATerror("ATdictPut: out of memory");
+      }
       buffer[i++] = (ATerm)pair;
     }
   }
+  
+  AT_free_protected(buffer);
 
   /* The key is not in the dictionary */
   pair = ATmakeList2(key, value);
@@ -704,18 +741,25 @@ ATerm ATdictRemove(ATerm dict, ATerm key)
 
 ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
 {
+  ATerm* buffer;
   unsigned int i = 0;
   ATerm el = NULL;
   ATermList l = list;
   ATermList result = ATempty;
   ATbool found = ATfalse;
 
+  buffer = AT_alloc_protected_minmax(0, ATgetLength(list));
+  if (!buffer) {
+    ATerror("ATfilter: out of memory");
+  }
+
   while(!ATisEmpty(l)) {
     el = ATgetFirst(l);
     l = ATgetNext(l);
     if(predicate(el)) {
-      if(i >= buffer_size)  {
-	resize_buffer(i*2);
+      buffer = AT_grow_protected(buffer, i+1);
+      if (!buffer) {
+        ATerror("ATfilter: out of memory");
       }
       buffer[i++] = el;
     } else {
@@ -723,15 +767,18 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
     }
   }
 
-  if(!found)
+  if(!found) {
+    AT_free_protected(buffer); 
     return list;
+  }
 
   /* Add all elements prior to this one to the tail of the list. */
   while (i>0) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
     i--;
   }
+
+  AT_free_protected(buffer); 
   
   return result;
 }
@@ -747,18 +794,24 @@ ATermList ATfilter(ATermList list, ATbool (*predicate)(ATerm))
 
 ATermList ATgetArguments(ATermAppl appl)
 {
+  ATerm* buffer;
   Symbol s = ATgetSymbol(appl);
   unsigned int i, len = ATgetArity(s);
   ATermList result = ATempty;
-  RESIZE_BUFFER(len);
+
+  buffer = AT_alloc_protected(len);
+  if (!buffer) {
+    ATerror("ATsort: out of memory");
+  }
 
   for(i=0; i<len; i++)
     buffer[i] = ATgetArgument(appl, i);
 
   for(i=len; i>0; i--) {
     result = ATinsert(result, buffer[i-1]);
-    buffer[i-1] = NULL;
   }
+  
+  AT_free_protected(buffer);
 
   return result;
 }

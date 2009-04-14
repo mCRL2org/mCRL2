@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,21 +12,29 @@
 #include <cassert>
 #include <time.h>
 #include <sstream>
-#include "print/messaging.h"
-#include "mcrl2/utilities/aterm_ext.h"
-#include "libstruct.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/libdataelm.h"
-#include "libnextstate.h"
-#include "libenum.h"
-#include "librewrite.h"
-#include "libtrace.h"
+#include "mcrl2/lps/data_elimination.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/data/enum.h"
+#include "mcrl2/data/rewrite.h"
+#include "mcrl2/trace.h"
 #include "squadt_interactor.h"
 #include "exploration.h"
 #include "lts.h"
+#include "mcrl2/atermpp/vector.h"
+
 
 using namespace std;
-using namespace ::mcrl2::utilities;
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
+using namespace mcrl2::trace;
+
+
+static ATerm get_repr(ATerm state);
+
 
 exploration_strategy str_to_expl_strat(const char *s)
 {
@@ -62,54 +72,44 @@ static lts_generation_options *lgopts;
 
 static NextState *nstate;
 
-static ATermIndexedSet states;
+static ATermIndexedSet states = NULL;
 static unsigned long long num_states;
 static unsigned long long trans;
 static unsigned long level;
 static unsigned long long num_found_same;
 static unsigned long long current_state;
 static unsigned long long initial_state;
- 
-static ATermTable backpointers;
-static unsigned long *bithashtable;
-static ATermTable representation = NULL;
- 
+
+static atermpp::vector<ATerm> backpointers;
+static unsigned long *bithashtable = NULL;
+
+static bool trace_support = false;
 static unsigned long tracecnt;
- 
+
 static char *basefilename = NULL;
 
 static bool lg_error = false;
+
+static void initialise_representation(bool confluence_reduction);
+static void cleanup_representation();
 
 bool initialise_lts_generation(lts_generation_options *opts)
 {
   gsVerboseMsg("initialising...\n");
 
   lgopts = opts;
- 
-  FILE *SpecStream;
-  if ( (SpecStream = fopen(lgopts->specification.c_str(), "rb")) == NULL )
-  {
-    gsErrorMsg("could not open input file '%s' for reading: ", lgopts->specification.c_str());
-    perror(NULL);
-    return false;
-  }
-  gsVerboseMsg("reading LPS from '%s'\n", lgopts->specification.c_str());
-  ATerm Spec = ATreadFromFile(SpecStream);
-  if ( Spec == NULL )
-  {
-    gsErrorMsg("could not read LPS from '%s'\n", lgopts->specification.c_str());
-    return false;
-  }
-  assert(Spec != NULL);
-  if (!gsIsSpecV1((ATermAppl) Spec)) {
-    gsErrorMsg("'%s' does not contain an LPS\n", lgopts->specification.c_str());
-    return false;
+
+  lg_error = false;
+
+  ATermAppl Spec = (ATermAppl) load_aterm(lgopts->specification);
+  if (!gsIsLinProcSpec(Spec)) {
+    throw mcrl2::runtime_error(((lgopts->specification.empty())?"stdin":("'" + lgopts->specification + "'")) + " does not contain an LPS");
   }
 
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    Spec = (ATerm) removeUnusedData((ATermAppl) Spec);
+    Spec = removeUnusedData(Spec);
   }
 
   basefilename = strdup(lgopts->specification.c_str());
@@ -137,21 +137,25 @@ bool initialise_lts_generation(lts_generation_options *opts)
   } else {
     states = ATindexedSetCreate(lgopts->initial_table_size,50);
   }
-  
-  if ( lgopts->trace )
+
+  assert( backpointers.empty() );
+  if ( lgopts->trace || lgopts->save_error_trace )
   {
-    backpointers = ATtableCreate(lgopts->initial_table_size,50);
+    trace_support = true;
+    backpointers.push_back(NULL);
   } else {
-    backpointers = NULL;
+    trace_support = false;
   }
- 
-  nstate = createNextState((ATermAppl) Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator((ATermAppl) Spec,createRewriter(lps::data_specification(ATAgetArgument((ATermAppl) Spec,0)),lgopts->strat),true),true);
- 
+
+  nstate = createNextState(Spec,!lgopts->usedummies,lgopts->stateformat,createEnumerator(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),createRewriter(mcrl2::data::data_specification(ATAgetArgument(Spec,0)),lgopts->strat),true),true);
+
   if ( lgopts->priority_action != "" )
   {
     gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
     nstate->prioritise(lgopts->priority_action.c_str());
-    representation = ATtableCreate(lgopts->initial_table_size,50);
+    initialise_representation(true);
+  } else {
+    initialise_representation(false);
   }
 
   num_states = 0;
@@ -160,46 +164,22 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   if ( lgopts->lts != "" )
   {
-    if ( lgopts->outformat == OF_UNKNOWN )
-    {
-      const char *s = strrchr(lgopts->lts.c_str(),'.');
-      if ( s == NULL )
-      {
-        gsWarningMsg("no extension given for output file; writing state space in SVC format\n",s);
-        lgopts->outformat = OF_SVC;
-      } else {
-        s++;
-        if ( !strcmp(s,"aut") )
-        {
-          lgopts->outformat = OF_AUT;
-        } else {
-          if ( strcmp(s,"svc") )
-          {
-            gsWarningMsg("extension '%s' of output file not recognised; writing state space in SVC format\n",s);
-          }
-          lgopts->outformat = OF_SVC;
-        }
-      }
-    }
-
     lts_options lts_opts;
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
+    lts_opts.spec = Spec;
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
-    lgopts->outformat = OF_UNKNOWN;
+    lgopts->outformat = mcrl2::lts::lts_none;
     gsVerboseMsg("not saving state space.\n");
   }
 
   return true;
 }
-  
+
 bool finalise_lts_generation()
 {
-  delete nstate;
-  free(basefilename);
-
   if ( lg_error )
   {
     remove_lts();
@@ -241,6 +221,18 @@ bool finalise_lts_generation()
     }
   }
 
+  cleanup_representation();
+  delete nstate;
+  backpointers.clear();
+  if ( states != NULL )
+  {
+    ATindexedSetDestroy(states);
+    states = NULL;
+  }
+  free(bithashtable);
+  bithashtable = NULL;
+  free(basefilename);
+
   return true;
 }
 
@@ -260,22 +252,42 @@ static bool occurs_in(ATermAppl name, ATermList ma)
   return false;
 }
 
-static bool savetrace(string const &info, ATerm state, ATermTable backpointers, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
+static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm extra_state = NULL, ATermAppl extra_transition = NULL)
 {
   ATerm s = state;
   ATerm ns;
   ATermList tr = ATmakeList0();
-  
+  NextStateGenerator *nsgen = NULL;
+
   if ( extra_state != NULL )
   {
     tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
   }
-  while ( (ns = ATtableGet(backpointers, s)) != NULL )
+  while ( (ns = backpointers[ATindexedSetGetIndex(states,s)]) != NULL )
   {
-    tr = ATinsert(tr, (ATerm) ATmakeList2(ATgetFirst(ATgetNext((ATermList) ns)),s));
-    s = ATgetFirst((ATermList) ns);
+    ATermAppl trans;
+    ATerm t;
+    bool priority;
+    nsgen = nstate->getNextStates(ns,nsgen);
+    while ( nsgen->next(&trans,&t,&priority) )
+    {
+      if ( !priority && ATisEqual(s,get_repr(t)) )
+      {
+        break;
+      }
+    }
+    if ( nsgen->errorOccurred() )
+    {
+      gsErrorMsg("error occurred while reconstructing trace\n");
+      delete nsgen;
+      return false;
+    }
+    tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
+    s = ns;
   }
-  
+
+  delete nsgen;
+
   Trace trace;
   trace.setState(nstate->makeStateVector(s));
   for (; !ATisEmpty(tr); tr=ATgetNext(tr))
@@ -286,7 +298,15 @@ static bool savetrace(string const &info, ATerm state, ATermTable backpointers, 
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
 
-  return trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+  try
+  {
+    trace.save(lgopts->generate_filename_for_trace(info, "trc"));
+  } catch ( ... )
+  {
+    return false;
+  }
+
+  return true;
 }
 
 std::string lts_generation_options::generate_trace_file_name(std::string const& info, std::string const& extension) {
@@ -308,7 +328,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         std::ostringstream ss;
         ss << "act_" << tracecnt << "_" << ATgetName(ATgetAFun(lgopts->trace_actions[j]));
         string sss(ss.str());
-        bool saved_ok = savetrace(sss,OldState,backpointers,nstate,NewState,Transition);
+        bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
 
         if ( lgopts->detect_action || gsVerbose )
         {
@@ -333,14 +353,14 @@ static void save_error_trace(ATerm state)
 {
   if ( lgopts->save_error_trace )
   {
-    bool saved_ok = savetrace("error",state,backpointers,nstate);
+    bool saved_ok = savetrace("error",state,nstate);
 
     if ( saved_ok )
     {
       lgopts->error_trace_saved = true;
-      gsVerboseMsg("saved trace to error in '%s_trace.trc'.\n",basefilename);
+      gsVerboseMsg("saved trace to error in '%s_error.trc'.\n",basefilename);
     } else {
-      gsVerboseMsg("trace to error could not be saved in '%s_trace.trc'.\n",basefilename);
+      gsVerboseMsg("trace to error could not be saved in '%s_error.trc'.\n",basefilename);
     }
     fflush(stderr);
   }
@@ -355,7 +375,7 @@ static void check_deadlocktrace(ATerm state)
       std::ostringstream ss;
       ss << "dlk_" << tracecnt;
       string sss(ss.str());
-      bool saved_ok = savetrace(sss,state,backpointers,nstate);
+      bool saved_ok = savetrace(sss,state,nstate);
 
       if ( lgopts->detect_deadlock || gsVerbose )
       {
@@ -385,119 +405,129 @@ static void check_deadlocktrace(ATerm state)
 // Efficient State Space Generation, Technical Report SEN-R0123, CWI,
 // Amsterdam, 2001
 
+static bool apply_confluence_reduction;
+static ATermIndexedSet repr_visited;
+static ATermTable repr_number;
+static ATermTable repr_low;
+static ATermTable repr_next;
+static ATermTable repr_back;
+static NextStateGenerator *repr_nsgen;
+
+static void initialise_representation(bool confluence_reduction)
+{
+  apply_confluence_reduction = confluence_reduction;
+  if ( confluence_reduction )
+  {
+    repr_visited = ATindexedSetCreate(1000,50);
+    repr_number = ATtableCreate(1000,50);
+    repr_low = ATtableCreate(1000,50);
+    repr_next = ATtableCreate(1000,50);
+    repr_back = ATtableCreate(1000,50);
+    repr_nsgen = NULL;
+  }
+}
+
+static void cleanup_representation()
+{
+  if ( apply_confluence_reduction )
+  {
+    delete repr_nsgen;
+    ATtableDestroy(repr_back);
+    ATtableDestroy(repr_next);
+    ATtableDestroy(repr_low);
+    ATtableDestroy(repr_number);
+    ATindexedSetDestroy(repr_visited);
+  }
+}
+
 static ATerm get_repr(ATerm state)
 {
-  if ( representation == NULL )
+  if ( !apply_confluence_reduction )
   {
     return state;
   }
 
-  ATerm t = ATtableGet(representation,state);
-  if ( t != NULL )
-  {
-    return t;
-  }
-
   ATerm v = state;
-  ATermIndexedSet visited = ATindexedSetCreate(1000,50);
+  ATindexedSetReset(repr_visited);
   int num_visited = 0;
-  ATermTable number = ATtableCreate(1000,50);
-  ATermTable low = ATtableCreate(1000,50);
-  ATermTable next = ATtableCreate(1000,50);
-  ATermTable back = ATtableCreate(1000,50);
+  ATtableReset(repr_number);
+  ATtableReset(repr_low);
+  ATtableReset(repr_next);
+  ATtableReset(repr_back);
   int count;
-  NextStateGenerator *nsgen = NULL;
 
-  ATtablePut(number,v,(ATerm) ATmakeInt(0));
+  ATtablePut(repr_number,v,(ATerm) ATmakeInt(0));
   count = 0;
   bool notdone = true;
   while ( notdone )
   {
-    if ( ATgetInt((ATermInt) ATtableGet(number,v)) == 0 )
+    if ( ATgetInt((ATermInt) ATtableGet(repr_number,v)) == 0 )
     {
       count++;
-      ATtablePut(number,v,(ATerm) ATmakeInt(count));
-      ATtablePut(low,v,(ATerm) ATmakeInt(count));
+      ATtablePut(repr_number,v,(ATerm) ATmakeInt(count));
+      ATtablePut(repr_low,v,(ATerm) ATmakeInt(count));
       ATermList nextl = ATmakeList0();
-      nsgen = nstate->getNextStates(v,nsgen);
+      repr_nsgen = nstate->getNextStates(v,repr_nsgen);
       ATermAppl Transition;
       ATerm NewState;
       bool prioritised_action;
-      while ( nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
+      while ( repr_nsgen->next(&Transition,&NewState,&prioritised_action) && prioritised_action )
       {
         ATbool b;
-        ATindexedSetPut(visited,NewState,&b);
+        ATindexedSetPut(repr_visited,NewState,&b);
         if ( b == ATtrue )
         {
           num_visited++;
         }
-        ATerm t = ATtableGet(representation,NewState);
-        if ( t != NULL )
-        {
-          v = t;
-          notdone = false;
-          break;
-        }
         nextl = ATinsert(nextl,NewState);
-        if ( ATtableGet(number,NewState) == NULL ) // This condition was missing in the report
+        if ( ATtableGet(repr_number,NewState) == NULL ) // This condition was missing in the report
         {
-          ATtablePut(number,NewState,(ATerm) ATmakeInt(0));
+          ATtablePut(repr_number,NewState,(ATerm) ATmakeInt(0));
         }
       }
       if ( !notdone )
       {
         break;
       }
-      ATtablePut(next,v,(ATerm) nextl);
+      ATtablePut(repr_next,v,(ATerm) nextl);
     }
-    ATermList nextl = (ATermList) ATtableGet(next,v);
+    ATermList nextl = (ATermList) ATtableGet(repr_next,v);
     if ( ATisEmpty(nextl) )
     {
-      if ( ATisEqual(ATtableGet(number,v),ATtableGet(low,v)) )
+      if ( ATisEqual(ATtableGet(repr_number,v),ATtableGet(repr_low,v)) )
       {
         break;
       }
-      ATerm backv = ATtableGet(back,v);
-      int a = ATgetInt((ATermInt) ATtableGet(low,backv));
-      int b = ATgetInt((ATermInt) ATtableGet(low,v));
+      ATerm backv = ATtableGet(repr_back,v);
+      int a = ATgetInt((ATermInt) ATtableGet(repr_low,backv));
+      int b = ATgetInt((ATermInt) ATtableGet(repr_low,v));
       if ( a < b )
       {
-        ATtablePut(low,backv,(ATerm) ATmakeInt(a));
+        ATtablePut(repr_low,backv,(ATerm) ATmakeInt(a));
       } else {
-        ATtablePut(low,backv,(ATerm) ATmakeInt(b));
+        ATtablePut(repr_low,backv,(ATerm) ATmakeInt(b));
       }
       v = backv;
     } else {
       ATerm u = ATgetFirst(nextl);
-      ATtablePut(next,v,(ATerm) ATgetNext(nextl));
-      int nu = ATgetInt((ATermInt) ATtableGet(number,u));
+      ATtablePut(repr_next,v,(ATerm) ATgetNext(nextl));
+      int nu = ATgetInt((ATermInt) ATtableGet(repr_number,u));
       if ( nu == 0 )
       {
-        ATtablePut(back,u,v);
+        ATtablePut(repr_back,u,v);
         v = u;
       } else {
-        if ( nu < ATgetInt((ATermInt) ATtableGet(number,v)) )
+        if ( nu < ATgetInt((ATermInt) ATtableGet(repr_number,v)) )
         {
-          int lv = ATgetInt((ATermInt) ATtableGet(low,v));
+          int lv = ATgetInt((ATermInt) ATtableGet(repr_low,v));
           if ( nu < lv )
           {
-            ATtablePut(low,v,(ATerm) ATmakeInt(nu));
+            ATtablePut(repr_low,v,(ATerm) ATmakeInt(nu));
           }
         }
       }
     }
   }
-  for (int i=0; i<num_visited; i++)
-  {
-    ATtablePut(representation,ATindexedSetGetElem(visited,i),v);
-  }
-
-  delete nsgen;
-  ATtableDestroy(back);
-  ATtableDestroy(next);
-  ATtableDestroy(low);
-  ATtableDestroy(number);
-  ATindexedSetDestroy(visited);
 
   return v;
 }
@@ -552,7 +582,7 @@ static unsigned long long calc_hash_finish()
   return (((unsigned long long) (sh_a & 0xffff0000)) << 24) |
          (((unsigned long long) (sh_b & 0xffff0000)) << 16) |
          (((unsigned long long) (sh_c & 0xffff0000))     ) |
-         (sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff);
+         ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
 }
 static void calc_hash_aterm(ATerm t)
 {
@@ -588,24 +618,24 @@ static unsigned long long calc_hash(ATerm state)
   calc_hash_init();
 
   calc_hash_aterm(state);
-  
+
   return calc_hash_finish() % lgopts->bithashsize;
 }
 
 static bool get_bithash(unsigned long long i)
 {
-  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1) == 1;
+  return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1UL) == 1UL;
 }
 
 static void set_bithash(unsigned long long i)
 {
-  bithashtable[i/(8*sizeof(unsigned long))] |=  1 << (i%(8*sizeof(unsigned long)));
+  bithashtable[i/(8*sizeof(unsigned long))] |= 1UL << (i%(8*sizeof(unsigned long)));
 }
 
 static void remove_state_from_bithash(ATerm state)
 {
   unsigned long long i = calc_hash(state);
-  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1 << (i%(8*sizeof(unsigned long))));
+  bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
 }
 
 static unsigned long long add_state(ATerm state, bool *is_new)
@@ -689,7 +719,7 @@ static ATerm add_to_full_queue(ATerm state)
       return old_state;
     }
   }
-  return NULL;
+  return state;
 }
 
 static ATerm add_to_queue(ATerm state)
@@ -723,10 +753,13 @@ static ATerm add_to_queue(ATerm state)
     tmp = (ATerm *) realloc(queue_get, queue_size*sizeof(ATerm));
     if ( tmp == NULL )
     {
-      gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
-      queue_size = queue_put_count;
-      ATprotectArray(queue_get,queue_size);
-      ATprotectArray(queue_put,queue_size);
+      if ( queue_size != 0 )
+      {
+        gsWarningMsg("cannot store all unexplored states (more than %lu); dropping some states from now on\n",queue_put_count);
+        queue_size = queue_put_count;
+        ATprotectArray(queue_get,queue_size);
+        ATprotectArray(queue_put,queue_size);
+      }
       queue_size_fixed = true;
       return add_to_full_queue(state);
     }
@@ -791,25 +824,19 @@ static bool add_transition(ATerm from, ATermAppl action, ATerm to)
 
   if ( new_state )
   {
-    if ( num_states < lgopts->max_states )
+    num_states++;
+    if ( trace_support )
     {
-            num_states++;
-            if ( lgopts->trace )
-            {
-                    ATtablePut(backpointers, to, (ATerm) ATmakeList2(from,(ATerm) action));
-            }
+      backpointers.push_back(from);
     }
   } else {
     num_found_same++;
   }
 
-  if ( lgopts->bithashing || (i < num_states) )
-  {
-    check_actiontrace(from,action,to);
+  check_actiontrace(from,action,to);
 
-    save_transition(state_index(from),from,action,i,to);
-    trans++;
-  }
+  save_transition(state_index(from),from,action,i,to);
+  trans++;
 
   return new_state;
 }
@@ -831,8 +858,6 @@ bool generate_lts()
     unsigned long long endoflevelat = 1;
     unsigned long long prevtrans = 0;
     unsigned long long prevcurrent = 0;
-    unsigned long long statesskipped = 0;
-    unsigned long long statestobeskipped = 0;
     num_found_same = 0;
     tracecnt = 0;
     gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(lgopts->expl_strat));
@@ -870,15 +895,19 @@ bool generate_lts()
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
         {
-          int i = rand()%len;
-          while ( i > 0 )
+          int r = rand()%len;
+          ATerm new_state = NULL;
+          for (int i=0; i<len; i++)
           {
+            add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+            if ( r == i )
+            {
+              new_state = ATgetFirst(tmp_states);
+            }
             tmp_trans = ATgetNext(tmp_trans);
             tmp_states = ATgetNext(tmp_states);
-            i--;
           }
-          add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
-          state = ATgetFirst(tmp_states);
+          state = new_state;
         } else {
           check_deadlocktrace(state);
           break;
@@ -899,17 +928,27 @@ bool generate_lts()
           );
         }
       }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_breadth )
     {
       NextStateGenerator *nsgen = NULL;
+      unsigned long long int limit = lgopts->max_states;
       if ( lgopts->bithashing )
       {
-        queue_size_max = lgopts->todo_max;
+        lgopts->max_states = ULLONG_MAX;
+        queue_size_max = ((limit-1)>lgopts->todo_max)?lgopts->todo_max:limit-1;
         srand((unsigned)time(NULL)+getpid());
         add_to_queue(state);
         swap_queues();
       }
+      // E is the set of explored states
+      // S is the set of "seen" states
+      //
+      // normal:     S = [0..num_states), E = [0..current_state)
+      // bithashing: S = { h | get_bithash(h) }, E = S \ "items left in queues"
+      //
+      // both:       |E| <= limit
       while ( current_state < endoflevelat )
       {
         if ( lgopts->bithashing )
@@ -920,7 +959,7 @@ bool generate_lts()
           state = ATindexedSetGetElem(states,current_state);
         }
         bool deadlockstate = true;
-  
+
         nsgen = nstate->getNextStates(state,nsgen);
         ATermAppl Transition;
         ATerm NewState;
@@ -938,13 +977,12 @@ bool generate_lts()
               if ( removed_state != NULL )
               {
                 remove_state_from_bithash(removed_state);
-              }
-              if ( num_states > endoflevelat+lgopts->todo_max )
                 num_states--;
+              }
             }
           }
         }
-        
+
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
@@ -955,7 +993,7 @@ bool generate_lts()
         {
           check_deadlocktrace(state);
         }
-  
+
         current_state++;
         if ( (current_state%200) == 0 ) {
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
@@ -965,8 +1003,8 @@ bool generate_lts()
           gsVerboseMsg(
             "monitor: currently at level %lu with %llu state%s and %llu transition%s explored and %llu state%s seen.\n",
             level,
-            current_state-statesskipped,
-            (current_state-statesskipped==1)?"":"s",
+            current_state,
+            (current_state==1)?"":"s",
             trans,
             (trans==1)?"":"s",
             num_states,
@@ -979,7 +1017,6 @@ bool generate_lts()
           {
             swap_queues();
           }
-          current_state = current_state+statestobeskipped;
           lgopts->display_status(level,current_state,num_states,num_found_same,trans);
           if ( gsVerbose )
           {
@@ -993,20 +1030,25 @@ bool generate_lts()
             fflush(stderr);
           }
           level++;
-	  statesskipped = statesskipped+statestobeskipped;
           unsigned long long nextcurrent = endoflevelat;
-          if ( lgopts->bithashing && (current_state+lgopts->todo_max < num_states) )
+          endoflevelat = (limit>num_states)?num_states:limit;
+          if ( lgopts->bithashing )
           {
-            endoflevelat = current_state+lgopts->todo_max;
-	    statestobeskipped = num_states-endoflevelat;
-          } else {
-            endoflevelat = num_states;
+            if ( (limit - num_states) < queue_size_max )
+            {
+              queue_size_max = limit - num_states;
+              if ( queue_size > queue_size_max )
+              {
+                queue_size = queue_size_max;
+              }
+            }
           }
 	  current_state = nextcurrent;
           prevcurrent = current_state;
           prevtrans = trans;
         }
       }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_depth )
     {
@@ -1028,13 +1070,14 @@ bool generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ( (nsgens_num > 0) && (current_state < lgopts->max_states) )
+      while ( nsgens_num > 0 )
       {
         NextStateGenerator *nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
         ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
+        bool add_new_states = (current_state < lgopts->max_states);
         bool state_is_deadlock = !top_trans_seen /* && !nsgen->next(...) */ ;
         bool priority;
         if ( nsgen->next(&Transition,&NewState,&priority) )
@@ -1047,31 +1090,34 @@ bool generate_lts()
             state_is_deadlock = false;
             if ( add_transition(state,Transition,NewState) )
             {
-              new_state = true;
-              if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
+              if ( add_new_states )
               {
-                nsgens_size = nsgens_size*2;
-                if ( nsgens_size > lgopts->todo_max )
+                new_state = true;
+                if ( (nsgens_num == nsgens_size) && (nsgens_size < lgopts->todo_max) )
                 {
-                  nsgens_size = lgopts->todo_max;
+                  nsgens_size = nsgens_size*2;
+                  if ( nsgens_size > lgopts->todo_max )
+                  {
+                    nsgens_size = lgopts->todo_max;
+                  }
+                  nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
+                  if ( nsgens == NULL )
+                  {
+                    gsErrorMsg("cannot enlarge state stack\n");
+                    exit(1);
+                  }
+                  for (unsigned long i=nsgens_num; i<nsgens_size; i++)
+                  {
+                    nsgens[i] = NULL;
+                  }
                 }
-                nsgens = (NextStateGenerator **) realloc(nsgens,nsgens_size*sizeof(NextStateGenerator *));
-                if ( nsgens == NULL )
+                if ( nsgens_num < nsgens_size )
                 {
-                  gsErrorMsg("cannot enlarge state stack\n");
-                  exit(1);
+                  nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
+                  nsgens_num++;
+                  top_trans_seen = false;
+                  // inv
                 }
-                for (unsigned long i=nsgens_num; i<nsgens_size; i++)
-                {
-                  nsgens[i] = NULL;
-                }
-              }
-              if ( nsgens_num < nsgens_size )
-              {
-                nsgens[nsgens_num] = nstate->getNextStates(NewState,nsgens[nsgens_num]);
-                nsgens_num++;
-                top_trans_seen = false;
-                // inv
               }
             }
           }
@@ -1081,7 +1127,7 @@ bool generate_lts()
           // inv
         }
         // inv
-        
+
         if ( nsgen->errorOccurred() )
         {
           lg_error = true;
@@ -1111,7 +1157,7 @@ bool generate_lts()
           }
         }
       }
-      lgopts->display_status(level,current_state,num_states,num_found_same,trans);
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
 
       for (unsigned long i=0; i<nsgens_size; i++)
       {
@@ -1121,6 +1167,6 @@ bool generate_lts()
       gsErrorMsg("unknown exploration strategy\n");
     }
   }
-  
+
   return !lg_error;
 }

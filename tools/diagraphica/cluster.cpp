@@ -1,19 +1,20 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./cluster.cpp
 
-// --- cluster.cpp --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "cluster.h"
 
-	
 // -- constructors and destructors ----------------------------------
 
+using namespace std;
 
 // ---------------
 Cluster::Cluster()
@@ -42,7 +43,7 @@ Cluster::Cluster( const vector< int > &crd )
 Cluster::Cluster( const Cluster &clst )
 // ------------------------------------
 {
-    coord      = clst.coord;
+    coord 	   = clst.coord;
     index      = clst.index;
     parent     = clst.parent;
     children   = clst.children;
@@ -66,9 +67,9 @@ Cluster::~Cluster()
     clearOutBundles();
 }
 
-	
+
 // -- set functions -------------------------------------------------
-    
+
 
 // ----------------------------------------------
 void Cluster::setCoord( const vector< int> &crd )
@@ -197,7 +198,7 @@ int Cluster::getCoord( const int &idx )
     if ( 0 <= idx && static_cast <size_t> (idx) < coord.size() )
         result = coord[idx];
     return result;
-}   
+}
 
 
 // -----------------------------------------
@@ -240,14 +241,17 @@ Cluster* Cluster::getChild( const int &idx )
         return children[idx];
     else
         throw new string( "Error retrieving cluster child." );
-}   
+}
 
 
 // ------------------------
 int Cluster::getSizeNodes()
 // ------------------------
 {
-    return nodes.size();
+    if (this != NULL)
+      {return nodes.size();}
+    else
+      {return 0;}
 }
 
 
@@ -259,7 +263,7 @@ Node* Cluster::getNode( const int &idx )
         return nodes[idx];
     else
         throw new string( "Error retrieving cluster node." );
-}   
+}
 
 
 // ----------------------------

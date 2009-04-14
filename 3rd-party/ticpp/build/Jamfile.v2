@@ -1,6 +1,5 @@
-project aterm
+project ticpp
        : source-location ../source
-       : build-dir $(BUILD_TOP)
        : requirements
           <include>../include
        ;
@@ -8,8 +7,9 @@ project aterm
 lib ticpp
        : [ glob *.cpp ]
        : <define>TIXML_USE_TICPP
-         <threading>single
        :
        : <define>TIXML_USE_TICPP
+         <include>../include
        ;
 
+install-libraries ticpp ;

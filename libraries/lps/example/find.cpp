@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,20 +12,22 @@
 #include <iostream>
 #include <iterator>
 
-#include "atermpp/atermpp.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "test_specifications.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
-using namespace lps::detail;
+using namespace mcrl2::core;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
+using namespace mcrl2::lps;
 
 struct compare_variable
 {
@@ -41,24 +45,22 @@ struct compare_variable
 
 bool occurs_in(data_expression d, data_variable v)
 {
-  return find_if(aterm_appl(d), compare_variable(v)) != aterm();
+  return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   specification spec = mcrl22lps(ABP_SPECIFICATION);
   linear_process lps = spec.process();
-  std::set<identifier_string> ids = identifiers(aterm(lps));
+  std::set<identifier_string> ids = find_identifiers(aterm(lps));
   for (std::set<identifier_string>::iterator i = ids.begin(); i != ids.end(); ++i)
   {
     cout << "- " << *i << endl;
   }
   cin.get();
-  
+
   summand summand_ = *lps.summands().begin();
   data_expression d = summand_.condition();
   cout << "d = " << d << endl;

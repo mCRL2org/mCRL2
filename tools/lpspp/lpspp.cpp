@@ -1,4 +1,6 @@
 // Author(s): Aad Mathijssen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -6,26 +8,28 @@
 //
 /// \file lpspp.cpp
 
-#define  NAME      "lpspp"
-#define  VERSION   "0.4.4"
-#define  AUTHOR    "Aad Mathijssen"
+#include "boost.hpp" // precompiled headers
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <limits.h>
-#include <getopt.h>
-#include <stdbool.h>
-#include <assert.h>
+#define NAME "lpspp"
+#define AUTHOR "Aad Mathijssen"
+
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
+#include <cstring>
+#include <cassert>
 
 #include <aterm2.h>
-#include "libstruct.h"
-#include "libprint_types.h"
-#include "libprint_c.h"
-#include "print/messaging.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/command_line_messaging.h"
 
 using namespace mcrl2::utilities;
+using namespace mcrl2::core;
 
 //local declarations
 
@@ -34,248 +38,129 @@ int main(int argc, char *argv[]);
 //  argc represents the number of arguments
 //  argv represents the arguments
 
-static void PrintUsage(char *Name);
-//print usage information
+struct t_tool_options {
+  std::string  specification_file_name;
+  std::string  output_file_name;
+  t_pp_format  format;
 
-static void PrintMoreInfo(char *Name);
-//print --help suggestion
+  bool parse_command_line(int ac, char** av) {
+    interface_description clinterface(av[0], NAME, AUTHOR,
+      "pretty print an LPS",
+      "[OPTION]... [INFILE [OUTFILE]]\n",
+      "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
+      "is not present, stdout is used. If INFILE is not present, stdin is used.",
+      "The LPS printed in the default format might not be a well-formed mCRL2 specification, "
+      "because the proc and init sections could be preceded by declarations of free variables "
+      "denoted by var.");
 
-static void PrintVersion(void);
-//print version information
+    clinterface.
+      add_option("format", make_mandatory_argument("FORMAT"),
+        "print the LPS in the specified FORMAT:\n"
+        "  'internal' for a textual ATerm representation of the internal format,\n"
+        "  'default' for an mCRL2 specification (default), or\n"
+        "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, each data equation is put in a separate data equation section, and next states of process references are printed in assignment notation", 'f');
 
-static bool PrintSpecificationFileName(char *SpecFileName, char *OutFileName,
-  t_pp_format pp_format);
-/*Pre: SpecFileName is the name of a file from which can be read, and which
-       contains a specification that adheres to the internal format
-       which can be read
-       OutFileName is the name of a valid file to which can be written, or NULL
-  Post:the specification in SpecFileName is printed in the pp_format format
-       and saved to OutFileName
-       If OutFileName is NULL, stdout is used.
-  Ret: true, if everything went ok.
-       false, otherwise; appropriate error messages have been shown.
-*/ 
+    command_line_parser parser(clinterface, ac, av);
 
-static void PrintPPFormat(FILE *stream, t_pp_format pp_format);
-/*Pre: stream points to a stream to which can be written
- *Ret: a string representation of pp_format is written to stream
- */
+    if (parser.continue_execution()) {
+      format = ppDefault;
+
+      if (parser.options.count("format")) {
+        std::string str_format(parser.option_argument("format"));
+        if (str_format == "internal") {
+          format = ppInternal;
+        } else if (str_format == "debug") {
+          format = ppDebug;
+        } else if (str_format != "default") {
+          parser.error("option -f/--format has illegal argument '" + str_format + "'");
+        }
+      }
+
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
+      }
+      if (0 < parser.arguments.size()) {
+        specification_file_name = parser.arguments[0];
+      }
+      if (1 < parser.arguments.size()) {
+        output_file_name = parser.arguments[1];
+      }
+    }
+
+    return parser.continue_execution();
+  }
+};
+
+static void print_specification_file_name(t_tool_options const& tool_options);
+
+static std::string pp_format_to_string(t_pp_format pp_format);
 
 //implementation
 
-int main(int argc, char* argv[]) {
-  //declarations for parsing the specification
-  char *SpecFileName   = NULL;
-  char *OutputFileName = NULL;
-  t_pp_format opt_pp_format = ppDefault;
-  //declarations for getopt  
-  #define ShortOptions      "f:hqvd"
-  #define VersionOption     CHAR_MAX + 1
-  struct option LongOptions[] = { 
-    {"format"    , required_argument, NULL, 'f'},
-    {"help"      , no_argument,       NULL, 'h'},
-    {"version"   , no_argument,       NULL, VersionOption},
-    {"quiet"     , no_argument,       NULL, 'q'},
-    {"verbose"   , no_argument,       NULL, 'v'},
-    {"debug"     , no_argument,       NULL, 'd'},
-    {0, 0, 0, 0}
-  };
-  int Option;
-  //parse options
-  Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
-  while (Option != -1) {
-    switch (Option) {
-      case 'f':
-        if (strcmp(optarg, "default") == 0) {
-          opt_pp_format = ppDefault;
-        } else if (strcmp(optarg, "debug") == 0) {
-          opt_pp_format = ppDebug;
-        } else if (strcmp(optarg, "internal") == 0) {
-          opt_pp_format = ppInternal;
-        } else {
-          gsErrorMsg("option -f has illegal argument '%s'\n", optarg);
-          return 1;
-        }
-        break;
-      case 'h':
-        PrintUsage(argv[0]);
-        return 0; 
-      case VersionOption: 
-        PrintVersion(); 
-        return 0;
-      case 'q':
-        gsSetQuietMsg();
-        break;
-      case 'v': 
-        gsSetVerboseMsg();
-        break;
-      case 'd': 
-        gsSetDebugMsg();
-        break;
-      default:
-      	PrintMoreInfo(argv[0]);
-      	return 1;
-    }
-    Option = getopt_long(argc, argv, ShortOptions, LongOptions, NULL);
-  }
-  int NoArgc; //non-option argument count
-  NoArgc = argc - optind;
-  if (NoArgc > 2) {
-    fprintf(stderr, "%s: too many arguments\n", NAME);
-   	PrintMoreInfo(argv[0]);
-   	return 1;
-  } else {
-    //NoArgc >= 0 && NoArgc <= 2
-    if (NoArgc > 0) {
-      SpecFileName = strdup(argv[optind]);
-    }
-    if (NoArgc == 2) {
-      OutputFileName = strdup(argv[optind + 1]);
-    }
-  }
-  //initialise ATerm library
-  ATerm StackBottom;
-  ATinit(0, NULL, &StackBottom);
-  //print specification  
-  bool Result =
-    PrintSpecificationFileName(SpecFileName, OutputFileName, opt_pp_format);
-  free(SpecFileName);
-  free(OutputFileName);
-  return Result?0:1;
-}
-
-bool PrintSpecificationFileName(char *SpecFileName, char *OutputFileName,
-  t_pp_format pp_format)
+int main(int argc, char* argv[])
 {
-  FILE *SpecStream      = NULL;
-  FILE *OutputStream    = NULL;
-  //open SpecFileName for reading
-  if (SpecFileName == NULL ) {
-    SpecStream = stdin;
-    gsDebugMsg("input from stdin.\n");
-  } else {
-    SpecStream = fopen(SpecFileName, "rb");
-  }
-  if (SpecStream == NULL) {
-    gsErrorMsg(
-      "could not open input file '%s' for reading: ", SpecFileName);
-    perror(NULL);
-    return false;
-  }
-  assert(SpecStream != NULL);
-  //read specification from SpecStream
-  if ( SpecStream != stdin )
-    gsDebugMsg("input file '%s' is opened for reading.\n", SpecFileName);
-  ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
-  if (Spec == NULL) {
-    if (SpecStream == stdin) {
-      gsErrorMsg("could not read LPS from stdin\n");
-    } else {
-      gsErrorMsg("could not read LPS from '%s'\n", SpecFileName);
-      fclose(SpecStream);
+  MCRL2_ATERM_INIT(argc, argv)
+
+  try {
+    t_tool_options options;
+
+    if (options.parse_command_line(argc, argv)) {
+      //print specification
+      print_specification_file_name(options);
     }
-    return false;
   }
-  assert(Spec != NULL);
-  gsEnableConstructorFunctions();
-  if (!gsIsSpecV1(Spec)) {
-    if (SpecStream == stdin) {
-      gsErrorMsg("stdin does not contain an LPS\n");
-    } else {
-      gsErrorMsg("'%s' does not contain an LPS\n", SpecFileName);
-      fclose(SpecStream);
-    }
-    return false;
+  catch (std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    return EXIT_FAILURE;
   }
-  assert(gsIsSpecV1(Spec));
+
+  return EXIT_SUCCESS;
+}
+
+void print_specification_file_name(t_tool_options const& tool_options)
+{
+  std::string str_in  = (tool_options.specification_file_name.empty())?"stdin":("'" + tool_options.specification_file_name + "'");
+  std::string str_out = (tool_options.output_file_name.empty())?"stdout":("'" + tool_options.output_file_name + "'");
+  ATermAppl spec = (ATermAppl) mcrl2::core::detail::load_aterm(tool_options.specification_file_name);
+  if (!mcrl2::core::detail::gsIsLinProcSpec(spec)) {
+    throw mcrl2::runtime_error(str_in + " does not contain an LPS");
+  }
   //open output file for writing or set to stdout
-  if (OutputFileName == NULL) {
-    OutputStream = stdout;
+  FILE *output_stream    = NULL;
+  if (tool_options.output_file_name.empty()) {
+    output_stream = stdout;
     gsDebugMsg("output to stdout.\n");
-  } else {  
-    OutputStream = fopen(OutputFileName, "wb");
-    if (OutputStream == NULL) {
-      gsErrorMsg("could not open output file '%s' for writing ",
-        OutputFileName);
-      perror(NULL);
-      if (SpecStream != stdin) {
-        fclose(SpecStream);
+  } else {
+    output_stream = fopen(tool_options.output_file_name.c_str(), "w");
+    if (output_stream == NULL) {
+      std::string err_msg(strerror(errno));
+      if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
+        err_msg.replace(err_msg.length()-1, 1, "");
       }
-      return false;
+      throw mcrl2::runtime_error("could not open output file " + str_out + " for writing (" + err_msg + ")");
     }
-    gsDebugMsg("output file '%s' is opened for writing.\n", OutputFileName);
+    gsDebugMsg("output file %s is opened for writing.\n", str_out.c_str());
   }
-  assert(OutputStream != NULL);
-  //print Spec to OutputStream
-  if (gsVerbose) {
-    fprintf(stderr, "printing LPS from ");
-    if (SpecStream == stdin) {
-      fprintf(stderr, "stdin");
-    } else {
-      fprintf(stderr, "'%s'", SpecFileName);
-    }
-    fprintf(stderr, " to ");
-    if (OutputStream == stdout) {
-      fprintf(stderr, "stdout");
-    } else {
-      fprintf(stderr, "'%s'", OutputFileName);
-    }
-    fprintf(stderr, " in the ");
-    PrintPPFormat(stderr, pp_format);
-    fprintf(stderr, " format\n");
+  assert(output_stream != NULL);
+  //print spec to output_stream
+  gsVerboseMsg("printing LPS from %s to %s in the %s format\n",
+    str_in.c_str(), str_out.c_str(), pp_format_to_string(tool_options.format).c_str());
+  //pretty print spec to output_stream
+  PrintPart_C(output_stream, (ATerm) spec, tool_options.format);
+  if (output_stream != stdout) {
+    fclose(output_stream);
   }
-  //pretty print Spec to OutputStream
-  PrintPart_C(OutputStream, (ATerm) Spec, pp_format);
-  if (SpecStream != stdin) {
-    fclose(SpecStream);
-  }
-  if (OutputStream != stdout) {
-    fclose(OutputStream);
-  }
-  return true;
 }
 
-void PrintUsage(char *Name) {
-  fprintf(stderr, 
-    "Usage: %s [OPTION]... [INFILE [OUTFILE]]\n"
-    "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE\n"
-    "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
-    "\n"
-    "Mandatory arguments to long options are mandatory for short options too.\n"
-    "  -f, --format=FORMAT   print the LPS in the specificied FORMAT:\n"
-    "                        - 'default' for an mCRL2 specification (default)\n"
-    "                        - 'debug' is like 'default' with the following\n"
-    "                          exceptions:\n"
-    "                          + data expressions are printed in prefix notation\n"
-    "                            using identifiers from the internal format\n"
-    "                          + each data equation is put in a separate data\n"
-    "                            equation section\n"
-    "                        - 'internal' for a textual ATerm representation of the\n"
-    "                          internal format\n"
-    "  -h, --help            display this help and terminate\n"
-    "      --version         display version information and terminate\n"
-    "  -q, --quiet           do not display warning messages\n"
-    "  -v, --verbose         display concise intermediate messages\n"
-    "  -d, --debug           display detailed intermediate messages\n",
-    Name
-  );
-}
-
-void PrintMoreInfo(char *Name) {
-  fprintf(stderr, "Try \'%s --help\' for more information.\n", Name);
-}
-
-void PrintVersion(void) {
-  fprintf(stderr,"%s %s (revision %s)\n", NAME, VERSION, REVISION);
-}
-
-void PrintPPFormat(FILE *stream, t_pp_format pp_format)
+std::string pp_format_to_string(t_pp_format pp_format)
 {
   if (pp_format == ppDefault) {
-    fprintf(stream, "default");
+    return "default";
   } else if (pp_format == ppDebug) {
-    fprintf(stream, "debug");
+    return "debug";
   } else if (pp_format == ppInternal) {
-    fprintf(stream, "internal");
+    return "internal";
+  } else {
+    throw mcrl2::runtime_error("unknown pretty print format");
   }
 }

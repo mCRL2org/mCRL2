@@ -9,14 +9,7 @@
 
 //----------------------------------------------------------------------------//
 
-//  VC++ 8.0 warns on usage of certain Standard Library and API functions that
-//  can be cause buffer overruns or other possible security issues if misused.
-//  See http://msdn.microsoft.com/msdnmag/issues/05/05/SafeCandC/default.aspx
-//  But the wording of the warning is misleading and unsettling, there are no
-//  portable alternative functions, and VC++ 8.0's own libraries use the
-//  functions in question. So turn off the warnings.
-#define _CRT_SECURE_NO_DEPRECATE
-#define _SCL_SECURE_NO_DEPRECATE
+#include <boost/config/warning_disable.hpp>
 
 // define BOOST_SYSTEM_SOURCE so that <boost/system/config.hpp> knows
 // the library is being built (possibly exporting rather than importing code)
@@ -30,15 +23,12 @@
 #include <cassert>
 
 using namespace boost::system;
+using namespace boost::system::posix_error;
 
 #include <cstring> // for strerror/strerror_r
 
-# ifdef BOOST_NO_STDC_NAMESPACE
-    namespace std { using ::strerror; }
-# endif
-
 # if defined( BOOST_WINDOWS_API )
-#   include "windows.h"
+#   include <windows.h>
 #   ifndef ERROR_INCORRECT_SIZE
 #    define ERROR_INCORRECT_SIZE ERROR_BAD_ARGUMENTS
 #   endif
@@ -48,76 +38,304 @@ using namespace boost::system;
 
 namespace
 {
+  //  standard error categories  ---------------------------------------------//
 
-#ifdef BOOST_WINDOWS_API
-  struct native_to_errno_t
-  { 
-    boost::int32_t native_value;
-    int to_errno;
+  class generic_error_category : public error_category
+  {
+  public:
+    generic_error_category(){}
+    const char *   name() const;
+    std::string    message( int ev ) const;
   };
 
-  const native_to_errno_t native_to_errno[] = 
+  class system_error_category : public error_category
   {
-    // see WinError.h comments for descriptions of errors
-    
-    // most common errors first to speed sequential search
-    { ERROR_FILE_NOT_FOUND, ENOENT },
-    { ERROR_PATH_NOT_FOUND, ENOENT },
-
-    // rest are alphabetical for easy maintenance
-    { 0, 0 }, // no error 
-    { ERROR_ACCESS_DENIED, EACCES },
-    { ERROR_ALREADY_EXISTS, EEXIST },
-    { ERROR_BAD_UNIT, ENODEV },
-    { ERROR_BUFFER_OVERFLOW, ENAMETOOLONG },
-    { ERROR_BUSY, EBUSY },
-    { ERROR_BUSY_DRIVE, EBUSY },
-    { ERROR_CANNOT_MAKE, EACCES },
-    { ERROR_CANTOPEN, EIO },
-    { ERROR_CANTREAD, EIO },
-    { ERROR_CANTWRITE, EIO },
-    { ERROR_CURRENT_DIRECTORY, EACCES },
-    { ERROR_DEV_NOT_EXIST, ENODEV },
-    { ERROR_DEVICE_IN_USE, EBUSY },
-    { ERROR_DIR_NOT_EMPTY, ENOTEMPTY },
-    { ERROR_DIRECTORY, EINVAL }, // WinError.h: "The directory name is invalid"
-    { ERROR_DISK_FULL, ENOSPC },
-    { ERROR_FILE_EXISTS, EEXIST },
-    { ERROR_HANDLE_DISK_FULL, ENOSPC },
-    { ERROR_INVALID_ACCESS, EACCES },
-    { ERROR_INVALID_DRIVE, ENODEV },
-    { ERROR_INVALID_FUNCTION, ENOSYS },
-    { ERROR_INVALID_HANDLE, EBADHANDLE },
-    { ERROR_INVALID_NAME, EINVAL },
-    { ERROR_LOCK_VIOLATION, EACCES },
-    { ERROR_LOCKED, EACCES },
-    { ERROR_NEGATIVE_SEEK, EINVAL },
-    { ERROR_NOACCESS, EACCES },
-    { ERROR_NOT_ENOUGH_MEMORY, ENOMEM },
-    { ERROR_NOT_READY, EAGAIN },
-    { ERROR_NOT_SAME_DEVICE, EXDEV },
-    { ERROR_OPEN_FAILED, EIO },
-    { ERROR_OPEN_FILES, EBUSY },
-    { ERROR_OUTOFMEMORY, ENOMEM },
-    { ERROR_READ_FAULT, EIO },
-    { ERROR_SEEK, EIO },
-    { ERROR_SHARING_VIOLATION, EACCES },
-    { ERROR_TOO_MANY_OPEN_FILES, ENFILE },
-    { ERROR_WRITE_FAULT, EIO },
-    { ERROR_WRITE_PROTECT, EROFS }
+  public:
+    system_error_category(){}
+    const char *        name() const;
+    std::string         message( int ev ) const;
+    error_condition     default_error_condition( int ev ) const;
   };
 
-  int windows_ed( const error_code & ec )
+  //  generic_error_category implementation  ---------------------------------//
+
+  const char * generic_error_category::name() const
   {
-    const native_to_errno_t * cur = native_to_errno;
-    do
-    {
-      if ( ec.value() == cur->native_value ) return cur->to_errno;
-      ++cur;
-    } while ( cur != native_to_errno + sizeof(native_to_errno)/sizeof(native_to_errno_t) );
-    return EOTHER;
+    return "generic";
   }
 
+  std::string generic_error_category::message( int ev ) const
+  {
+    static std::string unknown_err( "Unknown error" );
+  // strerror_r is preferred because it is always thread safe,
+  // however, we fallback to strerror in certain cases because:
+  //   -- Windows doesn't provide strerror_r.
+  //   -- HP and Sundo provide strerror_r on newer systems, but there is
+  //      no way to tell if is available at runtime and in any case their
+  //      versions of strerror are thread safe anyhow.
+  //   -- Linux only sometimes provides strerror_r.
+  //   -- Tru64 provides strerror_r only when compiled -pthread.
+  //   -- VMS doesn't provide strerror_r, but on this platform, strerror is
+  //      thread safe.
+  # if defined(BOOST_WINDOWS_API) || defined(__hpux) || defined(__sun)\
+     || (defined(__linux) && (!defined(__USE_XOPEN2K) || defined(BOOST_SYSTEM_USE_STRERROR)))\
+     || (defined(__osf__) && !defined(_REENTRANT))\
+     || (defined(__vms))\
+     || (defined(__QNXNTO__))
+      const char * c_str = std::strerror( ev );
+      return  c_str
+        ? std::string( c_str )
+        : unknown_err;
+  # else  // use strerror_r
+      char buf[64];
+      char * bp = buf;
+      std::size_t sz = sizeof(buf);
+  #  if defined(__CYGWIN__) || defined(__USE_GNU)
+      // Oddball version of strerror_r
+      const char * c_str = strerror_r( ev, bp, sz );
+      return  c_str
+        ? std::string( c_str )
+        : unknown_err;
+  #  else
+      // POSIX version of strerror_r
+      int result;
+      for (;;)
+      {
+        // strerror_r returns 0 on success, otherwise ERANGE if buffer too small,
+        // invalid_argument if ev not a valid error number
+  #  if defined (__sgi)
+        const char * c_str = strerror( ev );
+        result = 0;
+      return  c_str
+        ? std::string( c_str )
+        : unknown_err;
+  #  else
+        result = strerror_r( ev, bp, sz );
+  #  endif
+        if (result == 0 )
+          break;
+        else
+        {
+  #  if defined(__linux)
+          // Linux strerror_r returns -1 on error, with error number in errno
+          result = errno;
+  #  endif
+          if ( result !=  ERANGE ) break;
+          if ( sz > sizeof(buf) ) std::free( bp );
+          sz *= 2;
+          if ( (bp = static_cast<char*>(std::malloc( sz ))) == 0 )
+            return std::string( "ENOMEM" );
+        }
+      }
+      std::string msg;
+      try
+      {
+        msg = ( ( result == invalid_argument ) ? "Unknown error" : bp );
+      }
+
+#   ifndef BOOST_NO_EXCEPTIONS
+      // See ticket #2098
+      catch(...)
+      {
+        // just eat the exception
+      }
+#   endif
+
+      if ( sz > sizeof(buf) ) std::free( bp );
+      sz = 0;
+      return msg;
+  #  endif   // else POSIX version of strerror_r
+  # endif  // else use strerror_r
+  }
+  //  system_error_category implementation  --------------------------------// 
+
+  const char * system_error_category::name() const
+  {
+    return "system";
+  }
+
+  error_condition system_error_category::default_error_condition( int ev ) const
+  {
+    switch ( ev )
+    {
+    case 0: return make_error_condition( success );
+  # if defined(BOOST_POSIX_API)
+    // POSIX-like O/S -> posix_errno decode table  ---------------------------//
+    case E2BIG: return make_error_condition( argument_list_too_long );
+    case EACCES: return make_error_condition( permission_denied );
+    case EADDRINUSE: return make_error_condition( address_in_use );
+    case EADDRNOTAVAIL: return make_error_condition( address_not_available );
+    case EAFNOSUPPORT: return make_error_condition( address_family_not_supported );
+    case EAGAIN: return make_error_condition( resource_unavailable_try_again );
+#   if EALREADY != EBUSY  //  EALREADY and EBUSY are the same on QNX Neutrino
+    case EALREADY: return make_error_condition( connection_already_in_progress );
+#   endif
+    case EBADF: return make_error_condition( bad_file_descriptor );
+    case EBADMSG: return make_error_condition( bad_message );
+    case EBUSY: return make_error_condition( device_or_resource_busy );
+    case ECANCELED: return make_error_condition( operation_canceled );
+    case ECHILD: return make_error_condition( no_child_process );
+    case ECONNABORTED: return make_error_condition( connection_aborted );
+    case ECONNREFUSED: return make_error_condition( connection_refused );
+    case ECONNRESET: return make_error_condition( connection_reset );
+    case EDEADLK: return make_error_condition( resource_deadlock_would_occur );
+    case EDESTADDRREQ: return make_error_condition( destination_address_required );
+    case EDOM: return make_error_condition( argument_out_of_domain );
+    case EEXIST: return make_error_condition( file_exists );
+    case EFAULT: return make_error_condition( bad_address );
+    case EFBIG: return make_error_condition( file_too_large );
+    case EHOSTUNREACH: return make_error_condition( host_unreachable );
+    case EIDRM: return make_error_condition( identifier_removed );
+    case EILSEQ: return make_error_condition( illegal_byte_sequence );
+    case EINPROGRESS: return make_error_condition( operation_in_progress );
+    case EINTR: return make_error_condition( interrupted );
+    case EINVAL: return make_error_condition( invalid_argument );
+    case EIO: return make_error_condition( io_error );
+    case EISCONN: return make_error_condition( already_connected );
+    case EISDIR: return make_error_condition( is_a_directory );
+    case ELOOP: return make_error_condition( too_many_synbolic_link_levels );
+    case EMFILE: return make_error_condition( too_many_files_open );
+    case EMLINK: return make_error_condition( too_many_links );
+    case EMSGSIZE: return make_error_condition( message_size );
+    case ENAMETOOLONG: return make_error_condition( filename_too_long );
+    case ENETDOWN: return make_error_condition( network_down );
+    case ENETRESET: return make_error_condition( network_reset );
+    case ENETUNREACH: return make_error_condition( network_unreachable );
+    case ENFILE: return make_error_condition( too_many_files_open_in_system );
+    case ENOBUFS: return make_error_condition( no_buffer_space );
+    case ENODATA: return make_error_condition( no_message_available );
+    case ENODEV: return make_error_condition( no_such_device );
+    case ENOENT: return make_error_condition( no_such_file_or_directory );
+    case ENOEXEC: return make_error_condition( executable_format_error );
+    case ENOLCK: return make_error_condition( no_lock_available );
+    case ENOLINK: return make_error_condition( no_link );
+    case ENOMEM: return make_error_condition( not_enough_memory );
+    case ENOMSG: return make_error_condition( no_message );
+    case ENOPROTOOPT: return make_error_condition( no_protocol_option );
+    case ENOSPC: return make_error_condition( no_space_on_device );
+    case ENOSR: return make_error_condition( no_stream_resources );
+    case ENOSTR: return make_error_condition( not_a_stream );
+    case ENOSYS: return make_error_condition( function_not_supported );
+    case ENOTCONN: return make_error_condition( not_connected );
+    case ENOTDIR: return make_error_condition( not_a_directory );
+  # if ENOTEMPTY != EEXIST // AIX treats ENOTEMPTY and EEXIST as the same value
+    case ENOTEMPTY: return make_error_condition( directory_not_empty );
+  # endif // ENOTEMPTY != EEXIST
+    case ENOTRECOVERABLE: return make_error_condition( state_not_recoverable );
+    case ENOTSOCK: return make_error_condition( not_a_socket );
+    case ENOTSUP: return make_error_condition( not_supported );
+    case ENOTTY: return make_error_condition( inappropriate_io_control_operation );
+    case ENXIO: return make_error_condition( no_such_device_or_address );
+  # if EOPNOTSUPP != ENOTSUP
+    case EOPNOTSUPP: return make_error_condition( operation_not_supported );
+  # endif // EOPNOTSUPP != ENOTSUP
+    case EOVERFLOW: return make_error_condition( value_too_large );
+    case EOWNERDEAD: return make_error_condition( owner_dead );
+    case EPERM: return make_error_condition( operation_not_permitted );
+    case EPIPE: return make_error_condition( broken_pipe );
+    case EPROTO: return make_error_condition( protocol_error );
+    case EPROTONOSUPPORT: return make_error_condition( protocol_not_supported );
+    case EPROTOTYPE: return make_error_condition( wrong_protocol_type );
+    case ERANGE: return make_error_condition( result_out_of_range );
+    case EROFS: return make_error_condition( read_only_file_system );
+    case ESPIPE: return make_error_condition( invalid_seek );
+    case ESRCH: return make_error_condition( no_such_process );
+    case ETIME: return make_error_condition( stream_timeout );
+    case ETIMEDOUT: return make_error_condition( timed_out );
+    case ETXTBSY: return make_error_condition( text_file_busy );
+  # if EAGAIN != EWOULDBLOCK
+    case EWOULDBLOCK: return make_error_condition( operation_would_block );
+  # endif // EAGAIN != EWOULDBLOCK
+    case EXDEV: return make_error_condition( cross_device_link );
+  #else
+    // Windows system -> posix_errno decode table  ---------------------------//
+    // see WinError.h comments for descriptions of errors
+    case ERROR_ACCESS_DENIED: return make_error_condition( permission_denied );
+    case ERROR_ALREADY_EXISTS: return make_error_condition( file_exists );
+    case ERROR_BAD_UNIT: return make_error_condition( no_such_device );
+    case ERROR_BUFFER_OVERFLOW: return make_error_condition( filename_too_long );
+    case ERROR_BUSY: return make_error_condition( device_or_resource_busy );
+    case ERROR_BUSY_DRIVE: return make_error_condition( device_or_resource_busy );
+    case ERROR_CANNOT_MAKE: return make_error_condition( permission_denied );
+    case ERROR_CANTOPEN: return make_error_condition( io_error );
+    case ERROR_CANTREAD: return make_error_condition( io_error );
+    case ERROR_CANTWRITE: return make_error_condition( io_error );
+    case ERROR_CURRENT_DIRECTORY: return make_error_condition( permission_denied );
+    case ERROR_DEV_NOT_EXIST: return make_error_condition( no_such_device );
+    case ERROR_DEVICE_IN_USE: return make_error_condition( device_or_resource_busy );
+    case ERROR_DIR_NOT_EMPTY: return make_error_condition( directory_not_empty );
+    case ERROR_DIRECTORY: return make_error_condition( invalid_argument ); // WinError.h: "The directory name is invalid"
+    case ERROR_DISK_FULL: return make_error_condition( no_space_on_device );
+    case ERROR_FILE_EXISTS: return make_error_condition( file_exists );
+    case ERROR_FILE_NOT_FOUND: return make_error_condition( no_such_file_or_directory );
+    case ERROR_HANDLE_DISK_FULL: return make_error_condition( no_space_on_device );
+    case ERROR_INVALID_ACCESS: return make_error_condition( permission_denied );
+    case ERROR_INVALID_DRIVE: return make_error_condition( no_such_device );
+    case ERROR_INVALID_FUNCTION: return make_error_condition( function_not_supported );
+    case ERROR_INVALID_HANDLE: return make_error_condition( invalid_argument );
+    case ERROR_INVALID_NAME: return make_error_condition( invalid_argument );
+    case ERROR_LOCK_VIOLATION: return make_error_condition( no_lock_available );
+    case ERROR_LOCKED: return make_error_condition( no_lock_available );
+    case ERROR_NEGATIVE_SEEK: return make_error_condition( invalid_argument );
+    case ERROR_NOACCESS: return make_error_condition( permission_denied );
+    case ERROR_NOT_ENOUGH_MEMORY: return make_error_condition( not_enough_memory );
+    case ERROR_NOT_READY: return make_error_condition( resource_unavailable_try_again );
+    case ERROR_NOT_SAME_DEVICE: return make_error_condition( cross_device_link );
+    case ERROR_OPEN_FAILED: return make_error_condition( io_error );
+    case ERROR_OPEN_FILES: return make_error_condition( device_or_resource_busy );
+    case ERROR_OPERATION_ABORTED: return make_error_condition( operation_canceled );
+    case ERROR_OUTOFMEMORY: return make_error_condition( not_enough_memory );
+    case ERROR_PATH_NOT_FOUND: return make_error_condition( no_such_file_or_directory );
+    case ERROR_READ_FAULT: return make_error_condition( io_error );
+    case ERROR_RETRY: return make_error_condition( resource_unavailable_try_again );
+    case ERROR_SEEK: return make_error_condition( io_error );
+    case ERROR_SHARING_VIOLATION: return make_error_condition( permission_denied );
+    case ERROR_TOO_MANY_OPEN_FILES: return make_error_condition( too_many_files_open );
+    case ERROR_WRITE_FAULT: return make_error_condition( io_error );
+    case ERROR_WRITE_PROTECT: return make_error_condition( permission_denied );
+    case WSAEACCES: return make_error_condition( permission_denied );
+    case WSAEADDRINUSE: return make_error_condition( address_in_use );
+    case WSAEADDRNOTAVAIL: return make_error_condition( address_not_available );
+    case WSAEAFNOSUPPORT: return make_error_condition( address_family_not_supported );
+    case WSAEALREADY: return make_error_condition( connection_already_in_progress );
+    case WSAEBADF: return make_error_condition( bad_file_descriptor );
+    case WSAECONNABORTED: return make_error_condition( connection_aborted );
+    case WSAECONNREFUSED: return make_error_condition( connection_refused );
+    case WSAECONNRESET: return make_error_condition( connection_reset );
+    case WSAEDESTADDRREQ: return make_error_condition( destination_address_required );
+    case WSAEFAULT: return make_error_condition( bad_address );
+    case WSAEHOSTUNREACH: return make_error_condition( host_unreachable );
+    case WSAEINPROGRESS: return make_error_condition( operation_in_progress );
+    case WSAEINTR: return make_error_condition( interrupted );
+    case WSAEINVAL: return make_error_condition( invalid_argument );
+    case WSAEISCONN: return make_error_condition( already_connected );
+    case WSAEMFILE: return make_error_condition( too_many_files_open );
+    case WSAEMSGSIZE: return make_error_condition( message_size );
+    case WSAENAMETOOLONG: return make_error_condition( filename_too_long );
+    case WSAENETDOWN: return make_error_condition( network_down );
+    case WSAENETRESET: return make_error_condition( network_reset );
+    case WSAENETUNREACH: return make_error_condition( network_unreachable );
+    case WSAENOBUFS: return make_error_condition( no_buffer_space );
+    case WSAENOPROTOOPT: return make_error_condition( no_protocol_option );
+    case WSAENOTCONN: return make_error_condition( not_connected );
+    case WSAENOTSOCK: return make_error_condition( not_a_socket );
+    case WSAEOPNOTSUPP: return make_error_condition( operation_not_supported );
+    case WSAEPROTONOSUPPORT: return make_error_condition( protocol_not_supported );
+    case WSAEPROTOTYPE: return make_error_condition( wrong_protocol_type );
+    case WSAETIMEDOUT: return make_error_condition( timed_out );
+    case WSAEWOULDBLOCK: return make_error_condition( operation_would_block );
+  #endif
+    default: return error_condition( ev, system_category );
+    }
+  }
+
+# if !defined( BOOST_WINDOWS_API )
+
+  std::string system_error_category::message( int ev ) const
+  {
+    return generic_category.message( ev );
+  }
+# else
 // TODO:
   
 //Some quick notes on the implementation (sorry for the noise if
@@ -133,199 +351,84 @@ namespace
 //
 //Cheers,
 //Chris
-
-  std::string windows_md( const error_code & ec )
+  std::string system_error_category::message( int ev ) const
   {
+# ifndef BOOST_NO_ANSI_APIS  
     LPVOID lpMsgBuf;
-    ::FormatMessageA( 
+    DWORD retval = ::FormatMessageA( 
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
         FORMAT_MESSAGE_FROM_SYSTEM | 
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
-        ec.value(),
+        ev,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
         (LPSTR) &lpMsgBuf,
         0,
         NULL 
     );
+    if (retval == 0)
+        return std::string("Unknown error");
+        
     std::string str( static_cast<LPCSTR>(lpMsgBuf) );
     ::LocalFree( lpMsgBuf ); // free the buffer
-    while ( str.size()
-      && (str[str.size()-1] == '\n' || str[str.size()-1] == '\r') )
-        str.erase( str.size()-1 );
-    return str;
-  }
-
-  wstring_t windows_wmd( const error_code & ec )
-  {
+# else  // WinCE workaround
     LPVOID lpMsgBuf;
-    ::FormatMessageW( 
+    DWORD retval = ::FormatMessageW( 
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
         FORMAT_MESSAGE_FROM_SYSTEM | 
         FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL,
-        ec.value(),
+        ev,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
         (LPWSTR) &lpMsgBuf,
         0,
         NULL 
     );
-    wstring_t str( static_cast<LPCWSTR>(lpMsgBuf) );
+    if (retval == 0)
+        return std::string("Unknown error");
+    
+    int num_chars = (wcslen( static_cast<LPCWSTR>(lpMsgBuf) ) + 1) * 2;
+    LPSTR narrow_buffer = (LPSTR)_alloca( num_chars );
+    if (::WideCharToMultiByte(CP_ACP, 0, static_cast<LPCWSTR>(lpMsgBuf), -1, narrow_buffer, num_chars, NULL, NULL) == 0)
+        return std::string("Unknown error");
+
+    std::string str( narrow_buffer );
     ::LocalFree( lpMsgBuf ); // free the buffer
-    while ( str.size()
-      && (str[str.size()-1] == L'\n' || str[str.size()-1] == L'\r') )
-        str.erase( str.size()-1 );
-    return str;
-  }
-
-#endif
-
-  int errno_ed( const error_code & ec ) { return ec.value(); }
-
-  std::string errno_md( const error_code & ec )
-  {
-  // strerror_r is preferred because it is always thread safe,
-  // however, we fallback to strerror in certain cases because:
-  //   -- Windows doesn't provide strerror_r.
-  //   -- HP and Sundo provide strerror_r on newer systems, but there is
-  //      no way to tell if is available at runtime and in any case their
-  //      versions of strerror are thread safe anyhow.
-  //   -- Linux only sometimes provides strerror_r.
-# if defined(BOOST_WINDOWS_API) || defined(__hpux) || defined(__sun)\
-     || (defined(__linux) && (!defined(__USE_XOPEN2K) || defined(BOOST_SYSTEM_USE_STRERROR)))
-    const char * c_str = std::strerror( ec.value() );
-    return std::string( c_str ? c_str : "EINVAL" );
-# else
-    char buf[64];
-    char * bp = buf;
-    std::size_t sz = sizeof(buf);
-#  if defined(__CYGWIN__) || defined(__USE_GNU)
-    // Oddball version of strerror_r
-    const char * c_str = strerror_r( ec.value(), bp, sz );
-    return std::string( c_str ? c_str : "EINVAL" );
-#  else
-    // POSIX version of strerror_r
-    int result;
-    for (;;)
-    {
-      // strerror_r returns 0 on success, otherwise ERANGE if buffer too small,
-      // EINVAL if ec.value() not a valid error number
-      if ( (result = strerror_r( ec.value(), bp, sz )) == 0 )
-        break;
-      else
-      {
-#  if defined(__linux)
-        // Linux strerror_r returns -1 on error, with error number in errno
-        result = errno;
-#  endif
-        if ( result !=  ERANGE ) break;
-        if ( sz > sizeof(buf) ) std::free( bp );
-        sz *= 2;
-        if ( (bp = static_cast<char*>(std::malloc( sz ))) == 0 )
-          return std::string( "ENOMEM" );
-      }
-    }
-    try
-    {
-      std::string msg( ( result == EINVAL ) ? "EINVAL" : bp );
-      if ( sz > sizeof(buf) ) std::free( bp );
-      sz = 0;
-      return msg;
-    }
-    catch(...)
-    {
-      if ( sz > sizeof(buf) ) std::free( bp );
-      throw;
-    }
-#  endif
 # endif
-  }
-
-  wstring_t errno_wmd( const error_code & ec )
-  {
-    // TODO: Implement this:
-    assert( 0 && "sorry, not implemented yet" );
-    wstring_t str;
+    while ( str.size()
+      && (str[str.size()-1] == '\n' || str[str.size()-1] == '\r') )
+        str.erase( str.size()-1 );
+    if ( str.size() && str[str.size()-1] == '.' ) 
+      { str.erase( str.size()-1 ); }
     return str;
   }
+# endif
 
-  struct decoder_element
-  {
-    errno_decoder ed;
-    message_decoder md;
-    wmessage_decoder wmd;
-
-    decoder_element( errno_decoder ed_,
-      message_decoder md_, wmessage_decoder wmd_ )
-      : ed(ed_), md(md_), wmd(wmd_) {}
- 
-    decoder_element() : ed(0), md(0), wmd(0) {}
-  };
-
-  typedef std::vector< decoder_element > decoder_vec_type;
-
-  decoder_vec_type & decoder_vec()
-  {
-    static const decoder_element init_decoders[] =
-#ifdef BOOST_WINDOWS_API
-    { decoder_element( errno_ed, errno_md, errno_wmd ),
-      decoder_element( windows_ed, windows_md, windows_wmd) };
-#else
-    { decoder_element( errno_ed, errno_md, errno_wmd ) };
-#endif
-
-    static decoder_vec_type dv( init_decoders,
-      init_decoders + sizeof(init_decoders)/sizeof(decoder_element));
-    return dv;
-  }
 } // unnamed namespace
 
 namespace boost
 {
   namespace system
   {
-    error_category error_code::new_category( 
-      errno_decoder ed, message_decoder md, wmessage_decoder wmd )
+
+# ifndef BOOST_SYSTEM_NO_DEPRECATED
+    BOOST_SYSTEM_DECL error_code throws; // "throw on error" special error_code;
+                                         //  note that it doesn't matter if this
+                                         //  isn't initialized before use since
+                                         //  the only use is to take its
+                                         //  address for comparison purposes
+# endif
+
+    BOOST_SYSTEM_DECL const error_category & get_system_category()
     {
-      decoder_vec().push_back( decoder_element( ed, md, wmd ) );
-      return error_category( static_cast<value_type>(decoder_vec().size()) - 1 );
+      static const system_error_category  system_category_const;
+      return system_category_const;
     }
 
-    bool error_code::get_decoders( error_category cat,
-      errno_decoder & ed, message_decoder & md,  wmessage_decoder & wmd )                       
+    BOOST_SYSTEM_DECL const error_category & get_generic_category()
     {
-      if ( cat.value() < decoder_vec().size() )
-      {
-        ed = decoder_vec()[cat.value()].ed;
-        md = decoder_vec()[cat.value()].md;
-        wmd = decoder_vec()[cat.value()].wmd;
-        return true;
-      }
-      return false;
-    }
-
-    int error_code::to_errno() const
-    {
-      return (m_category.value() < decoder_vec().size()
-        && decoder_vec()[m_category.value()].ed)
-          ? decoder_vec()[m_category.value()].ed( *this )
-          : EOTHER;
-    }
-
-    std::string error_code::message() const
-    {
-      return (m_category.value() < decoder_vec().size()
-        && decoder_vec()[m_category.value()].md)
-          ? decoder_vec()[m_category.value()].md( *this )
-          : std::string( "API error" );
-    }
-
-    wstring_t error_code::wmessage() const
-    {
-      return (m_category.value() < decoder_vec().size()
-        && decoder_vec()[m_category.value()].wmd)
-          ? decoder_vec()[m_category.value()].wmd( *this )
-          : wstring_t( L"API error" );
+      static const generic_error_category generic_category_const;
+      return generic_category_const;
     }
 
   } // namespace system

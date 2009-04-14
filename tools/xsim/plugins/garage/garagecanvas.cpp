@@ -1,10 +1,14 @@
 // Author(s): Aad Mathijssen and Hannes Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file garagecanvas.cpp
+
+#include "wx.hpp" // precompiled headers
 
 // ---------------------------------
 //
@@ -88,7 +92,7 @@ void GarageCanvas::SetDataStructs( int floor[3][20],
   }
   }
 
-  // Update lift state 
+  // Update lift state
   liftHeight = liftH;
   liftOccupied = liftO;
 
@@ -145,7 +149,7 @@ void GarageCanvas::Draw()
   else
     scaleFactor = 11*VisUtils::getColInterval();
 
-  glScalef( 
+  glScalef(
         2.0/scaleFactor,
         2.0/scaleFactor,
         2.0/scaleFactor );
@@ -219,7 +223,7 @@ void GarageCanvas::OnEvtSize( wxSizeEvent& event )
     glViewport(0, 0, width, height);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
- 
+
     //Force redraw because the paint event is not triggered in Windows
 //  Draw();
   }

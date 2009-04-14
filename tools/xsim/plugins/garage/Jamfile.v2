@@ -1,38 +1,29 @@
 project toolset/xsim/plugins/garage
-       : build-dir $(BUILD_TOP)/xsim/garage
-       : requirements
-          <include>../..
+       : requirements <include>../..
+         <pch>on:<source>/site-config//wx.pch
+       : default-build <threading>multi
        ;
 
-alias xsim_garage_view : : <wx>no ;
-alias xsim_garage_view : : <wx>yes <link>static ;
+use-project /tools/xsim : ../../ ;
 
-lib xsim_garage_view
+plugin xsim_garage_view
        : garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         /libraries//nextstate
-         /libraries//mcrl2_basic
-         /tools/xsim//xsim_base
-         /site-config//wx_gl
+         /libraries//lps
+         /tools/xsim//xsim_core
        : <define>GARAGEFRAMEDLL
-         <toolset>darwin:<bundle>yes
-         <wx>yes
-         <link>shared
-         <runtime-link>shared
+         <wx>gl
        ;
 
-alias garageframe : : <wx>no ;
-
-exe garageframe
+tool garage
        : xmain.cpp
          garageframe.cpp
          garagecanvas.cpp
          visutils.cpp
-         /site-config//wx_gl
-       : <library>/libraries//nextstate
-         <wx>yes
+       : <library>/libraries//lps
+         <wx>gl
        ;
 
-explicit garageframe ;
+explicit garage ;
 

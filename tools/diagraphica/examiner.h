@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./examiner.h
-
-// --- examiner.h ---------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef EXAMINER_H
 #define EXAMINER_H
@@ -14,9 +14,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cmath>
-#include <string>
 #include <vector>
-using namespace std;
 #include <wx/event.h>
 #include <wx/timer.h>
 #include "bundle.h"
@@ -54,17 +52,17 @@ public:
     static void setColorBdl( const ColorRGB &col );
 
     static void setBlendType( const int &type );
-    
+
     void setDiagram( Diagram *dgrm );
-    void setFrame( 
+    void setFrame(
         Cluster* frme,
-        const vector< Attribute* > &attrs,
+        const std::vector< Attribute* > &attrs,
         ColorRGB col );
     void clrFrame();
 
     void addFrameHist(
         Cluster* frme,
-        const vector< Attribute* > &attrs );
+        const std::vector< Attribute* > &attrs );
     void clrFrameHist();
     void clrFrameHistCur();
     int getSizeFramesHist();
@@ -77,56 +75,56 @@ public:
 
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
-        
+
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
-    
-    void handleMouseLftDownEvent( 
-        const int &x, 
+
+    void handleMouseLftDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
+    void handleMouseLftUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseLftDClickEvent( 
-        const int &x, 
+    void handleMouseLftDClickEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
+    void handleMouseRgtDownEvent(
+        const int &x,
         const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
+    void handleMouseRgtUpEvent(
+        const int &x,
         const int &y );
-    void handleMouseMotionEvent( 
-        const int &x, 
+    void handleMouseMotionEvent(
+        const int &x,
         const int &y );
     void handleKeyDownEvent( const int &keyCode );
 
 protected:
     // -- utility functions -----------------------------------------
 /*
-    void initAttributes( const vector< Attribute* > &attrs );
+    void initAttributes( const std::vector< Attribute* > &attrs );
     void initFrames();
     void initBundles();
-*/    
+*/
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
     void calcPosFrame();
     void calcPosFramesHist();
-    
+
     void clearAttributes();
     void clearDiagram();
     void clearFrames();
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void handleIconRwnd();
     void handleIconLft();
     /*
     void handleIconPlay();
     */
     void handleIconRgt();
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- utility drawing functions ---------------------------------
@@ -139,9 +137,9 @@ protected:
     // -- utility event handlers ------------------------------------
 /*
     void onTimer( wxTimerEvent &e );
-*/  
+*/
     // -- static variables ------------------------------------------
-    
+
     static ColorRGB colClr;
     static ColorRGB colTxt;
     static int      szeTxt;
@@ -157,21 +155,21 @@ protected:
         ID_ICON_RGT,
         ID_ICON_PLAY,
         ID_FRAME,
-        ID_FRAME_HIST,
+        ID_FRAME_HIST
     };
-    
+
     // -- data members ----------------------------------------------
     Diagram* diagram;                // association
-    vector< Attribute* > attributes; // association
+    std::vector< Attribute* > attributes; // association
 
     Cluster* frame;                  // composition
     ColorRGB colFrm;
 
-    vector< Cluster* > framesHist;            // composition
-    vector< vector< Attribute* > > attrsHist; // association
+    std::vector< Cluster* > framesHist;            // composition
+    std::vector< std::vector< Attribute* > > attrsHist; // association
 
     Position2D posFrame;
-    vector< Position2D > posFramesHist;
+    std::vector< Position2D > posFramesHist;
 
     size_t focusFrameIdx;
 
@@ -183,7 +181,7 @@ protected:
     size_t vsblHistIdxRgt;
 
     // -- declare event table ---------------------------------------
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

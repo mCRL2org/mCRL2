@@ -1,4 +1,4 @@
-// Copyright (C) 2003, Fernando Luis Cacciola Carballal.
+// Copyright (C) 2003, 2008 Fernando Luis Cacciola Carballal.
 //
 // Use, modification, and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
@@ -9,6 +9,9 @@
 // You are welcome to contact the author at:
 //  fernando_cacciola@hotmail.com
 //
+// Revisions:
+// 27 Apr 2008 (improved swap) Fernando Cacciola, Niels Dekker, Thorsten Ottosen
+// 
 #ifndef BOOST_OPTIONAL_OPTIONAL_FLC_19NOV2002_HPP
 #define BOOST_OPTIONAL_OPTIONAL_FLC_19NOV2002_HPP
 
@@ -19,6 +22,7 @@
 #include "boost/assert.hpp"
 #include "boost/type.hpp"
 #include "boost/type_traits/alignment_of.hpp"
+#include "boost/type_traits/has_nothrow_constructor.hpp"
 #include "boost/type_traits/type_with_alignment.hpp"
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/type_traits/is_reference.hpp"
@@ -26,8 +30,9 @@
 #include "boost/mpl/bool.hpp"
 #include "boost/mpl/not.hpp"
 #include "boost/detail/reference_content.hpp"
-#include "boost/none_t.hpp"
+#include "boost/none.hpp"
 #include "boost/utility/compare_pointees.hpp"
+#include "boost/utility/in_place_factory.hpp"
 
 #include "boost/optional/optional_fwd.hpp"
 
@@ -75,6 +80,19 @@
 //   are incrorrectly sink to this general catch-all member function template as shown above.
 #define BOOST_OPTIONAL_WEAK_OVERLOAD_RESOLUTION
 #endif
+
+// Daniel Wallin discovered that bind/apply.hpp badly interacts with the apply<>
+// member template of a factory as used in the optional<> implementation.
+// He proposed this simple fix which is to move the call to apply<> outside
+// namespace boost.
+namespace boost_optional_detail
+{
+  template <class T, class Factory>
+  void construct(Factory const& factory, void* address)
+  {
+    factory.BOOST_NESTED_TEMPLATE apply<T>(address);
+  }
+}
 
 
 namespace boost {
@@ -173,7 +191,7 @@ class optional_base : public optional_tag
 
     // Creates an optional<T> uninitialized.
     // No-throw
-    optional_base ( none_t const& )
+    optional_base ( none_t )
       :
       m_initialized(false) {}
 
@@ -266,7 +284,7 @@ class optional_base : public optional_tag
 
     // Assigns from "none", destroying the current value, if any, leaving this UNINITIALIZED
     // No-throw (assuming T::~T() doesn't)
-    void assign ( none_t const& ) { destroy(); }
+    void assign ( none_t ) { destroy(); }
 
 #ifndef BOOST_OPTIONAL_NO_INPLACE_FACTORY_SUPPORT
     template<class Expr>
@@ -309,7 +327,7 @@ class optional_base : public optional_tag
     void construct ( Expr const& factory, in_place_factory_base const* )
      {
        BOOST_STATIC_ASSERT ( ::boost::mpl::not_<is_reference_predicate>::value ) ;
-       factory.BOOST_NESTED_TEMPLATE apply<value_type>(m_storage.address()) ;
+       boost_optional_detail::construct<value_type>(factory, m_storage.address());
        m_initialized = true ;
      }
 
@@ -428,6 +446,8 @@ class optional_base : public optional_tag
     // the following olverloads are used to filter out the case and guarantee an error in case of T being a reference.
     pointer_const_type cast_ptr( internal_type const* p, is_not_reference_tag ) const { return p ; }
     pointer_type       cast_ptr( internal_type *      p, is_not_reference_tag )       { return p ; }
+    pointer_const_type cast_ptr( internal_type const* p, is_reference_tag     ) const { return &p->get() ; }
+    pointer_type       cast_ptr( internal_type *      p, is_reference_tag     )       { return &p->get() ; }
 
     bool m_initialized ;
     storage_type m_storage ;
@@ -459,7 +479,7 @@ class optional : public optional_detail::optional_base<T>
 
     // Creates an optional<T> uninitialized.
     // No-throw
-    optional( none_t const& none_ ) : base(none_) {}
+    optional( none_t none_ ) : base(none_) {}
 
     // Creates an optional<T> initialized with 'val'.
     // Can throw if T::T(T const&) does
@@ -501,7 +521,7 @@ class optional : public optional_detail::optional_base<T>
 
     // Creates a deep copy of another optional<T>
     // Can throw if T::T(T const&) does
-    optional ( optional const& rhs ) : base(rhs) {}
+    optional ( optional const& rhs ) : base( static_cast<base const&>(rhs) ) {}
 
    // No-throw (assuming T::~T() doesn't)
     ~optional() {}
@@ -535,7 +555,7 @@ class optional : public optional_detail::optional_base<T>
     //  (NOTE: On BCB, this operator is not actually called and left is left UNMODIFIED in case of a throw)
     optional& operator= ( optional const& rhs )
       {
-        this->assign( rhs ) ;
+        this->assign( static_cast<base const&>(rhs) ) ;
         return *this ;
       }
 
@@ -550,11 +570,19 @@ class optional : public optional_detail::optional_base<T>
     // Assigns from a "none"
     // Which destroys the current value, if any, leaving this UNINITIALIZED
     // No-throw (assuming T::~T() doesn't)
-    optional& operator= ( none_t const& none_ )
+    optional& operator= ( none_t none_ )
       {
         this->assign( none_ ) ;
         return *this ;
       }
+
+    void swap( optional & arg )
+      {
+        // allow for Koenig lookup
+        using boost::swap ;
+        swap(*this, arg);
+      }
+
 
     // Returns a reference to the value if this is initialized, otherwise,
     // the behaviour is UNDEFINED
@@ -678,6 +706,11 @@ get_pointer ( optional<T>& opt )
 // optional's relational operators ( ==, !=, <, >, <=, >= ) have deep-semantics (compare values).
 // WARNING: This is UNLIKE pointers. Use equal_pointees()/less_pointess() in generic code instead.
 
+
+//
+// optional<T> vs optional<T> cases
+//
+
 template<class T>
 inline
 bool operator == ( optional<T> const& x, optional<T> const& y )
@@ -708,64 +741,141 @@ inline
 bool operator >= ( optional<T> const& x, optional<T> const& y )
 { return !( x < y ) ; }
 
+
+//
+// optional<T> vs T cases
+//
 template<class T>
 inline
-bool operator == ( optional<T> const& x, none_t const& )
+bool operator == ( optional<T> const& x, T const& y )
+{ return equal_pointees(x, optional<T>(y)); }
+
+template<class T>
+inline
+bool operator < ( optional<T> const& x, T const& y )
+{ return less_pointees(x, optional<T>(y)); }
+
+template<class T>
+inline
+bool operator != ( optional<T> const& x, T const& y )
+{ return !( x == y ) ; }
+
+template<class T>
+inline
+bool operator > ( optional<T> const& x, T const& y )
+{ return y < x ; }
+
+template<class T>
+inline
+bool operator <= ( optional<T> const& x, T const& y )
+{ return !( y < x ) ; }
+
+template<class T>
+inline
+bool operator >= ( optional<T> const& x, T const& y )
+{ return !( x < y ) ; }
+
+//
+// T vs optional<T> cases
+//
+
+template<class T>
+inline
+bool operator == ( T const& x, optional<T> const& y )
+{ return equal_pointees( optional<T>(x), y ); }
+
+template<class T>
+inline
+bool operator < ( T const& x, optional<T> const& y )
+{ return less_pointees( optional<T>(x), y ); }
+
+template<class T>
+inline
+bool operator != ( T const& x, optional<T> const& y )
+{ return !( x == y ) ; }
+
+template<class T>
+inline
+bool operator > ( T const& x, optional<T> const& y )
+{ return y < x ; }
+
+template<class T>
+inline
+bool operator <= ( T const& x, optional<T> const& y )
+{ return !( y < x ) ; }
+
+template<class T>
+inline
+bool operator >= ( T const& x, optional<T> const& y )
+{ return !( x < y ) ; }
+
+
+//
+// optional<T> vs none cases
+//
+
+template<class T>
+inline
+bool operator == ( optional<T> const& x, none_t )
 { return equal_pointees(x, optional<T>() ); }
 
 template<class T>
 inline
-bool operator < ( optional<T> const& x, none_t const& )
+bool operator < ( optional<T> const& x, none_t )
 { return less_pointees(x,optional<T>() ); }
 
 template<class T>
 inline
-bool operator != ( optional<T> const& x, none_t const& y )
+bool operator != ( optional<T> const& x, none_t y )
 { return !( x == y ) ; }
 
 template<class T>
 inline
-bool operator > ( optional<T> const& x, none_t const& y )
+bool operator > ( optional<T> const& x, none_t y )
 { return y < x ; }
 
 template<class T>
 inline
-bool operator <= ( optional<T> const& x, none_t const& y )
+bool operator <= ( optional<T> const& x, none_t y )
 { return !( y < x ) ; }
 
 template<class T>
 inline
-bool operator >= ( optional<T> const& x, none_t const& y )
+bool operator >= ( optional<T> const& x, none_t y )
 { return !( x < y ) ; }
+
+//
+// none vs optional<T> cases
+//
 
 template<class T>
 inline
-bool operator == ( none_t const& x, optional<T> const& y )
+bool operator == ( none_t x, optional<T> const& y )
 { return equal_pointees(optional<T>() ,y); }
 
 template<class T>
 inline
-bool operator < ( none_t const& x, optional<T> const& y )
+bool operator < ( none_t x, optional<T> const& y )
 { return less_pointees(optional<T>() ,y); }
 
 template<class T>
 inline
-bool operator != ( none_t const& x, optional<T> const& y )
+bool operator != ( none_t x, optional<T> const& y )
 { return !( x == y ) ; }
 
 template<class T>
 inline
-bool operator > ( none_t const& x, optional<T> const& y )
+bool operator > ( none_t x, optional<T> const& y )
 { return y < x ; }
 
 template<class T>
 inline
-bool operator <= ( none_t const& x, optional<T> const& y )
+bool operator <= ( none_t x, optional<T> const& y )
 { return !( y < x ) ; }
 
 template<class T>
 inline
-bool operator >= ( none_t const& x, optional<T> const& y )
+bool operator >= ( none_t x, optional<T> const& y )
 { return !( x < y ) ; }
 
 //
@@ -781,43 +891,76 @@ namespace optional_detail {
 #define BOOST_OPTIONAL_STD_SWAP_INTRODUCED_AT_NS_SCOPE
 #endif
 
-// optional's swap:
-// If both are initialized, calls swap(T&, T&). If this swap throws, both will remain initialized but their values are now unspecified.
-// If only one is initialized, calls U.reset(*I), THEN I.reset().
-// If U.reset(*I) throws, both are left UNCHANGED (U is kept uinitialized and I is never reset)
-// If both are uninitialized, do nothing (no-throw)
-template<class T>
-inline
-void optional_swap ( optional<T>& x, optional<T>& y )
-{
-  if ( !x && !!y )
+  template<bool use_default_constructor> struct swap_selector;
+
+  template<>
+  struct swap_selector<true>
   {
-    x.reset(*y);
-    y.reset();
-  }
-  else if ( !!x && !y )
-  {
-    y.reset(*x);
-    x.reset();
-  }
-  else if ( !!x && !!y )
-  {
-// GCC > 3.2 and all other compilers have the using declaration at function scope (FLC)
+    template<class T>
+    static void optional_swap ( optional<T>& x, optional<T>& y )
+    {
+     bool hasX = x;
+     bool hasY = y;
+
+     if ( !hasX && !hasY )
+       return;
+
+     if( !hasX )
+         x = boost::in_place();
+     else if ( !hasY )
+         y = boost::in_place();
+
+   // GCC > 3.2 and all other compilers have the using declaration at function scope (FLC)
 #ifndef BOOST_OPTIONAL_STD_SWAP_INTRODUCED_AT_NS_SCOPE
-    // allow for Koenig lookup
-    using std::swap ;
+     // allow for Koenig lookup
+     using std::swap ;
 #endif
-    swap(*x,*y);
-  }
-}
+     swap(*x,*y);
+
+     if( !hasX )
+         y = boost::none ;
+     else if( !hasY )
+         x = boost::none ;
+    }
+  };
+
+  template<>
+  struct swap_selector<false>
+  {
+    template<class T>
+    static void optional_swap ( optional<T>& x, optional<T>& y )
+    {
+      if ( !x && !!y )
+      {
+        x = *y;
+        y = boost::none ;
+      }
+      else if ( !!x && !y )
+      {
+        y = *x ;
+        x = boost::none ;
+      }
+      else if ( !!x && !!y )
+      {
+    // GCC > 3.2 and all other compilers have the using declaration at function scope (FLC)
+    #ifndef BOOST_OPTIONAL_STD_SWAP_INTRODUCED_AT_NS_SCOPE
+        // allow for Koenig lookup
+        using std::swap ;
+    #endif
+        swap(*x,*y);
+      }
+    }
+  };
 
 } // namespace optional_detail
 
+template<class T>
+struct optional_swap_should_use_default_constructor : has_nothrow_default_constructor<T> {} ;
+
 template<class T> inline void swap ( optional<T>& x, optional<T>& y )
 {
-  optional_detail::optional_swap(x,y);
+  optional_detail::swap_selector<optional_swap_should_use_default_constructor<T>::value>::optional_swap(x, y);
 }
-
 
 } // namespace boost
 

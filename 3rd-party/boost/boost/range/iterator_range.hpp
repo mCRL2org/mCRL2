@@ -11,8 +11,15 @@
 #ifndef BOOST_RANGE_ITERATOR_RANGE_HPP
 #define BOOST_RANGE_ITERATOR_RANGE_HPP
 
-// From boost/dynamic_bitset.hpp; thanks to Matthias Troyer for Cray X1 patch.
 #include <boost/config.hpp> // Define __STL_CONFIG_H, if appropriate.
+#include <boost/detail/workaround.hpp>
+
+#if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1500))
+    #pragma warning( push )
+    #pragma warning( disable : 4996 )
+#endif
+
+// From boost/dynamic_bitset.hpp; thanks to Matthias Troyer for Cray X1 patch.
 #ifndef BOOST_OLD_IOSTREAMS 
 # if defined(__STL_CONFIG_H) && \
     !defined (__STL_USE_NEW_IOSTREAMS) && !defined(__crayx1) \
@@ -21,21 +28,23 @@
 # endif
 #endif // #ifndef BOOST_OLD_IOSTREAMS
 
-#include <boost/detail/workaround.hpp>
+#include <boost/assert.hpp>
+#include <boost/iterator/iterator_traits.hpp>    
+#include <boost/type_traits/is_abstract.hpp>
 #include <boost/range/functions.hpp>
 #include <boost/range/iterator.hpp>
 #include <boost/range/difference_type.hpp>
-#include <boost/iterator/iterator_traits.hpp>    
-#include <boost/assert.hpp>
+#include <boost/utility/enable_if.hpp>
 #include <iterator>
 #include <algorithm>
-#ifndef BOOST_OLD_IOSTREAMS
-# include <ostream>
-#else
-# include <ostream.h>
-#endif
+#ifndef _STLP_NO_IOSTREAMS
+# ifndef BOOST_OLD_IOSTREAMS
+#  include <ostream>
+# else
+#  include <ostream.h>
+# endif
+#endif // _STLP_NO_IOSTREAMS
 #include <cstddef>
-
 
 /*! \file
     Defines the \c iterator_class and related functions. 
@@ -70,10 +79,10 @@ namespace boost
         template< class Left, class Right >
         inline bool equal( const Left& l, const Right& r )
         {
-            typedef BOOST_DEDUCED_TYPENAME boost::range_size<Left>::type sz_type;
+            typedef BOOST_DEDUCED_TYPENAME boost::range_difference<Left>::type sz_type;
 
-            sz_type l_size = boost::size( l ),
-                    r_size = boost::size( r );
+            sz_type l_size = boost::distance( l ),
+                    r_size = boost::distance( r );
 
             if( l_size != r_size )
                 return false;
@@ -158,32 +167,25 @@ namespace boost
             //! iterator type
             typedef IteratorT iterator;
 
+        private: // for return value of operator()()
+            typedef BOOST_DEDUCED_TYPENAME 
+                boost::mpl::if_< boost::is_abstract<value_type>,
+                                 reference, value_type >::type abstract_value_type;
+
+        public:
             iterator_range() : m_Begin( iterator() ), m_End( iterator() )
                 #ifndef NDEBUG
             , singular( true )
                 #endif
             { }
-/*
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564))  
-            iterator_range( this_type r ) :
-            : m_Begin(r.begin()), m_End(r.end())
-            { }
-
-            this_type& operator=( this_type r )
-            {
-                m_Begin = r.begin();
-                m_End   = r.end();
-                return *this;
-            }
-#endif
-*/            
+           
             //! Constructor from a pair of iterators
             template< class Iterator >
             iterator_range( Iterator Begin, Iterator End ) : 
                 m_Begin(Begin), m_End(End)
                 #ifndef NDEBUG
             , singular(false) 
-                 #endif
+                #endif
             {}
 
             //! Constructor from a Range
@@ -208,7 +210,7 @@ namespace boost
             template< class Range >
             iterator_range( const Range& r, iterator_range_detail::const_range_tag ) : 
                 m_Begin( impl::adl_begin( r ) ), m_End( impl::adl_end( r ) )
-                 #ifndef NDEBUG
+                #ifndef NDEBUG
             , singular(false) 
                 #endif
             {}
@@ -217,7 +219,7 @@ namespace boost
             template< class Range >
             iterator_range( Range& r, iterator_range_detail::range_tag ) : 
                 m_Begin( impl::adl_begin( r ) ), m_End( impl::adl_end( r ) )
-                 #ifndef NDEBUG
+                #ifndef NDEBUG
             , singular(false) 
                 #endif
             {}
@@ -280,7 +282,7 @@ namespace boost
                 return m_End; 
             } 
 
-            size_type size() const
+            difference_type size() const
             { 
                 BOOST_ASSERT( !is_singular() );
                 return m_End - m_Begin;
@@ -348,10 +350,21 @@ namespace boost
                return *--last;
            }
     
-           reference operator[]( size_type sz ) const
+           reference operator[]( difference_type at ) const
            {
-               BOOST_ASSERT( sz < size() );
-               return m_Begin[sz];
+               BOOST_ASSERT( at >= 0 && at < size() );
+               return m_Begin[at];
+           }
+
+           //
+           // When storing transform iterators, operator[]()
+           // fails because it returns by reference. Therefore
+           // operator()() is provided for these cases.
+           // 
+           abstract_value_type operator()( difference_type at ) const                              
+           {
+               BOOST_ASSERT( at >= 0 && at < size() );
+               return m_Begin[at];               
            }
 
            iterator_range& advance_begin( difference_type n )
@@ -377,13 +390,15 @@ namespace boost
             bool      singular;
             #endif
 
-            #ifndef NDEBUG
         public:
             bool is_singular() const
             {
+                 #ifndef NDEBUG
                  return singular;
+                 #else
+                 return false;
+                 #endif
             }
-            #endif
 
         protected:
             //
@@ -395,7 +410,8 @@ namespace boost
 
 //  iterator range free-standing operators ---------------------------//
 
-#ifndef BOOST_OLD_IOSTREAMS   
+#ifndef _STLP_NO_IOSTREAMS
+# ifndef BOOST_OLD_IOSTREAMS   
 
         //! iterator_range output operator
         /*!
@@ -414,7 +430,7 @@ namespace boost
             return Os;
         }
 
-#else
+# else
 
         //! iterator_range output operator
         /*!
@@ -430,7 +446,8 @@ namespace boost
             return Os;
         }
 
-#endif
+# endif
+#endif // _STLP_NO_IOSTREAMS
 
         /////////////////////////////////////////////////////////////////////
         // comparison operators
@@ -633,6 +650,10 @@ namespace boost
 } // namespace 'boost'
 
 #undef BOOST_OLD_IOSTREAMS
+
+#if BOOST_WORKAROUND(BOOST_MSVC, BOOST_TESTED_AT(1500)) 
+    #pragma warning( pop )
+#endif
 
 #endif
 

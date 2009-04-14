@@ -1,11 +1,11 @@
 % The following is the specification of the safety layer of the automated
 % parking garage after reduction 2 as described in [1, Appendices B and C.3],
 % containing two errors [1, Figure 7].
-% 
+%
 % Simulation of this specification is possible. When used in combination with
 % the corresponding visualisation plugin, it is an effective way to find
 % errors.
-% 
+%
 % [1] Aad Mathijssen and A. Johannes Pretorius. Specification, Analysis and
 %     Verification of an Automated Parking Garage. Computer Science Report
 %     05-25, Eindhoven University of Technology (TU/e), 2005.
@@ -32,7 +32,7 @@ sort
   MoveSize = struct full | half;
   LiftHeight = struct street | rotate | basement;
   Area =
-    struct area(positions: FloorPosList, tilted_c1: Bool, tilted_c10: Bool);                
+    struct area(positions: FloorPosList, tilted_c1: Bool, tilted_c10: Bool);
   Instruction = struct move_belts(R1BeltSet, DirCol, MoveSize)
                      | move_belts(R2BeltSet, DirCol, MoveSize)
                      | move_belts(R3BeltSet, DirCol, MoveSize)
@@ -189,7 +189,7 @@ map
   % exists
   connected: ShuttlePos # ShuttlePos -> Bool;
   % connected(spa, spb) indicates if the bottom of spa is connected to the top
-  % of spb 
+  % of spb
 var
   spa, spb: ShuttlePos;
 eqn
@@ -299,7 +299,7 @@ eqn
   lt(soa, sob) = index(soa) < index(sob);
   gt(soa, sob) = index(soa) > index(sob);
   not(lowered) = tilted;
-  not(tilted) = lowered;  
+  not(tilted) = lowered;
 
 % Belt operations
 map
@@ -315,9 +315,9 @@ map
   lt: R2Belt # R2Belt -> Bool;
   lt: R3Belt # R3Belt -> Bool;
   % lt(ba, bb) indicates if belt ba is less than belt bb
-  positions: R1Belt -> FloorPosList;  
-  positions: R2Belt -> FloorPosList;  
-  positions: R3Belt -> FloorPosList;  
+  positions: R1Belt -> FloorPosList;
+  positions: R2Belt -> FloorPosList;
+  positions: R3Belt -> FloorPosList;
   % positions(ba) represents the positions corresponding to belt ba
   connected: R1Belt # R1Belt -> Bool;
   connected: R2Belt # R2Belt -> Bool;
@@ -390,13 +390,13 @@ eqn
   available(b_r1a, shs, ls) = true;
   available(b_r1lift, shs, ls) = ls == ls_basement;
   available(b_r1b, shs, ls) = true;
-  available(b_r1b_sh, shs, ls) = shs(r1b, lowered) == avail; 
-  available(b_r2a_sh, shs, ls) = shs(r2a, lowered) == avail; 
+  available(b_r1b_sh, shs, ls) = shs(r1b, lowered) == avail;
+  available(b_r2a_sh, shs, ls) = shs(r2a, lowered) == avail;
   available(b_r2, shs, ls) = true;
-  available(b_r2b_sh, shs, ls) = shs(r2b, lowered) == avail; 
-  available(b_r3a_sh, shs, ls) = shs(r3a, lowered) == avail; 
-  available(b_r3, shs, ls) = true; 
-  available(b_r3b_sh, shs, ls) = shs(r3b, lowered) == avail; 
+  available(b_r2b_sh, shs, ls) = shs(r2b, lowered) == avail;
+  available(b_r3a_sh, shs, ls) = shs(r3a, lowered) == avail;
+  available(b_r3, shs, ls) = true;
+  available(b_r3b_sh, shs, ls) = shs(r3b, lowered) == avail;
 
 % BeltSet operations
 map
@@ -497,7 +497,7 @@ var
 eqn
   overlap(area(fps, tc1a, tc1b), area(fpt, tc10a, tc10b)) =
     overlap(fps, fpt) || (tc1a && tc1b) || (tc10a && tc10b);
- 
+
 % Instruction operations
 map
   index: Instruction -> Pos;
@@ -673,12 +673,12 @@ eqn
   occupied(fpa |> fps, fsa) = fsa(fpa) == occupied && occupied(fps, fsa);
   occupied([], fsa) = true;
   end_free(fps, col_inc, false, fsa) =
-    fsa(head(rev(fps))) == free; 
+    fsa(head(rev(fps))) == free;
   end_free(fps, col_inc, true, fsa) =
     fsa(head(l)) == free && fsa(head(tail(l))) == free
       whr l = rev(fps) end;
   end_free(fps, col_dec, false, fsa) =
-    fsa(head(fps)) == free; 
+    fsa(head(fps)) == free;
   end_free(fps, col_dec, true, fsa) =
     fsa(head(fps)) == free && fsa(head(tail(fps))) == free;
   even_occ([], fsa) = true;
@@ -766,7 +766,7 @@ var
   asa, asb: AvailState;
 eqn
   init_shs(spa, lowered) = if(row(spa) != r3, avail, n_avail);
-  init_shs(spa, tilted) = if(row(spa) != r3, n_avail, avail); 
+  init_shs(spa, tilted) = if(row(spa) != r3, n_avail, avail);
   spa == spb  && soa == sob  ->
     update(spa, soa, asa, shs)(spb, sob) = asa;
   spa != spb  || soa != sob  ->
@@ -961,7 +961,7 @@ eqn
             )
           ),
         shs, make_ls(lh, occupied));
-  !occupied(ls, fs) -> 
+  !occupied(ls, fs) ->
     nextstate(move_lift(lh), ok, glob_state(fs, shs, ls)) =
       glob_state(fs, shs, make_ls(lh, free));
   nextstate(rotate_lift, ok, gs) = gs;

@@ -2,7 +2,7 @@
 // socket_option.hpp
 // ~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -111,8 +111,19 @@ public:
   template <typename Protocol>
   void resize(const Protocol&, std::size_t s)
   {
-    if (s != sizeof(value_))
+    // On some platforms (e.g. Windows Vista), the getsockopt function will
+    // return the size of a boolean socket option as one byte, even though a
+    // four byte integer was passed in.
+    switch (s)
+    {
+    case sizeof(char):
+      value_ = *reinterpret_cast<char*>(&value_) ? 1 : 0;
+      break;
+    case sizeof(value_):
+      break;
+    default:
       throw std::length_error("boolean socket option resize");
+    }
   }
 
 private:

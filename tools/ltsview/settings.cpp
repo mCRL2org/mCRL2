@@ -1,11 +1,15 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file settings.cpp
-/// \brief Add your file description here.
+/// \brief Implements the settings store
+
+#include "wx.hpp" // precompiled headers
 
 #include <vector>
 #include "settings.h"
@@ -32,7 +36,7 @@ Setting::Setting(SettingID i) {
 }
 
 void Setting::notify_all() {
-  for (vector<Subscriber*>::iterator sub_it = subscribers.begin(); 
+  for (vector<Subscriber*>::iterator sub_it = subscribers.begin();
        sub_it != subscribers.end(); ++sub_it) {
     (**sub_it).notify(id);
   }
@@ -54,7 +58,7 @@ class Setting_Int: public Setting {
     void reset();
 };
 
-Setting_Int::Setting_Int(SettingID i,int dv): Setting(i) { 
+Setting_Int::Setting_Int(SettingID i,int dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -89,7 +93,7 @@ class Setting_Bool: public Setting {
     void reset();
 };
 
-Setting_Bool::Setting_Bool(SettingID i,bool dv): Setting(i) { 
+Setting_Bool::Setting_Bool(SettingID i,bool dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -124,7 +128,7 @@ class Setting_Float: public Setting {
     void reset();
 };
 
-Setting_Float::Setting_Float(SettingID i,float dv): Setting(i) { 
+Setting_Float::Setting_Float(SettingID i,float dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -194,7 +198,7 @@ class Setting_RGB: public Setting {
     void reset();
 };
 
-Setting_RGB::Setting_RGB(SettingID i,RGB_Color dv): Setting(i) { 
+Setting_RGB::Setting_RGB(SettingID i,RGB_Color dv): Setting(i) {
   def_value = dv;
   value = dv;
 }
@@ -224,11 +228,14 @@ Settings::Settings() {
   RGB_Color sel = {255, 255, 0};
   RGB_Color pos = {0, 255, 255};
   RGB_Color bg = {150,150,150};
-  settings[NodeSize]            = new Setting_Float(NodeSize,0.1f);
-  settings[BranchRotation]      = new Setting_Int(BranchRotation,111);
+  settings[StateSize]           = new Setting_Float(StateSize,0.1f);
+  settings[BranchRotation]      = new Setting_Int(BranchRotation,0);
   settings[ClusterHeight]       = new Setting_Float(ClusterHeight,0.0f);
   settings[BranchTilt]          = new Setting_Int(BranchTilt,30);
   settings[Quality]             = new Setting_Int(Quality,12);
+  settings[TransitionAttraction]= new Setting_Float(TransitionAttraction,1.0f);
+  settings[TransitionLength]    = new Setting_Float(TransitionLength,1.0f);
+  settings[StateRepulsion]      = new Setting_Float(StateRepulsion,1.0f);
   settings[Alpha]               = new Setting_UByte(Alpha,178);
   settings[LongInterpolation]   = new Setting_Bool(LongInterpolation,false);
   settings[DisplayBackpointers] = new Setting_Bool(DisplayBackpointers,false);
@@ -261,7 +268,7 @@ Settings::~Settings() {
   settings.clear();
 }
 
-void Settings::subscribe(SettingID st,Subscriber* ss) { 
+void Settings::subscribe(SettingID st,Subscriber* ss) {
   settings[st]->subscribe(ss);
 }
 

@@ -1,13 +1,13 @@
-//  (C) Copyright Gennadiy Rozental 2001-2005.
+//  (C) Copyright Gennadiy Rozental 2001-2008.
 //  Distributed under the Boost Software License, Version 1.0.
 //  (See accompanying file LICENSE_1_0.txt or copy at 
 //  http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org/libs/test for the library home page.
 //
-//  File        : $RCSfile: global_typedef.hpp,v $
+//  File        : $RCSfile$
 //
-//  Version     : $Revision: 1.2 $
+//  Version     : $Revision: 50358 $
 //
 //  Description : some trivial global typedefs
 // ***************************************************************************
@@ -32,11 +32,11 @@ typedef unsigned long   counter_t;
 
 //____________________________________________________________________________//
 
-enum report_level  { CONFIRMATION_REPORT, SHORT_REPORT, DETAILED_REPORT, NO_REPORT, INV_REPORT_LEVEL };
+enum report_level  { INV_REPORT_LEVEL, CONFIRMATION_REPORT, SHORT_REPORT, DETAILED_REPORT, NO_REPORT };
 
 //____________________________________________________________________________//
 
-enum output_format { CLF /* compiler log format */, XML /* XML */ };
+enum output_format { INV_OF, CLF /* compiler log format */, XML /* XML */ };
 
 //____________________________________________________________________________//
 
@@ -45,6 +45,7 @@ enum test_unit_type { tut_case = 0x01, tut_suite = 0x10, tut_any = 0x11 };
 //____________________________________________________________________________//
 
 typedef unsigned long   test_unit_id;
+
 const test_unit_id INV_TEST_UNIT_ID  = 0xFFFFFFFF;
 const test_unit_id MAX_TEST_CASE_ID  = 0xFFFFFFFE;
 const test_unit_id MIN_TEST_CASE_ID  = 0x00010000;
@@ -52,6 +53,8 @@ const test_unit_id MAX_TEST_SUITE_ID = 0x0000FF00;
 const test_unit_id MIN_TEST_SUITE_ID = 0x00000001;
 
 //____________________________________________________________________________//
+
+namespace ut_detail {
 
 inline test_unit_type
 test_id_2_unit_type( test_unit_id id )
@@ -61,6 +64,19 @@ test_id_2_unit_type( test_unit_id id )
 
 //____________________________________________________________________________//
 
+// helper templates to prevent ODR violations 
+template<class T> 
+struct static_constant { 
+    static T value; 
+}; 
+
+template<class T> 
+T static_constant<T>::value; 
+
+//____________________________________________________________________________// 
+
+} // namespace ut_detail
+
 } // namespace unit_test
 
 } // namespace boost
@@ -68,17 +84,5 @@ test_id_2_unit_type( test_unit_id id )
 //____________________________________________________________________________//
 
 #include <boost/test/detail/enable_warnings.hpp>
-
-// ***************************************************************************
-//  Revision History :
-//  
-//  $Log: global_typedef.hpp,v $
-//  Revision 1.2  2006/03/15 03:18:29  rogeeff
-//  made literal resizable
-//
-//  Revision 1.1  2005/02/20 08:27:06  rogeeff
-//  This a major update for Boost.Test framework. See release docs for complete list of fixes/updates
-//
-// ***************************************************************************
 
 #endif // BOOST_TEST_GLOBAL_TYPEDEF_HPP_021005GER

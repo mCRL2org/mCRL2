@@ -1,4 +1,6 @@
 // Author(s): Muck van Weerdenburg
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,7 +14,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <aterm2.h>
-#include "xsimbase.h"
+#include "simbase.h"
 
 //----------------------------------------------------------------------------
 // XSimTrace
@@ -42,18 +44,21 @@ public:
 private:
     // WDR: method declarations for XSimMain
     void AddState(ATermAppl Transition, ATerm State, bool enabled);
-    
+    void _add_state(ATermAppl Transition, ATerm State, bool enabled);
+    void _reset(ATerm State);
+    void _update();
+
 private:
     // WDR: member variable declarations for XSimMain
     wxListView *traceview;
     SimulatorInterface *simulator;
     unsigned int current_pos;
-    
+
 private:
     // WDR: handler declarations for XSimMain
     void OnCloseWindow( wxCloseEvent &event );
     void OnListItemActivated( wxListEvent &event );
-    
+
 private:
 
 private:

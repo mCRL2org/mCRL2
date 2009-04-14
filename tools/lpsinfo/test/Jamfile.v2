@@ -1,5 +1,0 @@
-project toolset/lpsinfo/test ;
-
-test-suite lpsinfo
-    : [ run_tool_on_examples /tools/lpsinfo//lpsinfo lpsinfo : : $(BUILD_TOP) lps ]
-    ;

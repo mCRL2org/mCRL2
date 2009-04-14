@@ -1,13 +1,6 @@
-project toolset/pbespp
-       : build-dir $(BUILD_TOP)/pbespp
-       ;
+project toolset/pbespp ;
 
-exe pbespp
+tool pbespp
        : pbespp.cpp
-         /libraries//mcrl2_basic
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
+         /libraries//pbes
        ;
-
-install-binaries install
-       : pbespp ;

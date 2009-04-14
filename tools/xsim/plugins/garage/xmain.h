@@ -1,4 +1,6 @@
 // Author(s): Aad Mathijssen and Hannes Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -8,8 +10,8 @@
 
 // ---------------------------------
 //
-// This class initializes the 
-//		Bremen parking garage 
+// This class initializes the
+//		Bremen parking garage
 //		visualization module.
 //
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -19,15 +21,11 @@
 #define MAIN_H
 
 
-// For compilers that support precompiled headers
-#include <wx/wxprec.h>
-// Else include 'wx/wx.h'
-#ifndef WX_PRECOMP
-	#include <wx/wx.h>
-#endif
+#include <wx/wx.h>
 
 
 #include "garageframe.h"
+#include "mcrl2/core/aterm_ext.h"
 
 
 class Bremen : public wxApp

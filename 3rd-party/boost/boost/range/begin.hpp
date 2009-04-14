@@ -41,6 +41,11 @@ namespace range_detail
     inline BOOST_DEDUCED_TYPENAME range_iterator<C>::type
     range_begin( C& c )
     {
+        //
+        // If you get a compile-error here, it is most likely because
+        // you have not implemented range_begin() properly in
+        // the namespace of C
+        //
         return c.begin();
     }
 
@@ -68,15 +73,15 @@ namespace range_detail
     // May this be discarded? Or is it needed for bad compilers?
     //
     template< typename T, std::size_t sz >
-    inline const T* range_begin( const T (&array)[sz] )
+    inline const T* range_begin( const T (&a)[sz] )
     {
-        return array;
+        return a;
     }
 
     template< typename T, std::size_t sz >
-    inline T* range_begin( T (&array)[sz] )
+    inline T* range_begin( T (&a)[sz] )
     {
-        return array;
+        return a;
     }
 
 

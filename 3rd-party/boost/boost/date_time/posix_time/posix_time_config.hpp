@@ -4,9 +4,9 @@
 /* Copyright (c) 2002,2003,2005 CrystalClear Software, Inc.
  * Use, modification and distribution is subject to the 
  * Boost Software License, Version 1.0. (See accompanying
- * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
+ * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2005/04/24 01:35:19 $
+ * $Date: 2008-10-10 18:10:00 +0200 (Fri, 10 Oct 2008) $
  */
 
 #include "boost/date_time/time_duration.hpp"
@@ -16,7 +16,7 @@
 #include "boost/limits.hpp"
 #include "boost/date_time/compiler_config.hpp"
 #include "boost/cstdint.hpp"
-#include <cmath>
+#include <boost/config/no_tr1/cmath.hpp>
 #include <cstdlib> //for MCW 7.2 std::abs(long long)
 
 namespace boost {

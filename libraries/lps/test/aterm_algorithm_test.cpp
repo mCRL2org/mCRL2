@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -10,21 +12,22 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "atermpp/atermpp.h"
-#include "atermpp/algorithm.h"
+#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/sort.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/tools.h"
+#include "mcrl2/lps/mcrl22lps.h"
 
 using namespace std;
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
-using namespace lps::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
+using namespace mcrl2::lps;
+using namespace mcrl2::lps::detail;
 
-std::string SPECIFICATION = 
+std::string SPECIFICATION =
 "% This file contains the alternating bit protocol, as described in W.J.    \n"
 "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
 "%                                                                          \n"
@@ -79,18 +82,43 @@ struct compare_variable
 
 bool occurs_in(data_expression d, data_variable v)
 {
-  return find_if(aterm_appl(d), compare_variable(v)) != aterm();
+  return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
-int test_main(int, char*[])
+inline
+bool is_variable(aterm t)
 {
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  return t.type() == AT_APPL && is_data_variable(aterm_appl(t));
+};
+
+/// Search for a data variable in the term t. Precondition: t must contain
+/// at least one variable.
+template <typename Term>
+data_variable find_variable(Term t)
+{
+  aterm_appl result = atermpp::find_if(t, is_variable);
+  assert((result)); // check if a variable has been found
+  return result;
+}
+
+void test_find_variable()
+{
+  data_variable d("d:D");
+  data_variable e("e:E");
+  data_expression d_e = and_(d, e);
+  data_variable v = find_variable(d_e);
+  BOOST_CHECK(v == d);
+}
+
+int test_main(int argc, char** argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
+
+  test_find_variable();
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
- 
+
   // find all action labels in lps
   std::set<action_label> labels;
   find_all_if(lps, is_action_label, inserter(labels, labels.end()));
@@ -100,9 +128,9 @@ int test_main(int, char*[])
   find_all_if(lps, is_data_variable, inserter(variables, variables.end()));
 
   // find all functions in spec
-  std::set<function> functions;
-  find_all_if(spec.data().constructors(), is_function, std::inserter(functions, functions.end()));
-  find_all_if(spec.data().mappings(), is_function, std::inserter(functions, functions.end()));
+  std::set<data_operation> functions;
+  find_all_if(spec.data().constructors(), is_data_operation, std::inserter(functions, functions.end()));
+  find_all_if(spec.data().mappings(), is_data_operation, std::inserter(functions, functions.end()));
 
   // find all existential quantifications in lps
   std::set<data_expression> existential_quantifications;

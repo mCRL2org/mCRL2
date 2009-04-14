@@ -1,16 +1,22 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./parser.cpp
 
-// --- parser.cpp ---------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "parser.h"
 
+#include "mcrl2/lts/lts.h"
+#include "mcrl2/core/messaging.h"
+
+
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 
@@ -43,14 +49,14 @@ int Parser::getFileSize( const string &path )
 {
     int result = 0;
     ifstream file;
-    
+
     int begin  = 0;
     int end    = 0;
-    
+
     file.open( path.c_str() );
     if ( !file.is_open() )
     {
-        string* msg = new string( 
+        string* msg = new string(
             "Error opening file for computing file size." );
         throw msg;
     }
@@ -59,7 +65,7 @@ int Parser::getFileSize( const string &path )
     {
         // get starting position
         begin = file.tellg();
-        
+
         // seek and set current position to 'EOF'
         file.seekg( 0, ios::end );
         end = file.tellg();
@@ -69,18 +75,18 @@ int Parser::getFileSize( const string &path )
     }
     catch ( ... )
     {
-        string* msg = new string( 
+        string* msg = new string(
             "Error computing file size." );
         throw msg;
     }
     file.close();
-    
+
     return result;
 }
 
 
 // -----------------------
-void Parser::parseFSMFile( 
+void Parser::parseFSMFile(
     const string &path,
     Graph* graph )
 // -----------------------
@@ -93,20 +99,108 @@ void Parser::parseFSMFile(
 // allready read.
 // ------------------------------------------------------------------
 {
-    ifstream file;
+using namespace mcrl2::lts;
+//using namespace mcrl2::core;
+
+    //ifstream file;
     string line = "";
-    int sect = 0;
-    int lineCnt = 0;
-    int byteCnt = 0;
-   
-    file.open( path.c_str() );
+    //int sect = 0;
+    //int lineCnt = 0;
+    //int byteCnt = 0;
+
+      ////////////////////////////////////////////////////
+    mcrl2::lts::lts l;
+
+    if (!l.read_from(path , lts_none)) {
+        string* msg = new string(
+            "Error opening file for parsing." );
+      throw msg;
+    }
+    try{
+    if(l.has_state_parameters ())
+    {
+      for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
+      {
+        line.clear();
+        line.append(l.state_parameter_name_str(i));
+        line.append("(");
+        line.append(to_string(l.get_state_parameter_values(i).size()));
+        line.append(") ");
+        line.append(l.state_parameter_sort_str(i)) ;
+        //Following line of code is needed to avoid iteration over a changing object.
+        atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
+        for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+        {
+          line.append( " \"");
+          line.append(l.pretty_print_state_parameter_value(*z));
+          line.append("\"");
+        }
+        //cout << line  << endl;
+                        parseStateVarDescr(
+                            line,
+                            graph );
+      }
+    }
+
+    state_iterator si = l.get_states();
+    while(si.more())
+    {
+      line.clear();
+      if(l.has_state_parameters ())
+      {
+        for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
+        {
+          if  (i != 0)
+          {
+            line.append(" ");
+          }
+
+          int c = 0;
+          atermpp::set< ATerm > tmp = l.get_state_parameter_values(i);
+          for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
+          {
+            if (*z == l.get_state_parameter_value( *si, i ))
+            {
+              line.append(to_string(c));
+            }
+            ++c;
+          }
+        }
+      }
+  //    cout << line << endl;
+      parseStates(
+         line,
+         graph );
+      ++si;
+    }
+
+    for(transition_iterator ti = l.get_transitions(); ti.more(); ++ti)
+    {
+       line.clear();
+       line.append(to_string(ti.from()+1));
+       line.append(" ");
+       line.append(to_string(ti.to()+1));
+       line.append(" \"");
+       line.append(l.label_value_str(ti.label() ) );
+       line.append("\"");
+//       cout << line << endl;
+                        parseTransitions(
+                            line,
+                            graph );
+    }
+
+    mediator->updateProgress( 1 );
+
+
+    /////////////////////////////////////////////////////
+
+/*    file.open( path.c_str() );
     if ( !file.is_open() )
     {
-        string* msg = new string( 
+        string* msg = new string(
             "Error opening file for parsing." );
         throw msg;
     }
-
     try
     {
         while ( getline( file, line ) )
@@ -117,10 +211,10 @@ void Parser::parseFSMFile(
 
             if ( lineCnt % 1000 == 0 )
                 mediator->updateProgress( byteCnt );
-            
+
             // linux, mac and windows EOL
-            if ( line == "---"   || 
-                 line == "---\n" || 
+            if ( line == "---"   ||
+                 line == "---\n" ||
                  line == "---\r" ||
                  line == "---\0" )
                 ++sect;
@@ -130,20 +224,19 @@ void Parser::parseFSMFile(
                 switch ( sect )
                 {
                     case 0:
-                        parseStateVarDescr( 
-                            line, 
+                        parseStateVarDescr(
+                            line,
                             graph );
                         break;
 
                     case 1:
-                        parseStates( 
-                            line, 
+                        parseStates(
+                            line,
                             graph );
                         break;
 
                     case 2:
-                        parseTransitions( 
-                            lineCnt,
+                        parseTransitions(
                             line,
                             graph );
                         break;
@@ -154,7 +247,7 @@ void Parser::parseFSMFile(
             }
         }
 
-        file.close();
+        file.close();*/
     }
     catch ( const string* msg )
     {
@@ -172,17 +265,17 @@ void Parser::writeFSMFile(
     size_t begIdx, endIdx;
     string fileName;
     string delims    = "\\/";
-    
+
     ofstream file;
     string line = "";
-    
+
     int lineCnt = 0;
     int lineTot = 0;
-    
+
     file.open( path.c_str() );
     if ( !file.is_open() )
     {
-        string* msg = new string( 
+        string* msg = new string(
             "Error opening file for writing." );
         throw msg;
     }
@@ -197,7 +290,7 @@ void Parser::writeFSMFile(
             begIdx += 1;
         endIdx   = path.size();
         fileName = path.substr( begIdx, endIdx-begIdx );
-        
+
         // init progress
         lineCnt = 0;
         lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
@@ -205,8 +298,8 @@ void Parser::writeFSMFile(
             "Saving file",
             "Writing " + fileName,
             lineTot );
-    
-        
+
+
         // write state variable description
         {
         for ( int i = 0; i < graph->getSizeAttributes(); ++i )
@@ -249,7 +342,7 @@ void Parser::writeFSMFile(
             ++lineCnt;
         }
         }
-        
+
         // write state vectors
         line = "---\n";
         file << line;
@@ -258,11 +351,11 @@ void Parser::writeFSMFile(
         for ( int i = 0; i < graph->getSizeNodes(); ++i )
         {
             line = "";
-            
+
             for ( int j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
             {
                 line.append( Utils::dblToStr( graph->getNode(i)->getTupleVal(j) ) );
-                
+
                 if ( j < graph->getNode( i )->getSizeTuple()-1 )
                     line.append( " " );
             }
@@ -285,7 +378,7 @@ void Parser::writeFSMFile(
         for ( int i = 0; i < graph->getSizeEdges(); ++i )
         {
             line = "";
-            
+
             line.append( Utils::intToStr( graph->getEdge(i)->getInNode()->getIndex()+1 ) );
             line.append( " " );
             line.append( Utils::intToStr( graph->getEdge(i)->getOutNode()->getIndex()+1 ) );
@@ -302,7 +395,7 @@ void Parser::writeFSMFile(
             ++lineCnt;
         }
         }
-        
+
         file.close();
 
         // close progress
@@ -311,7 +404,7 @@ void Parser::writeFSMFile(
     catch ( const string* msg )
     {
         throw msg;
-    }    
+    }
 }
 
 
@@ -329,12 +422,12 @@ void Parser::parseAttrConfig(
     if ( doc.LoadFile() == true )
     {
         TiXmlElement* curNode    = NULL;
-        
+
         try
         {
-            
+
             curNode = doc.FirstChildElement();
-            
+
             if ( curNode != NULL )
             {
                 attrIdxFrTo.clear();
@@ -353,20 +446,20 @@ void Parser::parseAttrConfig(
             curNode = NULL;
 
             string* errMsg = new string( "Error loading attribute configuration." );
-            
+
             errMsg->append( "\n" );
             errMsg->append( *msg );
 
             delete msg;
             msg = NULL;
-            
+
             throw errMsg;
         }
     }
     else
     {
         string* msg = new string( "Error opening attribute configuration file." );
-        throw msg; 
+        throw msg;
     }
 }
 
@@ -392,46 +485,46 @@ void Parser::writeAttrConfig(
         TiXmlElement*     valu;
         TiXmlElement*     map;
         TiXmlElement*     pos;
-        	    
+
         // document declaration
-        decl = new TiXmlDeclaration( "1.0", "", "" );  
+        decl = new TiXmlDeclaration( "1.0", "", "" );
 	    doc.LinkEndChild( decl );
 
         // configuration
-	    conf = new TiXmlElement( "Configuration" );  
+	    conf = new TiXmlElement( "Configuration" );
 	    doc.LinkEndChild( conf );
- 
+
         // file name
-	    file = new TiXmlElement( "File" );  
+	    file = new TiXmlElement( "File" );
 	    conf->LinkEndChild( file );
         file->LinkEndChild( new TiXmlText( graph->getFileName().c_str() ) );
-        
+
         // attributes
         for ( int i = 0; i < graph->getSizeAttributes(); ++i )
         {
             attr = new TiXmlElement( "Attribute" );
             conf->LinkEndChild( attr );
-                
+
             // name
             name = new TiXmlElement( "Name" );
             attr->LinkEndChild( name );
-            name->LinkEndChild( 
-                new TiXmlText( 
+            name->LinkEndChild(
+                new TiXmlText(
                     graph->getAttribute(i)->getName().c_str() ) );
 
             // type
             type = new TiXmlElement( "Type" );
             attr->LinkEndChild( type );
-            type->LinkEndChild( 
-                new TiXmlText( 
+            type->LinkEndChild(
+                new TiXmlText(
                     graph->getAttribute(i)->getType().c_str() ) );
 
             // cardinality
             card = new TiXmlElement( "OriginalCardinality" );
             attr->LinkEndChild( card );
-            card->LinkEndChild( 
-                new TiXmlText( 
-                    Utils::intToStr( 
+            card->LinkEndChild(
+                new TiXmlText(
+                    Utils::intToStr(
                         graph->getAttribute(i)->getSizeOrigValues() ).c_str() ) );
 
             /*
@@ -445,7 +538,7 @@ void Parser::writeAttrConfig(
                 valu = new TiXmlElement( "Value" );
                 domn->LinkEndChild( valu );
                 valu->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         graph->getAttribute(i)->getOrigValue(j)->getValue().c_str() ) );
             }
             }
@@ -461,7 +554,7 @@ void Parser::writeAttrConfig(
                 valu = new TiXmlElement( "Value" );
                 domn->LinkEndChild( valu );
                 valu->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         graph->getAttribute(i)->getCurValue(j)->getValue().c_str() ) );
             }
             }
@@ -477,15 +570,15 @@ void Parser::writeAttrConfig(
                 pos = new TiXmlElement( "CurrentPosition" );
                 map->LinkEndChild( pos );
                 pos->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         Utils::intToStr(
                             graph->getAttribute(i)->mapToValue(j)->getIndex() ).c_str() ) );
             }
             }
         }
-        
+
         doc.SaveFile( path.c_str() );
-        
+
         decl = NULL;
         conf = NULL;
         file = NULL;
@@ -520,12 +613,12 @@ void Parser::parseDiagram(
     if ( doc.LoadFile() == true )
     {
         TiXmlElement* curNode    = NULL;
-        
+
         try
         {
-            
+
             curNode = doc.FirstChildElement();
-            
+
             if ( curNode != NULL )
             {
                 parseDiagram(
@@ -542,20 +635,20 @@ void Parser::parseDiagram(
             curNode = NULL;
 
             string* errMsg = new string( "Error loading diagram." );
-            
+
             errMsg->append( "\n" );
             errMsg->append( *msg );
 
             delete msg;
             msg = NULL;
-            
+
             throw errMsg;
         }
     }
     else
     {
         string* msg = new string( "Error opening diagram file." );
-        throw msg; 
+        throw msg;
     }
 }
 
@@ -581,15 +674,15 @@ void Parser::writeDiagram(
         Attribute *       attr;
 
         // document declaration
-        decl = new TiXmlDeclaration( "1.0", "", "" );  
+        decl = new TiXmlDeclaration( "1.0", "", "" );
 	    doc.LinkEndChild( decl );
 
         // configuration
-	    dgrm = new TiXmlElement( "Diagram" );  
+	    dgrm = new TiXmlElement( "Diagram" );
 	    doc.LinkEndChild( dgrm );
- 
+
         // file name
-	    file = new TiXmlElement( "File" );  
+	    file = new TiXmlElement( "File" );
 	    dgrm->LinkEndChild( file );
         file->LinkEndChild( new TiXmlText( graph->getFileName().c_str() ) );
 
@@ -602,14 +695,14 @@ void Parser::writeDiagram(
             // coordinates
             prop = new TiXmlElement( "XCenter" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getXCtr() ).c_str() ) );
 
             prop = new TiXmlElement( "YCenter" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getYCtr() ).c_str() ) );
@@ -617,14 +710,14 @@ void Parser::writeDiagram(
             // distance from center
             prop = new TiXmlElement( "XDistanceFromCenter" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getXDFC() ).c_str() ) );
 
             prop = new TiXmlElement( "YDistanceFromCenter" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getYDFC() ).c_str() ) );
@@ -632,14 +725,14 @@ void Parser::writeDiagram(
             // hinge
             prop = new TiXmlElement( "XHinge" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getXHinge() ).c_str() ) );
 
             prop = new TiXmlElement( "YHinge" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getYHinge() ).c_str() ) );
@@ -647,7 +740,7 @@ void Parser::writeDiagram(
             // angle center
             prop = new TiXmlElement( "AngleCenter" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getAngleCtr() ).c_str() ) );
@@ -657,90 +750,90 @@ void Parser::writeDiagram(
             shpe->LinkEndChild( prop );
             if ( diagram->getShape(i)->getType() == Shape::TYPE_LINE )
             {
-                prop->LinkEndChild( 
+                prop->LinkEndChild(
                     new TiXmlText( "TYPE_LINE" ) );
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_RECT )
             {
-                prop->LinkEndChild( 
+                prop->LinkEndChild(
                     new TiXmlText( "TYPE_RECT" ) );
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_ELLIPSE )
             {
-                prop->LinkEndChild( 
+                prop->LinkEndChild(
                     new TiXmlText( "TYPE_ELLIPSE" ) );
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_ARROW )
             {
-                prop->LinkEndChild( 
+                prop->LinkEndChild(
                     new TiXmlText( "TYPE_ARROW" ) );
             }
             else if ( diagram->getShape(i)->getType() == Shape::TYPE_DARROW )
             {
-                prop->LinkEndChild( 
+                prop->LinkEndChild(
                     new TiXmlText( "TYPE_DARROW" ) );
             }
-            
+
             // line width
             prop = new TiXmlElement( "LineWidth" );
             shpe->LinkEndChild( prop );
-            prop->LinkEndChild( 
+            prop->LinkEndChild(
                 new TiXmlText(
                     Utils::dblToStr(
                         diagram->getShape(i)->getLineWidth() ).c_str() ) );
-            
+
             // color line
             prop = new TiXmlElement( "LineColor" );
             shpe->LinkEndChild( prop );
-            
+
             diagram->getShape(i)->getLineColor( col );
             subp = new TiXmlElement( "Red" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.r ).c_str() ) );
             subp = new TiXmlElement( "Green" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.g ).c_str() ) );
             subp = new TiXmlElement( "Blue" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.b ).c_str() ) );
             subp = new TiXmlElement( "Alpha" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.a ).c_str() ) );
 
             // color fill
             prop = new TiXmlElement( "FillColor" );
             shpe->LinkEndChild( prop );
-            
+
             diagram->getShape(i)->getFillColor( col );
             subp = new TiXmlElement( "Red" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.r ).c_str() ) );
             subp = new TiXmlElement( "Green" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.g ).c_str() ) );
             subp = new TiXmlElement( "Blue" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.b ).c_str() ) );
             subp = new TiXmlElement( "Alpha" );
             prop->LinkEndChild( subp );
             subp->LinkEndChild(
-                new TiXmlText( 
+                new TiXmlText(
                     Utils::dblToStr( col.a ).c_str() ) );
-        
+
             // X center DOF
             prop = new TiXmlElement( "XCenterDOF" );
             shpe->LinkEndChild( prop );
@@ -750,7 +843,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFXCtr()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -760,9 +853,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFXCtr()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFXCtr()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -775,7 +868,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFYCtr()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -785,9 +878,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFYCtr()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFYCtr()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -800,22 +893,22 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFWth()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
-            
+
             {
             for ( int j = 0; j < diagram->getShape(i)->getDOFWth()->getSizeValues(); ++j )
             {
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFWth()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFWth()->getValue(j) ).c_str() ) );
             }
             }
-            
+
             // height DOF
             prop = new TiXmlElement( "HeightDOF" );
             shpe->LinkEndChild( prop );
@@ -825,7 +918,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFHgt()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -836,9 +929,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFHgt()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFHgt()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -851,7 +944,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFAgl()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -862,9 +955,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFAgl()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFAgl()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -877,7 +970,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFCol()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -887,9 +980,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFCol()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFCol()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -901,9 +994,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "AuxilaryValue" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            yValsCol[j] ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            yValsCol[j] ).c_str() ) );
             }
             }
 
@@ -916,7 +1009,7 @@ void Parser::writeDiagram(
             attr = diagram->getShape(i)->getDOFOpa()->getAttribute();
             if ( attr != NULL )
                 subp->LinkEndChild(
-                    new TiXmlText( 
+                    new TiXmlText(
                         attr->getName().c_str() ) );
             attr = NULL;
 
@@ -926,9 +1019,9 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "Value" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            diagram->getShape(i)->getDOFOpa()->getValue(j) ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            diagram->getShape(i)->getDOFOpa()->getValue(j) ).c_str() ) );
             }
             }
 
@@ -940,15 +1033,15 @@ void Parser::writeDiagram(
                 subp = new TiXmlElement( "AuxilaryValue" );
                 prop->LinkEndChild( subp );
                 subp->LinkEndChild(
-                    new TiXmlText( 
-                        Utils::dblToStr( 
-                            yValsOpa[j] ).c_str() ) );    
+                    new TiXmlText(
+                        Utils::dblToStr(
+                            yValsOpa[j] ).c_str() ) );
             }
             }
         }
 
         doc.SaveFile( path.c_str() );
-        
+
         decl = NULL;
         dgrm = NULL;
         file = NULL;
@@ -961,16 +1054,16 @@ void Parser::writeDiagram(
     {
         string* msg = new string(
             "Error saving diagram." );
-        throw msg; 
+        throw msg;
     }
 }
-    
+
 
 // -- private utility functions -------------------------------------
 
 
 // -----------------------------
-void Parser::parseStateVarDescr( 
+void Parser::parseStateVarDescr(
     const string &nextLine,
     Graph* graph )
 // -----------------------------
@@ -997,13 +1090,13 @@ void Parser::parseStateVarDescr(
             name = "unspecified";
         else
             name = token;
-        
+
         // cardinality
         begIdx = nextLine.find_first_not_of( delims, endIdx );
         endIdx = nextLine.find_first_of( delims, begIdx );
         token = nextLine.substr( begIdx, endIdx-begIdx );
         card = token;
-        
+
         // type
         begIdx = nextLine.find_first_not_of( "() ", endIdx );
         endIdx = nextLine.find_first_of( "() ", begIdx );
@@ -1019,14 +1112,14 @@ void Parser::parseStateVarDescr(
         }
         else
             type = token;
-        
+
         // domain
         if ( card != "0" )
         {
             // all domain values are specified
             begIdx = nextLine.find_first_not_of( " \"", endIdx );
             endIdx = nextLine.find_first_of( "\"", begIdx );
-        
+
             while ( endIdx != string::npos )
             {
                 token = nextLine.substr( begIdx, endIdx-begIdx );
@@ -1087,7 +1180,7 @@ void Parser::parseStateVarDescr(
 
 
 // ------------------------
-void Parser::parseStates( 
+void Parser::parseStates(
     const string &nextLine,
     Graph* graph )
 // ------------------------
@@ -1126,13 +1219,12 @@ void Parser::parseStates(
 
 
 // ---------------------------
-void Parser::parseTransitions( 
-    const int &lineNumber,
+void Parser::parseTransitions(
     const string &nextLine,
     Graph* graph )
 // ---------------------------
 // -----------------------------------------------------------------------
-// This function is used by Parser::ParseFsmFile() to parse the 
+// This function is used by Parser::ParseFsmFile() to parse the
 // transitions (third) part of an fsm file.
 // -----------------------------------------------------------------------
 {
@@ -1180,7 +1272,7 @@ void Parser::parseTransitions(
         if ( token != "\n" )
             params.push_back( token );
         */
-        graph->addEdge( 
+        graph->addEdge(
             trLbl,
             frStateIdx,
             toStateIdx );
@@ -1231,23 +1323,23 @@ void Parser::parseAttrConfig(
         {
             try
             {
-                parseAttr( 
-                    graph, 
-                    attrIdxFrTo, 
-                    attrCurDomains, 
-                    attrOrigToCurDomains, 
+                parseAttr(
+                    graph,
+                    attrIdxFrTo,
+                    attrCurDomains,
+                    attrOrigToCurDomains,
                     curNode );
             }
             catch ( const string* msg )
             {
                 string* errMsg = new string( "Error parsing attribute." );
-            
+
                 errMsg->append( "\n" );
                 errMsg->append( *msg );
 
                 delete msg;
                 msg = NULL;
-            
+
                 throw errMsg;
             }
         }
@@ -1255,14 +1347,14 @@ void Parser::parseAttrConfig(
         else
         {
             TiXmlElement* nxtNode;
-            for ( nxtNode = curNode->FirstChildElement(); 
+            for ( nxtNode = curNode->FirstChildElement();
                   nxtNode != NULL;
                   nxtNode = nxtNode->NextSiblingElement() )
             {
-                parseAttrConfig( 
-                    graph, 
-                    attrIdxFrTo, 
-                    attrCurDomains, 
+                parseAttrConfig(
+                    graph,
+                    attrIdxFrTo,
+                    attrCurDomains,
                     attrOrigToCurDomains,
                     nxtNode );
             }
@@ -1333,7 +1425,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Types do not match." ); 
+                throw new string( "Types do not match." );
             }
         }
         else
@@ -1365,7 +1457,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Cardinalities do not match." ); 
+                throw new string( "Cardinalities do not match." );
             }
         }
         else
@@ -1425,7 +1517,7 @@ void Parser::parseAttr(
         ssbp = NULL;
         throw new string( "Missing domain." );
     }
-    
+
     // update domain
     attrCurDomains.insert( pair< int, vector< string > >( attr->getIndex(), domain ) );
 
@@ -1444,8 +1536,8 @@ void Parser::parseAttr(
 
                 if ( ssbp != NULL )
                 {
-                    origToCur.insert( 
-                        pair< int, int >( 
+                    origToCur.insert(
+                        pair< int, int >(
                         valCnt, Utils::strToInt( ssbp->ToText()->Value() ) ) );
                     ++valCnt;
                 }
@@ -1487,14 +1579,14 @@ void Parser::parseDiagram(
     Diagram* dgrmOld,
     Diagram* dgrmNew,
     TiXmlElement* curNode )
-// ------------------------   
+// ------------------------
 {
     if ( curNode != NULL && curNode->Value() != NULL)
     {
         // file
         if ( strcmp( curNode->Value(), "File") == 0 )
         {
-            /* 
+            /*
             // the code below checks for matching file names
             if ( curNode->FirstChild()->ToText()->Value() != NULL )
             {
@@ -1524,13 +1616,13 @@ void Parser::parseDiagram(
             catch ( const string* msg )
             {
                 string* errMsg = new string( "Error parsing shape." );
-            
+
                 errMsg->append( "\n" );
                 errMsg->append( *msg );
 
                 delete msg;
                 msg = NULL;
-            
+
                 throw errMsg;
             }
         }
@@ -1538,7 +1630,7 @@ void Parser::parseDiagram(
         else
         {
             TiXmlElement* nxtNode;
-            for ( nxtNode = curNode->FirstChildElement(); 
+            for ( nxtNode = curNode->FirstChildElement();
                   nxtNode != NULL;
                   nxtNode = nxtNode->NextSiblingElement() )
             {
@@ -1619,7 +1711,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing y-coordinate." );
     }
-        
+
     // x distance from center
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1643,7 +1735,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing x distance from center." );
     }
-        
+
     // y distance from center
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1667,7 +1759,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing y distance from center." );
     }
-        
+
     // x hinge
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1691,7 +1783,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing x hinge." );
     }
-        
+
     // y hinge
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1715,7 +1807,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing y hinge." );
     }
-        
+
     // angle center
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1739,7 +1831,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing angle." );
     }
-        
+
     // type
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1774,7 +1866,7 @@ void Parser::parseShape(
         ssbp = NULL;
         throw new string( "Missing type." );
     }
-    
+
     // line width
     prop = prop->NextSibling();
     if ( prop != NULL &&
@@ -1806,12 +1898,12 @@ void Parser::parseShape(
     {
         // red
         subp = prop->FirstChild();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Red" ) == 0 )
         {
             ssbp = subp->FirstChild();
             if ( ssbp != NULL )
-                lineCol.r = Utils::strToDbl( ssbp->ToText()->Value() ); 
+                lineCol.r = Utils::strToDbl( ssbp->ToText()->Value() );
             else
             {
                 prop = NULL;
@@ -1830,7 +1922,7 @@ void Parser::parseShape(
 
         // green
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Green" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -1854,7 +1946,7 @@ void Parser::parseShape(
 
         // blue
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Blue" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -1878,7 +1970,7 @@ void Parser::parseShape(
 
         // alpha
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Alpha" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -1915,12 +2007,12 @@ void Parser::parseShape(
     {
         // red
         subp = prop->FirstChild();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Red" ) == 0 )
         {
             ssbp = subp->FirstChild();
             if ( ssbp != NULL )
-                fillCol.r = Utils::strToDbl( ssbp->ToText()->Value() ); 
+                fillCol.r = Utils::strToDbl( ssbp->ToText()->Value() );
             else
             {
                 prop = NULL;
@@ -1939,7 +2031,7 @@ void Parser::parseShape(
 
         // green
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Green" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -1963,7 +2055,7 @@ void Parser::parseShape(
 
         // blue
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Blue" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -1987,7 +2079,7 @@ void Parser::parseShape(
 
         // alpha
         subp = subp->NextSibling();
-        if ( subp != NULL && 
+        if ( subp != NULL &&
              strcmp( subp->Value(), "Alpha" ) == 0 )
         {
             ssbp = subp->FirstChild();
@@ -2020,7 +2112,7 @@ void Parser::parseShape(
     // init shape
     Shape* s = new Shape(
         mediator,
-        dgrmNew->getSizeShapes(), 
+        dgrmNew->getSizeShapes(),
         xCtr,   yCtr,
         xDFC,   yDFC,
         aglCtr, type );
@@ -2031,11 +2123,11 @@ void Parser::parseShape(
     // DOF's
     Attribute* attr;
     DOF*       dof;
-    
+
     int  cntVal;
     int  cntAuxCol;
     int  cntAuxOpa;
-    
+
     for ( prop = prop->NextSibling(); prop != NULL; prop = prop->NextSibling() )
     {
         attr = NULL;
@@ -2058,7 +2150,7 @@ void Parser::parseShape(
                 dof = s->getDOFCol();
             else if ( strcmp( prop->Value(), "OpacityDOF" ) == 0 )
                 dof = s->getDOFOpa();
-            
+
             if ( dof != NULL )
             {
                 // attribute
@@ -2151,7 +2243,7 @@ void Parser::parseShape(
 
             } // dof
         } // prop
-    
+
     }
 
     // add shape

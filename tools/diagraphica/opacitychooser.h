@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./opacitychooser.h
-
-// --- opacitychooser.h ---------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef OPACITYCHOOSER_H
 #define OPACITYCHOOSER_H
@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
 #include "graph.h"
 #include "utils.h"
 #include "visualizer.h"
@@ -33,8 +32,8 @@ public:
     // -- set functions ---------------------------------------------
     void setActive( const bool &flag );
     void setPoints(
-        const vector< double > &opa,
-        const vector< double > &y );
+        const std::vector< double > &opa,
+        const std::vector< double > &y );
     
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
@@ -68,7 +67,7 @@ protected:
     void drawPoints( const bool &inSelectMode );
 
     // -- utility event handlers ------------------------------------
-    void handleHits( const vector< int > &ids );
+    void handleHits( const std::vector< int > &ids );
     void handleDrag();
 
     // -- hit detection ---------------------------------------------
@@ -79,14 +78,14 @@ protected:
     // -- data members ----------------------------------------------
     bool active;
     
-    vector< double > positionsX;
-    vector< double > positionsY;
+    std::vector< double > positionsX;
+    std::vector< double > positionsY;
     int dragIdx;
 
     // vis settings
     double hdlSize;
     /*
-    vector< Position2D > positions;
+    std::vector< Position2D > positions;
     */
 };
 

@@ -1,19 +1,11 @@
-project lps2lts
-       : build-dir $(BUILD_TOP)/lps2lts
-       ;
+project lps2lts ;
 
-exe lps2lts
+tool lps2lts
        : lps2lts.cpp
          exploration.cpp
 	 lts.cpp
-         /libraries/lps//dataelm
-         /libraries//nextstate
-         /libraries//mcrl2_basic
          /libraries//trace
+         /libraries//lps
          /libraries//lts
-       : <toolset>msvc:<library>/libraries//getopt
-         <squadt-connectivity>implemented
+       : <squadt-connectivity>implemented
        ;
-
-install-binaries install
-       : lps2lts ;

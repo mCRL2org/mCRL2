@@ -1,108 +1,126 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/lps/action.h
-/// \brief Add your file description here.
+/// \brief The class action.
 
 #ifndef MCRL2_LPS_ACTION_H
 #define MCRL2_LPS_ACTION_H
 
 #include <cassert>
-#include "mcrl2/lps/action_label.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/lps/action_label.h"
+
+namespace mcrl2 {
 
 namespace lps {
 
-using atermpp::aterm_appl;
-using atermpp::term_list;
-
-///////////////////////////////////////////////////////////////////////////////
-// action
-/// \brief Represents an action
-///
+/// \brief Represents an action.
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
-class action: public aterm_appl
+class action: public atermpp::aterm_appl
 {
   protected:
+
+    /// \brief The label of the action
     action_label m_label;
-    data_expression_list m_arguments;
+
+    /// \brief The arguments of the action
+    data::data_expression_list m_arguments;
 
   public:
+    /// \brief Constructor.
     action()
-      : aterm_appl(detail::constructAction())
+      : atermpp::aterm_appl(mcrl2::core::detail::constructAction())
     {}
 
-    action(aterm_appl t)
-     : aterm_appl(t)
+    /// \brief Constructor.
+    /// \param t A term
+    action(atermpp::aterm_appl t)
+     : atermpp::aterm_appl(t)
     {
-      assert(detail::check_rule_Action(m_term));
-      aterm_appl::iterator i = t.begin();
+      assert(core::detail::check_rule_Action(m_term));
+      atermpp::aterm_appl::iterator i = t.begin();
       m_label = action_label(*i++);
-      m_arguments = data_expression_list(*i);
+      m_arguments = data::data_expression_list(*i);
     }
 
-    action(const action_label& label, const data_expression_list& arguments)
-     : aterm_appl(gsMakeAction(label, arguments)),
+    /// \brief Constructor.
+    /// \param label An action label
+    /// \param arguments A sequence of data expressions
+    action(const action_label& label, const data::data_expression_list& arguments)
+     : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
        m_label(label),
        m_arguments(arguments)
     {}
 
-    /// Returns the label of the action.
-    ///
+    /// \brief Returns the label of the action.
+    /// \return The label of the action.
     action_label label() const
     {
       return m_label;
     }
 
-    /// Returns the arguments of the action.
-    ///
-    data_expression_list arguments() const
+    /// \brief Returns the arguments of the action.
+    /// \return The arguments of the action.
+    data::data_expression_list arguments() const
     {
       return m_arguments;
     }
 
-    /// Applies a substitution to this action and returns the result.
-    /// The Substitution object must supply the method aterm operator()(aterm).
+    /// \brief Applies a low level substitution function to this term and returns the result.
+    /// \param f A
+    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
+    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
+    /// \deprecated
+    /// \return The substitution result.
     template <typename Substitution>
     action substitute(Substitution f)
     {
-      return action(f(aterm_appl(*this)));
-    }     
+      return action(f(atermpp::aterm_appl(*this)));
+    }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// action_list
-/// \brief singly linked list of actions
-typedef term_list<action> action_list;
+/// Read-only singly linked list of actions
+typedef atermpp::term_list<action> action_list;
 
-/// Returns true if the term t is an action
+/// \brief Returns true if the term t is an action
+/// \param t A term
+/// \return True if the term t is an action
 inline
-bool is_action(aterm_appl t)
+bool is_action(atermpp::aterm_appl t)
 {
-  return gsIsAction(t);
+  return core::detail::gsIsAction(t);
+}
+
+/// \brief Compares the signatures of two actions
+/// \param a An action
+/// \param b An action
+/// \return Returns true if the actions a and b have the same label, and
+/// the sorts of the arguments of a and b are equal.
+inline
+bool equal_signatures(const action& a, const action& b)
+{
+  if (a.label() != b.label())
+    return false;
+
+  const data::data_expression_list& a_args = a.arguments();
+  const data::data_expression_list& b_args = b.arguments();
+
+  if (a_args.size() != b_args.size())
+    return false;
+
+  return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
 }
 
 } // namespace lps
 
-/// INTERNAL ONLY
-namespace atermpp
-{
-using lps::action;
-
-template<>
-struct aterm_traits<action>
-{
-  typedef ATermAppl aterm_type;
-  static void protect(action t)   { t.protect(); }
-  static void unprotect(action t) { t.unprotect(); }
-  static void mark(action t)      { t.mark(); }
-  static ATerm term(action t)     { return t.term(); }
-  static ATerm* ptr(action& t)    { return &t.term(); }
-};
-
-} // namespace atermpp
+} // namespace mcrl2
 
 #endif // MCRL2_LPS_ACTION_H

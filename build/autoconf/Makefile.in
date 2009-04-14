@@ -1,8 +1,8 @@
 HOST_OS            = "@HOST_OS@"
 
 # Installation directories
-prefix             = "@PREFIX_DIR@"
-exec_prefix        = "@EXEC_PREFIX_DIR@"
+prefix             = "@prefix@"
+exec_prefix        = "@exec_prefix@"
 bindir             = "@bindir@"
 libdir             = "@libdir@"
 datadir            = "@datarootdir@"
@@ -18,49 +18,7 @@ ifeq ($(HOST_OS),WINDOWS)
 BJAM_BUILD         = build.bat runtime-link=static link=static
 endif
 
-BOOST_BUILD       := $(BJAM) --prefix=${prefix} @BUILD_EXTRA@@BUILD_VARIANT@
-
-DOCBOOK_XSL_PREFIX = "@abs_top_srcdir@/3rd-party/docbook/xsl"
-XSLTPROC           = XML_CATALOG_FILES=$(DOCBOOK_XSL_PREFIX)/catalog.xml @XSLTPROC@
-
-ifneq (@XSLTPROC@,)
-  MAN_MANIFEST      = build/bin/MAN.MANIFEST
-  INSTALL_MAN_PAGES = install-man
-endif
-
-# Creates an application bundle on Mac OS X
-.PHONY: all bjam install tools test man web
-
-all: $(BJAM) tools man
-
-install: $(BJAM) $(INSTALL_MAN_PAGES)
-	$(BOOST_BUILD) --install
-
-tools:
-	$(BOOST_BUILD)
-
-test: $(BJAM)
-	$(BJAM) ./status --preserve-test-targets
-
-$(MAN_MANIFEST): doc/*.xml
-	@cd doc; $(XSLTPROC) --stringparam man.output.subdirs.enabled 1 \
-	             --stringparam man.output.manifest.enabled 1 \
-	             --stringparam man.output.manifest.filename ../$(MAN_MANIFEST) \
-	             --stringparam man.output.in.separate.dir 1 \
-	             --stringparam man.output.base.dir ../build/man/ \
-		     $(DOCBOOK_XSL_PREFIX)/manpages/docbook.xsl index.xml
-
-man: $(MAN_MANIFEST)
-
-install-man: man
-	@install -d $(mandir)
-	@cp -rf build/man/* $(mandir)
-
-web: 
-	cd doc; $(XSLTPROC) --stringparam base.dir ../build/web/ \
-	             --stringparam html.stylesheet man.css \
-		     $(DOCBOOK_XSL_PREFIX)/html/chunk.xsl index.xml; \
-	 install -m 0644 man.css ../build/web/
+BOOST_BUILD       := $(BJAM) @BUILD_OPTIONS@
 
 # Build boost build tool
 bjam: $(BJAM)
@@ -70,6 +28,11 @@ $(BJAM):
 	@cd 3rd-party/boost/tools/jam; $(BJAM_BUILD)
 	@rm -rf 3rd-party/boost/tools/jam/bootstrap
 
+configure: build/autoconf/configure.ac
+	autoconf -o $@ -W all $<
+
 config.status: configure build/autoconf/config.jam.in
-	$(error Update to configure detected, please run: ./config.status --recheck; ./config.status)
+	@echo "Update to configure detected reconfiguring..."
+	@./config.status --recheck
+	@./config.status
 

@@ -1,22 +1,24 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./diagram.cpp
 
-// --- diagram.cpp --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "diagram.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 
 
 // -----------------
-Diagram::Diagram( 
+Diagram::Diagram(
     Mediator* m )
     : Colleague( m )
 // -----------------
@@ -42,7 +44,7 @@ Diagram::~Diagram()
     }
     shapes.clear();
 }
-	
+
 
 // -- set functions -------------------------------------------------
 
@@ -100,13 +102,13 @@ void Diagram::moveShapeForward( const size_t &idx )
     if ( 0 < idx && idx < shapes.size() )
     {
         Shape* tmp = shapes[idx];
-        
+
         shapes[idx] = shapes[idx-1];
         shapes[idx]->setIndex(idx);
-        
+
         shapes[idx-1] = tmp;
         shapes[idx-1]->setIndex(idx-1);
-        
+
         tmp = NULL;
     }
 }
@@ -122,10 +124,10 @@ void Diagram::moveShapeBackward( const size_t &idx )
 
         shapes[idx] = shapes[idx+1];
         shapes[idx]->setIndex(idx);
-        
+
         shapes[idx+1] = tmp;
         shapes[idx+1]->setIndex(idx+1);
-        
+
         tmp = NULL;
     }
 }
@@ -146,7 +148,7 @@ void Diagram::setSnapGrid( const bool &flag )
     snapGrid = flag;
 }
 
-    
+
 // -- get functions -------------------------------------------------
 
 
@@ -163,9 +165,9 @@ Shape* Diagram::getShape( const size_t &idx )
 // ---------------------------------------
 {
     Shape* result = NULL;
-	if ( 0 <= idx && idx < shapes.size() )
-		result = shapes[idx];
-	return result;
+    if ( 0 <= idx && idx < shapes.size() )
+	result = shapes[idx];
+    return result;
 }
 
 
@@ -184,12 +186,12 @@ double Diagram::getGridInterval( GLCanvas* canvas )
     double numIntervals = GRID_NUM_INTERV_HINT;
     double sizeInterval;
     double pix;
-    
+
     // get pixel size
     pix = canvas->getPixelSize();
-    
+
     sizeInterval = (2.0-(2.0*pix*SIZE_BORDER))/(double)numIntervals;
-        
+
     return sizeInterval;
 }
 
@@ -200,8 +202,18 @@ double Diagram::getAngleInterval()
 {
     double numIntervals = ANGL_NUM_INTERV_HINT;
     double sizeInterval = 360.0/(double)numIntervals;
-    
+
     return sizeInterval;
+}
+
+// -------------------------------
+void Diagram::getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom)
+// -------------------------------
+{
+    xLeft = gridXLeft;
+    xRight = gridXRight;
+    yTop = gridYTop;
+    yBottom = gridYBottom;
 }
 
 
@@ -219,7 +231,6 @@ void Diagram::deleteShape( const size_t &idx )
         shapes.erase( shapes.begin()+idx );
         delete s;
         s = NULL;
-
         // update indices
         for ( size_t i = idx; i < shapes.size(); ++i )
             shapes[i]->setIndex( i );
@@ -231,7 +242,7 @@ void Diagram::deleteShape( const size_t &idx )
 
 
 // ------------------------------------------------
-void Diagram::visualize( 
+void Diagram::visualize(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ------------------------------------------------
@@ -258,12 +269,39 @@ void Diagram::visualize(
 // ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
+    {
         drawBorderFlush( inSelectMode, canvas );
+    }
     else
     {
         drawBorderFlush( inSelectMode, canvas );
         for ( size_t i = 0; i < shapes.size(); ++i )
             shapes[i]->visualize( canvas, attrs, attrValIdcs );
+    }
+}
+
+
+// ----------------------------------
+void Diagram::visualize(
+    const bool &inSelectMode,
+    GLCanvas* canvas,
+    const vector< Attribute* > attrs,
+    const vector< double > attrValIdcs,
+    const double &pix )
+// ----------------------------------
+// ------------------------------------------------------------------
+// Used by visualizers.
+// ------------------------------------------------------------------
+{
+    if ( inSelectMode == true )
+    {
+        drawBorderFlush( inSelectMode, canvas );
+    }
+    else
+    {
+        drawBorderFlush( inSelectMode, canvas );
+        for ( size_t i = 0; i < shapes.size(); ++i )
+            shapes[i]->visualize( canvas, attrs, attrValIdcs, pix );
     }
 }
 
@@ -281,7 +319,9 @@ void Diagram::visualize(
 // ------------------------------------------------------------------
 {
     if ( inSelectMode == true )
+    {
         drawBorderFlush( inSelectMode, canvas );
+    }
     else
     {
         drawBorderFlush( inSelectMode, canvas, opacity );
@@ -304,7 +344,7 @@ void Diagram::initGridSettings()
 
 
 // --------------------------
-void Diagram::drawAxes( 
+void Diagram::drawAxes(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // --------------------------
@@ -312,20 +352,20 @@ void Diagram::drawAxes(
     if ( inSelectMode != true )
     {
         double pix = canvas->getPixelSize();
-        
+
         VisUtils::setColorMdGray();
-        VisUtils::drawLine(  
+        VisUtils::drawLine(
             0.0,                 0.0,
             1.0-pix*SIZE_BORDER, -1+pix*SIZE_BORDER );
-        VisUtils::drawLine( 
-            -1.0+pix*SIZE_BORDER, 1-pix*SIZE_BORDER, 
-            0.0,                  0.0 );    
+        VisUtils::drawLine(
+            -1.0+pix*SIZE_BORDER, 1-pix*SIZE_BORDER,
+            0.0,                  0.0 );
     }
 }
 
 
 // --------------------------
-void Diagram::drawBorder( 
+void Diagram::drawBorder(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // --------------------------
@@ -337,7 +377,7 @@ void Diagram::drawBorder(
 
         // get pixel size
         pix = canvas->getPixelSize();
-    
+
         // calc margins
         xLft = -1.0 + pix*SIZE_BORDER;
         xRgt =  1.0 - pix*SIZE_BORDER;
@@ -354,7 +394,7 @@ void Diagram::drawBorder(
 
         // get pixel size
         pix = canvas->getPixelSize();
-    
+
         // calc margins
         xLft = -1.0 + pix*SIZE_BORDER;
         xRgt =  1.0 - pix*SIZE_BORDER;
@@ -372,7 +412,7 @@ void Diagram::drawBorder(
 
 
 // ---------------------------
-void Diagram::drawBorderFlush( 
+void Diagram::drawBorderFlush(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // ---------------------------
@@ -392,7 +432,7 @@ void Diagram::drawBorderFlush(
 
 
 // ---------------------------
-void Diagram::drawBorderFlush( 
+void Diagram::drawBorderFlush(
     const bool &inSelectMode,
     GLCanvas* canvas,
     const double &opacity )
@@ -423,7 +463,7 @@ void Diagram::drawBorderFlush(
 
 
 // --------------------------
-void Diagram::drawGrid( 
+void Diagram::drawGrid(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // --------------------------
@@ -437,32 +477,37 @@ void Diagram::drawGrid(
 
         // get pixel size
         pix = canvas->getPixelSize();
-    
+
         // calc margins
         xLft = -1.0 + pix*SIZE_BORDER;
         xRgt =  1.0 - pix*SIZE_BORDER;
         yTop =  1.0 - pix*SIZE_BORDER;
         yBot = -1.0 + pix*SIZE_BORDER;
-        
+
+	gridXLeft = xLft;
+	gridXRight = xRgt;
+	gridYTop = yTop;
+	gridYBottom = yBot;
+
         sizeInterval = (2.0-(2.0*pix*SIZE_BORDER)-2.0*pix)/(double)numIntervals;
-        
+
         VisUtils::setColorLtGray();
         // draw inside out
         for ( int i = 0; i < numIntervals/2; ++i )
         {
             // vertical
-            VisUtils::drawLine( 
-                -i*sizeInterval,          -i*sizeInterval, 
+            VisUtils::drawLine(
+                -i*sizeInterval,          -i*sizeInterval,
                  1.0-pix*SIZE_BORDER-pix, -1.0+pix*SIZE_BORDER+pix );
-            VisUtils::drawLine(  
-                 i*sizeInterval,           i*sizeInterval, 
+            VisUtils::drawLine(
+                 i*sizeInterval,           i*sizeInterval,
                  1.0-pix*SIZE_BORDER-pix, -1.0+pix*SIZE_BORDER+pix );
             // horizontal
-            VisUtils::drawLine( 
-                -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix,  
+            VisUtils::drawLine(
+                -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix,
                  i*sizeInterval,           i*sizeInterval );
-            VisUtils::drawLine( 
-                -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix, 
+            VisUtils::drawLine(
+                -1.0+pix*SIZE_BORDER+pix,  1.0-pix*SIZE_BORDER-pix,
                 -i*sizeInterval,          -i*sizeInterval );
         }
     }
@@ -470,11 +515,12 @@ void Diagram::drawGrid(
 
 
 // --------------------------
-void Diagram::drawShapes( 
+void Diagram::drawShapes(
     const bool &inSelectMode,
     GLCanvas* canvas )
 // --------------------------
 {
+
     if ( inSelectMode == true )
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
@@ -487,8 +533,11 @@ void Diagram::drawShapes(
     else
     {
         for ( size_t i = 0; i < shapes.size(); ++i )
+        {
             shapes[i]->visualize( inSelectMode, canvas );
+        }
     }
+
 }
 
 

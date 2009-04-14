@@ -1,36 +1,11 @@
-project aterm
-       : source-location ../source
-       : build-dir $(BUILD_TOP)
+project atermpp
+       : source-location ..
        ;
 
-alias atermpp.main
+mcrl2-library atermpp
        :
-       : <use>/boost//headers
-         <use>/libraries/aterm//headers
-       :
-       : <use>/boost//headers
-       ;
-
-alias atermpp
-       : atermpp.main
-       : <link>static
-       :
-       : <dependency>/libraries//aterm
-       ;
-
-alias atermpp
-       : /libraries//mcrl2
-       : <link>shared
+       : <library>/libraries//aterm
        :
        : <include>../include
+         <use>/site-config//boost
        ;
-
-alias headers
-       :
-       :
-       :
-       : <include>../include
-         <use>/libraries/aterm//headers
-       ;
-
-explicit atermpp.main ;

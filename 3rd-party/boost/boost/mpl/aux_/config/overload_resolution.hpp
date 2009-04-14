@@ -10,15 +10,15 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/aux_/config/overload_resolution.hpp,v $
-// $Date: 2004/09/02 15:40:45 $
-// $Revision: 1.9 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #include <boost/mpl/aux_/config/workaround.hpp>
 
 #if    !defined(BOOST_MPL_CFG_BROKEN_OVERLOAD_RESOLUTION) \
     && !defined(BOOST_MPL_PREPROCESSING_MODE) \
-    && (   BOOST_WORKAROUND(__BORLANDC__, < 0x600) \
+    && (   BOOST_WORKAROUND(__BORLANDC__, < 0x590) \
         || BOOST_WORKAROUND(__MWERKS__, < 0x3001) \
         )
 

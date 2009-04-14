@@ -2,7 +2,7 @@
 % each state i has transitions to all states 1,...,i+1.
 % This means its transitions go maximally back to
 % already detected states, and only one transition
-% goes to a new state (i.e. i+1) when doing a bread
+% goes to a new state (i.e. i+1) when doing a breadth
 % first search.
 
 % Jan Friso Groote, September 3, 2006.
@@ -12,6 +12,6 @@ act a;
 map N:Pos;
 eqn N=1000;
 
-proc X(i:Pos)=sum j:Pos.(j<=i+1 && j<=N)->a.X(j);
+proc X(i:Pos)=sum j:Pos.(j<=i+1 && j<=N)->a.X(j)<>delta;
 
 init X(1);

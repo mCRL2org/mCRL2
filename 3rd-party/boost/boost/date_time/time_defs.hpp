@@ -4,9 +4,9 @@
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
  * Use, modification and distribution is subject to the 
  * Boost Software License, Version 1.0. (See accompanying
- * file LICENSE-1.0 or http://www.boost.org/LICENSE-1.0)
+ * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland 
- * $Date: 2003/11/23 03:31:27 $
+ * $Date: 2008-11-01 11:34:04 +0100 (Sat, 01 Nov 2008) $
  */
 
 
@@ -20,7 +20,17 @@ namespace boost {
 namespace date_time {
 
   //!Defines some nice types for handling time level resolutions
-  enum time_resolutions {sec, tenth, hundreth, milli, ten_thousandth, micro, nano, NumResolutions };
+  enum time_resolutions {
+    sec,
+    tenth,
+    hundreth, // deprecated misspelled version of hundredth
+    hundredth = hundreth,
+    milli,
+    ten_thousandth,
+    micro,
+    nano,
+    NumResolutions
+  };
 
   //! Flags for daylight savings or summer time
   enum dst_flags {not_dst, is_dst, calculate};

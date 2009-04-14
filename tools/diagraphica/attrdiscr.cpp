@@ -1,19 +1,20 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./attrdiscr.cpp
 
-// --- attrdiscr.cpp ------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "attrdiscr.h"
 
-
 // -- constructors and destructor -----------------------------------
 
+using namespace std;
 
 // -------------------------------
 AttrDiscr::AttrDiscr(
@@ -157,8 +158,8 @@ void AttrDiscr::clusterValues(
 
 // -----------------------
 void AttrDiscr::moveValue(
-    const int &idxFr,
-    const int &idxTo )
+    const size_t &idxFr,
+    const size_t &idxTo )
 // -----------------------
 {
     try
@@ -169,7 +170,7 @@ void AttrDiscr::moveValue(
         if ( idxFr < idxTo )
         {
             // move all values after idxFr 1 pos up
-            for ( int i = idxFr; i < idxTo; ++i )
+            for ( size_t i = idxFr; i < idxTo; ++i )
             {
                 curValues[i] = curValues[i+1];
                 curValues[i]->setIndex( i );
@@ -181,7 +182,7 @@ void AttrDiscr::moveValue(
         else if ( idxTo < idxFr )
         {
             // move all values before idxFr 1 pos down
-            for ( int i = idxFr; i > idxTo; --i )
+            for ( size_t i = idxFr; i > idxTo; --i )
             {
                 curValues[i] = curValues[i-1];
                 curValues[i]->setIndex( i );

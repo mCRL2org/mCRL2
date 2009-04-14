@@ -1,5 +1,5 @@
 % This is an MCRL2 description of a chatbox provided by Judi Romijn. Users can
-% JOIN and LEAVE a discussion, and if joined can send each other 
+% JOIN and LEAVE a discussion, and if joined can send each other
 % messages and acknowledgements. The system has exactly 2^16 states.
 
 % In this description the JOIN, LEAVE and DREQ actions have been hidden.
@@ -17,7 +17,7 @@ proc	Chatbox(pres0: Bool, pres1: Bool, pres2: Bool, pres3: Bool,
                 sentto10: Bool, sentto12: Bool, sentto13: Bool,
                 sentto20: Bool, sentto21: Bool, sentto23: Bool,
                 sentto30: Bool, sentto31: Bool, sentto32: Bool)
-        = 
+        =
 	   pres0 -> JOIN(0,NO_OUTPUT) . Chatbox(pres0, pres1, pres2, pres3,
                                        sentto01, sentto02, sentto03,
                                        sentto10, sentto12, sentto13,

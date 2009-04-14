@@ -1,19 +1,19 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./frame.h
-
-// --- frame.h ------------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef FRAME_H
 #define FRAME_H
 
 #include <cstddef>
 #include <string>
-using namespace std;
+#include <vector>
 #include <wx/wx.h>
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
@@ -26,6 +26,7 @@ using namespace std;
 #include "dof.h"
 #include "droptarget.h"
 #include "glcanvas.h"
+#include "graph.h"
 #include "partitionframe.h"
 #include "popupframe.h"
 #include "settingsframe.h"
@@ -35,75 +36,84 @@ class Frame : public Colleague, public wxFrame
 {
 public:
     // -- constructors and destructors ------------------------------
-    Frame( 
+    Frame(
         Mediator* m,
         wxString title );
     virtual ~Frame();
 
     // -- set functions ---------------------------------------------
-    void setTitleText( const string &msg );
-    void setStatusText( const string &msg );
-    void setOutputText( const string &msg );
-    void appOutputText( const string &msg );
-    
+    void setTitleText( const std::string &msg );
+    void setStatusText( const std::string &msg );
+    void setOutputText( const std::string &msg );
+    void appOutputText( const std::string &msg );
+    void enableEditMode( const bool &enable);
+
     void setFileOptionsActive();
     void setEditModeSelect();
+    void setEditModeNote();
     void setEditModeDOF();
 
+    void setDOFColorSelected();
+	void setDOFOpacitySelected();
+
     // -- display functions -----------------------------------------
+    void handleNote( const int &shapeId, const std::string &msg );
+    void handleTextSize( const int &shapeId, const int &textSize );
     void displNumNodes( const int &val );
     void displNumEdges( const int &val );
-    void displAttrInfo( 
-        const vector< int > &indices,
-        const vector< string > &names,
-        const vector< string > &types,
-        const vector< int > &cards,
-        const vector< string > &range );
+    void displAttrInfo(
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names,
+        const std::vector< std::string > &types,
+        const std::vector< int > &cards,
+        const std::vector< std::string > &range );
     void displAttrInfo(
         const int &selectIdx,
-        const vector< int > &indices,
-        const vector< string > &names,
-        const vector< string > &types,
-        const vector< int > &cards,
-        const vector< string > &range );
-    void displDomainInfo( 
-        const vector< int > &indices,
-        const vector< string > &values,
-        const vector< int > &number,
-        const vector< double > &perc );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names,
+        const std::vector< std::string > &types,
+        const std::vector< int > &cards,
+        const std::vector< std::string > &range );
+    void displDomainInfo(
+        const std::vector< int > &indices,
+        const std::vector< std::string > &values,
+        const std::vector< int > &number,
+        const std::vector< double > &perc );
     void clearDomainInfo();
-    
+
     void displShapeMenu(
         const bool &cut,
         const bool &copy,
         const bool &paste,
         const bool &clear,
-        const bool &bringToFront, 
+        const bool &bringToFront,
         const bool &sendToBack,
-        const bool &bringForward, 
+        const bool &bringForward,
         const bool &sendBackward,
-        const bool &editDOF );
+        const bool &editDOF,
+        const int  &checkedItemId );
+    void displClusterMenu();
     void displDgrmMenu(
         const bool &sendSglToSiml,
         const bool &sendSglToTrace,
         const bool &sendSetToTrace,
         const bool &sendSglToExnr,
         const bool &sentSetToExnr );
-    
+
     void displDOFInfo(
-        const vector< int > &degsOfFrdmIndcs,
-        const vector< string > &degsOfFrdm,
-        const vector< string > &attrNames,
+        const std::vector< int > &degsOfFrdmIndcs,
+        const std::vector< std::string > &degsOfFrdm,
+        const std::vector< std::string > &attrNames,
         const int &selIdx );
     void clearDOFInfo();
 
     void displClustMenu();
     void displAttrInfoClust(
-        const vector< int > &indices,
-        const vector< string > &names );
+        const std::vector< int > &indices,
+        const std::vector< std::string > &names );
 
-    void displAttrInfoPart( 
-        string attrName,
+    void displAttrInfoPart(
+        std::string attrName,
         int minParts,
         int maxParts,
         int curParts );
@@ -120,7 +130,7 @@ public:
         const int &tgtId,
         const int &tgtX,
         const int &tgtY,
-        const vector< int > &data );
+        const std::vector< int > &data );
 
     void closePopupFrames();
     void handleCloseFrame( PopupFrame* f );
@@ -136,12 +146,12 @@ public:
     GLCanvas* getCanvasCombn();
     GLCanvas* getCanvasColDOF();
     GLCanvas* getCanvasOpaDOF();
-    
+
     // -- clear functions -------------------------------------------
     void clearOuput();
 
     // -- overloaded operators --------------------------------------
-    void operator<<( const string &msg );
+    void operator<<( const std::string &msg );
 
 private:
     // -- GUI initialization ----------------------------------------
@@ -149,11 +159,11 @@ private:
     void initIcon();            // 1
     void initMenuBar();         // 1
     void initSplitterFrame();   // 1
-    
+
     void initSplitterLft();     // 2
-    
+
     void initSplitterTopLft();  // 3
-    
+
     void initPanelTopTopLft();  // 4
     void initLabelsGraphInfo(); // 5
     void initListCtrlAttr();    // 5
@@ -164,37 +174,41 @@ private:
 
     void initPanelBotLft();     // 3
     void initTextCtrl();        // 4
-    
+
     void initSplitterRgt();     // 2
     void initSplitterTopRgt();  // 3
-    
+
     void initPanelTopRgt();     // 3
     void initCanvasOne();       // 4
     void initToolbarEdit();     // 4
-    
+
     void initSplitterBotRgt();  // 3
 
-    void initPanelLftBotRgt();  // 4
+    void initPanelBotRgt();  // 4
     void initCanvasTwo();       // 5
     void initPanelRgtBotRgt();  // 4
     void initCanvasThree();     // 5
 
-    void initAboutFrame();      // 1
-    
+//    void initAboutFrameOld();   // 1
+
     void initFrameSettings();
     void initFramePartition(
         wxString attrName,
         int minParts,
         int maxParts,
         int curParts );
-    
+
     void initFrameDOF();
+    void initFrameNote();
+    void initFrameTextSize();
     void initPanelDOF();
+    void initPanelNote();
     void initListCtrlDOF();
     void initTextOptionsDOF();
     void initCanvasColDOF();
     void initCanvasOpaDOF();
-    
+    void initNoteButtons();
+
     void initFramePlot();
     void initPanelPlot();
     void initCanvasPlot();
@@ -203,17 +217,19 @@ private:
     void initPanelClust();
     void initListCtrlClust();
     void initButtonsClust();
-    
+
     // -- event handlers --------------------------------------------
     void onMenuBar( wxCommandEvent &e );
     void onListCtrlSelect( wxListEvent &e );
     void onListCtrlBeginDrag( wxListEvent &e );
     void onListCtrlRgtClick( wxListEvent &e );
     void onPopupMenu( wxCommandEvent &e );
+    void onClusterMenu( wxCommandEvent &e );
     void onTool( wxCommandEvent &e );
     void onButton( wxCommandEvent &e );
     void onRadioBox( wxCommandEvent &e );
-    
+    void onSplitterDoubleClick( wxSplitterEvent &e);
+
     // -- menu bar --------------------------------------------------
     wxMenuBar* menuBar;
     wxMenu*    fileMenu;
@@ -228,11 +244,16 @@ private:
     wxBoxSizer*       sizerFrame;
     wxSplitterWindow* splitterFrame;
 
+    // -- note -----------------------------------------------------
+    int			  	  currentShapeId;
+    std::string			  currentShapeNote;
+    int				  currentTextSize;
+
     // -- left panel ------------------------------------------------
     wxSplitterWindow* splitterLft;
 
     wxSplitterWindow* splitterTopLft;
-    
+
     wxBoxSizer*       sizerTopTopLft;
     wxScrolledWindow* panelTopTopLft;
     wxStaticText*     lblNumNodes;
@@ -240,7 +261,7 @@ private:
     wxListCtrl*       listCtrlAttr;
     wxButton*         buttonClustAttr;
     wxButton*         buttonTraceAttr;
-    
+
     wxBoxSizer*       sizerBotTopLft;
     wxScrolledWindow* panelBotTopLft;
     wxListCtrl*       listCtrlDomain;
@@ -248,42 +269,51 @@ private:
     wxBoxSizer*       sizerBotLft;
     wxScrolledWindow* panelBotLft;
     GLCanvas*         canvasThree;
-    
+
     // -- right panel -----------------------------------------------
     wxSplitterWindow* splitterRgt;
     double            sashRatioRgt;
-    
+    double	      sashRatioLft;
+
     wxBoxSizer*       sizerTopRgt;
     wxScrolledWindow* panelTopRgt;
     GLCanvas*         canvasOne;
     wxToolBar*        toolBarEdit;
 
-    wxSplitterWindow* splitterBotRgt;
-    
-    wxBoxSizer*       sizerLftBotRgt;
-    wxScrolledWindow* panelLftBotRgt;
+
+    wxBoxSizer*       sizerBotRgt;
+    wxScrolledWindow* panelBotRgt;
     GLCanvas*         canvasTwo;
-    
+
     wxBoxSizer*       sizerRgtBotRgt;
     wxScrolledWindow* panelRgtBotRgt;
     wxTextCtrl*       textCtrl;
-    
+
     // -- settings frame --------------------------------------------
     SettingsFrame*    frameSettings;
 
     // -- partition frame -------------------------------------------
     PartitionFrame*   framePartition;
-    
+
     // -- DOF frame -------------------------------------------------
     PopupFrame*       frameDOF;
+    PopupFrame*	      frameNote;
+    PopupFrame*	      frameTextSize;
     wxBoxSizer*       sizerFrameDOF;
+    wxBoxSizer*       sizerFrameNote;
     wxScrolledWindow* panelDOF;
+    wxScrolledWindow* panelNote;
     wxBoxSizer*       sizerDOF;
+    wxBoxSizer*       sizerNote;
+    wxBoxSizer*       sizerTextSize;
+    wxTextCtrl*	      noteText;
+    wxComboBox*	      textSizeBox;
     wxListCtrl*       listCtrlDOF;
     wxRadioBox*       radioBoxTextDOF;
     GLCanvas*         canvasColDOF;
     GLCanvas*         canvasOpaDOF;
-    
+    bool	      dofMenu;
+
     // -- Plot frame ------------------------------------------------
     PopupFrame*       framePlot;
     wxBoxSizer*       sizerFramePlot;
@@ -300,8 +330,13 @@ private:
     wxButton*         buttonOKClust;
 
     // -- about frame -----------------------------------------------
-    wxFrame*          frameAbout;
-    
+    wxFrame*	frameAbout;
+
+    // -- menus -----------------------------------------------------
+    wxMenu	*addAttributeMenu;
+    wxMenu	*showVariableMenu;
+    wxMenu      *clustMenu;
+
     // -- ID's ------------------------------------------------------
     enum
     {
@@ -341,9 +376,10 @@ private:
         ID_CANVAS_MAIN,
         ID_TOOL_BAR_EDIT,
         ID_TOOL_SELECT,
+        ID_TOOL_NOTE,
         ID_TOOL_DOF,
         ID_TOOL_RECT,
-        ID_TOOL_ELLIPSE,             
+        ID_TOOL_ELLIPSE,
         ID_TOOL_LINE,
         ID_TOOL_ARROW,
         ID_TOOL_DARROW,
@@ -355,18 +391,24 @@ private:
         ID_SPLITTER_BOT_RGT,
         ID_PANEL_LFT_BOT_RGT,
         ID_CANVAS_LFT,
-        ID_PANEL_RGT_BOT_RGT,
+        ID_PANEL_BOT_RGT,
         ID_CANVAS_RGT,
-        
+
         ID_FRAME_SETTINGS,
         ID_FRAME_PARTITION,
         ID_FRAME_DOF,
+        ID_FRAME_NOTE,
+	ID_FRAME_TEXT_SIZE,
         ID_PANEL_DOF,
+   	ID_ADD_BUTTON_NOTE,
+   	ID_CLEAR_BUTTON_NOTE,
+	ID_OK_BUTTON_TEXT_SIZE,
         ID_LIST_CTRL_DOF,
         ID_RADIO_BOX_TEXT_DOF,
         ID_CANVAS_COL_DOF,
         ID_CANVAS_OP_DOF,
         ID_MENU_ITEM_DOF_UNLINK,
+        ID_MENU_ITEM_DOF_ATTRIBUTE_LIST,
         ID_FRAME_PLOT,
         ID_PANEL_PLOT,
         ID_CANVAS_PLOT,
@@ -389,6 +431,10 @@ private:
         ID_PANEL_CLUST,
         ID_LIST_CTRL_CLUST,
         ID_BUTTON_OK_CLUST,
+	ID_MENU_ITEM_CLUSTER,
+        ID_MENU_ITEM_SHOW_VARIABLES,
+        ID_MENU_ITEM_SHOW_NOTE,
+	ID_MENU_ITEM_TEXT_SIZE,
         ID_MENU_ITEM_SHAPE_CUT,
         ID_MENU_ITEM_SHAPE_COPY,
         ID_MENU_ITEM_SHAPE_PASTE,
@@ -405,7 +451,7 @@ private:
         ID_MENU_ITEM_DGRM_SET_TO_EXNR,
         ID_MENU_ITEM_EXNR_CLEAR,
 
-        ID_BUTTON_ABOUT,
+        ID_BUTTON_ABOUT
     };
 
     // -- declare event table ---------------------------------------

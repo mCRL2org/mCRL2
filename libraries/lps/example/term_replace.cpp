@@ -1,4 +1,6 @@
 // Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -8,14 +10,14 @@
 /// \brief Add your file description here.
 
 #include <cassert>
-#include "atermpp/algorithm.h"     // replace
-#include "atermpp/make_list.h"
-#include "atermpp/substitute.h"
+#include "mcrl2/atermpp/algorithm.h"     // replace
+#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/data.h"
 
 using namespace atermpp;
-using namespace lps;
-using namespace lps::data_expr;
+using namespace mcrl2::data;
+using namespace mcrl2::data::data_expr;
 
 // replace d with d0
 aterm_appl replace_d_d0(aterm_appl t)
@@ -34,20 +36,16 @@ struct replace_variables
   replace_variables(const data_variable& src_, const data_variable& dest_)
     : src(src_), dest(dest_)
   {}
-  
+
   aterm_appl operator()(aterm_appl t)
   {
     return atermpp::replace(t, src, dest);
   }
 };
 
-int main()
+int main(int argc, char* argv[])
 {
-  using namespace lps::data_expr;
-
-  aterm bottom_of_stack;
-  aterm_init(bottom_of_stack);
-  gsEnableConstructorFunctions();
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   data_variable d("d:D");
   data_variable d0("d0:D");
@@ -74,9 +72,9 @@ int main()
 
   // replace using the predefined function object for lists
   data_variable_list src  = make_list(d, e);
-  data_variable_list dest = make_list(d0, e0); 
+  data_variable_list dest = make_list(d0, e0);
   t = d_e.substitute(make_list_substitution(src, dest));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   // use atermpp::replace directly
   t = atermpp::replace(d_e, d, d0);
@@ -91,7 +89,7 @@ int main()
   data_assignment b(e, e0);
   data_assignment_list l = make_list(a, b);
   t = d_e.substitute(assignment_list_substitution(l));
-  assert(t == d0_e0); 
+  assert(t == d0_e0);
 
   return 0;
 }

@@ -1,5 +1,5 @@
 
-// Copyright 2005-2007 Daniel James.
+// Copyright 2005-2008 Daniel James.
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
@@ -10,14 +10,10 @@
 #if !defined(BOOST_FUNCTIONAL_HASH_HASH_HPP)
 #define BOOST_FUNCTIONAL_HASH_HASH_HPP
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
-# pragma once
-#endif
-
 #include <boost/functional/hash_fwd.hpp>
 #include <functional>
-#include <boost/functional/detail/hash_float.hpp>
-#include <boost/functional/detail/container_fwd.hpp>
+#include <boost/functional/hash/detail/hash_float.hpp>
+#include <boost/detail/container_fwd.hpp>
 #include <string>
 
 #if defined(BOOST_NO_TEMPLATE_PARTIAL_SPECIALIZATION)
@@ -34,20 +30,24 @@
 
 namespace boost
 {
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
-    // Borland complains about an ambiguous function overload
-    // when compiling boost::hash<bool>.
     std::size_t hash_value(bool);
-#endif
-    
+    std::size_t hash_value(char);
+    std::size_t hash_value(unsigned char);
+    std::size_t hash_value(signed char);
+    std::size_t hash_value(short);
+    std::size_t hash_value(unsigned short);
     std::size_t hash_value(int);
     std::size_t hash_value(unsigned int);
     std::size_t hash_value(long);
     std::size_t hash_value(unsigned long);
 
+#if !defined(BOOST_NO_INTRINSIC_WCHAR_T)
+    std::size_t hash_value(wchar_t);
+#endif
+    
 #if defined(BOOST_HAS_LONG_LONG)
-    std::size_t hash_value(long long);
-    std::size_t hash_value(unsigned long long);
+    std::size_t hash_value(boost::long_long_type);
+    std::size_t hash_value(boost::ulong_long_type);
 #endif
 
 #if !BOOST_WORKAROUND(__DMC__, <= 0x848)
@@ -58,10 +58,10 @@ namespace boost
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
     template< class T, unsigned N >
-    std::size_t hash_value(const T (&array)[N]);
+    std::size_t hash_value(const T (&x)[N]);
 
     template< class T, unsigned N >
-    std::size_t hash_value(T (&array)[N]);
+    std::size_t hash_value(T (&x)[N]);
 #endif
 
     std::size_t hash_value(float v);
@@ -137,12 +137,35 @@ namespace boost
         }
     }
 
-#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x551))
     inline std::size_t hash_value(bool v)
     {
         return static_cast<std::size_t>(v);
     }
-#endif
+
+    inline std::size_t hash_value(char v)
+    {
+        return static_cast<std::size_t>(v);
+    }
+
+    inline std::size_t hash_value(unsigned char v)
+    {
+        return static_cast<std::size_t>(v);
+    }
+
+    inline std::size_t hash_value(signed char v)
+    {
+        return static_cast<std::size_t>(v);
+    }
+
+    inline std::size_t hash_value(short v)
+    {
+        return static_cast<std::size_t>(v);
+    }
+
+    inline std::size_t hash_value(unsigned short v)
+    {
+        return static_cast<std::size_t>(v);
+    }
 
     inline std::size_t hash_value(int v)
     {
@@ -164,13 +187,20 @@ namespace boost
         return static_cast<std::size_t>(v);
     }
 
+#if !defined(BOOST_NO_INTRINSIC_WCHAR_T)
+    inline std::size_t hash_value(wchar_t v)
+    {
+        return static_cast<std::size_t>(v);
+    }
+#endif
+
 #if defined(BOOST_HAS_LONG_LONG)
-    inline std::size_t hash_value(long long v)
+    inline std::size_t hash_value(boost::long_long_type v)
     {
         return hash_detail::hash_value_signed(v);
     }
 
-    inline std::size_t hash_value(unsigned long long v)
+    inline std::size_t hash_value(boost::ulong_long_type v)
     {
         return hash_detail::hash_value_unsigned(v);
     }
@@ -185,6 +215,7 @@ namespace boost
     {
         std::size_t x = static_cast<std::size_t>(
            reinterpret_cast<std::ptrdiff_t>(v));
+
         return x + (x >> 3);
     }
 
@@ -250,15 +281,15 @@ namespace boost
 
 #if !defined(BOOST_NO_FUNCTION_TEMPLATE_ORDERING)
     template< class T, unsigned N >
-    inline std::size_t hash_value(const T (&array)[N])
+    inline std::size_t hash_value(const T (&x)[N])
     {
-        return hash_range(array, array + N);
+        return hash_range(x, x + N);
     }
 
     template< class T, unsigned N >
-    inline std::size_t hash_value(T (&array)[N])
+    inline std::size_t hash_value(T (&x)[N])
     {
-        return hash_range(array, array + N);
+        return hash_range(x, x + N);
     }
 #endif
 
@@ -438,10 +469,17 @@ namespace boost
     struct hash<T*>
         : public std::unary_function<T*, std::size_t>
     {
-        std::size_t operator()(T* v) const \
-        { \
-            return boost::hash_value(v); \
-        } \
+        std::size_t operator()(T* v) const
+        {
+#if !BOOST_WORKAROUND(__SUNPRO_CC, <= 0x590)
+            return boost::hash_value(v);
+#else
+            std::size_t x = static_cast<std::size_t>(
+                reinterpret_cast<std::ptrdiff_t>(v));
+
+            return x + (x >> 3);
+#endif
+        }
     };
 #else
     namespace hash_detail
@@ -458,7 +496,14 @@ namespace boost
             {
                 std::size_t operator()(T val) const
                 {
+#if !BOOST_WORKAROUND(__SUNPRO_CC, <= 590)
                     return boost::hash_value(val);
+#else
+                    std::size_t x = static_cast<std::size_t>(
+                        reinterpret_cast<std::ptrdiff_t>(val));
+
+                    return x + (x >> 3);
+#endif
                 }
             };
         };
@@ -473,3 +518,12 @@ namespace boost
 }
 
 #endif // BOOST_FUNCTIONAL_HASH_HASH_HPP
+
+// Include this outside of the include guards in case the file is included
+// twice - once with BOOST_HASH_NO_EXTENSIONS defined, and then with it
+// undefined.
+
+#if !defined(BOOST_HASH_NO_EXTENSIONS) \
+    && !defined(BOOST_FUNCTIONAL_HASH_EXTENSIONS_HPP)
+#include <boost/functional/hash/extensions.hpp>
+#endif

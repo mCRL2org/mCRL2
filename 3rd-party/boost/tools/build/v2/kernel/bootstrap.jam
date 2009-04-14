@@ -20,7 +20,7 @@ for local r in $(required-rules)
     {
         ECHO "error: builtin rule '$(r)' is not present" ;
         ECHO "error: your version of bjam is likely out of date" ;
-        ECHO "error: please get a fresh version from CVS." ;
+        ECHO "error: please get a fresh version from SVN." ;
         EXIT ;
     }
 }
@@ -37,7 +37,7 @@ while $(native)
         ECHO "error: missing native rule '$(native[1]).$(native[2])'" ;
         ECHO "error: or interface version of that rule is too low" ;
         ECHO "error: your version of bjam is likely out of date" ;
-        ECHO "error: please get a fresh version from CVS." ;
+        ECHO "error: please get a fresh version from SVN." ;
         EXIT ;
     }
     native = $(native[4-]) ;
@@ -54,7 +54,7 @@ module .ENVIRON
     {
         ECHO "error: no builtin module .ENVIRON is found" ;
         ECHO "error: your version of bjam is likely out of date" ;
-        ECHO "error: please get a fresh version from CVS." ;
+        ECHO "error: please get a fresh version from SVN." ;
         EXIT ;
     }
 }
@@ -68,12 +68,22 @@ module .ENVIRON
     {
         ECHO "error: no @() functionality found" ;
         ECHO "error: your version of bjam is likely out of date" ;
-        ECHO "error: please get a fresh version from CVS." ;
+        ECHO "error: please get a fresh version from SVN." ;
         EXIT ;
     }
 }
 
-
+# Make sure that \n escape is avaiable.
+if "\n" = "n"
+{
+    if $(OS) = CYGWIN 
+    {        
+        ECHO "warning: escape sequences are not supported" ;
+        ECHO "warning: this will cause major misbehaviour on cygwin" ;
+        ECHO "warning: your version of bjam is likely out of date" ;
+        ECHO "warning: please get a fresh version from SVN." ;
+    }    
+}
 
 # Bootstrap the module system. Then bring the import rule into the global module.
 #
@@ -94,12 +104,8 @@ IMPORT modules : import : : import ;
       util          # low-level substrate: string/number handling, etc.
       build         # essential elements of the build system architecture
       tools         # toolsets for handling specific build jobs and targets.
-
-      new           # until we get everything sorted out, there is
-                    # still some code here
-
+      contrib       # user contributed (unreviewed) modules
       .             # build-system.jam lives here
-
       ;
     local whereami = [ NORMALIZE_PATH $(.bootstrap-file:DT) ] ;
     BOOST_BUILD_PATH += $(whereami:D)/$(subdirs) ;
@@ -118,7 +124,7 @@ import modules ;
 import option ;
 local dont-build = [ option.process ] ;
 
-# Should we skip building, i.e. loding the build system, according
+# Should we skip building, i.e. loading the build system, according
 # to the options processed?
 #
 if ! $(dont-build)
@@ -131,4 +137,3 @@ if ! $(dont-build)
     # Use last element in case of multiple command-line options
     import $(build-system[-1]) ;
 }
-

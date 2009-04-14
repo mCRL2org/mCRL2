@@ -42,6 +42,11 @@ namespace range_detail
         inline BOOST_DEDUCED_TYPENAME range_iterator<C>::type
         range_end( C& c )
         {
+            //
+            // If you get a compile-error here, it is most likely because
+            // you have not implemented range_begin() properly in
+            // the namespace of C
+            //
             return c.end();
         }
 
@@ -66,15 +71,15 @@ namespace range_detail
         //////////////////////////////////////////////////////////////////////
 
         template< typename T, std::size_t sz >
-        inline const T* range_end( const T (&array)[sz] )
+        inline const T* range_end( const T (&a)[sz] )
         {
-            return range_detail::array_end<T,sz>( array );
+            return range_detail::array_end<T,sz>( a );
         }
 
         template< typename T, std::size_t sz >
-        inline T* range_end( T (&array)[sz] )
+        inline T* range_end( T (&a)[sz] )
         {
-            return range_detail::array_end<T,sz>( array );
+            return range_detail::array_end<T,sz>( a );
         }
 
 #if !BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x564)) && \

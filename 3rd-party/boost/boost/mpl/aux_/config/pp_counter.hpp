@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/aux_/config/pp_counter.hpp,v $
-// $Date: 2006/12/02 23:42:09 $
-// $Revision: 1.1 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #if !defined(BOOST_MPL_AUX_PP_COUNTER)
 #   include <boost/mpl/aux_/config/msvc.hpp>

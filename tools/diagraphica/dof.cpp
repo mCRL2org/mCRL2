@@ -1,22 +1,24 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./dof.cpp
 
-// --- dof.cpp ------------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "dof.h"
 
+using namespace std;
 
 // -- constructors and destructor -----------------------------------
 
 
 // --------------------
-DOF::DOF( 
+DOF::DOF(
     const int &idx,
     const string &lbl )
 // --------------------
@@ -61,7 +63,7 @@ DOF::~DOF()
     // association
     attr = NULL;
 }
-	
+
 
 // -- set functions -------------------------------------------------
 
@@ -114,7 +116,7 @@ void DOF::setMinMax( const double &mn, const double &mx )
 
 
 // --------------------
-void DOF::setValue( 
+void DOF::setValue(
     const int &idx,
     const double &val )
 // --------------------
@@ -139,10 +141,10 @@ void DOF::clearValue( const int &idx )
     if ( values.size() > 2 &&
          ( 0 <= idx && static_cast <size_t> (idx) < values.size() ) )
     {
-        values.erase( values.begin() + idx );    
+        values.erase( values.begin() + idx );
     }
 }
-        
+
 
 // ------------------------------
 void DOF::setDir( const int &dr )
@@ -164,7 +166,7 @@ void DOF::setAttribute( Attribute* a )
 void DOF::setTextStatus( const int &status )
 // -----------------------------------------
 {
-    if ( status == ID_TEXT_NONE || 
+    if ( status == ID_TEXT_NONE ||
          status == ID_TEXT_ALL  ||
          status == ID_TEXT_ATTR ||
          status == ID_TEXT_VAL )
@@ -175,7 +177,7 @@ void DOF::setTextStatus( const int &status )
 
 
 // -- get functions -------------------------------------------------
-    
+
 
 // ----------------
 int DOF::getIndex()

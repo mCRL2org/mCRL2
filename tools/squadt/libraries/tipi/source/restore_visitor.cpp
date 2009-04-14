@@ -1,24 +1,30 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/restore_visitor.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include <boost/bind.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>
+#include <boost/integer_traits.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/lexical_cast.hpp>
 
-#include <tipi/utility/generic_visitor.tcc>
-#include "tipi/visitors.hpp"
+#include "tipi/detail/utility/generic_visitor.hpp"
+#include "tipi/detail/visitors.hpp"
 #include "tipi/report.hpp"
 #include "tipi/tool/capabilities.hpp"
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/basic_datatype.hpp"
-#include "tipi/detail/layout_elements.hpp"
-#include "tipi/detail/layout_manager.hpp"
-#include "tipi/display.hpp"
+#include "tipi/layout_elements.hpp"
+#include "tipi/layout_manager.hpp"
+#include "tipi/tool_display.hpp"
 #include "tipi/detail/event_handlers.hpp"
 #include "tipi/common.hpp"
 
@@ -71,37 +77,36 @@ namespace tipi {
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::istream& s) {
-    s >> in;
+    std::ostringstream l;
+
+    l << s.rdbuf();
+
+    in.Parse(l.str());
 
     tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(std::string const& s) {
-    std::istringstream ins(s);
-
-    ins >> in;
+    in.Parse(s, false);
 
     tree = in.FirstChildElement(false);
   }
 
   inline restore_visitor_impl_frontend::restore_visitor_impl_frontend(boost::filesystem::path const& p) {
-    std::ifstream ins(p.native_file_string().c_str());
-
-    ins >> in;
+    in.LoadFile(p.native_file_string().c_str());
 
     tree = in.FirstChildElement(false);
   }
 
-  std::istream& operator >> (std::istream& s, tipi::message::type_identifier_t& id) {
+  std::istream& operator >> (std::istream& s, tipi::message::message_type & id) {
     size_t t;
 
     s >> t;
 
-    id = static_cast < tipi::message::type_identifier_t > (t);
+    id = static_cast < tipi::message::message_type > (t);
 
     return (s);
   }
-  /// \endcond
 
   /**
    * \brief Constructor for reading from a ticpp parse tree
@@ -125,9 +130,11 @@ namespace tipi {
   restore_visitor::restore_visitor(boost::filesystem::path const& p) :
         ::utility::visitor_interface< restore_visitor_impl >(boost::shared_ptr < ::utility::visitor< restore_visitor_impl > > (new restore_visitor_impl_frontend(p))) {
   }
+  /// \endcond
 }
 
 namespace utility {
+  /// \cond INTERNAL_DOCS
 
   /**
    * \param[in] o the tipi::message object to restore
@@ -135,17 +142,15 @@ namespace utility {
   template <>
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::message& o) {
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message-meta");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "message");
 
-    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::message_unknown);
+    tree->GetAttributeOrDefault("type", &o.m_type, tipi::message::unknown());
 
     o.m_content.clear();
 
     for (ticpp::Node* e = tree->FirstChild(false); e != 0; e = e->NextSibling(false)) {
       if (e->Type() == TiXmlNode::TEXT) {
-        static_cast < ticpp::Text* > (e)->SetCDATA(false);
-
-        o.m_content += e->ToString(*e);
+        o.m_content += e->Value();
       }
     }
   }
@@ -159,17 +164,13 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::boolean& e, std::string& s) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "boolean");
 
-    s = tree->GetAttributeValue("value", false);
-
-    if (s != tipi::datatype::boolean::true_string) {
-      s = tipi::datatype::boolean::false_string;
-    }
+    tree->GetAttributeOrDefault("value", &s, "false");
 
     assert(e.validate(s));
 
     /* Set to default if value is invalid */
     if (!(e.validate(s))) {
-      s = tipi::datatype::boolean::false_string;
+      s.assign("false");
     }
   }
 
@@ -179,14 +180,11 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::integer& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_integer_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "integer_range");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, tipi::datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, tipi::datatype::integer::implementation_maximum);
-    tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
-    tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
+    tree->GetAttributeOrDefault("value", &s, 0);
 
     assert(e.validate(s));
 
@@ -202,14 +200,11 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::real& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_real_range& e, std::string& s) {
     /* Current element must be <integer> */
-    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real");
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "real_range");
 
-    tree->GetAttributeOrDefault("minimum", &e.m_minimum, tipi::datatype::integer::implementation_minimum);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum, tipi::datatype::integer::implementation_maximum);
-    tree->GetAttributeOrDefault("default", &e.m_default_value, e.m_minimum);
-    tree->GetAttributeOrDefault("value", &s, boost::lexical_cast < std::string > (e.m_default_value));
+    tree->GetAttributeOrDefault("value", &s, 0);
 
     assert(e.validate(s));
 
@@ -225,19 +220,17 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::enumeration& e, std::string& s) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::datatype::basic_enumeration& e, std::string& s) {
     /* Current element must be <enumeration> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "enumeration");
 
-    tree->GetAttributeOrDefault("default", &e.m_default_value, 0);
-
     for (ticpp::Element* ae = tree->FirstChildElement(false); ae != 0; ae = ae->NextSiblingElement(false)) {
       if (ae->Value() == "element") {
-        e.add_value(ae->GetAttributeValue("value"));
+        e.add(boost::lexical_cast< size_t >(ae->GetAttribute("value")), ae->GetText(false));
       }
     }
 
-    tree->GetAttributeOrDefault("value", &s, e.m_values[e.m_default_value]);
+    tree->GetAttribute("value", &s, false);
 
     assert(e.validate(s));
   }
@@ -252,9 +245,8 @@ namespace utility {
     /* Current element must be <string> */
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "string");
 
-    tree->GetAttributeOrDefault("default", &e.m_default_value, "");
     tree->GetAttributeOrDefault("minimum", &e.m_minimum_length, 0);
-    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, tipi::datatype::string::implementation_maximum_length);
+    tree->GetAttributeOrDefault("maximum", &e.m_maximum_length, boost::integer_traits< size_t >::const_max);
 
     s = tree->GetText(false);
 
@@ -271,16 +263,16 @@ namespace utility {
     std::string name(tree->Value());
 
     if (name == "enumeration") {
-      c.reset(new tipi::datatype::enumeration);
+      c.reset(new tipi::datatype::enumeration< size_t >);
     }
     else if (name == "boolean") {
       c.reset(new tipi::datatype::boolean);
     }
     else if (name == "integer") {
-      c.reset(new tipi::datatype::integer);
+      c = tipi::datatype::basic_integer_range::reconstruct(tree->GetAttribute("range", false));
     }
     else if (name == "real") {
-      c.reset(new tipi::datatype::real);
+      c = tipi::datatype::basic_real_range::reconstruct(tree->GetAttribute("range", false));
     }
     else if (name == "uri") {
     }
@@ -296,15 +288,15 @@ namespace utility {
   }
 
   /**
-   * \param[in] o a tipi::object object to restore
+   * \param[in] o a tipi::configuration::object object to restore
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::object& o) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::object& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "object");
 
-    o.m_mime_type = tipi::mime_type(tree->GetAttributeValue("mime-type"));
-    
+    o.m_mime_type = tipi::mime_type(tree->GetAttribute("format"));
+
     tree->GetAttribute("location", &o.m_location, false);
   }
 
@@ -313,7 +305,7 @@ namespace utility {
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::option& o) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::configuration::option& o) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "option");
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
@@ -341,32 +333,56 @@ namespace utility {
     c.m_output_objects.clear();
     c.m_positions.clear();
 
-    tree->GetAttributeOrDefault("fresh", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("interactive", &c.m_fresh, false);
+    tree->GetAttributeOrDefault("valid", &c.m_fresh, c.m_fresh);
     tree->GetAttribute("output-prefix", &c.m_output_prefix, false);
-    tree->GetAttribute("category", &c.m_category);
+
+    std::string category;
+
+    tree->GetAttribute("category", &category);
+
+    c.m_category = tipi::tool::category::match(category);
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-      std::string identifier = e->GetAttributeValue("id");
-     
+      std::string identifier = e->GetAttribute("id");
+
       if (e->Value() == "option") {
-        boost::shared_ptr < tipi::option > o(new tipi::option);
+        boost::shared_ptr < tipi::configuration::option > o(new tipi::configuration::option);
 
         visitor< tipi::restore_visitor_impl >(e).visit(*o);
 
         c.add_option(identifier, o);
       }
       else if (e->Value() == "object") {
-        boost::shared_ptr < tipi::object > o(new tipi::object);
+        boost::shared_ptr < tipi::configuration::object > o(new tipi::configuration::object);
 
         visitor< tipi::restore_visitor_impl >(e).visit(*o);
 
-        if (e->GetAttributeValue("type") == "input") {
+        if (e->GetAttribute("type") == "input") {
           c.add_input(identifier, o);
         }
         else {
           c.add_output(identifier, o);
         }
       }
+    }
+  }
+
+  /**
+   * \param[in] c a tipi::tool::capabilities::input_configuration object to restore
+   * \param[in,out] cp a pointer that will contain the restored object
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool::capabilities::input_configuration& c, boost::shared_ptr < tipi::tool::capabilities::input_configuration >& cp) {
+    using tipi::tool::capabilities;
+
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "input-configuration");
+
+    cp.reset(new capabilities::input_configuration(tipi::tool::category::match(tree->GetAttribute("category"))));
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      cp->m_object_map.insert(std::make_pair(e->GetAttribute("id"), e->GetAttribute("format")));
     }
   }
 
@@ -379,22 +395,28 @@ namespace utility {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "capabilities");
 
     if (tree->Value() == "capabilities") {
+      using tipi::tool::capabilities;
+
+      static capabilities::input_configuration dummy(tipi::tool::category("unknown"));
+
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
-     
+
         if (e->Value() == "protocol-version") {
-          c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("major")));
-          c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttributeValue("minor")));
+          c.m_protocol_version.major = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("major")));
+          c.m_protocol_version.minor = static_cast < unsigned char > (boost::lexical_cast < unsigned short > (e->GetAttribute("minor")));
         }
         else if (e->Value() == "input-configuration") {
-          c.m_input_combinations.insert(
-              tipi::tool::capabilities::input_combination(
-                  tipi::tool::category::fit(e->GetAttributeValue("category")),
-                  tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+          boost::shared_ptr< capabilities::input_configuration > input_configuration;
+
+          visitor< tipi::restore_visitor_impl >(e).visit(dummy, input_configuration);
+
+          c.m_input_configurations.insert(input_configuration);
         }
         else if (e->Value() == "output-configuration") {
-          c.m_output_combinations.insert(
-              tipi::tool::capabilities::output_combination(
-                      tipi::mime_type(e->GetAttributeValue("format")), e->GetAttributeValue("identifier")));
+          c.m_output_configurations.insert(
+             boost::shared_ptr< const capabilities::output_configuration >(
+               new capabilities::output_configuration(
+                  tipi::mime_type(e->GetAttribute("format")), e->GetAttribute("id"))));
         }
       }
     }
@@ -416,7 +438,7 @@ namespace utility {
         }
       }
     }
-  }  
+  }
 
   /**
    * \param[in] c a tipi::report object to restore
@@ -426,13 +448,13 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::report& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "report");
 
-    c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttributeValue("type")));
+    c.m_report_type = static_cast < tipi::report::type > (boost::lexical_cast < unsigned int > (tree->GetAttribute("type")));
 
-    c.description.clear();
+    c.m_description.clear();
 
     for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
       if (e->Value() == "description") {
-        c.description += e->GetText(false);
+        c.m_description += e->GetText(false);
       }
     }
   }
@@ -444,10 +466,10 @@ namespace utility {
   template <>
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::label& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "label");
-    
+
     c.m_text = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -458,9 +480,9 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::button& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS
@@ -480,7 +502,8 @@ namespace utility {
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
+
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
     if (c.m_selected) {
@@ -490,49 +513,48 @@ namespace utility {
 
   /**
    * \param[in] c a tipi::layout::elements::radio_button object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::radio_button& c, tipi::display::element_for_id& element_by_id) {
-    using tipi::layout::elements::radio_button;
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::radio_button& c, tipi::display& d) {
+    using ::tipi::layout::elements::radio_button;
+    using ::tipi::display;
 
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "radio-button");
 
-    tree->GetAttribute("label", &c.m_label);
+    c.m_label = tree->GetText(false);
 
-    tree->GetAttributeOrDefault("connected", &c.m_connection, &c);
-    tree->GetAttributeOrDefault("first", &c.m_first, false);
+    display::element_identifier id = reinterpret_cast < display::element_identifier > (&c);
+
+    tree->GetAttribute("connected", &id, false);
     tree->GetAttributeOrDefault("selected", &c.m_selected, false);
 
-    if (c.m_connection != &c) {
-      if (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (c.m_connection))) {
-        radio_button* i = &c;
+    c.m_connection = reinterpret_cast < radio_button* > (id);
 
-        while (0 < element_by_id.count(reinterpret_cast < tipi::layout::element_identifier > (i->m_connection))) {
-          if (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)] == &c) {
-            i->m_connection = &c;
-            i               = i->m_connection;
+    try {
+      radio_button* i = &c;
 
-            while (i->m_connection != &c) {
-              i->m_connection = static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)]);
-              i               = i->m_connection;
-            }
+      // Check whether the group is complete
+      do {
+        i = &d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+      }
+      while (i != &c);
 
-            if (c.m_selected) {
-              /* Make sure all associated radio buttons are unselected */
-              c.set_selected();
-            }
-         
-            break;
-          }
+      do {
+        i->m_connection = &d.find< radio_button >(reinterpret_cast < display::element_identifier > (i->m_connection));
+        i               = i->m_connection;
+      } while (i != &c);
 
-          i = static_cast < radio_button* > (element_by_id[reinterpret_cast < tipi::layout::element_identifier > (i->m_connection)]);
-        }
+      if (c.m_selected) {
+        /* Make sure all associated radio buttons are unselected */
+        c.set_selected();
       }
     }
-     
-    c.m_event_handler->process(&c, false);
+    catch (...) {
+    }
+
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -543,10 +565,11 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::elements::checkbox& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "checkbox");
 
-    tree->GetAttribute("label", &c.m_label);
-    tree->GetAttributeOrDefault("status", &c.m_status, false);
+    c.m_label = tree->GetText(false);
 
-    c.m_event_handler->process(&c, false);
+    tree->GetAttributeOrDefault("checked", &c.m_status, false);
+
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -561,7 +584,7 @@ namespace utility {
     tree->GetAttribute("maximum", &c.m_maximum);
     tree->GetAttribute("current", &c.m_current);
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /**
@@ -578,7 +601,7 @@ namespace utility {
       }
     }
 
-    c.m_event_handler->process(&c, false);
+    c.m_event_handler->process(&c, false, true);
   }
 
   /// \cond INTERNAL_DOCS
@@ -630,81 +653,56 @@ namespace utility {
   void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::properties& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "properties");
 
-    c.m_alignment_horizontal = text_to_horizontal_alignment(tree->GetAttributeValueOrDefault("horizontal-alignment", "right"));
-    c.m_alignment_vertical   = text_to_vertical_alignment(tree->GetAttributeValueOrDefault("vertical-alignment", "bottom"));
-    c.m_visible              = text_to_visibility(tree->GetAttributeValueOrDefault("visibility", "visible"));
+    std::string s;
 
-    tree->GetAttribute("margin-top", &c.m_margin.top, false);
-    tree->GetAttribute("margin-left", &c.m_margin.left, false);
-    tree->GetAttribute("margin-bottom", &c.m_margin.bottom, false);
-    tree->GetAttribute("margin-right", &c.m_margin.right, false);
+    tree->GetAttribute("horizontal-alignment", &s, false);
+
+    if (!s.empty()) {
+      c.m_alignment_horizontal = text_to_horizontal_alignment(s);
+    } else {
+      s.clear();
+    }
+
+    tree->GetAttribute("vertical-alignment", &s, false);
+
+    if (!s.empty()) {
+      c.m_alignment_vertical = text_to_vertical_alignment(s);
+    } else {
+      s.clear();
+    }
+
+    tree->GetAttribute("visibility",&s , false);
+
+    if (!s.empty()) {
+      c.m_visible = text_to_visibility(s);
+    }
+
+    tree->GetAttribute("margin-top", &c.m_margin.m_top, false);
+    tree->GetAttribute("margin-left", &c.m_margin.m_left, false);
+    tree->GetAttribute("margin-bottom", &c.m_margin.m_bottom, false);
+    tree->GetAttribute("margin-right", &c.m_margin.m_right, false);
     tree->GetAttribute("grow", &c.m_grow, false);
     tree->GetAttribute("enabled", &c.m_enabled, false);
   }
 
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::box&, tipi::display::element_for_id&);
-
   /**
-   * \param[in] c an STL auto pointer to a tipi::layout::manager object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in] c a pointer to the tipi::layout::manager object to restore
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::manager >& c, tipi::display::element_for_id& element_by_id) {
-    std::string name(tree->Value());
-
-    if (name == "box-layout-manager") {
-      if (tree->GetAttributeValue("variant", false) == "vertical") {
-        c.reset(new tipi::layout::vertical_box());
-
-      }
-      else {
-        c.reset(new tipi::layout::horizontal_box());
-      }
-
-      visit(static_cast < tipi::layout::box& > (*c), element_by_id);
-    }
-    else {
-      throw std::runtime_error("Layout manager: '" + name + "' unknown");
-    }
-  }
-
-  /**
-   * \param[in] c a tipi::layout::horizontal_box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::horizontal_box& c, tipi::display::element_for_id& element_by_id) {
-    visit(static_cast < tipi::layout::box& > (c), element_by_id);
-  }
-
-  /**
-   * \param[in] c a tipi::layout::vertical_box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
-   **/
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::vertical_box& c, tipi::display::element_for_id& element_by_id) {
-    visit(static_cast < tipi::layout::box& > (c), element_by_id);
-  }
-
-  template <>
-  template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::element >& c, tipi::display::element_for_id& element_by_id);
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::element >&, tipi::display&);
 
   /**
    * \param[in] c a tipi::layout::box object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::box& c, tipi::display::element_for_id& element_by_id) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::vertical_box& c, tipi::display& d) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
 
-    tipi::layout::properties current_properties = tipi::layout::manager::default_properties;
+    tipi::layout::properties current_properties;
 
     c.clear();
 
@@ -713,120 +711,187 @@ namespace utility {
         visitor< tipi::restore_visitor_impl >(e).visit(current_properties);
       }
       else {
-        tipi::layout::element_identifier id;
+        boost::shared_ptr < tipi::layout::element > p;
 
-        e->GetAttribute("id", &id, false);
-       
-        std::auto_ptr < tipi::layout::element > p;
-
-        visitor< tipi::restore_visitor_impl >(e).visit(p, element_by_id);
+        visitor< tipi::restore_visitor_impl >(e).visit(p, d);
 
         if (p.get() != 0) {
           tipi::layout::properties cn = current_properties;
 
-          element_by_id[id] = p.get();
-
           cn.set_growth(p->get_grow());
 
-          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.release(), cn, id));
+          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.get(), cn));
         }
       }
     }
   }
 
   /**
-   * \param[in] c an STL auto pointer to a tipi::layout::element object to restore
-   * \param[in,out] element_by_id map for resolving radio_button identifiers to pointers to actual corresponding objects of type radio_button
+   * \param[in] c a tipi::layout::box object to restore
+   * \param[in,out] d display with which the element is associated
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(std::auto_ptr < tipi::layout::element >& c, tipi::display::element_for_id& element_by_id) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::horizontal_box& c, tipi::display& d) {
+    assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "box-layout-manager");
+
+    tipi::layout::properties current_properties;
+
+    c.clear();
+
+    for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
+      if (e->Value() == "properties") {
+        visitor< tipi::restore_visitor_impl >(e).visit(current_properties);
+      }
+      else {
+        boost::shared_ptr < tipi::layout::element > p;
+
+        visitor< tipi::restore_visitor_impl >(e).visit(p, d);
+
+        if (p.get() != 0) {
+          tipi::layout::properties cn(current_properties);
+
+          cn.set_growth(p->get_grow());
+
+          c.m_children.push_back(tipi::layout::manager::layout_descriptor(p.get(), cn));
+        }
+      }
+    }
+  }
+
+  /**
+   * \param[in] c a shared pointer to a tipi::layout::manager object to restore
+   * \param[in,out] d display with which the element is associated
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::manager >& c, tipi::display& d) {
+    std::string name(tree->Value());
+
+    if (name == "box-layout-manager") {
+      ::tipi::display::element_identifier id;
+
+      tree->GetAttributeOrDefault("id", &id, 0);
+
+      boost::shared_ptr < tipi::layout::element > m;
+
+      if (tree->GetAttribute("variant", false) == "vertical") {
+        d.create< tipi::layout::vertical_box >(m, id);
+
+        visit(static_cast < tipi::layout::vertical_box& > (*m), d);
+      }
+      else {
+        d.create< tipi::layout::horizontal_box >(m, id);
+
+        visit(static_cast < tipi::layout::horizontal_box& > (*m), d);
+      }
+
+      c = boost::static_pointer_cast < tipi::layout::manager > (m);
+    }
+    else {
+      throw std::runtime_error("Layout manager: '" + name + "' unknown");
+    }
+  }
+
+  /**
+   * \param[in] c a shared pointer to a tipi::layout::element object to restore
+   * \param[in,out] d display with which the element is associated
+   **/
+  template <>
+  template <>
+  void visitor< tipi::restore_visitor_impl >::visit(boost::shared_ptr < tipi::layout::element >& c, ::tipi::display& d) {
     using namespace tipi::layout::elements;
+
+    ::tipi::display::element_identifier id;
+
+    tree->GetAttributeOrDefault("id", &id, 0);
 
     std::string name(tree->Value());
 
     if (name == "radio-button") {
-      tipi::layout::element_identifier id;
-
-      tree->GetAttribute("id", &id, false);
-      
-      c.reset(new radio_button());
-
-      element_by_id[id] = c.get();
+      d.create< radio_button >(c, id);
 
       // Read concrete element data
-      do_visit(*c, element_by_id);
+      do_visit(*c, d);
     }
     else {
       if (name == "label") {
-        c.reset(new label());
+        d.create< label >(c, id);
       }
       else if (name == "button") {
-        c.reset(new button());
+        d.create< button >(c, id);
       }
       else if (name == "checkbox") {
-        c.reset(new checkbox());
+        d.create< checkbox >(c, id);
       }
       else if (name == "progress-bar") {
-        c.reset(new progress_bar());
+        d.create< progress_bar >(c, id);
       }
       else if (name == "text-field") {
-        c.reset(new text_field());
+        d.create< text_field >(c, id);
       }
 
       if (c.get()) {
-        // Read concrete element data
         do_visit(*c);
       }
-      else {
-        // Assume the element is a layout manager
-        std::auto_ptr< tipi::layout::manager > m;
-         
-        visit(m, element_by_id);
-     
-        if (m.get()) {
-          c.reset(m.release()); 
+      else  {
+        if (name == "box-layout-manager") {
+          if (tree->GetAttribute("variant", false) == "vertical") {
+            d.create< tipi::layout::vertical_box >(c, id);
+
+            visit(static_cast < tipi::layout::vertical_box& > (*c), d);
+          }
+          else {
+            d.create< tipi::layout::horizontal_box >(c, id);
+
+            visit(static_cast < tipi::layout::horizontal_box& > (*c), d);
+          }
+        }
+        else {
+          throw std::runtime_error("Layout manager: '" + name + "' unknown");
         }
       }
     }
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to restore
+   * \param[in] c a tipi::tool_display object to restore
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::tool_display& c) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c) {
     assert((tree->Type() == TiXmlNode::ELEMENT) && tree->Value() == "display-layout");
 
     if (tree->Value() == "display-layout") {
-      c.m_element_by_id.clear();
+      c.impl.reset(new tipi::display_impl);
 
       tree->GetAttribute("visible", &c.m_visible, false);
-     
+
       for (ticpp::Element* e = tree->FirstChildElement(false); e != 0; e = e->NextSiblingElement(false)) {
         if (e->Value() == "layout-manager" && !e->NoChildren()) {
-          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.m_manager, c.m_element_by_id);
+          visitor< tipi::restore_visitor_impl >(e->FirstChildElement(false)).visit(c.impl->get_manager(), static_cast < tipi::display& > (c));
         }
       }
     }
   }
 
   /**
-   * \param[in] c a tipi::layout::tool_display object to restore
+   * \param[in] c a tipi::tool_display object to restore
    * \param[in,out] elements the list of tipi::layout::element objects that has been modified
    * \todo create and move this functionality to mediator / update visitors
    **/
   template <>
   template <>
-  void visitor< tipi::restore_visitor_impl >::visit(tipi::layout::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
-  
-    if (c.m_manager.get() != 0) {
+  void visitor< tipi::restore_visitor_impl >::visit(tipi::tool_display& c, std::vector < tipi::layout::element const* >& elements) {
+
+    if (c.manager() != 0) {
       try {
         for (ticpp::Element* e = tree; e != 0; e = e->NextSiblingElement(false)) {
-          tipi::layout::element const* t = c.find(boost::lexical_cast < tipi::layout::element_identifier > (e->GetAttributeValue("id")));
+          ::tipi::display::element_identifier id;
 
-          if (t != 0) {
+          e->GetAttribute("id", &id, false);
+
+          if (tipi::layout::element const* t = &c.find< tipi::layout::element >(id)) {
             visitor< tipi::restore_visitor_impl >(e).do_visit(*t);
 
             elements.push_back(t);
@@ -843,29 +908,32 @@ namespace utility {
   bool visitor< tipi::restore_visitor_impl >::initialise() {
     register_visit_method< tipi::message >();
     register_visit_method< tipi::datatype::boolean, std::string >();
-    register_visit_method< tipi::datatype::integer, std::string >();
-    register_visit_method< tipi::datatype::real, std::string >();
-    register_visit_method< tipi::datatype::enumeration, std::string >();
+    register_visit_method< tipi::datatype::basic_integer_range, std::string >();
+    register_visit_method< tipi::datatype::basic_real_range, std::string >();
+    register_visit_method< tipi::datatype::basic_enumeration, std::string >();
     register_visit_method< tipi::datatype::string, std::string >();
-    register_visit_method< tipi::object >();
-    register_visit_method< tipi::option >();
+    register_visit_method< tipi::configuration::object >();
+    register_visit_method< tipi::configuration::option >();
     register_visit_method< tipi::configuration >();
     register_visit_method< tipi::controller::capabilities >();
     register_visit_method< tipi::tool::capabilities >();
+    register_visit_method< tipi::tool::capabilities::input_configuration,
+                boost::shared_ptr < tipi::tool::capabilities::input_configuration > >();
     register_visit_method< tipi::report >();
-    register_visit_method< tipi::layout::tool_display >();
-    register_visit_method< tipi::layout::tool_display, std::vector< tipi::layout::element const* > >();
+    register_visit_method< tipi::tool_display >();
+    register_visit_method< tipi::tool_display, std::vector< tipi::layout::element const* > >();
     register_visit_method< tipi::layout::elements::button >();
     register_visit_method< tipi::layout::elements::checkbox >();
     register_visit_method< tipi::layout::elements::label >();
     register_visit_method< tipi::layout::elements::progress_bar >();
     register_visit_method< tipi::layout::elements::radio_button >();
-    register_visit_method< tipi::layout::elements::radio_button, tipi::display::element_for_id >();
+    register_visit_method< tipi::layout::elements::radio_button, ::tipi::display >();
     register_visit_method< tipi::layout::elements::text_field >();
-    register_visit_method< tipi::layout::horizontal_box, tipi::display::element_for_id >();
-    register_visit_method< tipi::layout::vertical_box, tipi::display::element_for_id >();
+    register_visit_method< tipi::layout::horizontal_box, ::tipi::display >();
+    register_visit_method< tipi::layout::vertical_box, ::tipi::display >();
     register_visit_method< tipi::layout::properties >();
 
     return true;
   }
+  /// \endcond
 }

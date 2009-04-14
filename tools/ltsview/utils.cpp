@@ -1,17 +1,23 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file utils.cpp
-/// \brief Add your file description here.
+/// \brief Source file for Utils namespace
 
+#include "wx.hpp" // precompiled headers
+
+#include <algorithm> // for std::min/std::max
 #include "utils.h"
 #include <cmath>
 
 namespace Utils
 {
+
 bool operator==(RGB_Color c1,RGB_Color c2) {
   return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
 }
@@ -36,11 +42,15 @@ Utils::Point3D operator*(float s,Point3D p) {
 }
 
 Utils::Vect operator+(Vect v1, Vect v2) {
-  Vect result;
-  result.x = v1.x + v2.x;
-  result.y = v1.y + v2.y;
+  Vect result = { v1.x + v2.x, v1.y + v2.y };
   return result;
 }
+
+Utils::Vect operator*(float s,Vect v) {
+  Vect result = { s*v.x, s*v.y };
+  return result;
+}
+
 float length(Point3D p) {
   return sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
 }
@@ -74,6 +84,25 @@ Utils::HSV_Color operator+(HSV_Color c1,HSV_Color c2) {
   return result;
 }
 
+Utils::RGB_Color blend_RGB(RGB_Color c1, RGB_Color c2, float factor)
+{
+  RGB_Color result = {static_cast<unsigned char>(
+                        static_cast<float>(c1.r * factor) +
+                        static_cast<float>(c2.r * (1 - factor))
+                      ),
+                      static_cast<unsigned char> (
+                        static_cast<float>(c1.g * factor) +
+                        static_cast<float>(c2.g * (1 - factor))
+                      ),
+                      static_cast<unsigned char> (
+                        static_cast<float>(c1.b * factor) +
+                        static_cast<float>(c2.b * (1 - factor))
+                      )};
+
+  return result;
+}
+
+
 float deg_to_rad(float deg) {
   return deg * Utils::PI / 180.0f;
 }
@@ -83,13 +112,13 @@ float rad_to_deg(float rad) {
 }
 
 Utils::HSV_Color RGB_to_HSV(RGB_Color c) {
-  unsigned char MIN = std::min(c.r,std::min(c.g,c.b));
-  unsigned char MAX = std::max(c.r,std::max(c.g,c.b));
-  
+  unsigned char MIN = (std::min)(c.r,(std::min)(c.g,c.b));
+  unsigned char MAX = (std::max)(c.r,(std::max)(c.g,c.b));
+
   HSV_Color result;
   if (MAX == MIN) {
     result.h = 0;
-  } 
+  }
   else if (MAX == c.r) {
     if (c.g >= c.b) {
       result.h = round_to_int(60.0 * double(c.g-c.b)/double(MAX-MIN));
@@ -166,31 +195,31 @@ Utils::RGB_Color HSV_to_RGB(HSV_Color c) {
 }
 
 int round_to_int(double f) {
-  double intpart;
-  modf(f + 0.5,&intpart);
-  return static_cast< int > (intpart);
+  return static_cast< int > (f+0.5);
 }
 
-float vec_to_ang(Utils::Vect v) {
-  return atan2(v.y, v.x);
+float truncate_float(float f) {
+  return float(int(f * 1000000.0f)) / 1000000.0f;
 }
 
-Utils::Vect ang_to_vec( float phi) {
+float vec_to_deg(Utils::Vect v) {
+  float r = rad_to_deg(atan2(v.y,v.x));
+  if (r < 0.0f) {
+    r += 360.0f;
+  }
+  return r;
+}
+
+Utils::Vect deg_to_vec(float deg) {
   Vect v;
-  if (rad_to_deg(phi) < -0.9f) {
-    v.x = 0;
-    v.y = 0;
-  }
-  else {
-    v.x = cos(phi);
-    v.y = sin(phi);
-  }
-
+  float r = deg_to_rad(deg);
+  v.x = cos(r);
+  v.y = sin(r);
   return v;
 }
 
-float vec_length( Vect v) {
-  return sqrt(v.x*v.x + v.y *  v.y);
+float vec_length(Vect v) {
+  return sqrt(v.x*v.x + v.y*v.y);
 }
 
 Interpolater::Interpolater(RGB_Color rgb1,RGB_Color rgb2,int n,bool l) {
@@ -217,10 +246,10 @@ Interpolater::Interpolater(RGB_Color rgb1,RGB_Color rgb2,int n,bool l) {
 }
 
 Utils::RGB_Color Interpolater::getColor(int i) {
-	float r = float(i);
-	if (N > 1) {
-  	r /= float(N);
-	}
+  float r = float(i);
+  if (N > 1) {
+    r /= float(N);
+  }
   HSV_Color result;
   if (is_long) {
     if (abs(delta_h1) < abs(delta_h2)) {
@@ -237,13 +266,22 @@ Utils::RGB_Color Interpolater::getColor(int i) {
   }
   while (result.h < 0) {
     result.h += 360;
-  } 
+  }
   while (result.h >= 360) {
     result.h -= 360;
   }
   result.s = round_to_int(base.s + r*delta_s);
   result.v = round_to_int(base.v + r*delta_v);
   return HSV_to_RGB(result);
+}
+
+wxColour RGB_to_wxC(RGB_Color c) {
+  return wxColour(c.r,c.g,c.b);
+}
+
+Utils::RGB_Color wxC_to_RGB(wxColour c) {
+  RGB_Color result = {c.Red(),c.Green(),c.Blue()};
+  return result;
 }
 
 }

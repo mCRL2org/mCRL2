@@ -43,6 +43,10 @@
 #   define BOOST_FUNCTION_SCOPE_USING_DECLARATION_BREAKS_ADL
 #   define BOOST_NO_IS_ABSTRACT
 #elif __GNUC__ == 3
+#  if defined (__PATHSCALE__)
+#     define BOOST_NO_TWO_PHASE_NAME_LOOKUP
+#     define BOOST_NO_IS_ABSTRACT
+#  endif
    //
    // gcc-3.x problems:
    //
@@ -54,6 +58,12 @@
 #  if __GNUC_MINOR__ < 4
 #     define BOOST_NO_IS_ABSTRACT
 #  endif
+#endif
+#if __GNUC__ < 4
+//
+// All problems to gcc-3.x and earlier here:
+//
+#define BOOST_NO_TWO_PHASE_NAME_LOOKUP
 #endif
 
 #ifndef __EXCEPTIONS
@@ -81,6 +91,15 @@
 #if __GNUC__ > 3 || ( __GNUC__ == 3 && __GNUC_MINOR__ >= 1 )
 #define BOOST_HAS_NRVO
 #endif
+//
+// RTTI and typeinfo detection is possible post gcc-4.3:
+//
+#if __GNUC__ * 100 + __GNUC_MINOR__ >= 403
+#  ifndef __GXX_RTTI
+#     define BOOST_NO_TYPEID
+#     define BOOST_NO_RTTI
+#  endif
+#endif
 
 //
 // C++0x features
@@ -88,15 +107,17 @@
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
 // C++0x features are only enabled when -std=c++0x or -std=gnu++0x are
 // passed on the command line, which in turn defines
-// __GXX_EXPERIMENTAL_CXX0X__. Note: __GXX_EXPERIMENTAL_CPP0X__ is
-// defined by some very early development versions of GCC 4.3; we will
-// remove this part of the check in the near future.
-#  if defined(__GXX_EXPERIMENTAL_CPP0X__) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+// __GXX_EXPERIMENTAL_CXX0X__. 
+#  if defined(__GXX_EXPERIMENTAL_CXX0X__)
 #    define BOOST_HAS_STATIC_ASSERT
-#    ifndef __STRICT_ANSI__
-#      define BOOST_HAS_VARIADIC_TMPL
-#    endif
+#    define BOOST_HAS_VARIADIC_TMPL
+#    define BOOST_HAS_RVALUE_REFS
+#    define BOOST_HAS_DECLTYPE
 #  endif
+#endif
+
+#if !defined(__GXX_EXPERIMENTAL_CXX0X__) || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 4)
+#  define BOOST_NO_INITIALIZER_LISTS
 #endif
 
 //
@@ -109,16 +130,10 @@
 #  define BOOST_HAS_VARIADIC_TMPL
 #endif
 
-// Rvalue reference support
-#ifdef __RVALUE_REFS
-#  define BOOST_HAS_RVALUE_REFS
-#endif
-
 // ConceptGCC compiler:
 //   http://www.generic-programming.org/software/ConceptGCC/
 #ifdef __GXX_CONCEPTS__
 #  define BOOST_HAS_CONCEPTS
-#  define BOOST_HAS_RVALUE_REFS
 #  define BOOST_COMPILER "ConceptGCC version " __VERSION__
 #endif
 

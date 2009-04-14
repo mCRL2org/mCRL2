@@ -1,54 +1,60 @@
 // Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file include/mcrl2/utilities/utilities.h
-/// \brief Add your file description here.
-
-// Interface to utility functions
-// file: utilities.h
+/// \file mcrl2/utilities/utilities.h
+/// \brief Miscellaneous utility functions
 
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+#include <cmath>
+
 #include "aterm2.h"
 
-enum Compare_Result {
-  compare_result_smaller,
-  compare_result_equal,
-  compare_result_bigger
-};
 
-const char* bool_to_char_string(bool a_bool);
+/**
+ * \brief Converts to textual representation for a boolean
+ * \param[in] b the boolean to convert
+ * \note for writing to stream consider using std::boolalpha
+ **/
+inline const char* bool_to_char_string(bool b) {
+  return (b) ? "true" : "false";
+}
 
-class Indent {
-  private:
-    int f_indentation_level;
-    void update_string();
-  public:
-    Indent();
-    ~Indent();
-    char* blank_spaces;
-    void indent();
-    void deindent();
-};
+inline
+ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
+{
+  ATprotectAppl(&f);
+  return v;
+}
 
-int number_of_digits(int a_integer);
 
-Compare_Result compare_address(ATerm a_term1, ATerm a_term2);
+// Eventually, these two functions should probably be moved into core
+/**
+ * \brief Creates an identifier for the for the ctau action
+ **/
+inline ATermAppl make_ctau_act_id() {
+  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
 
-Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2);
+  assert(ctau_act_id);
 
-ATerm read_ATerm_from_file(char* a_file_name, char* a_feedback_string);
+  return ctau_act_id;
+}
 
-void write_ATerm_to_file(char* a_file_name, ATermAppl a_term, char* a_feedback_string);
+/**
+ * \brief Creates the ctau action
+ **/
+inline ATermAppl make_ctau_action() {
+  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
 
-// Eventually, these two functions should probably be moved into libstruct
+  assert(ctau_action);
 
-ATermAppl make_ctau_act_id();
-
-ATermAppl make_ctau_action();
+  return ctau_action;
+}
 
 #endif

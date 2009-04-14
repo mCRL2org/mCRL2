@@ -10,9 +10,9 @@
 //
 // See http://www.boost.org/libs/mpl for documentation.
 
-// $Source: /cvsroot/boost/boost/boost/mpl/assert.hpp,v $
-// $Date: 2006/12/02 23:45:58 $
-// $Revision: 1.21 $
+// $Id$
+// $Date: 2008-10-10 11:10:26 +0200 (Fri, 10 Oct 2008) $
+// $Revision: 49239 $
 
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/aux_/value_wknd.hpp>
@@ -35,7 +35,7 @@
 #include <cstddef>
 
 
-#if BOOST_WORKAROUND(__BORLANDC__, >= 0x560) && BOOST_WORKAROUND(__BORLANDC__, < 0x600) \
+#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x610)) \
     || (BOOST_MPL_CFG_GCC != 0) \
     || BOOST_WORKAROUND(__IBMCPP__, <= 600)
 #   define BOOST_MPL_CFG_ASSERT_USE_RELATION_NAMES
@@ -43,7 +43,7 @@
 
 #if BOOST_WORKAROUND(__MWERKS__, < 0x3202) \
     || BOOST_WORKAROUND(__EDG_VERSION__, <= 238) \
-    || BOOST_WORKAROUND(__BORLANDC__, < 0x600) \
+    || BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x610)) \
     || BOOST_WORKAROUND(__DMC__, BOOST_TESTED_AT(0x840))
 #   define BOOST_MPL_CFG_ASSERT_BROKEN_POINTER_TO_POINTER_TO_MEMBER
 #endif
@@ -51,7 +51,7 @@
 // agurt, 10/nov/06: use enums for Borland (which cannot cope with static constants) 
 // and GCC (which issues "unused variable" warnings when static constants are used 
 // at a function scope)
-#if BOOST_WORKAROUND(__BORLANDC__, < 0x600) \
+#if BOOST_WORKAROUND(__BORLANDC__, BOOST_TESTED_AT(0x610)) \
     || (BOOST_MPL_CFG_GCC != 0)
 #   define BOOST_MPL_AUX_ASSERT_CONSTANT(T, expr) enum { expr }
 #else

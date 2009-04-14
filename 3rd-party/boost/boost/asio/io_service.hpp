@@ -2,7 +2,7 @@
 // io_service.hpp
 // ~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -26,6 +26,7 @@
 #include <boost/system/error_code.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
+#include <boost/asio/detail/dev_poll_reactor_fwd.hpp>
 #include <boost/asio/detail/epoll_reactor_fwd.hpp>
 #include <boost/asio/detail/kqueue_reactor_fwd.hpp>
 #include <boost/asio/detail/noncopyable.hpp>
@@ -39,6 +40,11 @@
 
 namespace boost {
 namespace asio {
+
+class io_service;
+template <typename Service> Service& use_service(io_service& ios);
+template <typename Service> void add_service(io_service& ios, Service* svc);
+template <typename Service> bool has_service(io_service& ios);
 
 /// Provides core I/O functionality.
 /**
@@ -95,6 +101,32 @@ namespace asio {
  *   }
  * }
  * @endcode
+ *
+ * @par Stopping the io_service from running out of work
+ *
+ * Some applications may need to prevent an io_service's run() call from
+ * returning when there is no more work to do. For example, the io_service may
+ * be being run in a background thread that is launched prior to the
+ * application's asynchronous operations. The run() call may be kept running by
+ * creating an object of type boost::asio::io_service::work:
+ *
+ * @code boost::asio::io_service io_service;
+ * boost::asio::io_service::work work(io_service);
+ * ... @endcode
+ *
+ * To effect a shutdown, the application will then need to call the io_service's
+ * stop() member function. This will cause the io_service run() call to return
+ * as soon as possible, abandoning unfinished operations and without permitting
+ * ready handlers to be dispatched.
+ *
+ * Alternatively, if the application requires that all operations and handlers
+ * be allowed to finish normally, the work object may be explicitly destroyed.
+ *
+ * @code boost::asio::io_service io_service;
+ * auto_ptr<boost::asio::io_service::work> work(
+ *     new boost::asio::io_service::work(io_service));
+ * ...
+ * work.reset(); // Allow run() to exit. @endcode
  */
 class io_service
   : private noncopyable
@@ -103,10 +135,13 @@ private:
   // The type of the platform-specific implementation.
 #if defined(BOOST_ASIO_HAS_IOCP)
   typedef detail::win_iocp_io_service impl_type;
+  friend class detail::win_iocp_overlapped_ptr;
 #elif defined(BOOST_ASIO_HAS_EPOLL)
   typedef detail::task_io_service<detail::epoll_reactor<false> > impl_type;
 #elif defined(BOOST_ASIO_HAS_KQUEUE)
   typedef detail::task_io_service<detail::kqueue_reactor<false> > impl_type;
+#elif defined(BOOST_ASIO_HAS_DEV_POLL)
+  typedef detail::task_io_service<detail::dev_poll_reactor<false> > impl_type;
 #else
   typedef detail::task_io_service<detail::select_reactor<false> > impl_type;
 #endif
@@ -152,6 +187,9 @@ public:
    * @return The number of handlers that were executed.
    *
    * @throws boost::system::system_error Thrown on failure.
+   *
+   * @note The poll() function may also be used to dispatch ready handlers,
+   * but without blocking.
    */
   std::size_t run();
 
@@ -171,6 +209,9 @@ public:
    * @param ec Set to indicate what error occurred, if any.
    *
    * @return The number of handlers that were executed.
+   *
+   * @note The poll() function may also be used to dispatch ready handlers,
+   * but without blocking.
    */
   std::size_t run(boost::system::error_code& ec);
 
@@ -321,7 +362,7 @@ public:
 #if defined(GENERATING_DOCUMENTATION)
   unspecified
 #else
-  detail::wrapped_handler<io_service, Handler>
+  detail::wrapped_handler<io_service&, Handler>
 #endif
   wrap(Handler handler);
 
@@ -374,7 +415,8 @@ public:
 private:
 #if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
   detail::winsock_init<> init_;
-#elif defined(__sun) || defined(__QNX__)
+#elif defined(__sun) || defined(__QNX__) || defined(__hpux) || defined(_AIX) \
+  || defined(__osf__)
   detail::signal_init<> init_;
 #endif
 
@@ -422,8 +464,12 @@ public:
    */
   ~work();
 
-  /// Get the io_service associated with the work.
+  /// (Deprecated: use get_io_service().) Get the io_service associated with the
+  /// work.
   boost::asio::io_service& io_service();
+
+  /// Get the io_service associated with the work.
+  boost::asio::io_service& get_io_service();
 
 private:
   // Prevent assignment.
@@ -447,8 +493,12 @@ class io_service::service
   : private noncopyable
 {
 public:
-  /// Get the io_service object that owns the service.
+  /// (Deprecated: use get_io_service().) Get the io_service object that owns
+  /// the service.
   boost::asio::io_service& io_service();
+
+  /// Get the io_service object that owns the service.
+  boost::asio::io_service& get_io_service();
 
 protected:
   /// Constructor.

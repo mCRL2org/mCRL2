@@ -1,41 +1,11 @@
 project toolset/pbes2bes
-       : build-dir $(BUILD_TOP)/pbes2bes
-       ;
+   : requirements
+      <library>/libraries//lps
+      <library>/libraries//pbes
+   ;
 
-obj sort_functions.o
-       : sort_functions.cpp
-         /libraries//lps
-         /libraries//rewrite
-         /libraries//parser
-         /site-config//boost_program_options
-       : <include>.
-       ;
-
-exe pbes2bes
+tool pbes2bes
        : pbes2bes.cpp
-         pbes_rewrite.cpp
-         sort_functions.o
-         /libraries//lps
-         /libraries//rewrite
-         /libraries//parser
-         /site-config//boost_program_options
-       : <include>.
-         <squadt-connectivity>implemented
-       ;
-
-exe pbes2bool
-       : pbes2bool.cpp
-         pbes_rewrite_jfg.cpp
-         sort_functions.o
-         /libraries//lps
-         /libraries//rewrite
-         /site-config//boost_program_options
-       : <include>.
-         <squadt-connectivity>implemented
-       ;
-
-install-binaries install
-       : pbes2bes pbes2bool
-       :
-       : <status>experimental
+       : <squadt-connectivity>implemented
+         <status>experimental
        ;

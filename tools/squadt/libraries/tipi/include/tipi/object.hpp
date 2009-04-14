@@ -1,33 +1,25 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file include/tipi/object.h
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file tipi/object.hpp
+/// \brief Type used to represent an object in a configuration (protocol concept)
 
 #ifndef TIPI_OBJECT_H
 #define TIPI_OBJECT_H
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
-#include "tipi/parameter.hpp"
 #include "tipi/mime_type.hpp"
 #include "tipi/uri.hpp"
 
 namespace tipi {
 
-  namespace controller {
-    class communicator;
-  }
-
-  namespace tool {
-    class communicator;
-  }
-
   class configuration;
-  class store_visitor_impl;
-  class restore_visitor_impl;
 
   /**
    * \brief Describes some tool capabilities (e.g. supported protocol version)
@@ -41,16 +33,11 @@ namespace tipi {
    * As well as any information about the controller that might be interesting
    * for a tool developer.
    **/
-  class object : public tipi::parameter {
+  class configuration::object : public configuration::parameter {
     friend class tipi::configuration;
 
     template < typename R, typename S >
     friend class ::utility::visitor;
-
-    public:
-
-      /** \brief convenience type to hide the shared pointer implementation */
-      typedef boost::shared_ptr < object >  sptr;
 
     private:
 
@@ -63,47 +50,35 @@ namespace tipi {
     private:
 
       /** \brief Constructor */
-      inline object();
+      inline object() : m_mime_type("unknown") {
+      }
 
       /** \brief Constructor */
-      inline object(mime_type const&, uri const& = "");
+      inline object(mime_type const& m, uri const& l = "") : m_mime_type(m), m_location(l) {
+      }
 
     public:
 
       /** \brief Returns the object storage format */
-      inline mime_type get_mime_type() const;
+      inline mime_type type() const {
+        return (m_mime_type);
+      }
 
       /** \brief Sets the object storage format */
-      inline void set_mime_type(mime_type const&);
+      inline void type(mime_type const& m) {
+        m_mime_type = m;
+      }
 
       /** \brief Returns the object location */
-      inline uri get_location() const;
+      inline uri location() const {
+        return (m_location);
+      }
 
       /** \brief Sets the object location */
-      inline void set_location(uri const&);
+      inline void location(uri const& l) {
+        m_location = l;
+      }
   };
-
-  inline object::object() : m_mime_type("unknown") {
-  }
-
-  inline object::object(mime_type const& m, uri const& l) : m_mime_type(m), m_location(l) {
-  }
-
-  inline mime_type object::get_mime_type() const {
-    return (m_mime_type);
-  }
-
-  inline void object::set_mime_type(mime_type const& m) {
-    m_mime_type = m;
-  }
-
-  inline uri object::get_location() const {
-    return (m_location);
-  }
-
-  inline void object::set_location(uri const& l) {
-    m_location = l;
-  }
 }
 
 #endif

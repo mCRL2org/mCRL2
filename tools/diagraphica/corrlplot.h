@@ -1,12 +1,12 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./corrlplot.h
-
-// --- corrlplot.h --------------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef CORRLPLOT_H
 #define CORRLPLOT_H
@@ -15,7 +15,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <vector>
-using namespace std;
 #include "diagram.h"
 #include "graph.h"
 #include "utils.h"
@@ -35,22 +34,22 @@ public:
     void setValues(
         const int &idx1,
         const int &idx2,
-        const vector< vector< int > > &mapXY,
-        const vector< vector< int > > &num );
+        const std::vector< std::vector< int > > &mapXY,
+        const std::vector< std::vector< int > > &num );
     void clearValues();
 
   	void setDiagram( Diagram* dgrm );
-        
+
     // -- visualization functions  ----------------------------------
     void visualize( const bool &inSelectMode );
     void drawAxes(
         const bool &inSelectMode,
-        const string &xLbl,
-        const string &yLbl );
+        const std::string &xLbl,
+        const std::string &yLbl );
     void drawLabels( const bool &inSelectMode );
     void drawPlot( const bool &inSelectMode );
     void drawDiagram( const bool &inSelectMode );
-    
+
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
 		const int &x,
@@ -59,7 +58,7 @@ public:
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
-    
+
 protected:
     // -- utility data functions ------------------------------------
     void initLabels();
@@ -77,30 +76,30 @@ protected:
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
+    void processHits(
+        GLint hits,
         GLuint buffer[] );
 
     // -- data members ----------------------------------------------
-    
+
     // data
     int attrIdx1;
     int attrIdx2;
-    string xLabel;
-    string yLabel;
-    vector< vector< int > > mapXToY; // for each x idx, 1 or more y indices
-    vector< vector< int > > number;  // number associated with every entry in mapXToY
-    vector< int > maxNumX;   // for every column, the largest number 
+    std::string xLabel;
+    std::string yLabel;
+    std::vector< std::vector< int > > mapXToY; // for each x idx, 1 or more y indices
+    std::vector< std::vector< int > > number;  // number associated with every entry in mapXToY
+    std::vector< int > maxNumX;   // for every column, the largest number
     int sumMaxNumX;          // sum of entries in maxNumX
-    vector< int > maxNumY;   // for every row, the largest number 
+    std::vector< int > maxNumY;   // for every row, the largest number
     int sumMaxNumY;          // sum of entries in maxNumY
     int maxNumber;           // overall largest number
-    
+
     // vis settings
     int minRadHintPx; // min radius cannot be smaller than this
     int maxRadHintPx; // max radius cannot be smaller than this
-    vector< vector< double > > radii;
-    vector< vector< Position2D > > positions;
+    std::vector< std::vector< double > > radii;
+    std::vector< std::vector< Position2D > > positions;
 
     // diagram
     Diagram*   diagram;         // association, user-defined diagram
@@ -109,7 +108,7 @@ protected:
     bool       showDgrm;        // show or hide diagram
     int        attrValIdx1Dgrm; // value idx of 1st attribute associated with diagram
     int        attrValIdx2Dgrm; // value idx of 2nd attribute associated with diagram
-    string     msgDgrm;        // message to show with diagram
+    std::string     msgDgrm;        // message to show with diagram
 };
 
 #endif

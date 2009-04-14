@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/controller/capabilities.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include <ostream>
 #include <sstream>
@@ -12,7 +16,7 @@
 
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/tool/capabilities.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace tipi {
   namespace controller {
@@ -22,9 +26,9 @@ namespace tipi {
      * \param[in,out] s stream to write to
      * \param[in] c the capabilities object to write out
      **/
-    inline std::ostream& operator << (std::ostream& s, controller::capabilities const& c) {
+    std::ostream& operator << (std::ostream& s, controller::capabilities const& c) {
       visitors::store(c, s);
- 
+
       return (s);
     }
   }

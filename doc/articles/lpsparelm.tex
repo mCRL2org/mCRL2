@@ -27,7 +27,7 @@
 
 \newcommand{\tabw}{\hspace*{15.mm} \= \hspace*{20.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm} \= \hspace*{5.mm} \= \hspace*{5.mm}  \= \hspace*{5.mm}  \= \hspace*{5.mm}\kill}
 
-\font \aap cmmi10        
+\font \aap cmmi10
 \newcommand{\at}[1]{\mbox{\aap ,} #1}
 
 %opening
@@ -56,25 +56,25 @@ will write the output to an output file \ti{output.lps} (in the \ti{.lps} format
 
 \section{Definitions} \label{sec:def}
 
-The equation below is a \lps\ in \mcrl : 
+The equation below is a \lps\ in \mcrl :
 \begin{defn}\lps\ (LPS) \newline
 \begin{tabbing}
 \tab
-$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( \ovr{d, e_i }) \rightarrow 
+$X (\ovr{d: D}) = $ \> \> \> $ \sum_{i \in I} \sum_{\ovr{e_i: E_i}} \ovr{c_i} ( \ovr{d, e_i }) \rightarrow
 (a_i^1 (\ovr{f_{i,1}}(\ovr{d,e_i})) \vert \ldots \vert a_i^{n(i)}(\ovr{f_{i,n(i)}}(\ovr{d,e_i}))) \at \text{ } t_i(\ovr{d,e_i})  \cdot X(\ovr{g_i}(\ovr{d,e_i})) +$ \\ \\
-\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} \ovr{c_j} ( \ovr{d, e_j} ) \rightarrow 
+\> \> \> $ \sum_{j \in J} \sum_{\ovr{e_j: E_j}} \ovr{c_j} ( \ovr{d, e_j} ) \rightarrow
 (a_j^1 (\ovr{f_{j,1}}(\ovr{d,e_j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{d,e_j}))) \at \text{ } t_j(\ovr{d,e_j}) + $ \\ \\
-\> \> \> $\sum_{\ovr{e_\delta}:\ovr{E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow 
-\delta \at \text{ } t_\delta(\ovr{d,e_\delta})$ 
+\> \> \> $\sum_{\ovr{e_\delta}:\ovr{E_\delta}} \ovr{c_\delta} ( \ovr{d, e_\delta}) \rightarrow
+\delta \at \text{ } t_\delta(\ovr{d,e_\delta})$
 \end{tabbing}
 
 Where $I$ and $J$ are disjoint.\\
 \end{defn}
 
-If we speak about an LPS in this article we refer to Definition \ref{sec:def}.  The different states 
-of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPS expresses that in state $\ovr{d}$ it performs (multi)actions $a_i^1, \ldots , a_i^{n(i)}$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and 
+If we speak about an LPS in this article we refer to Definition \ref{sec:def}.  The different states
+of the process are represented by the data vector parameter $\ovr{d}:\ovr{D}$. $\ovr{D}$ may be a Cartesian product of $n$ data types, meaning that $\ovr{d}$ consist of a tuple $(d_1, \ldots, d_n)$. The LPS expresses that in state $\ovr{d}$ it performs (multi)actions $a_i^1, \ldots , a_i^{n(i)}$, carrying data parameters $\ovr{f_{i,1}}(\ovr{d,e_i}), \ldots , \ovr{f_{i,n(i)}}(\ovr{d, e_i})$ and
 it can reach the new state $\ovr{g_i}(\ovr{d ,e_i})$ under the condition that $c_i(\ovr{d , e_i})$ is \ti{true}. So for each summand $i$ from $I$ we have a function $\ovr{g_i}: \ovr{D} \times \ovr{E_i} \rightarrow \ovr{D}$ and a function $c_i: \ovr{D} \times \ovr{E_i} \rightarrow \mathbb{B}$.
-Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to action range over a data domain. 
+Data parameters $\ovr{e_i : E_i}$ are sum variables. These variables are used to action range over a data domain.
 
 For an more detailed explanation of \lps s  we refer to \cite{LPS_info}.
 
@@ -100,7 +100,7 @@ If $j \not\in X$ then $\boxtimes^w_X._j = y \hspace{40pt} \text{where }y \in \ov
 If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 \end{defn}
 
-% \begin{defn}[\texttt{Dom($x$)}] Let $x$ be an variable, then \texttt{Dom$(x)$} is the collection of all values which variable $x$ can be. 
+% \begin{defn}[\texttt{Dom($x$)}] Let $x$ be an variable, then \texttt{Dom$(x)$} is the collection of all values which variable $x$ can be.
 % \end{defn}
 
 \newcommand{\zi}{{\boxtimes}^k_{S_L}}
@@ -116,7 +116,7 @@ If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 %  \> $+ \sum_{j \in J} \sum_{\ovr{e_j:E_j}} c_j ( \ovr{vect^j} ) \rightarrow $
 % $ a_j^1 (\ovr{f_{j,1}}(\ovr{vect^j})) \vert \ldots \vert a_j^{n(j)}(\ovr{f_{j,n(j)}}(\ovr{vect^j})) \at \text{ } t_j(\ovr{vect^j})
 % $ \\
-%  \> $ + \sum_{\ovr{e_\delta:E_\delta}} c_\delta ( \ovr{d, e_\delta}) \rightarrow 
+%  \> $ + \sum_{\ovr{e_\delta:E_\delta}} c_\delta ( \ovr{d, e_\delta}) \rightarrow
 % \delta \at \text{ } t_\delta(\ovr{vect^{\delta}})$ \\
 % \end{tabbing}
 % \end{defn}
@@ -125,23 +125,23 @@ If $j \in X$ then $\boxtimes^w_X._j = \ovr{vect^w}._j$ \\
 $M \bisim L$, with $M$ defined as follows:
 \begin{tabbing}
 \tab
-$Y(\ovr{d:D}) = $ \\ 
+$Y(\ovr{d:D}) = $ \\
 \> \>$\sum_{k \in I} \sum_{\ovr{e_k:E_k}} c_k ( \zi ) \rightarrow $
 $ a_k^1 (\ovr{f_{k,1}}(\zi) \vert \ldots \vert a_k^{n(k)}(\ovr{f_{k,n(k)}}(\zi) \at \text{ } t_{k}(\zi)  \cdot Y(\ovr{g_{k}}(\zi)
 $ \\
 \> $+ $\> $\sum_{l \in J} \sum_{\ovr{e_l:E_L}} c_l ( \zj ) \rightarrow $
 $ a_{l}^1 (\ovr{f_{l,1}}(\zj) \vert \ldots \vert a_{l}^{n(l)}(\ovr{f_{l,n(l)}}(\zj) \at \text{ } t_{l}(\zj)
 $ \\
-\> $ + $ \> $ \sum_{\ovr{e_{\delta}:E_{\delta^1}}} c_{\delta} ( \zd ) \rightarrow 
+\> $ + $ \> $ \sum_{\ovr{e_{\delta}:E_{\delta^1}}} c_{\delta} ( \zd ) \rightarrow
 {\delta} \at \text{ } t_{\delta}(\zd)$\\
 \end{tabbing}
 \end{defn}
 
 \section{Description} \label{sec:desc}
-It is possible having \pps\ which can have any value without influencing the behavior of the LPS. 
-If we look at the next states in an LPS in the LPS-format, we see that the LPS only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So, if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. If we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps\ are used, we keep a set $UsedPP$\footnote{$UsedPP = S_M$ : Due the length off the word $UsedPP$ the Definition \ref{def:lps:M} would get to long and clipped} which contains all indices used \pps . To find all \pps in a condition, action argument or time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, action argument or time tag. 
+It is possible having \pps\ which can have any value without influencing the behavior of the LPS.
+If we look at the next states in an LPS in the LPS-format, we see that the LPS only contains \pps\ which influence the behavior and it omits those \pps\ which do not influence the behavior. So, if \pps\ do not occur in condition, action arguments or time tags, they do not influence the behavior in a direct way. If we collect all \pps , which are used in the condition, action arguments and time tags, we know which \pps\ are used. To indicate which \pps\ are used, we keep a set $UsedPP$\footnote{$UsedPP = S_M$ : Due the length off the word $UsedPP$ the Definition \ref{def:lps:M} would get to long and clipped} which contains all indices used \pps . To find all \pps in a condition, action argument or time tag we have function called $FindUsedPP$. This function returns a set of  \pp\ indices which occur in a given condition, action argument or time tag.
 
-A next state is always used as an input state, to calculate another next state. So for each \pp\ we have to check while  all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices. 
+A next state is always used as an input state, to calculate another next state. So for each \pp\ we have to check while  all \pps\ which are used to construct a next state are in the set of used \pps . If a \pp\ is used as an input and is not in the set of used \pps\ this \pp\ is added to the set of indices.
 Also, we have to check, that all \pps\ on which the added \pp\ depends, are also in the list of used \pps. We continue adding \pps\ dependant on other \pps\ which are also in the set of used \pp\ indices.
 
 In short: Throughout the run of the algorithm \pps\ get marked if they are used in an action, time or condition. Process parameters which are dependant of other marked \pps\ also get marked. If a \pp\ gets marked it should not be removed. Initially, all parameters in the LPS are unmarked. After the algorithm terminates all unmarked \pps\ are removed. A \pp\ gets marked if it occurs in one of the following places:
@@ -202,9 +202,9 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case1.mcrl2"
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i:Nat) = \> a.X(i)\\
-\tb{init} \> X(2); \\  
+\tb{init} \> X(2); \\
 \line(1,0){120}\\
-\ti{Result} \> Process parameter $i$ should be removed.\\ 
+\ti{Result} \> Process parameter $i$ should be removed.\\
 \end{tabbing}
 
 \subsection*{Case 2}
@@ -215,9 +215,9 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case2.mcrl2"
 \line(1,0){120}\\
 \tb{act} \> a: Nat; \\
 \tb{proc} \> X(i,j:Nat) = \> a(i). X(i,j)\\
-\tb{init} \> X(0,1); \\  
+\tb{init} \> X(0,1); \\
 \line(1,0){120}\\
-\ti{Result} \> Process parameter $j$ should be removed.\\ 
+\ti{Result} \> Process parameter $j$ should be removed.\\
 \end{tabbing}
 
 \subsection*{Case 3}
@@ -228,9 +228,9 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case3.mcrl2"
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i,j:Nat) = \> (i == 5 ) $\rightarrow$ a. X(i,j)\\
-\tb{init} \> X(0,1); \\  
+\tb{init} \> X(0,1); \\
 \line(1,0){120}\\
-\ti{Result} \> Process parameter $j$ should be removed.\\ 
+\ti{Result} \> Process parameter $j$ should be removed.\\
 \end{tabbing}
 
 \subsection*{Case 4}
@@ -241,9 +241,9 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case4.mcrl2"
 \line(1,0){120}\\
 \tb{act} \> a; \\
 \tb{proc} \> X(i,j:Nat) = \> a$@$i. X(i,j)\\
-\tb{init} \> X(0,4); \\  
+\tb{init} \> X(0,4); \\
 \line(1,0){120}\\
-\ti{Result} \> Process parameter $j$ should be removed.\\ 
+\ti{Result} \> Process parameter $j$ should be removed.\\
 \end{tabbing}
 
 \subsection*{Case 5}
@@ -256,9 +256,9 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case5.mcrl2"
 \tb{act} \> b; \\
 \tb{proc} \> X(i,j,k:Nat) = \> a(i).X(k,j,k) + \\
           \> \>              b.X(j,j,k);\\
-\tb{init} \> X(1,2,3); \\  
+\tb{init} \> X(1,2,3); \\
 \line(1,0){120}\\
-\ti{Result} \> No process parameters should be removed.\\ 
+\ti{Result} \> No process parameters should be removed.\\
 \end{tabbing}
 
 \subsection*{Case 6}
@@ -273,7 +273,7 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case6.mcrl2"
 \>     Y(i,j: Nat) \> = \> act2(j).Y(i,j+1); \\
 \tb{init} X(0); \\
 \line(1,0){120}\\
-\ti{Result} \> No \pp\ should be removed.\\ 
+\ti{Result} \> No \pp\ should be removed.\\
 \> \textbf{Note:} Different linearization might lead to other results.\\
 \line(1,0){120}\\
 \ti{Genarated LPS} \\
@@ -305,7 +305,7 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case7.mcrl2"
           \>               \>  \> (i == 5) $\rightarrow$ act3(i).X(i, j, 4); \\
 \tb{init} X(0,5, 1);\\
 \line(1,0){120}\\
-\ti{Result} \> No \pp\ should be removed.\\ 
+\ti{Result} \> No \pp\ should be removed.\\
 \line(1,0){120}\\
 \ti{Genarated LPS} \\
 \>  \verb" proc P(i,z,j: Nat) ="\\
@@ -319,7 +319,7 @@ inputfile: \verb"$DIR$/tests/lpsparelm/case7.mcrl2"
 \>  \verb" init P(i := 0, z := Pos2Nat(5), j := Pos2Nat(1));"\\
 \end{tabbing}
 
-\begin{thebibliography}{99}  
+\begin{thebibliography}{99}
    \bibitem{LPS_info} unknown author \\
    \textit{Article not ready at the moment},
   \bibitem{LPSframework} J.W. Wesselink,

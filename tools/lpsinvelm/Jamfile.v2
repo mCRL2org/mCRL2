@@ -1,15 +1,6 @@
-project lpsinvelm
-  : build-dir $(BUILD_TOP)/lpsinvelm
-  ;
+project lpsinvelm ;
 
-exe lpsinvelm
+tool lpsinvelm
        : lpsinvelm.cpp
-         /libraries//parser
-         /libraries//prover
-       : <include>.
-         <toolset>msvc:<library>/libraries//getopt
-#         <toolset>gcc:<define>CVC_LITE_LIB
+         /libraries//lps
        ;
-
-install-binaries install
-       : lpsinvelm ;

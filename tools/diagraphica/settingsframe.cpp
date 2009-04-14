@@ -1,13 +1,14 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./settingsframe.cpp
 
-// --- settingsframe.cpp --------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
-
+#include "wx.hpp" // precompiled headers
 
 #include "settingsframe.h"
 
@@ -26,15 +27,15 @@ SettingsFrame::SettingsFrame(
     : PopupFrame(
         m,
         parent,
-        id, 
+        id,
         title,
-        position, 
+        position,
         size )
 // --------------------------
 {
     SetMinSize( size );
     SetMaxSize( size );
-    
+
     initFrame();
 }
 
@@ -46,7 +47,7 @@ SettingsFrame::~SettingsFrame()
 
 
 // -- GUI initialization --------------------------------------------
-    
+
 
 // ----------------------------
 void SettingsFrame::initFrame()
@@ -54,7 +55,7 @@ void SettingsFrame::initFrame()
 {
     sizerFrame = new wxBoxSizer( wxVERTICAL );
     this->SetSizer( sizerFrame );
-    
+
     panelNotebook = new wxScrolledWindow( this, wxID_ANY );
     panelNotebook->SetWindowStyle( wxSUNKEN_BORDER );
     sizerFrame->Add( panelNotebook, 1 , wxEXPAND );
@@ -69,6 +70,9 @@ void SettingsFrame::initFrame()
         notebook,
         1,
         wxEXPAND );
+
+    submitButton = new wxButton(panelNotebook, ID_BUTTON_SUBMIT, wxString( wxT( "Submit")), wxDefaultPosition, wxDefaultSize );
+    sizerNotebook->Add(submitButton, 0);
 
     initPanelGeneral();
     initPanelClustTree();
@@ -112,57 +116,57 @@ void SettingsFrame::initPanelGeneral()
         this,
         ID_BUTTON_COL_BG );
     buttonColorBG->SetSizeHints(
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ),
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ) );
     buttonColorBG->SetWindowStyle( wxSIMPLE_BORDER );
     buttonColorBG->SetBackgroundColour( colBG );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelGeneral,
             wxID_ANY,
             wxString( wxT( "Background color") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         buttonColorBG,
         0,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
 
     // text color
     buttonColorTxt = new wxColorButton(
         panelGeneral,
-        this, 
+        this,
         ID_BUTTON_COL_TXT );
     buttonColorTxt->SetSizeHints(
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ),
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ) );
     buttonColorTxt->SetWindowStyle( wxSIMPLE_BORDER );
     buttonColorTxt->SetBackgroundColour( colTxt );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelGeneral,
             wxID_ANY,
             wxString( wxT( "Text color")  ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         buttonColorTxt,
         0,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -188,18 +192,18 @@ void SettingsFrame::initPanelGeneral()
         sizeVals );
     comboBoxSizeTxt->SetValue( sizeVal );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelGeneral,
             wxID_ANY,
             wxString( wxT("Text size") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         comboBoxSizeTxt,
         0,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -215,21 +219,21 @@ void SettingsFrame::initPanelGeneral()
         wxButton::GetDefaultSize(),
         wxButton::GetDefaultSize() );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelGeneral,
             wxID_ANY,
             wxString( wxT( "Animation speed")  ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         spinCtrlAnimSpd,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
-    
+
     sizer = NULL;
 }
 
@@ -281,18 +285,18 @@ void SettingsFrame::initPanelClustTree()
         wxString( wxT("") ) );
     checkBoxShowCT->SetValue( show );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelClustTree,
             wxID_ANY,
             wxString( wxT( "Show") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         checkBoxShowCT,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxALL,
         10 );
 
@@ -303,18 +307,18 @@ void SettingsFrame::initPanelClustTree()
         wxString( wxT("") ) );
     checkBoxAnnotateCT->SetValue( annotate );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelClustTree,
             wxID_ANY,
             wxString( wxT( "Annotate" ) ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         checkBoxAnnotateCT,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -337,18 +341,18 @@ void SettingsFrame::initPanelClustTree()
         colVals );
     comboBoxColMap->SetValue( colVal );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelClustTree,
             wxID_ANY,
             wxString( wxT("Color mapping" ) ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         comboBoxColMap,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -385,21 +389,21 @@ void SettingsFrame::initPanelBarTree()
         wxString( wxT("") ) );
     checkBoxShowBT->SetValue( show );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelBarTree,
             wxID_ANY,
             wxString( wxT( "Show" ) ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         checkBoxShowBT,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxALL,
         10 );
-    
+
     // magnification
     spinCtrlMagnBT = new wxSpinCtrlFloat(
         panelBarTree,
@@ -412,21 +416,21 @@ void SettingsFrame::initPanelBarTree()
         wxButton::GetDefaultSize(),
         wxButton::GetDefaultSize() );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelBarTree,
             wxID_ANY,
             wxString( wxT( "Magnification" ) ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         spinCtrlMagnBT,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
-    
+
     sizer = NULL;
 }
 
@@ -440,10 +444,10 @@ void SettingsFrame::initPanelArcDiagram()
     bool     showArcs;
     wxColour colBndl;
     double   trspBndl;
-    mediator->getSettingsArcDiagram( 
-        showNodes, 
-        showArcs, 
-        colBndl, 
+    mediator->getSettingsArcDiagram(
+        showNodes,
+        showArcs,
+        colBndl,
         trspBndl );
 
     // init panel
@@ -466,18 +470,18 @@ void SettingsFrame::initPanelArcDiagram()
         wxString( wxT( "" ) ) );
     checkBoxShowNodes->SetValue( showNodes );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelArcDiagram,
             wxID_ANY,
             wxString( wxT( "Show nodes" ) ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         checkBoxShowNodes,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxALL,
         10 );
 
@@ -488,18 +492,18 @@ void SettingsFrame::initPanelArcDiagram()
         wxString( wxT( "" ) ) );
     checkBoxShowArcs->SetValue( showArcs );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelArcDiagram,
             wxID_ANY,
             wxString( wxT( "Show arcs") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         checkBoxShowArcs,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -509,27 +513,27 @@ void SettingsFrame::initPanelArcDiagram()
         this,
         ID_BUTTON_COL_ARCS );
     buttonColorArcs->SetSizeHints(
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ),
-        wxSize( 
+        wxSize(
             wxButton::GetDefaultSize().GetHeight(),
 		    wxButton::GetDefaultSize().GetHeight() ) );
     buttonColorArcs->SetWindowStyle( wxSIMPLE_BORDER );
     buttonColorArcs->SetBackgroundColour( colBndl );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelArcDiagram,
             wxID_ANY,
             wxString( wxT("Arc color") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         buttonColorArcs,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -544,18 +548,18 @@ void SettingsFrame::initPanelArcDiagram()
         wxButton::GetDefaultSize(),
         wxButton::GetDefaultSize() );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelArcDiagram,
             wxID_ANY,
             wxString( wxT("Arc transparency") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
     sizer->Add(
         spinCtrlTrspArcs,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxLEFT | wxRIGHT | wxBOTTOM,
         10 );
 
@@ -595,7 +599,7 @@ void SettingsFrame::initPanelSimulator()
     wxFlexGridSizer* sizer = new wxFlexGridSizer( 2 );
     sizer->AddGrowableCol( 1 );
     panelSimulator->SetSizer( sizer );
-    
+
     // blend mode
     wxArrayString blendVals;
     blendVals.Add( wxString( wxT( "Hard transition" ) ) );
@@ -603,7 +607,7 @@ void SettingsFrame::initPanelSimulator()
     blendVals.Add( wxString( wxT( "Concave" ) ) );
     blendVals.Add( wxString( wxT( "Convex") ) );
     blendVals.Add( wxString( wxT( "Oscillate") ) );
-    
+
     comboBoxBlendType = new wxComboBox(
         panelSimulator,
         ID_COMBO_BOX_BLEND_TYPE,
@@ -613,18 +617,18 @@ void SettingsFrame::initPanelSimulator()
         blendVals );
     comboBoxBlendType->SetValue( blendVal );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelSimulator,
             wxID_ANY,
             wxString( wxT( "Blend type") ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         comboBoxBlendType,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxALL,
         10 );
 
@@ -659,18 +663,18 @@ void SettingsFrame::initPanelTrace()
         wxString( "" ) );
     checkBoxUseShading->SetValue( useShading );
     sizer->Add(
-        new wxStaticText( 
+        new wxStaticText(
             panelTrace,
             wxID_ANY,
             wxString( "Use shading" ) ),
         1,
-        wxEXPAND | 
+        wxEXPAND |
         wxALL,
         10 );
     sizer->Add(
         checkBoxUseShading,
         1,
-        wxEXPAND  | 
+        wxEXPAND  |
         wxALL,
         10 );
     */
@@ -692,7 +696,7 @@ void SettingsFrame::initPanelDgrmEditor()
 
 
 // -- set functions -------------------------------------------------
-    
+
 
 // -----------------------------
 void SettingsFrame::setGeneral()
@@ -757,12 +761,23 @@ void SettingsFrame::setDgrmEditor()
 void SettingsFrame::onButton( wxCommandEvent &e )
 // ----------------------------------------------
 {
-    if ( e.GetId() == ID_BUTTON_COL_BG )
+    if( e.GetId() == ID_BUTTON_SUBMIT)
+    {
+	updateSettingsGeneral();
+	updateSettingsClustTree();
+	updateSettingsBarTree();
+	updateSettingsArcDiagram();
+	updateSettingsTrace();
+	updateSettingsSimulator();
+	updateSettingsDgrmEditor();
+	this->Close( false );
+    }
+    /*else if ( e.GetId() == ID_BUTTON_COL_BG )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_BUTTON_COL_TXT )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_BUTTON_COL_ARCS )
-        updateSettingsArcDiagram();
+        updateSettingsArcDiagram();*/
 }
 
 
@@ -770,7 +785,7 @@ void SettingsFrame::onButton( wxCommandEvent &e )
 void SettingsFrame::onCheckBox( wxCommandEvent &e )
 // ------------------------------------------------
 {
-    if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
+    /*if ( e.GetId() == ID_CHECK_BOX_SHOW_CT )
         updateSettingsClustTree();
     if ( e.GetId() == ID_CHECK_BOX_ANNOTATE_CT )
         updateSettingsClustTree();
@@ -781,7 +796,7 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
     else if ( e.GetId() == ID_CHECK_BOX_SHOW_NODES )
         updateSettingsArcDiagram();
     else if ( e.GetId() == ID_CHECK_BOX_USE_SHADING )
-        updateSettingsTrace();
+        updateSettingsTrace();*/
 }
 
 
@@ -789,12 +804,12 @@ void SettingsFrame::onCheckBox( wxCommandEvent &e )
 void SettingsFrame::onComboBox( wxCommandEvent &e )
 // ------------------------------------------------
 {
-    if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
+    /*if ( e.GetId() == ID_COMBO_BOX_SIZE_TXT )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_COMBO_BOX_COL_MAP )
         updateSettingsClustTree();
     else if ( e.GetId() == ID_COMBO_BOX_BLEND_TYPE )
-        updateSettingsSimulator();
+        updateSettingsSimulator();*/
 }
 
 
@@ -802,12 +817,12 @@ void SettingsFrame::onComboBox( wxCommandEvent &e )
 void SettingsFrame::onSpinCtrl( wxSpinEvent &e )
 // ---------------------------------------------
 {
-    if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )
+    /*if ( e.GetId() == ID_SPIN_CTRL_ANIM_SPD )
         updateSettingsGeneral();
     else if ( e.GetId() == ID_SPIN_CTRL_MAGN_BT )
         updateSettingsBarTree();
     else if ( e.GetId() == ID_SPIN_CTRL_TRSP_ARCS )
-        updateSettingsArcDiagram();
+        updateSettingsArcDiagram();*/
 }
 
 
@@ -821,7 +836,7 @@ void SettingsFrame::updateSettingsGeneral()
     wxColour colClr = buttonColorBG->GetBackgroundColour();
     wxColour colTxt = buttonColorTxt->GetBackgroundColour();
     wxString szeVal = comboBoxSizeTxt->GetValue();
-    int szeTxt      = Utils::strToInt( string(szeVal.fn_str()) );
+    int szeTxt      = Utils::strToInt( std::string(szeVal.fn_str()) );
     double spdAnim  = spinCtrlAnimSpd->GetValue();
     mediator->setSettingsGeneral( colClr, colTxt, szeTxt, spdAnim );
 }
@@ -863,7 +878,7 @@ void SettingsFrame::updateSettingsBarTree()
 {
     bool   show = checkBoxShowBT->GetValue();
     double magn = spinCtrlMagnBT->GetValue();
-    
+
     mediator->setSettingsBarTree( show, magn );
 }
 
@@ -874,7 +889,7 @@ void SettingsFrame::updateSettingsArcDiagram()
 {
     bool     showNodes = checkBoxShowNodes->GetValue();
     bool     showArcs  = checkBoxShowArcs->GetValue();
-    wxColour colArcs   = buttonColorArcs->GetBackgroundColour(); 
+    wxColour colArcs   = buttonColorArcs->GetBackgroundColour();
     double   trspArcs  = spinCtrlTrspArcs->GetValue();
 
     mediator->setSettingsArcDiagram(
@@ -891,9 +906,9 @@ void SettingsFrame::updateSettingsSimulator()
 {
     wxString blendVal;
     int blendType;
-    
+
     blendVal   = comboBoxBlendType->GetValue();
-    
+
     if ( blendVal == wxT("Hard transition") )
         blendType = VisUtils::BLEND_HARD;
     else if ( blendVal == wxT( "Linear") )
@@ -913,9 +928,9 @@ void SettingsFrame::updateSettingsSimulator()
 void SettingsFrame::updateSettingsTrace()
 // --------------------------------------
 {
-    bool useShading;
+    /*bool useShading;
     useShading = checkBoxUseShading->GetValue();
-    mediator->setSettingsTrace( useShading );
+    mediator->setSettingsTrace( useShading );*/
 }
 
 
@@ -929,7 +944,8 @@ void SettingsFrame::updateSettingsDgrmEditor()
 
 
 BEGIN_EVENT_TABLE( SettingsFrame, PopupFrame )
-EVT_BUTTON( ID_BUTTON_COL_BG, SettingsFrame::onButton )
+    EVT_BUTTON( ID_BUTTON_SUBMIT, SettingsFrame::onButton )
+    EVT_BUTTON( ID_BUTTON_COL_BG, SettingsFrame::onButton )
     EVT_BUTTON( ID_BUTTON_COL_TXT, SettingsFrame::onButton )
     EVT_COMBOBOX( ID_COMBO_BOX_SIZE_TXT, SettingsFrame::onComboBox )
     EVT_SPINCTRL( ID_SPIN_CTRL_ANIM_SPD, SettingsFrame::onSpinCtrl )

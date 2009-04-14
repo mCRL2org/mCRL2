@@ -2,13 +2,15 @@ import testing ;
 
 project libraries/aterm/test
    : requirements
-       <dependency>/boost//headers
-       <dependency>/libraries//atermpp
+       <use>/site-config//boost
+       <use>/libraries//atermpp
+       <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//aterm
    ;
 
 test-suite aterm
     :
+      [ run aterm_traits_test.cpp ]
       [ run make_match_test.cpp ]
       [ run aterm_list_test.cpp ]
       [ run aterm_test.cpp ]

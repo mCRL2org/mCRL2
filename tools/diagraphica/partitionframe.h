@@ -1,18 +1,16 @@
-//  Copyright 2007 A.j. (Hannes) pretorius. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): A.J. (Hannes) Pretorius
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file ./partitionframe.h
-
-// --- partitionframe.h ---------------------------------------------
-// (c) 2007  -  A.J. Pretorius  -  Eindhoven University of Technology
-// ---------------------------  *  ----------------------------------
 
 #ifndef PARTITIONFRAME_H
 #define PARTITIONFRAME_H
 
-#include <vector>
-using namespace std;
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include "attribute.h"
@@ -45,7 +43,7 @@ protected:
     void onComboBox( wxCommandEvent &e );
     void onSpinCtrl( wxSpinEvent &e );
     void onSpinCtrlText( wxCommandEvent &e );
-    
+
 private:
     // -- utility functions -----------------------------------------
     // INSERT
@@ -69,7 +67,7 @@ private:
 
     wxBoxSizer*       sizerPanel;
     wxFlexGridSizer*  sizerTop;
-    
+
     wxSpinCtrl*       spinCtrlNumber;
     wxComboBox*       comboBoxMethod;
     GLCanvas*         canvas;
@@ -82,9 +80,9 @@ private:
         ID_SPIN_CTRL_NUMBER,
         ID_COMBO_BOX_METHOD,
         ID_BUTTON_CANCEL,
-        ID_BUTTON_OK,
+        ID_BUTTON_OK
     };
-    
+
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

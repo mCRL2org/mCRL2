@@ -1,23 +1,17 @@
 // Author(s): Luc Engelen
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file source/bdd2dot.cpp
-/// \brief Add your file description here.
 
-// Implementation of class BDD2Dot
-// file: bdd2dot.cpp
-
-#include "libstruct.h"
-#include "libprint_c.h"
+#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/utilities/bdd2dot.h"
-#include "print/messaging.h"
+#include "mcrl2/core/messaging.h"
 
-#ifdef __cplusplus
-using namespace ::mcrl2::utilities;
-#endif
+using namespace mcrl2::core;
 
 // Class BDD2Dot --------------------------------------------------------------------------------
   // Class BDD2Dot - Functions declared private -------------------------------------------------
@@ -61,7 +55,7 @@ using namespace ::mcrl2::utilities;
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
 
-    void BDD2Dot::output_bdd(ATermAppl a_bdd, char* a_file_name) {
+    void BDD2Dot::output_bdd(ATermAppl a_bdd, char const* a_file_name) {
       f_visited = ATtableCreate(200, 75);
       f_node_number = 0;
       f_dot_file = fopen(a_file_name, "w");

@@ -1,8 +1,12 @@
-//  Copyright 2007 Jeroen van der Wulp. Distributed under the Boost
-//  Software License, Version 1.0. (See accompanying file
-//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+// Author(s): Jeroen van der Wulp
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
-/// \file source/tool/capabilities.cpp
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
+#include "boost.hpp" // precompiled headers
 
 #include <ostream>
 #include <sstream>
@@ -12,10 +16,11 @@
 
 #include "tipi/controller/capabilities.hpp"
 #include "tipi/tool/capabilities.hpp"
-#include "tipi/visitors.hpp"
+#include "tipi/detail/visitors.hpp"
 
 namespace tipi {
   namespace tool {
+    /// \cond INTERNAL
     /**
      * \brief Operator for writing to stream
      *
@@ -24,60 +29,72 @@ namespace tipi {
      **/
     std::ostream& operator << (std::ostream& s, tool::capabilities const& t) {
       visitors::store(t, s);
- 
+
       return (s);
     }
 
+    /// \endcond
+
     capabilities::capabilities(const version v) : m_protocol_version(v) {
     }
- 
+
     /**
      * \param[in] id a unique identifier for the input object
      * \param[in] f mime-type for the object
      * \param[in] c category to which the functionality of the tool must be counted
      **/
-    void capabilities::add_input_combination(std::string const& id, mime_type const& f, tool::category const& c) {
-      input_combination ic(c, f, id);
- 
-      m_input_combinations.insert(ic);
+    void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category::standard_category_type c) {
+      boost::shared_ptr< const input_configuration > ic(new input_configuration(tool::category::standard_categories()[c], f, id));
+
+      m_input_configurations.insert(ic);
     }
- 
+
+    /**
+     * \param[in] id a unique identifier for the input object
+     * \param[in] f mime-type for the object
+     * \param[in] c category to which the functionality of the tool must be counted
+     **/
+    void capabilities::add_input_configuration(std::string const& id, mime_type const& f, const tool::category& c) {
+      boost::shared_ptr< const input_configuration > ic(new input_configuration(c, f, id));
+
+      m_input_configurations.insert(ic);
+    }
+
     /**
      * \param[in] id a unique identifier for the output object
      * \param[in] f mime-type for the object
      **/
-    void capabilities::add_output_combination(std::string const& id, mime_type const& f) {
-      output_combination oc(f, id);
- 
-      m_output_combinations.insert(oc);
+    void capabilities::add_output_configuration(std::string const& id, mime_type const& f) {
+      boost::shared_ptr< const output_configuration > oc(new output_configuration(f, id));
+
+      m_output_configurations.insert(oc);
     }
- 
+
     version capabilities::get_version() const {
       return (m_protocol_version);
     }
- 
-    capabilities::input_combination_range capabilities::get_input_combinations() const {
-      return (boost::make_iterator_range(m_input_combinations));
+
+    capabilities::input_configuration_range capabilities::get_input_configurations() const {
+      return (boost::make_iterator_range(m_input_configurations));
     }
- 
-    capabilities::output_combination_range capabilities::get_output_combinations() const {
-      return (boost::make_iterator_range(m_output_combinations));
+
+    capabilities::output_configuration_range capabilities::get_output_configurations() const {
+      return (boost::make_iterator_range(m_output_configurations));
     }
 
     /**
      * \param[in] f the storage format
      * \param[in] t the category in which the tool operates
      **/
-    capabilities::input_combination const*
-              capabilities::find_input_combination(const mime_type& f, const tool::category& t) const {
- 
-      for (input_combination_list::const_iterator i = m_input_combinations.begin(); i != m_input_combinations.end(); ++i) {
-        if (i->m_category == t && i->m_mime_type == f) {
-          return (&(*i));
+    boost::shared_ptr< const capabilities::input_configuration >
+              capabilities::find_input_configuration(const mime_type& f, const tool::category& t) const {
+      for (input_configuration_list::const_iterator i = m_input_configurations.begin(); i != m_input_configurations.end(); ++i) {
+        if ((*i)->get_category() == t && (*i)->get_primary_object_descriptor().second == f) {
+          return *i;
         }
       }
 
-      return (0);
+      return boost::shared_ptr< const input_configuration >();
     }
   }
 }

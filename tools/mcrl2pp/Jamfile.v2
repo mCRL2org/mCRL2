@@ -1,0 +1,8 @@
+project toolset/mcrl2pp ;
+
+tool mcrl2pp
+       : mcrl2pp.cpp
+         /libraries//core
+         /libraries/utilities//command_line_interfacing
+       : <status>experimental
+       ;

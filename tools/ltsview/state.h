@@ -1,11 +1,13 @@
 // Author(s): Bas Ploeger and Carst Tankink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file state.h
-/// \brief Add your file description here.
+/// \brief Header file for State class
 
 #ifndef STATE_H
 #define STATE_H
@@ -14,97 +16,105 @@
 #include <set>
 #include "utils.h"
 
-#ifndef TRANSITION_H
-  #include "transition.h"
-#else
-  class Transition;
-#endif
-
-#ifndef CLUSTER_H
-  #include "cluster.h"
-#else
-  class Cluster;
-#endif
+class Transition;
+class Cluster;
 
 class State {
   public:
-    State();
+    State(int aid);
     ~State();
-    void      addComrade( State* s );
-    void      addInTransition( Transition* trans );
-    void      addLoop( Transition* trans );
-    void      addOutTransition( Transition* trans );
-    void      addParameterValue(int valindex);
-    void      addSubordinate( State* s );
-    void      addSuperior( State* s );
-    void      clearHierarchyInfo();
-    void      deselect();
-    void      DFSfinish();
-    void      DFSclear();
-    void      DFSvisit();
-    Utils::DFSState  getVisitState() const;
+    void addInTransition(Transition* trans);
+    void addLoop(Transition* trans);
+    void addOutTransition(Transition* trans);
+    void center();
+    void deselect();
 
-    Cluster*  getCluster() const;
-    void      getComrades( std::set< State* > &ss ) const;
-    int       getID();
-    void      getInTransitions( std::vector< Transition* > &ts ) const;
-    void      getOutTransitions( std::vector< Transition* > &ts ) const;
-    Transition* getOutTransitioni( int i) const;
-    int       getNumOutTransitions() const;
-    void      getLoops( std::vector< Transition* > &ls ) const;
-    Transition* getLoopi( int i ) const;
-    int       getNumberOfLoops() const;
+    Cluster* getCluster() const;
+    int getID();
+    Transition* getInTransition(int i) const;
+    Transition* getOutTransition(int i) const;
+    Transition* getLoop(int i) const;
+    int getNumInTransitions() const;
+    int getNumOutTransitions() const;
+    int getNumLoops() const;
 
-    float     getPosition() const;
+    float getPositionAngle() const;
+    float getPositionRadius() const;
     Utils::Point3D getPositionAbs() const;
     Utils::Point3D getOutgoingControl() const;
     Utils::Point3D getIncomingControl() const;
-    int	      getRank() const;
-    bool      isSimulated() const;
-    int       getSlot() const;
-    void      getSubordinates( std::set< State* > &ss ) const;
-    void      getSuperiors( std::set< State* > &ss ) const;
-    int	      getParameterValue(int parindex);
-    bool      isDeadlock() const;
-    bool      isMarked() const;
-    bool      isSelected() const;
-    void      mark();
-    void      select();
-    void      setCluster( Cluster* c );
-    void      setPosition( float p );
-    void      setPositionAbs( Utils::Point3D p );
-    void      setOutgoingControl( Utils::Point3D p);
-    void      setIncomingControl( Utils::Point3D p);
-    void      setID(int id);
-    void      setRank( int r );
-    void      setSlot( int s );
-    void      setSimulated(bool simulated);
-    void      unmark();
-   
+    Utils::Point3D getLoopControl1() const;
+    Utils::Point3D getLoopControl2() const;
+    int getRank() const;
+    bool isSimulated() const;
+    bool isCentered() const;
+    bool isDeadlock() const;
+    bool isSelected() const;
+    bool hasTextures() const;
+
+    void addMatchedRule(int mr);
+    bool removeMatchedRule(int mr);
+    void getMatchedRules(std::vector< int > &mrs);
+    int getNumMatchedRules();
+    //unsigned int getNumMatchedRules() const;
+    //bool isMarked() const;
+    //void setMarking(bool b);
+    //void setMarkAllEmpty(bool b);
+    // Adds mr to the rules matched by this state, and returns the total number
+    // of rules matched.
+    //int mark(Utils::MarkRule* mr);
+    // Removes mr from the rules matched by this state (if any) and returns the
+    // total number of rules matched.
+    //int unmark(Utils::MarkRule* mr);
+
+    void select();
+    void setCluster(Cluster* c);
+    void setPositionAngle(float a);
+    void setPositionRadius(float r);
+    void setPositionAbs(Utils::Point3D &p);
+    void setOutgoingControl(Utils::Point3D &p);
+    void setIncomingControl(Utils::Point3D &p);
+    void setLoopControl1(Utils::Point3D &p);
+    void setLoopControl2(Utils::Point3D &p);
+    void setID(int id);
+    void setRank(int r);
+    void setSimulated(bool simulated);
+
+    void setZoomLevel(const int i);
+    int getZoomLevel() const;
+
+    void addForce(Utils::Point3D f);
+    Utils::Point3D getForce();
+    void resetForce();
+    Utils::Vect getVelocity();
+    void resetVelocity();
+    void setVelocity(Utils::Vect v);
+
   private:
-    Cluster*		  cluster;
-    std::set< State* >	  comrades;
-    //float		  currentProbability;
-    int	                  id;
+    Cluster* cluster;
+    int id;
+    int zoomLevel;
     std::vector< Transition* > inTransitions;
     std::vector< Transition* > loops;
-    bool		  marked;
-    //float		  probability;
     std::vector< Transition* > outTransitions;
-    float		  position;
-    Utils::Point3D	  positionAbs;
-    Utils::Point3D        outgoingControl;
-    Utils::Point3D        incomingControl;
-    int			  rank;
-    bool                  simulated;
-    int                   slot; // The slot this state occupies
-    std::vector< int >    stateVector;
-    std::set< State* >	  subordinates;
-    std::set< State* >	  superiors;
-    Utils::DFSState       visitState;
-    bool                  selected;
+    std::set< int > matchedRules;
+    /*
+    std::vector< Utils::MarkRule* > rulesMatched;
+    bool marked;
+    bool markAllEmpty;*/
 
-
+    float positionAngle;
+    float positionRadius;
+    Utils::Point3D positionAbs;
+    Utils::Point3D outgoingControl;
+    Utils::Point3D incomingControl;
+    Utils::Point3D loopControl1;
+    Utils::Point3D loopControl2;
+    int rank;
+    bool simulated;
+    bool selected;
+    Utils::Point3D force;
+    Utils::Vect velocity;
 };
 
 #endif //STATE_H

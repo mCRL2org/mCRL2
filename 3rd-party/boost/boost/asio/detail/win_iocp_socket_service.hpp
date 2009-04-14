@@ -2,7 +2,7 @@
 // win_iocp_socket_service.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2007 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -24,6 +24,7 @@
 #include <boost/asio/detail/push_options.hpp>
 #include <cstring>
 #include <boost/shared_ptr.hpp>
+#include <boost/type_traits/is_same.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/asio/detail/pop_options.hpp>
 
@@ -57,7 +58,7 @@ public:
   typedef typename Protocol::endpoint endpoint_type;
 
   // Base class for all operations.
-  typedef win_iocp_operation operation;
+  typedef win_iocp_io_service::operation operation;
 
   struct noop_deleter { void operator()(void*) {} };
   typedef boost::shared_ptr<void> shared_cancel_token_type;
@@ -113,6 +114,9 @@ public:
     endpoint_type remote_endpoint_;
   };
 
+  // The type of the reactor used for connect operations.
+  typedef detail::select_reactor<true> reactor_type;
+
   // The implementation type of the socket.
   class implementation_type
   {
@@ -138,7 +142,7 @@ public:
     enum
     {
       enable_connection_aborted = 1, // User wants connection_aborted errors.
-      user_set_linger = 2, // The user set the linger option.
+      close_might_block = 2, // User set linger option for blocking close.
       user_set_non_blocking = 4 // The user wants a non-blocking socket.
     };
 
@@ -156,22 +160,24 @@ public:
     // The protocol associated with the socket.
     protocol_type protocol_;
 
+    // Per-descriptor data used by the reactor.
+    reactor_type::per_descriptor_data reactor_data_;
+
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // The ID of the thread from which it is safe to cancel asynchronous
     // operations. 0 means no asynchronous operations have been started yet.
     // ~0 means asynchronous operations have been started from more than one
     // thread, and cancellation is not supported for the socket.
     DWORD safe_cancellation_thread_id_;
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Pointers to adjacent socket implementations in linked list.
     implementation_type* next_;
     implementation_type* prev_;
   };
 
-  // The type of the reactor used for connect operations.
-  typedef detail::select_reactor<true> reactor_type;
-
   // The maximum number of buffers to support in a single operation.
-  enum { max_buffers = 16 };
+  enum { max_buffers = 64 < max_iov_len ? 64 : max_iov_len };
 
   // Constructor.
   win_iocp_socket_service(boost::asio::io_service& io_service)
@@ -193,7 +199,7 @@ public:
     while (impl)
     {
       boost::system::error_code ignored_ec;
-      close(*impl, ignored_ec);
+      close_for_destruction(*impl);
       impl = impl->next_;
     }
   }
@@ -204,7 +210,9 @@ public:
     impl.socket_ = invalid_socket;
     impl.flags_ = 0;
     impl.cancel_token_.reset();
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     impl.safe_cancellation_thread_id_ = 0;
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Insert implementation into linked list of all implementations.
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
@@ -218,34 +226,7 @@ public:
   // Destroy a socket implementation.
   void destroy(implementation_type& impl)
   {
-    if (impl.socket_ != invalid_socket)
-    {
-      // Check if the reactor was created, in which case we need to close the
-      // socket on the reactor as well to cancel any operations that might be
-      // running there.
-      reactor_type* reactor = static_cast<reactor_type*>(
-            interlocked_compare_exchange_pointer(
-              reinterpret_cast<void**>(&reactor_), 0, 0));
-      if (reactor)
-        reactor->close_descriptor(impl.socket_);
-
-      if (impl.flags_ & implementation_type::user_set_linger)
-      {
-        ::linger opt;
-        opt.l_onoff = 0;
-        opt.l_linger = 0;
-        boost::system::error_code ignored_ec;
-        socket_ops::setsockopt(impl.socket_,
-            SOL_SOCKET, SO_LINGER, &opt, sizeof(opt), ignored_ec);
-      }
-
-      boost::system::error_code ignored_ec;
-      socket_ops::close(impl.socket_, ignored_ec);
-      impl.socket_ = invalid_socket;
-      impl.flags_ = 0;
-      impl.cancel_token_.reset();
-      impl.safe_cancellation_thread_id_ = 0;
-    }
+    close_for_destruction(impl);
 
     // Remove implementation from linked list of all implementations.
     boost::asio::detail::mutex::scoped_lock lock(mutex_);
@@ -275,7 +256,8 @@ public:
       return ec;
 
     HANDLE sock_as_handle = reinterpret_cast<HANDLE>(sock.get());
-    iocp_service_.register_handle(sock_as_handle);
+    if (iocp_service_.register_handle(sock_as_handle, ec))
+      return ec;
 
     impl.socket_ = sock.release();
     impl.flags_ = 0;
@@ -296,7 +278,8 @@ public:
       return ec;
     }
 
-    iocp_service_.register_handle(native_socket.as_handle());
+    if (iocp_service_.register_handle(native_socket.as_handle(), ec))
+      return ec;
 
     impl.socket_ = native_socket;
     impl.flags_ = 0;
@@ -325,7 +308,7 @@ public:
             interlocked_compare_exchange_pointer(
               reinterpret_cast<void**>(&reactor_), 0, 0));
       if (reactor)
-        reactor->close_descriptor(impl.socket_);
+        reactor->close_descriptor(impl.socket_, impl.reactor_data_);
 
       if (socket_ops::close(impl.socket_, ec) == socket_error_retval)
         return ec;
@@ -333,7 +316,9 @@ public:
       impl.socket_ = invalid_socket;
       impl.flags_ = 0;
       impl.cancel_token_.reset();
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
       impl.safe_cancellation_thread_id_ = 0;
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
     }
 
     ec = boost::system::error_code();
@@ -353,7 +338,38 @@ public:
     if (!is_open(impl))
     {
       ec = boost::asio::error::bad_descriptor;
+      return ec;
     }
+    else if (FARPROC cancel_io_ex_ptr = ::GetProcAddress(
+          ::GetModuleHandleA("KERNEL32"), "CancelIoEx"))
+    {
+      // The version of Windows supports cancellation from any thread.
+      typedef BOOL (WINAPI* cancel_io_ex_t)(HANDLE, LPOVERLAPPED);
+      cancel_io_ex_t cancel_io_ex = (cancel_io_ex_t)cancel_io_ex_ptr;
+      socket_type sock = impl.socket_;
+      HANDLE sock_as_handle = reinterpret_cast<HANDLE>(sock);
+      if (!cancel_io_ex(sock_as_handle, 0))
+      {
+        DWORD last_error = ::GetLastError();
+        if (last_error == ERROR_NOT_FOUND)
+        {
+          // ERROR_NOT_FOUND means that there were no operations to be
+          // cancelled. We swallow this error to match the behaviour on other
+          // platforms.
+          ec = boost::system::error_code();
+        }
+        else
+        {
+          ec = boost::system::error_code(last_error,
+              boost::asio::error::get_system_category());
+        }
+      }
+      else
+      {
+        ec = boost::system::error_code();
+      }
+    }
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     else if (impl.safe_cancellation_thread_id_ == 0)
     {
       // No operations have been started, so there's nothing to cancel.
@@ -368,7 +384,8 @@ public:
       if (!::CancelIo(sock_as_handle))
       {
         DWORD last_error = ::GetLastError();
-        ec = boost::system::error_code(last_error, boost::system::native_ecat);
+        ec = boost::system::error_code(last_error,
+            boost::asio::error::get_system_category());
       }
       else
       {
@@ -381,6 +398,13 @@ public:
       // so cancellation is not safe.
       ec = boost::asio::error::operation_not_supported;
     }
+#else // defined(BOOST_ASIO_ENABLE_CANCELIO)
+    else
+    {
+      // Cancellation is not supported as CancelIo may not be used.
+      ec = boost::asio::error::operation_not_supported;
+    }
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     return ec;
   }
@@ -476,7 +500,12 @@ public:
       if (option.level(impl.protocol_) == SOL_SOCKET
           && option.name(impl.protocol_) == SO_LINGER)
       {
-        impl.flags_ |= implementation_type::user_set_linger;
+        const ::linger* linger_option =
+          reinterpret_cast<const ::linger*>(option.data(impl.protocol_));
+        if (linger_option->l_onoff != 0 && linger_option->l_linger != 0)
+          impl.flags_ |= implementation_type::close_might_block;
+        else
+          impl.flags_ &= ~implementation_type::close_might_block;
       }
 
       socket_ops::setsockopt(impl.socket_,
@@ -564,7 +593,7 @@ public:
     }
 
     endpoint_type endpoint;
-    socket_addr_len_type addr_len = endpoint.capacity();
+    std::size_t addr_len = endpoint.capacity();
     if (socket_ops::getsockname(impl.socket_, endpoint.data(), &addr_len, ec))
       return endpoint_type();
     endpoint.resize(addr_len);
@@ -603,7 +632,7 @@ public:
     else
     {
       endpoint_type endpoint;
-      socket_addr_len_type addr_len = endpoint.capacity();
+      std::size_t addr_len = endpoint.capacity();
       if (socket_ops::getpeername(impl.socket_, endpoint.data(), &addr_len, ec))
         return endpoint_type();
       endpoint.resize(addr_len);
@@ -669,7 +698,8 @@ public:
         last_error = WSAECONNRESET;
       else if (last_error == ERROR_PORT_UNREACHABLE)
         last_error = WSAECONNREFUSED;
-      ec = boost::system::error_code(last_error, boost::system::native_ecat);
+      ec = boost::system::error_code(last_error,
+          boost::asio::error::get_system_category());
       return 0;
     }
 
@@ -677,18 +707,34 @@ public:
     return bytes_transferred;
   }
 
+  // Wait until data can be sent without blocking.
+  size_t send(implementation_type& impl, const null_buffers&,
+      socket_base::message_flags, boost::system::error_code& ec)
+  {
+    if (!is_open(impl))
+    {
+      ec = boost::asio::error::bad_descriptor;
+      return 0;
+    }
+
+    // Wait for socket to become ready.
+    socket_ops::poll_write(impl.socket_, ec);
+
+    return 0;
+  }
+
   template <typename ConstBufferSequence, typename Handler>
   class send_operation
     : public operation
   {
   public:
-    send_operation(boost::asio::io_service& io_service,
+    send_operation(win_iocp_io_service& io_service,
         weak_cancel_token_type cancel_token,
         const ConstBufferSequence& buffers, Handler handler)
-      : operation(
+      : operation(io_service,
           &send_operation<ConstBufferSequence, Handler>::do_completion_impl,
           &send_operation<ConstBufferSequence, Handler>::destroy_impl),
-        work_(io_service),
+        work_(io_service.get_io_service()),
         cancel_token_(cancel_token),
         buffers_(buffers),
         handler_(handler)
@@ -720,7 +766,8 @@ public:
 #endif // defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
 
       // Map non-portable errors to their portable counterparts.
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       if (ec.value() == ERROR_NETNAME_DELETED)
       {
         if (handler_op->cancel_token_.expired())
@@ -741,7 +788,7 @@ public:
       ptr.reset();
 
       // Call the handler.
-      asio_handler_invoke_helpers::invoke(
+      boost_asio_handler_invoke_helpers::invoke(
           detail::bind_handler(handler, ec, bytes_transferred), &handler);
     }
 
@@ -752,6 +799,16 @@ public:
       op_type* handler_op(static_cast<op_type*>(op));
       typedef handler_alloc_traits<Handler, op_type> alloc_traits;
       handler_ptr<alloc_traits> ptr(handler_op->handler_, handler_op);
+
+      // A sub-object of the handler may be the true owner of the memory
+      // associated with the handler. Consequently, a local copy of the handler
+      // is required to ensure that any owning sub-object remains valid until
+      // after we have deallocated the memory here.
+      Handler handler(handler_op->handler_);
+      (void)handler;
+
+      // Free the memory associated with the handler.
+      ptr.reset();
     }
 
     boost::asio::io_service::work work_;
@@ -768,23 +825,25 @@ public:
   {
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor, 0));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Allocate and construct an operation to wrap the handler.
     typedef send_operation<ConstBufferSequence, Handler> value_type;
     typedef handler_alloc_traits<Handler, value_type> alloc_traits;
     raw_handler_ptr<alloc_traits> raw_ptr(handler);
-    handler_ptr<alloc_traits> ptr(raw_ptr,
-        this->io_service(), impl.cancel_token_, buffers, handler);
+    handler_ptr<alloc_traits> ptr(raw_ptr, iocp_service_,
+        impl.cancel_token_, buffers, handler);
 
     // Copy buffers into WSABUF array.
     ::WSABUF bufs[max_buffers];
@@ -804,7 +863,7 @@ public:
     // A request to receive 0 bytes on a stream socket is a no-op.
     if (impl.protocol_.type() == SOCK_STREAM && total_buffer_size == 0)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
       boost::system::error_code error;
       iocp_service_.post(bind_handler(handler, error, 0));
@@ -820,14 +879,74 @@ public:
     // Check if the operation completed immediately.
     if (result != 0 && last_error != WSA_IO_PENDING)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       iocp_service_.post(bind_handler(handler, ec, bytes_transferred));
     }
     else
     {
       ptr.release();
+    }
+  }
+
+  template <typename Handler>
+  class null_buffers_operation
+  {
+  public:
+    null_buffers_operation(boost::asio::io_service& io_service, Handler handler)
+      : work_(io_service),
+        handler_(handler)
+    {
+    }
+
+    bool perform(boost::system::error_code&,
+        std::size_t& bytes_transferred)
+    {
+      bytes_transferred = 0;
+      return true;
+    }
+
+    void complete(const boost::system::error_code& ec,
+        std::size_t bytes_transferred)
+    {
+      work_.get_io_service().post(bind_handler(
+            handler_, ec, bytes_transferred));
+    }
+
+  private:
+    boost::asio::io_service::work work_;
+    Handler handler_;
+  };
+
+  // Start an asynchronous wait until data can be sent without blocking.
+  template <typename Handler>
+  void async_send(implementation_type& impl, const null_buffers&,
+      socket_base::message_flags, Handler handler)
+  {
+    if (!is_open(impl))
+    {
+      this->get_io_service().post(bind_handler(handler,
+            boost::asio::error::bad_descriptor, 0));
+    }
+    else
+    {
+      // Check if the reactor was already obtained from the io_service.
+      reactor_type* reactor = static_cast<reactor_type*>(
+            interlocked_compare_exchange_pointer(
+              reinterpret_cast<void**>(&reactor_), 0, 0));
+      if (!reactor)
+      {
+        reactor = &(boost::asio::use_service<reactor_type>(
+              this->get_io_service()));
+        interlocked_exchange_pointer(
+            reinterpret_cast<void**>(&reactor_), reactor);
+      }
+
+      reactor->start_write_op(impl.socket_, impl.reactor_data_,
+          null_buffers_operation<Handler>(this->get_io_service(), handler),
+          false);
     }
   }
 
@@ -860,13 +979,14 @@ public:
     // Send the data.
     DWORD bytes_transferred = 0;
     int result = ::WSASendTo(impl.socket_, bufs, i, &bytes_transferred,
-        flags, destination.data(), destination.size(), 0, 0);
+        flags, destination.data(), static_cast<int>(destination.size()), 0, 0);
     if (result != 0)
     {
       DWORD last_error = ::WSAGetLastError();
       if (last_error == ERROR_PORT_UNREACHABLE)
         last_error = WSAECONNREFUSED;
-      ec = boost::system::error_code(last_error, boost::system::native_ecat);
+      ec = boost::system::error_code(last_error,
+          boost::asio::error::get_system_category());
       return 0;
     }
 
@@ -874,17 +994,34 @@ public:
     return bytes_transferred;
   }
 
+  // Wait until data can be sent without blocking.
+  size_t send_to(implementation_type& impl, const null_buffers&,
+      socket_base::message_flags, const endpoint_type&,
+      boost::system::error_code& ec)
+  {
+    if (!is_open(impl))
+    {
+      ec = boost::asio::error::bad_descriptor;
+      return 0;
+    }
+
+    // Wait for socket to become ready.
+    socket_ops::poll_write(impl.socket_, ec);
+
+    return 0;
+  }
+
   template <typename ConstBufferSequence, typename Handler>
   class send_to_operation
     : public operation
   {
   public:
-    send_to_operation(boost::asio::io_service& io_service,
+    send_to_operation(win_iocp_io_service& io_service,
         const ConstBufferSequence& buffers, Handler handler)
-      : operation(
+      : operation(io_service,
           &send_to_operation<ConstBufferSequence, Handler>::do_completion_impl,
           &send_to_operation<ConstBufferSequence, Handler>::destroy_impl),
-        work_(io_service),
+        work_(io_service.get_io_service()),
         buffers_(buffers),
         handler_(handler)
     {
@@ -915,7 +1052,8 @@ public:
 #endif // defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
 
       // Map non-portable errors to their portable counterparts.
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       if (ec.value() == ERROR_PORT_UNREACHABLE)
       {
         ec = boost::asio::error::connection_refused;
@@ -929,7 +1067,7 @@ public:
       ptr.reset();
 
       // Call the handler.
-      asio_handler_invoke_helpers::invoke(
+      boost_asio_handler_invoke_helpers::invoke(
           detail::bind_handler(handler, ec, bytes_transferred), &handler);
     }
 
@@ -940,6 +1078,16 @@ public:
       op_type* handler_op(static_cast<op_type*>(op));
       typedef handler_alloc_traits<Handler, op_type> alloc_traits;
       handler_ptr<alloc_traits> ptr(handler_op->handler_, handler_op);
+
+      // A sub-object of the handler may be the true owner of the memory
+      // associated with the handler. Consequently, a local copy of the handler
+      // is required to ensure that any owning sub-object remains valid until
+      // after we have deallocated the memory here.
+      Handler handler(handler_op->handler_);
+      (void)handler;
+
+      // Free the memory associated with the handler.
+      ptr.reset();
     }
 
     boost::asio::io_service::work work_;
@@ -956,23 +1104,24 @@ public:
   {
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor, 0));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Allocate and construct an operation to wrap the handler.
     typedef send_to_operation<ConstBufferSequence, Handler> value_type;
     typedef handler_alloc_traits<Handler, value_type> alloc_traits;
     raw_handler_ptr<alloc_traits> raw_ptr(handler);
-    handler_ptr<alloc_traits> ptr(raw_ptr,
-        this->io_service(), buffers, handler);
+    handler_ptr<alloc_traits> ptr(raw_ptr, iocp_service_, buffers, handler);
 
     // Copy buffers into WSABUF array.
     ::WSABUF bufs[max_buffers];
@@ -989,21 +1138,52 @@ public:
 
     // Send the data.
     DWORD bytes_transferred = 0;
-    int result = ::WSASendTo(impl.socket_, bufs, i, &bytes_transferred,
-        flags, destination.data(), destination.size(), ptr.get(), 0);
+    int result = ::WSASendTo(impl.socket_, bufs, i, &bytes_transferred, flags,
+        destination.data(), static_cast<int>(destination.size()), ptr.get(), 0);
     DWORD last_error = ::WSAGetLastError();
 
     // Check if the operation completed immediately.
     if (result != 0 && last_error != WSA_IO_PENDING)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       iocp_service_.post(bind_handler(handler, ec, bytes_transferred));
     }
     else
     {
       ptr.release();
+    }
+  }
+
+  // Start an asynchronous wait until data can be sent without blocking.
+  template <typename Handler>
+  void async_send_to(implementation_type& impl, const null_buffers&,
+      socket_base::message_flags, const endpoint_type&, Handler handler)
+  {
+    if (!is_open(impl))
+    {
+      this->get_io_service().post(bind_handler(handler,
+            boost::asio::error::bad_descriptor, 0));
+    }
+    else
+    {
+      // Check if the reactor was already obtained from the io_service.
+      reactor_type* reactor = static_cast<reactor_type*>(
+            interlocked_compare_exchange_pointer(
+              reinterpret_cast<void**>(&reactor_), 0, 0));
+      if (!reactor)
+      {
+        reactor = &(boost::asio::use_service<reactor_type>(
+              this->get_io_service()));
+        interlocked_exchange_pointer(
+            reinterpret_cast<void**>(&reactor_), reactor);
+      }
+
+      reactor->start_write_op(impl.socket_, impl.reactor_data_,
+          null_buffers_operation<Handler>(this->get_io_service(), handler),
+          false);
     }
   }
 
@@ -1052,10 +1232,11 @@ public:
         last_error = WSAECONNRESET;
       else if (last_error == ERROR_PORT_UNREACHABLE)
         last_error = WSAECONNREFUSED;
-      ec = boost::system::error_code(last_error, boost::system::native_ecat);
+      ec = boost::system::error_code(last_error,
+          boost::asio::error::get_system_category());
       return 0;
     }
-    if (bytes_transferred == 0)
+    if (bytes_transferred == 0 && impl.protocol_.type() == SOCK_STREAM)
     {
       ec = boost::asio::error::eof;
       return 0;
@@ -1065,20 +1246,37 @@ public:
     return bytes_transferred;
   }
 
+  // Wait until data can be received without blocking.
+  size_t receive(implementation_type& impl, const null_buffers&,
+      socket_base::message_flags, boost::system::error_code& ec)
+  {
+    if (!is_open(impl))
+    {
+      ec = boost::asio::error::bad_descriptor;
+      return 0;
+    }
+
+    // Wait for socket to become ready.
+    socket_ops::poll_read(impl.socket_, ec);
+
+    return 0;
+  }
+
   template <typename MutableBufferSequence, typename Handler>
   class receive_operation
     : public operation
   {
   public:
-    receive_operation(boost::asio::io_service& io_service,
+    receive_operation(int protocol_type, win_iocp_io_service& io_service,
         weak_cancel_token_type cancel_token,
         const MutableBufferSequence& buffers, Handler handler)
-      : operation(
+      : operation(io_service,
           &receive_operation<
             MutableBufferSequence, Handler>::do_completion_impl,
           &receive_operation<
             MutableBufferSequence, Handler>::destroy_impl),
-        work_(io_service),
+        protocol_type_(protocol_type),
+        work_(io_service.get_io_service()),
         cancel_token_(cancel_token),
         buffers_(buffers),
         handler_(handler)
@@ -1110,7 +1308,8 @@ public:
 #endif // defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
 
       // Map non-portable errors to their portable counterparts.
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       if (ec.value() == ERROR_NETNAME_DELETED)
       {
         if (handler_op->cancel_token_.expired())
@@ -1124,7 +1323,9 @@ public:
       }
 
       // Check for connection closed.
-      else if (!ec && bytes_transferred == 0)
+      else if (!ec && bytes_transferred == 0
+          && handler_op->protocol_type_ == SOCK_STREAM
+          && !boost::is_same<MutableBufferSequence, null_buffers>::value)
       {
         ec = boost::asio::error::eof;
       }
@@ -1137,7 +1338,7 @@ public:
       ptr.reset();
 
       // Call the handler.
-      asio_handler_invoke_helpers::invoke(
+      boost_asio_handler_invoke_helpers::invoke(
           detail::bind_handler(handler, ec, bytes_transferred), &handler);
     }
 
@@ -1148,8 +1349,19 @@ public:
       op_type* handler_op(static_cast<op_type*>(op));
       typedef handler_alloc_traits<Handler, op_type> alloc_traits;
       handler_ptr<alloc_traits> ptr(handler_op->handler_, handler_op);
+
+      // A sub-object of the handler may be the true owner of the memory
+      // associated with the handler. Consequently, a local copy of the handler
+      // is required to ensure that any owning sub-object remains valid until
+      // after we have deallocated the memory here.
+      Handler handler(handler_op->handler_);
+      (void)handler;
+
+      // Free the memory associated with the handler.
+      ptr.reset();
     }
 
+    int protocol_type_;
     boost::asio::io_service::work work_;
     weak_cancel_token_type cancel_token_;
     MutableBufferSequence buffers_;
@@ -1165,23 +1377,26 @@ public:
   {
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor, 0));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Allocate and construct an operation to wrap the handler.
     typedef receive_operation<MutableBufferSequence, Handler> value_type;
     typedef handler_alloc_traits<Handler, value_type> alloc_traits;
     raw_handler_ptr<alloc_traits> raw_ptr(handler);
-    handler_ptr<alloc_traits> ptr(raw_ptr,
-        this->io_service(), impl.cancel_token_, buffers, handler);
+    int protocol_type = impl.protocol_.type();
+    handler_ptr<alloc_traits> ptr(raw_ptr, protocol_type,
+        iocp_service_, impl.cancel_token_, buffers, handler);
 
     // Copy buffers into WSABUF array.
     ::WSABUF bufs[max_buffers];
@@ -1200,7 +1415,7 @@ public:
     // A request to receive 0 bytes on a stream socket is a no-op.
     if (impl.protocol_.type() == SOCK_STREAM && total_buffer_size == 0)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
       boost::system::error_code error;
       iocp_service_.post(bind_handler(handler, error, 0));
@@ -1215,14 +1430,94 @@ public:
     DWORD last_error = ::WSAGetLastError();
     if (result != 0 && last_error != WSA_IO_PENDING)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       iocp_service_.post(bind_handler(handler, ec, bytes_transferred));
     }
     else
     {
       ptr.release();
+    }
+  }
+
+  // Wait until data can be received without blocking.
+  template <typename Handler>
+  void async_receive(implementation_type& impl, const null_buffers& buffers,
+      socket_base::message_flags flags, Handler handler)
+  {
+    if (!is_open(impl))
+    {
+      this->get_io_service().post(bind_handler(handler,
+            boost::asio::error::bad_descriptor, 0));
+    }
+    else if (impl.protocol_.type() == SOCK_STREAM)
+    {
+      // For stream sockets on Windows, we may issue a 0-byte overlapped
+      // WSARecv to wait until there is data available on the socket.
+
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
+      // Update the ID of the thread from which cancellation is safe.
+      if (impl.safe_cancellation_thread_id_ == 0)
+        impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
+      else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
+        impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
+
+      // Allocate and construct an operation to wrap the handler.
+      typedef receive_operation<null_buffers, Handler> value_type;
+      typedef handler_alloc_traits<Handler, value_type> alloc_traits;
+      raw_handler_ptr<alloc_traits> raw_ptr(handler);
+      int protocol_type = impl.protocol_.type();
+      handler_ptr<alloc_traits> ptr(raw_ptr, protocol_type,
+          iocp_service_, impl.cancel_token_, buffers, handler);
+
+      // Issue a receive operation with an empty buffer.
+      ::WSABUF buf = { 0, 0 };
+      DWORD bytes_transferred = 0;
+      DWORD recv_flags = flags;
+      int result = ::WSARecv(impl.socket_, &buf, 1,
+          &bytes_transferred, &recv_flags, ptr.get(), 0);
+      DWORD last_error = ::WSAGetLastError();
+      if (result != 0 && last_error != WSA_IO_PENDING)
+      {
+        boost::asio::io_service::work work(this->get_io_service());
+        ptr.reset();
+        boost::system::error_code ec(last_error,
+            boost::asio::error::get_system_category());
+        iocp_service_.post(bind_handler(handler, ec, bytes_transferred));
+      }
+      else
+      {
+        ptr.release();
+      }
+    }
+    else
+    {
+      // Check if the reactor was already obtained from the io_service.
+      reactor_type* reactor = static_cast<reactor_type*>(
+            interlocked_compare_exchange_pointer(
+              reinterpret_cast<void**>(&reactor_), 0, 0));
+      if (!reactor)
+      {
+        reactor = &(boost::asio::use_service<reactor_type>(
+              this->get_io_service()));
+        interlocked_exchange_pointer(
+            reinterpret_cast<void**>(&reactor_), reactor);
+      }
+
+      if (flags & socket_base::message_out_of_band)
+      {
+        reactor->start_except_op(impl.socket_, impl.reactor_data_,
+            null_buffers_operation<Handler>(this->get_io_service(), handler));
+      }
+      else
+      {
+        reactor->start_read_op(impl.socket_, impl.reactor_data_,
+            null_buffers_operation<Handler>(this->get_io_service(), handler),
+            false);
+      }
     }
   }
 
@@ -1255,7 +1550,7 @@ public:
     // Receive some data.
     DWORD bytes_transferred = 0;
     DWORD recv_flags = flags;
-    int endpoint_size = sender_endpoint.capacity();
+    int endpoint_size = static_cast<int>(sender_endpoint.capacity());
     int result = ::WSARecvFrom(impl.socket_, bufs, i, &bytes_transferred,
         &recv_flags, sender_endpoint.data(), &endpoint_size, 0, 0);
     if (result != 0)
@@ -1263,19 +1558,40 @@ public:
       DWORD last_error = ::WSAGetLastError();
       if (last_error == ERROR_PORT_UNREACHABLE)
         last_error = WSAECONNREFUSED;
-      ec = boost::system::error_code(last_error, boost::system::native_ecat);
+      ec = boost::system::error_code(last_error,
+          boost::asio::error::get_system_category());
       return 0;
     }
-    if (bytes_transferred == 0)
+    if (bytes_transferred == 0 && impl.protocol_.type() == SOCK_STREAM)
     {
       ec = boost::asio::error::eof;
       return 0;
     }
 
-    sender_endpoint.resize(endpoint_size);
+    sender_endpoint.resize(static_cast<std::size_t>(endpoint_size));
 
     ec = boost::system::error_code();
     return bytes_transferred;
+  }
+
+  // Wait until data can be received without blocking.
+  size_t receive_from(implementation_type& impl,
+      const null_buffers&, endpoint_type& sender_endpoint,
+      socket_base::message_flags, boost::system::error_code& ec)
+  {
+    if (!is_open(impl))
+    {
+      ec = boost::asio::error::bad_descriptor;
+      return 0;
+    }
+
+    // Wait for socket to become ready.
+    socket_ops::poll_read(impl.socket_, ec);
+
+    // Reset endpoint since it can be given no sensible value at this time.
+    sender_endpoint = endpoint_type();
+
+    return 0;
   }
 
   template <typename MutableBufferSequence, typename Handler>
@@ -1283,17 +1599,18 @@ public:
     : public operation
   {
   public:
-    receive_from_operation(boost::asio::io_service& io_service,
+    receive_from_operation(int protocol_type, win_iocp_io_service& io_service,
         endpoint_type& endpoint, const MutableBufferSequence& buffers,
         Handler handler)
-      : operation(
+      : operation(io_service,
           &receive_from_operation<
             MutableBufferSequence, Handler>::do_completion_impl,
           &receive_from_operation<
             MutableBufferSequence, Handler>::destroy_impl),
+        protocol_type_(protocol_type),
         endpoint_(endpoint),
-        endpoint_size_(endpoint.capacity()),
-        work_(io_service),
+        endpoint_size_(static_cast<int>(endpoint.capacity())),
+        work_(io_service.get_io_service()),
         buffers_(buffers),
         handler_(handler)
     {
@@ -1329,14 +1646,16 @@ public:
 #endif // defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
 
       // Map non-portable errors to their portable counterparts.
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       if (ec.value() == ERROR_PORT_UNREACHABLE)
       {
         ec = boost::asio::error::connection_refused;
       }
 
       // Check for connection closed.
-      if (!ec && bytes_transferred == 0)
+      if (!ec && bytes_transferred == 0
+          && handler_op->protocol_type_ == SOCK_STREAM)
       {
         ec = boost::asio::error::eof;
       }
@@ -1352,7 +1671,7 @@ public:
       ptr.reset();
 
       // Call the handler.
-      asio_handler_invoke_helpers::invoke(
+      boost_asio_handler_invoke_helpers::invoke(
           detail::bind_handler(handler, ec, bytes_transferred), &handler);
     }
 
@@ -1363,8 +1682,19 @@ public:
       op_type* handler_op(static_cast<op_type*>(op));
       typedef handler_alloc_traits<Handler, op_type> alloc_traits;
       handler_ptr<alloc_traits> ptr(handler_op->handler_, handler_op);
+
+      // A sub-object of the handler may be the true owner of the memory
+      // associated with the handler. Consequently, a local copy of the handler
+      // is required to ensure that any owning sub-object remains valid until
+      // after we have deallocated the memory here.
+      Handler handler(handler_op->handler_);
+      (void)handler;
+
+      // Free the memory associated with the handler.
+      ptr.reset();
     }
 
+    int protocol_type_;
     endpoint_type& endpoint_;
     int endpoint_size_;
     boost::asio::io_service::work work_;
@@ -1382,23 +1712,26 @@ public:
   {
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor, 0));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Allocate and construct an operation to wrap the handler.
     typedef receive_from_operation<MutableBufferSequence, Handler> value_type;
     typedef handler_alloc_traits<Handler, value_type> alloc_traits;
     raw_handler_ptr<alloc_traits> raw_ptr(handler);
-    handler_ptr<alloc_traits> ptr(raw_ptr,
-        this->io_service(), sender_endp, buffers, handler);
+    int protocol_type = impl.protocol_.type();
+    handler_ptr<alloc_traits> ptr(raw_ptr, protocol_type,
+        iocp_service_, sender_endp, buffers, handler);
 
     // Copy buffers into WSABUF array.
     ::WSABUF bufs[max_buffers];
@@ -1421,14 +1754,57 @@ public:
     DWORD last_error = ::WSAGetLastError();
     if (result != 0 && last_error != WSA_IO_PENDING)
     {
-      boost::asio::io_service::work work(this->io_service());
+      boost::asio::io_service::work work(this->get_io_service());
       ptr.reset();
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
       iocp_service_.post(bind_handler(handler, ec, bytes_transferred));
     }
     else
     {
       ptr.release();
+    }
+  }
+
+  // Wait until data can be received without blocking.
+  template <typename Handler>
+  void async_receive_from(implementation_type& impl,
+      const null_buffers&, endpoint_type& sender_endpoint,
+      socket_base::message_flags flags, Handler handler)
+  {
+    if (!is_open(impl))
+    {
+      this->get_io_service().post(bind_handler(handler,
+            boost::asio::error::bad_descriptor, 0));
+    }
+    else
+    {
+      // Check if the reactor was already obtained from the io_service.
+      reactor_type* reactor = static_cast<reactor_type*>(
+            interlocked_compare_exchange_pointer(
+              reinterpret_cast<void**>(&reactor_), 0, 0));
+      if (!reactor)
+      {
+        reactor = &(boost::asio::use_service<reactor_type>(
+              this->get_io_service()));
+        interlocked_exchange_pointer(
+            reinterpret_cast<void**>(&reactor_), reactor);
+      }
+
+      // Reset endpoint since it can be given no sensible value at this time.
+      sender_endpoint = endpoint_type();
+
+      if (flags & socket_base::message_out_of_band)
+      {
+        reactor->start_except_op(impl.socket_, impl.reactor_data_,
+            null_buffers_operation<Handler>(this->get_io_service(), handler));
+      }
+      else
+      {
+        reactor->start_read_op(impl.socket_, impl.reactor_data_,
+            null_buffers_operation<Handler>(this->get_io_service(), handler),
+            false);
+      }
     }
   }
 
@@ -1452,9 +1828,8 @@ public:
 
     for (;;)
     {
-      boost::system::error_code ec;
       socket_holder new_socket;
-      socket_addr_len_type addr_len = 0;
+      std::size_t addr_len = 0;
       if (peer_endpoint)
       {
         addr_len = peer_endpoint->capacity();
@@ -1499,7 +1874,7 @@ public:
         socket_type socket, socket_type new_socket, Socket& peer,
         const protocol_type& protocol, endpoint_type* peer_endpoint,
         bool enable_connection_aborted, Handler handler)
-      : operation(
+      : operation(io_service,
           &accept_operation<Socket, Handler>::do_completion_impl,
           &accept_operation<Socket, Handler>::destroy_impl),
         io_service_(io_service),
@@ -1508,7 +1883,7 @@ public:
         peer_(peer),
         protocol_(protocol),
         peer_endpoint_(peer_endpoint),
-        work_(io_service.io_service()),
+        work_(io_service.get_io_service()),
         enable_connection_aborted_(enable_connection_aborted),
         handler_(handler)
     {
@@ -1530,8 +1905,7 @@ public:
     }
 
   private:
-    static void do_completion_impl(operation* op,
-        DWORD last_error, size_t bytes_transferred)
+    static void do_completion_impl(operation* op, DWORD last_error, size_t)
     {
       // Take ownership of the operation object.
       typedef accept_operation<Socket, Handler> op_type;
@@ -1609,7 +1983,8 @@ public:
         GetAcceptExSockaddrs(handler_op->output_buffer(), 0,
             handler_op->address_length(), handler_op->address_length(),
             &local_addr, &local_addr_length, &remote_addr, &remote_addr_length);
-        if (remote_addr_length > peer_endpoint.capacity())
+        if (static_cast<std::size_t>(remote_addr_length)
+            > peer_endpoint.capacity())
         {
           last_error = WSAEINVAL;
         }
@@ -1617,7 +1992,7 @@ public:
         {
           using namespace std; // For memcpy.
           memcpy(peer_endpoint.data(), remote_addr, remote_addr_length);
-          peer_endpoint.resize(remote_addr_length);
+          peer_endpoint.resize(static_cast<std::size_t>(remote_addr_length));
         }
       }
 
@@ -1660,8 +2035,9 @@ public:
       ptr.reset();
 
       // Call the handler.
-      boost::system::error_code ec(last_error, boost::system::native_ecat);
-      asio_handler_invoke_helpers::invoke(
+      boost::system::error_code ec(last_error,
+          boost::asio::error::get_system_category());
+      boost_asio_handler_invoke_helpers::invoke(
           detail::bind_handler(handler, ec), &handler);
     }
 
@@ -1672,6 +2048,16 @@ public:
       op_type* handler_op(static_cast<op_type*>(op));
       typedef handler_alloc_traits<Handler, op_type> alloc_traits;
       handler_ptr<alloc_traits> ptr(handler_op->handler_, handler_op);
+
+      // A sub-object of the handler may be the true owner of the memory
+      // associated with the handler. Consequently, a local copy of the handler
+      // is required to ensure that any owning sub-object remains valid until
+      // after we have deallocated the memory here.
+      Handler handler(handler_op->handler_);
+      (void)handler;
+
+      // Free the memory associated with the handler.
+      ptr.reset();
     }
 
     win_iocp_io_service& io_service_;
@@ -1695,7 +2081,7 @@ public:
     // Check whether acceptor has been initialised.
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor));
       return;
     }
@@ -1703,16 +2089,18 @@ public:
     // Check that peer socket has not already been opened.
     if (peer.is_open())
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::already_open));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Create a new socket for the connection.
     boost::system::error_code ec;
@@ -1720,7 +2108,7 @@ public:
           impl.protocol_.type(), impl.protocol_.protocol(), ec));
     if (sock.get() == invalid_socket)
     {
-      this->io_service().post(bind_handler(handler, ec));
+      this->get_io_service().post(bind_handler(handler, ec));
       return;
     }
 
@@ -1758,9 +2146,10 @@ public:
       }
       else
       {
-        boost::asio::io_service::work work(this->io_service());
+        boost::asio::io_service::work work(this->get_io_service());
         ptr.reset();
-        boost::system::error_code ec(last_error, boost::system::native_ecat);
+        boost::system::error_code ec(last_error,
+            boost::asio::error::get_system_category());
         iocp_service_.post(bind_handler(handler, ec));
       }
     }
@@ -1787,58 +2176,38 @@ public:
   }
 
   template <typename Handler>
-  class connect_handler
+  class connect_operation
   {
   public:
-    connect_handler(socket_type socket, bool user_set_non_blocking,
-        boost::shared_ptr<bool> completed,
-        boost::asio::io_service& io_service,
-        reactor_type& reactor, Handler handler)
+    connect_operation(socket_type socket, bool user_set_non_blocking,
+        boost::asio::io_service& io_service, Handler handler)
       : socket_(socket),
         user_set_non_blocking_(user_set_non_blocking),
-        completed_(completed),
         io_service_(io_service),
-        reactor_(reactor),
         work_(io_service),
         handler_(handler)
     {
     }
 
-    bool operator()(const boost::system::error_code& result)
+    bool perform(boost::system::error_code& ec,
+        std::size_t& bytes_transferred)
     {
-      // Check whether a handler has already been called for the connection.
-      // If it has, then we don't want to do anything in this handler.
-      if (*completed_)
-        return true;
-
-      // Cancel the other reactor operation for the connection.
-      *completed_ = true;
-      reactor_.enqueue_cancel_ops_unlocked(socket_);
-
       // Check whether the operation was successful.
-      if (result)
-      {
-        io_service_.post(bind_handler(handler_, result));
+      if (ec)
         return true;
-      }
 
       // Get the error code from the connect operation.
       int connect_error = 0;
       size_t connect_error_len = sizeof(connect_error);
-      boost::system::error_code ec;
       if (socket_ops::getsockopt(socket_, SOL_SOCKET, SO_ERROR,
             &connect_error, &connect_error_len, ec) == socket_error_retval)
-      {
-        io_service_.post(bind_handler(handler_, ec));
         return true;
-      }
 
       // If connection failed then post the handler with the error code.
       if (connect_error)
       {
-        ec = boost::system::error_code(
-            connect_error, boost::system::native_ecat);
-        io_service_.post(bind_handler(handler_, ec));
+        ec = boost::system::error_code(connect_error,
+            boost::asio::error::get_system_category());
         return true;
       }
 
@@ -1847,24 +2216,23 @@ public:
       {
         ioctl_arg_type non_blocking = 0;
         if (socket_ops::ioctl(socket_, FIONBIO, &non_blocking, ec))
-        {
-          io_service_.post(bind_handler(handler_, ec));
           return true;
-        }
       }
 
       // Post the result of the successful connection operation.
       ec = boost::system::error_code();
-      io_service_.post(bind_handler(handler_, ec));
       return true;
+    }
+
+    void complete(const boost::system::error_code& ec, std::size_t)
+    {
+      io_service_.post(bind_handler(handler_, ec));
     }
 
   private:
     socket_type socket_;
     bool user_set_non_blocking_;
-    boost::shared_ptr<bool> completed_;
     boost::asio::io_service& io_service_;
-    reactor_type& reactor_;
     boost::asio::io_service::work work_;
     Handler handler_;
   };
@@ -1876,16 +2244,18 @@ public:
   {
     if (!is_open(impl))
     {
-      this->io_service().post(bind_handler(handler,
+      this->get_io_service().post(bind_handler(handler,
             boost::asio::error::bad_descriptor));
       return;
     }
 
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
     // Update the ID of the thread from which cancellation is safe.
     if (impl.safe_cancellation_thread_id_ == 0)
       impl.safe_cancellation_thread_id_ = ::GetCurrentThreadId();
     else if (impl.safe_cancellation_thread_id_ != ::GetCurrentThreadId())
       impl.safe_cancellation_thread_id_ = ~DWORD(0);
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
 
     // Check if the reactor was already obtained from the io_service.
     reactor_type* reactor = static_cast<reactor_type*>(
@@ -1893,7 +2263,8 @@ public:
             reinterpret_cast<void**>(&reactor_), 0, 0));
     if (!reactor)
     {
-      reactor = &(boost::asio::use_service<reactor_type>(this->io_service()));
+      reactor = &(boost::asio::use_service<reactor_type>(
+            this->get_io_service()));
       interlocked_exchange_pointer(
           reinterpret_cast<void**>(&reactor_), reactor);
     }
@@ -1904,7 +2275,7 @@ public:
     boost::system::error_code ec;
     if (socket_ops::ioctl(impl.socket_, FIONBIO, &non_blocking, ec))
     {
-      this->io_service().post(bind_handler(handler, ec));
+      this->get_io_service().post(bind_handler(handler, ec));
       return;
     }
 
@@ -1921,7 +2292,7 @@ public:
 
       // The connect operation has finished successfully so we need to post the
       // handler immediately.
-      this->io_service().post(bind_handler(handler, ec));
+      this->get_io_service().post(bind_handler(handler, ec));
     }
     else if (ec == boost::asio::error::in_progress
         || ec == boost::asio::error::would_block)
@@ -1929,11 +2300,11 @@ public:
       // The connection is happening in the background, and we need to wait
       // until the socket becomes writeable.
       boost::shared_ptr<bool> completed(new bool(false));
-      reactor->start_write_and_except_ops(impl.socket_,
-          connect_handler<Handler>(
+      reactor->start_connect_op(impl.socket_, impl.reactor_data_,
+          connect_operation<Handler>(
             impl.socket_,
             (impl.flags_ & implementation_type::user_set_non_blocking) != 0,
-            completed, this->io_service(), *reactor, handler));
+            this->get_io_service(), handler));
     }
     else
     {
@@ -1946,31 +2317,73 @@ public:
       }
 
       // The connect operation has failed, so post the handler immediately.
-      this->io_service().post(bind_handler(handler, ec));
+      this->get_io_service().post(bind_handler(handler, ec));
     }
   }
 
 private:
-  // Helper function to provide InterlockedCompareExchangePointer functionality
-  // on very old Platform SDKs.
+  // Helper function to close a socket when the associated object is being
+  // destroyed.
+  void close_for_destruction(implementation_type& impl)
+  {
+    if (is_open(impl))
+    {
+      // Check if the reactor was created, in which case we need to close the
+      // socket on the reactor as well to cancel any operations that might be
+      // running there.
+      reactor_type* reactor = static_cast<reactor_type*>(
+            interlocked_compare_exchange_pointer(
+              reinterpret_cast<void**>(&reactor_), 0, 0));
+      if (reactor)
+        reactor->close_descriptor(impl.socket_, impl.reactor_data_);
+
+      // The socket destructor must not block. If the user has changed the
+      // linger option to block in the foreground, we will change it back to the
+      // default so that the closure is performed in the background.
+      if (impl.flags_ & implementation_type::close_might_block)
+      {
+        ::linger opt;
+        opt.l_onoff = 0;
+        opt.l_linger = 0;
+        boost::system::error_code ignored_ec;
+        socket_ops::setsockopt(impl.socket_,
+            SOL_SOCKET, SO_LINGER, &opt, sizeof(opt), ignored_ec);
+      }
+
+      boost::system::error_code ignored_ec;
+      socket_ops::close(impl.socket_, ignored_ec);
+      impl.socket_ = invalid_socket;
+      impl.flags_ = 0;
+      impl.cancel_token_.reset();
+#if defined(BOOST_ASIO_ENABLE_CANCELIO)
+      impl.safe_cancellation_thread_id_ = 0;
+#endif // defined(BOOST_ASIO_ENABLE_CANCELIO)
+    }
+  }
+
+  // Helper function to emulate InterlockedCompareExchangePointer functionality
+  // for:
+  // - very old Platform SDKs; and
+  // - platform SDKs where MSVC's /Wp64 option causes spurious warnings.
   void* interlocked_compare_exchange_pointer(void** dest, void* exch, void* cmp)
   {
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT <= 0x400) && (_M_IX86)
+#if defined(_M_IX86)
     return reinterpret_cast<void*>(InterlockedCompareExchange(
-          reinterpret_cast<LONG*>(dest), reinterpret_cast<LONG>(exch),
+          reinterpret_cast<PLONG>(dest), reinterpret_cast<LONG>(exch),
           reinterpret_cast<LONG>(cmp)));
 #else
     return InterlockedCompareExchangePointer(dest, exch, cmp);
 #endif
   }
 
-  // Helper function to provide InterlockedExchangePointer functionality on very
-  // old Platform SDKs.
+  // Helper function to emulate InterlockedExchangePointer functionality for:
+  // - very old Platform SDKs; and
+  // - platform SDKs where MSVC's /Wp64 option causes spurious warnings.
   void* interlocked_exchange_pointer(void** dest, void* val)
   {
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT <= 0x400) && (_M_IX86)
+#if defined(_M_IX86)
     return reinterpret_cast<void*>(InterlockedExchange(
-          reinterpret_cast<LONG*>(dest), reinterpret_cast<LONG>(val)));
+          reinterpret_cast<PLONG>(dest), reinterpret_cast<LONG>(val)));
 #else
     return InterlockedExchangePointer(dest, val);
 #endif
