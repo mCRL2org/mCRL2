@@ -59,6 +59,7 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph >
     void display();
 
     void moveObject(double x, double y);
+    void toggleVectorSelected();
     void lockObject();
     void dragObject();
     void stopDrag();

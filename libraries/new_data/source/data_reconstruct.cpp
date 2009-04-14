@@ -1010,7 +1010,8 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
     atermpp::table superfluous_data_eqns(100,75);
 
     for (ATermList l = data_decls.sorts; !ATisEmpty(l); l = ATgetNext(l)) {
-      sorts_table.put(ATgetFirst(l), (ATerm) ATtrue);
+      // sorts_table.put(ATgetFirst(l), (ATerm) ATtrue);   WRONG
+         sorts_table.put(ATgetFirst(l), ATgetFirst(l));
     }
 
     // Construct lists of data declarations for system defined sorts
@@ -1043,19 +1044,23 @@ ATermAppl remove_headers_without_binders_from_spec(ATermAppl Spec, ATermList* p_
     }
 
     while(!ATisEmpty(data_decls_impl.sorts)) {
-      superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), (ATerm) ATtrue);
+      // superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), (ATerm) ATtrue); WRONG
+      superfluous_sorts.put(ATAgetFirst(data_decls_impl.sorts), ATAgetFirst(data_decls_impl.sorts));
       data_decls_impl.sorts = ATgetNext(data_decls_impl.sorts);
     }
     while(!ATisEmpty(data_decls_impl.cons_ops)) {
-      superfluous_cons_ops.put(ATAgetFirst(data_decls_impl.cons_ops), (ATerm) ATtrue);
+      // superfluous_cons_ops.put(ATAgetFirst(data_decls_impl.cons_ops), (ATerm) ATtrue); WRONG
+      superfluous_cons_ops.put(ATAgetFirst(data_decls_impl.cons_ops), ATAgetFirst(data_decls_impl.cons_ops));
       data_decls_impl.cons_ops = ATgetNext(data_decls_impl.cons_ops);
     }
     while(!ATisEmpty(data_decls_impl.ops)) {
-      superfluous_ops.put(ATAgetFirst(data_decls_impl.ops), (ATerm) ATtrue);
+      // superfluous_ops.put(ATAgetFirst(data_decls_impl.ops), (ATerm) ATtrue); WRONG
+      superfluous_ops.put(ATAgetFirst(data_decls_impl.ops), ATAgetFirst(data_decls_impl.ops));
       data_decls_impl.ops = ATgetNext(data_decls_impl.ops);
     }
     while(!ATisEmpty(data_decls_impl.data_eqns)) {
-      superfluous_data_eqns.put(ATAgetFirst(data_decls_impl.data_eqns), (ATerm) ATtrue);
+      // superfluous_data_eqns.put(ATAgetFirst(data_decls_impl.data_eqns), (ATerm) ATtrue); WRONG
+      superfluous_data_eqns.put(ATAgetFirst(data_decls_impl.data_eqns), ATAgetFirst(data_decls_impl.data_eqns));
       data_decls_impl.data_eqns = ATgetNext(data_decls_impl.data_eqns);
     }
 
@@ -1762,7 +1767,8 @@ void initialise_sorts(const t_data_decls* p_data_decls, t_reconstruct_context* p
   {
     ATermAppl sort = ATAgetFirst(l);
     if (p_ctx->sorts_table.get(sort) == NULL) { // Unique sorts in the table
-      p_ctx->sorts_table.put                (sort, (ATerm) ATtrue);
+      // p_ctx->sorts_table.put                (sort, (ATerm) ATtrue);   WRONG
+      p_ctx->sorts_table.put                (sort, sort);
       p_ctx->sort_constructors.insert       (std::make_pair(sort, atermpp::indexed_set(20,50)));
       p_ctx->num_sort_constructors.insert   (std::make_pair(sort, 0));
       p_ctx->sort_mappings.insert           (std::make_pair(sort, atermpp::indexed_set(20,50)));
@@ -2266,13 +2272,15 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
   // Mappings for function operations should be removed unconditionally
   for (ATermList l = p_ctx->function_operation_mappings; !ATisEmpty(l); l = ATgetNext(l))
   {
-    mappings->put(ATgetFirst(l), (ATerm) ATtrue);
+    // mappings->put(ATgetFirst(l), (ATerm) ATtrue);   WRONG
+    mappings->put(ATgetFirst(l), ATgetFirst(l));
   }
 
   // Equations for function operations should be removed unconditionally
   for (ATermList l = p_ctx->function_operation_equations; !ATisEmpty(l); l = ATgetNext(l))
   {
-    equations->put(ATgetFirst(l), (ATerm) ATtrue);
+    // equations->put(ATgetFirst(l), (ATerm) ATtrue);  WRONG
+    equations->put(ATgetFirst(l), ATgetFirst(l));
   }
 
 //  gsDebugMsg("Flatten mappings and equations\n");
@@ -2286,7 +2294,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
         if (is_standard_function(elt) ||
             p_ctx->composite_sorts.get(sort) == sort)
         {
-          mappings->put(ATAgetFirst(elts), (ATerm) ATtrue);
+          // mappings->put(ATAgetFirst(elts), (ATerm) ATtrue);   WRONG
+          mappings->put(ATAgetFirst(elts), ATAgetFirst(elts));
         }
         elts = ATgetNext(elts);
       }
@@ -2297,7 +2306,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
         if (is_system_defined_equation(elt) ||
             p_ctx->composite_sorts.get(sort) == sort)
         {
-          equations->put(ATgetFirst(elts), (ATerm) ATtrue);
+          // equations->put(ATgetFirst(elts), (ATerm) ATtrue);  WRONG
+          equations->put(ATgetFirst(elts), ATgetFirst(elts));
         }
         elts = ATgetNext(elts);
       }
@@ -2310,7 +2320,8 @@ void flatten_mappings_and_equations(atermpp::table* mappings, atermpp::table* eq
           if (is_system_defined_equation(elt) ||
               p_ctx->composite_sorts.get(sort) == sort)
           {
-            equations->put(ATgetFirst(elts), (ATerm) ATtrue);
+            // equations->put(ATgetFirst(elts), (ATerm) ATtrue); WRONG
+            equations->put(ATgetFirst(elts), ATgetFirst(elts));
           }
           elts = ATgetNext(elts);
         }
@@ -2350,7 +2361,8 @@ void remove_mappings(t_data_decls* p_data_decls, atermpp::table* p_mappings)
   ATermList mappings = ATmakeList0();
   while (!ATisEmpty(p_data_decls->ops)) {
     ATermAppl op = ATAgetFirst(p_data_decls->ops);
-    if (!ATisEqual(p_mappings->get(op), ATtrue) &&
+    if (!ATisEqual(p_mappings->get(op), op) &&
+    // if (!ATisEqual(p_mappings->get(op), ATtrue ) &&  WRONG
         !gsIsLambdaOpId(op)) {
       mappings = ATinsert(mappings, (ATerm) op);
     }
@@ -2376,7 +2388,8 @@ void remove_data_equations(t_data_decls* p_data_decls, atermpp::table* p_data_eq
     if (!is_lambda_expr(lhs)) {
       data_eqn = gsSubstValues_Appl(*p_substs, data_eqn, true);
       data_eqn = (ATermAppl) beta_reduce_term((ATerm) data_eqn);
-      if(!ATisEqual(p_data_eqns->get(data_eqn), ATtrue)) {
+      // if(!ATisEqual(p_data_eqns->get(data_eqn), ATtrue)) {  WRONG
+      if(!ATisEqual(p_data_eqns->get(data_eqn), data_eqn)) {
         data_eqns = ATinsert(data_eqns, (ATerm) data_eqn);
       }
     }

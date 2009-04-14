@@ -34,20 +34,48 @@
 %                  x x x
 %
 % There are three other, moves in the initial situation.
-% The total number of reachable board positions is as yet unknown,
-% but is estimated to be approximately 160Mstate. Using a 3.5Gbyte
-% machine we can now generate 45Mstate of which appr. 12M are
-% explored.  An upperbound of the number of states is 2^33, which is appr.
-% 9 10^9. [added: 19/4/2007 the state space is much larger than
-% 160Mstate. At least 608Mstate have been reached in an exploration
-% attempt, but the state space is certainly twice at large, and
-% maybe even 10 times.].
+% The total number of reachable board positions is 187636300.
+% The state spaces per level are given below (where the transition
+% from level 32 to level 33 is a ready transition):
+%
+% level 1 done. (1 state, 4 transitions)
+% level 2 done. (4 states, 12 transitions)
+% level 3 done. (12 states, 60 transitions)
+% level 4 done. (60 states, 400 transitions)
+% level 5 done. (296 states, 2228 transitions)
+% level 6 done. (1338 states, 11360 transitions)
+% level 7 done. (5648 states, 51952 transitions)
+% level 8 done. (21842 states, 213420 transitions)
+% level 9 done. (77559 states, 790132 transitions)
+% level 10 done. (249690 states, 2595424 transitions)
+% level 11 done. (717788 states, 7510380 transitions)
+% level 12 done. (1834379 states, 19116668 transitions)
+% level 13 done. (4138302 states, 42497988 transitions)
+% level 14 done. (8171208 states, 81824196 transitions)
+% level 15 done. (14020166 states, 135512592 transitions)
+% level 16 done. (20773236 states, 191887588 transitions)
+% level 17 done. (26482824 states, 231397620 transitions)
+% level 18 done. (28994876 states, 236879588 transitions)
+% level 19 done. (27286330 states, 205786556 transitions)
+% level 20 done. (22106348 states, 151783424 transitions)
+% level 21 done. (15425572 states, 94975656 transitions)
+% level 22 done. (9274496 states, 50282084 transitions)
+% level 23 done. (4792664 states, 22378164 transitions)
+% level 24 done. (2120101 states, 8318648 transitions)
+% level 25 done. (800152 states, 2565692 transitions)
+% level 26 done. (255544 states, 644556 transitions)
+% level 27 done. (68236 states, 127620 transitions)
+% level 28 done. (14727 states, 18804 transitions)
+% level 29 done. (2529 states, 2052 transitions)
+% level 30 done. (334 states, 124 transitions)
+% level 31 done. (32 states, 8 transitions)
+% level 32 done. (5 states, 1 transition)
+% level 33 done. (1 state, 0 transitions)
 %
 % We currently use the following commands to explore the state
 % space:
 %
-% mcrl22lps -n -D peg_solitaire.mcrl2 temps.lps
-% lpsuntime temps.lps temps1.lps
+% mcrl22lps -n -D peg_solitaire.mcrl2 temps1.lps
 % lpssuminst temps1.lps temps2.lps
 % lpsrewr temps2.lps temps3.lps
 % lps2lts -vrjittyc -ftree -t -aready temps3.lps
@@ -64,13 +92,21 @@
 % of at least 2, provided the flag -t (store states as trees) is
 % used.
 %
-% Jan Friso Groote, 4/1/2007.
+% Jan Friso Groote, 4/1/2007. 
 %
 % On 3/4/2009 Jaco van de Pol analyzed this example using symbolic
 % state space exploration. He found a stupid copy/paste mistake
-% that has now been repaired. Using ltsmin the necessary time was
+% that has now been repaired. Using ltsmin (symbolic state space
+% generation) the necessary time was
 % appr. a half hour and memory requirements were approximately 8GB.
-
+%
+% On 9/4/2009 it turned out to be possible to generate the state
+% space using the recipe above (uncovering a garbage collection
+% bug in the aterm library slowing state space generation with
+% an unnecessary factor up to 1000 (sic)). The state space requirements
+% were 25Gbyte and the required time 24hours (svn version 5952).
+% Lpsstructelm (about to be called lpsparunfold) was not used, and
+% is expected to substantially increase the speed requirements. 
 
 sort Piece = struct empty | pin | unused;
      Row = struct row(Piece,Piece,Piece,Piece,Piece,Piece,Piece);

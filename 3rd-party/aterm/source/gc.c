@@ -134,26 +134,41 @@ ATerm *stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(ATerm *start, ATerm *stop)
+static void mark_memory(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
 {
-  ATerm *cur, real_term;
-
-    /*fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);*/
-    /* Traverse the stack */
-  for(cur=start; cur<stop; cur++) {
-    if(AT_isPotentialTerm(*cur)) {
-      real_term = AT_isInsideValidTerm(*cur);
-      if (real_term != NULL) {
-        if(!IS_MARKED((real_term)->header)) {
-          AT_markTerm(real_term);
-            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));*/
-            /*nb_cell_in_stack++;*/
+  ATerm *cur;
+  // fprintf(stderr,"---> mark_memory phase [%x,%x]\n",start,stop);
+  /* Traverse the stack */
+  if (check_term)
+  { ATerm real_term;
+    for(cur=start; cur<stop; cur++) 
+    { if(AT_isPotentialTerm(*cur)) 
+      { real_term = AT_isInsideValidTerm(*cur);
+        if (real_term != NULL) 
+        { if(!IS_MARKED((real_term)->header)) 
+          {
+            assert(AT_isValidTerm(real_term));
+            AT_markTerm(real_term);
+              /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));
+ *   */
+              /*nb_cell_in_stack++;*/
+          }
         }
+      } 
+      else if (AT_isValidSymbol((Symbol)*cur)) 
+      {
+          /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
+        AT_markSymbol((Symbol)*cur);
+          /*nb_cell_in_stack++;*/
       }
-    } else if (AT_isValidSymbol((Symbol)*cur)) {
-        /*fprintf(stderr,"mark_memory: AT_markSymbol(%d)\n",(Symbol)*cur);*/
-      AT_markSymbol((Symbol)*cur);
-        /*nb_cell_in_stack++;*/
+    }
+  }
+  else 
+  { for(cur=start; cur<stop; cur++)
+    { if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      { assert(AT_isValidTerm(*cur));
+        AT_markTerm(*cur);
+      }
     }
   }
 }
@@ -161,26 +176,41 @@ static void mark_memory(ATerm *start, ATerm *stop)
 /*}}}  */
 /*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
 
-static void mark_memory_young(ATerm *start, ATerm *stop) 
+static void mark_memory_young(ATerm *start, ATerm *stop,ATbool check_term) // CHANGED BY JFG
 {
-  ATerm *cur, real_term;
+  ATerm *cur;
+  // fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);
 
-    /*fprintf(stderr,"---> mark_memory_young phase [%x,%x]\n",start,stop);*/
-    /* Traverse the stack */
-  for(cur=start; cur<stop; cur++) {
-    if(AT_isPotentialTerm(*cur)) {
-      real_term = AT_isInsideValidTerm(*cur);
-      if (real_term != NULL) {
-        if(!IS_MARKED(real_term->header)) {
-          AT_markTerm_young(real_term);
-            /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));*/
-            /*nb_cell_in_stack++;*/
+  if (check_term)
+  { ATerm real_term;
+    for(cur=start; cur<stop; cur++) 
+    { if(AT_isPotentialTerm(*cur)) 
+      { real_term = AT_isInsideValidTerm(*cur);
+        if (real_term != NULL) 
+        { if(!IS_MARKED(real_term->header)) 
+          { 
+            assert(AT_isValidTerm(real_term));
+            AT_markTerm_young(real_term);
+                /*printf("mark_memory: cur = %x\ttop sym = %s\n",cur,ATgetName(ATgetAFun(real_term)));  */
+                /*nb_cell_in_stack++;*/
+          }
         }
+      } 
+      else if (AT_isValidSymbol((Symbol)*cur)) 
+      {
+            /*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
+          AT_markSymbol_young((Symbol)*cur);
+            /*nb_cell_in_stack++;*/
       }
-    } else if (AT_isValidSymbol((Symbol)*cur)) {
-        /*fprintf(stderr,"mark_memory_young: AT_markSymbol_young(%d)\n",(Symbol)*cur);*/
-      AT_markSymbol_young((Symbol)*cur);
-        /*nb_cell_in_stack++;*/
+    }
+  }
+  else 
+  { 
+    for(cur=start; cur<stop; cur++) 
+    { if ((*cur!=NULL) && (!IS_MARKED((*cur)->header)))
+      { assert(AT_isValidTerm(*cur));
+        AT_markTerm_young(*cur);
+      }
     }
   }
 }
@@ -196,9 +226,9 @@ void ATmarkArray(ATerm *start, int size)
 {
   if ( at_mark_young == ATtrue )
   {
-	  mark_memory_young(start,start+size);
+	  mark_memory_young(start,start+size,ATfalse);
   } else {
-	  mark_memory(start,start+size);
+	  mark_memory(start,start+size,ATfalse);
   }
 }
 
@@ -273,7 +303,7 @@ VOIDCDECL mark_phase()
 
   start = (ATerm *)((char *)env);
   stop  = ((ATerm *)(((char *)env) + sizeof(jmp_buf)));
-  mark_memory(start, stop);
+  mark_memory(start, stop,ATtrue);
 #endif
 
   stackTop = stack_top();
@@ -284,7 +314,8 @@ VOIDCDECL mark_phase()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  mark_memory(start, stop);
+  // fprintf(stderr,"Mark memory 1\n");
+  mark_memory(start, stop,ATtrue);
 
   /* Traverse protected terms */
   for(i=0; i<at_prot_table_size; i++) {
@@ -298,23 +329,28 @@ VOIDCDECL mark_phase()
     }
   }
 
+  // fprintf(stderr,"Mark memory 2\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
-    mark_memory((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size));
+    mark_memory((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
+  // fprintf(stderr,"Mark memory 3\n");
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
     if (pblock->protsize>0)
-      mark_memory(pblock->term, &pblock->term[pblock->protsize]);
+      mark_memory(pblock->term, &pblock->term[pblock->protsize],ATfalse);
   }
   
+  // fprintf(stderr,"Mark memory 4\n");
   at_mark_young = ATfalse;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
 
+  // fprintf(stderr,"Mark memory 5\n");
   AT_markProtectedSymbols();
 
+  // fprintf(stderr,"Mark memory 6\n");
   /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
     AT_markSymbol(at_parked_symbol);
@@ -392,7 +428,7 @@ VOIDCDECL mark_phase_young()
 
   start = (ATerm *)((char *)env);
   stop  = ((ATerm *)(((char *)env) + sizeof(jmp_buf)));
-  mark_memory_young(start, stop);
+  mark_memory_young(start, stop,ATtrue);
 #endif
 
   stackTop = stack_top();
@@ -402,8 +438,10 @@ VOIDCDECL mark_phase_young()
   stack_size = stop-start;
   STATS(stack_depth, stack_size);
 
-  mark_memory_young(start, stop);
+  // fprintf(stderr,"Mark memory young 1\n");
+  mark_memory_young(start, stop,ATtrue);
 
+  // fprintf(stderr,"Mark memory young 2\n");
   /* Traverse protected terms */
   for(i=0; i<at_prot_table_size; i++) {
     ProtEntry *cur = at_prot_table[i];
@@ -416,22 +454,31 @@ VOIDCDECL mark_phase_young()
     }
   }
 
+  // fprintf(stderr,"Mark memory young 3\n");
   for (prot=at_prot_memory; prot != NULL; prot=prot->next) {
-    mark_memory_young((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size));
+    mark_memory_young((ATerm *)prot->start, (ATerm *)((prot->start) + prot->size),ATfalse);
   }
   
+  // fprintf(stderr,"Mark memory young 4\n");
+  unsigned int count=0;
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
-    if (pblock->protsize>0)
-      mark_memory_young(pblock->term, &pblock->term[pblock->protsize]);
+  { if (pblock->protsize>0)
+      mark_memory_young(pblock->term, &pblock->term[pblock->protsize], ATfalse);
+      count++;
+  }
+
   }
   
+  // fprintf(stderr,"Mark memory young 5 %d\n",count);
   at_mark_young = ATtrue;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
   }
     
+  // fprintf(stderr,"Mark memory young 6\n");
   AT_markProtectedSymbols_young();
+  // fprintf(stderr,"Mark memory young 7\n");
 
    /* Mark 'parked' symbol */
   if (AT_isValidSymbol(at_parked_symbol)) {
@@ -1126,7 +1173,6 @@ void AT_collect()
 #endif
 
   mark_phase();
-
 #ifdef WITH_STATS
   mark = clock();
   user = mark - start;
@@ -1168,7 +1214,7 @@ void AT_collect_minor()
   at_gc_count++;
   if (!silent)
   {
-    fprintf(file, "young collecting garbage..(%d)",at_gc_count);
+    fprintf(file, "young collecting garbage..(%d)yy",at_gc_count);
     fflush(file);
   }
 
@@ -1209,6 +1255,7 @@ void AT_collect()
 #endif
   FILE *file = gc_f;
   unsigned int size;
+  // fprintf(stderr,"begin AT collect phase\n");
 
   /* snapshot*/
   for(size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++) {
@@ -1231,7 +1278,9 @@ void AT_collect()
 
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
+  // fprintf(stderr,"begin mark phase\n");
   mark_phase();
+  // fprintf(stderr,"end mark phase\n");
   
 #ifdef WITH_STATS
   times(&mark);
@@ -1240,6 +1289,7 @@ void AT_collect()
 #endif
 
   sweep_phase();
+  // fprintf(stderr,"end sweep phase\n");
 
 #ifdef WITH_STATS  
   times(&sweep);
@@ -1257,6 +1307,7 @@ void AT_collect()
 
 void AT_collect_minor()
 {
+  // fprintf(stderr,"begin AT collect phase\n");
 #ifdef WITH_STATS
   struct tms start, mark, sweep;
   clock_t user;
@@ -1286,8 +1337,10 @@ void AT_collect_minor()
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
     /*nb_cell_in_stack=0;*/
+  // fprintf(stderr,"begin mark young phase\n");
   mark_phase_young();
     /*fprintf(stderr,"AT_collect_young: nb_cell_in_stack = %d\n",nb_cell_in_stack++);*/
+  // fprintf(stderr,"end mark young phase\n");
     
 #ifdef WITH_STATS
   times(&mark);
@@ -1298,6 +1351,7 @@ void AT_collect_minor()
   minor_sweep_phase_young();
   CHECK_UNMARKED_BLOCK(AT_BLOCK);
   CHECK_UNMARKED_BLOCK(AT_OLD_BLOCK);
+  // fprintf(stderr,"end sweep young phase\n");
 
 #ifdef WITH_STATS
   times(&sweep);

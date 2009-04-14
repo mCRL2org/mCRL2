@@ -23,6 +23,7 @@ namespace IDS
     myID_DLG_INFO,
     myID_DLG_ALGO,
     myID_TOGGLE_POSITIONING,
+    myID_TOGGLE_VECTOR,
 
     myID_NS_SLIDER,
     myID_ES_SLIDER,
