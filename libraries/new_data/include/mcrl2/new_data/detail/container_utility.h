@@ -230,19 +230,17 @@ namespace mcrl2 {
         return conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >(std::inserter(c, c.end()));
       }
 
-      template < typename Container >
+      template < typename Container, typename Range >
       struct range_factory {
-        template < typename Iterator >
-        static typename boost::iterator_range< Iterator > make_range(Container const& c) {
-          return typename boost::iterator_range< Iterator >(c);
+        static Range make_range(Container const& c) {
+          return Range(c);
         }
       };
 
-      template < >
-      struct range_factory< ATermList > {
-        template < typename Iterator >
-        static boost::iterator_range< Iterator > make_range(ATermList c) {
-          return typename boost::iterator_range< Iterator >(Iterator(atermpp::aterm_list(c)), Iterator());
+      template < typename Range >
+      struct range_factory< ATermList, Range > {
+        static Range make_range(ATermList c) {
+          return Range(typename Range::iterator(atermpp::aterm_list(c)), typename Range::iterator());
         }
       };
 
@@ -296,7 +294,7 @@ namespace mcrl2 {
     template < typename Iterator, typename Container >
     typename boost::iterator_range< Iterator >
     make_iterator_range(Container const& c) {
-      return detail::range_factory< Container >::template make_range< Iterator >(c);
+      return detail::range_factory< Container, boost::iterator_range< Iterator > >::make_range(c);
     }
 
     /// \brief Constructs a vector with element type T of one argument.
