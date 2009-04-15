@@ -23,6 +23,7 @@
 #include "mcrl2/core/find.h"
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/detail/find.h"
 #include "mcrl2/new_data/detail/data_utility.h"
 #include "mcrl2/lps/specification.h"

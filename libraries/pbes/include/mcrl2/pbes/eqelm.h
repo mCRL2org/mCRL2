@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/remove_parameters.h"
@@ -84,13 +85,13 @@ namespace pbes_system {
       /// \brief Puts all parameters of the same sort in the same equivalence set.
       std::vector<std::set<variable_type> > compute_equivalence_sets(const propositional_variable_decl_type& X) const
       {
-        std::map<sort_expression, std::set<variable_type> > m;
+        std::map< new_data::sort_expression, std::set<variable_type> > m;
         for (typename variable_sequence_type::const_iterator i = X.parameters().begin(); i != X.parameters().end(); ++i)
         {
           m[i->sort()].insert(*i);
         }
         std::vector<std::set<variable_type> > result;
-        for (typename std::map<sort_expression, std::set<variable_type> >::iterator i = m.begin(); i != m.end(); ++i)
+        for (typename std::map<new_data::sort_expression, std::set<variable_type> >::iterator i = m.begin(); i != m.end(); ++i)
         {
           if (i->second.size() > 1)
           {
@@ -160,7 +161,7 @@ namespace pbes_system {
           for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
             unsigned int p = index_of(*k, m_parameters[Y]);
-            w[m_data_rewriter(data_variable_map_replace(e[p], vX))].insert(*k);
+            w[m_data_rewriter(variable_map_replace(e[p], vX))].insert(*k);
           }
           if (w.size() > 1)
           {
@@ -206,7 +207,7 @@ namespace pbes_system {
           std::map<variable_type, data_term_type> replacements = compute_substitution(X);
           if (!X.empty())
           {
-            *i = pbes_equation(i->symbol(), i->variable(), data::data_variable_map_replace(i->formula(), replacements));
+            *i = pbes_equation(i->symbol(), i->variable(), new_data::variable_map_replace(i->formula(), replacements));
           }
         }
 

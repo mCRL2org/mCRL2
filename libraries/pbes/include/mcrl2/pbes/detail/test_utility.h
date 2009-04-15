@@ -13,6 +13,8 @@
 
 #include <string>
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/nat.h"
+#include "mcrl2/new_data/bool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 

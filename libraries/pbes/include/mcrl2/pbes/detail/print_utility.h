@@ -15,6 +15,8 @@
 #include <string>
 #include <sstream>
 
+#include "mcrl2/core/print.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {

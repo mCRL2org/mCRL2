@@ -19,6 +19,7 @@
 
 // this is only needed because of the data_true <-> pbes_true problems
 #include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/bool.h"
 
 namespace mcrl2 {
 

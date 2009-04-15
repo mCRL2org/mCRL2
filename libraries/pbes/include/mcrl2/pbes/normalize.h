@@ -15,6 +15,7 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_equation.h"
+#include "mcrl2/new_data/bool.h"
 
 namespace mcrl2 {
 
