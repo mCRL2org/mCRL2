@@ -78,7 +78,5 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  lps_parelm_tool tool;
-
-  return tool.execute(argc, argv);
+  return lps_parelm_tool().execute(argc, argv);
 }

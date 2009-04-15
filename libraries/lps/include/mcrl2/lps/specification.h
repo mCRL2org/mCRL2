@@ -268,7 +268,7 @@ class specification: public atermpp::aterm_appl
 /// \param data A data specification
 /// \return The modified specification
 inline
-specification set_data_specification(specification spec, new_data::data_specification data)
+specification set_data_specification(specification const& spec, new_data::data_specification const& data)
 {
   return specification(data,
                        spec.action_labels(),

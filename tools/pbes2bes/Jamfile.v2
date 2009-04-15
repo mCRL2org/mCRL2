@@ -1,6 +1,5 @@
 project toolset/pbes2bes
    : requirements
-      <library>/libraries//lps
       <library>/libraries//pbes
    ;
 

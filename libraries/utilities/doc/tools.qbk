@@ -120,52 +120,64 @@ by overriding the method =available_rewriters=.
 
 
 [h3 Creating a squadt user interface for a tool]
-The preferred way to add a squadt user interface to a tool is to define a
-class that derives from the tool class, and from the class =squadt::mcrl2_tool_interface=.
-In this class one has to override the four methods =set_capabilities=,
-=user_interactive_configuration=, =check_configuration= and =perform_task=. All squadt
-related code has to made conditional using the flag =ENABLE_SQUADT_CONNECTIVITY=.
-An example is given below:
+The preferred way to add a squadt user interface to a tool is to define a class
+that derives from tool class adapted by the =squadt_tool= template class.  In
+this class one has to override the four methods =set_capabilities=,
+=user_interactive_configuration=, =check_configuration= and =perform_task=. All
+squadt related code has to made conditional using the flag
+=ENABLE_SQUADT_CONNECTIVITY=.  An example is given below:
 
-  #ifdef ENABLE_SQUADT_CONNECTIVITY
-  class squadt_pbes2bes_tool : public pbes2bes_tool, public squadt::mcrl2_tool_interface
+  class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
   {
     public:
+
+      // Normal tool class implementation for rewriter_tool<input_output_tool>
+      ....
+
+  // squadt related functionality (see squadt::mcrl2_tool_interface)
+  #ifdef ENABLE_SQUADT_CONNECTIVITY
       void set_capabilities(tipi::tool::capabilities&) const;
 
-      void user_interactive_configuration(tipi::configuration&);
+      void user_interactive_configuration(tipi::configuration& c)
+      {
+        // Let squadt_tool update configuration for rewriter and add output file configuration
+        synchronise_with_configuration(c);
 
-      bool check_configuration(tipi::configuration const&) const;
+        // do some user interaction ...
+
+        // update tool class specific part of the configuration
+        update_configuration(c);
+      }
+
+      bool check_configuration(tipi::configuration const&) const {
+        return true; // no tool class specific checking implemented
+      }
 
       bool perform_task(tipi::configuration&);
-
-      int execute(int argc, char** argv)
-      {
-        if (squadt::free_activation(*this, argc, argv)) {
-          return EXIT_SUCCESS;
-        }
-        return pbes2bes_tool::execute(argc, argv);
-      }
-  };
   #endif
+  };
 
   int main(int argc, char* argv[])
   {
     MCRL2_ATERMPP_INIT(argc, argv)
-
-    try {
-  #ifdef ENABLE_SQUADT_CONNECTIVITY
-      squadt_pbes2bes_tool tool;
-  #else
-      pbes2bes_tool tool;
-  #endif
-      return tool.execute(argc, argv);
-    }
-    catch (std::exception& e) {
-      std::cerr << e.what() << std::endl;
-    }
-
-    return EXIT_FAILURE;
+ 
+    return pbes2bes_tool().execute(argc, argv);
   }
+
+Properties of the tool class that are provided as argument to the squadt_tool
+template class are mimicked for the squadt context. For example
+squadt_tool<input_tool> takes an input file named "main-input". Similarly
+squadt_tool<rewriter_tool<input_output_tool>> adds input/output files named
+"main-input" and "main-output" and a mandatory option "rewrite-strategy".
+
+A =squadt_tool= template class instantiation has two methods that simplify
+dealing with configuration objects. One is =synchronise_with_configuration=, this
+synchronises the state of tool class variables with that of a configuration
+object (the latter has precedence).  This method should only be used in the
+user_interactive_configuration and perform_task methods. The other method is
+=update_configuration=; which updates a configuration with values received from
+the user. This one is typically used at the end of user interactive
+configuration. Both of these methods should become obsolete in the near future
+and will be removed in the future.
 
 [endsect]

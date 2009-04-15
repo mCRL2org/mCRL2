@@ -19,29 +19,21 @@
 #define AUTHOR "Alexander van Dam, Wieger Wesselink"
 
 //C++
-#include <cstdio>
-#include <exception>
+#include <stdexcept>
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <utility>
-#include <sstream>
 
 //MCRL2-specific
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/enumerator.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-
-// SQuADT protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-#endif
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2;
 using utilities::command_line_parser;
@@ -49,12 +41,13 @@ using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
+using utilities::tools::squadt_tool;
 
 /// The pbes2bes tool.
-class pbes2bes_tool: public rewriter_tool<input_output_tool>
+class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
     /// The output formats of the tool.
     enum pbes_output_format {
@@ -120,7 +113,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
-    	super::parse_options(parser);
+      super::parse_options(parser);
       try
       {
         set_output_format(parser.option_argument("output"));
@@ -142,7 +135,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
     void add_options(interface_description& desc)
     {
-    	super::add_options(desc);
+      super::add_options(desc);
       desc.
         add_option("strategy",
           make_optional_argument("NAME", "lazy"),
@@ -214,6 +207,8 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     /// Runs the algorithm.
     bool run()
     {
+      using namespace mcrl2::pbes_system;
+
       if (core::gsVerbose)
       {
         std::cerr << "pbes2bes parameters:" << std::endl;
@@ -242,18 +237,18 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
       else
       {
         // data rewriter
-        data::rewriter datar = create_rewriter(p.data());
+        new_data::rewriter datar = create_rewriter(p.data());
 
         // name generator
         std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-        data::number_postfix_generator name_generator(prefix);
+        new_data::number_postfix_generator name_generator(prefix);
 
         // data enumerator
-        data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
+        new_data::data_enumerator<new_data::number_postfix_generator> datae(p.data(), datar, name_generator);
 
         // pbes rewriter
-        data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
+        new_data::rewriter_with_variables datarv(datar);
+        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, false);
 
         if (m_strategy == ts_finite)
         {
@@ -277,17 +272,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
     {
       m_output_filename = filename;
     }
-};
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcrl2_tool_interface
-{
-  private:
-    static const char*  pbes_file_for_input;  ///< file containing an LPS
-    static const char*  pbes_file_for_output; ///< file used to write the output to
-    static const char* option_transformation_strategy;
-    static const char* option_selected_output_format;
-
     static bool initialise_types() {
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
 
@@ -305,137 +290,121 @@ class squadt_pbes2bes_tool : public pbes2bes_tool, public utilities::squadt::mcr
       return true;
     }
 
-  public:
+// Names for options
+# define option_transformation_strategy "transformation_strategy"
+# define option_selected_output_format  "selected_output_format"
 
-    /** \brief constructor */
-    squadt_pbes2bes_tool() {
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities& c) const
+    {
       static bool initialised = initialise_types();
 
       static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-    }
 
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+      c.add_input_configuration("main-input",
+        tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
+    }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
+    void user_interactive_configuration(tipi::configuration& c)
+    {
+      using namespace tipi;
+      using namespace tipi::layout;
+      using namespace tipi::layout::elements;
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
+      /* Create display */
+      tipi::tool_display d;
+
+      // Helper for format selection
+      utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
+
+      // Helper for strategy selection
+      utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
+
+      layout::vertical_box& m = d.create< vertical_box >();
+
+      m.append(d.create< label >().set_text("Output format : ")).
+        append(d.create< horizontal_box >().
+                    append(format_selector.associate(of_pbes, "pbes")).
+                    append(format_selector.associate(of_internal, "internal")).
+                    append(format_selector.associate(of_cwi, "cwi")),
+              margins(0,5,0,5)).
+        append(d.create< label >().set_text("Transformation strategy : ")).
+        append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
+        append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
+
+      button& okay_button = d.create< button >().set_label("OK");
+
+      m.append(d.create< label >().set_text(" ")).
+        append(okay_button, layout::right);
+
+      /// Copy values from options specified in the configuration
+      if (c.option_exists(option_transformation_strategy)) {
+        strategy_selector.set_selection(
+            c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
+      }
+      if (c.option_exists(option_selected_output_format)) {
+        format_selector.set_selection(
+            c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
+      }
+
+      send_display_layout(d.manager(m));
+
+      /* Wait until the ok button was pressed */
+      okay_button.await_change();
+
+      /* Add output file to the configuration */
+      if (c.output_exists("main-output")) {
+        tipi::configuration::object& output_file = c.get_output("main-output");
+
+        output_file.location(c.get_output_name(".pbes"));
+      }
+      else {
+        c.add_output("main-output", tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
+      }
+
+      c.add_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
+      c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
+
+      send_clear_display();
+
+      update_configuration(c);
+    }
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+    bool check_configuration(tipi::configuration const& c) const
+    {
+      return c.input_exists("main-input") &&
+             c.output_exists("main-output") &&
+             c.option_exists(option_transformation_strategy) &&
+             c.option_exists(option_selected_output_format);
+    }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-
-    /// \brief Run the tool with the given command line options.
-    /// \param argc Number of command line arguments
-    /// \param argv Command line arguments
-    /// \return The execution result
-    int execute(int argc, char** argv)
+    bool perform_task(tipi::configuration& c)
     {
-      if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
-        return EXIT_SUCCESS;
-      }
-      return pbes2bes_tool::execute(argc, argv);
+      static std::string strategies[] = { "lazy", "finite" };
+      static std::string formats[]    = { "pbes", "internal", "cwi" };
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
+      m_input_filename = c.get_input("main-input").location();
+      m_output_filename = c.get_output("main-output").location();
+      set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
+      set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
+      bool result = run();
+
+      send_clear_display();
+
+      return result;
     }
-};
 
-const char* squadt_pbes2bes_tool::pbes_file_for_input  = "pbes_in";
-const char* squadt_pbes2bes_tool::pbes_file_for_output = "pbes_out";
-const char* squadt_pbes2bes_tool::option_transformation_strategy = "transformation_strategy";
-const char* squadt_pbes2bes_tool::option_selected_output_format  = "selected_output_format";
-
-void squadt_pbes2bes_tool::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(pbes_file_for_input, tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
-}
-
-void squadt_pbes2bes_tool::user_interactive_configuration(tipi::configuration& c) {
-  using namespace tipi;
-  using namespace tipi::layout;
-  using namespace tipi::layout::elements;
-
-  /* Create display */
-  tipi::tool_display d;
-
-  // Helper for format selection
-  utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
-
-  // Helper for strategy selection
-  utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
-
-  layout::vertical_box& m = d.create< vertical_box >();
-
-  m.append(d.create< label >().set_text("Output format : ")).
-    append(d.create< horizontal_box >().
-                append(format_selector.associate(of_pbes, "pbes")).
-                append(format_selector.associate(of_internal, "internal")).
-                append(format_selector.associate(of_cwi, "cwi")),
-          margins(0,5,0,5)).
-    append(d.create< label >().set_text("Transformation strategy : ")).
-    append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
-    append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
-
-  button& okay_button = d.create< button >().set_label("OK");
-
-  m.append(d.create< label >().set_text(" ")).
-    append(okay_button, layout::right);
-
-  /// Copy values from options specified in the configuration
-  if (c.option_exists(option_transformation_strategy)) {
-    strategy_selector.set_selection(
-        c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
-  }
-  if (c.option_exists(option_selected_output_format)) {
-    format_selector.set_selection(
-        c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
-  }
-
-  send_display_layout(d.manager(m));
-
-  /* Wait until the ok button was pressed */
-  okay_button.await_change();
-
-  /* Add output file to the configuration */
-  if (c.output_exists(pbes_file_for_output)) {
-    tipi::configuration::object& output_file = c.get_output(pbes_file_for_output);
-
-    output_file.location(c.get_output_name(".pbes"));
-  }
-  else {
-    c.add_output(pbes_file_for_output, tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
-  }
-
-  c.add_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-  c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-  send_clear_display();
-}
-
-bool squadt_pbes2bes_tool::check_configuration(tipi::configuration const& c) const {
-  bool result = true;
-
-  result &= c.input_exists(pbes_file_for_input);
-  result &= c.output_exists(pbes_file_for_output);
-  result &= c.option_exists(option_transformation_strategy);
-  result &= c.option_exists(option_selected_output_format);
-
-  return (result);
-}
-
-bool squadt_pbes2bes_tool::perform_task(tipi::configuration& c) {
-  static std::string strategies[] = { "lazy", "finite" };
-  static std::string formats[]    = { "pbes", "internal", "cwi" };
-
-  m_input_filename = c.get_input(pbes_file_for_input).location();
-  m_output_filename = c.get_output(pbes_file_for_output).location();
-  set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
-  set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
-  bool result = run();
-
-  send_clear_display();
-
-  return result;
-}
 #endif // ENABLE_SQUADT_CONNECTIVITY
+};
 
 //Main Program
 //------------
@@ -444,17 +413,5 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    squadt_pbes2bes_tool tool;
-#else
-    pbes2bes_tool tool;
-#endif
-    return tool.execute(argc, argv);
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-  }
-
-  return EXIT_FAILURE;
+  return pbes2bes_tool().execute(argc, argv);
 }
