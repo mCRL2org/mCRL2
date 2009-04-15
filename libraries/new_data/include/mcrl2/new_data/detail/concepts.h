@@ -18,16 +18,16 @@ namespace mcrl2 {
         typedef typename S::variable_type   variable_type;
         typedef typename S::expression_type expression_type;
 
-        variable_type const&    v;
-        expression_type const&  e;
+        variable_type    v;
+        expression_type  e;
 
         S s;
 
         BOOST_CONCEPT_USAGE(Substitution) {
           BOOST_ASSERT((boost::is_convertible< variable_type, expression_type >::value));
 
-          s(e) == e;
-          s(v) == static_cast< expression_type >(v);
+          s(static_cast< expression_type const& >(e)) == e;
+          s(static_cast< variable_type const& >(v)) == v;
         }
       };
 
@@ -38,14 +38,14 @@ namespace mcrl2 {
         typedef typename S::variable_type   variable_type;
         typedef typename S::expression_type expression_type;
 
-        variable_type const&    v;
-        expression_type const&  e;
+        variable_type    v;
+        expression_type  e;
 
         S s;
 
         BOOST_CONCEPT_USAGE(MutableSubstitution) {
-          s[v] = e;
-          s[v] = v;
+          s[static_cast< variable_type const& >(v)] = e;
+          s[static_cast< variable_type const& >(v)] = v;
         }
       };
 

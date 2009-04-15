@@ -24,7 +24,7 @@ using namespace atermpp;
 
 struct counter
 {
-  mutable int& m_sum;
+  int& m_sum;
 
   counter(int& sum)
     : m_sum(sum)

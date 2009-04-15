@@ -23,13 +23,34 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
+
+      template < typename Container >
+      struct container_value {
+        typedef typename Container::value_type type;
+      };
+
+      template < >
+      struct container_value< ATermList > {
+        typedef atermpp::aterm type;
+      };
+
       template < typename TargetContainer, typename SourceContainer,
-                 typename TargetExpression = typename TargetContainer::value_type,
-                 typename SourceExpression = typename SourceContainer::value_type >
+                 typename TargetExpression = typename container_value< TargetContainer >::type,
+                 typename SourceExpression = typename container_value< SourceContainer >::type >
       struct converter {
         template < typename Container >
         static TargetContainer convert(Container const& l) {
           return TargetContainer(l.begin(), l.end());
+        }
+      };
+
+      // Specialisation for ATermList
+      template < typename TargetContainer, typename TargetExpression >
+      struct converter< TargetContainer, ATermList, TargetExpression, atermpp::aterm > :
+                 public converter< TargetContainer, atermpp::aterm_list, TargetExpression, atermpp::aterm > {
+
+        static TargetContainer convert(ATermList l) {
+          return convert(atermpp::aterm_list(l));
         }
       };
 
@@ -88,14 +109,6 @@ namespace mcrl2 {
     template < typename TargetContainer, typename SourceContainer >
     TargetContainer convert(SourceContainer const& c) {
       return detail::converter< TargetContainer, SourceContainer >::convert(c);
-    }
-
-    /// \brief Convert container with expressions to a new container with expressions
-    template < typename TargetContainer >
-    TargetContainer convert(ATermList l) {
-      return detail::converter< TargetContainer,
-               atermpp::term_list< typename TargetContainer::value_type > >::
-                        convert(atermpp::term_list< typename TargetContainer::value_type >(l));
     }
 
   } // namespace new_data
