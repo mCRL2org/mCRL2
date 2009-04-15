@@ -13,7 +13,7 @@
 #define MCRL2_LPS_MULTI_ACTION_H
 
 #include "mcrl2/lps/action.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/data_expression_utility.h"
 
 namespace mcrl2 {
 

@@ -23,10 +23,10 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/utility.h"
-#include "mcrl2/lps/summand.h"
-#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/lps/summand.h"
+#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/detail/free_variables.h"
 
 namespace mcrl2 {

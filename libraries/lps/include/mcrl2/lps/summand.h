@@ -21,7 +21,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/real.h"
 #include "mcrl2/new_data/bool.h"

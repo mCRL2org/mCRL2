@@ -13,6 +13,7 @@
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula_builder.h"
+#include "mcrl2/new_data/bool.h"
 
 namespace mcrl2 {
 

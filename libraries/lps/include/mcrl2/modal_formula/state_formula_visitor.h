@@ -12,7 +12,7 @@
 #ifndef MCRL2_MODAL_STATE_FORMULA_VISITOR_H
 #define MCRL2_MODAL_STATE_FORMULA_VISITOR_H
 
-#include <stdexcept>
+#include "mcrl2/exception.h"
 #include "mcrl2/modal_formula/state_formula.h"
 
 namespace mcrl2 {

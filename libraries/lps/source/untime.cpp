@@ -18,6 +18,7 @@
 #include "mcrl2/lps/linear_process.h"
 //mCRL2 data
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/utility.h"
 
 #include "mcrl2/core/messaging.h"

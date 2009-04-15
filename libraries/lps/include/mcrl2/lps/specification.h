@@ -25,13 +25,11 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/detail/action_utility.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
-#include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
 

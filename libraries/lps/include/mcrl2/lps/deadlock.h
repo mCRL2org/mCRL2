@@ -12,6 +12,9 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
+#include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/new_data/utility.h" // for pp
+
 namespace mcrl2 {
 
 namespace lps {
@@ -65,7 +68,7 @@ namespace lps {
       /// \brief Returns a string representation of the deadlock
       std::string to_string() const
       {
-        return std::string("delta") + (has_time() ? (" @ " + core::pp(m_time)) : "");
+        return std::string("delta") + (has_time() ? (" @ " + new_data::pp(m_time)) : "");
       }
 
       /// \brief Comparison operator
