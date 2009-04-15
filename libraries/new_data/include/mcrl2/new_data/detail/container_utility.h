@@ -234,7 +234,7 @@ namespace mcrl2 {
       struct range_factory {
         template < typename Iterator >
         static typename boost::iterator_range< Iterator > make_range(Container const& c) {
-          return typename boost::iterator_range< Iterator >(Iterator(c.begin()), Iterator(c.end()));
+          return typename boost::iterator_range< Iterator >(c);
         }
       };
 
