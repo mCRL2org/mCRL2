@@ -371,7 +371,8 @@ namespace mcrl2 {
           // print dots if there are more lines and we are at the bottem of our bounding box    
           if ( !moretext && lastlineinbox ) 
           {
-            subs = subs.substr(0, subs.length()-3);
+            //only shorten the text if the dots would be outside the bounding box
+            if (CHARWIDTH * scale * (subs.length() + 3) > xRgt-xLft) subs = subs.substr(0, subs.length()-3);
             subs = subs.append("...");
           }
 

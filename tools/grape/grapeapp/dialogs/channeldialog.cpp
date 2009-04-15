@@ -97,6 +97,8 @@ bool grape_channel_dlg::show_modal( channel &p_channel )
 {
   if (ShowModal() != wxID_CANCEL)
   {
+    wxMessageBox( _T("identifier is not valid"), _T(""), wxOK | wxICON_INFORMATION);
+
     p_channel.set_name(m_name_input->GetValue());     
     p_channel.set_rename_to(m_rename_input->GetValue());
   
