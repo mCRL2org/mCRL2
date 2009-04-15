@@ -66,7 +66,7 @@ namespace mcrl2 {
         /// \brief returns true if and only if not select< !Value >::test(e)
         template < typename ExpressionType >
         static bool test(ExpressionType const& e) {
-          return !selectors::select< Value >::template test(e);
+          return !selectors::select< Value >::template test< ExpressionType >(e);
         }
       };
 
