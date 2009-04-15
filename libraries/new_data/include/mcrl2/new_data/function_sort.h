@@ -66,7 +66,7 @@ namespace mcrl2 {
         template < typename ForwardTraversalIterator >
         function_sort(const typename boost::iterator_range< ForwardTraversalIterator >& domain,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(make_sort_expression_list(domain), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(convert< sort_expression_list >(domain), codomain))
         {
           assert(!domain.empty());
         }
@@ -102,7 +102,7 @@ namespace mcrl2 {
         /// \post *this represents dom1 -> codomain
         function_sort(const sort_expression& dom1,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1)), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::make_list(dom1), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 2
@@ -114,7 +114,7 @@ namespace mcrl2 {
         function_sort(const sort_expression& dom1,
                       const sort_expression& dom2,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2)), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::make_list(dom1, dom2), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 3
@@ -128,7 +128,7 @@ namespace mcrl2 {
                       const sort_expression& dom2,
                       const sort_expression& dom3,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3)), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::make_list(dom1, dom2, dom3), codomain))
         {}
 
         /// \brief Convenience constructor for function sort with domain size 3
@@ -144,7 +144,7 @@ namespace mcrl2 {
                       const sort_expression& dom3,
                       const sort_expression& dom4,
                       const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::term_list<sort_expression>(atermpp::make_list(dom1, dom2, dom3, dom4)), codomain))
+          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(atermpp::make_list(dom1, dom2, dom3, dom4), codomain))
         {}
 
         /// \overload

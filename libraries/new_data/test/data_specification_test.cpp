@@ -19,6 +19,7 @@
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/set.h"
 #include "mcrl2/new_data/bag.h"
+#include "mcrl2/new_data/list.h"
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/parser.h"

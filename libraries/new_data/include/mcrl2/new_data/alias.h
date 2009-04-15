@@ -12,8 +12,6 @@
 #ifndef MCRL2_NEW_DATA_ALIAS_H
 #define MCRL2_NEW_DATA_ALIAS_H
 
-#include "boost/range/iterator_range.hpp"
-
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/new_data/sort_expression.h"

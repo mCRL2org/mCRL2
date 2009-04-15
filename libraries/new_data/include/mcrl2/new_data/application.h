@@ -16,8 +16,8 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/new_data/data_expression.h"
 
 namespace mcrl2 {
@@ -74,7 +74,7 @@ namespace mcrl2 {
         /// \pre arguments is not empty.
         application(const data_expression& head,
                     const data_expression_vector& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end())))
+          : data_expression(core::detail::gsMakeDataAppl(head, convert< atermpp::aterm_list >(arguments)))
         {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());
@@ -89,7 +89,7 @@ namespace mcrl2 {
         template <typename ForwardIterator >
         application(const data_expression& head,
                     const typename boost::iterator_range< ForwardIterator >& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(arguments.begin(), arguments.end())))
+          : data_expression(core::detail::gsMakeDataAppl(head, convert< atermpp::aterm_list >(arguments)))
         {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());
@@ -102,7 +102,7 @@ namespace mcrl2 {
         /// \post *this represents head(arg1)
         application(const data_expression& head,
                     const data_expression& arg1)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1))))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1)))
         { }
 
         /// \brief Convenience constructor for application with two arguments
@@ -114,7 +114,7 @@ namespace mcrl2 {
         application(const data_expression& head,
                     const data_expression& arg1,
                     const data_expression& arg2)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2))))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2)))
         { }
 
         /// \brief Convenience constructor for application with three arguments
@@ -128,7 +128,7 @@ namespace mcrl2 {
                     const data_expression& arg1,
                     const data_expression& arg2,
                     const data_expression& arg3)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3))))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3)))
         { }
 
         /// \brief Convenience constructor for application with three arguments
@@ -144,7 +144,7 @@ namespace mcrl2 {
                     const data_expression& arg2,
                     const data_expression& arg3,
                     const data_expression& arg4)
-          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::term_list<data_expression>(atermpp::make_list(arg1, arg2, arg3, arg4))))
+          : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3, arg4)))
         { }
 
         /// \brief Returns the application of this application to an argument.

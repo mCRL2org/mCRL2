@@ -16,6 +16,7 @@
 #include "mcrl2/new_data/mutable_substitution_adapter.h"
 #include "mcrl2/new_data/detail/concepts.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
+#include "mcrl2/new_data/standard_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;

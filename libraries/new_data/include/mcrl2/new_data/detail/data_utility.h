@@ -18,9 +18,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
+#include "boost/range/iterator_range.hpp"
+#include "boost/algorithm/string.hpp"
+#include "boost/algorithm/string/split.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/function_symbol.h"

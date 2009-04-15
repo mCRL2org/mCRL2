@@ -13,7 +13,6 @@
 #define MCRL2_NEW_DATA_CONTAINER_SORT_H
 
 #include <iostream>
-#include <boost/range/iterator_range.hpp>
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/identifier_string.h"

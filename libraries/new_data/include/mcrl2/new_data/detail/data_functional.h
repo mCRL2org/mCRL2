@@ -20,15 +20,14 @@
 #include <utility>
 #include <vector>
 
-#include "boost/format.hpp"
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/variable.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/detail/data_utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
+#include "mcrl2/new_data/basic_sort.h"
+#include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/new_data/detail/data_utility.h"
 
 namespace mcrl2 {
 

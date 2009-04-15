@@ -12,6 +12,8 @@
 #ifndef _MCRL2_NEW_DATA_SUBSTITUTION__HPP_
 #define _MCRL2_NEW_DATA_SUBSTITUTION__HPP_
 
+#include <sstream>
+
 #include "boost/type_traits/remove_cv.hpp"
 #include "boost/type_traits/is_same.hpp"
 
@@ -325,12 +327,12 @@ namespace mcrl2 {
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].
     /// \return A string representation of the map.
-    template <typename MutableSubstitution>
-    std::string to_string(const MutableSubstitution& sigma)
+    template <typename Substitution>
+    std::string to_string(const Substitution& sigma)
     {
       std::stringstream result;
       result << "[";
-      for (typename MutableSubstitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+      for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
       {
         result << (i == sigma.begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
       }

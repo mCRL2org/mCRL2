@@ -35,7 +35,6 @@
 // new_data expressions
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/application.h"
 #include "mcrl2/new_data/data_equation.h"
 
 namespace mcrl2 {

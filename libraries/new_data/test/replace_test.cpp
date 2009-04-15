@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"

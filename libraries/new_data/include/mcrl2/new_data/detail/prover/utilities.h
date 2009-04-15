@@ -15,7 +15,7 @@
 #include <cmath>
 
 #include "aterm2.h"
-
+#include "mcrl2/core/detail/struct.h"
 
 namespace mcrl2 {
   namespace new_data {

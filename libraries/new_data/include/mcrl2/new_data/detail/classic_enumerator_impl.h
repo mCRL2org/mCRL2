@@ -18,6 +18,8 @@
 
 #include "mcrl2/new_data/detail/enum/standard.h"
 #include "mcrl2/new_data/detail/convert.h"
+#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/new_data/data_specification.h"
 
 namespace mcrl2 {
   namespace new_data {

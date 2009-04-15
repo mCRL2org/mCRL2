@@ -30,6 +30,7 @@
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/function_sort.h"
 #include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"

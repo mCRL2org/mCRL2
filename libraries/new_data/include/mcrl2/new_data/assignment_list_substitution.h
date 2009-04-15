@@ -15,6 +15,7 @@
 #include <utility>
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/new_data/variable.h"
+#include "mcrl2/new_data/assignment.h"
 #include "mcrl2/new_data/data_expression.h"
 
 namespace mcrl2 {

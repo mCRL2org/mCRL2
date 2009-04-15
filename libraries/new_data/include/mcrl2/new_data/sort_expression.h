@@ -16,12 +16,11 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/new_data/detail/convert.h"
 #include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
+#include "mcrl2/new_data/detail/convert.h"
 
 namespace mcrl2 {
 

@@ -16,6 +16,7 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/bool.h"
+#include "mcrl2/new_data/standard_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;

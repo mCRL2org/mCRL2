@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/nat.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/detail/sort_utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/identifier_generator.h"

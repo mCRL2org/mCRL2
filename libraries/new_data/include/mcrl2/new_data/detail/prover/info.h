@@ -12,6 +12,7 @@
 #ifndef INFO_H
 #define INFO_H
 
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/detail/prover/utilities.h"
 
 namespace mcrl2 {

@@ -20,6 +20,8 @@
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/utility.h"
+#include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/new_data/data_expression_utility.h"
 
 using namespace atermpp;
 using namespace mcrl2::core;

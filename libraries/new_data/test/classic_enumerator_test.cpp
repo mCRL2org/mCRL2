@@ -20,6 +20,7 @@
 #include "mcrl2/new_data/classic_enumerator.h"
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/detail/concepts.h"
+#include "mcrl2/new_data/standard_utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
