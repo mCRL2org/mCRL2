@@ -369,6 +369,7 @@ VOIDCDECL mark_phase_young()
   ProtEntry *prot;
   ATprotected_block pblock;
 
+  unsigned int count=0;
 #if defined(_MSC_VER) && defined(WIN32)
 
   unsigned int r_eax, r_ebx, r_ecx, r_edx, \
@@ -460,11 +461,10 @@ VOIDCDECL mark_phase_young()
   }
   
   // fprintf(stderr,"Mark memory young 4\n");
-  unsigned int count=0;
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next) {
   { if (pblock->protsize>0)
       mark_memory_young(pblock->term, &pblock->term[pblock->protsize], ATfalse);
-      count++;
+      ++count;
   }
 
   }
