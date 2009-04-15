@@ -5,6 +5,13 @@
 import string
 import copy
 
+# Remove trailing _ from a string
+def remove_underscore(s):
+  if len(s) > 0 and s[len(s)-1] == "_":
+    return s[:len(s)-1]
+  else:
+    return s
+
 # Escape an initial @ sign is present. Needed for doxygen code extraction
 def escape(s):
   if len(s) > 0 and s[0] == "@":
@@ -1802,6 +1809,9 @@ class specification():
     code += "//\n"
     code += "/// \\file mcrl2/new_data/%s.h\n" % (self.namespace)
     code += "/// \\brief The standard sort %s.\n" % (self.namespace)
+    code += "\n"
+    code += "/// \\detail This file was generated from the data sort specification\n"
+    code += "///          mcrl2/new_data/build/%s.spec.\n" % (remove_underscore(self.namespace))
     code += "\n"
     code += "#ifndef MCRL2_NEW_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_NEW_DATA_%s_H\n\n" % (self.namespace.upper())

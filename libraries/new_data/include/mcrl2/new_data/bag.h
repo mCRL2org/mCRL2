@@ -9,6 +9,9 @@
 /// \file mcrl2/new_data/bag.h
 /// \brief The standard sort bag.
 
+/// \detail This file was generated from the data sort specification
+///          mcrl2/new_data/build/bag.spec.
+
 #ifndef MCRL2_NEW_DATA_BAG_H
 #define MCRL2_NEW_DATA_BAG_H
 

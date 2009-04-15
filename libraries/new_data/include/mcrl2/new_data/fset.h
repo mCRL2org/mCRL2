@@ -9,6 +9,9 @@
 /// \file mcrl2/new_data/fset.h
 /// \brief The standard sort fset.
 
+/// \detail This file was generated from the data sort specification
+///          mcrl2/new_data/build/fset.spec.
+
 #ifndef MCRL2_NEW_DATA_FSET_H
 #define MCRL2_NEW_DATA_FSET_H
 
