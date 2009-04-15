@@ -14,6 +14,7 @@
 
 #include "grape_ids.h"
 #include "preambledialog.h"
+#include "inputvalidation.h"
 
 using namespace grape::grapeapp;
 
@@ -127,7 +128,18 @@ void grape_preamble_dialog::check_text()
   static grape::libgrape::preamble tmp_preamble;
   valid = tmp_preamble.set_parameter_declarations( get_parameter_declarations() );
   valid &= tmp_preamble.set_local_variable_declarations( get_local_variable_declarations() );
-
+  
+  for ( int i = 0; i < m_parameter_grid->GetNumberRows(); ++i )
+  {
+    //check all the names in the grid
+    valid &= identifier_valid( m_parameter_grid->GetCellValue(i, 0) );
+  }
+  for ( int i = 0; i < m_localvar_grid->GetNumberRows(); ++i )
+  {
+    //check all the names in the grid
+    valid &= identifier_valid( m_localvar_grid->GetCellValue(i, 0) );
+  }
+   
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 

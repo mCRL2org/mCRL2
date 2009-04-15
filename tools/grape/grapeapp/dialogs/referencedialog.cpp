@@ -81,6 +81,8 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
   init( panel );
 
   m_combo->SetFocus();
+  
+  change_combobox();
 }
 
 void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_varupdate p_list_of_varupdate, grape_specification *p_spec )
@@ -151,7 +153,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   m_combo->SetFocus();
   Centre();
-  check_text();
+  change_combobox();
 }
 
 grape_reference_dialog::grape_reference_dialog()
@@ -234,7 +236,7 @@ void grape_reference_dialog::event_change_text( wxGridEvent &p_event )
   check_text();
 }
 
-void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
+void grape_reference_dialog::change_combobox()
 {
   int start_index = 0;
   process_diagram *diagram_ptr = static_cast<process_diagram*>(find_a_diagram( m_main_frame, get_diagram_id() ) );
@@ -266,6 +268,10 @@ void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
   check_text();
 }
 
+void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )
+{
+  change_combobox();
+}
 
 BEGIN_EVENT_TABLE(grape_reference_dialog, wxDialog)
   EVT_COMBOBOX(GRAPE_COMBO_TEXT, grape_reference_dialog::event_change_combobox)

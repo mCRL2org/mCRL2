@@ -83,6 +83,11 @@ namespace grape
        
         DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
 
+	      /**
+	       * Updates the combobox with variables.
+      	 */
+        void change_combobox();
+
       public:
 
         /**

@@ -12,7 +12,9 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
+#include "inputvalidation.h"
 #include "channeldialog.h"
+#include "grape_ids.h"
 
 using namespace grape::grapeapp;
 
@@ -25,7 +27,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("name:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create name input
-  m_name_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_name(), wxDefaultPosition, wxSize(300, 25) );
+  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, p_channel.get_name(), wxDefaultPosition, wxSize(300, 25) );
 
   // create sizer
   wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -39,7 +41,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create rename input
-  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );
+  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, p_channel.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );
 
   // create sizer
   wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -73,6 +75,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
+  FindWindow(GetAffirmativeId())->Enable( update_validation() );
   sizer->Layout();
   wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
 
@@ -93,12 +96,21 @@ grape_channel_dlg::~grape_channel_dlg()
 {
 }
 
+bool grape_channel_dlg::update_validation()
+{
+  bool is_valid = identifier_valid(m_name_input->GetValue());
+  is_valid &= identifier_valid(m_rename_input->GetValue());
+  return is_valid;
+}
+void grape_channel_dlg::event_update_validation( wxCommandEvent &p_event )
+{
+  FindWindow(GetAffirmativeId())->Enable( update_validation() );
+}
+        
 bool grape_channel_dlg::show_modal( channel &p_channel )
 {
   if (ShowModal() != wxID_CANCEL)
   {
-    wxMessageBox( _T("identifier is not valid"), _T(""), wxOK | wxICON_INFORMATION);
-
     p_channel.set_name(m_name_input->GetValue());     
     p_channel.set_rename_to(m_rename_input->GetValue());
   
@@ -111,3 +123,8 @@ bool grape_channel_dlg::show_modal( channel &p_channel )
   
   return false;
 }
+
+BEGIN_EVENT_TABLE(grape_channel_dlg, wxDialog)
+  EVT_TEXT(GRAPE_CHANNEL_NAME_INPUT_TEXT, grape_channel_dlg::event_update_validation)   
+  EVT_TEXT(GRAPE_CHANNEL_RENAME_INPUT_TEXT, grape_channel_dlg::event_update_validation)   
+END_EVENT_TABLE()

@@ -12,7 +12,9 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
+#include "inputvalidation.h"
 #include "channelcommunicationdialog.h"
+#include "grape_ids.h"
 
 using namespace grape::grapeapp;
 
@@ -25,7 +27,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
   
   // create rename input
-  m_rename_input = new wxTextCtrl(this, wxID_ANY, p_channel_communication.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );            
+  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_RENAME_INPUT_TEXT, p_channel_communication.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );            
     
   // create sizer
   wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -53,6 +55,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
+  FindWindow(GetAffirmativeId())->Enable( update_validation() );
   sizer->Layout();
   wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
 
@@ -87,3 +90,17 @@ bool grape_channel_communication_dlg::show_modal( channel_communication &p_chann
 
   return false;
 }
+
+bool grape_channel_communication_dlg::update_validation()
+{
+  return identifier_valid(m_rename_input->GetValue());
+}
+void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &p_event )
+{
+  FindWindow(GetAffirmativeId())->Enable( update_validation() );
+}
+
+BEGIN_EVENT_TABLE(grape_channel_communication_dlg, wxDialog)
+  EVT_TEXT(GRAPE_CHANNEL_COMMUNICATION_RENAME_INPUT_TEXT, grape_channel_communication_dlg::event_update_validation)   
+END_EVENT_TABLE()
+
