@@ -1791,7 +1791,19 @@ class specification():
   def code(self):
     # Add structured sorts to constructor declarations
     self.function_specification = self.sort_specification.merge_structured_sorts(self.function_specification)
-    code  = "#ifndef MCRL2_NEW_DATA_%s_H\n" % (self.namespace.upper())
+    code  = ""
+    code += "// Author(s): Jeroen Keiren\n"
+    code += "// Copyright: see the accompanying file COPYING or copy at\n"
+    code += "// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING\n"
+    code += "//\n"
+    code += "// Distributed under the Boost Software License, Version 1.0.\n"
+    code += "// (See accompanying file LICENSE_1_0.txt or copy at\n"
+    code += "// http://www.boost.org/LICENSE_1_0.txt)\n"
+    code += "//\n"
+    code += "/// \\file mcrl2/new_data/%s.h\n" % (self.namespace)
+    code += "/// \\brief The standard sort %s.\n" % (self.namespace)
+    code += "\n"
+    code += "#ifndef MCRL2_NEW_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_NEW_DATA_%s_H\n\n" % (self.namespace.upper())
     code += "#include \"mcrl2/new_data/basic_sort.h\"\n"
     code += "#include \"mcrl2/new_data/function_sort.h\"\n"
