@@ -187,8 +187,8 @@ namespace tipi {
 
       /**
        * \brief Special function to set/replace the value of an argument ...
-       * \param[in] t pointer to the data type definition
-       * \param[in] b whether or not to add if the argument is already present
+       * \param[in] t value to set
+       * \param[in] b whether or not to append if the argument is not present
        **/
       template < unsigned int n, typename S, typename T >
       inline typename boost::enable_if< typename boost::is_pod< T >::type, void >::type
@@ -212,8 +212,8 @@ namespace tipi {
 
       /**
        * \brief Special function to set/replace the value of an argument ...
-       * \param[in] t pointer to the data type definition
-       * \param[in] b whether or not to add if the argument is already present
+       * \param[in] t value to set
+       * \param[in] b whether or not to append if the argument is not present
        **/
       template < unsigned int n, typename T >
       inline void set_argument_value(const T t, bool b = true) {

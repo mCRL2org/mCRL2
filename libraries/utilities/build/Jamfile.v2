@@ -30,6 +30,7 @@ obj command_line_interfacing
       : <use>/site-config//boost
       :
       : <include>../include
+        <include>../../pbes/include # Temporary measure until squadt_tool class hierarchy is complete
       ;
 
 mcrl2-library utilities

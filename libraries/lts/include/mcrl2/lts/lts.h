@@ -22,10 +22,10 @@
 #include <vector>
 #include <set>
 #include <iostream>
-#include <aterm2.h>
-#include <mcrl2/atermpp/set.h>
-#include <mcrl2/new_data/data_specification.h>
-#include <mcrl2/lps/specification.h>
+#include "aterm2.h"
+#include "mcrl2/atermpp/set.h"
+#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/lps/specification.h"
 
 #ifdef USE_BCG
 #include <bcg_user.h>

@@ -9,6 +9,7 @@
 #include "mcrl2/new_data/postfix_identifier_generator.h"
 #include "mcrl2/new_data/basic_sort.h"
 #include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/lps/linear_process.h"
 #include <boost/range/iterator_range.hpp>

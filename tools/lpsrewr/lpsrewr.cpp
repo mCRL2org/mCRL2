@@ -17,6 +17,7 @@
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -26,11 +27,12 @@ using namespace mcrl2::lps;
 
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
+using mcrl2::utilities::tools::squadt_tool;
 
-class lps_rewriter_tool : public rewriter_tool<input_output_tool>
+class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    typedef squadt_tool< rewriter_tool< input_output_tool > > super;
 
     lps::specification        m_specification;
     mcrl2::new_data::rewriter m_rewriter;
@@ -106,26 +108,11 @@ class lps_rewriter_tool : public rewriter_tool<input_output_tool>
 
       return true;
     }
-};
 
-
-// SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/mcrl2_squadt_interface.h"
-
-// Strings containing tags used for communication between lpsrewr and squadt
-const char* lps_file_for_input    = "lps_in";
-const char* lps_file_for_output   = "lps_out";
-
-class squadt_interactor
-              : public mcrl2::utilities::squadt::mcrl2_tool_interface,
-                public lps_rewriter_tool
-{
-  public:
-
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+      c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
@@ -140,8 +127,8 @@ class squadt_interactor
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
-      input_filename() = c.get_input(lps_file_for_input).location();
-      output_filename() = c.get_output(lps_file_for_output).location();
+      input_filename() = c.get_input("main-input").location();
+      output_filename() = c.get_output("main-output").location();
 
       bool result = run();
 
@@ -151,37 +138,16 @@ class squadt_interactor
 
       return (result);
     }
-
-    int execute(int argc, char** argv)
-    { if (squadt::free_activation(*this, argc, argv))
-      { return EXIT_SUCCESS;
-      }
-      return lps_rewriter_tool::execute(argc,argv);
-    }
-};
 #endif //ENABLE_SQUADT_CONNECTIVITY
-
+};
 
 //Main program
 //------------
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  try
-  {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    squadt_interactor tool;
-#else
-    lps_rewriter_tool tool;
-#endif
-    return tool.execute(argc, argv);
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
-  return EXIT_FAILURE;
+  return lps_rewriter_tool().execute(argc, argv);
 }
 
