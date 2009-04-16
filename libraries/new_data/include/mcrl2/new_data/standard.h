@@ -118,7 +118,7 @@ namespace mcrl2 {
     /// \param e A data expression
     /// \return true iff e is an application of function symbol less_equal to a
     ///     number of arguments
-    bool is_less_application(const data_expression& e);
+    bool is_less_equal_application(const data_expression& e);
 
     /// \brief Constructor for function symbol >
     /// \param s A sort expression
