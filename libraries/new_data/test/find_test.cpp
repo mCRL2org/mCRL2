@@ -15,6 +15,7 @@
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/data.h"
 #include "mcrl2/new_data/find.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/function_sort.h"
 
 using namespace mcrl2::core;
