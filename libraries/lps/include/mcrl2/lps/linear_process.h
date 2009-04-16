@@ -173,7 +173,7 @@ class linear_process: public atermpp::aterm_appl
       {
         new_data::assignment_list assignments(i->assignments());
         std::set<new_data::variable> summation_variables = mcrl2::new_data::detail::make_set(i->summation_variables());
-        std::set<new_data::variable> used_variables = new_data::find_all_variables(atermpp::make_list(i->condition(), i->actions(), i->time(),
+        std::set<new_data::variable> used_variables = new_data::find_all_unbound_variables(atermpp::make_list(i->condition(), i->actions(), i->time(),
            atermpp::term_list< new_data::variable >(assignments.begin(), assignments.end())));
         std::set<new_data::variable> bound_variables = mcrl2::new_data::detail::set_union(parameters, summation_variables);
         std::set<new_data::variable> free_variables = mcrl2::new_data::detail::set_difference(used_variables, bound_variables);

@@ -152,6 +152,19 @@ std::set<variable> find_all_variables(Container const& container)
   return result;
 }
 
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \return All data variables that occur in the term t
+template <typename Container >
+std::set<variable> find_all_unbound_variables(Container const& container)
+{
+  std::set<variable> result;
+  detail::partial_find_all_if(container, boost::bind(&detail::is_variable, _1),
+                                         boost::bind(std::logical_not<bool>(), boost::bind(&core::detail::gsIsBinder, _1)),
+                                         detail::make_inserter(result));
+  return result;
+}
+
 /// \brief Returns true if the term has a given sort identifier as subterm.
 /// \param t an expression
 /// \param s A sort identifier

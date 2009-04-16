@@ -135,6 +135,20 @@ void test_process(std::string text)
   }
 }
 
+void test_free_variables()
+{
+  lps::specification specification(mcrl22lps(
+    "act a : Bool;\n"
+    "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+    "init X;\n"
+  ));
+
+  std::set< new_data::variable > free_variables(specification.process().find_free_variables());
+
+  BOOST_CHECK(free_variables.find(new_data::variable("x", new_data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(new_data::variable("y", new_data::sort_nat::nat())) == free_variables.end());
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -142,6 +156,7 @@ int test_main(int argc, char* argv[])
   test_process(SPEC1);
   test_process(SPEC2);
   test_process(ABS_SPEC_LINEARIZED);
+  test_free_variables();
 
   return 0;
 }

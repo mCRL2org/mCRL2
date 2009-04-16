@@ -73,18 +73,6 @@ namespace detail {
     return result;
   }
 
-  /// \brief Applies data implementation to a specification
-  /// \param spec A term
-  /// \return A term in an undocumented format
-  inline
-  ATermAppl implement_data_specification(ATermAppl spec)
-  {
-    ATermAppl result = new_data::detail::implement_data_proc_spec(spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("data implementation error");
-    return result;
-  }
-
   /// \brief Applies linearization to a specification
   /// \param spec A term
   /// \param options Options for the algorithm
