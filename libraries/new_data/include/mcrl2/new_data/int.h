@@ -6,10 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/int_.h
+/// \file mcrl2/new_data/int.h
 /// \brief The standard sort int_.
-/// \detail This file was generated from the data sort specification
-///          mcrl2/new_data/build/int.spec.
+///
+/// This file was generated from the data sort specification
+/// mcrl2/new_data/build/int.spec.
 
 #ifndef MCRL2_NEW_DATA_INT__H
 #define MCRL2_NEW_DATA_INT__H

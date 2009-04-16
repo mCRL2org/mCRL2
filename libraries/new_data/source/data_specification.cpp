@@ -54,7 +54,6 @@ namespace mcrl2 {
       {
         return s.is_system_defined(c);
       }
-      /// \endcond
 
       /// \brief Set of sorts that depend on the sorts that are added
       class dependent_sort_helper
@@ -194,7 +193,7 @@ namespace mcrl2 {
       };
 
     } // namespace detail
-    /// \endcond INTERNAL_DOCS
+    /// \endcond
 
     /// \pre m_sorts.find(sort) == m_sorts.empty()
     void data_specification::import_system_defined_sort(sort_expression const& sort)

@@ -8,8 +8,9 @@
 //
 /// \file mcrl2/new_data/pos.h
 /// \brief The standard sort pos.
-/// \detail This file was generated from the data sort specification
-///          mcrl2/new_data/build/pos.spec.
+///
+/// This file was generated from the data sort specification
+/// mcrl2/new_data/build/pos.spec.
 
 #ifndef MCRL2_NEW_DATA_POS_H
 #define MCRL2_NEW_DATA_POS_H

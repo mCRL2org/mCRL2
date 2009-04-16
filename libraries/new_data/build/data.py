@@ -1807,10 +1807,11 @@ class specification():
     code += "// (See accompanying file LICENSE_1_0.txt or copy at\n"
     code += "// http://www.boost.org/LICENSE_1_0.txt)\n"
     code += "//\n"
-    code += "/// \\file mcrl2/new_data/%s.h\n" % (self.namespace)
+    code += "/// \\file mcrl2/new_data/%s.h\n" % (remove_underscore(self.namespace))
     code += "/// \\brief The standard sort %s.\n" % (self.namespace)
-    code += "/// \\detail This file was generated from the data sort specification\n"
-    code += "///          mcrl2/new_data/build/%s.spec.\n" % (remove_underscore(self.namespace))
+    code += "///\n"
+    code += "/// This file was generated from the data sort specification\n"
+    code += "/// mcrl2/new_data/build/%s.spec.\n" % (remove_underscore(self.namespace))
     code += "\n"
     code += "#ifndef MCRL2_NEW_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_NEW_DATA_%s_H\n\n" % (self.namespace.upper())

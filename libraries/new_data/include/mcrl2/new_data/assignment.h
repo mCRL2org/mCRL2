@@ -146,6 +146,7 @@ namespace detail {
 
 } // namespace detail
 /// \endcond
+
     /// \brief Applies a substitution function to data expressions appearing in the right hand
     /// sides of assignments.
     /// \param l                         A sequence of assignments

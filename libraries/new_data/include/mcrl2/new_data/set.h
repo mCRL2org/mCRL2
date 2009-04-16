@@ -6,10 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/set_.h
+/// \file mcrl2/new_data/set.h
 /// \brief The standard sort set_.
-/// \detail This file was generated from the data sort specification
-///          mcrl2/new_data/build/set.spec.
+///
+/// This file was generated from the data sort specification
+/// mcrl2/new_data/build/set.spec.
 
 #ifndef MCRL2_NEW_DATA_SET__H
 #define MCRL2_NEW_DATA_SET__H

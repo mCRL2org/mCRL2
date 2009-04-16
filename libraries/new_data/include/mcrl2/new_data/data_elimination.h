@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/data_elimination.h
+/// \file mcrl2/new_data/data_elimination.h
 /// \brief The files provides the class data_elimination.
 
 #ifndef MCRL2_DATA_DATA_ELIMINATION_H
