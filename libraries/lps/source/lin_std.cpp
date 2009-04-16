@@ -441,6 +441,10 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
   {
     return ATAgetArgument(sortterm,0);
   }
+  if (gsIsSortStruct(sortterm))
+  {
+    return sortterm;
+  }
 
   gsErrorMsg("expected a sortterm %T",sortterm);
   exit(1);
@@ -730,46 +734,6 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
   //add generated declarations to spec
   insert_data_decls(data_decls, spec, false);
 }
-
-// Temporary measure, the rest of the code relies on the declarations of Pos, Nat, Int, Real
-// being found when needed.
-//static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictype *spec)
-//{
-//  if (gsIsSortExprReal(sort_expr))
-//  {
-//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
-//      insertsort(gsMakeSortExprReal(), spec);
-//      sort_expr = gsMakeSortIdInt();
-//    }
-//  }
-//  if (gsIsSortExprInt(sort_expr))
-//  {
-//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-//      insertsort(gsMakeSortExprInt(), spec);
-//      sort_expr = gsMakeSortIdNat();
-//    }
-//  }
-//  if (gsIsSortExprNat(sort_expr))
-//  {
-//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-//      insertsort(gsMakeSortExprNat(), spec);
-//      sort_expr = gsMakeSortIdPos();
-//    }
-//  }
-//  if (gsIsSortExprPos(sort_expr))
-//  {
-//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
-//      insertsort(gsMakeSortExprPos(), spec);
-//      sort_expr = gsMakeSortIdBool();
-//    }
-//  }
-//  if (gsIsSortExprBool(sort_expr))
-//  {
-//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdBool(), 0) == -1) {
-//      insertsort(gsMakeSortExprBool(), spec);
-//    }
-//  }
-//}
 
 static ATermList getnames(ATermAppl multiAction)
 { ATermList result=ATempty;
@@ -1806,6 +1770,10 @@ static int occursinterm(ATermAppl var, ATermAppl t)
 
   if (gsIsOpId(t))
   { return 0; }
+  if (gsIsBinder(t))
+  { gsfprintf(stderr,"Warning: occurs on expression with binders\n");
+    return 0;
+  }
 
   assert(gsIsDataAppl(t));
 
@@ -1828,6 +1796,10 @@ static void filter_vars_by_term(
 
   if (gsIsOpId(t))
   { return;
+  }
+  if (gsIsBinder(t))
+  { gsfprintf(stderr,"Warning: filtering of variables expression with binders\n");
+    return;
   }
 
   assert(gsIsDataAppl(t));
@@ -2081,23 +2053,42 @@ static ATermAppl substitute_data_rec(
     return substitute_variable_rec(terms,vars,t);
   }
 
-  /* Exists en forall do not occur in terms.
   if (gsIsExists(ATAgetArgument(t, 0)))
   { gsfprintf(stderr,"Warning: no renaming of variable in exists\n");
     return gsMakeBinder(gsMakeExists(),
-                 ATLgetArgument(t,0),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
+                 ATLgetArgument(t,1),
+                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
 
   }
 
   if (gsIsForall(ATAgetArgument(t, 0)))
   { gsfprintf(stderr,"Warning: no renaming of variable in forall\n");
     return gsMakeBinder(gsMakeForall(),
-                 ATLgetArgument(t,0),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,1)));
+                 ATLgetArgument(t,1),
+                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
 
-  } */
+  }
+  if (gsIsLambda(ATAgetArgument(t, 0)))
+  { gsfprintf(stderr,"Warning: no renaming of variable in lambda\n");
+    return gsMakeBinder(gsMakeLambda(),
+                 ATLgetArgument(t,1),
+                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
 
+  }
+  if (gsIsSetComp(ATAgetArgument(t, 0)))
+  { gsfprintf(stderr,"Warning: no renaming of variable in set comprehension\n");
+    return gsMakeBinder(gsMakeSetComp(),
+                 ATLgetArgument(t,1),
+                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
+
+  }
+  if (gsIsBagComp(ATAgetArgument(t, 0)))
+  { gsfprintf(stderr,"Warning: no renaming of variable in bag comprehension\n");
+    return gsMakeBinder(gsMakeSetComp(),
+                 ATLgetArgument(t,1),
+                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
+
+  }
   assert(gsIsOpId(t));
   return t;
 }
@@ -2474,7 +2465,6 @@ static ATermAppl newprocess(
     warningNumber=warningNumber*2;
   }
   parameters=parameters_that_occur_in_body(parameters, body);
-
   ATermAppl p=gsMakeProcVarId(fresh_name("P"),linGetSorts(parameters));
   insertProcDeclaration(
              p,
