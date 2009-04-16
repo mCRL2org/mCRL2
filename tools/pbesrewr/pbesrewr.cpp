@@ -113,67 +113,62 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
     void set_capabilities(tipi::tool::capabilities& c) const {
       c.add_input_configuration("main-input", tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
     }
-    
+
     void user_interactive_configuration(tipi::configuration& c) {
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
       using namespace utilities;
-    
+
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(c);
-    
+
       /* Create display */
       tipi::tool_display d;
-    
+
       layout::vertical_box& m = d.create< vertical_box >();
-    
+
       add_rewrite_option(d, m);
       add_pbes_rewrite_option(d, m);
-    
+
       button& okay_button = d.create< button >().set_label("OK");
-    
+
       m.append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);
-    
+
       send_display_layout(d.manager(m));
-    
+
       /* Wait until the ok button was pressed */
       okay_button.await_change();
-    
+
       /* Add output file to the configuration */
-      if (c.output_exists("main-output")) {
-        tipi::configuration::object& output_file = c.get_output("main-output");
-    
-        output_file.location(c.get_output_name(".pbes"));
-      }
-      else {
+      if (!c.output_exists("main-output")) {
         c.add_output("main-output", tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
       }
-    
+
       send_clear_display();
-    
+
       // let squadt_tool update configuration for rewriter and input/output files
       update_configuration(c);
     }
-    
+
     bool check_configuration(tipi::configuration const& c) const {
       return c.input_exists("main-input") &&
              c.output_exists("main-output") &&
              c.option_exists("rewrite-strategy") &&
              c.option_exists("pbes-rewriter-type");
     }
-    
+
     bool perform_task(tipi::configuration& c) {
       using namespace utilities;
-    
+
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(c);
-    
+
       bool result = run();
-    
+
       send_clear_display();
-    
+
       return result;
     }
 #endif

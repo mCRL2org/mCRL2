@@ -63,6 +63,9 @@ namespace mcrl2 {
        private:
           friend class boost::iterator_core_access;
 
+          ATermList m_start;
+          ATermList m_list;
+
           template < typename TermList >
           friend class random_access_list;
 
@@ -87,7 +90,8 @@ namespace mcrl2 {
           /// \return The value that the iterator references
           const Expression dereference() const
           {
-          assert(!ATisEmpty(m_list));
+            assert(!ATisEmpty(m_list));
+
             return Expression(typename atermpp::term_list_iterator_traits<Expression>::value_type(ATgetFirst(m_list)));
           }
 
@@ -105,17 +109,23 @@ namespace mcrl2 {
 
           /// \brief Increments the iterator
           void increment()
-          { m_list = ATgetNext(m_list); }
+          {
+            assert(!ATisEmpty(m_list));
+
+            m_list = ATgetNext(m_list);
+          }
 
           /// \brief Advance by n
-          void advance(size_t n) {
+          void advance(size_t n)
+          {
             for (; n != 0; --n) {
               increment();
             }
           }
 
           /// \brief Measure distance to other iterator
-          ptrdiff_t distance_to(term_list_random_iterator const& other) const {
+          ptrdiff_t distance_to(term_list_random_iterator const& other) const
+          {
             ptrdiff_t count = 0;
 
             for (ATermList l = m_list; !ATisEmpty(l); l = ATgetNext(l), ++count) {
@@ -134,9 +144,6 @@ namespace mcrl2 {
 
             return count;
           }
-
-          ATermList m_start;
-          ATermList m_list;
       };
 
       // Condition for recognising types that represent containers

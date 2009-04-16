@@ -116,8 +116,11 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&) {
-      // lpsrewr does not require interaction with squadt.
+    void user_interactive_configuration(tipi::configuration& c) {
+      /* Add output file to the configuration */
+      if (!c.output_exists("main-output")) {
+        c.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
+      }
     }
 
     /** \brief check an existing configuration object to see if it is usable */
@@ -127,8 +130,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
-      input_filename() = c.get_input("main-input").location();
-      output_filename() = c.get_output("main-output").location();
+      synchronise_with_configuration(c);
 
       bool result = run();
 
