@@ -22,178 +22,130 @@
 #include <mcrl2/atermpp/aterm_list.h>
 #include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
+#include "mcrl2/utilities/squadt_tool.h"
 
-//Aterms
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
+//Tool framework
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 
 #include "realelm.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-
-struct tool_options {
-  std::string input_file; ///< Name of the file to read input from
-  std::string output_file; ///< Name of the file to write output to (or stdout)
-  int max_iterations;
-  RewriteStrategy strategy;
-};
+using utilities::tools::squadt_tool;
+using utilities::tools::rewriter_tool;
+using utilities::tools::input_output_tool;
 
 //Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
-//Forward declaration because do_realelm() is called within squadt_interactor class
-int do_realelm(const tool_options& options);
-
-class squadt_interactor: public mcrl2::utilities::squadt::mcrl2_tool_interface
+class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
 {
-  private:
+  protected:
+    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
-    static const char*  lps_file_for_input;  ///< file containing an LPS that can be imported
-    static const char*  lps_file_for_output; ///< file used to write the output to
+    int max_iterations;
+
+    /// Parse the non-default options.
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      try
+      { max_iterations = parser.option_argument_as< int > ("max");
+      } 
+      catch (std::logic_error) 
+      { max_iterations = DEFAULT_MAX_ITERATIONS;
+      }
+    }
+  
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.
+        add_option("max", 
+          make_mandatory_argument("NUM"),
+                   "perform at most NUM iterations");
+    }
 
   public:
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
+    lpsrealelm_tool()
+      : super(
+          TOOLNAME,
+          AUTHORS,
+          "remove real numbers from an LPS",
+          "Remove Real numbers from the linear process specification (LPS) in "
+          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. ")
+    {}
 
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
+    /// Runs the algorithm.
+    /// Reads a specification from input_file,
+    ///i applies real time abstraction to it and writes the result to output_file.
+    bool run()
+    {
+      using namespace mcrl2::pbes_system;
 
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
+      if (core::gsVerbose)
+      {
+        std::cerr << "parameters of lpsrealelm:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  max_iterations:     " << max_iterations << std::endl;
+      }
 
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-};
+      specification lps_specification;
+      lps_specification.load(m_input_filename);
 
-const char* squadt_interactor::lps_file_for_input  = "lps_in";
-const char* squadt_interactor::lps_file_for_output = "lps_out";
+      // Untime lps_specification and save the output to a binary file
+      rewriter r(lps_specification.data());
+      specification new_spec = realelm(lps_specification, max_iterations, r);
 
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& capabilities) const
-{
-  // The tool has only one main input combination
-  gsDebugMsg("squadt_interactor: Setting capabilities\n");
-  capabilities.add_input_configuration(lps_file_for_input, tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
-}
+      if (core::gsVerbose)
+      { std::cerr << "Real time abstraction completed, saving to " << m_output_filename << "\n";
+      }
+      new_spec.save(m_output_filename);
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& configuration)
-{
-  gsDebugMsg("squadt_interactor: User interactive configuration\n");
-
-  if (configuration.fresh()) {
-    if (!configuration.output_exists(lps_file_for_output)) {
-      configuration.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
+      return true;
     }
-  }
-}
 
-bool squadt_interactor::check_configuration(tipi::configuration const& configuration) const
-{
-  gsDebugMsg("squadt_interactor: Checking configuration\n");
-  // Check if everything present
-  return (configuration.input_exists(lps_file_for_input) &&
-          configuration.output_exists(lps_file_for_output)
-         );
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& configuration)
-{
-  gsDebugMsg("squadt_interactor: Performing task\n");
-  tool_options options;
-  options.input_file = configuration.get_input(lps_file_for_input).location();
-  options.output_file = configuration.get_output(lps_file_for_output).location();
-  options.max_iterations = DEFAULT_MAX_ITERATIONS;
-
-  gsDebugMsg("Calling do_realelm through SQuADT, with input: %s and output: %s\n", options.input_file.c_str(), options.output_file.c_str());
-  return (do_realelm(options)==0);
-}
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  
+    void set_capabilities(tipi::tool::capabilities& capabilities) const
+    {
+      // The tool has only one main input combination
+      capabilities.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+    }
+    
+    void user_interactive_configuration(tipi::configuration& configuration)
+    {
+      if (configuration.fresh()) {
+        if (!configuration.output_exists("main-output")) {
+          configuration.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
+        }
+      }
+    }
+    
+    bool check_configuration(tipi::configuration const& configuration) const
+    {
+      return (configuration.input_exists("main-input") &&
+              configuration.output_exists("main-output")
+             );
+    }
+    
+    bool perform_task(tipi::configuration& configuration)
+    {
+      synchronise_with_configuration(configuration);
+      max_iterations = DEFAULT_MAX_ITERATIONS;
+       
+      const bool result = run();
+      send_clear_display();
+      return result;
+    }
 
 #endif //ENABLE_SQUADT_CONNECTIVITY
-
-///Reads a specification from input_file,
-///applies real time abstraction to it and writes the result to output_file.
-int do_realelm(const tool_options& options)
-{
-  specification lps_specification;
-
-  lps_specification.load(options.input_file);
-
-  // Untime lps_specification and save the output to a binary file
-  specification new_spec = realelm(lps_specification, options.max_iterations, options.strategy);
-
-  gsDebugMsg("Real time abstraction completed, saving to %s\n", options.output_file.c_str());
-  new_spec.save(options.output_file);
-
-  return 0;
-}
-
-///Parses command line and sets settings from command line switches
-bool parse_command_line(int ac, char** av, tool_options& t_options) {
-  interface_description clinterface(av[0], TOOLNAME, AUTHORS,
-                             "remove real numbers from an LPS",
-                             "[OPTION]... [INFILE [OUTFILE]]\n",
-                             "Remove Real numbers from the linear process specification (LPS) in "
-                             "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-                             "If OUTFILE is not present, stdout is used.");
-
-  clinterface.add_rewriting_options();
-  clinterface.add_option("max", make_mandatory_argument("NUM"),
-    "perform at most NUM iterations");
-
-  command_line_parser parser(clinterface, ac, av);
-
-  if (parser.continue_execution()) {
-    t_options.strategy = parser.option_argument_as< RewriteStrategy >("rewriter");
-
-    if (parser.options.count("max")) {
-      t_options.max_iterations = parser.option_argument_as< int > ("max");
-    }
-    else
-    {
-      t_options.max_iterations = DEFAULT_MAX_ITERATIONS;
-    }
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        t_options.input_file = parser.arguments[0];
-      }
-      if (1 < parser.arguments.size()) {
-        t_options.output_file = parser.arguments[1];
-      }
-    }
-  }
-
-  return parser.continue_execution();
-}
+};
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
-
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
-
-    tool_options options;
-
-    if (parse_command_line(argc, argv, options)) {
-      return do_realelm(options);
-    }
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return lpsrealelm_tool().execute(argc, argv);
 }

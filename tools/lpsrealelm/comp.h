@@ -14,20 +14,22 @@
 
 #include <iostream>
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/data_operation.h"
-#include "mcrl2/data/data_application.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/data_specification.h"
+// #include "mcrl2/new_data/data_operation.h"
+// #include "mcrl2/new_data/data_application.h"
+#include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/detail/data_implementation_concrete.h"
+#include "mcrl2/new_data/structured_sort.h"
 
-using namespace atermpp;
+// using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
-using namespace mcrl2::data;
-using namespace mcrl2::data::data_expr;
+// using namespace mcrl2::core;
+// using namespace mcrl2::core::detail;
+using namespace mcrl2::new_data;
+// using namespace mcrl2::new_data::data_expr;
 using namespace mcrl2::new_data::detail;
 
+/* 
 /// \brief Name for the sort Comp.
 /// Comp is used as sort indicating relative order in lpsrealelm.
 inline identifier_string comp_name()
@@ -75,34 +77,34 @@ inline
 identifier_string is_larger_name()
 {
   return identifier_string("is_larger");
-}
+} */
 
 /// \brief Sort expression for sort Comp.
-inline
-sort_expression comp()
+/* inline
+basic_sort comp()
 {
-  return sort_identifier(comp_name());
+  return basic_sort("Comp");
 }
 
 /// \brief Constructor smaller for sort Comp.
 inline
-data_operation smaller()
+function_symbol smaller()
 {
-  return data_operation(smaller_name(), comp());
+  return function_symbol("smaller",comp());
 }
 
 /// \brief Constructor equal for sort Comp.
 inline
-data_operation equal()
+function_symbol equal()
 {
-  return data_operation(equal_name(), comp());
+  return function_symbol("equal", comp());
 }
 
 /// \brief Constructor larger for sort Comp.
 inline
-data_operation larger()
+function_symbol larger()
 {
-  return data_operation(larger_name(), comp());
+  return function_symbol("larger", comp());
 }
 
 /// \brief Sort expression Comp -> Bool
@@ -158,34 +160,96 @@ data_application is_larger(const data_expression& e)
 /// \param s A data specification.
 /// \ret s to which declarations for sort Comp have been added.
 inline
-data_specification add_comp_sort(const data_specification& s)
+structured_sort add_comp_sort(data_specification& s)
 {
   // Constructors
-  aterm_appl comp_smaller = gsMakeStructCons(smaller_name(), aterm_list(), is_smaller_name());
-  aterm_appl comp_equal   = gsMakeStructCons(equal_name(), aterm_list(), is_equal_name());
-  aterm_appl comp_larger  = gsMakeStructCons(larger_name(), aterm_list(), is_larger_name());
-  aterm_list comp_constructors = make_list(comp_smaller, comp_equal, comp_larger);
+  structured_sort_constructor comp_smaller("smaller","is_smaller");
+  structured_sort_constructor comp_equal("equal","is_equal");
+  structured_sort_constructor comp_larger("larger","is_larger");
+  structured_sort_constructor_vector comp_constructors = 
+             make_vector(comp_smaller, comp_equal, comp_larger);
 
   // Build up structured sort
-  aterm_appl comp_struct = gsMakeSortStruct(comp_constructors);
+  structured_sort comp_struct(comp_constructors);
 
-  // Empty data declarations and substitutions
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  ATermList substitutions = ATmakeList0();
-  ATermList new_equations = ATmakeList0();
+  basic_sort comp("Comp");
+  s.add_sort(alias(comp,comp_struct));
+  return comp_struct;
+} */
 
-  // Implement Comp as structured sort, reusing data implementation
-  impl_sort_struct(comp_struct, comp(), &substitutions, &data_decls, true, &new_equations);
+class comp_struct:public structured_sort
+{
+  private:
+    function_symbol f_smaller;
+    function_symbol f_equal;
+    function_symbol f_larger;
+    function_symbol f_is_smaller;
+    function_symbol f_is_equal;
+    function_symbol f_is_larger;
 
-  // Add declarations in data_decls to the specification
-  sort_expression_list sorts = ATconcat(s.sorts(), data_decls.sorts);
-  data_operation_list constructors = ATconcat(s.constructors(), data_decls.cons_ops);
-  data_operation_list mappings = ATconcat(s.mappings(), data_decls.ops);
-  data_equation_list equations = ATconcat(s.equations(), data_decls.data_eqns);
+    static structured_sort_constructor &c_smaller()
+    { static structured_sort_constructor c_smaller("smaller","is_smaller");
+      return c_smaller;
+    }
 
-  return data_specification(sorts, constructors, mappings, equations);
-}
+    static structured_sort_constructor &c_equal()
+    { static structured_sort_constructor c_equal("equal","is_equal");
+      return c_equal;
+    }
+
+    static structured_sort_constructor &c_larger()
+    { static structured_sort_constructor c_larger("larger","is_larger");
+      return c_larger;
+    }
+
+    static basic_sort &comp_sort()
+    { static basic_sort comp_sort("Comp");
+      return comp_sort;
+    }
+
+  public:
+    comp_struct():
+           structured_sort(make_vector(c_smaller(),c_equal(),c_larger()))
+    { c_smaller().protect(); 
+      c_equal().protect();
+      c_larger().protect();
+      comp_sort().protect();
+      f_smaller=c_smaller().constructor_function(comp_sort());
+      f_equal=c_equal().constructor_function(comp_sort());
+      f_larger=c_larger().constructor_function(comp_sort());
+      f_is_smaller=c_smaller().recogniser_function(comp_sort());
+      f_is_equal=c_equal().recogniser_function(comp_sort());
+      f_is_larger=c_larger().recogniser_function(comp_sort());
+    }
+
+    basic_sort sort() const
+    { return comp_sort();
+    }
+
+    data_expression smaller() const
+    { return f_smaller;
+    }
+
+    data_expression equal() const
+    { return f_equal;
+    }
+
+    data_expression larger() const
+    { return f_larger;
+    }
+
+    data_expression is_smaller(const data_expression& e) const
+    { return f_is_smaller(e);
+    }
+
+    data_expression is_equal(const data_expression& e) const
+    { return f_is_equal(e);
+    }
+
+    data_expression is_larger(const data_expression& e) const
+    { return f_is_larger(e);
+    }
+};
 
 #endif //MCRL2_LPSRTA_COMP_H
 

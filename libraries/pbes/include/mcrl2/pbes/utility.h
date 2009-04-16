@@ -83,7 +83,8 @@ static bool occurs_in_varL(atermpp::aterm_appl l, new_data::variable v)
   return find_if(l, compare_variableL(v)) != atermpp::aterm();
 }
 
-
+/* Rewrite and simplify should be replaced by 
+ * the standard pbes rewriters.
 ///\brief returns a pbes expression which has been rewritten en where unnecessary quantifications have been removed. The result can optionally be translated to internal rewrite format.
 /// This function simplifies all data expressions in p by applying the rewriter to it.
 /// Data expressions that are true or false are translated to the pbes expressions true and false.
@@ -206,14 +207,14 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     new_data::data_expression_list parameters;
     if (yield_internal_rewriter_format)
     { assert(0); // internal format cannot be used anymore.
-      /* for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
+      / * for( new_data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
         parameters = atermpp::push_front(parameters, r(*l));
         / * parameters = atermpp::push_front(parameters, new_data::data_expression(r.rewriteInternal(
                                 r.toRewriteFormat(*l))));  * /
       }
-      parameters = atermpp::reverse(parameters); */
+      parameters = atermpp::reverse(parameters); * /
     }
     else
     {
@@ -232,7 +233,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
     if (yield_internal_rewriter_format)
     {
       assert(0); // internal rewriter format is not used any longer.
-      /* new_data::data_expression d = (new_data::data_expression)r.rewriteInternal(r.toRewriteFormat(p));
+      / * new_data::data_expression d = (new_data::data_expression)r.rewriteInternal(r.toRewriteFormat(p));
       if (is_true_in_internal_rewrite_format(d,r))
       { result = true_();
       }
@@ -241,7 +242,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
       }
       else
       { result = d;
-      } */
+      } * /
     }
     else
     {
@@ -259,7 +260,7 @@ inline pbes_expression pbes_expression_rewrite_and_simplify(
   }
 
   return result;
-}
+} */
 
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
 /// occurs in the pbes_specification.
