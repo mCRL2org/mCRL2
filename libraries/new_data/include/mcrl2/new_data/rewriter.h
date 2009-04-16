@@ -263,7 +263,6 @@ namespace new_data {
       }
 
       ~basic_rewriter() {
-        m_specification.unprotect();
       }
   };
 

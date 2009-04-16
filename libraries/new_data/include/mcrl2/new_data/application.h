@@ -34,6 +34,12 @@ namespace mcrl2 {
         /// \brief Iterator over arguments
         typedef detail::term_list_random_iterator< data_expression > argument_iterator;
 
+        /// \brief Iterator range over constant arguments
+        typedef boost::iterator_range< argument_iterator >           arguments_const_range;
+
+        /// \brief Iterator range over arguments
+        typedef boost::iterator_range< argument_iterator >           arguments_range;
+
       public:
 
         /// \brief Constructor.

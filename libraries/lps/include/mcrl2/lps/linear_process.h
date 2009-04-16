@@ -25,6 +25,7 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/detail/sequence_algorithm.h"
 #include "mcrl2/new_data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/detail/free_variables.h"
@@ -168,16 +169,19 @@ class linear_process: public atermpp::aterm_appl
 
       // TODO: the efficiency of this implementation is not optimal
       std::set<new_data::variable> result;
-      std::set<new_data::variable> parameters = mcrl2::new_data::detail::make_set(process_parameters());
+      std::set<new_data::variable> parameters = mcrl2::new_data::convert< std::set< new_data::variable > >(process_parameters());
       for (summand_list::iterator i = m_summands.begin(); i != m_summands.end(); ++i)
       {
         new_data::assignment_list assignments(i->assignments());
         std::set<new_data::variable> summation_variables = mcrl2::new_data::detail::make_set(i->summation_variables());
-        std::set<new_data::variable> used_variables = new_data::find_all_unbound_variables(atermpp::make_list(i->condition(), i->actions(), i->time(),
-           atermpp::term_list< new_data::variable >(assignments.begin(), assignments.end())));
+        std::set<new_data::variable> used_variables;
+        lps::find_all_free_variables(i->condition(), std::inserter(used_variables, used_variables.end()));
+        lps::find_all_free_variables(i->actions(), std::inserter(used_variables, used_variables.end()));
+        lps::find_all_free_variables(i->time(), std::inserter(used_variables, used_variables.end()));
+        lps::find_all_free_variables(i->assignments(), std::inserter(used_variables, used_variables.end()));
         std::set<new_data::variable> bound_variables = mcrl2::new_data::detail::set_union(parameters, summation_variables);
         std::set<new_data::variable> free_variables = mcrl2::new_data::detail::set_difference(used_variables, bound_variables);
-        result.insert(free_variables.begin(), free_variables.end());
+        result.swap(free_variables);
       }
       return result;
     }
@@ -207,17 +211,8 @@ class linear_process: public atermpp::aterm_appl
           ))
       {
         std::cerr << "linear_process::is_well_typed() failed: some of the free variables were not declared\n";
-        std::cerr << "declared free variables: ";
-        for (std::set<new_data::variable>::const_iterator i = declared_free_variables.begin(); i != declared_free_variables.end(); ++i)
-        {
-          std::cerr << mcrl2::core::pp(*i) << " ";
-        }
-        std::cerr << "\noccurring free variables: ";
-        for (std::set<new_data::variable>::const_iterator i = occurring_free_variables.begin(); i != occurring_free_variables.end(); ++i)
-        {
-          std::cerr << mcrl2::core::pp(*i) << " ";
-        }
-        std::cerr << std::endl;
+        std::cerr << "declared free variables: " << new_data::pp(declared_free_variables) << std::endl;
+        std::cerr << "occurring free variables: " << new_data::pp(occurring_free_variables) << std::endl;
         return false;
       }
 
