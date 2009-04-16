@@ -1809,7 +1809,6 @@ class specification():
     code += "//\n"
     code += "/// \\file mcrl2/new_data/%s.h\n" % (self.namespace)
     code += "/// \\brief The standard sort %s.\n" % (self.namespace)
-    code += "\n"
     code += "/// \\detail This file was generated from the data sort specification\n"
     code += "///          mcrl2/new_data/build/%s.spec.\n" % (remove_underscore(self.namespace))
     code += "\n"

@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/fbag.h
 /// \brief The standard sort fbag.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/fbag.spec.
 

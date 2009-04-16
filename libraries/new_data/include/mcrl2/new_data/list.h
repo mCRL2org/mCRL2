@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/list.h
 /// \brief The standard sort list.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/list.spec.
 

@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/nat.h
 /// \brief The standard sort nat.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/nat.spec.
 

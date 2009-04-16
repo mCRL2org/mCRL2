@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/set_.h
 /// \brief The standard sort set_.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/set.spec.
 

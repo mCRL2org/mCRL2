@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/int_.h
 /// \brief The standard sort int_.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/int.spec.
 

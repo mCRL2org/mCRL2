@@ -8,7 +8,6 @@
 //
 /// \file mcrl2/new_data/fset.h
 /// \brief The standard sort fset.
-
 /// \detail This file was generated from the data sort specification
 ///          mcrl2/new_data/build/fset.spec.
 
