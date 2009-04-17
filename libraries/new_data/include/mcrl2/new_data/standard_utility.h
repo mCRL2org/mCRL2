@@ -1,4 +1,4 @@
-// Author(s): Jeroen van der Wulp, Aad Mathijssen
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,8 +13,8 @@
 #define MCRL2_NEW_DATA_DATA_EXPRESSION_STANDARD_UTILITY_H
 
 #include "boost/utility/enable_if.hpp"
+#include "boost/assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
-#include "boost/type_traits/is_unsigned.hpp"
 #include "boost/type_traits/make_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
 
@@ -152,7 +152,7 @@ namespace mcrl2 {
         data_expression list_expression(nil(s));
 
         for (I i = begin; i != end; ++i) {
-          assert(i->sort() == s);
+          BOOST_ASSERT(i->sort() == s);
 
           list_expression = sort_list::snoc(s, list_expression, *i);
         }
@@ -175,7 +175,7 @@ namespace mcrl2 {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
         for (I i = begin; i != end; ++i) {
-          assert(i->sort() == s);
+          BOOST_ASSERT(i->sort() == s);
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
         }
@@ -198,7 +198,7 @@ namespace mcrl2 {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
         for (I i = begin; i != end; ++i) {
-          assert(i->sort() == s);
+          BOOST_ASSERT(i->sort() == s);
 
           fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, 1);
         }
@@ -219,38 +219,48 @@ namespace mcrl2 {
       /// \brief Constructs expression of type Bool from an integral type
       /// Type T is an unsigned integral type.
       template < typename T >
-      inline typename boost::enable_if< typename boost::is_integral< T >::type,
-        typename boost::enable_if< typename boost::is_unsigned< T >::type, data_expression >::type >::type
+      inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       pos(const T t) {
-        return data_expression(core::detail::gsMakeOpId(
-                atermpp::aterm_string(detail::as_decimal_string(t).c_str()), sort_pos::pos()));
+        BOOST_ASSERT(0 < t);
+
+        std::vector< bool > bits;
+        bits.reserve(8 * sizeof(T));
+
+        for (T u = t; 1 < u; u /= 2)
+        {
+          bits.push_back(u % 2 != 0);
+        }
+
+        data_expression result(sort_pos::c1());
+
+        for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i) {
+          result = sort_pos::cdub(sort_bool_::bool_(*i), result);
+        }
+
+        return result;
       }
 
       /// \brief Constructs expression of type Pos from a string
       /// \param n A string
       inline data_expression pos(std::string const& n) {
-        using namespace mcrl2::core::detail;
+        std::vector< char > number_as_vector(detail::string_to_vector_number(n));
 
-//// Temporary measure
-//        std::vector< char > number_as_vector(detail::string_to_vector_number(n));
-//        std::vector< bool > bits;
-//
-//        bits.reserve(number_as_vector.size());
-//
-//        while (number_as_vector[0] != 1 || 1 < number_as_vector.size()) { // number != 1
-//          bits.push_back((static_cast< int >(*number_as_vector.rbegin()) % 2 != 0));
-//
-//          detail::decimal_number_divide_by_two(number_as_vector);
-//        }
-//
-//        data_expression result(core::detail::gsMakeDataExprC1());
-//
-//        for (std::vector< bool >::const_reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i) {
-//          result = data_expression(gsMakeDataExprCDub(((*i) ? gsMakeDataExprTrue() : gsMakeDataExprFalse()), result));
-//        }
-//
-//        return result;
-        return data_expression(gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_pos::pos()));
+        std::vector< bool > bits;
+        bits.reserve(number_as_vector.size());
+
+        while (0 < number_as_vector.size() && !((number_as_vector.size() == 1) && number_as_vector[0] == 1)) { // number != 1
+          bits.push_back((static_cast< int >(*number_as_vector.rbegin()) % 2 != 0));
+
+          detail::decimal_number_divide_by_two(number_as_vector);
+        }
+
+        data_expression result(sort_pos::c1());
+
+        for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i) {
+          result = sort_pos::cdub(sort_bool_::bool_(*i), result);
+        }
+
+        return result;
       }
     }
 
@@ -260,22 +270,14 @@ namespace mcrl2 {
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       nat(T t) {
-        assert(0 <= t);
-//// Temporary measure
-//        return data_expression(core::detail::gsMakeDataExprNat(const_cast< char* >(detail::as_decimal_string(t).c_str())));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(detail::as_decimal_string(t).c_str()), sort_nat::nat()));
+        BOOST_ASSERT(0 <= t);
+        return (t == 0) ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(t)));
       }
 
       /// \brief Constructs expression of type Nat from a string
       /// \param n A string
       inline data_expression nat(std::string const& n) {
-//// Temporary measure
-//        if (n == "0") {
-//          return data_expression(core::detail::gsMakeDataExprC0());
-//        }
-//
-//        return data_expression(core::detail::gsMakeDataExprCNat(sort_pos::pos(n)));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_nat::nat()));
+        return (n == "0") ? sort_nat::c0() : static_cast< data_expression >(sort_nat::cnat(sort_pos::pos(n)));
       }
     }
 
@@ -287,24 +289,16 @@ namespace mcrl2 {
       int_(T t) {
         std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
 
-//// Temporary measure
-//        return data_expression(core::detail::gsMakeDataExprInt(const_cast< char* >((0 < t) ?
-//                        number.c_str() : std::string("-").append(number).c_str())));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string((0 < t) ?
-                        number.c_str() : std::string("-").append(number).c_str()), sort_int_::int_()));
+        return (t < 0) ? sort_int_::cneg(sort_pos::pos(-t)) :
+            static_cast< data_expression const& >(sort_int_::cint(sort_nat::nat(t)));
       }
 
       /// \brief Constructs expression of type Int from a string
       /// \param n A string
-      /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
+      /// \pre n is of the form ([-]?[0...9][0...9]+)([0...9]+)
       inline data_expression int_(std::string const& n) {
-//// Temporary measure
-//        if (n[0] == '-') {
-//          return data_expression(core::detail::gsMakeDataExprCNeg(sort_pos::pos(n.substr(1))));
-//        }
-//
-//        return data_expression(core::detail::gsMakeDataExprCInt(sort_nat::nat(n)));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_int_::int_()));
+        return (n[0] == '-') ? sort_int_::cneg(sort_pos::pos(n.substr(1))) :
+            static_cast< data_expression const& >(sort_int_::cint(sort_nat::nat(n)));
       }
     }
 
@@ -321,29 +315,21 @@ namespace mcrl2 {
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       real_(T t) {
-        std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
-
-//// Temporary measure
-//        return data_expression(core::detail::gsMakeDataExprReal(const_cast< char* >((0 <= t) ?
-//                        number.c_str() : std::string("-").append(number).c_str())));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string((0 <= t) ?
-                        number.c_str() : std::string("-").append(number).c_str()), sort_real_::real_()));
+        return sort_real_::creal(sort_int_::int_(t), sort_pos::c1());
       }
 
       /// \brief Constructs expression of type Real from a string
       /// \param n A string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
       inline data_expression real_(std::string const& n) {
-//// Temporary measure
-//        return data_expression(core::detail::gsMakeDataExprCReal(sort_int_::int_(n), core::detail::gsMakeDataExprC1()));
-        return data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(n.c_str()), sort_real_::real_()));
+        return sort_real_::creal(sort_int_::int_(n), sort_pos::c1());
       }
     }
 
     /// \brief Construct numeric expression from a string representing a number in decimal notation
     /// \param s A sort expression
     /// \param n A string
-    /// \pre n is of the form [0...9]+
+    /// \pre n is of the form [1]?[0...9]+
     inline data_expression number(sort_expression const& s, std::string const& n)
     {
       if (s == sort_pos::pos()) {
@@ -358,7 +344,6 @@ namespace mcrl2 {
 
       return sort_real_::real_(n);
     }
-
 
   } // namespace new_data
 

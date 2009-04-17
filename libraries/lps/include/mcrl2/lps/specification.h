@@ -146,7 +146,6 @@ class specification: public atermpp::aterm_appl
     /// much more compact than the ascii representation.
     void save(const std::string& filename, bool binary = true)
     {
-std::cerr << core::pp(m_term) << std::endl;
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed());

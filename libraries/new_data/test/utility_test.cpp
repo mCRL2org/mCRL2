@@ -1,4 +1,4 @@
-// Author(s): Jeroen  van der Wulp
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -55,15 +55,15 @@ void number_test() {
   representation_check(R, number(sort_real_::real_(), "1"), R(pos2real(parse_data_expression("1"))));
 
   representation_check(R, pos("11"), parse_data_expression("11"));
-  representation_check(R, pos(static_cast< unsigned >(11)), parse_data_expression("11"));
-  representation_check(R, nat("11"), R(pos2nat(parse_data_expression("11"))));
-  representation_check(R, nat(static_cast< unsigned >(11)), R(pos2nat(parse_data_expression("11"))));
+  representation_check(R, pos(12), parse_data_expression("12"));
+  representation_check(R, nat("18"), R(pos2nat(parse_data_expression("18"))));
+  representation_check(R, nat(12), R(pos2nat(parse_data_expression("12"))));
   representation_check(R, int_("0"), R(nat2int(parse_data_expression("0"))));
   representation_check(R, int_("-1"), parse_data_expression("-1"));
-  representation_check(R, int_(-1), parse_data_expression("-1"));
+  representation_check(R, int_(-2), parse_data_expression("-2"));
   representation_check(R, real_("0"), R(nat2real(parse_data_expression("0"))));
   representation_check(R, real_("-1"), R(int2real(parse_data_expression("-1"))));
-  representation_check(R, real_(-1), R(int2real(parse_data_expression("-1"))));
+  representation_check(R, real_(-2), R(int2real(parse_data_expression("-2"))));
 }
 
 void list_construction_test() {
