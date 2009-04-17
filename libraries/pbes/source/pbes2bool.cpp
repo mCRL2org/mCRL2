@@ -622,9 +622,11 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
   { todo.push_front(2);
   }
   // Data rewriter
-  pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
-                     r,
-                     tool_options.opt_precompile_pbes);
+// replaced to make the code compile again
+  pbes_expression p=pbes_spec.initial_state();
+//  pbes_expression p=pbes_expression_rewrite_and_simplify(pbes_spec.initial_state(),
+//                     r,
+//                     tool_options.opt_precompile_pbes);
   variable_index.put((tool_options.opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
   if (tool_options.opt_strategy>=on_the_fly)
@@ -659,10 +661,12 @@ static void do_lazy_algorithm(pbes<Container> pbes_spec,
             pbes_equation(
                 eqi->symbol(),
                 eqi->variable(),
-                pbes_expression_rewrite_and_simplify(
-                              eqi->formula(),
-                r,
-                tool_options.opt_precompile_pbes)));
+// replaced to make the code compile again
+                eqi->formula()));
+//                pbes_expression_rewrite_and_simplify(
+//                              eqi->formula(),
+//                r,
+//                tool_options.opt_precompile_pbes)));
     if (eqi->symbol()!=current_fixpoint_symbol)
     { current_fixpoint_symbol=eqi->symbol();
       rank=rank+1;
