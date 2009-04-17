@@ -797,7 +797,7 @@ summand generate_summand(const summand_information &summand_info,
                  i!=new_actions.end(); i++)
     { // put "_MAY" behind each action, and add its declaration to the action declarations.
       data_expression_list args=i->arguments();
-      sort_expression_list sorts=get_sorts(args);
+      sort_expression_list sorts=i->label().sorts(); // get_sorts(args);
       std::map < std::pair< std::string, sort_expression_list >,
                  std::string> ::iterator action_label_it=
                      action_label_map.find(std::pair< std::string, sort_expression_list >
