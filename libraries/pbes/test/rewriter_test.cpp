@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/new_data/map_substitution_adapter.h"
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_parse.h"
@@ -304,6 +305,14 @@ void test_substitutions1()
   BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
+template <typename PbesRewriter>
+void test_map_substitution_adapter(PbesRewriter r)
+{
+  atermpp::map<new_data::variable, new_data::data_expression_with_variables> sigma;
+  pbes_system::pbes_expression x = new_data::sort_bool_::true_();
+  pbes_system::pbes_expression y = r(x, new_data::make_map_substitution_adapter(sigma));
+}
+
 void test_substitutions2()
 {
   std::cout << "<test_substitutions2>" << std::endl;
@@ -366,6 +375,8 @@ void test_substitutions2()
 	expr2 = "val(true)";
   sigma = "";
   test_expressions(R, expr1, expr2, var_decl, sigma);
+  
+  test_map_substitution_adapter(R);
 }
 
 void test_substitutions3()

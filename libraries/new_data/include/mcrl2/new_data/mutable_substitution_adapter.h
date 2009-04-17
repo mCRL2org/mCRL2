@@ -29,12 +29,6 @@ namespace new_data {
       /// \brief type used to represent expressions
       typedef typename Substitution::expression_type expression_type;
 
-      /// \brief Iterator type for constant element access
-      typedef typename Substitution::const_iterator const_iterator;
-
-      /// \brief Iterator type for non-constant element access
-      typedef typename Substitution::const_iterator iterator;
-
       /// \brief Wrapper class for internal storage and substitution updates using operator()
       typedef typename mutable_substitution<variable_type, expression_type>::assignment assignment;
 
@@ -50,26 +44,6 @@ namespace new_data {
       mutable_substitution_adapter(const Substitution& f)
         : f_(f)
       {}
-
-      /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-      const_iterator begin() const {
-        return g_.begin();
-      }
-
-      /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-      iterator begin() {
-        return g_.begin();
-      }
-
-      /// \brief Returns an iterator pointing past the end of the sequence of assignments
-      const_iterator end() const {
-        return g_.end();
-      }
-
-      /// \brief Returns an iterator pointing past the end of the sequence of assignments
-      iterator end() {
-        return g_.end();
-      }
 
       /// \brief Apply on single single variable expression
       /// \param[in] v the variable for which to give the associated expression
@@ -140,12 +114,6 @@ namespace new_data {
       /// \brief type used to represent expressions
       typedef typename substitution_type::expression_type expression_type;
 
-      /// \brief Iterator type for constant element access
-      typedef typename substitution_type::const_iterator const_iterator;
-
-      /// \brief Iterator type for non-constant element access
-      typedef typename substitution_type::const_iterator iterator;
-
       /// \brief Wrapper class for internal storage and substitution updates using operator()
       typedef typename substitution_type::assignment assignment;
 
@@ -156,26 +124,6 @@ namespace new_data {
       mutable_substitution_adapter(mutable_substitution<Variable, Expression>& g)
         : g_(g)
       {}
-
-      /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-      const_iterator begin() const {
-        return g_.begin();
-      }
-
-      /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-      iterator begin() {
-        return g_.begin();
-      }
-
-      /// \brief Returns an iterator pointing past the end of the sequence of assignments
-      const_iterator end() const {
-        return g_.end();
-      }
-
-      /// \brief Returns an iterator pointing past the end of the sequence of assignments
-      iterator end() {
-        return g_.end();
-      }
 
       /// \brief Apply on single single variable expression
       /// \param[in] v the variable for which to give the associated expression
