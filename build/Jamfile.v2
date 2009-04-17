@@ -131,7 +131,6 @@ alias opengl : : <target-os>darwin : : <framework>OpenGL ;
 if ! $(BOOST_LIBRARY_PATH) {
   use-project /boost : ../3rd-party/boost ;
 }
-#use-project /boost : ../3rd-party/boost ;
 
 local boost-requirements =
                <include>$(BOOST_ROOT)

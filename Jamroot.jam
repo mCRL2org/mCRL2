@@ -152,12 +152,16 @@ if [ path.exists ./tools ] {
       # Complete install
       alias install : /tools/$(tools)//install /libraries//install examples $(boost-headers) ;
 
-      local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
-      local header-location   = [ path.join [ get-install-root ] "include" ] ;
+      if $(boost-headers) { 
+        local all-boost-headers = [ MATCH (3rd-party/boost/boost/.*)$ : [ glob-tree *.hpp *.ipp : .svn ] ] ;
+        local header-location   = [ path.join [ get-install-root ] "include" ] ;
 
-      install install-boost-headers : [ set.difference $(all-boost-headers) :
-        [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
-              : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
+        install install-boost-headers : [ set.difference $(all-boost-headers) :
+          [ MATCH (.*asio.*)|(.*xpressive.*)|(.*filesystem.*)|(.*test.*)|(.*thread.*)|(.*signal.*)|(.*program_options.*)|(.*aux_/preprocessed/.*) : $(all-boost-headers) ] ]
+                : <location>$(header-location) <install-type>H <install-source-root>3rd-party/boost ;
+
+        explicit install-boost-headers ;
+      }
 
       # General examples
       install-data examples
@@ -165,8 +169,6 @@ if [ path.exists ./tools ] {
               : <install-source-root>./examples
                 <data-sub-location>examples
               ;
-
-      explicit install-boost-headers ;
     }
   }
 }
