@@ -51,7 +51,7 @@ namespace new_data {
       /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
       expression_type operator()(variable_type const& v) const {
         const_iterator i = m_map.find(v);
-        return i == m_map.end() ? v : i->second;
+        return i == m_map.end() ? expression_type(v) : i->second;
       }
 
       /** \brief Apply substitution to an expression
