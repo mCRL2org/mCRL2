@@ -82,17 +82,15 @@ namespace mcrl2 {
         }
 
         /// \brief Returns the name of the variable.
-        inline
         std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }
 
         /// \brief Returns true iff this function symbol is a number.
-        inline
         bool is_number() const
         {
-          return core::detail::gsIsNumericString(name().c_str());
+          return core::detail::gsIsSortExprNumeric(*this);
         }
 
     }; // class function_symbol

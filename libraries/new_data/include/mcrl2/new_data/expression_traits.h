@@ -201,7 +201,7 @@ namespace core {
 } // namespace core
 
 namespace new_data {
-  /// \brief TODO replace term_traits by expression_traits
+  /// \brief expression traits (currently nothing more than core::term_traits)
   template < typename Expression >
   struct expression_traits : public core::term_traits< Expression >
   { };
