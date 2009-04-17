@@ -431,7 +431,8 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
       (sortterm==gsMakeSortExprNat())||
       (sortterm==gsMakeSortExprPos())||
       (gsIsSortId(sortterm))||
-      (gsIsSortCons(sortterm)))
+      (gsIsSortCons(sortterm)) ||
+      (gsIsSortStruct(sortterm)))
   { return sortterm;
   }
   if (gsIsSortArrow(sortterm))
@@ -440,10 +441,6 @@ static ATermAppl getTargetSort(ATermAppl sortterm)
   if (gsIsSortRef(sortterm))
   {
     return ATAgetArgument(sortterm,0);
-  }
-  if (gsIsSortStruct(sortterm))
-  {
-    return sortterm;
   }
 
   gsErrorMsg("expected a sortterm %T",sortterm);
@@ -2053,42 +2050,14 @@ static ATermAppl substitute_data_rec(
     return substitute_variable_rec(terms,vars,t);
   }
 
-  if (gsIsExists(ATAgetArgument(t, 0)))
-  { gsfprintf(stderr,"Warning: no renaming of variable in exists\n");
-    return gsMakeBinder(gsMakeExists(),
+  if (gsIsBinder(t))
+  { gsfprintf(stderr,"Warning: no renaming of variable in bound expression\n");
+    return gsMakeBinder(ATAgetArgument(t, 0),
                  ATLgetArgument(t,1),
                  substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
 
   }
 
-  if (gsIsForall(ATAgetArgument(t, 0)))
-  { gsfprintf(stderr,"Warning: no renaming of variable in forall\n");
-    return gsMakeBinder(gsMakeForall(),
-                 ATLgetArgument(t,1),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
-
-  }
-  if (gsIsLambda(ATAgetArgument(t, 0)))
-  { gsfprintf(stderr,"Warning: no renaming of variable in lambda\n");
-    return gsMakeBinder(gsMakeLambda(),
-                 ATLgetArgument(t,1),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
-
-  }
-  if (gsIsSetComp(ATAgetArgument(t, 0)))
-  { gsfprintf(stderr,"Warning: no renaming of variable in set comprehension\n");
-    return gsMakeBinder(gsMakeSetComp(),
-                 ATLgetArgument(t,1),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
-
-  }
-  if (gsIsBagComp(ATAgetArgument(t, 0)))
-  { gsfprintf(stderr,"Warning: no renaming of variable in bag comprehension\n");
-    return gsMakeBinder(gsMakeSetComp(),
-                 ATLgetArgument(t,1),
-                 substitute_data_rec(terms,vars,ATAgetArgument(t,2)));
-
-  }
   assert(gsIsOpId(t));
   return t;
 }
