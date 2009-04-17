@@ -34,13 +34,13 @@ namespace new_data {
       /// \brief The wrapped substitution
       const MapContainer& m_map;
 
+    public: 
       /// \brief Iterator type for constant element access
       typedef typename MapContainer::const_iterator const_iterator;
 
       /// \brief Iterator type for non-constant element access
       typedef typename MapContainer::const_iterator iterator;
 
-    public:
       /// \brief Constructor
       map_substitution_adapter(const MapContainer& m)
         : m_map(m)
