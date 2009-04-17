@@ -21,7 +21,6 @@
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/new_data/detail/rewrite.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
 #include "mcrl2/new_data/data_equation.h"
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
@@ -153,7 +152,7 @@ namespace new_data {
         {
           if (r.front().reference().is_container_sort() || r.front().reference().is_structured_sort())
           {
-            m_substitution_context   = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context);
+            m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context);
 
             // only for sorts that have been introduced for conversion to ATerm
             if (known_aliases.find(r.front()) == known_aliases.end())
@@ -172,7 +171,7 @@ namespace new_data {
         return result;
       }
 
-      /// \brief Performs data implementation before rewriting
+      /// \brief Performs data implementation before rewriting (should become obsolete)
       ATermAppl implement(data_expression const& expression) const
       {
         ATermList substitution_context = m_substitution_context;
@@ -196,12 +195,19 @@ namespace new_data {
           for (atermpp::term_list_iterator< sort_expression > i(declarations.sorts);
                            i != atermpp::term_list_iterator< sort_expression >(); ++i) {
 
-             if (known_sorts.find(*i) == known_sorts.end()) {
+             if (known_sorts.find(*i) == known_sorts.end())
+             {
                data_equation_vector equations(standard_generate_equations_code(*i));
 
                new_equations = atermpp::term_list< data_equation >
-                                        (equations.begin(), equations.end()) + new_equations;
+                                      (equations.begin(), equations.end()) + new_equations;
              }
+          }
+
+          // update reconstruction context
+          for (atermpp::term_list_iterator< atermpp::aterm_appl > i(substitution_context); i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i)
+          {
+            m_reconstruction_context[sort_expression((*i)(1))] = sort_expression((*i)(0));
           }
 
           // add rewrite rules
@@ -220,14 +226,10 @@ namespace new_data {
         return implemented;
       }
 
-      /// \brief Performs data reconstruction after rewriting
+      /// \brief Performs data reconstruction after rewriting (should become obsolete)
       data_expression reconstruct(ATermAppl expression) const
       {
-        ATermAppl reconstructed(reinterpret_cast< ATermAppl >(
-           detail::reconstruct_exprs(reinterpret_cast< ATerm >(
-           static_cast< ATermAppl >(expression)), m_specification)));
-
-        return data_expression(atermpp::replace(reconstructed, m_reconstruction_context));
+        return data_expression(atermpp::replace(expression, m_reconstruction_context));
       }
 
     public:

@@ -40,6 +40,7 @@ void representation_check(Rewriter& R, data_expression const& input, data_expres
 }
 
 void number_test() {
+  using namespace sort_bool_;
   using namespace sort_pos;
   using namespace sort_nat;
   using namespace sort_int_;
@@ -49,21 +50,21 @@ void number_test() {
 
   mcrl2::new_data::rewriter R(specification);
 
-  representation_check(R, number(sort_pos::pos(), "1"), parse_data_expression("1"));
-  representation_check(R, number(sort_nat::nat(), "1"), R(pos2nat(parse_data_expression("1"))));
-  representation_check(R, number(sort_int_::int_(), "-1"), R(parse_data_expression("-1")));
-  representation_check(R, number(sort_real_::real_(), "1"), R(pos2real(parse_data_expression("1"))));
+  representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1());
+  representation_check(R, number(sort_nat::nat(), "1"), R(pos2nat(sort_pos::c1())));
+  representation_check(R, number(sort_int_::int_(), "-1"), R(cneg(sort_pos::c1())));
+  representation_check(R, number(sort_real_::real_(), "1"), R(pos2real(sort_pos::c1())));
 
-  representation_check(R, pos("11"), parse_data_expression("11"));
-  representation_check(R, pos(12), parse_data_expression("12"));
-  representation_check(R, nat("18"), R(pos2nat(parse_data_expression("18"))));
-  representation_check(R, nat(12), R(pos2nat(parse_data_expression("12"))));
-  representation_check(R, int_("0"), R(nat2int(parse_data_expression("0"))));
-  representation_check(R, int_("-1"), parse_data_expression("-1"));
-  representation_check(R, int_(-2), parse_data_expression("-2"));
-  representation_check(R, real_("0"), R(nat2real(parse_data_expression("0"))));
-  representation_check(R, real_("-1"), R(int2real(parse_data_expression("-1"))));
-  representation_check(R, real_(-2), R(int2real(parse_data_expression("-2"))));
+  representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))));
+  representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))));
+  representation_check(R, nat("18"), R(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1())))))));
+  representation_check(R, nat(12), R(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1()))))));
+  representation_check(R, int_("0"), R(nat2int(c0())));
+  representation_check(R, int_("-1"), cneg(c1()));
+  representation_check(R, int_(-2), cneg(cdub(false_(), c1())));
+  representation_check(R, real_("0"), R(nat2real(c0())));
+  representation_check(R, real_("-1"), R(int2real(cneg(c1()))));
+  representation_check(R, real_(-2), R(int2real(cneg(cdub(false_(), c1())))));
 }
 
 void list_construction_test() {

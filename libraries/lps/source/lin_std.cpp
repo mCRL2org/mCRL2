@@ -34,7 +34,7 @@
 #include <memory>
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/core/detail/struct.h"
-// #include "mcrl2/core/detail/data_common.h"
+#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -912,10 +912,8 @@ static int upperpowerof2(int i)
 
 static ATermAppl RewriteTerm(ATermAppl t)
 {
-  // Rewriting is switched off, because it automatically carries out an
-  // undesired data implementation. Rewriting can be switched on after 
-  // the transition to the new data structures will be completed.
-  // if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::new_data::data_expression(t)));
+  // gsfprintf(stderr,"Rewrite %P\n",t);
+  if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::new_data::data_expression(t)));
   return t;
 }
 
@@ -1081,10 +1079,10 @@ static specificationbasictype *create_spec(ATermAppl t)
   spec->eqns = ATempty;
   ATermAppl data_spec = ATAgetArgument(t,0);
   t_data_decls data_decls = get_data_decls(data_spec);
-  // t_data_decls data_decls_copy = get_data_decls(   // XXXXXXXXXXXXXXXXXXXXXXXXX
-  //                          implement_data_spec(data_spec));
-  // subtract_data_decls(&data_decls_copy, &data_decls);
-  // insert_data_decls(data_decls_copy, spec, false);
+  t_data_decls data_decls_copy = get_data_decls(
+                           implement_data_spec(data_spec));
+  subtract_data_decls(&data_decls_copy, &data_decls);
+  insert_data_decls(data_decls_copy, spec, false);
   insert_data_decls(data_decls, spec, true);
 
   spec->acts = ATLgetArgument(ATAgetArgument(t,1),0);
@@ -1756,7 +1754,7 @@ static ATermAppl fresh_name(const std::string &name)
 /****************  occursinterm *** occursintermlist ***********/
 
 static int occursinterm(ATermAppl var, ATermAppl t)
-{ // return mcrl2::new_data::search_variable(t,var);  // XXXXXXXXXXXXXXXXX
+{
   assert(gsIsDataVarId(var));
   if (gsIsDataVarId(t))
   {
@@ -1769,7 +1767,6 @@ static int occursinterm(ATermAppl var, ATermAppl t)
 
   if (gsIsOpId(t))
   { return 0; }
-
   if (gsIsBinder(t))
   { gsfprintf(stderr,"Warning: occurs on expression with binders\n");
     return 0;
@@ -1778,7 +1775,7 @@ static int occursinterm(ATermAppl var, ATermAppl t)
   assert(gsIsDataAppl(t));
 
   return occursinterm(var,ATAgetArgument(t,0))||
-         occursintermlist(var,ATLgetArgument(t,1)); 
+         occursintermlist(var,ATLgetArgument(t,1));
 }
 
 static void filter_vars_by_term(
@@ -2050,8 +2047,7 @@ static ATermAppl substitute_data_rec(
 
   if ( gsIsDataVarId(t))
   {
-    ATermAppl result=substitute_variable_rec(terms,vars,t);
-    return result;
+    return substitute_variable_rec(terms,vars,t);
   }
 
   if (gsIsBinder(t))
@@ -2095,9 +2091,7 @@ static ATermAppl substitute_data(
                  ATermAppl t)
 {
   if (terms==ATempty) return t;
-  return substitute_data_rec(terms,
-                             vars,
-                             t); 
+  return substitute_data_rec(terms,vars,t);
 }
 
 static ATermList substitute_multiaction_rec(
@@ -2158,7 +2152,7 @@ static ATermList substitute_assignmentlist(
   assert(ATgetLength(terms)==ATgetLength(vars));
 
   if (parameters==ATempty)
-  { assert(assignments==ATempty);       
+  { assert(assignments==ATempty);
     return ATempty;
   }
 

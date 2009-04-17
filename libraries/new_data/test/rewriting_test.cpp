@@ -297,7 +297,7 @@ void list_rewrite_test() {
 
   data_rewrite_test(R, in(bool_(), true_(), head_true), true_());
   data_rewrite_test(R, in(bool_(), false_(), head_true), false_());
-  data_rewrite_test(R, count(bool_(), head_true), new_data::function_symbol("1", sort_nat::nat()));
+  data_rewrite_test(R, count(bool_(), head_true), sort_nat::nat(1));
   data_rewrite_test(R, in(bool_(), false_(), snoc(bool_(), head_true, true_())), false_());
   data_rewrite_test(R, concat(bool_(), head_true, head_true), R(cons_(bool_(), true_(), head_true)));
   data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("0")), true_());
