@@ -34,13 +34,13 @@ namespace new_data {
       /// \brief The wrapped substitution
       const MapContainer& m_map;
 
-    public: 
       /// \brief Iterator type for constant element access
       typedef typename MapContainer::const_iterator const_iterator;
 
       /// \brief Iterator type for non-constant element access
       typedef typename MapContainer::const_iterator iterator;
 
+    public: 
       /// \brief Constructor
       map_substitution_adapter(const MapContainer& m)
         : m_map(m)
@@ -51,7 +51,8 @@ namespace new_data {
       /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
       expression_type operator()(variable_type const& v) const {
         const_iterator i = m_map.find(v);
-        return i == m_map.end() ? expression_type(v) : i->second;
+        expression_type t; t=v; // Do not assume existence of a constructor.
+        return i == m_map.end() ? t : i->second;
       }
 
       /** \brief Apply substitution to an expression
