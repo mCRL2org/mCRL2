@@ -101,8 +101,8 @@ namespace tools {
           command_line_parser parser(clinterface, argc, argv);
           check_positional_options(parser);
           parse_options(parser);
-	        if (!parser.continue_execution())
-	        {
+	  if (!parser.continue_execution())
+	  {
 	          return EXIT_SUCCESS;
           }
         }

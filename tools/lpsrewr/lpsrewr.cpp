@@ -34,9 +34,6 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
   protected:
     typedef squadt_tool< rewriter_tool< input_output_tool > > super;
 
-    lps::specification        m_specification;
-    mcrl2::new_data::rewriter m_rewriter;
-
     bool                      m_benchmark;
     unsigned long             m_bench_times;
 
@@ -59,15 +56,6 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
       }
     }
 
-    static lps::specification load_specification(std::string const& filename)
-    {
-      lps::specification specification;
-
-      specification.load(filename);
-
-      return specification;
-    }
-
   public:
 
     lps_rewriter_tool()
@@ -79,8 +67,6 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
           "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is"
           "used."
         ),
-        m_specification(load_specification(m_input_filename)),
-        m_rewriter(m_specification.data(), m_rewrite_strategy),
         m_benchmark(false),
         m_bench_times(1)
     {}
@@ -96,15 +82,21 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
         std::clog << "  number of times:    " << m_bench_times << std::endl;
       }
 
+      lps::specification specification;
+
+      specification.load(m_input_filename);
+
+      mcrl2::new_data::rewriter rewriter = create_rewriter(specification.data());
+
       if (m_benchmark)
       {
         std::clog << "rewriting LPS " << m_bench_times << " times...\n";
       }
       for (unsigned long i=0; i < m_bench_times; i++)
       {
-        m_specification = rewrite_lps(m_specification, m_rewriter);
+        specification = rewrite_lps(specification, rewriter);
       }
-      m_specification.save(m_output_filename);
+      specification.save(m_output_filename);
 
       return true;
     }
