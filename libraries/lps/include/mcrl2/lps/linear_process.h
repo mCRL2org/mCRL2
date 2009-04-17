@@ -175,10 +175,7 @@ class linear_process: public atermpp::aterm_appl
         new_data::assignment_list assignments(i->assignments());
         std::set<new_data::variable> summation_variables = mcrl2::new_data::detail::make_set(i->summation_variables());
         std::set<new_data::variable> used_variables;
-        lps::find_all_free_variables(i->condition(), std::inserter(used_variables, used_variables.end()));
-        lps::find_all_free_variables(i->actions(), std::inserter(used_variables, used_variables.end()));
-        lps::find_all_free_variables(i->time(), std::inserter(used_variables, used_variables.end()));
-        lps::find_all_free_variables(i->assignments(), std::inserter(used_variables, used_variables.end()));
+        lps::find_all_free_variables(*i, std::inserter(used_variables, used_variables.end()));
         std::set<new_data::variable> bound_variables = mcrl2::new_data::detail::set_union(parameters, summation_variables);
         std::set<new_data::variable> free_variables = mcrl2::new_data::detail::set_difference(used_variables, bound_variables);
         result.swap(free_variables);
@@ -278,7 +275,7 @@ std::set<new_data::variable> compute_free_variables(const linear_process& proces
   for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     std::set<new_data::variable> temporary;
-    lps::detail::collect_free_variables(*i, process_parameters, std::inserter(temporary, temporary.end()));
+    lps::detail::find_all_free_variables(*i, process_parameters, std::inserter(temporary, temporary.end()));
 
     new_data::variable_vector summation_variables(new_data::make_variable_vector(i->summation_variables()));
     std::sort(summation_variables.begin(), summation_variables.end());

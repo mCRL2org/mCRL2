@@ -147,6 +147,19 @@ void test_free_variables()
 
   BOOST_CHECK(free_variables.find(new_data::variable("x", new_data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(new_data::variable("y", new_data::sort_nat::nat())) == free_variables.end());
+
+  specification = mcrl22lps(
+    "act a;\n"
+    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
+    "init X(true);\n"
+  );
+
+  free_variables = specification.process().find_free_variables();
+
+  BOOST_CHECK(free_variables.find(new_data::variable("x", new_data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(new_data::variable("y", new_data::sort_nat::nat())) == free_variables.end());
+
+  BOOST_CHECK(specification.is_well_typed());
 }
 
 int test_main(int argc, char* argv[])

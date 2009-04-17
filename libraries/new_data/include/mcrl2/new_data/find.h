@@ -197,6 +197,13 @@ namespace detail {
       m_bound.swap(bound_variables);
     }
 
+    free_variable_find_helper(MatchPredicate& match,
+                              OutputIterator const& destBegin,
+		              std::set< new_data::variable > const& bound_by_context) :
+			m_bound(bound_by_context), m_match(match), m_iterator(destBegin)
+    {
+    }
+
     free_variable_find_helper(MatchPredicate& match, OutputIterator const& destBegin) :
 					 m_match(match), m_iterator(destBegin)
     {
