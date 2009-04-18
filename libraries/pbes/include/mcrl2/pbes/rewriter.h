@@ -26,7 +26,9 @@
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
+#include "mcrl2/new_data/detail/bdd_prover.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
+#include "mcrl2/pbes/gauss.h"
 
 namespace mcrl2 {
 
@@ -234,6 +236,84 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << sigma.to_string() << s
       term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
         return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()), sigma);
+      }
+  };
+
+/*  /// \brief The simplifying pbes rewriter used in pbes2bool.
+  class simplify_rewriter_jfg
+  {
+    data::rewriter datar;
+
+    public:
+      /// \brief Constructor
+      /// \param data A data specification
+      simplify_rewriter_jfg(const data::data_specification& data)
+        : datar(data)
+      { }
+
+      /// \brief Rewrites a pbes expression.
+      /// \param p A PBES expression
+      /// \return The rewrite result.
+      pbes_expression operator()(pbes_expression p)
+      {
+        return pbes_expression_rewrite_and_simplify(p, datar.get_rewriter());
+      }
+  };
+*/
+
+/*   /// \brief The substituting pbes rewriter used in pbes2bool.
+  class substitute_rewriter_jfg
+  {
+    new_data::rewriter& datar_;
+    const new_data::data_specification& data_spec;
+
+    public:
+      /// \brief Constructor
+      /// \param datar A data rewriter
+      /// \param data A data specification
+      substitute_rewriter_jfg(new_data::rewriter& datar, const new_data::data_specification& data)
+        : datar_(datar), data_spec(data)
+      { }
+
+      /// \brief Rewrites a pbes expression.
+      /// \param p A PBES expression
+      /// \return The rewrite result.
+      pbes_expression operator()(pbes_expression p)
+      {
+        return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
+      }
+  }; */
+
+  /// \brief A pbes rewriter that uses a bdd based prover internally.
+  class pbessolve_rewriter
+  {
+    new_data::rewriter datar_;
+    const new_data::data_specification& data_spec;
+    int n;
+    new_data::variable_list fv;
+    boost::shared_ptr<new_data::detail::BDD_Prover> prover;
+
+    public:
+      /// \brief Constructor
+      /// \param datar A data rewriter
+      /// \param data A data specification
+      /// \param rewrite_strategy A rewrite strategy
+      /// \param solver_type An SMT solver type
+      pbessolve_rewriter(const new_data::rewriter& datar, const new_data::data_specification& data, 
+              new_data::rewriter::strategy rewrite_strategy, 
+              new_data::detail::SMT_Solver_Type solver_type)
+        : datar_(datar),
+          data_spec(data),
+          n(0),
+          prover(new new_data::detail::BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
+      { }
+
+      /// \brief Rewrites a pbes expression.
+      /// \param p A PBES expression
+      /// \return The rewrite result.
+      pbes_expression operator()(pbes_expression p)
+      {
+        return pbes_expression_simplify(p, &n, fv, prover.get());
       }
   };
 

@@ -38,7 +38,7 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
     pbes_rewriter()
       : super(
           "pbesrewr",
-          "Jan friso Groote and Wieger Wesselink",
+          "Jan Friso Groote and Wieger Wesselink",
           "rewrite and simplify a PBES",
           "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
           "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."

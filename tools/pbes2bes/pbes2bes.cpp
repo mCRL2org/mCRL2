@@ -211,7 +211,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       if (core::gsVerbose)
       {
-        std::cerr << "pbes2bes parameters:" << std::endl;
+        std::cerr << "parameters of pbes2bes:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  strategy:           " << strategy_string() << std::endl;
