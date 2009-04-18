@@ -1,16 +1,4 @@
-project libraries/pbes/pgsolver
-   : requirements
-       <use>/site-config//boost
-       <source>/libraries//core
-       <source>/libraries//lps
-       <source>/libraries//pbes
-       <source>/libraries//utilities
-       <include>.
-       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
-       <define>MCRL2_REVISION=\"\\\"0\\\"\"
-       <define>WITH_MCRL2
-       <toolset>gcc:<define>POSIX
-   ;
+project toolset/pbespgsolve ;
 
 SOURCES = Compatibility.cc
           ComponentSolver.cpp
@@ -32,10 +20,13 @@ lib pg : $(SOURCES) ;
 lib timing : timing.c : <toolset>gcc ;
 lib timing : timing_msvc.c : <toolset>msvc ;
 
-exe pbespgsolve : pbespgsolve.cpp pg timing : ;
-
-install dist
-   :
-     pbespgsolve
-   :
+tool pbespgsolve
+   : pbespgsolve.cpp
+     pg
+     timing
+     /libraries//lps
+     /libraries//pbes
+   : <status>experimental
+     <define>WITH_MCRL2
+     <toolset>gcc:<define>POSIX
    ;
