@@ -1,3 +1,12 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include "ParityGame.h"
 #include <map>
 #include <algorithm>
@@ -181,6 +190,7 @@ void ParityGame::compress_priorities()
     int new_d = last_prio + 1;
     assert(new_d < d_);
     verti *new_cardinality = new verti[new_d];
+    std::fill(new_cardinality, new_cardinality + new_d, 0);
     for (int p = 0; p < d_; ++p)
     {
         if (prio_map[p] >= 0)

@@ -4,17 +4,23 @@ project libraries/pbes/pgsolver
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes
+       <source>/libraries//utilities
        <include>.
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
        <define>MCRL2_REVISION=\"\\\"0\\\"\"
        <define>WITH_MCRL2
+       <toolset>gcc:<define>POSIX
    ;
 
-SOURCES = FocusListLiftingStrategy.cc
+SOURCES = Compatibility.cc
+          ComponentSolver.cpp
+          FocusListLiftingStrategy.cc
           Graph.cc
+          GraphOrdering.cpp
           LiftingStrategy.cc
           LinearLiftingStrategy.cc
           MaxMeasureLiftingStrategy.cc
+          OldMaxMeasureLiftingStrategy.cc
           ParityGame.cc
           ParityGame_IO.cc
           PredecessorLiftingStrategy.cc
@@ -25,10 +31,10 @@ SOURCES = FocusListLiftingStrategy.cc
 
 lib pg : $(SOURCES) ;
 
-exe pgsolver : pgsolver.cpp pg : ;
+exe pbespgsolve : pbespgsolve.cpp pg : ;
 
 install dist
    :
-     pgsolver
+     pbespgsolve
    :
    ;

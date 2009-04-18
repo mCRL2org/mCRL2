@@ -1,9 +1,24 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #ifndef PARITY_GAME_H_INCLUDED
 #define PARITY_GAME_H_INCLUDED
 
 #include "Graph.h"
 #include <iostream>
 #include <vector>
+
+#if __GNUC__ >= 3
+#   define ATTR_PACKED  __attribute__((__packed__))
+#else
+#   define ATTR_PACKED
+#endif
 
 /*! Information stored for each vertex of a parity game:
     - the player to move (either PLAYER_EVEN or PLAYER_ODD)
@@ -15,6 +30,16 @@ struct ParityGameVertex
     unsigned char player, priority;
 };
 
+inline bool operator== (const ParityGameVertex &a, const ParityGameVertex &b)
+{
+    return a.player == b.player && a.priority == b.priority;
+}
+
+inline bool operator!= (const ParityGameVertex &a, const ParityGameVertex &b)
+{
+    return a.player != b.player || a.priority != b.priority;
+}
+
 /*! A parity game extends a directed graph by assigning a player
     (Even or Odd) and an integer priority to every vertex.
     Priorities are between 0 and `d` (exclusive). */
@@ -25,7 +50,7 @@ public:
     enum Player { PLAYER_NONE = -1,
                   PLAYER_EVEN =  0,
                   PLAYER_ODD  =  1
-                } __attribute__((__packed__));
+                } ATTR_PACKED;
 
     /*! Construct an empty parity game */
     ParityGame();

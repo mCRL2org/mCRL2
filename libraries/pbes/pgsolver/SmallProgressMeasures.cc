@@ -1,3 +1,12 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include "SmallProgressMeasures.h"
 #include "logging.h"
 #include <algorithm>
@@ -49,20 +58,6 @@ SmallProgressMeasures::~SmallProgressMeasures()
 
     delete[] spm_;
     delete[] M_;
-}
-
-inline int SmallProgressMeasures::vector_cmp(verti v, verti w, int N)
-{
-    if (is_top(v)) return is_top(w) ? 0 : +1;   /* v is top */
-    if (is_top(w)) return -1;                   /* w is top, but v isn't */
-
-    for (int n = 0; n < N; ++n)
-    {
-        if (vec(v)[n] < vec(w)[n]) return -1;
-        if (vec(v)[n] > vec(w)[n]) return +1;
-    }
-
-    return 0;
 }
 
 inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max)
@@ -152,6 +147,7 @@ bool SmallProgressMeasures::solve()
     {
         lifted = lift(vertex);
         if (stats_ != NULL) stats_->record_lift(vertex, lifted);
+        if (aborted()) return false;
     }
 
     return true;

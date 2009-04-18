@@ -1,10 +1,23 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include "LiftingStrategy.h"
 #include "LinearLiftingStrategy.h"
 #include "PredecessorLiftingStrategy.h"
 #include "FocusListLiftingStrategy.h"
 #include "MaxMeasureLiftingStrategy.h"
+#include "OldMaxMeasureLiftingStrategy.h"
+
 #include <stdlib.h>
-#include <strings.h>
+
+#include "Compatibility.h"
+#define strcasecmp compat_strcasecmp
 
 LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
                                           const std::string description )
@@ -50,6 +63,11 @@ LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
     if (strcasecmp(parts[0].c_str(), "maxmeasure") == 0)
     {
         return new MaxMeasureLiftingStrategy(game);
+    }
+    else
+    if (strcasecmp(parts[0].c_str(), "oldmaxmeasure") == 0)
+    {
+        return new OldMaxMeasureLiftingStrategy(game);
     }
     else
     {

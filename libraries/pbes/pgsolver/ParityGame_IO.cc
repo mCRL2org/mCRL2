@@ -1,3 +1,12 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #include "ParityGame.h"
 #include <assert.h>
 #ifdef WITH_MCRL2
@@ -22,6 +31,9 @@ void ParityGame::read_pgsolver( std::istream &is,
         while (is.get(ch) && ch != ';') ch = 0;
     }
 
+    // Invalid vertex (used to mark uninitialized vertices)
+    ParityGameVertex invalid = { (unsigned char)-1, (unsigned char)-1 };
+
     int max_prio = 0;
     std::vector<ParityGameVertex> vertices;
     StaticGraph::edge_list edges;
@@ -33,25 +45,26 @@ void ParityGame::read_pgsolver( std::istream &is,
         int prio, player;
         if (!(is >> id >> prio >> player)) break;
 
-        if (prio < 0) prio = 0;
-        if (prio > 127) prio = 127;
-        if (player < 0) player = 0;
-        if (player > 1) player = 1;
-
+        assert(prio >= 0);
+        assert(prio < 256);
+        assert(player == 0 || player == 1);
         if (prio > max_prio) max_prio = prio;
-        if (id >= vertices.size()) vertices.resize(id + 1);
+        if (id >= vertices.size()) vertices.resize(id + 1, invalid);
+
+        /* FIXME: the PGSolver file format description allows vertices to be
+                  defined more than once (in that case, the old vertex should
+                  be removed), but we currently don't support that. Instead,
+                  just assert that each vertex is initialized once. */
+        assert(vertices[id] == invalid);
+
         vertices[id].player   = player;
         vertices[id].priority = prio;
-
-        /* FIXME: the PGSolver file format description requires that we remove
-                  existing successor edges (in case a vertex is defined more
-                  than once). */
 
         // Read successors
         do {
             verti succ;
             if (!(is >> succ)) break;
-            if (succ >= vertices.size()) vertices.resize(succ + 1);
+            if (succ >= vertices.size()) vertices.resize(succ + 1, invalid);
 
             edges.push_back(std::make_pair(id, succ));
 
@@ -62,11 +75,14 @@ void ParityGame::read_pgsolver( std::istream &is,
     }
 
     // Assign vertex info and recount cardinalities
-    vertex_ = new ParityGameVertex();
     reset((verti)vertices.size(), max_prio + 1);
-    for (size_t n = 0; n < vertices.size(); ++n) vertex_[n] = vertices[n];
-    vertices.clear();
+    for (size_t n = 0; n < vertices.size(); ++n)
+    {
+        assert(vertices[n] != invalid);
+        vertex_[n] = vertices[n];
+    }
     recalculate_cardinalities(vertices.size());
+    vertices.clear();
 
     // Assign graph
     graph_.assign(edges, edge_dir);

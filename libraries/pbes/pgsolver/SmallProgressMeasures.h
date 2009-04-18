@@ -1,3 +1,12 @@
+// Copyright (c) 2007, 2009 University of Twente
+// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009 Eindhoven University of Technology
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+
 #ifndef SMALL_PROGRESS_MEASURES_H_INCLUDED
 #define SMALL_PROGRESS_MEASURES_H_INCLUDED
 
@@ -25,7 +34,6 @@ private:
 private:
     long long lifts_attempted_, lifts_succeeded_;
     std::vector<std::pair<long long, long long> > vertex_stats_;
-
 };
 
 /*! A parity game solver based on Marcin Jurdzinski's small progress measures
@@ -82,7 +90,7 @@ protected:
     /*! Compares the first `N` elements of the SPM vectors for the given
         vertices and returns -1, 0 or 1 to indicate that v is smaller, equal to,
         r larger than w (respectively). */
-    int vector_cmp(verti v, verti w, int N);
+    inline int vector_cmp(verti v, verti w, int N);
 
     /*! Returns the minimum or maximum successor for vertex `v`,
         depending on whether take_max is false or true (respectively). */
@@ -97,6 +105,7 @@ protected:
     // Allow lifting strategy to access the SPM  internals:
     friend class LiftingStrategy;
     friend class MaxMeasureLiftingStrategy;
+    friend class OldMaxMeasureLiftingStrategy;
 
 protected:
     bool preprocessed_;         /*!< set if the graph has been preprocessed */
@@ -106,5 +115,20 @@ protected:
     verti *spm_;                /*!< array storing the SPM vector data */
     LiftingStatistics *stats_;  /*!< object to record lifting statistics */
 };
+
+
+int SmallProgressMeasures::vector_cmp(verti v, verti w, int N)
+{
+    if (is_top(v)) return is_top(w) ? 0 : +1;   /* v is top */
+    if (is_top(w)) return -1;                   /* w is top, but v isn't */
+
+    for (int n = 0; n < N; ++n)
+    {
+        if (vec(v)[n] < vec(w)[n]) return -1;
+        if (vec(v)[n] > vec(w)[n]) return +1;
+    }
+
+    return 0;
+}
 
 #endif /* ndef SMALL_PROGRESS_MEASURES_H_INCLUDED */
