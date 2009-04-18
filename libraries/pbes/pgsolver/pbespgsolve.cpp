@@ -19,16 +19,9 @@
 #include <memory>
 
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/pbes/parity_game_generator.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "ParityGame.h"
-#include "logging.h"
-#include "timing.h"
-#include "SCC.h"
-#include "ParityGame.h"
-#include "LinearLiftingStrategy.h"
-#include "PredecessorLiftingStrategy.h"
-#include "mcrl2/pbes/parity_game_generator.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -53,7 +46,7 @@ using utilities::tools::input_tool;
 //#include <aterm_init.h>
 
 #include <assert.h>
-#include <getopt.h>
+//#include <getopt.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fstream>
@@ -138,153 +131,153 @@ static void print_usage()
 "  --timeout/-t <t>       abort solving after <t> seconds\n");
 }
 
-static void parse_args(int argc, char *argv[])
-{
-    static struct option long_options[] = {
-        { "help",       false, NULL, 'h' },
-        { "input",      true,  NULL, 'i' },
-        { "size",       true,  NULL,  1  },
-        { "outdegree",  true,  NULL,  2  },
-        { "priorities", true,  NULL,  3  },
-        { "seed",       true,  NULL,  4  },
-        { "strategy",   true,  NULL, 'l' },
-        { "dot",        true,  NULL, 'd' },
-        { "pgsolver",   true,  NULL, 'p' },
-        { "raw",        true,  NULL, 'r' },
-        { "winners",    true,  NULL, 'w' },
-        { "scc",        false, NULL,  5  },
-        { "dual",       false, NULL,  6  },
-        { "reorder",    true,  NULL, 'e' },
-        { "timeout",    true,  NULL, 't' },
-        { NULL,         false, NULL,  0  } };
-
-    static const char *short_options = "hi:l:d:p:r:w:e:t:";
-
-    for (;;)
-    {
-        int ch = getopt_long(argc, argv, short_options, long_options, NULL);
-        if (ch == -1) break;
-
-        switch (ch)
-        {
-        case 'h':   /* help */
-            print_usage();
-            exit(EXIT_SUCCESS);
-            break;
-
-        case 'i':   /* input format */
-            if (strcasecmp(optarg, "random") == 0)
-            {
-                arg_input_format = INPUT_RANDOM;
-            }
-            else
-            if (strcasecmp(optarg, "raw") == 0)
-            {
-                arg_input_format = INPUT_RAW;
-            }
-            else
-            if (strcasecmp(optarg, "pgsolver") == 0)
-            {
-                arg_input_format = INPUT_PGSOLVER;
-            }
-            else
-            if (strcasecmp(optarg, "pbes") == 0)
-            {
-#ifdef WITH_MCRL2
-                arg_input_format = INPUT_PBES;
-#else
-                printf("PBES input requires linking to mCRL2\n");
-                exit(EXIT_FAILURE);
-#endif
-            }
-            else
-            {
-                printf("Invalid input format: %s\n", optarg);
-                exit(EXIT_FAILURE);
-            }
-            break;
-
-        case 1:     /* random graph size */
-            arg_random_size = atoi(optarg);
-            break;
-
-        case 2:     /* random graph out-degree */
-            arg_random_out_degree = atoi(optarg);
-            break;
-
-        case 3:     /* random game number of priorities */
-            arg_random_priorities = atoi(optarg);
-            break;
-
-        case 4:     /* random seed */
-            arg_random_seed = atoi(optarg);
-            break;
-
-        case 'l':   /* Small Progress Measures lifting strategy */
-            arg_spm_lifting_strategy = optarg;
-            break;
-
-        case 'd':   /* dot output file */
-            arg_dot_file = optarg;
-            break;
-
-        case 'p':   /* PGSolver output file */
-            arg_pgsolver_file = optarg;
-            break;
-
-        case 'r':   /* raw output file */
-            arg_raw_file = optarg;
-            break;
-
-        case 'w':   /* winners output file */
-            arg_winners_file = optarg;
-            break;
-
-        case 5:     /* decompose into strongly connected components */
-            arg_scc_decomposition = true;
-            break;
-
-        case 6:     /* solve dual game */
-            arg_solve_dual = true;
-            break;
-
-        case 'e':   /* reorder vertices */
-            if (strcasecmp(optarg, "bfs") == 0)
-            {
-                arg_reordering = REORDER_BFS;
-            }
-            else
-            if (strcasecmp(optarg, "dfs") == 0)
-            {
-                arg_reordering = REORDER_DFS;
-            }
-            else
-            {
-                printf("Invalid reordering: %s\n", optarg);
-                exit(EXIT_FAILURE);
-            }
-            break;
-
-        case 't':   /* time limit (in seconds) */
-            arg_timeout = atoi(optarg);
-            break;
-
-        case '?':
-            {
-                printf("Unrecognized option!\n");
-                exit(EXIT_FAILURE);
-            }
-            break;
-        }
-    }
-
-    if (arg_input_format == INPUT_NONE)
-    {
-        printf("No input format specified!\n");
-        print_usage();
-        exit(EXIT_FAILURE);
-    }
-}
+// static void parse_args(int argc, char *argv[])
+// {
+//     static struct option long_options[] = {
+//         { "help",       false, NULL, 'h' },
+//         { "input",      true,  NULL, 'i' },
+//         { "size",       true,  NULL,  1  },
+//         { "outdegree",  true,  NULL,  2  },
+//         { "priorities", true,  NULL,  3  },
+//         { "seed",       true,  NULL,  4  },
+//         { "strategy",   true,  NULL, 'l' },
+//         { "dot",        true,  NULL, 'd' },
+//         { "pgsolver",   true,  NULL, 'p' },
+//         { "raw",        true,  NULL, 'r' },
+//         { "winners",    true,  NULL, 'w' },
+//         { "scc",        false, NULL,  5  },
+//         { "dual",       false, NULL,  6  },
+//         { "reorder",    true,  NULL, 'e' },
+//         { "timeout",    true,  NULL, 't' },
+//         { NULL,         false, NULL,  0  } };
+// 
+//     static const char *short_options = "hi:l:d:p:r:w:e:t:";
+// 
+//     for (;;)
+//     {
+//         int ch = getopt_long(argc, argv, short_options, long_options, NULL);
+//         if (ch == -1) break;
+// 
+//         switch (ch)
+//         {
+//         case 'h':   /* help */
+//             print_usage();
+//             exit(EXIT_SUCCESS);
+//             break;
+// 
+//         case 'i':   /* input format */
+//             if (strcasecmp(optarg, "random") == 0)
+//             {
+//                 arg_input_format = INPUT_RANDOM;
+//             }
+//             else
+//             if (strcasecmp(optarg, "raw") == 0)
+//             {
+//                 arg_input_format = INPUT_RAW;
+//             }
+//             else
+//             if (strcasecmp(optarg, "pgsolver") == 0)
+//             {
+//                 arg_input_format = INPUT_PGSOLVER;
+//             }
+//             else
+//             if (strcasecmp(optarg, "pbes") == 0)
+//             {
+// #ifdef WITH_MCRL2
+//                 arg_input_format = INPUT_PBES;
+// #else
+//                 printf("PBES input requires linking to mCRL2\n");
+//                 exit(EXIT_FAILURE);
+// #endif
+//             }
+//             else
+//             {
+//                 printf("Invalid input format: %s\n", optarg);
+//                 exit(EXIT_FAILURE);
+//             }
+//             break;
+// 
+//         case 1:     /* random graph size */
+//             arg_random_size = atoi(optarg);
+//             break;
+// 
+//         case 2:     /* random graph out-degree */
+//             arg_random_out_degree = atoi(optarg);
+//             break;
+// 
+//         case 3:     /* random game number of priorities */
+//             arg_random_priorities = atoi(optarg);
+//             break;
+// 
+//         case 4:     /* random seed */
+//             arg_random_seed = atoi(optarg);
+//             break;
+// 
+//         case 'l':   /* Small Progress Measures lifting strategy */
+//             arg_spm_lifting_strategy = optarg;
+//             break;
+// 
+//         case 'd':   /* dot output file */
+//             arg_dot_file = optarg;
+//             break;
+// 
+//         case 'p':   /* PGSolver output file */
+//             arg_pgsolver_file = optarg;
+//             break;
+// 
+//         case 'r':   /* raw output file */
+//             arg_raw_file = optarg;
+//             break;
+// 
+//         case 'w':   /* winners output file */
+//             arg_winners_file = optarg;
+//             break;
+// 
+//         case 5:     /* decompose into strongly connected components */
+//             arg_scc_decomposition = true;
+//             break;
+// 
+//         case 6:     /* solve dual game */
+//             arg_solve_dual = true;
+//             break;
+// 
+//         case 'e':   /* reorder vertices */
+//             if (strcasecmp(optarg, "bfs") == 0)
+//             {
+//                 arg_reordering = REORDER_BFS;
+//             }
+//             else
+//             if (strcasecmp(optarg, "dfs") == 0)
+//             {
+//                 arg_reordering = REORDER_DFS;
+//             }
+//             else
+//             {
+//                 printf("Invalid reordering: %s\n", optarg);
+//                 exit(EXIT_FAILURE);
+//             }
+//             break;
+// 
+//         case 't':   /* time limit (in seconds) */
+//             arg_timeout = atoi(optarg);
+//             break;
+// 
+//         case '?':
+//             {
+//                 printf("Unrecognized option!\n");
+//                 exit(EXIT_FAILURE);
+//             }
+//             break;
+//         }
+//     }
+// 
+//     if (arg_input_format == INPUT_NONE)
+//     {
+//         printf("No input format specified!\n");
+//         print_usage();
+//         exit(EXIT_FAILURE);
+//     }
+// }
 
 /*! Write summary of winners. For each node, a single character is printed:
     'E' or 'O', depending on whether player Even or Odd wins the parity game

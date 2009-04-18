@@ -26,12 +26,13 @@ SOURCES = Compatibility.cc
           PredecessorLiftingStrategy.cc
           SmallProgressMeasures.cc
           logging.c
-          timing.c
         ;
 
 lib pg : $(SOURCES) ;
+lib timing : timing.c : <toolset>gcc ;
+lib timing : timing_msvc.c : <toolset>msvc ;
 
-exe pbespgsolve : pbespgsolve.cpp pg : ;
+exe pbespgsolve : pbespgsolve.cpp pg timing : ;
 
 install dist
    :

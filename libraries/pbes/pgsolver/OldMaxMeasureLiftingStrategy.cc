@@ -36,14 +36,14 @@ verti OldMaxMeasureLiftingStrategy::next(verti prev_vertex, bool prev_lifted)
                   it != graph_.pred_end(prev_vertex); ++it )
             {
                 verti u = *it;
-                queue_t::iterator it = queue_pos_[u];
+                queue_t::iterator it1 = queue_pos_[u];
 
                 /* Skip this predecessor if it is already queued with an
                    equal or greater weight. */
-                if (it != queue_.end() && it->first >= m) continue;
+                if (it1 != queue_.end() && it1->first >= m) continue;
 
                 // If we have an old entry in the queue, remove it first.
-                if (it != queue_.end()) queue_.erase(queue_pos_[u]);
+                if (it1 != queue_.end()) queue_.erase(queue_pos_[u]);
 
                 // Add new entry to the queue
                 queue_pos_[u] = queue_.insert(std::make_pair(m, u)).first;
