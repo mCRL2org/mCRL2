@@ -9,6 +9,8 @@
 #define ERROR 2
 #define FATAL 3
 
+extern int logging_enabled;
+
 /* Prints an error message followed by a newline character,
    prefixed by the time in seconds spend by the program
    and displaying the type of error. */
@@ -28,10 +30,13 @@ void message(int severity, const char *fmt, va_list ap)
 
 void info(const char *fmt, ...)
 {
+  if (logging_enabled)
+  {
     va_list ap;
     va_start(ap, fmt);
     message(INFO, fmt, ap);
     va_end(ap);
+  }
 }
 
 void warn(const char *fmt, ...)

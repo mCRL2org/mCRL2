@@ -1,0 +1,1 @@
+int logging_enabled;

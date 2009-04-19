@@ -1,4 +1,10 @@
-project toolset/pbespgsolve ;
+project toolset/pbespgsolve
+  : requirements
+    <define>WITH_MCRL2
+    <toolset>gcc:<define>POSIX
+    <source>/libraries//lps
+    <source>/libraries//pbes
+  ;
 
 SOURCES = Compatibility.cc
           ComponentSolver.cpp
@@ -14,6 +20,7 @@ SOURCES = Compatibility.cc
           PredecessorLiftingStrategy.cc
           SmallProgressMeasures.cc
           logging.c
+          logging_enabled.c
         ;
 
 lib pg : $(SOURCES) ;
@@ -24,9 +31,5 @@ tool pbespgsolve
    : pbespgsolve.cpp
      pg
      timing
-     /libraries//lps
-     /libraries//pbes
    : <status>experimental
-     <define>WITH_MCRL2
-     <toolset>gcc:<define>POSIX
    ;

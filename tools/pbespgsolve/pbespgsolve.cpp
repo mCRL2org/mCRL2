@@ -31,6 +31,8 @@ using utilities::tools::input_tool;
 //using utilities::tools::rewriter_tool;
 //using utilities::tools::pbes_rewriter_tool;
 
+extern int logging_enabled;
+
 //-------------------------------------------------------------------------------------------------------------------//
 // code copied from main.cc        
 //-------------------------------------------------------------------------------------------------------------------//
@@ -450,6 +452,35 @@ static void set_timeout(int t)
 #endif
 //-------------------------------------------------------------------------------------------------------------------//
 
+void display_result(const ParityGameSolver& solver)
+{
+  ParityGame::Player winner = solver.winner(0);
+  bool solved = arg_solve_dual ? (winner == ParityGame::PLAYER_ODD) : (winner == ParityGame::PLAYER_EVEN);
+  std::clog << "The solution for the initial variable of the pbes is " << (solved ? "true" : "false") << std::endl;
+
+  // Write summary of winners. For each node, a single character is printed:
+  // 'E' or 'O', depending on whether player Even or Odd wins the parity game
+  //   starting from this node.
+  if (mcrl2::core::gsVerbose)
+  { 
+    std::clog << "Complete solution" << std::endl;
+    verti next_newline = 80;
+    for (verti v = 0; v < solver.game().graph().V(); ++v)
+    {
+      if (v == next_newline)
+      {
+        std::clog << '\n';
+        next_newline += 80;
+      }
+      ParityGame::Player winner = solver.winner(v);
+      std::clog << ( (winner == ParityGame::PLAYER_EVEN) ^ arg_solve_dual ? 'E' :
+                     (winner == ParityGame::PLAYER_ODD)  ^ arg_solve_dual ? 'O' :
+                                                                            '?' );
+    }
+    std::clog << '\n';
+  }
+}
+
 void run_pg(ParityGame& game)
 {
     arg_spm_lifting_strategy = "maxmeasure";
@@ -569,7 +600,8 @@ void run_pg(ParityGame& game)
         info("Total lifting attempts:       %12lld", lifts_total);
         // info("Minimum lifts required:    %12lld", 0LL);  // TODO
 
-        write_output(game, solver);
+//        write_output(game, solver);
+display_result(*solver);
         solver = NULL;
     }
 
@@ -621,18 +653,15 @@ class pg_solver_tool: public input_tool
 
     void parse_options(const command_line_parser& parser)
     {
-    	super::parse_options(parser);
-      try
+      super::parse_options(parser);
+      // set_edge_direction(parser.option_argument("edge-direction"));
+      set_edge_direction("successor");
+      if (parser.options.count("lifting-strategy") > 0)
       {
-        set_edge_direction(parser.option_argument("edge-direction"));
-        arg_spm_lifting_strategy  = "";
-        arg_scc_decomposition = parser.options.count("scc") > 0;
-        arg_solve_dual = parser.options.count("dual") > 0;
+        set_lifting_strategy(parser.option_argument("lifting-strategy"));
       }
-      catch (std::logic_error)
-      {
-        set_edge_direction("successor");
-      }
+      arg_scc_decomposition = parser.options.count("scc") > 0;
+      arg_solve_dual = parser.options.count("dual") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -645,7 +674,7 @@ class pg_solver_tool: public input_tool
            "  'oldmaxmeasure'",
            'l');
       desc.add_option("scc", "enable decomposition into strongly connected components", 'c');
-      desc.add_option("dual", "solve the dual game", 'd');
+      desc.add_option("dual", "solve the dual game", 'u');
 //        add_option("edge-direction",
 //          make_optional_argument("NAME", "successor"),
 //          "Use the edge direction NAME:\n"
@@ -658,7 +687,7 @@ class pg_solver_tool: public input_tool
   public:
     pg_solver_tool()
       : super(
-          "pgsolver",
+          "pbespgsolve",
           "Michael Weber, Maks Verver, Wieger Wesselink",
           "Solve a PBES using a parity game solver",
           "Reads a file containing a PBES, instantiates it into a BES, and applies a\n"
@@ -670,10 +699,13 @@ class pg_solver_tool: public input_tool
 
     bool run()
     {
+      // this determines if the info() function displays output
+      logging_enabled = mcrl2::core::gsVerbose ? 1 : 0;
+
       if (mcrl2::core::gsVerbose)
       {
-        std::clog << "pgsolver parameters:" << std::endl;
-        std::clog << "  input file:       " << m_input_filename << std::endl;
+        std::clog << "pbespgsolve parameters:" << std::endl;
+        std::clog << "  input file:       " << input_filename() << std::endl;
         std::clog << "  edge direction:   " << edge_direction_string() << std::endl;
         std::clog << "  lifting strategy: " << lifting_strategy() << std::endl;
         std::clog << "  dual:             " << std::boolalpha << arg_solve_dual << std::endl;
