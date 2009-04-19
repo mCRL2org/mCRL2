@@ -1,7 +1,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/bisimulation.h"
-#include "mcrl2/pbes/pbes2bool.h"
 
 using namespace atermpp;
 using namespace mcrl2::lps;

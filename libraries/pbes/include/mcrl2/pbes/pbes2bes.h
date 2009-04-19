@@ -183,7 +183,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  new_data::data_specification data = pbes_spec.data();
+  new_data::data_specification& data = pbes_spec.data();
 
   propositional_variable_instantiation new_initial_state;
   atermpp::vector<pbes_equation> new_equation_system;
@@ -289,7 +289,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  new_data::data_specification data = pbes_spec.data();
+  new_data::data_specification& data = pbes_spec.data();
 
   atermpp::vector<pbes_equation> result_eqsys;        // resulting equation system
   int nr_of_equations = 0;          // Nr of equations computed

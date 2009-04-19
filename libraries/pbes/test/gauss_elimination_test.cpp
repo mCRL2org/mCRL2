@@ -24,7 +24,6 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
-#include "mcrl2/pbes/pbes2bool.h"
 
 using namespace mcrl2;
 

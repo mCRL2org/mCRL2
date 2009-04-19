@@ -89,11 +89,7 @@ struct t_tool_options
    // bool opt_precompile_pbes;
 
    /// \brief The rewrite strategy
-<<<<<<< .mine
-   // RewriteStrategy rewrite_strategy;
-=======
    mcrl2::new_data::rewriter::strategy rewrite_strategy;
->>>>>>> .r5969
 
    /// \brief The hashtable option
    bool opt_use_hashtables;
@@ -119,15 +115,9 @@ struct t_tool_options
    /// \brief Constructor
    t_tool_options()
      : opt_outputformat("none"),
-<<<<<<< .mine
        opt_strategy(bes::lazy),
        // opt_precompile_pbes(false),
        // rewrite_strategy(GS_REWR_JITTY),
-=======
-       opt_strategy(lazy),
-       opt_precompile_pbes(false),
-       rewrite_strategy(mcrl2::new_data::rewriter::jitty),
->>>>>>> .r5969
        opt_use_hashtables(false),
        opt_construct_counter_example(false),
        opt_store_as_tree(false),
