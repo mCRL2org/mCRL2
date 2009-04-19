@@ -13,11 +13,57 @@
 #define MCRL2_UTILITIES_REWRITER_TOOL_H
 
 #include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
 
 namespace mcrl2 {
 
 namespace utilities {
+
+  /// standard conversion from stream
+  inline std::istream& operator>>(std::istream& is, new_data::rewriter::strategy& s) {
+    char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    using namespace mcrl2::new_data::detail;
+
+    is.readsome(strategy, 9);
+
+    size_t new_s = static_cast< size_t >(RewriteStrategyFromString(strategy));
+
+    s = static_cast< new_data::rewriter::strategy >(new_s);
+
+    if (static_cast< size_t >(new_s) == static_cast< size_t >(GS_REWR_INVALID)) {
+      is.setstate(std::ios_base::failbit);
+    }
+
+    return is;
+  }
+
+  /// standard conversion to stream
+  inline std::ostream& operator<<(std::ostream& os, new_data::rewriter::strategy& s) {
+    static char* strategies[] = {
+      "inner",
+#ifdef MCRL2_INNERC_AVAILABLE
+      "innerc",
+#endif
+      "jitty",
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "jittyc",
+#endif
+      "innerp",
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "innerpc",
+#endif
+#ifdef MCRL2_JITTYC_AVAILABLE
+      "jittyp"
+#else
+      "jittyp",
+      "jittypc"
+#endif
+    };
+
+    os << strategies[s];
+
+    return os;
+  }
 
 namespace tools {
 
@@ -35,7 +81,22 @@ namespace tools {
       void add_options(interface_description& desc)
       {
         Tool::add_options(desc);
-        desc.add_rewriting_options();
+
+        desc.add_option(
+          "rewriter", interface_description::mandatory_argument< new_data::rewriter::strategy >("NAME", "jitty"),
+          "use rewrite strategy NAME:\n"
+          "  'jitty' for jitty rewriting (default),\n"
+          "  'jittyp' for jitty rewriting with prover,\n"
+#ifdef MCRL2_JITTYC_AVAILABLE
+          "  'jittyc' for compiled jitty rewriting,\n"
+#endif
+          "  'inner' for innermost rewriting,\n"
+          "  'innerp' for innermost rewriting with prover, or\n"
+#ifdef MCRL2_INNERC_AVAILABLE
+          "  'innerc' for compiled innermost rewriting"
+#endif
+          ,'r'
+        );
       }
 
       /// \brief Parse non-standard options

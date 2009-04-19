@@ -52,14 +52,6 @@
 #include "bes_deprecated.h"
 #include "mcrl2/pbes/pbesrewr.h"
 
-//MCRL2-specific
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
-
-
 using namespace std;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

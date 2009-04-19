@@ -1,10 +1,9 @@
-project toolset/pbes2bes
-   : requirements
-      <library>/libraries//pbes
-   ;
+project toolset/pbes2bes ;
 
 tool pbes2bes
        : pbes2bes.cpp
        : <squadt-connectivity>implemented
          <status>experimental
+         <library>/libraries//pbes
+         <use>/libraries//lps
        ;

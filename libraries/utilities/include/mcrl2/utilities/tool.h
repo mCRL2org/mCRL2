@@ -105,14 +105,14 @@ namespace tools {
 	  {
 	          return EXIT_SUCCESS;
           }
+          if (run())
+          {
+            return EXIT_SUCCESS;
+          }
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
           return EXIT_FAILURE;
-        }
-        if (run())
-        {
-          return EXIT_SUCCESS;
         }
         return EXIT_FAILURE;
       }
