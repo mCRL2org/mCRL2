@@ -13,9 +13,9 @@
 #include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>                                                                                              
-#include "mcrl2/utilities/input_input_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bisimulation.h"
+#include "mcrl2/utilities/tool.h"
 
 //using namespace mcrl2::new_data;
 //using namespace mcrl2::pbes_system::pbes_expr;
