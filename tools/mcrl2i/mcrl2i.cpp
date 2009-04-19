@@ -19,30 +19,30 @@
 #include <string>
 #include <cctype>
 
+#include "boost/utility.hpp"
+
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <aterm2.h>
 
 #include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/classic_enumerator.h"
+#include "mcrl2/new_data/enumerator_factory.h"
+#include "mcrl2/new_data/map_substitution_adapter.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include <mcrl2/new_data/detail/data_implementation.h>
-#include <mcrl2/new_data/detail/data_reconstruct.h>
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
-#include "mcrl2/new_data/enumerator_factory.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -103,7 +103,7 @@ static void parse_var_decl(string decl,
 
     stringstream ss(decl.substr(semi_pos+1));
 
-    sort_expression sort = type_check_sort_expr(parse_sort_expr(ss),(ATerm)spec);
+    sort_expression sort = type_check_sort_expr(parse_sort_expr(ss),new_data::detail::data_specification_to_aterm_data_spec(spec));
 
     if (gsDebug)
     { cerr << "sort parsed and type checked: " << pp(sort) << "\n";
@@ -312,26 +312,26 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           { declare_variables(s,context_variables,spec);
           } 
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
-          { atermpp::set <variable> vars = parse_varlist_from_string(s,spec);
+          {
+            atermpp::set <variable> vars = parse_varlist_from_string(s,spec);
             data_expression term = parse_term(s,spec,context_variables,vars);
             if ( term.sort()!=sort_bool_::bool_())
             { throw mcrl2::runtime_error("expression is not of sort Bool\n");
             }
             // static EnumeratorSolutions *sols = NULL;
             // clear_rewr_substs(vars);
-            classic_enumerator < data_expression > sols = 
-                   e.make(new_data::convert < std::set <variable > >(vars),rewr,term);
-            for ( sols!= classic_enumerator<>() ; ++sols ) 
+            for (classic_enumerator< > i =
+                 e.make(new_data::convert < std::set <variable > >(vars),rewr,term);
+                                                          i != classic_enumerator<>() ; ++i) 
             { 
-              mutable_substitution sol= *sols;
               cout << "[";
-              for ( variable_list::const_iterator v=vars.begin(); v!=vars.end() ; ++v ) 
-              { cout << pp(*v) << " := " << (*sols)(v); 
-                if ( (v+1)!=vars.end() )
+              for ( atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v ) 
+              { cout << pp(*v) << " := " << (*i)(*v); 
+                if ( boost::next(v)!=vars.end() )
                 { cout << ", ";
                 }
               }
-              cout << "] gives "<< rewr(term,*sols) << "]\n";
+              cout << "] gives "<< rewr(term,*i) << "]\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
@@ -348,7 +348,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
-            term = rewr(term,assignments);
+            term = rewr(term,make_map_substitution_adapter(assignments));
             assignments[var]=term;
             context_variables.insert(var);
           }
