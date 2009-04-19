@@ -1,0 +1,8 @@
+project toolset/lpsbisim2pbes ;
+
+tool lpsbisim2pbes
+       : lpsbisim2pbes.cpp
+         /libraries//lps
+         /libraries//pbes
+       : <status>experimental
+       ;
