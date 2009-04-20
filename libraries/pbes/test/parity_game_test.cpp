@@ -181,6 +181,7 @@ void test_parity_game_generator()
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec_text, formula_text, timed);
   pbes_system::detail::parity_game_output pgg(p);
   pgg.run();
+  AT_collect();
 }
 
 void test_bes_examples()
