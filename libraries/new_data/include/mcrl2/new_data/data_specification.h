@@ -190,6 +190,11 @@ namespace mcrl2 {
         ///\brief Table containing system defined equations.
         mutable atermpp::table m_sys_equations;
 
+        /// \brief The following map contains for each sort a default term of that particular
+        /// sort. Each default term remains valid, as long as no constructors or mappings
+        /// are removed from the specification.
+        mutable atermpp::map < sort_expression, data_expression > default_expression_map;
+
       public:
 
       ///\brief Default constructor
@@ -788,16 +793,35 @@ namespace mcrl2 {
       ///\brief Adds the system defined sorts in a sequence
       void import_system_defined_sort(sort_expression const&);
 
-      /// \brief Returns a default expression for a sort.
-      ///
-      /// \param[in] s A sort expression.
-      /// \return Default expression of sort s.
-      inline
-      data_expression default_expression(const sort_expression& s)
-      {
-        return data_expression();
-        //TODO
-      }
+      /// \brief Returns a default expression that has the sort s.
+      /// \brief Returns a valid data expression according to this data specification
+      /// of the given sort s. If no valid expression can be found, data_expression()
+      /// is returned. If s is a basic sort, it returns a minimal term with by default at most three nested function
+      /// symbols. When selecting function symbols, constructor symbols have a
+      /// preference over mappings. Constructors and functions that have arrows in their
+      /// target sorts (e.g. f:A->(B->C)) are not used to construct default terms.
+      /// <P>
+      /// For each sort, the same term is returned.
+      /// For function sorts a mapping with that sort is returned provided it exists, or otherwise
+      /// data_expression() is returned.
+      /// <P>
+      /// Terms that are generated are stored in a map such that they do not have to be
+      /// generated more than once. When generating a term the nesting depth is taken into
+      /// account. When the term is taken from the map, the nesting depth is ignored.
+      /// So, generating a term with nesting depth 10, and subsequentely with nesting depth
+      /// 1 can still yield a term of nesting depth larger than 1, because the earlier
+      /// generated term is returned.
+      /// <P>
+      /// It can be expected that this function will evolve through time, in the sense that
+      /// more complex terms will be generated over time to act as default terms of a certain
+      /// sort, for instance containing fucntion symbols with complex target sorts, containing
+      /// explicit function constructors (lambda's). So, no reliance is possible on the particular
+      /// shape of the terms that are generated.
+      /// \param s A sort expression
+      /// \param max_recursion_depth A positive integer
+      /// \return A constant data expression of the given sort.
+
+      data_expression default_expression(sort_expression s, const unsigned int max_recursion_depth=3) const;
 
       /// \brief Returns true if
       /// <ul>

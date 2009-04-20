@@ -225,6 +225,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         std::cerr << "pbes2bool parameters:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
         std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
 
@@ -583,7 +584,8 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
+{
   bool result = true;
 
   result &= c.input_exists(pbes_file_for_input);

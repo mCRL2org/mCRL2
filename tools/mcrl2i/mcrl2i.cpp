@@ -32,6 +32,7 @@
 #include "mcrl2/new_data/classic_enumerator.h"
 #include "mcrl2/new_data/enumerator_factory.h"
 #include "mcrl2/new_data/map_substitution_adapter.h"
+#include "mcrl2/new_data/parser.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
@@ -103,7 +104,8 @@ static void parse_var_decl(string decl,
 
     stringstream ss(decl.substr(semi_pos+1));
 
-    sort_expression sort = type_check_sort_expr(parse_sort_expr(ss),new_data::detail::data_specification_to_aterm_data_spec(spec));
+    sort_expression sort = type_check_sort_expr(parse_sort_expr(ss),
+                              new_data::detail::data_specification_to_aterm_data_spec(spec));
 
     if (gsDebug)
     { cerr << "sort parsed and type checked: " << pp(sort) << "\n";
@@ -159,7 +161,7 @@ static data_expression parse_term(string &term_string,
                                   const atermpp::set < variable > &local_variables = atermpp::set < variable >())
 { stringstream ss(term_string);
   context_variables.insert(local_variables.begin(),local_variables.end());
-  ATermAppl aterm = parse_data_expr(ss);
+  ATermAppl aterm = parse_data_expression(ss);
   data_expression term = type_check_data_expr(aterm,NULL,spec,context_variables);
   return term;
 }
@@ -294,11 +296,9 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           { cout << help_text;
           } 
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
-          { rewriter::strategy new_strategy = static_cast<rewriter::strategy> 
-                          (RewriteStrategyFromString(s.c_str()));
-            if ( new_strategy == GS_REWR_INVALID )
-            { throw mcrl2::runtime_error("invalid rewrite strategy" + s + ", ignoring command");
-            } 
+          { 
+            rewriter::strategy new_strategy;
+            s >> new_strategy;
             if (new_strategy!=m_rewrite_strategy)
             { m_rewrite_strategy=new_strategy;
               rewr=rewriter(spec,m_rewrite_strategy);
@@ -367,13 +367,6 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
-  try
-  { return mcrl2i_tool().execute(argc, argv);
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
-  return EXIT_FAILURE;
+  return mcrl2i_tool().execute(argc, argv);
 }
 
