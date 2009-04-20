@@ -40,13 +40,15 @@ namespace mcrl2 {
     {
       public:
 
-        /// Constructor.
+        /// \brief Constructor.
         ///
         data_expression()
           : atermpp::aterm_appl(core::detail::constructOpId())
         {}
 
-        /// \internal
+        /// \brief Constructor.
+        ///
+        /// \param[in] t a term adhering to the internal format.
         data_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
         {}

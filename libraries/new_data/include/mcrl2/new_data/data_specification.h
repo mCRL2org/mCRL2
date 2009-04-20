@@ -198,7 +198,9 @@ namespace mcrl2 {
         make_system_defined_complete();
       }
 
-      ///\internal
+      ///\brief Constructor
+      ///
+      /// \param[in] t a term adhering to the internal format.
       data_specification(const atermpp::aterm_appl& t)
       {
         assert(core::detail::check_rule_DataSpec(t));
@@ -740,7 +742,7 @@ namespace mcrl2 {
 
       /// \brief Checks whether a function symbol is system defined.
       ///
-      /// \param[in[ f A function symbol.
+      /// \param[in] f A function symbol.
       /// \return true iff f is system defined (either as constructor or as
       ///      mapping), false otherwise.
       inline

@@ -78,7 +78,9 @@ namespace detail {
 } // namespace detail
 /// \endcond
 
-  /// Parses a new_data specification.
+  /// \brief Parses a new_data specification.
+  /// \param[in] text a textual description of the data specification
+  /// \return the data specification corresponding to text.
   inline
   data_specification parse_data_specification(const std::string& text)
   {
@@ -99,7 +101,9 @@ namespace detail {
 
   /// \deprecated This function will be removed after decent testing of
   //              parse_data_specification has been performed.
-  /// Parses a new_data specification and implements the new_data types.
+  /// \brief Parses a new_data specification and implements the new_data types.
+  /// \param[in] text a textual description of the data specification.
+  /// \return the implemented data specfication corresponding to text.
   inline
   atermpp::aterm_appl parse_data_specification_and_implement(const std::string& text)
   {

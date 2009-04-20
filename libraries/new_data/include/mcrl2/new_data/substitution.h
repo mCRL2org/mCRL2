@@ -113,8 +113,12 @@ namespace mcrl2 {
 
       protected:
 
+        /// \brief a mapping from variables to expressions
         atermpp::map< variable_type, expression_type > m_map;
 
+        /// \brief look up the expression corresponding to v
+        /// \param[in] v a variable
+        /// \return the expression corresponding to v.
         expression_type const& lookup(variable_type const& v) const {
           typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
 
@@ -270,6 +274,10 @@ namespace mcrl2 {
 
           public:
 
+            /// \brief Constructor.
+            ///
+            /// \param[in] v a variable.
+            /// \param[in] m a mapping of variables to expressions.
             assignment(variable_type v, atermpp::map< variable_type, expression_type >& m) :
                 m_variable(v), m_map(m)
             {
@@ -326,6 +334,7 @@ namespace mcrl2 {
     };
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+    /// \param sigma a substitution.
     /// \return A string representation of the map.
     template <typename Substitution>
     std::string to_string(const Substitution& sigma)

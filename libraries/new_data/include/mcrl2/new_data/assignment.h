@@ -39,7 +39,9 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructDataVarIdInit())
         {}
 
-        /// \internal
+        /// \brief Constructor.
+        ///
+        /// \param[in] a A term adhering to the internal format.
         assignment(const atermpp::aterm_appl& a)
           : atermpp::aterm_appl(a)
         {}

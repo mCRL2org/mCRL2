@@ -33,7 +33,7 @@ namespace mcrl2 {
     class function_sort: public sort_expression
     {
       public:
-        // \brief iterator range over list of structured sort constructors
+        /// \brief iterator range over list of structured sort constructors
         typedef detail::term_list_random_iterator< sort_expression > domain_iterator;
         /// \brief iterator range over list of structured sort constructors
         typedef boost::iterator_range< domain_iterator >             domain_range;

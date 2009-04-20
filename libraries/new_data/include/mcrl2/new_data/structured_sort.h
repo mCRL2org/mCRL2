@@ -52,7 +52,6 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructStructProj())
         {}
 
-        /// \internal
         /// \brief Constructor
         ///
         /// \param[in] a A term.
@@ -150,7 +149,6 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructStructCons())
         {}
 
-        /// \internal
         /// \brief Constructor
         ///
         /// \param[in] c A term

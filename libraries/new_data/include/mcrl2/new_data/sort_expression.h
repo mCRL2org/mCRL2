@@ -44,7 +44,6 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructSortId())
         {}
 
-        /// \internal
         /// \brief Constructor.
         /// \param[in] t A term.
         /// \pre t has the internal structure of a sort expression.

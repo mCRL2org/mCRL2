@@ -33,13 +33,15 @@ namespace mcrl2 {
     {
       public:
 
-        /// Constructor.
+        /// \brief Constructor.
         ///
         function_symbol()
           : data_expression(core::detail::constructOpId())
         {}
 
-        /// \internal
+        /// \brief Constructor.
+        ///
+        /// \param[in] a a term adhering to the internal format.
         function_symbol(const atermpp::aterm_appl& a)
           : data_expression(a)
         {}

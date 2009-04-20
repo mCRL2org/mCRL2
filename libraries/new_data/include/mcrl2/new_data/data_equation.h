@@ -49,7 +49,6 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::constructDataEqn())
         {}
 
-        /// \internal
         /// \brief Constructor
         ///
         /// \param[in] a An aterm adhering to the internal format.
@@ -83,6 +82,10 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] variables The free variables of the data_equation.
+        /// \param[in] condition The condition of the data_equation.
+        /// \param[in] lhs The left hand side of the data_equation.
+        /// \param[in] rhs The right hand side of the data_equation.
         /// \overload for variable list as iterator range
         template < typename ForwardTraversalIterator >
         data_equation(const typename boost::iterator_range< ForwardTraversalIterator >& variables,

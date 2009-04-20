@@ -139,6 +139,8 @@ namespace new_data {
                        m_reconstruction_context(other.m_substitution_context)
       {}
 
+      /// \brief Performs data implementation before rewriting (should become obsolete)
+      /// \param[in] specification a data specification.
       ATermAppl implement(data_specification const& specification) const
       {
         atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
@@ -172,6 +174,7 @@ namespace new_data {
       }
 
       /// \brief Performs data implementation before rewriting (should become obsolete)
+      /// \param[in] expression an expression.
       ATermAppl implement(data_expression const& expression) const
       {
         ATermList substitution_context = m_substitution_context;
@@ -280,8 +283,7 @@ namespace new_data {
       { }
 
       /// \brief Constructor.
-      /// \param d A data specification
-      /// \param s A rewriter strategy.
+      /// \param r a rewriter.
       rewriter(rewriter const& r) :
          basic_rewriter<data_expression>(r)
       { }
