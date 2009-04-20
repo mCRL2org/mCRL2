@@ -160,6 +160,7 @@ namespace detail {
     }
 
     /// \brief Converts an iterator range to data_expression_list
+    /// \param r A range of assignments.
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
@@ -168,18 +169,21 @@ namespace detail {
     }
 
     /// \brief Converts a vector to a variable_list 
+    /// \param r A range of assignments.
     template < typename Expression >
     inline assignment_list make_assignment_list(atermpp::vector< Expression >const& r) {
       return convert< assignment_list >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
+    /// \param r A range of assignments.
     template < typename ForwardTraversalIterator >
     inline assignment_vector make_assignment_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
       return convert< assignment_vector >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
+    /// \param r A range of assignments.
     template < typename Expression >
     inline assignment_vector make_assignment_vector(atermpp::term_list< Expression > const& r) {
       return convert< assignment_vector >(boost::make_iterator_range(r));

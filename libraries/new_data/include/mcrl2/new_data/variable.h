@@ -108,6 +108,7 @@ namespace mcrl2 {
     typedef atermpp::vector< variable >                            variable_vector;
 
     /// \brief Converts an iterator range to data_expression_list
+    /// \param r A range of variables.
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
     template < typename ForwardTraversalIterator >
@@ -116,18 +117,21 @@ namespace mcrl2 {
     }
 
     /// \brief Converts a vector to a variable_list 
+    /// \param r A range of variables.
     template < typename Expression >
     inline variable_list make_variable_list(atermpp::vector< Expression >const& r) {
       return convert< variable_list >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
+    /// \param r A range of variables.
     template < typename ForwardTraversalIterator >
     inline variable_vector make_variable_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
       return convert< variable_vector >(r);
     }
 
     /// \brief Converts an iterator range to variable_list
+    /// \param r A range of variables.
     template < typename Expression >
     inline variable_vector make_variable_vector(atermpp::term_list< Expression > const& r) {
       return convert< variable_vector >(boost::make_iterator_range(r));

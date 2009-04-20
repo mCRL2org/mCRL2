@@ -808,6 +808,7 @@ namespace mcrl2 {
     }; // class data_specification
 
     /// \brief Removes all system defined sorts, constructors, mappings and equations
+    /// \param specification A data specification
     /// \warning this makes a data specification incomplete with respect to system defined
     /// sorts, constructors, mappings and equations
     inline data_specification& remove_all_system_defined(data_specification& specification)
@@ -818,6 +819,7 @@ namespace mcrl2 {
     }
 
     /// \brief Removes all system defined sorts, constructors, mappings and equations
+    /// \param specification A data specification
     /// \warning this makes a data specification incomplete with respect to system defined
     /// sorts, constructors, mappings and equations
     inline data_specification remove_all_system_defined(data_specification const& specification)

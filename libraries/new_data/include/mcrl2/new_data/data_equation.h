@@ -50,6 +50,9 @@ namespace mcrl2 {
         {}
 
         /// \internal
+        /// \brief Constructor
+        ///
+        /// \param[in] a An aterm adhering to the internal format.
         data_equation(const atermpp::aterm_appl& a)
           : atermpp::aterm_appl(a)
         { }
@@ -135,6 +138,7 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] condition The condition of the new_data equation.
         /// \param[in] lhs The left hand side of the new_data equation.
         /// \param[in] rhs The right hand side of the new_data equation.
         /// \post this is the new_data equations representing the input, without

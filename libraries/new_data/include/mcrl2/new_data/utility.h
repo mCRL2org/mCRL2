@@ -82,7 +82,9 @@ namespace mcrl2 {
 
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
-    /// \param[in,out] c applies substitution function on elements of container
+    /// \param[in] c applies substitution function on elements of container
+    /// \return a vector of Expressions, such that the result is the vector of
+    ///         elements in c with f applied to them.
     template < typename Expression, typename SubstitutionFunction >
     atermpp::vector< Expression > substitute(SubstitutionFunction const& f, atermpp::vector< Expression > const& c)
     {
@@ -98,6 +100,10 @@ namespace mcrl2 {
 
 
     /// \brief Applies a substitution function to all elements of a container
+    /// \param[in] f substitution function
+    /// \param[in] c applies substitution function on elements of container
+    /// \param[out] o output iterator to which the elements of c with f applied
+    ///             to them are added.
     template < typename Container, typename SubstitutionFunction, typename OutputIterator >
     void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
     {
@@ -135,14 +141,14 @@ namespace mcrl2 {
     }
 
     /// \brief Pretty prints a data and sort expressions
-    /// \param[in] specification a data specification
+    /// \param[in] c A data or sort expression
     inline std::string pp(atermpp::aterm_appl const& c)
     {
       return core::pp(c);
     }
 
     /// \brief Pretty prints a data and sort expressions
-    /// \param[in] specification a data specification
+    /// \param[in] c A data or sort expression.
     template < typename Expression >
     inline std::string pp(atermpp::term_list< Expression > const& c)
     {

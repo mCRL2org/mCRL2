@@ -243,7 +243,7 @@ namespace detail {
 /// \endcond
 
 /// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] container a container with expressions
+/// \param[in] t a container with expressions
 /// \param d A data variable
 /// \return True if the term has a given variable as subterm.
 template <typename Container >
@@ -281,6 +281,8 @@ std::set<variable> find_all_variables(Container const& container)
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
+/// \param[out] o an output iterator to which all data variables occurring in t
+///             are added.
 /// \return All data variables that occur in the term t
 template <typename Container, typename OutputIterator >
 void find_all_free_variables(Container const& container, OutputIterator const& o)
@@ -404,6 +406,7 @@ sort_expression find_sort(data_specification const& data, std::string const& s)
 /// \brief Gets all equations with a data expression as head
 /// on one of its sides.
 ///
+/// \param[in] specification A data specification.
 /// \param[in] d A new_data expression.
 /// \return All equations with d as head in one of its sides.
 inline
