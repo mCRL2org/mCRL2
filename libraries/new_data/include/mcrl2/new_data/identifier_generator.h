@@ -23,39 +23,37 @@ namespace mcrl2 {
 
 namespace new_data {
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. This class is useful for
-/// algorithms that have to avoid name clashes.
-///
+/// \brief Abstract base class for identifier generators.
+/// Identifier generators generate fresh names that do not appear in a
+/// given context.
+/// A context is maintained containing already used identifiers.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers are generated that do not appear in the context.
 class identifier_generator
 {
   public:
-    /// Constructor.
-    ///
+
+    /// \brief Constructor.
     identifier_generator()
     {}
 
-    /// Destructor.
-    ///
+    /// \brief Destructor.
     virtual ~identifier_generator()
     {}
 
-    /// Clears the context.
-    ///
+    /// \brief Clears the context.
     virtual void clear_context() = 0;
 
-    /// Adds the identifier s to the context.
-    ///
+    /// \brief Adds the identifier s to the context.
+    /// \param s An identifier.
     virtual void add_identifier(core::identifier_string s) = 0;
 
-    /// Removes the identifier s from the context.
-    ///
+    /// \brief Removes the identifier s from the context.
+    /// \param s An identifier.
     virtual void remove_identifier(core::identifier_string s) = 0;
 
-    /// Adds identifiers of term t to the context.
-    ///
+    /// \brief Adds identifiers of term t to the context.
+    /// \param t A term
     template <typename Term>
     void add_to_context(Term t)
     {
@@ -66,8 +64,8 @@ class identifier_generator
       }
     }
 
-    /// Adds identifiers of term t to the context.
-    ///
+    /// \brief Adds identifiers to the context.
+    /// \param c A sequence of identifiers.
     template <typename Container>
     void add_identifiers(const Container& c)
     {
@@ -77,8 +75,8 @@ class identifier_generator
       }
     }
 
-    /// Removes identifiers of term t from the context.
-    ///
+    /// \brief Removes identifiers appearing in term t from the context.
+    /// \param t A term
     template <typename Term>
     void remove_from_context(Term t)
     {
@@ -89,13 +87,15 @@ class identifier_generator
       }
     }
 
-    /// Returns true if the identifier s appears in the context.
-    ///
+    /// \brief Returns true if the identifier s appears in the context.
+    /// \param s An identifier.
+    /// \return True if the identifier appears in the context.
     virtual bool has_identifier(core::identifier_string s) const = 0;
    
-    /// Returns a unique identifier, with the given hint as prefix.
+    /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
-    ///
+    /// \param hint A string
+    /// \return A fresh identifier.
     virtual core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string id(hint);
@@ -114,23 +114,31 @@ class identifier_generator
     }
 };
 
-/// Identifier generator that generates names with a postfix consisting of a number,
-/// that is incremented after each call to operator().
+/// \brief Identifier generator that generates names with a postfix consisting of a number.
 class number_postfix_generator
 {
   protected:
+    /// \brief A prefix.
     std::string m_prefix;
+
+    /// \brief An index.
     unsigned int m_index;
   
   public:
+    /// \brief Constructor.
     number_postfix_generator()
       : m_prefix("x"), m_index(0)
     {}
-    
+
+    /// \brief Constructor.
+    /// \param prefix A string
+    /// \param index A positive integer
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
      : m_prefix(prefix), m_index(index)
     {}
 
+    /// \brief Generates a fresh identifier that doesn't appear in the context.
+    /// \return A fresh identifier.
     core::identifier_string operator()()
     {
       std::ostringstream out;

@@ -85,24 +85,29 @@ namespace mcrl2 {
       {}
     };
 
-    /// Fresh variable generator that generates new_data variables with
-    /// names that do not appear in the given context.
+    /// \brief Variable generator that generates data variables with names that do not appear in a given context.
     class fresh_variable_generator
     {
       protected:
+        /// \brief The identifiers of the context.
         atermpp::set<core::identifier_string> m_identifiers;
-        sort_expression m_sort;                    // used for operator()()
-        std::string m_hint;                  // used as a hint for operator()()
+
+        /// \brief A sort for the generated variables.
+        sort_expression m_sort;
+
+        /// \brief A hint for the name of generated variables.
+        std::string m_hint;
 
       public:
-        /// Constructor.
-        ///
+        /// \brief Constructor.
         fresh_variable_generator()
          : m_sort(sort_bool_::bool_()), m_hint("t")
         { }
 
-        /// Constructor.
-        ///
+        /// \brief Constructor.
+        /// \param context A term
+        /// \param s A sort expression
+        /// \param hint A string
         template <typename Term>
         fresh_variable_generator(Term context, sort_expression s = sort_bool_::bool_(), std::string hint = "t")
         {
@@ -111,44 +116,44 @@ namespace mcrl2 {
           m_sort = s;
         }
 
-        /// Set a new hint.
-        ///
+        /// \brief Set a new hint.
+        /// \param hint A string
         void set_hint(std::string hint)
         {
           m_hint = hint;
         }
 
-        /// Returns the current hint.
-        ///
+        /// \brief Returns the current hint.
+        /// \return The current hint.
         std::string hint() const
         {
           return m_hint;
         }
 
-        /// Set a new context.
-        ///
+        /// \brief Set a new context.
+        /// \param context A term
         template <typename Term>
         void set_context(Term context)
         {
           m_identifiers = core::find_identifiers(context);
         }
 
-        /// Set a new sort.
-        ///
+        /// \brief Set a new sort.
+        /// \param s A sort expression
         void set_sort(sort_expression s)
         {
           m_sort = s;
         }
 
-        /// Returns the current sort.
-        ///
+        /// \brief Returns the current sort.
+        /// \return The current sort.
         sort_expression sort() const
         {
           return m_sort;
         }
 
-        /// Add term t to the context.
-        ///
+        /// \brief Add term t to the context.
+        /// \param t A term
         template <typename Term>
         void add_to_context(Term t)
         {
@@ -156,9 +161,9 @@ namespace mcrl2 {
           std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
         }
 
-        /// Returns a unique variable of the given sort, with the given hint as prefix.
+        /// \brief Returns a unique variable of the given sort, with the given hint as prefix.
         /// The returned variable is added to the context.
-        ///
+        /// \return A fresh variable that does not appear in the current context.
         variable operator()()
         {
           core::identifier_string id(m_hint);
@@ -172,9 +177,11 @@ namespace mcrl2 {
           return variable(id, m_sort);
         }
 
-        /// Returns a unique variable with the same sort as the variable v, and with
+        /// \brief Returns a unique variable with the same sort as the variable v, and with
         /// the same prefix. The returned variable is added to the context.
-        ///
+        /// \param v A data variable
+        /// \return A fresh variable with the same sort as the given variable, and with the name of
+        /// the variable as prefix.
         variable operator()(variable v)
         {
           std::string hint = v.name();

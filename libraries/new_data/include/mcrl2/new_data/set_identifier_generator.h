@@ -19,104 +19,108 @@ namespace mcrl2 {
 
 namespace new_data {
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. The context is stored
-/// in a set.
-///
+/// \brief Identifier generator that stores the identifiers of the
+/// context in a set.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
 /// context.
 class set_identifier_generator: public identifier_generator
 {
   protected:
+    /// \brief The context of the identifier generator.
     atermpp::set<core::identifier_string> m_identifiers;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     set_identifier_generator()
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     template <typename Term>
     set_identifier_generator(Term t)
     {
       add_to_context(t);
     }
 
-    /// Clears the context.
+    /// \brief Clears the context.
     void clear_context()
     {
       m_identifiers.clear();
     }
 
-    /// Adds the identifier s to the context.
+    /// \brief Adds the identifier s to the context.
+    /// \param s A
     void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
-    /// Removes one occurrence of the identifier s from the context.
+    /// \brief Removes one occurrence of the identifier s from the context.
+    /// \param s A
     void remove_identifier(core::identifier_string s)
     {
       m_identifiers.erase(s);
     }
 
-    /// Returns true if the identifier s appears in the context.
+    /// \brief Returns true if the identifier s appears in the context.
+    /// \param s A
+    /// \return True if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
-    /// Returns the context.
+    /// \brief Returns the context.
+    /// \return The context.
     const atermpp::set<core::identifier_string>& context() const
     {
       return m_identifiers;
     }
 };
 
-/// A class that generates identifiers. A context is maintained
-/// containing already used identifiers. The context is stored
-/// in a multiset. If an identifier occurs multiple times,
+/// \brief Identifier generator that stores the identifiers of the
+/// context in a multiset.
+/// If an identifier occurs multiple times,
 /// multiple calls to remove_from_context are required to
 /// remove it.
-///
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
 /// context.
 class multiset_identifier_generator: public identifier_generator
 {
   protected:
+    /// \brief The context of the identifier generator.
     atermpp::multiset<core::identifier_string> m_identifiers;
 
   public:
-    /// Constructor.
-    ///
+    /// \brief Constructor.
     multiset_identifier_generator()
     {}
 
-    /// Constructor.
-    ///
+    /// \brief Constructor.
+    /// \param t A term
     template <typename Term>
     multiset_identifier_generator(Term t)
     {
       add_to_context(t);
     }
 
-    /// Clears the context.
+    /// \brief Clears the context.
     void clear_context()
     {
       m_identifiers.clear();
     }
 
-    /// Adds the identifier s to the context.
+    /// \brief Adds the identifier s to the context.
+    /// \param s A
     void add_identifier(core::identifier_string s)
     {
       m_identifiers.insert(s);
     }
 
-    /// Removes one occurrence of the identifier s from the context.
+    /// \brief Removes one occurrence of the identifier s from the context.
+    /// \param s A
     void remove_identifier(core::identifier_string s)
     {
       atermpp::multiset<core::identifier_string>::iterator i = m_identifiers.find(s);
@@ -126,13 +130,16 @@ class multiset_identifier_generator: public identifier_generator
       }
     }
 
-    /// Returns true if the identifier s appears in the context.
+    /// \brief Returns true if the identifier s appears in the context.
+    /// \param s A
+    /// \return True if the identifier s appears in the context.
     bool has_identifier(core::identifier_string s) const
     {
       return m_identifiers.find(s) != m_identifiers.end();
     }
 
-    /// Returns the context.
+    /// \brief Returns the context.
+    /// \return The context.
     const atermpp::multiset<core::identifier_string>& context() const
     {
       return m_identifiers;
