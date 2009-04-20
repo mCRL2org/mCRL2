@@ -42,7 +42,11 @@ class input_input_tool: public tool
     /// \param parser A command line parser
     void check_positional_options(const command_line_parser& parser)
     {
-      if (2 != parser.arguments.size())
+      if (parser.options.find("help") != parser.options.end())
+      {
+        return;
+      }
+      if (parser.arguments.size() < 2)
       {
         parser.error("wrong number of file arguments");
       }
@@ -122,17 +126,7 @@ class lpsbisim2pbes_tool: public input_input_tool
     
     /// \brief If true the result is normalized
     bool normalize;
-
-    /// \brief Checks if the number of positional options is OK.
-    /// \param parser A command line parser
-    void check_positional_options(const command_line_parser& parser)
-    {
-      if (parser.arguments.size() < 2 || parser.arguments.size() > 3)
-      {
-        parser.error("wrong number of file arguments");
-      }
-    }
-    
+   
     /// \brief Returns the synopsis of the tool.
     /// \return The string "[OPTION]... INFILE1 INFILE2 [OUTFILE]\n"
     std::string synopsis() const
