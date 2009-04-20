@@ -25,6 +25,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
+using utilities::make_optional_argument;
 using utilities::tools::tool;
 
 /// \brief Base class for tools that take a file as input.
@@ -149,6 +150,7 @@ class lpsbisim2pbes_tool: public input_input_tool
         m_output_filename = parser.arguments[2];
       }
       normalize = parser.options.count("normalize") > 0;
+
       bisimulation_type = parser.option_argument_as< int >("bisimulation-type");
       if (bisimulation_type < 0 || bisimulation_type > 3)
       {
@@ -160,7 +162,7 @@ class lpsbisim2pbes_tool: public input_input_tool
                      options by overriding the virtual function `add_options`. >*/
     {
       desc.add_option("normalize", "normalize the result", 'n');
-      desc.add_option("bisimulation-type", "the type of bisimulation", 'b');
+      desc.add_option("bisimulation-type", make_optional_argument("NAME", "0"), "the type of bisimulation", 'b');
     }
 
   public:
