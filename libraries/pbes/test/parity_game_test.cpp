@@ -11,10 +11,11 @@
 /// testing is done. Instead graph representations are produced
 /// in a format that can be read by a python script.
 
-// #define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-
-// #define MCRL2_PARITY_GAME_DEBUG
-// #define MCRL2_PARITY_GAME_CREATE_FILES
+//#define MCRL2_PARITY_GAME_DEBUG
+//#define MCRL2_PARITY_GAME_CREATE_FILES
+//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include <fstream>
 #include <string>

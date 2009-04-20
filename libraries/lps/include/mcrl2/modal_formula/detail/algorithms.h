@@ -107,7 +107,8 @@ namespace detail {
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
-    spec = lps::specification(copy_spec);
+    ATermAppl tmp = copy_spec; // Force the data specification to be recomputed
+    spec = lps::specification(tmp);
     return f;
   }
 

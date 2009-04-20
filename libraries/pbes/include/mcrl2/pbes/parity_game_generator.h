@@ -61,7 +61,7 @@ namespace pbes_system {
       typedef new_data::mutable_substitution<new_data::variable, new_data::data_expression_with_variables> substitution_function;
 
       /// \brief The PBES that is being solved.
-      const pbes<>& m_pbes;
+      pbes<>& m_pbes;
 
       /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
       new_data::number_postfix_generator generator;
@@ -146,7 +146,7 @@ namespace pbes_system {
       /// \param p A PBES
       /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
       /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-      parity_game_generator(const pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true)
+      parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true)
         : m_pbes(p),
           generator("UNIQUE_PREFIX"),
           datar(p.data()),
@@ -161,6 +161,9 @@ namespace pbes_system {
         {
           return;
         }
+
+        // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
+        m_pbes.normalize();
 
         // Compute equation index map.
         for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)

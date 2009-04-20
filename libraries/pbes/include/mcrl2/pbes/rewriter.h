@@ -172,7 +172,7 @@ namespace pbes_system {
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
+std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
         return result;
       }
@@ -188,7 +188,7 @@ std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, substitution_function(sigma));
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cerr << core::pp(x) << " -> " << core::pp(result) << new_data::to_string(sigma) << std::endl;
+std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << new_data::to_string(sigma) << std::endl;
 #endif
         return result;
       }

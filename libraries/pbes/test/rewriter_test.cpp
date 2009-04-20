@@ -375,7 +375,19 @@ void test_substitutions2()
 	expr2 = "val(true)";
   sigma = "";
   test_expressions(R, expr1, expr2, var_decl, sigma);
-  
+
+  //------------------------//
+  var_decl =
+    "datavar         \n"
+    "  b: Bool;      \n"
+    "predvar         \n"
+    "  X: Nat;       \n"
+    ;
+	expr1 = "!!val(!!b)";
+	expr2 = "val(true)";
+  sigma = "b:Bool := true";
+  test_expressions(R, expr1, expr2, var_decl, sigma);
+ 
   test_map_substitution_adapter(R);
 }
 
