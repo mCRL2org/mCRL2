@@ -1,0 +1,17 @@
+project libraries/utilities/example
+   : requirements
+       <use>/site-config//boost
+       <source>/libraries//core
+       <source>/libraries//new_data
+       <source>/libraries//utilities
+       <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
+       <define>MCRL2_REVISION=\"\\\"0\\\"\"
+   ;
+
+exe cmdline1 : cmdline1.cpp : ;
+
+install dist
+   :
+     cmdline1
+   :
+   ;
