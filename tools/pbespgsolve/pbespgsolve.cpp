@@ -655,7 +655,7 @@ class pg_solver_tool: public input_tool
     {
       super::parse_options(parser);
       // set_edge_direction(parser.option_argument("edge-direction"));
-      set_edge_direction("successor");
+      set_edge_direction("bidirectional");
       if (parser.options.count("lifting-strategy") > 0)
       {
         set_lifting_strategy(parser.option_argument("lifting-strategy"));
