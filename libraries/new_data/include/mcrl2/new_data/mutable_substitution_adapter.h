@@ -32,6 +32,9 @@ namespace new_data {
       /// \brief Wrapper class for internal storage and substitution updates using operator()
       typedef typename mutable_substitution<variable_type, expression_type>::assignment assignment;
 
+      /// \brief The type of the wrapped substitution
+      typedef Substitution substitution_type;
+
     protected:
       /// \brief The wrapped substitution
       const Substitution& f_;
@@ -98,16 +101,23 @@ namespace new_data {
       assignment operator[](variable_type const& v) {
         return g_[v];
       }
+
+      /// \brief Returns the wrapped substitution
+      /// \return The wrapped substitution
+      const substitution_type& substitution() const
+      {
+        return f_;
+      }
   };
 
   /// \brief Specialization for mutable_substitution.
   template <typename Variable, typename Expression, template < class Substitution > class SubstitutionProcedure >
   class mutable_substitution_adapter<mutable_substitution<Variable, Expression, SubstitutionProcedure > >
   {
-    protected:
+    public:
+      /// \brief The type of the wrapped substitution
       typedef mutable_substitution<Variable, Expression, SubstitutionProcedure> substitution_type;
 
-    public:
       /// \brief type used to represent variables
       typedef typename substitution_type::variable_type variable_type;
 
@@ -178,7 +188,22 @@ namespace new_data {
       assignment operator[](variable_type const& v) {
         return g_[v];
       }
+
+      /// \brief Returns the wrapped substitution
+      /// \return The wrapped substitution
+      const substitution_type& substitution() const
+      {
+        return g_;
+      }
   };
+
+    /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+    /// \return A string representation of the map.
+    template <typename Substitution>
+    std::string to_string(const mutable_substitution_adapter<Substitution>& sigma)
+    {
+      return to_string(sigma.substitution());
+    }
 
 } // namespace new_data
 

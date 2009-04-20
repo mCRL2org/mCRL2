@@ -57,6 +57,12 @@ class my_tool: public tool
         std::string s = parser.arguments[0];
         std::cout << "positional option 1: " << s << std::endl;       
       }
+      
+      std::cout << "--- parser arguments ---" << std::endl;
+      for (command_line_parser::option_map::const_iterator i = parser.options.begin(); i != parser.options.end(); ++i)
+      {
+        std::cout << i->first << " -> " << i->second << std::endl;
+      }
     }
 
     void add_options(interface_description& desc)
