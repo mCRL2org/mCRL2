@@ -389,7 +389,7 @@ static void split_condition(
                         real_conditions,non_real_conditions,negate);
   }
   else if (sort_bool_::is_not__application(e))
-  { split_condition(application(e).left(),real_conditions,non_real_conditions,!negate);
+  { split_condition(application(e).arguments()[0],real_conditions,non_real_conditions,!negate);
   }
   else if(is_inequality(e) && (application(e).left().sort() == sort_real_::real_() || application(e).right().sort() == sort_real_::real_()))
   { std::set < variable > vars=find_all_variables(e);
@@ -510,7 +510,7 @@ static void normalize_specification(
         inequalities.clear();
         remove_redundant_inequalities(new_inequalities,inequalities,r);
 
-        if ((inequalities.size()>0) && (inequalities.front().is_false()))
+        if ((inequalities.size()>0) && (inequalities.front().is_false(r)))
         { //  std::cerr << "INCONSISTENT \n";
         }
         else
@@ -955,7 +955,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
         // context combinations to be considered for the xi variables.
 
 
-        // if (condition.empty() || !condition.front().is_false())
+        // if (condition.empty() || !condition.front().is_false(r))
         if (!is_inconsistent(condition1,r))
         {
           // condition contains the inequalities over the process parameters
@@ -1037,7 +1037,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
             if (j->comparison()==linear_inequality::equal)
             { new_condition=lazy::and_(new_condition,c.is_equal(k->get_variable()));
             }
-            else if ((j->lhs_begin()!=j->lhs_end()) && (is_positive(j->lhs_begin()->second)))
+            else if ((j->lhs_begin()!=j->lhs_end()) && (is_positive(j->lhs_begin()->second,r)))
             { // The inequality has *j has shape t<u or t<=u
               if (j->comparison()==linear_inequality::less)
               { new_condition=lazy::and_(new_condition,c.is_smaller(k->get_variable()));
@@ -1088,7 +1088,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       // Add these values for xi variables as a new condition. Remove these variables from the
       // context combinations to be considered for the xi variables.
 
-      /* if (condition.empty() || !condition.front().is_false()) // is consistent... */
+      /* if (condition.empty() || !condition.front().is_false(r)) // is consistent... */
       {
         /* context_type xi_context_for_this_summand;
         data_expression_list xi_condition;
@@ -1122,6 +1122,8 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
           if (!all_conditions_found)
           // if (!new_inequalities.empty())
           { // add a may transition.
+            std::cerr << "CONDITION " << pp(new_condition) << "\n" 
+                        << "INTERNAL " << new_condition << "\n\n";
             summand s = generate_summand(*i,
                                          new_condition,
                                          // and_(join_and(xi_condition.begin(), xi_condition.end()),

@@ -44,18 +44,16 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
   protected:
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
-    int max_iterations;
+    unsigned int max_iterations;
 
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      try
-      { max_iterations = parser.option_argument_as< int > ("max");
+
+      if (parser.options.count("max")>0)
+      { max_iterations = parser.option_argument_as< unsigned int > ("max");
       } 
-      catch (std::logic_error) 
-      { max_iterations = DEFAULT_MAX_ITERATIONS;
-      }
     }
   
     void add_options(interface_description& desc)
@@ -63,7 +61,7 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
       super::add_options(desc);
       desc.
         add_option("max", 
-          make_mandatory_argument("NUM"),
+                   make_mandatory_argument("NUM"),
                    "perform at most NUM iterations");
     }
 
@@ -74,7 +72,8 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
           AUTHORS,
           "remove real numbers from an LPS",
           "Remove Real numbers from the linear process specification (LPS) in "
-          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. ")
+          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
+        max_iterations(DEFAULT_MAX_ITERATIONS)
     {}
 
     /// Runs the algorithm.
@@ -86,9 +85,10 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
 
       if (core::gsVerbose)
       {
-        std::cerr << "parameters of lpsrealelm:" << std::endl;
+        std::cerr << "Parameters of lpsrealelm:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  data rewriter       " << m_rewrite_strategy << std::endl;
         std::cerr << "  max_iterations:     " << max_iterations << std::endl;
       }
 
@@ -99,6 +99,7 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
       rewriter r(lps_specification.data());
       specification new_spec = realelm(lps_specification, max_iterations, r);
 
+      std::cerr << "RRRRRR " << new_spec << "\n";
       if (core::gsVerbose)
       { std::cerr << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       }

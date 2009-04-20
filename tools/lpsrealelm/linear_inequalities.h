@@ -22,6 +22,7 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/map_substitution_adapter.h"
+#include "mcrl2/new_data/function_symbol.h"
 #include <algorithm>
 
 namespace mcrl2 {
@@ -34,13 +35,13 @@ data_expression real_one();
 data_expression real_minus_one();
 // data_expression lhs_(const data_expression e);
 // data_expression rhs_(const data_expression e);
-data_expression divide(const data_expression e1,const data_expression e2);
-data_expression multiply(const data_expression e1,const data_expression e2);
+// data_expression divide(const data_expression e1,const data_expression e2);
+// data_expression multiply(const data_expression e1,const data_expression e2);
 data_expression min(const data_expression e1,const data_expression e2,const rewriter &);
 data_expression max(const data_expression e1,const data_expression e2,const rewriter &);
-bool is_number(const data_expression e);
-bool is_negative(const data_expression e);
-bool is_positive(const data_expression e);
+bool is_closed_real_number(const data_expression e);
+bool is_negative(const data_expression e,const rewriter &r);
+bool is_positive(const data_expression e,const rewriter &r);
 bool is_zero(const data_expression e);
 // End of functions that ought to be defined elsewhere.
 
@@ -57,7 +58,8 @@ class linear_inequality
 {
   public:
     enum comparison_t { equal, less, less_eq };
-    class lhs_t:public atermpp::map < mcrl2::new_data::variable, mcrl2::new_data::data_expression > 
+    
+    class lhs_t:public atermpp::map < variable, data_expression > 
     { private:
         template < application Operation(const data_expression &, const data_expression &) >
         lhs_t &meta_operation_constant(const data_expression v, const rewriter &r)
@@ -116,7 +118,27 @@ class linear_inequality
           }
           return r(result,make_map_substitution_adapter(beta));
         }
-    };
+        
+        std::string string() const
+        { std::string s;
+          if (begin()==end())
+          { s="0";
+          }
+          for( linear_inequality::lhs_t::const_iterator i=begin(); i!=end(); ++i)
+          { s=s + (i==begin()?"":" + ") ;
+            if (i->second==real_one())
+            { s=s + pp(i->first);
+            }
+            else if (i->second==real_minus_one())
+            { s=s + "-" + pp(i->first);
+            }
+            else
+            { s=s + pp(i->second) + "*" + pp(i->first);
+            }
+          }
+          return s;
+        }
+      };
 
 
     // void set_factor_for_a_variable(const variable x,const data_expression e);
@@ -151,10 +173,10 @@ class linear_inequality
       }
       else if (sort_real_::is_times_application(e))
       { data_expression lhs=r(application(e).left()), rhs=r(application(e).right());
-        if (is_number(lhs))
+        if (is_closed_real_number(lhs))
         { parse_and_store_expression(rhs,r,negate,sort_real_::times(lhs,factor));
         }
-        else if (is_number(rhs))
+        else if (is_closed_real_number(rhs))
         { parse_and_store_expression(lhs,r,negate,sort_real_::times(rhs,factor));
         }
         else throw mcrl2::runtime_error("Expect constant multiplies expression: " + pp(e) + "\n");
@@ -176,7 +198,7 @@ class linear_inequality
         else
            throw mcrl2::runtime_error("Encountered a variable in a real expression which is not of sort real: " + pp(e) + "\n");
       }
-      else if (is_number(rewrite_with_memory(e,r)))
+      else if (is_closed_real_number(rewrite_with_memory(e,r)))
       { set_rhs(negate?rewrite_with_memory(sort_real_::plus(rhs(),e),r)
                       :rewrite_with_memory(sort_real_::minus(rhs(),e),r));
       }
@@ -215,7 +237,7 @@ class linear_inequality
     /// a variable and c is a real constant.
     /// \param e Contains the expression to become a linear inequality.
 
-    linear_inequality(const mcrl2::new_data::data_expression e,
+    linear_inequality(const data_expression e,
                       const rewriter &r)
                      :m_lhs(),m_comparison(less)
     { 
@@ -271,6 +293,10 @@ class linear_inequality
     { return m_lhs.end();
     }
 
+    std::string lhs_string() const
+    { return m_lhs.string();
+    }
+
     lhs_t &lhs() 
     { return m_lhs;
     }
@@ -294,12 +320,12 @@ class linear_inequality
     }
 
     void set_rhs(const data_expression e)
-    { assert(is_number(e));
+    { assert(is_closed_real_number(e));
       m_rhs=e;
     }
 
     void set_factor_for_a_variable(const variable x,const data_expression e)
-    { assert(is_number(e));
+    { assert(is_closed_real_number(e));
       if (e==real_zero())
       { lhs_t::iterator i=m_lhs.find(x);
         if (i!=m_lhs.end())
@@ -325,17 +351,17 @@ class linear_inequality
     { m_comparison=c;
     }
 
-    bool is_false() const
+    bool is_false(const rewriter &r) const
     {
       return m_lhs.empty() &&
-        ((m_comparison==less_eq)?is_negative(rhs()):
-        ((m_comparison==equal)?!is_zero(rhs()):!is_positive(rhs())));
+        ((m_comparison==less_eq)?is_negative(rhs(),r):
+        ((m_comparison==equal)?!is_zero(rhs()):!is_positive(rhs(),r)));
     }
 
-    bool is_true() const
+    bool is_true(const rewriter &r) const
     { return m_lhs.empty() &&
-        ((m_comparison==less_eq)?!is_negative(rhs()):
-        ((m_comparison==equal)?is_zero(rhs()):is_positive(rhs())));
+        ((m_comparison==less_eq)?!is_negative(rhs(),r):
+        ((m_comparison==equal)?is_zero(rhs()):is_positive(rhs(),r)));
     }
 
 
@@ -361,15 +387,15 @@ class linear_inequality
                   const data_expression f1,
                   const data_expression f2,
                   const rewriter &r)
-    { data_expression f=rewrite_with_memory(mcrl2::new_data::divide(f1,f2),r);
+    { data_expression f=rewrite_with_memory(sort_real_::divides(f1,f2),r);
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
       { set_factor_for_a_variable(
                   i->first,
                   rewrite_with_memory(
-                     sort_real_::minus(get_factor_for_a_variable(i->first),multiply(f,i->second)),r));
+                     sort_real_::minus(get_factor_for_a_variable(i->first),sort_real_::times(f,i->second)),r));
       }
-      set_rhs(rewrite_with_memory(sort_real_::minus(rhs(),multiply(f,e.rhs())),r));
+      set_rhs(rewrite_with_memory(sort_real_::minus(rhs(),sort_real_::times(f,e.rhs())),r));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -388,7 +414,7 @@ class linear_inequality
 
       for(lhs_t::const_iterator i=lhs_begin(); i!=lhs_end(); ++i)
       { variable v=i->first;
-        data_expression e=multiply(rewrite_with_memory(mcrl2::new_data::divide(i->second,factor),r),
+        data_expression e=sort_real_::times(rewrite_with_memory(sort_real_::divides(i->second,factor),r),
                                            data_expression(v));
         if (i==lhs_begin())
         { lhs_expression=e;
@@ -398,19 +424,19 @@ class linear_inequality
         }
       }
 
-      rhs_expression=rewrite_with_memory(mcrl2::new_data::divide(rhs(),factor),r);
+      rhs_expression=rewrite_with_memory(sort_real_::divides(rhs(),factor),r);
     }
 
     void divide(const data_expression e, const rewriter &r)
     { 
-      assert(is_number(e));
+      assert(is_closed_real_number(e));
       assert(!is_zero(e));
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
       { // m_lhs.find(i->first) == i
-        m_lhs[i->first]=rewrite_with_memory(mcrl2::new_data::divide(m_lhs[i->first],e),r);
+        m_lhs[i->first]=rewrite_with_memory(sort_real_::divides(m_lhs[i->first],e),r);
       }
-      set_rhs(rewrite_with_memory(mcrl2::new_data::divide(rhs(),e),r));
+      set_rhs(rewrite_with_memory(sort_real_::divides(rhs(),e),r));
     }
 
     void invert(const rewriter &r)
@@ -443,8 +469,8 @@ class linear_inequality
 //static atermpp::vector < mcrl2::data::data_expression > linear_inequality::m_rhss;
 
 std::string string(const linear_inequality &l)
-{ std::string s;
-  if (l.lhs_begin()==l.lhs_end())
+{ std::string s=l.lhs_string();
+  /* if (l.lhs_begin()==l.lhs_end())
   { s="0";
   }
   for( linear_inequality::lhs_t::const_iterator i=l.lhs_begin(); i!=l.lhs_end(); ++i)
@@ -458,7 +484,8 @@ std::string string(const linear_inequality &l)
     else
     { s=s + pp(i->second) + "*" + pp(i->first);
     }
-  }
+  } */
+
   if (l.comparison()==linear_inequality::less)
   { s=s + " < ";
   }
@@ -542,39 +569,46 @@ inline data_expression max(const data_expression e1,const data_expression e2,con
 }
 
 
-inline bool is_number(const data_expression e)
+inline bool is_closed_real_number(const data_expression e)
 { // TODO: Check that the number is closed.
-  // std::cerr << "is_number " << pp(e) << "\n";
+  if (e.sort()!=sort_real_::real_())
+  { return false;
+  }
+
   std::set < variable > s=find_all_variables(e);
   if (!s.empty())  // The expression e contains variables.
   { return false;
   }
-  return core::detail::gsIsDataExprC0(e) ||
-         core::detail::gsIsDataExprCDub(e) ||
-         core::detail::gsIsDataExprC1(e) ||
-         core::detail::gsIsDataExprCNat(e) ||
-         core::detail::gsIsDataExprCNeg(e) ||
-         core::detail::gsIsDataExprCInt(e) ||
-         core::detail::gsIsDataExprCReal(e);
+  return true;
 }
 
-inline bool is_negative(const data_expression e)
-{ // Assume data_expression is in normal form.
-  assert(is_number(e));
-  assert(e.sort()==sort_real_::real_());
-  return sort_real_::is_negate_application(e);
-  // return sort_real_::is_negate_application(e) || gsIsDataExprCNeg(e) || (gsIsDataExprCReal(e) && is_negative(e.left()));
-}
-
-inline bool is_positive(const data_expression e)
+inline bool is_negative(const data_expression e,const rewriter &r)
 { 
-  return ((e!=real_zero()) && !(is_negative(e)));
+  data_expression result=r(less(e,real_zero()));
+  if (result==sort_bool_::true_())
+  { return true;
+  }
+  if (result==sort_bool_::false_())
+  { return false;
+  }
+  throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is smaller than 0");
+}
+
+inline bool is_positive(const data_expression e,const rewriter &r)
+{ 
+  data_expression result=r(greater_equal(e,real_zero()));
+  if (result==sort_bool_::true_())
+  { return true;
+  }
+  if (result==sort_bool_::false_())
+  { return false;
+  }
+  throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is larger than or equal to 0");
 }
 
 inline bool is_zero(const data_expression e)
 { // Assume data_expression is in normal form.
-  assert(is_number(e));
-  assert(e.sort()==sort_real_::real_());
+  assert(is_closed_real_number(e));
   return (e==real_zero());
 }
 
@@ -625,12 +659,13 @@ bool is_inconsistent(
 static void count_occurrences(
                  const std::vector < linear_inequality > &inequalities,
                  std::map < variable, unsigned int> &nr_positive_occurrences,
-                 std::map < variable, unsigned int> &nr_negative_occurrences)
+                 std::map < variable, unsigned int> &nr_negative_occurrences,
+                 const rewriter &r)
 { 
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
            i!=inequalities.end(); ++i)
   { for(linear_inequality::lhs_t::const_iterator j=i->lhs_begin(); j!=i->lhs_end(); ++j)
-    { if (is_positive(j->second))
+    { if (is_positive(j->second,r))
       { nr_positive_occurrences[j->first]=nr_positive_occurrences[j->first]+1;
       }
       else
@@ -699,7 +734,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   {
     std::map < variable, unsigned int> nr_positive_occurrences;
     std::map < variable, unsigned int> nr_negative_occurrences;
-    count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences);
+    count_occurrences(inequalities,nr_positive_occurrences,nr_negative_occurrences,r);
 
     bool found=false;
     unsigned int best_choice=0;
@@ -749,10 +784,10 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
       { data_expression f=factor_it->second;
         j->lhs().erase(best_variable);
         j->divide(f,r);
-        if (is_positive(f))
+        if (is_positive(f,r))
         { inequalities_with_positive_variable.push_back(&(*j));
         }
-        else if (is_negative(f))
+        else if (is_negative(f,r))
         { inequalities_with_negative_variable.push_back(&(*j));
         }
         else assert(0);
@@ -780,14 +815,14 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
                          ((*k)->comparison()==linear_inequality::less_eq)?
                                 linear_inequality::less_eq:
                                 linear_inequality::less);
-        if (e.is_false())
+        if (e.is_false(r))
         { resulting_inequalities.push_back(linear_inequality()); // This is a single contraditory inequality;
           if (core::gsDebug)
           { std::cerr << "Fourier-Motzkin elimination yields " + pp_vector(resulting_inequalities) + "\n";
           }
           return;
         }
-        if (!e.is_true())
+        if (!e.is_true(r))
         { new_inequalities.push_back(e);
         }
       }
@@ -799,8 +834,8 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
   // Add the equalities to the inequalities and return the result
   for(std::vector < linear_inequality > :: const_iterator i=equalities.begin();
               i!=equalities.end(); ++i)
-  { assert(!i->is_false());
-    if (!i->is_true())
+  { assert(!i->is_false(r));
+    if (!i->is_true(r))
     { resulting_inequalities.push_back(*i);
     }
   }
@@ -944,7 +979,7 @@ inline void remove_redundant_inequalities(
   // If false is among the inequalities, [false] is the minimal result.
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
                 i!=inequalities.end(); ++i)
-  { if (i->is_false())
+  { if (i->is_false(r))
     { return true;
     }
   }
@@ -967,7 +1002,7 @@ inline void remove_redundant_inequalities(
 
   for(std::vector < linear_inequality >::const_iterator i=resulting_inequalities.begin();
                  i!=resulting_inequalities.end(); ++i)
-  { if(i->is_false())
+  { if(i->is_false(r))
     { return true;
     }
     else
@@ -992,15 +1027,19 @@ static void pivot_and_update(
                const rewriter &r)
 {
   const data_expression aij=working_equalities[xi][xj];
-  const data_expression theta=r(divide(sort_real_::minus(v,beta[xi]),aij));
+  const data_expression theta=r(sort_real_::divides(sort_real_::minus(v,beta[xi]),aij));
+  const data_expression theta_delta_correction=r(sort_real_::divides(sort_real_::minus(v,beta_delta_correction[xi]),aij));
   beta[xi]=v;
   beta_delta_correction[xi]=v_delta_correction;
   beta[xj]=r(sort_real_::plus(beta[xj],theta));
+  beta_delta_correction[xj]=r(sort_real_::plus(beta_delta_correction[xj],theta_delta_correction));
+
   for(atermpp::set < variable >::const_iterator k=basic_variables.begin();
           k!=basic_variables.end(); ++k)
-  { if (*k!=xj)
+  { if (*k!=xi)
     { const data_expression akj=working_equalities[*k][xj];
-      beta[*k]=r(sort_real_::plus(beta[*k],multiply(akj ,theta)));
+      beta[*k]=r(sort_real_::plus(beta[*k],sort_real_::times(akj ,theta)));
+      beta_delta_correction[*k]=r(sort_real_::plus(beta_delta_correction[*k],sort_real_::times(akj ,theta_delta_correction)));
     }
   }
   // Apply pivoting on variables xi and xj;
@@ -1011,7 +1050,7 @@ static void pivot_and_update(
   linear_inequality::lhs_t expression_for_xj=expression_for_xi;
   expression_for_xj.erase(xj);
   expression_for_xj[xi]=real_one();
-  expression_for_xj.multiply(divide(real_minus_one(),aij),r);
+  expression_for_xj.multiply(sort_real_::divides(real_minus_one(),aij),r);
 
   working_equalities.erase(xi);
   for(std::map < variable, linear_inequality::lhs_t >::iterator j=working_equalities.begin();
@@ -1023,6 +1062,19 @@ static void pivot_and_update(
     }
   }
   working_equalities[xj]=expression_for_xj;
+
+  if (core::gsDebug)
+  { for(atermpp::map < variable,data_expression > ::const_iterator i=beta.begin();
+               i!=beta.end(); ++i)
+    { std::cerr << "beta[" << pp(i->first) << "]= " << pp(i->second) << "+ delta* " << 
+                       pp(beta_delta_correction[i->first]) << "\n";
+    }
+    for(std::map < variable, linear_inequality::lhs_t >::const_iterator i=working_equalities.begin();
+            i!=working_equalities.end() ; ++i)
+    { std::cerr << "EQ: " << pp(i->first) << " : " << i->second.string() << "\n";
+
+    }
+  }
 }
 
 /// \brief Determine whether a list of data expressions is inconsistent
@@ -1066,13 +1118,13 @@ inline bool is_inconsistent(
   atermpp::set < variable > basic_variables; 
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
-  new_data::fresh_variable_generator fresh_variable;
+  fresh_variable_generator fresh_variable;
   fresh_variable.set_hint("slack_var");
   fresh_variable.set_sort(sort_real_::real_());
   
   for(std::vector < linear_inequality >::const_iterator i=inequalities_in.begin();
                 i!=inequalities_in.end(); ++i)
-  { if (i->is_false())
+  { if (i->is_false(r))
     { std::cerr << "Inconsistent, because linear inequalities contains an inconsistent inequality\n";
       return true;
     }
@@ -1102,11 +1154,11 @@ inline bool is_inconsistent(
   // if required.
   for(std::vector < linear_inequality >::iterator i=inequalities.begin();
          i!=inequalities.end(); ++i)
-  { if (i->is_false())
+  { if (i->is_false(r))
     { std::cerr << "Inconsistent, because linear inequalities contains an inconsistent inequality after gaus elimination\n";
       return true;
     }
-    if (!i->is_true())  // This inequality is redundant and can be skipped.
+    if (!i->is_true(r))  // This inequality is redundant and can be skipped.
     { assert(i->comparison()!=linear_inequality::equal);
       assert(i->lhs_size()>0); // this signals a redundant or an inconsistent inequality.
       
@@ -1145,11 +1197,11 @@ inline bool is_inconsistent(
             }
           }
         }
-        else if (is_positive(i->lhs_begin()->second))
+        else if (is_positive(i->lhs_begin()->second,r))
         { // The inequality has the shape v<=c
           if ((upperbounds.count(v)==0) ||
                (r(less(i->rhs(),upperbounds[v]))==sort_bool_::true_()))
-          { upperbounds[v]=divide(i->rhs(),factor);
+          { upperbounds[v]=sort_real_::divides(i->rhs(),factor);
             upperbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
  
@@ -1166,7 +1218,7 @@ inline bool is_inconsistent(
         { // The inequality has the shape v<=c
           if ((lowerbounds.count(v)==0) ||
                (r(less(lowerbounds[v],i->rhs()))==sort_bool_::true_()))
-          { lowerbounds[v]=divide(i->rhs(),factor);
+          { lowerbounds[v]=sort_real_::divides(i->rhs(),factor);
             lowerbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_one():real_zero());
           } 
@@ -1276,13 +1328,15 @@ inline bool is_inconsistent(
     { // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
       const linear_inequality::lhs_t &lhs=working_equalities[v];
-      for(linear_inequality::lhs_t::const_iterator i=lhs.begin(); i!=lhs.end(); ++i)
-      { if ((is_positive(i->second) && 
-                ((upperbounds.count(i->first)==0) || (beta[i->first]<upperbounds[i->first]))) ||
-            (!is_positive(i->second) && 
-                 ((lowerbounds.count(i->first)==0) || (beta[i->first]<lowerbounds[i->first]))))
+      for(linear_inequality::lhs_t::const_iterator xj=lhs.begin(); xj!=lhs.end(); ++xj)
+      { std::cerr << pp(xj->first) << "  --  " << pp(xj->second) << "\n";
+        if ((is_positive(xj->second,r) && 
+                ((upperbounds.count(xj->first)==0) || (beta[xj->first]<upperbounds[xj->first]))) ||
+            (is_negative(xj->second,r) && 
+                 ((lowerbounds.count(xj->first)==0) || (beta[xj->first]>lowerbounds[xj->first]))))
         { found=true;
-          pivot_and_update(v,i->first,lowerbounds[v],lowerbounds_delta_correction[v],
+          std:: cerr << "Found\n";
+          pivot_and_update(v,xj->first,lowerbounds[v],lowerbounds_delta_correction[v],
                            beta, beta_delta_correction,
                            basic_variables,working_equalities,r);
           break;
@@ -1296,16 +1350,20 @@ inline bool is_inconsistent(
 
     }
     else  // Upperbound violation.
-    { // select the smallest non-basic variable with which pivoting can take place.
+    { std::cerr << "Upperbound viaoationdt \n";
+      // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
-      for(linear_inequality::lhs_t::const_iterator i=working_equalities[v].begin(); 
-                i!=working_equalities[v].end(); ++i)
-      { if ((!is_positive(i->second) && 
-                ((upperbounds.count(i->first)==0) || (beta[i->first]<upperbounds[i->first]))) ||
-            (is_positive(i->second) && 
-                 ((lowerbounds.count(i->first)==0) || (beta[i->first]<lowerbounds[i->first]))))
+      for(linear_inequality::lhs_t::const_iterator xj=working_equalities[v].begin(); 
+                xj!=working_equalities[v].end(); ++xj)
+      { std::cerr << pp(xj->first) << "  --  " << pp(xj->second) <<  " POS " <<
+                        is_positive(xj->second,r) << "\n";
+        if ((is_negative(xj->second,r) && 
+                ((upperbounds.count(xj->first)==0) || (beta[xj->first]<upperbounds[xj->first]))) ||
+            (is_positive(xj->second,r) && 
+                 ((lowerbounds.count(xj->first)==0) || (beta[xj->first]>lowerbounds[xj->first]))))
         { found=true;
-          pivot_and_update(v,i->first,upperbounds[v],upperbounds_delta_correction[v],
+          std:: cerr << "Found\n";
+          pivot_and_update(v,xj->first,upperbounds[v],upperbounds_delta_correction[v],
                            beta,beta_delta_correction,
                            basic_variables,working_equalities,r);
           break;
@@ -1356,14 +1414,14 @@ atermpp::set < variable >  gauss_elimination(
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
   for(std::vector < linear_inequality > ::const_iterator j = inequalities.begin(); j != inequalities.end(); ++j)
-  { if (j->is_false())
+  { if (j->is_false(r))
     { // The input contains false. Return false and stop.
       resulting_equalities.clear();
       resulting_inequalities.clear();
       resulting_inequalities.push_back(linear_inequality());
       return remaining_variables;
     }
-    else if (!j->is_true()) // Do not consider redundant equations.
+    else if (!j->is_true(r)) // Do not consider redundant equations.
     { if (j->comparison()==linear_inequality::equal)
       { resulting_equalities.push_back(*j);
       }
@@ -1393,7 +1451,7 @@ atermpp::set < variable >  gauss_elimination(
                       resulting_inequalities[k].get_factor_for_a_variable(*i),
                       resulting_equalities[j].get_factor_for_a_variable(*i),
                       r);
-          if (resulting_inequalities[k].is_false())
+          if (resulting_inequalities[k].is_false(r))
           { // The input is inconsistent. Return false.
             resulting_equalities.clear();
             resulting_inequalities.clear();
@@ -1401,7 +1459,7 @@ atermpp::set < variable >  gauss_elimination(
             remaining_variables.clear();
             return remaining_variables;
           }
-          else if (resulting_inequalities[k].is_true())
+          else if (resulting_inequalities[k].is_true(r))
           { // Inequality k has become redundant, and can be removed.
             if ((k+1)<resulting_inequalities.size())
             { resulting_inequalities[k].swap(resulting_inequalities.back());
@@ -1421,7 +1479,7 @@ atermpp::set < variable >  gauss_elimination(
                                        resulting_equalities[k].get_factor_for_a_variable(*i),
                                        resulting_equalities[j].get_factor_for_a_variable(*i),
                                        r);
-            if (resulting_equalities[k].is_false())
+            if (resulting_equalities[k].is_false(r))
             { // The input is inconsistent. Return false.
               resulting_equalities.clear();
               resulting_inequalities.clear();
@@ -1429,7 +1487,7 @@ atermpp::set < variable >  gauss_elimination(
               remaining_variables.clear();
               return remaining_variables;
             }
-            else if (resulting_equalities[k].is_true())
+            else if (resulting_equalities[k].is_true(r))
             { // Equality k has become redundant, and can be removed.
               if (j+1==resulting_equalities.size())
               { // It is not possible to move move the last element of resulting
@@ -1459,7 +1517,7 @@ atermpp::set < variable >  gauss_elimination(
         // If there are unremoved resulting equalities, remove them now.
         if (check_equalities_for_redundant_inequalities)
         { for(unsigned int k = 0; k<resulting_equalities.size(); )
-          { if (resulting_equalities[k].is_true())
+          { if (resulting_equalities[k].is_true(r))
             { // Equality k is redundant, and can be removed.
               if ((k+1)<resulting_equalities.size())
               { resulting_equalities[k].swap(resulting_equalities.back());

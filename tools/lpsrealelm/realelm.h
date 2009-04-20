@@ -16,14 +16,16 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/data/rewrite.h"
-#include "mcrl2/data/rewriter.h"
+// #include "mcrl2/new_data/rewrite.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "comp.h"
 #include "linear_inequalities.h"
 
 
 
-mcrl2::lps::specification realelm(mcrl2::lps::specification s, int max_iterations = 5, RewriteStrategy = GS_REWR_JITTY);
+mcrl2::lps::specification realelm(mcrl2::lps::specification s, 
+                                  int max_iterations = 5, 
+                                  const rewriter &r = rewriter());
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);
@@ -33,15 +35,15 @@ void normalize_pair(data_expression &,data_expression &,const rewriter &, const 
 class real_representing_variable 
 {
   private:
-    mcrl2::data::data_variable variable;
-    mcrl2::data::data_expression lowerbound;
-    mcrl2::data::data_expression upperbound;
+    mcrl2::new_data::variable variable;
+    mcrl2::new_data::data_expression lowerbound;
+    mcrl2::new_data::data_expression upperbound;
 
   public:
     real_representing_variable
-          ( mcrl2::data::data_variable v,
-            mcrl2::data::data_expression lb,
-            mcrl2::data::data_expression ub)
+          ( mcrl2::new_data::variable v,
+            mcrl2::new_data::data_expression lb,
+            mcrl2::new_data::data_expression ub)
     {
       variable.protect();
       lowerbound.protect();
@@ -79,15 +81,15 @@ class real_representing_variable
 
     }
 
-    mcrl2::data::data_variable get_variable() const
+    mcrl2::new_data::variable get_variable() const
     { return variable;
     }
 
-    mcrl2::data::data_expression get_lowerbound() const
+    mcrl2::new_data::data_expression get_lowerbound() const
     { return lowerbound;
     }
 
-    mcrl2::data::data_expression get_upperbound() const
+    mcrl2::new_data::data_expression get_upperbound() const
     { return upperbound;
     }
 };
@@ -99,14 +101,14 @@ class summand_information
 
   private:
     mcrl2::lps::summand smd;
-    data_variable_list real_summation_variables;
-    data_variable_list non_real_summation_variables;
-    atermpp::vector < mcrl2::data::data_expression > new_values_for_xi_variables;
-    vector < linear_inequality > summand_real_conditions;
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
+    variable_list real_summation_variables;
+    variable_list non_real_summation_variables;
+    atermpp::vector < mcrl2::new_data::data_expression > new_values_for_xi_variables;
+    std::vector < linear_inequality > summand_real_conditions;
+    atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>  summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
-    vector < vector < linear_inequality > > nextstate_context_combinations;
+    std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
     // vector < vector < linear_inequality > > residual_inequalities; // These are inequalities equal to 
                                                                    // xi conditions which are used in the current
                                                                    // summand to be generated, but not added
@@ -119,10 +121,10 @@ class summand_information
   public:
     summand_information(
              const mcrl2::lps::summand s,
-             data_variable_list rsv,
-             data_variable_list nrsv,
-             vector < linear_inequality > src,
-             atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
+             variable_list rsv,
+             variable_list nrsv,
+             std::vector < linear_inequality > src,
+             atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>  srnm
              ):
       smd(s),
       real_summation_variables(rsv),
@@ -170,41 +172,41 @@ class summand_information
     { return smd;
     }
 
-    data_variable_list get_real_summation_variables() const
+    variable_list get_real_summation_variables() const
     { return real_summation_variables;
     }
 
-    data_variable_list get_non_real_summation_variables() const
+    variable_list get_non_real_summation_variables() const
     { return non_real_summation_variables;
     }
 
-    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
+    atermpp::vector < mcrl2::new_data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
     {
       return new_values_for_xi_variables.begin();
     }
 
-    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
+    atermpp::vector < mcrl2::new_data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
     {
       return new_values_for_xi_variables.end();
     }
 
-    vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const
+    std::vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const
     { return summand_real_conditions.begin();
     }
 
-    vector < linear_inequality >::const_iterator get_summand_real_conditions_end() const
+    std::vector < linear_inequality >::const_iterator get_summand_real_conditions_end() const
     { return summand_real_conditions.end();
     }
 
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> get_summand_real_nextstate_map() const
+    atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> get_summand_real_nextstate_map() const
     { return summand_real_nextstate_map;
     }
 
-    vector < vector < linear_inequality > > :: const_iterator nextstate_context_combinations_begin() const
+    std::vector < std::vector < linear_inequality > > :: const_iterator nextstate_context_combinations_begin() const
     { return nextstate_context_combinations.begin();
     }
 
-    vector < vector < linear_inequality > > :: const_iterator nextstate_context_combinations_end() const
+    std::vector < std::vector < linear_inequality > > :: const_iterator nextstate_context_combinations_end() const
     { return nextstate_context_combinations.end();
     }
 
@@ -218,6 +220,14 @@ class summand_information
 
     atermpp::vector < data_expression_list > :: const_iterator nextstate_value_combinations_begin() const
     { return nextstate_value_combinations.begin();
+    }
+
+    static bool power_of_2(const unsigned int i) 
+    { unsigned int k=2;
+      for( ; k<i ; k=k<<1)
+      { // std::cerr << "HAHAH " << k << "\n";
+      }
+      return k==i;
     }
 
     atermpp::vector < data_expression_list > :: const_iterator nextstate_value_combinations_end() const
@@ -235,7 +245,10 @@ class summand_information
     ///          indication that no fixed value for xi can be used in this summand.
     ///          Secondly, check whether the bounds for xi imply the substituted bounds for
     ///          the other variables xi' and substitute xi for xi'.
-    void add_a_new_next_state_argument(const context_type &context, const rewriter &r)
+    void add_a_new_next_state_argument(
+                         const context_type &context, 
+                         const rewriter &r,
+                         const comp_struct &c)
     {
       assert(context.size()==new_values_for_xi_variables.size()+1);
       real_representing_variable new_xi_variable=context.back();
@@ -249,8 +262,8 @@ class summand_information
       
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
-      if ((linear_inequality(substituted_lowerbound,xi_t,linear_inequality::equal,r).is_true()) &&
-         (linear_inequality(substituted_upperbound,xi_u,linear_inequality::equal,r).is_true()))
+      if ((linear_inequality(substituted_lowerbound,xi_t,linear_inequality::equal,r).is_true(r)) &&
+         (linear_inequality(substituted_upperbound,xi_u,linear_inequality::equal,r).is_true(r)))
       { new_values_for_xi_variables.push_back(context.back().get_variable());
       }
       else       
@@ -261,14 +274,14 @@ class summand_information
         e.typical_pair(normalized_substituted_lowerbound,normalized_substituted_upperbound,r);
   
         // First check whether this new next state argument follows from an existing argument
-        if (r(core::detail::gsMakeDataExprLT(normalized_substituted_lowerbound,normalized_substituted_upperbound))==true_())
-        { new_values_for_xi_variables.push_back(smaller());
+        if (r(new_data::less(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
+        { new_values_for_xi_variables.push_back(c.smaller());
         }
-        else if (r(core::detail::gsMakeDataExprEq(normalized_substituted_lowerbound,normalized_substituted_upperbound))==true_())
-        { new_values_for_xi_variables.push_back(equal());
+        else if (r(new_data::equal_to(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
+        { new_values_for_xi_variables.push_back(c.equal());
         }
-        else if (r(core::detail::gsMakeDataExprLT(normalized_substituted_upperbound,normalized_substituted_lowerbound))==true_())
-        { new_values_for_xi_variables.push_back(larger());
+        else if (r(new_data::less(normalized_substituted_upperbound,normalized_substituted_lowerbound))==sort_bool_::true_())
+        { new_values_for_xi_variables.push_back(c.larger());
         }
         else
         { bool success(false);
@@ -283,7 +296,7 @@ class summand_information
           }
           if (!success)
           { // Leave an empty spot, indicated by data_expression(). No prefabricated value can be set.
-            new_values_for_xi_variables.push_back(mcrl2::data::data_expression());
+            new_values_for_xi_variables.push_back(mcrl2::new_data::data_expression());
           }
         }
       }
@@ -298,10 +311,10 @@ class summand_information
 
 #ifndef NDEBUG
       // sanity check
-      for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
+      for(atermpp::vector<mcrl2::new_data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
           i != new_values_for_xi_variables.end(); ++i)
       {
-        assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
+        assert(mcrl2::new_data::is_data_expression(*i) || *i == mcrl2::new_data::data_expression());
       }
       assert(context.size()==new_values_for_xi_variables.size());
 #endif
@@ -310,14 +323,14 @@ class summand_information
       // Now it must be checked whether the newly added xi variable can lead to a standard value of
       // existing xi variables.
 
-      context_type::const_iterator c=context.begin();
-      for(atermpp::vector < mcrl2::data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
-                       (cxi+1)!=new_values_for_xi_variables.end(); ++cxi, ++c)
+      context_type::const_iterator cntxt=context.begin();
+      for(atermpp::vector < mcrl2::new_data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
+                       (cxi+1)!=new_values_for_xi_variables.end(); ++cxi, ++cntxt)
       { if (*cxi==data_expression())
         { // Check whether lowerbound,upperbound for xi imply the substituted, normalized lowerbounds for
-          // c->get_variable().
-          data_expression cxi_t=c->get_lowerbound();
-          data_expression cxi_u=c->get_upperbound();
+          // cntxtc->get_variable().
+          data_expression cxi_t=cntxt->get_lowerbound();
+          data_expression cxi_u=cntxt->get_upperbound();
           data_expression substituted_cxi_t=realelm_data_expression_map_replace(cxi_t,summand_real_nextstate_map);
           data_expression substituted_cxi_u=realelm_data_expression_map_replace(cxi_u,summand_real_nextstate_map);
           linear_inequality e(substituted_cxi_t,substituted_cxi_u,linear_inequality::less,r);
@@ -344,29 +357,30 @@ class summand_information
                     //         context.back().get_upperbound(),
                      //        summand_real_nextstate_map);
 
-        vector < vector < linear_inequality > > new_nextstate_context_combinations;
+        std::vector < std::vector < linear_inequality > > new_nextstate_context_combinations;
         atermpp::vector < data_expression_list > new_nextstate_value_combinations;
         // atermpp::vector < vector < linear_inequality > > new_residual_inequalities; 
         // atermpp::vector < vector < linear_inequality > > ::const_iterator k=residual_inequalities.begin();
         atermpp::vector < data_expression_list >::const_iterator j=nextstate_value_combinations.begin();
-        for(vector < vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
+        for(std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
                     i!=nextstate_context_combinations.end(); ++i,++j/* ,++k*/)
         { if (new_values_for_xi_variables.back()!=data_expression()) // i.e. it is a xi variable.
           { 
-            //vector < linear_inequality > k_aux= *k;
-            //k_aux.push_back(linear_inequality(t,u,linear_inequality::equal,r)); // Niet goed, niet altijd juiste xi variabele.
-            // new_residual_inequalities.push_back(k_aux);
             new_nextstate_value_combinations.push_back(*j); // This can be done more efficiently,
             new_nextstate_context_combinations.push_back(*i); // by not copying the arrays step by step.
           }
           else 
           { 
-            // Three times is intensional.
-            // new_residual_inequalities.push_back(*k);
-            // new_residual_inequalities.push_back(*k);
-            // new_residual_inequalities.push_back(*k);
-            vector < linear_inequality > vec_lin_eq;
-            vec_lin_eq.swap(*i);
+            std::vector < linear_inequality > vec_lin_eq;
+            if (power_of_2(i->size()))
+            { remove_redundant_inequalities(
+                      *i,
+                      vec_lin_eq,
+                      r);
+            }
+            else 
+            { vec_lin_eq.swap(*i);
+            }
             unsigned int old_size=vec_lin_eq.size();
             // vector < linear_inequality > new_condition_list;
             vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
@@ -380,7 +394,7 @@ class summand_information
             { // new_nextstate_context_combinations.push_back(new_condition_list);
               new_nextstate_context_combinations.push_back(vec_lin_eq);
               if (new_values_for_xi_variables.back()==data_expression())
-              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(equal())));
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(c.equal())));
               }
               else 
               { new_nextstate_value_combinations.push_back(*j);
@@ -400,7 +414,7 @@ class summand_information
             { // new_nextstate_context_combinations.push_back(new_condition_list);
               new_nextstate_context_combinations.push_back(vec_lin_eq);
               if (new_values_for_xi_variables.back()==data_expression())
-              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(smaller())));
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(c.smaller())));
               }
               else 
               { new_nextstate_value_combinations.push_back(*j);
@@ -423,7 +437,7 @@ class summand_information
             { // new_nextstate_context_combinations.push_back(new_condition_list);
               new_nextstate_context_combinations.push_back(vec_lin_eq);
               if (new_values_for_xi_variables.back()==data_expression())
-              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(larger())));
+              { new_nextstate_value_combinations.push_back(push_front(*j,data_expression(c.larger())));
               }
               else 
               { new_nextstate_value_combinations.push_back(*j);
