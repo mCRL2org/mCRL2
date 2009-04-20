@@ -573,9 +573,9 @@ namespace mcrl2 {
 
       data_expression data_specification::default_expression(
                           sort_expression s, 
-                          const unsigned int max_recursion_depth=3) const;
+                          const unsigned int max_recursion_depth) const
       { // TODO: This code could ultimate be rewritten using an enumerator.
-
+/*
         // first check whether a term has already been constructed for this sort.
   
         data_expression result;
@@ -700,7 +700,7 @@ namespace mcrl2 {
             }
           }
         }
-  
+*/  
         return data_expression();
       }
 
