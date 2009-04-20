@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for help actions.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/html/helpctrl.h>
 
 #include "grape_frame.h"

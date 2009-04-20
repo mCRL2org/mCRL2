@@ -8,6 +8,8 @@
 //
 // Implements the visualchannel_communication class.
 
+#include "wx.hpp" // precompiled headers
+
 #include "channelcommunication.h"
 #include "visualchannel_communication.h"
 #include "geometric.h"

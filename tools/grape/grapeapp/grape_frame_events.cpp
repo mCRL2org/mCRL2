@@ -8,6 +8,8 @@
 //
 // Implements the event handlers of the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>
 

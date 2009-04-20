@@ -8,8 +8,11 @@
 //
 // Implements the visualarchitecture_reference class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <string>
 #include <math.h>
+
 #include "grape_glcanvas.h"
 #include "architecturereference.h"
 #include "visualarchitecture_reference.h"

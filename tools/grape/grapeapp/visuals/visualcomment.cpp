@@ -8,6 +8,8 @@
 //
 // Implements the visualcomment class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <string>
 
 #include "grape_glcanvas.h"

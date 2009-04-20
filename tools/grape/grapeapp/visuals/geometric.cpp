@@ -8,6 +8,8 @@
 //
 // Implements the visualcomment class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <algorithm>
 #include <string>
 #include <cmath>

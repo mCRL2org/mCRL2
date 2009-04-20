@@ -8,6 +8,8 @@
 //
 // Defines a channel dialog.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/textctrl.h>

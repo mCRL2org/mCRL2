@@ -1,4 +1,4 @@
-	// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
+// Author(s): Diana Koenraadt, Remco Blewanus, Bram Schoenmakers, Thorstin Crijns, Hans Poppelaars, Bas Luksenburg, Jonathan Nelisse
 //
 // Distributed under the Boost Software License, Version 1.0.
 // ( See accompanying file LICENSE_1_0.txt or copy at
@@ -7,6 +7,8 @@
 /// \file event_terminatingtransition.cpp
 //
 // Defines GraPE events for terminating transitions
+
+#include "wx.hpp" // precompiled headers
 
 #include "wx/wx.h"
 #include "grape_frame.h"

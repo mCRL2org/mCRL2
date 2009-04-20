@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for diagrams
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/xml/xml.h>
 #include <iostream>
 #include <sstream>

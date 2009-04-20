@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for file operations.
 
+#include "wx.hpp" // precompiled headers
+
 #include "xml.h"
 #include "xmlopen.h"
 

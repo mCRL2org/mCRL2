@@ -8,6 +8,7 @@
 //
 // Implements the logpanel class used to display log messages.
 
+#include "wx.hpp" // precompiled headers
 
 #include <memory>
 #include <streambuf>

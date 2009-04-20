@@ -8,6 +8,8 @@
 //
 // Implements the main frame of the application class.
 
+#include "wx.hpp" // precompiled headers
+
 #include <wx/cmdproc.h>
 #include <wx/filesys.h>
 #include <wx/fs_arc.h>

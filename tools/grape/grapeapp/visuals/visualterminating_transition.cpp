@@ -8,6 +8,8 @@
 //
 // Implements the visualterminating_transition class.
 
+#include "wx.hpp" // precompiled headers
+
 #include "terminatingtransition.h"
 #include "visualterminating_transition.h"
 #include "compoundstate.h"

@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for channels
 
+#include "wx.hpp" // precompiled headers
+
 #include "wx/wx.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"

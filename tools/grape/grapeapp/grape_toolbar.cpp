@@ -8,6 +8,8 @@
 //
 // Implements the toolbar used by the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_toolbar.h"
 #include "grape_ids.h"
 #include "grape_icons.h"

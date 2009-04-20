@@ -8,6 +8,8 @@
 //
 // Implements the menubar class used by the main frame.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_menubar.h"
 #include "grape_ids.h"
 #include "grape_icons.h"

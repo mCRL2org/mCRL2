@@ -8,6 +8,8 @@
 //
 // Implements the listbox class used to list diagrams
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_listbox.h"
 #include "grape_frame.h"
 #include "grape_ids.h"

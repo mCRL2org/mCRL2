@@ -8,6 +8,8 @@
 //
 // Validation of user input
 
+#include "wx.hpp" // precompiled headers
+
 #include "inputvalidation.h"
 
 using namespace grape::grapeapp;

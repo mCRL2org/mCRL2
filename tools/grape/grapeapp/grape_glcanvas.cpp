@@ -8,6 +8,8 @@
 //
 // Implements the OpenGL canvas used to draw objects.
 
+#include "wx.hpp" // precompiled headers
+
 #include <cmath>
 #include <algorithm>
 

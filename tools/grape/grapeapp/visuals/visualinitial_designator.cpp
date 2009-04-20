@@ -8,6 +8,8 @@
 //
 // Implements the visualinitial_designator class.
 
+#include "wx.hpp" // precompiled headers
+
 #include "initialdesignator.h"
 #include "visualinitial_designator.h"
 #include "geometric.h"

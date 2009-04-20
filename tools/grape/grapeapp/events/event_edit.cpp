@@ -8,6 +8,8 @@
 //
 // Defines GraPE events for editting operations.
 
+#include "wx.hpp" // precompiled headers
+
 #include "grape_clipboard.h"
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
