@@ -109,8 +109,6 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
   }
 }
 
-// This test fails on several platforms (in debug mode). It looks like
-// a garbage collection issue.
 void test_parity_game_generator()
 {
   std::string spec_text =
@@ -279,8 +277,8 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_parity_game_generator();
   test_parity_game_generator2();
-  // test_parity_game_generator();
   test_bes_examples();
 
   return 0;
