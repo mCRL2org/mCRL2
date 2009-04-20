@@ -30,6 +30,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/new_data/data.h"
+#include "mcrl2/new_data/representative_generator.h"
 #include "mcrl2/new_data/data_specification.h"
 #include "mcrl2/new_data/replace.h"
 #include "mcrl2/new_data/detail/data_functional.h"
@@ -395,9 +396,11 @@ class pbes
       atermpp::vector<new_data::data_expression> dest; // the corresponding replacements
       atermpp::set<new_data::variable> fail;   // the variables that could not be replaced
 
+      new_data::representative_generator default_expression_generator(m_data);
+
       for (typename std::set<new_data::variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
       {
-        new_data::data_expression d = m_data.default_expression(i->sort());
+        new_data::data_expression d = default_expression_generator(i->sort());
         if (d == new_data::data_expression())
         {
           fail.insert(*i);

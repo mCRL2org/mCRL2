@@ -26,6 +26,7 @@ test-suite new_data
       [ run implement_data_types_test.cpp ]
       [ run rewriter_test.cpp ]
       [ run rewriting_test.cpp ]
+      [ run representative_generator_test.cpp ]
       [ run utility_test.cpp ]
       [ run enumerator_test.cpp ]
       [ run classic_enumerator_test.cpp ]

@@ -23,7 +23,7 @@ namespace mcrl2 {
     namespace detail {
 
       /// Test is a term is a sort, and if it is equal to s
-      struct compare_sort
+      struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
       {
         sort_expression s;
 
@@ -77,12 +77,6 @@ namespace mcrl2 {
         return result;
       }
 
-      ///\return true if f has 1 or more arguments, false otherwise
-      inline bool has_arguments(const function_symbol& f)
-      {
-        return !core::detail::gsIsSortId(atermpp::aterm_appl(f.argument(1)));
-      }
-
       ///\pre s is a sort that occurs in data_specfication data
       ///\return true iff there exists a constructor function with s as target sort
       inline bool is_constructorsort(const sort_expression &s,const data_specification &data)
@@ -124,35 +118,6 @@ namespace mcrl2 {
 
       /// Undocumented function.
       inline
-      new_data::data_expression_vector create_data_expression_vector(new_data::function_symbol f, std::vector< new_data::data_expression_vector > const& dess)
-      {
-        // Result list
-        new_data::data_expression_vector result;
-        // At first put function f in result
-        result.push_back(new_data::data_expression(f));
-        for (std::vector< new_data::data_expression_vector >::const_iterator i = dess.begin(); i != dess.end(); i++)
-        {
-                //*i is a list of constructor expressions that should be applied to the elements of result
-                new_data::data_expression_vector tmp;
-                for (new_data::data_expression_vector::const_iterator k = i->begin(); k != i->end(); k++)
-                //*k is a constructor expression that should be applied to the elements of result
-                {
-                        for (new_data::data_expression_vector::iterator j = result.begin(); j != result.end(); j++)
-                        {
-                                // *j is a data expression
-                                //  apply *j to *k
-                                //  One of the constructor values is applied to f
-                                tmp.push_back(new_data::application(*j, *k));
-                        }
-                }
-                // Next iteration replace all values which are created in tmp
-                result.swap(tmp);
-        }
-        return result;
-      }
-
-      /// Undocumented function.
-      inline
       new_data::data_expression_vector enumerate_constructors(new_data::data_specification const& d, new_data::sort_expression s)
       {
         // All datasorts which are taken into account must be finite. Normally this is the case, because a check on finiteness is done in create_bes
@@ -160,27 +125,43 @@ namespace mcrl2 {
         // The resulting new_data::data_expression_list.
         data_expression_vector ces;
         // For each constructor of sort s...
-        function_symbol_vector constructors_s(boost::copy_range< function_symbol_vector >(d.constructors(s)));
-        for (function_symbol_vector::const_iterator i(constructors_s.begin()); i != constructors_s.end(); ++i)
+        for (data_specification::constructors_const_range r(d.constructors(s)); !r.empty(); r.advance_begin(1))
         {
-                if (i->sort().is_function_sort())
+          if (r.front().sort().is_function_sort())
+          {
+            // Result list
+            new_data::data_expression_vector result;
+            // At first put function f in result
+            result.push_back(new_data::data_expression(r.front()));
+
+            // For each sort of the constructor...
+            for (function_sort::domain_const_range j(function_sort(r.front().sort()).domain()); !j.empty(); j.advance_begin(1))
+            {
+              // Put all values which the sort can have in a list
+              new_data::data_expression_vector constructor_terms(enumerate_constructors(d, j.front()));
+
+              //*i is a list of constructor expressions that should be applied to the elements of result
+              new_data::data_expression_vector temporary;
+
+              for (new_data::data_expression_vector::const_iterator k = constructor_terms.begin(); k != constructor_terms.end(); ++k)
+              //*k is a constructor expression that should be applied to the elements of result
+              {
+                for (new_data::data_expression_vector::iterator l = result.begin(); l != result.end(); ++l)
                 {
-                  // Vector for all enumerated constructors
-                  std::vector< new_data::data_expression_vector > argumentss;
-                  // For each sort of the constructor...
-                  for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
-                  {
-                    // Put all values which the sort can have in a list
-                    argumentss.push_back(enumerate_constructors(d, j.front()));
-                  }
-                  // Create data_expression_list out of the values which a sort can have
-                  new_data::data_expression_vector temp = create_data_expression_vector(*i, argumentss);
-                  //concatenate ces and temp
-                  ces.insert(ces.end(), temp.begin(), temp.end());
+                  //  apply *l to *k
+                  //  One of the constructor values is applied to f
+                  temporary.push_back(new_data::application(*l, *k));
                 }
-                else {
-                  ces.push_back(*i);
-                }
+              }
+              // Next iteration replace all values which are created in tmp
+              result.swap(temporary);
+            }
+            //concatenate ces and result
+            ces.insert(ces.end(), result.begin(), result.end());
+          }
+          else {
+            ces.push_back(r.front());
+          }
         }
         // Put ces in the correct order
         return ces;

@@ -5162,7 +5162,7 @@ static enumeratedtype *create_enumeratedtype
       w->sortId = sort_id;
       w->elementnames = new_data::convert< new_data::function_symbol_list >(
                 new_data::structured_sort(new_data::sort_expression(sort_struct)).
-                                        constructor_functions(new_data::sort_expression(sort_id)));
+                                        constructor_functions());
     }
 
     w->functions=ATempty;

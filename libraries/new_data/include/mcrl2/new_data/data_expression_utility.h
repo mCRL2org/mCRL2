@@ -70,21 +70,6 @@ namespace mcrl2 {
       return t == core::detail::gsMakeNil();
     }
 
-    /// \brief Iterator adapter for traversing the sorts of an underlying sequence of data expressions
-    template < typename ForwardTraversalIterator >
-    struct sort_of_iterator : public boost::transform_iterator<
-      detail::sort_of< typename ForwardTraversalIterator::value_type >, ForwardTraversalIterator >
-    {
-      /// \brief Constructor from iterator
-      sort_of_iterator(ForwardTraversalIterator const& i) :
-        boost::transform_iterator< detail::sort_of< typename ForwardTraversalIterator::value_type >, ForwardTraversalIterator >(i)
-      {}
-
-      /// \brief Constructor for past-the-end iterator
-      sort_of_iterator()
-      {}
-    };
-
     /// \brief Variable generator that generates data variables with names that do not appear in a given context.
     class fresh_variable_generator
     {

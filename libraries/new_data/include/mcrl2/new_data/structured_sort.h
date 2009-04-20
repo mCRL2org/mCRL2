@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/new_data/sort_expression.h"
 #include "mcrl2/new_data/function_symbol.h"
@@ -116,6 +117,8 @@ namespace mcrl2 {
     /// non-empty list of arguments and and optional recogniser name.
     class structured_sort_constructor: public atermpp::aterm_appl
     {
+      friend class structured_sort;
+
       private:
 
         struct get_argument_sort : public
@@ -218,7 +221,6 @@ namespace mcrl2 {
 
         /// \brief Returns the name of the constructor.
         ///
-        inline
         std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
@@ -226,7 +228,6 @@ namespace mcrl2 {
 
         /// \brief Returns the arguments of the constructor.
         ///
-        inline
         arguments_const_range arguments() const
         {
           return boost::make_iterator_range(add_random_access< structured_sort_constructor_argument >(atermpp::list_arg2(appl())));
@@ -234,44 +235,14 @@ namespace mcrl2 {
 
         /// \brief Returns the sorts of the arguments.
         ///
-        inline
         argument_sorts_const_range argument_sorts() const
         {
           return new_data::make_iterator_range< argument_sorts_iterator >(arguments());
         }
 
-        /// \brief Returns the constructor function for this constructor,
-        ///        assuming it is internally represented with sort s.
-        /// \param s Sort expression this sort is internally represented as.
-        inline
-        function_symbol constructor_function(const sort_expression& s) const
-        {
-          argument_sorts_const_range arguments(argument_sorts());
-
-          return function_symbol(name(), (arguments.empty()) ? s : function_sort(arguments, s));
-        }
-
-        /// \brief Returns the projection functions for this constructor.
-        /// \param s The sort as which the structured sort this constructor corresponds
-        ///          to is treated internally.
-        inline
-        function_symbol_vector projection_functions(const sort_expression& s) const
-        {
-          function_symbol_vector result;
-          for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
-          {
-            if (!i.front().name().empty()) {
-              result.push_back(function_symbol(i.front().name(), function_sort(s, i.front().sort())));
-            }
-          }
-          return result;
-        }
-
         /// \brief Returns the arguments of the constructor, without the
         ///        projection names
-
         /// \brief Returns the name of the recogniser of the constructor.
-        inline
         std::string recogniser() const
         {
           atermpp::aterm_appl r = arg3(*this);
@@ -285,11 +256,35 @@ namespace mcrl2 {
           }
         }
 
+        /// \brief Returns the constructor function for this constructor,
+        ///        assuming it is internally represented with sort s.
+        /// \param s Sort expression this sort is internally represented as.
+        function_symbol constructor_function(const sort_expression& s) const
+        {
+          argument_sorts_const_range arguments(argument_sorts());
+
+          return function_symbol(name(), (arguments.empty()) ? s : function_sort(arguments, s));
+        }
+
+        /// \brief Returns the projection functions for this constructor.
+        /// \param s The sort as which the structured sort this constructor corresponds
+        ///          to is treated internally.
+        function_symbol_vector projection_functions(const sort_expression& s) const
+        {
+          function_symbol_vector result;
+          for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
+          {
+            if (!i.front().name().empty()) {
+              result.push_back(function_symbol(i.front().name(), function_sort(s, i.front().sort())));
+            }
+          }
+          return result;
+        }
+
         /// \brief Returns the function corresponding to the recogniser of this
         /// constructor, such that it is usable in the rewriter.
         /// \param s The sort as which the structured sort this constructor
         /// corresponds to is treated internally.
-        inline
         function_symbol recogniser_function(const sort_expression& s) const
         {
           return function_symbol(recogniser(), function_sort(s, sort_bool_::bool_()));
@@ -303,6 +298,22 @@ namespace mcrl2 {
     /// \brief List of structured_sort_constructor.
     typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
+    // declare for friendship
+    namespace sort_fset {
+      function_symbol_vector fset_generate_constructors_code(const sort_expression&);
+      data_equation_vector fset_generate_equations_code(const sort_expression&);
+    };
+
+    // declare for friendship
+    namespace sort_fbag {
+      function_symbol_vector fbag_generate_constructors_code(const sort_expression&);
+      data_equation_vector fbag_generate_equations_code(const sort_expression&);
+    };
+
+    namespace detail {
+      void impl_sort_struct(ATermAppl, ATermAppl, ATermList*, mcrl2::core::detail::t_data_decls*, bool, ATermList*);
+    }
+
     /// \brief structured sort.
     ///
     /// A structured sort is a sort with the following structure:
@@ -315,98 +326,23 @@ namespace mcrl2 {
     /// * is_ci are the recognisers.
     class structured_sort: public sort_expression
     {
+      friend class data_specification;
 
       private:
+
+        friend function_symbol_vector sort_fset::fset_generate_constructors_code(const sort_expression&);
+        friend data_equation_vector sort_fset::fset_generate_equations_code(const sort_expression&);
+        friend function_symbol_vector sort_fbag::fbag_generate_constructors_code(const sort_expression&);
+        friend data_equation_vector sort_fbag::fbag_generate_equations_code(const sort_expression&);
+
+        // temporary friend, until data implementation has been phased out
+        friend void detail::impl_sort_struct(ATermAppl, ATermAppl, ATermList*, core::detail::t_data_decls*, bool, ATermList*);
 
         static bool has_recogniser(structured_sort_constructor const& s)
         {
           return !s.recogniser().empty();
         }
 
-      public:
-
-        /// \brief iterator range over list of constructor declarations
-        typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructor_range;
-        /// \brief iterator range over constant list of constructor declarations
-        typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructor_const_range;
-
-        /// \brief iterator range over list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::iterator >                   constructor_function_range;
-        /// \brief iterator range over constant list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::const_iterator >             constructor_function_const_range;
-
-        /// \brief iterator range over list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::iterator >                   projection_function_range;
-        /// \brief iterator range over constant list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::const_iterator >             projection_function_const_range;
-
-        /// \brief iterator range over list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::iterator >                   recogniser_function_range;
-        /// \brief iterator range over constant list of constructor functions
-        typedef boost::iterator_range< function_symbol_list::const_iterator >             recogniser_function_const_range;
-
-      public:
-
-        /// \brief Constructor
-        structured_sort()
-          : sort_expression(core::detail::constructSortStruct())
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] s A sort expression.
-        /// \pre s is a structured sort.
-        structured_sort(const sort_expression& s)
-          : sort_expression(s)
-        {
-          assert(s.is_structured_sort());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] struct_constructors The list of constructors.
-        /// \post struct_constructors is empty.
-        structured_sort(const structured_sort_constructor_list& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(struct_constructors))
-        {
-          assert(!struct_constructors.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] struct_constructors The list of constructors.
-        /// \post struct_constructors is empty.
-        structured_sort(const structured_sort_constructor_vector& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
-        {
-          assert(!struct_constructors.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] struct_constructors The list of constructors.
-        /// \post struct_constructors is empty.
-        template < typename ForwardTraversalIterator >
-        structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
-        {
-          assert(!struct_constructors.empty());
-        }
-
-        /// \brief Returns the struct constructors of this sort
-        ///
-        inline
-        constructor_const_range struct_constructors() const
-        {
-          return boost::make_iterator_range(structured_sort_constructor_list(atermpp::arg1(*this)));
-        }
-
-
-        /// \brief Returns the constructor functions of this sort, such that the
-        ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
-        inline
         function_symbol_vector constructor_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
@@ -417,11 +353,6 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Returns the projection functions of this sort, such that the
-        ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
-        inline
         function_symbol_vector projection_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
@@ -437,11 +368,6 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Returns the recogniser functions of this sort, such that the
-        ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
-        inline
         function_symbol_vector recogniser_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
@@ -454,11 +380,6 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Returns the equations for ==, < and <= for this sort, such that the
-        ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
-        inline
         data_equation_vector constructor_equations(const sort_expression& s) const
         {
           data_equation_vector result;
@@ -568,11 +489,6 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Generate equations for the projection functions of this sort, assuming
-        ///        that this sort is referred to with s.
-        /// \param s A sort expression
-        /// \return A vector of equations for the projection functions of this sort.
-        inline
         data_equation_vector projection_equations(const sort_expression& s) const
         {
           data_equation_vector result;
@@ -611,11 +527,6 @@ namespace mcrl2 {
           return result;
         }
 
-        /// \brief Generate equations for the recognisers of this sort, assuming
-        ///        that this sort is referred to with s.
-        /// \param s A sort expression
-        /// \return A vector of equations for the recognisers of this sort.
-        inline
         data_equation_vector recogniser_equations(const sort_expression& s) const
         {
           data_equation_vector result;
@@ -659,6 +570,138 @@ namespace mcrl2 {
           }
 
           return result;
+        }
+
+      public:
+
+        /// \brief iterator range over list of constructor declarations
+        typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructor_range;
+        /// \brief iterator range over constant list of constructor declarations
+        typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructor_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   constructor_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             constructor_function_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   projection_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             projection_function_const_range;
+
+        /// \brief iterator range over list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::iterator >                   recogniser_function_range;
+        /// \brief iterator range over constant list of constructor functions
+        typedef boost::iterator_range< function_symbol_list::const_iterator >             recogniser_function_const_range;
+
+      public:
+
+        /// \brief Constructor
+        structured_sort()
+          : sort_expression(core::detail::constructSortStruct())
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] s A sort expression.
+        /// \pre s is a structured sort.
+        structured_sort(const sort_expression& s)
+          : sort_expression(s)
+        {
+          assert(s.is_structured_sort());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        structured_sort(const structured_sort_constructor_list& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(struct_constructors))
+        {
+          assert(!struct_constructors.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        structured_sort(const structured_sort_constructor_vector& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
+        {
+          assert(!struct_constructors.empty());
+        }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] struct_constructors The list of constructors.
+        /// \post struct_constructors is empty.
+        template < typename ForwardTraversalIterator >
+        structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
+        {
+          assert(!struct_constructors.empty());
+        }
+
+        /// \brief Returns the struct constructors of this sort
+        ///
+        constructor_const_range struct_constructors() const
+        {
+          return boost::make_iterator_range(structured_sort_constructor_list(atermpp::arg1(*this)));
+        }
+
+
+        /// \brief Returns the constructor functions of this sort, such that the
+        ///        result can be used by the rewriter
+        /// \param s The sort expression as which this sort is treated
+        //         internally
+        function_symbol_vector constructor_functions() const
+        {
+          return constructor_functions(*this);
+        }
+
+        /// \brief Returns the projection functions of this sort, such that the
+        ///        result can be used by the rewriter
+        /// \param s The sort expression as which this sort is treated
+        //         internally
+        function_symbol_vector projection_functions() const
+        {
+          return projection_functions(*this);
+        }
+
+
+        /// \brief Returns the recogniser functions of this sort, such that the
+        ///        result can be used by the rewriter
+        /// \param s The sort expression as which this sort is treated
+        //         internally
+        function_symbol_vector recogniser_functions() const
+        {
+          return recogniser_functions(*this);
+        }
+
+        /// \brief Returns the equations for ==, < and <= for this sort, such that the
+        ///        result can be used by the rewriter
+        /// \param s The sort expression as which this sort is treated
+        //         internally
+        data_equation_vector constructor_equations() const
+        {
+          return constructor_equations(*this);
+        }
+        /// \brief Generate equations for the projection functions of this sort, assuming
+        ///        that this sort is referred to with s.
+        /// \param s A sort expression
+        /// \return A vector of equations for the projection functions of this sort.
+        data_equation_vector projection_equations() const
+        {
+          return projection_equations(*this);
+        }
+
+        /// \brief Generate equations for the recognisers of this sort, assuming
+        ///        that this sort is referred to with s.
+        /// \param s A sort expression
+        /// \return A vector of equations for the recognisers of this sort.
+        data_equation_vector recogniser_equations() const
+        {
+          return recogniser_equations(*this);
         }
 
     }; // class structured_sort

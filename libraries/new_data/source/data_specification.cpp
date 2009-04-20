@@ -13,7 +13,7 @@
 #include <functional>
 #include <iostream>
 
-#include <boost/bind.hpp>
+#include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/new_data/substitution.h"
@@ -476,6 +476,7 @@ namespace mcrl2 {
       m_equations = detail::aterm_data_eqn_spec_to_equation_set(atermpp::replace(atermpp::arg4(term), renamings));
     }
 
+    /// \cond INTERNAL_DOCS
     namespace detail {
       // mutable_substitution is used because at present there is no other decent method to accomplish the same
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
@@ -569,140 +570,7 @@ namespace mcrl2 {
            gsMakeDataEqnSpec(atermpp::replace(boost::copy_range< atermpp::aterm_list >(s.equations()), renamings)));
       }
     } // namespace detail
-
-
-      data_expression data_specification::default_expression(
-                          sort_expression s, 
-                          const unsigned int max_recursion_depth) const
-      { // TODO: This code could ultimate be rewritten using an enumerator.
-/*
-        // first check whether a term has already been constructed for this sort.
-  
-        data_expression result;
-        atermpp::map < sort_expression,data_expression >::iterator l=default_expression_map.find(s);
-  
-        if (l!=default_expression_map.end())
-        { // a default data_expression is found.
-          return l->second;
-        }
-  
-        if (s.is_function_sort())
-        { // s is a function sort. We search for a constructor of mapping of this sort
-          // Although in principle possible, we do not do a lot of effort to construct
-          // a term of this sort. We just look whether a term of exactly this sort is
-          // present.
-  
-          // check if there is a mapping with sort s (constructors with sort s cannot exist).
-          atermpp::set < function_symbol >::const_iterator i =
-                       std::find_if(m_mappings.begin(), m_mappings.end(),
-                                   detail::is_operation_with_given_sort(s));
-          if (i != mappings().end())
-          {
-            result=data_expression((atermpp::aterm_appl)*i);
-            default_expression_map.insert(std::make_pair(s,result));
-            return result;
-          }
-          // No term of sort s is found. At the end of this function we return
-          // data_expression()
-  
-        }
-        else
-        { // s is a constant (not a function sort).
-          // check if there is a constant constructor for s
-          constructors_const_range::const_iterator i =
-                                            std::find_if(constructors(s).begin(),
-                                                         constructors(s).end(),
-                                                         detail::is_constant_operation());
-          if (i != constructors().end())
-          {
-            result=data_expression((atermpp::aterm_appl)*i);
-            default_expression_map.insert(std::make_pair(s,result));
-            return result;
-          }
-  
-          // check if there is a constant mapping for s
-          atermpp::vector < function_symbol > mappings_of_sort_s=mappings(s);
-          atermpp::vector < function_symbol >::const_iterator i1 = mappings
-               std::find_if(mappings_of_sort_s.begin(), 
-                            mappings_of_sort_s.end(), detail::is_constant_operation());
-          if (i1 != mappings().end())
-          {
-            result=data_expression((atermpp::aterm_appl)*i1);
-            default_expression_map.insert(std::make_pair(s,result));
-            return result;
-          }
-  
-          if (max_recursion_depth>0)
-          { // recursively traverse constructor functions
-            for(constructors_const_range::const_iterator i=constructors(s).begin();
-                i!=constructors(s).end(); i++)
-            { assert(i->sort().is_function_sort()); // If a basic constructor of this sort
-                                            // exists, a situation as mentioned above applies.
-              sort_function_sort sa=i->sort();
-              sort_expression_list argument_sorts=sa.argument_sorts();
-              sort_expression target_sort=sa.result_sort();
-              if (target_sort==s)
-              { // We only deal with operators of the form
-                // f:s1#...#sn->s. Operators of the form
-                // f:s1#...#sn->G where G is a complex sort expression
-                // are ignored.
-                data_expression_list arguments;
-                sort_expression_list::iterator j;
-  
-                for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
-                { data_expression t=default_expression(*j,max_recursion_depth-1);
-                  if (t==data_expression())
-                  { break;
-                  }
-                  else arguments=push_front(arguments,t);
-                }
-                if (j==argument_sorts.end())
-                { // a suitable set of arguments is found
-                  arguments=reverse(arguments);
-                  // The result sort can be equal to s, in which case
-                  // we are ready, or it can have a more complex structure.
-                  result=application((atermpp::aterm_appl)*i,arguments);
-                  default_expression_map.insert(std::make_pair(s,result));
-                  return result;
-                }
-              }
-            }
-  
-            // recursively traverse mappings
-            for(function_symbol_list::const_iterator i=mappings_of_sort_s.begin();
-                i!=mappings_of_sort_s.end(); i++)
-            { assert(i->sort().is_function_sort()); // if a basic mapping of sort s would exist
-                                            // we cannot end up here.
-              sort_function_sort sa=i->sort();
-              sort_expression_list argument_sorts=sa.argument_sorts();
-              sort_expression target_sort=sa.result_sort();
-              // sort_expression_list argument_sorts=source(i->sort());
-              // sort_expression target_sort=target(i->sort());
-              if (target_sort==s)
-              { // See comments for similar code for constructors.
-                data_expression_list arguments;
-                sort_expression_list::iterator j;
-                for(j=argument_sorts.begin();j!=argument_sorts.end(); j++)
-                { data_expression t=default_expression(*j,max_recursion_depth-1);
-                  if (t==data_expression())
-                  { break;
-                  }
-                  else arguments=push_front(arguments,t);
-                }
-                if (j==argument_sorts.end())
-                { // a suitable set of arguments is found
-                  arguments=reverse(arguments);
-                  result=application((atermpp::aterm_appl)*i,arguments);
-                  default_expression_map.insert(std::make_pair(s,result));
-                  return result;
-                }
-              }
-            }
-          }
-        }
-*/  
-        return data_expression();
-      }
+    /// \endcond
 
   } // namespace new_data
 } // namespace mcrl2
