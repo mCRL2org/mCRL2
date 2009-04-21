@@ -12,6 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using lps::mcrl22lps;
@@ -70,7 +71,9 @@ int test_main(int argc, char** argv )
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   test1();
+  core::garbage_collect();
   test2();
+  core::garbage_collect();
 
   return 0;
 }

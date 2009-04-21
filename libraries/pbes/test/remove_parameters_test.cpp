@@ -20,6 +20,7 @@
 
 using namespace mcrl2::core;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;

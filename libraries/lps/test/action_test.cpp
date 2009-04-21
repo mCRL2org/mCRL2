@@ -17,8 +17,10 @@
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
@@ -53,6 +55,8 @@ int test_main(int argc, char** argv )
   action empty = action();
   std::cerr << pp(empty) << std::endl;
   std::cerr << pp(action()) << std::endl;
+
+  core::garbage_collect();
 
   return 0;
 }

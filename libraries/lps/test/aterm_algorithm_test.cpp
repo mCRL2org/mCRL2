@@ -20,9 +20,11 @@
 #include "mcrl2/new_data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
@@ -128,6 +130,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERM_INIT(argc, argv)
 
   test_find_variable();
+  core::garbage_collect();
 
   specification spec = mcrl22lps(SPECIFICATION);
   linear_process lps = spec.process();
@@ -136,18 +139,26 @@ int test_main(int argc, char** argv)
   std::set<action_label> labels;
   find_all_if(lps, is_action_label, inserter(labels, labels.end()));
 
+  core::garbage_collect();
+
   // find all data variables in lps
   std::set<variable> variables;
   find_all_if(lps, is_variable, inserter(variables, variables.end()));
+
+  core::garbage_collect();
 
   // find all functions in spec
   std::set< mcrl2::new_data::function_symbol > functions;
   insert(functions, spec.data().constructors());
   insert(functions, spec.data().mappings());
 
+  core::garbage_collect();
+
   // find all existential quantifications in lps
   std::set<data_expression> existential_quantifications;
   find_all_if(lps, local::is_exists, inserter(existential_quantifications, existential_quantifications.end()));
+
+  core::garbage_collect();
 
   return 0;
 }

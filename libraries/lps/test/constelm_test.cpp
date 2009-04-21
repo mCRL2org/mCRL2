@@ -20,6 +20,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -288,10 +289,15 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_constelm(case_1, removed_1);
+  core::garbage_collect();
   test_constelm(case_2, removed_2);
+  core::garbage_collect();
   test_constelm(case_3, removed_3);
+  core::garbage_collect();
   test_constelm(case_4, removed_4);
+  core::garbage_collect();
   test_constelm(case_5, removed_5);
+  core::garbage_collect();
   // test_constelm(case_6, removed_6);
 
   return 0;

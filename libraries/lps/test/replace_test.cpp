@@ -20,6 +20,7 @@
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -54,6 +55,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_replace();
+  core::garbage_collect();
 
   return 0;
 }

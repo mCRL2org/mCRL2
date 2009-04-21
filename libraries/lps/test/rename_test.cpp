@@ -17,9 +17,11 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
@@ -107,7 +109,9 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERM_INIT(argc, argv)
 
   test_rename();
+  core::garbage_collect();
   test_lps_rename();
+  core::garbage_collect();
 
   return 0;
 }

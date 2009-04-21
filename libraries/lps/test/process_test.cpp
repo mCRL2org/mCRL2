@@ -20,6 +20,7 @@
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 #include "mcrl2/lps/mcrl22lps.h"
 
@@ -167,9 +168,13 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_process(SPEC1);
+  core::garbage_collect();
   test_process(SPEC2);
+  core::garbage_collect();
   test_process(ABS_SPEC_LINEARIZED);
+  core::garbage_collect();
   test_free_variables();
+  core::garbage_collect();
 
   return 0;
 }

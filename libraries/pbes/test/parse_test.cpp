@@ -15,6 +15,7 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
+using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 const std::string PBESSPEC =

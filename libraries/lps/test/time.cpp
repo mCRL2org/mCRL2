@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -68,9 +70,11 @@ int test_main(int argc, char** argv)
   linear_process lps = spec.process();
   BOOST_CHECK(lps.is_well_typed());
   BOOST_CHECK(!lps.has_time());
+  core::garbage_collect();
 
   summand s = lps.summands().front();
   BOOST_CHECK(!s.has_time());
+  core::garbage_collect();
 
   return 0;
 }

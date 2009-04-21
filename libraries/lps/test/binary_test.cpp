@@ -15,8 +15,10 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/binary.h>
 #include <mcrl2/lps/mcrl22lps.h>
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
@@ -237,11 +239,17 @@ int test_main(int ac, char** av)
   MCRL2_ATERM_INIT(ac, av)
 
   test_case_1();
+  core::garbage_collect();
   test_case_2();
+  core::garbage_collect();
   test_case_3();
+  core::garbage_collect();
   test_case_4();
+  core::garbage_collect();
   test_case_5();
+  core::garbage_collect();
   test_case_6();
+  core::garbage_collect();
 
   return 0;
 }

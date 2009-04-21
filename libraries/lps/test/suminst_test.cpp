@@ -15,8 +15,10 @@
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/suminst.h>
 #include <mcrl2/lps/mcrl22lps.h>
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
 
@@ -172,10 +174,15 @@ int test_main(int ac, char** av)
   t_suminst_options opts;
 
   test_case_1(opts);
+  core::garbage_collect();
   test_case_2(opts);
+  core::garbage_collect();
   test_case_3(opts);
+  core::garbage_collect();
   test_case_4(opts);
+  core::garbage_collect();
   test_case_5(opts);
+  core::garbage_collect();
 
   return 0;
 }

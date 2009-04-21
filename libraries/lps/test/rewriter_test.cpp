@@ -19,9 +19,11 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::new_data::detail;
 using namespace mcrl2::lps;
@@ -137,8 +139,11 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test1();
+  core::garbage_collect();
   test2();
+  core::garbage_collect();
   test3();
+  core::garbage_collect();
 
   return 0;
 }

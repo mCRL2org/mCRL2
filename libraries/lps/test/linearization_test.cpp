@@ -13,7 +13,9 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/mcrl22lps.h>
+#include "mcrl2/core/garbage_collection.h"
 
+using namespace mcrl2;
 using namespace mcrl2::lps;
 
 // Parameter i should be removed
@@ -428,9 +430,13 @@ int test_main(int argc, char** argv )
   MCRL2_ATERM_INIT(argc, argv)
 
   test_struct();
+  core::garbage_collect();
   test_multiple_linearization_calls();
+  core::garbage_collect();
   test_process_assignments();
+  core::garbage_collect();
   test_large_specification();
+  core::garbage_collect();
 
   return 0;
 }

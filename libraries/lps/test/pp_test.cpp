@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -64,6 +65,7 @@ int test_main(int argc, char** argv)
   specification spec = mcrl22lps(ABP_SPEC);
   std::string text = core::pp(spec);
   specification spec2 = mcrl22lps(text);
+  core::garbage_collect();
 
   return 0;
 }

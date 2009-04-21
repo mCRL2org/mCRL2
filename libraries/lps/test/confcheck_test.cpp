@@ -16,9 +16,10 @@
 #include <mcrl2/lps/confluence_checker.h>
 #include <mcrl2/lps/mcrl22lps.h>
 #include <mcrl2/new_data/bool.h>
-#include "gc.h" // garbage collector of ATerm Library
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
@@ -75,6 +76,7 @@ int test_main(int argc, char** argv)
   s1=checker1.check_confluence_and_mark(new_data::sort_bool_::true_(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
+  core::garbage_collect();
 
   // case 2
   s0 = mcrl22lps(case_2);
@@ -82,6 +84,7 @@ int test_main(int argc, char** argv)
   s1=checker2.check_confluence_and_mark(new_data::sort_bool_::true_(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(check_for_ctau(s1));
+  core::garbage_collect();
 
   // case 3
   s0 = mcrl22lps(case_3);
@@ -89,6 +92,7 @@ int test_main(int argc, char** argv)
   s1=checker3.check_confluence_and_mark(new_data::sort_bool_::true_(),0);  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
+  core::garbage_collect();
 
   return 0;
 }
