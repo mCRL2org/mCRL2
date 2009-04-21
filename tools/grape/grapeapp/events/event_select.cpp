@@ -163,7 +163,10 @@ grape_event_deselect_all::~grape_event_deselect_all( void )
 bool grape_event_deselect_all::Do( void )
 {
   diagram* dia = m_main_frame->get_glcanvas()->get_diagram();
-  dia->deselect_all_objects();
+  if (dia != 0)
+  {
+    dia->deselect_all_objects();
+  }
 
   // refresh canvas
   m_main_frame->get_glcanvas()->Refresh();

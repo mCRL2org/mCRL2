@@ -147,6 +147,7 @@ void grape_glcanvas::reset()
   m_mousedown = false;
   m_diagram = 0;
 }
+
 void grape_glcanvas::draw_visual_objects()
 {
   // draw all objects
@@ -520,7 +521,7 @@ void grape_glcanvas::event_lmouse_up(wxMouseEvent &p_event)
   if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") ) {
     if ( ( m_main_frame->get_mode() == GRAPE_MODE_ARCH ) || ( m_main_frame->get_mode() == GRAPE_MODE_PROC ) )
     {
-      m_main_frame->get_statusbar()->PopStatusText();
+      m_main_frame->get_statusbar()->SetStatusText(wxEmptyString);
     }
   }
 

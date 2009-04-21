@@ -38,7 +38,10 @@ bool grape_event_add_architecture_diagram::Do( void )
   assert( spec != 0 );
   architecture_diagram* new_arch_ptr = spec->add_architecture_diagram( m_arch, _T("ArchitectureDiagram") );
 
+  assert( new_arch_ptr != 0);
   m_main_frame->get_glcanvas()->set_diagram( new_arch_ptr );
+  diagram* dia = m_main_frame->get_glcanvas()->get_diagram();
+  assert(dia != 0);
 
   m_main_frame->set_mode( GRAPE_MODE_ARCH );
 

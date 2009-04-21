@@ -124,7 +124,7 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
 
   m_var_decls_input->SetFocus();  
   
-  Centre();
+  CentreOnParent();
 }
 
 grape_label_dialog::grape_label_dialog()

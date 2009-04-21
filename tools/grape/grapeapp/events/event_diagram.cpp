@@ -41,8 +41,7 @@ void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
   if (is_valid)
   {
     // display message in statusbar
-    if ( p_main_frame->get_statusbar()->GetStatusText() == wxEmptyString ) p_main_frame->get_statusbar()->PopStatusText();
-    p_main_frame->get_statusbar()->PushStatusText( p_main_frame->get_logpanel()->GetValue() );  
+    p_main_frame->get_statusbar()->SetStatusText( p_main_frame->get_logpanel()->GetValue() );  
   } 
   else
   {

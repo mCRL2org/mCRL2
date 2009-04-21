@@ -67,6 +67,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wnd_sizer->SetSizeHints(this);
 
   m_rename_input->SetFocus();
+  CentreOnParent();
 }
 
 grape_channel_communication_dlg::grape_channel_communication_dlg()

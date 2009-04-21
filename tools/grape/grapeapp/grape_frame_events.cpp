@@ -368,12 +368,6 @@ void grape_frame::event_listbox_remove_diagram( int p_diagram_type )
   }
 }
 
-void grape_frame::event_splitter_dclick( wxSplitterEvent& WXUNUSED(p_event) )
-{
-  int height;
-  m_splitter->GetWindow2()->GetClientSize( 0, &height );
-}
-
 void grape_frame::event_window_close( wxCloseEvent &p_event )
 {
   grape_event_close *event = new grape_event_close( this );

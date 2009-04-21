@@ -82,7 +82,7 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble )
   vsizer->SetSizeHints(this);
 
   m_parameter_grid->SetFocus();
-  Centre();
+  CentreOnParent();
   check_text();
 }
 

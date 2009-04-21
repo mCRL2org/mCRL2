@@ -54,7 +54,7 @@ namespace grape
         grape_listbox   *m_process_diagram_list;      /**< Listbox used to list process diagrams of the current specification. */
         grape_listbox   *m_architecture_diagram_list; /**< Listbox used to list architecture diagrams of the current specification. */
         grape_glcanvas  *m_glcanvas;                  /**< Canvas used for drawing diagrams. */
-        wxSplitterWindow *m_splitter;                  /**< Splitter used to attach the logpanel. */
+        wxSplitterWindow *m_splitter;                  /**< Splitter used to attach the canvas and the datatypespecification. */
         grape_logpanel  *m_logpanel;                  /**< Logpanel used to display messages. */
         wxStatusBar *m_statusbar;                 /**< Statusbar used to display information. */
 
@@ -416,12 +416,6 @@ namespace grape
          * @param p_diagram_type The diagram type the event is mentioned for.
          */
         void event_listbox_remove_diagram( int p_diagram_type );
-
-        /**
-         * This event is called whenever the user doubleclicks the splitter.
-         * @param p_event The generated event.
-         */
-        void event_splitter_dclick( wxSplitterEvent &p_event );
 
         /**
          * This is called when the window is being closed (with the [X] or with File->Quit.

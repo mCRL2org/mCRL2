@@ -83,8 +83,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
   init( panel );
 
   m_combo->SetFocus();
-  
-  change_combobox();
+  CentreOnParent();
 }
 
 void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_varupdate p_list_of_varupdate, grape_specification *p_spec )
@@ -154,7 +153,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   init( panel );
 
   m_combo->SetFocus();
-  Centre();
+  CentreOnParent();
   change_combobox();
 }
 
@@ -242,32 +241,35 @@ void grape_reference_dialog::change_combobox()
 {
   int start_index = 0;
   process_diagram *diagram_ptr = static_cast<process_diagram*>(find_a_diagram( m_main_frame, get_diagram_id() ) );
-  list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
-  
-  // fill grid with parameters
-  int param_count = parameter_declarations.GetCount();
-  while ( m_grid->GetNumberRows() < param_count) m_grid->AppendRows();
   if (diagram_ptr != 0)
-  {  
-    for ( int i = 0; i < param_count; ++i )
+  {
+    list_of_decl parameter_declarations = diagram_ptr->get_preamble()->get_parameter_declarations_list();
+    
+    // fill grid with parameters
+    int param_count = parameter_declarations.GetCount();
+    while ( m_grid->GetNumberRows() < param_count) m_grid->AppendRows();
+    if (diagram_ptr != 0)
+    {  
+      for ( int i = 0; i < param_count; ++i )
+      {
+        m_grid->SetCellValue(i, 0, parameter_declarations.Item( i ).get_name());
+        m_grid->SetCellValue(i, 1, _T(""));
+      }
+      start_index = parameter_declarations.GetCount();
+    }
+   
+    // fill grid with empty values
+    for ( int i = start_index; i < m_grid->GetNumberRows(); ++i )
     {
-      m_grid->SetCellValue(i, 0, parameter_declarations.Item( i ).get_name());
+      m_grid->SetCellValue(i, 0, _T(""));
       m_grid->SetCellValue(i, 1, _T(""));
     }
-    start_index = parameter_declarations.GetCount();
+    
+    // remove empty rows
+    while ( (m_grid->GetNumberRows() > 0) && (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 0).IsEmpty()) &&  (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 1).IsEmpty()) ) m_grid->DeleteRows(m_grid->GetNumberRows()-1);
+    
+    check_text();
   }
- 
-  // fill grid with empty values
-  for ( int i = start_index; i < m_grid->GetNumberRows(); ++i )
-  {
-    m_grid->SetCellValue(i, 0, _T(""));
-    m_grid->SetCellValue(i, 1, _T(""));
-  }
-  
-  // remove empty rows
-  while ( (m_grid->GetNumberRows() > 0) && (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 0).IsEmpty()) &&  (m_grid->GetCellValue(m_grid->GetNumberRows()-1, 1).IsEmpty()) ) m_grid->DeleteRows(m_grid->GetNumberRows()-1);
-  
-  check_text();
 }
 
 void grape_reference_dialog::event_change_combobox( wxCommandEvent &p_event )

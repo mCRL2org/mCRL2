@@ -87,6 +87,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->SetSizeHints(this);
 
   m_name_input->SetFocus();
+  CentreOnParent();
 }
 
 grape_channel_dlg::grape_channel_dlg()

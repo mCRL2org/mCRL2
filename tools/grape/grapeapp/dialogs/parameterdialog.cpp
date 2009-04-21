@@ -71,6 +71,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   m_grid->SetFocus();
   
   check_parameters();
+  CentreOnParent();
 }
 
 grape_parameter_dialog::grape_parameter_dialog()

@@ -52,6 +52,7 @@ grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_messa
   wnd_sizer->SetSizeHints(this);
 
   m_input->SetFocus();
+  CentreOnParent();
 }
 
 grape_text_dlg::grape_text_dlg()

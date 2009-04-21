@@ -41,25 +41,14 @@ void grape_listbox::event_click( wxMouseEvent &p_event )
   {
     if (!IsEmpty())
     {
-      if ( m_main_frame->get_statusbar()->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
-      {
-        if ( m_main_frame->get_statusbar()->GetStatusText() == wxEmptyString )
-        {
-          m_main_frame->get_statusbar()->PopStatusText();
-        }
-        m_main_frame->get_statusbar()->PushStatusText( _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") );
+      m_main_frame->get_statusbar()->SetStatusText( _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") );
 
-        wxCommandEvent event;
-        m_main_frame->event_menu_deselect_all( event );
-      }
+      wxCommandEvent event;
+      m_main_frame->event_menu_deselect_all( event );
     }
     else
     {
-      if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
-      {
-        m_main_frame->get_statusbar()->PopStatusText();
-      }
-      m_main_frame->get_statusbar()->PushStatusText(wxEmptyString);
+      m_main_frame->get_statusbar()->SetStatusText(wxEmptyString);
     }
   }
 }
@@ -69,25 +58,14 @@ void grape_listbox::event_select( wxCommandEvent &p_event )
 {
   if (!IsEmpty())
   {
-    if ( m_main_frame->get_statusbar()->GetStatusText() != _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
-    {
-      if ( m_main_frame->get_statusbar()->GetStatusText() != wxEmptyString )
-      {
-        m_main_frame->get_statusbar()->PopStatusText();
-      }
-      m_main_frame->get_statusbar()->PushStatusText( _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") );
+    m_main_frame->get_statusbar()->SetStatusText( _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") );
 
-      wxCommandEvent event;
-      m_main_frame->event_menu_deselect_all( event );
-    }
+    wxCommandEvent event;
+    m_main_frame->event_menu_deselect_all( event );
   }
   else
   {
-    if ( m_main_frame->get_statusbar()->GetStatusText() == _T("Click to select. Double click -> Rename current diagram. Press Delete -> Remove current diagram.") )
-    {
-      m_main_frame->get_statusbar()->PopStatusText();
-    }
-    m_main_frame->get_statusbar()->PushStatusText(wxEmptyString);
+    m_main_frame->get_statusbar()->SetStatusText(wxEmptyString);
   }
 
   // process further
