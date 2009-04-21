@@ -111,44 +111,42 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
 
-      if (parser.continue_execution()) {
-        opt_use_hashtables            = 0 < parser.options.count("hashtables");
-        opt_construct_counter_example = 0 < parser.options.count("counter");
-        opt_store_as_tree             = 0 < parser.options.count("tree");
-        opt_data_elm                  = parser.options.count("unused-data") == 0;
-        opt_outputformat              = "none";
-        opt_strategy                  = lazy;
-        outfilename                   = m_output_filename;
+      opt_use_hashtables            = 0 < parser.options.count("hashtables");
+      opt_construct_counter_example = 0 < parser.options.count("counter");
+      opt_store_as_tree             = 0 < parser.options.count("tree");
+      opt_data_elm                  = parser.options.count("unused-data") == 0;
+      opt_outputformat              = "none";
+      opt_strategy                  = lazy;
+      outfilename                   = m_output_filename;
     
-        if (parser.options.count("output")) { // Output format
-          std::string format = parser.option_argument("output");
+      if (parser.options.count("output")) { // Output format
+        std::string format = parser.option_argument("output");
     
-          if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes"))) {
-            parser.error("unknown output format specified (got `" + format + "')");
-          }
-    
-          opt_outputformat = format;
+        if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes"))) {
+          parser.error("unknown output format specified (got `" + format + "')");
         }
     
-        if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
-          int strategy = parser.option_argument_as< int >("strategy");
+        opt_outputformat = format;
+      }
     
-          switch (strategy) {
-            case 0:
-             opt_strategy = lazy;
-             break;
-            case 1:
-             opt_strategy = optimize;
-             break;
-            case 2:
-             opt_strategy = on_the_fly;
-             break;
-            case 3:
-             opt_strategy = on_the_fly_with_fixed_points;
-             break;
-            default:
-              parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
-          }
+      if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
+        int strategy = parser.option_argument_as< int >("strategy");
+    
+        switch (strategy) {
+          case 0:
+           opt_strategy = lazy;
+           break;
+          case 1:
+           opt_strategy = optimize;
+           break;
+          case 2:
+           opt_strategy = on_the_fly;
+           break;
+          case 3:
+           opt_strategy = on_the_fly_with_fixed_points;
+           break;
+          default:
+            parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
         }
       }
     }

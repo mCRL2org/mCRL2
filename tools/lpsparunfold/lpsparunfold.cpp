@@ -58,15 +58,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
 
-      if (parser.continue_execution())
+      if (0 == parser.options.count("index"))
       {
-        if (0 == parser.options.count("index"))
-        {
-          parser.error("Index of process parameter is not specified.");
-        }
-
-        m_index = parser.option_argument_as< int >("index");
+        parser.error("Index of process parameter is not specified.");
       }
+
+      m_index = parser.option_argument_as< int >("index");
     }
 
   public:

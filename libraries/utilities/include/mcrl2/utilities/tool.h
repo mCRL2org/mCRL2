@@ -99,20 +99,21 @@ namespace tools {
           interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
-          check_positional_options(parser);
-          parse_options(parser);
-	  if (!parser.continue_execution())
+	  if (parser.continue_execution())
 	  {
-	          return EXIT_SUCCESS;
+            check_positional_options(parser);
+            parse_options(parser);
+           
+            if (!run())
+            {
+              return EXIT_FAILURE;
+            }
           }
-          if (run())
-          {
-            return EXIT_SUCCESS;
-          }
+
+	  return EXIT_SUCCESS;
         }
         catch (std::exception& e) {
           std::cerr << e.what() << std::endl;
-          return EXIT_FAILURE;
         }
         return EXIT_FAILURE;
       }
