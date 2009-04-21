@@ -72,11 +72,19 @@ namespace mcrl2 {
 
           int execute(int argc, char** argv)
           {
-            if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
-              return EXIT_SUCCESS;
+            try {
+              if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
+                return EXIT_SUCCESS;
+              }
+
+              return Tool::execute(argc, argv);
+            }
+            catch (std::exception&)
+            {
+              return EXIT_FAILURE;
             }
 
-            return Tool::execute(argc, argv);
+            return EXIT_SUCCESS;
           }
       };
 
