@@ -1027,20 +1027,20 @@ static void pivot_and_update(
                const rewriter &r)
 { std::cerr << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
   const data_expression aij=working_equalities[xi][xj];
-  const data_expression theta=r(sort_real_::divides(sort_real_::minus(v,beta[xi]),aij));
-  const data_expression theta_delta_correction=r(sort_real_::divides(sort_real_::minus(v,beta_delta_correction[xi]),aij));
+  const data_expression theta=rewrite_with_memory(sort_real_::divides(sort_real_::minus(v,beta[xi]),aij),r);
+  const data_expression theta_delta_correction=rewrite_with_memory(sort_real_::divides(sort_real_::minus(v,beta_delta_correction[xi]),aij),r);
   beta[xi]=v;
   beta_delta_correction[xi]=v_delta_correction;
-  beta[xj]=r(sort_real_::plus(beta[xj],theta));
-  beta_delta_correction[xj]=r(sort_real_::plus(beta_delta_correction[xj],theta_delta_correction));
+  beta[xj]=rewrite_with_memory(sort_real_::plus(beta[xj],theta),r);
+  beta_delta_correction[xj]=rewrite_with_memory(sort_real_::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
   for(atermpp::set < variable >::const_iterator k=basic_variables.begin();
           k!=basic_variables.end(); ++k)
   { if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
     { const data_expression akj=working_equalities[*k][xj];
       std::cerr << "AAA " << pp(akj) << "   " << pp(theta) << "\n";
-      beta[*k]=r(sort_real_::plus(beta[*k],sort_real_::times(akj ,theta)));
-      beta_delta_correction[*k]=r(sort_real_::plus(beta_delta_correction[*k],sort_real_::times(akj ,theta_delta_correction)));
+      beta[*k]=rewrite_with_memory(sort_real_::plus(beta[*k],sort_real_::times(akj ,theta)),r);
+      beta_delta_correction[*k]=rewrite_with_memory(sort_real_::plus(beta_delta_correction[*k],sort_real_::times(akj ,theta_delta_correction)),r);
     }
   }
   // Apply pivoting on variables xi and xj;
@@ -1169,11 +1169,11 @@ inline bool is_inconsistent(
       if (i->lhs_size()==1)  // the left hand side consists of a single variable.
       { variable v=i->lhs_begin()->first;
         data_expression factor=i->lhs_begin()->second;   assert(factor!=real_zero());
-        data_expression bound=r(sort_real_::divides(i->rhs(),factor));
+        data_expression bound=rewrite_with_memory(sort_real_::divides(i->rhs(),factor),r);
         if (is_positive(factor,r))
         { // The inequality has the shape factor*v<=c or factor*v<c with factor positive
           if ((upperbounds.count(v)==0) ||
-               (r(less(bound,upperbounds[v]))==sort_bool_::true_()))
+               (rewrite_with_memory(less(bound,upperbounds[v]),r)==sort_bool_::true_()))
           { upperbounds[v]=bound;
             upperbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
@@ -1190,7 +1190,7 @@ inline bool is_inconsistent(
         else 
         { // The inequality has the shape factor*v<=c or factor*v<c with factor negative
           if ((lowerbounds.count(v)==0) ||
-               (r(less(lowerbounds[v],bound))==sort_bool_::true_()))
+               (rewrite_with_memory(less(lowerbounds[v],bound),r)==sort_bool_::true_()))
           { lowerbounds[v]=bound;
             lowerbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_one():real_zero());
@@ -1223,9 +1223,9 @@ inline bool is_inconsistent(
         i!=non_basic_variables.end(); ++i)
   { if (lowerbounds.count(*i)>0)
     { if ((upperbounds.count(*i)>0) && 
-          ((r(less(upperbounds[*i],lowerbounds[*i]))==sort_bool_::true_()) ||
+          ((rewrite_with_memory(less(upperbounds[*i],lowerbounds[*i]),r)==sort_bool_::true_()) ||
            ((upperbounds[*i]==lowerbounds[*i]) && 
-            (r(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]))==sort_bool_::true_()))))
+            (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
       { if (core::gsDebug)
         { std::cerr << "Inconsistent, preprocessing " << pp(*i) << "\n";
         }
@@ -1272,9 +1272,9 @@ inline bool is_inconsistent(
       data_expression value_delta_correction=working_equalities[*i].
                         evaluate(beta_delta_correction,r);
       if ((upperbounds.count(*i)>0) &&
-          ((r(less(upperbounds[*i],value))==sort_bool_::true_()) ||
+          ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool_::true_()) ||
            ((upperbounds[*i]==value) && 
-            (r(less(upperbounds_delta_correction[*i],value_delta_correction))==sort_bool_::true_()))))
+            (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool_::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
         found=true;
@@ -1282,9 +1282,9 @@ inline bool is_inconsistent(
         lowerbound_violation=false;
       }
       else if ((lowerbounds.count(*i)>0) && 
-               ((r(less(value,lowerbounds[*i]))==sort_bool_::true_()) ||
+               ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool_::true_()) ||
                 ((lowerbounds[*i]==value) && 
-                 (r(less(value_delta_correction,lowerbounds_delta_correction[*i]))==sort_bool_::true_()))))
+                 (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
         found=true;
@@ -1310,12 +1310,12 @@ inline bool is_inconsistent(
         // std::cerr << pp(xj) << "  --  " << pp(xj_it->second) << "\n";
         if ((is_positive(xj_it->second,r) && 
                 ((upperbounds.count(xj)==0) || 
-                    ((r(less(beta[xj],upperbounds[xj]))==sort_bool_::true_())||
-                     ((beta[xj]==upperbounds[xj])&& (r(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]))==sort_bool_::true_()))))) ||
+                    ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_())||
+                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
             (is_negative(xj_it->second,r) && 
                  ((lowerbounds.count(xj)==0) || 
-                    ((r(greater(beta[xj],lowerbounds[xj]))==sort_bool_::true_())||
-                     ((beta[xj]==lowerbounds[xj]) && (r(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]))==sort_bool_::true_()))))))
+                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_())||
+                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
         { found=true;
           pivot_and_update(xi,xj,lowerbounds[xi],lowerbounds_delta_correction[xi],
                            beta, beta_delta_correction,
@@ -1343,12 +1343,12 @@ inline bool is_inconsistent(
         //                 is_positive(xj_it->second,r) << "\n";
         if ((is_negative(xj_it->second,r) && 
                 ((upperbounds.count(xj)==0) || 
-                   ((r(less(beta[xj],upperbounds[xj]))==sort_bool_::true_()) ||
-                     ((beta[xj]==upperbounds[xj])&& (r(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]))==sort_bool_::true_()))))) ||
+                   ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_()) ||
+                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
             (is_positive(xj_it->second,r) && 
                  ((lowerbounds.count(xj)==0) || 
-                    ((r(greater(beta[xj],lowerbounds[xj]))==sort_bool_::true_()) ||
-                     ((beta[xj]==lowerbounds[xj]) && (r(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]))==sort_bool_::true_()))))))
+                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_()) ||
+                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
         { found=true;
           pivot_and_update(xi,xj,upperbounds[xi],upperbounds_delta_correction[xi],
                            beta,beta_delta_correction,
