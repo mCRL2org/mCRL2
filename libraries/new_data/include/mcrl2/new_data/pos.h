@@ -38,6 +38,7 @@ namespace mcrl2 {
       basic_sort pos()
       {
         static basic_sort pos("Pos");
+        pos.protect();
         return pos;
       }
 

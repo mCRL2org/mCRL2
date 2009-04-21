@@ -283,7 +283,8 @@ namespace mcrl2 {
      * \note Necessary for range construction with term_list_random_iterator
      **/
     template < typename TargetExpression, typename SourceExpression >
-    detail::random_access_list< TargetExpression > add_random_access(atermpp::term_list< SourceExpression > const& list) {
+    detail::random_access_list< TargetExpression > add_random_access(atermpp::term_list< SourceExpression > const& list)
+    {
       return detail::random_access_list< TargetExpression >(list);
     }
 
@@ -292,7 +293,8 @@ namespace mcrl2 {
      * \note Necessary for range construction with term_list_random_iterator
      **/
     template < typename Expression >
-    detail::random_access_list< Expression > add_random_access(ATermList list) {
+    detail::random_access_list< Expression > add_random_access(ATermList list)
+    {
       return detail::random_access_list< Expression >(list);
     }
 
@@ -300,7 +302,8 @@ namespace mcrl2 {
     /// \seealso boost::make_iterator_range
     template < typename Iterator, typename Container >
     typename boost::iterator_range< Iterator >
-    make_iterator_range(Container const& c) {
+    make_iterator_range(Container const& c)
+    {
       return detail::range_factory< Container, boost::iterator_range< Iterator > >::make_range(c);
     }
 

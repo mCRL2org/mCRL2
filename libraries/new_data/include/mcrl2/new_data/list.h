@@ -42,7 +42,8 @@ namespace mcrl2 {
       container_sort list(const sort_expression& s)
       {
         container_sort list("list", s);
-        return list;
+        list.protect()
+;        return list;
       }
 
       /// \brief Recogniser for sort expression List(s)

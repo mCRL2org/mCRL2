@@ -39,6 +39,7 @@ namespace mcrl2 {
       basic_sort nat()
       {
         static basic_sort nat("Nat");
+        nat.protect();
         return nat;
       }
 
@@ -61,6 +62,7 @@ namespace mcrl2 {
       basic_sort natpair()
       {
         static basic_sort natpair("@NatPair");
+        natpair.protect();
         return natpair;
       }
 

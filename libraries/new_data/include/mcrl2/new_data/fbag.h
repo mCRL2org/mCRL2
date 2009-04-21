@@ -44,7 +44,8 @@ namespace mcrl2 {
       container_sort fbag(const sort_expression& s)
       {
         container_sort fbag("fbag", s);
-        return fbag;
+        fbag.protect()
+;        return fbag;
       }
 
       /// \brief Recogniser for sort expression FBag(s)

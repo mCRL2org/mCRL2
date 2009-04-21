@@ -40,6 +40,7 @@ namespace mcrl2 {
       basic_sort int_()
       {
         static basic_sort int_("Int");
+        int_.protect();
         return int_;
       }
 

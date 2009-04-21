@@ -41,6 +41,7 @@ namespace mcrl2 {
       basic_sort real_()
       {
         static basic_sort real_("Real");
+        real_.protect();
         return real_;
       }
 

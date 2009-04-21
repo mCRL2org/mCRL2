@@ -43,7 +43,8 @@ namespace mcrl2 {
       container_sort set_(const sort_expression& s)
       {
         container_sort set_("set_", s);
-        return set_;
+        set_.protect()
+;        return set_;
       }
 
       /// \brief Recogniser for sort expression Set(s)

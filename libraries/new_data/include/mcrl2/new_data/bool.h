@@ -37,6 +37,7 @@ namespace mcrl2 {
       basic_sort bool_()
       {
         static basic_sort bool_("Bool");
+        bool_.protect();
         return bool_;
       }
 
