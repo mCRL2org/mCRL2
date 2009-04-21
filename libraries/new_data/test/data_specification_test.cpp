@@ -23,6 +23,7 @@
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/parser.h"
+#include "gc.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -446,6 +447,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_sorts();
+  AT_collect();
   test_constructors();
   test_functions();
   test_equations();
