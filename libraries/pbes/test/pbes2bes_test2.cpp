@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
@@ -139,6 +140,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test1();
+  core::garbage_collect();
 
   return 0;
 }

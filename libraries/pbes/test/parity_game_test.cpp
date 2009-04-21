@@ -23,7 +23,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
-#include "gc.h" // ATerm Library garbage collector
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -280,8 +280,11 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_parity_game_generator();
+  core::garbage_collect();
   test_parity_game_generator2();
+  core::garbage_collect();
   test_bes_examples();
+  core::garbage_collect();
 
   return 0;
 }

@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -143,6 +144,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_balancing_plat();
+  core::garbage_collect();
 
   return 0;
 }

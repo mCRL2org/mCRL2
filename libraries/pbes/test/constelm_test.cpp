@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -254,19 +255,33 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_pbes(t1 , x1 , false);
+  core::garbage_collect();
   test_pbes(t2 , x2 , false);
+  core::garbage_collect();
   test_pbes(t3 , x3 , false);
+  core::garbage_collect();
   test_pbes(t4 , x4 , true);
+  core::garbage_collect();
   test_pbes(t5 , x5 , true);
+  core::garbage_collect();
   test_pbes(t6 , x6 , false);
+  core::garbage_collect();
   test_pbes(t7 , x7 , false);
+  core::garbage_collect();
   test_pbes(t8 , x8 , true);
+  core::garbage_collect();
   test_pbes(t9 , x9 , true);
+  core::garbage_collect();
   test_pbes(t10, x10, true);
+  core::garbage_collect();
   test_pbes(t11, x11, true);
+  core::garbage_collect();
   test_pbes(t12, x12, false);
+  core::garbage_collect();
   test_pbes(t13, x13, false);
+  core::garbage_collect();
   test_pbes(t14, x14, false);
+  core::garbage_collect();
 
   return 0;
 }

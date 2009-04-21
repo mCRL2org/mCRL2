@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2::core;
 using namespace atermpp;
@@ -94,6 +95,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_propositional_variable_instantiation();
+  core::garbage_collect();
 
   return 0;
 }

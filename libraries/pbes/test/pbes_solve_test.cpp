@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2::new_data;
 using namespace mcrl2::lps;
@@ -135,6 +136,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test_hblc();
+  core::garbage_collect();
 
   return 0;
 }

@@ -14,6 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/pbes/bes.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -50,6 +51,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_boolean_expressions();
+  core::garbage_collect();
 
   return 0;
 }

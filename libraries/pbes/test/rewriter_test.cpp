@@ -27,6 +27,7 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -481,12 +482,19 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_simplifying_rewriter();
+  core::garbage_collect();
   test_enumerate_quantifiers_rewriter();
+  core::garbage_collect();
   test_enumerate_quantifiers_rewriter_finite();
+  core::garbage_collect();
   test_substitutions1();
+  core::garbage_collect();
   test_substitutions2();
+  core::garbage_collect();
   test_substitutions3();
+  core::garbage_collect();
   test_pfnf_rewriter();
+  core::garbage_collect();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
   BOOST_CHECK(false);

@@ -23,6 +23,7 @@
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using pbes_system::enumerate_quantifiers_rewriter;
@@ -210,6 +211,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
   test_pbes2bes();
+  core::garbage_collect();
 
   return 0;
 }

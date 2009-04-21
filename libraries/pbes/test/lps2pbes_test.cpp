@@ -23,6 +23,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "test_specifications.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -314,10 +315,15 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_lps2pbes();
+  core::garbage_collect();
   test_lps2pbes2();
+  core::garbage_collect();
   test_trivial();
+  core::garbage_collect();
   test_formulas();
+  core::garbage_collect();
   test_equal_multi_actions();
+  core::garbage_collect();
   //test_directory();
 
   return 0;

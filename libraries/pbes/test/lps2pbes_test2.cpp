@@ -16,6 +16,7 @@
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -86,8 +87,11 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);
+  core::garbage_collect();
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA2);
+  core::garbage_collect();
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA3);
+  core::garbage_collect();
 
   return 0;
 }

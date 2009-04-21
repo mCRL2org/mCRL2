@@ -13,6 +13,7 @@
 #include <sstream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2::pbes_system;
 
@@ -47,6 +48,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_parse();
+  core::garbage_collect();
 
   return 0;
 }

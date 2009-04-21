@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
 using namespace atermpp;
@@ -106,6 +107,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_parelm();
+  core::garbage_collect();
 
   return 0;
 }

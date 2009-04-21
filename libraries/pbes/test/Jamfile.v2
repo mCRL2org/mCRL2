@@ -7,6 +7,7 @@ project libraries/pbes/test
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
+       #<define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
 
 include $(TOP)/build/testing/header_test.jam ;

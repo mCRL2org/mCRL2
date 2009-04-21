@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -231,8 +232,11 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes();
+  core::garbage_collect();
   test_abp();
+  core::garbage_collect();
   test_bes_examples();
+  core::garbage_collect();
 
   return 0;
 }

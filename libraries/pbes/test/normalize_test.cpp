@@ -20,7 +20,7 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "gc.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 
@@ -187,13 +187,13 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_normalize1();
-  AT_collect();
+  core::garbage_collect();
   test_normalize2();
-  AT_collect();
+  core::garbage_collect();
   test_normalize3();
-  AT_collect();
+  core::garbage_collect();
   test_pfnf_visitor();
-  AT_collect();
+  core::garbage_collect();
 
   return 0;
 }

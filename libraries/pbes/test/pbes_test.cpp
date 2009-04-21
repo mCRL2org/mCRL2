@@ -30,6 +30,7 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using new_data::make_vector;
@@ -343,13 +344,21 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_trivial();
+  core::garbage_collect();
   test_pbes();
+  core::garbage_collect();
   // test_xyz_generator();
+  core::garbage_collect();
   test_free_variables();
+  core::garbage_collect();
   test_quantifier_rename_builder();
+  core::garbage_collect();
   test_complement_method_builder();
+  core::garbage_collect();
   test_pbes_expression();
+  core::garbage_collect();
   test_instantiate_free_variables();
+  core::garbage_collect();
 
   return 0;
 }
