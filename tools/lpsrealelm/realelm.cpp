@@ -937,7 +937,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
         variable_list sumvars= i->get_real_summation_variables(); 
  
         // std::cerr << "SUMVARS " << pp(sumvars) << "\n" ;
-        std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
+        // std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
         
         fourier_motzkin(*nextstate_combination,
                         sumvars.begin(),
@@ -994,7 +994,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   for(std::vector < summand_information >::const_iterator i = summand_info.begin();
                        i != summand_info.end(); ++i)
   {
-    // std::cerr << "SUMMAND_IN " << pp(i->get_summand()) << "\n";
+    std::cerr << "SUMMAND_IN__ " << pp(i->get_summand()) << "\n";
     
     // Construct the real time condition for summand in terms of xi variables.
 
@@ -1059,105 +1059,42 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
             }
           }
         }
-        // std::cerr << "FOUND " << pp(new_condition) << "\n";
         if (!found)
         { all_conditions_found=false;
         }
       }
 
-      // original condition of the summand && zeta[x := g(x)]
-      /* vector < linear_inequality >  condition = *nextstate_combination;
-         condition.insert(condition.end(),
-                         i->get_summand_real_conditions_begin(),
-                         i->get_summand_real_conditions_end());
-
-      // Eliminate sum bound variables, resulting in inequalities over
-      // process parameters of sort Real.
-
-      vector < linear_inequality > condition1;
-      variable_list sumvars= i->get_summand().summation_variables();
-      fourier_motzkin(condition,
-                      sumvars.begin(),
-                      sumvars.end(),
-                      condition1,
-                      r);
-      condition.clear();
-      remove_redundant_inequalities(condition1,condition,r); */
-
-      // First check which of these inequalities are equivalent to concrete values of xi variables.
-      // Add these values for xi variables as a new condition. Remove these variables from the
-      // context combinations to be considered for the xi variables.
-
-      /* if (condition.empty() || !condition.front().is_false(r)) // is consistent... */
-      {
-        /* context_type xi_context_for_this_summand;
-        data_expression_list xi_condition;
-
-        // Filter the xi_context_for_this_summand by removing variables for which lower and upperbound
-        // do not share variables with the expressions in condition.
-        context_type filtered_xi_context_for_this_summand;
-        for(context_type::iterator c=context.begin();
-                                     c!=context.end(); ++c)
-        { if (are_variables_shared(c->get_lowerbound(),c->get_upperbound(),condition))
-          { filtered_xi_context_for_this_summand.push_back(*c);
-          }
-        }
-
-        // std::cerr << "condition " << pp_vector(condition) << "\n";
-        atermpp::vector < data_expression_list > xi_context_conditions =
-                    generate_xi_conditions(filtered_xi_context_for_this_summand,
-                    condition,
-                    r);
-
-        // std::cerr << "Xi combinations: " << xi_context_conditions.size() << "\n";
-        for(atermpp::vector < data_expression_list >::iterator
-                  xi_context_condition = xi_context_conditions.begin();
-                  xi_context_condition != xi_context_conditions.end(); 
-                  ++xi_context_condition) // , ++xi_context_condition) */
-        {
-          /* // std::cerr << "Xi context condition " << pp(*xi_context_condition) << "\n";
-          atermpp::vector < data_expression > new_inequalities; */
-
-
-          if (!all_conditions_found)
-          // if (!new_inequalities.empty())
-          { // add a may transition.
-            std::cerr << "CONDITION " << pp(new_condition) << "\n" 
-                        << "INTERNAL " << new_condition << "\n\n";
-            summand s = generate_summand(*i,
-                                         new_condition,
-                                         // and_(join_and(xi_condition.begin(), xi_condition.end()),
-                                         //     join_and(xi_context_condition->begin(),
-                                         //            xi_context_condition->end())),
-                                         *nextstate_value,
-                                         context,
-                                         r,
-                                         new_act_declarations,
-                                         variable_generator,
-                                         true);
-            // std::cerr << "MAY SUMMAND_OUT: " << pp(s) << "\n";
-            summands = push_front(summands, s);
-          }
-          else
-          { // add a must transition.
-            summand s = generate_summand(*i,
-                                      new_condition,
-                                      // and_(join_and(xi_condition.begin(), xi_condition.end()),
-                                      //       join_and(xi_context_condition->begin(),
-                                      //               xi_context_condition->end())),
-                                       *nextstate_value,
-                                       context,
-                                       r,
-                                       new_act_declarations,
-                                       variable_generator,
-                                       false);
-            // std::cerr << "MUST SUMMAND_OUT: " << pp(s) << "\n";
-            summands = push_front(summands, s);
-          }
-        }
+      if (!all_conditions_found)
+      // if (!new_inequalities.empty())
+      { // add a may transition.
+        summand s = generate_summand(*i,
+                                     new_condition,
+                                     *nextstate_value,
+                                     context,
+                                     r,
+                                     new_act_declarations,
+                                     variable_generator,
+                                     true);
+        // std::cerr << "MAY SUMMAND_OUT: " << pp(s) << "\n";
+        summands = push_front(summands, s);
+      }
+      else
+      { // add a must transition.
+        summand s = generate_summand(*i,
+                                  new_condition,
+                                   *nextstate_value,
+                                   context,
+                                   r,
+                                   new_act_declarations,
+                                   variable_generator,
+                                   false);
+        // std::cerr << "MUST SUMMAND_OUT: " << pp(s) << "\n";
+        summands = push_front(summands, s);
       }
     }
   }
+
+
   summands = reverse(summands);
 
   // Process parameters
