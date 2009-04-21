@@ -85,12 +85,25 @@ void list_construction_test() {
                                 expressions[0]), expressions[1]), expressions[2]), expressions[3])));
 }
 
+void convert_test() {
+
+  std::vector< data_expression > l;
+ 
+  l.push_back(sort_bool_::true_());
+
+  atermpp::aterm_list al = convert< atermpp::aterm_list >(l);
+
+  // Could loop indefinitely if the wrong overload is chosen through type-unsafe conversion
+  std::vector< data_expression > r = convert< std::vector< data_expression > >(static_cast< ATermList >(al));
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
   number_test();
   list_construction_test();
+  convert_test();
 
   return EXIT_SUCCESS;
 }

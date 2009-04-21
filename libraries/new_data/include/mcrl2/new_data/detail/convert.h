@@ -47,10 +47,10 @@ namespace mcrl2 {
       // Specialisation for ATermList
       template < typename TargetContainer, typename TargetExpression >
       struct converter< TargetContainer, ATermList, TargetExpression, atermpp::aterm > :
-                 public converter< TargetContainer, atermpp::aterm_list, TargetExpression, atermpp::aterm > {
+                 public converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm > {
 
         static TargetContainer convert(ATermList l) {
-          return convert(atermpp::aterm_list(l));
+          return converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >::convert(atermpp::term_list< TargetExpression >(l));
         }
       };
 
