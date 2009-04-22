@@ -5,6 +5,7 @@ project libraries/new_data/test
        <library>/libraries//core
        <toolset>msvc:<asynch-exceptions>on
        <source>/site-config//boost_filesystem
+       <define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
