@@ -318,6 +318,15 @@ namespace mcrl2 {
         return sort_real_::creal(sort_int_::int_(t), sort_pos::c1());
       }
 
+      /// \brief Constructs expression of type pos from an integral type
+      /// \param n numerator
+      /// \param d denominator
+      template < typename T >
+      inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
+      real_(T numerator, T denominator) {
+        return sort_real_::creal(sort_int_::int_(numerator), sort_pos::pos(denominator));
+      }
+
       /// \brief Constructs expression of type Real from a string
       /// \param n A string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)

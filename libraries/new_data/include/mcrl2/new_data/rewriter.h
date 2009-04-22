@@ -137,7 +137,10 @@ namespace new_data {
                        m_specification(other.m_specification),
                        m_substitution_context(other.m_substitution_context),
                        m_reconstruction_context(other.m_substitution_context)
-      {}
+      {
+        m_specification.protect();
+        m_substitution_context.protect();
+      }
 
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] specification a data specification.
@@ -167,8 +170,6 @@ namespace new_data {
             m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
           }
         }
-
-        m_substitution_context.protect();
 
         return result;
       }
@@ -245,8 +246,8 @@ namespace new_data {
           m_reconstruction_context(r.m_reconstruction_context),
           m_specification(r.m_specification)
       {
-        m_substitution_context.protect();
         m_specification.protect();
+        m_substitution_context.protect();
       }
 
       /// \brief Constructor.
@@ -257,6 +258,7 @@ namespace new_data {
           m_specification(implement(d))
       {
         m_specification.protect();
+        m_substitution_context.protect();
       }
 
       /// \brief Returns a reference to the Rewriter object that is used for the implementation.
@@ -267,7 +269,9 @@ namespace new_data {
         return *m_rewriter;
       }
 
-      ~basic_rewriter() {
+      virtual ~basic_rewriter() {
+        m_specification.unprotect();
+        m_substitution_context.unprotect();
       }
   };
 

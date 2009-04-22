@@ -30,6 +30,8 @@ using namespace mcrl2::new_data;
 
 void test_sorts()
 {
+  std::clog << "test_sorts" << std::endl;
+
   basic_sort s("S");
   basic_sort s0("S0");
   alias s1(basic_sort("S1"), s);
@@ -72,6 +74,8 @@ void test_sorts()
 
 void test_aliases()
 {
+  std::clog << "test_aliases" << std::endl;
+
   basic_sort s("S");
   basic_sort t("T");
   alias      s1(basic_sort("S1"), s);
@@ -102,6 +106,8 @@ void test_aliases()
 
 void test_constructors()
 {
+  std::clog << "test_constructors" << std::endl;
+
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(make_vector(sort_expression(s0)),s);
@@ -164,6 +170,8 @@ void test_constructors()
 
 void test_functions()
 {
+  std::clog << "test_functions" << std::endl;
+
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(make_vector(sort_expression(s0)), s);
@@ -231,6 +239,7 @@ void test_functions()
 
 void test_equations()
 {
+  std::clog << "test_equations" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s(make_vector(reinterpret_cast<sort_expression&>(s0)), s);
@@ -279,6 +288,7 @@ void test_equations()
 
 void test_is_certainly_finite()
 {
+  std::clog << "test_is_certainly_finite" << std::endl;
   basic_sort s("S");
   basic_sort s0("S0");
   function_sort s0s0(make_vector(static_cast<sort_expression&>(s0)), s0);
@@ -344,6 +354,7 @@ void test_is_certainly_finite()
 
 void test_constructor()
 {
+  std::clog << "test_constructor" << std::endl;
   std::string SPEC =
     "sort                      \n"
     "  D     = struct d1 | d2; \n"
@@ -392,6 +403,8 @@ bool search(boost::iterator_range< ForwardTraversalIterator > const& range, Expr
 
 void test_system_defined()
 {
+  std::clog << "test_system_defined" << std::endl;
+
   data_specification specification(parse_data_specification(
     "sort S;"
     "map f: Set(S);"));
@@ -432,6 +445,8 @@ void test_system_defined()
 
 void test_copy()
 {
+  std::clog << "test_copy" << std::endl;
+
   data_specification specification(parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
     "sort S;"

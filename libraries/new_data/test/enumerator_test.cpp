@@ -142,7 +142,7 @@ void f(data_expression d)
 
 void test2()
 {
-  variable n = parse_data_expression("n", "n: Pos;\n");
+  variable n("n", sort_pos::pos());
   A a = n;
   f(a);
   std::cout << "a = " << mcrl2::core::pp(a) << std::endl;

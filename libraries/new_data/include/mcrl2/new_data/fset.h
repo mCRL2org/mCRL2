@@ -41,7 +41,6 @@ namespace mcrl2 {
       container_sort fset(const sort_expression& s)
       {
         container_sort fset("fset", s);
-        fset.protect();
         return fset;
       }
 

@@ -13,6 +13,8 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/new_data/pos.h"
+#include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/parser.h"
 #include "mcrl2/new_data/standard.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -32,6 +34,8 @@ void parser_test()
   BOOST_CHECK(boost::copy_range< new_data::sort_expression_vector >(spec.sorts()).size() == 1);
   BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.constructors()).size() == 1);
   BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.mappings()).size() == 1);
+
+  BOOST_CHECK(new_data::parse_data_expression("2") == new_data::sort_pos::pos(2));
 }
 
 int test_main(int argc, char** argv)

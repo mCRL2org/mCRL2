@@ -42,7 +42,6 @@ namespace mcrl2 {
       container_sort list(const sort_expression& s)
       {
         container_sort list("list", s);
-        list.protect();
         return list;
       }
 

@@ -196,7 +196,22 @@ void test4()
   std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
   std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, core::pp(new_data::detail::implement_data_specification(data_spec)), sigma);
+  test_expressions(R, expr1, expr2, new_data::pp(data_spec), sigma);
+}
+
+void allocation_test()
+{
+  data_specification data_spec;
+  std::auto_ptr< new_data::rewriter > R_heap(new new_data::rewriter(data_spec));
+  new_data::rewriter                  R_stack(data_spec);
+
+  R_stack(parse_data_expression("1 == 2"));
+  core::garbage_collect();
+  R_stack(parse_data_expression("1 == 2"));
+
+  (*R_heap)(parse_data_expression("1 == 2"));
+  core::garbage_collect();
+  (*R_heap)(parse_data_expression("1 == 2"));
 }
 
 int test_main(int argc, char** argv)

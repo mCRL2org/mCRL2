@@ -87,10 +87,10 @@ void pos_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p1(R(parse_data_expression("1")));
-  data_expression p2(R(parse_data_expression("2")));
-  data_expression p3(R(parse_data_expression("3")));
-  data_expression p4(R(parse_data_expression("4")));
+  data_expression p1(pos("1"));
+  data_expression p2(pos("2"));
+  data_expression p3(pos("3"));
+  data_expression p4(pos("4"));
 
   data_rewrite_test(R, sort_pos::plus(p1, p2), p3);
   data_rewrite_test(R, sort_pos::plus(p2, p1), p3);
@@ -116,11 +116,11 @@ void nat_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p0(R(parse_data_expression("0")));
-  data_expression p1(R(pos2nat(parse_data_expression("1"))));
-  data_expression p2(R(pos2nat(parse_data_expression("2"))));
-  data_expression p3(R(pos2nat(parse_data_expression("3"))));
-  data_expression p4(R(pos2nat(parse_data_expression("4"))));
+  data_expression p0(nat(0));
+  data_expression p1(nat(1));
+  data_expression p2(nat(2));
+  data_expression p3(nat(3));
+  data_expression p4(nat(4));
 
   data_rewrite_test(R, plus(p0, p2), p2);
   data_rewrite_test(R, plus(p2, p0), p2);
@@ -150,10 +150,10 @@ void nat_rewrite_test() {
 
   data_rewrite_test(R, abs(p1), p1);
 
-  data_rewrite_test(R, div(p1, parse_data_expression("1")), p1);
-  data_rewrite_test(R, div(p0, parse_data_expression("2")), p0);
-  data_rewrite_test(R, div(p2, parse_data_expression("1")), p2);
-  data_rewrite_test(R, div(p4, parse_data_expression("2")), p2);
+  data_rewrite_test(R, div(p1, sort_pos::pos(1)), p1);
+  data_rewrite_test(R, div(p0, sort_pos::pos(2)), p0);
+  data_rewrite_test(R, div(p2, sort_pos::pos(1)), p2);
+  data_rewrite_test(R, div(p4, sort_pos::pos(2)), p2);
 
   data_rewrite_test(R, mod(p1, nat2pos(p1)), p0);
   data_rewrite_test(R, mod(p0, nat2pos(p2)), p0);
@@ -163,10 +163,10 @@ void nat_rewrite_test() {
   data_rewrite_test(R, exp(p2, p2), p4);
 
   // Added a few additional checks (Wieger)
-  new_data::rewriter datar;
+  new_data::rewriter datar(specification);
   new_data::data_expression x = new_data::parse_data_expression("n >= 0", "n:Nat;");
   BOOST_CHECK(datar(x) == sort_bool_::true_());
-  variable n("n", sort_nat::nat());
+  variable n("n", nat());
   data_rewrite_test(R, greater_equal(n, p0), sort_bool_::true_());
 }
 
@@ -177,11 +177,11 @@ void int_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p0(R(nat2int(parse_data_expression("0"))));
-  data_expression p1(R(pos2int(parse_data_expression("1"))));
-  data_expression p2(R(pos2int(parse_data_expression("2"))));
-  data_expression p3(R(pos2int(parse_data_expression("3"))));
-  data_expression p4(R(pos2int(parse_data_expression("4"))));
+  data_expression p0(int_(0));
+  data_expression p1(int_(1));
+  data_expression p2(int_(2));
+  data_expression p3(int_(3));
+  data_expression p4(int_(4));
 
   data_rewrite_test(R, plus(p0, p2), p2);
   data_rewrite_test(R, plus(p2, p0), p2);
@@ -233,11 +233,11 @@ void real_rewrite_test() {
 
   new_data::rewriter R(specification);
 
-  data_expression p0(R(nat2real(parse_data_expression("0"))));
-  data_expression p1(R(pos2real(parse_data_expression("1"))));
-  data_expression p2(R(pos2real(parse_data_expression("2"))));
-  data_expression p3(R(pos2real(parse_data_expression("3"))));
-  data_expression p4(R(pos2real(parse_data_expression("4"))));
+  data_expression p0(real_(0));
+  data_expression p1(real_(1));
+  data_expression p2(real_(2));
+  data_expression p3(real_(3));
+  data_expression p4(real_(4));
 
   data_rewrite_test(R, plus(p0, p2), p2);
   data_rewrite_test(R, plus(p2, p0), p2);
@@ -276,12 +276,12 @@ void real_rewrite_test() {
 
   data_rewrite_test(R, exp(p2, real2int(p2)), p4);
 
-  data_rewrite_test(R, int2real(floor(parse_data_expression("29/10"))), p2);
+  data_rewrite_test(R, int2real(floor(real_(29, 10))), p2);
 
-  data_rewrite_test(R, int2real(ceil(parse_data_expression("12/10"))), p2);
+  data_rewrite_test(R, int2real(ceil(real_(12, 10))), p2);
 
-  data_rewrite_test(R, int2real(round(parse_data_expression("16/10"))), p2);
-  data_rewrite_test(R, int2real(round(parse_data_expression("24/10"))), p2);
+  data_rewrite_test(R, int2real(round(real_(16, 10))), p2);
+  data_rewrite_test(R, int2real(round(real_(24, 10))), p2);
 }
 
 void list_rewrite_test() {
@@ -301,7 +301,7 @@ void list_rewrite_test() {
   data_rewrite_test(R, count(bool_(), head_true), sort_nat::nat(1));
   data_rewrite_test(R, in(bool_(), false_(), snoc(bool_(), head_true, true_())), false_());
   data_rewrite_test(R, concat(bool_(), head_true, head_true), R(cons_(bool_(), true_(), head_true)));
-  data_rewrite_test(R, element_at(bool_(), head_true, parse_data_expression("0")), true_());
+  data_rewrite_test(R, element_at(bool_(), head_true, sort_nat::nat(0)), true_());
   data_rewrite_test(R, head(bool_(), head_true), true_());
   data_rewrite_test(R, rhead(bool_(), head_true), true_());
   data_rewrite_test(R, rtail(bool_(), head_true), empty);
@@ -324,9 +324,9 @@ void set_rewrite_test() {
 
   data_expression empty(R(emptyset(nat())));
 
-  data_expression p0(R(parse_data_expression("0")));
-  data_expression p1(R(pos2nat(parse_data_expression("1"))));
-  data_expression p2(R(pos2nat(parse_data_expression("2"))));
+  data_expression p0(nat(0));
+  data_expression p1(nat(1));
+  data_expression p2(nat(2));
 
   data_expression s1(R(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat())))));
   data_expression s2(R(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat())))));
@@ -367,13 +367,13 @@ void bag_rewrite_test() {
 
   data_expression empty(R(emptybag(nat())));
 
-  data_expression p0(R(parse_data_expression("0")));
-  data_expression p1(R(pos2nat(parse_data_expression("1"))));
-  data_expression p2(R(pos2nat(parse_data_expression("2"))));
+  data_expression p0(nat(0));
+  data_expression p1(nat(1));
+  data_expression p2(nat(2));
 
-  data_expression s1(R(bagfbag(nat(), fbaginsert(nat(), p1, pos("1"), fbag_empty(nat())))));
-  data_expression s2(R(bagfbag(nat(), fbaginsert(nat(), p2, pos("2"), fbag_empty(nat())))));
-  data_expression s(R(bagfbag(nat(), fbaginsert(nat(), p1, pos("1"), fbaginsert(nat(), p2, pos("2"), fbag_empty(nat()))))));
+  data_expression s1(R(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat())))));
+  data_expression s2(R(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))));
+  data_expression s(R(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))))));
 
   data_rewrite_test(R, bagin(nat(), p0, s), false_());
   data_rewrite_test(R, bagin(nat(), p1, s), true_());
@@ -430,7 +430,7 @@ void structured_sort_rewrite_test() {
   new_data::structured_sort ls(boost::make_iterator_range(constructors));
 
   specification.add_sort(alias(basic_sort("D"), ls));
-std::clog << "S" << new_data::pp(specification) << std::endl;
+
   new_data::rewriter R(specification);
 
   data_expression c0(constructors[0].constructor_function(ls));
