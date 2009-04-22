@@ -17,38 +17,38 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/detail/implement_data_types.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/implement_data_types.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 
-new_data::rewriter make_data_rewriter(const data_specification& data_spec)
+data::rewriter make_data_rewriter(const data_specification& data_spec)
 {
-  new_data::rewriter datar(data_spec);
+  data::rewriter datar(data_spec);
   return datar;
 }
 
 struct A
 {
-  new_data::rewriter& r_;
+  data::rewriter& r_;
 
-  A(new_data::rewriter& r)
+  A(data::rewriter& r)
     : r_(r)
   { }
 };
 
-A make_A(new_data::rewriter& d)
+A make_A(data::rewriter& d)
 {
   A result(d);
   return result;
@@ -56,7 +56,7 @@ A make_A(new_data::rewriter& d)
 
 void test1()
 {
-  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::data::sort_nat;
 
   std::string DATA_SPEC1 =
   "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
@@ -72,11 +72,11 @@ void test1()
     parse_data_expression("2"))) == datar(parse_data_expression("3")));
 
   // copy a rewriter
-  new_data::rewriter datar1 = datar;
+  data::rewriter datar1 = datar;
   t = datar1(greater(minimum(x,y), z));
 
   // rewriter as return value
-  new_data::rewriter datar2 = make_data_rewriter(data);
+  data::rewriter datar2 = make_data_rewriter(data);
   t = datar2(greater(minimum(x,y), z));
 
   A a(datar);
@@ -91,7 +91,7 @@ void test1()
 
 void test2()
 {
-  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::data::sort_nat;
 
   rewriter r;
   data_expression d1 = parse_data_expression("2+7");
@@ -129,7 +129,7 @@ void test3()
 
   data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
   data_expression_with_variables z = r(y);
-  std::cout << "y = " << core::pp(y) << " " << new_data::pp(y.variables()) << std::endl;
+  std::cout << "y = " << core::pp(y) << " " << data::pp(y.variables()) << std::endl;
   BOOST_CHECK(z.variables().empty());
 
   std::string var_decl = "m, n: Pos;\n";
@@ -163,8 +163,8 @@ void parse_substitutions(std::string text, std::string data_spec, SubstitutionFu
     {
       continue;
     }
-    new_data::variable v = new_data::parse_variable(words[0], data_spec);
-    new_data::data_expression e = new_data::parse_data_expression(words[1], "", data_spec);
+    data::variable v = data::parse_variable(words[0], data_spec);
+    data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
     sigma[v] = e;
   }
 }
@@ -191,19 +191,19 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
 void test4()
 {
   data_specification data_spec;
-  new_data::rewriter R(data_spec);
+  data::rewriter R(data_spec);
 
   std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
   std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, new_data::pp(data_spec), sigma);
+  test_expressions(R, expr1, expr2, data::pp(data_spec), sigma);
 }
 
 void allocation_test()
 {
   data_specification data_spec;
-  std::auto_ptr< new_data::rewriter > R_heap(new new_data::rewriter(data_spec));
-  new_data::rewriter                  R_stack(data_spec);
+  std::auto_ptr< data::rewriter > R_heap(new data::rewriter(data_spec));
+  data::rewriter                  R_stack(data_spec);
 
   R_stack(parse_data_expression("1 == 2"));
   core::garbage_collect();

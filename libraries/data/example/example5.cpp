@@ -1,11 +1,11 @@
 #include <cassert>
-#include "mcrl2/new_data/pos.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/identifier_generator.h"
 
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 int main(int argc, char* argv[])
 {
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   atermpp::vector<enumerator_expression> values = e.enumerate(x);
   for (atermpp::vector<enumerator_expression>::iterator i = values.begin(); i != values.end(); ++i)
   {
-    std::cout << new_data::pp(i->expression()) << " " << new_data::pp(i->variables()) << std::endl;
+    std::cout << data::pp(i->expression()) << " " << data::pp(i->variables()) << std::endl;
   }
 
   return 0;

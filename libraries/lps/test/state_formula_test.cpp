@@ -16,9 +16,9 @@
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/state_formula_normalize.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -27,7 +27,7 @@ using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;

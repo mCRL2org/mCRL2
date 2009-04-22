@@ -17,16 +17,16 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/expression_traits.h"
-#include "mcrl2/new_data/mutable_substitution_adapter.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
-#include "mcrl2/new_data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
 
 namespace mcrl2 {
@@ -166,7 +166,7 @@ namespace pbes_system {
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        typedef new_data::mutable_substitution<variable_type, data_term_type> substitution_function;
+        typedef data::mutable_substitution<variable_type, data_term_type> substitution_function;
         substitution_function sigma;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);
@@ -183,11 +183,11 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        typedef new_data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
+        typedef data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, substitution_function(sigma));
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << new_data::to_string(sigma) << std::endl;
+std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << data::to_string(sigma) << std::endl;
 #endif
         return result;
       }
@@ -224,7 +224,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()));
+        return m_rewriter(pbes_expression_with_variables(x, data::variable_list()));
       }
 
       /// \brief Rewrites a pbes expression.
@@ -234,7 +234,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction sigma)
       {
-        return m_rewriter(pbes_expression_with_variables(x, new_data::variable_list()), sigma);
+        return m_rewriter(pbes_expression_with_variables(x, data::variable_list()), sigma);
       }
   };
 
@@ -263,14 +263,14 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
 /*   /// \brief The substituting pbes rewriter used in pbes2bool.
   class substitute_rewriter_jfg
   {
-    new_data::rewriter& datar_;
-    const new_data::data_specification& data_spec;
+    data::rewriter& datar_;
+    const data::data_specification& data_spec;
 
     public:
       /// \brief Constructor
       /// \param datar A data rewriter
       /// \param data A data specification
-      substitute_rewriter_jfg(new_data::rewriter& datar, const new_data::data_specification& data)
+      substitute_rewriter_jfg(data::rewriter& datar, const data::data_specification& data)
         : datar_(datar), data_spec(data)
       { }
 
@@ -286,11 +286,11 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
   /// \brief A pbes rewriter that uses a bdd based prover internally.
   class pbessolve_rewriter
   {
-    new_data::rewriter datar_;
-    const new_data::data_specification& data_spec;
+    data::rewriter datar_;
+    const data::data_specification& data_spec;
     int n;
-    new_data::variable_list fv;
-    boost::shared_ptr<new_data::detail::BDD_Prover> prover;
+    data::variable_list fv;
+    boost::shared_ptr<data::detail::BDD_Prover> prover;
 
     public:
       /// \brief Constructor
@@ -298,13 +298,13 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       /// \param data A data specification
       /// \param rewrite_strategy A rewrite strategy
       /// \param solver_type An SMT solver type
-      pbessolve_rewriter(const new_data::rewriter& datar, const new_data::data_specification& data, 
-              new_data::rewriter::strategy rewrite_strategy, 
-              new_data::detail::SMT_Solver_Type solver_type)
+      pbessolve_rewriter(const data::rewriter& datar, const data::data_specification& data, 
+              data::rewriter::strategy rewrite_strategy, 
+              data::detail::SMT_Solver_Type solver_type)
         : datar_(datar),
           data_spec(data),
           n(0),
-          prover(new new_data::detail::BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
+          prover(new data::detail::BDD_Prover(data_spec, rewrite_strategy, 0, false, solver_type, false))
       { }
 
       /// \brief Rewrites a pbes expression.

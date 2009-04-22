@@ -35,9 +35,9 @@
 #include <utility>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/detail/sequence_substitution.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/sequence_substitution.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
@@ -52,9 +52,9 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& /* e */, const new_data::data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    return new_data::sort_bool_::not_(d);
+    return data::sort_bool_::not_(d);
   }
 
   /// \brief Visit true node
@@ -97,7 +97,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_forall(const pbes_expression& /* e */, const new_data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_forall(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr_optimized::exists(variables, visit(expression));
   }
@@ -106,7 +106,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_exists(const pbes_expression& /* e */, const new_data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_exists(const pbes_expression& /* e */, const data::variable_list& variables, const pbes_expression& expression)
   {
     return pbes_expr_optimized::forall(variables, visit(expression));
   }

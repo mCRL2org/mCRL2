@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/new_data/detail/rewrite/jitty.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
 
 #define NAME "rewr_jitty"
 
@@ -31,7 +31,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 static AFun nilAFun;

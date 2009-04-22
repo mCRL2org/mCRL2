@@ -33,9 +33,9 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
 
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/map_substitution_adapter.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 
 
 #include "mcrl2/pbes/pbes.h"
@@ -124,16 +124,16 @@ namespace bes
   
   static void assign_variables_in_tree(
                         ATerm t,
-                        mcrl2::new_data::variable_list::iterator &var_iter,
-                        atermpp::map<mcrl2::new_data::variable, 
-                                        mcrl2::new_data::data_expression_with_variables> &sigma)
+                        mcrl2::data::variable_list::iterator &var_iter,
+                        atermpp::map<mcrl2::data::variable, 
+                                        mcrl2::data::data_expression_with_variables> &sigma)
   { if (is_pair(t))
     { assign_variables_in_tree(ATgetArgument(t,0),var_iter,sigma);
       assign_variables_in_tree(ATgetArgument(t,1),var_iter,sigma);
     }
     else
     {
-      sigma[*var_iter]=mcrl2::new_data::data_expression(t);
+      sigma[*var_iter]=mcrl2::data::data_expression(t);
       var_iter++;
     }
   }
@@ -147,7 +147,7 @@ namespace bes
    * tree is unique.
    */
   {
-    mcrl2::new_data::data_expression_list args=p.parameters();
+    mcrl2::data::data_expression_list args=p.parameters();
   
     if ( args.size() ==0 )
     return p.name();
@@ -159,7 +159,7 @@ namespace bes
     /* put the arguments in the intermediate tree_store. The last elements are stored as
      * pairs, such that the args.size() elements are stored in n positions. */
     unsigned int i=0;
-    for(mcrl2::new_data::data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
+    for(mcrl2::data::data_expression_list::const_iterator t=args.begin() ; t!=args.end(); t++)
     { if (i<2*n-args.size())
       { tree_store[i]= (*t);
         i++;
@@ -1679,7 +1679,7 @@ namespace bes
           data_to_construct_counter_example(1),
           construct_counter_example(false),
           max_rank(0)
-    { using namespace mcrl2::new_data;
+    { using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       assert(pbes_spec.is_well_typed());
       assert(pbes_spec.is_closed());
@@ -1801,8 +1801,8 @@ namespace bes
         {
     
           pbes_equation current_pbeq;
-          atermpp::map<mcrl2::new_data::variable, mcrl2::new_data::data_expression_with_variables > sigma;
-          // mcrl2::new_data::atermpp::map<mcrl2::new_data::variable, mcrl2::new_data::data_expression > sigma;
+          atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
+          // mcrl2::data::atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression > sigma;
     
           // Add the required substitutions
           if (opt_store_as_tree)
@@ -2001,7 +2001,7 @@ namespace bes
     void print_tree_rec(const char c,
                         ATerm t,
                         std::ostream &f)
-    { using namespace mcrl2::new_data;
+    { using namespace mcrl2::data;
       if (is_pair(t))
       { print_tree_rec(',',ATgetArgument(t,0),f);
         print_tree_rec(',',ATgetArgument(t,1),f);
@@ -2018,7 +2018,7 @@ namespace bes
                                           std::vector<bool> &already_printed,
                                           const bool opt_store_as_tree,
                                           std::ostream &f)
-    { using namespace mcrl2::new_data;
+    { using namespace mcrl2::data;
       using namespace mcrl2::pbes_system;
       if (opt_store_as_tree)
       { ATerm t=variable_index.get(current_var);
@@ -2486,7 +2486,7 @@ static void save_bes_in_pbes_format(
                    boolean_equation_system &bes_equations,
                    const typename mcrl2::pbes_system::pbes<Container> &p)
 { using namespace mcrl2::pbes_system;
-  using namespace mcrl2::new_data;
+  using namespace mcrl2::data;
   if (mcrl2::core::gsVerbose)
   { std::cerr << "Converting result to PBES-format...\n";
   }
@@ -2509,7 +2509,7 @@ static void save_bes_in_pbes_format(
     }
   }
 
-  pbes<> p1(p.data(),eqns,atermpp::set<mcrl2::new_data::variable>(),
+  pbes<> p1(p.data(),eqns,atermpp::set<mcrl2::data::variable>(),
                              propositional_variable_instantiation("X1"));
   p1.save(outfilename);
 }

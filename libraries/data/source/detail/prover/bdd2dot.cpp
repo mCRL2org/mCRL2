@@ -8,7 +8,7 @@
 
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/detail/prover/bdd2dot.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
 #include "mcrl2/core/messaging.h"
 
 using namespace mcrl2::core;

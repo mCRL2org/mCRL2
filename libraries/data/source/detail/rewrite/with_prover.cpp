@@ -17,21 +17,21 @@
 #include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/data_specification.h"
-using namespace mcrl2::new_data::detail;
-#include "mcrl2/new_data/detail/bdd_prover.h"
-#include "mcrl2/new_data/detail/rewrite.h"
-#include "mcrl2/new_data/detail/rewrite/with_prover.h"
+#include "mcrl2/data/data_specification.h"
+using namespace mcrl2::data::detail;
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
-RewriterProver::RewriterProver(ATermAppl DataSpec, mcrl2::new_data::rewriter::strategy strat)
+RewriterProver::RewriterProver(ATermAppl DataSpec, mcrl2::data::rewriter::strategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();

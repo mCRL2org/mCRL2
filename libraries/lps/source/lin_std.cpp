@@ -38,8 +38,8 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
 
@@ -48,7 +48,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 using namespace mcrl2;
 
 #define STRINGLENGTH 256
@@ -68,7 +68,7 @@ static bool allowFreeDataVariablesInProcesses;
 static bool nodeltaelimination;
 static bool add_delta;
 
-static std::auto_ptr< mcrl2::new_data::rewriter > rewr;
+static std::auto_ptr< mcrl2::data::rewriter > rewr;
 
 /* PREAMBLE */
 
@@ -664,7 +664,7 @@ static long insertmapping(
 
 static void insertequation(ATermAppl eqn, specificationbasictype *spec, bool add_to_spec)
 {
-  if (mayrewrite) rewr->add_rule(mcrl2::new_data::data_equation(eqn));
+  if (mayrewrite) rewr->add_rule(mcrl2::data::data_equation(eqn));
   if (add_to_spec) spec->eqns=ATinsertA(spec->eqns,eqn);
 }
 
@@ -913,7 +913,7 @@ static int upperpowerof2(int i)
 static ATermAppl RewriteTerm(ATermAppl t)
 {
   // gsfprintf(stderr,"Rewrite %P\n",t);
-  if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::new_data::data_expression(t)));
+  if (mayrewrite) t=static_cast< ATermAppl >((*rewr)(mcrl2::data::data_expression(t)));
   return t;
 }
 
@@ -5160,8 +5160,8 @@ static enumeratedtype *create_enumeratedtype
 
       //store new declarations in return value w
       w->sortId = sort_id;
-      w->elementnames = new_data::convert< new_data::function_symbol_list >(
-                new_data::structured_sort(new_data::sort_expression(sort_struct)).
+      w->elementnames = data::convert< data::function_symbol_list >(
+                data::structured_sort(data::sort_expression(sort_struct)).
                                         constructor_functions());
     }
 
@@ -9316,8 +9316,8 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   initialize_data();
 
   if (mayrewrite) {
-    rewr.reset(new mcrl2::new_data::rewriter(
-                new_data::data_specification(), lin_options.rewrite_strategy));
+    rewr.reset(new mcrl2::data::rewriter(
+                data::data_specification(), lin_options.rewrite_strategy));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)

@@ -12,9 +12,9 @@
 #define MCRL2_PBES_DETAIL_TEST_UTILITY_H
 
 #include <string>
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 
@@ -27,32 +27,32 @@ namespace detail {
   /// \brief Returns a data variable of type Nat with a given name
   /// \param name A string
   /// \return A data variable of type Nat with a given name
-  new_data::variable nat(std::string name)
+  data::variable nat(std::string name)
   {
-    return new_data::variable(core::identifier_string(name), new_data::sort_nat::nat());
+    return data::variable(core::identifier_string(name), data::sort_nat::nat());
   }
 
   /// \brief Returns a data variable of type Pos with a given name
   /// \param name A string
   /// \return A data variable of type Pos with a given name
-  new_data::variable pos(std::string name)
+  data::variable pos(std::string name)
   {
-    return new_data::variable(core::identifier_string(name), new_data::sort_pos::pos());
+    return data::variable(core::identifier_string(name), data::sort_pos::pos());
   }
 
   /// \brief Returns a data variable of type Bool with a given name
   /// \param name A string
   /// \return A data variable of type Bool with a given name
-  new_data::variable bool_(std::string name)
+  data::variable bool_(std::string name)
   {
-    return new_data::variable(core::identifier_string(name), new_data::sort_bool_::bool_());
+    return data::variable(core::identifier_string(name), data::sort_bool_::bool_());
   }
 
   /// \brief Returns a propositional variable declaration with the given name and parameters
   /// \param name A string
   /// \param parameters A sequence of data variables
   /// \return A propositional variable declaration with the given name and parameters
-  propositional_variable propvar(std::string name, new_data::variable_list parameters)
+  propositional_variable propvar(std::string name, data::variable_list parameters)
   {
     return propositional_variable(core::identifier_string(name), parameters);
   }
@@ -61,7 +61,7 @@ namespace detail {
   /// \param name A string
   /// \param parameters A sequence of data expressions
   /// \return A propositional variable instantiation with the given name and parameters
-  propositional_variable_instantiation propvarinst(std::string name, new_data::data_expression_list parameters)
+  propositional_variable_instantiation propvarinst(std::string name, data::data_expression_list parameters)
   {
     return propositional_variable_instantiation(core::identifier_string(name), parameters);
   }

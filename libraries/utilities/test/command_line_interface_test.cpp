@@ -16,8 +16,8 @@
 #include <boost/test/included/unit_test_framework.hpp>
 
 #define MCRL2_REVISION "xXxXx"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
@@ -35,12 +35,12 @@ void string_to_type_test(std::string const& value) {
 
 template < bool b >
 inline void string_to_strategy_test(std::string const& strategy) {
-  string_to_type_test< mcrl2::new_data::rewriter::strategy, b >(strategy);
+  string_to_type_test< mcrl2::data::rewriter::strategy, b >(strategy);
 }
 
 template < bool b >
 inline void string_to_prover_type_test(std::string const& prover_type) {
-  string_to_type_test< mcrl2::new_data::detail::SMT_Solver_Type, b >(prover_type);
+  string_to_type_test< mcrl2::data::detail::SMT_Solver_Type, b >(prover_type);
 }
 
 BOOST_AUTO_TEST_CASE(border_invalid) {

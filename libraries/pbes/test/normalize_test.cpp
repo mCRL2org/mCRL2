@@ -68,13 +68,13 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = new_data::variable("x", new_data::sort_bool_::bool_());
-  y = new_data::variable("y", new_data::sort_bool_::bool_());
-  z = new_data::variable("z", new_data::sort_bool_::bool_());
+  x = data::variable("x", data::sort_bool_::bool_());
+  y = data::variable("y", data::sort_bool_::bool_());
+  z = data::variable("z", data::sort_bool_::bool_());
 
   f  = not_(x);
   f1 = normalize(f);
-  f2 = new_data::sort_bool_::not_(x);
+  f2 = data::sort_bool_::not_(x);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -82,7 +82,7 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = normalize(f);
-  f2 = or_(or_(new_data::sort_bool_::not_(x), new_data::sort_bool_::not_(y)), z);
+  f2 = or_(or_(data::sort_bool_::not_(x), data::sort_bool_::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -95,7 +95,7 @@ void test_normalize1()
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
-  new_data::variable_list ab = make_list(new_data::variable("s", new_data::basic_sort("S")));
+  data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
   y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
   z = normalize(y);
@@ -161,8 +161,8 @@ void test_pfnf_expression(std::string s)
   pbes_system::pbes_expression t1 = expr(s);
   visitor.visit(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
-  new_data::rewriter datar;
-  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> R(datar);
+  data::rewriter datar;
+  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))
   {
     BOOST_CHECK(R(t1) == R(t2));

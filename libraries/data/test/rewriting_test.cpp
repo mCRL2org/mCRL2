@@ -17,30 +17,30 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/int.h"
-#include "mcrl2/new_data/real.h"
-#include "mcrl2/new_data/list.h"
-#include "mcrl2/new_data/set.h"
-#include "mcrl2/new_data/bag.h"
-#include "mcrl2/new_data/structured_sort.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/detail/implement_data_types.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/implement_data_types.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 
 template <typename Rewriter>
 void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output) {
@@ -61,11 +61,11 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
 }
 
 void bool_rewrite_test() {
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_bool_;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_rewrite_test(R, true_(), true_());
   data_rewrite_test(R, false_(), false_());
@@ -81,11 +81,11 @@ void bool_rewrite_test() {
 }
 
 void pos_rewrite_test() {
-  using namespace mcrl2::new_data::sort_pos;
+  using namespace mcrl2::data::sort_pos;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_expression p1(pos("1"));
   data_expression p2(pos("2"));
@@ -110,11 +110,11 @@ void pos_rewrite_test() {
 }
 
 void nat_rewrite_test() {
-  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::data::sort_nat;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_expression p0(nat(0));
   data_expression p1(nat(1));
@@ -163,19 +163,19 @@ void nat_rewrite_test() {
   data_rewrite_test(R, exp(p2, p2), p4);
 
   // Added a few additional checks (Wieger)
-  new_data::rewriter datar(specification);
-  new_data::data_expression x = new_data::parse_data_expression("n >= 0", "n:Nat;");
+  data::rewriter datar(specification);
+  data::data_expression x = data::parse_data_expression("n >= 0", "n:Nat;");
   BOOST_CHECK(datar(x) == sort_bool_::true_());
   variable n("n", nat());
   data_rewrite_test(R, greater_equal(n, p0), sort_bool_::true_());
 }
 
 void int_rewrite_test() {
-  using namespace mcrl2::new_data::sort_int_;
+  using namespace mcrl2::data::sort_int_;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_expression p0(int_(0));
   data_expression p1(int_(1));
@@ -227,11 +227,11 @@ void int_rewrite_test() {
 }
 
 void real_rewrite_test() {
-  using namespace mcrl2::new_data::sort_real_;
+  using namespace mcrl2::data::sort_real_;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_expression p0(real_(0));
   data_expression p1(real_(1));
@@ -285,12 +285,12 @@ void real_rewrite_test() {
 }
 
 void list_rewrite_test() {
-  using namespace mcrl2::new_data::sort_bool_;
-  using namespace mcrl2::new_data::sort_list;
+  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_list;
 
   data_specification specification;
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   sort_expression list_bool(list(bool_()));
   data_expression empty(R(nil(bool_())));
@@ -309,16 +309,16 @@ void list_rewrite_test() {
 }
 
 void set_rewrite_test() {
-  using namespace mcrl2::new_data::sort_set_;
-  using namespace mcrl2::new_data::sort_fset;
-  using namespace mcrl2::new_data::sort_nat;
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_set_;
+  using namespace mcrl2::data::sort_fset;
+  using namespace mcrl2::data::sort_nat;
+  using namespace mcrl2::data::sort_bool_;
 
   data_specification specification = parse_data_specification(
     "sort A = Set(Nat);"
   );
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   sort_expression set_nat(sort_set_::set_(nat()));
 
@@ -351,17 +351,17 @@ void set_rewrite_test() {
 }
 
 void bag_rewrite_test() {
-  using namespace mcrl2::new_data::sort_bag;
-  using namespace mcrl2::new_data::sort_fbag;
-  using namespace mcrl2::new_data::sort_nat;
-  using namespace mcrl2::new_data::sort_pos;
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_bag;
+  using namespace mcrl2::data::sort_fbag;
+  using namespace mcrl2::data::sort_nat;
+  using namespace mcrl2::data::sort_pos;
+  using namespace mcrl2::data::sort_bool_;
 
   data_specification specification = parse_data_specification(
     "sort A = Bag(Nat);"
   );
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   sort_expression bag_nat(sort_bag::bag(nat()));
 
@@ -427,11 +427,11 @@ void structured_sort_rewrite_test() {
   constructors.push_back(structured_sort_constructor("c",
      boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
 
-  new_data::structured_sort ls(boost::make_iterator_range(constructors));
+  data::structured_sort ls(boost::make_iterator_range(constructors));
 
   specification.add_sort(alias(basic_sort("D"), ls));
 
-  new_data::rewriter R(specification);
+  data::rewriter R(specification);
 
   data_expression c0(constructors[0].constructor_function(ls));
   data_expression c1(constructors[1].constructor_function(ls));

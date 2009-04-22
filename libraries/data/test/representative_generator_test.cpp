@@ -17,15 +17,15 @@
 #include "boost/bind.hpp"
 #include "boost/test/minimal.hpp"
 
-#include "mcrl2/new_data/representative_generator.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/bool.h"
-#include "mcrl2/new_data/list.h"
-#include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 void test_representative_generator()
 {
@@ -34,7 +34,7 @@ void test_representative_generator()
   specification.import_system_defined_sort(sort_nat::nat());
   specification.import_system_defined_sort(sort_list::list(sort_bool_::bool_()));
 
-  atermpp::vector< new_data::structured_sort_constructor_argument > arguments;
+  atermpp::vector< data::structured_sort_constructor_argument > arguments;
   arguments.push_back(basic_sort("E"));
   arguments.push_back(sort_nat::nat());
 

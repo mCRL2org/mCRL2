@@ -52,7 +52,7 @@ std::set<propositional_variable_instantiation> find_all_propositional_variable_i
   std::set<propositional_variable_instantiation> variables;
   atermpp::partial_find_all_if(t,
                                is_propositional_variable_instantiation,
-                               boost::bind(std::logical_or<bool>(), boost::bind(new_data::is_data_expression, _1), boost::bind(is_propositional_variable_instantiation, _1)),
+                               boost::bind(std::logical_or<bool>(), boost::bind(data::is_data_expression, _1), boost::bind(is_propositional_variable_instantiation, _1)),
                                std::inserter(variables, variables.end())
                               );
 */
@@ -63,7 +63,7 @@ std::set<propositional_variable_instantiation> find_all_propositional_variable_i
 /// \param e A PBES expression
 /// \return The free data variables occurring in the expression.
 inline
-std::set<new_data::variable> find_free_variables(const pbes_expression& e)
+std::set<data::variable> find_free_variables(const pbes_expression& e)
 {
   detail::free_variable_visitor<pbes_expression> visitor;
   visitor.visit(e);

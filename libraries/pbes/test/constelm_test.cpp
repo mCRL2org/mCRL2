@@ -21,7 +21,7 @@
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
 std::string t1 =
@@ -179,7 +179,7 @@ std::string x14 = "";
 
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
-  typedef simplifying_rewriter<pbes_expression, new_data::rewriter> my_pbes_rewriter;
+  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
   std::cout << "----------------------------------" << std::endl;
   std::cout << pbes_spec << std::endl;
@@ -191,13 +191,13 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   core::gsSetVerboseMsg();
 
   // data rewriter
-  new_data::rewriter datar(q.data());
+  data::rewriter datar(q.data());
 
   // pbes rewriter
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  pbes_constelm_algorithm<pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+  pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
   algorithm.run(q, compute_conditions, remove_equations);

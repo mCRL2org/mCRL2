@@ -16,11 +16,11 @@
 #include <mcrl2/atermpp/atermpp.h>
 #include <mcrl2/atermpp/detail/utility.h>
 
-#include <mcrl2/new_data/parser.h>
-#include <mcrl2/new_data/data_specification.h>
-#include <mcrl2/new_data/basic_sort.h>
-#include <mcrl2/new_data/sort_expression.h>
-#include <mcrl2/new_data/detail/data_reconstruct.h>
+#include <mcrl2/data/parser.h>
+#include <mcrl2/data/data_specification.h>
+#include <mcrl2/data/basic_sort.h>
+#include <mcrl2/data/sort_expression.h>
+#include <mcrl2/data/detail/data_reconstruct.h>
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
@@ -28,7 +28,7 @@ using namespace atermpp::detail;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 struct compare_term: public std::unary_function<aterm_appl, bool>
 {
@@ -61,10 +61,10 @@ void test_data_reconstruct_sort_expr()
 
   sort_expression l(basic_sort("List@0"));
   std::cerr << l << std::endl;
-  BOOST_CHECK(find_term(new_data::detail::data_specification_to_aterm_data_spec(data)(2),l));
+  BOOST_CHECK(find_term(data::detail::data_specification_to_aterm_data_spec(data)(2),l));
 
-  BOOST_CHECK(new_data::detail::reconstruct_exprs(aterm(l),
-         new_data::detail::data_specification_to_aterm_data_spec(data)) != l);
+  BOOST_CHECK(data::detail::reconstruct_exprs(aterm(l),
+         data::detail::data_specification_to_aterm_data_spec(data)) != l);
 }
 
 int test_main(int argc, char** argv)

@@ -17,8 +17,8 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
 
-#include "mcrl2/new_data/detail/data_reconstruct.h"
-#include "mcrl2/new_data/detail/data_implementation_concrete.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -29,10 +29,10 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // declarations
@@ -2604,5 +2604,5 @@ bool is_function_operation(ATermAppl data_expr)
 }
 
     }   //namespace detail
-  }   //namespace new_data
+  }   //namespace data
 }     //namespace mcrl2

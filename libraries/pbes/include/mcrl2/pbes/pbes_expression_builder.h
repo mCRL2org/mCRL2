@@ -18,8 +18,8 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 
 // this is only needed because of the data_true <-> pbes_true problems
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
@@ -278,11 +278,11 @@ struct pbes_expression_builder
     // TODO: this is a hack, to deal with the data_true <-> pbes_true issue
     if (tr::is_true(result))
     {
-      result = new_data::sort_bool_::true_();
+      result = data::sort_bool_::true_();
     }
     if (tr::is_false(result))
     {
-      result = new_data::sort_bool_::false_();
+      result = data::sort_bool_::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
@@ -509,11 +509,11 @@ struct pbes_expression_builder<Term, void>
     // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
     if (tr::is_true(result))
     {
-      result = new_data::sort_bool_::true_();
+      result = data::sort_bool_::true_();
     }
     if (tr::is_false(result))
     {
-      result = new_data::sort_bool_::false_();
+      result = data::sort_bool_::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG

@@ -12,15 +12,15 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/bool.h"
-#include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 template < typename Rewriter >
 void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected) {
@@ -49,7 +49,7 @@ void number_test() {
 
   data_specification specification = parse_data_specification("sort A = Real;");
 
-  mcrl2::new_data::rewriter R(specification);
+  mcrl2::data::rewriter R(specification);
 
   representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1());
   representation_check(R, number(sort_nat::nat(), "1"), R(pos2nat(sort_pos::c1())));
@@ -69,8 +69,8 @@ void number_test() {
 }
 
 void list_construction_test() {
-  using namespace mcrl2::new_data::sort_list;
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_list;
+  using namespace mcrl2::data::sort_bool_;
 
   data_expression_vector expressions;
 
@@ -79,7 +79,7 @@ void list_construction_test() {
   expressions.push_back(true_());
   expressions.push_back(false_());
 
-  mcrl2::new_data::rewriter R(data_specification(), rewriter::innermost);
+  mcrl2::data::rewriter R(data_specification(), rewriter::innermost);
 
   representation_check(R, sort_list::list(bool_(), expressions.begin(), expressions.end()),
                        R(snoc(bool_(), snoc(bool_(), snoc(bool_(), snoc(bool_(), nil(bool_()),

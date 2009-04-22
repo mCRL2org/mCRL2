@@ -7,24 +7,24 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_equation_test.cpp
-/// \brief Basic regression test for new_data equations.
+/// \brief Basic regression test for data equations.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/new_data/data_equation.h"
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/variable.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/data_equation.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 void data_equation_test()
 {

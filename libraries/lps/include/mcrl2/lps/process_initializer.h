@@ -16,10 +16,10 @@
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/detail/assignment_functional.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/assignment_functional.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 
 namespace mcrl2 {
@@ -32,10 +32,10 @@ class process_initializer: public atermpp::aterm_appl
 {
   protected:
     /// \brief The free variables of the initializer
-    new_data::variable_list   m_free_variables;
+    data::variable_list   m_free_variables;
 
     /// \brief The assignments of the initializer
-    new_data::assignment_list m_assignments;
+    data::assignment_list m_assignments;
 
   public:
     /// \brief Constructor.
@@ -44,8 +44,8 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    process_initializer(new_data::variable_list free_variables,
-                        new_data::assignment_list assignments
+    process_initializer(data::variable_list free_variables,
+                        data::assignment_list assignments
                        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(
          free_variables,
@@ -68,21 +68,21 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    new_data::variable_list free_variables() const
+    data::variable_list free_variables() const
     {
       return m_free_variables;
     }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    new_data::assignment_list assignments() const
+    data::assignment_list assignments() const
     {
       return m_assignments;
     }
 
     /// \brief Returns the initial state of the LPS.
     /// \return The initial state of the LPS.
-    new_data::data_expression_list state() const
+    data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
     }
@@ -107,9 +107,9 @@ class process_initializer: public atermpp::aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (mcrl2::new_data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), new_data::detail::assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , new_data::detail::assignment_lhs())
+      if (mcrl2::data::detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
               )
          )
       {

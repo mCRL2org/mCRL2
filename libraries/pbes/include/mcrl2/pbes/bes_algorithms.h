@@ -13,9 +13,9 @@
 #define MCRL2_PBES_ALGORITHMS_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/gauss_elimination.h"
@@ -83,12 +83,12 @@ struct pbes_equation_solver
 template <typename Container>
 int pbes_gauss_elimination(pbes<Container>& p)
 {
-  typedef new_data::data_enumerator<new_data::number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, new_data::rewriter, my_enumerator> my_rewriter;
+  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef typename core::term_traits<pbes_expression> tr;
 
-  new_data::rewriter datar(p.data());
-  new_data::number_postfix_generator name_generator;
+  data::rewriter datar(p.data());
+  data::number_postfix_generator name_generator;
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
 
@@ -115,10 +115,10 @@ int pbes_gauss_elimination(pbes<Container>& p)
 /// \return A bes.
 pbes<> pbes2bes(const pbes<>& p, bool lazy = false)
 {
-  typedef new_data::data_enumerator<new_data::number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, new_data::rewriter, my_enumerator> my_rewriter;
-  new_data::rewriter datar(p.data());
-  new_data::number_postfix_generator name_generator;
+  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
+  typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
+  data::rewriter datar(p.data());
+  data::number_postfix_generator name_generator;
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
   if (lazy)

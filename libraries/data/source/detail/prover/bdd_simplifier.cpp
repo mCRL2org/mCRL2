@@ -8,12 +8,12 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/new_data/detail/prover/bdd_simplifier.h"
+#include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "aterm2.h"
 #include "time.h"
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // class BDD_Simplifier ---------------------------------------------------------------------------

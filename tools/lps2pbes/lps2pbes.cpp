@@ -26,8 +26,8 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -44,7 +44,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::modal;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 
 //Type definitions
 //----------------

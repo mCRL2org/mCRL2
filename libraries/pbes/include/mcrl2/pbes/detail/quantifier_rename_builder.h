@@ -18,11 +18,11 @@
 #include <utility>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/new_data/detail/sequence_substitution.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/detail/sequence_substitution.h"
+#include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {
 
@@ -37,8 +37,8 @@ template <typename IdentifierGenerator>
 struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression>
 {
   IdentifierGenerator& generator;
-  std::vector<new_data::variable_list> quantifier_stack;
-  std::deque<std::pair<new_data::variable, new_data::variable> > replacements;
+  std::vector<data::variable_list> quantifier_stack;
+  std::deque<std::pair<data::variable, data::variable> > replacements;
 
   quantifier_rename_builder(IdentifierGenerator& generator)
     : generator(generator)
@@ -49,12 +49,12 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \return True if the quantifier_stack contains a data variable with the given name
   bool is_in_quantifier_stack(core::identifier_string name) const
   {
-    for (std::vector<new_data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (std::vector<data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
-      if (std::find(boost::make_transform_iterator(i->begin(), new_data::detail::variable_name()),
-                    boost::make_transform_iterator(i->end()  , new_data::detail::variable_name()),
+      if (std::find(boost::make_transform_iterator(i->begin(), data::detail::variable_name()),
+                    boost::make_transform_iterator(i->end()  , data::detail::variable_name()),
                     name
-                   ) != boost::make_transform_iterator(i->end()  , new_data::detail::variable_name())
+                   ) != boost::make_transform_iterator(i->end()  , data::detail::variable_name())
          )
       {
         return true;
@@ -66,17 +66,17 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \brief Adds variables to the quantifier stack, and adds replacements for the name clashes to replacements.
   /// \param variables A sequence of data variables
   /// \return The number of replacements that were added.
-  unsigned int push(const new_data::variable_list& variables)
+  unsigned int push(const data::variable_list& variables)
   {
     unsigned int replacement_count = 0;
 
     // check for new name clashes
-    for (new_data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
+    for (data::variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (is_in_quantifier_stack(i->name()))
       {
         replacement_count++;
-        new_data::variable new_variable(generator(i->name()), i->sort());
+        data::variable new_variable(generator(i->name()), i->sort());
 
         // add the replacement in front, since it needs to be applied first
         replacements.push_front(std::make_pair(*i, new_variable));
@@ -106,9 +106,9 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param e A PBES expression
   /// \param d A data expression
   /// \return The result of visiting the node
-  pbes_expression visit_data_expression(const pbes_expression& e, const new_data::data_expression& d)
+  pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d)
   {
-    return substitute(new_data::detail::make_sequence_substitution(replacements), d);
+    return substitute(data::detail::make_sequence_substitution(replacements), d);
   }
 
   /// \brief Visit forall node
@@ -116,11 +116,11 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_forall(const pbes_expression& e, const new_data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_forall(const pbes_expression& e, const data::variable_list& variables, const pbes_expression& expression)
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    new_data::variable_list new_variables = replacement_count > 0 ? substitute(new_data::detail::make_sequence_substitution(replacements), variables) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? substitute(data::detail::make_sequence_substitution(replacements), variables) : variables;
     pop(replacement_count);
     return pbes_expr::forall(new_variables, new_expression);
   }
@@ -130,11 +130,11 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \param variables A sequence of data variables
   /// \param expression A PBES expression
   /// \return The result of visiting the node
-  pbes_expression visit_exists(const pbes_expression& e, const new_data::variable_list& variables, const pbes_expression& expression)
+  pbes_expression visit_exists(const pbes_expression& e, const data::variable_list& variables, const pbes_expression& expression)
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    new_data::variable_list new_variables = replacement_count > 0 ? substitute(new_data::detail::make_sequence_substitution(replacements), variables) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? substitute(data::detail::make_sequence_substitution(replacements), variables) : variables;
     pop(replacement_count);
     return pbes_expr::exists(new_variables, new_expression);
   }

@@ -55,18 +55,18 @@ namespace mcrl2 {
 
           static bool initialise_enumerated_type_conversions() {
 #ifdef __LIBREWRITE_H
-            tipi::datatype::enumeration< mcrl2::new_data::rewriter::strategy > strategy_enumeration;
+            tipi::datatype::enumeration< mcrl2::data::rewriter::strategy > strategy_enumeration;
 
             strategy_enumeration.
-              add(mcrl2::new_data::rewriter::innermost, "inner").
+              add(mcrl2::data::rewriter::innermost, "inner").
 # ifdef MCRL2_INNERC_AVAILABLE
-              add(mcrl2::new_data::rewriter::innermost_compiling, "innerc").
+              add(mcrl2::data::rewriter::innermost_compiling, "innerc").
 # endif
 # ifdef MCRL2_JITTYC_AVAILABLE
-              add(mcrl2::new_data::rewriter::jitty, "jitty").
-              add(mcrl2::new_data::rewriter::jitty_compiling, "jittyc");
+              add(mcrl2::data::rewriter::jitty, "jitty").
+              add(mcrl2::data::rewriter::jitty_compiling, "jittyc");
 # else
-              add(mcrl2::new_data::rewriter::jitty, "jitty");
+              add(mcrl2::data::rewriter::jitty, "jitty");
 # endif
 #endif
 

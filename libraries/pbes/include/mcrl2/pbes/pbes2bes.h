@@ -18,9 +18,9 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/detail/sort_utility.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -33,10 +33,10 @@ namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
 struct t_instantiations {
-  new_data::variable_list finite_var;     // List of all finite variables
-  new_data::variable_list infinite_var;   // List of all infinite variables
-  new_data::data_expression_list finite_exp;   // List of all finite expressions
-  new_data::data_expression_list infinite_exp; // List of all infinite expressions
+  data::variable_list finite_var;     // List of all finite variables
+  data::variable_list infinite_var;   // List of all infinite variables
+  data::data_expression_list finite_exp;   // List of all finite expressions
+  data::data_expression_list infinite_exp; // List of all infinite expressions
 
   void protect()
   {
@@ -104,12 +104,12 @@ atermpp::vector<pbes_equation> sort_names(std::vector< core::identifier_string >
 /// \param propvar_name A
 /// \param del A sequence of data expressions
 inline
-core::identifier_string create_propvar_name(core::identifier_string propvar_name, new_data::data_expression_list del)
+core::identifier_string create_propvar_name(core::identifier_string propvar_name, data::data_expression_list del)
 {
   std::string propvar_name_current = propvar_name;
   if (!del.empty())
   {
-    for (new_data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
+    for (data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
     {
       if (del_i->is_function_symbol())
       { //If p is a OpId
@@ -138,10 +138,10 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
 /// \param propvarinst A propositional variable instantiation
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
 {
-  new_data::data_expression_list finite_expression;
-  new_data::data_expression_list infinite_expression;
+  data::data_expression_list finite_expression;
+  data::data_expression_list infinite_expression;
 
-  for (new_data::data_expression_list::iterator p = propvarinst.parameters().begin(); p != propvarinst.parameters().end(); p++)
+  for (data::data_expression_list::iterator p = propvarinst.parameters().begin(); p != propvarinst.parameters().end(); p++)
   {
     if (enumerated_sorts->get(p->sort()) != NULL)
     { //sort is finite
@@ -183,7 +183,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  new_data::data_specification& data = pbes_spec.data();
+  data::data_specification& data = pbes_spec.data();
 
   propositional_variable_instantiation new_initial_state;
   atermpp::vector<pbes_equation> new_equation_system;
@@ -192,8 +192,8 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   atermpp::set< propositional_variable_instantiation >::iterator current_state_it;
 
   int nr_of_equations = 0;
-  new_data::variable_list empty_variable_list;
-  new_data::data_expression_list empty_data_expression_list;
+  data::variable_list empty_variable_list;
+  data::data_expression_list empty_data_expression_list;
 
   atermpp::table pbes_equations(2*eqsys.size(), 50);  // (propvarname, pbes_equation)
   atermpp::indexed_set states_done(10000, 50);    // (propvarinst)
@@ -232,7 +232,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
     // Replace all occurrences in the right hand side and rewrite the expression
     pbes_expression new_pbes_expression;
-    new_pbes_expression = new_data::variable_sequence_replace(current_pbes_expression, current_variable.parameters(), current_state.parameters());
+    new_pbes_expression = data::variable_sequence_replace(current_pbes_expression, current_variable.parameters(), current_state.parameters());
     new_pbes_expression = rewrite(new_pbes_expression);
 
     propositional_variable_instantiation_list oldpropvarinst_list;
@@ -289,14 +289,14 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
-  new_data::data_specification& data = pbes_spec.data();
+  data::data_specification& data = pbes_spec.data();
 
   atermpp::vector<pbes_equation> result_eqsys;        // resulting equation system
   int nr_of_equations = 0;          // Nr of equations computed
 
-  // Empty new_data::variable_list and new_data::data_expression_list
-  new_data::variable_list empty_variable_list;
-  new_data::data_expression_list empty_data_expression_list;
+  // Empty data::variable_list and data::data_expression_list
+  data::variable_list empty_variable_list;
+  data::data_expression_list empty_data_expression_list;
 
   atermpp::table sort_enumerations(10,50);
 
@@ -304,18 +304,18 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   core::gsVerboseMsg("Enumerating finite data sorts...\n");
   for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
-    new_data::variable_list parameters = eq_i->variable().parameters();
-    for (new_data::variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
+    data::variable_list parameters = eq_i->variable().parameters();
+    for (data::variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
     {
-      new_data::sort_expression current_sort = p->sort();
+      data::sort_expression current_sort = p->sort();
       if (sort_enumerations.get(current_sort) == NULL)
       {
         // if (check_finite(data.constructors(), current_sort))
         if (data.is_certainly_finite(current_sort))
         {
-          // new_data::data_expression_list enumerations_from_sort = new_data::detail::enumerate_constructors(data.constructors(), current_sort);
-          new_data::data_expression_vector v = new_data::detail::enumerate_constructors(data, current_sort);
-          new_data::data_expression_list enumerations_from_sort = new_data::make_data_expression_list(v);
+          // data::data_expression_list enumerations_from_sort = data::detail::enumerate_constructors(data.constructors(), current_sort);
+          data::data_expression_vector v = data::detail::enumerate_constructors(data, current_sort);
+          data::data_expression_list enumerations_from_sort = data::make_data_expression_list(v);
           sort_enumerations.put(current_sort, enumerations_from_sort);
         }
       }
@@ -331,7 +331,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     pbes_expression formula = equation.formula();
 
     core::identifier_string propvar_name = propvar.name();
-    new_data::variable_list propvar_parameters = propvar.parameters();
+    data::variable_list propvar_parameters = propvar.parameters();
 
 
     atermpp::vector< t_instantiations > instantiation_list;
@@ -343,7 +343,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     std::string propvar_name_string = propvar_name;
     core::gsVerboseMsg("Creating all possible instantiations for propositional variable %s...\n", propvar_name_string.c_str());
 
-    for (new_data::variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
+    for (data::variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
     {
       atermpp::vector< t_instantiations > intermediate_instantiation_list;
       if (sort_enumerations.get(p->sort()) == NULL)
@@ -359,11 +359,11 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
       else
       { // The sort is finite
         current_values.finite_var = push_back(current_values.finite_var, *p);
-        new_data::data_expression_list enumerations = sort_enumerations.get(p->sort());
+        data::data_expression_list enumerations = sort_enumerations.get(p->sort());
 
         for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
-          for (new_data::data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
+          for (data::data_expression_list::iterator e = enumerations.begin(); e != enumerations.end(); e++)
           {
             current_values.finite_exp = push_back(inst_i->finite_exp, *e);
             intermediate_instantiation_list.push_back(current_values);
@@ -382,7 +382,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
       pbes_expression current_expression; // Current expression
 
       // Substitute all instantiated variables and rewrite the rhs as far as possible.
-      current_expression = new_data::variable_sequence_replace(formula, inst_i->finite_var, inst_i->finite_exp);
+      current_expression = data::variable_sequence_replace(formula, inst_i->finite_var, inst_i->finite_exp);
       current_expression = rewrite(current_expression);
 
       propositional_variable_instantiation_list oldpropvarinst_list;

@@ -14,9 +14,9 @@
 
 #include <deque>
 #include "mcrl2/modal_formula/state_formula_builder.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/utility.h"
 
 namespace mcrl2 {
 
@@ -61,7 +61,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param n A
   /// \param l A sequence of data expressions
   /// \return The result of visiting the node
-  state_formula visit_var(const state_formula& e, const core::identifier_string& n, const new_data::data_expression_list& l)
+  state_formula visit_var(const state_formula& e, const core::identifier_string& n, const data::data_expression_list& l)
   {
     core::identifier_string new_name = n;
     for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
@@ -81,7 +81,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const new_data::assignment_list& a, const state_formula& f)
+  state_formula visit_mu(const state_formula& e, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
@@ -95,7 +95,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const new_data::assignment_list& a, const state_formula& f)
+  state_formula visit_nu(const state_formula& e, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
   {
     core::identifier_string new_name = push(n);
     state_formula new_formula = visit(f);
@@ -132,17 +132,17 @@ template <typename IdentifierGenerator>
 state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<new_data::variable> src = new_data::find_all_variables(f);
+  std::set<data::variable> src = data::find_all_variables(f);
 
   // create a mapping of replacements
-  std::map<new_data::variable, new_data::data_expression> replacements;
+  std::map<data::variable, data::data_expression> replacements;
 
-  for (std::set<new_data::variable>::iterator i = src.begin(); i != src.end(); ++i)
+  for (std::set<data::variable>::iterator i = src.begin(); i != src.end(); ++i)
   {
-    replacements[*i] = new_data::variable(generator(i->name()), i->sort());
+    replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return new_data::variable_map_replace(f, replacements);
+  return data::variable_map_replace(f, replacements);
 }
 
 } // namespace modal

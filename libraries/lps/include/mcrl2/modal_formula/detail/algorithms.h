@@ -22,8 +22,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/specification.h"
@@ -72,7 +72,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = new_data::detail::implement_data_state_frm(formula, spec);
+    ATermAppl result = data::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;
@@ -103,7 +103,7 @@ namespace detail {
     formula_stream << formula_text;
     ATermAppl f = parse_state_formula(formula_stream);
     lps::specification copy_spec(set_data_specification(spec, remove_all_system_defined(spec.data())));
-    ATermAppl reconstructed_spec = new_data::detail::reconstruct_spec(copy_spec);
+    ATermAppl reconstructed_spec = data::detail::reconstruct_spec(copy_spec);
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);

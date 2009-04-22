@@ -17,11 +17,11 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/substitution.h"
-#include "mcrl2/new_data/map_substitution_adapter.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
@@ -35,14 +35,14 @@ namespace lps {
 /// \param r A data rewriter
 /// \return A map m that maps the constant parameters to their constant value
 template <typename DataRewriter>
-std::map<new_data::variable, new_data::data_expression> compute_constant_parameters(const linear_process& p, new_data::data_expression_list init, DataRewriter& r)
+std::map<data::variable, data::data_expression> compute_constant_parameters(const linear_process& p, data::data_expression_list init, DataRewriter& r)
 {
-  using namespace new_data;
-  using namespace new_data::sort_bool_;
+  using namespace data;
+  using namespace data::sort_bool_;
 
-  std::map<new_data::variable, new_data::data_expression> replacements;
-  new_data::variable_list::iterator i = p.process_parameters().begin();
-  new_data::data_expression_list::iterator j = init.begin();
+  std::map<data::variable, data::data_expression> replacements;
+  data::variable_list::iterator i = p.process_parameters().begin();
+  data::data_expression_list::iterator j = init.begin();
   for ( ; i != p.process_parameters().end(); ++i, ++j)
   {
     replacements[*i] = r(*j);
@@ -54,18 +54,18 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      new_data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
+      data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
       if (rc == false_())
       {
         continue;
       }
 
-      for (new_data::assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      for (data::assignment_list::iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
-        std::map<new_data::variable, new_data::data_expression>::iterator k = replacements.find(j->lhs());
+        std::map<data::variable, data::data_expression>::iterator k = replacements.find(j->lhs());
         if (k != replacements.end())
         {
-          new_data::data_expression gj = new_data::variable_map_replace(j->rhs(), replacements);
+          data::data_expression gj = data::variable_map_replace(j->rhs(), replacements);
           if (r(or_(not_(rc), not_equal_to(k->second, gj))) == true_())
           {
             replacements.erase(k);
@@ -88,16 +88,16 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
 /// \param init A sequence of data expressions
 /// \param r A data rewriter
 /// \return A map m that maps constant parameters to their constant value.
-std::map<new_data::variable, new_data::data_expression> compute_constant_parameters_subst(const linear_process& p, new_data::data_expression_list init, new_data::rewriter& r)
+std::map<data::variable, data::data_expression> compute_constant_parameters_subst(const linear_process& p, data::data_expression_list init, data::rewriter& r)
 {
-  using namespace new_data;
-  using namespace new_data::sort_bool_;
-  namespace opt = new_data::lazy;
+  using namespace data;
+  using namespace data::sort_bool_;
+  namespace opt = data::lazy;
 
   // create a mapping from process parameters to initial values
-  atermpp::map<new_data::variable, new_data::data_expression> replacements;
-  new_data::data_expression_list::iterator j = init.begin();
-  for (new_data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
+  atermpp::map<data::variable, data::data_expression> replacements;
+  data::data_expression_list::iterator j = init.begin();
+  for (data::variable_list::const_iterator i = p.process_parameters().begin(); i != p.process_parameters().end(); ++i, ++j)
   {
     replacements[*i] = *j;
   }
@@ -108,20 +108,20 @@ std::map<new_data::variable, new_data::data_expression> compute_constant_paramet
     has_changed = false;
     for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
     {
-      new_data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
+      data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
 
       if (rc == false_())
       {
         continue;
       }
-      for (new_data::assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
+      for (data::assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
       {
-        std::map<new_data::variable, new_data::data_expression>::iterator k = replacements.find(j->lhs());
+        std::map<data::variable, data::data_expression>::iterator k = replacements.find(j->lhs());
         if (k != replacements.end())
         {
-          new_data::data_expression d  = j->lhs();  // process parameter
-          new_data::data_expression g  = j->rhs();  // assigned value
-          new_data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
+          data::data_expression d  = j->lhs();  // process parameter
+          data::data_expression g  = j->rhs();  // assigned value
+          data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
           if (r(x, make_map_substitution_adapter(replacements)) == true_())
           {
             replacements.erase(k);
@@ -149,9 +149,9 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
 {
   using core::pp;
 
-  std::map<new_data::variable, new_data::data_expression> replacements = compute_constant_parameters_subst(spec.process(), spec.initial_process().state(), r);
-  std::set<new_data::variable> constant_parameters;
-  for (std::map<new_data::variable, new_data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
+  std::map<data::variable, data::data_expression> replacements = compute_constant_parameters_subst(spec.process(), spec.initial_process().state(), r);
+  std::set<data::variable> constant_parameters;
+  for (std::map<data::variable, data::data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
   {
 	  constant_parameters.insert(i->first);
   }
@@ -159,9 +159,9 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
   if (verbose)
   {
     std::cout << "Removing the constant process parameters: ";
-    for (std::set<new_data::variable>::iterator i = constant_parameters.begin(); i != constant_parameters.end(); ++i)
+    for (std::set<data::variable>::iterator i = constant_parameters.begin(); i != constant_parameters.end(); ++i)
     {
-      std::cout << new_data::pp(*i) << " ";
+      std::cout << data::pp(*i) << " ";
     }
     std::cout << std::endl;
   }
@@ -170,8 +170,8 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
   result = detail::remove_parameters(result, constant_parameters);
 
   // N.B. The replacements may only be applied to the process and the initial process!
-  linear_process new_process   = new_data::variable_map_replace(result.process(), replacements);
-  process_initializer new_init = new_data::variable_map_replace(result.initial_process(), replacements);
+  linear_process new_process   = data::variable_map_replace(result.process(), replacements);
+  process_initializer new_init = data::variable_map_replace(result.initial_process(), replacements);
   result = set_lps(result, new_process);
   result = set_initial_process(result, new_init);
 

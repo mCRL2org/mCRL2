@@ -26,7 +26,7 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/core/sequence.h"
 #include "mcrl2/core/detail/join.h"
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/find.h"
 
@@ -43,11 +43,11 @@ namespace detail {
   /// \param finite_variables A sequence of data variables
   /// \param infinite_variables A sequence of data variables
   inline
-  void split_finite_variables(new_data::variable_list variables, const new_data::data_specification& data, new_data::variable_list& finite_variables, new_data::variable_list& infinite_variables)
+  void split_finite_variables(data::variable_list variables, const data::data_specification& data, data::variable_list& finite_variables, data::variable_list& infinite_variables)
   {
-    std::vector<new_data::variable> finite;
-    std::vector<new_data::variable> infinite;
-    for (new_data::variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
+    std::vector<data::variable> finite;
+    std::vector<data::variable> infinite;
+    for (data::variable_list::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (data.is_certainly_finite(i->sort()))
       {
@@ -58,8 +58,8 @@ namespace detail {
         infinite.push_back(*i);
       }
     }
-    finite_variables = new_data::variable_list(finite.begin(), finite.end());
-    infinite_variables = new_data::variable_list(infinite.begin(), infinite.end());
+    finite_variables = data::variable_list(finite.begin(), finite.end());
+    infinite_variables = data::variable_list(infinite.begin(), infinite.end());
   }
 
   /// \brief Returns a string representation of a container
@@ -519,8 +519,8 @@ namespace detail {
       }
       else
       {
-        new_data::variable_list finite;
-        new_data::variable_list infinite;
+        data::variable_list finite;
+        data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {
@@ -548,8 +548,8 @@ namespace detail {
       }
       else
       {
-        new_data::variable_list finite;
-        new_data::variable_list infinite;
+        data::variable_list finite;
+        data::variable_list infinite;
         split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
         if (finite.empty())
         {

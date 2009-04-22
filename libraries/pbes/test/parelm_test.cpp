@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -29,7 +29,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;

@@ -16,17 +16,17 @@
 #include <mcrl2/atermpp/atermpp.h>
 #include <mcrl2/atermpp/detail/utility.h>
 
-#include <mcrl2/new_data/parser.h>
-#include <mcrl2/new_data/data_specification.h>
-#include <mcrl2/new_data/basic_sort.h>
-#include <mcrl2/new_data/sort_expression.h>
-#include <mcrl2/new_data/bool.h>
-#include <mcrl2/new_data/real.h>
-#include <mcrl2/new_data/int.h>
-#include <mcrl2/new_data/nat.h>
-#include <mcrl2/new_data/pos.h>
-#include <mcrl2/new_data/bool.h>
-#include <mcrl2/new_data/detail/data_reconstruct.h>
+#include <mcrl2/data/parser.h>
+#include <mcrl2/data/data_specification.h>
+#include <mcrl2/data/basic_sort.h>
+#include <mcrl2/data/sort_expression.h>
+#include <mcrl2/data/bool.h>
+#include <mcrl2/data/real.h>
+#include <mcrl2/data/int.h>
+#include <mcrl2/data/nat.h>
+#include <mcrl2/data/pos.h>
+#include <mcrl2/data/bool.h>
+#include <mcrl2/data/detail/data_reconstruct.h>
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
@@ -34,7 +34,7 @@ using namespace atermpp::detail;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 struct compare_term: public std::unary_function<aterm_appl, bool>
 {
@@ -83,7 +83,7 @@ void test_data_reconstruct_struct()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -121,7 +121,7 @@ void test_data_reconstruct_struct_complex()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -183,7 +183,7 @@ void test_data_reconstruct_struct_nest()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -250,7 +250,7 @@ void test_data_reconstruct_simple_constructor()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -258,7 +258,7 @@ void test_data_reconstruct_simple_constructor()
   identifier_string S_name("S");
   identifier_string c_name("c");
   basic_sort S_id("S");
-  new_data::function_symbol c(c_name, S_id);
+  data::function_symbol c(c_name, S_id);
 
   BOOST_CHECK(find_term(rec_data(0), S_name));
   BOOST_CHECK(find_term(rec_data(0), S_id));
@@ -291,7 +291,7 @@ void test_data_reconstruct_bool_function()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -299,7 +299,7 @@ void test_data_reconstruct_bool_function()
   identifier_string c_name("c");
   sort_expression b = sort_bool_::bool_();
   sort_expression bb = function_sort(make_list(b), b);
-  new_data::function_symbol cbb(c_name, bb);
+  data::function_symbol cbb(c_name, bb);
 
   BOOST_CHECK(find_term(rec_data(2), c_name));
   BOOST_CHECK(find_term(rec_data(2), b));
@@ -324,7 +324,7 @@ void test_data_reconstruct_bool_function_one_eq()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -333,7 +333,7 @@ void test_data_reconstruct_bool_function_one_eq()
   identifier_string c_name("c");
   sort_expression b = sort_bool_::bool_();
   sort_expression bb = function_sort(make_list(b), b);
-  new_data::function_symbol cbb(c_name, bb);
+  data::function_symbol cbb(c_name, bb);
   data_expression t = sort_bool_::true_();
   application ct(cbb, make_list(t));
 
@@ -359,7 +359,7 @@ void test_data_reconstruct_list()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -388,7 +388,7 @@ void test_data_reconstruct_list_alias()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -413,7 +413,7 @@ void test_data_reconstruct_list_struct()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -447,7 +447,7 @@ void test_data_reconstruct_bag()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -476,7 +476,7 @@ void test_data_reconstruct_set()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -505,7 +505,7 @@ void test_data_reconstruct_bag_alias()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 
@@ -530,7 +530,7 @@ void test_data_reconstruct_set_alias()
   std::clog << "IN: " << text << std::endl;
 
   data_specification data = remove_all_system_defined(parse_data_specification(text));
-  aterm_appl rec_data = new_data::detail::reconstruct_spec(new_data::detail::data_specification_to_aterm_data_spec(data));
+  aterm_appl rec_data = data::detail::reconstruct_spec(data::detail::data_specification_to_aterm_data_spec(data));
 
   std::clog << "RECONSTRUCTED: " << rec_data << std::endl;
 

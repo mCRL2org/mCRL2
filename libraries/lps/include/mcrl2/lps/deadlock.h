@@ -12,8 +12,8 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/utility.h" // for pp
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/utility.h" // for pp
 
 namespace mcrl2 {
 
@@ -22,13 +22,13 @@ namespace lps {
   class deadlock
   {
     protected:
-      /// \brief The time of the deadlock. If <tt>m_time == new_data::data_expression()</tt>
+      /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
       /// the multi action has no time.
-      new_data::data_expression m_time;
+      data::data_expression m_time;
 
     public:
       /// \brief Constructor
-      deadlock(new_data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+      deadlock(data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
         : m_time(time)
       {}
 
@@ -36,19 +36,19 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != new_data::data_expression();
+        return m_time != data::data_expression();
       }
 
       /// \brief Returns the time.
       /// \return The time.
-      const new_data::data_expression& time() const
+      const data::data_expression& time() const
       {
         return m_time;
       }
 
       /// \brief Returns the time.
       /// \return The time.
-      new_data::data_expression& time()
+      data::data_expression& time()
       {
         return m_time;
       }
@@ -68,7 +68,7 @@ namespace lps {
       /// \brief Returns a string representation of the deadlock
       std::string to_string() const
       {
-        return std::string("delta") + (has_time() ? (" @ " + new_data::pp(m_time)) : "");
+        return std::string("delta") + (has_time() ? (" @ " + data::pp(m_time)) : "");
       }
 
       /// \brief Comparison operator

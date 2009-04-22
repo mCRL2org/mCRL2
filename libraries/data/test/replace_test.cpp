@@ -18,17 +18,17 @@
 
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/assignment_list_substitution.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/assignment_list_substitution.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using mcrl2::core::pp;
 
 struct add_zero
@@ -72,7 +72,7 @@ struct assignment_list_replacer
 
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
-    if (!mcrl2::new_data::detail::is_variable(t))
+    if (!mcrl2::data::detail::is_variable(t))
     {
       return std::make_pair(t, true); // continue the recursion
     }
@@ -90,7 +90,7 @@ struct assignment_list_replacer
 
 void test_replace()
 {
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_bool_;
 
   variable d("d", basic_sort("D"));
   variable e("e", basic_sort("D"));
@@ -110,7 +110,7 @@ void test_replace()
 
 void test_assignment_list()
 {
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_bool_;
 
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));
@@ -150,7 +150,7 @@ void test_assignment_list()
 
 void test_variable_replace()
 {
-  using namespace mcrl2::new_data::sort_bool_;
+  using namespace mcrl2::data::sort_bool_;
 
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));
@@ -212,9 +212,9 @@ void test_data_expression_replace()
   std::cerr << e_ << std::endl;
   BOOST_CHECK(e_ == x);
 
-  std::cerr << mcrl2::new_data::pp(xl) << std::endl;
+  std::cerr << mcrl2::data::pp(xl) << std::endl;
   data_expression_vector xl_ = data_expression_map_replace(el, replacements);
-  std::cerr << mcrl2::new_data::pp(xl_) << std::endl;
+  std::cerr << mcrl2::data::pp(xl_) << std::endl;
   BOOST_CHECK(xl_ == xl);
 
   data_expression u = sort_real_::plus(sort_real_::real_(4), sort_real_::real_(1));

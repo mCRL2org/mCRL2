@@ -15,7 +15,7 @@
 #include <aterm2.h>
 
 #include <mcrl2/lps/nextstate.h>
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 #include "simbase.h"
 
 class StandardSimulator: virtual public SimulatorInterface
@@ -45,7 +45,7 @@ public:
 
     // XXX make private and use functions?
     bool use_dummies;
-    mcrl2::new_data::rewriter::strategy rewr_strat;
+    mcrl2::data::rewriter::strategy rewr_strat;
 
     // SimulatorInterface methods
     virtual void Register(SimulatorViewInterface *View);

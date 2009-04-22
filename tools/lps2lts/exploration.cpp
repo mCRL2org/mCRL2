@@ -15,7 +15,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace.h"
@@ -146,7 +146,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
 
-  mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > > enumerator_factory(lps_specification.data(), new_data::rewriter(lps_specification.data(), lgopts->strat));
+  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), data::rewriter(lps_specification.data(), lgopts->strat));
 
   nstate = createNextState(lps_specification,!lgopts->usedummies,lgopts->stateformat, enumerator_factory);
 

@@ -27,8 +27,8 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -137,8 +137,8 @@ void print_specification_file_name(t_tool_options const& tool_options)
   if(mcrl2::core::detail::gsIsLinProcSpec(spec)) spec_type = "LPS";
   if(mcrl2::core::detail::gsIsPBES(spec)) spec_type = "PBES";
 
-  new_data::data_specification data_spec(ATAgetArgument(spec, 0));
-  spec = ATsetArgument(spec, atermpp::aterm((new_data::detail::data_specification_to_aterm_data_spec(data_spec))), 0);
+  data::data_specification data_spec(ATAgetArgument(spec, 0));
+  spec = ATsetArgument(spec, atermpp::aterm((data::detail::data_specification_to_aterm_data_spec(data_spec))), 0);
   //open output file for writing or set to stdout
   FILE *output_stream    = NULL;
   if (tool_options.output_file_name.empty()) {

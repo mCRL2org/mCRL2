@@ -52,14 +52,14 @@ namespace detail {
       {
         return false;
       }
-      new_data::assignment_list a1 = a.assignments();
-      new_data::variable_list v = eqn.variables1();
+      data::assignment_list a1 = a.assignments();
+      data::variable_list v = eqn.variables1();
       if (a1.size() != v.size())
       {
         return false;
       }
-      new_data::assignment_list::iterator i;
-      new_data::variable_list::iterator j;
+      data::assignment_list::iterator i;
+      data::variable_list::iterator j;
       for (i = a1.begin(), j = v.begin(); i != a1.end(); i++, j++)
       {
         if (i->lhs() != *j)
@@ -133,14 +133,14 @@ namespace detail {
 
     /// \brief Visit process node
     /// \return The result of visiting the node
-    bool visit_process(const process_expression& x, const process_identifier pi, const new_data::data_expression_list& v)
+    bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
     {
       return continue_recursion;
     }
 
     /// \brief Visit process_assignment node
     /// \return The result of visiting the node
-    bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const new_data::assignment_list& v)
+    bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
     {
       process_assignment a = x;
       if (!check_process_assignment(a))
@@ -152,7 +152,7 @@ namespace detail {
 
     /// \brief Visit sum node
     /// \return The result of visiting the node
-    bool visit_sum(const process_expression& x, const new_data::variable_list& v, const process_expression& right)
+    bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
     {
       if (!is_alternative(right))
       {
@@ -214,7 +214,7 @@ namespace detail {
 
     /// \brief Visit at_time node
     /// \return The result of visiting the node
-    bool visit_at_time(const process_expression& x, const process_expression& left, const new_data::data_expression& d)
+    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
       if (!is_multiaction(left) && !tr::is_delta(left))
       {
@@ -245,7 +245,7 @@ namespace detail {
 
     /// \brief Visit if_then node
     /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const new_data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
     {
       if (!is_action_prefix(right) && !is_timed_deadlock(right))
       {
@@ -256,7 +256,7 @@ namespace detail {
 
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
-    bool visit_if_then_else(const process_expression& x, const new_data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;

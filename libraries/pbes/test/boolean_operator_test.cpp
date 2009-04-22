@@ -15,8 +15,8 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/core/garbage_collection.h"

@@ -7,26 +7,26 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_specification_test.cpp
-/// \brief Basic regression test for new_data specifications.
+/// \brief Basic regression test for data specifications.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/set.h"
-#include "mcrl2/new_data/bag.h"
-#include "mcrl2/new_data/list.h"
-#include "mcrl2/new_data/structured_sort.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/parser.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/parser.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 void test_sorts()
 {
@@ -332,24 +332,24 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(function_sort(s0,s)));
 
   // structured sort
-  atermpp::vector< new_data::structured_sort_constructor_argument > arguments;
+  atermpp::vector< data::structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(new_data::structured_sort_constructor_argument(s));
-  arguments.push_back(new_data::structured_sort_constructor_argument(s0));
-  arguments.push_back(new_data::structured_sort_constructor_argument(s1));
+  arguments.push_back(data::structured_sort_constructor_argument(s));
+  arguments.push_back(data::structured_sort_constructor_argument(s0));
+  arguments.push_back(data::structured_sort_constructor_argument(s1));
 
-  atermpp::vector< new_data::structured_sort_constructor > constructors;
-  constructors.push_back(new_data::structured_sort_constructor("a",
+  atermpp::vector< data::structured_sort_constructor > constructors;
+  constructors.push_back(data::structured_sort_constructor("a",
      boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(new_data::structured_sort_constructor("b",
+  constructors.push_back(data::structured_sort_constructor("b",
      boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
-  constructors.push_back(new_data::structured_sort_constructor("b",
+  constructors.push_back(data::structured_sort_constructor("b",
      boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
 
-  BOOST_CHECK(spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
-  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
-  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
-  BOOST_CHECK(!spec.is_certainly_finite(new_data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
+  BOOST_CHECK(spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
+  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
+  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
+  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
 }
 
 void test_constructor()
@@ -362,7 +362,7 @@ void test_constructor()
     "                          \n"
     ;
   data_specification data = remove_all_system_defined(parse_data_specification(SPEC));
-  ATermAppl a = new_data::detail::data_specification_to_aterm_data_spec(data);
+  ATermAppl a = data::detail::data_specification_to_aterm_data_spec(data);
   data_specification spec1(a);
 }
 

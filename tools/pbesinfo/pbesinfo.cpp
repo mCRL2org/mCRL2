@@ -40,7 +40,7 @@ using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 

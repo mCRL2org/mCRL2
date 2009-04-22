@@ -4,8 +4,8 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
-#include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
@@ -13,7 +13,7 @@
 
 using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
@@ -33,9 +33,9 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  typedef new_data::rewriter my_data_rewriter;
-  typedef new_data::data_enumerator<number_postfix_generator> my_enumerator;
-  typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter, my_enumerator> my_pbes_rewriter;
+  typedef data::rewriter my_data_rewriter;
+  typedef data::data_enumerator<number_postfix_generator> my_enumerator;
+  typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_pbes_rewriter;
 
   std::string infile;
   int type;

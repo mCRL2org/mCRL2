@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/nextstate.h
+/// \file mcrl2/data/nextstate.h
 
 #ifndef _LIBNEXTSTATE_H
 #define _LIBNEXTSTATE_H
@@ -14,9 +14,9 @@
 #include <memory>
 #include <vector>
 #include "aterm2.h"
-#include "mcrl2/new_data/classic_enumerator.h"
-#include "mcrl2/new_data/enumerator_factory.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator_factory.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 
 /** \brief Internal NextState state storage method **/
@@ -227,7 +227,7 @@ class NextState
                  * standard data types are use.
                  * \return Rewriter object used by this NextState object.
                  **/
-                virtual mcrl2::new_data::detail::Rewriter *getRewriter() = 0;
+                virtual mcrl2::data::detail::Rewriter *getRewriter() = 0;
 
 };
 
@@ -248,7 +248,7 @@ NextState *createNextState(
                 mcrl2::lps::specification const& spec,
 		bool allow_free_vars,
 		int state_format,
-		mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > > const& e,
+		mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& e,
 		NextStateStrategy strategy = nsStandard
 		);
 
@@ -269,9 +269,9 @@ NextState *createNextState(
                 mcrl2::lps::specification const& spec,
 		bool allow_free_vars = true,
 		int state_format = GS_STATE_VECTOR,
-		mcrl2::new_data::rewriter::strategy rewrite_strategy = mcrl2::new_data::rewriter::jitty,
+		mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::rewriter::jitty,
 		NextStateStrategy strategy = nsStandard,
-		mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy = mcrl2::new_data::detail::ENUM_STANDARD
+		mcrl2::data::detail::EnumerateStrategy enumerator_strategy = mcrl2::data::detail::ENUM_STANDARD
 		);
 
 #endif

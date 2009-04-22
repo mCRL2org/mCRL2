@@ -16,8 +16,8 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"

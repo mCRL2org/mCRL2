@@ -13,18 +13,18 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/expression_traits.h"
-#include "mcrl2/new_data/classic_enumerator.h"
-#include "mcrl2/new_data/substitution.h"
-#include "mcrl2/new_data/detail/concepts.h"
-#include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/expression_traits.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/detail/concepts.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 template < typename T >
 void enumerate(data_specification const& d,
@@ -61,9 +61,9 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
   }
 }
 
-#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/data/enumerator.h"
 
-// specialisation for new_data::enumerator
+// specialisation for data::enumerator
 template <>
 void enumerate< data_enumerator< > >(data_specification const& d,
                                             std::set< variable > const& v,
@@ -109,19 +109,19 @@ void enumerate< data_enumerator< > >(data_specification const& d,
   }
 }
 
-#include "mcrl2/new_data/detail/enum/enumerator.h"
+#include "mcrl2/data/detail/enum/enumerator.h"
 
-// specialisation for new_data::detail::Enumerator
+// specialisation for data::detail::Enumerator
 template <>
 void enumerate< detail::Enumerator >(data_specification const& d,
                                 std::set< variable > const& v,
                                     data_expression const& c, size_t t) {
 
-  new_data::rewriter                            rewriter(d);
+  data::rewriter                            rewriter(d);
 
   rewriter(c); // forces data implementation and that proper rewrite rules are added
 
-  std::auto_ptr< new_data::detail::Enumerator > enumerator(detail::createEnumerator(
+  std::auto_ptr< data::detail::Enumerator > enumerator(detail::createEnumerator(
       detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter()));
 
   variable_list variables;
@@ -147,12 +147,12 @@ void enumerate< detail::Enumerator >(data_specification const& d,
 }
 
 void empty_test() {
-  using namespace mcrl2::new_data::selectors;
+  using namespace mcrl2::data::selectors;
 
-  typedef classic_enumerator< mutable_substitution< >, new_data::rewriter, select_not< false > >  enumerator_type;
+  typedef classic_enumerator< mutable_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
 
   // test manual construction of evaluator with rewriter
-  new_data::rewriter evaluator;
+  data::rewriter evaluator;
 
   std::set< variable > variables;
 
@@ -242,7 +242,7 @@ void mutually_recursive_test(const size_t count) {
 }
 
 void check_concepts() {
-  using namespace mcrl2::new_data::concepts;
+  using namespace mcrl2::data::concepts;
 
   BOOST_CONCEPT_ASSERT((Evaluator< rewriter, mutable_substitution< > >));
 

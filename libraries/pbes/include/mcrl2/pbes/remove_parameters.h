@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <boost/bind.hpp>
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
@@ -47,7 +47,7 @@ namespace detail {
         result.push_back(*i);
       }
     }
-    return new_data::convert< atermpp::term_list< Term > >(result);
+    return data::convert< atermpp::term_list< Term > >(result);
   }
 
 } // namespace detail

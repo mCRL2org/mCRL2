@@ -10,18 +10,18 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
-#include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2::core;
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 

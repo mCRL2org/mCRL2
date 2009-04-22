@@ -20,8 +20,8 @@
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/variable.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -33,12 +33,12 @@
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using new_data::make_vector;
+using data::make_vector;
 using core::identifier_string;
-using new_data::data_expression;
-using new_data::variable;
-using new_data::basic_sort;
-using new_data::multiset_identifier_generator;
+using data::data_expression;
+using data::variable;
+using data::basic_sort;
+using data::multiset_identifier_generator;
 using modal::detail::mcf2statefrm;
 using modal::state_formula;
 using lps::mcrl22lps;
@@ -254,8 +254,8 @@ void test_quantifier_rename_builder()
   variable mN("m", basic_sort("N"));
   variable nN("n", basic_sort("N"));
 
-  pbes_expression f = new_data::equal_to(mN, nN);
-  pbes_expression g = new_data::not_equal_to(mN, nN);
+  pbes_expression f = data::equal_to(mN, nN);
+  pbes_expression g = data::not_equal_to(mN, nN);
 
   multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
 
@@ -283,10 +283,10 @@ void test_quantifier_rename_builder()
 void test_complement_method_builder()
 {
   using namespace pbes_system::pbes_expr;
-  namespace d = new_data::sort_bool_;
+  namespace d = data::sort_bool_;
 
-  variable X("x", new_data::sort_bool_::bool_());
-  variable Y("y", new_data::sort_bool_::bool_());
+  variable X("x", data::sort_bool_::bool_());
+  variable Y("y", data::sort_bool_::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));

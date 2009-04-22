@@ -19,13 +19,13 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
 #define ATisList(x) (ATgetType(x) == AT_LIST)
@@ -358,7 +358,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
 
     if ( applied_conversion )
     {
-      data_spec = mcrl2::new_data::detail::data_specification_to_aterm_data_spec(spec->data());
+      data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec->data());
       act_spec = ATAgetArgument((ATermAppl) *spec,1);
     } else {
       data_spec = ATAgetArgument((ATermAppl) extra_data,0);

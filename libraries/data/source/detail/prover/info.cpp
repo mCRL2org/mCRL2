@@ -9,17 +9,17 @@
 #include "boost.hpp" // precompiled headers
 
 #include "aterm2.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/detail/prover/info.h"
-#include "mcrl2/new_data/detail/prover/utilities.h"
+#include "mcrl2/data/detail/prover/info.h"
+#include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/core/aterm_ext.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 inline static Compare_Result lexico(Compare_Result a_result1, Compare_Result a_result2) {

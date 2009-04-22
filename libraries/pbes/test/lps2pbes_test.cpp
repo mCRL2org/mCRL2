@@ -28,7 +28,7 @@
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 using namespace mcrl2::modal;
@@ -281,7 +281,7 @@ void test_multi_actions(action_list a, action_list b, data_expression expected_r
 
 void test_equal_multi_actions()
 {
-  namespace d = new_data;
+  namespace d = data;
 
   data_expression d1 = nat("d1");
   data_expression d2 = nat("d2");

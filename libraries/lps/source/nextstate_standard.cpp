@@ -18,7 +18,7 @@
 #include <memory>
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/classic_enumerator.h"
+#include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/core/messaging.h"
@@ -473,7 +473,7 @@ ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList
 }
 
 NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format,
-         mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator<> > const& enumerator_factory) : info(enumerator_factory)
+         mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > const& enumerator_factory) : info(enumerator_factory)
 {
         ATermList l,m,n,free_vars;
 
@@ -710,7 +710,7 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, int index, Nex
   return new NextStateGeneratorSummand(index, state,info,next_id++);
 }
 
-mcrl2::new_data::detail::Rewriter *NextStateStandard::getRewriter() // Deprecated. Do not USE.
+mcrl2::data::detail::Rewriter *NextStateStandard::getRewriter() // Deprecated. Do not USE.
 {
         // return info.rewr_obj;
         return &(info.m_rewriter.get_rewriter());
@@ -945,7 +945,7 @@ NextState *createNextState(
   mcrl2::lps::specification const& spec,
   bool allow_free_vars,
   int state_format,
-  mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > > const& e,
+  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& e,
   NextStateStrategy strategy
 )
 {
@@ -963,9 +963,9 @@ NextState *createNextState(
   mcrl2::lps::specification const& spec,
   bool allow_free_vars,
   int state_format,
-  mcrl2::new_data::rewriter::strategy rewrite_strategy,
+  mcrl2::data::rewriter::strategy rewrite_strategy,
   NextStateStrategy strategy,
-  mcrl2::new_data::detail::EnumerateStrategy enumerator_strategy
+  mcrl2::data::detail::EnumerateStrategy enumerator_strategy
 )
 {
   return
@@ -973,7 +973,7 @@ NextState *createNextState(
       spec,
       allow_free_vars,
       state_format,
-      mcrl2::new_data::enumerator_factory< mcrl2::new_data::classic_enumerator< > >(spec.data(), mcrl2::new_data::rewriter(spec.data(), rewrite_strategy)),
+      mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), mcrl2::data::rewriter(spec.data(), rewrite_strategy)),
       strategy
     );
 }

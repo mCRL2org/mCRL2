@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_expression_test.cpp
-/// \brief Basic regression test for new_data expressions.
+/// \brief Basic regression test for data expressions.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
@@ -16,23 +16,23 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/new_data/detail/container_utility.h"
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/variable.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/application.h"
-#include "mcrl2/new_data/abstraction.h"
-#include "mcrl2/new_data/lambda.h"
-#include "mcrl2/new_data/forall.h"
-#include "mcrl2/new_data/exists.h"
-#include "mcrl2/new_data/where_clause.h"
-#include "mcrl2/new_data/assignment.h"
+#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/application.h"
+#include "mcrl2/data/abstraction.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/forall.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/where_clause.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 /*
 template <typename T>

@@ -7,16 +7,16 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file parser_test.cpp
-/// \brief Regression test for parsing a new_data specification.
+/// \brief Regression test for parsing a data specification.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/pos.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/standard.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/standard.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -29,13 +29,13 @@ void parser_test()
     "map f:S -> List(S);\n"
   );
 
-  new_data::data_specification spec(new_data::remove_all_system_defined(new_data::parse_data_specification(text)));
+  data::data_specification spec(data::remove_all_system_defined(data::parse_data_specification(text)));
 
-  BOOST_CHECK(boost::copy_range< new_data::sort_expression_vector >(spec.sorts()).size() == 1);
-  BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.constructors()).size() == 1);
-  BOOST_CHECK(boost::copy_range< new_data::function_symbol_vector >(spec.mappings()).size() == 1);
+  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 1);
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors()).size() == 1);
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 1);
 
-  BOOST_CHECK(new_data::parse_data_expression("2") == new_data::sort_pos::pos(2));
+  BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
 }
 
 int test_main(int argc, char** argv)

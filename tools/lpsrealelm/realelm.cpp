@@ -14,10 +14,10 @@
 
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/postfix_identifier_generator.h"
-#include "mcrl2/new_data/replace.h"
-#include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/postfix_identifier_generator.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/data/data_expression_utility.h"
 
 #include "realelm.h"
 #include "linear_inequalities.h"
@@ -25,7 +25,7 @@
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 // Custom replace functions

@@ -28,19 +28,19 @@
 #include <cstring>
 #include <cassert>
 
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/substitution.h"
-#include "mcrl2/new_data/classic_enumerator.h"
-#include "mcrl2/new_data/enumerator_factory.h"
-#include "mcrl2/new_data/map_substitution_adapter.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator_factory.h"
+#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -52,7 +52,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using mcrl2::core::gsDebug;
 using namespace mcrl2::utilities::tools;
 using mcrl2::utilities::tools::rewriter_tool;
@@ -101,7 +101,7 @@ static void parse_var_decl(string decl,
     stringstream ss(decl.substr(semi_pos+1));
 
     sort_expression sort(type_check_sort_expr(parse_sort_expr(ss),
-                              new_data::detail::data_specification_to_aterm_data_spec(spec)));
+                              data::detail::data_specification_to_aterm_data_spec(spec)));
 
     if (gsDebug)
     { cerr << "sort parsed and type checked: " << pp(sort) << "\n";
@@ -157,7 +157,7 @@ static data_expression parse_term(string &term_string,
                                   const atermpp::set < variable > &local_variables = atermpp::set < variable >())
 {
   context_variables.insert(local_variables.begin(),local_variables.end());
-//  return type_check_data_expr(parse_data_expression(term_string),NULL,new_data::detail::data_specification_to_aterm_data_spec(spec),context_variables);
+//  return type_check_data_expr(parse_data_expression(term_string),NULL,data::detail::data_specification_to_aterm_data_spec(spec),context_variables);
 //  variable context is ignored, current objective is to get the tool to compile
   return parse_data_expression(term_string);
 }
@@ -316,7 +316,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             // static EnumeratorSolutions *sols = NULL;
             // clear_rewr_substs(vars);
             for (classic_enumerator< > i =
-                 e.make(new_data::convert < std::set <variable > >(vars),rewr,term);
+                 e.make(data::convert < std::set <variable > >(vars),rewr,term);
                                                           i != classic_enumerator<>() ; ++i) 
             { 
               cout << "[";

@@ -12,8 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 #define MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/utility.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
 namespace mcrl2 {
@@ -30,29 +30,29 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   typedef typename super::data_term_type data_term_type;
   typedef typename super::propositional_variable_type propositional_variable_type;
 
-  new_data::variable_list bound_variables;
-  std::vector<new_data::variable_list> quantifier_stack;
-  std::set<new_data::variable> result;
+  data::variable_list bound_variables;
+  std::vector<data::variable_list> quantifier_stack;
+  std::set<data::variable> result;
   bool search_propositional_variables;
 
   free_variable_visitor(bool search_propositional_variables_ = true)
     : search_propositional_variables(search_propositional_variables_)
   {}
 
-  free_variable_visitor(new_data::variable_list bound_variables_, bool search_propositional_variables_ = true)
+  free_variable_visitor(data::variable_list bound_variables_, bool search_propositional_variables_ = true)
     : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
   {}
 
   /// \brief Returns true if v is an element of bound_variables or quantifier_stack
   /// \param v A data variable
   /// \return True if v is an element of bound_variables or quantifier_stack
-  bool is_bound(const new_data::variable& v) const
+  bool is_bound(const data::variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())
     {
       return true;
     }
-    for (std::vector<new_data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (std::vector<data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
       if (std::find(i->begin(), i->end(), v) != i->end())
       {
@@ -64,7 +64,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
 
   /// \brief Pushes v on the stack of quantifier variables
   /// \param v A sequence of data variables
-  void push(const new_data::variable_list& v)
+  void push(const data::variable_list& v)
   {
     quantifier_stack.push_back(v);
   }
@@ -79,7 +79,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_forall(const term_type& e, const new_data::variable_list& v, const term_type&)
+  bool visit_forall(const term_type& e, const data::variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -95,7 +95,7 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \param e A term
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_exists(const term_type& e, const new_data::variable_list& v, const term_type&)
+  bool visit_exists(const term_type& e, const data::variable_list& v, const term_type&)
   {
     push(v);
     return true;
@@ -115,8 +115,8 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   {
     if (search_propositional_variables)
     {
-      std::set<new_data::variable> variables = new_data::find_all_variables(v.parameters());
-      for (std::set<new_data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+      std::set<data::variable> variables = data::find_all_variables(v.parameters());
+      for (std::set<data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
       {
         if (!is_bound(*i))
         {
@@ -133,8 +133,8 @@ struct free_variable_visitor: public pbes_expression_visitor<Term>
   /// \return The result of visiting the node
   bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
-    std::set<new_data::variable> variables = new_data::find_all_variables(d);
-    for (std::set<new_data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+    std::set<data::variable> variables = data::find_all_variables(d);
+    for (std::set<data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
       {

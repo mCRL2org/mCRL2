@@ -31,7 +31,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 
 namespace mcrl2 {
   namespace core {
@@ -399,9 +399,9 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
       if (gsIsDataSpec((ATermAppl) Part) || gsIsProcSpec((ATermAppl) Part) ||
           gsIsLinProcSpec((ATermAppl) Part) || gsIsPBES((ATermAppl) Part))
       {
-        ReconstructedPart = mcrl2::new_data::detail::reconstruct_exprs(Part, (ATermAppl) Part);
+        ReconstructedPart = mcrl2::data::detail::reconstruct_exprs(Part, (ATermAppl) Part);
       } else {
-        ReconstructedPart = mcrl2::new_data::detail::reconstruct_exprs(Part, NULL);
+        ReconstructedPart = mcrl2::data::detail::reconstruct_exprs(Part, NULL);
       }
     }
     if (ATgetType(ReconstructedPart) == AT_APPL) {

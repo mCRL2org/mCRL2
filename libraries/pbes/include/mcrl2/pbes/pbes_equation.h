@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -125,9 +125,9 @@ class pbes_equation: public atermpp::aterm_appl
     bool is_well_typed() const
     {
       // check 1)
-      if (new_data::detail::sequence_contains_duplicates(
-             boost::make_transform_iterator(variable().parameters().begin(), new_data::detail::variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , new_data::detail::variable_name())
+      if (data::detail::sequence_contains_duplicates(
+             boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name())
             )
          )
       {
@@ -138,11 +138,11 @@ class pbes_equation: public atermpp::aterm_appl
       // check 2)
       detail::quantifier_visitor qvisitor;
       qvisitor.visit(formula());
-      if (new_data::detail::sequences_do_overlap(
-             boost::make_transform_iterator(variable().parameters().begin(), new_data::detail::variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , new_data::detail::variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.begin()     , new_data::detail::variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.end()       , new_data::detail::variable_name())
+      if (data::detail::sequences_do_overlap(
+             boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
+             boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.begin()     , data::detail::variable_name()),
+             boost::make_transform_iterator(qvisitor.variables.end()       , data::detail::variable_name())
            )
          )
       {

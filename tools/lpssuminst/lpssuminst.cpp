@@ -64,7 +64,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
        lps_specification.load(m_input_filename);
 
-       mcrl2::new_data::rewriter r = create_rewriter(lps_specification.data());
+       mcrl2::data::rewriter r = create_rewriter(lps_specification.data());
 
        lps::specification result = instantiate_sums(lps_specification, r, m_suminst_opts);
 

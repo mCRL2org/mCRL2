@@ -34,7 +34,7 @@
 
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
@@ -65,7 +65,7 @@ class lpsconstelm_tool: public squadt_tool<  rewriter_tool<input_output_tool> >
       lps::specification lps_specification;
       lps_specification.load(m_input_filename);
 
-      mcrl2::new_data::rewriter data_rewriter(lps_specification.data());
+      mcrl2::data::rewriter data_rewriter(lps_specification.data());
 
       mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter );
       r.save(m_output_filename);

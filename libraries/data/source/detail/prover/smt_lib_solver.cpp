@@ -11,7 +11,7 @@
 #include <cstdlib>
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/detail/prover/smt_lib_solver.h"
+#include "mcrl2/data/detail/prover/smt_lib_solver.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -23,11 +23,11 @@ using namespace mcrl2::core::detail;
 using namespace std;
 
 #ifdef HAVE_CVC
-# include "mcrl2/new_data/detail/prover/smt_lib_solver_fast.ipp"
+# include "mcrl2/data/detail/prover/smt_lib_solver_fast.ipp"
 #endif // HAVE_CVC
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class SMT_LIB_Solver ---------------------------------------------------------------------------
@@ -847,7 +847,7 @@ namespace mcrl2 {
 #include <iostream>
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
       namespace prover {
         template < typename T >

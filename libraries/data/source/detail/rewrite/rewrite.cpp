@@ -18,26 +18,26 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/rewrite.h"
-#include "mcrl2/new_data/detail/rewrite/inner.h"
-#include "mcrl2/new_data/detail/rewrite/jitty.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite/inner.h"
+#include "mcrl2/data/detail/rewrite/jitty.h"
 #ifdef MCRL2_INNERC_AVAILABLE
-#include "mcrl2/new_data/detail/rewrite/innerc.h"
+#include "mcrl2/data/detail/rewrite/innerc.h"
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-#include "mcrl2/new_data/detail/rewrite/jittyc.h"
+#include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
-using namespace mcrl2::new_data::detail;
-#include "mcrl2/new_data/detail/rewrite/with_prover.h"
+using namespace mcrl2::data::detail;
+#include "mcrl2/data/detail/rewrite/with_prover.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace std;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 Rewriter::Rewriter()
@@ -240,16 +240,16 @@ Rewriter *createRewriter(ATermAppl DataSpec, RewriteStrategy Strategy)
 			return new RewriterCompilingJitty(DataSpec);
 #endif
 		case GS_REWR_INNER_P:
-			return new RewriterProver(DataSpec,mcrl2::new_data::rewriter::innermost);
+			return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost);
 		case GS_REWR_JITTY_P:
-			return new RewriterProver(DataSpec,mcrl2::new_data::rewriter::jitty);
+			return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty);
 #ifdef MCRL2_INNERC_AVAILABLE
 		case GS_REWR_INNERC_P:
-			return new RewriterProver(DataSpec,new_data::rewriter::innermost_compiling);
+			return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
 		case GS_REWR_JITTYC_P:
-			return new RewriterProver(DataSpec,new_data::rewriter::jitty_compiling);
+			return new RewriterProver(DataSpec,data::rewriter::jitty_compiling);
 #endif
 		default:
 			return NULL;

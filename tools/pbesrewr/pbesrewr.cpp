@@ -16,9 +16,9 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
-#include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -63,34 +63,34 @@ class pbes_rewriter : public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       p.load(m_input_filename);
 
       // data rewriter
-      new_data::rewriter datar = create_rewriter(p.data());
+      data::rewriter datar = create_rewriter(p.data());
 
       // pbes rewriter
       switch (rewriter_type())
       {
         case simplify:
         {
-          simplifying_rewriter<pbes_expression, new_data::rewriter> pbesr(datar);
+          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
           pbesrewr(p, pbesr);
           break;
         }
         case quantifier_all:
         {
-          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-          new_data::data_enumerator<> datae(p.data(), datar, generator);
-          new_data::rewriter_with_variables datarv(datar);
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }
         case quantifier_finite:
         {
-          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-          new_data::data_enumerator<> datae(p.data(), datar, generator);
-          new_data::rewriter_with_variables datarv(datar);
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p, pbesr);
           break;
         }

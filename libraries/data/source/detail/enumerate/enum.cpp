@@ -8,11 +8,11 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/new_data/detail/enum/enumerator.h"
-#include "mcrl2/new_data/detail/enum/standard.h"
+#include "mcrl2/data/detail/enum/enumerator.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 Enumerator *createEnumerator(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
 {
@@ -25,5 +25,5 @@ Enumerator *createEnumerator(ATermAppl data_spec, Rewriter *r, bool clean_up_rew
 	}
 }
     } // namespace detail
-  } // namespace new_data
+  } // namespace data
 } // namespace mcrl2

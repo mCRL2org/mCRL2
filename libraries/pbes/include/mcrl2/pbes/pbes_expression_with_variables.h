@@ -16,7 +16,7 @@
 #include <set>
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/core/detail/join.h"
-#include "mcrl2/new_data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 
@@ -31,7 +31,7 @@ namespace pbes_system {
   {
     protected:
       /// \brief The sequence of variables.
-      new_data::variable_list m_variables;
+      data::variable_list m_variables;
 
     public:
       /// \brief Constructor.
@@ -53,20 +53,20 @@ namespace pbes_system {
       /// \brief Constructor.
       /// \param expression A PBES expression
       /// \param variables A sequence of data variables
-      pbes_expression_with_variables(pbes_expression expression, new_data::variable_list variables)
+      pbes_expression_with_variables(pbes_expression expression, data::variable_list variables)
         : pbes_expression(expression), m_variables(variables)
       {}
 
       /// \brief Returns the variables
       /// \return The variables
-      new_data::variable_list variables() const
+      data::variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the variables
       /// \return The variables
-      new_data::variable_list& variables()
+      data::variable_list& variables()
       {
         return m_variables;
       }
@@ -110,16 +110,16 @@ namespace core {
     typedef pbes_system::pbes_expression_with_variables term_type;
 
     /// \brief The data term type
-    typedef new_data::data_expression_with_variables data_term_type;
+    typedef data::data_expression_with_variables data_term_type;
 
     /// \brief The data term sequence type
-    typedef new_data::data_expression_list data_term_sequence_type;
+    typedef data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef new_data::variable variable_type;
+    typedef data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef new_data::variable_list variable_sequence_type;
+    typedef data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -370,7 +370,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " [" + new_data::pp(t.variables()) + "]";
+      return core::pp(t) + " [" + data::pp(t.variables()) + "]";
     }
   };
 

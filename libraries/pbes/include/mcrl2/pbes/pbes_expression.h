@@ -21,8 +21,8 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
-#include "mcrl2/new_data/variable.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
@@ -149,37 +149,37 @@ namespace pbes_expr {
   /// \param t A PBES expression
   /// \return True if it is the value \p true
   inline bool is_true(pbes_expression t)
-  { return is_pbes_true(t) || new_data::sort_bool_::is_true__function_symbol(t); }
+  { return is_pbes_true(t) || data::sort_bool_::is_true__function_symbol(t); }
 
   /// \brief Test for the value false
   /// \param t A PBES expression
   /// \return True if it is the value \p false
   inline bool is_false(pbes_expression t)
-  { return is_pbes_false(t) || new_data::sort_bool_::is_false__function_symbol(t); }
+  { return is_pbes_false(t) || data::sort_bool_::is_false__function_symbol(t); }
 
   /// \brief Test for a negation
   /// \param t A PBES expression
   /// \return True if it is a negation
   inline bool is_not(pbes_expression t)
-  { return is_pbes_not(t) || new_data::sort_bool_::is_not__application(t); }
+  { return is_pbes_not(t) || data::sort_bool_::is_not__application(t); }
 
   /// \brief Test for a conjunction
   /// \param t A PBES expression
   /// \return True if it is a conjunction
   inline bool is_and(pbes_expression t)
-  { return is_pbes_and(t) || new_data::sort_bool_::is_and__application(t); }
+  { return is_pbes_and(t) || data::sort_bool_::is_and__application(t); }
 
   /// \brief Test for a disjunction
   /// \param t A PBES expression
   /// \return True if it is a disjunction
   inline bool is_or(pbes_expression t)
-  { return is_pbes_or(t) || new_data::sort_bool_::is_or__application(t); }
+  { return is_pbes_or(t) || data::sort_bool_::is_or__application(t); }
 
   /// \brief Test for an implication
   /// \param t A PBES expression
   /// \return True if it is an implication
   inline bool is_imp(pbes_expression t)
-  { return is_pbes_imp(t) || new_data::sort_bool_::is_implies_application(t); }
+  { return is_pbes_imp(t) || data::sort_bool_::is_implies_application(t); }
 
   /// \brief Test for an universal quantification
   /// \param t A PBES expression
@@ -215,7 +215,7 @@ namespace accessors {
   /// \param t A PBES expression
   /// \return The converted expression
   inline
-  new_data::data_expression val(pbes_expression t)
+  data::data_expression val(pbes_expression t)
   {
     assert(core::detail::gsIsDataExpr(t));
     return atermpp::aterm_appl(t);
@@ -231,7 +231,7 @@ namespace accessors {
     {
       return atermpp::arg1(t);
     }
-    assert(new_data::sort_bool_::is_not__application(t) ||
+    assert(data::sort_bool_::is_not__application(t) ||
            pbes_expr::is_forall(t)    ||
            pbes_expr::is_exists(t)
           );
@@ -262,11 +262,11 @@ namespace accessors {
   /// \param t A PBES expression
   /// \return The variables of a quantification expression
   inline
-  new_data::variable_list var(pbes_expression t)
+  data::variable_list var(pbes_expression t)
   {
     assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
-    return new_data::variable_list(atermpp::term_list_iterator< new_data::variable >(atermpp::list_arg1(t)),
-                                   atermpp::term_list_iterator< new_data::variable >());
+    return data::variable_list(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
+                                   atermpp::term_list_iterator< data::variable >());
   }
 
   /// \brief Returns the name of a propositional variable expression
@@ -283,11 +283,11 @@ namespace accessors {
   /// \param t A PBES expression
   /// \return The parameters of a propositional variable instantiation.
   inline
-  new_data::data_expression_list param(pbes_expression t)
+  data::data_expression_list param(pbes_expression t)
   {
     assert(pbes_expr::is_propositional_variable_instantiation(t));
-    return new_data::data_expression_list(atermpp::term_list_iterator< new_data::data_expression >(atermpp::list_arg2(t)),
-                                          atermpp::term_list_iterator< new_data::data_expression >());
+    return data::data_expression_list(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
+                                          atermpp::term_list_iterator< data::data_expression >());
   }
 } // accessors
 
@@ -354,13 +354,13 @@ namespace pbes_expr {
   /// \param p A PBES expression
   /// \return The value <tt>forall l.p</tt>
   inline
-  pbes_expression forall(new_data::variable_list l, pbes_expression p)
+  pbes_expression forall(data::variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
       return p;
     }
-    return pbes_expression(core::detail::gsMakePBESForall(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
+    return pbes_expression(core::detail::gsMakePBESForall(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Make an existential quantification
@@ -368,13 +368,13 @@ namespace pbes_expr {
   /// \param p A PBES expression
   /// \return The value <tt>exists l.p</tt>
   inline
-  pbes_expression exists(new_data::variable_list l, pbes_expression p)
+  pbes_expression exists(data::variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
       return p;
     }
-    return pbes_expression(core::detail::gsMakePBESExists(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
+    return pbes_expression(core::detail::gsMakePBESExists(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -517,7 +517,7 @@ namespace pbes_expr_optimized {
   /// \param p A PBES expression
   /// \return The value <tt>forall l.p</tt>
   inline
-  pbes_expression forall(new_data::variable_list l, pbes_expression p)
+  pbes_expression forall(data::variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
@@ -526,7 +526,7 @@ namespace pbes_expr_optimized {
     if (is_false(p))
     {
       // N.B. Here we use the fact that mCRL2 data types are never empty.
-      return new_data::sort_bool_::false_();
+      return data::sort_bool_::false_();
     }
     if (is_true(p))
     {
@@ -541,7 +541,7 @@ namespace pbes_expr_optimized {
   /// \param p A PBES expression
   /// \return The value <tt>exists l.p</tt>
   inline
-  pbes_expression exists(new_data::variable_list l, pbes_expression p)
+  pbes_expression exists(data::variable_list l, pbes_expression p)
   {
     if (l.empty())
     {
@@ -549,12 +549,12 @@ namespace pbes_expr_optimized {
     }
     if (is_false(p))
     {
-      return new_data::sort_bool_::false_();
+      return data::sort_bool_::false_();
     }
     if (is_true(p))
     {
       // N.B. Here we use the fact that mCRL2 data types are never empty.
-      return new_data::sort_bool_::true_();
+      return data::sort_bool_::true_();
     }
     return pbes_expr::exists(l, p);
   }
@@ -611,16 +611,16 @@ namespace core {
     typedef pbes_system::pbes_expression term_type;
 
     /// \brief The data term type
-    typedef new_data::data_expression data_term_type;
+    typedef data::data_expression data_term_type;
 
     /// \brief The data term sequence type
-    typedef new_data::data_expression_list data_term_sequence_type;
+    typedef data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef new_data::variable variable_type;
+    typedef data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef new_data::variable_list variable_sequence_type;
+    typedef data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -729,7 +729,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESForall(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p);
+      return core::detail::gsMakePBESForall(atermpp::term_list< data::variable >(l.begin(), l.end()), p);
     }
 
     /// \brief Make an existential quantification
@@ -743,7 +743,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESExists(atermpp::term_list< new_data::variable >(l.begin(), l.end()), p);
+      return core::detail::gsMakePBESExists(atermpp::term_list< data::variable >(l.begin(), l.end()), p);
     }
 
     /// \brief Propositional variable instantiation
@@ -898,8 +898,8 @@ namespace core {
       assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
       assert(is_exists(t) || is_forall(t));
 
-      return variable_sequence_type(atermpp::term_list_iterator< new_data::variable >(atermpp::list_arg1(t)),
-                                    atermpp::term_list_iterator< new_data::variable >());
+      return variable_sequence_type(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
+                                    atermpp::term_list_iterator< data::variable >());
     }
 
     /// \brief Returns the name of a propositional variable instantiation
@@ -919,8 +919,8 @@ namespace core {
     data_term_sequence_type param(term_type t)
     {
       assert(is_prop_var(t));
-      return data_term_sequence_type(atermpp::term_list_iterator< new_data::data_expression >(atermpp::list_arg2(t)),
-                                    atermpp::term_list_iterator< new_data::data_expression >());
+      return data_term_sequence_type(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
+                                    atermpp::term_list_iterator< data::data_expression >());
     }
 
     /// \brief Conversion from variable to term
@@ -938,7 +938,7 @@ namespace core {
     static inline
     bool is_variable(term_type t)
     {
-      return new_data::data_expression(t).is_variable();
+      return data::data_expression(t).is_variable();
     }
 
     /// \brief Returns the free variables of a term

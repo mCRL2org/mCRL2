@@ -11,16 +11,16 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/lambda.h"
-#include "mcrl2/new_data/substitution.h"
-#include "mcrl2/new_data/mutable_substitution_adapter.h"
-#include "mcrl2/new_data/detail/concepts.h"
-#include "mcrl2/new_data/detail/data_expression_with_variables.h"
-#include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/mutable_substitution_adapter.h"
+#include "mcrl2/data/detail/concepts.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 data_expression operator+(data_expression const& l, data_expression const& r) {
   return sort_nat::plus(l, r);
@@ -32,13 +32,13 @@ data_expression operator*(data_expression const& l, data_expression const& r) {
 
 void test1()
 {
-  using namespace mcrl2::new_data::sort_nat;
+  using namespace mcrl2::data::sort_nat;
 
   variable        x("x", sort_nat::nat());
   variable        y("y", sort_nat::nat());
   data_expression e(variable("z", sort_nat::nat()) + (x + y));
 
-  using mcrl2::new_data::concepts::MutableSubstitution;
+  using mcrl2::data::concepts::MutableSubstitution;
 
   BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, data_expression > >));
   BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, variable > >));
@@ -93,7 +93,7 @@ void test_mutable_substitution_adapter()
 
 void test_mutable_substitution()
 {
-  using namespace mcrl2::new_data::detail;
+  using namespace mcrl2::data::detail;
 
   mutable_substitution<variable, data_expression_with_variables> sigma;
   variable v("v", sort_nat::nat());

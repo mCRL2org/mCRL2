@@ -1,9 +1,9 @@
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/parser.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/parser.h"
 #include <iostream>
 
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 int main(int argc, char* argv[])
 {
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
   );
 
   // pretty print the data specification
-  std::cout << new_data::pp(data_spec) << "\n";
+  std::cout << data::pp(data_spec) << "\n";
 
   return 0;
 }

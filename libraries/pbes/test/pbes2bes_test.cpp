@@ -17,8 +17,8 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -34,11 +34,11 @@ using pbes_system::txt2pbes;
 inline
 pbes<> pbes2bes(pbes<>& p, bool finite = true)
 {
-  new_data::rewriter datar(p.data());
-  new_data::rewriter_with_variables datarv(p.data());
-  new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-  new_data::data_enumerator<> datae(p.data(), datar, generator);
-  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae);
+  data::rewriter datar(p.data());
+  data::rewriter_with_variables datarv(p.data());
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<> datae(p.data(), datar, generator);
+  enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae);
   pbes<> result = (finite ? do_finite_algorithm(p, pbesr) : do_lazy_algorithm(p, pbesr));
   return result;
 }

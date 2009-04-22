@@ -10,12 +10,12 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/new_data/data_expression.h>
-#include <mcrl2/new_data/data_elimination.h>
+#include <mcrl2/data/data_expression.h>
+#include <mcrl2/data/data_elimination.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/data_elimination.h>
 
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 namespace mcrl2
 {

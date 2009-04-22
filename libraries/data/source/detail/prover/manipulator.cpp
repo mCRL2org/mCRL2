@@ -10,14 +10,14 @@
 
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/detail/rewrite.h"
-#include "mcrl2/new_data/detail/prover/manipulator.h"
-#include "mcrl2/new_data/detail/prover/info.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/detail/prover/manipulator.h"
+#include "mcrl2/data/detail/prover/info.h"
 
 using namespace mcrl2::core;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class ATerm_Manipulator ------------------------------------------------------------------------

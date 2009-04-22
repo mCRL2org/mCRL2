@@ -28,7 +28,7 @@
 #include <aterm2.h>
 #include "xsimmain.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -93,7 +93,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
 class XSim: public mcrl2::utilities::wx::tool< XSim >
 {
 private:
-    mcrl2::new_data::rewriter::strategy rewrite_strategy;
+    mcrl2::data::rewriter::strategy rewrite_strategy;
     bool            dummies;
 
 public:
@@ -128,7 +128,7 @@ bool XSim::parse_command_line(int argc, wxChar** argv) {
   if (parser.continue_execution()) {
     dummies = 0 < parser.options.count("dummy");
 
-    rewrite_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
+    rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
     if (0 < parser.arguments.size()) {
       lps_file_argument = parser.arguments[0];

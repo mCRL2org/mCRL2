@@ -13,16 +13,16 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/new_data/detail/container_utility.h"
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/alias.h"
-#include "mcrl2/new_data/structured_sort.h"
-#include "mcrl2/new_data/container_sort.h"
+#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/container_sort.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 void basic_sort_test()
 {

@@ -13,8 +13,8 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/process.h"
@@ -23,7 +23,7 @@
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 const std::string SPEC = 

@@ -10,7 +10,7 @@
 
 #include <sstream>
 
-#include "mcrl2/new_data/detail/prover/formula_checker.h"
+#include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
@@ -18,7 +18,7 @@
 using namespace mcrl2::core;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class Formula_Checker --------------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace mcrl2 {
   // Class Formula_Checker - Functions declared public --------------------------------------------
 
     Formula_Checker::Formula_Checker(
-      mcrl2::new_data::data_specification a_data_spec, mcrl2::new_data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      mcrl2::data::data_specification a_data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_counter_example, bool a_witness, char const* a_dot_file_name
     ):
       f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
@@ -121,6 +121,6 @@ namespace mcrl2 {
     }
 
     } //namespace detail
-  } //namespace new_data
+  } //namespace data
 } //namespace mcrl2
 

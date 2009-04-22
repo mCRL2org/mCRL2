@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {
@@ -61,7 +61,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   {
     // PropVar => <Int>
     propositional_variable_instantiation propvarinst = propositional_variable_instantiation(p);
-    new_data::variable_list empty;
+    data::variable_list empty;
     propositional_variable propvar = propositional_variable(propvarinst.name(), empty);
     long variable = variables->index(propvar);
     if (variable < 0)

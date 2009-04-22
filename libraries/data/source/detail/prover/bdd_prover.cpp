@@ -12,21 +12,21 @@
 #include <ctime>
 
 #include "aterm2.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/new_data/detail/prover.h"
-#include "mcrl2/new_data/detail/prover/utilities.h"
-#include "mcrl2/new_data/detail/bdd_prover.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
-#include "mcrl2/new_data/detail/prover/induction.h"
+#include "mcrl2/data/detail/prover.h"
+#include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/detail/prover/induction.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class BDD_Prover -------------------------------------------------------------------------------
@@ -280,7 +280,7 @@ namespace mcrl2 {
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
     BDD_Prover::BDD_Prover(
-      ATermAppl data_spec, mcrl2::new_data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      ATermAppl data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
       f_data_spec(data_spec),
@@ -306,7 +306,7 @@ namespace mcrl2 {
     }
 
     BDD_Prover::BDD_Prover(
-      mcrl2::new_data::data_specification const& data_spec, mcrl2::new_data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
+      mcrl2::data::data_specification const& data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_specification_to_aterm_data_spec(data_spec), a_rewrite_strategy, a_time_limit),
       f_data_spec(data_specification_to_aterm_data_spec(data_spec)),

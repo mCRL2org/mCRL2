@@ -13,13 +13,13 @@
 #define MCRL2_LPS_BINARY_H
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2 {
 
 namespace lps {
 
-specification binary(const specification& s, new_data::rewriter& r);
+specification binary(const specification& s, data::rewriter& r);
 
 } // namespace lps
 

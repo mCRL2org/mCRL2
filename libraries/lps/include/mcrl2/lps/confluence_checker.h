@@ -16,11 +16,11 @@
 #define CONFLUENCE_CHECKER_H
 
 #include "aterm2.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/detail/bdd_prover.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/new_data/detail/prover/bdd2dot.h"
+#include "mcrl2/data/detail/prover/bdd2dot.h"
 
     /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
         \brief The tau actions of all confluent tau-summands are renamed to ctau.
@@ -133,7 +133,7 @@ class Confluence_Checker {
     Invariant_Checker f_invariant_checker;
 
     /// \brief BDD based prover.
-    mcrl2::new_data::detail::BDD_Prover f_bdd_prover;
+    mcrl2::data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
     BDD2Dot f_bdd2dot;
@@ -183,10 +183,10 @@ class Confluence_Checker {
     /// to 0, no time limit will be enforced
     Confluence_Checker(
       ATermAppl a_lps,
-      mcrl2::new_data::rewriter::strategy a_rewrite_strategy = mcrl2::new_data::rewriter::jitty,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      mcrl2::new_data::detail::SMT_Solver_Type a_solver_type = mcrl2::new_data::detail::solver_type_ario,
+      mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
       bool a_apply_induction = false,
       bool a_no_marking = false,
       bool a_check_all = false,

@@ -17,8 +17,8 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"

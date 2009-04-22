@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file implement_data_types.cpp
-/// \brief Regression test for new_data implementation.
+/// \brief Regression test for data implementation.
 
 #include <algorithm>
 #include <iostream>
@@ -16,27 +16,27 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/replace.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/detail/implement_data_types.h"
-#include "mcrl2/new_data/detail/data_implementation_concrete.h"
+#include "mcrl2/data/detail/implement_data_types.h"
+#include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/core/detail/struct.h"
 
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/structured_sort.h"
-#include "mcrl2/new_data/list.h"
-#include "mcrl2/new_data/set.h"
-#include "mcrl2/new_data/bag.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 
 // Copies taken from data_implementation_concrete.cpp
 ATermAppl make_fresh_struct_sort_id(ATerm term)
@@ -79,7 +79,7 @@ ATermAppl make_fresh_lambda_op_id(ATermAppl sort_expr, ATerm term)
 void old_impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
   ATermList *p_substs, t_data_decls *p_data_decls, bool recursive = true);
 
-/* Old new_data implementation functions, plainly copied over */
+/* Old data implementation functions, plainly copied over */
 void old_impl_sort_bool(t_data_decls *p_data_decls)
 {
   //Declare sort Bool
@@ -97,7 +97,7 @@ void old_impl_sort_bool(t_data_decls *p_data_decls)
       (ATerm) gsMakeOpIdOr(),
       (ATerm) gsMakeOpIdImp()
     ), p_data_decls->ops);
-  //Declare new_data equations for sort Bool
+  //Declare data equations for sort Bool
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
@@ -156,7 +156,7 @@ void old_impl_sort_pos(t_data_decls *p_data_decls)
       (ATerm) gsMakeOpIdMult(se_pos),
       (ATerm) gsMakeOpIdMultIR()
     ), p_data_decls->ops);
-  //Declare new_data equations for sort Pos
+  //Declare data equations for sort Pos
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
@@ -315,7 +315,7 @@ void old_impl_sort_nat_pair(t_data_decls *p_data_decls)
       (ATerm) gsMakeOpIdGDivMod(),
       (ATerm) gsMakeOpIdGGDivMod()
     ), p_data_decls->ops);
-  //Declare new_data equations for sort Int
+  //Declare data equations for sort Int
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
@@ -432,7 +432,7 @@ void old_impl_sort_nat(t_data_decls *p_data_decls, bool recursive)
       (ATerm) gsMakeOpIdSwapZeroMonus(),
       (ATerm) gsMakeOpIdSwapZeroLTE()
     ), p_data_decls->ops);
-  //Declare new_data equations for sort Nat
+  //Declare data equations for sort Nat
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
@@ -864,7 +864,7 @@ void old_impl_sort_int(t_data_decls *p_data_decls, bool recursive)
       (ATerm) gsMakeOpIdMod(se_int),
       (ATerm) gsMakeOpIdExp(se_int)
     ), p_data_decls->ops);
-  //Declare new_data equations for sort Int
+  //Declare data equations for sort Int
   ATermList el = ATmakeList0();
   ATermAppl nil = gsMakeNil();
   ATermAppl one = gsMakeDataExprC1();
@@ -1141,7 +1141,7 @@ void old_impl_sort_real(t_data_decls *p_data_decls, bool recursive)
       (ATerm) gsMakeOpIdRedFracHlp()
     ), p_data_decls->ops);
 
-  //Declare new_data equations for sort Int
+  //Declare data equations for sort Int
   ATermAppl nil = gsMakeNil();
   ATermAppl t = gsMakeDataExprTrue();
   ATermAppl f = gsMakeDataExprFalse();
@@ -1244,7 +1244,7 @@ void old_impl_sort_real(t_data_decls *p_data_decls, bool recursive)
 ATermList old_build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
 {
   data_equation_vector equations = sort_list::list_generate_equations_code(sort_expression(sort_elt));
-  //Declare new_data equations for sort sort_id
+  //Declare data equations for sort sort_id
   ATermList el = ATmakeList0();
   ATermAppl el_sort_id = gsMakeDataExprEmptyList(sort_list);
   ATermAppl s_sort_id = gsMakeDataVarId(gsString2ATermAppl("s"), sort_list);
@@ -1270,7 +1270,7 @@ ATermList old_build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
     (ATerm) d_sort_elt, (ATerm) e_sort_elt);
   ATermList dspl = ATmakeList3((ATerm) d_sort_elt, (ATerm) s_sort_id, (ATerm) p);
 
-  ATermList new_data_eqns = ATmakeList(20,
+  ATermList data_eqns = ATmakeList(20,
       //equality (sort_id -> sort_id -> Bool)
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(el_sort_id, ds), f),
       (ATerm) gsMakeDataEqn(dsl, nil, gsMakeDataExprEq(ds, el_sort_id), f),
@@ -1346,7 +1346,7 @@ ATermList old_build_list_equations(ATermAppl sort_elt, ATermAppl sort_list)
         gsMakeDataExprCons(d_sort_elt,
           gsMakeDataExprRTail(gsMakeDataExprCons(e_sort_elt, s_sort_id)))));
 
-  return new_data_eqns;
+  return data_eqns;
 }
 
 void old_impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
@@ -1386,15 +1386,15 @@ void old_impl_sort_list(ATermAppl sort_list, ATermAppl sort_id,
       (ATerm) gsMakeOpIdRHead(sort_list, sort_elt),
       (ATerm) gsMakeOpIdRTail(sort_list));
 
-  ATermList new_data_eqns = old_build_list_equations(sort_elt, sort_list);
+  ATermList data_eqns = old_build_list_equations(sort_elt, sort_list);
 
   //perform substitutions
   new_cons_ops = gsSubstValues_List(*p_substs, new_cons_ops, true);
   p_data_decls->cons_ops = ATconcat(new_cons_ops, p_data_decls->cons_ops);
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
-  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+  data_eqns = gsSubstValues_List(*p_substs, data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(data_eqns, p_data_decls->data_eqns);
 
   //add implementation of sort Nat, if necessary
   if (ATindexOf(p_data_decls->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
@@ -1427,7 +1427,7 @@ ATermList old_build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id)
   ATermList dstfgl = ATmakeList5((ATerm) d, (ATerm) s, (ATerm) t, (ATerm) f, (ATerm) g);
   ATermList destfgl = ATmakeList6((ATerm) d, (ATerm) e, (ATerm) s, (ATerm) t, (ATerm) f, (ATerm) g);
 
-  ATermList new_data_eqns = ATmakeList(28,
+  ATermList data_eqns = ATmakeList(28,
     //insert (sort_elt # sort_fset_id -> sort_fset_id)
     (ATerm) gsMakeDataEqn(dl, gsMakeNil(),
       gsMakeDataExprFSetInsert(d, gsMakeDataExprFSetEmpty(sort_fset_id)),
@@ -1568,7 +1568,7 @@ ATermList old_build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id)
         gsMakeDataExprFSetInter(f, g, gsMakeDataExprFSetCons(d, s), t)))
   );
 
-  return new_data_eqns;
+  return data_eqns;
 }
 
 void old_impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_fset_id,
@@ -1614,13 +1614,13 @@ void old_impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_fset_id,
       (ATerm) gsMakeOpIdFSetInter(sort_elt, sort_fset_id)
   );
 
-  ATermList new_data_eqns = old_build_fset_equations(sort_elt, sort_fset_id);
+  ATermList data_eqns = old_build_fset_equations(sort_elt, sort_fset_id);
 
   //perform substitutions
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
-  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+  data_eqns = gsSubstValues_List(*p_substs, data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(data_eqns, p_data_decls->data_eqns);
 }
 
 ATermList old_build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_set)
@@ -1643,7 +1643,7 @@ ATermList old_build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATerm
   ATermList fgstl = ATmakeList4((ATerm) f, (ATerm) g, (ATerm) s, (ATerm) t);
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
 
-  ATermList new_data_eqns = ATmakeList(32,
+  ATermList data_eqns = ATmakeList(32,
     //empty set (sort_set)
     (ATerm) gsMakeDataEqn(ATmakeList0(), gsMakeNil(),
       gsMakeDataExprEmptySet(sort_set),
@@ -1792,7 +1792,7 @@ ATermList old_build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATerm
       gsMakeDataExprTrueFunc(sort_elt))
   );
 
-  return new_data_eqns;
+  return data_eqns;
 }
 
 void old_impl_sort_set(ATermAppl sort_set, ATermAppl sort_set_id,
@@ -1844,15 +1844,15 @@ void old_impl_sort_set(ATermAppl sort_set, ATermAppl sort_set_id,
       (ATerm) gsMakeOpIdOrFunc(sort_elt)
   );
 
-  ATermList new_data_eqns = old_build_set_equations(sort_elt, sort_fset_id, sort_set_id);
+  ATermList data_eqns = old_build_set_equations(sort_elt, sort_fset_id, sort_set_id);
 
-  new_data_eqns = impl_exprs_list(new_data_eqns, p_substs, p_data_decls, &equations);
+  data_eqns = impl_exprs_list(data_eqns, p_substs, p_data_decls, &equations);
 
   //perform substitutions
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
-  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+  data_eqns = gsSubstValues_List(*p_substs, data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(data_eqns, p_data_decls->data_eqns);
 }
 
 ATermList old_build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id)
@@ -1868,7 +1868,7 @@ ATermList old_build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, A
   ATermAppl g = gsMakeDataVarId(gsString2ATermAppl("g"), gsMakeSortArrow1(sort_elt, gsMakeSortExprNat()));
   ATermAppl s = gsMakeDataVarId(gsString2ATermAppl("s"), sort_fset_id);
 
-  ATermList new_data_eqns = ATmakeList(39,
+  ATermList data_eqns = ATmakeList(39,
     //insert (sort_elt # Pos # sort_fbag_id -> sort_fbag_id)
     (ATerm) gsMakeDataEqn(ATmakeList2((ATerm) d, (ATerm) p), gsMakeNil(),
       gsMakeDataExprFBagInsert(d, p, gsMakeDataExprFBagEmpty(sort_fbag_id)),
@@ -2099,7 +2099,7 @@ ATermList old_build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, A
       ))
   );
 
-  return new_data_eqns;
+  return data_eqns;
 }
 
 void old_impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id,
@@ -2160,13 +2160,13 @@ void old_impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id,
       (ATerm) gsMakeOpIdFSet2FBag(sort_fset_id, sort_fbag_id)
   );
 
-  ATermList new_data_eqns = old_build_fbag_equations(sort_elt, sort_fset_id, sort_fbag_id);
+  ATermList data_eqns = old_build_fbag_equations(sort_elt, sort_fset_id, sort_fbag_id);
 
   //perform substitutions
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
-  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+  data_eqns = gsSubstValues_List(*p_substs, data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(data_eqns, p_data_decls->data_eqns);
 }
 
 ATermList old_build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATermAppl sort_fbag, ATermAppl sort_set, ATermAppl sort_bag)
@@ -2194,7 +2194,7 @@ ATermList old_build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATerm
   ATermList xyl = ATmakeList2((ATerm) x, (ATerm) y);
   ATermList hsl = ATmakeList2((ATerm) h, (ATerm) s);
 
-  ATermList new_data_eqns = ATmakeList(36,
+  ATermList data_eqns = ATmakeList(36,
     //empty bag (sort_bag)
     (ATerm) gsMakeDataEqn(ATmakeList0(), gsMakeNil(),
       gsMakeDataExprEmptyBag(sort_bag),
@@ -2374,7 +2374,7 @@ ATermList old_build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset, ATerm
       gsMakeDataExprOneFunc(sort_elt))
   );
 
-  return new_data_eqns;
+  return data_eqns;
 }
 
 void old_impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_bag_id,
@@ -2445,15 +2445,15 @@ void old_impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_bag_id,
   ATermAppl sort_fset_id =
     (ATermAppl) gsSubstValues(*p_substs, (ATerm) gsMakeSortExprFSet(sort_elt), false);
   //declare equations
-  ATermList new_data_eqns = old_build_bag_equations(sort_elt, sort_fset_id, sort_fbag_id, sort_set_id, sort_bag_id);
+  ATermList data_eqns = old_build_bag_equations(sort_elt, sort_fset_id, sort_fbag_id, sort_set_id, sort_bag_id);
 
-  new_data_eqns = impl_exprs_list(new_data_eqns, p_substs, p_data_decls, &equations);
+  data_eqns = impl_exprs_list(data_eqns, p_substs, p_data_decls, &equations);
 
   //perform substitutions
   new_ops = gsSubstValues_List(*p_substs, new_ops, true);
   p_data_decls->ops = ATconcat(new_ops, p_data_decls->ops);
-  new_data_eqns = gsSubstValues_List(*p_substs, new_data_eqns, true);
-  p_data_decls->data_eqns = ATconcat(new_data_eqns, p_data_decls->data_eqns);
+  data_eqns = gsSubstValues_List(*p_substs, data_eqns, true);
+  p_data_decls->data_eqns = ATconcat(data_eqns, p_data_decls->data_eqns);
 }
 
 
@@ -2470,7 +2470,7 @@ void old_impl_standard_functions_sort(ATermAppl sort, t_data_decls *p_data_decls
       (ATerm) gsMakeOpIdGTE(sort),
       (ATerm) gsMakeOpIdGT(sort)
     ), p_data_decls->ops);
-  //Declare new_data equations for sort sort
+  //Declare data equations for sort sort
   ATermAppl x = gsMakeDataVarId(gsString2ATermAppl("x"), sort);
   ATermAppl y = gsMakeDataVarId(gsString2ATermAppl("y"), sort);
   ATermAppl b = gsMakeDataVarId(gsString2ATermAppl("b"), gsMakeSortExprBool());
@@ -2748,18 +2748,18 @@ struct is_new_variable : std::unary_function< bool, atermpp::aterm_appl >
   }
 };
 
-data_equation normalise_equation(mcrl2::new_data::data_equation const& e)
+data_equation normalise_equation(mcrl2::data::data_equation const& e)
 {
   atermpp::vector< variable > variables;
 
-  atermpp::find_all_if(mcrl2::new_data::data_equation(e.condition(), e.lhs(), e.rhs()), is_new_variable(), std::back_inserter(variables));
+  atermpp::find_all_if(mcrl2::data::data_equation(e.condition(), e.lhs(), e.rhs()), is_new_variable(), std::back_inserter(variables));
 
-  return mcrl2::new_data::data_equation(variables, e.condition(), e.lhs(), e.rhs());
+  return mcrl2::data::data_equation(variables, e.condition(), e.lhs(), e.rhs());
 }
 
-bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2)
+bool alpha_equivalent(mcrl2::data::data_equation o1, mcrl2::data::data_equation o2)
 {
-  using namespace mcrl2::new_data;
+  using namespace mcrl2::data;
 
   if (o1.variables().size() == o2.variables().size()) {
     data_equation normalised_o1(normalise_equation(o1));
@@ -2791,7 +2791,7 @@ bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_e
           o2variables.advance_begin(1);
         }
 
-        if (normalised_o1 == new_data::variable_map_replace(normalised_o2, replacement_map)) {
+        if (normalised_o1 == data::variable_map_replace(normalised_o2, replacement_map)) {
           return true;
         }
       }
@@ -2804,7 +2804,7 @@ bool alpha_equivalent(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_e
 // imposes a strict ordering on the operands (<)
 struct equation_smaller {
 
-  bool operator()(mcrl2::new_data::data_equation o1, mcrl2::new_data::data_equation o2) const {
+  bool operator()(mcrl2::data::data_equation o1, mcrl2::data::data_equation o2) const {
 
     if (alpha_equivalent(o1, o2)) {
       return false;
@@ -2882,29 +2882,29 @@ bool compare_modulo_order(
 
 // compares equations of two lists disregarding duplicates, equation order and variable naming
 bool compare_modulo_order_and_alpha(
-  atermpp::term_list< mcrl2::new_data::data_equation > olde,
-  atermpp::term_list< mcrl2::new_data::data_equation > newe) {
+  atermpp::term_list< mcrl2::data::data_equation > olde,
+  atermpp::term_list< mcrl2::data::data_equation > newe) {
 
-  std::set< mcrl2::new_data::data_equation, equation_smaller > oldset(olde.begin(), olde.end());
-  std::set< mcrl2::new_data::data_equation, equation_smaller > newset(newe.begin(), newe.end());
+  std::set< mcrl2::data::data_equation, equation_smaller > oldset(olde.begin(), olde.end());
+  std::set< mcrl2::data::data_equation, equation_smaller > newset(newe.begin(), newe.end());
 
   if (oldset != newset) {
-    std::vector< mcrl2::new_data::data_equation > olddiff;
-    std::vector< mcrl2::new_data::data_equation > newdiff;
+    std::vector< mcrl2::data::data_equation > olddiff;
+    std::vector< mcrl2::data::data_equation > newdiff;
 
     std::set_difference(oldset.begin(), oldset.end(), newset.begin(), newset.end(),
-      std::back_insert_iterator< std::vector< mcrl2::new_data::data_equation > >(olddiff),
+      std::back_insert_iterator< std::vector< mcrl2::data::data_equation > >(olddiff),
       equation_smaller());
 
     std::set_difference(newset.begin(), newset.end(), oldset.begin(), oldset.end(),
-      std::back_insert_iterator< std::vector< mcrl2::new_data::data_equation > >(newdiff),
+      std::back_insert_iterator< std::vector< mcrl2::data::data_equation > >(newdiff),
       equation_smaller());
 
     std::string old_differences;
 
     // The relative order of equations in oldset and newset differs so olddiff.size() not necessarily newdiff.size()
-    for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = olddiff.begin(); i != olddiff.end(); ++i) {
-      std::set< mcrl2::new_data::data_equation, equation_smaller >::const_iterator j =
+    for (std::vector< mcrl2::data::data_equation >::const_iterator i = olddiff.begin(); i != olddiff.end(); ++i) {
+      std::set< mcrl2::data::data_equation, equation_smaller >::const_iterator j =
          std::find_if(newset.begin(), newset.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
       if (j == newset.end()) {
@@ -2923,8 +2923,8 @@ bool compare_modulo_order_and_alpha(
     std::string new_differences;
 
     // The relative order of equations in oldset and newset differs so olddiff.size() not necessarily newdiff.size()
-    for (std::vector< mcrl2::new_data::data_equation >::const_iterator i = newdiff.begin(); i != newdiff.end(); ++i) {
-      std::set< mcrl2::new_data::data_equation, equation_smaller >::const_iterator j =
+    for (std::vector< mcrl2::data::data_equation >::const_iterator i = newdiff.begin(); i != newdiff.end(); ++i) {
+      std::set< mcrl2::data::data_equation, equation_smaller >::const_iterator j =
          std::find_if(oldset.begin(), oldset.end(), std::bind1st(std::ptr_fun(&alpha_equivalent), *i));
 
       if (j == oldset.end()) {
@@ -2956,20 +2956,20 @@ void compare(t_data_decls const& old_, t_data_decls const& new_) {
               << "NEW " << mcrl2::core::pp(new_.sorts) << std::endl;
   }
 */
-  BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
-                                   atermpp::term_list< new_data::function_symbol >(new_.cons_ops)));
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< data::function_symbol >(old_.cons_ops),
+                                   atermpp::term_list< data::function_symbol >(new_.cons_ops)));
 /*
-  if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.cons_ops),
-                            atermpp::term_list< new_data::function_symbol >(new_.cons_ops))) {
+  if (!compare_modulo_order(atermpp::term_list< data::function_symbol >(old_.cons_ops),
+                            atermpp::term_list< data::function_symbol >(new_.cons_ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.cons_ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.cons_ops) << std::endl;
   }
 */
-  BOOST_CHECK(compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
-                                   atermpp::term_list< new_data::function_symbol >(new_.ops)));
+  BOOST_CHECK(compare_modulo_order(atermpp::term_list< data::function_symbol >(old_.ops),
+                                   atermpp::term_list< data::function_symbol >(new_.ops)));
 /*
-  if (!compare_modulo_order(atermpp::term_list< new_data::function_symbol >(old_.ops),
-                            atermpp::term_list< new_data::function_symbol >(new_.ops))) {
+  if (!compare_modulo_order(atermpp::term_list< data::function_symbol >(old_.ops),
+                            atermpp::term_list< data::function_symbol >(new_.ops))) {
     std::clog << "OLD " << mcrl2::core::pp(old_.ops) << std::endl
               << "NEW " << mcrl2::core::pp(new_.ops) << std::endl;
   }
@@ -3063,7 +3063,7 @@ void implement_list_test()
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
   basic_sort s("S");
-  container_sort ls(new_data::sort_list::list(s));
+  container_sort ls(data::sort_list::list(s));
   ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortListPrefix(), atermpp::aterm(ls), false));
   old_impl_sort_list(ls, sort_id, &old_substs, &data_decls_old);
   ATermList equations = ATmakeList0();
@@ -3083,7 +3083,7 @@ void implement_set_test()
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
   basic_sort s("S");
-  container_sort ss(new_data::sort_set_::set_(s));
+  container_sort ss(data::sort_set_::set_(s));
   ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortSetPrefix(), atermpp::aterm(ss), false));
   ATermList equations = ATmakeList0();
   old_impl_sort_set(ss, sort_id, &old_substs, &data_decls_old);
@@ -3103,7 +3103,7 @@ void implement_bag_test()
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
   basic_sort s("S");
-  container_sort bs(new_data::sort_bag::bag(s));
+  container_sort bs(data::sort_bag::bag(s));
   ATermAppl sort_id = gsMakeSortId(gsFreshString2ATermAppl(gsSortBagPrefix(), atermpp::aterm(bs), false));
   ATermList equations = ATmakeList0();
   old_impl_sort_bag(bs, sort_id, &old_substs, &data_decls_old);
@@ -3137,33 +3137,33 @@ void implement_structured_sort_test()
   ATermList old_substs = ATmakeList0();
   ATermList new_substs = ATmakeList0();
 
-  atermpp::vector< new_data::structured_sort_constructor_argument > arguments;
+  atermpp::vector< data::structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(new_data::structured_sort_constructor_argument("a0", basic_sort("A")));
-  arguments.push_back(new_data::structured_sort_constructor_argument(basic_sort("B")));
-  arguments.push_back(new_data::structured_sort_constructor_argument("n0", sort_nat::nat()));
-  arguments.push_back(new_data::structured_sort_constructor_argument("n1", sort_nat::nat()));
+  arguments.push_back(data::structured_sort_constructor_argument("a0", basic_sort("A")));
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("B")));
+  arguments.push_back(data::structured_sort_constructor_argument("n0", sort_nat::nat()));
+  arguments.push_back(data::structured_sort_constructor_argument("n1", sort_nat::nat()));
 
-  atermpp::vector< new_data::structured_sort_constructor > constructors;
+  atermpp::vector< data::structured_sort_constructor > constructors;
   // without arguments or recogniser
   //  c0
-  constructors.push_back(new_data::structured_sort_constructor("c0"));
+  constructors.push_back(data::structured_sort_constructor("c0"));
   // without arguments, with recogniser
   //  c1?is_one
-  constructors.push_back(new_data::structured_sort_constructor("c1", std::string("is_one")));
+  constructors.push_back(data::structured_sort_constructor("c1", std::string("is_one")));
   // with arguments, without recogniser
   //  a(a0 : A)
-  constructors.push_back(new_data::structured_sort_constructor("a",
+  constructors.push_back(data::structured_sort_constructor("a",
      boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   // two arguments, with recogniser
   //  b(B)?is_b
-  constructors.push_back(new_data::structured_sort_constructor("b",
+  constructors.push_back(data::structured_sort_constructor("b",
      boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
   //  c(n0 : Nat, n1 : Nat)?is_c
-  constructors.push_back(new_data::structured_sort_constructor("c",
+  constructors.push_back(data::structured_sort_constructor("c",
      boost::make_iterator_range(arguments.begin() + 1, arguments.end()), "is_c"));
 
-  new_data::structured_sort ls(boost::make_iterator_range(constructors));
+  data::structured_sort ls(boost::make_iterator_range(constructors));
   ATermAppl sort_id = make_fresh_struct_sort_id((ATerm) ATmakeList0());
 
   old_impl_sort_struct(ls, sort_id, &old_substs, &data_decls_old);
@@ -3181,9 +3181,9 @@ void implement_data_specification_test()
     "map f:S -> List(S);\n"
   );
 
-  new_data::data_specification spec(remove_all_system_defined(new_data::parse_data_specification(text)));
-  atermpp::aterm_appl old_impl_spec = new_data::parse_data_specification_and_implement(text);
-  atermpp::aterm_appl impl_spec = new_data::detail::implement_data_specification(spec);
+  data::data_specification spec(remove_all_system_defined(data::parse_data_specification(text)));
+  atermpp::aterm_appl old_impl_spec = data::parse_data_specification_and_implement(text);
+  atermpp::aterm_appl impl_spec = data::detail::implement_data_specification(spec);
 
   BOOST_CHECK(impl_spec == old_impl_spec);
 }

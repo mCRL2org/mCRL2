@@ -27,8 +27,8 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/core/messaging.h"
@@ -43,8 +43,8 @@
 using namespace atermpp;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 using namespace std;
 
@@ -227,7 +227,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool>
     //rename all assigned actions
     gsVerboseMsg("renaming actions...\n");
     specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
-    new_data::rewriter datar;
+    data::rewriter datar;
     if (m_rewrite)
     { datar = create_rewriter(lps_new_spec.data());
       lps_new_spec = rewrite_lps(lps_new_spec,datar);

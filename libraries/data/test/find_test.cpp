@@ -12,16 +12,16 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/new_data/sort_expression.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/function_sort.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 inline
 variable nat(std::string name)

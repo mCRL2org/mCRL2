@@ -19,9 +19,9 @@
 
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/specification.h"
@@ -35,7 +35,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 
   /// \mainpage lpsconfcheck
   /// \section section_introduction Introduction
@@ -90,7 +90,7 @@ using namespace mcrl2::new_data::detail;
       std::string f_dot_file_name;
 
       /// \brief The rewrite strategy used by the rewriter.
-      mcrl2::new_data::rewriter::strategy f_strategy;
+      mcrl2::data::rewriter::strategy f_strategy;
 
       /// \brief The maximal number of seconds spent on proving a single confluence condition.
       size_t f_time_limit;
@@ -226,7 +226,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < SMT_Solver_Type > solver_selector(d);
 
   // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < mcrl2::new_data::rewriter::strategy > strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < mcrl2::data::rewriter::strategy > strategy_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
@@ -280,7 +280,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   // Set default values for options if the configuration specifies them
   if (c.option_exists(option_rewrite_strategy)) {
-    strategy_selector.set_selection(c.get_option_argument< mcrl2::new_data::rewriter::strategy >(option_rewrite_strategy, 0));
+    strategy_selector.set_selection(c.get_option_argument< mcrl2::data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
   if (c.option_exists(option_invariant)) {
     invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
@@ -420,7 +420,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       f_check_all(false),
       f_counter_example(false),
       f_dot_file_name(""),
-      f_strategy(mcrl2::new_data::rewriter::jitty),
+      f_strategy(mcrl2::data::rewriter::jitty),
       f_time_limit(0),
       f_path_eliminator(false),
       f_solver_type(solver_type_ario),
@@ -506,7 +506,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
           f_time_limit = parser.option_argument_as< size_t >("time-limit");
         }
 
-        f_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
+        f_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
         if (parser.options.count("smt-solver")) {
           f_path_eliminator = true;

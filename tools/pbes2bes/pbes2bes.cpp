@@ -25,8 +25,8 @@
 #include <utility>
 
 //MCRL2-specific
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
@@ -237,18 +237,18 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       else
       {
         // data rewriter
-        new_data::rewriter datar = create_rewriter(p.data());
+        data::rewriter datar = create_rewriter(p.data());
 
         // name generator
         std::string prefix = "UNIQUE_PREFIX"; // TODO: compute a unique prefix
-        new_data::number_postfix_generator name_generator(prefix);
+        data::number_postfix_generator name_generator(prefix);
 
         // data enumerator
-        new_data::data_enumerator<new_data::number_postfix_generator> datae(p.data(), datar, name_generator);
+        data::data_enumerator<data::number_postfix_generator> datae(p.data(), datar, name_generator);
 
         // pbes rewriter
-        new_data::rewriter_with_variables datarv(datar);
-        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > pbesr(datarv, datae, false);
+        data::rewriter_with_variables datarv(datar);
+        pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, false);
 
         if (m_strategy == ts_finite)
         {

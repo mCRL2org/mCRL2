@@ -14,14 +14,14 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/exception.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class BDD_Path_Eliminator ----------------------------------------------------------------------
@@ -146,14 +146,14 @@ namespace mcrl2 {
     BDD_Path_Eliminator::BDD_Path_Eliminator(SMT_Solver_Type a_solver_type) {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
       if (a_solver_type == solver_type_ario) {
-        if (mcrl2::new_data::detail::prover::ario_smt_solver::usable()) {
-          f_smt_solver = new mcrl2::new_data::detail::prover::ario_smt_solver();
+        if (mcrl2::data::detail::prover::ario_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::data::detail::prover::ario_smt_solver();
 
           return;
         }
       } else if (a_solver_type == solver_type_cvc) {
-        if (mcrl2::new_data::detail::prover::cvc_smt_solver::usable()) {
-          f_smt_solver = new mcrl2::new_data::detail::prover::cvc_smt_solver();
+        if (mcrl2::data::detail::prover::cvc_smt_solver::usable()) {
+          f_smt_solver = new mcrl2::data::detail::prover::cvc_smt_solver();
 
           return;
         }

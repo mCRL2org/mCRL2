@@ -15,22 +15,22 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/rewriter.h"
 
 using namespace std;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
-typedef new_data::data_enumerator<number_postfix_generator> my_enumerator;
-typedef simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> my_simplify_rewriter;
-typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
+typedef data::data_enumerator<number_postfix_generator> my_enumerator;
+typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_simplify_rewriter;
+typedef enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter, my_enumerator> my_enumerate_quantifiers_rewriter;
 
 // Use boost::variant to create a heterogenous container of rewriters.
 typedef boost::variant<my_simplify_rewriter,
@@ -54,16 +54,16 @@ class rewriter_visitor: public boost::static_visitor<pbes_expression>
     }
 };
 
-new_data::rewriter::strategy data_rewriter_strategy(int i)
+data::rewriter::strategy data_rewriter_strategy(int i)
 {
   switch (i)
   {
-    case 0: return new_data::rewriter::innermost       ;
-    case 1: return new_data::rewriter::innermost_prover;
-    case 2: return new_data::rewriter::jitty           ;
-    case 3: return new_data::rewriter::jitty_prover    ;
+    case 0: return data::rewriter::innermost       ;
+    case 1: return data::rewriter::innermost_prover;
+    case 2: return data::rewriter::jitty           ;
+    case 3: return data::rewriter::jitty_prover    ;
   }
-  return new_data::rewriter::jitty_prover;
+  return data::rewriter::jitty_prover;
 }
 
 std::string data_rewriter_name(int i)
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
     number_postfix_generator name_generator;
 
     // store the data rewriters
-    std::vector<new_data::rewriter> data_rewriters;
+    std::vector<data::rewriter> data_rewriters;
 
     // store the corresponding data enumerators
     std::vector<my_enumerator> data_enumerators;
@@ -245,8 +245,8 @@ int main(int argc, char* argv[])
     for (std::vector<int>::iterator i = data_rewriter_indices.begin(); i != data_rewriter_indices.end(); ++i)
     {
       // Make sure the references to data rewriters stay valid after exiting the loop.
-      data_rewriters.push_back(new_data::rewriter(data_spec, data_rewriter_strategy(*i)));
-      new_data::rewriter& datar = data_rewriters.back();
+      data_rewriters.push_back(data::rewriter(data_spec, data_rewriter_strategy(*i)));
+      data::rewriter& datar = data_rewriters.back();
       data_enumerators.push_back(my_enumerator(data_spec, data_rewriters.back(), name_generator));
       my_enumerator& datae = data_enumerators.back();
 

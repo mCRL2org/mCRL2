@@ -21,9 +21,9 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
-#include "mcrl2/new_data/detail/prover/bdd_path_eliminator.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/invariant_eliminator.h"
@@ -35,7 +35,7 @@
 #include "mcrl2/utilities/command_line_proving.h"
 
 using namespace mcrl2::core;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 
   /// \mainpage lpsinvelm
   /// \section section_introduction Introduction
@@ -99,7 +99,7 @@ using namespace mcrl2::new_data::detail;
       SMT_Solver_Type f_solver_type;
 
       /// \brief The rewrite strategy used by the rewriter.
-      mcrl2::new_data::rewriter::strategy f_strategy;
+      mcrl2::data::rewriter::strategy f_strategy;
 
       /// \brief The flag indicating whether or not induction should be applied.
       bool f_apply_induction;
@@ -151,7 +151,7 @@ using namespace mcrl2::new_data::detail;
       f_simplify_all = false;
       f_all_violations = false;
       f_counter_example = false;
-      f_strategy = mcrl2::new_data::rewriter::jitty;
+      f_strategy = mcrl2::data::rewriter::jitty;
       f_time_limit = 0;
       f_path_eliminator = false;
       f_solver_type = solver_type_ario;
@@ -237,7 +237,7 @@ using namespace mcrl2::new_data::detail;
           f_time_limit = parser.option_argument_as< size_t >("time-limit");
         }
 
-        f_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
+        f_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
         if (parser.options.count("smt-solver")) {
           f_path_eliminator = true;

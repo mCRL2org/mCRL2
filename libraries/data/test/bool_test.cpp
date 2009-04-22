@@ -7,19 +7,19 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file data_expression_test.cpp
-/// \brief Basic regression test for new_data expressions.
+/// \brief Basic regression test for data expressions.
 
 #include <iostream>
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/bool.h"
 
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::sort_bool_;
+using namespace mcrl2::data;
+using namespace mcrl2::data::sort_bool_;
 
 void bool__sort_test()
 {

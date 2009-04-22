@@ -15,12 +15,12 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/new_data/detail/sort_utility.h"
-#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/data/detail/sort_utility.h"
+#include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/find.h"
 
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 using namespace mcrl2::pbes_system::accessors;
@@ -163,9 +163,9 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 		propositional_variable_instantiation propvar = p;
 		identifier_string name = propvar.name();
                 data_expression_list propvar_parameters(propvar.parameters());
-		data_expression_list parameters(atermpp::term_list_iterator< mcrl2::new_data::data_expression >(
-                                         rewriter->rewriteList(atermpp::term_list< mcrl2::new_data::data_expression >(propvar_parameters.begin(), propvar_parameters.end()))),
-                                                atermpp::term_list_iterator< mcrl2::new_data::data_expression >());
+		data_expression_list parameters(atermpp::term_list_iterator< mcrl2::data::data_expression >(
+                                         rewriter->rewriteList(atermpp::term_list< mcrl2::data::data_expression >(propvar_parameters.begin(), propvar_parameters.end()))),
+                                                atermpp::term_list_iterator< mcrl2::data::data_expression >());
 		result = pbes_expression(propositional_variable_instantiation(name, parameters));
 	}
 	else
@@ -221,7 +221,7 @@ bool element_in_propvarinstlist(variable_list vars, std::set< propositional_vari
 ///\return variable v occurs in l.
 bool occurs_inL(atermpp::aterm_appl l, variable v)
 {
-  return atermpp::find_if(l, mcrl2::new_data::detail::compare_variable(v)) != atermpp::aterm_appl();
+  return atermpp::find_if(l, mcrl2::data::detail::compare_variable(v)) != atermpp::aterm_appl();
 }
 
 pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_expression pbexp, data_specification data)

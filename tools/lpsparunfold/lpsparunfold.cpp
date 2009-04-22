@@ -23,7 +23,7 @@
 #include "mcrl2/lps/specification.h"
 
 //DATA
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -33,7 +33,7 @@
 #include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2::utilities;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;

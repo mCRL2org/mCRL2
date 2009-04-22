@@ -10,21 +10,21 @@
 #define __COMMAND_LINE_REWRITING_H
 
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2 {
   namespace utilities {
     /// \cond INTERNAL_DOCS
-    inline std::istream& operator>>(std::istream& is, new_data::rewriter::strategy& s) {
+    inline std::istream& operator>>(std::istream& is, data::rewriter::strategy& s) {
       char strategy[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-      using namespace mcrl2::new_data::detail;
+      using namespace mcrl2::data::detail;
 
       is.readsome(strategy, 9);
 
       size_t new_s = static_cast< size_t >(RewriteStrategyFromString(strategy));
 
-      s = static_cast< new_data::rewriter::strategy >(new_s);
+      s = static_cast< data::rewriter::strategy >(new_s);
 
       if (static_cast< size_t >(new_s) == static_cast< size_t >(GS_REWR_INVALID)) {
         is.setstate(std::ios_base::failbit);
@@ -35,10 +35,10 @@ namespace mcrl2 {
 
     namespace detail {
       template <>
-      struct initialiser< new_data::rewriter::strategy > {
+      struct initialiser< data::rewriter::strategy > {
         static void add_options(interface_description& standard) {
           standard.add_option(
-            "rewriter", interface_description::mandatory_argument< new_data::rewriter::strategy >("NAME", "jitty"),
+            "rewriter", interface_description::mandatory_argument< data::rewriter::strategy >("NAME", "jitty"),
             "use rewrite strategy NAME:\n"
             "  'jitty' for jitty rewriting (default),\n"
             "  'jittyp' for jitty rewriting with prover,\n"
@@ -56,7 +56,7 @@ namespace mcrl2 {
       };
 
       void register_rewriting_options(interface_description& d) {
-        initialiser< new_data::rewriter::strategy >::add_options(d);
+        initialiser< data::rewriter::strategy >::add_options(d);
       }
     }
   /// \endcond

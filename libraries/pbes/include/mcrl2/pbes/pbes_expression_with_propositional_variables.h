@@ -46,7 +46,7 @@ namespace pbes_system {
 
       /// \brief Constructor.
       pbes_expression_with_propositional_variables(pbes_expression expression,
-                                                   new_data::variable_list variables,
+                                                   data::variable_list variables,
                                                    propositional_variable_instantiation_list propositional_variables = propositional_variable_instantiation_list())
         : pbes_expression_with_variables(expression, variables), m_propositional_variables(propositional_variables)
       {}
@@ -103,16 +103,16 @@ namespace core {
     typedef pbes_system::pbes_expression_with_propositional_variables term_type;
 
     /// \brief The data term type
-    typedef new_data::data_expression_with_variables data_term_type;
+    typedef data::data_expression_with_variables data_term_type;
 
     /// \brief The data term sequence type
-    typedef new_data::data_expression_list data_term_sequence_type;
+    typedef data::data_expression_list data_term_sequence_type;
 
     /// \brief The variable type
-    typedef new_data::variable variable_type;
+    typedef data::variable variable_type;
 
     /// \brief The variable sequence type
-    typedef new_data::variable_list variable_sequence_type;
+    typedef data::variable_list variable_sequence_type;
 
     /// \brief The propositional variable declaration type
     typedef pbes_system::propositional_variable propositional_variable_decl_type;
@@ -374,7 +374,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " [" + new_data::pp(t.variables()) + "] [" + new_data::pp(t.propositional_variables()) + "]";
+      return core::pp(t) + " [" + data::pp(t.variables()) + "] [" + data::pp(t.propositional_variables()) + "]";
     }
   };
 

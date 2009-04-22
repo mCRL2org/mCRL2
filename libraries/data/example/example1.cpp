@@ -1,7 +1,7 @@
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 #include <cassert>
 
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 int main(int argc, char* argv[])
 {

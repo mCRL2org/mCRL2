@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/data_specification.h
+/// \file mcrl2/data/data_specification.h
 /// \brief The class data_specification.
 
 #include <algorithm>
@@ -16,26 +16,26 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/substitution.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/detail/compatibility.h"
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
-#include "mcrl2/new_data/detail/data_utility.h"
-#include "mcrl2/new_data/bool.h"
-#include "mcrl2/new_data/pos.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/int.h"
-#include "mcrl2/new_data/real.h"
-#include "mcrl2/new_data/list.h"
-#include "mcrl2/new_data/set.h"
-#include "mcrl2/new_data/bag.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/compatibility.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/structured_sort.h"
 
 namespace mcrl2 {
 
-  namespace new_data {
+  namespace data {
     /// \cond INTERNAL_DOCS
     namespace detail {
 
@@ -572,6 +572,6 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
-  } // namespace new_data
+  } // namespace data
 } // namespace mcrl2
 

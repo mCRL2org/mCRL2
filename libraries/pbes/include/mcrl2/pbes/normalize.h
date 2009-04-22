@@ -15,7 +15,7 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
@@ -74,7 +74,7 @@ pbes_expression normalize(pbes_expression f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return new_data::sort_bool_::not_(f);
+      return data::sort_bool_::not_(f);
     } else if (is_pbes_true(f)) {
       return false_();
     } else if (is_pbes_false(f)) {

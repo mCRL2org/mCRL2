@@ -13,11 +13,11 @@
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 
 using namespace atermpp;
 using namespace mcrl2::data;
-using namespace mcrl2::new_data::data_expr;
+using namespace mcrl2::data::data_expr;
 
 // replace d with d0
 aterm_appl replace_d_d0(aterm_appl t)

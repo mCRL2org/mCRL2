@@ -15,8 +15,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/alias.h"
-#include "mcrl2/new_data/detail/enum/standard.h"
+#include "mcrl2/data/alias.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 #include "workarounds.h" // DECL_A
 
@@ -38,7 +38,7 @@ using namespace mcrl2::core::detail;
 using namespace std;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 void EnumeratorSolutionsStandard::fs_reset()
@@ -612,9 +612,9 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool cl
         info.constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(data_spec,0),0)),50);
         for (ATermList sorts=ATLgetArgument(ATAgetArgument(data_spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
         {
-          if (mcrl2::new_data::sort_expression(ATgetFirst(sorts)).is_alias())
+          if (mcrl2::data::sort_expression(ATgetFirst(sorts)).is_alias())
           {
-                ATtablePut(info.constructors,reinterpret_cast< ATerm >(static_cast< ATermAppl >(mcrl2::new_data::alias(atermpp::aterm_appl(ATgetFirst(sorts))).name())),(ATerm) ATmakeList0());
+                ATtablePut(info.constructors,reinterpret_cast< ATerm >(static_cast< ATermAppl >(mcrl2::data::alias(atermpp::aterm_appl(ATgetFirst(sorts))).name())),(ATerm) ATmakeList0());
           }
           else
           {
@@ -687,5 +687,5 @@ Rewriter *EnumeratorStandard::getRewriter()
         return info.rewr_obj;
 }
     } // namespace detail
-  } // namespace new_data
+  } // namespace data
 } // namespace mcrl2

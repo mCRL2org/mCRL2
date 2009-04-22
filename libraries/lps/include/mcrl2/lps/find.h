@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/new_data/find.h
+/// \file mcrl2/data/find.h
 /// \brief Search functions of the data library.
 
 #ifndef MCRL2_LPS_FIND_H
@@ -17,7 +17,7 @@
 
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/summand.h"
-#include "mcrl2/new_data/find.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -26,15 +26,15 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail {
       template <typename MatchPredicate, typename OutputIterator>
-      struct free_variable_find_helper : public new_data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >
+      struct free_variable_find_helper : public data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >
       {
-        using new_data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >::find_all_if;
+        using data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >::find_all_if;
 
         void find_all_if(action const& a)
         {
-          new_data::data_expression_list arguments(a.arguments());
+          data::data_expression_list arguments(a.arguments());
 
-          for (new_data::data_expression_list::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+          for (data::data_expression_list::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
           {
             find_all_if(*i);
           }
@@ -59,13 +59,13 @@ namespace mcrl2 {
 
         free_variable_find_helper(MatchPredicate& match,
                                   OutputIterator const& destBegin,
-		                  std::set< new_data::variable > const& bound_by_context) :
-           new_data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >(match, destBegin, bound_by_context)
+		                  std::set< data::variable > const& bound_by_context) :
+           data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >(match, destBegin, bound_by_context)
         {
         }
 
         free_variable_find_helper(MatchPredicate& match, OutputIterator const& destBegin) :
-           new_data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >(match, destBegin)
+           data::detail::free_variable_find_helper< MatchPredicate, OutputIterator >(match, destBegin)
         {
         }
       };
@@ -82,7 +82,7 @@ namespace mcrl2 {
       }
   
       template <typename T, typename MatchPredicate, typename OutputIterator>
-      void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::disable_if< typename new_data::detail::is_container< T >::type >::type* = 0)
+      void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::disable_if< typename data::detail::is_container< T >::type >::type* = 0)
       {
         free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin);
   
@@ -90,7 +90,7 @@ namespace mcrl2 {
       }
   
       template <typename T, typename MatchPredicate, typename OutputIterator>
-      void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename new_data::detail::is_container< T >::type >::type* = 0)
+      void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename data::detail::is_container< T >::type >::type* = 0)
       {
         free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin);
   
@@ -101,8 +101,8 @@ namespace mcrl2 {
       }
 
       template <typename T, typename MatchPredicate, typename OutputIterator>
-      void find_all_free_variables_if(T const& t, std::set< new_data::variable > const& bound, MatchPredicate match,
-                                      OutputIterator const& destBegin, typename boost::disable_if< typename new_data::detail::is_container< T >::type >::type* = 0)
+      void find_all_free_variables_if(T const& t, std::set< data::variable > const& bound, MatchPredicate match,
+                                      OutputIterator const& destBegin, typename boost::disable_if< typename data::detail::is_container< T >::type >::type* = 0)
       {
         free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin, bound);
   
@@ -113,9 +113,9 @@ namespace mcrl2 {
       /// \param[in] container a container with expressions
       /// \return All data variables that occur in the term t
       template <typename Container, typename OutputIterator >
-      void find_all_free_variables(Container const& container, std::set< new_data::variable > const& bound, OutputIterator const& o)
+      void find_all_free_variables(Container const& container, std::set< data::variable > const& bound, OutputIterator const& o)
       {
-        detail::find_all_free_variables_if(container, bound, boost::bind(&new_data::detail::is_variable, _1), o);
+        detail::find_all_free_variables_if(container, bound, boost::bind(&data::detail::is_variable, _1), o);
       }
     } // namespace detail
 
@@ -125,18 +125,18 @@ namespace mcrl2 {
     template <typename Container, typename OutputIterator >
     void find_all_free_variables(Container const& container, OutputIterator const& o)
     {
-      detail::find_all_free_variables_if(container, boost::bind(&new_data::detail::is_variable, _1), o);
+      detail::find_all_free_variables_if(container, boost::bind(&data::detail::is_variable, _1), o);
     }
 
     /// \brief Returns all data variables that occur in a range of expressions
     /// \param[in] container a container with expressions
     /// \return All data variables that occur in the term t
     template <typename Container >
-    std::set< new_data::variable > find_all_free_variables(Container const& container)
+    std::set< data::variable > find_all_free_variables(Container const& container)
     {
-      std::set< new_data::variable > result;
+      std::set< data::variable > result;
     
-      find_all_free_variables(container, new_data::detail::make_inserter(result));
+      find_all_free_variables(container, data::detail::make_inserter(result));
     
       return result;
     }

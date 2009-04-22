@@ -13,7 +13,7 @@
 #define MCRL2_LPS_SUMINST_H
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2 {
 
@@ -22,17 +22,17 @@ namespace lps {
 struct t_suminst_options {
   bool tau_only;
   bool finite_only;
-  new_data::rewriter::strategy strategy;
+  data::rewriter::strategy strategy;
 
   t_suminst_options()
     : tau_only(false),
       finite_only(true),
-      strategy(new_data::rewriter::jitty)
+      strategy(data::rewriter::jitty)
 
   {}
 };
 
-specification instantiate_sums(const specification& s, new_data::rewriter& r, const t_suminst_options& o);
+specification instantiate_sums(const specification& s, data::rewriter& r, const t_suminst_options& o);
 
 } // namespace lps
 

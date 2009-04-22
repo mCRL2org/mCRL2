@@ -16,22 +16,22 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/nat.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/detail/sort_utility.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/detail/sort_utility.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 
 const std::string DATA_SPEC1 =
   "sort A;                     \n"
@@ -99,7 +99,7 @@ void test_data_enumerator()
   atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
   for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
   {
-    std::cout << mcrl2::core::pp(*i) << " " << mcrl2::new_data::pp(i->variables()) << std::endl;
+    std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
   }
 
   data_expression_with_variables expr(x, make_vector(x));
@@ -109,7 +109,7 @@ void test_data_enumerator()
     atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
     for (atermpp::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
     {
-      std::cout << mcrl2::core::pp(*j) << " " << mcrl2::new_data::pp(j->variables()) << std::endl;
+      std::cout << mcrl2::core::pp(*j) << " " << mcrl2::data::pp(j->variables()) << std::endl;
     }
   }
 }

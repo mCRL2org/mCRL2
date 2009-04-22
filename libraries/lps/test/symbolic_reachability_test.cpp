@@ -101,8 +101,8 @@ class group_information {
 void group_information::gather(mcrl2::lps::specification const& l) {
   using namespace mcrl2;
 
-  using new_data::find_all_variables;
-  using new_data::variable;
+  using data::find_all_variables;
+  using data::variable;
 
   struct local {
     static void add_used_variables(std::set< variable >& r, std::set< variable > const& c) {
@@ -130,9 +130,9 @@ void group_information::gather(mcrl2::lps::specification const& l) {
       local::add_used_variables(used_variables, find_all_variables(i->time()));
     }
 
-    new_data::assignment_list assignments(i->assignments());
+    data::assignment_list assignments(i->assignments());
 
-    for (new_data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j) {
+    for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j) {
       if(j->lhs() != j->rhs()) {
         local::add_used_variables(used_variables, find_all_variables(j->lhs()));
         local::add_used_variables(used_variables, find_all_variables(j->rhs()));

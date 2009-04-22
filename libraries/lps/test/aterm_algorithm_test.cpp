@@ -14,10 +14,10 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/sort_expression.h"
-#include "mcrl2/new_data/data_expression.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -25,7 +25,7 @@
 using namespace std;
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
@@ -122,8 +122,8 @@ int test_main(int argc, char** argv)
 {
   struct local {
     static bool is_exists(atermpp::aterm p) {
-      mcrl2::new_data::data_expression e(p);
-      return e.is_abstraction() && mcrl2::new_data::abstraction(e).is_exists();
+      mcrl2::data::data_expression e(p);
+      return e.is_abstraction() && mcrl2::data::abstraction(e).is_exists();
     }
   };
 
@@ -148,7 +148,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   // find all functions in spec
-  std::set< mcrl2::new_data::function_symbol > functions;
+  std::set< mcrl2::data::function_symbol > functions;
   insert(functions, spec.data().constructors());
   insert(functions, spec.data().mappings());
 

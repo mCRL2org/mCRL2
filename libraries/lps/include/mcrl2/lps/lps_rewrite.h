@@ -22,8 +22,8 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/new_data/rewriter.h"
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
@@ -43,12 +43,12 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
 {
   // Rewrite the righthandsides of the assignments
 
-  new_data::assignment_list initial_assignments=spec.initial_process().assignments();
-  new_data::assignment_list new_initial_assignments;
-  for (new_data::assignment_list::iterator i=initial_assignments.begin();
+  data::assignment_list initial_assignments=spec.initial_process().assignments();
+  data::assignment_list new_initial_assignments;
+  for (data::assignment_list::iterator i=initial_assignments.begin();
          i!=initial_assignments.end(); ++i)
   {
-     new_initial_assignments = atermpp::push_front(new_initial_assignments, new_data::assignment(i->lhs(),r(i->rhs())));
+     new_initial_assignments = atermpp::push_front(new_initial_assignments, data::assignment(i->lhs(),r(i->rhs())));
   }
 
   // Rewrite the summands in the linear process.
@@ -59,14 +59,14 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
   for (summand_list::const_iterator i=summands.begin();
            i!=summands.end(); ++i)
   { // Rewrite the condition.
-    new_data::data_expression new_condition=r(i->condition());
+    data::data_expression new_condition=r(i->condition());
 
     // Rewrite the actions.
     action_list new_actions, actions=i->actions();
     for (action_list::const_iterator j = actions.begin(); j != actions.end(); ++j)
     {
-      new_data::data_expression_list new_arguments, arguments=j->arguments();
-      for (new_data::data_expression_list::iterator k=arguments.begin();
+      data::data_expression_list new_arguments, arguments=j->arguments();
+      for (data::data_expression_list::iterator k=arguments.begin();
             k!=arguments.end(); ++k)
       {
         new_arguments = atermpp::push_front(new_arguments, r(*k));
@@ -77,11 +77,11 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
     new_actions=reverse(new_actions);
 
     // Rewrite the assignments in the next state of the summand.
-    new_data::assignment_list new_assignments, assignments=i->assignments();
-    for (new_data::assignment_list::iterator j=assignments.begin();
+    data::assignment_list new_assignments, assignments=i->assignments();
+    for (data::assignment_list::iterator j=assignments.begin();
            j!=assignments.end(); ++j)
     {
-      new_assignments = atermpp::push_front(new_assignments, new_data::assignment(j->lhs(),r(j->rhs())));
+      new_assignments = atermpp::push_front(new_assignments, data::assignment(j->lhs(),r(j->rhs())));
     }
 
     // Construct a new summand, with or without time.

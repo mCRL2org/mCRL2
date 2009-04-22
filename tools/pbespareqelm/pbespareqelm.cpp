@@ -18,9 +18,9 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/new_data/identifier_generator.h"
-#include "mcrl2/new_data/enumerator.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -79,30 +79,30 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
       p.load(m_input_filename);
 
       // data rewriter
-      new_data::rewriter datar = create_rewriter(p.data());
+      data::rewriter datar = create_rewriter(p.data());
 
       // pbes rewriter
       switch (rewriter_type())
       {
         case simplify:
         {
-          typedef simplifying_rewriter<pbes_system::pbes_expression, new_data::rewriter> my_pbes_rewriter;
+          typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
-          pbes_eqelm_algorithm<pbes_system::pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          new_data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_ignore_initial_state);
           break;
         }
         case quantifier_all:
         case quantifier_finite:
         {
-          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, new_data::rewriter_with_variables, new_data::data_enumerator<> > my_pbes_rewriter;
+          typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
           bool enumerate_infinite_sorts = (rewriter_type() == quantifier_all);
-          new_data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          new_data::data_enumerator<> datae(p.data(), datar, name_generator);
-          new_data::rewriter_with_variables datarv(datar);
+          data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, name_generator);
+          data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbes_eqelm_algorithm<pbes_system::pbes_expression, new_data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           algorithm.run(p, m_ignore_initial_state);
           break;
         }

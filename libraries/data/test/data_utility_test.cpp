@@ -17,19 +17,19 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/core/find.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/data_expression_utility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::sort_bool_;
+using namespace mcrl2::data;
+using namespace mcrl2::data::sort_bool_;
 
 void test_fresh_variable_generator()
 {
@@ -83,7 +83,7 @@ void test_fresh_variables()
   context.insert("e");
   context.insert("f_00");
   variable_vector w1 = fresh_variables(w, context);
-  std::cout << "w1 = " << mcrl2::new_data::pp(w1) << std::endl;
+  std::cout << "w1 = " << mcrl2::data::pp(w1) << std::endl;
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d_01", basic_sort("D"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e_01", basic_sort("E"))) != w1.end());
   BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f_01", basic_sort("F"))) != w1.end());

@@ -19,12 +19,12 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/postfix_identifier_generator.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/detail/linear_process_utility.h"
-#include "mcrl2/new_data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
 namespace mcrl2 {
 
@@ -37,27 +37,27 @@ namespace lps {
 /// are taken into account. The result consists of two vectors (src, dest) that specify
 /// the renaming src[i] := dest[i].
 template <typename IdentifierGenerator>
-std::pair<std::vector<new_data::variable>, std::vector<new_data::variable> >
+std::pair<std::vector<data::variable>, std::vector<data::variable> >
 rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& generator)
 {
-  std::set<core::identifier_string> forbidden_names = new_data::detail::set_union(
+  std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     detail::free_variable_names(p),
     detail::summand_variable_names(p)
   );
 
-  std::vector<new_data::variable> src;  // contains the variables that need to be renamed
-  std::vector<new_data::variable> dest; // contains the corresponding replacements
-  std::vector<new_data::variable> parameters(new_data::make_variable_vector(p.process_parameters()));
+  std::vector<data::variable> src;  // contains the variables that need to be renamed
+  std::vector<data::variable> dest; // contains the corresponding replacements
+  std::vector<data::variable> parameters(data::make_variable_vector(p.process_parameters()));
   generator.add_identifiers(forbidden_names);
 
-  for (new_data::variable_vector::const_iterator i = parameters.begin(); i != parameters.end(); ++i)
+  for (data::variable_vector::const_iterator i = parameters.begin(); i != parameters.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())
     {
       // save the old and new value in the src and dest arrays
       src.push_back(*i);
-      dest.push_back(new_data::variable(new_name, i->sort()));
+      dest.push_back(data::variable(new_name, i->sort()));
     }
   }
   return std::make_pair(src, dest);
@@ -71,7 +71,7 @@ rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& g
 template <typename IdentifierGenerator>
 linear_process rename_process_parameters(const linear_process& p, IdentifierGenerator& generator)
 {
-  std::pair<std::vector<new_data::variable>, std::vector<new_data::variable> > r = rename_process_parameters_helper(p, generator);
+  std::pair<std::vector<data::variable>, std::vector<data::variable> > r = rename_process_parameters_helper(p, generator);
   return atermpp::partial_replace(p, lps::detail::make_variable_replacer(r.first, r.second));
 }
 
@@ -84,7 +84,7 @@ linear_process rename_process_parameters(const linear_process& p, IdentifierGene
 inline
 linear_process rename_process_parameters(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
-  new_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(p, generator);
 }
@@ -96,7 +96,7 @@ linear_process rename_process_parameters(const linear_process& p, const std::set
 template <typename IdentifierGenerator>
 specification rename_process_parameters(const specification& spec, IdentifierGenerator& generator)
 {
-  std::pair<std::vector<new_data::variable>, std::vector<new_data::variable> > r = rename_process_parameters_helper(spec.process(), generator);
+  std::pair<std::vector<data::variable>, std::vector<data::variable> > r = rename_process_parameters_helper(spec.process(), generator);
 
   linear_process new_process              = atermpp::partial_replace(spec.process()        , lps::detail::make_variable_replacer(r.first, r.second));
   process_initializer new_initial_process = atermpp::partial_replace(spec.initial_process(), lps::detail::make_variable_replacer(r.first, r.second));
@@ -116,7 +116,7 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
 inline
 specification rename_process_parameters(const specification& spec, const std::set<core::identifier_string>& forbidden_names, const std::string postfix)
 {
-  new_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_process_parameters(spec, generator);
 }
@@ -128,23 +128,23 @@ specification rename_process_parameters(const specification& spec, const std::se
 template <typename IdentifierGenerator>
 linear_process rename_free_variables(const linear_process& p, IdentifierGenerator& generator)
 {
-  std::set<core::identifier_string> forbidden_names = new_data::detail::set_union(
+  std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     detail::process_parameter_names(p),
     detail::summand_variable_names(p)
   );
 
-  std::vector<new_data::variable> src;  // contains the variables that need to be renamed
-  std::vector<new_data::variable> dest; // contains the corresponding replacements
+  std::vector<data::variable> src;  // contains the variables that need to be renamed
+  std::vector<data::variable> dest; // contains the corresponding replacements
   generator.add_identifiers(forbidden_names);
-  new_data::variable_list free_variables(p.free_variables());
-  for (new_data::variable_list::const_iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+  data::variable_list free_variables(p.free_variables());
+  for (data::variable_list::const_iterator i = free_variables.begin(); i != free_variables.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())
     {
       // save the old and new value in the src and dest arrays
       src.push_back(*i);
-      dest.push_back(new_data::variable(new_name, i->sort()));
+      dest.push_back(data::variable(new_name, i->sort()));
     }
   }
   return atermpp::partial_replace(p, lps::detail::make_variable_replacer(src, dest));
@@ -159,7 +159,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
 inline
 linear_process rename_free_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
-  new_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_free_variables(p, generator);
 }
@@ -173,7 +173,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 {
   atermpp::vector<summand> new_summands;
 
-  std::set<core::identifier_string> forbidden_names = new_data::detail::set_union(
+  std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     lps::detail::process_parameter_names(p),
     lps::detail::free_variable_names(p)
   );
@@ -183,19 +183,19 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 
   for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
-    std::vector<new_data::variable> src;  // contains the variables that need to be renamed
-    std::vector<new_data::variable> dest; // contains the corresponding replacements
+    std::vector<data::variable> src;  // contains the variables that need to be renamed
+    std::vector<data::variable> dest; // contains the corresponding replacements
 
-    new_data::variable_list summation_variables(i->summation_variables());
+    data::variable_list summation_variables(i->summation_variables());
 
-    for (new_data::variable_list::const_iterator j = summation_variables.begin(); j != summation_variables.end(); ++j)
+    for (data::variable_list::const_iterator j = summation_variables.begin(); j != summation_variables.end(); ++j)
     {
       core::identifier_string new_name = generator(j->name());
       if (new_name != j->name())
       {
         // save the old and new value in the src and dest arrays
         src.push_back(*j);
-        dest.push_back(new_data::variable(new_name, j->sort()));
+        dest.push_back(data::variable(new_name, j->sort()));
       }
     }
     new_summands.push_back(atermpp::partial_replace(*i, lps::detail::make_variable_replacer(src, dest)));
@@ -213,7 +213,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 inline
 linear_process rename_summation_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
-  new_data::postfix_identifier_generator generator(postfix);
+  data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
   return rename_summation_variables(p, generator);
 }

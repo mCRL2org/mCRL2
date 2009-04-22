@@ -21,13 +21,13 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/real.h"
-#include "mcrl2/new_data/bool.h"
-#include "mcrl2/new_data/detail/assignment_functional.h"
-#include "mcrl2/new_data/assignment_list_substitution.h"
-#include "mcrl2/new_data/detail/sequence_algorithm.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/detail/assignment_functional.h"
+#include "mcrl2/data/assignment_list_substitution.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/deadlock.h"
 #include "mcrl2/lps/multi_action.h"
@@ -49,10 +49,10 @@ class summand: public atermpp::aterm_appl
 {
   protected:
     /// \brief The summation variables of the summand
-    new_data::variable_list m_summation_variables;
+    data::variable_list m_summation_variables;
 
     /// \brief The condition of the summand
-    new_data::data_expression m_condition;
+    data::data_expression m_condition;
 
     /// \brief If m_delta is true the summand is a delta summand
     bool m_delta;
@@ -60,13 +60,13 @@ class summand: public atermpp::aterm_appl
     /// \brief The actions of the summand
     action_list m_actions;
 
-    /// \brief The time of the summand. If <tt>m_time == new_data::data_expression()</tt>
+    /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
     /// the summand has no time.
-    new_data::data_expression m_time;
+    data::data_expression m_time;
 
     /// \brief The assignments of the summand. These assignments are an encoding of
     /// the 'next states' of the summand.
-    new_data::assignment_list m_assignments;
+    data::assignment_list m_assignments;
 
   public:
     /// \brief Returns the multi-action of this summand.
@@ -97,7 +97,7 @@ class summand: public atermpp::aterm_appl
       atermpp::aterm_appl::iterator i = t.begin();
 
       m_summation_variables = *i++;
-      m_condition           = new_data::data_expression(*i++);
+      m_condition           = data::data_expression(*i++);
       atermpp::aterm_appl x          = *i++;
       m_delta = core::detail::gsIsDelta(x);
       if (!m_delta)
@@ -105,18 +105,18 @@ class summand: public atermpp::aterm_appl
         assert(core::detail::gsIsMultAct(x));
         m_actions = action_list(x.argument(0));
       }
-      m_time                = new_data::data_expression(*i++);
+      m_time                = data::data_expression(*i++);
       m_assignments = *i;
     }
 
     /// \brief Constructor.
     /// Constructs an untimed summand.
     /// \deprecated
-    summand(new_data::variable_list   summation_variables,
-            new_data::data_expression      condition,
+    summand(data::variable_list   summation_variables,
+            data::data_expression      condition,
             bool                 delta,
             action_list          actions,
-            new_data::assignment_list assignments
+            data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                summation_variables,
@@ -129,19 +129,19 @@ class summand: public atermpp::aterm_appl
         m_condition          (condition),
         m_delta              (delta),
         m_actions            (actions),
-        m_time               (new_data::data_expression(core::detail::gsMakeNil())),
+        m_time               (data::data_expression(core::detail::gsMakeNil())),
         m_assignments        (assignments)
     {}
 
     /// \brief Constructor.
     /// Constructs a timed summand.
     /// \deprecated
-    summand(new_data::variable_list   summation_variables,
-            new_data::data_expression condition,
+    summand(data::variable_list   summation_variables,
+            data::data_expression condition,
             bool                      delta,
             action_list               actions,
-            new_data::data_expression time,
-            new_data::assignment_list assignments
+            data::data_expression time,
+            data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                summation_variables,
@@ -160,10 +160,10 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// Constructs a multi action summand.
-    summand(new_data::variable_list   summation_variables,
-            new_data::data_expression      condition,
+    summand(data::variable_list   summation_variables,
+            data::data_expression      condition,
             const lps::multi_action&   a,
-            new_data::assignment_list assignments
+            data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
                summation_variables,
@@ -182,8 +182,8 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// Constructs a deadlock summand.
-    summand(new_data::variable_list   summation_variables,
-            new_data::data_expression      condition,
+    summand(data::variable_list   summation_variables,
+            data::data_expression      condition,
             const lps::deadlock&       d
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
@@ -191,7 +191,7 @@ class summand: public atermpp::aterm_appl
                condition,
                core::detail::gsMakeDelta(),
                d.time(),
-               atermpp::term_list< new_data::assignment >())
+               atermpp::term_list< data::assignment >())
         ),
         m_summation_variables(summation_variables),
         m_condition          (condition),
@@ -201,7 +201,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Returns the sequence of summation variables.
     /// \return The sequence of summation variables.
-    new_data::variable_list summation_variables() const
+    data::variable_list summation_variables() const
     {
       return m_summation_variables;
     }
@@ -235,12 +235,12 @@ class summand: public atermpp::aterm_appl
     /// \return True if time is available.
     bool has_time() const
     {
-      return !new_data::is_nil(m_time);
+      return !data::is_nil(m_time);
     }
 
     /// \brief Returns the condition expression.
     /// \return The condition expression.
-    new_data::data_expression const& condition() const
+    data::data_expression const& condition() const
     {
       return m_condition;
     }
@@ -256,14 +256,14 @@ class summand: public atermpp::aterm_appl
     /// \brief Returns the time.
     /// \return The time.
     /// \deprecated
-    new_data::data_expression const& time() const
+    data::data_expression const& time() const
     {
       return m_time;
     }
 
     /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
-    new_data::assignment_list const& assignments() const
+    data::assignment_list const& assignments() const
     {
       return m_assignments;
     }
@@ -275,14 +275,14 @@ class summand: public atermpp::aterm_appl
     /// argument is the list with the process parameters of this process.
     /// \param process_parameters A sequence of data variables
     /// \return A symbolic representation of the next states
-    new_data::data_expression_list next_state(const new_data::variable_list& process_parameters) const
+    data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
-      new_data::data_expression_vector result;
+      data::data_expression_vector result;
 
-      substitute(new_data::assignment_list_substitution(assignments()),
+      substitute(data::assignment_list_substitution(assignments()),
                         process_parameters, std::inserter(result, result.end()));
 
-      return new_data::make_data_expression_list(result);
+      return data::make_data_expression_list(result);
     }
 
     /// \brief Applies a low level substitution function to this term and returns the result.
@@ -295,12 +295,12 @@ class summand: public atermpp::aterm_appl
 //    summand substitute(Substitution f) const
 //    {
 //      action_list actions;
-//      new_data::data_expression condition = substitute(f, m_condition);
+//      data::data_expression condition = substitute(f, m_condition);
 //      if (!m_delta)
 //      {
 //        actions = substitute(f, m_actions);
 //      }
-//      new_data::data_expression time = substitute(f, m_time);
+//      data::data_expression time = substitute(f, m_time);
 //
 //      return summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
 //    }
@@ -319,28 +319,28 @@ class summand: public atermpp::aterm_appl
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // check 1)
-      for (new_data::assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
+      for (data::assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
       {
         if (!i->is_well_typed())
           return false;
       }
 
       // check 2)
-      if (has_time() && !new_data::sort_real_::is_real_(m_time.sort()))
+      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!new_data::sort_bool_::is_bool_(m_condition.sort()))
+      if (!data::sort_bool_::is_bool_(m_condition.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: condition " << mcrl2::core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
       }
 
       // check 4)
-      if (!mcrl2::new_data::detail::unique_names(m_summation_variables))
+      if (!mcrl2::data::detail::unique_names(m_summation_variables))
       {
         std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
         return false;
@@ -348,8 +348,8 @@ class summand: public atermpp::aterm_appl
 
       // check 5)
       if (sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), new_data::detail::assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , new_data::detail::assignment_lhs())
+               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
               )
          )
       {
@@ -366,7 +366,7 @@ class summand: public atermpp::aterm_appl
 /// \param summation_variables A sequence of data variables
 /// \return The updated summand
 inline
-summand set_summation_variables(summand s, new_data::variable_list summation_variables)
+summand set_summation_variables(summand s, data::variable_list summation_variables)
 {
   return summand(summation_variables,
                      s.condition          (),
@@ -382,7 +382,7 @@ summand set_summation_variables(summand s, new_data::variable_list summation_var
 /// \param condition A data expression
 /// \return The updated summand
 inline
-summand set_condition(summand s, new_data::data_expression condition)
+summand set_condition(summand s, data::data_expression condition)
 {
   return summand(s.summation_variables(),
                  condition,
@@ -429,7 +429,7 @@ summand set_actions(summand s, action_list actions)
 /// \param time A data expression
 /// \return The updated summand
 inline
-summand set_time(summand s, new_data::data_expression time)
+summand set_time(summand s, data::data_expression time)
 {
   return summand(s.summation_variables(),
                      s.condition          (),
@@ -445,7 +445,7 @@ summand set_time(summand s, new_data::data_expression time)
 /// \param assignments A sequence of assignments to data variables
 /// \return The updated summand
 inline
-summand set_assignments(summand s, new_data::assignment_list assignments)
+summand set_assignments(summand s, data::assignment_list assignments)
 {
   return summand(s.summation_variables(),
                  s.condition          (),
@@ -473,10 +473,10 @@ summand replace_data_expressions(const summand& s,
                                  bool substitute_time       = true,
                                  bool substitute_next_state = true)
 {
-  new_data::data_expression condition = s.condition();
+  data::data_expression condition = s.condition();
   action_list actions = s.actions();
-  new_data::data_expression time = s.time();
-  new_data::assignment_list assignments = s.assignments();
+  data::data_expression time = s.time();
+  data::assignment_list assignments = s.assignments();
 
   if (substitute_condition)
   {

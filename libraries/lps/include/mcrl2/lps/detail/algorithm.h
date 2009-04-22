@@ -19,10 +19,10 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/real.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace mcrl2 {
@@ -35,9 +35,9 @@ namespace detail {
 /// is chosen such that it doesn't appear in context.
 struct make_timed_lps_summand
 {
-  new_data::fresh_variable_generator& m_generator;
+  data::fresh_variable_generator& m_generator;
 
-  make_timed_lps_summand(new_data::fresh_variable_generator& generator)
+  make_timed_lps_summand(data::fresh_variable_generator& generator)
     : m_generator(generator)
   {}
 
@@ -48,9 +48,9 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      new_data::variable v = m_generator();
-      summand_ = set_time(summand_, new_data::data_expression(v));
-      new_data::variable_list V(summand_.summation_variables());
+      data::variable v = m_generator();
+      summand_ = set_time(summand_, data::data_expression(v));
+      data::variable_list V(summand_.summation_variables());
       V = push_front(V, v);
       summand_ = set_summation_variables(summand_, V);
     }
@@ -66,7 +66,7 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
-  new_data::fresh_variable_generator generator(context, new_data::sort_real_::real_());
+  data::fresh_variable_generator generator(context, data::sort_real_::real_());
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }
@@ -90,7 +90,7 @@ struct variable_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!new_data::data_expression(t).is_variable())
+    if (!data::data_expression(t).is_variable())
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
@@ -136,18 +136,18 @@ struct variable_name_replacer
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (!new_data::data_expression(t).is_variable())
+    if (!data::data_expression(t).is_variable())
     {
       return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
     }
-    new_data::variable v(t);
+    data::variable v(t);
     typename SrcList::const_iterator i = src_.begin();
     typename DestList::const_iterator j = dest_.begin();
     for (; i != src_.end(); ++i, ++j)
     {
       if (v.name() == *i)
       {
-        return std::pair<atermpp::aterm_appl, bool>(new_data::variable(*j, v.sort()), false); // don't continue the recursion
+        return std::pair<atermpp::aterm_appl, bool>(data::variable(*j, v.sort()), false); // don't continue the recursion
       }
     }
     return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion

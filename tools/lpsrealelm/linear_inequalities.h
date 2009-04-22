@@ -19,15 +19,15 @@
 
 #include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/standard_utility.h"
-#include "mcrl2/new_data/map_substitution_adapter.h"
-#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/function_symbol.h"
 #include <algorithm>
 
 namespace mcrl2 {
 
-namespace new_data {
+namespace data {
 
 // Functions below should be made available in the data library.
 data_expression real_zero();
@@ -1549,7 +1549,7 @@ inline data_expression rewrite_with_memory(
 }
 
 
-} // namespace new_data
+} // namespace data
 
 } // namespace mcrl2
 

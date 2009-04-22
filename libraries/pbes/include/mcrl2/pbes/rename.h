@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_RENAME_H
 #define MCRL2_PBES_RENAME_H
 
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 
@@ -27,9 +27,9 @@ namespace pbes_system {
 /// \param free_variables A sequence of data variables
 /// \return The rename result
 inline
-pbes_expression rename_quantifier_variables(const pbes_expression& p, const new_data::variable_list& free_variables)
+pbes_expression rename_quantifier_variables(const pbes_expression& p, const data::variable_list& free_variables)
 {
-  new_data::multiset_identifier_generator generator(free_variables);
+  data::multiset_identifier_generator generator(free_variables);
   return detail::make_quantifier_rename_builder(generator).visit(p);
 }
 

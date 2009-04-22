@@ -10,7 +10,7 @@
 
 #include <cstdlib>
 
-#include "mcrl2/new_data/detail/prover/induction.h"
+#include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/numeric_string.h"
@@ -21,7 +21,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class Induction --------------------------------------------------------------------------------

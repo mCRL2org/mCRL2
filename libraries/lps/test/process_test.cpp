@@ -19,7 +19,7 @@
 #include "mcrl2/lps/process_expression_builder.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 #include "mcrl2/lps/mcrl22lps.h"
@@ -115,10 +115,10 @@ void test_process(std::string text)
   specification sp = parse_linear_process_specification(text);
   std::cout << "<spec>" << core::pp(sp) << std::endl;
 
-  //std::cout << core::pp(new_data::detail::data_specification_to_aterm_data_spec(spec.data())) << std::endl
+  //std::cout << core::pp(data::detail::data_specification_to_aterm_data_spec(spec.data())) << std::endl
   //          << core::pp(spec.actions()) << std::endl
-  //          << new_data::pp(spec.equations()) << std::endl
-  //          << new_data::pp(spec.init()) << std::endl;
+  //          << data::pp(spec.equations()) << std::endl
+  //          << data::pp(spec.init()) << std::endl;
   for (process_equation_list::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
   {
     visit_process_expression(i->expression());
@@ -144,10 +144,10 @@ void test_free_variables()
     "init X;\n"
   ));
 
-  std::set< new_data::variable > free_variables(specification.process().find_free_variables());
+  std::set< data::variable > free_variables(specification.process().find_free_variables());
 
-  BOOST_CHECK(free_variables.find(new_data::variable("x", new_data::sort_nat::nat())) == free_variables.end());
-  BOOST_CHECK(free_variables.find(new_data::variable("y", new_data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
   specification = mcrl22lps(
     "act a;\n"
@@ -157,8 +157,8 @@ void test_free_variables()
 
   free_variables = specification.process().find_free_variables();
 
-  BOOST_CHECK(free_variables.find(new_data::variable("x", new_data::sort_nat::nat())) == free_variables.end());
-  BOOST_CHECK(free_variables.find(new_data::variable("y", new_data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
+  BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
   BOOST_CHECK(specification.is_well_typed());
 }

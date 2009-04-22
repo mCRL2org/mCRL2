@@ -14,20 +14,20 @@
 
 #include <iostream>
 #include "mcrl2/core/detail/struct.h"
-// #include "mcrl2/new_data/data_operation.h"
-// #include "mcrl2/new_data/data_application.h"
-#include "mcrl2/new_data/data_equation.h"
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/data_implementation_concrete.h"
-#include "mcrl2/new_data/structured_sort.h"
+// #include "mcrl2/data/data_operation.h"
+// #include "mcrl2/data/data_application.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_implementation_concrete.h"
+#include "mcrl2/data/structured_sort.h"
 
 // using namespace atermpp;
 using namespace mcrl2;
 // using namespace mcrl2::core;
 // using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data;
-// using namespace mcrl2::new_data::data_expr;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+// using namespace mcrl2::data::data_expr;
+using namespace mcrl2::data::detail;
 
 /* 
 /// \brief Name for the sort Comp.

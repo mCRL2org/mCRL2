@@ -2,8 +2,8 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/rewriter.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -1,8 +1,8 @@
 #include <cassert>
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/rewriter.h"
 
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 
 int main(int argc, char* argv[])
 {

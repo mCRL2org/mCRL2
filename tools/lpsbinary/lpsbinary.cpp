@@ -46,7 +46,7 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       specification lps_specification;
       lps_specification.load(m_input_filename);
 
-      mcrl2::new_data::rewriter r(create_rewriter(lps_specification.data()));
+      mcrl2::data::rewriter r(create_rewriter(lps_specification.data()));
 
       // apply binary on lps_specification and save the output to a binary file
       specification result = binary(lps_specification, r);

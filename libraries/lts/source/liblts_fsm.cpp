@@ -18,9 +18,9 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"
@@ -30,7 +30,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data::detail;
 using namespace mcrl2;
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)
@@ -154,10 +154,10 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
           }
         }
       }
-      new_data::variable_list process_parameters(spec->process().process_parameters());
+      data::variable_list process_parameters(spec->process().process_parameters());
       extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
-              (ATerm)(ATermAppl) mcrl2::new_data::detail::data_specification_to_aterm_data_spec(spec->data()),
-              (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) static_cast< ATermList >(atermpp::term_list< new_data::variable >(process_parameters.begin(), process_parameters.end()))),
+              (ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec->data()),
+              (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) static_cast< ATermList >(atermpp::term_list< data::variable >(process_parameters.begin(), process_parameters.end()))),
               ATgetArgument((ATermAppl) *spec,1));
       this->type = lts_mcrl2;
     } else if ( type == lts_mcrl ) {
@@ -433,8 +433,8 @@ static ATermList get_lps_params(ATerm lps)
 
 static ATermList get_lps_params(lps::linear_process &lps)
 {
-  new_data::variable_list process_parameters(lps.process_parameters());
-  return atermpp::term_list< new_data::variable >(process_parameters.begin(), process_parameters.end());
+  data::variable_list process_parameters(lps.process_parameters());
+  return atermpp::term_list< data::variable >(process_parameters.begin(), process_parameters.end());
 }
 
 static bool isATermString(ATerm a)

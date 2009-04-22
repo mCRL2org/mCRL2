@@ -100,10 +100,10 @@ namespace squadt {
       project_menu->Append(cmID_UPDATE, wxT("&Update...\tCTRL-u"))->Enable(false);
       project_menu->Append(wxID_CLOSE, wxT("&Close\tCTRL-F4"))->Enable(false);
       project_menu->AppendSeparator();
-      wxMenu* new_data_source_menu = new wxMenu();
-      new_data_source_menu->Append(cmID_ADD_EXISTING_FILE, wxT("&Existing File..."));
-      new_data_source_menu->Append(cmID_ADD_NEW_FILE, wxT("&New File"));
-      project_menu->Append(cmID_NEW_DATA_SOURCE, wxT("New &Model..."), new_data_source_menu)->Enable(false);
+      wxMenu* data_source_menu = new wxMenu();
+      data_source_menu->Append(cmID_ADD_EXISTING_FILE, wxT("&Existing File..."));
+      data_source_menu->Append(cmID_ADD_NEW_FILE, wxT("&New File"));
+      project_menu->Append(cmID_NEW_DATA_SOURCE, wxT("New &Model..."), data_source_menu)->Enable(false);
       project_menu->AppendSeparator();
       project_menu->Append(wxID_EXIT, wxT("&Quit"));
       menu->Append(project_menu, wxT("&Project"));

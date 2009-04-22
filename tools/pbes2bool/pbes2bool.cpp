@@ -39,14 +39,14 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/data/identifier_generator.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/new_data/detail/rewrite.h"
-#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/data_elimination.h"
-#include "mcrl2/new_data/enumerator.h"
+#include "mcrl2/data/enumerator.h"
 
 //Boolean equation systems
 #include "bes_deprecated.h"
@@ -244,7 +244,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       { std::stringstream message;
         message << "Fail to instantiate all free variables in the pbes.\n";
         message << "Remaining free variables are: ";
-        for(atermpp::set <mcrl2::new_data::variable>::iterator i=p.free_variables().begin() ;
+        for(atermpp::set <mcrl2::data::variable>::iterator i=p.free_variables().begin() ;
                    i!=p.free_variables().end() ; i++ )
         { message << mcrl2::core::pp(*i) << " ";
         }
@@ -253,7 +253,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       }
 
       // data rewriter
-      new_data::rewriter datar=create_rewriter(p.data());
+      data::rewriter datar=create_rewriter(p.data());
 
       ::bes::boolean_equation_system bes_equations;
       // pbes rewriter
@@ -261,7 +261,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       {
         case simplify:
         {
-          simplifying_rewriter<pbes_expression, new_data::rewriter> pbesr(datar);
+          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
           pbesrewr(p,pbesr); // Simplify p such that it does not have to be done
                              // repeatedly.
           bes_equations=::bes::boolean_equation_system(p,
@@ -274,12 +274,12 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         }
         case quantifier_finite:
         {
-          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-          new_data::data_enumerator<> datae(p.data(), datar, generator);
-          new_data::rewriter_with_variables datarv(datar);
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, 
-                                                             new_data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
+                                                             data::data_enumerator<> > 
                           pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
                               // repeatedly. 
@@ -293,19 +293,19 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         }
         case quantifier_all:
         {
-          new_data::number_postfix_generator generator("UNIQUE_PREFIX");
-          new_data::data_enumerator<> datae(p.data(), datar, generator);
-          new_data::rewriter_with_variables datarv(datar);
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
           const bool enumerate_infinite_sorts1 = false;
-          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, 
-                                                             new_data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
+                                                             data::data_enumerator<> > 
                           pbesr1(datarv, datae, enumerate_infinite_sorts1);
           pbesrewr(p,pbesr1);  // Simplify p such that this does not need to be done
                                // repeatedly, without expanding quantifiers over infinite
                                // domains. 
           const bool enumerate_infinite_sorts2 = true;
-          enumerate_quantifiers_rewriter<pbes_expression, new_data::rewriter_with_variables, 
-                                                             new_data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
+                                                             data::data_enumerator<> > 
                           pbesr2(datarv, datae, enumerate_infinite_sorts2);
           bes_equations=::bes::boolean_equation_system(p,
                             pbesr2,
@@ -463,7 +463,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_unused_data).set_argument_value< 0 >(true);
   }
   if (!c.option_exists(option_rewrite_strategy)) {
-    c.add_option(option_rewrite_strategy).set_argument_value< 0 >(new_data::rewriter::jitty);
+    c.add_option(option_rewrite_strategy).set_argument_value< 0 >(data::rewriter::jitty);
   }
   if (!c.option_exists(option_transformation_strategy)) {
     c.add_option(option_transformation_strategy).set_argument_value< 0 >(lazy);
@@ -479,7 +479,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < bes_output_format > format_selector(d);
 
   // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < new_data::rewriter::strategy > rewrite_strategy_selector(d);
+  mcrl2::utilities::squadt::radio_button_helper < data::rewriter::strategy > rewrite_strategy_selector(d);
 
   // Helper for strategy selection
   mcrl2::utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
@@ -494,15 +494,15 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
 
   m.append(d.create< label >().set_text("Rewrite strategy")).
     append(d.create< horizontal_box >().
-                append(rewrite_strategy_selector.associate(new_data::rewriter::innermost, "Inner")).
+                append(rewrite_strategy_selector.associate(data::rewriter::innermost, "Inner")).
 #ifdef MCRL2_INNERC_AVAILABLE
-                append(rewrite_strategy_selector.associate(new_data::rewriter::innermost_compiling, "Innerc")).
+                append(rewrite_strategy_selector.associate(data::rewriter::innermost_compiling, "Innerc")).
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty, "Jitty")).
-                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty_compiling, "Jittyc")),
+                append(rewrite_strategy_selector.associate(data::rewriter::jitty, "Jitty")).
+                append(rewrite_strategy_selector.associate(data::rewriter::jitty_compiling, "Jittyc")),
 #else
-                append(rewrite_strategy_selector.associate(new_data::rewriter::jitty, "Jitty")),
+                append(rewrite_strategy_selector.associate(data::rewriter::jitty, "Jitty")),
 #endif
           margins(0,5,0,5)).
     append(d.create< label >().set_text("Output format : ")).
@@ -544,7 +544,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   }
   if (c.option_exists(option_rewrite_strategy)) {
     rewrite_strategy_selector.set_selection(
-        c.get_option_argument< new_data::rewriter::strategy >(option_rewrite_strategy, 0));
+        c.get_option_argument< data::rewriter::strategy >(option_rewrite_strategy, 0));
   }
 
   send_display_layout(d.manager(m));
@@ -605,7 +605,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c)
   opt_store_as_tree             = c.get_option_argument< bool >(option_tree);
   opt_data_elm                  = c.get_option_argument< bool >(option_unused_data);;
   opt_use_hashtables            = c.get_option_argument< bool >(option_hash_table);;
-  m_rewrite_strategy            = c.get_option_argument< new_data::rewriter::strategy >(option_rewrite_strategy, 0);
+  m_rewrite_strategy            = c.get_option_argument< data::rewriter::strategy >(option_rewrite_strategy, 0);
 
   if (opt_construct_counter_example && !c.output_exists(counter_example_file_for_output)) {
     opt_counter_example_file = c.get_output_name(".txt").c_str();

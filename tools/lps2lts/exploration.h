@@ -50,7 +50,7 @@ struct lts_generation_options {
                              unsigned long long) {
   }
 
-  mcrl2::new_data::rewriter::strategy strat;
+  mcrl2::data::rewriter::strategy strat;
   bool usedummies;
   bool removeunused;
   int stateformat;
@@ -76,7 +76,7 @@ struct lts_generation_options {
 };
 
 inline lts_generation_options::lts_generation_options() :
-    strat(mcrl2::new_data::rewriter::jitty),
+    strat(mcrl2::data::rewriter::jitty),
     usedummies(true),
     removeunused(true),
     stateformat(GS_STATE_VECTOR),

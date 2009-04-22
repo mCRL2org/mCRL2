@@ -16,8 +16,8 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/linear_process.h"
-// #include "mcrl2/new_data/rewrite.h"
-#include "mcrl2/new_data/rewriter.h"
+// #include "mcrl2/data/rewrite.h"
+#include "mcrl2/data/rewriter.h"
 #include "comp.h"
 #include "linear_inequalities.h"
 
@@ -35,15 +35,15 @@ void normalize_pair(data_expression &,data_expression &,const rewriter &, const 
 class real_representing_variable 
 {
   private:
-    mcrl2::new_data::variable variable;
-    mcrl2::new_data::data_expression lowerbound;
-    mcrl2::new_data::data_expression upperbound;
+    mcrl2::data::variable variable;
+    mcrl2::data::data_expression lowerbound;
+    mcrl2::data::data_expression upperbound;
 
   public:
     real_representing_variable
-          ( mcrl2::new_data::variable v,
-            mcrl2::new_data::data_expression lb,
-            mcrl2::new_data::data_expression ub)
+          ( mcrl2::data::variable v,
+            mcrl2::data::data_expression lb,
+            mcrl2::data::data_expression ub)
     {
       variable.protect();
       lowerbound.protect();
@@ -81,15 +81,15 @@ class real_representing_variable
 
     }
 
-    mcrl2::new_data::variable get_variable() const
+    mcrl2::data::variable get_variable() const
     { return variable;
     }
 
-    mcrl2::new_data::data_expression get_lowerbound() const
+    mcrl2::data::data_expression get_lowerbound() const
     { return lowerbound;
     }
 
-    mcrl2::new_data::data_expression get_upperbound() const
+    mcrl2::data::data_expression get_upperbound() const
     { return upperbound;
     }
 };
@@ -103,9 +103,9 @@ class summand_information
     mcrl2::lps::summand smd;
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
-    atermpp::vector < mcrl2::new_data::data_expression > new_values_for_xi_variables;
+    atermpp::vector < mcrl2::data::data_expression > new_values_for_xi_variables;
     std::vector < linear_inequality > summand_real_conditions;
-    atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>  summand_real_nextstate_map;
+    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
@@ -124,7 +124,7 @@ class summand_information
              variable_list rsv,
              variable_list nrsv,
              std::vector < linear_inequality > src,
-             atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression>  srnm
+             atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
              ):
       smd(s),
       real_summation_variables(rsv),
@@ -180,12 +180,12 @@ class summand_information
     { return non_real_summation_variables;
     }
 
-    atermpp::vector < mcrl2::new_data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
+    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_begin() const
     {
       return new_values_for_xi_variables.begin();
     }
 
-    atermpp::vector < mcrl2::new_data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
+    atermpp::vector < mcrl2::data::data_expression >::const_iterator get_new_values_for_xi_variables_end() const
     {
       return new_values_for_xi_variables.end();
     }
@@ -198,7 +198,7 @@ class summand_information
     { return summand_real_conditions.end();
     }
 
-    atermpp::map<mcrl2::new_data::data_expression, mcrl2::new_data::data_expression> get_summand_real_nextstate_map() const
+    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> get_summand_real_nextstate_map() const
     { return summand_real_nextstate_map;
     }
 
@@ -274,13 +274,13 @@ class summand_information
         e.typical_pair(normalized_substituted_lowerbound,normalized_substituted_upperbound,r);
   
         // First check whether this new next state argument follows from an existing argument
-        if (r(new_data::less(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
+        if (r(data::less(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
         { new_values_for_xi_variables.push_back(c.smaller());
         }
-        else if (r(new_data::equal_to(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
+        else if (r(data::equal_to(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool_::true_())
         { new_values_for_xi_variables.push_back(c.equal());
         }
-        else if (r(new_data::less(normalized_substituted_upperbound,normalized_substituted_lowerbound))==sort_bool_::true_())
+        else if (r(data::less(normalized_substituted_upperbound,normalized_substituted_lowerbound))==sort_bool_::true_())
         { new_values_for_xi_variables.push_back(c.larger());
         }
         else
@@ -296,7 +296,7 @@ class summand_information
           }
           if (!success)
           { // Leave an empty spot, indicated by data_expression(). No prefabricated value can be set.
-            new_values_for_xi_variables.push_back(mcrl2::new_data::data_expression());
+            new_values_for_xi_variables.push_back(mcrl2::data::data_expression());
           }
         }
       }
@@ -311,10 +311,10 @@ class summand_information
 
 #ifndef NDEBUG
       // sanity check
-      for(atermpp::vector<mcrl2::new_data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
+      for(atermpp::vector<mcrl2::data::data_expression>::const_iterator i = new_values_for_xi_variables.begin();
           i != new_values_for_xi_variables.end(); ++i)
       {
-        assert(mcrl2::new_data::is_data_expression(*i) || *i == mcrl2::new_data::data_expression());
+        assert(mcrl2::data::is_data_expression(*i) || *i == mcrl2::data::data_expression());
       }
       assert(context.size()==new_values_for_xi_variables.size());
 #endif
@@ -324,7 +324,7 @@ class summand_information
       // existing xi variables.
 
       context_type::const_iterator cntxt=context.begin();
-      for(atermpp::vector < mcrl2::new_data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
+      for(atermpp::vector < mcrl2::data::data_expression >::iterator cxi=new_values_for_xi_variables.begin();
                        (cxi+1)!=new_values_for_xi_variables.end(); ++cxi, ++cntxt)
       { if (*cxi==data_expression())
         { // Check whether lowerbound,upperbound for xi imply the substituted, normalized lowerbounds for

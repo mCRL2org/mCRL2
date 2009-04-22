@@ -44,12 +44,12 @@ namespace pbes_system {
   /// \param e A sequence of data expressions
   /// \return The substitution that maps the i-th element of \p v to the i-th element of \p e
   inline
-  pbes2bes_substitution_function make_pbes2bes_substitution(new_data::variable_list v, new_data::data_expression_list e)
+  pbes2bes_substitution_function make_pbes2bes_substitution(data::variable_list v, data::data_expression_list e)
   {
     assert(v.size() == e.size());
     pbes2bes_substitution_function sigma;
-    new_data::variable_list::iterator i = v.begin();
-    new_data::data_expression_list::iterator j = e.begin();
+    data::variable_list::iterator i = v.begin();
+    data::data_expression_list::iterator j = e.begin();
 
     for (; i != v.end(); ++i, ++j)
     {
@@ -94,7 +94,7 @@ namespace pbes_system {
       /// \param rewriter_strategy A strategy for the data rewriter
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
-      pbes2bes_algorithm(new_data::data_specification const& data_spec, new_data::rewriter::strategy rewriter_strategy = new_data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
+      pbes2bes_algorithm(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_equations = false, bool print_rewriter_output = false)
         : R(data_spec, rewriter_strategy, print_rewriter_output), equation_count(0), m_print_equations(print_equations)
       {}
 
@@ -137,7 +137,7 @@ namespace pbes_system {
               todo.insert(*i);
             }
           }
-          pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), new_data::variable_list()), psi_e);
+          pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), psi_e);
           if (m_print_equations)
           {
             std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;

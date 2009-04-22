@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file compatibility_test.cpp
-/// \brief Regression test for the transformations between new and old new_data
+/// \brief Regression test for the transformations between new and old data
 ///       format.
 
 #include <iostream>
@@ -15,10 +15,10 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/new_data/parser.h"
-#include "mcrl2/new_data/standard.h"
-#include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/parser.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2;
 using namespace atermpp;
@@ -36,13 +36,13 @@ void compatibility_test()
   data_stream << text;
   data_stream << "init delta;\n";
 
-  aterm_appl lps_spec(new_data::detail::parse_specification(data_stream));
-  lps_spec = new_data::detail::type_check_specification(lps_spec);
-  lps_spec = new_data::detail::alpha_reduce(lps_spec);
+  aterm_appl lps_spec(data::detail::parse_specification(data_stream));
+  lps_spec = data::detail::type_check_specification(lps_spec);
+  lps_spec = data::detail::alpha_reduce(lps_spec);
 
   aterm_appl spec_old_format = atermpp::arg1(lps_spec);
-  new_data::data_specification spec_new_format(spec_old_format);
-  aterm_appl spec_old_format1 = new_data::detail::data_specification_to_aterm_data_spec(remove_all_system_defined(spec_new_format));
+  data::data_specification spec_new_format(spec_old_format);
+  aterm_appl spec_old_format1 = data::detail::data_specification_to_aterm_data_spec(remove_all_system_defined(spec_new_format));
 
   BOOST_CHECK(spec_old_format == spec_old_format1);
 }

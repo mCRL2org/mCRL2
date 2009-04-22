@@ -1,13 +1,13 @@
-#include "mcrl2/new_data/basic_sort.h"
-#include "mcrl2/new_data/function_sort.h"
-#include "mcrl2/new_data/standard.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/basic_sort.h"
+#include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/bool.h"
 
 #include <iostream>
 
 namespace mcrl2 {
 
-  namespace new_data {
+  namespace data {
 
     // Function symbol ==
     function_symbol equal_to(const sort_expression& s)
@@ -286,6 +286,6 @@ namespace mcrl2 {
       return result;
     }
 
-  } // namespace new_data
+  } // namespace data
 } // namespace mcrl2
 

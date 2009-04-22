@@ -15,8 +15,8 @@
 #include <set>
 #include <vector>
 #include "mcrl2/modal_formula/state_formula_visitor.h"
-#include "mcrl2/new_data/data.h"
-#include "mcrl2/new_data/find.h"
+#include "mcrl2/data/data.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -28,13 +28,13 @@ namespace state_frm {
 struct free_variable_visitor: public state_formula_visitor
 {
   /// \brief A sequence of bound variables
-  new_data::variable_list bound_variables;
+  data::variable_list bound_variables;
 
   /// \brief A stack with quantifier variables
-  std::vector<new_data::variable_list> quantifier_stack;
+  std::vector<data::variable_list> quantifier_stack;
 
   /// \brief Contains the solution
-  std::set<new_data::variable> result;
+  std::set<data::variable> result;
 
   /// \brief Constructor
   free_variable_visitor()
@@ -42,20 +42,20 @@ struct free_variable_visitor: public state_formula_visitor
 
   /// \brief Constructor
   /// \param bound_variables_ A sequence of data variables
-  free_variable_visitor(new_data::variable_list bound_variables_)
+  free_variable_visitor(data::variable_list bound_variables_)
     : bound_variables(bound_variables_)
   {}
 
   /// \brief Returns true if v is an element of bound_variables or quantifier_stack
   /// \return True if v is an element of bound_variables or quantifier_stack
   /// \param v A data variable
-  bool is_bound(const new_data::variable& v) const
+  bool is_bound(const data::variable& v) const
   {
     if (std::find(bound_variables.begin(), bound_variables.end(), v) != bound_variables.end())
     {
       return true;
     }
-    for (std::vector<new_data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+    for (std::vector<data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
     {
       if (std::find(i->begin(), i->end(), v) != i->end())
       {
@@ -67,7 +67,7 @@ struct free_variable_visitor: public state_formula_visitor
 
   /// \brief Pushes a sequence of data variables on the stack
   /// \param v A sequence of data variables
-  void push(const new_data::variable_list& v)
+  void push(const data::variable_list& v)
   {
     quantifier_stack.push_back(v);
   }
@@ -82,7 +82,7 @@ struct free_variable_visitor: public state_formula_visitor
   /// \param e A modal formula
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_forall(const state_formula& e, const new_data::variable_list& v, const state_formula&)
+  bool visit_forall(const state_formula& e, const data::variable_list& v, const state_formula&)
   {
     push(v);
     return true;
@@ -98,7 +98,7 @@ struct free_variable_visitor: public state_formula_visitor
   /// \param e A modal formula
   /// \param v A sequence of data variables
   /// \return The result of visiting the node
-  bool visit_exists(const state_formula& e, const new_data::variable_list& v, const state_formula&)
+  bool visit_exists(const state_formula& e, const data::variable_list& v, const state_formula&)
   {
     push(v);
     return true;
@@ -113,10 +113,10 @@ struct free_variable_visitor: public state_formula_visitor
   /// \brief Visit var node
   /// \param l A sequence of data expressions
   /// \return The result of visiting the node
-  bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const new_data::data_expression_list& l)
+  bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& l)
   {
-    std::set<new_data::variable> variables = find_all_variables(l);
-    for (std::set<new_data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
+    std::set<data::variable> variables = find_all_variables(l);
+    for (std::set<data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
       {
@@ -129,10 +129,10 @@ struct free_variable_visitor: public state_formula_visitor
   /// \brief Visit data_expression node
   /// \param d A data expression
   /// \return The result of visiting the node
-  bool visit_data_expression(const state_formula& /* e */, const new_data::data_expression& d)
+  bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
-    std::set<new_data::variable> variables = find_all_variables(d);
-    for (std::set<new_data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
+    std::set<data::variable> variables = find_all_variables(d);
+    for (std::set<data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
       {
@@ -149,7 +149,7 @@ struct free_variable_visitor: public state_formula_visitor
 /// \param f A modal formula
 /// \return The free variables that occur in the state formula f.
 inline
-std::set<new_data::variable> compute_free_state_formula_variables(const state_formula& f)
+std::set<data::variable> compute_free_state_formula_variables(const state_formula& f)
 {
   state_frm::free_variable_visitor visitor;
   visitor.visit(f);

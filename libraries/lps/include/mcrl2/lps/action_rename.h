@@ -18,18 +18,18 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
-#include "mcrl2/new_data/detail/data_reconstruct.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/new_data/find.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/new_data/data_expression.h"
-#include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -103,10 +103,10 @@ namespace lps {
   {
     protected:
       /// \brief The data variables of the rule
-      new_data::variable_list m_variables;
+      data::variable_list m_variables;
 
       /// \brief The condition of the rule
-      new_data::data_expression    m_condition;
+      data::data_expression    m_condition;
 
       /// \brief The left hand side of the rule
       action                   m_lhs;
@@ -143,14 +143,14 @@ namespace lps {
 
       /// \brief Returns the variables of the rule.
       /// \return The variables of the rule.
-      new_data::variable_list variables() const
+      data::variable_list variables() const
       {
         return m_variables;
       }
 
       /// \brief Returns the condition of the rule.
       /// \return The condition of the rule.
-      new_data::data_expression condition() const
+      data::data_expression condition() const
       {
         return m_condition;
       }
@@ -179,7 +179,7 @@ namespace lps {
     protected:
 
       /// \brief The data specification of the action rename specification
-      new_data::data_specification m_data;
+      data::data_specification m_data;
 
       /// \brief The action labels of the action rename specification
       action_label_list        m_action_labels;
@@ -217,7 +217,7 @@ namespace lps {
       /// \param data A data specification
       /// \param action_labels A sequence of action labels
       /// \param rules A sequence of action rename rules
-      action_rename_specification(new_data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
+      action_rename_specification(data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
         :
           m_data(data),
           m_action_labels(action_labels),
@@ -225,7 +225,7 @@ namespace lps {
       {
           m_term = reinterpret_cast<ATerm>(
           core::detail::gsMakeActionRenameSpec(
-            new_data::detail::data_specification_to_aterm_data_spec(data),
+            data::detail::data_specification_to_aterm_data_spec(data),
             core::detail::gsMakeActSpec(action_labels),
             core::detail::gsMakeActionRenameRules(rules)
           )
@@ -269,7 +269,7 @@ namespace lps {
 
       /// \brief Returns the data action_rename_specification.
       /// \return The data action_rename_specification.
-      new_data::data_specification data() const
+      data::data_specification data() const
       { return m_data; }
 
       /// \brief Returns the sequence of action labels
@@ -328,13 +328,13 @@ namespace lps {
     inline
     ATermAppl implement_action_rename_specification(ATermAppl ar_spec, ATermAppl& lps_spec)
     {
-      ATermAppl result = new_data::detail::implement_data_action_rename_spec(ar_spec, lps_spec);
+      ATermAppl result = data::detail::implement_data_action_rename_spec(ar_spec, lps_spec);
       if (result == NULL)
         throw runtime_error("process data implementation error");
       return result;
     }
 
-    using namespace mcrl2::new_data;
+    using namespace mcrl2::data;
     using namespace mcrl2::lps;
 
     /// \brief Renames variables
@@ -411,7 +411,7 @@ lps::specification action_rename(
             const lps::specification &lps_old_spec)
 {
   using namespace mcrl2::core;
-  using namespace mcrl2::new_data;
+  using namespace mcrl2::data;
   using namespace mcrl2::lps;
   using namespace std;
 
@@ -420,7 +420,7 @@ lps::specification action_rename(
   summand_list lps_summands = summand_list(); //for changes in lps_old_summands
   action_list lps_new_actions = action_list();;
 
-  new_data::postfix_identifier_generator generator("");
+  data::postfix_identifier_generator generator("");
   generator.add_to_context(lps_old_spec);
 
   bool to_tau=false;
@@ -563,14 +563,14 @@ lps::specification action_rename(
           { if (rule_old_argument_i->is_variable())
             {
               new_equalities_condition=lazy::and_(new_equalities_condition,
-                               new_data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                               data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
             { assert((find_all_variables(*rule_old_argument_i).empty())); // the argument must be closed,
                                                                                // which is checked above.
               renamed_rule_condition=
                         lazy::and_(renamed_rule_condition,
-                             new_data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                             data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             lps_old_argument_i++;
           }

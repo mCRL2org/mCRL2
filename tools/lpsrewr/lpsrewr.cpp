@@ -20,7 +20,7 @@
 #include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lps;
@@ -86,7 +86,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
 
       specification.load(m_input_filename);
 
-      mcrl2::new_data::rewriter rewriter = create_rewriter(specification.data());
+      mcrl2::data::rewriter rewriter = create_rewriter(specification.data());
 
       if (m_benchmark)
       {

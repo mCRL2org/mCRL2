@@ -14,7 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/parse.h"
@@ -23,7 +23,7 @@
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 std::string case_1 =
@@ -250,7 +250,7 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
   {
     s0 = mcrl22lps(spec_text);
   }
-  new_data::rewriter datar(s0.data());
+  data::rewriter datar(s0.data());
   specification s1 = constelm(s0, datar, true);
   variable_list v0 = s0.process().process_parameters();
   variable_list v1 = s1.process().process_parameters();

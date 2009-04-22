@@ -1,7 +1,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/algorithm.h"     // replace
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/new_data/data.h"
+#include "mcrl2/data/data.h"
 #include "mcrl2/core/aterm_ext.h"
 
 using namespace lps;

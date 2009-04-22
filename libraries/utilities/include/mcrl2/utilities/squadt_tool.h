@@ -123,7 +123,7 @@ namespace mcrl2 {
 
           typedef rewriter_tool< squadt_tool< Tool > > super_type;
 
-          void set_rewrite_strategy(mcrl2::new_data::rewriter::strategy s)
+          void set_rewrite_strategy(mcrl2::data::rewriter::strategy s)
           {
             this->m_rewrite_strategy = s;
           }
@@ -133,17 +133,17 @@ namespace mcrl2 {
           /// \brief actives convesion from rewriter::strategy to string and vice versa
           bool activate_strategy_conversion()
           {
-            tipi::datatype::enumeration< mcrl2::new_data::rewriter::strategy > strategy_enumeration;
+            tipi::datatype::enumeration< mcrl2::data::rewriter::strategy > strategy_enumeration;
 
             strategy_enumeration.
-              add(mcrl2::new_data::rewriter::innermost, "inner").
-              add(mcrl2::new_data::rewriter::jitty, "jitty");
+              add(mcrl2::data::rewriter::innermost, "inner").
+              add(mcrl2::data::rewriter::jitty, "jitty");
 
 # ifdef MCRL2_INNERC_AVAILABLE
-            strategy_enumeration.add(mcrl2::new_data::rewriter::innermost_compiling, "innerc");
+            strategy_enumeration.add(mcrl2::data::rewriter::innermost_compiling, "innerc");
 # endif
 # ifdef MCRL2_JITTYC_AVAILABLE
-            strategy_enumeration.add(mcrl2::new_data::rewriter::jitty_compiling, "jittyc");
+            strategy_enumeration.add(mcrl2::data::rewriter::jitty_compiling, "jittyc");
 # endif
             return true;
           }
@@ -159,7 +159,7 @@ namespace mcrl2 {
           template < typename LayoutManager >
           void add_rewrite_option(tipi::tool_display& display, LayoutManager& base)
           {
-            using new_data::rewriter;
+            using data::rewriter;
             using namespace tipi::layout;
             using namespace tipi::layout::elements;
 
@@ -210,7 +210,7 @@ namespace mcrl2 {
           /// \brief Adds rewrite strategy to the configuration or vice versa if the strategy is part of the configuration
           void synchronise_with_configuration(tipi::configuration& c) {
             if (c.option_exists("rewrite-strategy")) {
-              this->m_rewrite_strategy = c.get_option_argument< mcrl2::new_data::rewriter::strategy >("rewrite-strategy", 0);
+              this->m_rewrite_strategy = c.get_option_argument< mcrl2::data::rewriter::strategy >("rewrite-strategy", 0);
             }
             else {
               static_cast< tipi::configuration::option& >(c.add_option("rewrite-strategy")).

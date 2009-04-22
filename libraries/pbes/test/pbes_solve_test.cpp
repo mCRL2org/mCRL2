@@ -19,7 +19,7 @@
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/core/garbage_collection.h"
 
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::modal;
 using namespace mcrl2::pbes_system;

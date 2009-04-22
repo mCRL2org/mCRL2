@@ -13,7 +13,7 @@
 #define MCRL2_LPS_MULTI_ACTION_H
 
 #include "mcrl2/lps/action.h"
-#include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/data/data_expression_utility.h"
 
 namespace mcrl2 {
 
@@ -25,13 +25,13 @@ namespace lps {
       /// \brief The actions of the summand
       action_list m_actions;
 
-      /// \brief The time of the summand. If <tt>m_time == new_data::data_expression()</tt>
+      /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
       /// the multi action has no time.
-      new_data::data_expression m_time;
+      data::data_expression m_time;
 
     public:
       /// \brief Constructor
-      multi_action(action_list actions = action_list(), new_data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
+      multi_action(action_list actions = action_list(), data::data_expression time = atermpp::aterm_appl(core::detail::gsMakeNil()))
         : m_actions(actions), m_time(time)
       {}
 
@@ -45,7 +45,7 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != new_data::data_expression();
+        return m_time != data::data_expression();
       }
 
       /// \brief Returns the sequence of actions.
@@ -57,14 +57,14 @@ namespace lps {
 
       /// \brief Returns the time.
       /// \return The time.
-      const new_data::data_expression& time() const
+      const data::data_expression& time() const
       {
         return m_time;
       }
 
       /// \brief Returns the time.
       /// \return The time.
-      new_data::data_expression& time()
+      data::data_expression& time()
       {
         return m_time;
       }
@@ -78,7 +78,7 @@ namespace lps {
 
       /// \brief Returns the arguments of the multi action.
       /// \return The arguments of the multi action.
-      new_data::data_expression_list arguments() const
+      data::data_expression_list arguments() const
       {
         return front(m_actions).arguments();
       }
@@ -92,7 +92,7 @@ namespace lps {
       template <typename Substitution>
       multi_action substitute(Substitution f)
       {
-        return multi_action(m_actions.substitute(f), new_data::substitute(f, m_time));
+        return multi_action(m_actions.substitute(f), data::substitute(f, m_time));
       }
 
       /// \brief Returns a string representation of the multi action
@@ -202,11 +202,11 @@ namespace detail {
     {
       const std::vector<action>& a;
       const std::vector<action>& b;
-      atermpp::set<new_data::data_expression>& result;
+      atermpp::set<data::data_expression>& result;
 
       equal_data_parameters_builder(const std::vector<action>& a_,
                                     const std::vector<action>& b_,
-                                    atermpp::set<new_data::data_expression>& result_
+                                    atermpp::set<data::data_expression>& result_
                                    )
         : a(a_),
           b(b_),
@@ -216,23 +216,23 @@ namespace detail {
       /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace new_data::lazy;
-        namespace d = new_data;
+        using namespace data::lazy;
+        namespace d = data;
 
-        atermpp::vector<new_data::data_expression> v;
+        atermpp::vector<data::data_expression> v;
         std::vector<action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
-          new_data::data_expression_list d1 = i->arguments();
-          new_data::data_expression_list d2 = j->arguments();
+          data::data_expression_list d1 = i->arguments();
+          data::data_expression_list d2 = j->arguments();
           assert(d1.size() == d2.size());
-          new_data::data_expression_list::iterator i1, i2;
+          data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
             v.push_back(d::lazy::equal_to(*i1, *i2));
           }
         }
-        new_data::data_expression expr = join_and(v.begin(), v.end());
+        data::data_expression expr = join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
 std::cerr << "  <and-term> " << pp(expr) << std::endl;
 #endif
@@ -245,11 +245,11 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     {
       const std::vector<action>& a;
       const std::vector<action>& b;
-      atermpp::vector<new_data::data_expression>& result;
+      atermpp::vector<data::data_expression>& result;
 
       not_equal_multi_actions_builder(const std::vector<action>& a_,
                                       const std::vector<action>& b_,
-                                      atermpp::vector<new_data::data_expression>& result_
+                                      atermpp::vector<data::data_expression>& result_
                                      )
         : a(a_),
           b(b_),
@@ -259,19 +259,19 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
       /// \brief Adds the expression 'a == b' to result.
       void operator()()
       {
-        using namespace new_data::lazy;
+        using namespace data::lazy;
 
-        atermpp::vector<new_data::data_expression> v;
+        atermpp::vector<data::data_expression> v;
         std::vector<action>::const_iterator i, j;
         for (i = a.begin(), j = b.begin(); i != a.end(); ++i, ++j)
         {
-          new_data::data_expression_list d1 = i->arguments();
-          new_data::data_expression_list d2 = j->arguments();
+          data::data_expression_list d1 = i->arguments();
+          data::data_expression_list d2 = j->arguments();
           assert(d1.size() == d2.size());
-          new_data::data_expression_list::iterator i1, i2;
+          data::data_expression_list::iterator i1, i2;
           for (i1 = d1.begin(), i2 = d2.begin(); i1 != d1.end(); ++i1, ++i2)
           {
-            v.push_back(new_data::not_equal_to(*i1, *i2));
+            v.push_back(data::not_equal_to(*i1, *i2));
           }
         }
         result.push_back(join_or(v.begin(), v.end()));
@@ -286,14 +286,14 @@ std::cerr << "  <and-term> " << pp(expr) << std::endl;
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return Necessary conditions for the equality of a and b
-    inline new_data::data_expression equal_multi_actions(const multi_action& a, const multi_action& b)
+    inline data::data_expression equal_multi_actions(const multi_action& a, const multi_action& b)
     {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
 std::cerr << "\n<equal multi actions>" << std::endl;
 std::cerr << "a = " << pp(a.actions()) << std::endl;
 std::cerr << "b = " << pp(b.actions()) << std::endl;
 #endif
-      using namespace new_data::lazy;
+      using namespace data::lazy;
 
       // make copies of a and b and sort them
       std::vector<action> va(a.actions().begin(), a.actions().end()); // protection not needed
@@ -308,7 +308,7 @@ std::cerr << "different action signatures detected!" << std::endl;
 std::cerr << "a = " << action_list(va.begin(), va.end()) << std::endl;
 std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 #endif
-        return new_data::sort_bool_::false_();
+        return data::sort_bool_::false_();
       }
 
       // compute the intervals of a with equal names
@@ -322,10 +322,10 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
         first = next;
       }
 
-      atermpp::set<new_data::data_expression> z;
+      atermpp::set<data::data_expression> z;
       detail::equal_data_parameters_builder f(va, vb, z);
       detail::forall_permutations(intervals.begin(), intervals.end(), f);
-      new_data::data_expression result = join_or(z.begin(), z.end());
+      data::data_expression result = join_or(z.begin(), z.end());
       return result;
     }
 
@@ -334,9 +334,9 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
     /// \param a A sequence of actions
     /// \param b A sequence of actions
     /// \return Necessary conditions for the inequality of a and b
-    inline new_data::data_expression not_equal_multi_actions(const multi_action& a, const multi_action& b)
+    inline data::data_expression not_equal_multi_actions(const multi_action& a, const multi_action& b)
     {
-      using namespace new_data::lazy;
+      using namespace data::lazy;
 
       // make copies of a and b and sort them
       std::vector<action> va(a.actions().begin(), a.actions().end());
@@ -346,7 +346,7 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 
       if (!detail::equal_action_signatures(va, vb))
       {
-        return new_data::sort_bool_::true_();
+        return data::sort_bool_::true_();
       }
 
       // compute the intervals of a with equal names
@@ -359,10 +359,10 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
         intervals.push_back(std::make_pair(first, next));
         first = next;
       }
-      atermpp::vector<new_data::data_expression> z;
+      atermpp::vector<data::data_expression> z;
       detail::not_equal_multi_actions_builder f(va, vb, z);
       detail::forall_permutations(intervals.begin(), intervals.end(), f);
-      new_data::data_expression result = join_and(z.begin(), z.end());
+      data::data_expression result = join_and(z.begin(), z.end());
       return result;
     }
 

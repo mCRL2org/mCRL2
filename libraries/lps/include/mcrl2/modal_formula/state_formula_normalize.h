@@ -13,7 +13,7 @@
 #define MCRL2_MODAL_STATE_FORMULA_NORMALIZE_H
 
 #include "mcrl2/modal_formula/state_formula_builder.h"
-#include "mcrl2/new_data/bool.h"
+#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 
@@ -60,7 +60,7 @@ state_formula normalize(state_formula f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return new_data::sort_bool_::not_(f);
+      return data::sort_bool_::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {

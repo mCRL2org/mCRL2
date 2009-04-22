@@ -147,11 +147,11 @@ namespace act_frm
   /// \param p An action formula
   /// \return The value <tt>forall l.p</tt>
   inline
-  action_formula forall(new_data::variable_list l, action_formula p)
+  action_formula forall(data::variable_list l, action_formula p)
   {
     assert(!l.empty());
     return action_formula(core::detail::gsMakeActForall(
-      atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
+      atermpp::term_list< data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Make an existential quantification
@@ -160,11 +160,11 @@ namespace act_frm
   /// \param p An action formula
   /// \return The value <tt>exists l.p</tt>
   inline
-  action_formula exists(new_data::variable_list l, action_formula p)
+  action_formula exists(data::variable_list l, action_formula p)
   {
     assert(!l.empty());
     return action_formula(core::detail::gsMakeActExists(
-      atermpp::term_list< new_data::variable >(l.begin(), l.end()), p));
+      atermpp::term_list< data::variable >(l.begin(), l.end()), p));
   }
 
   /// \brief Returns the operation 'p at d'
@@ -172,7 +172,7 @@ namespace act_frm
   /// \param d A data expression
   /// \return The operation 'p at d'
   inline
-  action_formula at(action_formula p, new_data::data_expression d)
+  action_formula at(action_formula p, data::data_expression d)
   {
     return action_formula(core::detail::gsMakeActAt(p,d));
   }
@@ -262,19 +262,19 @@ namespace accessors
   /// \param t An action formula
   /// \return The variables of a quantification expression
   inline
-  new_data::variable_list var(action_formula t)
+  data::variable_list var(action_formula t)
   {
     assert(core::detail::gsIsActExists(t) || core::detail::gsIsActForall(t));
-    return new_data::variable_list(
-             atermpp::term_list_iterator< new_data::variable >(atermpp::list_arg1(t)),
-             atermpp::term_list_iterator< new_data::variable >());
+    return data::variable_list(
+             atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
+             atermpp::term_list_iterator< data::variable >());
   }
 
   /// \brief Returns the time of an at expression
   /// \param t An action formula
   /// \return The time of an at expression
   inline
-  new_data::data_expression time(action_formula t)
+  data::data_expression time(action_formula t)
   {
     assert(core::detail::gsIsActAt(t));
     return atermpp::arg2(t);

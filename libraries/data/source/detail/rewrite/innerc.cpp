@@ -8,7 +8,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
 
 #ifdef MCRL2_INNERC_AVAILABLE
 
@@ -30,9 +30,9 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/setup.h"
-#include "mcrl2/new_data/detail/rewrite/innerc.h"
+#include "mcrl2/data/detail/rewrite/innerc.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -43,7 +43,7 @@ using namespace mcrl2::core::detail;
 #define ATXgetArgument(x,y) ((unsigned int) (intptr_t) ATgetArgument(x,y))
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 static ATermList ATinsertA(ATermList l, ATermAppl a)

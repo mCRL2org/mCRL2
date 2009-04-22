@@ -17,26 +17,26 @@
 #include <mcrl2/atermpp/table.h>
 
 //LPS Framework
-#include <mcrl2/new_data/data.h>
-#include <mcrl2/new_data/utility.h>
-#include <mcrl2/new_data/function_symbol.h>
+#include <mcrl2/data/data.h>
+#include <mcrl2/data/utility.h>
+#include <mcrl2/data/function_symbol.h>
 #include <mcrl2/lps/linear_process.h>
-#include <mcrl2/new_data/detail/sort_utility.h>
+#include <mcrl2/data/detail/sort_utility.h>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/detail/specification_utility.h>
 #include <mcrl2/core/messaging.h>
 #include <mcrl2/core/aterm_ext.h>
 //Enumerator
-#include <mcrl2/new_data/classic_enumerator.h>
-#include <mcrl2/new_data/enumerator_factory.h>
+#include <mcrl2/data/classic_enumerator.h>
+#include <mcrl2/data/enumerator_factory.h>
 
 #include <mcrl2/lps/binary.h>
 
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::new_data;
-using namespace mcrl2::new_data::detail;
+using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 
 namespace mcrl2 {
@@ -76,7 +76,7 @@ unsigned int powerof2_(unsigned int n)
 ///\pre cl is a list of constructors
 ///\return all sorts s in sl that are finite and not bool
 ///\deprecated this function does not seem to be used
-sort_expression_vector get_finite_sorts_not_bool(const new_data::data_specification& d, const sort_expression_list& sl)
+sort_expression_vector get_finite_sorts_not_bool(const data::data_specification& d, const sort_expression_list& sl)
 {
   sort_expression_vector result;
   for(sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
@@ -168,7 +168,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
 /// \return data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
 variable_list replace_enumerated_parameters(const lps::specification& specification,
-                                                 new_data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
+                                                 data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
                                                  table& new_parameters_table,
                                                  table& enumerated_elements_table)
 {
@@ -313,7 +313,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
       {
         if (!elts.empty())
         {
-          r = lazy::or_(r, new_data::equal_to(arg, elts.front()));
+          r = lazy::or_(r, data::equal_to(arg, elts.front()));
           elts = pop_front(elts);
         }
       }
@@ -472,7 +472,7 @@ specification binary(const lps::specification& spec,
   table new_parameters_table(128, 50);
   table enumerated_elements_table(128,50);
 
-  new_data::enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
+  data::enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
 
   // This needs to be done in a counter-intuitive order because of the well-typedness checks
   // (they make sure we can't build up an intermediate result!)

@@ -17,7 +17,7 @@
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/utilities/tool.h"
 
-//using namespace mcrl2::new_data;
+//using namespace mcrl2::data;
 //using namespace mcrl2::pbes_system::pbes_expr;
 
 using namespace mcrl2;

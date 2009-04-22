@@ -14,7 +14,7 @@
 
 #include <cassert>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/new_data/sort_expression.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
@@ -33,7 +33,7 @@ class action_label: public atermpp::aterm_appl
     core::identifier_string m_name;
 
     /// \brief The sorts of the label
-    new_data::sort_expression_list m_sorts;
+    data::sort_expression_list m_sorts;
 
   public:
     /// \brief Constructor.
@@ -55,7 +55,7 @@ class action_label: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param name A
     /// \param sorts A sequence of sort expressions
-    action_label(const core::identifier_string& name, const new_data::sort_expression_list &sorts)
+    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
        m_name(name),
        m_sorts(sorts)
@@ -70,7 +70,7 @@ class action_label: public atermpp::aterm_appl
 
     /// \brief Returns the sorts of the action label
     /// \return The sorts of the action label
-    new_data::sort_expression_list const& sorts() const
+    data::sort_expression_list const& sorts() const
     {
       return m_sorts;
     }

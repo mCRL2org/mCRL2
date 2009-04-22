@@ -14,20 +14,20 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/new_data/function_symbol.h"
-#include "mcrl2/new_data/detail/container_utility.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 int test_main(int argc, char** argv )
 {
-  using mcrl2::new_data::make_vector;
+  using mcrl2::data::make_vector;
   using mcrl2::core::pp;
 
   MCRL2_ATERMPP_INIT(argc, argv)

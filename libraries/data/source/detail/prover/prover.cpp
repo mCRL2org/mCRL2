@@ -10,21 +10,21 @@
 
 #include <cstdlib>
 
-#include "mcrl2/new_data/data_specification.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/new_data/detail/rewrite.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
-#include "mcrl2/new_data/detail/prover.h"
-#include "mcrl2/new_data/detail/prover/manipulator.h"
-#include "mcrl2/new_data/detail/prover/utilities.h"
-#include "mcrl2/new_data/detail/prover/info.h"
+#include "mcrl2/data/detail/prover.h"
+#include "mcrl2/data/detail/prover/manipulator.h"
+#include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/detail/prover/info.h"
 
 using namespace mcrl2::core;
 
 namespace mcrl2 {
-  namespace new_data {
+  namespace data {
     namespace detail {
 
 // Class Prover -----------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ namespace mcrl2 {
 
     Prover::Prover(
       ATermAppl data_spec,
-      mcrl2::new_data::rewriter::strategy a_rewrite_strategy,
+      mcrl2::data::rewriter::strategy a_rewrite_strategy,
       int a_time_limit
     ) {
       f_time_limit = a_time_limit;
@@ -40,7 +40,7 @@ namespace mcrl2 {
       f_processed = false;
 
       switch (a_rewrite_strategy) {
-        case (mcrl2::new_data::rewriter::innermost): {
+        case (mcrl2::data::rewriter::innermost): {
           f_rewriter = createRewriter(data_spec, GS_REWR_INNER);
           f_info = new AI_Inner(f_rewriter);
           f_manipulator = new AM_Inner(f_rewriter, f_info);
@@ -50,7 +50,7 @@ namespace mcrl2 {
           );
           break;
         }
-        case (mcrl2::new_data::rewriter::jitty): {
+        case (mcrl2::data::rewriter::jitty): {
           f_rewriter = createRewriter(data_spec, GS_REWR_JITTY);
           f_info = new AI_Jitty(f_rewriter);
           f_manipulator = new AM_Jitty(f_rewriter, f_info);
@@ -61,33 +61,33 @@ namespace mcrl2 {
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
-        case (mcrl2::new_data::rewriter::innermost_compiling): {
+        case (mcrl2::data::rewriter::innermost_compiling): {
           throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover.");
           break;
         }
 #endif
-        case (mcrl2::new_data::rewriter::innermost_prover): {
+        case (mcrl2::data::rewriter::innermost_prover): {
           throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover.");
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
-        case (mcrl2::new_data::rewriter::innermost_compiling_prover): {
+        case (mcrl2::data::rewriter::innermost_compiling_prover): {
           mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover.");
           break;
         }
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case (mcrl2::new_data::rewriter::jitty_compiling): {
+        case (mcrl2::data::rewriter::jitty_compiling): {
           throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover.");
           break;
         }
 #endif
-        case (mcrl2::new_data::rewriter::jitty_prover): {
+        case (mcrl2::data::rewriter::jitty_prover): {
           throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover.");
           break;
         }
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case (mcrl2::new_data::rewriter::jitty_compiling_prover): {
+        case (mcrl2::data::rewriter::jitty_compiling_prover): {
           throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover.");
           break;
         }

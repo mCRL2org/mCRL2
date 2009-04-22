@@ -19,7 +19,7 @@
 
 using namespace atermpp;
 using namespace mcrl2;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 /*

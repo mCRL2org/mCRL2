@@ -17,17 +17,17 @@
 #include "mcrl2/atermpp/table.h"
 
 //LPS Framework
-#include "mcrl2/new_data/function_symbol.h"
+#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/new_data/detail/sort_utility.h"
-#include "mcrl2/new_data/find.h"
+#include "mcrl2/data/detail/sort_utility.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/new_data/detail/data_functional.h"
+#include "mcrl2/data/detail/data_functional.h"
 
 //Enumerator
-#include "mcrl2/new_data/classic_enumerator.h"
-#include "mcrl2/new_data/enumerator_factory.h"
+#include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/enumerator_factory.h"
 
 #include <mcrl2/lps/suminst.h>
 
@@ -35,7 +35,7 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace atermpp;
-using namespace mcrl2::new_data;
+using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
 
@@ -93,7 +93,7 @@ variable_list filter(const variable_list& vl, const std::set< variable >& rl)
 
 ///\pre fl is a list of constructors
 ///\return a list of finite sorts in sl
-std::set< sort_expression > get_finite_sorts(const new_data::data_specification& d, const sort_expression_list& sl)
+std::set< sort_expression > get_finite_sorts(const data::data_specification& d, const sort_expression_list& sl)
 {
   std::set< sort_expression > result;
   for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
@@ -152,7 +152,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
   }
   else
   {
-    variables = new_data::convert< std::set< variable > >(summand_.summation_variables());
+    variables = data::convert< std::set< variable > >(summand_.summation_variables());
   }
 
   if (variables.size() == 0)

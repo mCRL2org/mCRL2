@@ -24,7 +24,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/new_data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -122,7 +122,7 @@ namespace detail {
   inline
   ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
   {
-    ATermAppl result = new_data::detail::implement_data_state_frm(formula, spec);
+    ATermAppl result = data::detail::implement_data_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("data implementation error");
     return result;

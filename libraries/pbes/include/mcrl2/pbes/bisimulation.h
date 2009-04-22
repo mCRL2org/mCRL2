@@ -19,16 +19,16 @@
 #include <sstream>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/new_data/utility.h"
-#include "mcrl2/new_data/detail/data_functional.h"
-#include "mcrl2/new_data/detail/container_utility.h"
-#include "mcrl2/new_data/detail/find.h"
-#include "mcrl2/new_data/set_identifier_generator.h"
+#include "mcrl2/data/utility.h"
+#include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/detail/find.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/new_data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
@@ -37,8 +37,8 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using new_data::detail::operator+;
-using namespace new_data;
+using data::detail::operator+;
+using namespace data;
 using namespace lps;
 
 /// \brief Base class for bisimulation algorithms.
@@ -258,18 +258,18 @@ public:
     {
       std::set<core::identifier_string> used_names;
       variable_list const& process_parameters(p.process_parameters());
-      used_names.insert(boost::make_transform_iterator(process_parameters.begin(), new_data::detail::variable_name()),
-                        boost::make_transform_iterator(process_parameters.end()  , new_data::detail::variable_name())
+      used_names.insert(boost::make_transform_iterator(process_parameters.begin(), data::detail::variable_name()),
+                        boost::make_transform_iterator(process_parameters.end()  , data::detail::variable_name())
                        );
       variable_list const& free_variables(p.free_variables());
-      used_names.insert(boost::make_transform_iterator(free_variables.begin(), new_data::detail::variable_name()),
-                        boost::make_transform_iterator(free_variables.end()  , new_data::detail::variable_name())
+      used_names.insert(boost::make_transform_iterator(free_variables.begin(), data::detail::variable_name()),
+                        boost::make_transform_iterator(free_variables.end()  , data::detail::variable_name())
                        );
       for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
       {
         variable_list summation_variables(i->summation_variables());
-        used_names.insert(boost::make_transform_iterator(summation_variables.begin(), new_data::detail::variable_name()),
-                          boost::make_transform_iterator(summation_variables.end()  , new_data::detail::variable_name())
+        used_names.insert(boost::make_transform_iterator(summation_variables.begin(), data::detail::variable_name()),
+                          boost::make_transform_iterator(summation_variables.end()  , data::detail::variable_name())
                          );
       }
       linear_process result = q;
@@ -668,7 +668,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<std::string> used_names = mcrl2::new_data::detail::find_variable_name_strings(atermpp::make_list(p, q));
+        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(p, q));
         variable_list e1_new = fresh_variables(e1, used_names);
         data_expression    cj_new = substitute(make_list_substitution(e1, e1_new), cj);
         data_expression_list gj_new = substitute(make_list_substitution(e1, e1_new), gj);

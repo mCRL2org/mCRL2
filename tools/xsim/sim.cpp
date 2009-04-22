@@ -28,7 +28,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/new_data/rewriter.h"
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
@@ -101,12 +101,12 @@ void print_help(FILE *f, char *Name)
 }
 
 struct tool_options_type {
-  mcrl2::new_data::rewriter::strategy rewrite_strategy;
+  mcrl2::data::rewriter::strategy rewrite_strategy;
   std::string     lps_file_argument;
   bool            use_dummies;
 
   tool_options_type() :
-    rewrite_strategy(mcrl2::new_data::rewriter::jitty),
+    rewrite_strategy(mcrl2::data::rewriter::jitty),
     lps_file_argument(""),
     use_dummies(false)
   {}
@@ -129,7 +129,7 @@ struct tool_options_type {
     if (parser.continue_execution()) {
       use_dummies = 0 < parser.options.count("dummy");
 
-      rewrite_strategy = parser.option_argument_as< mcrl2::new_data::rewriter::strategy >("rewriter");
+      rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
 
       if (parser.arguments.size() == 0) {
         parser.error("no INFILE specified");
