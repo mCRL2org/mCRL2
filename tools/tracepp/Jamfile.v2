@@ -3,6 +3,6 @@ project toolset/tracepp ;
 tool tracepp
        : tracepp.cpp
          /libraries//core
-         /libraries//new_data
+         /libraries//data
          /libraries//trace
        ;

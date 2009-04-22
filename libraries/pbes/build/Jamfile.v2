@@ -6,7 +6,7 @@ mcrl2-library pbes
        : pbes_rewrite.cpp
          pbes2bool.cpp
          data_elimination.cpp
-       : <library>/libraries//new_data
+       : <library>/libraries//data
          <include>../include
          <include>../../lps/include # for modal_formula
          <use>/site-config//boost

@@ -4,7 +4,7 @@ tool ltsmin
        : ltsmin.cpp
          ltsmindata.cpp
          ltsminkernel.cpp
-         /libraries//new_data
+         /libraries//data
          /libraries//svc
        : <status>deprecated
        ;

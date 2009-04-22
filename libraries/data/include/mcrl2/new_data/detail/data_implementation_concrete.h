@@ -1,0 +1,253 @@
+// Author(s): Aad Mathijssen, Jeroen Keiren
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file data_implementation_concrete.h
+
+#ifndef MCRL2_DATA_IMPLEMENTATION_CONCRETE_H
+#define MCRL2_DATA_IMPLEMENTATION_CONCRETE_H
+
+#include <aterm2.h>
+#include "mcrl2/core/detail/data_common.h"
+
+namespace mcrl2 {
+  namespace new_data {
+    namespace detail {
+
+//\pre spec represents an mCRL2 data, linear process, process or PBES
+//     specification that adheres to the internal ATerm structure after the
+//     type checking phase.
+//\post The datatypes of spec are implemented as higher-order abstract data
+//     types.
+//\return if the data implementation went well, an equivalent version of spec is
+//     returned that adheres to the internal ATerm structure after data
+//     implementation.
+//     If something went wrong, an appropriate error message is printed and
+//     NULL is returned.
+ATermAppl implement_data_spec(ATermAppl spec, ATermList* substitution_context);
+
+//\pre part is an expression that adheres to the internal syntax after type
+//     checking.
+//     spec represents an LPS specification in the internal syntax after type
+//     checking.
+//\post The datatypes of spec are implemented as higher-order abstract data
+//     types in spec
+//\return if the data implementation went well, an equivalent version of part
+//     is returned that adheres to the internal ATerm structure after data
+//     implementation.
+//     If something went wrong, an appropriate error message is printed and
+//     NULL is returned.
+ATermAppl impl_exprs_with_spec(ATermAppl part, ATermAppl& spec);
+
+//Pre: part is a part of a specification that adheres to the internal syntax
+//     after type checking
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of part
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Ret: part in which:
+//     - all substitutions of *p_substs are performed on the elements of part
+//     - each substituted element is implemented, where the new data
+//       declarations are stored in *p_data_decls
+ATermAppl impl_exprs_appl(ATermAppl part, ATermList *p_substs,
+  core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+//Pre: parts consists of parts of a specification that adheres to the internal
+//     syntax after type checking
+//     p_substs is a pointer to a list of substitutions induced by the context
+//     of parts
+//     p_data_decls represents a pointer to new data declarations, induced by
+//     the context of part
+//Ret: parts in which:
+//     - all substitutions of *p_substs are performed on the elements of parts
+//     - each substituted element is implemented, where the new data
+//       declarations are stored in *p_data_decls
+ATermList impl_exprs_list(ATermList parts, ATermList *p_substs,
+  core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/** \brief     Implement data types of a type checked mCRL2 action rename
+ *             specification with respect to a type checked mCRL2 linear
+ *             process specification (LPS).
+ *             This is a detailed implemenation, in order to prevent cluttering
+ *             of the actual interface of data_implementation_concrete.h
+ *  \param[in] ar_spec An ATerm representation of an mCRL2 action rename
+ *             specification that adheres to the internal ATerm
+ *             structure after the type checking phase.
+ *  \param[in] spec An ATerm representation of an mCRL2 LPS that adheres
+ *             to the internal ATerm structure after the type checking phase.
+ *  \post      The data types in action_rename_spec are implemented as
+ *             higher-order abstract data types types and the data types
+ *             of lps_spec are added to the data types of ar_spec.  The
+ *             datatypes of lps_spec are implemented as higher-order
+ *             abstract data types in lps_spec
+ *  \return    If the data implementation went well, an equivalent
+ *             version of ar_spec is returned that adheres to the
+ *             internal ATerm structure after data implementation, also
+ *             containing the data specification of lps_spec If
+ *             something went wrong, an appropriate error message is
+ *             printed and NULL is returned.
+**/
+ATermAppl impl_data_action_rename_spec_detail(ATermAppl ar_spec, ATermAppl& lps_spec);
+
+/// \pre  sort_struct is a structured sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_struct
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_struct
+/// \post an implementation of sort_struct represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+///       if recursive, then the sorts of the projection functions are also implemented
+void impl_sort_struct(ATermAppl sort_struct, ATermAppl sort_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
+
+/// \pre sort_elt and sort_list are sort expressions.
+/// \return the list of data equations belonging to the list sort sort_list, with
+//     elements sort_elt.
+ATermList build_list_equations(ATermAppl sort_elt, ATermAppl sort_expression_list);
+
+/// \pre  sort_list is a list sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_expression_list
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_expression_list
+/// \post an implementation of sort_list represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_list(ATermAppl sort_expression_list, ATermAppl sort_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+/// \return the list of data equations belonging to the finite set FSet(sort_elt)
+///      represented by sort_fset_id
+ATermList build_fset_equations(ATermAppl sort_elt, ATermAppl sort_fset_id);
+
+/// \pre  sort_fset is a finite set sort
+///       sort_fset_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of sort sort_fset represented by sort sort_fset_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_fset(ATermAppl sort_fset, ATermAppl sort_sfet_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_set_id is a sort identifier
+/// \return the list of data equations belonging to the set Set(sort_elt) represented
+///      by sort_set_id, making use of finite set sort FSet(sort_elt) represented by
+///      sort_fset_id
+ATermList build_set_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_set_id);
+
+/// \pre  sort_set is a set sort
+///       sort_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of sort_set represented by sort sort_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_set(ATermAppl sort_set, ATermAppl sort_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_fbag_id is a sort identifier
+/// \return the list of data equations belonging to the finite bag FBag(sort_elt)
+///      represented by sort_fbag_id, making use of finite set sort FSet(sort_elt)
+///      represented by sort_fset_id
+ATermList build_fbag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id);
+
+/// \pre  sort_fbag is finite bag sort
+///       sort_fbag_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_set
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_set
+/// \post an implementation of sort sort_fbag represented by sort sort_fbag_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_fbag(ATermAppl sort_fbag, ATermAppl sort_fbag_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre sort_elt is a sort expression
+///      sort_fset_id is a sort identifier
+///      sort_fbag_id is a sort identifier
+///      sort_set_id is a sort identifier
+///      sort_bag_id is a sort identifier
+/// \return the list of data equations belonging to the bag Bag(sort_elt) represented
+///      by sort_bag_id, making use of:
+///      \li set sort Set(sort_elt) represented by sort_set_id
+///      \li finite set sort FSet(sort_elt) represented by sort_fset_id
+///      \li finite bag sort FBag(sort_elt) represented by sort_fbag_id
+ATermList build_bag_equations(ATermAppl sort_elt, ATermAppl sort_fset_id, ATermAppl sort_fbag_id, ATermAppl sort_set_id, ATermAppl sort_bag_id);
+
+/// \pre  sort_bag is a bag sort
+///       sort_bag_id is a fresh sort identifier (not occurring in p_data_decls->sorts)
+///       p_substs is a pointer to a list of substitutions induced by the context
+///       of sort_bag
+///       p_data_decls represents a pointer to new data declarations, induced by
+///       the context of sort_bag
+/// \post an implementation of sort_bag represented by sort sort_bag_id is added to
+///       *p_data_decls and new induced substitutions are added *p_substs
+void impl_sort_bag(ATermAppl sort_bag, ATermAppl sort_bag_id,
+  ATermList *p_substs, core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre p_data_decls represents a pointer to new data declarations
+/// \post an implementation of sort Bool is added to *p_data_decls
+void impl_sort_bool(core::detail::t_data_decls *p_data_decls);
+
+/// \pre p_data_decls represents a pointer to new data declarations
+/// \post an implementation of sort Pos is added to *p_data_decls
+void impl_sort_pos(core::detail::t_data_decls *p_data_decls, ATermList* new_data_equations);
+
+/// \pre p_data_decls represents a pointer to new data declarations
+/// \post an implementation of sort Nat is added to *p_data_decls
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_nat(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
+
+/// \pre p_data_decls represents a pointer to new data declarations
+/// \post an implementation of sort Int is added to *p_data_decls
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_int(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
+
+/// \pre p_data_decls represents a pointer to new data declarations
+/// \post an implementation of sort Real is added to *p_data_decls
+///       if recursive, then the sorts it depends on are also implemented
+void impl_sort_real(core::detail::t_data_decls *p_data_decls, bool recursive = true, ATermList* new_data_equations = 0);
+
+/// \pre sort is a sort expression that adheres to the internal syntax after
+///     data implementation
+///     p_data_decls represents a pointer to data declarations
+/// \post an implementation of equality, inequality and if for sort expression
+///     sort is added to *p_data_decls
+void impl_standard_functions_sort(ATermAppl sort, core::detail::t_data_decls *p_data_decls);
+
+/// \pre    op_id is an operation identifier of sort s_op_id; here s_op_id is:
+///         - either a sort identifier
+///         - or it is of the form s_0 x ... x s_n -> s, where the s_i and s are
+///           sort expressions
+///         p_vars points to a list of DataVarIds
+///         context is some term
+/// \return [], if s_op_id is a sort identifier
+///         [v_0,...,v_n], if s_op_id is of the form s_0 x ... x s_n -> s;
+///         here for 1 <= i <= n, v_i is a data variable of sort s_i different from
+///         the other v_j, and either
+///         - v_i occurs in *p_vars
+///         - v_i does not occur in *p_vars and context
+/// \post   *p_vars is extended with newly introduced v_i
+///         (which did not occur in *p_vars and context)
+ATermList create_op_id_args(ATermAppl op_id, ATermList *p_vars, ATerm context);
+
+    }
+  }
+}
+
+#endif //MCRL2_DATA_RECONSTRUCT_CONCRETE_H
+

@@ -18,7 +18,7 @@ mcrl2-library core
          source/aterm_ext.cpp
          source/numeric_string.cpp
        : <library>/libraries//atermpp
-         <include>../../new_data/include
+         <include>../../data/include
          <include>../include
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic

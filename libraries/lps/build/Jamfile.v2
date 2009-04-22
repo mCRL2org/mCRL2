@@ -17,7 +17,7 @@ mcrl2-library lps
          invariant_checker.cpp
          invariant_eliminator.cpp
          data_elimination.cpp
-       : <library>/libraries//new_data
+       : <library>/libraries//data
          <include>../include
          <use>/site-config//boost
        :

@@ -7,6 +7,6 @@ tool lysa2mcrl2
          lysaconverter.cpp
          lysa.cpp
          string_template.cpp
-         /libraries//new_data
+         /libraries//data
        : <status>experimental
        ;

@@ -2,6 +2,6 @@ project toolset/mcrl2pp ;
 
 tool mcrl2pp
        : mcrl2pp.cpp
-         /libraries//new_data
+         /libraries//data
        : <status>experimental
        ;
