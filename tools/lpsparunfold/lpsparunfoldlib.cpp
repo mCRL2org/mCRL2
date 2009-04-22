@@ -45,25 +45,56 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
       sort_names.insert( (basic_sort(*i)).name() );
     }
 
-    if (i->is_alias())
+ /*   if (i->is_alias())
     {
       sort_names.insert( (alias( *i ).name()).name());
-      if (m_data_specification.find_referenced_sort( *i).is_basic_sort())
+      sort_expression x = m_data_specification.find_referenced_sort( *i);
+      if (x.is_basic_sort())
         sort_names.insert( basic_sort(m_data_specification.find_referenced_sort( *i)).name() );
     }
+*/
 
     if (i->is_structured_sort()) {
       cout << *i << endl;
 
+            function_symbol_vector fs1 = mcrl2::data::structured_sort( *i ).projection_functions( );
+            function_symbol_vector fs2 = mcrl2::data::structured_sort( *i ).recogniser_functions( );
+            data_equation_vector   dev = mcrl2::data::structured_sort( *i ).constructor_equations( );
+          
+            cout << fs1.size() << endl;  
+            cout << fs2.size() << endl; 
+            cout << dev.size() << endl;
+            cout << "=======" << endl; 
+          
+            for( function_symbol_vector::iterator k = fs1.begin(); k != fs1.end(); ++k )
+            {
+              cout << *k << endl;
+              mapSet.insert( *k );
+            }
+
+            for( function_symbol_vector::iterator k = fs2.begin(); k != fs2.end(); ++k )
+            {
+              cout << *k << endl;
+              mapSet.insert( *k );
+            }
+
+            for( data_equation_vector::iterator k = dev.begin(); k != dev.end(); ++k )
+            {
+              cout << pp(*k) << endl;
+              mapSet.insert( *k );
+            }
+ 
+     
+
       // Create constructors
-      deriveConstrutorsFromStructuredSort( *i );
+      // deriveConstrutorsFromStructuredSort( *i );
       // Create projector mapping functions
 
       // Create recongnisers mapping functions    
-
-      abort();
+      //cout << "X" << endl;
     }
   };
+
   gsVerboseMsg("Specification has %d sorts\n", sortSet.size() );
 
   {
@@ -133,45 +164,6 @@ function_symbol_vector Sorts::determineAffectedConstructors()
   return k;
 }
 
-bool Sorts::basic_sortOccursInSort_expression( mcrl2::data::sort_expression s, mcrl2::data::basic_sort b )
-{
-
-  using namespace mcrl2::data;
-
-  if( s.is_basic_sort() )
-  {
-    if (basic_sort(s) == b)
-    {
-      return true;
-    }
-  }
-  if( s.is_function_sort() )
-  {
-    function_sort fs = function_sort(s);
-    bool x = basic_sortOccursInSort_expression(fs.codomain(), b ) ;
-    boost::iterator_range<sort_expression_list::const_iterator> lst(fs.domain());
-    for( sort_expression_list::const_iterator i = lst.begin(); i != lst.end(); ++i ){
-      x = x || basic_sortOccursInSort_expression( *i, b );
-    }
-    return x;
-  }
-  if( s.is_container_sort() )
-  {
-    return basic_sortOccursInSort_expression((container_sort(s)).element_sort(), b );
-  }
-  if( s.is_alias() )
-  {
-    return basic_sortOccursInSort_expression(alias(s).reference(), b );
-  }
-  if( s.is_structured_sort() )
-  {
-    gsVerboseMsg("No structs are yet supported");
-    abort();
-  }
-
-  return false;
-}
-
 function_symbol_vector Sorts::determineAffectedMappings()
 {
   using namespace mcrl2::data;
@@ -180,7 +172,10 @@ function_symbol_vector Sorts::determineAffectedMappings()
   for( std::set<mcrl2::data::function_symbol>::iterator i = mapSet.begin();
                                                         i != mapSet.end();
                                                          ++i){
-    if(basic_sortOccursInSort_expression( i->sort(), unfoldParameter ))
+      cout <<  unfoldParameter << endl;
+      cout <<  i -> sort() << endl;
+      if(mcrl2::data::search_basic_sort( i ->sort(),  unfoldParameter ))
+//    if(basic_sortOccursInSort_expression( i->sort(), unfoldParameter ))
     {
       m.push_back( *i );
       gsDebugMsg("\t%s: %s\n", i->name().c_str(), i->sort().to_string().c_str()  );
@@ -737,7 +732,8 @@ mcrl2::data::basic_sort Sorts::getSortOfProcessParameter(int parameter_at_index)
 
 void Sorts::algorithm(int parameter_at_index)
 {
-   unfoldParameter = m_data_specification.find_referenced_sort(getSortOfProcessParameter( parameter_at_index ));
+   unfoldParameter = getSortOfProcessParameter( parameter_at_index);
+   //unfoldParameter = m_data_specification.find_referenced_sort(getSortOfProcessParameter( parameter_at_index ));
 
    /* Var Dec */
    function_symbol_vector m;
