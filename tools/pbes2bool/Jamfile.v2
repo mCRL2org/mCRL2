@@ -2,7 +2,7 @@ project toolset/pbes2bool ;
 
 tool pbes2bool
        : pbes2bool.cpp
-         /libraries//lps
          /libraries//pbes
        : <squadt-connectivity>implemented
+         <use>/libraries//lps
        ;
