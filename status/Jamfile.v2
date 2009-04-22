@@ -73,11 +73,7 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
   }
 
   for tool in $(pbes-tools) {
-    if $(tool) in pbessolve {
-    }
-    else {
-      tests += [ run /tools/$(tool)//$(tool) : : test.pbes : <testing.preserve>true ] ;
-    }
+    tests += [ run /tools/$(tool)//$(tool) : : test.pbes : <testing.preserve>true ] ;
   }
 
   for tool in $(lts-tools) {

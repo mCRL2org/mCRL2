@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
 #include "mcrl2/new_data/detail/bdd_prover.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
-#include "mcrl2/pbes/gauss.h"
 
 namespace mcrl2 {
 
@@ -282,7 +281,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       {
         return pbes_expression_substitute_and_rewrite(p, data_spec, datar_.get_rewriter(), false);
       }
-  }; */
+  };
 
   /// \brief A pbes rewriter that uses a bdd based prover internally.
   class pbessolve_rewriter
@@ -315,7 +314,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       {
         return pbes_expression_simplify(p, &n, fv, prover.get());
       }
-  };
+  }; */
 
 } // namespace pbes_system
 

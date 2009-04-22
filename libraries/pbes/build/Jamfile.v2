@@ -5,8 +5,6 @@ project pbes
 mcrl2-library pbes
        : pbes_rewrite.cpp
          pbes2bool.cpp
-#         gauss.cpp
-#         sort_instantiator.cpp
          data_elimination.cpp
        : <library>/libraries//new_data
          <include>../include
