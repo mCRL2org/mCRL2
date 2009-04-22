@@ -7,7 +7,6 @@ tool lysa2mcrl2
          lysaconverter.cpp
          lysa.cpp
          string_template.cpp
-         /libraries//core
-         /libraries/utilities//command_line_interfacing
+         /libraries//new_data
        : <status>experimental
        ;

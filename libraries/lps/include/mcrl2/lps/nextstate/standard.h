@@ -183,6 +183,7 @@ class NextStateStandard : public NextState
 		ATermAppl getStateArgument(ATerm state, int index);
 		ATermAppl makeStateVector(ATerm state);
 		ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
+                mcrl2::new_data::detail::Rewriter *getRewriter(); // Deprecated. Do not use.
 
 	private:
 		ns_info info;

@@ -218,6 +218,17 @@ class NextState
 		 *         in match such that it corresponds with state.
 		 **/
 		virtual ATerm parseStateVector(ATermAppl state, ATerm match = NULL) = 0;
+
+                /**
+                 * \brief Get rewriter used by this object.
+                 * \deprecated
+                 * \details This function does not work reliably anymore with
+                 * the new data library and the new rewriters, especially when
+                 * standard data types are use.
+                 * \return Rewriter object used by this NextState object.
+                 **/
+                virtual mcrl2::new_data::detail::Rewriter *getRewriter() = 0;
+
 };
 
 /**

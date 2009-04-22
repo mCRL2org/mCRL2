@@ -302,7 +302,7 @@ void GarageFrame::UpdateState( ATerm State )
       //get the elements of gs_hal
       ATermList gs_hal_elts = gsGetDataExprArgs(gs_hal);
 
-      Rewriter* rewriter = nextState->getRewriter();
+      mcrl2::new_data::detail::Rewriter *rewriter = nextState->getRewriter();
 
       //update floor state
       ATermAppl sOccState = MakeSortId("OccState");

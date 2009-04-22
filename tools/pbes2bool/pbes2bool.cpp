@@ -318,13 +318,10 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         case pfnf:
         { 
           throw mcrl2::runtime_error("The pfnf boolean equation rewriter cannot be used\n");
-          break;
         }
         case prover:
-        { // Just ignore.
-          assert(0);  // This PBES rewriter cannot be activated through
-                      // the commandline or squadt. So, we cannot end up here.
-          break;
+        { 
+          throw mcrl2::runtime_error("The prover based rewriter cannot be used\n");
         }
       }
 
