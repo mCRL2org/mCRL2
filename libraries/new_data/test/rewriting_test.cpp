@@ -34,6 +34,7 @@
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/detail/implement_data_types.h"
 #include "mcrl2/new_data/detail/data_specification_compatibility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -472,14 +473,31 @@ int test_main(int argc, char** argv)
 //  std::string expr1("forall b: Bool, c: Bool. if(b, c, b)");
 
   bool_rewrite_test();
+  core::garbage_collect();
+
   pos_rewrite_test();
+  core::garbage_collect();
+
   nat_rewrite_test();
+  core::garbage_collect();
+
   int_rewrite_test();
+  core::garbage_collect();
+
   real_rewrite_test();
+  core::garbage_collect();
+
   list_rewrite_test();
+  core::garbage_collect();
+
   set_rewrite_test();
+  core::garbage_collect();
+
   bag_rewrite_test();
+  core::garbage_collect();
+
   structured_sort_rewrite_test();
+  core::garbage_collect();
 
   return 0;
 }

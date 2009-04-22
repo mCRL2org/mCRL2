@@ -23,7 +23,7 @@
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/parser.h"
-#include "gc.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -447,14 +447,28 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   test_sorts();
-  AT_collect();
+  core::garbage_collect();
+
   test_constructors();
+  core::garbage_collect();
+
   test_functions();
+  core::garbage_collect();
+
   test_equations();
+  core::garbage_collect();
+
   test_is_certainly_finite();
+  core::garbage_collect();
+
   test_constructor();
+  core::garbage_collect();
+
   test_system_defined();
+  core::garbage_collect();
+
   test_copy();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/variable.h"
 #include "mcrl2/new_data/function_symbol.h"
 #include "mcrl2/new_data/data_equation.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -46,6 +47,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   data_equation_test();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

@@ -22,6 +22,7 @@
 #include "mcrl2/new_data/bool.h"
 #include "mcrl2/new_data/list.h"
 #include "mcrl2/new_data/structured_sort.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -70,6 +71,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_representative_generator();
+  core::garbage_collect();
 
   return 0;
 }

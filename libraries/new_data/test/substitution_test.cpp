@@ -17,6 +17,7 @@
 #include "mcrl2/new_data/detail/concepts.h"
 #include "mcrl2/new_data/detail/data_expression_with_variables.h"
 #include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -109,8 +110,13 @@ int test_main(int a, char**aa)
   MCRL2_ATERMPP_INIT(a, aa);
 
   test1();
+  core::garbage_collect();
+
   test_mutable_substitution_adapter();
+  core::garbage_collect();
+
   test_mutable_substitution();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

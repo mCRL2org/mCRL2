@@ -25,8 +25,10 @@
 #include "mcrl2/new_data/detail/sort_utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/identifier_generator.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 using namespace mcrl2::new_data::detail;
@@ -218,10 +220,19 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_data_enumerator();
+  core::garbage_collect();
+
   test2();
+  core::garbage_collect();
+
   test3();
+  core::garbage_collect();
+
   test4();
+  core::garbage_collect();
+
   test5();
+  core::garbage_collect();
 
   return 0;
 }

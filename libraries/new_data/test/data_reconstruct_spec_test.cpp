@@ -27,6 +27,7 @@
 #include <mcrl2/new_data/pos.h>
 #include <mcrl2/new_data/bool.h>
 #include <mcrl2/new_data/detail/data_reconstruct.h>
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
@@ -548,19 +549,46 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find_term();
+  core::garbage_collect();
+
   test_data_reconstruct_struct();
+  core::garbage_collect();
+
   test_data_reconstruct_struct_complex();
+  core::garbage_collect();
+
   test_data_reconstruct_struct_nest();
+  core::garbage_collect();
+
   test_data_reconstruct_simple_constructor();
+  core::garbage_collect();
+
   test_data_reconstruct_bool_function();
+  core::garbage_collect();
+
   test_data_reconstruct_bool_function_one_eq();
+  core::garbage_collect();
+
   test_data_reconstruct_list();
+  core::garbage_collect();
+
   test_data_reconstruct_list_alias();
+  core::garbage_collect();
+
   test_data_reconstruct_list_struct();
+  core::garbage_collect();
+
   test_data_reconstruct_bag();
+  core::garbage_collect();
+
   test_data_reconstruct_set();
+  core::garbage_collect();
+
   test_data_reconstruct_bag_alias();
+  core::garbage_collect();
+
   test_data_reconstruct_set_alias();
+  core::garbage_collect();
 
   return 0;
 }

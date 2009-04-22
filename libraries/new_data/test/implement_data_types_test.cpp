@@ -29,6 +29,7 @@
 #include "mcrl2/new_data/list.h"
 #include "mcrl2/new_data/set.h"
 #include "mcrl2/new_data/bag.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -3192,16 +3193,37 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   implement_bool_test();
+  core::garbage_collect();
+
   implement_pos_test();
+  core::garbage_collect();
+
   implement_nat_test();
+  core::garbage_collect();
+
   implement_int_test();
+  core::garbage_collect();
+
   implement_real_test();
+  core::garbage_collect();
+
   implement_list_test();
+  core::garbage_collect();
+
   implement_set_test();
+  core::garbage_collect();
+
   implement_bag_test();
+  core::garbage_collect();
+
   implement_structured_sort_test();
+  core::garbage_collect();
+
   implement_standard_functions_test();
+  core::garbage_collect();
+
   implement_data_specification_test();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

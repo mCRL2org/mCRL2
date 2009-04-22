@@ -17,7 +17,9 @@
 #include "mcrl2/new_data/find.h"
 #include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/function_sort.h"
+#include "mcrl2/core/garbage_collection.h"
 
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::new_data;
 
@@ -71,6 +73,8 @@ std::cout << "<sexpr>" << sexpr << std::endl;
   BOOST_CHECK( search_variable(x, n3));
   BOOST_CHECK(!search_variable(x, n4));
 
+  core::garbage_collect();
+
   std::set<variable> v = find_all_variables(x);
   BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
@@ -81,10 +85,14 @@ std::cout << "<sexpr>" << sexpr << std::endl;
   BOOST_CHECK( search_basic_sort(y, sort_bool_::bool_()));
   BOOST_CHECK(!search_basic_sort(y, sort_real_::real_() ));
 
+  core::garbage_collect();
+
   std::set<basic_sort> s = find_all_basic_sorts(y);
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_nat::nat()) != s.end());
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_pos::pos()) != s.end());
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_bool_::bool_()) != s.end());
+
+  core::garbage_collect();
 
   std::set<sort_expression> e = find_all_sort_expressions(q1);
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
@@ -92,10 +100,14 @@ std::cout << "<sexpr>" << sexpr << std::endl;
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_bool_::bool_()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), sexpr)              != e.end());
 
+  core::garbage_collect();
+
   std::set<data_expression> d = find_all_data_expressions(make_vector(q1, p1, n1));
   BOOST_CHECK(std::find(d.begin(), d.end(), q1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), p1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), n1) != d.end());
+
+  core::garbage_collect();
 
   return 0;
 }

@@ -21,6 +21,7 @@
 #include "mcrl2/new_data/substitution.h"
 #include "mcrl2/new_data/detail/concepts.h"
 #include "mcrl2/new_data/standard_utility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -252,12 +253,17 @@ int test_main(int argc, char** argv) {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
 
   check_concepts();
+  core::garbage_collect();
 
   empty_test();
+  core::garbage_collect();
 
   list_test< classic_enumerator< > >(512);
+  core::garbage_collect();
   tree_test< classic_enumerator< > >(1096);
+  core::garbage_collect();
   mutually_recursive_test< classic_enumerator< > >(1096);
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

@@ -19,7 +19,9 @@
 #include "mcrl2/new_data/alias.h"
 #include "mcrl2/new_data/structured_sort.h"
 #include "mcrl2/new_data/container_sort.h"
+#include "mcrl2/core/garbage_collection.h"
 
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 
 void basic_sort_test()
@@ -172,10 +174,19 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   basic_sort_test();
+  core::garbage_collect();
+
   function_sort_test();
+  core::garbage_collect();
+
   alias_test();
+  core::garbage_collect();
+
   structured_sort_test();
+  core::garbage_collect();
+
   container_sort_test();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

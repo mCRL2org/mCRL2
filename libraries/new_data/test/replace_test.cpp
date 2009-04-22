@@ -24,8 +24,10 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/detail/data_functional.h"
 #include "mcrl2/new_data/assignment_list_substitution.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::new_data;
 using mcrl2::core::pp;
 
@@ -229,9 +231,16 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_replace();
+  core::garbage_collect();
+
   test_assignment_list();
+  core::garbage_collect();
+
   test_variable_replace();
+  core::garbage_collect();
+
   test_data_expression_replace();
+  core::garbage_collect();
 
   return 0;
 }

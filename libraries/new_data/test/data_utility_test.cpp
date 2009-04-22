@@ -22,8 +22,10 @@
 #include "mcrl2/new_data/utility.h"
 #include "mcrl2/new_data/standard_utility.h"
 #include "mcrl2/new_data/data_expression_utility.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::new_data;
@@ -92,7 +94,10 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_fresh_variable_generator();
+  core::garbage_collect();
+
   test_fresh_variables();
+  core::garbage_collect();
 
   return 0;
 }

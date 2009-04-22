@@ -29,6 +29,7 @@
 #include "mcrl2/new_data/exists.h"
 #include "mcrl2/new_data/where_clause.h"
 #include "mcrl2/new_data/assignment.h"
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::new_data;
@@ -301,14 +302,31 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv);
 
   variable_test();
+  core::garbage_collect();
+
   function_symbol_test();
+  core::garbage_collect();
+
   application_test();
+  core::garbage_collect();
+
   abstraction_test();
+  core::garbage_collect();
+
   lambda_test();
+  core::garbage_collect();
+
   forall_test();
+  core::garbage_collect();
+
   exists_test();
+  core::garbage_collect();
+
   where_declaration_test();
+  core::garbage_collect();
+
   assignment_test();
+  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

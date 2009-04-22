@@ -21,6 +21,7 @@
 #include <mcrl2/new_data/basic_sort.h>
 #include <mcrl2/new_data/sort_expression.h>
 #include <mcrl2/new_data/detail/data_reconstruct.h>
+#include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
 using namespace atermpp::detail;
@@ -71,6 +72,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_data_reconstruct_sort_expr();
+  core::garbage_collect();
 
-  return 0;
+  return EXIT_SUCCESS;
 }
