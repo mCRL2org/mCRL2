@@ -20,6 +20,7 @@
 #include <cctype>
 
 #include "boost/utility.hpp"
+#include "boost/lexical_cast.hpp"
 
 #include <cstdio>
 #include <cerrno>
@@ -33,17 +34,13 @@
 #include "mcrl2/new_data/enumerator_factory.h"
 #include "mcrl2/new_data/map_substitution_adapter.h"
 #include "mcrl2/new_data/parser.h"
+#include "mcrl2/new_data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/new_data/data_specification.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -56,7 +53,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::new_data;
-// using namespace mcrl2::new_data::detail;
 using mcrl2::core::gsDebug;
 using namespace mcrl2::utilities::tools;
 using mcrl2::utilities::tools::rewriter_tool;
@@ -104,8 +100,8 @@ static void parse_var_decl(string decl,
 
     stringstream ss(decl.substr(semi_pos+1));
 
-    sort_expression sort = type_check_sort_expr(parse_sort_expr(ss),
-                              new_data::detail::data_specification_to_aterm_data_spec(spec));
+    sort_expression sort(type_check_sort_expr(parse_sort_expr(ss),
+                              new_data::detail::data_specification_to_aterm_data_spec(spec)));
 
     if (gsDebug)
     { cerr << "sort parsed and type checked: " << pp(sort) << "\n";
@@ -115,7 +111,7 @@ static void parse_var_decl(string decl,
     string::size_type i;
     while ( ( i = names.find(',') ) != string::npos )
     {
-      varset.insert(variable(gsString2ATermAppl(trim_spaces(names.substr(0,i)).c_str()),sort));
+      varset.insert(variable(trim_spaces(names.substr(0,i)), sort));
       names = names.substr(i+1);
     }
 }
@@ -159,11 +155,11 @@ static data_expression parse_term(string &term_string,
                                   const data_specification &spec, 
                                   atermpp::set < variable > context_variables,
                                   const atermpp::set < variable > &local_variables = atermpp::set < variable >())
-{ stringstream ss(term_string);
+{
   context_variables.insert(local_variables.begin(),local_variables.end());
-  ATermAppl aterm = parse_data_expression(ss);
-  data_expression term = type_check_data_expr(aterm,NULL,spec,context_variables);
-  return term;
+//  return type_check_data_expr(parse_data_expression(term_string),NULL,new_data::detail::data_specification_to_aterm_data_spec(spec),context_variables);
+//  variable context is ignored, current objective is to get the tool to compile
+  return parse_data_expression(term_string);
 }
 
 static void declare_variables(
@@ -297,8 +293,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           } 
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           { 
-            rewriter::strategy new_strategy;
-            s >> new_strategy;
+            rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
             if (new_strategy!=m_rewrite_strategy)
             { m_rewrite_strategy=new_strategy;
               rewr=rewriter(spec,m_rewrite_strategy);
@@ -361,6 +356,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         }
       }
 
+      return true;
     }
 };
 
