@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/find.h
+/// \file mcrl2/new_data/detail/find.h
 /// \brief Add your file description here.
 
 #ifndef MCRL2_NEW_DATA_DETAIL_FIND_H

@@ -1399,7 +1399,6 @@ class sort_declaration():
     code += "      {\n"
 #    code += "        //static container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
     code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
-    code += "        %s.protect();\n" % (label.to_string())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 

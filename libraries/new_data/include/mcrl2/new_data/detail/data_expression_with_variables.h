@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/data_expression_with_variables.h
+/// \file mcrl2/new_data/data_expression_with_variables.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_NEW_DATA_DATA_EXPRESSION_WITH_VARIABLES_H

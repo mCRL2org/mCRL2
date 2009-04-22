@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/inner.h
+/// \file mcrl2/new_data/detail/rewrite/inner.h
 
 #ifndef __REWR_INNER_H
 #define __REWR_INNER_H

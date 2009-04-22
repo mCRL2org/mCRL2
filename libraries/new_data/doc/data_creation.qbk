@@ -5,38 +5,38 @@ or using a parser.
 
 Constructing data expressions directly can be quite tedious:
 
-    sort_identifier X("X");
-    sort_identifier Y("Y");
-    sort_identifier Z("Z");
-    sort_expression XYZ = sort_arrow(sort_arrow(X, Y), Z);
-    data_variable x("x", XYZ);
+    basic_sort X("X");
+    basic_sort Y("Y");
+    basic_sort Z("Z");
+    sort_expression XYZ = function_sort(function_sort(X, Y), Z);
+    variable x("x", XYZ);
 
-    data_variable three("3", sort_expr::pos());
-    data_variable zero("0", sort_expr::nat());
+    variable three("3", sort_pos::pos());
+    variable zero("0", sort_nat::nat());
 
 For convenience a function `parse_data_expression` is available. This function
 takes a variable declaration as optional second argument, that can be used to
 specify unbound variables that appear in the expression. An example of this
 is:
 
-    #include "mcrl2/data/data.h"
-    #include "mcrl2/data/parser.h"
+    #include "mcrl2/new_data/data.h"
+    #include "mcrl2/new_data/parser.h"
+    #include "mcrl2/new_data/pos.h"
+    #include "mcrl2/new_data/nat.h"
 
-    using namespace mcrl2::data;
+    using namespace mcrl2::new_data;
 
     int main(int argc, char* argv[])
     {
       MCRL2_ATERMPP_INIT(argc, argv)
 
-      using namespace data_expr;
-
       // two ways to create the expression m + n
       std::string var_decl = "m, n: Pos;\n";
       data_expression d1 = parse_data_expression("m+n", var_decl);
 
-      data_variable m = parse_data_expression("m", var_decl);
-      data_variable n = parse_data_expression("n", var_decl);
-      data_expression d2 = plus(m, n);
+      variable m = parse_data_expression("m", var_decl);
+      variable n = parse_data_expression("n", var_decl);
+      data_expression d2 = sort_pos::plus(m, n);
 
       return 0;
     }

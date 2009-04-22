@@ -906,9 +906,8 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
           {
                   set_substitutions();
           }
-          for (mcrl2::new_data::mutable_substitution< >::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
-            info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first),
-                static_cast< ATermAppl >(i->second));
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+            info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
           }
 
           *Transition = rewrActionArgs((ATermAppl) cur_act);
@@ -918,8 +917,8 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
                   *prioritised = (sum_idx <= info.num_prioritised);
           }
 
-          for (mcrl2::new_data::mutable_substitution< >::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
-            info.m_rewriter.clear_internally_associated_value(static_cast< ATermAppl >(i->first));
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+            info.m_rewriter.clear_internally_associated_value(i->first);
           }
           ++valuations;
 

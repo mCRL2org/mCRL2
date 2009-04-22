@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/enum/standard.h
+/// \file mcrl2/new_data/detail/enum/standard.h
 
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H

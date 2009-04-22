@@ -9,12 +9,11 @@ Currently the functionality of a `data_specification` is very limited.
 It can not be modified, and the only way to create it is using a parser.
 An example of this is given below:
 
-    #include "mcrl2/data/data.h"
-    #include "mcrl2/data/parser.h"
+    #include "mcrl2/new_data/data.h"
+    #include "mcrl2/new_data/parser.h"
     #include <iostream>
 
-    using namespace mcrl2::core;
-    using namespace mcrl2::data;
+    using namespace mcrl2::new_data;
 
     int main(int argc, char* argv[])
     {

@@ -91,7 +91,7 @@ author = 'Wieger Wesselink'
 #process_dir(year, author, '../../atermpp/example', '*.cpp')
 #process_dir(year, author, '../../atermpp/example', '*.h')
 #process_dir(year, author, '../../atermpp/test', '*.cpp')
-#process_dir(year, author, '../../lps/include/mcrl2/data/detail', '*.h')
+#process_dir(year, author, '../../lps/include/mcrl2/new_data/detail', '*.h')
 #process_dir(year, author, '../../pbes/include/mcrl2/pbes/detail', '*.h')
 process_dir(year, author, '../../lps/include/mcrl2/lps/detail', '*.h')
 

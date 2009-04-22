@@ -39,7 +39,7 @@ namespace utilities {
 
   /// standard conversion to stream
   inline std::ostream& operator<<(std::ostream& os, new_data::rewriter::strategy& s) {
-    static char* strategies[] = {
+    static char const* strategies[] = {
       "inner",
 #ifdef MCRL2_INNERC_AVAILABLE
       "innerc",

@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/innerc.h
+/// \file mcrl2/new_data/detail/rewrite/innerc.h
 
 #ifndef __REWR_INNERC_H
 #define __REWR_INNERC_H

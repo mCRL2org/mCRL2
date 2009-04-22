@@ -14,7 +14,7 @@
 #include <string>
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/data/rewriter.h"
+#include "mcrl2/new_data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/constelm.h"
 

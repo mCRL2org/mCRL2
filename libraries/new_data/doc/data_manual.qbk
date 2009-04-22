@@ -28,9 +28,9 @@ and sorts. In the __mcrl2_language_reference__ these concepts are explained in m
 [section: Data expressions]
 The class =data_expression= represents expressions like =true=, [^x > 3] and [^forall n:Nat. f(n) < 5].
 Each data expression =d= has a type or sort =d.sort()= of type =sort_expression=. The code in the
-Data Library is inside the namespace =mcrl2::data=. Let's look at a simple example:
+Data Library is inside the namespace =mcrl2::new_data=. Let's look at a simple example:
 
-    #include "mcrl2/data/data.h"
+    #include "mcrl2/new_data/data.h"
     #include <cassert>
 
     using namespace mcrl2::data;
@@ -39,11 +39,11 @@ Data Library is inside the namespace =mcrl2::data=. Let's look at a simple examp
     {
       MCRL2_ATERMPP_INIT(argc, argv)
 
-      data_expression two   = data_expr::nat(2);
-      data_expression three = data_expr::nat(3);
-      data_expression five  = data_expr::plus(two, three);
+      data_expression two   = sort_nat::nat(2);
+      data_expression three = sort_nat::nat(3);
+      data_expression five  = sort_nat::plus(two, three);
 
-      assert(five.sort() == sort_expr::nat());
+      assert(five.sort() == sort_nat::nat());
       return 0;
     }
 

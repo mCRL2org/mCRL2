@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/rewrite/jitty.h
+/// \file mcrl2/new_data/detail/rewrite/jitty.h
 
 #ifndef __REWR_JITTY_H
 #define __REWR_JITTY_H

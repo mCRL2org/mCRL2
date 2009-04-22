@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/prover/bdd_simplifier.h
+/// \file mcrl2/new_data/detail/prover/bdd_simplifier.h
 /// \brief Abstract interface for BDD simplifiers
 
 #ifndef BDD_SIMPLIFIER_H

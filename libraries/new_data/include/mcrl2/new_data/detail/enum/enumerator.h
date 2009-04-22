@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/enum.h
+/// \file mcrl2/new_data/detail/enum/enumerator.h
 
 #ifndef _LIBENUM_H
 #define _LIBENUM_H
