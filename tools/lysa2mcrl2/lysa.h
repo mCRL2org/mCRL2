@@ -121,6 +121,7 @@ namespace lysa
     string typed_lysa_to_lysa();
     virtual E_ptr find_opar_before_dy(E_ptr last_opar);
     std::list<E_ptr> find_let_until(E_ptr stop_at);
+    virtual ~Expression() {};
   };
 
   class String : public Expression
@@ -129,6 +130,7 @@ namespace lysa
     string s;
     String(string s) : s(s) {};
     virtual operator string() { return s; };
+    virtual ~String() {};
   };
 
   class Term : public Expression {};
@@ -147,6 +149,7 @@ namespace lysa
     Indices(E_ptr s, bool isShort);
     virtual operator string();
     virtual void push_back(string s);
+    virtual ~Indices() {};
   };
 
   class Iset;
@@ -166,6 +169,7 @@ namespace lysa
       set(static_pointer_cast<String>(s)->s), 
       iset(static_pointer_cast<Iset>(iset)) {};
     virtual operator string();
+    virtual ~IndexDef() {};
   };
   typedef std::list<shared_ptr<IndexDef> > IndexDef_list;
   class IndexDefs : public Expression, public IndexDef_list
@@ -186,6 +190,7 @@ namespace lysa
     virtual void push_back(E_ptr t);
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Terms() {};
   };
 
   class Identifier : public Term
@@ -197,6 +202,7 @@ namespace lysa
     Identifier(E_ptr s)          : name(process_info->options.prefix + static_pointer_cast<String>(s)->s), indices(new Indices()) {};
     Identifier(E_ptr s, E_ptr i) : name(process_info->options.prefix + static_pointer_cast<String>(s)->s), indices(static_pointer_cast<Indices>(i)) {};
     virtual operator string();
+    virtual ~Identifier() {};
   };
 
   //NOTE: a Name is any identifier that is not a typed variable definition, crypto-point or asymmetic name!
@@ -218,6 +224,7 @@ namespace lysa
     TypedVar(E_ptr s, Type type) : Name(s), type(type) {};
     TypedVar(E_ptr s, E_ptr i, Type type) : Name(s, i), type(type) {};
     virtual operator string();
+    virtual ~TypedVar() {};
   };
 
   class ASymName : public Name
@@ -228,6 +235,7 @@ namespace lysa
     ASymName(E_ptr s, bool hasPlus) : Name(s), hasPlus(hasPlus) {};
     ASymName(E_ptr s, E_ptr i, bool hasPlus) : Name(s, i), hasPlus(hasPlus) {};
     virtual operator string();
+    virtual ~ASymName() {};
   };
 
   class Ciphertext : public Term
@@ -242,6 +250,7 @@ namespace lysa
     terms(static_pointer_cast<Terms>(t)), key(static_pointer_cast<Term>(k)), anno(static_pointer_cast<Annotation>(a)), isASym(isASym) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Ciphertext() {};
   };
 
   class Iset : public Expression
@@ -259,6 +268,7 @@ namespace lysa
     virtual domain to_domain();
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~IsetIndices() {};
   };
 
   enum IsetDefSet { ZERO, NATURAL1, NATURAL2, NATURAL3, NATURAL01, NATURAL02, NATURAL03 };
@@ -268,6 +278,7 @@ namespace lysa
     IsetDefSet v;
     IsetDefSetSemval(IsetDefSet v) : v(v) {};
     virtual operator string() { return ""; };
+    virtual ~IsetDefSetSemval() {};
   };
   class IsetDef : public Iset
   {
@@ -276,6 +287,7 @@ namespace lysa
     IsetDef(E_ptr d) : def_set((static_pointer_cast<IsetDefSetSemval>(d))->v) {};
     virtual domain to_domain();
     virtual operator string();
+    virtual ~IsetDef() {};
   };
 
   class IsetUnion : public Iset
@@ -295,6 +307,7 @@ namespace lysa
   {
   public:
     virtual operator string() { return "0"; }
+    virtual ~Zero() {};
   };
 
   class DY : public Proc 
@@ -303,6 +316,7 @@ namespace lysa
     virtual operator string();
     DY() { process_info->set_calculus(lysa::TypedLySa); };
     virtual E_ptr find_opar_before_dy(E_ptr last_opar);
+    virtual ~DY() {};
   };
 
   class Let : public Proc
@@ -320,6 +334,7 @@ namespace lysa
     virtual operator string();
     string to_string_without_deepening();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Let() {};
   };
 
   class Send : public Proc
@@ -331,6 +346,7 @@ namespace lysa
     Send(E_ptr t, E_ptr p) : terms(static_pointer_cast<Terms>(t)), proc(static_pointer_cast<Proc>(p)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Send() {};
   };
 
   class PMatchTerms : public Expression
@@ -342,6 +358,7 @@ namespace lysa
     PMatchTerms(E_ptr t, E_ptr v);
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~PMatchTerms() {};
   };
 
   class Receive : public Proc
@@ -353,6 +370,7 @@ namespace lysa
     Receive(E_ptr t, E_ptr p) : terms(static_pointer_cast<PMatchTerms>(t)), proc(static_pointer_cast<Proc>(p)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Receive() {};
   };
 
   class Decrypt : public Proc
@@ -368,6 +386,7 @@ namespace lysa
     ciphertext(static_pointer_cast<Name>(c)), terms(static_pointer_cast<PMatchTerms>(t)), key(static_pointer_cast<Term>(k)), proc(static_pointer_cast<Proc>(p)), anno(static_pointer_cast<Annotation>(a)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Decrypt() {};
   };
 
   class New : public Proc
@@ -384,6 +403,7 @@ namespace lysa
     isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(static_pointer_cast<IndexDefs>(id)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~New() {};
   };
 
   class Parallel : public Proc {};
@@ -396,6 +416,7 @@ namespace lysa
     OrdinaryParallel(std::list<E_ptr> ps);
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~OrdinaryParallel() {};
   };
 
   class IndexedParallel : public Parallel 
@@ -407,6 +428,7 @@ namespace lysa
     IndexedParallel(E_ptr p, E_ptr id) : proc(static_pointer_cast<Proc>(p)), index_defs(static_pointer_cast<IndexDefs>(id)) {}
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~IndexedParallel() {};
   };
 
   class Replication : public Parallel 
@@ -417,6 +439,7 @@ namespace lysa
     Replication(E_ptr p) : proc(static_pointer_cast<Proc>(p)) {}
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Replication() {};
   };
 
 
@@ -436,6 +459,7 @@ namespace lysa
     virtual void push_back(E_ptr c);
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Cryptopoints() {};
   };
 
   class Annotation : public Expression
@@ -451,6 +475,7 @@ namespace lysa
     Annotation(bool isDest, E_ptr a, E_ptr d_o);
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
+    virtual ~Annotation() {};
   };
 
 
