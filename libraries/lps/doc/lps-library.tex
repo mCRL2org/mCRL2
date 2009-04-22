@@ -8,7 +8,7 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Thursday, February 26, 2009 11:40:40}
+%TCIDATA{LastRevised=Wednesday, April 22, 2009 20:50:22}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -138,8 +138,8 @@ a(e) & \text{action(}a\text{,}e\text{)} & \text{Action} \\
 P(e) & \text{process(}P\text{,}e\text{)} & \text{Process} \\ 
 P(d:=e) & \text{process\_assignment(}P\text{,}d:=e\text{)} & \text{%
 ProcessAssignment} \\ 
-\delta  & \text{delta()} & \text{Delta} \\ 
-\tau  & \text{tau()} & \text{Tau} \\ 
+\delta & \text{delta()} & \text{Delta} \\ 
+\tau & \text{tau()} & \text{Tau} \\ 
 \dsum\limits_{d}x & \text{sum(}d\text{,}x\text{)} & \text{Sum} \\ 
 \partial _{B}(x) & \text{block(}B\text{,}x\text{)} & \text{Block} \\ 
 \tau _{B}(x) & \text{hide(}B\text{,}x\text{)} & \text{Hide} \\ 
@@ -399,22 +399,65 @@ Then we define the following implementations of constelm:
 \[
 \begin{tabular}{|l|}
 \hline
-\textsc{Constelm1(}$p,\overline{d},R$\textsc{)} \\ 
+\textsc{Constelm1(}$p,\overline{d},V,R$\textsc{)} \\ 
 $x:=\overline{d}$ \\ 
-$G:=\{1,\ldots ,n\}$ \\ 
+$G:=\{d_{1},\ldots ,d_{n}\}$ \\ 
+$\sigma :=\widehat{\sigma }$ \\ 
+\textbf{for} $j:=1$ \textbf{to} $n$ \textbf{do} \ $undo[j]:=\emptyset $ \\ 
 $\text{\textbf{do}}$ \\ 
-$\qquad \Delta G:=\{j\in G|\exists _{i\in I}.R(c_{i}(x))\neq false\wedge
-R(g_{i}(x)_{j})\neq R(\overline{d}_{j})\}$ \\ 
-$\qquad G:=G\backslash \Delta G$ \\ 
-$\qquad \text{\textbf{for }}(j\in \Delta G):$ \\ 
-$\qquad \qquad x_{j}:=d_{j}$ \\ 
-$\qquad $\textbf{rof} \\ 
+$\qquad \Delta G:=\emptyset $ \\ 
+$\qquad $\textbf{for} $i\in I$ \textbf{do} \\ 
+$\qquad \qquad $\textbf{for }$d_{j}\in G$ \textbf{do} \\ 
+$\qquad \qquad \qquad $\textbf{if }$R(\sigma (c_{i}(x)))\neq false\wedge
+R(\sigma (g_{i}(x)_{j}))\neq R(\overline{d}_{j})$ \\ 
+$\qquad \qquad \qquad \qquad W:=$\textsc{solve}$(V,c_{i}(x),g_{i}(x),d_{j},%
+\overline{d}_{j},R,\sigma )$ \\ 
+$\qquad \qquad \qquad \qquad $\textbf{if }$W\neq \emptyset $ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{for }$(w_{0},w_{1})\in W$ 
+\textbf{do} \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w_{0}]:=w_{1}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=undo[j]\cup \{w_{0}\}$
+\\ 
+$\qquad \qquad \qquad \qquad $\textbf{else} \\ 
+$\qquad \qquad \qquad \qquad \qquad G:=G\setminus \{d_{j}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad \Delta G:=\Delta G\cup \{d_{j}\}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad x_{j}:=d_{j}$ \\ 
+$\qquad \qquad \qquad \qquad \qquad $\textbf{for }$w\in undo[j]$ \textbf{do}
+\\ 
+$\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w]:=w$ \\ 
+$\qquad \qquad \qquad \qquad \qquad undo[j]:=\emptyset $ \\ 
 $\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
-$\text{\textbf{return} \textsc{RemoveConstantParameters(}}%
-p,\{d_{j_{1}},\cdots ,d_{j_{m}}\},\overline{d}\text{\textsc{)}},$ \\ \hline
+$\text{\textbf{return} \textsc{RemoveConstantParameters(}}p,G,\overline{d}%
+\text{\textsc{)}},$ \\ \hline
 \end{tabular}%
 \]%
-where $\{j_{1},\cdots ,j_{m}\}=G$.
+where $V$ is the set of global variables of the linear process $p$, and
+where $\sigma $ is a substitution function and $\widehat{\sigma }$ is the
+identity function. The notation $\sigma \lbrack v]:=w$ means $\sigma =\sigma
+^{\prime }$ with%
+\[
+\left\{ 
+\begin{array}{l}
+\sigma ^{\prime }(x)=\sigma ^{\prime }(x)\text{ if }x\neq v \\ 
+\sigma ^{\prime }(x)=w\text{ if }x\neq v%
+\end{array}%
+\right. 
+\]%
+The function \textsc{solve} is defined as%
+\[
+\begin{tabular}{|l|}
+\hline
+$\text{\textsc{solve}}(V,c,g,d,\overline{d},R,\sigma )$ \\ 
+\textbf{if }$R(\sigma (g))\in V$ \\ 
+$\qquad \text{\textbf{return} }\{(R(\sigma (g)),\overline{d})\}$ \\ 
+\textbf{else} \\ 
+$\qquad \text{\textbf{return} }\emptyset $ \\ \hline
+\end{tabular}%
+\]%
+In general,  \textsc{solve} is a function that returns an assignment to
+variables in $V$ that makes the expression $R(\sigma (c))=false\vee R(\sigma
+(g))=R(\overline{d})$ true, or returns the empty set if it can't find such
+an assignment.
 
 \[
 \begin{tabular}{|l|}
