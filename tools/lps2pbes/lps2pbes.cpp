@@ -1,4 +1,4 @@
-// Author(s): Alexander van Dam
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -11,17 +11,12 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lps2pbes"
-#define AUTHOR "Alexander van Dam, Aad Mathijssen and Wieger Wesselink"
-
-#include <cstdio>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
@@ -33,10 +28,8 @@
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace std;
 using namespace mcrl2::lps;
@@ -45,36 +38,77 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::modal;
 using namespace mcrl2::data::detail;
-
-//Type definitions
-//----------------
-
-//t_phase represents the phases at which the program should be able to stop
-typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
+using namespace mcrl2::utilities::tools;
+                       
 #include "mcrl2/utilities/mcrl2_squadt_interface.h"
-#endif
 
-class lps2pbes_tool
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-                      : public mcrl2::utilities::squadt::mcrl2_tool_interface
-#endif
-                      {
+class lps2pbes_tool : public squadt_tool<input_output_tool>
+{
+  typedef squadt_tool<input_output_tool> super;
 
-  private:
-
+  protected:
+    //t_phase represents the phases at which the program should be able to stop
+    typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
+    
     bool pretty;
     bool timed;
     t_phase end_phase;
     string formfilename;
-    string infilename;
-    string outfilename;
 
-  private:
+    std::string synopsis() const
+    {
+      return "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n";
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("formula", make_mandatory_argument("FILE"),
+          "use the state formula from FILE", 'f');
+      desc.add_option("timed",
+          "use the timed version of the algorithm, even for untimed LPS's", 't');
+      desc.add_option("end-phase", make_mandatory_argument("PHASE"),
+          "stop conversion and output the state formula after phase PHASE: "
+          "'pa' (parsing), "
+          "'tc' (type checking), "
+          "'di' (data implementation), or "
+          "'rft' (regular formula translation)"
+        , 'p');
+      desc.add_option("pretty",
+          "return a pretty printed version of the output", 'P');
+    }
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+
+      pretty    = 0 < parser.options.count("pretty");
+      timed     = 0 < parser.options.count("timed");
+      end_phase = PH_NONE;
+      
+      if (parser.options.count("end-phase"))
+      {
+        std::string phase = parser.option_argument("end-phase");
+        if      (phase == "pa")  { end_phase = PH_PARSE; }
+        else if (phase == "tc")  { end_phase = PH_TYPE_CHECK; }
+        else if (phase == "di")  { end_phase = PH_DATA_IMPL; }
+        else if (phase == "rft") { end_phase = PH_REG_FRM_TRANS; }
+        else {
+          parser.error("option -p has illegal argument '" + phase + "'");
+        }
+      }
+      
+      //check for presence of -f
+      if (parser.options.count("formula")) {
+        formfilename = parser.option_argument("formula");
+      }
+      else {
+        parser.error("option -f is not specified");
+      }
+    }
 
     //Pre:  formfilename contains a state formula
-    //      infilename contains an LPS ("" indicates stdin)
+    //      input_filename() contains an LPS ("" indicates stdin)
     //      end_phase indicates at which phase conversion stops
     //Ret:  if end_phase == PH_NONE, the PBES generated from the state formula and
     //      the LPS
@@ -82,10 +116,10 @@ class lps2pbes_tool
     //      NULL, if something went wrong
     ATermAppl create_pbes()
     {
-      //open infilename
+      //open input_filename()
       specification lps_spec;
-      lps_spec.load(infilename);
-
+      lps_spec.load(input_filename());
+    
       //parse formula from formfilename
       gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
       ifstream formstream(formfilename.c_str(), ifstream::in|ifstream::binary);
@@ -102,9 +136,9 @@ class lps2pbes_tool
       if (end_phase == PH_PARSE) {
         return result;
       }
-
+    
       ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(lps_spec));
-
+    
       //type check formula
       gsVerboseMsg("type checking...\n");
       result = type_check_state_frm(result, reconstructed_spec);
@@ -115,7 +149,7 @@ class lps2pbes_tool
       if (end_phase == PH_TYPE_CHECK) {
         return result;
       }
-
+    
       //implement standard data types and type constructors on the result
       gsVerboseMsg("implementing standard data types and type constructors...\n");
       result = implement_data_state_frm(result, reconstructed_spec);
@@ -126,10 +160,10 @@ class lps2pbes_tool
       if (end_phase == PH_DATA_IMPL) {
         return result;
       }
-
+    
       //update lps_spec with the newly implemented specification
       lps_spec = specification(reconstructed_spec);
-
+    
       //translate regular formulas in terms of state and action formulas
       gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");
       result = translate_reg_frms(result);
@@ -140,7 +174,7 @@ class lps2pbes_tool
       if (end_phase == PH_REG_FRM_TRANS) {
         return result;
       }
-
+    
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
       pbes<> p = pbes_translate(state_formula(result), lps_spec, timed);
@@ -148,89 +182,25 @@ class lps2pbes_tool
       if (result == NULL) {
         return NULL;
       }
-
+    
       return result;
     }
+    
+  public:
+    lps2pbes_tool() : super(
+      "lps2pbes",
+      "Aad Mathijssen and Wieger Wesselink",
+      "generate a PBES from an LPS and a state formula",
+      "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
+      "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
+      "present, stdout is used. If INFILE is not present, stdin is used.\n"
+      "\n"
+      "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>."
+      )
+    {}
 
-    //Post: The command line options are parsed.
-    //      The program has aborted with a suitable error code, if:
-    //      - errors were encountered
-    //      - non-standard behaviour was requested (help or version)
-    //Ret:  the parsed command line options
-    bool parse_command_line(int argc, char **argv) {
-      using namespace ::mcrl2::utilities;
-
-      interface_description clinterface(argv[0], NAME, AUTHOR,
-        "generate a PBES from an LPS and a state formula",
-        "[OPTION]... --formula=FILE [INFILE [OUTFILE]]\n",
-        "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
-        "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
-        "present, stdout is used. If INFILE is not present, stdin is used.\n"
-        "\n"
-        "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>.");
-
-      clinterface.add_option("formula", make_mandatory_argument("FILE"),
-          "use the state formula from FILE", 'f');
-      clinterface.add_option("timed",
-          "use the timed version of the algorithm, even for untimed LPS's", 't');
-      clinterface.add_option("end-phase", make_mandatory_argument("PHASE"),
-          "stop conversion and output the state formula after phase PHASE: "
-          "'pa' (parsing), "
-          "'tc' (type checking), "
-          "'di' (data implementation), or "
-          "'rft' (regular formula translation)"
-        , 'p');
-      clinterface.add_option("pretty",
-          "return a pretty printed version of the output", 'P');
-
-      command_line_parser parser(clinterface, argc, argv);
-
-      if (parser.continue_execution()) {
-        pretty    = 0 < parser.options.count("pretty");
-        timed     = 0 < parser.options.count("timed");
-        end_phase = PH_NONE;
-
-        if (parser.options.count("end-phase")) {
-          std::string phase = parser.option_argument("end-phase");
-
-          if (std::strncmp(phase.c_str(), "pa", 3) == 0) {
-            end_phase = PH_PARSE;
-          } else if (std::strncmp(phase.c_str(), "tc", 3) == 0) {
-            end_phase = PH_TYPE_CHECK;
-          } else if (std::strncmp(phase.c_str(), "di", 3) == 0) {
-            end_phase = PH_DATA_IMPL;
-          } else if (std::strncmp(phase.c_str(), "rft", 4) == 0) {
-            end_phase = PH_REG_FRM_TRANS;
-          } else {
-            parser.error("option -p has illegal argument '" + phase + "'");
-          }
-        }
-
-        //check for presence of -f
-        if (parser.options.count("formula")) {
-          formfilename = parser.option_argument("formula");
-        }
-        else {
-          parser.error("option -f is not specified");
-        }
-
-        if (2 < parser.arguments.size()) {
-          parser.error("too many file arguments");
-        }
-        else {
-          if (0 < parser.arguments.size()) {
-            infilename = parser.arguments[0];
-          }
-          if (1 < parser.arguments.size()) {
-            outfilename = parser.arguments[1];
-          }
-        }
-      }
-
-      return parser.continue_execution();
-    }
-
-    bool process() {
+    bool run()
+    {
       //process state formula
       ATermAppl result = create_pbes();
 
@@ -239,22 +209,22 @@ class lps2pbes_tool
       }
 
       //store the result
-      if (outfilename.empty()) {
-        gsVerboseMsg("saving result to stdout...\n");
+      if (output_filename().empty()) {
+        gsVerboseMsg("saving result to standard output...\n");
       } else {
-        gsVerboseMsg("saving result to '%s'...\n", outfilename.c_str());
+        gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
       }
       if ((end_phase == PH_NONE) && (!pretty)) {
         mcrl2::pbes_system::pbes<> pbes_spec(result);
-        pbes_spec.save(outfilename);
+        pbes_spec.save(output_filename());
       } else {
-        if (outfilename.empty()) {
+        if (output_filename().empty()) {
           PrintPart_CXX(cout, (ATerm) result, (pretty)?ppDefault:ppInternal);
           cout << endl;
         } else {
-          ofstream outstream(outfilename.c_str(), ofstream::out|ofstream::binary);
+          ofstream outstream(output_filename().c_str(), ofstream::out|ofstream::binary);
           if (!outstream.is_open()) {
-            throw mcrl2::runtime_error("could not open output file '" + outfilename + "' for writing");
+            throw mcrl2::runtime_error("could not open output file '" + output_filename() + "' for writing");
           }
           PrintPart_CXX(outstream, (ATerm) result, pretty?ppDefault:ppInternal);
           outstream.close();
@@ -263,33 +233,8 @@ class lps2pbes_tool
       return true;
     }
 
-  public:
-
-    int execute(int argc, char** argv) {
-      try {
+// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-        if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
-          return EXIT_SUCCESS;
-        }
-#endif
-        if (parse_command_line(argc, argv)) {
-          if (!process()) {
-            return EXIT_FAILURE;
-          }
-        }
-      }
-      catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
-
-      return EXIT_SUCCESS;
-    }
-
-// SQuADT protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  private:
-
     enum pbes_output_format {
       normal,
       readable
@@ -313,8 +258,6 @@ class lps2pbes_tool
 
       return true;
     }
-
-  public:
 
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const {
@@ -411,7 +354,7 @@ class lps2pbes_tool
         else {
           c.add_output("pbes_out", tipi::mime_type("pbes", tipi::mime_type::text), c.get_output_name(".pbes"));
         }
-      }
+      }                            
 
       c.get_option("use_timed_algorithm").set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
       c.get_option("selected_output_format").set_argument_value< 0 >(format_selector.get_selection());
@@ -439,26 +382,17 @@ class lps2pbes_tool
       timed            = c.get_option_argument< bool >("use_timed_algorithm");
       end_phase        = c.get_option_argument< t_phase >("stop_after_phase");
       formfilename     = c.get_input("formula_in").location();
-      infilename       = c.get_input("lps_in").location();
-      outfilename      = c.get_output("pbes_out").location();
-
-      bool result = process();
-
-      if (result) {
-        send_clear_display();
-      }
-
-      return (result);
+      input_filename()       = c.get_input("lps_in").location();
+      output_filename()      = c.get_output("pbes_out").location();
+      return run();
     }
 #endif
+
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  lps2pbes_tool tool;
-
-  return tool.execute(argc, argv);
+  return lps2pbes_tool().execute(argc, argv);
 }
-
