@@ -500,6 +500,41 @@ summand replace_data_expressions(const summand& s,
 /// \brief Read-only singly linked list of summands
 typedef atermpp::term_list<summand> summand_list;
 
+/// \brief Traverses the summand, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const summand& s, OutIter dest)
+{
+  // summation variables
+  const data::variable_list& v = s.summation_variables();
+  for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    *dest++ = i->sort();
+  }
+
+  // condition
+  *dest++ = s.condition().sort();
+
+  // deadlock
+  if (s.is_delta())
+  {
+    traverse_sort_expressions(s.deadlock(), dest);
+  }
+  // multi action
+  else
+  {
+    traverse_sort_expressions(s.multi_action(), dest);
+  }
+  
+  // next state
+  const data::assignment_list& a = s.assignments();
+  for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    *dest++ = i->lhs().sort();
+    *dest++ = i->rhs().sort();
+  }
+}
+
 } // namespace lps
 
 } // namespace mcrl2

@@ -119,6 +119,20 @@ bool equal_signatures(const action& a, const action& b)
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
 }
 
+/// \brief Traverses the action, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const action& a, OutIter dest)
+{
+  traverse_sort_expressions(a.label(), dest);
+  
+  const data::data_expression_list& d = a.arguments();
+  for (data::data_expression_list::const_iterator i = d.begin(); i != d.end(); ++i)
+  {
+    *dest++ = i->sort();
+  }
+}
+
 } // namespace lps
 
 } // namespace mcrl2

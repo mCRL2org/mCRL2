@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/print_utility.h
+/// \file mcrl2/core/detail/print_utility.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_PRINT_UTILITY_H
-#define MCRL2_PBES_DETAIL_PRINT_UTILITY_H
+#ifndef MCRL2_CORE_DETAIL_PRINT_UTILITY_H
+#define MCRL2_CORE_DETAIL_PRINT_UTILITY_H
 
 #include <string>
 #include <sstream>
@@ -19,7 +19,7 @@
 
 namespace mcrl2 {
 
-namespace pbes_system {
+namespace core {
 
 namespace detail {
 
@@ -78,8 +78,8 @@ namespace detail {
 
 } // namespace detail
 
-} // namespace pbes_system
+} // namespace core
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PRINT_UTILITY_H
+#endif // MCRL2_CORE_DETAIL_PRINT_UTILITY_H

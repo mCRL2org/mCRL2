@@ -36,7 +36,7 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != data::data_expression();
+        return m_time != core::detail::gsMakeNil();
       }
 
       /// \brief Returns the time.
@@ -83,6 +83,17 @@ namespace lps {
         return !(*this == other);
       }
   };
+
+/// \brief Traverses the deadlock, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const deadlock& d, OutIter dest)
+{
+  if (d.has_time())
+  {
+    *dest++ = d.time().sort();
+  }
+}
 
 } // namespace lps
 

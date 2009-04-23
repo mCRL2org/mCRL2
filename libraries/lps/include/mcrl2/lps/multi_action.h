@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
 
+#include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/lps/action.h"
 #include "mcrl2/data/data_expression_utility.h"
 
@@ -45,12 +46,13 @@ namespace lps {
       /// \return True if time is available.
       bool has_time() const
       {
-        return m_time != data::data_expression();
+        // TODO: remove the Nil
+        return m_time != core::detail::gsMakeNil();
       }
 
       /// \brief Returns the sequence of actions.
       /// \return The sequence of actions.
-      action_list actions() const
+      const action_list& actions() const
       {
         return m_actions;
       }
@@ -365,6 +367,23 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
       data::data_expression result = join_and(z.begin(), z.end());
       return result;
     }
+
+/// \brief Traverses the multi action, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const multi_action& m, OutIter dest)
+{
+  if (m.has_time())
+  {
+    *dest++ = m.time().sort();
+  }
+
+  const action_list& a = m.actions();
+  for (action_list::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    traverse_sort_expressions(*i, dest);
+  }
+}
 
 } // namespace lps
 

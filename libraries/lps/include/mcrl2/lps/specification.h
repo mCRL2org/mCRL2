@@ -338,6 +338,32 @@ specification repair_free_variables(const specification& spec)
   return result;
 }
 
+/// \brief Traverses the linear process specification, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const specification& spec, OutIter dest)
+{
+  // action labels
+  const action_label_list l = spec.action_labels();
+  for (action_label_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  {
+    traverse_sort_expressions(*i, dest);
+  }
+
+  // linear process
+  traverse_sort_expressions(spec.process(), dest);
+
+  // initial process
+  traverse_sort_expressions(spec.initial_process(), dest);
+}
+
+/// \brief Adds all sorts that appear in the process of l to the data specification of l.
+/// \param l A linear process specification
+inline
+void complete_data_specification(lps::specification& spec)
+{
+}
+
 } // namespace lps
 
 } // namespace mcrl2

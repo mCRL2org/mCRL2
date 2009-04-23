@@ -121,6 +121,27 @@ class process_initializer: public atermpp::aterm_appl
     }
 };
 
+/// \brief Traverses the process initializer, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const process_initializer& init, OutIter dest)
+{
+  // free variables
+  const data::variable_list& v = init.free_variables();
+  for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    *dest++ = i->sort();
+  }
+
+  // next state
+  const data::assignment_list& a = init.assignments();
+  for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+  {
+    *dest++ = i->lhs().sort();
+    *dest++ = i->rhs().sort();
+  }
+}
+
 } // namespace lps
 
 } // namespace mcrl2

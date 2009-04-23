@@ -25,7 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/pbes/detail/print_utility.h"
+#include "mcrl2/core/detail/print_utility.h"
 
 namespace mcrl2 {
 
