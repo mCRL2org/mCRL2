@@ -14,6 +14,7 @@
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/channelcommunicationdialog.h"
+#include "../visuals/visualchannel_communication.h"
 
 #include "event_channelcommunication.h"
 
@@ -115,7 +116,19 @@ bool grape_event_remove_channel_communication::Do( void )
 
   if ( comm_ptr )
   {
-    dia_ptr->remove_channel_communication( comm_ptr );
+    visualchannel_communication* vis_comm_ptr = static_cast<visualchannel_communication*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
+    int communication_selected = vis_comm_ptr->get_communication_selected();
+    
+    // if there is no valid selected communication
+    if ( (communication_selected == -1) || (communication_selected > comm_ptr->count_channel()) || (comm_ptr->count_channel() == 2) ) 
+    {
+      // remove the entire channel communication
+      dia_ptr->remove_channel_communication( comm_ptr );
+    } else {
+      // remove the selected channel
+      channel* chan = comm_ptr->get_attached_channel( communication_selected );
+      comm_ptr->detach_channel( chan );
+    }
 
     finish_modification();
     return true;
@@ -136,20 +149,37 @@ bool grape_event_remove_channel_communication::Undo( void )
   {
     // not all channels have revived yet, try again later.
     return false;
-  }
+  } 
+  
+  channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_c_comm, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
 
-  channel_communication* new_comm = dia_ptr->add_channel_communication( m_c_comm, m_coordinate, chan_1, chan_2 );
-
-  // Reattach channels
-  for ( unsigned int i = 2; i < m_channels.GetCount(); ++i )
+  if ( comm_ptr == 0)
   {
-    channel* chan =  dynamic_cast<channel*> ( find_object( m_channels.Item( i ), CHANNEL, dia_ptr->get_id() ) );
-    dia_ptr->attach_channel_communication_to_channel( new_comm, chan );
+    // Recreate channel communication
+    channel_communication* new_comm = dia_ptr->add_channel_communication( m_c_comm, m_coordinate, chan_1, chan_2 );
+
+    // Reattach channels
+    for ( unsigned int i = 2; i < m_channels.GetCount(); ++i )
+    {
+      channel* chan =  dynamic_cast<channel*> ( find_object( m_channels.Item( i ), CHANNEL, dia_ptr->get_id() ) );
+      dia_ptr->attach_channel_communication_to_channel( new_comm, chan );
+    }
+
+    new_comm->set_rename_to( m_rename );
+    new_comm->set_channel_communication_type( m_channel_communication_type );
+  } else {
+    // Reattach channel
+    for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
+    {
+      channel* chan =  dynamic_cast<channel*> ( find_object( m_channels.Item( i ), CHANNEL, dia_ptr->get_id() ) );
+      // if the channel communication is not yet connected with chan
+      if (!comm_ptr->has_channel(chan))
+      {
+        // make a connection
+        dia_ptr->attach_channel_communication_to_channel( comm_ptr, chan );
+      }
+    }
   }
-
-  new_comm->set_rename_to( m_rename );
-  new_comm->set_channel_communication_type( m_channel_communication_type );
-
   finish_modification();
   return true;
 }

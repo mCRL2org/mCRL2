@@ -140,11 +140,11 @@ namespace grape
          */
         ~grape_glcanvas(void);
 
-		/**
-		 * Reset function
-		 * Resets the scrollbars
-		 */
-		void reset();
+        /**
+         * Reset function
+         * Resets the scrollbars
+         */
+        void reset();
         /**
          * Drawing function.
          * (Re-)draws the canvas.

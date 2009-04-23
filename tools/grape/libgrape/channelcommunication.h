@@ -126,9 +126,15 @@ namespace grape
         /**
          * Channel communication type assignment function
          * Takes a new channeltype and assigns it to the channeltype of the channel.
-         * @param p_channeltype The new channeltype
+         * @param p_channel type The new channeltype
          */
         void set_channel_communication_type( const channel_communication_type &p_channel_communication_type );
+        
+        /**
+         * @param p_channel the channel
+         * @return channel communication is attached on p_channel
+         */
+        bool has_channel( const channel* p_channel);
     };
 
     /**

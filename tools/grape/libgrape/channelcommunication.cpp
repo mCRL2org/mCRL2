@@ -42,6 +42,22 @@ channel_communication::channel_communication( const channel_communication &p_cha
   set_channel_communication_type(p_channel_comm.get_channel_communication_type());
 }
 
+bool channel_communication::has_channel( const channel* p_channel)
+{
+  // for all channel communications  
+  for ( unsigned int i = 0; i < m_communication.GetCount(); ++i )
+  {
+    communication &comm = m_communication.Item ( i );
+    channel* channel_ptr = comm.get_channel();
+    // if they are equal
+    if (channel_ptr == p_channel)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 channel_communication::~channel_communication( void )
 {
   // Remove all references to the channel communication

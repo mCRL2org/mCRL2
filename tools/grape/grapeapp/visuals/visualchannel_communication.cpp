@@ -24,11 +24,13 @@ using namespace mcrl2::utilities::wx;
 visualchannel_communication::visualchannel_communication( channel_communication* p_channel_communication )
 {
   m_object = p_channel_communication;
+  m_communication_selected = -1;
 }
 
 visualchannel_communication::visualchannel_communication( const visualchannel_communication &p_channel_communication )
 : visual_object( p_channel_communication )
 {
+  m_communication_selected = p_channel_communication.m_communication_selected;
 }
 
 visualchannel_communication::~visualchannel_communication( void )
@@ -40,12 +42,12 @@ void visualchannel_communication::draw( void )
   channel_communication* comm = static_cast<channel_communication*>( m_object );
 
   //for all communications
-  for ( unsigned int i = 0; i < comm->count_channel(); ++i )
+  for ( int i = 0; i < comm->count_channel(); ++i )
   {
     channel* chan = comm->get_attached_channel( i );
 
     // draw communication line
-    draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_object->get_selected());
+    draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_communication_selected == i);
   }
 
   channel_communication *cc = static_cast<channel_communication *>(m_object);
@@ -64,13 +66,39 @@ void visualchannel_communication::draw( void )
 
 bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
 {
-  // return inside test
-  return is_inside_ellipse( m_object->get_coordinate(), 0.05f, 0.05f, p_coord);
+  m_communication_selected = -1;
+  channel_communication* comm = static_cast<channel_communication*>( m_object );
+
+  if (!is_inside_ellipse( m_object->get_coordinate(), 0.05f, 0.05f, p_coord))
+  {
+    //for all communications
+    for ( unsigned int i = 0; i < comm->count_channel(); ++i )
+    {
+      channel* chan = comm->get_attached_channel( i );
+
+      // test if the mouse is on the communication line
+      if (is_inside_line( m_object->get_coordinate(), chan->get_coordinate(), p_coord)) 
+      {
+        // store the last selected communication line
+        m_communication_selected = i;
+        return true;
+      }
+    }
+    return false;    
+  } else {
+    return true;
+  }
 }
 
 grape_direction visualchannel_communication::is_on_border( libgrape::coordinate &p_coord )
-{
+{  
   return GRAPE_DIR_NONE;
+}
+
+
+int visualchannel_communication::get_communication_selected()
+{
+  return m_communication_selected;
 }
 
 }
