@@ -108,7 +108,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    lps_specification = lps::specification(removeUnusedData(lps_specification));
+    lps_specification = lps::specification(removeUnusedData(specification_to_aterm(lps_specification)));
   }
 
   basefilename = strdup(lgopts->specification.c_str());
@@ -169,7 +169,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
-    lts_opts.spec = lps_specification;
+    lts_opts.spec = specification_to_aterm(lps_specification);
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
     lgopts->outformat = mcrl2::lts::lts_none;

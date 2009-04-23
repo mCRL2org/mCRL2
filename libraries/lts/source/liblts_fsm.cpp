@@ -50,7 +50,7 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification &spec)
   {
     gsVerboseMsg("cannot parse action as mCRL2\n");
   } else {
-    ATermAppl reconstructed_spec = reconstruct_spec(spec);
+    ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(spec));
     t = type_check_mult_act(t,reconstructed_spec);
     if ( t == NULL )
     {
@@ -81,7 +81,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
 
     // typechecking and data implementation of terms needs an lps
     // before data implementation
-    ATermAppl reconstructed_lps = reconstruct_spec(spec);
+    ATermAppl reconstructed_lps = reconstruct_spec(specification_to_aterm(spec));
 
     std::stringstream sort_ss(ATgetName(ATgetAFun(sort)));
     sort = parse_sort_expr(sort_ss);
@@ -158,7 +158,7 @@ bool p_lts::read_from_fsm(std::istream &is, lts_type type, lps::specification *s
       extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),
               (ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec->data()),
               (ATerm) ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) static_cast< ATermList >(atermpp::term_list< data::variable >(process_parameters.begin(), process_parameters.end()))),
-              ATgetArgument((ATermAppl) *spec,1));
+              ATgetArgument(specification_to_aterm(*spec),1));
       this->type = lts_mcrl2;
     } else if ( type == lts_mcrl ) {
       if ( nstates > 0 && ATgetLength((ATermList) state_values[0]) == 0 )

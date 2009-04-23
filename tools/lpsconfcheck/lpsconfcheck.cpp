@@ -567,7 +567,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
       lps_specification.load(f_input_file_name);
 
       // temporary measure, until the invariant and confluence checkers use the lps framework
-      f_lps = (ATermAppl) lps_specification;
+      f_lps = specification_to_aterm(lps_specification);
         // type checking and data implementation of data expressions use an lps
         // before data implementation
       ATermAppl f_reconstructed_lps = reconstruct_spec(f_lps);
@@ -593,7 +593,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         throw mcrl2::runtime_error("Data implementation of the invariant formula failed.\n");
       }
 
-      f_lps = specification(f_reconstructed_lps);
+      f_lps = specification(specification_to_aterm(f_reconstructed_lps));
 
     }
 

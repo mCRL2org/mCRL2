@@ -275,7 +275,7 @@ using namespace mcrl2::data::detail;
 
       // type checking and data implementation of data expressions use an lps
       // before data implementation
-      ATermAppl f_reconstructed_spec = reconstruct_spec(lps_specification);
+      ATermAppl f_reconstructed_spec = reconstruct_spec(specification_to_aterm(lps_specification));
 
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name.c_str());
@@ -310,7 +310,7 @@ using namespace mcrl2::data::detail;
         exit(1);
       }
 
-      f_lps = mcrl2::lps::specification(f_reconstructed_spec);
+      f_lps = mcrl2::lps::specification(specification_to_aterm(f_reconstructed_spec));
     }
 
     // --------------------------------------------------------------------------------------------

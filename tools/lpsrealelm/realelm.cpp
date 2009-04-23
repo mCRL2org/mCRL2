@@ -886,9 +886,9 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   comp_struct c;
   data_specification ds=s.data();
   ds.add_sort(alias(c.sort(),c));
-  s = set_data_specification(s, ds);
+  s.data() = ds;
   postfix_identifier_generator variable_generator("");
-  variable_generator.add_to_context(s);
+  variable_generator.add_to_context(specification_to_aterm(s));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());

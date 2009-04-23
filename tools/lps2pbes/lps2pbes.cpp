@@ -103,7 +103,7 @@ class lps2pbes_tool
         return result;
       }
 
-      ATermAppl reconstructed_spec = reconstruct_spec(lps_spec);
+      ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(lps_spec));
 
       //type check formula
       gsVerboseMsg("type checking...\n");

@@ -81,8 +81,6 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
     ///i applies real time abstraction to it and writes the result to output_file.
     bool run()
     {
-      using namespace mcrl2::pbes_system;
-
       if (core::gsVerbose)
       {
         std::cerr << "Parameters of lpsrealelm:" << std::endl;

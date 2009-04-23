@@ -260,7 +260,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
-            ATermAppl reconstructed_spec = reconstruct_spec(*spec);
+            ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(*spec));
             t = type_check_mult_act(t,reconstructed_spec);
             if ( t == NULL )
             {
@@ -359,7 +359,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
     if ( applied_conversion )
     {
       data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec->data());
-      act_spec = ATAgetArgument((ATermAppl) *spec,1);
+      act_spec = ATAgetArgument(specification_to_aterm(*spec),1);
     } else {
       data_spec = ATAgetArgument((ATermAppl) extra_data,0);
       if ( gsIsNil(data_spec) )
