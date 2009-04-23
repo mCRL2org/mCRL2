@@ -386,7 +386,7 @@ namespace lps {
   action_rename_specification parse_action_rename_specification(std::istream& in, lps::specification& spec)
   {
     //std::istringstream in(text);
-    ATermAppl lps_spec = spec;
+    ATermAppl lps_spec = specification_to_aterm(spec);
     ATermAppl result = detail::parse_action_rename_specification(in);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
     result           = detail::implement_action_rename_specification(result, lps_spec);

@@ -76,6 +76,18 @@ class specification
       m_initial_process = atermpp::aterm_appl(*i);
     }
 
+    /// \brief Conversion to ATermAppl.
+    /// \return The specification converted to ATerm format.
+    operator ATermAppl() const
+    {
+      return core::detail::gsMakeLinProcSpec(
+          data::detail::data_specification_to_aterm_data_spec(m_data),
+          core::detail::gsMakeActSpec(m_action_labels),
+          m_process,
+          m_initial_process
+      );
+    }
+
   public:
     /// \brief Constructor.
     specification()
@@ -101,18 +113,6 @@ class specification
         m_process(lps),
         m_initial_process(initial_process)
     {}
-
-    /// \brief Conversion to ATermAppl.
-    /// \return The specification converted to ATerm format.
-    operator ATermAppl() const
-    {
-      return core::detail::gsMakeLinProcSpec(
-          data::detail::data_specification_to_aterm_data_spec(m_data),
-          core::detail::gsMakeActSpec(m_action_labels),
-          m_process,
-          m_initial_process
-      );
-    }
 
     /// \brief Reads the specification from file.
     /// \param filename A string
@@ -351,9 +351,24 @@ ATermAppl specification_to_aterm(const specification& spec)
   );
 }
 
+/// \brief Pretty print function
 inline std::string pp(const specification& spec)
 {
   return core::pp(specification_to_aterm(spec));
+}
+
+/// \brief Equality operator
+inline
+bool operator==(const specification& spec1, const specification& spec2)
+{
+  return specification_to_aterm(spec1) == specification_to_aterm(spec2);
+}
+
+/// \brief Inequality operator
+inline
+bool operator!=(const specification& spec1, const specification& spec2)
+{
+  return !(spec1 == spec2);
 }
 
 } // namespace lps

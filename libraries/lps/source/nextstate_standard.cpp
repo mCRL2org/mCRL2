@@ -486,7 +486,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
         tree_init = NULL;
 
-        current_spec = spec;
+        current_spec = specification_to_aterm(spec);
         ATprotectAppl(&current_spec);
 
         info.stateformat = state_format;

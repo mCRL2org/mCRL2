@@ -114,7 +114,7 @@ namespace pbes_system {
             {
               std::clog << ", ";
             }
-            std::clog << detail::print_pp_set(*j);
+            std::clog << core::detail::print_pp_set(*j);
           }
           std::clog << " ]" << std::endl;
         }
@@ -125,7 +125,7 @@ namespace pbes_system {
       {
         for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
-          std::clog << core::pp(i->first) << " -> " << detail::print_pp_set(i->second) << std::endl;
+          std::clog << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
         }
       }
 
@@ -294,7 +294,7 @@ namespace pbes_system {
           if (mcrl2::core::gsDebug)
           {
             std::clog << "todo element X = " << core::pp(X) << std::endl;
-            std::clog << "todo list = " << detail::print_pp_set(todo) << std::endl;
+            std::clog << "todo list = " << core::detail::print_pp_set(todo) << std::endl;
             std::clog << "--- vertices ---" << std::endl;
             print_vertices();
           }

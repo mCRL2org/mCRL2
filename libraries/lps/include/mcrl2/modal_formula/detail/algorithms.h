@@ -104,11 +104,11 @@ namespace detail {
     ATermAppl f = parse_state_formula(formula_stream);
     lps::specification copy_spec = spec;
     copy_spec.data() = remove_all_system_defined(spec.data());
-    ATermAppl reconstructed_spec = data::detail::reconstruct_spec(copy_spec);
+    ATermAppl reconstructed_spec = data::detail::reconstruct_spec(specification_to_aterm(copy_spec));
     f = type_check_state_formula(f, reconstructed_spec);
     f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
-    ATermAppl tmp = copy_spec; // Force the data specification to be recomputed
+    ATermAppl tmp = specification_to_aterm(copy_spec); // Force the data specification to be recomputed
     spec = lps::specification(tmp);
     return f;
   }

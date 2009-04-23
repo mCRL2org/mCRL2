@@ -176,7 +176,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
   variable_list process_parameters = specification.process().process_parameters();
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
 
-  fresh_variable_generator generator = fresh_variable_generator(aterm(specification));
+  fresh_variable_generator generator = fresh_variable_generator(specification_to_aterm(specification));
   generator.set_sort(sort_bool_::bool_());
 
   // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.

@@ -115,5 +115,5 @@ ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis) // deprecated
 {
 	mcrl2::lps::specification spec(ATSpec);
 	spec = mcrl2::lps::remove_unused_data(spec,keep_basis);
-	return (ATermAppl) spec;
+	return specification_to_aterm(spec);
 }
