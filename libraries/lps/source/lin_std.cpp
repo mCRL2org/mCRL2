@@ -42,6 +42,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/lps/specification.h"
 
 #include "workarounds.h" // DECL_A
 
@@ -9364,6 +9365,10 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   rewr.release();
 
   return result;
+  // lps::specification spec1(result);
+  // add missing sorts to the data specification
+  // lps::complete_data_specification(spec1);
+  // return spec1;
 }
 
 /// \brief Function to initialize the global variables in this file.

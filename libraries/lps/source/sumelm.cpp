@@ -341,7 +341,8 @@ namespace lps {
     }
     new_summand_list = reverse(new_summand_list);
 
-    new_specification = set_lps(specification, set_summands(lps, new_summand_list));
+    new_specification = specification;
+    new_specification.process() = set_summands(lps, new_summand_list);
     return new_specification;
   }
 

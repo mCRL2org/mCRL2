@@ -179,8 +179,8 @@ void test_case_6()
   BOOST_CHECK(s0 == s1);
 
   if (!(s0 == s1) || sumvar_count != 1) {
-    std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
-              << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
+    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
+              << "Output specification : " << lps::pp(s1) << std::endl;
   }
 }
 
@@ -302,8 +302,8 @@ void test_case_10()
   BOOST_CHECK(sumvar_count == 0);
 
   if (!(s0 == s1)) {
-    std::clog << "Input specification  : " << mcrl2::core::pp(s0) << std::endl
-              << "Output specification : " << mcrl2::core::pp(s1) << std::endl;
+    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
+              << "Output specification : " << lps::pp(s1) << std::endl;
   }
 }
 

@@ -113,7 +113,7 @@ void test_process(std::string text)
 
   process_specification spec = parse_process_specification(text);
   specification sp = parse_linear_process_specification(text);
-  std::cout << "<spec>" << core::pp(sp) << std::endl;
+  std::cout << "<spec>" << core::pp(specification_to_aterm(sp)) << std::endl;
 
   //std::cout << core::pp(data::detail::data_specification_to_aterm_data_spec(spec.data())) << std::endl
   //          << core::pp(spec.actions()) << std::endl

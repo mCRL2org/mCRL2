@@ -478,7 +478,7 @@ specification binary(const lps::specification& spec,
   // (they make sure we can't build up an intermediate result!)
   variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
-  result = set_lps(result, set_process_parameters(result.process(), new_process_parameters));
+  result.process() = set_process_parameters(result.process(), new_process_parameters);
   gsDebugMsg("Finished processing\n");
 
   return result;

@@ -50,7 +50,7 @@ namespace lps {
 // init P(true, 0);
 //
 //<Spec>         ::= LinProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
-class specification: public atermpp::aterm_appl
+class specification
 {
   protected:
     /// \brief The data specification of the specification
@@ -67,9 +67,8 @@ class specification: public atermpp::aterm_appl
 
     /// \brief Initializes the specification with an ATerm.
     /// \param t A term
-    void init_term(atermpp::aterm_appl t)
+    void construct_from_aterm(atermpp::aterm_appl t)
     {
-      m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
       atermpp::aterm_appl::iterator i = t.begin();
       m_data            = atermpp::aterm_appl(*i++);
       m_action_labels   = atermpp::aterm_appl(*i++)(0);
@@ -80,16 +79,14 @@ class specification: public atermpp::aterm_appl
   public:
     /// \brief Constructor.
     specification()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructLinProcSpec())
-    { }
+    {}
 
     /// \brief Constructor.
     /// \param t A term
     specification(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_LinProcSpec(m_term));
-      init_term(t);
+      assert(core::detail::check_rule_LinProcSpec(t));
+      construct_from_aterm(t);
     }
 
     /// \brief Constructor.
@@ -103,14 +100,17 @@ class specification: public atermpp::aterm_appl
         m_action_labels(action_labels),
         m_process(lps),
         m_initial_process(initial_process)
+    {}
+
+    /// \brief Conversion to ATermAppl.
+    /// \return The specification converted to ATerm format.
+    operator ATermAppl() const
     {
-      m_term = reinterpret_cast<ATerm>(
-        core::detail::gsMakeLinProcSpec(
-          data::detail::data_specification_to_aterm_data_spec(data),
-          core::detail::gsMakeActSpec(action_labels),
-          lps,
-          initial_process
-        )
+      return core::detail::gsMakeLinProcSpec(
+          data::detail::data_specification_to_aterm_data_spec(m_data),
+          core::detail::gsMakeActSpec(m_action_labels),
+          m_process,
+          m_initial_process
       );
     }
 
@@ -126,7 +126,7 @@ class specification: public atermpp::aterm_appl
         throw mcrl2::runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an LPS");
       }
       //store the term locally
-      init_term(atermpp::aterm_appl(t));
+      construct_from_aterm(atermpp::aterm_appl(t));
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed());
@@ -149,34 +149,56 @@ class specification: public atermpp::aterm_appl
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed());
-      //if (!is_well_typed())
-      //{
-      //  throw mcrl2::runtime_error("specification is not well typed (specification::save())");
-      //}
-      core::detail::save_aterm(m_term, filename, binary);
+      ATermAppl t = *this;
+      core::detail::save_aterm(reinterpret_cast<ATerm>(t), filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
     /// \return The linear process of the specification.
-    linear_process process() const
+    const linear_process& process() const
+    {
+      return m_process;
+    }
+
+    /// \brief Returns a reference to the linear process of the specification.
+    /// \return The linear process of the specification.
+    linear_process& process()
     {
       return m_process;
     }
 
     /// \brief Returns the data specification.
     /// \return The data specification.
-    data::data_specification data() const
+    const data::data_specification& data() const
+    { return m_data; }
+
+    /// \brief Returns a reference to the data specification.
+    /// \return The data specification.
+    data::data_specification& data()
     { return m_data; }
 
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
-    action_label_list action_labels() const
+    const action_label_list& action_labels() const
+    { return m_action_labels; }
+
+    /// \brief Returns a sequence of action labels.
+    /// This sequence contains all action labels occurring in the specification (but it can have more).
+    /// \return A sequence of action labels.
+    action_label_list& action_labels()
     { return m_action_labels; }
 
     /// \brief Returns the initial process.
     /// \return The initial process.
-    process_initializer initial_process() const
+    const process_initializer& initial_process() const
+    {
+      return m_initial_process;
+    }
+
+    /// \brief Returns a reference to the initial process.
+    /// \return The initial process.
+    process_initializer& initial_process()
     {
       return m_initial_process;
     }
@@ -261,62 +283,6 @@ class specification: public atermpp::aterm_appl
     }
 };
 
-/// \brief Sets the data specification of spec and returns the result
-/// \param spec A linear process specification
-/// \param data A data specification
-/// \return The modified specification
-inline
-specification set_data_specification(specification const& spec, data::data_specification const& data)
-{
-  return specification(data,
-                       spec.action_labels(),
-                       spec.process(),
-                       spec.initial_process()
-                      );
-}
-
-/// \brief Sets the action labels of spec and returns the result
-/// \param spec A linear process specification
-/// \param action_labels A sequence of action labels
-/// \return The modified specification
-inline
-specification set_action_labels(specification spec, action_label_list action_labels)
-{
-  return specification(spec.data(),
-                       action_labels,
-                       spec.process(),
-                       spec.initial_process()
-                      );
-}
-
-/// \brief Sets the linear process of spec and returns the result
-/// \param spec A linear process specification
-/// \param lps A linear process
-/// \return The modified specification
-inline
-specification set_lps(specification spec, linear_process lps)
-{
-  return specification(spec.data(),
-                       spec.action_labels(),
-                       lps,
-                       spec.initial_process()
-                      );
-}
-
-/// \brief Sets the initial process of spec and returns the result
-/// \param spec A linear process specification
-/// \param initial_process A process initializer
-/// \return The modified specification
-inline
-specification set_initial_process(specification spec, process_initializer initial_process)
-{
-  return specification(spec.data(),
-                       spec.action_labels(),
-                       spec.process(),
-                       initial_process
-                      );
-}
-
 /// \brief Replaces the free variables of the process and the initial state by the union of them.
 /// \param spec A linear process specification
 /// \return The modified specification
@@ -332,8 +298,7 @@ specification repair_free_variables(const specification& spec)
   linear_process      new_process = set_free_variables(spec.process(), new_free_vars);
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());
 
-  specification result = set_lps(spec, new_process);
-  result = set_initial_process(result, new_init);
+  specification result(spec.data(), spec.action_labels(), new_process, new_init);
   assert(result.is_well_typed());
   return result;
 }
@@ -362,6 +327,33 @@ void traverse_sort_expressions(const specification& spec, OutIter dest)
 inline
 void complete_data_specification(lps::specification& spec)
 {
+  std::set<data::sort_expression> s;
+  traverse_sort_expressions(spec, std::inserter(s, s.end()));
+  for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
+  {
+    if (i->is_standard() && !spec.data().has_sort(*i))
+    {
+      spec.data().import_system_defined_sort(*i);
+    }
+  }
+}
+
+/// \brief Conversion to ATermAppl.
+/// \return The specification converted to ATerm format.
+inline
+ATermAppl specification_to_aterm(const specification& spec)
+{
+  return core::detail::gsMakeLinProcSpec(
+      data::detail::data_specification_to_aterm_data_spec(spec.data()),
+      core::detail::gsMakeActSpec(spec.action_labels()),
+      spec.process(),
+      spec.initial_process()
+  );
+}
+
+inline std::string pp(const specification& spec)
+{
+  return core::pp(specification_to_aterm(spec));
 }
 
 } // namespace lps

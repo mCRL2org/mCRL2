@@ -796,6 +796,12 @@ namespace mcrl2 {
       /// \return True if the data specification is well typed.
       bool is_well_typed() const;
 
+      /// \brief Returns true if the data specification contains the given sort
+      bool has_sort(const sort_expression& s) const
+      {
+        return m_sorts.find(s) != m_sorts.end();
+      }
+
     }; // class data_specification
 
     /// \brief Removes all system defined sorts, constructors, mappings and equations

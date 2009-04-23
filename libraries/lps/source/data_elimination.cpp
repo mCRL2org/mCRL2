@@ -104,9 +104,8 @@ specification remove_unused_data(specification spec, bool keep_basis)
 		}
 	}
 
-	specification new_spec = set_data_specification(spec, elim.apply(spec.data()));
-
-	return new_spec;
+	spec.data() = elim.apply(spec.data());
+	return spec;
 }
 
 }

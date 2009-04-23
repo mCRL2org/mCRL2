@@ -72,11 +72,34 @@ void test_traverse_sort_expressions()
   // BOOST_CHECK(false);
 }
 
+void test_system_defined_sorts()
+{
+  const std::string SPEC(
+    "act a;\n\n"
+    "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
+    "init X(0,1);\n");
+
+  specification spec = mcrl22lps(SPEC);
+  complete_data_specification(spec);
+  std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
+
+  boost::iterator_range<data_specification::constructors_const_iterator> r = spec.data().constructors(data::sort_nat::nat());
+  
+  // make a copy of the range, since it is a filter iterator
+  std::vector<data::sort_expression> c;
+  std::copy(r.begin(), r.end(), std::back_inserter(c));
+
+  BOOST_CHECK(c.size() != 0);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_traverse_sort_expressions();
+  core::garbage_collect();
+
+  test_system_defined_sorts();
   core::garbage_collect();
 
   return 0;

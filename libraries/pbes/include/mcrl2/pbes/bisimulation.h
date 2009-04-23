@@ -451,7 +451,9 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
         equations.push_back(e1);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      specification spec1 = spec;
+      spec1.process() = s;
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -534,7 +536,9 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), and_(match(m, s), match(s, m))));
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      specification spec1 = spec;
+      spec1.process() = s;
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -717,7 +721,9 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         equations.push_back(e2);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      specification spec1 = spec;
+      spec1.process() = s;
+      return build_pbes(equations, model, spec1);
     }
 };
 
@@ -772,7 +778,9 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
         equations.push_back(e1);
       }
 
-      return build_pbes(equations, model, set_lps(spec, s));
+      specification spec1 = spec;
+      spec1.process() = s;
+      return build_pbes(equations, model, spec1);
     }
 };
 

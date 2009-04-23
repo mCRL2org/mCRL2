@@ -172,8 +172,8 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
   // N.B. The replacements may only be applied to the process and the initial process!
   linear_process new_process   = data::variable_map_replace(result.process(), replacements);
   process_initializer new_init = data::variable_map_replace(result.initial_process(), replacements);
-  result = set_lps(result, new_process);
-  result = set_initial_process(result, new_init);
+  result.process() = new_process;
+  result.initial_process() = new_init;
 
   assert(result.is_well_typed());
   return result;

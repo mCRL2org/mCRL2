@@ -271,7 +271,7 @@ lps::specification instantiate_sums(const lps::specification& specification, rew
 
   gsVerboseMsg("Output: %d summands.\n", lps.summands().size());
 
-  return set_lps(specification, lps);
+  return lps::specification(specification.data(), specification.action_labels(), lps, specification.initial_process());
 }
 
 } // namespace lps

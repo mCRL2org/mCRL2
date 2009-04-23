@@ -72,9 +72,10 @@ inline
 specification remove_parameters(const specification& spec, const std::set<data::variable>& to_be_removed)
 {
   process_initializer new_initial_state(spec.initial_process().free_variables(), remove_parameters(spec.initial_process().assignments(), to_be_removed));
-  linear_process p = remove_parameters(spec.process(), to_be_removed);
-  specification result = set_lps(spec, p);
-  result = set_initial_process(result, new_initial_state);
+  linear_process new_process = remove_parameters(spec.process(), to_be_removed);
+  specification result = spec;
+  result.process() = new_process;
+  result.initial_process() = new_initial_state;
   return result;
 }
 

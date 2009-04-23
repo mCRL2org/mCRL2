@@ -333,7 +333,7 @@ void test_instantiate_free_variables()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
-  std::cout << "<lps>" << mcrl2::core::pp(spec) << std::endl;
+  std::cout << "<lps>" << lps::pp(spec) << std::endl;
   bool result = p.instantiate_free_variables();
   std::cout << "<result>" << result << std::endl;
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;

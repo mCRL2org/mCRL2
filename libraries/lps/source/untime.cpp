@@ -61,7 +61,8 @@ static lps::specification remove_deltas(const lps::specification& spec) {
   summands = push_front(summands, delta_summand);
   summands = atermpp::reverse(summands);
 
-  result = set_lps(spec, set_summands(spec.process(), summands));
+  result = spec;
+  result.process() = lps::set_summands(spec.process(), summands);
 
   return result;
 }
@@ -160,7 +161,7 @@ lps::specification untime(const lps::specification& spec) {
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = fresh_variable(spec, mcrl2::data::sort_real_::real_(), "last_action_time");
+  last_action_time = fresh_variable(lps::specification_to_aterm(spec), mcrl2::data::sort_real_::real_(), "last_action_time");
   data::data_expression time_invariant=calculate_time_invariant(spec,last_action_time); 
   untime_process_parameters = data::make_variable_vector(lps.process_parameters());
   untime_process_parameters.push_back(last_action_time);
@@ -201,7 +202,7 @@ lps::specification untime(const lps::specification& spec) {
 
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
-	mcrl2::data::variable time_var = fresh_variable(spec, data::sort_real_::real_(), "time_var");
+	mcrl2::data::variable time_var = fresh_variable(lps::specification_to_aterm(spec), data::sort_real_::real_(), "time_var");
 	untime_summation_variables = data::make_variable_vector(i->summation_variables());
         untime_summation_variables.push_back(time_var);
 

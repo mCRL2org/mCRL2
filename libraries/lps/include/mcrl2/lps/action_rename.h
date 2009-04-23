@@ -421,7 +421,7 @@ lps::specification action_rename(
   action_list lps_new_actions = action_list();;
 
   data::postfix_identifier_generator generator("");
-  generator.add_to_context(lps_old_spec);
+  generator.add_to_context(specification_to_aterm(lps_old_spec));
 
   bool to_tau=false;
   bool to_delta=false;

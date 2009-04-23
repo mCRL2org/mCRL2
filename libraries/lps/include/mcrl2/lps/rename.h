@@ -102,8 +102,8 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
   process_initializer new_initial_process = atermpp::partial_replace(spec.initial_process(), lps::detail::make_variable_replacer(r.first, r.second));
 
   specification result = spec;
-  result = set_lps(result, new_process);
-  result = set_initial_process(result, new_initial_process);
+  result.process() = new_process;
+  result.initial_process() = new_initial_process;
   return result;
 }
 
