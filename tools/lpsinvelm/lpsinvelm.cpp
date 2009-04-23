@@ -310,7 +310,7 @@ using namespace mcrl2::data::detail;
         exit(1);
       }
 
-      f_lps = mcrl2::lps::specification(specification_to_aterm(f_reconstructed_spec));
+      f_lps = f_reconstructed_spec;
     }
 
     // --------------------------------------------------------------------------------------------

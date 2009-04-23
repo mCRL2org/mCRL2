@@ -593,7 +593,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         throw mcrl2::runtime_error("Data implementation of the invariant formula failed.\n");
       }
 
-      f_lps = specification(specification_to_aterm(f_reconstructed_lps));
+      f_lps = f_reconstructed_lps;
 
     }
 
