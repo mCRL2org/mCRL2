@@ -2,8 +2,6 @@ project lps
        : source-location ../source
        ;
 
-
-
 mcrl2-library lps
        :
          lin_std.cpp
@@ -11,7 +9,7 @@ mcrl2-library lps
          sumelm.cpp
          suminst.cpp
          untime.cpp
-#         nextstate_standard.cpp
+         nextstate_standard.cpp
          confluence_checker.cpp
          disjointness_checker.cpp
          invariant_checker.cpp
