@@ -405,9 +405,13 @@ void test_system_defined()
 {
   std::clog << "test_system_defined" << std::endl;
 
-  data_specification specification(parse_data_specification(
+  data_specification specification;
+
+  BOOST_CHECK(!specification.constructors(sort_bool_::bool_()).empty());
+
+  specification = parse_data_specification(
     "sort S;"
-    "map f: Set(S);"));
+    "map f: Set(S);");
 
   BOOST_CHECK(search(specification.sorts(), sort_set_::set_(basic_sort("S"))));
   BOOST_CHECK(search(specification.sorts(), sort_fset::fset(basic_sort("S"))));
