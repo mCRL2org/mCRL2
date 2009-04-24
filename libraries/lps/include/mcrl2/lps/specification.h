@@ -38,6 +38,7 @@ namespace lps {
 
 class specification;
 ATermAppl specification_to_aterm(const specification&);
+void complete_data_specification(lps::specification&);
 
 /// \brief Linear process specification.
 // sort ...;
@@ -137,6 +138,7 @@ class specification
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
       //}
+      complete_data_specification(*this);
     }
 
     /// \brief Writes the specification to file.
@@ -147,7 +149,7 @@ class specification
     /// If binary is true the linear process is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
     /// much more compact than the ascii representation.
-    void save(const std::string& filename, bool binary = true)
+    void save(const std::string& filename, bool binary = true) const
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
@@ -335,7 +337,7 @@ void complete_data_specification(lps::specification& spec)
   traverse_sort_expressions(spec, std::inserter(s, s.end()));
   for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
   {
-    if (i->is_standard() && !spec.data().has_sort(*i))
+    if (i->is_standard())
     {
       spec.data().import_system_defined_sort(*i);
     }

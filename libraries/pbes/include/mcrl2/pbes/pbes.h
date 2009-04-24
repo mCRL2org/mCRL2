@@ -53,6 +53,9 @@ namespace pbes_system {
 
 using mcrl2::core::pp;
 
+template <typename Container>
+void complete_data_specification(pbes<Container>&);
+
 /// \cond INTERNAL_DOCS
 
   /// \brief Normalizes a PBES equation
@@ -368,6 +371,7 @@ class pbes
       //{
       //  throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
       //}
+      complete_data_specification(*this);
     }
 
     /// \brief Returns true if the PBES is a BES (boolean equation system).
@@ -435,7 +439,10 @@ class pbes
       //{
       //  throw mcrl2::runtime_error("PBES is not well typed (pbes::save())");
       //}
-      atermpp::aterm t = ATermAppl(*this);
+
+      pbes<Container> tmp(*this);
+      tmp.data() = data::remove_all_system_defined(tmp.data());
+      atermpp::aterm t = ATermAppl(tmp);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -744,6 +751,22 @@ void traverse_sort_expressions(const pbes<Container>& p, OutIter dest)
   }
 
   traverse_sort_expressions(p.initial_state(), dest);
+}
+
+/// \brief Adds all sorts that appear in the process of l to the data specification of l.
+/// \param l A linear process specification
+template <typename Container>
+void complete_data_specification(pbes<Container>& p)
+{
+  std::set<data::sort_expression> s;
+  traverse_sort_expressions(spec, std::inserter(s, s.end()));
+  for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
+  {
+    if (i->is_standard())
+    {
+      p.data().import_system_defined_sort(*i);
+    }
+  }
 }
 
 } // namespace pbes_system
