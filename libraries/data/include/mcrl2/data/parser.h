@@ -149,7 +149,7 @@ namespace detail {
 
     try
     {
-      data_specification data_spec(data::parse_data_specification(s));
+      data_specification data_spec(remove_all_system_defined(data::parse_data_specification(s)));
 
       // extract the left hand side of the equation 'x == x'
       std::vector<data_equation> eqn(data_spec.equations().begin(), data_spec.equations().end());

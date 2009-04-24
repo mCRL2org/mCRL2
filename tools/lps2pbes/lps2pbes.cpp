@@ -42,7 +42,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::modal;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::utilities::tools;
-                       
+
 class lps2pbes_tool : public squadt_tool<input_output_tool>
 {
   typedef squadt_tool<input_output_tool> super;
@@ -50,7 +50,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
   protected:
     //t_phase represents the phases at which the program should be able to stop
     typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
-    
+
     bool pretty;
     bool timed;
     t_phase end_phase;
@@ -86,7 +86,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       pretty    = 0 < parser.options.count("pretty");
       timed     = 0 < parser.options.count("timed");
       end_phase = PH_NONE;
-      
+
       if (parser.options.count("end-phase"))
       {
         std::string phase = parser.option_argument("end-phase");
@@ -98,7 +98,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
           parser.error("option -p has illegal argument '" + phase + "'");
         }
       }
-      
+
       //check for presence of -f
       if (parser.options.count("formula")) {
         formfilename = parser.option_argument("formula");
@@ -120,7 +120,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       //open input_filename()
       specification lps_spec;
       lps_spec.load(input_filename());
-    
+
       //parse formula from formfilename
       gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
       std::ifstream formstream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
@@ -137,7 +137,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_PARSE) {
         return result;
       }
-    
+
       lps_spec.data() = mcrl2::data::remove_all_system_defined(lps_spec.data());
       ATermAppl reconstructed_spec = specification_to_aterm(lps_spec);
 
@@ -151,7 +151,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_TYPE_CHECK) {
         return result;
       }
-    
+
       //implement standard data types and type constructors on the result
       gsVerboseMsg("implementing standard data types and type constructors...\n");
       result = implement_data_state_frm(result, reconstructed_spec);
@@ -162,10 +162,10 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_DATA_IMPL) {
         return result;
       }
-    
+
       //update lps_spec with the newly implemented specification
       lps_spec = specification(reconstructed_spec);
-    
+
       //translate regular formulas in terms of state and action formulas
       gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");
       result = translate_reg_frms(result);
@@ -176,7 +176,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_REG_FRM_TRANS) {
         return result;
       }
-    
+
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
       pbes<> p = pbes_translate(state_formula(result), lps_spec, timed);
@@ -184,7 +184,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (result == NULL) {
         return NULL;
       }
-    
+
       return result;
     }
 
@@ -195,7 +195,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       state_formula formula = modal::detail::mcf2statefrm(core::read_text(formfilename), spec);
       return lps2pbes(spec, formula, timed);
     }
-    
+
   public:
     lps2pbes_tool() : super(
       "lps2pbes",
@@ -275,7 +275,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       static_cast< void > (initialised); // harmless, and prevents unused variable warnings
 
-      c.add_input_configuration("lps_in", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
+      c.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
@@ -283,6 +283,9 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
       // Set default values for configuration
       if (!c.option_exists("use_timed_algorithm")) {
@@ -352,7 +355,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       }
 
       /* Add output file to the configuration */
-      if (c.output_exists("pbes_out")) {
+      if (c.output_exists("main_output")) {
         tipi::configuration::object& output_file = c.get_output("pbes_out");
 
         output_file.location(c.get_output_name(".pbes"));
@@ -364,36 +367,37 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         else {
           c.add_output("pbes_out", tipi::mime_type("pbes", tipi::mime_type::text), c.get_output_name(".pbes"));
         }
-      }                            
+      }
 
       c.get_option("use_timed_algorithm").set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
       c.get_option("selected_output_format").set_argument_value< 0 >(format_selector.get_selection());
       c.get_option("stop_after_phase").set_argument_value< 0 >(phase_selector.get_selection());
 
       send_clear_display();
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      update_configuration(c);
     }
 
     /** \brief check an existing configuration object to see if it is usable */
     bool check_configuration(tipi::configuration const& c) const {
-      bool result = true;
-
-      result &= c.input_exists("lps_in");
-      result &= c.input_exists("formula_in");
-      result &= c.output_exists("pbes_out");
-      result &= c.option_exists("stop_after_phase");
-      result &= c.option_exists("use_timed_algorithm");
-
-      return (result);
+      return c.input_exists("main-input") &&
+             c.input_exists("formula_in") &&
+             c.output_exists("main-output") &&
+             c.option_exists("stop_after_phase") &&
+             c.option_exists("use_timed_algorithm");
     }
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
       pretty           = c.get_option_argument< pbes_output_format >("selected_output_format") != normal;
       timed            = c.get_option_argument< bool >("use_timed_algorithm");
       end_phase        = c.get_option_argument< t_phase >("stop_after_phase");
       formfilename     = c.get_input("formula_in").location();
-      input_filename()       = c.get_input("lps_in").location();
-      output_filename()      = c.get_output("pbes_out").location();
       return run();
     }
 #endif

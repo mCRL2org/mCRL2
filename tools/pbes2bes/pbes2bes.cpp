@@ -336,6 +336,8 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
         append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
 
+      add_rewrite_option(d, m);
+
       button& okay_button = d.create< button >().set_label("OK");
 
       m.append(d.create< label >().set_text(" ")).

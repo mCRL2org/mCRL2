@@ -41,7 +41,7 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
       return true;
     }
 
-// Squadt protocol interface and utility pseudo-library
+// Squadt protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const {

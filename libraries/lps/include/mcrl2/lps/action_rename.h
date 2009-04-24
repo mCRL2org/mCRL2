@@ -18,8 +18,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -320,20 +318,6 @@ namespace lps {
       return result;
     }
 
-    /// \brief Applies data implementation to an action rename specification
-    /// \param ar_spec A term
-    /// \param spec A term containing a specification
-    /// \return A term in an undocumented format
-    /// \param lps_spec A term
-    inline
-    ATermAppl implement_action_rename_specification(ATermAppl ar_spec, ATermAppl& lps_spec)
-    {
-      ATermAppl result = data::detail::implement_data_action_rename_spec(ar_spec, lps_spec);
-      if (result == NULL)
-        throw runtime_error("process data implementation error");
-      return result;
-    }
-
     using namespace mcrl2::data;
     using namespace mcrl2::lps;
 
@@ -383,14 +367,14 @@ namespace lps {
   /// \param spec A linear process specification
   /// \return An action rename specification
   inline
-  action_rename_specification parse_action_rename_specification(std::istream& in, lps::specification& spec)
+  action_rename_specification parse_action_rename_specification(std::istream& in, lps::specification const& spec)
   {
     //std::istringstream in(text);
-    ATermAppl lps_spec = specification_to_aterm(spec);
     ATermAppl result = detail::parse_action_rename_specification(in);
+    lps::specification copy_specification(spec);
+    copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data());
+    ATermAppl lps_spec = specification_to_aterm(copy_specification);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
-    result           = detail::implement_action_rename_specification(result, lps_spec);
-    spec = lps::specification(lps_spec);
     return action_rename_specification(result);
   }
 
