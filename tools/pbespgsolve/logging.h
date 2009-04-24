@@ -16,6 +16,7 @@
 extern "C" {
 #endif
 
+void set_logging_enabled(int enabled);
 void info(const char *fmt, ...);
 void warn(const char *fmt, ...);
 void error(const char *fmt, ...);

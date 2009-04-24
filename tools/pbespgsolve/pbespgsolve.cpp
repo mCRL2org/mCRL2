@@ -20,6 +20,7 @@
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/pbes/parity_game_generator.h"
+#include "logging.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
@@ -700,7 +701,7 @@ class pg_solver_tool: public input_tool
     bool run()
     {
       // this determines if the info() function displays output
-      logging_enabled = mcrl2::core::gsVerbose ? 1 : 0;
+      set_logging_enabled(mcrl2::core::gsVerbose ? 1 : 0);
 
       if (mcrl2::core::gsVerbose)
       {

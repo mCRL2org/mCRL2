@@ -21,15 +21,20 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/core/regfrmtrans.h"
+#include "mcrl2/data/detail/data_implementation.h"
+#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/detail/algorithms.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
-using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
@@ -49,7 +54,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
     bool pretty;
     bool timed;
     t_phase end_phase;
-    string formfilename;
+    std::string formfilename;
 
     std::string synopsis() const
     {
@@ -118,7 +123,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
     
       //parse formula from formfilename
       gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
-      ifstream formstream(formfilename.c_str(), ifstream::in|ifstream::binary);
+      std::ifstream formstream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
       if (!formstream.is_open()) {
         gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
         return NULL;
@@ -182,6 +187,14 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
     
       return result;
     }
+
+    pbes<> create_pbes_new()
+    {
+      specification spec;
+      spec.load(input_filename());
+      state_formula formula = modal::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      return lps2pbes(spec, formula, timed);
+    }
     
   public:
     lps2pbes_tool() : super(
@@ -216,10 +229,10 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         pbes_spec.save(output_filename());
       } else {
         if (output_filename().empty()) {
-          PrintPart_CXX(cout, (ATerm) result, (pretty)?ppDefault:ppInternal);
-          cout << endl;
+          PrintPart_CXX(std::cout, (ATerm) result, (pretty)?ppDefault:ppInternal);
+          std::cout << std::endl;
         } else {
-          ofstream outstream(output_filename().c_str(), ofstream::out|ofstream::binary);
+          std::ofstream outstream(output_filename().c_str(), std::ofstream::out|std::ofstream::binary);
           if (!outstream.is_open()) {
             throw mcrl2::runtime_error("could not open output file '" + output_filename() + "' for writing");
           }

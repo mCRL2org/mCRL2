@@ -9,7 +9,12 @@
 #define ERROR 2
 #define FATAL 3
 
-extern int logging_enabled;
+static int logging_enabled;
+
+void set_logging_enabled(int enabled)
+{
+  logging_enabled = enabled;
+}
 
 /* Prints an error message followed by a newline character,
    prefixed by the time in seconds spend by the program

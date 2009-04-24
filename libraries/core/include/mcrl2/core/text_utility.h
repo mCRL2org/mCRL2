@@ -19,6 +19,7 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -74,8 +75,14 @@ namespace core {
     if (!in)
     {
       if (warn)
+      {
         std::cerr << "Could not open input file: " << filename << std::endl;
-      return "";
+        return "";
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Could not open input file: " + filename);
+      }
     }
     in.unsetf(std::ios::skipws); //  Turn of white space skipping on the stream
 

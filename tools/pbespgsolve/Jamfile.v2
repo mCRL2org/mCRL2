@@ -20,7 +20,6 @@ SOURCES = Compatibility.cc
           PredecessorLiftingStrategy.cc
           SmallProgressMeasures.cc
           logging.c
-          logging_enabled.c
         ;
 
 lib pg : $(SOURCES) ;
