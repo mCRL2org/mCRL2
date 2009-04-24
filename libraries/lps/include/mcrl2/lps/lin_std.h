@@ -13,9 +13,10 @@
 #define MCRL2_LPS_LIN_STD_H
 
 #include <aterm2.h>
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lin_types.h"
 
-ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options);
+mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_options);
 //Pre:  spec_term is an mCRL2 specification that adheres to the internal
 //      structure after data implementation
 //      lin_options represents the options that should be used during

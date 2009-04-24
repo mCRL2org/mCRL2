@@ -43,6 +43,7 @@
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/exception.h"
 
 #include "workarounds.h" // DECL_A
 
@@ -9298,7 +9299,7 @@ static ATermAppl transform(
 
 /**************** linearise_std **************************************/
 
-ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
+mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_options)
 {
   //set global parameters
   regular    = (lin_options.lin_method != lmStack);
@@ -9323,7 +9324,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
   { uninitialize_data();
-    return NULL;
+    throw mcrl2::runtime_error("Error: linearization failed");
   }
   initialize_symbols(); /* This must be done after storing the data,
                            to avoid a possible name conflict with action
@@ -9333,7 +9334,7 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   if (result == NULL)
   { uninitialize_data();
     uninitialize_symbols();
-    return NULL;
+    throw mcrl2::runtime_error("Error: linearization failed");
   }
   result = gsMakeLinProcSpec(
     gsMakeDataSpec(
@@ -9364,11 +9365,15 @@ ATermAppl linearise_std(ATermAppl spec, t_lin_options lin_options)
   uninitialize_symbols();
   rewr.release();
 
-  return result;
-  // lps::specification spec1(result);
+  if (!result)
+  {
+    throw mcrl2::runtime_error("Error: linearization failed");
+  }
+
+  lps::specification spec1(result);
   // add missing sorts to the data specification
-  // lps::complete_data_specification(spec1);
-  // return spec1;
+  lps::complete_data_specification(spec1);
+  return spec1;
 }
 
 /// \brief Function to initialize the global variables in this file.

@@ -80,10 +80,7 @@ namespace detail {
   inline
   specification linearise(ATermAppl spec, t_lin_options options)
   {
-    ATermAppl result = linearise_std(spec, options);
-    if (result == NULL)
-      throw mcrl2::runtime_error("linearisation error");
-    return atermpp::aterm_appl(result);
+    return linearise_std(spec, options);
   }
 
   /// \brief Reads a state formula from an input stream
