@@ -39,7 +39,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
-#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 //LPS-Framework
 #include "mcrl2/pbes/utility.h"
@@ -70,7 +70,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
+class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > >
 {
   protected:
     // Tool options.
@@ -82,7 +82,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
-    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+    typedef squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > > super;
 
     std::string default_rewriter() const
     { return "quantifier-finite";
@@ -225,7 +225,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       }
 
       // load the pbes
-      pbes<> p;
+      mcrl2::pbes_system::pbes<> p;
       p.load(m_input_filename);
 
       if (!p.is_well_typed())
@@ -351,7 +351,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
       return true;
     }
-};
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -367,14 +366,16 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
   private:
 
-    enum bes_output_format {
+    enum bes_output_format
+    {
       none,
       vasy,
       cwi,
       pbes
     };
 
-    static bool initialise_types() {
+    static bool initialise_types()
+    {
       tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
 
       transformation_strategy_enumeration.
@@ -408,7 +409,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c);
+    void user_interactive_configuration(tipi::configuration& c)
     {
       using namespace tipi;
       using namespace tipi::layout;
@@ -432,9 +433,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       }
       if (!c.option_exists(option_unused_data)) {
         c.add_option(option_unused_data).set_argument_value< 0 >(true);
-      }
-      if (!c.option_exists(option_rewrite_strategy)) {
-        c.add_option(option_rewrite_strategy).set_argument_value< 0 >(data::rewriter::jitty);
       }
       if (!c.option_exists(option_transformation_strategy)) {
         c.add_option(option_transformation_strategy).set_argument_value< 0 >(lazy);
@@ -508,7 +506,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
       c.get_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
       c.get_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-      c.get_option(option_rewrite_strategy).set_argument_value< 0 >(rewrite_strategy_selector.get_selection());
 
       if (c.get_option_argument< bes_output_format >(option_selected_output_format) != none)
       {
@@ -576,8 +573,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
       return result;
     }
-};
 #endif
+};
 
 int main(int argc, char* argv[])
 {

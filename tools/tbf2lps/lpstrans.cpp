@@ -32,12 +32,9 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/data/detail/data_implementation.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-using namespace mcrl2::data::detail;
-
 
 static bool remove_bools = true;
 static bool remove_standard_functions = true;
@@ -566,5 +563,5 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
 	ATunprotectList(&typelist);
 
-	return implement_data_lin_proc_spec(r);
+	return r;
 }

@@ -18,8 +18,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lts.h"
@@ -50,19 +48,13 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification &spec)
   {
     gsVerboseMsg("cannot parse action as mCRL2\n");
   } else {
-    ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(spec));
-    t = type_check_mult_act(t,reconstructed_spec);
+    lps::specification copy(spec);
+    copy.data() = data::remove_all_system_defined(copy.data());
+    t = type_check_mult_act(t,specification_to_aterm(copy));
     if ( t == NULL )
     {
       gsVerboseMsg("error type checking action\n");
-    } else {
-      t = implement_data_mult_act(t,reconstructed_spec);
-      if ( t == NULL )
-      {
-        gsVerboseMsg("error implementing data of action\n");
-      }
     }
-    spec = lps::specification(reconstructed_spec);
   }
 
   return (ATerm) t;
@@ -81,7 +73,9 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
 
     // typechecking and data implementation of terms needs an lps
     // before data implementation
-    ATermAppl reconstructed_lps = reconstruct_spec(specification_to_aterm(spec));
+    lps::specification copy(spec);
+    copy.data() = data::remove_all_system_defined(copy.data());
+    ATermAppl spec_for_type_check(specification_to_aterm(copy));
 
     std::stringstream sort_ss(ATgetName(ATgetAFun(sort)));
     sort = parse_sort_expr(sort_ss);
@@ -90,7 +84,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
       gsVerboseMsg("error parsing state argument sort\n");
       return NULL;
     }
-    sort = type_check_sort_expr(sort,reconstructed_lps);
+    sort = type_check_sort_expr(sort,spec_for_type_check);
     if ( sort == NULL )
     {
       gsVerboseMsg("error type checking state argument sort\n");
@@ -104,20 +98,12 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification &spec)
       gsVerboseMsg("error parsing state argument\n");
       return NULL;
     }
-    expr = type_check_data_expr(expr,sort,reconstructed_lps);
+    expr = type_check_data_expr(expr,sort,spec_for_type_check);
     if ( expr == NULL )
     {
       gsVerboseMsg("error type checking state argument\n");
       return NULL;
     }
-    expr = implement_data_expr(expr,reconstructed_lps);
-    if ( expr == NULL )
-    {
-      gsVerboseMsg("error implementing data of state argument\n");
-      return NULL;
-    }
-
-    spec = lps::specification(reconstructed_lps);
 
     state_args[i] = (ATerm) expr;
   }

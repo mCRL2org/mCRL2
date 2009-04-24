@@ -24,7 +24,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -96,7 +95,7 @@ namespace detail {
   }
 
   /// \brief Type checks state formula
-  /// \pre spec is a {lps specification, pbes specification, data specification} before data implementation
+  /// \pre spec is a {lps specification, pbes specification, data specification}
   /// \param formula A term
   /// \param spec A term
   /// \return A term in an undocumented format
@@ -106,21 +105,6 @@ namespace detail {
     ATermAppl result = core::type_check_state_frm(formula, spec);
     if (result == NULL)
       throw mcrl2::runtime_error("type check error");
-    return result;
-  }
-
-  /// \brief Applies data implementation to a state formula
-  /// \pre spec is a {lps specification, pbes specification, data specification}
-  /// before data implementation
-  /// \param formula A term
-  /// \param spec A term
-  /// \return A term in an undocumented format
-  inline
-  ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
-  {
-    ATermAppl result = data::detail::implement_data_state_frm(formula, spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("data implementation error");
     return result;
   }
 

@@ -1081,10 +1081,6 @@ static specificationbasictype *create_spec(ATermAppl t)
   spec->eqns = ATempty;
   ATermAppl data_spec = ATAgetArgument(t,0);
   t_data_decls data_decls = get_data_decls(data_spec);
-  t_data_decls data_decls_copy = get_data_decls(
-                           implement_data_spec(data_spec));
-  subtract_data_decls(&data_decls_copy, &data_decls);
-  insert_data_decls(data_decls_copy, spec, false);
   insert_data_decls(data_decls, spec, true);
 
   spec->acts = ATLgetArgument(ATAgetArgument(t,1),0);

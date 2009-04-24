@@ -22,7 +22,6 @@
 //mCRL2 specific
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
@@ -101,12 +100,6 @@ int main(int argc, char** argv)
       result = type_check_pbes_spec(result);
       if (result == NULL) {
         throw mcrl2::runtime_error("type checking failed");
-      }
-      //implement standard data types and type constructors on the result
-      gsVerboseMsg("implementing standard data types and type constructors...\n");
-      result = implement_data_pbes_spec(result);
-      if (result == NULL) {
-        throw mcrl2::runtime_error("data implementation failed");
       }
       //check if PBES is monotonic
       try {

@@ -19,8 +19,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::core;
@@ -260,23 +258,19 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
-            ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(*spec));
-            t = type_check_mult_act(t,reconstructed_spec);
+            lps::specification copy(*spec);
+            copy.data() = data::remove_all_system_defined(copy.data());
+            t = type_check_mult_act(t,specification_to_aterm(copy));
             if ( t == NULL )
             {
               gsVerboseMsg("error type checking action\n");
-            } else {
-              t = implement_data_mult_act(t,reconstructed_spec);
-              if ( t == NULL )
-              {
-                gsVerboseMsg("error implementing data of action\n");
-              } else {
-                no_convert = false;
-                label_values[i] = (ATerm) t;
-                applied_conversion = true;
-              }
             }
-            *spec = lps::specification(reconstructed_spec);
+            else
+            {
+              no_convert = false;
+              label_values[i] = (ATerm) t;
+              applied_conversion = true;
+            }
           }
         }
         if ( no_convert )
