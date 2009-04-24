@@ -22,8 +22,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/specification.h"
@@ -61,23 +59,6 @@ namespace detail {
     return result;
   }
 
-  /// \brief Implements sorts and data expressions in formula,
-  /// using the data from spec.
-  /// \param formula A term
-  /// \param spec A term
-  /// lps specification before data implementation, or
-  /// a pbes specification before data implementation, or
-  /// a data specification before data implementation.
-  /// \return The transformed formula
-  inline
-  ATermAppl implement_data_state_formula(ATermAppl formula, ATermAppl& spec)
-  {
-    ATermAppl result = data::detail::implement_data_state_frm(formula, spec);
-    if (result == NULL)
-      throw mcrl2::runtime_error("data implementation error");
-    return result;
-  }
-
   /// \brief Converts a regular formula to a state formula
   /// \param formula A term
   /// \return The converted formula
@@ -104,12 +85,10 @@ namespace detail {
     ATermAppl f = parse_state_formula(formula_stream);
     lps::specification copy_spec = spec;
     copy_spec.data() = remove_all_system_defined(spec.data());
-    ATermAppl reconstructed_spec = data::detail::reconstruct_spec(specification_to_aterm(copy_spec));
+    ATermAppl reconstructed_spec = specification_to_aterm(copy_spec);
     f = type_check_state_formula(f, reconstructed_spec);
-    f = implement_data_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
-    ATermAppl tmp = specification_to_aterm(copy_spec); // Force the data specification to be recomputed
-    spec = lps::specification(tmp);
+    spec = lps::specification(reconstructed_spec); // Force the data specification to be recomputed
     return f;
   }
 

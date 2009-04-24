@@ -21,8 +21,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
@@ -135,8 +133,9 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         return result;
       }
     
-      ATermAppl reconstructed_spec = reconstruct_spec(specification_to_aterm(lps_spec));
-    
+      lps_spec.data() = mcrl2::data::remove_all_system_defined(lps_spec.data());
+      ATermAppl reconstructed_spec = specification_to_aterm(lps_spec);
+
       //type check formula
       gsVerboseMsg("type checking...\n");
       result = type_check_state_frm(result, reconstructed_spec);

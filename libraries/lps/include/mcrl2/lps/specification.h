@@ -36,6 +36,9 @@ namespace mcrl2 {
 /// \brief The main namespace for the LPS library.
 namespace lps {
 
+class specification;
+ATermAppl specification_to_aterm(const specification&);
+
 /// \brief Linear process specification.
 // sort ...;
 //
@@ -149,8 +152,9 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed());
-      ATermAppl t = *this;
-      core::detail::save_aterm(reinterpret_cast<ATerm>(t), filename, binary);
+      specification tmp(*this);
+      tmp.data() = data::remove_all_system_defined(tmp.data());
+      core::detail::save_aterm(reinterpret_cast<ATerm>(specification_to_aterm(tmp)), filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
