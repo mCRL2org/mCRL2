@@ -726,6 +726,26 @@ std::set<data::variable> compute_free_variables(const pbes<Container>& p)
   return result;
 }
 
+/// \brief Traverses the summand, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename Container, typename OutIter>
+void traverse_sort_expressions(const pbes<Container>& p, OutIter dest)
+{
+  // equations
+  for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  {
+    traverse_sort_expressions(*i, dest);
+  }
+
+  // free variables
+  for (atermpp::set<data::variable>::const_iterator i = p.free_variables().begin(); i != p.free_variables().end(); ++i)
+  {
+    *dest++ = i->sort();
+  }
+
+  traverse_sort_expressions(p.initial_state(), dest);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

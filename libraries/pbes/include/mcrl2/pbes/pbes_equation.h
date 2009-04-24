@@ -166,6 +166,15 @@ class pbes_equation: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<pbes_equation> pbes_equation_list;
 
+/// \brief Traverses the summand, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const pbes_equation& e, OutIter dest)
+{
+  traverse_sort_expressions(e.variable(), dest);
+  traverse_sort_expressions(e.formula(), dest);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

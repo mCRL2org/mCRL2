@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <set>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -31,6 +32,7 @@
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/core/detail/print_utility.h"
 
 using namespace mcrl2;
 using data::make_vector;
@@ -339,6 +341,19 @@ void test_instantiate_free_variables()
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
 }
 
+void test_traverse_sort_expressions()
+{
+  using data::sort_expression;
+
+  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
+  bool timed = false;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  std::set<sort_expression> s;
+  traverse_sort_expressions(p, std::inserter(s, s.end()));
+  std::cout << core::detail::print_pp_set(s) << std::endl;
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -359,6 +374,8 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
   test_instantiate_free_variables();
   core::garbage_collect();
-
+  test_traverse_sort_expressions();
+  core::garbage_collect();
+ 
   return 0;
 }
