@@ -53,8 +53,8 @@ namespace pbes_system {
 
 using mcrl2::core::pp;
 
-template <typename Container>
-void complete_data_specification(pbes<Container>&);
+template <typename Container> class pbes;
+template <typename Container> void complete_data_specification(pbes<Container>&);
 
 /// \cond INTERNAL_DOCS
 
@@ -759,7 +759,7 @@ template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
-  traverse_sort_expressions(spec, std::inserter(s, s.end()));
+  traverse_sort_expressions(p, std::inserter(s, s.end()));
   for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
   {
     if (i->is_standard())
