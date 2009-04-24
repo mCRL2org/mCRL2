@@ -24,8 +24,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
@@ -190,21 +188,16 @@ using namespace mcrl2::data::detail;
 
     mcrl2::data::data_specification Form_Check::load_specification(const std::string &infilename)
     {
-      ATermAppl raw_specification;
-      if (infilename.empty()) {
-        //use empty data specification
-        raw_specification = implement_data_spec(mcrl2::core::detail::gsMakeEmptyDataSpec());
-      } else {
+      if (!infilename.empty()) {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-        raw_specification = (ATermAppl) mcrl2::core::detail::load_aterm(infilename);
+        ATermAppl raw_specification = (ATermAppl) mcrl2::core::detail::load_aterm(infilename);
         if (!mcrl2::core::detail::gsIsLinProcSpec(raw_specification) && !mcrl2::core::detail::gsIsPBES(raw_specification)) {
           throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS or PBES");
         }
-        raw_specification = ATAgetArgument(raw_specification, 0);
+        return mcrl2::data::data_specification(ATAgetArgument(raw_specification, 0));
       }
-      mcrl2::data::data_specification spec(raw_specification);
-      return spec;
+      return mcrl2::data::data_specification();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -242,14 +235,9 @@ using namespace mcrl2::data::detail;
         throw mcrl2::runtime_error("parsing formula from " + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "failed");
       }
       //typecheck the formula
-      f_formula = type_check_data_expr(f_formula, mcrl2::core::detail::gsMakeSortIdBool(), v_reconstructed_spec);
+      f_formula = type_check_data_expr(f_formula, mcrl2::data::sort_bool_::bool_(), v_reconstructed_spec);
       if(!f_formula){
         throw mcrl2::runtime_error("type checking formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
-      }
-      //implement data in the formula
-      f_formula = implement_data_expr(f_formula,v_reconstructed_spec);
-      if(!f_formula){
-        throw mcrl2::runtime_error("implementation of data types in the formula from '" + (f_formula_file_name.empty()?"stdin":"'" + f_formula_file_name + "'") + "' failed");
       }
 
       //update spec with the contents of v_reconstructed_spec
