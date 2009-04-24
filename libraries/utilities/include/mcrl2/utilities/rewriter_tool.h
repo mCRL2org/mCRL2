@@ -12,7 +12,9 @@
 #ifndef MCRL2_UTILITIES_REWRITER_TOOL_H
 #define MCRL2_UTILITIES_REWRITER_TOOL_H
 
+#include <iostream>
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2 {
 
@@ -83,7 +85,7 @@ namespace tools {
         Tool::add_options(desc);
 
         desc.add_option(
-          "rewriter", interface_description::mandatory_argument< data::rewriter::strategy >("NAME", "jitty"),
+          "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
           "use rewrite strategy NAME:\n"
           "  'jitty' for jitty rewriting (default),\n"
           "  'jittyp' for jitty rewriting with prover,\n"

@@ -40,8 +40,6 @@ using namespace mcrl2::modal;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::utilities::tools;
                        
-#include "mcrl2/utilities/mcrl2_squadt_interface.h"
-
 class lps2pbes_tool : public squadt_tool<input_output_tool>
 {
   typedef squadt_tool<input_output_tool> super;

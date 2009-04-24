@@ -348,6 +348,13 @@ namespace mcrl2 {
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&);
       friend mandatory_argument< std::string > make_mandatory_argument(std::string const&, std::string const&);
 
+      template <typename Arg>
+      friend optional_argument <Arg>  make_optional_argument(std::string const&, std::string const&);
+      template <typename Arg>
+      friend mandatory_argument<Arg> make_mandatory_argument(std::string const&);
+      template <typename Arg>
+      friend mandatory_argument<Arg> make_mandatory_argument(std::string const&, std::string const&);
+
         typedef std::map< std::string, option_descriptor > option_map;
 
         typedef std::map< const char,  std::string, option_identifier_less > short_to_long_map;
@@ -854,10 +861,31 @@ namespace mcrl2 {
     };
 
     /// Creates an optional option argument specification object
+    template <typename Arg>
+    interface_description::optional_argument<Arg> make_optional_argument(std::string const& name, std::string const& default_value)
+    {
+      return interface_description::optional_argument<Arg>(name, default_value);
+    }
+
+    /// Creates an optional option argument specification object
     interface_description::optional_argument< std::string > make_optional_argument(std::string const& name, std::string const& default_value);
 
     /// Creates a mandatory option argument specification object
+    template <typename Arg>
+    interface_description::mandatory_argument<Arg> make_mandatory_argument(std::string const& name)
+    {
+      return interface_description::mandatory_argument<Arg>(name);
+    }
+
+    /// Creates a mandatory option argument specification object
     interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name);
+
+    /// Creates a mandatory option argument specification object
+    template <typename Arg>
+    interface_description::mandatory_argument<Arg> make_mandatory_argument(std::string const& name, std::string const& standard_value)
+    {
+      return interface_description::mandatory_argument<Arg>(name, standard_value);
+    }
 
     /// Creates a mandatory option argument specification object
     interface_description::mandatory_argument< std::string > make_mandatory_argument(std::string const& name, std::string const& standard_value);
