@@ -23,8 +23,6 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/core/regfrmtrans.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
@@ -72,7 +70,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
           "stop conversion and output the state formula after phase PHASE: "
           "'pa' (parsing), "
           "'tc' (type checking), "
-          "'di' (data implementation), or "
           "'rft' (regular formula translation)"
         , 'p');
       desc.add_option("pretty",
@@ -138,6 +135,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         return result;
       }
 
+      // prepare specification for type-checking
       lps_spec.data() = mcrl2::data::remove_all_system_defined(lps_spec.data());
       ATermAppl reconstructed_spec = specification_to_aterm(lps_spec);
 
@@ -151,20 +149,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_TYPE_CHECK) {
         return result;
       }
-
-      //implement standard data types and type constructors on the result
-      gsVerboseMsg("implementing standard data types and type constructors...\n");
-      result = implement_data_state_frm(result, reconstructed_spec);
-      if (result == NULL) {
-        gsErrorMsg("data implementation failed\n");
-        return NULL;
-      }
-      if (end_phase == PH_DATA_IMPL) {
-        return result;
-      }
-
-      //update lps_spec with the newly implemented specification
-      lps_spec = specification(reconstructed_spec);
 
       //translate regular formulas in terms of state and action formulas
       gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");
@@ -263,7 +247,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         add(PH_NONE, "none").
         add(PH_PARSE, "parse").
         add(PH_TYPE_CHECK, "type_check").
-        add(PH_DATA_IMPL, "data_implementation").
         add(PH_REG_FRM_TRANS, "formula_translation");
 
       return true;
@@ -328,7 +311,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
             append(phase_selector.associate(PH_NONE, "none", true)).
             append(phase_selector.associate(PH_PARSE, "parsing")).
             append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
-            append(phase_selector.associate(PH_DATA_IMPL, "data implementation")).
             append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
         append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);

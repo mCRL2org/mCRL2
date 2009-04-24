@@ -19,8 +19,6 @@
 
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
@@ -559,7 +557,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         instream.close();
       }
       else {
-        f_invariant = mcrl2::core::detail::gsMakeOpIdTrue();
+        f_invariant = mcrl2::data::sort_bool_::true_();
       }
 
       specification lps_specification;
@@ -568,12 +566,12 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
       // temporary measure, until the invariant and confluence checkers use the lps framework
       f_lps = specification_to_aterm(lps_specification);
-        // type checking and data implementation of data expressions use an lps
-        // before data implementation
-      ATermAppl f_reconstructed_lps = reconstruct_spec(f_lps);
+      specification copy(lps_specification);
+      copy.data() = remove_all_system_defined(lps_specification.data());
+      ATermAppl f_mlps = specification_to_aterm(copy);
 
       //typecheck the invariant formula
-      ATermAppl process = ATAgetArgument(f_reconstructed_lps, 2);
+      ATermAppl process = ATAgetArgument(f_mlps, 2);
       assert(mcrl2::core::detail::gsIsLinearProcess(process));
       ATermList vars = ATLgetArgument(process, 1);
       ATermTable var_table = ATtableCreate(63,50);
@@ -581,20 +579,11 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       }
-      f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_lps, var_table);
+      f_invariant = type_check_data_expr(f_invariant, mcrl2::data::sort_bool_::bool_(), f_mlps, var_table);
       ATtableDestroy(var_table);
       if (!f_invariant) {
         throw mcrl2::runtime_error("Typechecking of the invariant formula failed.\n");
       }
-
-      //data implement the invariant formula
-      f_invariant = implement_data_expr(f_invariant, f_reconstructed_lps);
-      if (!f_invariant) {
-        throw mcrl2::runtime_error("Data implementation of the invariant formula failed.\n");
-      }
-
-      f_lps = f_reconstructed_lps;
-
     }
 
     // --------------------------------------------------------------------------------------------

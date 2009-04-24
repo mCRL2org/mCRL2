@@ -21,8 +21,6 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
@@ -273,9 +271,11 @@ using namespace mcrl2::data::detail;
       mcrl2::lps::specification lps_specification;
       lps_specification.load(f_lps_file_name);
 
-      // type checking and data implementation of data expressions use an lps
-      // before data implementation
-      ATermAppl f_reconstructed_spec = reconstruct_spec(specification_to_aterm(lps_specification));
+      // temporary measure, until the invariant and confluence checkers use the lps framework
+      f_lps = specification_to_aterm(lps_specification);
+      mcrl2::lps::specification copy(lps_specification);
+      copy.data() = remove_all_system_defined(lps_specification.data());
+      ATermAppl f_mlps = specification_to_aterm(copy);
 
       //parse the invariant formula from infilename
       std::ifstream instream(f_invariant_file_name.c_str());
@@ -290,27 +290,18 @@ using namespace mcrl2::data::detail;
       }
 
       //typecheck the invariant formula
-      ATermList vars = ATLgetArgument(ATAgetArgument(f_reconstructed_spec, 2), 1);
+      ATermList vars = ATLgetArgument(ATAgetArgument(f_mlps, 2), 1);
       ATermTable var_table = ATtableCreate(63,50);
       for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
         ATermAppl var = ATAgetFirst(vars);
         ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
       }
-      f_invariant = type_check_data_expr(f_invariant, mcrl2::core::detail::gsMakeSortIdBool(), f_reconstructed_spec, var_table);
+      f_invariant = type_check_data_expr(f_invariant, mcrl2::data::sort_bool_::bool_(), f_mlps, var_table);
       ATtableDestroy(var_table);
       if(!f_invariant){
         gsErrorMsg("Typechecking of the invariant formula failed.\n");
         exit(1);
       }
-
-      //data implement the invariant formula
-      f_invariant = implement_data_expr(f_invariant,f_reconstructed_spec);
-      if(!f_invariant){
-        gsErrorMsg("Data implementation of the invariant formula failed.\n");
-        exit(1);
-      }
-
-      f_lps = f_reconstructed_spec;
     }
 
     // --------------------------------------------------------------------------------------------
