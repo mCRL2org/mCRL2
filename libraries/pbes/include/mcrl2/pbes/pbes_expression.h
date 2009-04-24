@@ -94,19 +94,6 @@ class pbes_expression: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
-/// \brief Traverses the pbes expression, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const pbes_expression& p, OutIter dest)
-{
-  detail::sort_expression_visitor<pbes_expression> visitor;
-  visitor.visit(p);
-  for (std::set<data::sort_expression>::iterator i = visitor.result.begin(); i != visitor.result.end(); ++i)
-  {
-    *dest++ = *i;
-  }
-}
-
 /// \brief The namespace for predicates on pbes expressions.
 namespace pbes_expr {
 
@@ -1002,6 +989,25 @@ namespace core {
 
 } // namespace core
 
+} // namespace mcrl2
+
+namespace mcrl2 {
+namespace pbes_system {
+
+/// \brief Traverses the pbes expression, and writes all sort expressions
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+void traverse_sort_expressions(const pbes_expression& p, OutIter dest)
+{
+  detail::sort_expression_visitor<pbes_expression> visitor;
+  visitor.visit(p);
+  for (std::set<data::sort_expression>::iterator i = visitor.result.begin(); i != visitor.result.end(); ++i)
+  {
+    *dest++ = *i;
+  }
+}
+
+} // namespace pbes_system
 } // namespace mcrl2
 
 #endif // MCRL2_PBES_PBES_EXPRESSION_H
