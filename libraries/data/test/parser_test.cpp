@@ -35,7 +35,6 @@ void parser_test()
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors()).size() == 1);
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 1);
 
-
   std::cerr << "Parser.h " << data::parse_data_expression("2") << "\n";
   std::cerr << "Terms should be equal " << data::sort_pos::pos(2) << "\n";
 

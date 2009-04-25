@@ -37,9 +37,6 @@
 #include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/core/print.h"
-// #include "mcrl2/core/parse.h"
-// #include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -51,7 +48,6 @@ using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using mcrl2::core::gsDebug;
 using namespace mcrl2::utilities::tools;

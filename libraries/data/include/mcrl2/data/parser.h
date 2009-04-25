@@ -36,7 +36,6 @@ namespace mcrl2 {
 
 namespace data {
 
-
   /// \brief Parses a and typechecks a data specification.
   /// \details This function reads a data specification in 
   ///    input string text. It is assumed that the string contains
@@ -124,7 +123,8 @@ namespace data {
       throw mcrl2::runtime_error("Error while parsing data variable declarations.");
   
     // Type check the variabl list.
-    ATermAppl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
+    ATermAppl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+                                        mcrl2::data::remove_all_system_defined(data_spec));
     data_vars = core::type_check_data_vars(data_vars, d);
     if (data_vars == NULL)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
@@ -276,7 +276,8 @@ namespace data {
       variables.put(atermpp::aterm_string(v->name()),v->sort());
     }
     data_expr = core::type_check_data_expr(data_expr, NULL, 
-                 mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec), variables);
+                 mcrl2::data::detail::data_specification_to_aterm_data_spec(
+                        mcrl2::data::remove_all_system_defined(data_spec)), variables);
     if (data_expr == NULL)
       throw mcrl2::runtime_error("error type checking data expression");
     return data_expression(data_expr);
@@ -339,7 +340,6 @@ namespace data {
     return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
   }
 
-
   /// \brief Parses and typechecks a sort expression.
   /// \details See parsing a sort expression from a string for details.
   /// \param[in] text The input text containing a sort expression.
@@ -351,7 +351,8 @@ namespace data {
     ATermAppl sort_expr = core::parse_sort_expr(text);
     if (sort_expr == NULL)
       throw mcrl2::runtime_error("error parsing sort expression");
-    ATermAppl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
+    ATermAppl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+                                                mcrl2::data::remove_all_system_defined(data_spec));
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
     if (sort_expr == NULL)
       throw mcrl2::runtime_error("error type checking sort expression");
@@ -375,7 +376,6 @@ namespace data {
     return parse_sort_expression(spec_stream, data_spec);
   }
   
-
   /// \brief Parses a single data expression.
   /// \param text A string
   /// \param var_decl A string

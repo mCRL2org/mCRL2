@@ -215,7 +215,7 @@ namespace pbes_system {
   /// \param data_spec A data specification
   /// \param sigma A substitution function
   template <typename SubstitutionFunction>
-  void parse_substitutions(std::string text, data::data_specification data_spec, SubstitutionFunction& sigma)
+  void parse_substitutions(std::string text, data::data_specification const& data_spec, SubstitutionFunction& sigma)
   {
     std::cerr << "SSSSWWW" << text << std::endl;
     std::vector<std::string> substitutions = core::split(text, ";");
