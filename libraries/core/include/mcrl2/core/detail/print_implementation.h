@@ -31,7 +31,9 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-#include "mcrl2/data/detail/data_reconstruct.h"
+#include "mcrl2/core/detail/data_common.h"
+//#include "mcrl2/data/data_specification.h"
+//#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 namespace mcrl2 {
   namespace core {
@@ -394,15 +396,29 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
 #endif
   } else {
     ATerm ReconstructedPart = Part;
-    // Do not do data reconstruction in case of a debug print
+    // Tries to remove system defined sorts in case of non-debug prints
+    // This currently fails because the information of what is system defined or not is lost in translation to ATerm
     if (pp_format != ppDebug) {
-      if (gsIsDataSpec((ATermAppl) Part) || gsIsProcSpec((ATermAppl) Part) ||
-          gsIsLinProcSpec((ATermAppl) Part) || gsIsPBES((ATermAppl) Part))
-      {
-        ReconstructedPart = mcrl2::data::detail::reconstruct_exprs(Part, (ATermAppl) Part);
-      } else {
-        ReconstructedPart = mcrl2::data::detail::reconstruct_exprs(Part, NULL);
-      }
+//      if (gsIsDataSpec((ATermAppl) Part))
+//      {
+//        ReconstructedPart = (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
+//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification(Part))));
+//      }
+//      else if (gsIsProcSpec((ATermAppl) Part) ||
+//          gsIsLinProcSpec((ATermAppl) Part))
+//      {
+//        ReconstructedPart = reinterpret_cast< ATerm >(
+//            ATmakeAppl4(ATgetAFun((ATermAppl) Part), (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
+//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification((ATermAppl) ATAgetArgument((ATermAppl) Part, 0))))),
+//                 ATgetArgument((ATermAppl) Part, 1), ATgetArgument((ATermAppl) Part, 2), ATgetArgument((ATermAppl) Part, 3)));
+//      }
+//      else if (gsIsPBES((ATermAppl) Part))
+//      {
+//        ReconstructedPart = reinterpret_cast< ATerm >(
+//            ATmakeAppl3(ATgetAFun((ATermAppl) Part), (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
+//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification((ATermAppl) ATAgetArgument((ATermAppl) Part, 0))))),
+//                 ATgetArgument((ATermAppl) Part, 1), ATgetArgument((ATermAppl) Part, 2)));
+//      }
     }
     if (ATgetType(ReconstructedPart) == AT_APPL) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) ReconstructedPart, pp_format,
@@ -1088,6 +1104,127 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
   }
 }
 
+// Copied from data reconstruction
+static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
+{
+  ATermAppl Head = gsGetDataExprHead(PosExpr);
+  ATermList Args = gsGetDataExprArgs(PosExpr);
+  if (ATisEqual(PosExpr, gsMakeOpIdC1())) {
+    //PosExpr is 1; return Mult
+    return gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos());
+  } else if (ATisEqual(Head, gsMakeOpIdCDub())) {
+    //PosExpr is of the form cDub(b,p); return (Mult*2)*v(p) + Mult*v(b)
+    ATermAppl BoolArg = ATAelementAt(Args, 0);
+    ATermAppl PosArg = ATAelementAt(Args, 1);
+    char* NewMult = gsStringDub(Mult, 0);
+    PosArg = reconstruct_pos_mult(PosArg, NewMult);
+    if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+      //Mult*v(b) = 0
+      return PosArg;
+    } else if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+      //Mult*v(b) = Mult
+      return gsMakeDataExprAdd(PosArg,
+               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
+    } else if (strcmp(Mult, "1") == 0) {
+      //Mult*v(b) = v(b)
+      return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
+    } else {
+      //Mult*v(b)
+      return gsMakeDataExprAdd(PosArg,
+               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprNat()),
+                                  bool_to_numeric(BoolArg, gsMakeSortExprNat())));
+    }
+  } else {
+    //PosExpr is not a Pos constructor
+    if (strcmp(Mult, "1") == 0) {
+      return PosExpr;
+    } else {
+      return gsMakeDataExprMult(
+               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()),
+               PosExpr);
+    }
+  }
+}
+
+static ATermAppl reconstruct_numeric_expression(ATermAppl Part) {
+  if (gsIsDataExprC1(Part) || gsIsDataExprCDub(Part)) {
+  //  gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
+    if (gsIsPosConstant(Part)) {
+      Part = gsMakeOpId(gsString2ATermAppl(gsPosValue(Part)), gsMakeSortExprPos());
+    } else {
+      Part = reconstruct_pos_mult(Part, "1");
+    }
+  } else if (gsIsDataExprC0(Part)) {
+  //    gsDebugMsg("Reconstructing implementation of %T\n", Part);
+    Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
+  } else if ((gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part))
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprPos()))) {
+  //    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
+    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    value = reconstruct_numeric_expression(value);
+    Part = gsMakeDataExprPos2Nat(value);
+    if (gsIsOpId(value)) {
+      ATermAppl name = ATAgetArgument(value, 0);
+      if (gsIsNumericString(gsATermAppl2String(name))) {
+        Part = gsMakeOpId(name, gsMakeSortExprNat());
+      }
+    }
+  } else if (gsIsDataExprCPair(Part)) {
+  //    gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
+  } else if (gsIsDataExprCNeg(Part)) {
+  //    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
+    Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
+  } else if ((gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part))
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprNat()))) {
+  //    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
+    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    value = reconstruct_numeric_expression(value);
+    Part = gsMakeDataExprNat2Int(value);
+    if (gsIsOpId(value)) {
+      ATermAppl name = ATAgetArgument(value, 0);
+      if (gsIsNumericString(gsATermAppl2String(name))) {
+        Part = gsMakeOpId(name, gsMakeSortExprInt());
+      }
+    }
+  } else if (gsIsDataExprInt2Real(Part)
+            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprInt()))) {
+  //    gsDebugMsg("Reconstructing implementation of Int2Real (%T)\n", Part);
+    ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
+    value = reconstruct_numeric_expression(value);
+    Part = gsMakeDataExprInt2Real(value);
+    if (gsIsOpId(value)) {
+      ATermAppl name = ATAgetArgument(value, 0);
+      if (gsIsNumericString(gsATermAppl2String(name))) {
+        Part = gsMakeOpId(name, gsMakeSortExprReal());
+      }
+    }
+  } else if (gsIsDataExprCReal(Part)) {
+//    gsDebugMsg("Reconstructing implementation of CReal (%T)\n", Part);
+    ATermList Args = ATLgetArgument(Part, 1);
+    ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
+    ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
+    if (ATisEqual(ArgDenominator, gsMakeOpId(gsString2ATermAppl("1"), gsMakeSortExprPos()))) {
+      Part = gsMakeDataExprInt2Real(ArgNumerator);
+      if (gsIsOpId(ArgNumerator)) {
+        ATermAppl name = ATAgetArgument(ArgNumerator, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeOpId(name, gsMakeSortExprReal());
+        }
+      }
+    } else {
+      Part = gsMakeDataExprDivide(ArgNumerator, gsMakeDataExprPos2Int(ArgDenominator));
+      if (gsIsOpId(ArgDenominator)) {
+        ATermAppl name = ATAgetArgument(ArgDenominator, 0);
+        if (gsIsNumericString(gsATermAppl2String(name))) {
+          Part = gsMakeDataExprDivide(ArgNumerator, gsMakeOpId(name, gsMakeSortExprInt()));
+        }
+      }
+    }
+  }
+
+  return Part;
+}
+
 void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
   const ATermAppl DataExpr, t_pp_format pp_format, bool ShowSorts, int PrecLevel)
 {
@@ -1169,22 +1306,35 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
           pp_format, ShowSorts, PrecLevel);
       } else if (gsIsOpId(DataExpr) || gsIsDataVarId(DataExpr)) {
+        ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
         //print data variable or operation identifier
-        PRINT_FUNC(dbg_prints)("printing data variable or operation identifier\n");
-        PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
-          pp_format, ShowSorts, PrecLevel);
-        if (ShowSorts) {
-          PRINT_FUNC(fprints)(OutStream, ": ");
-          PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 1),
-            pp_format, ShowSorts, 0);
+        if (Reconstructed == DataExpr) {
+          PRINT_FUNC(dbg_prints)("printing data variable or operation identifier\n");
+          PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 0),
+            pp_format, ShowSorts, PrecLevel);
+          if (ShowSorts) {
+            PRINT_FUNC(fprints)(OutStream, ": ");
+            PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(DataExpr, 1),
+              pp_format, ShowSorts, 0);
+          }
+        }
+        else {
+          PRINT_FUNC(PrintDataExpr)(OutStream, Reconstructed, pp_format, ShowSorts, PrecLevel);
         }
       } else {
-        //print data application
-        PRINT_FUNC(dbg_prints)("printing data application\n");
-        PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecOpIdPrefix());
-        PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
-        PRINT_FUNC(fprints)(OutStream, ")");
+        ATermAppl Reconstructed(reconstruct_numeric_expression(DataExpr));
+        if (Reconstructed == DataExpr) {
+          //print data application
+          PRINT_FUNC(dbg_prints)("printing data application\n");
+          PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecOpIdPrefix());
+          PRINT_FUNC(fprints)(OutStream, "(");
+          PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
+          PRINT_FUNC(fprints)(OutStream, ")");
+        }
+        else {
+          PRINT_FUNC(dbg_prints)("printing numeric representation\n");
+          PRINT_FUNC(PrintDataExpr)(OutStream, Reconstructed, pp_format, ShowSorts, PrecLevel);
+        }
       }
     }
   } else if (gsIsBinder(DataExpr)) {
