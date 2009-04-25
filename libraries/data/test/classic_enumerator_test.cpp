@@ -178,7 +178,7 @@ void enumerate_upto_a_maximum(std::string const& specification, std::string cons
   data_specification data_specification(parse_data_specification(specification));
 
   enumerate< EnumeratorType >(data_specification,
-    parse_variable(variable, specification), count);
+    parse_variable(variable, data_specification), count);
 };
 
 template < typename EnumeratorType >

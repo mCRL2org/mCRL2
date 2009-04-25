@@ -294,6 +294,7 @@ void test_substitutions1()
   sigma[data::parse_variable("m: Pos")] = r(data::parse_data_expression("3"));
   sigma[data::parse_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
+  std::cout << "<test_substitutions1aaa>" << std::endl;
   std::string var_decl =
     "datavar         \n"
     "  m, n:  Pos;   \n"
@@ -443,7 +444,7 @@ void test_substitutions3()
   sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
   sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
-  sigma[data::parse_variable("b_R:BBuf", DATA_SPEC)] = data::parse_data_expression("[false, false]");
+  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::parse_data_expression("[false, false]");
 
   std::string var_decl =
     "datavar                                                     \n"

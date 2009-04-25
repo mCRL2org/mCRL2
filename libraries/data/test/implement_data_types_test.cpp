@@ -3181,11 +3181,12 @@ void implement_data_specification_test()
     "map f:S -> List(S);\n"
   );
 
-  data::data_specification spec(remove_all_system_defined(data::parse_data_specification(text)));
-  atermpp::aterm_appl old_impl_spec = data::parse_data_specification_and_implement(text);
-  atermpp::aterm_appl impl_spec = data::detail::implement_data_specification(spec);
+  // Data implementation has become obsolete.
+  // data::data_specification spec(remove_all_system_defined(data::parse_data_specification(text)));
+  // atermpp::aterm_appl old_impl_spec = data::parse_data_specification_and_implement(text);
+  // atermpp::aterm_appl impl_spec = data::detail::implement_data_specification(spec);
 
-  BOOST_CHECK(impl_spec == old_impl_spec);
+  // BOOST_CHECK(impl_spec == old_impl_spec);
 }
 
 int test_main(int argc, char** argv)

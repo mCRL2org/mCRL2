@@ -217,6 +217,7 @@ namespace pbes_system {
   template <typename SubstitutionFunction>
   void parse_substitutions(std::string text, data::data_specification data_spec, SubstitutionFunction& sigma)
   {
+    std::cerr << "SSSSWWW" << text << std::endl;
     std::vector<std::string> substitutions = core::split(text, ";");
     for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
     {
@@ -225,9 +226,10 @@ namespace pbes_system {
       {
         continue;
       }
-      std::string spec = core::pp(data_spec);
-      data::variable v = data::parse_variable(words[0], spec);
-      data::data_expression e = data::parse_data_expression(words[1], "", spec);
+      // std::string spec = core::pp(data_spec);
+      std::cerr << "WWWW" << words[0] << "\n";
+      data::variable v = data::parse_variable(words[0], data_spec);
+      data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
       sigma[v] = e;
     }
   }

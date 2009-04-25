@@ -29,11 +29,15 @@ void parser_test()
     "map f:S -> List(S);\n"
   );
 
+  data::data_specification spec1(data::parse_data_specification(text));
   data::data_specification spec(data::remove_all_system_defined(data::parse_data_specification(text)));
-
   BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 1);
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors()).size() == 1);
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 1);
+
+
+  std::cerr << "Parser.h " << data::parse_data_expression("2") << "\n";
+  std::cerr << "Terms should be equal " << data::sort_pos::pos(2) << "\n";
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
 }

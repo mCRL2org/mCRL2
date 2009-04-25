@@ -153,7 +153,7 @@ void test3()
 /// Parse a string of the form "b: Bool := true, n: Nat := 0", and add them
 /// to the substition function sigma.
 template <typename SubstitutionFunction>
-void parse_substitutions(std::string text, std::string data_spec, SubstitutionFunction& sigma)
+void parse_substitutions(std::string text, const data_specification &data_spec, SubstitutionFunction& sigma)
 {
   std::vector<std::string> substitutions = core::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
@@ -164,18 +164,18 @@ void parse_substitutions(std::string text, std::string data_spec, SubstitutionFu
       continue;
     }
     data::variable v = data::parse_variable(words[0], data_spec);
-    data::data_expression e = data::parse_data_expression(words[1], "", data_spec);
+    data::data_expression e = data::parse_data_expression(words[1], data_spec);
     sigma[v] = e;
   }
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string expr1, std::string expr2, const data_specification &data_spec, std::string substitutions)
 {
   mutable_substitution<variable, data_expression> sigma;
   parse_substitutions(substitutions, data_spec, sigma);
-  data_expression d1 = parse_data_expression(expr1, "", data_spec);
-  data_expression d2 = parse_data_expression(expr2, "", data_spec);
+  data_expression d1 = parse_data_expression(expr1, data_spec);
+  data_expression d2 = parse_data_expression(expr2, data_spec);
   if (R(d1, sigma) != R(d2))
   {
     BOOST_CHECK(R(d1, sigma) != R(d2));
@@ -196,7 +196,7 @@ void test4()
   std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
   std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, data::pp(data::remove_all_system_defined(data_spec)), sigma);
+  test_expressions(R, expr1, expr2, data_spec, sigma);
 }
 
 void allocation_test()
@@ -219,7 +219,6 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT(argc, argv)
   test1();
   core::garbage_collect();
-
   test2();
   core::garbage_collect();
 
