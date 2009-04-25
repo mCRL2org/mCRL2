@@ -144,7 +144,7 @@ namespace data {
 
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] specification a data specification.
-      ATermAppl implement(data_specification const& specification) const
+      ATermAppl implement(data_specification const& specification)
       {
         atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
 
@@ -171,15 +171,27 @@ namespace data {
           }
         }
 
+        m_specification = result;
+
+        // add rewrite rules (needed only for lambda expressions)
+        for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))
+        {
+          if (!add_rule(r.front()))
+          {
+            throw mcrl2::runtime_error("Could not add rewrite rule!");
+          }
+        }
+
         return result;
       }
 
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] expression an expression.
-      ATermAppl implement(data_expression const& expression) const
+      template < typename ExpressionOrEquation >
+      ATermAppl implement(ExpressionOrEquation const& expression) const
       {
         ATermList substitution_context = m_substitution_context;
-        ATermList data_equations   = ATmakeList0();
+        ATermList data_equations       = ATmakeList0();
 
         core::detail::t_data_decls declarations = core::detail::get_data_decls(m_specification);
 
@@ -217,7 +229,7 @@ namespace data {
           // add rewrite rules
           for (atermpp::term_list< data::data_equation >::const_iterator r = new_equations.begin();
                                                                         r != new_equations.end(); ++r) {
-            if (!m_rewriter->addRewriteRule(*r)) {
+            if (!m_rewriter->addRewriteRule(detail::impl_exprs_appl(*r, &substitution_context, &declarations, 0))) {
                throw mcrl2::runtime_error("Could not add rewrite rule!");
             }
           }
@@ -254,11 +266,19 @@ namespace data {
       /// \param d A data specification
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
-          basic_rewriter< atermpp::aterm >(d, s),
+          basic_rewriter< atermpp::aterm >(data_specification(), s),
           m_specification(implement(d))
       {
         m_specification.protect();
         m_substitution_context.protect();
+      }
+
+      /// \brief Adds an equation to the rewrite rules.
+      /// \param eq The equation that is added.
+      /// \return Returns true if the operation succeeded.
+      bool add_rule(const data_equation& equation)
+      {
+        return m_rewriter->addRewriteRule(const_cast< basic_rewriter const* >(this)->implement(equation));
       }
 
       /// \brief Returns a reference to the Rewriter object that is used for the implementation.

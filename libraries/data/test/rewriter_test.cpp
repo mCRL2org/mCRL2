@@ -196,7 +196,7 @@ void test4()
   std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
   std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, data::pp(data_spec), sigma);
+  test_expressions(R, expr1, expr2, data::pp(data::remove_all_system_defined(data_spec)), sigma);
 }
 
 void allocation_test()

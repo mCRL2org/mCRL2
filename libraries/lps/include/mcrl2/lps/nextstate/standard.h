@@ -25,7 +25,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
                                  mcrl2::data::rewriter(other) {
   }
 
-  ATerm translate(ATermAppl t)
+  ATerm translate(ATermAppl t) const
   {
     return m_rewriter->toRewriteFormat(implement(static_cast< mcrl2::data::data_expression >(t)));
   }

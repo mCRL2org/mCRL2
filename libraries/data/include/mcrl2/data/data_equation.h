@@ -166,28 +166,24 @@ namespace mcrl2 {
         {}
 
         /// \brief Returns the variables of the data equation.
-        inline
         variables_const_range variables() const
         {
           return boost::make_iterator_range(add_random_access< variable >(atermpp::list_arg1(appl())));
         }
 
         /// \brief Returns the condition of the data equation.
-        inline
         data_expression condition() const
         {
           return atermpp::arg2(*this);
         }
 
         /// \brief Returns the left hand side of the data equation.
-        inline
         data_expression lhs() const
         {
           return atermpp::arg3(*this);
         }
 
         /// \brief Returns the right hand side of the data equation.
-        inline
         data_expression rhs() const
         {
           return atermpp::arg4(*this);

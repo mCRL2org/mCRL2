@@ -56,7 +56,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
          std::set< variable > const& v,
                  data_expression const& c, size_t t) {
 
-  for (classic_enumerator< > i(d, v, c); t != 0 && i != classic_enumerator< >(); --t, ++i) {
+  for (classic_enumerator< > i(d, v, c); --t != 0 && i != classic_enumerator< >(); ++i) {
     std::cout << mcrl2::core::pp((*i)(c)) << std::endl;
   }
 }
@@ -258,11 +258,11 @@ int test_main(int argc, char** argv) {
   empty_test();
   core::garbage_collect();
 
-  list_test< classic_enumerator< > >(512);
+  list_test< classic_enumerator< > >(2);
   core::garbage_collect();
-  tree_test< classic_enumerator< > >(1096);
+  tree_test< classic_enumerator< > >(512);
   core::garbage_collect();
-  mutually_recursive_test< classic_enumerator< > >(1096);
+  mutually_recursive_test< classic_enumerator< > >(512);
   core::garbage_collect();
 
   return EXIT_SUCCESS;

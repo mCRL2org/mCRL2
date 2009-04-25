@@ -107,7 +107,7 @@ namespace mcrl2 {
               local(basic_rewriter< expression_type > const& e) : basic_rewriter< expression_type >(e) {
               }
 
-              atermpp::aterm translate(data_expression const& e) {
+              atermpp::aterm translate(data_expression const& e) const {
                 return basic_rewriter< expression_type >::m_rewriter->toRewriteFormat(basic_rewriter< expression_type >::implement(e));
               }
             };
@@ -122,7 +122,7 @@ namespace mcrl2 {
             }
 
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(variables, converter.translate(m_condition))));
+                        m_shared_context->m_enumerator.findSolutions(variables, converter.translate(m_condition), false)));
 
             while (increment()) {
               if (Selector::test(m_evaluator(m_condition, m_substitution))) {
