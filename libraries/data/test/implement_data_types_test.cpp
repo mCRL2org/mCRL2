@@ -3173,6 +3173,73 @@ void implement_structured_sort_test()
   compare(data_decls_old, data_decls_new);
 }
 
+namespace mcrl2 {
+  namespace data {
+    namespace detail {
+      inline 
+      ATermAppl parse_specification(std::istream& from) 
+      { 
+        ATermAppl result = core::parse_proc_spec(from); 
+        if (result == NULL) 
+          throw mcrl2::runtime_error("parse error"); 
+        return result; 
+      } 
+     
+      inline 
+      ATermAppl type_check_specification(ATermAppl spec) 
+      { 
+        ATermAppl result = core::type_check_proc_spec(spec); 
+        if (result == NULL) 
+          throw mcrl2::runtime_error("type check error"); 
+        return result; 
+      } 
+     
+      inline 
+      ATermAppl alpha_reduce(ATermAppl spec) 
+      { 
+        ATermAppl result = core::gsAlpha(spec); 
+        if (result == NULL) 
+          throw mcrl2::runtime_error("alpha reduction error"); 
+        return result; 
+      } 
+     
+      // \deprecated 
+      inline 
+      ATermAppl deprecated_implement_data_specification(ATermAppl spec) 
+      { 
+        ATermAppl result = implement_data_proc_spec(spec); 
+        if (result == NULL) 
+          throw mcrl2::runtime_error("data implementation error"); 
+        return result; 
+      } 
+    }
+
+    /// \deprecated This function will be removed after decent testing of
+    //              parse_data_specification has been performed.
+    /// \brief Parses a data specification and implements the data types.
+    /// \param[in] text a textual description of the data specification.
+    /// \return the implemented data specfication corresponding to text.
+    inline
+    atermpp::aterm_appl parse_data_specification_and_implement(const std::string& text)
+    {
+      // TODO: This is only a temporary solution. A decent standalone parser needs
+      // to be made for data specifications.
+
+      // make a fake linear process
+      std::stringstream lps_stream;
+      lps_stream << text;
+      lps_stream << "init delta;\n";
+
+      ATermAppl result = data::detail::parse_specification(lps_stream);
+      result           = data::detail::type_check_specification(result);
+      result           = data::detail::alpha_reduce(result);
+      result           = data::detail::deprecated_implement_data_specification(result);
+
+      return atermpp::arg1(result);
+    }
+  }
+}
+
 void implement_data_specification_test()
 {
   const std::string text(
@@ -3181,12 +3248,11 @@ void implement_data_specification_test()
     "map f:S -> List(S);\n"
   );
 
-  // Data implementation has become obsolete.
-  // data::data_specification spec(remove_all_system_defined(data::parse_data_specification(text)));
-  // atermpp::aterm_appl old_impl_spec = data::parse_data_specification_and_implement(text);
-  // atermpp::aterm_appl impl_spec = data::detail::implement_data_specification(spec);
+  data::data_specification spec(remove_all_system_defined(data::parse_data_specification(text)));
+  atermpp::aterm_appl old_impl_spec = data::parse_data_specification_and_implement(text);
+  atermpp::aterm_appl impl_spec = data::detail::implement_data_specification(spec);
 
-  // BOOST_CHECK(impl_spec == old_impl_spec);
+  BOOST_CHECK(impl_spec == old_impl_spec);
 }
 
 int test_main(int argc, char** argv)
