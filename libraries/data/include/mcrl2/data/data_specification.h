@@ -762,6 +762,23 @@ namespace mcrl2 {
         return m_sys_equations.get(e) != atermpp::aterm();
       }
 
+      /// \brief Checks whether two sort expressions represent the same sort
+      ///
+      /// \param[in] s1 A sort expression
+      /// \param[in] s2 A sort expression
+      bool equal_sorts(sort_expression const& s1, sort_expression const& s2) const
+      {
+        if (s1 == s2)
+        {
+          return true;
+        }
+
+        sort_expression normal_s1 = (s1.is_basic_sort()) ? find_referenced_sort(s1) : s1;
+        sort_expression normal_s2 = (s2.is_basic_sort()) ? find_referenced_sort(s2) : s2;
+
+        return normal_s1 == normal_s2;
+      }
+
       /// \brief Checks whether a sort is certainly finite.
       ///
       /// \param[in] s A sort expression

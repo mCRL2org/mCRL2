@@ -27,6 +27,8 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
@@ -118,6 +120,13 @@ void print_specification_file_name(t_tool_options const& tool_options)
   std::string str_in  = (tool_options.specification_file_name.empty())?"stdin":("'" + tool_options.specification_file_name + "'");
   std::string str_out = (tool_options.output_file_name.empty())?"stdout":("'" + tool_options.output_file_name + "'");
   ATermAppl spec = (ATermAppl) mcrl2::core::detail::load_aterm(tool_options.specification_file_name);
+
+  mcrl2::data::data_specification data_spec(ATAgetArgument(spec, 0));
+
+  spec = ATsetArgument(spec, atermpp::aterm((mcrl2::data::detail::data_specification_to_aterm_data_spec(
+    (tool_options.format != ppDebug) ?
+            mcrl2::data::remove_all_system_defined(data_spec) : data_spec))), 0);
+
   if (!mcrl2::core::detail::gsIsPBES(spec)) {
     throw mcrl2::runtime_error(str_in + " does not contain an PBES");
   }

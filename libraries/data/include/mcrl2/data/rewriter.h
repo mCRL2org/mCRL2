@@ -148,7 +148,7 @@ namespace data {
       {
         atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
 
-        std::set< sort_expression > known_aliases(convert< std::set< sort_expression > >(specification.aliases()));
+        std::set< alias > known_aliases(convert< std::set< alias > >(specification.aliases()));
 
         // Convert to data specification again to get the additional aliases that have been introduced (legacy)
         data_specification  specification_with_more_aliases(result);
@@ -159,7 +159,9 @@ namespace data {
           {
             m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context);
 
-            // only for sorts that have been introduced for conversion to ATerm
+            // only for sorts that have been introduced for conversion to
+            // ATerm; newly introduced sort are treated as an implementation
+            // detail that should not leak to the outside world.
             if (known_aliases.find(r.front()) == known_aliases.end())
             {
               m_reconstruction_context[r.front().name()] = r.front().reference();

@@ -188,7 +188,7 @@ class pbes
       data::data_expression_list::iterator j = w.begin();
       for ( ; i != v.end(); ++i, ++j)
       {
-        if (i->sort() != j->sort())
+        if (!m_data.equal_sorts(i->sort(), j->sort()))
         {
           return false;
         }
@@ -364,6 +364,8 @@ class pbes
       }
       init_term(atermpp::aterm_appl(t));
 
+      complete_data_specification(*this);
+
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
       assert(is_well_typed());
@@ -371,7 +373,6 @@ class pbes
       //{
       //  throw mcrl2::runtime_error("PBES is not well typed (pbes::load())");
       //}
-      complete_data_specification(*this);
     }
 
     /// \brief Returns true if the PBES is a BES (boolean equation system).
