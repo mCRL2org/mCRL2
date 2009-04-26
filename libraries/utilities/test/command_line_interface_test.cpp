@@ -17,11 +17,11 @@
 
 #define MCRL2_REVISION "xXxXx"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
 #include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/utilities/command_line_proving.h"
+#include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 
 using namespace ::mcrl2::utilities;
 
