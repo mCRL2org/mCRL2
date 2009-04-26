@@ -24,9 +24,9 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 

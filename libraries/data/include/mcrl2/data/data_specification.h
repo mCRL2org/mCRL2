@@ -28,7 +28,6 @@
 // sorts
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard.h"
 

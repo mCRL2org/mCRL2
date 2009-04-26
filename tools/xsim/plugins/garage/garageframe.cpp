@@ -302,7 +302,7 @@ void GarageFrame::UpdateState( ATerm State )
       //get the elements of gs_hal
       ATermList gs_hal_elts = gsGetDataExprArgs(gs_hal);
 
-      mcrl2::data::detail::Rewriter *rewriter = nextState->getRewriter();
+      mcrl2::data::rewriter& rewriter = nextState->getRewriter();
 
       //update floor state
       ATermAppl sOccState = MakeSortId("OccState");
@@ -313,7 +313,7 @@ void GarageFrame::UpdateState( ATerm State )
         for (int j = 1; j <= 10; ++j) {
           for (int k = 0; k <= 1; ++k) {
             ATermAppl fp = MakeFloorPos(i, j, i == 1, k);
-            ATermAppl state = rewriter->rewrite(gsMakeDataAppl1(fs, fp));
+            ATermAppl state = rewriter(gsMakeDataAppl1(fs, fp));
             if (ATisEqual(state, tFree)) {
               floorState[i-1][(j-1)*2+k] = 0;
             } else if (ATisEqual(state, tOccupied)) {
@@ -341,7 +341,7 @@ void GarageFrame::UpdateState( ATerm State )
       for (int i = 1; i <= 3; ++i) {
         for (int j = 0; j <= 1; ++j) {
           ATermAppl sp = MakeShuttlePos(i, j);
-          ATermAppl lstate = rewriter->rewrite(gsMakeDataAppl2(shs, sp, tLowered));
+          ATermAppl lstate = rewriter(gsMakeDataAppl2(shs, sp, tLowered));
           if (ATisEqual(lstate, tNAvail)) {
             floorState[i-1][j*18]   = -1;
             floorState[i-1][j*18+1] = -1;
@@ -354,7 +354,7 @@ void GarageFrame::UpdateState( ATerm State )
               << " cannot be rewritten to normal form"
               << std::endl;
           }
-          ATermAppl tstate = rewriter->rewrite(gsMakeDataAppl2(shs, sp, tTilted));
+          ATermAppl tstate = rewriter(gsMakeDataAppl2(shs, sp, tTilted));
           if (ATisEqual(tstate, tAvail)) {
             shuttleState[i-1][j] = 1;
           } else if (ATisEqual(tstate, tNAvail)) {

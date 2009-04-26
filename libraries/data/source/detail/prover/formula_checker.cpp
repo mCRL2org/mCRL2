@@ -10,10 +10,10 @@
 
 #include <sstream>
 
-#include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/data/detail/prover/formula_checker.h"
 
 using namespace mcrl2::core;
 

@@ -227,7 +227,7 @@ class NextState
                  * standard data types are use.
                  * \return Rewriter object used by this NextState object.
                  **/
-                virtual mcrl2::data::detail::Rewriter *getRewriter() = 0;
+                virtual mcrl2::data::rewriter& getRewriter() = 0;
 
 };
 

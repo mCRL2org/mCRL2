@@ -710,13 +710,6 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, int index, Nex
   return new NextStateGeneratorSummand(index, state,info,next_id++);
 }
 
-mcrl2::data::detail::Rewriter *NextStateStandard::getRewriter() // Deprecated. Do not USE.
-{
-        // return info.rewr_obj;
-        return &(info.m_rewriter.get_rewriter());
-}
-
-
 ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 {
         ATermList l;

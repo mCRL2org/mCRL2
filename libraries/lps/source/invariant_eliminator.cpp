@@ -11,11 +11,11 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/lps/invariant_eliminator.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
