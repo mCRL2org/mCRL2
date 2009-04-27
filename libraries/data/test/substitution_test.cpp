@@ -11,6 +11,7 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/assignment_list_substitution.h"
 #include "mcrl2/data/lambda.h"
@@ -98,6 +99,34 @@ void test_assignment_list_substitution()
   BOOST_CHECK(g(u) == z);
 }
 
+void test_list_substitution()
+{ 
+  using namespace atermpp;
+
+  variable x("x", sort_nat::nat());
+  variable y("y", sort_nat::nat());
+  variable z("z", sort_nat::nat());
+  variable u("u", sort_nat::nat());
+
+  variable y1("y1", sort_nat::nat());
+
+  assignment xy(x,y);
+  assignment uz(u,z);
+  assignment_list l(make_list(xy, uz));
+
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), x) == y1);
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), y) == y);
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), z) == z);
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), u) == u);
+
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), xy) == assignment(y1,y));
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), uz) == uz);
+
+  BOOST_CHECK(substitute(make_list_substitution(x,y), l) == assignment_list(make_list(assignment(y1,y), uz)));
+  std::clog << "substitution result: " << substitute(make_list_substitution(x,y), l) << std::endl;
+  std::clog << "expected result: " << assignment_list(make_list(assignment(y1,y), uz)) << std::endl;
+}
+
 void test_mutable_substitution_adapter()
 {
   mutable_substitution<variable, data_expression> f;
@@ -143,6 +172,9 @@ int test_main(int a, char**aa)
   core::garbage_collect();
   
   test_assignment_list_substitution();
+  core::garbage_collect();
+
+  test_list_substitution();
   core::garbage_collect();
 
   test_mutable_substitution_adapter();
