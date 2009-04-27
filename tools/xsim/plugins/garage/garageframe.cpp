@@ -19,10 +19,12 @@
 
 #include "simbasegui.h"
 #include "garageframe.h"
+#include "mcrl2/data/data_expression.h"
 #include <sstream>
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 
 BEGIN_EVENT_TABLE(GarageFrame,wxFrame)
     EVT_CLOSE(GarageFrame::OnCloseWindow)
@@ -313,7 +315,7 @@ void GarageFrame::UpdateState( ATerm State )
         for (int j = 1; j <= 10; ++j) {
           for (int k = 0; k <= 1; ++k) {
             ATermAppl fp = MakeFloorPos(i, j, i == 1, k);
-            ATermAppl state = rewriter(gsMakeDataAppl1(fs, fp));
+            ATermAppl state = rewriter(data_expression(gsMakeDataAppl1(fs, fp)));
             if (ATisEqual(state, tFree)) {
               floorState[i-1][(j-1)*2+k] = 0;
             } else if (ATisEqual(state, tOccupied)) {
@@ -341,7 +343,7 @@ void GarageFrame::UpdateState( ATerm State )
       for (int i = 1; i <= 3; ++i) {
         for (int j = 0; j <= 1; ++j) {
           ATermAppl sp = MakeShuttlePos(i, j);
-          ATermAppl lstate = rewriter(gsMakeDataAppl2(shs, sp, tLowered));
+          ATermAppl lstate = rewriter(data_expression(gsMakeDataAppl2(shs, sp, tLowered)));
           if (ATisEqual(lstate, tNAvail)) {
             floorState[i-1][j*18]   = -1;
             floorState[i-1][j*18+1] = -1;
@@ -354,7 +356,7 @@ void GarageFrame::UpdateState( ATerm State )
               << " cannot be rewritten to normal form"
               << std::endl;
           }
-          ATermAppl tstate = rewriter(gsMakeDataAppl2(shs, sp, tTilted));
+          ATermAppl tstate = rewriter(data_expression(gsMakeDataAppl2(shs, sp, tTilted)));
           if (ATisEqual(tstate, tAvail)) {
             shuttleState[i-1][j] = 1;
           } else if (ATisEqual(tstate, tNAvail)) {
