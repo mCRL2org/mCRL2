@@ -92,7 +92,7 @@ void test_assignment_list_substitution()
   l = make_list(xy, uz, yz);
   assignment_list_substitution g(l);
 
-  BOOST_CHECK(g(x) == z);
+  BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
   BOOST_CHECK(g(y) == z);
   BOOST_CHECK(g(z) == z);
   BOOST_CHECK(g(u) == z);
