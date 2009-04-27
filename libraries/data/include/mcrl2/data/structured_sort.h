@@ -298,6 +298,7 @@ namespace mcrl2 {
     /// \brief List of structured_sort_constructor.
     typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
+    /// \cond INTERNAL_DOCS
     // declare for friendship
     namespace sort_fset {
       function_symbol_vector fset_generate_constructors_code(const sort_expression&);
@@ -313,6 +314,7 @@ namespace mcrl2 {
     namespace detail {
       void impl_sort_struct(ATermAppl, ATermAppl, ATermList*, mcrl2::core::detail::t_data_decls*, bool, ATermList*);
     }
+    /// \endcond
 
     /// \brief structured sort.
     ///
@@ -652,8 +654,6 @@ namespace mcrl2 {
 
         /// \brief Returns the constructor functions of this sort, such that the
         ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
         function_symbol_vector constructor_functions() const
         {
           return constructor_functions(*this);
@@ -661,8 +661,6 @@ namespace mcrl2 {
 
         /// \brief Returns the projection functions of this sort, such that the
         ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
         function_symbol_vector projection_functions() const
         {
           return projection_functions(*this);
@@ -671,8 +669,6 @@ namespace mcrl2 {
 
         /// \brief Returns the recogniser functions of this sort, such that the
         ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
-        //         internally
         function_symbol_vector recogniser_functions() const
         {
           return recogniser_functions(*this);
@@ -680,15 +676,12 @@ namespace mcrl2 {
 
         /// \brief Returns the equations for ==, < and <= for this sort, such that the
         ///        result can be used by the rewriter
-        /// \param s The sort expression as which this sort is treated
         //         internally
         data_equation_vector constructor_equations() const
         {
           return constructor_equations(*this);
         }
-        /// \brief Generate equations for the projection functions of this sort, assuming
-        ///        that this sort is referred to with s.
-        /// \param s A sort expression
+        /// \brief Generate equations for the projection functions of this sort
         /// \return A vector of equations for the projection functions of this sort.
         data_equation_vector projection_equations() const
         {
@@ -697,7 +690,6 @@ namespace mcrl2 {
 
         /// \brief Generate equations for the recognisers of this sort, assuming
         ///        that this sort is referred to with s.
-        /// \param s A sort expression
         /// \return A vector of equations for the recognisers of this sort.
         data_equation_vector recogniser_equations() const
         {

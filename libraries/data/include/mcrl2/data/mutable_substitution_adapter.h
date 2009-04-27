@@ -128,9 +128,14 @@ namespace data {
       typedef typename substitution_type::assignment assignment;
 
     protected:
+
+      /// \brief object on which substitution manipulations are performed
       mutable_substitution<Variable, Expression>& g_;
 
     public:
+
+      /// \brief Constructor with mutable substitution object
+      /// \param[in,out] g underlying substitution object
       mutable_substitution_adapter(mutable_substitution<Variable, Expression>& g)
         : g_(g)
       {}
@@ -198,6 +203,7 @@ namespace data {
   };
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+    /// \param[in] sigma a constant reference to an object of a mutable_substitution_adapter instance
     /// \return A string representation of the map.
     template <typename Substitution>
     std::string to_string(const mutable_substitution_adapter<Substitution>& sigma)

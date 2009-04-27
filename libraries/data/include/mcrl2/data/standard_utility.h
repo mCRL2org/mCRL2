@@ -319,8 +319,8 @@ namespace mcrl2 {
       }
 
       /// \brief Constructs expression of type pos from an integral type
-      /// \param n numerator
-      /// \param d denominator
+      /// \param numerator numerator
+      /// \param denominator denominator
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       real_(T numerator, T denominator) {

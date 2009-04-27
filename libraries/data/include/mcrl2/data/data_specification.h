@@ -58,11 +58,14 @@ namespace mcrl2 {
         /// \brief map from sort expression to constructors
         typedef atermpp::multimap< sort_expression, function_symbol > constructors_map;
 
+        /// \brief projects a pair of sort and a constructor to the latter
         struct constructor_projection : public std::unary_function< constructors_map::value_type const&, function_symbol const& >
         {
+          /// \brief Application to pair
           function_symbol& operator()(constructors_map::value_type& v) const {
             return v.second;
           }
+          /// \brief Application to constant pair
           function_symbol const& operator()(constructors_map::value_type const& v) const {
             return v.second;
           }
@@ -92,9 +95,11 @@ namespace mcrl2 {
 
           public:
 
+            /// \brief Constructor with the end of an iterator range
             aliases_iterator(ForwardTraversalIterator const& end) : aliases_iterator::iterator_adaptor_(end)
             { }
 
+            /// \brief Constructor with iterator range and filter predicate
             explicit aliases_iterator(ForwardTraversalIterator const& begin,
                       ForwardTraversalIterator const& end,
                       boost::function< bool (sort_expression const&) > const& p = boost::function< bool(sort_expression const&) >()) :

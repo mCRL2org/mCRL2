@@ -59,15 +59,23 @@ namespace mcrl2 {
 
       protected:
 
+        /// \brief Type of shared context for enumerators created by the factory
         typedef typename enumerator_type::shared_context_type              shared_context_type;
 
+        /// \brief An internal evaluator object
         Evaluator                                m_internal_evaluator;
+        /// \brief Reference to a possibly external evaluator object
         Evaluator&                               m_evaluator;
+        /// \brief Context shared by enumerators
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
+        /// \brief Default constructor
         enumerator_factory() {
         }
 
+        /// \brief Constructor with shared context and evaluator instance
+        /// \param[in] context the shared context for enumerators
+        /// \param[in] evaluator a reference to an evaluator
         enumerator_factory(boost::shared_ptr< shared_context_type > const& context, Evaluator const& evaluator) :
                m_evaluator(evaluator),
                m_enumeration_context(context) {
@@ -75,7 +83,8 @@ namespace mcrl2 {
 
       public:
 
-        /// \brief Constructor with data specification
+        /// \brief Copy constructor
+        /// \param[in] other the original to copy
         enumerator_factory(enumerator_factory const& other) :
                m_internal_evaluator(other.m_evaluator),
                m_evaluator(m_internal_evaluator),
@@ -95,7 +104,7 @@ namespace mcrl2 {
         }
 
         /** \brief Constructor with data specification and evaluator
-         *
+         * \param[in] specification a data specification that serves as context
          * \note Only available when Evaluator can be constructed from data_specification
          **/
         enumerator_factory(data_specification const& specification) :

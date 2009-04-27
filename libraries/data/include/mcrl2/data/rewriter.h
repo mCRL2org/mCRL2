@@ -276,7 +276,7 @@ namespace data {
       }
 
       /// \brief Adds an equation to the rewrite rules.
-      /// \param eq The equation that is added.
+      /// \param equation The equation that is added.
       /// \return Returns true if the operation succeeded.
       bool add_rule(const data_equation& equation)
       {

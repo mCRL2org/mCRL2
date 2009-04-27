@@ -36,7 +36,7 @@ namespace mcrl2 {
 
 namespace data {
 
-  /// \brief Parses a and typechecks a data specification.
+  /// \brief Parses a and type checks a data specification.
   /// \details This function reads a data specification in 
   ///    input string text. It is assumed that the string contains
   ///    a single data specification, and nothing else. 
@@ -70,7 +70,7 @@ namespace data {
     return detail::numeric_conversion(data_specification(spec));
   }
 
-  /// \brief Parses a and typechecks a data specification.
+  /// \brief Parses a and type checks a data specification.
   /// \details This function reads a data specification in 
   ///    input string text. 
   ///    See for an example the function parse_data_expression
@@ -88,7 +88,7 @@ namespace data {
     return parse_data_specification(spec_stream);
   }
 
-  /// \brief Parses and typechecks a data variable declaration list checking for double occurrences
+  /// \brief Parses and type checks a data variable declaration list checking for double occurrences
   ///        of variables in an existing variable range.
   /// \details The shape of the variables are x_11,...,x_1n:S_1; ... x_m1,...,x_mk:S_m where
   ///      x_ij are variable strings and S_i are sort  expressions. It is checked that the
@@ -149,7 +149,7 @@ namespace data {
     }
   }
 
-  /// \brief Parses and typechecks a data variable declaration list checking for double occurrences
+  /// \brief Parses and type checks a data variable declaration list checking for double occurrences
   ///        of variables in an existing variable range.
   /// \details See parse_variables on a string for more explanation.
   /// \param[in] text A textual description of the variable declarations to be parsed.
@@ -171,7 +171,7 @@ namespace data {
     parse_variables(spec_stream, i, begin, end, data_spec);
   }
 
-  /// \brief Parses and typechecks a data variable declaration list.
+  /// \brief Parses and type checks a data variable declaration list.
   /// \details See parse_variables on a string for more explanation.
   /// \param[in] text A textual description of the variable declarations to be parsed.
   /// \param[out] i An input interator indicating where the parsed variables must be inserted.
@@ -185,7 +185,7 @@ namespace data {
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
   }
 
-  /// \brief Parses and typechecks a data variable declaration list.
+  /// \brief Parses and type checks a data variable declaration list.
   /// \details See parse_variables on a string for more explanation.
   /// \param[in] text A textual description of the variable declarations to be parsed.
   /// \param[out] i An input interator indicating where the parsed variables must be inserted.
@@ -199,7 +199,7 @@ namespace data {
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
   }
 
-  /// \brief Parses and typechecks a data variable declaration.
+  /// \brief Parses and type checks a data variable declaration.
   /// \details 
   ///    A variable declaration has the form x:S where x is a string and S is a
   ///    sort expression. No trailing information after the declaration of the
@@ -230,7 +230,7 @@ namespace data {
     return variable_store.front();
   }
 
-  /// \brief Parses and typechecks a data variable declaration.
+  /// \brief Parses and type checks a data variable declaration.
   /// \details
   ///    See the information for reading a variable declaration from a string.
   ///  \param[in] text A textual description of the variable declaration.
@@ -245,7 +245,7 @@ namespace data {
     return parse_variable(spec_stream, data_spec);
   }
 
-  /// \brief Parses and typechecks a data expression.
+  /// \brief Parses and type checks a data expression.
   /// \details 
   ///     A data expression is read from the input where it is assumed that
   ///     it can contain variables from the range from begin to end. The data     
@@ -283,7 +283,7 @@ namespace data {
     return detail::numeric_conversion(data_expression(data_expr));
   }
 
-  /// \brief Parses and typechecks a data expression.
+  /// \brief Parses and type checks a data expression.
   /// \details
   ///     See parsing a data expression from a string for details.
   /// \param[in] text The input text containing a data expression.
@@ -302,7 +302,7 @@ namespace data {
     return parse_data_expression(spec_stream, begin,end, data_spec);
   }
 
-  /// \brief Parses and typechecks a data expression.
+  /// \brief Parses and type checks a data expression.
   /// \details
   ///     See parsing a data expression from a string for details.
   /// \param[in] text The input text containing a data expression.
@@ -314,7 +314,7 @@ namespace data {
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
 
-  /// \brief Parses and typechecks a data expression.
+  /// \brief Parses and type checks a data expression.
   /// \details
   ///     See parsing a data expression from a string for details.
   /// \param[in] text The input text containing a data expression.
@@ -326,10 +326,11 @@ namespace data {
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
 
-  /// \brief Parses and typechecks a data expression.
+  /// \brief Parses and type checks a data expression.
   /// \details
   ///     See parsing a data expression from a string for details.
   /// \param[in] text The input text containing a data expression.
+  /// \param[in] var_decl a list of variable declarations
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   data_expression parse_data_expression(const std::string text,
@@ -340,7 +341,7 @@ namespace data {
     return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
   }
 
-  /// \brief Parses and typechecks a sort expression.
+  /// \brief Parses and type checks a sort expression.
   /// \details See parsing a sort expression from a string for details.
   /// \param[in] text The input text containing a sort expression.
   /// \param[in] data_spec The data specification that is used for type checking. 
@@ -359,9 +360,9 @@ namespace data {
     return sort_expression(sort_expr);
   }
 
-  /// \brief Parses and typechecks a sort expression.
+  /// \brief Parses and type checks a sort expression.
   /// \details
-  ///     Parses and typechecks the sort expression. An error is signalled using
+  ///     Parses and type checks the sort expression. An error is signalled using
   ///     the mcrl2::runtime_error exception. This routine expects exactly one sort
   ///     expression on the input. The default data specification contains all standard
   ///     sorts.

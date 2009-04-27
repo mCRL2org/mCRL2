@@ -80,13 +80,17 @@ namespace mcrl2 {
 
       protected:
 
+        /// \brief Data specification context
         data_specification const&                        m_specification;
 
-        /// Stores a representative e
+        /// \brief Serves as a cache for later find operations
         atermpp::map< sort_expression, data_expression > m_representatives;
 
       protected:
 
+        /// \brief Sets a data expression as representative of the sort
+        /// \param[in] sort the sort of which to set the representative
+        /// \param[in] representative the data expression that serves as representative
         data_expression set_representative(sort_expression const& sort, data_expression const& representative)
         {
           m_representatives[sort] = representative;
@@ -94,6 +98,9 @@ namespace mcrl2 {
           return representative;
         }
 
+        /// \brief Finds a representative for a function symbol
+        /// \param[in] symbol the function symbol for which to find the representative
+        /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
         /// \return an element of sort sort using a constructor or mapping; or the default constructed data_expression object
         /// \pre symbol.sort() is of type function_sort
         data_expression find_representative(function_symbol const& symbol, const unsigned int maximum_depth)
@@ -101,24 +108,27 @@ namespace mcrl2 {
           assert(symbol.sort().is_function_sort());
 
           data_expression_vector arguments;
-      
+
           for (function_sort::domain_const_range r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
           {
             data_expression representative = find_representative(r.front(), maximum_depth - 1);
-          
+
             if (representative == data_expression())
             {
               return data_expression();
             }
-          
+
             arguments.push_back(representative);
           }
-          
+
           // a suitable set of arguments is found
           return application(symbol, arguments);
         }
 
-        // \return an element of sort sort or the default constructed data_expression object
+        /// \brief Finds a representative element for an arbitrary sort expression
+        /// \param[in] sort the sort for which to find the representative
+        /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
+        /// \return an element of sort sort or the default constructed data_expression object
         data_expression find_representative(sort_expression const& sort, const unsigned int maximum_depth)
         {
           data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
@@ -149,7 +159,7 @@ namespace mcrl2 {
             {
                return set_representative(sort, *i);
             }
-  
+
             // check if there is a constant mapping for s
             for (data_specification::mappings_const_range::const_iterator i =
                  std::find_if(local_mappings.begin(), local_mappings.end(),
@@ -190,13 +200,13 @@ namespace mcrl2 {
               }
             }
           }
-          
+
           return set_representative(sort, data_expression());
         }
 
       public:
 
-        /// \brief 
+        /// \brief Constructor with data specification as context
         representative_generator(data_specification const& specification) : m_specification(specification)
         {
         }
