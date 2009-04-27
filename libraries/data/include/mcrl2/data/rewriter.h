@@ -15,7 +15,7 @@
 #include <functional>
 #include <algorithm>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
+#include "boost/shared_ptr.hpp"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
@@ -281,6 +281,14 @@ namespace data {
       bool add_rule(const data_equation& equation)
       {
         return m_rewriter->addRewriteRule(const_cast< basic_rewriter const* >(this)->implement(equation));
+      }
+
+      /// \brief Returns a reference to the Rewriter object that is used for the implementation.
+      /// \return A reference to the wrapped Rewriter object.
+      /// \deprecated
+      detail::Rewriter const& get_rewriter() const
+      {
+        return *m_rewriter;
       }
 
       /// \brief Returns a reference to the Rewriter object that is used for the implementation.

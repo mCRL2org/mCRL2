@@ -49,9 +49,12 @@ namespace mcrl2 {
 
         public:
 
-          classic_enumerator_context(data_specification const& specification, detail::Rewriter const& rewriter) :
+          /// Limitations in EnumeratorStandard force passing a rewriter
+          /// e.get_rewriter() is not required but at this moment data::rewriter is the currently only model of Evaluator
+          template < typename Evaluator >
+          classic_enumerator_context(data_specification const& specification, Evaluator const& evaluator) :
                     m_specification(specification),
-                    m_enumerator(detail::data_specification_to_aterm_data_spec(specification), &const_cast< detail::Rewriter& >(rewriter)) {
+                    m_enumerator(detail::data_specification_to_aterm_data_spec(specification), &const_cast< detail::Rewriter& >(evaluator.get_rewriter())) {
           }
       };
 
@@ -124,13 +127,7 @@ namespace mcrl2 {
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
                         m_shared_context->m_enumerator.findSolutions(variables, converter.translate(m_condition), false)));
 
-            while (increment()) {
-              if (Selector::test(m_evaluator(m_condition, m_substitution))) {
-                return true;
-              }
-            }
-
-            return false;
+            return increment();
           }
 
         public:
@@ -188,19 +185,10 @@ namespace mcrl2 {
               boost::shared_ptr< shared_context_type > const& context,
                   std::set< variable_type > const& v, expression_type const& c, substitution_type const& s = substitution_type()) {
 
-            if (v.empty()) {
-              Evaluator evaluator(context->m_specification);
+            target.reset(new classic_enumerator_impl(context, c, s));
 
-              if (Selector::test(evaluator(c))) {
-                target.reset(new classic_enumerator_impl(context, c, s));
-              }
-            }
-            else {
-              target.reset(new classic_enumerator_impl(context, c, s));
-
-              if (!target->initialise(v)) {
-                target.reset();
-              }
+            if (!target->initialise(v)) {
+              target.reset();
             }
           }
 
@@ -211,9 +199,8 @@ namespace mcrl2 {
             /// Limitations in EnumeratorStandard force passing a rewriter
             Evaluator evaluator(specification);
 
-            // e.get_rewriter() is not required but at this moment data::rewriter the only model of Evaluator
             create(target, boost::shared_ptr< shared_context_type >(
-                  new shared_context_type(specification, evaluator.get_rewriter())), v, c, evaluator, s);
+                  new shared_context_type(specification, evaluator)), v, c, evaluator, s);
           }
 
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
@@ -223,7 +210,7 @@ namespace mcrl2 {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
-            if (v.empty() || !target->initialise(v)) {
+            if (!target->initialise(v)) {
               target.reset();
             }
           }
@@ -231,9 +218,8 @@ namespace mcrl2 {
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               data_specification const& specification, std::set< variable_type > const& v,
               expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type()) {
-            /// Limitations in EnumeratorStandard force passing a rewriter
-            /// e.get_rewriter() is not required but at this moment data::rewriter is the currently only model of Evaluator
-            create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e).get_rewriter())), v, c, e, s);
+
+            create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }
       };
     }

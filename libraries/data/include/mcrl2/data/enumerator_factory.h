@@ -65,19 +65,20 @@ namespace mcrl2 {
         /// \brief An internal evaluator object
         Evaluator                                m_internal_evaluator;
         /// \brief Reference to a possibly external evaluator object
-        Evaluator&                               m_evaluator;
+        Evaluator const&                         m_evaluator;
         /// \brief Context shared by enumerators
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
         /// \brief Default constructor
-        enumerator_factory() {
+        enumerator_factory() : m_evaluator(m_internal_evaluator) {
         }
 
         /// \brief Constructor with shared context and evaluator instance
         /// \param[in] context the shared context for enumerators
         /// \param[in] evaluator a reference to an evaluator
         enumerator_factory(boost::shared_ptr< shared_context_type > const& context, Evaluator const& evaluator) :
-               m_evaluator(evaluator),
+               m_internal_evaluator(evaluator),
+               m_evaluator(m_internal_evaluator),
                m_enumeration_context(context) {
         }
 
@@ -94,13 +95,13 @@ namespace mcrl2 {
         /// \brief Constructor with data specification
         enumerator_factory(data_specification const& specification, Evaluator const& evaluator) :
                m_internal_evaluator(evaluator), m_evaluator(m_internal_evaluator),
-               m_enumeration_context(new shared_context_type(specification, m_evaluator.get_rewriter())) {
+               m_enumeration_context(new shared_context_type(specification, m_evaluator)) {
         }
 
         /// \brief Constructor with data specification (does not copy evaluator)
         enumerator_factory(data_specification const& specification, Evaluator& evaluator) :
                m_internal_evaluator(evaluator), m_evaluator(evaluator),
-               m_enumeration_context(new shared_context_type(specification, m_evaluator.get_rewriter())) {
+               m_enumeration_context(new shared_context_type(specification, m_evaluator)) {
         }
 
         /** \brief Constructor with data specification and evaluator

@@ -156,15 +156,21 @@ void empty_test() {
 
   std::set< variable > variables;
 
+  unsigned int count = 0;
+
   // explicit with condition evaluator and condition
-  for (enumerator_type i(data_specification(), variables, evaluator); i != enumerator_type(); ++i) {
+  for (enumerator_type i(data_specification(), variables, evaluator); i != enumerator_type(); ++i, ++count) {
     BOOST_CHECK(i->begin() == i->end()); // trivial valuation
   }
 
+  BOOST_CHECK(count == 1);
+
   // explicit with condition but without condition evaluator
-  for (enumerator_type i(data_specification(), variables); i != enumerator_type(); ++i) {
+  for (enumerator_type i(data_specification(), variables); i != enumerator_type(); ++i, ++count) {
     BOOST_CHECK(i->begin() == i->end()); //trivial valuation
   }
+
+  BOOST_CHECK(count == 2);
 
   variables.insert(variable("y", sort_nat::nat()));
 
