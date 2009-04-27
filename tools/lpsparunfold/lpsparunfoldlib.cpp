@@ -45,53 +45,33 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
       sort_names.insert( (basic_sort(*i)).name() );
     }
 
- /*   if (i->is_alias())
+    if (i->is_alias())
     {
       sort_names.insert( (alias( *i ).name()).name());
-      sort_expression x = m_data_specification.find_referenced_sort( *i);
+      sort_expression x = m_data_specification.find_referenced_sort( (alias( *i ).name())  );
       if (x.is_basic_sort())
         sort_names.insert( basic_sort(m_data_specification.find_referenced_sort( *i)).name() );
     }
-*/
 
     if (i->is_structured_sort()) {
-      cout << *i << endl;
-
             function_symbol_vector fs1 = mcrl2::data::structured_sort( *i ).projection_functions( );
             function_symbol_vector fs2 = mcrl2::data::structured_sort( *i ).recogniser_functions( );
             data_equation_vector   dev = mcrl2::data::structured_sort( *i ).constructor_equations( );
           
-            cout << fs1.size() << endl;  
-            cout << fs2.size() << endl; 
-            cout << dev.size() << endl;
-            cout << "=======" << endl; 
-          
             for( function_symbol_vector::iterator k = fs1.begin(); k != fs1.end(); ++k )
             {
-              cout << *k << endl;
               mapSet.insert( *k );
             }
 
             for( function_symbol_vector::iterator k = fs2.begin(); k != fs2.end(); ++k )
             {
-              cout << *k << endl;
               mapSet.insert( *k );
             }
 
             for( data_equation_vector::iterator k = dev.begin(); k != dev.end(); ++k )
             {
-              cout << pp(*k) << endl;
               mapSet.insert( *k );
             }
- 
-     
-
-      // Create constructors
-      // deriveConstrutorsFromStructuredSort( *i );
-      // Create projector mapping functions
-
-      // Create recongnisers mapping functions    
-      //cout << "X" << endl;
     }
   };
 
@@ -104,14 +84,12 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
                                                                       i != fsl.end();
                                                                       ++i){
       consSet.insert(*i);
-      cout << *i << endl;
       mapping_and_constructor_names.insert( i -> name() );
     };
     gsVerboseMsg("Specification has %d constructors\n", consSet.size() );
   }
 
   {
-    //Error: s.mappings( unfoldParameter ); -> 0 functions
     data_specification::mappings_const_range fsl= s.mappings();
     for (data_specification::mappings_const_range::const_iterator i = fsl.begin();
                                                                   i != fsl.end();
@@ -164,26 +142,48 @@ function_symbol_vector Sorts::determineAffectedConstructors()
   return k;
 }
 
-function_symbol_vector Sorts::determineAffectedMappings()
+function_symbol_vector Sorts::determineAffectedMappings(function_symbol_vector k)
 {
   using namespace mcrl2::data;
 
   function_symbol_vector m;
-  for( std::set<mcrl2::data::function_symbol>::iterator i = mapSet.begin();
-                                                        i != mapSet.end();
-                                                         ++i){
-      cout <<  unfoldParameter << endl;
-      cout <<  i -> sort() << endl;
-      if(mcrl2::data::search_basic_sort( i ->sort(),  unfoldParameter ))
-//    if(basic_sortOccursInSort_expression( i->sort(), unfoldParameter ))
+  set< sort_expression > m_visited;
+
+  for( function_symbol_vector::iterator i  = k.begin();
+                                        i != k.end();
+                                        ++i){
+    if( i->sort().is_function_sort() )
     {
-      m.push_back( *i );
-      gsDebugMsg("\t%s: %s\n", i->name().c_str(), i->sort().to_string().c_str()  );
-    };
+      function_sort fs = function_sort(i->sort());
+
+      boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
+      for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
+      {
+         /* Following 'if' statement avoids re-determination of affected mappings for function sorts */
+        if( m_visited.find( *j ) == m_visited.end() )
+        {
+          m_visited.insert( *j );
+          function_symbol_vector t = m_data_specification.mappings( *j );
+          for( function_symbol_vector::iterator k =  t.begin();
+                                                k != t.end();
+                                                     ++k )
+          {
+            if( (k->sort()).is_function_sort()  )  
+            {
+              boost::iterator_range<sort_expression_list::const_iterator> sel1 = function_sort(k->sort()).domain();
+              if (( std::distance(sel1.begin(), sel1.end()) == 1) && (*(sel1.begin()) == unfoldParameter) )
+              {
+                m.push_back( *k );
+              }
+            }
+          } 
+        }
+      }
+    }
   }
+ 
   gsDebugMsg("m:\t");
   gsVerboseMsg("%s has %d mapping function(s)\n", unfoldParameter.name().c_str() , m.size() );
-//  function_symbol_vector t = m_data_specification.mappings( unfoldParameter ); // <- Wrong result 
 
   return m;
 }
@@ -558,7 +558,7 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
       }
     }
 
-//    cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
+    cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
     assert( new_ass_left.size() == new_ass_right.size() );
     mcrl2::data::assignment_vector new_ass;
     while (!new_ass_left.empty())
@@ -746,7 +746,7 @@ void Sorts::algorithm(int parameter_at_index)
    /*   Alg */
    /*     1 */ sort_new = generateFreshSort( unfoldParameter.name() );
    /*     2 */ k = determineAffectedConstructors();
-   /*     3 */ m = determineAffectedMappings();
+   /*     3 */ m = determineAffectedMappings( k );
    /*     4 */ set_of_new_sorts = newSorts( k );
    /*     5 */ sortSet.insert( set_of_new_sorts.begin(), set_of_new_sorts.end() );
                sortSet.insert( sort_new );
