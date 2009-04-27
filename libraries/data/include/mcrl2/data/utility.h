@@ -77,7 +77,12 @@ namespace mcrl2 {
     {
       atermpp::vector< Expression > result;
 
-      return convert< atermpp::term_list< Expression > >(substitute(f, result));
+      for (typename atermpp::term_list< Expression >::iterator i = c.begin(); i != c.end(); ++i)
+      {
+        result.push_back(substitute(f, *i));
+      }
+
+      return convert< atermpp::term_list< Expression > >(result);
     }
 
     /// \brief Applies a substitution function to all elements of a container

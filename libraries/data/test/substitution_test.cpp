@@ -100,7 +100,7 @@ void test_assignment_list_substitution()
 }
 
 void test_list_substitution()
-{ 
+{
   using namespace atermpp;
 
   variable x("x", sort_nat::nat());
@@ -122,9 +122,7 @@ void test_list_substitution()
   BOOST_CHECK(substitute(make_list_substitution(x,y1), xy) == assignment(y1,y));
   BOOST_CHECK(substitute(make_list_substitution(x,y1), uz) == uz);
 
-  BOOST_CHECK(substitute(make_list_substitution(x,y), l) == assignment_list(make_list(assignment(y1,y), uz)));
-  std::clog << "substitution result: " << substitute(make_list_substitution(x,y), l) << std::endl;
-  std::clog << "expected result: " << assignment_list(make_list(assignment(y1,y), uz)) << std::endl;
+  BOOST_CHECK(substitute(make_list_substitution(x,y1), l) == assignment_list(make_list(assignment(y1,y), uz)));
 }
 
 void test_mutable_substitution_adapter()
@@ -134,7 +132,7 @@ void test_mutable_substitution_adapter()
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
   f[x] = y;
-  
+
   mutable_substitution_adapter<mutable_substitution<variable, data_expression> > g(f);
   BOOST_CHECK(g(x) == y);
 
@@ -170,7 +168,7 @@ int test_main(int a, char**aa)
 
   test1();
   core::garbage_collect();
-  
+
   test_assignment_list_substitution();
   core::garbage_collect();
 
