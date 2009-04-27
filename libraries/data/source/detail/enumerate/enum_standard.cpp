@@ -388,6 +388,10 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                         fs_reset();
                 } else {
                         ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
+                        if (l == NULL)
+                        {
+                          l = ATempty;
+			}
                         if ( ATisEmpty(l) )
                         {
                                 gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);

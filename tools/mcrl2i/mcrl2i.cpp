@@ -166,8 +166,8 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
         std::cerr << "  rewrite strategy:   " << m_rewrite_strategy << std::endl;
       }
 
-      data_specification spec; 
-      if (m_input_filename!="")
+      data_specification spec;
+      if (!m_input_filename.empty())
       { try 
         { // Try to read a linear specification
           mcrl2::lps::specification p;
@@ -188,6 +188,10 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
         }
       }
+
+      // Import all standard data types should be available even if they are
+      // not port of the loaded lps or pbes.
+      spec.import_system_defined_sort(sort_real_::real_());
       
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
@@ -244,7 +248,6 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           {
             atermpp::set <variable> vars;
             string::size_type dotpos=s.find(".");
-            std::cerr << "DOTOPOS " << dotpos << "\n";
             if (dotpos==string::npos)
             { throw mcrl2::runtime_error("Expect a `.' in the input");
             }
@@ -259,12 +262,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             { 
               cout << "[";
               for ( atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v ) 
-              { cout << pp(*v) << " := " << (*i)(*v); 
+              { cout << pp(*v) << " := " << pp((*i)(*v));
                 if ( boost::next(v)!=vars.end() )
                 { cout << ", ";
                 }
               }
-              cout << "] gives "<< rewr(term,*i) << "]\n";
+              cout << "] gives "<< pp(rewr(term,*i)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
