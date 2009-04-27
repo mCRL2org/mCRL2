@@ -111,10 +111,12 @@ static bool match_and_remove(string &s, const string &match)
 }
 
 static const std::string help_text=      
-          "At the prompt any mCRL2 data expression can be given. This term will be\n"
-          "rewritten to normal form and printed. Also, one can assign values to\n"
-          "variables. These variables can then be used in expressions. The prompt accepts \n"
-          "the following commands (where VARLIST is of the form x,y,...: S; ... v,w,...: T):\n"
+          "The following commands are available to manipulate mcrl2 data expressions.\n"
+          "Essentially, there are commands to rewrite and type expressions, as well as generating\n"
+          "the solutions for a boolean expression. The expressions can contain assigned or \n"
+          "unassigned variables. Note that there are no bounds on the number of steps to evaluate\n"
+          "or solve an expression, nor is the number of solutions bounded. Hence, the assign, eval\n"
+          "solve commands can give rise to infinite loops.\n"
           "  h[elp]                         print this help message.\n"
           "  q[uit]                         quit.\n"
           "  t[ype] EXPRESSION              print type of EXPRESSION.\n"
@@ -123,7 +125,8 @@ static const std::string help_text=
           "  v[ar] VARLIST                  declare variables in VARLIST.\n"
           "  r[ewriter] STRATEGY            use STRATEGY for rewriting.\n"
           "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in\n"
-          "                                      VARLIST that satisfy EXPRESSION.\n";
+          "                                      VARLIST that satisfy EXPRESSION.\n"
+          "VARLIST is of the form x,y,...: S; ... v,w,...: T)";
 
 
 class mcrl2i_tool: public rewriter_tool<input_tool> 
@@ -151,7 +154,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           "Interpreter for the mCRL2 data language",
           "Evaluate mCRL2 data expressions via a text-based interface. \n"
           "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used.\n" 
-          "If no input file is given, the standard built in data types are used (so stdin is ignored)\n"
+          "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored.\n"
           + help_text
         )
     {}
@@ -267,7 +270,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
                 { cout << ", ";
                 }
               }
-              cout << "] gives "<< pp(rewr(term,*i)) << "\n";
+              cout << "] evaluates to "<< pp(rewr(term,*i)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
