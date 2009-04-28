@@ -11,6 +11,7 @@ project libraries/pbes/example
    ;
 
 exe paritygame   : paritygame.cpp : ;
+exe bes_bisimulation : bes_bisimulation.cpp : ;
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
 exe bessolve     : bessolve.cpp : ;
@@ -23,6 +24,7 @@ exe pbes2bes     : pbes2bes.cpp : ;
 install dist
    :
      paritygame
+     bes_bisimulation
      bisimulation
      lps2pbes
      bessolve
