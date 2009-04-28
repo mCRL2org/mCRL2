@@ -138,75 +138,6 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
-    namespace sort_list {
-      /// \brief Constructs a list expression from a range of expressions
-      /// Type I must be a model of the Forward Traversal Iterator concept;
-      /// with value_type convertible to data_expression.
-      /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
-      template < typename I >
-      inline
-      application list(const sort_expression& s, I const& begin, I const& end)
-      {
-        data_expression list_expression(nil(s));
-
-        for (I i = begin; i != end; ++i) {
-          BOOST_ASSERT(i->sort() == s);
-
-          list_expression = sort_list::snoc(s, list_expression, *i);
-        }
-
-        return static_cast< application >(list_expression);
-      }
-    }
-
-    namespace sort_fset {
-      /// \brief Constructs a finite set expression from a range of expressions
-      /// Type I must be a model of the Forward Traversal Iterator concept;
-      /// with value_type convertible to data_expression.
-      /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
-      template < typename I >
-      inline
-      application fset(const sort_expression& s, I const& begin, I const& end)
-      {
-        data_expression fset_expression(sort_fset::fset_empty(s));
-
-        for (I i = begin; i != end; ++i) {
-          BOOST_ASSERT(i->sort() == s);
-
-          fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
-        }
-
-        return static_cast< application >(fset_expression);
-      }
-    }
-
-    namespace sort_fbag {
-      /// \brief Constructs a finite bag expression from a range of expressions
-      /// Type I must be a model of the Forward Traversal Iterator concept;
-      /// with value_type convertible to data_expression.
-      /// \param[in] s the sort of list elements
-      /// \param[in] begin iterator that marks the start of a range of elements of sort s
-      /// \param[in] end the past-end iterator for a range of elements of sort s
-      template < typename I >
-      inline
-      application fbag(const sort_expression& s, I const& begin, I const& end)
-      {
-        data_expression fbag_expression(sort_fbag::fbag_empty(s));
-
-        for (I i = begin; i != end; ++i) {
-          BOOST_ASSERT(i->sort() == s);
-
-          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, 1);
-        }
-
-        return static_cast< application >(fbag_expression);
-      }
-    }
-
     namespace sort_bool_{
       /// \brief Constructs expression of type Bool from an integral type
       /// \param b A Boolean
@@ -352,6 +283,114 @@ namespace mcrl2 {
       }
 
       return sort_real_::real_(n);
+    }
+
+
+    namespace sort_list {
+      /// \brief Constructs a list expression from a range of expressions
+      //
+      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
+      /// \param[in] s the sort of list elements
+      /// \param[in] begin iterator that marks the start of a range of elements of sort s
+      /// \param[in] end the past-end iterator for a range of elements of sort s
+      template < typename I >
+      inline
+      application list(const sort_expression& s, I const& begin, I const& end)
+      {
+        data_expression list_expression(nil(s));
+
+        for (I i = begin; i != end; ++i) {
+          BOOST_ASSERT(i->sort() == s);
+
+          list_expression = sort_list::snoc(s, list_expression, *i);
+        }
+
+        return static_cast< application >(list_expression);
+      }
+
+      /// \brief Constructs a list expression from a range of expressions
+      /// \param[in] s the sort of list elements
+      /// \param[in] r iterator range of elements of sort s
+      /// \see application list(const sort_expression&, I const&, I const&)
+      template < typename ForwardTraversalIterator >
+      inline
+      application list(const sort_expression& s,
+                       boost::iterator_range< ForwardTraversalIterator > const& r)
+      {
+        return list(s, r.begin(), r.end());
+      }
+    }
+
+    namespace sort_fset {
+      /// \brief Constructs a finite set expression from a range of expressions
+      //
+      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
+      /// \param[in] s the sort of list elements
+      /// \param[in] begin iterator that marks the start of a range of elements of sort s
+      /// \param[in] end the past-end iterator for a range of elements of sort s
+      template < typename I >
+      inline
+      application fset(const sort_expression& s, I const& begin, I const& end)
+      {
+        data_expression fset_expression(sort_fset::fset_empty(s));
+
+        for (I i = begin; i != end; ++i) {
+          BOOST_ASSERT(i->sort() == s);
+
+          fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
+        }
+
+        return static_cast< application >(fset_expression);
+      }
+
+      /// \brief Constructs a finite set expression from a range of expressions
+      /// \param[in] s the sort of list elements
+      /// \param[in] r iterator range of elements of sort s
+      /// \see application list(const sort_expression&, I const&, I const&)
+      template < typename ForwardTraversalIterator >
+      inline
+      application fset(const sort_expression& s,
+                       boost::iterator_range< ForwardTraversalIterator > const& r)
+      {
+        return fset(s, r.begin(), r.end());
+      }
+    }
+
+    namespace sort_fbag {
+      /// \brief Constructs a finite bag expression from a range of expressions
+      /// Type I must be a model of the Forward Traversal Iterator concept;
+      /// with value_type convertible to data_expression.
+      /// \param[in] s the sort of list elements
+      /// \param[in] begin iterator that marks the start of a range of elements of sort s
+      /// \param[in] end the past-end iterator for a range of elements of sort s
+      template < typename I >
+      inline
+      application fbag(const sort_expression& s, I const& begin, I const& end)
+      {
+        data_expression fbag_expression(sort_fbag::fbag_empty(s));
+
+        for (I i = begin; i != end; ++i) {
+          BOOST_ASSERT(i->sort() == s);
+
+          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, sort_nat::nat(1));
+        }
+
+        return static_cast< application >(fbag_expression);
+      }
+
+      /// \brief Constructs a finite bag expression from a range of expressions
+      /// \param[in] s the sort of list elements
+      /// \param[in] r iterator range of elements of sort s
+      /// \see application list(const sort_expression&, I const&, I const&)
+      template < typename ForwardTraversalIterator >
+      inline
+      application fbag(const sort_expression& s,
+                       boost::iterator_range< ForwardTraversalIterator > const& r)
+      {
+        return fbag(s, r.begin(), r.end());
+      }
     }
 
   } // namespace data

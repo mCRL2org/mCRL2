@@ -82,23 +82,7 @@ namespace mcrl2 {
       {
         if (mcrl2::core::detail::gsIsDataExprNumber(expression))
         { //part is a number; replace by its internal representation
-          std::string number(atermpp::aterm_appl(expression(0)).function().name());
-          if (expression.sort() == sort_pos::pos())
-          {
-            return sort_pos::pos(number);
-          }
-          if (expression.sort() == sort_nat::nat())
-          {
-            return sort_nat::nat(number);
-          }
-          if (expression.sort() == sort_int_::int_())
-          {
-            return sort_int_::int_(number);
-          }
-          if (expression.sort() == sort_real_::real_())
-          {
-            return sort_real_::real_(number);
-          }
+          return number(expression.sort(), atermpp::aterm_appl(expression(0)).function().name());
         }
         else if (expression.is_application())
         {
@@ -115,7 +99,6 @@ namespace mcrl2 {
 
         return expression;
       }
-
 
       /// Translates the numeric expressions to their internal representations
       inline

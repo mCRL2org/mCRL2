@@ -19,6 +19,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -31,7 +32,7 @@ namespace mcrl2 {
       public:
 
         /// \brief Iterator range over bound variables
-        typedef boost::iterator_range< variable_list::const_iterator > variable_const_range;
+        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
 
       protected:
 
@@ -56,14 +57,6 @@ namespace mcrl2 {
           else if (s == "exists")
           {
             result = core::detail::gsMakeExists();
-          }
-          else if (s == "setcomprehension")
-          {
-            result = core::detail::gsMakeSetComp();
-          }
-          else if (s == "bagcomprehension")
-          {
-            result = core::detail::gsMakeBagComp();
           }
           else
           {
@@ -93,14 +86,6 @@ namespace mcrl2 {
           else if (core::detail::gsIsExists(o))
           {
             result = "exists";
-          }
-          else if (core::detail::gsIsSetComp(o))
-          {
-            result = "setcomprehension";
-          }
-          else if (core::detail::gsIsBagComp(o))
-          {
-            result = "bagcomprehension";
           }
           else
           {
@@ -181,9 +166,9 @@ namespace mcrl2 {
 
         /// \brief Returns the variables of the abstraction
         inline
-        variable_const_range variables() const
+        variables_const_range variables() const
         {
-          return boost::make_iterator_range(atermpp::term_list< variable >(atermpp::list_arg2(*this)));
+          return boost::make_iterator_range(add_random_access< variable >(atermpp::list_arg2(*this)));
         }
 
         /// \brief Returns the body of the abstraction
@@ -212,20 +197,6 @@ namespace mcrl2 {
         bool is_exists() const
         {
           return binding_operator() == "exists";
-        }
-
-        /// \brief Returns true iff the binding operator is "setcomprehension"
-        inline
-        bool is_set_comprehension() const
-        {
-          return binding_operator() == "setcomprehension";
-        }
-
-        /// \brief Returns true iff the binding operator is "bagcomprehension"
-        inline
-        bool is_bag_comprehension() const
-        {
-          return binding_operator() == "bagcomprehension";
         }
 
     }; // class abstraction

@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file free_variables.h
-/// \brief Add your file description here.
+/// \brief Is this functionality still needed? -- jwulp
 
 #ifndef MCRL2_DATA_DETAIL_FREE_VARIABLES_H
 #define MCRL2_DATA_DETAIL_FREE_VARIABLES_H
