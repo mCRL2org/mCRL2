@@ -39,6 +39,146 @@ bool is_variable(const atermpp::aterm_appl& t)
   }
 }
 
+/// FIXME: Workaround circumventing the problem of using find_all_if in
+/// combination with tr::is_true
+inline
+bool is_true(const atermpp::aterm_appl& t)
+{
+  if(core::detail::check_rule_BooleanExpression(t))
+  {
+    return core::term_traits<boolean_expression>::is_true(t);
+  }
+  else
+  {
+    return false;
+  }
+}
+
+/// FIXME: Workaround circumventing the problem of using find_all_if in
+/// combination with tr::is_false
+inline
+bool is_false(const atermpp::aterm_appl& t)
+{
+  if(core::detail::check_rule_BooleanExpression(t))
+  {
+    return core::term_traits<boolean_expression>::is_false(t);
+  }
+  else
+  {
+    return false;
+  }
+}
+
+/// \brief Splits a disjunction into a sequence of operands
+/// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
+/// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
+/// function symbol.
+/// \param expr A PBES expression
+/// \return A sequence of operands
+inline
+atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  atermpp::set<boolean_expression> result;
+  core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
+  return result;
+}
+
+  /// \brief Splits a conjunction into a sequence of operands
+  /// Given a pbes expression of the form p1 && p2 && .... && pn, this will yield a
+  /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a && as main
+  /// function symbol.
+  /// \param expr A PBES expression
+  /// \return A sequence of operands
+inline
+atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  atermpp::set<boolean_expression> result;
+  core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
+  return result;
+}
+
+inline
+bool is_standard_form(boolean_expression const& e)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  if(tr::is_true(e) || tr::is_false(e))
+  {
+    return true;
+  }
+  else if(tr::is_and(e))
+  {
+    atermpp::set<boolean_expression> arguments(split_and(e));
+    for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+    {
+      if(tr::is_or(*i) || tr::is_imp(*i))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  else if(tr::is_or(e))
+  {
+    atermpp::set<boolean_expression> arguments(split_or(e));
+    for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+    {
+      if(tr::is_and(*i) || tr::is_imp(*i))
+      {
+        return false;
+      }
+    }
+    return true;
+  }   
+  else
+  {
+    return true;
+  }
+}
+
+template <typename Container>
+inline
+bool is_standard_form(boolean_equation_system<Container> const& bes)
+{
+  for(typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    if(!is_standard_form(i->formula()))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename Container>
+inline
+bool has_true(boolean_equation_system<Container> const& bes)
+{
+  for (typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    if(atermpp::find_if(i->formula(), is_true))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+template <typename Container>
+inline
+bool has_false(boolean_equation_system<Container> const& bes)
+{
+  for (typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    if(atermpp::find_if(i->formula(), is_false))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 /// \brief convert a propositional variable to a boolean variable
 /// \param v a propositional variable
 /// \return the boolean variable with the same name as v.
@@ -446,9 +586,10 @@ class bisimulation_reduction
       int iteration = 0; // Counter for verbose information
       while(changed)
       {
+        ++iteration;
         if(core::gsDebug)
         {
-          std::cerr << "Iteration " << ++iteration << std::endl;
+          std::cerr << "Iteration " << iteration << std::endl;
         }
 
         changed = false;
@@ -524,6 +665,20 @@ class bes_bisimulation_tool: public mcrl2::utilities::tools::input_output_tool
       
       boolean_equation_system<> bes;
       pbes_to_bes(pbes, bes);
+      
+      if(!is_standard_form(bes))
+      {
+        throw mcrl2::runtime_error("The boolean equation system in the input file is not in standard form");
+      }
+      if(has_true(bes))
+      {
+        throw mcrl2::runtime_error("The boolean equation system in the input file contains true in one of the right hand sides");
+      }
+      if(has_false(bes))
+      {
+        throw mcrl2::runtime_error("The boolean equation system in the input file contains false in one of the right hand sides");
+      }
+
 
 /*      if(!bes.is_closed())
       {
