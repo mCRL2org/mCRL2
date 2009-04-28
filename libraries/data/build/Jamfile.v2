@@ -3,13 +3,8 @@ project data
        ;
 
 mcrl2-library data
-       : source/data_implementation_concrete.cpp 
-         source/data_reconstruct.cpp 
-         source/data_specification.cpp 
-         source/standard.cpp
+       : source/implementations.cpp 
          [ glob source/detail/rewrite/*.cpp ]
-         [ glob source/detail/prover/*.cpp ]
-         [ glob source/detail/enumerate/*.cpp ]
        : <library>/libraries//core
          <use>/site-config//boost
          <use>/libraries/utilities//exception
