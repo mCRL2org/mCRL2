@@ -42,7 +42,7 @@ void visualchannel_communication::draw( void )
   channel_communication* comm = static_cast<channel_communication*>( m_object );
 
   //for all communications
-  for ( int i = 0; i < comm->count_channel(); ++i )
+  for ( unsigned int i = 0; i < comm->count_channel(); ++i )
   {
     channel* chan = comm->get_attached_channel( i );
 

@@ -117,7 +117,7 @@ bool grape_event_remove_channel_communication::Do( void )
   if ( comm_ptr )
   {
     visualchannel_communication* vis_comm_ptr = static_cast<visualchannel_communication*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
-    int communication_selected = vis_comm_ptr->get_communication_selected();
+    unsigned int communication_selected = vis_comm_ptr->get_communication_selected();
     
     // if there is no valid selected communication
     if ( (communication_selected == -1) || (communication_selected > comm_ptr->count_channel()) || (comm_ptr->count_channel() == 2) ) 

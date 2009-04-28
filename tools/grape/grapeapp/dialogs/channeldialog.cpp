@@ -29,7 +29,8 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("name:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create name input
-  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, p_channel.get_name(), wxDefaultPosition, wxSize(300, 25) );
+  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_name_input->ChangeValue(p_channel.get_name());
 
   // create sizer
   wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -43,7 +44,8 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create rename input
-  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, p_channel.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );
+  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_rename_input->ChangeValue(p_channel.get_rename_to());
 
   // create sizer
   wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);

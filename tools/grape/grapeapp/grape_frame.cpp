@@ -51,8 +51,8 @@ grape_frame::grape_frame( const wxString &p_filename )
 
 
   int gl_args[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
-  m_datatext = new wxTextCtrl( this, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
-  m_glcanvas = new grape_glcanvas(this, gl_args, this);
+  m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
+  m_glcanvas = new grape_glcanvas(m_splitter, gl_args, this);
   m_logpanel = new grape_logpanel(this);
   m_logpanel->Hide();
   m_splitter->SetSplitMode(wxSPLIT_HORIZONTAL);
@@ -374,7 +374,7 @@ void grape_frame::toggle_view( grape_mode p_mode )
   {
     load_datatype_specification();
     m_dataspecbutton->SetValue( true );
-    m_splitter->ReplaceWindow(m_glcanvas, m_datatext);
+    m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_datatext);
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
@@ -382,7 +382,7 @@ void grape_frame::toggle_view( grape_mode p_mode )
   else // switching back to canvas
   {
     save_datatype_specification();
-    m_splitter->ReplaceWindow(m_datatext, m_glcanvas);
+    m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_glcanvas);
     m_glcanvas->Show();
     m_datatext->Hide();
     if ( m_glcanvas->get_diagram() )

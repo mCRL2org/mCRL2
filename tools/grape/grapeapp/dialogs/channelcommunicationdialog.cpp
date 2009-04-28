@@ -29,8 +29,8 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
   
   // create rename input
-  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_RENAME_INPUT_TEXT, p_channel_communication.get_rename_to(), wxDefaultPosition, wxSize(300, 25) );            
-    
+  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_RENAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );            
+  m_rename_input->ChangeValue(p_channel_communication.get_rename_to());
   // create sizer
   wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
   rename_sizer->Add( text_rename );

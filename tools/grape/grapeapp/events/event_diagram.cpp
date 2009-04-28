@@ -29,7 +29,6 @@
 #include "mcrl2gen/mcrl2gen.h"
 
 
-
 using namespace grape::libgrape;
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
@@ -891,7 +890,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       display_message(m_main_frame, false);
       return false;
     }
-    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, true))
+    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, false))
     { 
       display_message(m_main_frame, false);
       return false;
@@ -906,7 +905,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       display_message(m_main_frame, false);
       return false;
     }
-    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, true))
+    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, false))
     {
       display_message(m_main_frame, false);
       return false;

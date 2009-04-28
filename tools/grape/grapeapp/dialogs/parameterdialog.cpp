@@ -38,7 +38,12 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   for ( unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i )
   {
     // fill cells
+    decl_init decl;
+    decl.set_name(p_parameter_declarations[i].get_name());
+    decl.set_type(p_parameter_declarations[i].get_type());
+    m_init.Add(decl);
     m_grid->SetCellValue(i, 0, p_parameter_declarations[i].get_name());
+    m_grid->SetReadOnly(i, 0);
     m_grid->SetCellValue(i, 1, _T(""));
   }
 

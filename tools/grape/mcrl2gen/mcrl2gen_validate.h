@@ -20,6 +20,7 @@
 #include "libgrape/varupdate.h"
 
 #include <aterm2.h>
+#include "mcrl2/atermpp/table.h"
 
 #define CONVERSION_ERROR            17
 
@@ -110,6 +111,48 @@ namespace grape
      */
     WX_DECLARE_OBJARRAY(renamed, arr_renamed);
 
+    ATermAppl parse_identifier(wxString p_identifier);
+    ATermAppl parse_sort_expr(wxString p_sort_expression);
+    ATermAppl parse_data_expr(wxString p_data_expression);
+    ATermAppl parse_proc_spec(wxString p_proc_spec);
+    wxXmlNode *get_child(wxXmlNode *p_parent, wxString p_child_name);
+    wxString get_child_value(wxXmlNode *p_parent, wxString p_child_name);
+    wxXmlNode *get_diagram(wxXmlNode *p_doc_root, wxString &p_diagram_id);
+    atermpp::table get_variable_table(list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, list_of_decl &p_trans_var_decls, ATermAppl &datatype_spec);
+    list_of_action get_architecture_visibles(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
+    list_of_action get_architecture_visible_channels(wxXmlNode *p_doc_root, wxString &p_diagram_name, wxXmlNode *p_objects, ATermAppl &datatype_spec);
+    list_of_action get_architecture_visible_channel_communications(wxXmlNode *p_doc_root, wxString &p_diagram_name, wxXmlNode *p_objects, ATermAppl &datatype_spec);
+    list_of_action get_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
+    bool is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString p_checked);
+    bool validate(wxXmlDocument &p_spec);
+    bool validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec);
+    bool validate_process_diagram(wxXmlDocument &p_spec, wxString &p_diagram_id);
+    bool validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, ATermAppl &datatype_spec);
+    bool validate_preamble(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
+    bool validate_preamble_local_variables(wxXmlNode *p_preamble, wxString &p_diagram_name, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
+    bool validate_preamble_parameters(wxXmlNode *p_preamble, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, ATermAppl &datatype_spec);
+    bool validate_initial_designator_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_designator_list);
+    bool validate_reference_state_list(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, wxXmlNode *p_ref_state_list, ATermAppl &datatype_spec);
+    bool validate_reference_parameters(wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, list_of_decl &p_preamble_parameter_decls, ATermAppl &datatype_spec);
+    bool validate_state_list(wxXmlNode *p_process_diagram, wxXmlNode *p_state_list);
+    bool validate_transition_connection(wxXmlNode *p_process_diagram, wxString &p_state_id);
+    bool validate_state_connection(wxXmlNode *p_process_diagram, wxString &p_transition_id);
+    bool validate_terminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_term_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec);
+    bool validate_nonterminating_transition_list(wxXmlNode *p_process_diagram, wxXmlNode *p_trans_list, list_of_decl &p_preamble_parameters, list_of_decl_init &p_preamble_variables, ATermAppl &datatype_spec);
+    bool validate_transition_label(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, label &p_trans_label, wxString p_diagram_name, ATermAppl &datatype_spec);
+    bool validate_transition_label_variable_declarations(wxXmlNode *p_transition_label, wxString &p_diagram_name, list_of_decl &p_local_var_decls, ATermAppl &datatype_spec);
+    bool validate_transition_label_condition(wxXmlNode *p_transition_label, wxString &p_diagram_name, wxString &p_condition, ATermAppl &datatype_spec, atermpp::table &vars);
+    bool validate_transition_label_actions(wxXmlNode *p_transition_label, wxString &p_diagram_name, list_of_action &p_actions, ATermAppl &datatype_spec, atermpp::table &vars);
+    bool validate_transition_label_timestamp(wxXmlNode *p_transition_label, wxString &p_diagram_name, wxString &p_timestamp, ATermAppl &datatype_spec, atermpp::table &vars);
+    bool validate_transition_label_variable_updates(wxXmlNode *p_transition_label, wxString &p_diagram_name, list_of_varupdate &p_variable_updates, ATermAppl &datatype_spec, atermpp::table &vars);
+    bool validate_architecture_diagram(wxXmlDocument &p_spec, wxString &p_diagram_id);
+    bool validate_architecture_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, ATermAppl &datatype_spec);
+    bool validate_architecture_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list, ATermAppl &datatype_spec);
+    bool validate_process_reference_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_reference_list, ATermAppl &datatype_spec);
+    bool validate_channel_communication_list(wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_communication_list);
+    bool validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_list, ATermAppl &datatype_spec);
+    bool validate_diagram_names(wxXmlNode *p_doc_root);
+
     /**
      * XML node child retrieval function.
      * Retrieves a pointer to a child of an XML node.
@@ -186,6 +229,17 @@ namespace grape
      */
     wxXmlNode *get_architecture_diagram(wxXmlNode *p_doc_root, wxString &p_diagram_name);
 
+
+    /**
+     * XML specification validation function.
+     * Validates an XML GraPE specification and produces error messages if necessary.
+     * @pre True.
+     * @post The XML specification is validated and error messages are produced if necessary.
+     * @param p_spec The specification to validate.
+     * @return True if the specification is valid, false otherwise.
+     */
+    bool validate(wxXmlDocument &p_spec);
+
     /**
      * Datatype specification validation function.
      * Validates the datatype specification.
@@ -196,6 +250,28 @@ namespace grape
      * @post True is returned if the datatype specification is valid, false otherwise and error messages are produced.
      */
     bool validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec);
+
+    /**
+     * XML process diagram validation function.
+     * Validates an XML process diagram and produces error messages if necessary.
+     * @pre p_spec is a valid reference to a GraPE XML specification and p_diagram_id is a valid reference to a process diagram contained in p_spec.
+     * @post The process diagram is validated and error messages are produced if necessary.
+     * @param p_spec The GraPE XML specification containing the diagram to validate.
+     * @param p_diagram_id The identifier of the process diagram to validate.
+     * @return True if the diagram is valid, false otherwise.
+     */
+    bool validate_process_diagram(wxXmlDocument &p_spec, wxString &p_diagram_id);
+
+    /**
+     * XML architecture diagram validation function.
+     * Validates an XML architecture diagram and produces error messages if necessary.
+     * @pre p_spec is a valid reference to a GraPE XML specification and p_diagram is a valid reference to an architecture diagram contained in p_spec.
+     * @post The architecture diagram is validated and error messages are produced if necessary.
+     * @param p_spec The GraPE XML specification containing the diagram to validate.
+     * @param p_diagram_id The identifier of the architecture diagram to validate.
+     * @return True if the diagram is valid, false otherwise
+     */
+    bool validate_architecture_diagram(wxXmlDocument &p_spec, wxString &p_diagram_id);
 
     /**
      * Initial designator list validation function.

@@ -137,6 +137,7 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
     // fill cells
     varupdate parameter_assignment = p_list_of_varupdate.Item( i );
     m_grid->SetCellValue(i, 0, parameter_assignment.get_lhs());
+    m_grid->SetReadOnly(i, 0);
     m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());
   }
 
@@ -154,7 +155,6 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
 
   m_combo->SetFocus();
   CentreOnParent();
-  change_combobox();
 }
 
 grape_reference_dialog::grape_reference_dialog()
