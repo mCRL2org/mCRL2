@@ -14,6 +14,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite pbes
     :
+      [ run bes_test.cpp ]
       [ run parity_game_test.cpp ]
       [ run pbes2bes_test.cpp ]
       [ run boolean_expression_test.cpp ]
