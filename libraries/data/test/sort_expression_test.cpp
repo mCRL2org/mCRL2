@@ -20,6 +20,8 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/utility.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -154,6 +156,21 @@ void structured_sort_test()
   structured_sort s_e_(s_e);
   BOOST_CHECK(s_e_ == s);
   BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
+
+  structured_sort_constructor_argument_vector nv(make_vector(structured_sort_constructor_argument(sort_nat::nat())));
+  structured_sort_constructor_argument_vector bv(make_vector(structured_sort_constructor_argument(sort_bool_::bool_())));
+  structured_sort_constructor b("B", boost::make_iterator_range(nv));
+  structured_sort_constructor c("C", boost::make_iterator_range(bv));
+  structured_sort bc(make_vector(b,c));
+
+  BOOST_CHECK(bc.struct_constructors() == make_vector(b,c));
+  structured_sort_constructor_vector bc_constructors(bc.struct_constructors().begin(), bc.struct_constructors().end());
+  BOOST_CHECK(bc_constructors[0] == b);
+  BOOST_CHECK(bc_constructors[1] == c);
+  BOOST_CHECK(!bc_constructors[0].arguments().empty());
+  BOOST_CHECK(!bc_constructors[1].arguments().empty());
+  BOOST_CHECK(sort_nat::is_nat(bc_constructors[0].arguments()[0].sort()));
+  BOOST_CHECK(sort_bool_::is_bool_(bc_constructors[1].arguments()[0].sort()));
 }
 
 void container_sort_test()

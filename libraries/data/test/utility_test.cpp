@@ -94,6 +94,8 @@ void convert_test() {
 
   atermpp::aterm_list al = convert< atermpp::aterm_list >(l);
 
+  BOOST_CHECK(l.size() == al.size());
+
   // Could loop indefinitely if the wrong overload is chosen through type-unsafe conversion
   std::vector< data_expression > r = convert< std::vector< data_expression > >(static_cast< ATermList >(al));
 }
