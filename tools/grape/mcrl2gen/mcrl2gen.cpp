@@ -859,7 +859,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
 
     wxFile file_error;
     wxString error_filename = p_filename;
-    error_filename.Replace(".mcrl2", ".error");
+    error_filename.Replace(_T(".mcrl2"), _T(".error"));
     file_error.Open(error_filename, wxFile::write);
     if(!file_error.IsOpened())
     {

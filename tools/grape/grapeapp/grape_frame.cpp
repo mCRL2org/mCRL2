@@ -133,7 +133,7 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxFileSystem::AddHandler(new wxArchiveFSHandler);
   m_help_controller = new wxHtmlHelpController(wxHF_DEFAULT_STYLE, this);
   wxString filename = wxEmptyString;
-  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
+  if ( fs.FindFileInPath( &filename, wxTRANSLATE( _T( GRAPE_HELP_DIR ) ), _T("grapehelp.zip") ) )
   {
     // file found
     m_help_controller->AddBook( wxFileName( filename ) );

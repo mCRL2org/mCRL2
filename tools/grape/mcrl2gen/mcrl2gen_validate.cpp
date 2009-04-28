@@ -28,7 +28,8 @@ ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 //  const char *id = identifier.c_str();
 //  istringstream iss(id);
 //  return parse_identifier(iss);
-  return mcrl2::core::parse_identifier(istringstream(string(p_identifier.mb_str()).c_str()));
+  std::istringstream r(string(p_identifier.mb_str()));
+  return mcrl2::core::parse_identifier(r);
 }
 
 ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
@@ -37,7 +38,8 @@ ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
 //  const char *sort_expr = sort_expression.c_str();
 //  istringstream iss(sort_expr);
 //  return parse_sort_expr(iss);
-  return mcrl2::core::parse_sort_expr(istringstream(string(p_sort_expression.mb_str()).c_str()));
+  std::istringstream r(string(p_sort_expression.mb_str()).c_str());
+  return mcrl2::core::parse_sort_expr( r );
 }
 
 ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
@@ -46,11 +48,13 @@ ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
 //  const char *data_expr = data_expression.c_str();
 //  istringstream iss(data_expr);
 //  return parse_data_expr(iss);
-  return mcrl2::core::parse_data_expr(istringstream(string(p_data_expression.mb_str()).c_str()));
+  istringstream r(string(p_data_expression.mb_str()).c_str());
+  return mcrl2::core::parse_data_expr(r);
 }
 ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
 {
-  return mcrl2::core::parse_proc_spec(istringstream(string(p_proc_spec.mb_str()).c_str()));
+ istringstream r(string(p_proc_spec.mb_str()).c_str());
+ return mcrl2::core::parse_proc_spec(r);
 }
 wxXmlNode *grape::mcrl2gen::get_child(wxXmlNode *p_parent, wxString p_child_name)
 {
@@ -753,7 +757,8 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATe
   // make datatype specification
   if (!datatype_specification.IsEmpty()) {
     // try to parse the mCRL2 specification
-    ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(istringstream(string(datatype_specification.mb_str()).c_str()));
+    istringstream r(string(datatype_specification.mb_str()).c_str());
+    ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(r);
     if(a_parsed_mcrl2_datatype_specification == 0)
     {
       cerr << "+ Could not parse the datatype specification." << endl;
