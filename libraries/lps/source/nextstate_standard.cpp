@@ -473,7 +473,7 @@ ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList
 }
 
 NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format,
-         mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > const& enumerator_factory) : info(enumerator_factory)
+         enumerator_factory_type const& enumerator_factory) : info(enumerator_factory)
 {
         ATermList l,m,n,free_vars;
 
@@ -861,7 +861,7 @@ void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 
         if ( info.num_summands == 0 )
         {
-          valuations = info.get_sols(ATmakeList0(),info.import_term(gsMakeDataExprFalse()));
+          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool_::false_()));
         } else {
           cur_act = ATgetArgument(info.summands[SummandIndex],2);
           cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
@@ -875,22 +875,22 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 {
         while ( valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands) )
         {
-                        cur_act = ATgetArgument(info.summands[sum_idx],2);
-                        cur_nextstate = (ATermList) ATgetArgument(info.summands[sum_idx],3);
+          cur_act = ATgetArgument(info.summands[sum_idx],2);
+          cur_nextstate = (ATermList) ATgetArgument(info.summands[sum_idx],3);
 
-                        if ( *info.current_id != id )
-                        {
-                                set_substitutions();
-                        }
+          if ( *info.current_id != id )
+          {
+            set_substitutions();
+          }
 
-                        valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
-                                                   ATgetArgument(info.summands[sum_idx],1));
+          valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
+                                     ATgetArgument(info.summands[sum_idx],1));
 
-                        ++sum_idx;
+          ++sum_idx;
 
-                        if (single_summand) {
-                          return false;
-                        }
+          if (single_summand) {
+            return false;
+          }
         }
 
         if ( valuations != ns_info::enumerator_type() )
@@ -899,20 +899,20 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
           {
                   set_substitutions();
           }
-          for (mcrl2::data::mutable_substitution< >::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
-            info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first),
-                static_cast< ATermAppl >(i->second));
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+            info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
           }
 
           *Transition = rewrActionArgs((ATermAppl) cur_act);
           *State = (ATerm) makeNewState(cur_state,cur_nextstate);
+
           if ( prioritised != NULL )
           {
                   *prioritised = (sum_idx <= info.num_prioritised);
           }
 
-          for (mcrl2::data::mutable_substitution< >::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
-            info.m_rewriter.clear_internally_associated_value(static_cast< ATermAppl >(i->first));
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+            info.m_rewriter.clear_internally_associated_value(i->first);
           }
           ++valuations;
 
@@ -939,7 +939,7 @@ NextState *createNextState(
   mcrl2::lps::specification const& spec,
   bool allow_free_vars,
   int state_format,
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& e,
+  NextStateStandard::enumerator_factory_type const& e,
   NextStateStrategy strategy
 )
 {
@@ -967,7 +967,7 @@ NextState *createNextState(
       spec,
       allow_free_vars,
       state_format,
-      mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), mcrl2::data::rewriter(spec.data(), rewrite_strategy)),
+      NextStateStandard::enumerator_factory_type(spec.data(), mcrl2::data::rewriter(spec.data(), rewrite_strategy)),
       strategy
     );
 }
