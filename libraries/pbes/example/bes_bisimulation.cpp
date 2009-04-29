@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
 
 namespace mcrl2 {
@@ -69,6 +70,28 @@ bool is_false(const atermpp::aterm_appl& t)
   }
 }
 
+/// \brief Returns or applied to the sequence of boolean expressions [first, last)
+/// \param first Start of a sequence of boolean expressions
+/// \param last End of a sequence of boolean expressions
+/// \return Or applied to the sequence of boolean expressions [first, last)
+template <typename FwdIt>
+boolean_expression join_or(FwdIt first, FwdIt last)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  return core::detail::join(first, last, tr::or_, tr::false_());
+}
+
+/// \brief Returns and applied to the sequence of boolean expressions [first, last)
+/// \param first Start of a sequence of boolean expressions
+/// \param last End of a sequence of boolean expressions
+/// \return And applied to the sequence of boolean expressions [first, last)
+template <typename FwdIt>
+boolean_expression join_and(FwdIt first, FwdIt last)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  return core::detail::join(first, last, tr::and_, tr::true_());
+}
+
 /// \brief Splits a disjunction into a sequence of operands
 /// Given a pbes expression of the form p1 || p2 || .... || pn, this will yield a
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
@@ -99,6 +122,9 @@ atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
   return result;
 }
 
+/// \brief Determines whether a boolean expression is in standard form.
+/// \param e a boolean expression
+/// \return true iff e is in standard form.
 inline
 bool is_standard_form(boolean_expression const& e)
 {
@@ -137,6 +163,9 @@ bool is_standard_form(boolean_expression const& e)
   }
 }
 
+/// \brief Determines whether a BES is in standard form
+/// \param bes a boolean equation system.
+/// \return true iff bes is in standard form.
 template <typename Container>
 inline
 bool is_standard_form(boolean_equation_system<Container> const& bes)
@@ -151,6 +180,150 @@ bool is_standard_form(boolean_equation_system<Container> const& bes)
   return true;
 }
 
+/// \brief Converts a boolean equation to standard form, adding the generated
+///        equations to result.
+/// \param e a boolean equation
+/// \param generator an identifier generator.
+/// \param result an output iterator to which boolean equations can be written.
+/// \post All boolean equations that are required to get e in standard form are
+///       added to result.
+template <typename IdentifierGenerator, typename OutputIterator>
+inline
+void to_standard_form(boolean_equation const& e, IdentifierGenerator& generator, OutputIterator result)
+{
+  typedef core::term_traits<boolean_expression> tr;
+  boolean_expression f = e.formula();
+  if (tr::is_true(f) || tr::is_false(f))
+  {
+    *result++ = e;
+  }
+  else if (tr::is_not(f))
+  {
+    if(!tr::is_variable(tr::arg(f)))
+    {
+      boolean_variable v(generator(tr::name(e.variable())));
+      *result++ = boolean_equation(e.symbol(), e.variable(), tr::not_(v));
+      boolean_equation e(e.symbol(), v, tr::arg(f));
+      to_standard_form(e, generator, result);
+    }
+    else
+    {
+      *result++ = e;
+    }
+  }
+  else if (tr::is_and(f))
+  {
+    atermpp::set<boolean_expression> arguments(split_and(f));
+    atermpp::set<boolean_expression> sf_arguments;
+    for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+    {
+      if(!tr::is_true(*i) && !tr::is_false(*i) && !tr::is_variable(*i))
+      {
+        boolean_variable v(generator(tr::name(e.variable())));
+        sf_arguments.insert(v);
+        boolean_equation e(e.symbol(), v, *i);
+        to_standard_form(e, generator, result);
+      }
+      else
+      {
+        sf_arguments.insert(*i);
+      }
+    }
+    *result++ = boolean_equation(e.symbol(), e.variable(), join_and(sf_arguments.begin(), sf_arguments.end()));
+  }
+  else if (tr::is_or(f))
+  {
+    atermpp::set<boolean_expression> arguments(split_or(f));
+    atermpp::set<boolean_expression> sf_arguments;
+    for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+    {
+      if(!tr::is_true(*i) && !tr::is_false(*i) && !tr::is_variable(*i))
+      {
+        boolean_variable v(generator(tr::name(e.variable())));
+        sf_arguments.insert(v);
+        boolean_equation e(e.symbol(), v, *i);
+        to_standard_form(e, generator, result);
+      }
+      else
+      {
+        sf_arguments.insert(*i);
+      }
+    }
+    *result++ = boolean_equation(e.symbol(), e.variable(), join_or(sf_arguments.begin(), sf_arguments.end()));
+  }
+  else
+  {
+    *result++ = e;
+  }
+}
+
+/// \brief Converts a BES to standard form
+/// \param bes a boolean equation system
+/// \return A BES equivalent to bes, that is in standard form.
+template <typename Container>
+inline
+boolean_equation_system<Container> to_standard_form(boolean_equation_system<Container> const& bes)
+{
+  Container equations;
+  mcrl2::data::set_identifier_generator generator(bes);
+  for (typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    to_standard_form(*i, generator, std::back_inserter(equations));
+  }
+  return boolean_equation_system<Container>(equations, bes.initial_state());
+}
+
+/// \brief Remove constant true from a BES by introduction an equation nu X = X,
+///        where X fresh.
+/// \param bes a boolean equation system.
+/// \return A boolean equations system equivalent to bes, but without the
+///         occurrence of the constant true.
+template <typename Container>
+inline
+boolean_equation_system<Container> remove_true(boolean_equation_system<Container> const& bes)
+{
+  typedef core::term_traits<boolean_expression> tr;
+
+  Container equations;
+  mcrl2::data::set_identifier_generator generator(bes);
+  boolean_variable v_true(generator("X_true"));
+  boolean_equation true_(boolean_equation(fixpoint_symbol::nu(), v_true, v_true));
+  equations.insert(equations.end(), true_);
+
+  for (typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    equations.insert(equations.end(), atermpp::replace(*i, tr::true_(), v_true));
+  }
+  return boolean_equation_system<Container>(equations, bes.initial_state());
+}
+
+/// \brief Remove constant false from a BES by introduction an equation mu X = X,
+///        where X fresh.
+/// \param bes a boolean equation system.
+/// \return A boolean equations system equivalent to bes, but without the
+///         occurrence of the constant false.
+template <typename Container>
+inline
+boolean_equation_system<Container> remove_false(boolean_equation_system<Container> const& bes)
+{
+  typedef core::term_traits<boolean_expression> tr;
+
+  Container equations;
+  mcrl2::data::set_identifier_generator generator(bes);
+  boolean_variable v_false(generator("X_false"));
+  boolean_equation false_(boolean_equation(fixpoint_symbol::mu(), v_false, v_false));
+  equations.insert(equations.end(), false_);
+
+  for (typename Container::const_iterator i = bes.equations().begin(); i != bes.equations().end(); ++i)
+  {
+    equations.insert(equations.end(), atermpp::replace(*i, tr::false_(), v_false));
+  }
+  return boolean_equation_system<Container>(equations, bes.initial_state());
+}
+
+/// \brief Determines whether the constant true occurs in bes
+/// \param bes a boolean equation system.
+/// \return true iff the constant true occurs in bes.
 template <typename Container>
 inline
 bool has_true(boolean_equation_system<Container> const& bes)
@@ -165,6 +338,9 @@ bool has_true(boolean_equation_system<Container> const& bes)
   return false;
 }
 
+/// \brief Determines whether the constant false occurs in bes
+/// \param bes a boolean equation system.
+/// \return true iff the constant false occurs in bes.
 template <typename Container>
 inline
 bool has_false(boolean_equation_system<Container> const& bes)
@@ -616,9 +792,6 @@ class bisimulation_reduction
 } //namespace mcrl2
 
 
-using namespace mcrl2::utilities::tools;
-using namespace mcrl2::utilities;
-
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
 class bes_bisimulation_tool: public mcrl2::utilities::tools::input_output_tool
@@ -629,13 +802,13 @@ class bes_bisimulation_tool: public mcrl2::utilities::tools::input_output_tool
 
     bool m_oblivious_bisimulation;
 
-    void add_options(interface_description& desc)
+    void add_options(mcrl2::utilities::interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("strong_bisimulation", "perform strong bisimulation reduction instead of oblivious bisimulation reduction", 's');
     }
 
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const mcrl2::utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
       m_oblivious_bisimulation = 0 >= parser.options.count("strong_bisimulation");
@@ -666,17 +839,30 @@ class bes_bisimulation_tool: public mcrl2::utilities::tools::input_output_tool
       boolean_equation_system<> bes;
       pbes_to_bes(pbes, bes);
       
+      // Convert BES to standard recursive form if needed.
       if(!is_standard_form(bes))
       {
-        throw mcrl2::runtime_error("The boolean equation system in the input file is not in standard form");
+        if(core::gsVerbose)
+        {
+          std::cerr << "Converting BES to standard form" << std::endl;
+        }
+        bes = to_standard_form(bes);
       }
       if(has_true(bes))
       {
-        throw mcrl2::runtime_error("The boolean equation system in the input file contains true in one of the right hand sides");
+        if(core::gsVerbose)
+        {
+          std::cerr << "Removing constant true from BES" << std::endl;
+        }
+        bes = remove_true(bes);
       }
       if(has_false(bes))
       {
-        throw mcrl2::runtime_error("The boolean equation system in the input file contains false in one of the right hand sides");
+        if(core::gsVerbose)
+        {
+          std::cerr << "Removing constant false from BES" << std::endl;
+        }
+        bes = remove_false(bes);
       }
 
 

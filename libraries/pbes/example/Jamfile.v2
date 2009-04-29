@@ -4,6 +4,7 @@ project libraries/pbes/example
        <source>/libraries//core
        <source>/libraries//lps
        <source>/libraries//pbes
+       <source>/libraries//utilities
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
