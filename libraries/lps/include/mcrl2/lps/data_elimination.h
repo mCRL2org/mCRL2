@@ -28,7 +28,7 @@ namespace lps
 /// \param[in] spec       An mCRL2 Linear Process Specification.
 /// \param[in] keep_basis Boolean to indicate whether or not to preserve
 ///                       standard data.
-specification remove_unused_data(lps::specification const& spec, bool keep_basis = true);
+specification remove_unused_data(lps::specification & spec, bool keep_basis = true);
 
 }
 }
