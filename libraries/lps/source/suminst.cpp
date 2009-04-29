@@ -171,7 +171,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
     gsVerboseMsg("processing...");
 
     try {
-      for (classic_enumerator< > i(enumerator_factory.make(variables)); i != classic_enumerator<>(); ++i)
+      for (classic_enumerator< > i(enumerator_factory.make(variables, summand_.condition())); i != classic_enumerator<>(); ++i)
       {
         assignment_list substitutions;
 
