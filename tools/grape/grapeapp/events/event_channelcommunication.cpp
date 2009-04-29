@@ -120,7 +120,7 @@ bool grape_event_remove_channel_communication::Do( void )
     unsigned int communication_selected = vis_comm_ptr->get_communication_selected();
     
     // if there is no valid selected communication
-    if ( (communication_selected == -1) || (communication_selected > comm_ptr->count_channel()) || (comm_ptr->count_channel() == 2) ) 
+    if ( (communication_selected == -1) || (communication_selected > static_cast<unsigned>(comm_ptr->count_channel())) || (comm_ptr->count_channel() == 2) ) 
     {
       // remove the entire channel communication
       dia_ptr->remove_channel_communication( comm_ptr );

@@ -47,7 +47,7 @@ void visualchannel_communication::draw( void )
     channel* chan = comm->get_attached_channel( i );
 
     // draw communication line
-    draw_line( m_object->get_coordinate(), chan->get_coordinate(), m_communication_selected == i);
+    draw_line( m_object->get_coordinate(), chan->get_coordinate(), static_cast<unsigned>(m_communication_selected) == i);
   }
 
   channel_communication *cc = static_cast<channel_communication *>(m_object);

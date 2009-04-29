@@ -406,7 +406,7 @@ bool grape_event_drag::Do( void )
       static coordinate s_orig_center;
       static coordinate s_dif;
       // dynamic array containing initial transition coordinates
-      static coordinate* s_orig_ntt = NULL;
+      static coordinate* s_orig_ntt = 0;
       static float s_orig_width;
       static float s_orig_height;
       static int s_flag;
@@ -426,6 +426,10 @@ bool grape_event_drag::Do( void )
         {
           compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
           // set length of dynamic array
+          if (s_orig_ntt != 0)
+          {
+            delete s_orig_ntt;
+          }
           s_orig_ntt = new coordinate[state->count_transition_endstate()];
 
           // fill dynamic array with initial coordinates
@@ -434,12 +438,7 @@ bool grape_event_drag::Do( void )
             nonterminating_transition* ntt = state->get_transition_endstate( i );
             s_orig_ntt[i] = ntt->get_coordinate();
           }
-        } else
-        {
-          // set length of dynamic array
-          s_orig_ntt = new coordinate[0];
         }
-
         if (new_drag == true)
         {
           s_flag = -1;

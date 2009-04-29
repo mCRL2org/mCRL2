@@ -385,7 +385,6 @@ arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXm
   arr_channel_comm comms;
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));
   wxXmlNode *objects = get_child(p_architecture_diagram, _T("objectlist"));
-  wxXmlNode *channels = get_child(objects, _T("channellist"));
   wxXmlNode *channel_comms = get_child(objects, _T("channelcommunicationlist"));
 
   for(wxXmlNode *child = channel_comms->GetChildren(); child != 0; child = child->GetNext())

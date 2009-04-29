@@ -28,7 +28,7 @@ ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 //  const char *id = identifier.c_str();
 //  istringstream iss(id);
 //  return parse_identifier(iss);
-  std::istringstream r(string(p_identifier.mb_str()));
+  istringstream r(string(p_identifier.mb_str()).c_str());
   return mcrl2::core::parse_identifier(r);
 }
 
@@ -38,8 +38,8 @@ ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
 //  const char *sort_expr = sort_expression.c_str();
 //  istringstream iss(sort_expr);
 //  return parse_sort_expr(iss);
-  std::istringstream r(string(p_sort_expression.mb_str()).c_str());
-  return mcrl2::core::parse_sort_expr( r );
+  istringstream r(string(p_sort_expression.mb_str()).c_str());
+  return mcrl2::core::parse_sort_expr(r);
 }
 
 ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
@@ -2522,7 +2522,6 @@ bool grape::mcrl2gen::validate_diagram_names(wxXmlNode *p_doc_root)
     diagram_names.Add(diagram_name);
   }
 
-  bool is_valid = true;
   for(unsigned int i=0; i<diagram_names.GetCount(); ++i)
   {
     for(unsigned int j=i+1; j<diagram_names.GetCount(); ++j)
