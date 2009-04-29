@@ -232,11 +232,11 @@ namespace data {
           for (atermpp::term_list< data::data_equation >::const_iterator r = new_equations.begin();
                                                                         r != new_equations.end(); ++r) {
             if (!m_rewriter->addRewriteRule(detail::impl_exprs_appl(*r, &substitution_context, &declarations, 0))) {
-               throw mcrl2::runtime_error("Could not add rewrite rule!");
+              throw mcrl2::runtime_error("Could not add rewrite rule! (" + pp(*r) + ")");
             }
           }
 
-          m_specification = core::detail::add_data_decls(m_specification, declarations);
+          m_specification = core::detail::set_data_decls(m_specification, declarations);
         }
 
         m_substitution_context = substitution_context;
