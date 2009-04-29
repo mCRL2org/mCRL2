@@ -28,6 +28,7 @@ test-suite lps
       [ run time.cpp ]
       [ run aterm_algorithm_test.cpp ]
       [ run parelm_test.cpp ]
+      [ run summand_test.cpp ]
       [ run sumelm_test.cpp ]
       [ run confcheck_test.cpp ]
       [ run binary_test.cpp ]
