@@ -10,10 +10,10 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include <mcrl2/data/data_expression.h>
-#include <mcrl2/data/data_elimination.h>
-#include <mcrl2/lps/specification.h>
-#include <mcrl2/lps/data_elimination.h>
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/data_elimination.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/data_elimination.h"
 
 using namespace mcrl2::data;
 
@@ -30,7 +30,7 @@ static void add_used(data_expression_list l, data_elimination &elim)
 	}
 }
 
-specification remove_unused_data(specification spec, bool keep_basis)
+specification remove_unused_data(specification& spec, bool keep_basis)
 {
 	data_elimination elim;
 
@@ -109,11 +109,4 @@ specification remove_unused_data(specification spec, bool keep_basis)
 }
 
 }
-}
-
-ATermAppl removeUnusedData(ATermAppl ATSpec, bool keep_basis) // deprecated
-{
-	mcrl2::lps::specification spec(ATSpec);
-	spec = mcrl2::lps::remove_unused_data(spec,keep_basis);
-	return specification_to_aterm(spec);
 }

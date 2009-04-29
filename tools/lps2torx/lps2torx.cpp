@@ -36,6 +36,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
+using namespace mcrl2;
 using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
@@ -211,22 +212,21 @@ struct lps2torx_tool {
   void process() {
     std::string str_in = (name_for_input.empty())?"stdin":("'" + name_for_input + "'");
     gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
-    ATermAppl Spec = (ATermAppl) mcrl2::core::detail::load_aterm(name_for_input);
-    if (!mcrl2::core::detail::gsIsLinProcSpec(Spec)) {
-      throw mcrl2::runtime_error(str_in + " does not contain an LPS");
-    }
+    lps::specification lps_specification;
+
+    lps_specification.load(name_for_input);
 
     if ( removeunused )
     {
       gsVerboseMsg("removing unused parts of the data specification.\n");
-      Spec = removeUnusedData(Spec);
+      lps_specification = remove_unused_data(lps_specification);
     }
 
     gsVerboseMsg("initialising...\n");
     torx_data td(10000);
 
     NextState *nstate = createNextState(
-      mcrl2::lps::specification(Spec),
+      lps_specification,
       !usedummies,
       stateformat,
       strategy

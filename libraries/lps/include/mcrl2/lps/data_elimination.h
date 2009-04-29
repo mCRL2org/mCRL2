@@ -14,7 +14,7 @@
 #define MCRL2_LPS_DATA_ELIMINATION_H
 
 #include <aterm2.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2
 {
@@ -28,19 +28,9 @@ namespace lps
 /// \param[in] spec       An mCRL2 Linear Process Specification.
 /// \param[in] keep_basis Boolean to indicate whether or not to preserve
 ///                       standard data.
-specification remove_unused_data(specification spec, bool keep_basis = true);
+specification remove_unused_data(lps::specification const& spec, bool keep_basis = true);
 
 }
 }
-
-/// \brief                Remove all unused data parts from the given LPS.
-/// \param[in] Spec       An mCRL2 Linear Process Specification (in ATerm
-///                       format).
-/// \param[in] keep_basis Boolean to indicate whether or not to preserve
-///                       standard data.
-/// \deprecated           This function will be removed in the future; use
-///                       remove_unused_data() instead.
-/// \see mcrl2::lps::remove_unused_data
-ATermAppl removeUnusedData(ATermAppl Spec, bool keep_basis = true); // deprecated
 
 #endif
