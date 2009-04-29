@@ -12,7 +12,7 @@
 
 #include "wx.hpp" // precompiled headers
 
-#include "font_renderer.h"
+#include "mcrl2/utilities/font_renderer.h"
 #include "font/character_set.xpm"
 #include <wx/image.h>
 #include <algorithm>

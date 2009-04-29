@@ -9,7 +9,7 @@
 #include <cmath>
 #include <string>
 
-#include "spinctrlfloat.h"
+#include "mcrl2/utilities/spinctrlfloat.h"
 
 using namespace std;
 
