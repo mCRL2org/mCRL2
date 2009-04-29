@@ -4,7 +4,6 @@ project pbes
 
 mcrl2-library pbes
        : pbes_rewrite.cpp
-         pbes2bool.cpp
          data_elimination.cpp
        : <library>/libraries//data
          <include>../include
