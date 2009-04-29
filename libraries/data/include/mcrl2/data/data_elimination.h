@@ -23,7 +23,7 @@ namespace mcrl2 {
 
 namespace data {
 
-  /// \brief   This class facilitates the elmination of unused or unnecessary
+  /// \brief   This class facilitates the elimination of unused or unnecessary
   ///          parts of a data specification.
   class data_elimination {
     private:
@@ -33,13 +33,6 @@ namespace data {
       bool keep_basis;
 
     public:
-      /// \brief Default constructor.
-      data_elimination()
-      { }
-
-      /// \brief Destructor.
-      ~data_elimination()
-      { }
 
       /// \brief       Ensure that data elimination does not remove sort s.
       /// \param[in] s An mCRL2 data sort expression.

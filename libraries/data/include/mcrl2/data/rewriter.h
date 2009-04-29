@@ -12,18 +12,24 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
+#define OLD_CONVERSION
+
 #include <functional>
 #include <algorithm>
 #include <sstream>
 #include "boost/shared_ptr.hpp"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/detail/implement_data_types.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
+#ifdef OLD_CONVERSION
+# include "mcrl2/data/detail/implement_data_types.h"
+# include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
+#else
+# include "mcrl2/data/detail/rewrite_conversion_helper.h"
+#endif
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
@@ -119,14 +125,20 @@ namespace data {
       typedef core::term_traits< data_expression >::variable_type variable_type;
 
     protected:
+
+#ifdef OLD_CONVERSION
       /// \brief for data implementation
       mutable atermpp::aterm_list                                      m_substitution_context;
 
       /// \brief for data reconstruction 
-      mutable mutable_substitution< sort_expression, sort_expression > m_reconstruction_context;
+      mutable mutable_substitution< data_expression, data_expression > m_reconstruction_context;
 
       /// \brief for data implementation/reconstruction
       mutable atermpp::aterm_appl                                      m_specification;
+#else
+      /// \brief for data implementation/reconstruction
+      mutable detail::rewrite_conversion_helper                        m_conversion_helper;
+#endif
 
     protected:
 
@@ -134,14 +146,21 @@ namespace data {
       template < typename CompatibleExpression >
       basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
                        basic_rewriter< atermpp::aterm >(other),
-                       m_specification(other.m_specification),
+#ifdef OLD_CONVERSION
                        m_substitution_context(other.m_substitution_context),
-                       m_reconstruction_context(other.m_substitution_context)
+                       m_reconstruction_context(other.m_substitution_context),
+                       m_specification(other.m_specification)
+#else
+                       m_conversion_helper(other.m_conversion_helper)
+#endif
       {
+#ifdef OLD_CONVERSION
         m_specification.protect();
         m_substitution_context.protect();
+#endif
       }
 
+#ifdef OLD_CONVERSION
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] specification a data specification.
       ATermAppl implement(data_specification const& specification)
@@ -231,7 +250,9 @@ namespace data {
           // add rewrite rules
           for (atermpp::term_list< data::data_equation >::const_iterator r = new_equations.begin();
                                                                         r != new_equations.end(); ++r) {
-            if (!m_rewriter->addRewriteRule(detail::impl_exprs_appl(*r, &substitution_context, &declarations, 0))) {
+
+            if (!m_rewriter->addRewriteRule(*r)) {
+
               throw mcrl2::runtime_error("Could not add rewrite rule! (" + pp(*r) + ")");
             }
           }
@@ -249,6 +270,21 @@ namespace data {
       {
         return data_expression(atermpp::replace(expression, m_reconstruction_context));
       }
+#else
+      /// \brief Performs data implementation before rewriting (should become obsolete)
+      /// \param[in] expression an expression.
+      template < typename ExpressionOrEquation >
+      data_expression implement(ExpressionOrEquation const& expression) const
+      {
+        return m_conversion_helper.implement(expression);
+      }
+
+      /// \brief Performs data reconstruction after rewriting (should become obsolete)
+      data_expression reconstruct(atermpp::aterm_appl expression) const
+      {
+        return m_conversion_helper.reconstruct(expression);
+      }
+#endif // OLD_CONVERSION
 
     public:
 
@@ -256,12 +292,18 @@ namespace data {
       /// \param r A rewriter
       basic_rewriter(basic_rewriter const& r) :
           basic_rewriter< atermpp::aterm >(r),
+#ifdef OLD_CONVERSION
           m_substitution_context(r.m_substitution_context),
           m_reconstruction_context(r.m_reconstruction_context),
           m_specification(r.m_specification)
+#else
+          m_conversion_helper(*m_rewriter)
+#endif
       {
+#ifdef OLD_CONVERSION
         m_specification.protect();
         m_substitution_context.protect();
+#endif
       }
 
       /// \brief Constructor.
@@ -269,10 +311,16 @@ namespace data {
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(data_specification(), s),
+#ifdef OLD_CONVERSION
           m_specification(implement(d))
+#else
+          m_conversion_helper(d, *m_rewriter)
+#endif
       {
+#ifdef OLD_CONVERSION
         m_specification.protect();
         m_substitution_context.protect();
+#endif
       }
 
       /// \brief Adds an equation to the rewrite rules.
@@ -300,8 +348,10 @@ namespace data {
       }
 
       virtual ~basic_rewriter() {
+#ifdef OLD_CONVERSION
         m_specification.unprotect();
         m_substitution_context.unprotect();
+#endif
       }
   };
 
@@ -327,7 +377,21 @@ namespace data {
       /// \return The normal form of d.
       data_expression operator()(const data_expression& d) const
       {
-        return reconstruct(m_rewriter->rewrite(implement(d)));
+        data_expression implemented(implement(d));
+        data_expression reconstructed(reconstruct(m_rewriter->rewrite(implemented)));
+//if (m_conversion_helper.reconstruct(data_expression(m_rewriter->rewrite(m_conversion_helper.implement(d)))) != reconstructed)
+//{
+//  atermpp::aterm_appl result(m_rewriter->rewrite(m_conversion_helper.implement(d)));
+//  std::cerr << "INPUT " << std::endl
+//            << m_conversion_helper.implement(d) << std::endl
+//            << result << std::endl;
+//            << "implemented" << m_conversion_helper.implement(d) << std::endl
+//            << "implemented" << implemented << std::endl
+//            << m_conversion_helper.reconstruct(data_expression(m_rewriter->rewrite(m_conversion_helper.implement(d)))) << std::endl
+//            << " != " << std::endl
+//            << reconstructed << std::endl;
+//}
+        return reconstructed;
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
