@@ -30,20 +30,20 @@ parsers: mcrl2parser chiparser liblts_fsmparser liblts_dotparser
 liblts_fsmparser:
 	cd libraries/lts/source; \
 	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
-	bison -p fsm -d -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
-	mv liblts_fsmparser.hpp ../include/mcrl2
+	bison -p fsm --defines=../include/mcrl2/liblts_fsmparser.hpp -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
+	sed -i 's+#include "liblts_fsmparser.hpp"+#include "mcrl2/liblts_fsmparser.hpp"+' liblts_fsmparser.cpp
 
 liblts_dotparser:
 	cd libraries/lts/source; \
 	flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll; \
-	bison -p dot -d -o liblts_dotparser.cpp liblts_dotparser.yy; \
-	mv liblts_dotparser.hpp ../include/mcrl2
+	bison -p dot --defines=../include/mcrl2/liblts_dotparser.hpp -o liblts_dotparser.cpp liblts_dotparser.yy; \
+	sed -i 's+#include "liblts_dotparser.hpp"+#include "mcrl2/liblts_dotparser.hpp"+' liblts_dotparser.cpp
 
 mcrl2parser:
 	cd libraries/core/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
-	bison -p mcrl2 -d -o mcrl2parser.cpp mcrl2parser.yy; \
-	mv mcrl2parser.hpp ../include/mcrl2/core/detail
+	bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.hpp -o mcrl2parser.cpp mcrl2parser.yy; \
+	sed -i 's+#include "mcrl2parser.hpp"+#include "mcrl2/core/detail/mcrl2parser.hpp"+' mcrl2parser.cpp
 
 chiparser:
 	cd tools/chi2mcrl2; \
