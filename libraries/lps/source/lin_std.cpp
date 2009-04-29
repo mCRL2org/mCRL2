@@ -701,37 +701,37 @@ static void insert_numeric_sort_decls(ATermAppl sort_expr, specificationbasictyp
 {
   assert(gsIsSortExprNumeric(sort_expr));
   //initialise local variables for storing the generated declarations
-  t_data_decls data_decls;
-  initialize_data_decls(&data_decls);
-  //add sort Real, if needed
-  if (gsIsSortExprReal(sort_expr)) {
-    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
-      impl_standard_functions_sort(gsMakeSortIdReal(), &data_decls);
-      impl_sort_real(&data_decls, false);
-    }
-  }
-  //add sort Int, if needed
-  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr)) {
-    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
-      impl_standard_functions_sort(gsMakeSortIdInt(), &data_decls);
-      impl_sort_int(&data_decls, false);
-    }
-  }
-  //add sort Nat, if needed
-  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr) || gsIsSortExprNat(sort_expr)) {
-    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
-      impl_standard_functions_sort(gsMakeSortIdNat(), &data_decls);
-      impl_sort_nat(&data_decls, false);
-    }
-  }
-  //add sort Pos, if needed
-  if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
-    impl_standard_functions_sort(gsMakeSortIdPos(), &data_decls);
-    ATermList new_equations = ATmakeList0();
-    impl_sort_pos(&data_decls, &new_equations);
-  }
-  //add generated declarations to spec
-  insert_data_decls(data_decls, spec, false);
+//  t_data_decls data_decls;
+//  initialize_data_decls(&data_decls);
+//  //add sort Real, if needed
+//  if (gsIsSortExprReal(sort_expr)) {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdReal(), 0) == -1) {
+//      impl_standard_functions_sort(gsMakeSortIdReal(), &data_decls);
+//      impl_sort_real(&data_decls, false);
+//    }
+//  }
+//  //add sort Int, if needed
+//  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr)) {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdInt(), 0) == -1) {
+//      impl_standard_functions_sort(gsMakeSortIdInt(), &data_decls);
+//      impl_sort_int(&data_decls, false);
+//    }
+//  }
+//  //add sort Nat, if needed
+//  if (gsIsSortExprReal(sort_expr) || gsIsSortExprInt(sort_expr) || gsIsSortExprNat(sort_expr)) {
+//    if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdNat(), 0) == -1) {
+//      impl_standard_functions_sort(gsMakeSortIdNat(), &data_decls);
+//      impl_sort_nat(&data_decls, false);
+//    }
+//  }
+//  //add sort Pos, if needed
+//  if (ATindexOf(spec->sorts, (ATerm) gsMakeSortIdPos(), 0) == -1) {
+//    impl_standard_functions_sort(gsMakeSortIdPos(), &data_decls);
+//    ATermList new_equations = ATmakeList0();
+//    impl_sort_pos(&data_decls, &new_equations);
+//  }
+//  //add generated declarations to spec
+//  insert_data_decls(data_decls, spec, false);
 }
 
 static ATermList getnames(ATermAppl multiAction)
