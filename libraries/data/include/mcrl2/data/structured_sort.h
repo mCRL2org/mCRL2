@@ -628,7 +628,7 @@ namespace mcrl2 {
         /// \param[in] struct_constructors The list of constructors.
         /// \post struct_constructors is empty.
         structured_sort(const structured_sort_constructor_vector& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(struct_constructors)))
         {
           assert(!struct_constructors.empty());
         }
@@ -639,7 +639,7 @@ namespace mcrl2 {
         /// \post struct_constructors is empty.
         template < typename ForwardTraversalIterator >
         structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(atermpp::term_list<structured_sort_constructor>(struct_constructors.begin(), struct_constructors.end())))
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(struct_constructors)))
         {
           assert(!struct_constructors.empty());
         }

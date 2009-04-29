@@ -116,19 +116,6 @@ namespace mcrl2 {
         /// \brief a mapping from variables to expressions
         atermpp::map< variable_type, expression_type > m_map;
 
-        /// \brief look up the expression corresponding to v
-        /// \param[in] v a variable
-        /// \return the expression corresponding to v.
-        expression_type const& lookup(variable_type const& v) const {
-          typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
-
-          if (i == m_map.end()) {
-            return v;
-          }
-
-          return i->second;
-        }
-
       public:
 
         /// \brief Returns an iterator pointing to the beginning of the sequence of assignments

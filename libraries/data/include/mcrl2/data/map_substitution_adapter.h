@@ -40,7 +40,7 @@ namespace data {
       /// \brief Iterator type for non-constant element access
       typedef typename MapContainer::const_iterator iterator;
 
-    public: 
+    public:
       /// \brief Constructor
       map_substitution_adapter(const MapContainer& m)
         : m_map(m)
@@ -61,7 +61,7 @@ namespace data {
        * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
        * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
        **/
-      expression_type operator()(const expression_type& e) const {
+      expression_type operator()(typename detail::expression_type_or_inaccessible< variable_type, expression_type >::type const& e) const {
         return variable_map_replace(e, m_map);
       }
   };

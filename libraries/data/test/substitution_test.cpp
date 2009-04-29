@@ -20,6 +20,7 @@
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -160,6 +161,25 @@ void test_mutable_substitution()
   e1 = e;
 
   sigma[v] = e;
+
+  // Compile test
+  mutable_substitution<variable, variable> sigmaprime;
+
+  sigma[v] = v;
+}
+
+void test_map_substitution_adapter()
+{
+  atermpp::map< variable, variable > mapping;
+  variable v("v", sort_nat::nat());
+  variable vv("vv", sort_nat::nat());
+
+  // Compile test
+  map_substitution_adapter< atermpp::map< variable, variable > > sigma(mapping);
+
+  mapping[v] = vv;
+
+  BOOST_CHECK(sigma(v) == vv);
 }
 
 int test_main(int a, char**aa)
