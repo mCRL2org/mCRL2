@@ -19,7 +19,9 @@
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data.h"
+#include "mcrl2/data/parser.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -226,6 +228,20 @@ void test_data_expression_replace()
   BOOST_CHECK(v_ != u);
 }
 
+void test_replace_with_binders()
+{
+  mutable_substitution< variable, data_expression > sigma;
+  data_expression                                   input1(parse_variable("c: Bool"));
+  data_expression                                   input2(parse_data_expression("exists b: Bool, c: Bool. if(b, c, b)"));
+
+  sigma[variable("c", sort_bool_::bool_())] = sort_bool_::false_();
+
+  BOOST_CHECK(replace_variables(input1, sigma) == sort_bool_::false_());
+
+  // variable c is bound and should not be replaced
+  BOOST_CHECK(replace_variables(input2, sigma) == input2);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -240,6 +256,9 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_data_expression_replace();
+  core::garbage_collect();
+
+  test_replace_with_binders();
   core::garbage_collect();
 
   return 0;

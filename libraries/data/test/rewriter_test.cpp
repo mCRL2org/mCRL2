@@ -106,7 +106,7 @@ void test2()
   // Rewrite two data expressions, and check if they are the same
   d1 = parse_data_expression("m+n", var_decl);
   d2 = parse_data_expression("7");
-  assert(r(d1, sigma) == r(d2));
+  BOOST_CHECK(r(d1, sigma) == r(d2));
 }
 
 void test3()
