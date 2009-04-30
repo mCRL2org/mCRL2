@@ -1755,15 +1755,29 @@ namespace mcrl2 {
       inline
       void add_real__to_specification(data_specification& specification)
       {
-         specification.add_system_defined_sort(real_());
-         specification.add_system_defined_constructors(boost::make_iterator_range(real__generate_constructors_code()));
-         specification.add_system_defined_mappings(boost::make_iterator_range(real__generate_functions_code()));
-         specification.add_system_defined_equations(boost::make_iterator_range(real__generate_equations_code()));
-
-         sort_int_::add_int__to_specification(specification);
-         sort_bool_::add_bool__to_specification(specification);
-         sort_pos::add_pos_to_specification(specification);
-         sort_nat::add_nat_to_specification(specification);
+         if (!specification.search_sort(real_()))
+         {
+           specification.add_system_defined_sort(real_());
+           specification.add_system_defined_constructors(boost::make_iterator_range(real__generate_constructors_code()));
+           specification.add_system_defined_mappings(boost::make_iterator_range(real__generate_functions_code()));
+           specification.add_system_defined_equations(boost::make_iterator_range(real__generate_equations_code()));
+         }
+         if (!specification.search_sort(sort_int_::int_()))
+         {
+           sort_int_::add_int__to_specification(specification);
+         }
+         if (!specification.search_sort(sort_bool_::bool_()))
+         {
+           sort_bool_::add_bool__to_specification(specification);
+         }
+         if (!specification.search_sort(sort_nat::nat()))
+         {
+           sort_nat::add_nat_to_specification(specification);
+         }
+         if (!specification.search_sort(sort_pos::pos()))
+         {
+           sort_pos::add_pos_to_specification(specification);
+         }
       }
     } // namespace sort_real_
 

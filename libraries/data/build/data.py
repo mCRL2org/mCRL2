@@ -1808,37 +1808,37 @@ class specification():
     code += "// (See accompanying file LICENSE_1_0.txt or copy at\n"
     code += "// http://www.boost.org/LICENSE_1_0.txt)\n"
     code += "//\n"
-    code += "/// \\file mcrl2/new_data/%s.h\n" % (remove_underscore(self.namespace))
+    code += "/// \\file mcrl2/data/%s.h\n" % (remove_underscore(self.namespace))
     code += "/// \\brief The standard sort %s.\n" % (self.namespace)
     code += "///\n"
     code += "/// This file was generated from the data sort specification\n"
-    code += "/// mcrl2/new_data/build/%s.spec.\n" % (remove_underscore(self.namespace))
+    code += "/// mcrl2/data/build/%s.spec.\n" % (remove_underscore(self.namespace))
     code += "\n"
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.namespace.upper())
-    code += "#include \"mcrl2/new_data/basic_sort.h\"\n"
-    code += "#include \"mcrl2/new_data/function_sort.h\"\n"
-    code += "#include \"mcrl2/new_data/function_symbol.h\"\n"
-    code += "#include \"mcrl2/new_data/application.h\"\n"
-    code += "#include \"mcrl2/new_data/data_equation.h\"\n"
-    code += "#include \"mcrl2/new_data/detail/container_utility.h\"\n"
-    code += "#include \"mcrl2/new_data/standard.h\"\n"
-    code += "#include \"mcrl2/new_data/data_specification.h\"\n"
+    code += "#include \"mcrl2/data/basic_sort.h\"\n"
+    code += "#include \"mcrl2/data/function_sort.h\"\n"
+    code += "#include \"mcrl2/data/function_symbol.h\"\n"
+    code += "#include \"mcrl2/data/application.h\"\n"
+    code += "#include \"mcrl2/data/data_equation.h\"\n"
+    code += "#include \"mcrl2/data/detail/container_utility.h\"\n"
+    code += "#include \"mcrl2/data/standard.h\"\n"
+    code += "#include \"mcrl2/data/data_specification.h\"\n"
     if self.has_lambda():
-      code += "#include \"mcrl2/new_data/lambda.h\"\n"
+      code += "#include \"mcrl2/data/lambda.h\"\n"
     if self.has_forall():
-      code += "#include \"mcrl2/new_data/forall.h\"\n"
+      code += "#include \"mcrl2/data/forall.h\"\n"
     if self.has_exists():
-      code += "#include \"mcrl2/new_data/exists.h\"\n"
+      code += "#include \"mcrl2/data/exists.h\"\n"
     if self.defines_container():
-      code += "#include \"mcrl2/new_data/container_sort.h\"\n"
+      code += "#include \"mcrl2/data/container_sort.h\"\n"
     if self.defines_struct():
-      code += "#include \"mcrl2/new_data/structured_sort.h\"\n"
+      code += "#include \"mcrl2/data/structured_sort.h\"\n"
     if self.includes != None:
       code += self.includes.code()
     code += "\n"
     code += "namespace mcrl2 {\n\n"
-    code += "  namespace new_data {\n\n"
+    code += "  namespace data {\n\n"
     code += "    /// \\brief Namespace for system defined sort %s\n" % (escape(self.namespace))
     code += "    namespace sort_%s {\n\n" % (self.namespace)
     code += self.sort_specification.code()
@@ -1852,7 +1852,11 @@ class specification():
         if e.defines_container():
           dependent_sorts.add("         sort_%s::add_%s_to_specification(specification, element);\n" % (e.original_namespace, e.original_namespace))
         else:
-          dependent_sorts.add("         sort_%s::add_%s_to_specification(specification);\n" % (e.original_namespace, e.original_namespace))
+          result  = "         if (!specification.search_sort(sort_%s::%s()))\n" % (e.original_namespace, e.original_namespace)
+          result += "         {\n"
+          result += "           sort_%s::add_%s_to_specification(specification);\n" % (e.original_namespace, e.original_namespace)
+          result += "         }\n"
+          dependent_sorts.add(result)
       if e.to_string()[0] == '@' and e.original_namespace == self.namespace:
         auxiliary_sorts.add("         specification.add_system_defined_sort(%s);\n" % (e.inline_code(self.sort_specification)))
     if self.defines_container():
@@ -1866,7 +1870,6 @@ class specification():
       code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code(element)));\n" % (self.namespace)
       code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code(element)));\n" % (self.namespace)
       code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code(element)));\n" % (self.namespace)
-      code += "\n"
       code += string.join(dependent_sorts, "")
       code += string.join(auxiliary_sorts, "")
       code += "      }\n"
@@ -1876,16 +1879,18 @@ class specification():
       code += "      inline\n"
       code += "      void add_%s_to_specification(data_specification& specification)\n" % (self.namespace)
       code += "      {\n"
-      code += "         specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
-      code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code()));\n" % (self.namespace)
-      code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code()));\n" % (self.namespace)
-      code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code()));\n" % (self.namespace)
-      code += "\n"
+      code += "         if (!specification.search_sort(%s()))\n" % (escape(self.namespace))
+      code += "         {\n"
+      code += "           specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
+      code += "           specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code()));\n" % (self.namespace)
+      code += "           specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code()));\n" % (self.namespace)
+      code += "           specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code()));\n" % (self.namespace)
+      code += "         }\n"
       code += string.join(dependent_sorts, "")
       code += string.join(auxiliary_sorts, "")
       code += "      }\n"
     code += "    } // namespace sort_%s\n\n" % (self.namespace)
-    code += "  } // namespace new_data\n\n"
+    code += "  } // namespace data\n\n"
     code += "} // namespace mcrl2\n\n"
     code += "#endif // MCRL2_DATA_%s_H\n" % (self.namespace.upper())
     return code
@@ -1922,7 +1927,7 @@ class include():
   def code(self):
     s = self.identifier.to_string()
     s = s[:len(s)-5]
-    return "#include \"mcrl2/new_data/%s.h\"" % (s)
+    return "#include \"mcrl2/data/%s.h\"" % (s)
 
 class include_list():
   def __init__(self, elements):

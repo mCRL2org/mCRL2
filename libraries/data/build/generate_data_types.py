@@ -28,7 +28,7 @@ def main():
   specs = get_specifications()
   for spec in specs:
     print "Generating code for %s" % (spec)
-    cmd = "python ./codegen.py %s %s.spec ../include/mcrl2/new_data/%s.h" % (arguments, spec, spec)
+    cmd = "python ./codegen.py %s %s.spec ../include/mcrl2/data/%s.h" % (arguments, spec, spec)
     retcode = call(cmd, shell=True)
 
 if __name__ == "__main__":

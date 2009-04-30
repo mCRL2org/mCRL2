@@ -813,10 +813,18 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(boost::make_iterator_range(list_generate_constructors_code(element)));
          specification.add_system_defined_mappings(boost::make_iterator_range(list_generate_functions_code(element)));
          specification.add_system_defined_equations(boost::make_iterator_range(list_generate_equations_code(element)));
-
-         sort_bool_::add_bool__to_specification(specification);
-         sort_pos::add_pos_to_specification(specification);
-         sort_nat::add_nat_to_specification(specification);
+         if (!specification.search_sort(sort_nat::nat()))
+         {
+           sort_nat::add_nat_to_specification(specification);
+         }
+         if (!specification.search_sort(sort_bool_::bool_()))
+         {
+           sort_bool_::add_bool__to_specification(specification);
+         }
+         if (!specification.search_sort(sort_pos::pos()))
+         {
+           sort_pos::add_pos_to_specification(specification);
+         }
       }
     } // namespace sort_list
 

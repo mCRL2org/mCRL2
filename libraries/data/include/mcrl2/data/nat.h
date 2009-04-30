@@ -2131,13 +2131,21 @@ namespace mcrl2 {
       inline
       void add_nat_to_specification(data_specification& specification)
       {
-         specification.add_system_defined_sort(nat());
-         specification.add_system_defined_constructors(boost::make_iterator_range(nat_generate_constructors_code()));
-         specification.add_system_defined_mappings(boost::make_iterator_range(nat_generate_functions_code()));
-         specification.add_system_defined_equations(boost::make_iterator_range(nat_generate_equations_code()));
-
-         sort_bool_::add_bool__to_specification(specification);
-         sort_pos::add_pos_to_specification(specification);
+         if (!specification.search_sort(nat()))
+         {
+           specification.add_system_defined_sort(nat());
+           specification.add_system_defined_constructors(boost::make_iterator_range(nat_generate_constructors_code()));
+           specification.add_system_defined_mappings(boost::make_iterator_range(nat_generate_functions_code()));
+           specification.add_system_defined_equations(boost::make_iterator_range(nat_generate_equations_code()));
+         }
+         if (!specification.search_sort(sort_bool_::bool_()))
+         {
+           sort_bool_::add_bool__to_specification(specification);
+         }
+         if (!specification.search_sort(sort_pos::pos()))
+         {
+           sort_pos::add_pos_to_specification(specification);
+         }
          specification.add_system_defined_sort(natpair());
       }
     } // namespace sort_nat
