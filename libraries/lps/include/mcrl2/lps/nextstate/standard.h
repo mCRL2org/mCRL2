@@ -216,15 +216,9 @@ struct ns_info
           return m_rewriter.translate(term);
         }
 
-        ns_info(mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory) :
-           m_enumerator_factory(factory),
-           m_rewriter(m_enumerator_factory.get_evaluator()) {
-
-           // Configure selector to compare with term that represents false
-           legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool_::false_());
-        }
+        ns_info(mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory);
 };
-/// \cond INTERNAL_DOCS
+/// \endcond
 
 class NextStateGeneratorStandard : public NextStateGenerator
 {

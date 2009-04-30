@@ -105,6 +105,15 @@ namespace mcrl2 {
   }
 }
 
+ns_info::ns_info(mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory) :
+  m_enumerator_factory(factory),
+  m_rewriter(m_enumerator_factory.get_evaluator()) {
+
+  // Configure selector to compare with term that represents false
+  legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool_::false_());
+}
+
+
 /* Explanation of the tree building algorithm.
  *
  * If len(l) is a power of 2, than building the tree is easy. One just
