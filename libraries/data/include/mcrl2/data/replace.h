@@ -30,9 +30,11 @@ namespace data {
 
 /// \cond INTERNAL_DOCS
 template <typename ReplaceFunction>
-struct replace_variables_helper
+struct replace_variables_helper // TODO make proper visitor on structure of data expression
 {
   const ReplaceFunction& r_;
+
+  mutable std::set< variable > m_bound;
 
   replace_variables_helper(const ReplaceFunction& r)
     : r_(r)
@@ -43,14 +45,20 @@ struct replace_variables_helper
   /// \return The function result
   std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
   {
-    if (data_expression(t).is_variable())
+    if (data_expression(t).is_abstraction())
     {
-      return std::pair<atermpp::aterm_appl, bool>(r_(static_cast< variable >(t)), false); // do not continue the recursion
+      abstraction::variables_const_range bound(abstraction(t).variables());
+
+      m_bound.insert(bound.begin(), bound.end());
     }
-    else
+    else if (data_expression(t).is_variable())
     {
-      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
+      return
+        std::pair<atermpp::aterm_appl, bool>(
+             (m_bound.find(t) != m_bound.end()) ? t : r_(static_cast< variable >(t)), false);
     }
+
+    return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
   }
 };
 /// \endcond
