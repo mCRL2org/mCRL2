@@ -56,7 +56,6 @@ namespace mcrl2 {
 
         public:
 
-
           // For normalising sort expressions
           sort_expression implement(sort_expression const& expression)
           {

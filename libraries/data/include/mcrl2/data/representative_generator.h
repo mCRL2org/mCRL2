@@ -141,7 +141,7 @@ namespace mcrl2 {
             // present.
 
             // check if there is a mapping with sort s (constructors with sort s cannot exist).
-            for (atermpp::set< function_symbol >::const_iterator i =
+            for (data_specification::mappings_const_range::const_iterator i =
                 std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
                                                                                          i != local_mappings.end(); )
             {

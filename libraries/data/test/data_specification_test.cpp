@@ -28,6 +28,41 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
+bool compare_for_equality(data_specification const& left, data_specification const& right)
+{
+  if (!(left == right) || !(detail::data_specification_to_aterm_data_spec(left) == detail::data_specification_to_aterm_data_spec(right))) {
+    BOOST_CHECK(left == right);
+
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
+              << "Specification detailed comparison:" << std::endl;
+
+    if (left.sorts() != right.sorts()) {
+      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+    }
+    if (left.constructors() != right.constructors()) {
+      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
+std::clog << left.constructors() << std::endl;
+      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+std::clog << right.constructors() << std::endl;
+    }
+    if (left.mappings() != right.mappings()) {
+      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+    }
+    if (left.equations() != right.equations()) {
+      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+    }
+
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
+    return false;
+  }
+
+  return true;
+}
+
 void test_sorts()
 {
   std::clog << "test_sorts" << std::endl;
@@ -50,14 +85,14 @@ void test_sorts()
 
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 
   basic_sort s2("S2");
   sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
   boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_system_defined_sort(s2);
   spec1.add_system_defined_sorts(s2l_range);
-  BOOST_CHECK(spec == spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
 
   BOOST_CHECK(spec.is_system_defined(s2));
   BOOST_CHECK(!spec.is_system_defined(s1));
@@ -69,7 +104,7 @@ void test_sorts()
   BOOST_CHECK(!spec1.is_system_defined(s));
   spec.remove_sorts(s2l_range);
   spec1.remove_sort(s2);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 }
 
 void test_aliases()
@@ -138,7 +173,7 @@ void test_constructors()
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
   BOOST_CHECK(spec.constructors() == spec1.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl_range);
   BOOST_CHECK(spec.constructors(s0) == hl_range);
@@ -147,13 +182,13 @@ void test_constructors()
   spec.add_constructor(function_symbol("i", s0));
   function_symbol i("i", s0);
   spec.remove_constructor(i);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 
   spec.add_system_defined_constructor(i);
   function_symbol_vector il(make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   spec1.add_system_defined_constructors(il_range);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
   BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
   BOOST_CHECK(!spec.is_system_defined(g));
@@ -165,7 +200,7 @@ void test_constructors()
 
   spec.remove_constructor(i);
   spec1.remove_constructors(il_range);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 }
 
 void test_functions()
@@ -203,8 +238,8 @@ void test_functions()
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) != mappings.end());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) != mappings.end());
 
-  BOOST_CHECK(spec == spec1);
-  BOOST_CHECK(spec.mappings(s).size() == 2);
+  compare_for_equality(spec, spec1);
+  BOOST_CHECK(boost::distance(spec.mappings(s)) == 2);
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), f) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), g) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s0).begin(), spec.mappings(s0).end(), h) != spec.mappings(s0).end());
@@ -212,7 +247,7 @@ void test_functions()
   BOOST_CHECK(spec1.mappings(s) == fgl_range);
   BOOST_CHECK(spec1.mappings(s0) == hl_range);
   BOOST_CHECK(spec1.mappings() == fghl_range);
-  BOOST_CHECK(spec1.mappings(s).size() == 2);
+  BOOST_CHECK(boost::distance(spec1.mappings(s)) == 2);
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), f) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
@@ -222,7 +257,7 @@ void test_functions()
   function_symbol_vector il(make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   spec1.add_system_defined_mappings(il_range);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
   BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
   BOOST_CHECK(!spec.is_system_defined(g));
@@ -234,7 +269,7 @@ void test_functions()
 
   spec.remove_mappings(il_range);
   spec1.remove_mapping(i);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 }
 
 void test_equations()
@@ -261,7 +296,7 @@ void test_equations()
   boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
   spec1.add_equations(fxxl_range);
 
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
   BOOST_CHECK(remove_all_system_defined(spec).equations() == fxxl_range);
   BOOST_CHECK(remove_all_system_defined(spec1).equations() == fxxl_range);
 
@@ -271,7 +306,7 @@ void test_equations()
   spec.add_system_defined_equation(fxf);
   spec1.add_system_defined_equations(fxfl_range);
 
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
   BOOST_CHECK(spec.is_system_defined(fxf));
   BOOST_CHECK(!spec.is_system_defined(fxx));
   BOOST_CHECK(spec1.is_system_defined(fxf));
@@ -283,7 +318,7 @@ void test_equations()
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
   spec.remove_equations(fxfl_range);
   spec1.remove_equation(fxf);
-  BOOST_CHECK(spec == spec1);
+  compare_for_equality(spec, spec1);
 }
 
 void test_is_certainly_finite()
@@ -366,35 +401,6 @@ void test_constructor()
   data_specification spec1(a);
 }
 
-void compare_for_equality(data_specification const& left, data_specification const& right)
-{
-  if (!(detail::data_specification_to_aterm_data_spec(left) == detail::data_specification_to_aterm_data_spec(right))) {
-    BOOST_CHECK(left == right);
-
-    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
-              << "Specification detailed comparison:" << std::endl;
-
-    if (left.sorts() != right.sorts()) {
-      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
-      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
-    }
-    if (left.constructors() != right.constructors()) {
-      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
-    }
-    if (left.mappings() != right.mappings()) {
-      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
-      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
-    }
-    if (left.equations() != right.equations()) {
-      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
-      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
-    }
-
-    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  }
-}
-
 template < typename ForwardTraversalIterator, typename Expression >
 bool search(boost::iterator_range< ForwardTraversalIterator > const& range, Expression const& expression)
 {
@@ -436,6 +442,8 @@ void test_system_defined()
     "sort E = D;"
     "sort F = E;");
 
+  BOOST_CHECK(specification.is_alias(basic_sort("D")));
+  BOOST_CHECK(specification.is_alias(basic_sort("F")));
   BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
@@ -445,6 +453,50 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
 
   compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
+}
+
+void test_utility_functionality()
+{
+  data_specification spec;
+
+  basic_sort s("S");
+  basic_sort s0("S0");
+  basic_sort a("a");
+  function_sort s0s(make_vector(sort_expression(s0)), s);
+  function_symbol f("f", s);
+  function_symbol g("g", s0s);
+  function_symbol h("h", s0);
+
+  BOOST_CHECK(!spec.search_sort(s));
+  spec.add_sort(s);
+  BOOST_CHECK(spec.search_sort(s));
+
+  spec.add_sort(alias(basic_sort("a"), s));
+  BOOST_CHECK(spec.search_sort(a));
+
+  BOOST_CHECK(spec.search_sort(s));
+  BOOST_CHECK(!spec.search_sort(s0));
+  spec.add_sort(s0);
+  BOOST_CHECK(spec.search_sort(s));
+
+  BOOST_CHECK(!spec.search_mapping(f));
+  BOOST_CHECK(!spec.search_constructor(f));
+  spec.add_constructor(f);
+  BOOST_CHECK(!spec.search_mapping(f));
+  BOOST_CHECK(spec.search_constructor(f));
+
+  BOOST_CHECK(!spec.search_mapping(g));
+  BOOST_CHECK(!spec.search_constructor(g));
+  spec.add_mapping(g);
+  BOOST_CHECK(spec.search_mapping(g));
+  BOOST_CHECK(!spec.search_constructor(g));
+  BOOST_CHECK(!spec.search_mapping(h));
+  BOOST_CHECK(!spec.search_constructor(h));
+  spec.add_mapping(h);
+  BOOST_CHECK(spec.search_mapping(h));
+
+  BOOST_CHECK(spec.constructors(a) == spec.constructors(s));
+  BOOST_CHECK(spec.mappings(a) == spec.mappings(s));
 }
 
 void test_copy()
@@ -484,6 +536,9 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_system_defined();
+  core::garbage_collect();
+
+  test_utility_functionality();
   core::garbage_collect();
 
   test_copy();

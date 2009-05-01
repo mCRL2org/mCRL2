@@ -117,7 +117,7 @@ namespace detail {
     }
   }
 
-  /// TODO migrate to visitor structure
+  /// TODO migrate to generated visitor structure
   template <typename MatchPredicate, typename OutputIterator>
   struct free_variable_find_helper {
     std::set< variable > m_bound;

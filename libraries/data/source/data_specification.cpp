@@ -16,9 +16,10 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/substitution.h"
+#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/compatibility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/data_utility.h"
@@ -236,7 +237,8 @@ namespace mcrl2 {
       }
       else if (sort.is_structured_sort())
       {
-        add_system_defined_sort(sort);
+        m_sorts.insert(sort);
+        m_sys_sorts.put(sort, sort);
 
         structured_sort s_sort(sort);
 
@@ -296,6 +298,12 @@ namespace mcrl2 {
           import_system_defined_sort(*i);
         }
       }
+
+      // for compatibilty with specifications imported from ATerm
+      if (s.is_standard() && constructors(s).empty())
+      {
+        import_system_defined_sort(s);
+      }
     }
 
     void data_specification::purge_system_defined()
@@ -306,7 +314,9 @@ namespace mcrl2 {
           boost::bind(detail::is_system_defined< function_symbol >, *this,
                 boost::bind(&atermpp::multimap< sort_expression, function_symbol >::value_type::second, _1)));
 
-      detail::remove_if(m_mappings, boost::bind(detail::is_system_defined< function_symbol >, *this, _1));
+      detail::remove_if(m_mappings,
+          boost::bind(detail::is_system_defined< function_symbol >, *this,
+                boost::bind(&atermpp::multimap< sort_expression, function_symbol >::value_type::second, _1)));
 
       detail::remove_if(m_equations, boost::bind(detail::is_system_defined< data_equation >, *this, _1));
     }
@@ -427,58 +437,69 @@ namespace mcrl2 {
 
     void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     {
-      typedef mutable_substitution< sort_expression, sort_expression > substitution_type;
+      assert(core::detail::check_rule_DataSpec(term));
 
-      m_sorts        = detail::aterm_sort_spec_to_sort_expression_set(atermpp::arg1(term));
-      m_constructors = detail::aterm_cons_spec_to_constructor_map(atermpp::arg2(term));
-      m_mappings     = detail::aterm_map_spec_to_function_set(atermpp::arg3(term));
+      atermpp::term_list< sort_expression > term_sorts(atermpp::list_arg1(atermpp::arg1(term)));
+      atermpp::term_list< function_symbol > term_constructors(atermpp::list_arg1(atermpp::arg2(term)));
+      atermpp::term_list< function_symbol > term_mappings(atermpp::list_arg1(atermpp::arg3(term)));
+      atermpp::term_list< data_equation >   term_equations(atermpp::list_arg1(atermpp::arg4(term)));
+
+      add_sorts(boost::make_iterator_range(term_sorts));
+
+      sort_to_symbol_map functions;
+
+      for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
+      {
+        functions.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      }
+      for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
+      {
+        functions.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      }
 
       // Sort expression substitutions for substituting parts of the sorts of expressions
-      substitution_type renamings;
+      atermpp::map< sort_expression, sort_expression > renamings;
 
       atermpp::set< alias > all_aliases(boost::copy_range< atermpp::set< alias > >(aliases()));
 
       // replace alias that names the sort under which the sort is implemented
-      for (atermpp::set< alias >::const_iterator i(all_aliases.begin()); i != all_aliases.end(); ++i)
+      for (ltr_aliases_map::const_iterator i = m_aliases_by_name.begin(); i != m_aliases_by_name.end(); ++i)
       {
-        sort_expression referenced_sort(i->reference());
-
-        if ((referenced_sort.is_container_sort() || referenced_sort.is_structured_sort()) &&
-              (m_constructors.equal_range(i->name()).first != m_constructors.end() ||
-               m_mappings.find(i->name()) != m_mappings.end()))
-        { // assume that the container or structured sort is implemented under the current alias
-          basic_sort main_identifier(i->name());
-
-          // update aliases
+        if ((i->second.is_container_sort() || i->second.is_structured_sort()) &&
+              (!boost::make_iterator_range(functions.equal_range(i->first)).empty()))
+        {
+          // assume that the container or structured sort is implemented under the current alias
           for (atermpp::set< sort_expression >::iterator c = m_sorts.begin(), ca = m_sorts.begin(); ca++ != m_sorts.end(); c = ca)
-          {
+          { // update aliases
             if (c->is_alias())
             {
               alias alias_c(*c);
 
-              if ((alias_c.name() != main_identifier) && (alias_c.reference() == referenced_sort))
+              if ((alias_c.name() != i->first) && (alias_c.reference() == i->second))
               {
-                m_sorts.insert(alias(alias_c.name(), referenced_sort));
-                m_sorts.erase(c);
+                add_alias(alias(alias_c.name(), i->second));
+                remove_alias(alias_c);
               }
             }
           }
 
-          renamings[main_identifier] = referenced_sort;
+          renamings[i->first] = i->second;
 
           // Specification contains equations that depend on the sort so add to the set of sorts
-          m_sorts.insert(referenced_sort);
+          m_sorts.insert(i->second);
         }
       }
 
-      m_constructors = detail::aterm_cons_spec_to_constructor_map(atermpp::replace(atermpp::arg2(term), renamings));
-      m_mappings = detail::aterm_map_spec_to_function_set(atermpp::replace(atermpp::arg3(term), renamings));
-      m_equations = detail::aterm_data_eqn_spec_to_equation_set(atermpp::replace(atermpp::arg4(term), renamings));
+      add_constructors(boost::make_iterator_range(
+          atermpp::term_list< function_symbol >(atermpp::replace(term_constructors, make_map_substitution_adapter(renamings)))));
+      add_mappings(boost::make_iterator_range(
+            atermpp::term_list< function_symbol >(atermpp::replace(term_mappings, make_map_substitution_adapter(renamings)))));
+      add_equations(boost::make_iterator_range(
+            atermpp::term_list< data_equation >(atermpp::replace(term_equations, make_map_substitution_adapter(renamings)))));
     }
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      // mutable_substitution is used because at present there is no other decent method to accomplish the same
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
       {
         struct local {
@@ -518,14 +539,11 @@ namespace mcrl2 {
         };
 
         typedef atermpp::set< sort_expression > sorts_set;
-        typedef atermpp::set< function_symbol > constructors_set;
-        typedef atermpp::set< function_symbol > mappings_set;
-        typedef atermpp::set< data_equation >   equations_set;
 
         sorts_set sorts = boost::copy_range< sorts_set >(s.aliases());
 
         // Sort expression substitutions for substituting parts of the sorts of expressions
-        mutable_substitution< sort_expression, sort_expression > renamings;
+        atermpp::map< sort_expression, sort_expression > renamings;
 
         // remove structured sorts and container sorts
         for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
@@ -535,8 +553,6 @@ namespace mcrl2 {
           if (current.is_container_sort() || current.is_structured_sort())
           {
             basic_sort main_identifier(local::find_suitable_identifier(sorts, s, current));
-
-            sorts.insert(alias(main_identifier, current));
 
             // update aliases
             for (sorts_set::iterator c = sorts.begin(), ca = sorts.begin(); ca++ != sorts.end(); c = ca)
@@ -554,6 +570,8 @@ namespace mcrl2 {
             }
 
             renamings[current] = main_identifier;
+
+            sorts.erase(current);
           }
           else if (!current.is_alias())
           {
@@ -565,9 +583,9 @@ namespace mcrl2 {
 
         return gsMakeDataSpec(
            gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
-           gsMakeConsSpec(atermpp::replace(boost::copy_range< atermpp::aterm_list >(s.constructors()), renamings)),
-           gsMakeMapSpec(atermpp::replace(boost::copy_range< atermpp::aterm_list >(s.mappings()), renamings)),
-           gsMakeDataEqnSpec(atermpp::replace(boost::copy_range< atermpp::aterm_list >(s.equations()), renamings)));
+           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
+           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
+           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
       }
     } // namespace detail
     /// \endcond

@@ -131,7 +131,7 @@ namespace atermpp {
       template <class Iter>
       term_list(Iter first, Iter last, typename boost::enable_if<
                 typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-                                        boost::bidirectional_traversal_tag >::type >::type* = 0)
+                                        boost::random_access_traversal_tag >::type >::type* = 0)
         : aterm_base(ATmakeList0())
       {
         while (first != last)
@@ -144,7 +144,7 @@ namespace atermpp {
       template <class Iter>
       term_list(Iter first, Iter last, typename boost::disable_if<
                 typename boost::is_convertible< typename boost::iterator_traversal< Iter >::type,
-                                        boost::bidirectional_traversal_tag >::type >::type* = 0)
+                                        boost::random_access_traversal_tag >::type >::type* = 0)
         : aterm_base(ATmakeList0())
       {
         while (first != last)

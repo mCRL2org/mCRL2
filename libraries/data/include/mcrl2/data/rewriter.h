@@ -379,18 +379,6 @@ namespace data {
       {
         data_expression implemented(implement(d));
         data_expression reconstructed(reconstruct(m_rewriter->rewrite(implemented)));
-//if (m_conversion_helper.reconstruct(data_expression(m_rewriter->rewrite(m_conversion_helper.implement(d)))) != reconstructed)
-//{
-//  atermpp::aterm_appl result(m_rewriter->rewrite(m_conversion_helper.implement(d)));
-//  std::cerr << "INPUT " << std::endl
-//            << m_conversion_helper.implement(d) << std::endl
-//            << result << std::endl;
-//            << "implemented" << m_conversion_helper.implement(d) << std::endl
-//            << "implemented" << implemented << std::endl
-//            << m_conversion_helper.reconstruct(data_expression(m_rewriter->rewrite(m_conversion_helper.implement(d)))) << std::endl
-//            << " != " << std::endl
-//            << reconstructed << std::endl;
-//}
         return reconstructed;
       }
 

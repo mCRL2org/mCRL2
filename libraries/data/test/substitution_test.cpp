@@ -67,9 +67,8 @@ void test1()
   BOOST_CHECK(s(lambda(x,x)) == lambda(x,x));
   BOOST_CHECK(s(lambda(x,y)) == lambda(x,c));
 
-  // non-capture avoiding substitution
-  BOOST_CHECK(s(lambda(y,y)) != lambda(y,y));
-  BOOST_CHECK(s(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
+  BOOST_CHECK(s(lambda(y,y)) == lambda(y,y));
+  BOOST_CHECK(s(application(lambda(y,y),x) + y) == application(lambda(y,y), x) + c);
 }
 
 void test_assignment_list_substitution()
