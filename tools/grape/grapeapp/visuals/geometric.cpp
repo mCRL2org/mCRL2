@@ -669,16 +669,19 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   //draw bezier
   coordinate pre_pnt;
   coordinate pnt = p_begin;
+  float angle_middle;
   for(unsigned int i=1;i<=40;++i)
   {
     pre_pnt = pnt;
     if (i <= 20)
     {
-      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));
+      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));  
     }
     else
     {
       pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05));
+      // calculate angle of midpoint
+      if (i == 21) angle_middle = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x)) + M_PI*0.5;
     };
     draw_line(pre_pnt, pnt, p_selected, g_color_black);
   }
@@ -699,23 +702,23 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
-  // draw text
-  // calculate midpoint
-  coordinate midpoint;
-  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
-  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
+  // keep angle between 0..pi
+  while (angle_middle < 0.0f) angle_middle += M_PI;
+  while (angle_middle >= M_PI) angle_middle -= M_PI;
+  
+  // align text
+  Alignment align_horizontal = al_center;
+  Alignment align_vertical = al_center;
 
+  if ((angle_middle >= 0.0f*M_PI) && (angle_middle < 0.25f*M_PI)) align_horizontal = al_right;   
+  if ((angle_middle >= 0.75f*M_PI) && (angle_middle < 1.25f*M_PI)) align_horizontal = al_left;    
+    
+  if ((angle_middle >= 0.25f*M_PI) && (angle_middle < 0.75f*M_PI)) align_vertical = al_top;
+    
   set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle_arrow < M_PI_2 ) || ( angle_arrow > M_PI && angle_arrow < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x - 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f, p_control.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
+  // draw text 
+  grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()),p_control.m_x + 0.05f*cos(angle_middle), p_control.m_y + 0.025f + 0.05f*sin(angle_middle), 0.0015f, align_horizontal, align_vertical );
+ 
   //draw control point
   if (p_selected)
   {
@@ -729,7 +732,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
   draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
 }
-
+/*
 void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
   draw_line( p_begin, p_end, p_selected, g_color_black );
@@ -771,7 +774,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin,
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 
-
+*/
 void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
   float width = p_end.m_x - p_begin.m_x;
@@ -797,23 +800,28 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
     glVertex3f( other_side_x, other_side_y, 0.0f);
   glEnd();
 
-  // draw text
   // calculate midpoint
   coordinate midpoint;
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
+    
+  angle += M_PI*0.5f;
+  while (angle < 0.0f) angle += 2.0f*M_PI;
+  while (angle >= 2.0f*M_PI) angle -= 2.0f*M_PI;
+  
+  // align text
+  Alignment align_horizontal = al_right;
+  Alignment align_vertical = al_center;
 
+  if ((angle >= 0.5f*M_PI) && (angle < 1.5f*M_PI)) align_horizontal = al_left;    
+    
+  if ((angle >= 0.25f*M_PI) && (angle < 0.75f*M_PI)) align_vertical = al_top;
+  if ((angle >= 1.25f*M_PI) && (angle < 1.75f*M_PI)) align_vertical = al_bottom;
+    
   set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x - 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f, midpoint.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
+  // draw text 
+  grape_glcanvas::get_font_renderer()->draw_text(std::string(p_label_text.fn_str()), midpoint.m_x + 0.05f*cos(angle), midpoint.m_y + 0.025f + 0.05f*sin(angle), 0.0015f, align_horizontal, align_vertical);   
+  
   // do not draw the bounding box, this is already done in visualnonterminating transition
 }
 

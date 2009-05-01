@@ -325,7 +325,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_label_text The label of the object.
      */
-    void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text );
+  //  void draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text );
 
     /**
      * Terminating transition (arrow) draw function.

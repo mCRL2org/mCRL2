@@ -16,6 +16,8 @@
 #include "grape_glcanvas.h"
 #include "mcrl2/utilities/font_renderer.h"
 
+#include <algorithm>
+
 namespace grape {
 
 using namespace grape::grapeapp;
@@ -59,9 +61,55 @@ void visualchannel_communication::draw( void )
   // draw channel
   draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channel_communication_type() );
 
-  //draw text 
-  if (rename_to != _T("")) grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.5 * m_object->get_width(), y, 0.0015f, al_right, al_top);
+  
+  // only find empty position if there is text
+  if (rename_to != _T("")) 
+  {
+    float rotation[comm->count_channel()+1];
+    
+    //store all angles in the array
+    for ( unsigned int i = 0; i < comm->count_channel(); ++i )
+    {
+      channel* chan = comm->get_attached_channel( i );
+      coordinate new_coordinate = m_object->get_coordinate()-chan->get_coordinate();
+      
+      rotation[i] = M_PI+atan2(new_coordinate.m_y, new_coordinate.m_x);
+    }
+    std::sort(rotation, rotation+comm->count_channel());
+    rotation[comm->count_channel()] = rotation[0]+2.0f*M_PI;
+     
+    float biggest_gap = 0;
+    int gap_index = 0;
+    
+    // find biggest gap between communication lines
+    for ( unsigned int i = 0; i < comm->count_channel(); ++i )
+    {
+      if (biggest_gap < rotation[i+1]-rotation[i])
+      {
+        biggest_gap = rotation[i+1]-rotation[i];
+        gap_index = i;
+      }
+    }
+    // calculate the actual angle
+    float empty_rotation = (rotation[gap_index+1]+rotation[gap_index])*0.5;    
+    while (empty_rotation < 0.0f) empty_rotation += 2.0f*M_PI;
+    while (empty_rotation >= 2.0f*M_PI) empty_rotation -= 2.0f*M_PI;
+    
+    
+    // align text
+    Alignment align_horizontal = al_center;
+    Alignment align_vertical = al_center;
 
+    if ((empty_rotation >= 0.0f*M_PI) && (empty_rotation < 0.25f*M_PI)) align_horizontal = al_right;
+    if ((empty_rotation >= 1.75f*M_PI) && (empty_rotation < 2.0f*M_PI)) align_horizontal = al_right;    
+    if ((empty_rotation >= 0.75f*M_PI) && (empty_rotation < 1.25f*M_PI)) align_horizontal = al_left;    
+    
+    if ((empty_rotation >= 0.25f*M_PI) && (empty_rotation < 0.75f*M_PI)) align_vertical = al_top;
+    if ((empty_rotation >= 1.25f*M_PI) && (empty_rotation < 1.75f*M_PI)) align_vertical = al_bottom;
+    
+    // draw text 
+    grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.05f*cos(empty_rotation), y + 0.025f + 0.05f*sin(empty_rotation), 0.0015f, align_horizontal, align_vertical);   
+  }
 }
 
 bool visualchannel_communication::is_inside( libgrape::coordinate &p_coord )
