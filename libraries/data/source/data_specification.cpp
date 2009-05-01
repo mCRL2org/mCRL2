@@ -237,8 +237,7 @@ namespace mcrl2 {
       }
       else if (sort.is_structured_sort())
       {
-        m_sorts.insert(sort);
-        m_sys_sorts.put(sort, sort);
+        add_system_defined_sort(sort);
 
         structured_sort s_sort(sort);
 
@@ -459,8 +458,10 @@ namespace mcrl2 {
         if (i->is_alias() && alias(*i).reference().is_standard())
         {
           import_system_defined_sort(alias(*i).reference());
+
+          add_alias(*i);
         }
-        if (i->is_standard())
+        else if (i->is_standard())
         {
           import_system_defined_sort(*i);
         }
@@ -532,7 +533,7 @@ namespace mcrl2 {
         m_equations.insert(atermpp::replace(*i, renaming_substitution));
       }
 
-      remove_all_system_defined(*this);
+      purge_system_defined();
     }
 
     /// \cond INTERNAL_DOCS
