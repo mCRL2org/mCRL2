@@ -143,19 +143,6 @@ namespace mcrl2 {
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
 
-        /// \brief Normalises a sort expression by following aliases
-        /// TODO finish for container sorts and structured sorts
-        /// \param[in] e a sort expression
-        sort_expression normalise(sort_expression const& e) const
-        {
-          if (e.is_basic_sort())
-          {
-            return find_referenced_sort(e);
-          }
-
-          return e;
-        }
-
       protected:
 
         ///\brief The basic sorts and structured sorts in the specification.
@@ -187,6 +174,35 @@ namespace mcrl2 {
 
         ///\brief Table containing system defined equations.
         mutable atermpp::table m_sys_equations;
+
+      protected:
+
+      void insert_sort(const sort_expression& s)
+      {
+        if (s.is_alias())
+        { // add aliases as names for sort expressions that are non-aliases
+          add_alias(s);
+        }
+        else if (!s.is_function_sort()) // do not add function sorts
+        {
+          m_sorts.insert(s);
+
+          add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
+          add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+        }
+      }
+
+      void add_function(sort_to_symbol_map& container, const function_symbol& f)
+      {
+        sort_expression index_sort(normalise(f.sort().target_sort()));
+
+        constructors_const_range relevant_range(container.equal_range(index_sort));
+
+        if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
+        {
+          container.insert(std::make_pair(index_sort, f));
+        }
+      }
 
       public:
 
@@ -304,45 +320,10 @@ namespace mcrl2 {
       ///
       /// \param[in] s A sort expression.
       /// \note this operation does not invalidate iterators of sorts_const_range
-      inline
       void add_sort(const sort_expression& s)
       {
-        if (s.is_alias())
-        { // add aliases as names for sort expressions that are non-aliases
-          add_alias(s);
-        }
-        else if (!s.is_function_sort()) // do not add function sorts
-        {
-          atermpp::set< sort_expression >::iterator position(m_sorts.find(s));
-
-          if (position == m_sorts.end())
-          {
-            m_sorts.insert(s);
-
-            add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
-            add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
-
-            make_system_defined_complete(s);
-          }
-        }
-      }
-
-      /// \brief Adds an alias (new name for a sort) to this specification
-      ///
-      /// \param[in] s an alias
-      /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
-      /// \note this operation does not invalidate iterators of aliases_const_range
-      void add_alias(alias const& s)
-      {
-        assert(!search_sort(s.name()) || is_alias(s.name()) || (constructors(s.name()).empty()));
-
-        m_sorts.insert(s); // TODO do aliases need to be part of the set of sorts? -- jwulp
-
-        m_aliases_by_name[s.name()] = s.reference();
-        m_aliases_by_sort.insert(rtl_aliases_map::value_type(s.reference(), s.name()));
-
-        // Make sure that the sort is also part of the specification
-        add_sort(s.reference());
+        insert_sort(s);
+        make_system_defined_complete(s);
       }
 
       /// \brief Adds a sort to this specification, and marks it as system
@@ -352,11 +333,45 @@ namespace mcrl2 {
       /// \pre s does not yet occur in this specification.
       /// \post is_system_defined(s) = true
       /// \note this operation does not invalidate iterators of sorts_const_range
-      inline
       void add_system_defined_sort(const sort_expression& s)
       {
-        add_sort(s);
+        insert_sort(s);
         m_sys_sorts.put(s,s);
+      }
+
+      /// \brief Adds an alias (new name for a sort) to this specification
+      ///
+      /// \param[in] s an alias
+      /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
+      /// \note this operation does not invalidate iterators of aliases_const_range
+      /// \post is_alias(s.name()) && find_referenced_sort(s.name()) = normalise(s.reference())
+      void add_alias(alias const& s)
+      {
+        assert(!search_sort(s.name()) || is_alias(s.name()) || (constructors(s.name()).empty()));
+
+        sort_expression canonical_sort(normalise(s.reference()));
+
+        m_sorts.insert(s.name());
+        m_sorts.insert(alias(s.name(), canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+
+        m_aliases_by_name[s.name()] = canonical_sort;
+        m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, s.name()));
+
+        boost::iterator_range< rtl_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(s.name()));
+
+        for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
+                                                                   j++ != relevant_range.end(); i = j)
+        { // s.name() was known as sort but not as alias, update aliases
+          m_aliases_by_name[i->second] = canonical_sort;
+          m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, i->second));
+          m_aliases_by_sort.erase(i);
+
+          m_sorts.erase(alias(i->second, i->first)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+          m_sorts.insert(alias(i->second, canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+        }
+
+        // Make sure that the sort is also part of the specification
+        add_sort(s.reference());
       }
 
       /// \brief Adds a constructor to this specification
@@ -364,21 +379,11 @@ namespace mcrl2 {
       /// \param[in] f A function symbol.
       /// \pre a mapping f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of constructors_const_range
-      inline
       void add_constructor(const function_symbol& f)
       {
         assert(!search_mapping(f));
-
-        sort_expression index_sort(normalise(f.sort().target_sort()));
-
-        constructors_const_range relevant_range(m_constructors.equal_range(index_sort));
-
-        if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
-        {
-          m_constructors.insert(std::make_pair(index_sort, f));
-
-          make_system_defined_complete(f.sort());
-        }
+        add_function(m_constructors, f);
+        make_system_defined_complete(f.sort());
       }
 
       /// \brief Adds a constructor to this specification, and marks it as
@@ -391,7 +396,7 @@ namespace mcrl2 {
       inline
       void add_system_defined_constructor(const function_symbol& f)
       {
-        add_constructor(f);
+        add_function(m_constructors, f);
         m_sys_constructors.put(f,f);
       }
 
@@ -400,21 +405,11 @@ namespace mcrl2 {
       /// \param[in] f A function symbol.
       /// \pre a constructor f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of mappings_const_range
-      inline
       void add_mapping(const function_symbol& f)
       {
         assert(!search_constructor(f));
-
-        sort_expression index_sort(normalise(f.sort().target_sort()));
-
-        mappings_const_range relevant_range(m_mappings.equal_range(index_sort));
-
-        if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
-        {
-          m_mappings.insert(std::make_pair(index_sort, f));
-
-          make_system_defined_complete(f.sort());
-        }
+        add_function(m_mappings, f);
+        make_system_defined_complete(f.sort());
       }
 
       /// \brief Adds a mapping to this specification, and marks it as system
@@ -424,10 +419,9 @@ namespace mcrl2 {
       /// \pre f does not yet occur in this specification.
       /// \post is_system_defined(f) == true
       /// \note this operation does not invalidate iterators of mappings_const_range
-      inline
       void add_system_defined_mapping(const function_symbol& f)
       {
-        add_mapping(f);
+        add_function(m_mappings, f);
         m_sys_mappings.put(f,f);
       }
 
@@ -436,7 +430,6 @@ namespace mcrl2 {
       /// \param[in] e An equation.
       /// \pre e does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of equations_const_range
-      inline
       void add_equation(const data_equation& e)
       {
         m_equations.insert(e);
@@ -449,7 +442,6 @@ namespace mcrl2 {
       /// \pre e does not yet occur in this specification.
       /// \post is_system_defined(f) == true
       /// \note this operation does not invalidate iterators of equations_const_range
-      inline
       void add_system_defined_equation(const data_equation& e)
       {
         add_equation(e);
@@ -461,7 +453,6 @@ namespace mcrl2 {
       /// \param[in] sl A range of sort expressions.
       /// \note this operation does not invalidate iterators of sorts_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
         for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
@@ -477,7 +468,6 @@ namespace mcrl2 {
       /// \post for all s in sl: is_system_defined(s)
       /// \note this operation does not invalidate iterators of sorts_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_system_defined_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
         for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
@@ -491,7 +481,6 @@ namespace mcrl2 {
       /// \param[in] fl A range of function symbols.
       /// \note this operation does not invalidate iterators of constructors_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
@@ -507,7 +496,6 @@ namespace mcrl2 {
       /// \post for all f in fl: is_system_defined(f)
       /// \note this operation does not invalidate iterators of constructors_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_system_defined_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
@@ -521,7 +509,6 @@ namespace mcrl2 {
       /// \param[in] fl A range of function symbols.
       /// \note this operation does not invalidate iterators of mappings_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
@@ -537,7 +524,6 @@ namespace mcrl2 {
       /// \post for all f in fl: is_system_defined(f)
       /// \note this operation does not invalidate iterators of mappings_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_system_defined_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
@@ -551,7 +537,6 @@ namespace mcrl2 {
       /// \param[in] el A range of equations.
       /// \note this operation does not invalidate iterators of equations_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
         for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
@@ -567,13 +552,25 @@ namespace mcrl2 {
       /// \post for all e in el: is_system_defined(e)
       /// \note this operation does not invalidate iterators of equations_const_range
       template < typename ForwardTraversalIterator >
-      inline
       void add_system_defined_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
         for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
         {
           add_system_defined_equation(*i);
         }
+      }
+
+      /// \brief Normalises a sort expression by following aliases
+      /// TODO finish for container sorts and structured sorts
+      /// \param[in] e a sort expression
+      sort_expression normalise(sort_expression const& e) const
+      {
+        if (e.is_basic_sort())
+        {
+          return find_referenced_sort(e);
+        }
+
+        return e;
       }
 
       /// \brief Follows aliases to the sort expression for which
@@ -609,7 +606,6 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \post s does not occur in this specification.
       /// \note this operation does not invalidate iterators of sorts_const_range, only if they point to the element that is removed
-      inline
       void remove_sort(const sort_expression& s)
       {
         if (is_system_defined(s))
@@ -633,11 +629,15 @@ namespace mcrl2 {
       }
 
       /// \brief Removes alias from specification.
+      /// \post !search_sort(a.name()) && !is_alias(a.name())
       void remove_alias(alias const& a)
       {
+        m_sorts.erase(a.name());
         m_sorts.erase(a); // TODO do aliases need to be part of the set of sorts -- jwulp
 
-        m_aliases_by_sort.erase(a.reference());
+        m_aliases_by_sort.erase(std::find(m_aliases_by_sort.lower_bound(a.reference()),
+                                          m_aliases_by_sort.upper_bound(a.reference()),
+                                      rtl_aliases_map::value_type(a.reference(), a.name())));
         m_aliases_by_name.erase(a.name());
       }
 
@@ -646,7 +646,6 @@ namespace mcrl2 {
       /// \param[in] sl A range of sorts.
       /// \post for all s in sl: s no in sorts()
       template < typename ForwardTraversalIterator >
-      inline
       void remove_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
       {
         for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
@@ -662,7 +661,6 @@ namespace mcrl2 {
       /// \pre f occurs in the specification as constructor.
       /// \post f does not occur as constructor.
       /// \note this operation does not invalidate iterators of constructors_const_range, only if they point to the element that is removed
-      inline
       void remove_constructor(const function_symbol& f)
       {
         constructors_const_range cs(constructors());
@@ -687,7 +685,6 @@ namespace mcrl2 {
       /// \param[in] cl A range of constructors.
       /// \post for all c in cl: c not in constructors()
       template < typename ForwardTraversalIterator >
-      inline
       void remove_constructors(const boost::iterator_range< ForwardTraversalIterator >& cl)
       {
         for (ForwardTraversalIterator i = cl.begin(); i != cl.end(); ++i)
@@ -702,7 +699,6 @@ namespace mcrl2 {
       /// \param[in] f A function.
       /// \post f does not occur as constructor.
       /// \note this operation does not invalidate iterators of mappings_const_range, only if they point to the element that is removed
-      inline
       void remove_mapping(const function_symbol& f)
       {
         if (is_system_defined(f))
@@ -725,7 +721,6 @@ namespace mcrl2 {
       /// \param[in] fl A range of constructors.
       /// \post for all f in fl: f not in mappings()
       template < typename ForwardTraversalIterator >
-      inline
       void remove_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
       {
         for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
@@ -739,7 +734,6 @@ namespace mcrl2 {
       /// \param[in] e An equation.
       /// \post e is removed from this specification.
       /// \note this operation does not invalidate iterators of equations_const_range, only if they point to the element that is removed
-      inline
       void remove_equation(const data_equation& e)
       {
         if (is_system_defined(e))
@@ -754,7 +748,6 @@ namespace mcrl2 {
       /// \param[in] el A range of equations.
       /// \post for all e in el: e not in equations()
       template < typename ForwardTraversalIterator >
-      inline
       void remove_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
       {
         for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
@@ -767,7 +760,6 @@ namespace mcrl2 {
       ///
       /// \param[in] s A sort expression.
       /// \return true iff s is system defined, false otherwise.
-      inline
       bool is_system_defined(const sort_expression& s) const
       {
         return m_sys_sorts.get(s) != atermpp::aterm();
@@ -778,7 +770,6 @@ namespace mcrl2 {
       /// \param[in] f A function symbol.
       /// \return true iff f is system defined (either as constructor or as
       ///      mapping), false otherwise.
-      inline
       bool is_system_defined(const function_symbol& f) const
       {
         return (m_sys_constructors.get(f) != atermpp::aterm() ||
@@ -789,7 +780,6 @@ namespace mcrl2 {
       ///
       /// \param[in] e An equation.
       /// \return true iff e is system defined, false otherwise.
-      inline
       bool is_system_defined(const data_equation& e) const
       {
         return m_sys_equations.get(e) != atermpp::aterm();
@@ -823,7 +813,6 @@ namespace mcrl2 {
       ///
       /// \param[in] s A range of sort expressions
       template < typename ForwardTraversalIterator >
-      inline
       bool is_certainly_finite(const boost::iterator_range< ForwardTraversalIterator >& s) const
       {
         for (ForwardTraversalIterator i = s.begin(); i != s.end(); ++i) {

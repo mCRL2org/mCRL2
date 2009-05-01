@@ -738,17 +738,14 @@ namespace mcrl2 {
       inline
       void add_pos_to_specification(data_specification& specification)
       {
-         if (!specification.search_sort(pos()))
-         {
-           specification.add_system_defined_sort(pos());
-           specification.add_system_defined_constructors(boost::make_iterator_range(pos_generate_constructors_code()));
-           specification.add_system_defined_mappings(boost::make_iterator_range(pos_generate_functions_code()));
-           specification.add_system_defined_equations(boost::make_iterator_range(pos_generate_equations_code()));
-         }
-         if (!specification.search_sort(sort_bool_::bool_()))
+         if (specification.constructors(sort_bool_::bool_()).empty())
          {
            sort_bool_::add_bool__to_specification(specification);
          }
+         specification.add_system_defined_sort(pos());
+         specification.add_system_defined_constructors(boost::make_iterator_range(pos_generate_constructors_code()));
+         specification.add_system_defined_mappings(boost::make_iterator_range(pos_generate_functions_code()));
+         specification.add_system_defined_equations(boost::make_iterator_range(pos_generate_equations_code()));
       }
     } // namespace sort_pos
 

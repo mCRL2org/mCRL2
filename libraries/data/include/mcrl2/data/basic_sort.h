@@ -57,7 +57,7 @@ namespace mcrl2 {
 
         /// \brief Returns the name of this sort.
         inline
-        std::string name()
+        std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }

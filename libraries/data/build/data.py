@@ -1852,7 +1852,7 @@ class specification():
         if e.defines_container():
           dependent_sorts.add("         sort_%s::add_%s_to_specification(specification, element);\n" % (e.original_namespace, e.original_namespace))
         else:
-          result  = "         if (!specification.search_sort(sort_%s::%s()))\n" % (e.original_namespace, e.original_namespace)
+          result  = "         if (specification.constructors(sort_%s::%s()).empty())\n" % (e.original_namespace, e.original_namespace)
           result += "         {\n"
           result += "           sort_%s::add_%s_to_specification(specification);\n" % (e.original_namespace, e.original_namespace)
           result += "         }\n"
@@ -1866,12 +1866,12 @@ class specification():
       code += "      inline\n"
       code += "      void add_%s_to_specification(data_specification& specification, sort_expression const& element)\n" % (self.namespace)
       code += "      {\n"
+      code += string.join(dependent_sorts, "")
+      code += string.join(auxiliary_sorts, "")
       code += "         specification.add_system_defined_sort(%s(element));\n" % (escape(self.namespace))
       code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code(element)));\n" % (self.namespace)
       code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code(element)));\n" % (self.namespace)
       code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code(element)));\n" % (self.namespace)
-      code += string.join(dependent_sorts, "")
-      code += string.join(auxiliary_sorts, "")
       code += "      }\n"
     else:
       code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
@@ -1879,15 +1879,12 @@ class specification():
       code += "      inline\n"
       code += "      void add_%s_to_specification(data_specification& specification)\n" % (self.namespace)
       code += "      {\n"
-      code += "         if (!specification.search_sort(%s()))\n" % (escape(self.namespace))
-      code += "         {\n"
-      code += "           specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
-      code += "           specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code()));\n" % (self.namespace)
-      code += "           specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code()));\n" % (self.namespace)
-      code += "           specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code()));\n" % (self.namespace)
-      code += "         }\n"
       code += string.join(dependent_sorts, "")
       code += string.join(auxiliary_sorts, "")
+      code += "         specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
+      code += "         specification.add_system_defined_constructors(boost::make_iterator_range(%s_generate_constructors_code()));\n" % (self.namespace)
+      code += "         specification.add_system_defined_mappings(boost::make_iterator_range(%s_generate_functions_code()));\n" % (self.namespace)
+      code += "         specification.add_system_defined_equations(boost::make_iterator_range(%s_generate_equations_code()));\n" % (self.namespace)
       code += "      }\n"
     code += "    } // namespace sort_%s\n\n" % (self.namespace)
     code += "  } // namespace data\n\n"

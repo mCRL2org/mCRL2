@@ -252,7 +252,6 @@ namespace data {
                                                                         r != new_equations.end(); ++r) {
 
             if (!m_rewriter->addRewriteRule(*r)) {
-
               throw mcrl2::runtime_error("Could not add rewrite rule! (" + pp(*r) + ")");
             }
           }

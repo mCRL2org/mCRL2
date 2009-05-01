@@ -130,6 +130,7 @@ void test3()
   data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
   data_expression_with_variables z = r(y);
   std::cout << "y = " << core::pp(y) << " " << data::pp(y.variables()) << std::endl;
+  std::cout << "z = " << core::pp(z) << " " << data::pp(z.variables()) << std::endl;
   BOOST_CHECK(z.variables().empty());
 
   std::string var_decl = "m, n: Pos;\n";

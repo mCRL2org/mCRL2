@@ -809,22 +809,22 @@ namespace mcrl2 {
       inline
       void add_list_to_specification(data_specification& specification, sort_expression const& element)
       {
+         if (specification.constructors(sort_nat::nat()).empty())
+         {
+           sort_nat::add_nat_to_specification(specification);
+         }
+         if (specification.constructors(sort_bool_::bool_()).empty())
+         {
+           sort_bool_::add_bool__to_specification(specification);
+         }
+         if (specification.constructors(sort_pos::pos()).empty())
+         {
+           sort_pos::add_pos_to_specification(specification);
+         }
          specification.add_system_defined_sort(list(element));
          specification.add_system_defined_constructors(boost::make_iterator_range(list_generate_constructors_code(element)));
          specification.add_system_defined_mappings(boost::make_iterator_range(list_generate_functions_code(element)));
          specification.add_system_defined_equations(boost::make_iterator_range(list_generate_equations_code(element)));
-         if (!specification.search_sort(sort_nat::nat()))
-         {
-           sort_nat::add_nat_to_specification(specification);
-         }
-         if (!specification.search_sort(sort_bool_::bool_()))
-         {
-           sort_bool_::add_bool__to_specification(specification);
-         }
-         if (!specification.search_sort(sort_pos::pos()))
-         {
-           sort_pos::add_pos_to_specification(specification);
-         }
       }
     } // namespace sort_list
 

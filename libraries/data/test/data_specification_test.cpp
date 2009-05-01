@@ -30,7 +30,7 @@ using namespace mcrl2::data;
 
 bool compare_for_equality(data_specification const& left, data_specification const& right)
 {
-  if (!(left == right) || !(detail::data_specification_to_aterm_data_spec(left) == detail::data_specification_to_aterm_data_spec(right))) {
+  if (!(left == right)) {
     BOOST_CHECK(left == right);
 
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
@@ -42,9 +42,7 @@ bool compare_for_equality(data_specification const& left, data_specification con
     }
     if (left.constructors() != right.constructors()) {
       std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-std::clog << left.constructors() << std::endl;
       std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
-std::clog << right.constructors() << std::endl;
     }
     if (left.mappings() != right.mappings()) {
       std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
@@ -173,7 +171,7 @@ void test_constructors()
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
 
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(spec.constructors() == spec1.constructors());
   BOOST_CHECK(spec.constructors(s) == fgl_range);
   BOOST_CHECK(spec.constructors(s0) == hl_range);
@@ -182,13 +180,13 @@ void test_constructors()
   spec.add_constructor(function_symbol("i", s0));
   function_symbol i("i", s0);
   spec.remove_constructor(i);
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.add_system_defined_constructor(i);
   function_symbol_vector il(make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
   spec1.add_system_defined_constructors(il_range);
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
   BOOST_CHECK(!spec.is_system_defined(g));
@@ -200,7 +198,7 @@ void test_constructors()
 
   spec.remove_constructor(i);
   spec1.remove_constructors(il_range);
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
 void test_functions()
@@ -435,7 +433,7 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
 
-  compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification));
 
   specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
@@ -452,7 +450,7 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
 
-  compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification);
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification));
 }
 
 void test_utility_functionality()
