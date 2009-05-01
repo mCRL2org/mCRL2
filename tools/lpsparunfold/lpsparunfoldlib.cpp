@@ -163,17 +163,17 @@ function_symbol_vector Sorts::determineAffectedMappings(function_symbol_vector k
         if( m_visited.find( *j ) == m_visited.end() )
         {
           m_visited.insert( *j );
-          function_symbol_vector t = m_data_specification.mappings( *j );
-          for( function_symbol_vector::iterator k =  t.begin();
-                                                k != t.end();
-                                                     ++k )
+          for( data_specification::mappings_const_range r(m_data_specification.mappings( *j ));
+                                                !r.empty();
+                                                  r.advance_begin(1) )
           {
-            if( (k->sort()).is_function_sort()  )  
+            if( (r.front().sort()).is_function_sort()  )  
             {
-              boost::iterator_range<sort_expression_list::const_iterator> sel1 = function_sort(k->sort()).domain();
-              if (( std::distance(sel1.begin(), sel1.end()) == 1) && (*(sel1.begin()) == unfoldParameter) )
+              function_sort::domain_const_range domain(function_sort(r.front().sort()).domain());
+
+              if (( domain.size() == 1) && (domain[0] == unfoldParameter) )
               {
-                m.push_back( *k );
+                m.push_back( r.front() );
               }
             }
           } 

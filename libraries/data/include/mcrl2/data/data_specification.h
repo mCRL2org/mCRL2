@@ -351,7 +351,6 @@ namespace mcrl2 {
 
         sort_expression canonical_sort(normalise(s.reference()));
 
-        m_sorts.insert(s.name());
         m_sorts.insert(alias(s.name(), canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
 
         m_aliases_by_name[s.name()] = canonical_sort;

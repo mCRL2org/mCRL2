@@ -283,7 +283,6 @@ namespace mcrl2 {
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
-std::cerr << "CONSTRUCTION IMPORTING " << " (" << *i << ")" << std::endl;
         if (i->is_standard() && constructors(*i).empty()) {
           import_system_defined_sort(*i);
         }

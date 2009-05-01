@@ -20,6 +20,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/join.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/optimized_logic_operators.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
