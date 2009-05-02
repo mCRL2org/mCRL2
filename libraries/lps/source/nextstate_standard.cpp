@@ -19,6 +19,7 @@
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/core/messaging.h"
@@ -372,6 +373,8 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
                 return a;
         }
 
+        mcrl2::data::representative_generator generator(info.m_specification);
+
         if ( ATisList(a) )
         {
                 l = (ATermList) a;
@@ -385,7 +388,8 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
         {
                 if ( ATindexOf(free_vars,a,0) >= 0 )
                 {
-                        return (ATerm) FindDummy(ATAgetArgument((ATermAppl) a,1));
+                        return reinterpret_cast< ATerm >(static_cast< ATermAppl >(
+                                generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));
                 } else {
                         return a;
                 }
@@ -473,7 +477,7 @@ ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList
 }
 
 NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format,
-         enumerator_factory_type const& enumerator_factory) : info(enumerator_factory)
+         enumerator_factory_type const& enumerator_factory) : info(spec.data(), enumerator_factory)
 {
         ATermList l,m,n,free_vars;
 

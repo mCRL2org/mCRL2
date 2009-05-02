@@ -182,6 +182,12 @@ struct legacy_selector
 namespace mcrl2 {
   namespace data {
 
+    // The following specialisations are here as a bridge to use the
+    // classic_enumerator on terms in rewrite format. Actually classic
+    // enumerator was built to function at the level of data expressions, but
+    // since there is an isomorphism between terms in both formats it is
+    // possible to replace only the methods below (since these are the only
+    // onse to make any specific assumptions about the format).
     namespace detail {
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
@@ -213,8 +219,16 @@ namespace mcrl2 {
       bool classic_enumerator_impl< mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
                   legacy_rewriter, legacy_selector >::initialise(std::set< atermpp::aterm_appl > const& v) {
 
+        atermpp::term_list< data::variable > variables;
+
+        // normalise variables
+        for (std::set< atermpp::aterm_appl >::const_iterator i = v.begin(); i != v.end(); ++i)
+        {
+          variables = atermpp::push_front(variables, variable(variable(*i).name(), m_shared_context->m_specification.normalise(variable(*i).sort())));
+        }
+
         m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                    m_shared_context->m_enumerator.findSolutions(convert< atermpp::aterm_list >(v), m_condition, false)));
+                    m_shared_context->m_enumerator.findSolutions(atermpp::reverse(variables), m_condition, false)));
 
         while (increment()) {
           if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) {
@@ -262,6 +276,7 @@ struct ns_info
 
         typedef mcrl2::data::enumerator_factory< enumerator_type > enumerator_factory_type;
 
+        mcrl2::data::data_specification const&       m_specification;
         legacy_enumerator_factory< enumerator_type > m_enumerator_factory;
         legacy_rewriter&                             m_rewriter; // only for translation to/from rewrite format
 
@@ -288,7 +303,9 @@ struct ns_info
           return m_rewriter.translate(term);
         }
 
-        ns_info(mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory) :
+        ns_info(mcrl2::data::data_specification const& specification,
+                mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory) :
+          m_specification(specification),
           m_enumerator_factory(factory),
           m_rewriter(m_enumerator_factory.get_evaluator()) {
 
