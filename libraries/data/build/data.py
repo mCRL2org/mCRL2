@@ -1850,7 +1850,11 @@ class specification():
     for e in self.sort_specification.declarations.elements:
       if e.original_namespace <> self.namespace:
         if e.defines_container():
-          dependent_sorts.add("         sort_%s::add_%s_to_specification(specification, element);\n" % (e.original_namespace, e.original_namespace))
+          result  = "         if (specification.constructors(sort_%s::%s(element)).empty())\n" % (e.original_namespace, e.original_namespace)
+          result += "         {\n"
+          result += "           sort_%s::add_%s_to_specification(specification, element);\n" % (e.original_namespace, e.original_namespace)
+          result += "         }\n"
+          dependent_sorts.add(result)
         else:
           result  = "         if (specification.constructors(sort_%s::%s()).empty())\n" % (e.original_namespace, e.original_namespace)
           result += "         {\n"

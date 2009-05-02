@@ -1133,21 +1133,30 @@ namespace mcrl2 {
       inline
       void add_bag_to_specification(data_specification& specification, sort_expression const& element)
       {
+         if (specification.constructors(sort_fbag::fbag(element)).empty())
+         {
+           sort_fbag::add_fbag_to_specification(specification, element);
+         }
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
            sort_bool_::add_bool__to_specification(specification);
          }
-         sort_set_::add_set__to_specification(specification, element);
          if (specification.constructors(sort_nat::nat()).empty())
          {
            sort_nat::add_nat_to_specification(specification);
          }
-         sort_fbag::add_fbag_to_specification(specification, element);
          if (specification.constructors(sort_pos::pos()).empty())
          {
            sort_pos::add_pos_to_specification(specification);
          }
-         sort_fset::add_fset_to_specification(specification, element);
+         if (specification.constructors(sort_fset::fset(element)).empty())
+         {
+           sort_fset::add_fset_to_specification(specification, element);
+         }
+         if (specification.constructors(sort_set_::set_(element)).empty())
+         {
+           sort_set_::add_set__to_specification(specification, element);
+         }
          specification.add_system_defined_sort(bag(element));
          specification.add_system_defined_constructors(boost::make_iterator_range(bag_generate_constructors_code(element)));
          specification.add_system_defined_mappings(boost::make_iterator_range(bag_generate_functions_code(element)));

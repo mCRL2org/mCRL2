@@ -912,7 +912,10 @@ namespace mcrl2 {
          {
            sort_bool_::add_bool__to_specification(specification);
          }
-         sort_fset::add_fset_to_specification(specification, element);
+         if (specification.constructors(sort_fset::fset(element)).empty())
+         {
+           sort_fset::add_fset_to_specification(specification, element);
+         }
          specification.add_system_defined_sort(set_(element));
          specification.add_system_defined_constructors(boost::make_iterator_range(set__generate_constructors_code(element)));
          specification.add_system_defined_mappings(boost::make_iterator_range(set__generate_functions_code(element)));

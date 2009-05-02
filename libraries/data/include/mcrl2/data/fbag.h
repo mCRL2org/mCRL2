@@ -987,7 +987,10 @@ namespace mcrl2 {
          {
            sort_pos::add_pos_to_specification(specification);
          }
-         sort_fset::add_fset_to_specification(specification, element);
+         if (specification.constructors(sort_fset::fset(element)).empty())
+         {
+           sort_fset::add_fset_to_specification(specification, element);
+         }
          if (specification.constructors(sort_nat::nat()).empty())
          {
            sort_nat::add_nat_to_specification(specification);

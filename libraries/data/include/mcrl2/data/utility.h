@@ -238,7 +238,7 @@ namespace mcrl2 {
     {
       std::set<core::identifier_string> s;
 
-      for (std::set<sort_expression>::const_iterator i = context.begin(); i != context.end(); ++i)
+      for (ForwardTraversalIterator i = context.begin(); i != context.end(); ++i)
       {
         if (i->is_alias())
         {

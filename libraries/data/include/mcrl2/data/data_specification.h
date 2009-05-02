@@ -59,7 +59,7 @@ namespace mcrl2 {
         typedef atermpp::map< basic_sort, sort_expression >           ltr_aliases_map;
 
         /// \brief map from sort expression to names
-        typedef atermpp::multimap< sort_expression, basic_sort >      rtl_aliases_map;
+        typedef std::multimap< sort_expression, basic_sort >          rtl_aliases_map;
 
       private:
 
@@ -358,19 +358,29 @@ namespace mcrl2 {
 
         boost::iterator_range< rtl_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(s.name()));
 
-        for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
-                                                                   j++ != relevant_range.end(); i = j)
-        { // s.name() was known as sort but not as alias, update aliases
-          m_aliases_by_name[i->second] = canonical_sort;
-          m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, i->second));
-          m_aliases_by_sort.erase(i);
+        if (!relevant_range.empty())
+        {
+          // s.name() was known as sort but not as alias, remove standard mappings/equations and update aliases
+          remove_mappings(boost::make_iterator_range(standard_generate_functions_code(s.name())));
+          remove_equations(boost::make_iterator_range(standard_generate_equations_code(s.name())));
 
-          m_sorts.erase(alias(i->second, i->first)); // TODO do aliases need to be part of the set of sorts? -- jwulp
-          m_sorts.insert(alias(i->second, canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+          for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
+                                                                     j++ != relevant_range.end(); i = j)
+          {
+            m_aliases_by_name[i->second] = canonical_sort;
+            m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, i->second));
+            m_aliases_by_sort.erase(i);
+
+            m_sorts.erase(alias(i->second, i->first));        // TODO do aliases need to be part of the set of sorts? -- jwulp
+            m_sorts.insert(alias(i->second, canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+          }
         }
 
-        // Make sure that the sort is also part of the specification
-        add_sort(s.reference());
+        if (s.reference().is_standard())
+        {
+          // Make sure that the sort is also part of the specification
+          add_sort(s.reference());
+        }
       }
 
       /// \brief Adds a constructor to this specification

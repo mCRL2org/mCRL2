@@ -51,7 +51,8 @@ namespace data {
       /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
       expression_type operator()(variable_type const& v) const {
         const_iterator i = m_map.find(v);
-        expression_type t; t=v; // Do not assume existence of a constructor.
+        expression_type t;
+        t=v; // Do not assume existence of a constructor.
         return i == m_map.end() ? t : i->second;
       }
 

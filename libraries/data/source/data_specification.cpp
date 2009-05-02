@@ -196,7 +196,7 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
-    /// \pre m_sorts.find(sort) == m_sorts.empty()
+    /// \pre sort.is_standard()
     void data_specification::import_system_defined_sort(sort_expression const& sort)
     {
       assert(sort.is_standard());
@@ -282,7 +282,8 @@ namespace mcrl2 {
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
-        if (i->is_standard() && constructors(*i).empty()) {
+        if (i->is_standard() && constructors(*i).empty())
+        {
           import_system_defined_sort(*i);
         }
       }
@@ -443,6 +444,7 @@ namespace mcrl2 {
     ///  - specification that includes all system defined information (legacy)
     /// The last type must eventually dissapear but is unfortunately still in
     /// use in a substantial amount of source code.
+    /// Note, all sorts with name prefix @legacy_ are eliminated
     void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     {
       assert(core::detail::check_rule_DataSpec(term));
@@ -452,14 +454,30 @@ namespace mcrl2 {
       atermpp::term_list< function_symbol > term_mappings(atermpp::list_arg1(atermpp::arg3(term)));
       atermpp::term_list< data_equation >   term_equations(atermpp::list_arg1(atermpp::arg4(term)));
 
-      // gather non-system-defined sorts
+      // Maps container unique name to a container sort expression
+      atermpp::map< sort_expression, sort_expression >      renamings;
+
+      // Maps container sort expressions to names
+      atermpp::multimap< sort_expression, sort_expression > other_names;
+
+      // Add sorts and aliases for a container or structured sort
       for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
-        if (i->is_alias() && alias(*i).reference().is_standard())
+        if (i->is_alias())
         {
-          import_system_defined_sort(alias(*i).reference());
+          basic_sort      name(alias(*i).name());
+          sort_expression reference(alias(*i).reference());
 
-          add_alias(*i);
+          if (reference.is_container_sort() || reference.is_structured_sort())
+          {
+            renamings[name] = reference;
+
+            import_system_defined_sort(reference);
+          }
+          else
+          {
+            other_names.insert(std::pair< sort_expression, sort_expression >(reference, name));
+          }
         }
         else if (i->is_standard())
         {
@@ -471,41 +489,21 @@ namespace mcrl2 {
         }
       }
 
-      // gather constructors
-      sort_to_symbol_map functions;
-
-      for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
+      // Step two: Normalise names for container sorts
+      for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
       {
-        functions.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+        if (basic_sort(i->first).name().find("@legacy_") != 0)
+        {
+          std::map< sort_expression, sort_expression > partial_renamings(renamings);
+
+          partial_renamings.erase(i->first);
+
+          add_alias(alias(i->first, atermpp::replace(i->second, make_map_substitution_adapter(partial_renamings))));
+        }
       }
-
-      // Sort expression substitutions for substituting parts of the sorts of expressions
-      atermpp::map< sort_expression, sort_expression > renamings;
-
-      ltr_aliases_map initial_aliases(m_aliases_by_name);
-
-      // replace alias that names the sort under which the sort is implemented
-      for (ltr_aliases_map::const_iterator i = initial_aliases.begin(); i != initial_aliases.end(); ++i)
+      for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
       {
-        if (i->first.name().find("@legacy_") != std::string::npos)
-        {
-          renamings[i->first] = i->second;
-
-          remove_alias(alias(i->first, i->second));
-          remove_sort(i->first);
-        }
-        else if (i->second.is_container_sort() || i->second.is_structured_sort())
-        {
-          renamings[i->first] = i->second;
-
-          // Specification contains equations that depend on the sort so add to the set of sorts
-          if (constructors(i->second).empty())
-          { // re-add sort
-            m_sorts.erase(i->second);
-
-            import_system_defined_sort(i->second);
-          }
-        }
+        add_alias(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(renamings))));
       }
 
       map_substitution_adapter< atermpp::map< sort_expression, sort_expression > > renaming_substitution(renamings);
@@ -532,15 +530,17 @@ namespace mcrl2 {
       {
         m_equations.insert(atermpp::replace(*i, renaming_substitution));
       }
-
-      purge_system_defined();
     }
 
     /// \cond INTERNAL_DOCS
     namespace detail {
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
       {
-        struct local {
+        // Generates names for a specification assuming that no sorts with name prefix @legacy_ exist
+        struct name_generator {
+
+          std::set< basic_sort > m_generated;
+
           static std::string sort_name(const sort_expression& target)
           {
             if (target.is_container_sort())
@@ -554,71 +554,66 @@ namespace mcrl2 {
           }
 
           // \brief find `THE' identifier for a structured sort or container sort
-          static basic_sort find_suitable_identifier(const atermpp::set< sort_expression >& context,
-                                                     const data_specification& specification,
-                                                     const sort_expression& target)
+          basic_sort generate_name(const sort_expression& target)
           {
-             data_specification::aliases_const_range aliases(specification.aliases(target));
-
-             if (!aliases.empty())
-             {
-               for (data_specification::aliases_const_range::const_iterator i(aliases.begin()); i != aliases.end(); ++i)
-               {
-                 if (i->reference() == target)
-                 {
-                   return i->name();
-                 }
-               }
-             }
-
-             return basic_sort(static_cast< std::string >(fresh_identifier(boost::make_iterator_range(context),
+             basic_sort generated(static_cast< std::string >(
+                        fresh_identifier(boost::make_iterator_range(m_generated),
                                         std::string("@legacy_").append(sort_name(target)))));
+
+             m_generated.insert(generated);
+
+             return generated;
           }
-        };
+        } generator;
 
-        typedef atermpp::set< sort_expression > sorts_set;
+        atermpp::set< sort_expression > sorts;
 
-        sorts_set sorts = boost::copy_range< sorts_set >(s.aliases());
+        // Maps container sort expressions to a unique name
+        atermpp::map< sort_expression, sort_expression >      renamings;
 
-        // Sort expression substitutions for substituting parts of the sorts of expressions
-        atermpp::map< sort_expression, sort_expression > renamings;
+        // Maps container sort expressions to names
+        atermpp::multimap< sort_expression, sort_expression > other_names;
 
-        // remove structured sorts and container sorts
+        // Step one: fix a name for all container sorts (legacy requirement)
+        for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
+        {
+          if (renamings.find(r.front().reference()) == renamings.end())
+          {
+            renamings[r.front().reference()] = r.front().name();
+          }
+          else
+          {
+            other_names.insert(std::pair< sort_expression, sort_expression >(r.front().reference(), r.front().name()));
+          }
+        }
+
         for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
         {
-          sort_expression current = r.front();
-
-          if (current.is_container_sort() || current.is_structured_sort())
+          if (r.front().is_container_sort() || r.front().is_structured_sort())
           {
-            basic_sort main_identifier(local::find_suitable_identifier(sorts, s, current));
-
-            // update aliases
-            for (sorts_set::iterator c = sorts.begin(), ca = sorts.begin(); ca++ != sorts.end(); c = ca)
+            if (renamings.find(r.front()) == renamings.end())
             {
-              if (c->is_alias())
-              {
-                alias alias_c(*c);
-
-                if ((alias_c.name() != main_identifier) && (alias_c.reference() == current))
-                {
-                  sorts.insert(alias(alias_c.name(), main_identifier));
-                  sorts.erase(c);
-                }
-              }
+              renamings[r.front()] = generator.generate_name(r.front());
             }
-
-            renamings[current] = main_identifier;
-
-            // erase sort for compatibility with legacy data implementation
-            sorts.erase(current);
-
-            // make sure that an alias exists with the (possibly generated) name
-            sorts.insert(alias(main_identifier, current));
           }
-          else if (!current.is_alias())
-          {
-            sorts.insert(current);
+          else if (!r.front().is_alias())
+          { // incidentally, store in set of sorts
+            sorts.insert(r.front());
           }
+        }
+
+        // Step two: Normalise names for container sorts
+        for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
+        {
+          std::map< sort_expression, sort_expression > partial_renamings(renamings);
+
+          partial_renamings.erase(i->first);
+
+          sorts.insert(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(partial_renamings))));
+        }
+        for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
+        {
+          sorts.insert(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(renamings))));
         }
 
         using namespace core::detail;
