@@ -566,7 +566,7 @@ static ATermList map_ATreverse(ATermList l)
   }
 }
 
-EnumeratorStandard::EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter)
+EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter)
 {
         info.rewr_obj = r;
         clean_up_rewr_obj = clean_up_rewriter;
@@ -574,62 +574,64 @@ EnumeratorStandard::EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool cl
         max_vars = MAX_VARS_INIT;
         info.max_vars = &max_vars;
 
-        info.rewr_true = info.rewr_obj->toRewriteFormat(gsMakeDataExprTrue());
+        info.rewr_true = info.rewr_obj->toRewriteFormat(sort_bool_::true_());
         ATprotect(&info.rewr_true);
-        info.rewr_false = info.rewr_obj->toRewriteFormat(gsMakeDataExprFalse());
+        info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool_::false_());
         ATprotect(&info.rewr_false);
 
         if ( (info.rewr_obj->getStrategy() == GS_REWR_INNER) || (info.rewr_obj->getStrategy() == GS_REWR_INNER_P) )
         {
-                info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
-                info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
-                info.opidAnd = info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd());
-                ATprotect(&info.opidAnd);
-                info.eqs = ATindexedSetCreate(100,50);
-                for (ATermList maps = ATLgetArgument(ATAgetArgument(data_spec,2),0); !ATisEmpty(maps); maps=ATgetNext(maps))
-                {
-                        if ( !strcmp(ATgetName(ATgetAFun(ATgetArgument(ATAgetFirst(maps),0))),"==") )
-                        {
-                                ATbool b;
-                                ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(ATAgetFirst(maps)),&b);
-                        }
-                }
+          info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
+          info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
+          info.opidAnd = info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd());
+          ATprotect(&info.opidAnd);
+          info.eqs = ATindexedSetCreate(100,50);
+          for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
+          {
+            if (r.front().name() == "==")
+            {
+              ATbool b;
+              ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(r.front()),&b);
+            }
+          }
         } else {
-                info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
-                info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
-                info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd()),0);
-                ATprotect(&info.opidAnd);
-                info.eqs = ATindexedSetCreate(100,50);
-                for (ATermList maps = ATLgetArgument(ATAgetArgument(data_spec,2),0); !ATisEmpty(maps); maps=ATgetNext(maps))
-                {
-                        if ( !strcmp(ATgetName(ATgetAFun(ATgetArgument(ATAgetFirst(maps),0))),"==") )
-                        {
-                                ATbool b;
-                                ATindexedSetPut(info.eqs,ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(ATAgetFirst(maps)),0),&b);
-                        }
-                }
+          info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
+          info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
+          info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd()),0);
+          ATprotect(&info.opidAnd);
+          info.eqs = ATindexedSetCreate(100,50);
+          for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
+          {
+            if (r.front().name() == "==")
+            {
+              ATbool b;
+              ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(r.front()),&b);
+            }
+          }
         }
 
         info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
         ATprotectAFun(info.tupAFun);
 
-        info.constructors = ATtableCreate(ATgetLength(ATLgetArgument(ATAgetArgument(data_spec,0),0)),50);
-        for (ATermList sorts=ATLgetArgument(ATAgetArgument(data_spec,0),0); !ATisEmpty(sorts); sorts=ATgetNext(sorts))
+        info.constructors = ATtableCreate(boost::distance(data_spec.sorts()),50);
+        for (data_specification::sorts_const_range r(data_spec.sorts()); !r.empty(); r.advance_begin(1))
         {
-          if (mcrl2::data::sort_expression(ATgetFirst(sorts)).is_alias())
+          sort_expression target((r.front().is_alias()) ? mcrl2::data::alias(r.front()).name() : r.front());
+std::cerr << "PUT" << r.front() << mcrl2::data::pp(data_spec.constructors(target)) << std::endl;
+
+          atermpp::aterm_list constructors;
+
+          for (data_specification::constructors_const_range rc(data_spec.constructors(target)); !rc.empty(); rc.advance_begin(1))
           {
-                ATtablePut(info.constructors,reinterpret_cast< ATerm >(static_cast< ATermAppl >(mcrl2::data::alias(atermpp::aterm_appl(ATgetFirst(sorts))).name())),(ATerm) ATmakeList0());
+            constructors = atermpp::push_front(constructors,
+              atermpp::aterm(ATmakeAppl2(info.tupAFun,
+                reinterpret_cast< ATerm >(static_cast< ATermAppl >(rc.front())),
+                  (ATerm) map_ATreverse(gsGetSortExprDomains(rc.front().sort())))));
           }
-          else
-          {
-                ATtablePut(info.constructors,ATgetFirst(sorts),(ATerm) ATmakeList0());
-          }
-        }
-        for (ATermList conss = ATLgetArgument(ATAgetArgument(data_spec,1),0); !ATisEmpty(conss); conss=ATgetNext(conss))
-        {
-                ATermAppl cons = ATAgetFirst(conss);
-                ATerm sort = (ATerm) gsGetSortExprResult(ATAgetArgument(cons,1));
-                ATtablePut(info.constructors,sort,(ATerm) ATinsert((ATermList) ATtableGet(info.constructors,sort),(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) cons,(ATerm) map_ATreverse(gsGetSortExprDomains(ATAgetArgument(cons,1))))));
+
+          ATtablePut(info.constructors,
+            reinterpret_cast< ATerm >(static_cast< ATermAppl >(target)),
+              reinterpret_cast< ATerm >(static_cast< ATermList >(constructors)));
         }
 }
 
@@ -686,9 +688,20 @@ ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolu
         return r;
 }
 
-Rewriter *EnumeratorStandard::getRewriter()
+Rewriter* EnumeratorStandard::getRewriter()
 {
         return info.rewr_obj;
+}
+
+Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
+{
+	switch ( strategy )
+	{
+		case ENUM_STANDARD:
+			return new EnumeratorStandard(data_spec, r,clean_up_rewriter);
+		default:
+			return NULL;
+	}
 }
     } // namespace detail
   } // namespace data

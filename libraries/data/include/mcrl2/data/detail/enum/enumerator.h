@@ -180,7 +180,7 @@ class Enumerator
  * \param strategy          The strategy to use for solution finding.
  * \return A Enumerator object with the given parameters.
  **/
-Enumerator *createEnumerator(ATermAppl spec, Rewriter *r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
+Enumerator *createEnumerator(mcrl2::data::data_specification const& spec, Rewriter *r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
 
     } // namespace detail
   } // namespace data

@@ -46,7 +46,7 @@ typedef struct {
 class EnumeratorStandard : public Enumerator
 {
 	public:
-		EnumeratorStandard(ATermAppl data_spec, Rewriter *r, bool clean_up_rewriter = false);
+		EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter = false);
 		~EnumeratorStandard();
 
 		ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
@@ -58,8 +58,6 @@ class EnumeratorStandard : public Enumerator
 
 	private:
 		bool clean_up_rewr_obj;
-
-		ATermAppl current_spec;
 
 		enumstd_info info;
 

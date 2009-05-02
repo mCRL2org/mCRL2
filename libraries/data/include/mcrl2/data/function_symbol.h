@@ -83,7 +83,7 @@ namespace mcrl2 {
           return application(*this, e);
         }
 
-        /// \brief Returns the name of the variable.
+        /// \brief Returns the name of the symbol.
         std::string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));

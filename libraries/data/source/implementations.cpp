@@ -5,7 +5,6 @@
 #include "data_reconstruct.cpp"
 #include "data_specification.cpp"
 #include "standard.cpp"
-#include "detail/enumerate/enum.cpp"
 #include "detail/enumerate/enum_standard.cpp"
 
 #undef ATisList
