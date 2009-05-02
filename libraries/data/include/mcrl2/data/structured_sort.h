@@ -183,10 +183,10 @@ namespace mcrl2 {
                                     const std::string& recogniser)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
                                   convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
-                                  atermpp::aterm_string(recogniser)))
+                                  (recogniser.empty()) ? core::detail::gsMakeNil()
+                                               : static_cast< ATermAppl >(atermpp::aterm_string(recogniser))))
         {
           assert(!name.empty());
-          assert(!recogniser.empty());
         }
 
         /// \brief Constructor

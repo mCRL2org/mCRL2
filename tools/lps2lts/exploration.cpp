@@ -108,7 +108,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    lps_specification = lps::specification(remove_unused_data(lps_specification));
+    lps_specification = remove_unused_data(lps_specification);
   }
 
   basefilename = strdup(lgopts->specification.c_str());

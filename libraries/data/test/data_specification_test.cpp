@@ -497,6 +497,35 @@ void test_utility_functionality()
   BOOST_CHECK(spec.mappings(a) == spec.mappings(s));
 }
 
+void test_normalisation()
+{
+  using namespace mcrl2::data;
+  using namespace mcrl2::data::sort_list;
+  using namespace mcrl2::data::sort_set_;
+  using namespace mcrl2::data::sort_bag;
+
+  data_specification specification;
+
+  basic_sort A("A");
+
+  specification.add_sort(A);
+
+  basic_sort L("L");
+  basic_sort S("S");
+  basic_sort B("B");
+
+  specification.add_alias(alias(L, list(A)));
+  specification.add_alias(alias(S, set_(A)));
+  specification.add_alias(alias(B, bag(A)));
+
+  BOOST_CHECK(specification.normalise(L) == list(A));
+  BOOST_CHECK(specification.normalise(list(L)) == list(list(A)));
+  BOOST_CHECK(specification.normalise(S) == set_(A));
+  BOOST_CHECK(specification.normalise(list(S)) == list(set_(A)));
+  BOOST_CHECK(specification.normalise(B) == bag(A));
+  BOOST_CHECK(specification.normalise(list(B)) == list(bag(A)));
+}
+
 void test_copy()
 {
   std::clog << "test_copy" << std::endl;
@@ -537,6 +566,9 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_utility_functionality();
+  core::garbage_collect();
+
+  test_normalisation();
   core::garbage_collect();
 
   test_copy();
