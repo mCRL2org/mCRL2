@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/specification.h"

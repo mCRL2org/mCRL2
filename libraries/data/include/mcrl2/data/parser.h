@@ -29,7 +29,6 @@
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/data/detail/numeric_conversion.h"
 
 namespace mcrl2 {

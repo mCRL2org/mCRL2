@@ -22,7 +22,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/utilities/command_line_interface.h"

@@ -16,7 +16,7 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/detail/data_implementation.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
 

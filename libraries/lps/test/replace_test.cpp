@@ -14,7 +14,7 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parser.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/process.h"

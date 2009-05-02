@@ -27,7 +27,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 
 // //Action rename rules
 // <ActionRenameRules>

@@ -28,7 +28,6 @@
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

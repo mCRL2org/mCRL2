@@ -19,7 +19,6 @@
 #include "mcrl2/lps/process_expression_builder.h"
 #include "mcrl2/lps/detail/linear_process_expression_visitor.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/core/garbage_collection.h"
 
 #include "mcrl2/lps/mcrl22lps.h"

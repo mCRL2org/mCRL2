@@ -19,7 +19,7 @@
 #include "mcrl2/data/detail/prover.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/data/detail/bdd_prover.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/induction.h"
 
 using namespace mcrl2::core;

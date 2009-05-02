@@ -26,7 +26,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/container_utility.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/find.h"
 

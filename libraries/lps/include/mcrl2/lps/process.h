@@ -18,7 +18,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/algorithms.h"
 

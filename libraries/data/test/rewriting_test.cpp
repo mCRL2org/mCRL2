@@ -33,7 +33,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/implement_data_types.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
+#include "mcrl2/data/detail/data_specification.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;

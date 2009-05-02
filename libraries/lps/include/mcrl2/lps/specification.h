@@ -29,7 +29,6 @@
 #include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 namespace mcrl2 {
 

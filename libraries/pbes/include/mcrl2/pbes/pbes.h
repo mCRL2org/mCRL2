@@ -37,7 +37,6 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/data/detail/data_specification_compatibility.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/pbes_initializer.h"
