@@ -617,7 +617,6 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         for (data_specification::sorts_const_range r(data_spec.sorts()); !r.empty(); r.advance_begin(1))
         {
           sort_expression target((r.front().is_alias()) ? mcrl2::data::alias(r.front()).name() : r.front());
-std::cerr << "PUT" << r.front() << mcrl2::data::pp(data_spec.constructors(target)) << std::endl;
 
           atermpp::aterm_list constructors;
 

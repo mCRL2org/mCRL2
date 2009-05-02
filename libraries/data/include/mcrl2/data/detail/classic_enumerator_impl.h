@@ -54,7 +54,7 @@ namespace mcrl2 {
           template < typename Evaluator >
           classic_enumerator_context(data_specification const& specification, Evaluator const& evaluator) :
                     m_specification(specification),
-                    m_enumerator(detail::data_specification_to_aterm_data_spec(specification), &const_cast< detail::Rewriter& >(evaluator.get_rewriter())) {
+                    m_enumerator(specification, &const_cast< detail::Rewriter& >(evaluator.get_rewriter())) {
           }
       };
 
