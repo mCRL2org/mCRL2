@@ -569,18 +569,11 @@ namespace mcrl2 {
         }
       }
 
-      /// \brief Normalises a sort expression by following aliases
+      /// \brief Normalises a sort expression by replacing aliases by sort expressions
       /// TODO finish for container sorts and structured sorts
       /// \param[in] e a sort expression
-      sort_expression normalise(sort_expression const& e) const
-      {
-        if (e.is_basic_sort())
-        {
-          return find_referenced_sort(e);
-        }
-
-        return e;
-      }
+      /// \result normalise(e) = normalise(normalise(e))
+      sort_expression normalise(sort_expression const& e) const;
 
       /// \brief Follows aliases to the sort expression for which
       /// constructors, mappings equations are added

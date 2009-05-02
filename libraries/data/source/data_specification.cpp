@@ -196,6 +196,32 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
+    sort_expression data_specification::normalise(sort_expression const& e) const
+    {
+      if (e.is_basic_sort())
+      {
+        return find_referenced_sort(e);
+      }
+      else if (e.is_function_sort())
+      {
+      }
+      else if (e.is_container_sort())
+      {
+        return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
+      }
+      else if (e.is_structured_sort())
+      {
+        for (structured_sort::constructor_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
+        {
+          for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
+          {
+          }
+        }
+      }
+
+      return e;
+    }
+
     /// \pre sort.is_standard()
     void data_specification::import_system_defined_sort(sort_expression const& sort)
     {
@@ -282,9 +308,14 @@ namespace mcrl2 {
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
-        if (i->is_standard() && constructors(*i).empty())
+        if (i->is_standard())
         {
-          import_system_defined_sort(*i);
+          sort_expression normalised(normalise(*i));
+
+          if (constructors(normalised).empty())
+          {
+            import_system_defined_sort(normalised);
+          }
         }
       }
     }
@@ -498,19 +529,20 @@ namespace mcrl2 {
 
           partial_renamings.erase(i->first);
 
-          add_alias(alias(i->first, atermpp::replace(i->second, make_map_substitution_adapter(partial_renamings))));
+          add_alias(alias(i->first, atermpp::bottom_up_replace(i->second, make_map_substitution_adapter(partial_renamings))));
         }
-      }
-      for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
-      {
-        add_alias(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(renamings))));
       }
 
       map_substitution_adapter< atermpp::map< sort_expression, sort_expression > > renaming_substitution(renamings);
 
+      for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
+      {
+        add_alias(alias(i->second, atermpp::bottom_up_replace(i->first, renaming_substitution)));
+      }
+
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {
-        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
+        function_symbol new_function(atermpp::bottom_up_replace(*i, renaming_substitution));
 
         if (!search_constructor(new_function))
         {
@@ -519,7 +551,7 @@ namespace mcrl2 {
       }
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
       {
-        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
+        function_symbol new_function(atermpp::bottom_up_replace(*i, renaming_substitution));
 
         if (!search_mapping(new_function))
         {
@@ -528,7 +560,7 @@ namespace mcrl2 {
       }
       for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
       {
-        m_equations.insert(atermpp::replace(*i, renaming_substitution));
+        m_equations.insert(atermpp::bottom_up_replace(*i, renaming_substitution));
       }
     }
 
@@ -591,9 +623,11 @@ namespace mcrl2 {
         {
           if (r.front().is_container_sort() || r.front().is_structured_sort())
           {
-            if (renamings.find(r.front()) == renamings.end())
+            sort_expression normalised(r.front());
+
+            if (renamings.find(normalised) == renamings.end())
             {
-              renamings[r.front()] = generator.generate_name(r.front());
+              renamings[normalised] = generator.generate_name(normalised);
             }
           }
           else if (!r.front().is_alias())
@@ -609,20 +643,20 @@ namespace mcrl2 {
 
           partial_renamings.erase(i->first);
 
-          sorts.insert(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(partial_renamings))));
+          sorts.insert(alias(i->second, atermpp::bottom_up_replace(i->first, make_map_substitution_adapter(partial_renamings))));
         }
         for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
         {
-          sorts.insert(alias(i->second, atermpp::replace(i->first, make_map_substitution_adapter(renamings))));
+          sorts.insert(alias(i->second, atermpp::bottom_up_replace(i->first, make_map_substitution_adapter(renamings))));
         }
 
         using namespace core::detail;
 
         return gsMakeDataSpec(
            gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
-           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
-           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
-           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
+           gsMakeConsSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
+           gsMakeMapSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
+           gsMakeDataEqnSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
       }
     } // namespace detail
     /// \endcond

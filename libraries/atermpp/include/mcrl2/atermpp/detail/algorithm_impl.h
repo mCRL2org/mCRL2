@@ -419,14 +419,14 @@ namespace detail {
     if (t.type() == AT_APPL)
     {
       aterm_appl a(t);
-      result = appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f));
+      result = f(appl_apply(a, bottom_up_replace_helpsr<ReplaceFunction>(f)));
     }
     else if (t.type() == AT_LIST)
     {
       aterm_list l(t);
       result = list_apply(l, bottom_up_replace_helpsr<ReplaceFunction>(f));
     }
-    return f(result);
+    return result;
   }
 
   struct default_bottom_up_replace
