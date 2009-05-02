@@ -241,10 +241,10 @@ void test_functions()
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), f) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), g) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s0).begin(), spec.mappings(s0).end(), h) != spec.mappings(s0).end());
-  BOOST_CHECK(spec.mappings() == fghl_range);
+  BOOST_CHECK(convert< std::set< function_symbol > >(spec.mappings()) == convert< std::set< function_symbol > >(fghl_range));
   BOOST_CHECK(spec1.mappings(s) == fgl_range);
   BOOST_CHECK(spec1.mappings(s0) == hl_range);
-  BOOST_CHECK(spec1.mappings() == fghl_range);
+  BOOST_CHECK(convert< std::set< function_symbol > >(spec1.mappings()) == convert< std::set< function_symbol > >(fghl_range));
   BOOST_CHECK(boost::distance(spec1.mappings(s)) == 2);
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), f) != spec1.mappings(s).end());
   BOOST_CHECK(std::find(spec1.mappings(s).begin(), spec1.mappings(s).end(), g) != spec1.mappings(s).end());
