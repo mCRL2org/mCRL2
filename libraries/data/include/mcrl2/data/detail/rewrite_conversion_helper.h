@@ -25,6 +25,7 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
@@ -97,7 +98,7 @@ namespace mcrl2 {
               {
               }
 
-              mcrl2::data::variable operator()(mcrl2::data::sort_expression const& sort)
+              function_symbol operator()(mcrl2::data::sort_expression const& sort)
               {
                 bool carry = true;
 
@@ -116,34 +117,42 @@ namespace mcrl2 {
                   m_current.append("0");
                 }
 
-                return mcrl2::data::variable(m_current, sort);
+                return mcrl2::data::function_symbol(m_current, sort);
               }
-            } variable_generator;
+            } symbol_generator;
 
             data_expression converted(m_implementation_context(expression));
 
-            if (converted != expression)
+            if (converted == expression)
             { // implementation with previously generated function
               atermpp::term_list< variable > bound_variables;
 
               for (lambda::variables_const_range r(expression.variables()); !r.empty(); r.advance_begin(1))
               {
-                atermpp::push_front(bound_variables, variable(r.front().name(), implement(r.front().sort())));
+                bound_variables = atermpp::push_front(bound_variables, variable(r.front().name(), implement(r.front().sort())));
               }
 
               if (!bound_variables.empty())
               { // function with non-empty domain
                 atermpp::aterm_appl body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables(get_free_vars(body));
+                atermpp::term_list< variable > free_variables(convert< atermpp::term_list< variable > >(find_all_free_variables(expression)));
 
-                function_sort   new_function_sort(sort_expression_list(gsGetSorts(free_variables)),
-                         function_sort(sort_expression_list(gsGetSorts(bound_variables)), sort_expression(gsGetSort(body))));
-                function_symbol new_function_symbol(variable_generator(new_function_sort), new_function_sort);
-                application     new_function(application(new_function_symbol, free_variables));
+                function_sort   new_function_sort(sort_expression_list(gsGetSorts(bound_variables)), sort_expression(gsGetSort(body)));
+
+                data_expression new_function(symbol_generator((free_variables.empty()) ? new_function_sort :
+                                      function_sort(sort_expression_list(gsGetSorts(free_variables)), new_function_sort)));
 
                 // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body
-                m_rewriter.addRewriteRule(
-                  data_equation(free_variables + bound_variables, application(new_function, bound_variables),body));
+                if (free_variables.empty())
+                {
+                  m_rewriter.addRewriteRule(
+                    data_equation(bound_variables, application(new_function, bound_variables), body));
+                }
+                else
+                {
+                  m_rewriter.addRewriteRule(
+                    data_equation(free_variables + bound_variables, application(application(new_function, bound_variables), free_variables), body));
+                }
 
                 m_implementation_context[expression]   = new_function;
                 m_reconstruction_context[new_function] = expression;
@@ -292,7 +301,6 @@ namespace mcrl2 {
             // Add rewrite rules (needed only for lambda expressions)
             for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))
             {
-    std::cerr << "RULE " << implement(r.front()) << std::endl;
               if (!m_rewriter.addRewriteRule(implement(r.front())))
               {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");

@@ -236,10 +236,10 @@ void test_replace_with_binders()
 
   sigma[variable("c", sort_bool_::bool_())] = sort_bool_::false_();
 
-  BOOST_CHECK(replace_variables(input1, sigma) == sort_bool_::false_());
+  BOOST_CHECK(replace_free_variables(input1, sigma) == sort_bool_::false_());
 
   // variable c is bound and should not be replaced
-  BOOST_CHECK(replace_variables(input2, sigma) == input2);
+  BOOST_CHECK(replace_free_variables(input2, sigma) == input2);
 }
 
 int test_main(int argc, char** argv)

@@ -389,7 +389,7 @@ namespace data {
       template <typename SubstitutionFunction>
       data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
       {
-        return reconstruct(m_rewriter->rewrite(implement(replace_variables(d, sigma))));
+        return reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma))));
       }
   };
 
@@ -435,7 +435,7 @@ namespace data {
       template <typename SubstitutionFunction>
       data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
       {
-        data_expression t = this->operator()(replace_variables(d, sigma));
+        data_expression t = this->operator()(replace_free_variables(d, sigma));
         std::set<variable> v = find_all_variables(t);
         return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
       }

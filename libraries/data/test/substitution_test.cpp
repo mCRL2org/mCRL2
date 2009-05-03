@@ -34,7 +34,7 @@ data_expression operator*(data_expression const& l, data_expression const& r) {
   return sort_nat::times(l, r);
 }
 
-void test1()
+void test_basic()
 {
   using namespace mcrl2::data::sort_nat;
 
@@ -67,8 +67,21 @@ void test1()
   BOOST_CHECK(s(lambda(x,x)) == lambda(x,x));
   BOOST_CHECK(s(lambda(x,y)) == lambda(x,c));
 
-  BOOST_CHECK(s(lambda(y,y)) == lambda(y,y));
-  BOOST_CHECK(s(application(lambda(y,y),x) + y) == application(lambda(y,y), x) + c);
+  // Replacing free as well as bound variables
+  mutable_substitution< variable, data_expression, textual_substitution > st;
+
+  st[y] = c;
+
+  BOOST_CHECK(st(lambda(y,y)) != lambda(y,y));
+  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
+
+  // Replacing free variables only
+  mutable_substitution< variable, data_expression, structural_substitution > sb;
+
+  sb[y] = c;
+
+  BOOST_CHECK(sb(lambda(y,y)) == lambda(y,y));
+  BOOST_CHECK(sb(application(lambda(y,y),x) + y) == application(lambda(y,y), x) + c);
 }
 
 void test_assignment_list_substitution()
@@ -185,7 +198,7 @@ int test_main(int a, char**aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
 
-  test1();
+  test_basic();
   core::garbage_collect();
 
   test_assignment_list_substitution();

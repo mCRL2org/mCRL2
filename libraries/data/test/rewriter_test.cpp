@@ -93,7 +93,11 @@ void test2()
 {
   using namespace mcrl2::data::sort_nat;
 
-  rewriter r;
+  data_specification data_spec;
+
+  data_spec.import_system_defined_sort(nat());
+
+  rewriter r(data_spec);
   data_expression d1 = parse_data_expression("2+7");
   data_expression d2 = parse_data_expression("4+5");
   BOOST_CHECK(r(d1) == r(d2));
@@ -171,12 +175,12 @@ void parse_substitutions(std::string text, const data_specification &data_spec, 
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2, const data_specification &data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification &data_spec, std::string substitutions)
 {
   mutable_substitution<variable, data_expression> sigma;
   parse_substitutions(substitutions, data_spec, sigma);
-  data_expression d1 = parse_data_expression(expr1, data_spec);
-  data_expression d2 = parse_data_expression(expr2, data_spec);
+  data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
+  data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
   if (R(d1, sigma) != R(d2))
   {
     BOOST_CHECK(R(d1, sigma) != R(d2));
@@ -192,12 +196,13 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, const da
 void test4()
 {
   data_specification data_spec;
+
   data::rewriter R(data_spec);
 
-  std::string expr1 = "exists b: Bool, c: Bool. if(b, c, b)";
+  std::string expr1 = "exists b: Bool. if(b, c, b)";
   std::string expr2 = "true";
   std::string sigma = "c: Bool := false";
-  test_expressions(R, expr1, expr2, data_spec, sigma);
+  test_expressions(R, expr1, expr2, "c: Bool;", data_spec, sigma);
 }
 
 void allocation_test()

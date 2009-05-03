@@ -65,6 +65,8 @@ void bool_rewrite_test() {
 
   data_specification specification;
 
+  specification.import_system_defined_sort(bool_());
+
   data::rewriter R(specification);
 
   data_rewrite_test(R, true_(), true_());
@@ -84,6 +86,8 @@ void pos_rewrite_test() {
   using namespace mcrl2::data::sort_pos;
 
   data_specification specification;
+
+  specification.import_system_defined_sort(pos());
 
   data::rewriter R(specification);
 
@@ -113,6 +117,8 @@ void nat_rewrite_test() {
   using namespace mcrl2::data::sort_nat;
 
   data_specification specification;
+
+  specification.import_system_defined_sort(nat());
 
   data::rewriter R(specification);
 
@@ -175,6 +181,8 @@ void int_rewrite_test() {
 
   data_specification specification;
 
+  specification.import_system_defined_sort(int_());
+
   data::rewriter R(specification);
 
   data_expression p0(int_(0));
@@ -230,6 +238,8 @@ void real_rewrite_test() {
   using namespace mcrl2::data::sort_real_;
 
   data_specification specification;
+
+  specification.import_system_defined_sort(real_());
 
   data::rewriter R(specification);
 
@@ -290,6 +300,8 @@ void list_rewrite_test() {
 
   data_specification specification;
 
+  specification.import_system_defined_sort(list(bool_()));
+
   data::rewriter R(specification);
 
   sort_expression list_bool(list(bool_()));
@@ -317,6 +329,8 @@ void set_rewrite_test() {
   data_specification specification = parse_data_specification(
     "sort A = Set(Nat);"
   );
+
+  specification.import_system_defined_sort(set_(nat()));
 
   data::rewriter R(specification);
 
@@ -360,6 +374,8 @@ void bag_rewrite_test() {
   data_specification specification = parse_data_specification(
     "sort A = Bag(Nat);"
   );
+
+  specification.import_system_defined_sort(bag(nat()));
 
   data::rewriter R(specification);
 

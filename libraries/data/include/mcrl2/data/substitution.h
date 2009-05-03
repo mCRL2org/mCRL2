@@ -54,10 +54,22 @@ namespace mcrl2 {
     }
     /// \endcond
 
-    /// \brief Procedure to be used with substitution to apply textual substitution an expression
-    ///
-    /// Type parameters:
-    ///  \arg Substitution a model of Substitution
+    /* \brief Procedure to be used with substitution to apply immediate textual substitution an expression
+     *
+     * The structure of expressions is completely ignored when doing
+     * replacements. Pay careful attention to the fact that using this
+     * procedure may result in terms that are not valid data expressions.
+     *
+     * The replacements are given by an object of type Substitution.
+     *
+     * Type parameters:
+     *  \arg Substitution a model of Substitution
+     *
+     * Examples: 
+     *  - [x := true, y := false] applied to x && y results in true && false
+     *  - [x := y, y := false] applied to x && y results in y && false
+     *  - [x := true, y := false] applied to lambda x:Bool. x && y results in lambda true:Bool. true && false
+     **/
     template < typename Substitution >
     struct textual_substitution {
       /// Function Arguments:
@@ -69,14 +81,48 @@ namespace mcrl2 {
       }
     };
 
+    /* \brief Procedure to be used with substitution to apply immediate structural substitution an expression
+     *
+     * Structural substitution takes variable binders into account i.e. the
+     * structure of the expression . The procedure is matches capture-avoiding
+     * substitution if the set of replacements only consists of closed
+     * expressions, or if it does contain open expressions but the structure
+     * of the operand is such that replacements do not introduce variables
+     * that get bound.
+     *
+     * The replacements are given by an object of type Substitution. When
+     * replacements cause a variable to be captured an assertion will be triggered.
+     *
+     * Type parameters:
+     *  \arg Substitution a model of Substitution
+     *
+     *  take lambda x:Bool. x && y and [x := true, y != false] the result is lambda true:Bool. true && false
+     *
+     * Examples: 
+     *  - [x := true, y := false] applied to x && y results in true && false
+     *  - [x := y, y := false] applied to x && y results in y && false
+     *  - [x := y, y := false] applied to lambda x:Bool. x && y results in lambda x:Bool. x && false
+     *  - [y := x] applied to lambda x:Bool. x && y results in lambda x:Bool. x && x (invalid input: assertion)
+     **/
+    template < typename Substitution >
+    struct structural_substitution {
+      /// Function Arguments:
+      ///  \param[in] s a substitution object that is only used for variable lookup
+      ///  \param[in] e the expression on which to apply variable replacement according to the substitution
+      /// \return the result of substitution
+      static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
+        return replace_free_variables(e, s);
+      }
+    };
+
     template < typename Variable = data::variable,
                typename Expression = data::data_expression,
-               template < typename Substitution > class SubstitutionProcedure = textual_substitution >
+               template < typename Substitution > class SubstitutionProcedure = structural_substitution >
     class substitution;
 
     template < typename Variable = data::variable,
                typename Expression = data::data_expression,
-               template < typename Substitution > class SubstitutionProcedure = textual_substitution >
+               template < typename Substitution > class SubstitutionProcedure = structural_substitution >
     class mutable_substitution;
 
     /** \brief Generic substitution class (model of Substitution)
@@ -90,9 +136,10 @@ namespace mcrl2 {
      *
      * Model of Substitution.
      *
-     * \note the default substitution procedure is term substitution that does
-     * not take into account binders. In special cases one would typically a
-     * need full-blown capture avoiding substitution procedure.
+     * \note the default substitution procedure is structural that does take
+     * variable binders into account but does not avoid capture. In special
+     * cases one would typically a need full-blown capture avoiding
+     * substitution procedure.
      **/
     template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
     class substitution {

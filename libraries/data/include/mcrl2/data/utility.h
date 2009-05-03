@@ -49,6 +49,7 @@ namespace mcrl2 {
     /// \param c an assignment to apply to the expression
     /// \param e the expression on which to apply the assignment
     /// \return The application of the assignment to the term.
+    /// \deprecated
     template < >
     inline data_expression substitute(assignment const& c, data_expression const& e)
     {
@@ -58,6 +59,7 @@ namespace mcrl2 {
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
     /// \param[in,out] c applies substitution function on elements of container
+    /// \deprecated
     template < typename Expression, typename SubstitutionFunction >
     atermpp::vector< Expression >& substitute(SubstitutionFunction const& f, atermpp::vector< Expression >& c)
     {
@@ -72,6 +74,7 @@ namespace mcrl2 {
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
     /// \param[in,out] c applies substitution function on elements of container
+    /// \deprecated
     template < typename Expression, typename SubstitutionFunction >
     atermpp::term_list< Expression > substitute(SubstitutionFunction const& f, atermpp::term_list< Expression > c)
     {
@@ -90,6 +93,7 @@ namespace mcrl2 {
     /// \param[in] c applies substitution function on elements of container
     /// \return a vector of Expressions, such that the result is the vector of
     ///         elements in c with f applied to them.
+    /// \deprecated
     template < typename Expression, typename SubstitutionFunction >
     atermpp::vector< Expression > substitute(SubstitutionFunction const& f, atermpp::vector< Expression > const& c)
     {
@@ -109,6 +113,7 @@ namespace mcrl2 {
     /// \param[in] c applies substitution function on elements of container
     /// \param[out] o output iterator to which the elements of c with f applied
     ///             to them are added.
+    /// \deprecated
     template < typename Container, typename SubstitutionFunction, typename OutputIterator >
     void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
     {
