@@ -20,6 +20,8 @@ namespace mcrl2 {
 
 namespace lps {
 
+/// \brief Contains multi actions 
+/// \detail Multi actions consist of a list of actions together with an optional time tag.
   class multi_action
   {
     protected:
