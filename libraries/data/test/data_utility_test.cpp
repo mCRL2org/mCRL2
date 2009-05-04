@@ -38,11 +38,11 @@ void test_fresh_variable_generator()
   variable d00("d00", basic_sort("D"));
   data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
 
-  fresh_variable_generator generator(e, d.sort(), "d");
-  variable x = generator();
-  BOOST_CHECK(x == variable("d01", basic_sort("D")));
-  x = generator();
-  BOOST_CHECK(x == variable("d02", basic_sort("D")));
+  fresh_variable_generator generator(e, "d");
+  variable x = generator(d.sort());
+  BOOST_CHECK(x == variable("d1", basic_sort("D")));
+  x = generator(d.sort());
+  BOOST_CHECK(x == variable("d2", basic_sort("D")));
 
   variable a = fresh_variable(e, basic_sort("D"), "d");
   BOOST_CHECK(a == variable("d01", basic_sort("D")));
@@ -62,18 +62,18 @@ void test_fresh_variable_generator()
   x = generator(f);
   BOOST_CHECK(x == variable("f", basic_sort("F")));
   x = generator(f);
-  BOOST_CHECK(x == variable("f00", basic_sort("F")));
+  BOOST_CHECK(x == variable("f0", basic_sort("F")));
 
   atermpp::vector<data_expression> v;
   variable p("p", basic_sort("P"));
   variable q("q", basic_sort("P"));
   v.push_back(p);
   v.push_back(q);
-  std::for_each(v.begin(), v.end(), boost::bind(&fresh_variable_generator::add_to_context<data_expression>, boost::ref(generator), _1));
+  generator.add_to_context(boost::make_iterator_range(v));
   x = generator(p);
-  BOOST_CHECK(x == variable("p00", basic_sort("P")));
+  BOOST_CHECK(x == variable("p0", basic_sort("P")));
   x = generator(q);
-  BOOST_CHECK(x == variable("q00", basic_sort("P")));
+  BOOST_CHECK(x == variable("q0", basic_sort("P")));
 }
 
 void test_fresh_variables()

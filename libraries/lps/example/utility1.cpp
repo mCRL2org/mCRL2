@@ -31,8 +31,9 @@ int main(int argc, char* argv[])
 
   variable d("d:D");
   variable d00("d00:D");
+  variable d0("d0:D");
   variable d02("d02:D");
-  data_expression e = and_(equal_to(d, d00), not_equal_to(d02, d00));
+  data_expression e = and_(equal_to(d0, d00), and_(equal_to(d, d00), not_equal_to(d02, d00)));
 
   // generate two variables that do not appear in the expression e
   variable v = fresh_variable(e, sort_expression("D"), "d");
@@ -41,11 +42,11 @@ int main(int argc, char* argv[])
   assert(v == variable("d03:D"));
 
   // do the same using a fresh_variable_generator
-  fresh_variable_generator generator(e, sort_expression("D"), "d");
+  fresh_variable_generator generator(e, "d");
   v = generator();
-  assert(v == variable("d01:D"));
+  assert(v == variable("d1", basic_sort("D")));
   v = generator();
-  assert(v == variable("d03:D"));
+  assert(v == variable("d3", basic_sort("D")));
 
   // find all identifiers appearing in e
   std::set<identifier_string> ids = core::find_identifiers(e);

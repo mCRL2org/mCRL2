@@ -587,9 +587,9 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   data::variable_list function_arguments;
                   for( data::sort_expression_list::const_iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; ++s )
-                  { variable_generator.set_sort(*s);
+                  {
                     constructor_sorts_found=constructor_sorts_found || data::detail::is_constructorsort(*s,data);
-                    data::variable new_variable=variable_generator();
+                    data::variable new_variable=variable_generator(*s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
@@ -655,10 +655,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
          in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
-      data::fresh_variable_generator variable_generator;
+      data::fresh_variable_generator variable_generator(expr, "x");
       unsigned int no_variables=0;
-      variable_generator.set_context(expr);
-      variable_generator.set_hint("x");
       data::variable_list data_vars;
       atermpp::set < pbes_expression > disjunction_set;
       distribute_or(expr,disjunction_set);
@@ -700,9 +698,9 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   data::variable_list function_arguments;
                   for( data::sort_expression_list::const_iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; ++s )
-                  { variable_generator.set_sort(*s);
+                  {
                     constructor_sorts_found=constructor_sorts_found || data::detail::is_constructorsort(*s,data);
-                    data::variable new_variable=variable_generator();
+                    data::variable new_variable=variable_generator(*s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
                     { std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";

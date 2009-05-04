@@ -48,7 +48,7 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data::variable v = m_generator();
+      data::variable v = m_generator(data::sort_real_::real_());
       summand_ = set_time(summand_, data::data_expression(v));
       data::variable_list V(summand_.summation_variables());
       V = push_front(V, v);
@@ -66,7 +66,7 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
-  data::fresh_variable_generator generator(context, data::sort_real_::real_());
+  data::fresh_variable_generator generator(context);
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
   return set_summands(lps, new_summands);
 }

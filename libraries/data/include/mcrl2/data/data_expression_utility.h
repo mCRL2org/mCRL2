@@ -16,7 +16,6 @@
 #include <vector>
 #include <set>
 
-#include "boost/format.hpp"
 #include "boost/assert.hpp"
 #include "boost/iterator/transform_iterator.hpp"
 
@@ -77,33 +76,81 @@ namespace mcrl2 {
         /// \brief The identifiers of the context.
         atermpp::set<core::identifier_string> m_identifiers;
 
-        /// \brief A sort for the generated variables.
-        sort_expression m_sort;
-
         /// \brief A hint for the name of generated variables.
         std::string m_hint;
 
+        std::string generate(std::string const& hint)
+        {
+          std::string new_name(hint);
+
+          while (m_identifiers.find(new_name) != m_identifiers.end())
+          {
+            bool carry = true;
+
+            for (std::string::reverse_iterator i = new_name.rbegin();
+                         carry && (hint.size() < static_cast< size_t >(new_name.rend() - i)); ++i)
+            {
+              if (*i == '9')
+              {
+                *i = '0';
+              }
+              else
+              {
+               carry = false;
+
+                ++(*i);
+              }
+            }
+
+            if (carry) {
+              new_name.append("0");
+            }
+          }
+
+          m_identifiers.insert(new_name);
+
+          return new_name;
+        }
+
       public:
+
         /// \brief Constructor.
-        fresh_variable_generator()
-         : m_sort(sort_bool_::bool_()), m_hint("t")
+        fresh_variable_generator(std::string const& hint = "t") : m_hint(hint)
         { }
 
         /// \brief Constructor.
-        /// \param context A term
-        /// \param s A sort expression
+        /// \param context data specification that serves as context
         /// \param hint A string
-        template <typename Term>
-        fresh_variable_generator(Term context, sort_expression s = sort_bool_::bool_(), std::string hint = "t")
+        fresh_variable_generator(data_specification const& context, std::string const& hint = "t") :
+          m_identifiers(convert< atermpp::set< core::identifier_string > >(
+                core::find_identifiers(convert< atermpp::aterm_list >(context.equations())))),
+          m_hint(hint)
         {
-          m_identifiers = core::find_identifiers(context);
-          m_hint = hint;
-          m_sort = s;
         }
+
+        /// \brief Constructor.
+        /// \param context container of expressions from which to extract the context
+        /// \param hint A string
+        template < typename ForwardTraversalIterator >
+        fresh_variable_generator(boost::iterator_range< ForwardTraversalIterator > const& context, std::string const& hint = "t") :
+          m_hint(hint)
+        {
+          set_context(context);
+        }
+
+        /// \brief Constructor.
+        /// \param context container of expressions from which to extract the context
+        /// \param hint A string
+        fresh_variable_generator(atermpp::aterm_appl const& context, std::string const& hint = "t") :
+          m_hint(hint)
+        {
+          set_context(context);
+        }
+
 
         /// \brief Set a new hint.
         /// \param hint A string
-        void set_hint(std::string hint)
+        void set_hint(std::string const& hint)
         {
           m_hint = hint;
         }
@@ -116,50 +163,50 @@ namespace mcrl2 {
         }
 
         /// \brief Set a new context.
-        /// \param context A term
-        template <typename Term>
-        void set_context(Term context)
+        /// \param context a range of expressions that will be traversed to find identifiers
+        template < typename ForwardTraversalIterator >
+        void set_context(boost::iterator_range< ForwardTraversalIterator > const& context)
         {
-          m_identifiers = core::find_identifiers(context);
+          m_identifiers = core::find_identifiers(convert< atermpp::aterm_list >(context));
         }
 
-        /// \brief Set a new sort.
-        /// \param s A sort expression
-        void set_sort(sort_expression s)
+        /// \brief Set a new context.
+        /// \param context a range of expressions that will be traversed to find identifiers
+        template < typename Expression >
+        void set_context(Expression const& expression)
         {
-          m_sort = s;
-        }
-
-        /// \brief Returns the current sort.
-        /// \return The current sort.
-        sort_expression sort() const
-        {
-          return m_sort;
+          m_identifiers = core::find_identifiers(expression);
         }
 
         /// \brief Add term t to the context.
-        /// \param t A term
-        template <typename Term>
-        void add_to_context(Term t)
+        /// \param context a range of expressions that will be traversed to find identifiers
+        template < typename ForwardTraversalIterator >
+        void add_to_context(boost::iterator_range< ForwardTraversalIterator > const& context)
         {
-          std::set<core::identifier_string> ids = core::find_identifiers(t);
-          std::copy(ids.begin(), ids.end(), std::inserter(m_identifiers, m_identifiers.end()));
+          for (ForwardTraversalIterator i = context.begin(); i != context.end(); ++i)
+          {
+            std::set<core::identifier_string> ids = core::find_identifiers(*i);
+
+            m_identifiers.insert(ids.begin(), ids.end());
+          }
+        }
+
+        /// \brief Add term t to the context.
+        /// \param context a range of expressions that will be traversed to find identifiers
+        template < typename Expression >
+        void add_to_context(Expression const& expression)
+        {
+          std::set<core::identifier_string> ids = core::find_identifiers(expression);
+
+          m_identifiers.insert(ids.begin(), ids.end());
         }
 
         /// \brief Returns a unique variable of the given sort, with the given hint as prefix.
         /// The returned variable is added to the context.
         /// \return A fresh variable that does not appear in the current context.
-        variable operator()()
+        variable operator()(sort_expression const& s)
         {
-          core::identifier_string id(m_hint);
-          int index = 0;
-          while (m_identifiers.find(id) != m_identifiers.end())
-          {
-            std::string name = str(boost::format(m_hint + "%02d") % index++);
-            id = core::identifier_string(name);
-          }
-          m_identifiers.insert(id);
-          return variable(id, m_sort);
+          return variable(generate(m_hint), s);
         }
 
         /// \brief Returns a unique variable with the same sort as the variable v, and with
@@ -167,18 +214,9 @@ namespace mcrl2 {
         /// \param v A data variable
         /// \return A fresh variable with the same sort as the given variable, and with the name of
         /// the variable as prefix.
-        variable operator()(variable v)
+        variable operator()(variable const& v)
         {
-          std::string hint = v.name();
-          core::identifier_string id(hint);
-          int index = 0;
-          while (m_identifiers.find(id) != m_identifiers.end())
-          {
-            std::string name = str(boost::format(hint + "%02d") % index++);
-            id = core::identifier_string(name);
-          }
-          m_identifiers.insert(id);
-          return variable(id, v.sort());
+          return variable(generate(v.name()), v.sort());
         }
     };
 
@@ -190,14 +228,14 @@ namespace mcrl2 {
     {
       if(f.sort().is_function_sort())
       {
-        fresh_variable_generator generator(context, sort_bool_::bool_(), "x");
+        fresh_variable_generator generator(boost::make_iterator_range(context), "x");
         variable_vector tmp_context = context; // Use vars only once
         function_sort f_sort = static_cast<const function_sort&>(f.sort());
         variable_vector arguments;
         for(function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
         {
           variable v;
-          generator.set_sort(i.front());
+
           for(variable_vector::iterator j = tmp_context.begin(); j != tmp_context.end() && v == variable(); ++j)
           {
             if(j->sort() == i.front())
@@ -210,7 +248,7 @@ namespace mcrl2 {
           // No variable found in context
           if(v == variable())
           {
-            v = generator(); // Make fresh
+            v = generator(i.front()); // Make fresh
           }
           arguments.push_back(v);
         }

@@ -1118,9 +1118,7 @@ inline bool is_inconsistent(
   atermpp::set < variable > basic_variables; 
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
-  fresh_variable_generator fresh_variable;
-  fresh_variable.set_hint("slack_var");
-  fresh_variable.set_sort(sort_real_::real_());
+  fresh_variable_generator fresh_variable("slack_var");
   
   for(std::vector < linear_inequality >::const_iterator i=inequalities_in.begin();
                 i!=inequalities_in.end(); ++i)
@@ -1207,7 +1205,7 @@ inline bool is_inconsistent(
       else
       { // The inequality has more than one variable at the left hand side.
         // We transform it into an equation with a new slack variable.
-        variable new_basic_variable=fresh_variable();
+        variable new_basic_variable=fresh_variable(sort_real_::real_());
         basic_variables.insert(new_basic_variable);
         upperbounds[new_basic_variable]=i->rhs();  
         upperbounds_delta_correction[new_basic_variable]=
