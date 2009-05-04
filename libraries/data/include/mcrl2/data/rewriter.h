@@ -296,7 +296,7 @@ namespace data {
           m_reconstruction_context(other.m_reconstruction_context),
           m_specification(other.m_specification)
 #else
-          m_conversion_helper(other)
+          m_conversion_helper(other.m_conversion_helper)
 #endif
       {
 #ifdef OLD_CONVERSION

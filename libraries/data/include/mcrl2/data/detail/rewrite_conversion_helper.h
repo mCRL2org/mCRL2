@@ -26,6 +26,7 @@
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
@@ -53,7 +54,7 @@ namespace mcrl2 {
           mutable_substitution< data_expression, data_expression > m_implementation_context;
 
           /// \brief after rewriting
-          mutable_substitution< data_expression, data_expression > m_reconstruction_context;
+          atermpp::map< data_expression, data_expression >         m_reconstruction_context;
 
           /// \brief the known sorts
           atermpp::set< sort_expression >                          m_known_sorts;
@@ -76,7 +77,7 @@ namespace mcrl2 {
               }
             }
 
-            return m_specification.normalise(expression);
+            return m_data_specification.normalise(expression);
           }
 
           data_equation implement(data_equation const& equation)
@@ -244,7 +245,7 @@ namespace mcrl2 {
 
           data_expression reconstruct(data_expression const& expression)
           {
-            return atermpp::replace(expression, m_reconstruction_context);
+            return atermpp::replace(expression, make_map_substitution_adapter(m_reconstruction_context));
           }
 
           data_expression implement(data_expression const& expression)
@@ -269,6 +270,7 @@ namespace mcrl2 {
 
           rewrite_conversion_helper(data_specification const& specification,
                                     mcrl2::data::detail::Rewriter& rewriter) :
+                   m_data_specification(specification),
                    m_rewriter(rewriter),
                    m_known_sorts(convert< atermpp::set< sort_expression > >(specification.sorts()))
           {
@@ -289,11 +291,6 @@ namespace mcrl2 {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");
               }
             }
-          }
-
-          rewrite_conversion_helper(data_specification const& specification, mcrl2::data::detail::Rewriter& rewriter) :
-                                         m_data_specification(specification), m_rewriter(rewriter)
-          {
           }
       };
     } // namespace detail

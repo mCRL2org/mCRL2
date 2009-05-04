@@ -28,6 +28,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -283,7 +284,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       }
       //store the result
       if ((m_linearisation_options.end_phase == phNone) && (!m_linearisation_options.pretty)) {
-        mcrl2::lps::specification spec(linearise_std(result, m_linearisation_options));
+        mcrl2::lps::specification spec(
+                     linearise_std(mcrl2::data::detail::internal_format_conversion(result), m_linearisation_options));
         if (m_linearisation_options.outfilename.empty()) 
         { gsVerboseMsg("saving result to stdout...\n");
         } else 
