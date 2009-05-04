@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_PROCESS_H
 #define MCRL2_LPS_PROCESS_H
 
+#include <functional>
+
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
@@ -19,6 +21,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/detail/algorithms.h"
 
@@ -242,6 +245,7 @@ namespace lps {
     ATermAppl result = detail::parse_specification(spec_stream);
     result           = detail::type_check_specification(result);
     result           = detail::alpha_reduce(result);
+    result           = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);
   }
 

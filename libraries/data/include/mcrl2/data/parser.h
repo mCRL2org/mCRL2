@@ -29,7 +29,7 @@
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/numeric_conversion.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 
 namespace mcrl2 {
 
@@ -66,7 +66,7 @@ namespace data {
     if (spec == NULL)
       throw mcrl2::runtime_error("Error while type checking data specification");
     // std::cerr << "SPEC11111 " << spec << "\n";
-    return detail::numeric_conversion(data_specification(spec));
+    return detail::internal_format_conversion(data_specification(spec));
   }
 
   /// \brief Parses a and type checks a data specification.
@@ -115,7 +115,7 @@ namespace data {
                                    Output_iterator i,
                                    const Variable_iterator begin,
                                    const Variable_iterator end,
-                                   const data_specification data_spec = data_specification())
+                                   const data_specification& data_spec = data_specification())
   { // Parse the variables list.
     ATermList data_vars = core::parse_data_vars(text);
     if (data_vars == NULL)
@@ -159,11 +159,11 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
 
   template <typename Output_iterator, typename Variable_iterator>
-  void parse_variables(const std::string &text, 
+  void parse_variables(const std::string &text,
                                    Output_iterator i,
                                    Variable_iterator begin,
                                    Variable_iterator end,
-                                   const data_specification data_spec = data_specification())
+                                   const data_specification& data_spec = data_specification())
   {
     std::stringstream spec_stream;
     spec_stream << text;
@@ -179,7 +179,7 @@ namespace data {
   template <typename Output_iterator>
   void parse_variables(std::istream &text,
                                    Output_iterator i,
-                                   const data_specification data_spec = data_specification())
+                                   const data_specification& data_spec = data_specification())
   { variable_list v_list;
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
   }
@@ -193,7 +193,7 @@ namespace data {
   template <typename Output_iterator>
   void parse_variables(const std::string &text,
                                    Output_iterator i,
-                                   const data_specification data_spec = data_specification())
+                                   const data_specification& data_spec = data_specification())
   { variable_list v_list;
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
   }
@@ -212,7 +212,7 @@ namespace data {
   ///  \return the variable corresponding to the string text.
   inline
   variable parse_variable(std::istream& text,
-                                      const data_specification data_spec = data_specification())
+                                      const data_specification& data_spec = data_specification())
   { atermpp::vector < variable > variable_store;
     std::string str;
     // An ugly way to get the stream in text into str. There should be a better way.
@@ -237,7 +237,7 @@ namespace data {
   ///  \return the variable corresponding to the input istream.
   inline
   variable parse_variable(const std::string& text,
-                                      const data_specification data_spec = data_specification())
+                                      const data_specification& data_spec = data_specification())
   {
     std::stringstream spec_stream;
     spec_stream << text;
@@ -262,7 +262,7 @@ namespace data {
   data_expression parse_data_expression(std::istream &text,
                                         const Variable_iterator begin,
                                         const Variable_iterator end,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   {
     ATermAppl data_expr = core::parse_data_expr(text);
     if (data_expr == NULL)
@@ -279,7 +279,8 @@ namespace data {
                         mcrl2::data::remove_all_system_defined(data_spec)), variables);
     if (data_expr == NULL)
       throw mcrl2::runtime_error("error type checking data expression");
-    return detail::numeric_conversion(data_expression(data_expr));
+    detail::internal_format_conversion_helper converter(data_spec);
+    return converter(data_expression(data_expr));
   }
 
   /// \brief Parses and type checks a data expression.
@@ -294,7 +295,7 @@ namespace data {
   data_expression parse_data_expression(const std::string &text,
                                         const Variable_iterator begin,
                                         const Variable_iterator end,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   {
     std::stringstream spec_stream;
     spec_stream << text;
@@ -308,7 +309,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   data_expression parse_data_expression(std::istream &text,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   { variable_list v_list;
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
@@ -320,7 +321,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   data_expression parse_data_expression(const std::string &text,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   { variable_list v_list;
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
@@ -334,7 +335,7 @@ namespace data {
   inline
   data_expression parse_data_expression(const std::string text,
                                         const std::string var_decl,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   { atermpp::vector < variable > variable_store;
     parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
     return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
@@ -346,7 +347,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   sort_expression parse_sort_expression(std::istream &text,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   {
     ATermAppl sort_expr = core::parse_sort_expr(text);
     if (sort_expr == NULL)
@@ -369,7 +370,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   sort_expression parse_sort_expression(const std::string &text,
-                                        const data_specification data_spec = data_specification())
+                                        const data_specification& data_spec = data_specification())
   {
     std::stringstream spec_stream;
     spec_stream << text;
@@ -407,12 +408,16 @@ namespace data {
       // extract the left hand side of the equation 'x == x'
       std::vector<data_equation> eqn(data_spec.equations().begin(), data_spec.equations().end());
       result = eqn.back().lhs();
+
+      detail::internal_format_conversion_helper converter(data_spec);
+      result = converter(result);
     }
     catch (std::runtime_error e)
     {
       std::cout << "<specification>" << s << std::endl;
       std::cout << e.what() << std::endl;
     }
+
     return result;
   }
 

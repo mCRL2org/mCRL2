@@ -69,7 +69,7 @@ unsigned int log2(unsigned int n)
 ///\return 2^n
 unsigned int powerof2_(unsigned int n)
 {
-  assert(n < sizeof(int));
+  assert(n < (8 * sizeof(unsigned int)));
   return 1 << n;
 }
 
@@ -131,6 +131,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
   {
     n = enumerated_elements.size();
     m = powerof2_(new_parameters.size() - 1);
+
     //m == 2^(new_parameters.size() - 1)
 
     if (m > n)
@@ -176,9 +177,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
   variable_list process_parameters = specification.process().process_parameters();
   gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
 
-  fresh_variable_generator generator = fresh_variable_generator(specification_to_aterm(specification));
-  generator.set_sort(sort_bool_::bool_());
-
+  fresh_variable_generator generator(specification_to_aterm(specification));
   // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
   for (variable_list::iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
   {
@@ -199,6 +198,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
 
       //Calculate the number of booleans needed to encode par
       int n = log2(enumerated_elements.size());
+
       // n = ceil(log_2(j)), so also 2^n <= j
       gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
 
@@ -208,7 +208,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
       //Create new parameters and add them to the parameter list.
       for (int i = 0; i<n; ++i)
       {
-        new_pars = push_front(new_pars, generator());
+        new_pars = push_front(new_pars, generator(sort_bool_::bool_()));
       }
       // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
 

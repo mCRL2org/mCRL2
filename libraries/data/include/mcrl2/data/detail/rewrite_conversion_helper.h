@@ -102,7 +102,7 @@ namespace mcrl2 {
               {
                 bool carry = true;
 
-                for (std::string::iterator i = m_current.begin() + 5; carry && (i != m_current.end()); ++i) {
+                for (std::string::iterator i = m_current.begin() + 7; carry && (i != m_current.end()); ++i) {
                   if (*i == '9') {
                     *i = 'a';
 
@@ -110,6 +110,11 @@ namespace mcrl2 {
                   }
                   else if (*i == 'z') {
                     *i = '0';
+                  }
+                  else {
+                    ++(*i);
+
+                    carry = false;
                   }
                 }
 
@@ -231,27 +236,6 @@ namespace mcrl2 {
             // convert arguments
             atermpp::term_list< data_expression > arguments(implement(expression.arguments()));
 
-            if (expression.is_function_symbol()) {
-              if (expression.head() == gsMakeOpIdNameListEnum())
-              { // convert to snoc list
-                return sort_list::list(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
-              }
-              else if (expression.head() == gsMakeOpIdNameSetEnum())
-              { // convert to finite set
-                return sort_fset::fset(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
-              }
-              else if (expression.head() == gsMakeOpIdNameBagEnum())
-              { // convert to finite bag
-                return sort_fbag::fbag(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
-              }
-            }
-
             return application(implement(expression.head()), boost::make_iterator_range(arguments));
           }
 
@@ -267,10 +251,6 @@ namespace mcrl2 {
             if (expression.is_application())
             {
               return implement(application(expression));
-            }
-            else if (mcrl2::core::detail::gsIsDataExprNumber(expression))
-            { //part is a number; replace by its internal representation (should be obsolete)
-              return number(expression.sort(), atermpp::aterm_appl(expression(0)).function().name());
             }
             else if (expression.is_abstraction())
             {

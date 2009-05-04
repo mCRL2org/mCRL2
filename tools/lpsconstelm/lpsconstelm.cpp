@@ -43,7 +43,6 @@ class lpsconstelm_tool: public squadt_tool<  rewriter_tool<input_output_tool> >
   protected:
 
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
-    //typedef rewriter_tool<input_output_tool> super;
 
   public:
 
@@ -67,7 +66,7 @@ class lpsconstelm_tool: public squadt_tool<  rewriter_tool<input_output_tool> >
 
       mcrl2::data::rewriter data_rewriter(lps_specification.data());
 
-      mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter );
+      mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter);
       r.save(m_output_filename);
       return true;
     }

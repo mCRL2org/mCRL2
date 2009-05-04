@@ -287,7 +287,9 @@ void test_substitutions1()
 {
   std::cout << "<test_substitutions1>" << std::endl;
 
-  data::rewriter  datar;
+  data::data_specification specification;
+  specification.import_system_defined_sort(data::sort_pos::pos());
+  data::rewriter  datar(specification);
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
   data::mutable_substitution<data::variable, data::data_expression_with_variables> sigma;
@@ -318,7 +320,8 @@ void test_map_substitution_adapter(PbesRewriter r)
 void test_substitutions2()
 {
   std::cout << "<test_substitutions2>" << std::endl;
-  data::data_specification data_spec = data::data_specification();
+  data::data_specification data_spec;
+  data_spec.import_system_defined_sort(data::sort_nat::nat());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter datar(data_spec);
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);

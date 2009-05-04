@@ -89,12 +89,6 @@ namespace mcrl2 {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }
 
-        /// \brief Returns true iff this function symbol is a number.
-        bool is_number() const
-        {
-          return core::detail::gsIsSortExprNumeric(*this);
-        }
-
     }; // class function_symbol
 
     /// \brief list of function symbols

@@ -14,6 +14,7 @@
 
 #include <string>
 #include <sstream>
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/detail/algorithms.h"
@@ -35,9 +36,11 @@ namespace lps {
     std::stringstream spec_stream;
     spec_stream << spec;
 
-    ATermAppl result = detail::parse_specification(spec_stream);
+    atermpp::aterm_appl result = detail::parse_specification(spec_stream);
     result           = detail::type_check_specification(result);
     result           = detail::alpha_reduce(result);
+    result           = data::detail::internal_format_conversion(result);
+
     return detail::linearise(result, options);
   }
 

@@ -318,7 +318,7 @@ namespace mcrl2 {
       application list(const sort_expression& s,
                        boost::iterator_range< ForwardTraversalIterator > const& r)
       {
-        return list(s, r.begin(), r.end());
+        return sort_list::list(s, r.begin(), r.end());
       }
     }
 

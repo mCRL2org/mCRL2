@@ -48,6 +48,7 @@ namespace pbes_system {
     if (result == NULL) {
       throw mcrl2::runtime_error("type checking failed");
     }
+    result = data::detail::internal_format_conversion(result);
 
     p = pbes<Container>(result);
     return from;
