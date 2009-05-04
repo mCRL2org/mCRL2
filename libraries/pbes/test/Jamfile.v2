@@ -4,7 +4,6 @@ project libraries/pbes/test
        <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lps
        <source>/libraries//pbes
-       <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
        #<define>MCRL2_WITH_GARBAGE_COLLECTION
