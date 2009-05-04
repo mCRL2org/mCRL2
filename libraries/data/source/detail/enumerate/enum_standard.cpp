@@ -17,6 +17,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/detail/enum/standard.h"
+#include "mcrl2/data/bool.h"
 
 #include "workarounds.h" // DECL_A
 

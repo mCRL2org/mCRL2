@@ -13,6 +13,7 @@
 
 #include <aterm2.h>
 #include <mcrl2/data/detail/rewrite.h>
+#include <mcrl2/data/data_specification.h>
 
 namespace mcrl2 {
   namespace data {
