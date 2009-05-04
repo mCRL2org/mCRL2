@@ -3139,10 +3139,10 @@ void implement_structured_sort_test()
 
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(data::structured_sort_constructor_argument("a0", basic_sort("A")));
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("A"), "a0"));
   arguments.push_back(data::structured_sort_constructor_argument(basic_sort("B")));
-  arguments.push_back(data::structured_sort_constructor_argument("n0", sort_nat::nat()));
-  arguments.push_back(data::structured_sort_constructor_argument("n1", sort_nat::nat()));
+  arguments.push_back(data::structured_sort_constructor_argument(sort_nat::nat(), "n0"));
+  arguments.push_back(data::structured_sort_constructor_argument(sort_nat::nat(), "n1"));
 
   atermpp::vector< data::structured_sort_constructor > constructors;
   // without arguments or recogniser

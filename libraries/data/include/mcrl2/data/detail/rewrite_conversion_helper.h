@@ -43,6 +43,9 @@ namespace mcrl2 {
 
         private:
 
+          /// \brief the known sorts
+          data_specification const&                                m_data_specification;
+
           /// \brief associated rewriter object
           mcrl2::data::detail::Rewriter&                           m_rewriter;
 
@@ -61,7 +64,7 @@ namespace mcrl2 {
           sort_expression implement(sort_expression const& expression)
           {
             if (m_known_sorts.find(expression) == m_known_sorts.end())
-            {
+            { // Temporary measure, add standard rules
               m_known_sorts.insert(expression);
 
               // add equations for standard functions for new sorts
@@ -73,7 +76,7 @@ namespace mcrl2 {
               }
             }
 
-            return expression;
+            return m_specification.normalise(expression);
           }
 
           data_equation implement(data_equation const& equation)
@@ -288,7 +291,8 @@ namespace mcrl2 {
             }
           }
 
-          rewrite_conversion_helper(mcrl2::data::detail::Rewriter& rewriter) : m_rewriter(rewriter)
+          rewrite_conversion_helper(data_specification const& specification, mcrl2::data::detail::Rewriter& rewriter) :
+                                         m_data_specification(specification), m_rewriter(rewriter)
           {
           }
       };

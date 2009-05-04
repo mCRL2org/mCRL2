@@ -229,7 +229,7 @@ namespace mcrl2 {
 
             for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
             {
-              new_arguments.push_back(structured_sort_constructor_argument(ra.front().name(), normalise(ra.front().sort())));
+              new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
             }
 
             new_constructors.push_back(structured_sort_constructor(r.front().name(),
@@ -630,13 +630,15 @@ namespace mcrl2 {
         // Step one: fix a name for all container sorts (legacy requirement)
         for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
         {
-          if (renamings.find(r.front().reference()) == renamings.end())
+          sort_expression reference(s.normalise(r.front().reference()));
+
+          if (renamings.find(reference) == renamings.end())
           {
-            renamings[r.front().reference()] = r.front().name();
+            renamings[reference] = r.front().name();
           }
           else
           {
-            other_names.insert(std::pair< sort_expression, sort_expression >(r.front().reference(), r.front().name()));
+            other_names.insert(std::pair< sort_expression, sort_expression >(reference, r.front().name()));
           }
         }
 
@@ -644,7 +646,7 @@ namespace mcrl2 {
         {
           if (r.front().is_container_sort() || r.front().is_structured_sort())
           {
-            sort_expression normalised(r.front());
+            sort_expression normalised(s.normalise(r.front()));
 
             if (renamings.find(normalised) == renamings.end())
             {

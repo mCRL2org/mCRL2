@@ -71,7 +71,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fbag_empty", "fbag_empty"));
-          constructors.push_back(structured_sort_constructor("@fbag_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument("head", s), structured_sort_constructor_argument("headcount", sort_pos::pos()), structured_sort_constructor_argument("tail", fbag(s)))), "fbag_cons"));
+          constructors.push_back(structured_sort_constructor("@fbag_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(sort_pos::pos(), "headcount"), structured_sort_constructor_argument(fbag(s), "tail"))), "fbag_cons"));
           return structured_sort(constructors);
         }
 

@@ -66,18 +66,13 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \param[in] sort The sort of the argument.
         /// \param[in] name The name of the argument.
-        /// \param[in] sort The sort of the argument.
-        structured_sort_constructor_argument(const std::string& name,
-                                             const sort_expression& sort)
-          : atermpp::aterm_appl(core::detail::gsMakeStructProj(atermpp::aterm_string(name), sort))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] sort The sort of the argument.
-        structured_sort_constructor_argument(const sort_expression& sort)
-          : atermpp::aterm_appl(core::detail::gsMakeStructProj(core::detail::gsMakeNil(), sort))
+        /// The default name, the empty string, signifies that there is no name.
+        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name = "")
+          : atermpp::aterm_appl(core::detail::gsMakeStructProj(
+                  (name.empty()) ? atermpp::aterm_appl(core::detail::gsMakeNil()) :
+                                   atermpp::aterm_appl(atermpp::aterm_string(name)), sort))
         {}
 
         /// \brief Returns the name of the constructor argument.

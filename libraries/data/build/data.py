@@ -1223,7 +1223,7 @@ class structured_sort_declaration():
     assert self.arguments <> None
     code = []
     for a in self.arguments.elements:
-      code += ["structured_sort_constructor_argument(\"%s\", %s)" % (a[1].to_string(), a[0].code(sort_spec))]
+      code += ["structured_sort_constructor_argument(%s, \"%s\")" % (a[0].code(sort_spec), a[1].to_string())]
     return "make_vector(%s)" % (string.join(code, ", "))
 
   def code(self, sort_spec):

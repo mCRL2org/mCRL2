@@ -419,10 +419,10 @@ void structured_sort_rewrite_test() {
 
   atermpp::vector< structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
+  arguments.push_back(structured_sort_constructor_argument(bool_(), "a0"));
   arguments.push_back(structured_sort_constructor_argument(bool_()));
-  arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
-  arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
+  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n0"));
+  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n1"));
 
   atermpp::vector< structured_sort_constructor > constructors;
   // without arguments or recogniser

@@ -89,8 +89,8 @@ namespace data {
       {}
 
       /// \brief Constructor.
-      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
-          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(d), static_cast< detail::RewriteStrategy >(s)))
+      basic_rewriter(strategy s = jitty) :
+          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(data_specification()), static_cast< detail::RewriteStrategy >(s)))
       {}
 
     public:
@@ -289,14 +289,14 @@ namespace data {
 
       /// \brief Constructor.
       /// \param r A rewriter
-      basic_rewriter(basic_rewriter const& r) :
-          basic_rewriter< atermpp::aterm >(r),
+      basic_rewriter(basic_rewriter const& other) :
+          basic_rewriter< atermpp::aterm >(other),
 #ifdef OLD_CONVERSION
-          m_substitution_context(r.m_substitution_context),
-          m_reconstruction_context(r.m_reconstruction_context),
-          m_specification(r.m_specification)
+          m_substitution_context(other.m_substitution_context),
+          m_reconstruction_context(other.m_reconstruction_context),
+          m_specification(other.m_specification)
 #else
-          m_conversion_helper(*m_rewriter)
+          m_conversion_helper(other)
 #endif
       {
 #ifdef OLD_CONVERSION
@@ -309,7 +309,7 @@ namespace data {
       /// \param d A data specification
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
-          basic_rewriter< atermpp::aterm >(data_specification(), s),
+          basic_rewriter< atermpp::aterm >(s),
 #ifdef OLD_CONVERSION
           m_specification(implement(d))
 #else

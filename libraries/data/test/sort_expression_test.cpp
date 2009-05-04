@@ -114,7 +114,7 @@ void structured_sort_test()
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
-  structured_sort_constructor_argument p0("p0", s0);
+  structured_sort_constructor_argument p0(s0, "p0");
   structured_sort_constructor_argument p1(s1);
   BOOST_CHECK(p0.name() == "p0");
   BOOST_CHECK(p1.name() == std::string());

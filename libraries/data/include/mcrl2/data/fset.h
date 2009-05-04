@@ -68,7 +68,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fset_empty", "fset_empty"));
-          constructors.push_back(structured_sort_constructor("@fset_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument("head", s), structured_sort_constructor_argument("tail", fset(s)))), "fset_cons"));
+          constructors.push_back(structured_sort_constructor("@fset_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(fset(s), "tail"))), "fset_cons"));
           return structured_sort(constructors);
         }
 
