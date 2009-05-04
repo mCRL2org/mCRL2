@@ -17,6 +17,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/substitution.h"

@@ -14,7 +14,7 @@
 
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/lps/action.h"
-#include "mcrl2/data/data_expression_utility.h"
+#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2 {
 

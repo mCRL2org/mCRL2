@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/data_expression_utility.h
-/// \brief Provides utilities for working with data expression.
+/// \file mcrl2/data/standard_utility.h
+/// \brief Provides utilities for working with data expressions of standard sorts
 
 #ifndef MCRL2_DATA_DATA_EXPRESSION_STANDARD_UTILITY_H
 #define MCRL2_DATA_DATA_EXPRESSION_STANDARD_UTILITY_H
@@ -17,6 +17,11 @@
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/make_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
+
+#include "mcrl2/core/detail/join.h"
+
+// Workaround for OS X with Apples patched gcc 4.0.1
+#undef nil
 
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -392,6 +397,140 @@ namespace mcrl2 {
         return fbag(s, r.begin(), r.end());
       }
     }
+
+    /// \brief Returns true if the term t is equal to nil
+    inline bool is_nil(atermpp::aterm_appl t)
+    {
+      return t == core::detail::gsMakeNil();
+    }
+
+    /** \brief A collection of utilities for lazy expression construction
+     *
+     * The basic idea is to keep expressions that result from application of
+     * any of the container operations by applying the usual rules of logic.
+     *
+     * For example and(true, x) as in `and' applied to `true' and `x' yields x.
+     **/
+    namespace lazy {
+      /// \brief Returns an expression equivalent to not p
+      /// \param p A data expression
+      /// \return The value <tt>!p</tt>
+      inline data_expression not_(data_expression const& p)
+      {
+        if (p == sort_bool_::true_()) {
+          return sort_bool_::false_();
+        }
+        else if (p == sort_bool_::false_()) {
+          return sort_bool_::true_();
+        }
+
+        return sort_bool_::not_(p);
+      }
+
+      /// \brief Returns an expression equivalent to p and q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value <tt>p && q</tt>
+      inline data_expression or_(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::true_()) || (q == sort_bool_::true_())) {
+          return sort_bool_::true_();
+        }
+        else if ((p == q) || (p == sort_bool_::false_())) {
+          return q;
+        }
+        else if (q == sort_bool_::false_()) {
+          return p;
+        }
+
+        return sort_bool_::or_(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p or q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value p || q
+      inline data_expression and_(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::false_()) || (q == sort_bool_::false_())) {
+          return sort_bool_::false_();
+        }
+        else if ((p == q) || (p == sort_bool_::true_())) {
+          return q;
+        }
+        else if (q == sort_bool_::true_()) {
+          return p;
+        }
+
+        return sort_bool_::and_(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p implies q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value p || q
+      inline data_expression implies(data_expression const& p, data_expression const& q)
+      {
+        if ((p == sort_bool_::false_()) || (q == sort_bool_::true_()) || (p == q)) {
+          return sort_bool_::true_();
+        }
+        else if (p == sort_bool_::true_()) {
+          return q;
+        }
+        else if (q == sort_bool_::false_()) {
+          return sort_bool_::not_(p);
+        }
+
+        return sort_bool_::implies(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p == q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value p == q
+      inline data_expression equal_to(data_expression const& p, data_expression const& q)
+      {
+        if (p == q) {
+          return sort_bool_::true_();
+        }
+
+        return data::equal_to(p, q);
+      }
+
+      /// \brief Returns an expression equivalent to p == q
+      /// \param p A data expression
+      /// \param q A data expression
+      /// \return The value ! p == q
+      inline data_expression not_equal_to(data_expression const& p, data_expression const& q)
+      {
+        if (p == q) {
+          return sort_bool_::false_();
+        }
+
+        return data::not_equal_to(p, q);
+      }
+
+      /// \brief Returns or applied to the sequence of data expressions [first, last)
+      /// \param first Start of a sequence of data expressions
+      /// \param last End of a sequence of data expressions
+      /// \return Or applied to the sequence of data expressions [first, last)
+      template < typename ForwardTraversalIterator >
+      data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
+      {
+        return core::detail::join(first, last, lazy::or_, static_cast< sort_expression const& >(sort_bool_::false_()));
+      }
+
+      /// \brief Returns and applied to the sequence of data expressions [first, last)
+      /// \param first Start of a sequence of data expressions
+      /// \param last End of a sequence of data expressions
+      /// \return And applied to the sequence of data expressions [first, last)
+      template < typename ForwardTraversalIterator >
+      data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
+      {
+        return core::detail::join(first, last, lazy::and_, static_cast< sort_expression const& >(sort_bool_::true_()));
+      }
+    }
+
 
   } // namespace data
 

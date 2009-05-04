@@ -23,6 +23,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/fresh_variable_generator.h"
 #include <algorithm>
 
 namespace mcrl2 {

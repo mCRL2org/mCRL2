@@ -23,6 +23,7 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace mcrl2 {
