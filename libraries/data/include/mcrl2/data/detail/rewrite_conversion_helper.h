@@ -16,7 +16,6 @@
 
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/abstraction.h"
@@ -44,14 +43,14 @@ namespace mcrl2 {
 
         private:
 
-          /// \brief the known sorts
-          data_specification const&                                m_data_specification;
+          /// \brief the known sorts (pointer type to allow assignment)
+          data_specification const*                                m_data_specification;
 
-          /// \brief associated rewriter object
-          mcrl2::data::detail::Rewriter&                           m_rewriter;
+          /// \brief associated rewriter object (pointer type to allow assignment)
+          mcrl2::data::detail::Rewriter*                           m_rewriter;
 
           /// \brief before rewriting
-          mutable_substitution< data_expression, data_expression > m_implementation_context;
+          atermpp::map< data_expression, data_expression >         m_implementation_context;
 
           /// \brief after rewriting
           atermpp::map< data_expression, data_expression >         m_reconstruction_context;
@@ -73,11 +72,11 @@ namespace mcrl2 {
 
               for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
               {
-                m_rewriter.addRewriteRule(implement(*i));
+                m_rewriter->addRewriteRule(implement(*i));
               }
             }
 
-            return m_data_specification.normalise(expression);
+            return m_data_specification->normalise(expression);
           }
 
           data_equation implement(data_equation const& equation)
@@ -130,7 +129,8 @@ namespace mcrl2 {
               }
             } symbol_generator;
 
-            data_expression converted(m_implementation_context(expression));
+            data_expression converted(atermpp::replace(static_cast< atermpp::aterm_appl const& >(expression),
+                                                         make_map_substitution_adapter(m_implementation_context)));
 
             if (converted == expression)
             { // implementation with previously generated function
@@ -154,12 +154,12 @@ namespace mcrl2 {
                 // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body
                 if (free_variables.empty())
                 {
-                  m_rewriter.addRewriteRule(
+                  m_rewriter->addRewriteRule(
                     data_equation(bound_variables, application(new_function, bound_variables), body));
                 }
                 else
                 {
-                  m_rewriter.addRewriteRule(
+                  m_rewriter->addRewriteRule(
                     data_equation(free_variables + bound_variables, application(application(new_function, bound_variables), free_variables), body));
                 }
 
@@ -269,24 +269,15 @@ namespace mcrl2 {
           }
 
           rewrite_conversion_helper(data_specification const& specification,
-                                    mcrl2::data::detail::Rewriter& rewriter) :
-                   m_data_specification(specification),
-                   m_rewriter(rewriter),
+                                    detail::Rewriter& rewriter) :
+                   m_data_specification(&specification),
+                   m_rewriter(&rewriter),
                    m_known_sorts(convert< atermpp::set< sort_expression > >(specification.sorts()))
           {
-            // Use aliases for type normalisation using substitutions
-            for (data_specification::aliases_const_range r(specification.aliases()); !r.empty(); r.advance_begin(1))
-            {
-              m_known_sorts.insert(r.front().name());
-
-              m_implementation_context[r.front().name()] = r.front().reference();
-              m_reconstruction_context[r.front().reference()] = r.front().name();
-            }
-
             // Add rewrite rules (needed only for lambda expressions)
             for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))
             {
-              if (!m_rewriter.addRewriteRule(implement(r.front())))
+              if (!m_rewriter->addRewriteRule(implement(r.front())))
               {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");
               }

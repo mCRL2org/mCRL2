@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
-#define OLD_CONVERSION
+//#define OLD_CONVERSION
 
 #include <functional>
 #include <algorithm>
@@ -272,8 +272,8 @@ namespace data {
 #else
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] expression an expression.
-      template < typename ExpressionOrEquation >
-      data_expression implement(ExpressionOrEquation const& expression) const
+      template < typename Expression >
+      data_expression implement(Expression const& expression) const
       {
         return m_conversion_helper.implement(expression);
       }
@@ -346,12 +346,12 @@ namespace data {
         return *m_rewriter;
       }
 
-      virtual ~basic_rewriter() {
 #ifdef OLD_CONVERSION
+      virtual ~basic_rewriter() {
         m_specification.unprotect();
         m_substitution_context.unprotect();
-#endif
       }
+#endif
   };
 
   /// \brief Rewriter that operates on data expressions.
