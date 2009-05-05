@@ -96,18 +96,22 @@ namespace mcrl2 {
 
           /// Translates contained numeric expressions to their internal representations
           /// Eliminates set/bag comprehension and list enumeration
-          abstraction operator()(abstraction const& expression)
+          data_expression operator()(abstraction const& expression)
           {
             using namespace sort_set_;
             using namespace sort_bag;
 
-            if (core::detail::gsIsSetComp(expression))
+            if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "SetComp")
             {
-              return setcomprehension(set_(expression.variables()[0].sort()), lambda(expression.variables(), expression.body()));
+              sort_expression element_sort((*this)(expression.variables()[0].sort()));
+
+              return setcomprehension(set_(element_sort), lambda(expression.variables(), expression.body()));
             }
-            else if (core::detail::gsIsBagComp(expression))
+            else if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "BagComp")
             {
-              return bagcomprehension(bag(expression.variables()[0].sort()), lambda(expression.variables(), expression.body()));
+              sort_expression element_sort((*this)(expression.variables()[0].sort()));
+
+              return bagcomprehension(bag(element_sort), lambda(expression.variables(), expression.body()));
             }
 
             return abstraction(expression.binding_operator(), expression.variables(), (*this)(expression.body()));
@@ -118,23 +122,27 @@ namespace mcrl2 {
             std::vector< data_expression > arguments((*this)(expression.arguments()));
 
             if (expression.head().is_function_symbol()) {
-              if (expression.head() == core::detail::gsMakeOpIdNameListEnum())
+              function_symbol head(expression.head());
+
+              if (head.name() == "@ListEnum")
               { // convert to snoc list
-                return sort_list::list(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
+                sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
+
+                return sort_list::list(element_sort, boost::make_iterator_range(arguments));
               }
-              else if (expression.head() == core::detail::gsMakeOpIdNameSetEnum())
+              else if (head.name() == "@SetEnum")
               { // convert to finite set
-                return sort_fset::fset(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
+                sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
+
+                return sort_set_::setfset(element_sort,
+                    sort_fset::fset(element_sort, boost::make_iterator_range(arguments)));
               }
-              else if (expression.head() == core::detail::gsMakeOpIdNameBagEnum())
+              else if (head.name() == "@BagEnum")
               { // convert to finite bag
-                return sort_fbag::fbag(
-                  container_sort(function_sort(expression.head().sort()).target_sort()).element_sort(),
-                                                                          boost::make_iterator_range(arguments));
+                sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
+
+                return sort_bag::bagfbag(element_sort,
+                    sort_fbag::fbag(element_sort, boost::make_iterator_range(arguments)));
               }
             }
 
