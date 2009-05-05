@@ -26,7 +26,6 @@ using namespace std;
 // Dynamic array implementations
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY(arr_channel_id);
-WX_DEFINE_OBJARRAY(arr_action_type);
 WX_DEFINE_OBJARRAY(arr_action_reference);
 WX_DEFINE_OBJARRAY(arr_channel_comm);
 WX_DEFINE_OBJARRAY(arr_renamed);
@@ -37,6 +36,7 @@ void grape::mcrl2gen::init_mcrl2libs(int p_argc, char** p_argv)
   MCRL2_ATERM_INIT(p_argc, p_argv);
   gsSetVerboseMsg();
 }
+
 void grape::mcrl2gen::verbose_actions(list_of_action &p_actions)
 {
   for (unsigned int i=0; i<p_actions.GetCount(); ++i)
@@ -62,6 +62,7 @@ void grape::mcrl2gen::verbose_actions(list_of_action &p_actions)
   }
   return;
 }
+
 bool grape::mcrl2gen::is_channel_of_reference(wxXmlNode *p_architecture_diagram, wxString &p_channel_id, wxString &p_reference_id)
 {
   // initialize variables
@@ -160,14 +161,6 @@ list_of_varupdate grape::mcrl2gen::get_process_reference_initialisation(wxXmlNod
     return inits;
   }
 
-/* TODO: remove when not necessary
-    if(inits.GetCount() > 0)
-    {
-      inits = sort_parameters(p_doc_root, p_reference_name, inits, datatype_spec);
-    }
-
-    return inits;
-*/
   return inits;
 }
 
@@ -226,6 +219,7 @@ wxString grape::mcrl2gen::get_state_name(wxXmlNode *p_process_diagram, wxString 
   // nothing found, return emptystring
   return wxEmptyString;
 }
+
 arr_channel_id grape::mcrl2gen::get_reference_channels(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, action_reference &p_reference, ATermAppl &datatype_spec)
 {
   // initialize variables
@@ -285,6 +279,7 @@ wxArrayString grape::mcrl2gen::get_reference_blocked_channels(wxXmlNode *p_archi
   }
   return blockeds;
 }
+
 list_of_action grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_blockeds)
 {
   list_of_action hidden;
@@ -320,6 +315,7 @@ list_of_action grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_a
 
   return hidden;
 }
+
 arr_channel_id grape::mcrl2gen::get_reference_renamed_actions(arr_channel_id &p_channels, wxArrayString &p_blockeds)
 {
   // initialize variables
@@ -434,6 +430,7 @@ arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXm
   }
   return comms;
 }
+
 arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_communications)
 {
   // initialize variables
@@ -543,10 +540,8 @@ arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode *p_doc_
   return ren;
 }
 
-list_of_action grape::mcrl2gen::compact_list_action(list_of_action &p_actions)
+void grape::mcrl2gen::compact_list_action(list_of_action &p_actions, list_of_action &new_actions)
 {
-  list_of_action new_actions;
-
   // compact members
   for (unsigned int i=0; i<p_actions.GetCount(); ++i)
   {
@@ -578,8 +573,6 @@ list_of_action grape::mcrl2gen::compact_list_action(list_of_action &p_actions)
       new_actions.Add(p_actions[i]);
     }
   }
-
-  return new_actions;
 }
 
 bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, wxString &p_diagram_id, bool p_verbose, bool p_save)
@@ -684,9 +677,9 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     arch_to_mcrl2 = arch_in_mcrl2;
     arch_in_mcrl2.Empty();
 
-//TODO: @arcs: first collect actions from proc_refs (done above), then add type to channels (possible channel actions), then collect blocked, hidden, renamed channels
-//             then collect channelcommunications + add type to chan_comms, then collect blocked, hidden, renamed chan_coms
-//             make arch specification
+// @arcs: first collect actions from proc_refs (done above), then add type to channels (possible channel actions), then collect blocked, hidden, renamed channels
+//        then collect channelcommunications + add type to chan_comms, then collect blocked, hidden, renamed chan_coms
+//        make arch specification
 
     // loop through archs 
     while (!arch_to_mcrl2.IsEmpty())
@@ -706,18 +699,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       {
         action ren;
         ren.set_name(renameds[i].m_new.get_name());
-//        cerr << "action added: " << renameds[i].m_new.get_name().ToAscii() << " ";
         ren.set_parameters(renameds[i].m_new.get_parameters());
-/*        for (unsigned int j=0; j<renameds[i].m_new.get_parameters().GetCount(); ++j)
-        {
-          if (j > 0) 
-          {
-            cerr << " # ";
-          }
-          cerr << renameds[i].m_new.get_parameters()[j].get_type().ToAscii();
-        }
-        cerr << endl;
-*/
         actions.Add(ren);
       }
       // add channels
@@ -728,18 +710,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
           wxString ren = refs[i].m_renamed[j].m_channel.get_name() + refs[i].m_renamed[j].m_channel_id;
           action ren_decl;
           ren_decl.set_name( ren );
-//          cerr << "channel action added: " << ren.ToAscii() << " ";
           ren_decl.set_parameters( refs[i].m_renamed[j].m_channel.get_parameters() );
-/*          for (unsigned int k=0; k<refs[i].m_renamed[j].m_channel.get_parameters().GetCount(); ++k)
-          {
-            if (k > 0)
-            {
-              cerr << " # ";
-            }
-            cerr << refs[i].m_renamed[j].m_channel.get_parameters()[k].get_type().ToAscii();
-          }
-          cerr << endl;
-*/
           actions.Add(ren_decl);
         }
       }
@@ -788,7 +759,9 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     }
 
     // remove duplicate actions
-    actions = compact_list_action(actions);
+    list_of_action new_actions;
+    compact_list_action(actions, new_actions);
+    actions = new_actions;
 
     // construct general expressions
     wxString dat_spec = datatype_specification_mcrl2(doc_root);
@@ -911,6 +884,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
   cerr << "+mCRL2 conversion successful." << endl;
   return true;
 }
+
 bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, wxString &p_diagram_id, list_of_decl_init &p_parameters_init, bool p_verbose, bool p_save)
 {
   try
@@ -1107,7 +1081,9 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   architecture_diagram_mcrl2_actions(p_doc_root, diagram, p_refs, datatype_spec);
   for (unsigned int i=0; i<p_refs.GetCount(); ++i)
   {
-    p_refs[i].m_actions = compact_list_action(p_refs[i].m_actions);
+    list_of_action new_actions;
+    compact_list_action(p_refs[i].m_actions, new_actions);
+    p_refs[i].m_actions = new_actions;
   }
 
   if (p_verbose)
@@ -1430,7 +1406,6 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
     {
       for (unsigned int j=0; j<p_channel_comms[i].m_channels.GetCount(); ++j)
       {
-    //    if((i > 0) || ((i == 0) && (j > 0)))
         bool found = false;
         for (unsigned int k=j+1; k<p_channel_comms[i].m_channels.GetCount(); ++k)
         {
@@ -1655,6 +1630,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   p_spec.Add(spec);
   return;
 }
+
 void grape::mcrl2gen::process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_diagram_id, wxArrayString &p_sort_expressions, list_of_action &p_actions, wxArrayString &p_internal_specs, wxArrayString &p_specs, ATermAppl &datatype_spec, bool p_verbose)
 {
   // initialize variables
@@ -1714,45 +1690,7 @@ void grape::mcrl2gen::process_diagram_mcrl2(wxXmlNode *p_doc_root, wxString &p_d
   }
 
   // add new unique actions to p_actions
-  // TODO: make function
-  for (unsigned int i=0; i<acts.GetCount(); ++i)
-  {
-    bool found = false;
-    for (unsigned int j=0; j<p_actions.GetCount(); ++j)
-    {
-	    if ( acts[i].get_name() == p_actions[j].get_name() )
-	    {
-	      if ( acts[i].get_parameters().GetCount() == p_actions[j].get_parameters().GetCount() )
-	      {
-		      if ( acts[i].get_parameters().GetCount() == 0 )
-		      {
-		        found = true;
-            break;
-		      }
-		      else
-		      {
-		        list_of_dataexpression acts_params = acts[i].get_parameters();
-		        list_of_dataexpression actions_params = p_actions[j].get_parameters();
-            found = true;
-            unsigned int k = 0;
-            while ( found && k < acts_params.GetCount() )
-		        {
-              found = acts_params[k].get_type() == actions_params[k].get_type();
-              ++k;
-		        }
-            if (found)
-            {
-              break;
-            }
-		      }
-	      }
-      }
-    }
-    if (!found)
-    {
-	    p_actions.Add(acts[i]);
-    }
-  }
+  compact_list_action(acts, p_actions);
 
   // construct state sort expression
   wxString diagram_sort = process_diagram_mcrl2_sort(diagram);
@@ -1827,6 +1765,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_sort(wxXmlNode *p_process_diagra
 
   return sort_struct_expr;
 }
+
 wxString grape::mcrl2gen::process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   // construct the first part of the declaration
@@ -1936,6 +1875,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_proc(wxXmlNode *p_process_diagra
 
   return proc_decl;
 }
+
 wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNode *p_transition, bool p_alternative, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   // initialize variables
@@ -2059,6 +1999,7 @@ wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNo
   }
   return decl_transition;
 }
+
 wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, bool p_alternative, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   // initialize variables
@@ -2090,7 +2031,6 @@ wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXm
   if (ref_inits.GetCount() > 0)
   {
     decl_transition_reference += _T("(");
-//TODO: remove when not neccasary    ref_inits = sort_parameters(p_doc_root, ref_name, ref_inits, datatype_spec);
     for (unsigned int i=0; i<ref_inits.GetCount(); ++i)
     {
       if(i > 0)
@@ -2122,6 +2062,7 @@ wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXm
 
   return decl_transition_reference;
 }
+
 wxString grape::mcrl2gen::initial_designator_mcrl2(wxXmlNode *p_process_diagram)
 {
   // initialize variables
@@ -2139,6 +2080,7 @@ wxString grape::mcrl2gen::initial_designator_mcrl2(wxXmlNode *p_process_diagram)
   }
   return des_name;
 }
+
 wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxString &p_diagram_name, list_of_decl_init &p_parameter_init, ATermAppl &datatype_spec)
 {
   wxString init_decl = wxEmptyString;
@@ -2149,7 +2091,6 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxSt
     init_decl += _T("(");
 
     // sort parameter initialisation and print to init declaration
-// TODO: remove when not necassary    list_of_decl_init decls = sort_parameters(p_doc_root, p_diagram_name, p_parameter_init, datatype_spec);
     list_of_decl_init decls = p_parameter_init;
     for(unsigned int i=0; i<decls.GetCount(); ++i)
     {
@@ -2164,6 +2105,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_init(wxXmlNode *p_doc_root, wxSt
   init_decl += _T(";");
   return init_decl;
 }
+
 void grape::mcrl2gen::architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_possibles, ATermAppl &datatype_spec)
 {
   // initialize variables
@@ -2241,9 +2183,9 @@ void grape::mcrl2gen::convert_spaces_node(wxXmlNode *p_node)
   wxString name = p_node->GetNodeContent();
   name.Replace(_T(" "), _T("_"));
   wxXmlNode *val = p_node->GetChildren();
-  //delete val;
   val = new wxXmlNode(p_node, wxXML_TEXT_NODE, _T("value"), name);
 }
+
 void grape::mcrl2gen::convert_spaces(wxXmlDocument &p_spec)
 {
   wxXmlNode *root_node = p_spec.GetRoot();
@@ -2285,28 +2227,6 @@ void grape::mcrl2gen::convert_spaces(wxXmlDocument &p_spec)
     for(wxXmlNode *diagram = archs->GetChildren(); diagram != 0; diagram = diagram->GetNext())
     {
       convert_spaces_node(get_child(diagram, _T("name")));
-
-      wxXmlNode *objects = get_child(diagram, _T("objectlist"));
-      if(objects != 0)
-      {
-        wxXmlNode *visibles = get_child(objects, _T("visiblelist"));
-        if(visibles != 0)
-        {
-          for(wxXmlNode *visible = visibles->GetChildren(); visible != 0; visible = visible->GetNext())
-          {
-            convert_spaces_node(get_child(visible, _T("name")));
-          }
-        }
-        wxXmlNode *channels = get_child(objects, _T("channellist"));
-        if(channels != 0)
-        {
-          for(wxXmlNode *channel = channels->GetChildren(); channel != 0; channel = channel->GetNext())
-          {
-            convert_spaces_node(get_child(channel, _T("name")));
-          }
-        }
-      }
     }
-
   }
 }

@@ -94,7 +94,7 @@ void channel_communication::detach_channel( channel* p_channel )
   for ( int i = 0; i < count; ++i )
   {
     communication &comm = m_communication.Item( i );
-    if ( comm.get_channel() == p_channel )
+    if ( &comm != 0 && comm.get_channel() == p_channel )
     {
       communication* del_comm = m_communication.Detach( i );
       delete del_comm;

@@ -703,8 +703,8 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   glEnd();
 
   // keep angle between 0..pi
-  while (angle_middle < 0.0f) angle_middle += M_PI;
-  while (angle_middle >= M_PI) angle_middle -= M_PI;
+  while (angle_middle < 0.0f) angle_middle += static_cast<float> ( M_PI );
+  while (angle_middle >= M_PI) angle_middle -= static_cast<float> ( M_PI );
   
   // align text
   Alignment align_horizontal = al_center;
@@ -805,9 +805,9 @@ void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, co
   midpoint.m_x = ( end_coord.m_x + p_begin.m_x ) * 0.5;
   midpoint.m_y = ( end_coord.m_y + p_begin.m_y ) * 0.5;
     
-  angle += M_PI*0.5f;
-  while (angle < 0.0f) angle += 2.0f*M_PI;
-  while (angle >= 2.0f*M_PI) angle -= 2.0f*M_PI;
+  angle += static_cast<float> ( M_PI*0.5f );
+  while (angle < 0.0f) angle += static_cast<float> ( 2.0f*M_PI );
+  while (angle >= 2.0f*M_PI) angle -= static_cast<float> ( 2.0f*M_PI );
   
   // align text
   Alignment align_horizontal = al_right;

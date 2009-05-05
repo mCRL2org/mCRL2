@@ -65,7 +65,8 @@ void visualchannel_communication::draw( void )
   // only find empty position if there is text
   if (rename_to != _T("")) 
   {
-    float rotation[comm->count_channel()+1];
+    static float* rotation = 0;
+    rotation = new float[(comm->count_channel()+1)];
     
     //store all angles in the array
     for ( unsigned int i = 0; i < comm->count_channel(); ++i )
@@ -92,8 +93,8 @@ void visualchannel_communication::draw( void )
     }
     // calculate the actual angle
     float empty_rotation = (rotation[gap_index+1]+rotation[gap_index])*0.5;    
-    while (empty_rotation < 0.0f) empty_rotation += 2.0f*M_PI;
-    while (empty_rotation >= 2.0f*M_PI) empty_rotation -= 2.0f*M_PI;
+    while (empty_rotation < 0.0f) empty_rotation += static_cast<float> ( 2.0f*M_PI );
+    while (empty_rotation >= 2.0f*M_PI) empty_rotation -= static_cast<float> ( 2.0f*M_PI );
     
     
     // align text
@@ -109,6 +110,9 @@ void visualchannel_communication::draw( void )
     
     // draw text 
     grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.05f*cos(empty_rotation), y + 0.025f + 0.05f*sin(empty_rotation), 0.0015f, align_horizontal, align_vertical);   
+    if (rotation != 0) {
+      delete rotation;
+    }
   }
 }
 
