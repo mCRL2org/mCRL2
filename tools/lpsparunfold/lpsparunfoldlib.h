@@ -67,8 +67,8 @@ class Sorts
     mcrl2::data::data_expression_vector unfoldConstructor( mcrl2::data::data_expression de, mcrl2::data::function_symbol_vector AffectedMappings, mcrl2::data::function_symbol Detmap);
     mcrl2::data::basic_sort getSortOfProcessParameter(int parameter_at_index);
     std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
-    void deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss );
-    mcrl2::data::structured_sort complete_structured_sort(mcrl2::data::structured_sort s );
+//    void deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss );
+//    mcrl2::data::structured_sort complete_structured_sort(mcrl2::data::structured_sort s );
 };
 
 

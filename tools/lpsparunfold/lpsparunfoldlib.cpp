@@ -13,13 +13,6 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_specification.h"
-/*#include "mcrl2/data/nat.h"
-#include "mcrl2/data/parser.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/detail/sort_utility.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/identifier_generator.h" */
-
 
 using namespace std;
 using namespace mcrl2;
@@ -34,49 +27,17 @@ using namespace mcrl2::data;
 
 Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_process const& lps)
 {
-
+  gsDebugMsg("Preprocessing\n");
   m_data_specification = s;
   m_lps = lps;
   for (data_specification::sorts_const_range::const_iterator i =  s.sorts().begin();
                                                              i != s.sorts().end();
                                                              ++i){
-    cout << *i << endl;
-
     if (i->is_basic_sort()) {
+      gsDebugMsg("\t Found sort: %s\n", basic_sort( *i ).name().c_str() );
       sort_names.insert( (basic_sort(*i)).name() );
-    }
-
-    if (i->is_alias())
-    {
-      sort_names.insert( (alias( *i ).name()).name());
-      sort_expression x = m_data_specification.find_referenced_sort( (alias( *i ).name())  );
-      if (x.is_basic_sort())
-        sort_names.insert( basic_sort(m_data_specification.find_referenced_sort( *i)).name() );
-    }
-
-    if (i->is_structured_sort()) {
-  
-            structured_sort comp_ss = complete_structured_sort(structured_sort( *i ));
-
-            function_symbol_vector fs1 = mcrl2::data::structured_sort( *i ).projection_functions( );
-            function_symbol_vector fs2 = mcrl2::data::structured_sort( *i ).recogniser_functions( );
-            data_equation_vector   dev = mcrl2::data::structured_sort( *i ).constructor_equations( );
-          
-            for( function_symbol_vector::iterator k = fs1.begin(); k != fs1.end(); ++k )
-            {
-              mapSet.insert( *k );
-            }
-
-            for( function_symbol_vector::iterator k = fs2.begin(); k != fs2.end(); ++k )
-            {
-              mapSet.insert( *k );
-            }
-
-/*            for( data_equation_vector::iterator k = dev.begin(); k != dev.end(); ++k )
-            {
-              mapSet.insert( *k );
-            }
-*/
+    } else {
+      assert(false);
     }
   };
 
@@ -104,92 +65,93 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
     gsVerboseMsg("Specification has %d mappings \n", mapSet.size() );
   }
 };
-mcrl2::data::structured_sort Sorts::complete_structured_sort(mcrl2::data::structured_sort s )
-{
-  using namespace mcrl2::data;
 
-  cout << mcrl2::data::pp( s.constructor_functions() ) << endl; 
+//mcrl2::data::structured_sort Sorts::complete_structured_sort(mcrl2::data::structured_sort s )
+//{
+//  using namespace mcrl2::data;
+//
+//  cout << mcrl2::data::pp( s.constructor_functions() ) << endl; 
+//
+//  function_symbol_vector constructor_functions = s.constructor_functions();
+//  
+//  for(function_symbol_vector::iterator i = constructor_functions.begin()
+//                                     ; i != constructor_functions.end()
+//                                     ; ++i
+//  )
+//  {
+//    cout << endl;
+//    cout << *i << endl;
+//    cout << i-> name() << "++"<<i->sort() << endl;
+//
+//    // Dit is voor genereren constructor functions
+//    if (i->sort().is_structured_sort() )
+//    {
+//      cout << "s_sort" << endl;
+//      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(i->sort() ).struct_constructors();
+//      for(structured_sort::constructor_const_range::iterator j = sc.begin()
+//                                                           ; j != sc.end()
+//                                                           ; ++j
+//      )
+//      {
+//        if ( i->name() == j->name() )
+//        {
+//          cout << "name" << j -> name() << endl;
+//          cout << "args  " << j->arguments() << endl;
+///*          function_symbol_vector fsv = j->projection_functions( *j );
+//          for( function_symbol_vector::iterator k =  fsv.begin()
+//                                              ; k != fsv.end()
+//                                              ; ++k
+//          )
+//          {
+//            cout << "--" << j->arguments()  << endl;
+//          }
+//*/
+//          cout << "rec " << j->recogniser_function( *j ) << endl;
+//        }
+//      }
+//    }
+//
+//    if (i->sort().is_function_sort())
+//    {
+//// complete_structured_sort( structured_sort( function_sort(i->sort()).codomain() ) );
+//      cout << "f_sort" << endl;
+//      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(structured_sort( function_sort(i->sort()).codomain() ) ).struct_constructors();
+//      for(structured_sort::constructor_const_range::iterator j = sc.begin()
+//                                                           ; j != sc.end()
+//                                                           ; ++j
+//      )
+//      {
+//        if ( i->name() == j->name() )
+//        {
+//          cout << "name" << j -> name() << endl;
+//          cout << "args  " << j->arguments() << endl;
+//          structured_sort_constructor::arguments_const_range args = j->arguments();
+//          for( structured_sort_constructor::arguments_const_range::iterator k =  args.begin()
+//                                              ; k != args.end()
+//                                              ; ++k
+//          )
+//          {
+//            cout << "-->" << *k  << endl;
+//          }
+//          cout << "rec " << j->recogniser_function( *j ) << endl;
+//        }
+//      }
+//    }
+//
+//  }
+// 
+//  structured_sort result;
+// 
+//
+//  return result; 
+//
+//}
 
-  function_symbol_vector constructor_functions = s.constructor_functions();
-  
-  for(function_symbol_vector::iterator i = constructor_functions.begin()
-                                     ; i != constructor_functions.end()
-                                     ; ++i
-  )
-  {
-    cout << endl;
-    cout << *i << endl;
-    cout << i-> name() << "++"<<i->sort() << endl;
-
-    // Dit is voor genereren constructor functions
-    if (i->sort().is_structured_sort() )
-    {
-      cout << "s_sort" << endl;
-      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(i->sort() ).struct_constructors();
-      for(structured_sort::constructor_const_range::iterator j = sc.begin()
-                                                           ; j != sc.end()
-                                                           ; ++j
-      )
-      {
-        if ( i->name() == j->name() )
-        {
-          cout << "name" << j -> name() << endl;
-          cout << "args  " << j->arguments() << endl;
-/*          function_symbol_vector fsv = j->projection_functions( *j );
-          for( function_symbol_vector::iterator k =  fsv.begin()
-                                              ; k != fsv.end()
-                                              ; ++k
-          )
-          {
-            cout << "--" << j->arguments()  << endl;
-          }
-*/
-          cout << "rec " << j->recogniser_function( *j ) << endl;
-        }
-      }
-    }
-
-    if (i->sort().is_function_sort())
-    {
-// complete_structured_sort( structured_sort( function_sort(i->sort()).codomain() ) );
-      cout << "f_sort" << endl;
-      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(structured_sort( function_sort(i->sort()).codomain() ) ).struct_constructors();
-      for(structured_sort::constructor_const_range::iterator j = sc.begin()
-                                                           ; j != sc.end()
-                                                           ; ++j
-      )
-      {
-        if ( i->name() == j->name() )
-        {
-          cout << "name" << j -> name() << endl;
-          cout << "args  " << j->arguments() << endl;
-          structured_sort_constructor::arguments_const_range args = j->arguments();
-          for( structured_sort_constructor::arguments_const_range::iterator k =  args.begin()
-                                              ; k != args.end()
-                                              ; ++k
-          )
-          {
-            cout << "-->" << *k  << endl;
-          }
-          cout << "rec " << j->recogniser_function( *j ) << endl;
-        }
-      }
-    }
-
-  }
- 
-  structured_sort result;
- 
-
-  return result; 
-
-}
-
-void Sorts::deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss )
-{
-
-  return;
-}
+//void Sorts::deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss )
+//{
+//
+//  return;
+//}
 
 mcrl2::data::basic_sort Sorts::generateFreshSort( std::string str )
 {
@@ -486,6 +448,8 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
       /* Equations for projection functions */
       int f = 0;
       for(function_symbol_vector::iterator j = pi.begin(); j != pi.end(); ++j){
+        //cout << mcrl2::data::pp(dal) << endl;
+      
         data_expression lhs = application( *j, mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
         gsDebugMsg("\tAdded \"pi\" equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
         del.push_back( data_equation( lhs, dal[f] ) );
@@ -545,20 +509,15 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
        gsDebugMsg("\t");
        gsVerboseMsg("Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( sort_new ).c_str());
 
-       for(mcrl2::data::function_symbol_vector::iterator j = AffectedConstructors.begin()
-                                                ; j != AffectedConstructors.end()
+       for(mcrl2::data::function_symbol_vector::iterator j = AffectedMappings.begin()
+                                                ; j != AffectedMappings.end()
                                                 ; ++j )
        {
          bool processed = false;
          if (j -> sort().is_function_sort())
          {
-           function_sort::domain_range dom = function_sort( j -> sort() ). domain();
-           for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
-           {
-             mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name());
-             process_parameters_injection.push_back( mcrl2::data::variable( idstr , *n ) );
-             gsDebugMsg("\tCreated process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( *n ).c_str());
-           }
+           mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name()); 
+           process_parameters_injection.push_back( mcrl2::data::variable( idstr , function_sort( j -> sort() ). codomain() ) );
            processed = true;
          }
 
@@ -585,10 +544,6 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
    }
    gsDebugMsg("\t");
    gsVerboseMsg("New LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
-   /* Ambiguity
-        utility.h std::string mcrl2::data::pp(const Container&, typename boost::enable_if<typename mcrl2::data::detail::is_container<T>::type, void>::type*) [with Container = mcrl2::data::variable_vector]
-        print.h:  std::string mcrl2::core::pp(Term, mcrl2::core::t_pp_format) [with Term = atermpp::vector<mcrl2::data::variable, std::allocator<mcrl2::data::variable> >]
-   */
 
   /* Reconstruct summands */
   /* NOTE: list has no push_back function */
@@ -663,7 +618,6 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
     }
 
     //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
-
     //cout << mcrl2::data::pp(new_ass_left)  << endl;
     //cout << mcrl2::data::pp(new_ass_right)  << endl;
    
