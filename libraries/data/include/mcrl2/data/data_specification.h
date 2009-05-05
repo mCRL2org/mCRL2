@@ -713,8 +713,8 @@ namespace mcrl2 {
         sort_to_symbol_map::iterator i =
                 std::find(r.begin(), r.end(), sort_to_symbol_map::value_type(f.sort().target_sort(), f));
 
-        if (i != m_constructors.end()) {
-          m_constructors.erase(i);
+        if (i != m_mappings.end()) {
+          m_mappings.erase(i);
         }
       }
 
