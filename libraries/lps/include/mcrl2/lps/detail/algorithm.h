@@ -23,7 +23,6 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
 namespace mcrl2 {
@@ -34,11 +33,12 @@ namespace detail {
 
 /// \brief Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.
+template <typename IdentifierGenerator>
 struct make_timed_lps_summand
 {
-  data::fresh_variable_generator& m_generator;
+  IdentifierGenerator& m_generator;
 
-  make_timed_lps_summand(data::fresh_variable_generator& generator)
+  make_timed_lps_summand(IdentifierGenerator& generator)
     : m_generator(generator)
   {}
 
@@ -49,7 +49,7 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data::variable v = m_generator(data::sort_real_::real_());
+      data::variable v(m_generator("T"), data::sort_real_::real_());
       summand_ = set_time(summand_, data::data_expression(v));
       data::variable_list V(summand_.summation_variables());
       V = push_front(V, v);
@@ -67,8 +67,8 @@ struct make_timed_lps_summand
 inline
 linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
 {
-  data::fresh_variable_generator generator(context);
-  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand(generator));
+  data::set_identifier_generator generator(context);
+  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand<data::set_identifier_generator>(generator));
   return set_summands(lps, new_summands);
 }
 

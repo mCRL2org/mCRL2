@@ -41,13 +41,6 @@ int main(int argc, char* argv[])
   v = fresh_variable(make_list(e, v), sort_expression("D"), "d");
   assert(v == variable("d03:D"));
 
-  // do the same using a fresh_variable_generator
-  fresh_variable_generator generator(e, "d");
-  v = generator();
-  assert(v == variable("d1", basic_sort("D")));
-  v = generator();
-  assert(v == variable("d3", basic_sort("D")));
-
   // find all identifiers appearing in e
   std::set<identifier_string> ids = core::find_identifiers(e);
   assert(ids.size() == 8);
