@@ -38,7 +38,7 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
       sort_names.insert( (basic_sort(*i)).name() );
     } else {
       cerr << *i << endl;
-      assert(false);
+     // assert(false);
     }
   };
 
@@ -192,70 +192,70 @@ function_symbol_vector Sorts::determineAffectedConstructors()
   return k;
 }
 
-function_symbol_vector Sorts::determineAffectedMappings(function_symbol_vector k)
-{
-  using namespace mcrl2::data;
-
-  function_symbol_vector m;
-  set< sort_expression > m_visited;
-
-  for( function_symbol_vector::iterator i  = k.begin();
-                                        i != k.end();
-                                        ++i){
-    if( i->sort().is_function_sort() )
-    {
-      function_sort fs = function_sort(i->sort());
-
-      boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
-      for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
-      {
-         /* Following 'if' statement avoids re-determination of affected mappings for function sorts */
-        if( m_visited.find( *j ) == m_visited.end() )
-        {
-          m_visited.insert( *j );
-          for( data_specification::mappings_const_range r(m_data_specification.mappings( *j ));
-                                                !r.empty();
-                                                  r.advance_begin(1) )
-          {
-            if( (r.front().sort()).is_function_sort()  )  
-            {
-              function_sort::domain_const_range domain(function_sort(r.front().sort()).domain());
-
-              if (( domain.size() == 1) && (domain[0] == unfoldParameter) )
-              {
-                m.push_back( r.front() );
-              }
-            }
-          } 
-        }
-      }
-    }
-    if( i ->sort().is_structured_sort() )
-    {
-     //  function_symbol_vector proj_func = mcrl2::data::structured_sort( *i ).projection_functions( );
-
-      abort();
-
-      //cout << "xxx"<< mcrl2::data::pp(structured_sort(*i).constructor_functions()) << endl;
-
-      std::string prefix = "ss_pi_";
-      mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
-      m.push_back( function_symbol( fresh_name , function_sort( sort_new, *i ) ) );
-      gsDebugMsg("\t%s\n", function_symbol( fresh_name , sort_new ).to_string().c_str() );
-      mapping_and_constructor_names.insert(fresh_name);
-     // function_symbol_vector recq_func = mcrl2::data::structured_sort( *i ).recogniser_functions( );
-    }
-  }
- 
-  gsDebugMsg("m:\t");
-  gsVerboseMsg("%s has %d mapping function(s)\n", unfoldParameter.name().c_str() , m.size() );
-  for( function_symbol_vector::iterator i = m.begin(); i != m.end(); ++i )
-  {
-    gsDebugMsg( "\t%s\n", i->to_string().c_str() );
-  }
-
-  return m;
-}
+//function_symbol_vector Sorts::determineAffectedMappings(function_symbol_vector k)
+//{
+//  using namespace mcrl2::data;
+//
+//  function_symbol_vector m;
+//  set< sort_expression > m_visited;
+//
+//  for( function_symbol_vector::iterator i  = k.begin();
+//                                        i != k.end();
+//                                        ++i){
+//    if( i->sort().is_function_sort() )
+//    {
+//      function_sort fs = function_sort(i->sort());
+//
+//      boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
+//      for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
+//      {
+//         /* Following 'if' statement avoids re-determination of affected mappings for function sorts */
+//        if( m_visited.find( *j ) == m_visited.end() )
+//        {
+//          m_visited.insert( *j );
+//          for( data_specification::mappings_const_range r(m_data_specification.mappings( *j ));
+//                                                !r.empty();
+//                                                  r.advance_begin(1) )
+//          {
+//            if( (r.front().sort()).is_function_sort()  )  
+//            {
+//              function_sort::domain_const_range domain(function_sort(r.front().sort()).domain());
+//
+//              if (( domain.size() == 1) && (domain[0] == unfoldParameter) )
+//              {
+//                m.push_back( r.front() );
+//              }
+//            }
+//          } 
+//        }
+//      }
+//    }
+//    if( i ->sort().is_structured_sort() )
+//    {
+//     //  function_symbol_vector proj_func = mcrl2::data::structured_sort( *i ).projection_functions( );
+//
+//      abort();
+//
+//      //cout << "xxx"<< mcrl2::data::pp(structured_sort(*i).constructor_functions()) << endl;
+//
+//      std::string prefix = "ss_pi_";
+//      mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
+//      m.push_back( function_symbol( fresh_name , function_sort( sort_new, *i ) ) );
+//      gsDebugMsg("\t%s\n", function_symbol( fresh_name , sort_new ).to_string().c_str() );
+//      mapping_and_constructor_names.insert(fresh_name);
+//     // function_symbol_vector recq_func = mcrl2::data::structured_sort( *i ).recogniser_functions( );
+//    }
+//  }
+// 
+//  gsDebugMsg("m:\t");
+//  gsVerboseMsg("%s has %d mapping function(s)\n", unfoldParameter.name().c_str() , m.size() );
+//  for( function_symbol_vector::iterator i = m.begin(); i != m.end(); ++i )
+//  {
+//    gsDebugMsg( "\t%s\n", i->to_string().c_str() );
+//  }
+//
+//  return m;
+//}
 
 
 function_symbol_vector Sorts::newSorts( mcrl2::data::function_symbol_vector k )
@@ -559,10 +559,11 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
   mcrl2::lps::summand_vector new_summands;
 
 
+  //Prepare variable substitution
+  //std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> varsub = variableSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
+
   //Prepare parameter substitution
   std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameterSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
-  //Prepare variable substitution
-  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> varsub = variableSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
 
   mcrl2::lps::summand_list s = m_lps.summands();
   for(mcrl2::lps::summand_list::iterator j = s.begin()
@@ -607,20 +608,21 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
         mcrl2::data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedConstructors, Detmap, pi );
         //Replace unfold parameters in affected assignments
-        mcrl2::data::data_expression_vector new_ins;
+/*        mcrl2::data::data_expression_vector new_ins;
         for( std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
                                                                                                   ; i != parsub.end()
-                                                                                                  ; ++i)
-        {
+                                                                                                  ; ++i) 
+        { 
           for(mcrl2::data::data_expression_vector::iterator l = ins.begin()
                                                               ; l != ins.end()
                                                               ; ++l )
           {
             new_ins.push_back(replace(*l, i->first, i->second ));
           } 
-        }
+        } */
+//        new_ass_right.insert(new_ass_right.end(), new_ins.begin(), new_ins.end());
 
-        new_ass_right.insert(new_ass_right.end(), new_ins.begin(), new_ins.end());
+        new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
       } else {
         new_ass_right.push_back( k-> rhs() );
       }
@@ -640,8 +642,8 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
     }
 
     mcrl2::lps::summand new_summand = set_assignments( *j, mcrl2::data::assignment_list( new_ass.begin(), new_ass.end() ) );
-    for( std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = varsub.begin()
-                                                                                              ; i != varsub.end()
+    for( std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
+                                                                                              ; i != parsub.end()
                                                                                               ; ++i)
     {
       new_summand = atermpp::replace( new_summand, i->first , i->second );
@@ -657,47 +659,48 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
   return;
 
 }
-std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
-{
-   std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
-   data_expression de;
-   set<mcrl2::data::variable_vector::iterator> used_iters;
 
-   for(std::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
-      ; i != proc_par_to_proc_par_inj.end()
-      ; ++i)
-   {
-     for( mcrl2::data::function_symbol_vector::iterator m = AffectedConstructors.begin()
-                                                    ; m != AffectedConstructors.end()
-                                                    ; ++m )
-     {
-       if (m -> sort().is_function_sort())
-       {
-         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
-         data_expression_vector arg;
-
-         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
-         {
-           for (mcrl2::data::variable_vector::iterator o = i->second.begin()
-                                              ; o != i->second.end()
-                                              ; ++o)
-           {
-             if (o -> sort() == *n && used_iters.find(o) == used_iters.end() )
-             {
-               used_iters.insert( o );
-               arg.push_back( *o );
-               break;
-             }
-           }
-         }
-         de = mcrl2::data::application( *m, arg ) ;
-       }
-     }
-     gsVerboseMsg( "variable substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( de ).c_str());
-     result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  de ) );
-   }
-  return result ;
-}
+//std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
+//{
+//   std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
+//   data_expression de;
+//   set<mcrl2::data::variable_vector::iterator> used_iters;
+//
+//   for(std::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
+//      ; i != proc_par_to_proc_par_inj.end()
+//      ; ++i)
+//   {
+//     for( mcrl2::data::function_symbol_vector::iterator m = AffectedConstructors.begin()
+//                                                    ; m != AffectedConstructors.end()
+//                                                    ; ++m )
+//     {
+//       if (m -> sort().is_function_sort())
+//       {
+//         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
+//         data_expression_vector arg;
+//
+//         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
+//         {
+//           for (mcrl2::data::variable_vector::iterator o = i->second.begin()
+//                                              ; o != i->second.end()
+//                                              ; ++o)
+//           {
+//             if (o -> sort() == *n && used_iters.find(o) == used_iters.end() )
+//             {
+//               used_iters.insert( o );
+//               arg.push_back( *o );
+//               break;
+//             }
+//           }
+//         }
+//         de = mcrl2::data::application( *m, arg ) ;
+//       }
+//     }
+//     gsVerboseMsg( "variable substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( de ).c_str());
+//     result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  de ) );
+//   }
+//  return result ;
+//}
 
 std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
 {
@@ -749,6 +752,7 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::para
          dev.push_back( mcrl2::data::application( *m, arg ) );
        }
      }
+     gsDebugMsg("");
      gsVerboseMsg( "parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( Cmap, dev  ) ).c_str());
      result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( Cmap, dev ) ) );
    }

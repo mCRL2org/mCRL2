@@ -47,7 +47,7 @@ class Sorts
     std::pair< mcrl2::data::variable_vector , mcrl2::data::data_equation_vector > createFunctionSection(mcrl2::data::function_symbol_vector pi, mcrl2::data::function_symbol Cmap, mcrl2::data::function_symbol_vector set_of_new_sorts,mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol Detmap);
 
     mcrl2::data::function_symbol_vector determineAffectedConstructors();
-    mcrl2::data::function_symbol_vector determineAffectedMappings( mcrl2::data::function_symbol_vector k );
+//    mcrl2::data::function_symbol_vector determineAffectedMappings( mcrl2::data::function_symbol_vector k );
     mcrl2::data::function_symbol_vector newSorts( mcrl2::data::function_symbol_vector k );
     std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
     std::set<mcrl2::core::identifier_string> sort_names;
@@ -66,7 +66,7 @@ class Sorts
     std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
     mcrl2::data::data_expression_vector unfoldConstructor( mcrl2::data::data_expression de, mcrl2::data::function_symbol_vector AffectedMappings, mcrl2::data::function_symbol Detmap, mcrl2::data::function_symbol_vector pi );
     mcrl2::data::basic_sort getSortOfProcessParameter(int parameter_at_index);
-    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
+//    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
 //    void deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss );
 //    mcrl2::data::structured_sort complete_structured_sort(mcrl2::data::structured_sort s );
 };
