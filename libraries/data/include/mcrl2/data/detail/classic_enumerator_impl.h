@@ -117,7 +117,7 @@ namespace mcrl2 {
 
             local converter(m_evaluator);
 
-            // Apply translation to variables
+            // Apply translation (effectively type normalisation) to variables
             atermpp::aterm_list variables;
 
             for (typename std::set< variable_type >::const_iterator i = v.begin(); i != v.end(); ++i) {

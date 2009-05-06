@@ -101,20 +101,22 @@ namespace mcrl2 {
             using namespace sort_set_;
             using namespace sort_bag;
 
+            variable_list bound_variables = convert< variable_list >((*this)(expression.variables()));
+
             if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "SetComp")
             {
               sort_expression element_sort((*this)(expression.variables()[0].sort()));
 
-              return setcomprehension(set_(element_sort), lambda(expression.variables(), expression.body()));
+              return setcomprehension(set_(element_sort), lambda(bound_variables, (*this)(expression.body())));
             }
             else if (atermpp::function_symbol(atermpp::arg1(expression).function()).name() == "BagComp")
             {
               sort_expression element_sort((*this)(expression.variables()[0].sort()));
 
-              return bagcomprehension(bag(element_sort), lambda(expression.variables(), expression.body()));
+              return bagcomprehension(bag(element_sort), lambda(bound_variables, (*this)(expression.body())));
             }
 
-            return abstraction(expression.binding_operator(), expression.variables(), (*this)(expression.body()));
+            return abstraction(expression.binding_operator(), bound_variables, (*this)(expression.body()));
           }
 
           application operator()(application const& expression)
@@ -216,7 +218,7 @@ namespace mcrl2 {
             {
               return (*this)(data_expression(term));
             }
-            if (is_sort_expression(term))
+            else if (is_sort_expression(term))
             {
               return m_data_specification.normalise(sort_expression(term));
             }

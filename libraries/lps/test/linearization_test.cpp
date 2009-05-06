@@ -425,6 +425,20 @@ void test_large_specification()
   specification model = mcrl22lps(MODEL);
 }
 
+void test_lambda()
+{
+  lps::specification s(mcrl22lps(
+    "map select : (Nat -> Bool) # List(Nat) -> List(Nat);\n"
+    "var f : Nat -> Bool;\n"
+    "    x : Nat;\n"
+    "    xs : List(Nat);\n"
+    "eqn select(f,[]) = [];\n"
+    "    select(f,x|>xs) = if(f(x), x|>sxs, sxs) whr sxs = select(f, xs) end;\n"
+    "act a : Nat;\n"
+    "init sum n : Nat.\n"
+    "  (n in select(lambda x : Nat.x mod 2 == 0, [1, 2, 3])) -> a(n).delta;\n"));
+}
+
 int test_main(int argc, char** argv )
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -436,6 +450,8 @@ int test_main(int argc, char** argv )
   test_process_assignments();
   core::garbage_collect();
   test_large_specification();
+  core::garbage_collect();
+  test_lambda();
   core::garbage_collect();
 
   return 0;

@@ -132,7 +132,7 @@ namespace mcrl2 {
             data_expression converted(atermpp::replace(static_cast< atermpp::aterm_appl const& >(expression),
                                                          make_map_substitution_adapter(m_implementation_context)));
 
-            if (converted == expression)
+            if (converted.is_abstraction())
             { // implementation with previously generated function
               atermpp::term_list< variable > bound_variables;
 
@@ -154,13 +154,13 @@ namespace mcrl2 {
                 // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body
                 if (free_variables.empty())
                 {
-                  m_rewriter->addRewriteRule(
-                    data_equation(bound_variables, application(new_function, bound_variables), body));
+                  m_rewriter->addRewriteRule(data_equation(bound_variables, application(new_function, bound_variables), body));
                 }
                 else
                 {
-                  m_rewriter->addRewriteRule(
-                    data_equation(free_variables + bound_variables, application(application(new_function, bound_variables), free_variables), body));
+                  new_function = application(new_function, free_variables);
+
+                  m_rewriter->addRewriteRule(data_equation(free_variables + bound_variables, application(new_function, bound_variables), body));
                 }
 
                 m_implementation_context[expression]   = new_function;
@@ -169,7 +169,7 @@ namespace mcrl2 {
                 return new_function;
               }
 
-              return expression.body();
+              return implement(expression.body());
             }
 
             return converted;
@@ -210,12 +210,12 @@ namespace mcrl2 {
 
             for (where_clause::declarations_const_range r(expression.declarations()); !r.empty(); r.advance_begin(1))
             {
-              variables.push_back(implement(r.front().lhs()));
+              variables.push_back(r.front().lhs());
               arguments.push_back(implement(r.front().rhs()));
             }
 
             return (variables.empty()) ? implement(expression.body()) :
-                application(lambda(boost::make_iterator_range(variables), implement(expression.body())),
+                application(implement(lambda(boost::make_iterator_range(variables), expression.body())),
                           boost::make_iterator_range(arguments));
           }
 
