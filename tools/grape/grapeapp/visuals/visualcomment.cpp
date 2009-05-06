@@ -59,10 +59,12 @@ void visualcomment::draw( void )
   draw_filled_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), selected, g_color_comment);
 
   // draw comment text
-//  render_text(text, x, y+height-g_text_space, width, height+g_text_space);
   grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(text.fn_str()), x, x+width, y+height, y, 0.0015f, al_left, al_top );
 
-  // draw bounding box; only drawn if the object is selected
+  // draw comment reference rectangle
+  if (m_object->get_selected()) draw_filled_rectangle( get_reference_coordinate(), 0.04f, 0.04f, selected, g_color_white);
+
+  // draw bounding box
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }
 
@@ -77,5 +79,15 @@ grape_direction visualcomment::is_on_border( libgrape::coordinate &p_coord )
   return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
 }
 
+bool visualcomment::is_inside_reference( libgrape::coordinate &p_coord )
+{
+  return is_inside_rectangle(get_reference_coordinate(), 0.04f, 0.04f, p_coord);
 }
 
+coordinate visualcomment::get_reference_coordinate()
+{
+  coordinate ref_coord = {m_object->get_coordinate().m_x + m_object->get_width() * 0.5 - 0.03f, m_object->get_coordinate().m_y - m_object->get_height() * 0.5 + 0.03f};
+  return ref_coord;
+}
+
+}

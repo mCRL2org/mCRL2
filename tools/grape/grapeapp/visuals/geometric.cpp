@@ -732,49 +732,7 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
   draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
 }
-/*
-void grape::grapeapp::draw_nonterminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
-{
-  draw_line( p_begin, p_end, p_selected, g_color_black );
 
-  // calculate rotation of arrow
-  // correction + get_coordinate not necessary as this results in 0
-  float angle = atan2(( p_begin.m_y - p_end.m_y), ( p_begin.m_x - p_end.m_x));
-
-  // draw arrow head based on calculated angle
-  float one_side_x = p_end.m_x + 0.03 * cos( angle - M_PI/4 );
-  float one_side_y = p_end.m_y + 0.03 * sin( angle - M_PI/4 );
-  float other_side_x = p_end.m_x + 0.03 * cos( angle + M_PI/4 );
-  float other_side_y = p_end.m_y + 0.03 * sin( angle + M_PI/4 );
-
-  // draw transition arrow
-  glBegin(GL_TRIANGLES);
-    glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
-    glVertex3f( one_side_x, one_side_y, 0.0f);
-    glVertex3f( other_side_x, other_side_y, 0.0f);
-  glEnd();
-
-  // draw text
-  // calculate midpoint
-  coordinate midpoint;
-  midpoint.m_x = ( p_end.m_x + p_begin.m_x ) * 0.5;
-  midpoint.m_y = ( p_end.m_y + p_begin.m_y ) * 0.5;
-
-  set_color(g_color_black, true);
-  // render text based on the calculated angle
-  if ( ( angle < M_PI_2 ) || ( angle > M_PI && angle < 1.5 * M_PI ) ) // text should be rendered to the left of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x - 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-  else // text should be rendered to the right of and above the transition
-  {
-      grape_glcanvas::get_font_renderer()->draw_text( std::string(p_label_text.fn_str()), p_begin.m_x + 0.05f, p_begin.m_y + 0.05f, 0.0015f, al_center, al_center );
-  }
-
-  // do not draw the bounding box, this is already done in visualnonterminating transition
-}
-
-*/
 void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
 {
   float width = p_end.m_x - p_begin.m_x;

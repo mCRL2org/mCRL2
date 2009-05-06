@@ -91,6 +91,7 @@ void diagram::remove_comment( comment* p_comment )
     comment* del_comment = m_comments.Detach( n );
     delete del_comment;
   }
+
 }
 
 unsigned int diagram::count_comment( void )

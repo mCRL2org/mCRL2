@@ -48,6 +48,7 @@ void comment::set_text( wxString &p_text )
 void comment::attach_to_object( object* p_object )
 {
   m_connected_to = p_object;
+  p_object->attach_comment(this);
 }
 
 void comment::detach_from_object( void )

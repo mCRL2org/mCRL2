@@ -21,6 +21,7 @@
 #include "visuals/visualnonterminating_transition.h"
 #include "visuals/visualprocess_reference.h"
 #include "visuals/visualpreamble.h"
+#include "visuals/visualcomment.h"
 
 #include "event_architecturereference.h"
 #include "event_channel.h"
@@ -390,7 +391,7 @@ bool grape_event_drag::Do( void )
   {
     return false;
   }
-
+  
   switch ( state )
   {
     case IDLE: break;
@@ -412,7 +413,7 @@ bool grape_event_drag::Do( void )
       static int s_flag;
 
       // if we started a new drag
-      if ( m_mousedown && new_drag )
+      if ( m_mousedown && new_drag)
       {
         s_orig_center = begin_object_ptr->get_coordinate();
         s_orig_width = begin_object_ptr->get_width();
@@ -536,11 +537,58 @@ bool grape_event_drag::Do( void )
         } else {
           //other object
         }
-
-        //move object
-        grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
-        m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
-
+        
+        // get initial object
+        visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_visual_object( begin_object_ptr );
+        visualcomment* v_com = static_cast<grapeapp::visualcomment*> (visual_beginobject);
+   
+        if (visual_beginobject->get_type() == COMMENT)
+        {       
+          comment* com = static_cast<libgrape::comment*> (begin_object_ptr); 
+          // test if the reference on the comment is selected
+          if (v_com->is_inside_reference(s_coord_mousedown))
+          {
+            if (visual_endobject != 0)
+            { 
+              object* end_object_ptr = visual_endobject->get_selectable_object();      
+              if ((end_object_ptr != begin_object_ptr))
+              {
+                grape_event_attach_comment* event = new grape_event_attach_comment( m_main_frame, com, end_object_ptr );
+                m_main_frame->get_event_handler()->Submit( event, true );
+              }
+            }
+            else 
+            {
+              comment* com = static_cast<libgrape::comment*> (begin_object_ptr);
+              grape_event_detach_comment* event = new grape_event_detach_comment( m_main_frame, com );
+              m_main_frame->get_event_handler()->Submit( event, true );
+            }
+          }
+          else
+          {
+            //move object
+            grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+            m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+          } 
+        }
+        else if (visual_beginobject->get_type() == CHANNEL)  
+        {
+          //find position near border
+          channel* chan = static_cast<libgrape::channel*> (begin_object_ptr);
+          compound_reference* ref = chan->get_reference();
+          coordinate coord = move_to_border_rectangle( ref->get_coordinate(), ref->get_width(), ref->get_height(), m_up );
+    
+          //move channel
+          grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, coord, !m_mousedown, s_flag );
+          m_main_frame->get_event_handler()->Submit( event, !m_mousedown ); 
+        }
+        else 
+        {
+          //move object
+          grape_event_move *event = new grape_event_move( m_main_frame, begin_object_ptr, s_orig_center, m_up, !m_mousedown, s_flag );
+          m_main_frame->get_event_handler()->Submit( event, !m_mousedown );
+        }
+        
         //also move the nonterminating transitions attached to the state
         if ((begin_object_ptr != 0) && (begin_object_ptr->get_type() == STATE || begin_object_ptr->get_type() == REFERENCE_STATE))
         {

@@ -68,6 +68,19 @@ namespace grape
          * @return Returns whether the specified coordinate on the border of a drawn object.
          */
         grape_direction is_on_border( libgrape::coordinate &p_coord );
+        
+        /**
+         * Test if coordinate is inside the reference
+         * @param p_coord test coordinate
+         * @return Returns whether the specified coordinate is inside the reference
+         */
+        bool is_inside_reference( libgrape::coordinate &p_coord );
+                
+        /**
+         * Get reference coordinate
+         * @return The coordinate
+         */
+        coordinate get_reference_coordinate( void );
     };
   } // namespace grapeapp
 } // namespace grape

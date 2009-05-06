@@ -152,7 +152,7 @@ void channel::set_channel_type( const channel_type &p_channel_type )
 {
   m_channel_type = p_channel_type;
 }
-
+        
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY( arr_channel );

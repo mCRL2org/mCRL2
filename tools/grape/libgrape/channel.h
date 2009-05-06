@@ -188,7 +188,7 @@ namespace grape
          * @param p_channeltype The new channeltype
          */
         void set_channel_type( const channel_type &p_channel_type );
-
+        
     };
 
     /**

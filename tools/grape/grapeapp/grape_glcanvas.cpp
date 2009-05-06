@@ -170,6 +170,17 @@ void grape_glcanvas::draw_visual_objects()
       // draw channel communication if we are dragging
       if (m_canvas_state == ADD_CHANNEL_COMMUNICATION) draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
     }
+  
+    if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (get_selectable_visual_object( m_mouse_coordinate ) == 0))
+    {
+      comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
+    
+      // find position on border rectangle
+      coordinate coord = move_to_border_rectangle( comm_ptr->get_coordinate(), comm_ptr->get_width(), comm_ptr->get_height(), m_mouse_coordinate );     
+      
+      // draw comment line if we are dragging in empty space
+      draw_line(coord, m_mouse_coordinate, true, g_color_black);
+    }
   }
 }
 
@@ -456,22 +467,31 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
     m_mouse_coordinate = clicked_coord;
 
     if ( m_lmouse_down_coordinate.m_x != clicked_coord.m_x || m_lmouse_down_coordinate.m_y != clicked_coord.m_y ) //we are only dragging if there was a displacement
-    {
+    { 
       if ( m_touched_visual_object )
       {
         // select object
         object *obj_ptr = m_touched_visual_object->get_selectable_object();        
-          
-        // update canvas if we are dragging a transition or channel communication
+     
+        // update canvas if we are dragging a comment
+        if (m_touched_visual_object->get_selectable_object()->get_type() == COMMENT) 
+        {  
+          draw();
+        }
+        
+        // update canvas if we are adding a transition or channel communication
         if (m_canvas_state == ADD_CHANNEL_COMMUNICATION || m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION) 
         {
           draw();
-        } else {
+        } 
+        else
+        {
           if ( obj_ptr && (int)obj_ptr->get_id() == m_touched_visual_object_id )
           {
             m_diagram->select_object( obj_ptr );
           }
         }
+        
 
         m_dragging = true;
 
