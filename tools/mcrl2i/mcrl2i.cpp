@@ -125,7 +125,7 @@ static const std::string help_text=
           "  r[ewriter] STRATEGY            use STRATEGY for rewriting.\n"
           "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in\n"
           "                                      VARLIST that satisfy EXPRESSION.\n"
-          "VARLIST is of the form x,y,...: S; ... v,w,...: T)";
+          "VARLIST is of the form x,y,...: S; ... v,w,...: T)\n";
 
 
 class mcrl2i_tool: public rewriter_tool<input_tool> 
