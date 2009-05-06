@@ -182,7 +182,7 @@ rule install-tool ( name : requirements * ) {
       destination = $(build-root)/stage ;
     }
     else { # install man pages
-      man $(name).1 : $(name) : <dependency>/libraries//install <location>$(mandir)/man1 ;
+      man $(name).1 : $(name) : <link>shared:<dependency>/libraries//install <location>$(mandir)/man1 ;
 
       targets += $(name).1 ;
     }
