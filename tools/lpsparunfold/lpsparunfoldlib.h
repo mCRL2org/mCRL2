@@ -44,7 +44,7 @@ class Sorts
     mcrl2::data::function_symbol createCMap(int k);
     mcrl2::data::function_symbol createDetMap();
     mcrl2::data::function_symbol_vector createProjectorFunctions( mcrl2::data::function_symbol_vector m);
-    std::pair< mcrl2::data::variable_vector , mcrl2::data::data_equation_vector > createFunctionSection(mcrl2::data::function_symbol_vector pi, mcrl2::data::function_symbol Cmap, mcrl2::data::function_symbol_vector set_of_new_sorts,mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol Detmap, mcrl2::data::function_symbol_vector m);
+    std::pair< mcrl2::data::variable_vector , mcrl2::data::data_equation_vector > createFunctionSection(mcrl2::data::function_symbol_vector pi, mcrl2::data::function_symbol Cmap, mcrl2::data::function_symbol_vector set_of_new_sorts,mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol Detmap);
 
     mcrl2::data::function_symbol_vector determineAffectedConstructors();
     mcrl2::data::function_symbol_vector determineAffectedMappings( mcrl2::data::function_symbol_vector k );
@@ -56,7 +56,7 @@ class Sorts
     bool basic_sortOccursInSort_expression(mcrl2::data::sort_expression s, mcrl2::data::basic_sort b );
     mcrl2::core::identifier_string generateFreshProcessParameterName(std::string str);
     std::set<mcrl2::core::identifier_string> process_parameter_names;
-    void updateLPS(mcrl2::data::function_symbol Cmap, mcrl2::data::function_symbol_vector, mcrl2::data::function_symbol Detmap, mcrl2::data::function_symbol_vector AffectedMappings, int parameter_at_index);
+    void updateLPS(mcrl2::data::function_symbol Cmap, mcrl2::data::function_symbol_vector, mcrl2::data::function_symbol Detmap, int parameter_at_index, mcrl2::data::function_symbol_vector pi);
   
     //Needed for additional process parameter in the LPS 
     mcrl2::data::sort_expression_vector affectedSorts;
@@ -64,7 +64,7 @@ class Sorts
     std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
     std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
-    mcrl2::data::data_expression_vector unfoldConstructor( mcrl2::data::data_expression de, mcrl2::data::function_symbol_vector AffectedMappings, mcrl2::data::function_symbol Detmap);
+    mcrl2::data::data_expression_vector unfoldConstructor( mcrl2::data::data_expression de, mcrl2::data::function_symbol_vector AffectedMappings, mcrl2::data::function_symbol Detmap, mcrl2::data::function_symbol_vector pi );
     mcrl2::data::basic_sort getSortOfProcessParameter(int parameter_at_index);
     std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
 //    void deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss );
