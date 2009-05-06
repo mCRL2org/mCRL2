@@ -48,6 +48,9 @@ void test_representative_generator()
 
   representative_generator default_expression_generator(specification);
 
+  // Check whether it can handle structured sorts as sort expression
+  BOOST_CHECK(default_expression_generator(structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
+
   // Should be true or false, since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(sort_bool_::bool_()) == sort_bool_::true_() ||
               default_expression_generator(sort_bool_::bool_()) == sort_bool_::false_());

@@ -4641,8 +4641,7 @@ static ATermAppl dummyterm(
   /* Third construct a new constant, and yield it. */
   if (allow_the_introduction_of_a_dummy_mapping)
   {
-    snprintf(scratch1,STRINGLENGTH,"dummy%s",gsATermAppl2String(ATAgetArgument(targetsort,0)));
-    ATermAppl dummymapping=gsMakeOpId(fresh_name(scratch1),targetsort);
+    ATermAppl dummymapping=gsMakeOpId(fresh_name(pp(targetsort).c_str()),targetsort);
     insertmapping(dummymapping,spec,true);
     return dummymapping;
   }
