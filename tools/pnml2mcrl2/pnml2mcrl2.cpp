@@ -28,8 +28,6 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/exception.h"
 
 #include "workarounds.h" // for DECL_A
@@ -205,17 +203,10 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
       return result;
     }
 
-// Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-// #include <mcrl2/utilities/mcrl2_squadt_interface.h>
-
-#define pnml_file_for_input   "pnml_in"
-#define mcrl2_file_for_output "mcrl2_out"
-
-
     void set_capabilities(tipi::tool::capabilities& c) const 
     {
-      c.add_input_configuration(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
+      c.add_input_configuration("main-input", tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
     }
 
     void user_interactive_configuration(tipi::configuration& c) {
@@ -224,19 +215,16 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
        * the same parameters
        */
       if (c.fresh()) {
-        if (!c.output_exists(mcrl2_file_for_output)) {
-          c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
+        if (!c.output_exists("main-output")) {
+          c.add_output("main-output", tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
         }
       }
     }
     
     bool check_configuration(tipi::configuration const& c) const 
-    { bool result = true;
-    
-      result |= c.input_exists(pnml_file_for_input);
-      result |= c.output_exists(mcrl2_file_for_output);
-    
-      return result;
+    {
+      return c.input_exists("main-input") ||
+             c.output_exists("main-output");
     }
     
     bool perform_task(tipi::configuration& c) 
@@ -244,12 +232,11 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
     
       rec_par=ATfalse;
     
-      m_input_filename=c.get_input(pnml_file_for_input).location();
-      m_output_filename=c.get_output(mcrl2_file_for_output).location().c_str(); 
+      m_input_filename  = c.get_input("main-input").location();
+      m_output_filename = c.get_output("main-output").location(); 
     
       return run();
     }
-    
 #endif
 };
 
@@ -2441,27 +2428,6 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   {
     MCRL2_ATERM_INIT(argc, argv)
     return pnml2mcrl2_tool().execute(argc,argv);
-
-/*    try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-      if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-        return EXIT_SUCCESS;
-      }
-#endif
-
-
-     tool_options_type options;
-
-      if (parse_command_line(argc, argv, options)) {
-        return perform_task(options);
-      }
-    }
-    catch (std::exception& e) {
-      std::cerr << e.what() << std::endl;
-      return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS; */
   }
 
 // Added by Yarick: alternative generation of Places:
