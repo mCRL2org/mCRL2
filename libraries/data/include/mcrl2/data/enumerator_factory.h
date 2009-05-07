@@ -65,7 +65,7 @@ namespace mcrl2 {
         /// \brief An internal evaluator object
         Evaluator                                m_internal_evaluator;
         /// \brief Reference to a possibly external evaluator object
-        Evaluator const&                         m_evaluator;
+        Evaluator&                               m_evaluator;
         /// \brief Context shared by enumerators
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
@@ -88,13 +88,13 @@ namespace mcrl2 {
         /// \param[in] other the original to copy
         enumerator_factory(enumerator_factory const& other) :
                m_internal_evaluator(other.m_evaluator),
-               m_evaluator(m_internal_evaluator),
+               m_evaluator(other.m_evaluator),
                m_enumeration_context(other.m_enumeration_context) {
         }
 
         /// \brief Constructor with data specification
         enumerator_factory(data_specification const& specification, Evaluator const& evaluator) :
-               m_internal_evaluator(evaluator), m_evaluator(m_internal_evaluator),
+               m_internal_evaluator(evaluator), m_evaluator(evaluator),
                m_enumeration_context(new shared_context_type(specification, m_evaluator)) {
         }
 
@@ -144,7 +144,7 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        enumerator_type make(std::set< variable_type > const& variables, Evaluator const& evaluator,
+        enumerator_type make(std::set< variable_type > const& variables, Evaluator& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -160,7 +160,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeEvaluator >
         classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
-          make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
+          make(std::set< variable_type > const& variables, AlternativeEvaluator& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -178,7 +178,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeSelector >
         classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
-          make(std::set< variable_type > const& variables, evaluator_type const& evaluator,
+          make(std::set< variable_type > const& variables, evaluator_type& evaluator,
             expression_type const& condition = expression_traits< expression_type >::true_(),
             substitution_type const& substitution = substitution_type()) const {
 
@@ -213,7 +213,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-          make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
+          make(std::set< variable_type > const& variables, AlternativeEvaluator& evaluator,
                          expression_type const& condition = sort_bool_::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 

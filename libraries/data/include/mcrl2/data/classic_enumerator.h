@@ -228,14 +228,14 @@ namespace mcrl2 {
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              variable_type const& variable, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator) {
+             substitution_type const& substitution, Evaluator& evaluator) {
 
           implementation_type::create(m_impl, context, make_set(variable), condition, evaluator, substitution);
         }
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              std::set< variable_type > const& variables, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator) {
+             substitution_type const& substitution, Evaluator& evaluator) {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }

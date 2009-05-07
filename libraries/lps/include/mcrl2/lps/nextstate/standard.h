@@ -114,6 +114,23 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   }
 };
 
+// Uses static context so code is not reentrant
+struct legacy_selector
+{
+  static atermpp::aterm& term()
+  {
+    static atermpp::aterm term = mcrl2::data::sort_bool_::false_();
+
+    return term;
+  }
+
+  /// \brief returns true if and only if the argument is equal to true
+  template < typename ExpressionType >
+  static bool test(ExpressionType const& e) {
+    return e != term();
+  }
+};
+
 // serves to extract the rewriter object, which used to be an implementation
 // detail of the enumerator that was exposed through its interface
 template < typename Enumerator >
@@ -150,7 +167,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     {
     }
 
-    Enumerator make(ATermList v, atermpp::aterm c)
+    Enumerator make(ATermList v, atermpp::aterm const& c)
     {
       return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), c);
     }
@@ -160,23 +177,6 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     {
       return const_cast< legacy_rewriter& >(this->m_evaluator);
     }
-};
-
-// Uses static context so code is not reentrant
-struct legacy_selector
-{
-  static atermpp::aterm& term()
-  {
-    static atermpp::aterm term = mcrl2::data::sort_bool_::false_();
-
-    return term;
-  }
-
-  /// \brief returns true if and only if the argument is equal to true
-  template < typename ExpressionType >
-  static bool test(ExpressionType const& e) {
-    return e != term();
-  }
 };
 
 namespace mcrl2 {
@@ -230,8 +230,10 @@ namespace mcrl2 {
         m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
                     m_shared_context->m_enumerator.findSolutions(atermpp::reverse(variables), m_condition, false)));
 
-        while (increment()) {
-          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) {
+        while (increment())
+        {
+          if (legacy_selector::test(m_evaluator(m_condition, m_substitution)))
+          {
             return true;
           }
         }

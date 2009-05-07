@@ -55,28 +55,17 @@ namespace mcrl2 {
           /// \brief after rewriting
           atermpp::map< data_expression, data_expression >         m_reconstruction_context;
 
-          /// \brief the known sorts
-          atermpp::set< sort_expression >                          m_known_sorts;
-
         public:
 
           // For normalising sort expressions
           sort_expression implement(sort_expression const& expression)
           {
-            if (m_known_sorts.find(expression) == m_known_sorts.end())
-            { // Temporary measure, add standard rules
-              m_known_sorts.insert(expression);
-
-              // add equations for standard functions for new sorts
-              data_equation_vector equations(standard_generate_equations_code(expression));
-
-              for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
-              {
-                m_rewriter->addRewriteRule(implement(*i));
-              }
-            }
-
             return m_data_specification->normalise(expression);
+          }
+
+          variable implement(variable const& v)
+          {
+            return variable(v.name(), implement(v.sort()));
           }
 
           data_equation implement(data_equation const& equation)
@@ -129,22 +118,17 @@ namespace mcrl2 {
               }
             } symbol_generator;
 
-            data_expression converted(atermpp::replace(static_cast< atermpp::aterm_appl const& >(expression),
-                                                         make_map_substitution_adapter(m_implementation_context)));
+            atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
 
-            if (converted.is_abstraction())
+            if (i == m_implementation_context.end())
             { // implementation with previously generated function
-              atermpp::term_list< variable > bound_variables;
-
-              for (lambda::variables_const_range r(expression.variables()); !r.empty(); r.advance_begin(1))
-              {
-                bound_variables = atermpp::push_front(bound_variables, variable(r.front().name(), implement(r.front().sort())));
-              }
+              atermpp::term_list< variable > bound_variables = implement(expression.variables());
 
               if (!bound_variables.empty())
               { // function with non-empty domain
                 atermpp::aterm_appl body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables(convert< atermpp::term_list< variable > >(find_all_free_variables(expression)));
+                atermpp::term_list< variable > free_variables(implement(
+                                                 boost::make_iterator_range(find_all_free_variables(expression))));
 
                 function_sort   new_function_sort(sort_expression_list(gsGetSorts(bound_variables)), sort_expression(gsGetSort(body)));
 
@@ -172,7 +156,7 @@ namespace mcrl2 {
               return implement(expression.body());
             }
 
-            return converted;
+            return i->second;
           }
 
           data_expression implement(abstraction const& expression)
@@ -181,7 +165,7 @@ namespace mcrl2 {
             using namespace mcrl2::data::sort_set_;
             using namespace mcrl2::data::sort_bag;
 
-            data_expression abstract_body(implement(lambda(expression.variables(), expression.body())));
+            data_expression abstract_body(implement(lambda(implement(expression.variables()), implement(expression.body()))));
 
             if (is_setcomprehension_application(expression))
             {
@@ -220,9 +204,9 @@ namespace mcrl2 {
           }
 
           template < typename ForwardTraversalIterator >
-          atermpp::term_list< data_expression > implement(boost::iterator_range< ForwardTraversalIterator > const& range)
+          atermpp::term_list< typename ForwardTraversalIterator::value_type > implement(boost::iterator_range< ForwardTraversalIterator > const& range)
           {
-            atermpp::vector< data_expression > result;
+            atermpp::vector< typename ForwardTraversalIterator::value_type > result;
 
             for (typename boost::iterator_range< ForwardTraversalIterator >::const_iterator
                                                           i(range.begin()); i != range.end(); ++i)
@@ -230,7 +214,7 @@ namespace mcrl2 {
               result.push_back(implement(*i));
             }
 
-            return convert< atermpp::term_list< data_expression > >(result);
+            return convert< atermpp::term_list< typename ForwardTraversalIterator::value_type > >(result);
           }
 
           data_expression implement(application const& expression)
@@ -243,9 +227,35 @@ namespace mcrl2 {
             return application(implement(expression.head()), boost::make_iterator_range(arguments));
           }
 
+          application reconstruct(application const& expression)
+          {
+            atermpp::vector< data_expression > arguments;
+
+            for (application::arguments_const_range r(expression.arguments()); !r.empty(); r.advance_begin(1))
+            {
+              arguments.push_back(reconstruct(r.front()));
+            }
+
+            return application(reconstruct(expression.head()), boost::make_iterator_range(arguments));
+          }
+
           data_expression reconstruct(data_expression const& expression)
           {
-            return atermpp::replace(expression, make_map_substitution_adapter(m_reconstruction_context));
+            if (expression.is_function_symbol())
+            {
+              atermpp::map< data_expression, data_expression >::const_iterator i(m_reconstruction_context.find(expression));
+
+              if (i != m_reconstruction_context.end())
+              {
+                return i->second;
+              }
+            }
+            else if (expression.is_application())
+            {
+              return reconstruct(application(expression));
+            }
+
+            return expression;
           }
 
           data_expression implement(data_expression const& expression)
@@ -255,6 +265,10 @@ namespace mcrl2 {
             if (expression.is_application())
             {
               return implement(application(expression));
+            }
+            else if (expression.is_variable())
+            {
+              return implement(variable(expression));
             }
             else if (expression.is_abstraction())
             {
@@ -271,8 +285,7 @@ namespace mcrl2 {
           rewrite_conversion_helper(data_specification const& specification,
                                     detail::Rewriter& rewriter) :
                    m_data_specification(&specification),
-                   m_rewriter(&rewriter),
-                   m_known_sorts(convert< atermpp::set< sort_expression > >(specification.sorts()))
+                   m_rewriter(&rewriter)
           {
             // Add rewrite rules (needed only for lambda expressions)
             for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))

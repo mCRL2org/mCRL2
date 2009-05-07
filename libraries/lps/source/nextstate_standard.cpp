@@ -956,22 +956,3 @@ NextState *createNextState(
 
   return NULL;
 }
-
-NextState *createNextState(
-  mcrl2::lps::specification const& spec,
-  bool allow_free_vars,
-  int state_format,
-  mcrl2::data::rewriter::strategy rewrite_strategy,
-  NextStateStrategy strategy,
-  mcrl2::data::detail::EnumerateStrategy enumerator_strategy
-)
-{
-  return
-    createNextState(
-      spec,
-      allow_free_vars,
-      state_format,
-      NextStateStandard::enumerator_factory_type(spec.data(), mcrl2::data::rewriter(spec.data(), rewrite_strategy)),
-      strategy
-    );
-}

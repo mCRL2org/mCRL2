@@ -532,12 +532,16 @@ void test_copy()
 
   data_specification specification(parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
+    "sort A = S;"
     "sort S;"
     "map f: Set(S);"));
 
-  data_specification other(specification);
+  data_specification other;
+  other = specification;
 
   BOOST_CHECK(other == specification);
+
+  BOOST_CHECK(other.normalise(basic_sort("A")) == basic_sort("S"));
 }
 
 int test_main(int argc, char** argv)

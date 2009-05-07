@@ -54,7 +54,7 @@ namespace mcrl2 {
     }
     /// \endcond
 
-    /* \brief Procedure to be used with substitution to apply immediate textual substitution an expression
+    /** \brief Procedure to be used with substitution to apply immediate textual substitution an expression
      *
      * The structure of expressions is completely ignored when doing
      * replacements. Pay careful attention to the fact that using this
@@ -81,7 +81,7 @@ namespace mcrl2 {
       }
     };
 
-    /* \brief Procedure to be used with substitution to apply immediate structural substitution an expression
+    /** \brief Procedure to be used with substitution to apply immediate structural substitution an expression
      *
      * Structural substitution takes variable binders into account i.e. the
      * structure of the expression . The procedure is matches capture-avoiding

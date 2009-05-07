@@ -177,32 +177,32 @@ namespace mcrl2 {
 
       protected:
 
-      void insert_sort(const sort_expression& s)
-      {
-        if (s.is_alias())
-        { // add aliases as names for sort expressions that are non-aliases
-          add_alias(s);
-        }
-        else if (!s.is_function_sort()) // do not add function sorts
+        void insert_sort(const sort_expression& s)
         {
-          m_sorts.insert(s);
+          if (s.is_alias())
+          { // add aliases as names for sort expressions that are non-aliases
+            add_alias(s);
+          }
+          else if (!s.is_function_sort()) // do not add function sorts
+          {
+            m_sorts.insert(s);
 
-          add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
-          add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+            add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
+            add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+          }
         }
-      }
 
-      void add_function(sort_to_symbol_map& container, const function_symbol& f)
-      {
-        sort_expression index_sort(normalise(f.sort().target_sort()));
-
-        constructors_const_range relevant_range(container.equal_range(index_sort));
-
-        if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
+        void add_function(sort_to_symbol_map& container, const function_symbol& f)
         {
-          container.insert(std::make_pair(index_sort, f));
+          sort_expression index_sort(normalise(f.sort().target_sort()));
+
+          constructors_const_range relevant_range(container.equal_range(index_sort));
+
+          if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
+          {
+            container.insert(std::make_pair(index_sort, f));
+          }
         }
-      }
 
       public:
 

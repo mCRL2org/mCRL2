@@ -146,7 +146,8 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
 
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), data::rewriter(lps_specification.data(), lgopts->strat));
+  data::rewriter rewriter(lps_specification.data(), lgopts->strat);
+  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
 
   nstate = createNextState(lps_specification,!lgopts->usedummies,lgopts->stateformat, enumerator_factory);
 

@@ -44,7 +44,7 @@ namespace mcrl2 {
 
         private:
 
-          data_specification         m_specification;
+          data_specification const&  m_specification;
           detail::EnumeratorStandard m_enumerator;    // embedded rewriter should not be part of context
 
         public:
@@ -80,7 +80,7 @@ namespace mcrl2 {
           // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
           boost::shared_ptr< EnumeratorSolutionsStandard > m_generator;
 
-          Evaluator                                        m_evaluator;
+          Evaluator&                                       m_evaluator;
 
           expression_type                                  m_condition;
 
@@ -98,7 +98,7 @@ namespace mcrl2 {
 
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
-                               expression_type const& c, substitution_type const& s, Evaluator const& e) :
+                               expression_type const& c, substitution_type const& s, Evaluator& e) :
                              m_shared_context(context), m_evaluator(e), m_condition(c), m_substitution(s) {
 
             m_evaluator(c); // adds the proper rewrite rules (for legacy Enumerator/Rewriter)
@@ -206,7 +206,7 @@ namespace mcrl2 {
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
                                std::set< variable_type > const& v, expression_type const& c,
-                               Evaluator const& e, substitution_type const& s = substitution_type()) {
+                               Evaluator& e, substitution_type const& s = substitution_type()) {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
@@ -217,7 +217,7 @@ namespace mcrl2 {
 
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               data_specification const& specification, std::set< variable_type > const& v,
-              expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type()) {
+              expression_type const& c, Evaluator& e, substitution_type const& s = substitution_type()) {
 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }
