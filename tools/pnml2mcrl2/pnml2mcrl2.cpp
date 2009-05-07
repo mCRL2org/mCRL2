@@ -11,7 +11,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "pnml2mcrl2"
+#define TOOLNAME "pnml2mcrl2"
 #define AUTHOR "Johfra Kamphuis and Yaroslav Usenko"
 
 #include <sstream>
@@ -34,9 +34,18 @@
 
 #include "workarounds.h" // for DECL_A
 
+//Tool framework
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
+
+
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+
+using namespace mcrl2;
+using utilities::tools::input_output_tool;
+using namespace mcrl2::utilities::tools;
 
 typedef struct {
   ATbool Abort;                 // if an element has no ID, this boolean is used to grant abortion of the conversion
@@ -116,92 +125,133 @@ static ATermList pn2gsMakeListOfLists(ATermList l);
 
 static std::string pn2gsGetText(ticpp::Element* cur);
 
-struct tool_options_type {
-  std::string infilename;
-  std::string outfilename;
-};
+bool do_pnml2mcrl2(char const* InFileName, FILE* OutStream);
 
-bool perform_task(char const* InFileName, FILE* OutStream);
+class pnml2mcrl2_tool: public squadt_tool< input_output_tool> 
+{
+  protected:
+    typedef squadt_tool< input_output_tool> super;
 
-bool perform_task(tool_options_type const& tool_options) {
-  FILE* OutStream = stdout;
+  public:
+    pnml2mcrl2_tool()
+      : super(
+          TOOLNAME,
+          AUTHOR,
+          "convert a Petri net to an mCRL2 specification",
+          "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
+          "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
+          "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard."
+          "\n\n"
+          "Only classical Petri nets are translated, i.e. places, transitions and arcs. "
+          "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are "
+          "not taken into account. "
+          "With the -p option turned on, more functionality is supported.")
+    {}
 
-  if (!tool_options.outfilename.empty()) {
-    OutStream = fopen(tool_options.outfilename.c_str(),"w");
+  private:   
 
-    if (OutStream == 0) {
-      throw mcrl2::runtime_error("cannot open file '" + tool_options.outfilename + "' for writing\n");
+    void parse_options(const command_line_parser& parser)
+    { super::parse_options(parser);
+      
+      if (parser.options.count("error")) {
+        error = parser.option_argument_as< unsigned long >("error");
+      }
+      if (parser.options.count("hide")) {
+        hide = ATtrue;
+      }
+      if (parser.options.count("no-rec-par")) {
+        rec_par = ATfalse;
+      }
     }
-  }
 
-  bool result = perform_task(tool_options.infilename.c_str(), OutStream);
 
-  fclose(OutStream);
+    void add_options(interface_description& desc)
+    { super::add_options(desc);
+      desc.add_option("error", make_optional_argument("NUM", "2"),
+                    "an __error action will happen if a place gets NUM or more "
+                    "tokens (default is 2)", 'e').
+           add_option("hide",
+                    "hide (rename to tau) all transition monitoring actions to "
+                    "hide all but one action edit the generated file and remove "
+                    "that action from the hide list", 'i').
+           add_option("no-rec-par",
+                    "generate non-recursive mCRL2 process for the places, "
+                    "and enable the translation of inhibitor and reset arcs", 'p');
+    }
 
-  return (result);
-}
+  public:
+    bool run()
+    { FILE* OutStream = stdout;
+
+      if (core::gsVerbose)
+      {
+        std::cerr << "pnml2mcrl2 parameters:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+      }
+
+      if (!m_output_filename.empty()) {
+        OutStream = fopen(m_output_filename.c_str(),"w");
+    
+        if (OutStream == 0) {
+          throw mcrl2::runtime_error("cannot open file '" + m_output_filename + "' for writing\n");
+        }
+      }
+    
+      bool result = do_pnml2mcrl2(m_input_filename.c_str(), OutStream);
+    
+      fclose(OutStream);
+    
+      return result;
+    }
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+// #include <mcrl2/utilities/mcrl2_squadt_interface.h>
 
-static const char* pnml_file_for_input   = "pnml_in";
-static const char* mcrl2_file_for_output = "mcrl2_out";
+#define pnml_file_for_input   "pnml_in"
+#define mcrl2_file_for_output "mcrl2_out"
 
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
 
-  public:
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-};
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
-  c.add_input_configuration(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
-}
-
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
-  /* set the squadt configuration to be sent back, such
-   * that mcrl22lps can be restarted later with exactly
-   * the same parameters
-   */
-  if (c.fresh()) {
-    if (!c.output_exists(mcrl2_file_for_output)) {
-      c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
+    void set_capabilities(tipi::tool::capabilities& c) const 
+    {
+      c.add_input_configuration(pnml_file_for_input, tipi::mime_type("pnml", tipi::mime_type::text), tipi::tool::category::transformation);
     }
-  }
-}
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
-  bool result = true;
-
-  result |= c.input_exists(pnml_file_for_input);
-  result |= c.output_exists(mcrl2_file_for_output);
-
-  return (result);
-}
-
-bool squadt_interactor::perform_task(tipi::configuration& c) {
-  using namespace tipi;
-
-  rec_par=ATfalse;
-
-  tool_options_type tool_options = { c.get_input(pnml_file_for_input).location().c_str(),
-                                     c.get_output(mcrl2_file_for_output).location().c_str()};
-
-  return ::perform_task(tool_options);
-}
-
+    void user_interactive_configuration(tipi::configuration& c) {
+      /* set the squadt configuration to be sent back, such
+       * that mcrl22lps can be restarted later with exactly
+       * the same parameters
+       */
+      if (c.fresh()) {
+        if (!c.output_exists(mcrl2_file_for_output)) {
+          c.add_output(mcrl2_file_for_output, tipi::mime_type("mcrl2", tipi::mime_type::text), c.get_output_name(".mcrl2"));
+        }
+      }
+    }
+    
+    bool check_configuration(tipi::configuration const& c) const 
+    { bool result = true;
+    
+      result |= c.input_exists(pnml_file_for_input);
+      result |= c.output_exists(mcrl2_file_for_output);
+    
+      return result;
+    }
+    
+    bool perform_task(tipi::configuration& c) 
+    { using namespace tipi;
+    
+      rec_par=ATfalse;
+    
+      m_input_filename=c.get_input(pnml_file_for_input).location();
+      m_output_filename=c.get_output(mcrl2_file_for_output).location().c_str(); 
+    
+      return run();
+    }
+    
 #endif
+};
 
   //====================================
   //ADDED BY YARICK: AFun extensions.
@@ -2239,8 +2289,8 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   //==================================================
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
-  bool perform_task(char const* InFileName, FILE* OutStream) {
-    ATprotectList(&(context.transitions));
+  bool do_pnml2mcrl2(char const* InFileName, FILE* OutStream) 
+  { ATprotectList(&(context.transitions));
     ATprotectAppl(&Appl0);
     ATprotectAppl(&IdX);
     ATprotectAppl(&Number0);
@@ -2382,58 +2432,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     return (true);
   }
 
-  bool parse_command_line(int ac, char** av, tool_options_type& tool_options) {
-    interface_description clinterface(av[0], NAME, AUTHOR,
-      "convert a Petri net to an mCRL2 specification",
-      "[OPTION]... [INFILE [OUTFILE]]\n",
-      "Convert a Petri net in INFILE to an mCRL2 specification, and write it to "
-      "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
-      "stdout is used. INFILE is supposed to conform to the EPNML 1.1 standard."
-      "\n\n"
-      "Only classical Petri nets are translated, i.e. places, transitions and arcs. "
-      "Other constructs such as timing, coloring, inhibitor arcs and hierarchy are "
-      "not taken into account. "
-      "With the -p option turned on, more functionality is supported.");
 
-    clinterface.add_option("error", make_optional_argument("NUM", "2"),
-                    "an __error action will happen if a place gets NUM or more "
-                    "tokens (default is 2)", 'e').
-                add_option("hide",
-                    "hide (rename to tau) all transition monitoring actions to "
-                    "hide all but one action edit the generated file and remove "
-                    "that action from the hide list", 'i').
-                add_option("no-rec-par",
-                    "generate non-recursive mCRL2 process for the places, "
-                    "and enable the translation of inhibitor and reset arcs", 'p');
-
-    command_line_parser parser(clinterface, ac, av);
-
-    if (parser.continue_execution()) {
-      if (parser.options.count("error")) {
-        error = parser.option_argument_as< unsigned long >("error");
-      }
-      if (parser.options.count("hide")) {
-        hide = ATtrue;
-      }
-      if (parser.options.count("no-rec-par")) {
-        rec_par = ATfalse;
-      }
-
-      if (2 < parser.arguments.size()) {
-        parser.error("too many file arguments");
-      }
-      else {
-        if (0 < parser.arguments.size()) {
-          tool_options.infilename = parser.arguments[0];
-        }
-        if (1 < parser.arguments.size()) {
-          tool_options.outfilename = parser.arguments[1];
-        }
-      }
-    }
-
-    return parser.continue_execution();
-  }
 
   //==================================================
   // main
@@ -2441,15 +2440,17 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   int main(int argc, char **argv)
   {
     MCRL2_ATERM_INIT(argc, argv)
+    return pnml2mcrl2_tool().execute(argc,argv);
 
-    try {
+/*    try {
 #ifdef ENABLE_SQUADT_CONNECTIVITY
       if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
         return EXIT_SUCCESS;
       }
 #endif
 
-      tool_options_type options;
+
+     tool_options_type options;
 
       if (parse_command_line(argc, argv, options)) {
         return perform_task(options);
@@ -2460,7 +2461,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    return EXIT_SUCCESS; */
   }
 
 // Added by Yarick: alternative generation of Places:
