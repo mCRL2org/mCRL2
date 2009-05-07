@@ -58,6 +58,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -87,8 +88,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -523,7 +522,7 @@ dot_lexer *dot_lexer_obj = NULL;    /* lexer object, used by dotparser */
 static int lineNo=1, posNo=1;
 extern void dotyyerror(const char* s);
 
-#line 527 "liblts_dotlexer.cpp"
+#line 526 "liblts_dotlexer.cpp"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -627,7 +626,7 @@ YY_DECL
 #line 74 "liblts_dotlexer.ll"
 
 
-#line 631 "liblts_dotlexer.cpp"
+#line 630 "liblts_dotlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -862,7 +861,7 @@ YY_RULE_SETUP
 #line 108 "liblts_dotlexer.ll"
 ECHO;
 	YY_BREAK
-#line 866 "liblts_dotlexer.cpp"
+#line 865 "liblts_dotlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();

@@ -58,6 +58,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -87,8 +88,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -482,7 +481,7 @@ extern void fsmyyerror(const char* s);
 void processId();
 void processQuoted();
 void processNumber();
-#line 486 "liblts_fsmlexer.cpp"
+#line 485 "liblts_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -585,7 +584,7 @@ YY_DECL
 #line 77 "liblts_fsmlexer.ll"
 
 
-#line 589 "liblts_fsmlexer.cpp"
+#line 588 "liblts_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -725,7 +724,7 @@ YY_RULE_SETUP
 #line 90 "liblts_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 729 "liblts_fsmlexer.cpp"
+#line 728 "liblts_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
