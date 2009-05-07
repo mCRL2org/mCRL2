@@ -327,7 +327,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             std::set< variable_type > const& variables,
-            Evaluator const& evaluator,
+            Evaluator& evaluator,
             expression_type const& condition = sort_bool_::true_()) {
 
             implementation_type::create(m_impl, specification, variables, condition, evaluator);
@@ -343,7 +343,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             std::set< variable_type > const& variables,
-            Evaluator const& evaluator,
+            Evaluator& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
 
@@ -360,7 +360,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
-            Evaluator const& evaluator,
+            Evaluator& evaluator,
             expression_type const& condition = sort_bool_::true_()) {
 
           implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator);
@@ -377,7 +377,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
-            Evaluator const& evaluator,
+            Evaluator& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
 

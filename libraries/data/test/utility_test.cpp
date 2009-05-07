@@ -81,9 +81,9 @@ void list_construction_test() {
 
   mcrl2::data::rewriter R(data_specification(), rewriter::innermost);
 
-  representation_check(R, sort_list::list(bool_(), expressions.begin(), expressions.end()),
-                       R(snoc(bool_(), snoc(bool_(), snoc(bool_(), snoc(bool_(), nil(bool_()),
-                                expressions[0]), expressions[1]), expressions[2]), expressions[3])));
+  representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
+                       R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],
+                             cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))));
 }
 
 void convert_test() {

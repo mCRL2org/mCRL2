@@ -249,16 +249,6 @@ namespace detail {
 }
 /// \endcond
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] t a container with expressions
-/// \param d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename Container >
-bool search_variable(Container t, const variable& d)
-{
-  return detail::partial_find_if(t, detail::compare_term<variable>(d), &detail::is_variable) != atermpp::aterm();
-}
-
 /// \brief Returns all data variables that occur in the term t
 /// This is implementation is more efficient, but there are problems with it...
 /// \param t an expression
@@ -309,6 +299,32 @@ std::set<variable> find_all_free_variables(Container const& container)
 
   return result;
 }
+
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] t a container with expressions
+/// \param[in] t an expression or container with expressions
+/// \param d A data variable
+/// \return True if the term has a given variable as subterm.
+template <typename Container >
+bool search_variable(Container t, const variable& d)
+{
+  return detail::partial_find_if(t, detail::compare_term<variable>(d), &detail::is_variable) != atermpp::aterm();
+}
+
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] container an expression or container with expressions
+/// \param d A data variable
+/// \return True if the term has a given variable as subterm.
+template <typename Container >
+bool search_free_variable(Container container, const variable& d)
+{ // TODO make more efficient implementation
+  std::set<variable> result;
+
+  find_all_free_variables(container, detail::make_inserter(result));
+  
+  return result.find(d) != result.end();
+}
+
 
 /// \brief Returns true if the term has a given sort identifier as subterm.
 /// \param t an expression
