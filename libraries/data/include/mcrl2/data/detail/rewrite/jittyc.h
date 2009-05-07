@@ -44,8 +44,15 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
+		
+                bool addRewriteRule(ATermAppl Rule);
+                bool removeRewriteRule(ATermAppl Rule);
 
 	private:
+                ATermTable tmp_eqns, subst_store;
+                bool need_rebuild;
+                bool made_files;
+
 		int num_opids;
 
 		int true_num;
@@ -94,6 +101,7 @@ class RewriterCompilingJitty: public Rewriter
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
 		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
 		void CompileRewriteSystem(ATermAppl DataSpec);
+		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);
 		ATerm toInner(ATermAppl Term, bool add_opids);

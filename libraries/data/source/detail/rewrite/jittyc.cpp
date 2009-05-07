@@ -618,44 +618,20 @@ static ATerm toInnerc(ATerm Term)
 ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl t)
 {
   int old_opids = num_opids;
+
   ATerm r = toInnerc(toInner(t,true));
 
-  if ( old_opids < num_opids )
-  {
-    ATunprotectArray((ATerm *) int2term);
-    int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
-    for (int i=old_opids; i<num_opids; i++)
-    {
-	    int2term[i] = NULL;
-    }
-    ATprotectArray((ATerm *) int2term,num_opids);
-
-    ATunprotectArray((ATerm *) jittyc_eqns);
-    jittyc_eqns = (ATermList *) realloc(jittyc_eqns,num_opids*sizeof(ATermList));
-    for (int i=old_opids; i<num_opids; i++)
-    {
-	    int2term[i] = NULL;
-	    jittyc_eqns[i] = NULL;
-    }
-    ATprotectArray((ATerm *) jittyc_eqns,num_opids);
-
-    ATermList l = ATtableKeys(term2int);
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      int i = ATgetInt((ATermInt) ATtableGet(term2int,ATgetFirst(l)));
-      if ( i >= old_opids )
-      {
-	      int2term[i] = ATAgetFirst(l);
-	      jittyc_eqns[i] = NULL;
-      }
-    }
-  }
+  if ( old_opids != num_opids )
+    need_rebuild = true;
 
   return r;
 }
 
 ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm t)
 {
+  if ( need_rebuild )
+    BuildRewriteSystem();
+
 	if ( ATisInt(t) )
 	{
 		return int2term[ATgetInt((ATermInt) t)];
@@ -2838,17 +2814,45 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   }
   //PRINT_AR
 }
+                
+bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
+{
+  ATermList n;
+
+  try
+  {
+    CheckRewriteRule(Rule);
+  } catch ( std::runtime_error &e ) {
+    gsWarningMsg("%s\n",e.what());
+    return false;
+  }
+  
+  need_rebuild = true;
+
+  ATermAppl u = (ATermAppl) toInnerc(toInner(ATAgetArgument(Rule,2),true));
+
+  if ( (n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL )
+  {
+    n = ATmakeList0();
+  }
+  n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(Rule,0),(ATerm) toInner(ATAgetArgument(Rule,1),true),(ATerm) u,(ATerm) toInner(ATAgetArgument(Rule,3),true)));
+  ATtablePut(tmp_eqns,ATgetArgument(u,0),(ATerm) n);
+
+  return true;
+}
+
+bool RewriterCompilingJitty::removeRewriteRule(ATermAppl Rule)
+{
+  return false;
+}
+
 
 void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataSpec)
 {
-  ATermList l,n;
-  ATermTable tmp_eqns;
-  ATermInt i;
-  int j;
-  FILE *f;
-  char *s,*t;
-  void *h;
+  ATermList l;
 
+  made_files = false;
+  need_rebuild = true;
 
   tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
 
@@ -2859,23 +2863,37 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataSpec)
   l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    try
-    {
-      CheckRewriteRule(ATAgetFirst(l));
-    } catch ( std::runtime_error &e ) {
-      gsWarningMsg("%s\n",e.what());
-      continue;
-    }
-
-    ATermAppl u = (ATermAppl) toInnerc(toInner(ATAgetArgument(ATAgetFirst(l),2),true));
-
-    if ( (n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL )
-    {
-      n = ATmakeList0();
-    }
-    n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) u,(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
-    ATtablePut(tmp_eqns,ATgetArgument(u,0),(ATerm) n);
+    addRewriteRule(ATAgetFirst(l));
   }
+
+  int2term = NULL;
+  jittyc_eqns = NULL;
+  int2ar_idx = NULL;
+  ar = NULL;
+}
+
+static void cleanup_file(char *f)
+{
+  if ( unlink(f) )
+  {
+	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
+  }
+  free(f);
+}
+
+void RewriterCompilingJitty::BuildRewriteSystem()
+{
+  ATermList l;
+  ATermInt i;
+  int j;
+  FILE *f;
+  char *s,*t;
+  void *h;
+
+  free(int2term);
+  free(jittyc_eqns);
+  free(int2ar_idx);
+  free(ar);
 
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
@@ -2906,8 +2924,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataSpec)
       ar_size += (arity*(arity+1))/2;
     }
   }
-
-  ATtableDestroy(tmp_eqns);
 
 #ifdef EXTEND_NFS
   fill_always_rewrite_array();
@@ -3639,39 +3655,43 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataSpec)
 
   so_rewr_init();
 
+  for (ATermList keys=ATtableKeys(subst_store); !ATisEmpty(keys); keys=ATgetNext(keys))
+  {
+    so_set_subst((ATermAppl) ATgetFirst(keys),ATtableGet(subst_store,ATgetFirst(keys)));
+  }
+
+  need_rebuild = false;
+#ifndef NDEBUG
+  if ( !gsDebug )
+#endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+#ifndef NDEBUG
+  } else {
+    made_files = true;
+#endif
+  }
+  
   free(t);
   free(s);
-}
-
-static void cleanup_file(char *f)
-{
-  if ( unlink(f) )
-  {
-	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
-  }
-  free(f);
 }
 
 RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataSpec)
 {
   term2int = ATtableCreate(100,75);
+  subst_store = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifndef NDEBUG
-  if (!gsDebug)
-#endif
-  { cleanup_file(file_c);
-    cleanup_file(file_o);
-    cleanup_file(file_so);
-  }
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
   finalise_common();
+  ATtableDestroy(subst_store);
   ATtableDestroy(term2int);
 #ifndef NDEBUG
-  if (gsDebug)
+  if ( made_files )
   { cleanup_file(file_c);
     cleanup_file(file_o);
     cleanup_file(file_so);
@@ -3685,6 +3705,9 @@ ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
   { return ATempty;
   }
 
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   return ATinsertA(
            rewriteInternalList(ATgetNext(l)),
            so_rewr(ATAgetFirst(l)));
@@ -3695,6 +3718,9 @@ ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
         /*gsVerboseMsg("Rewriting term: %T\n\n", Term);
         gsVerboseMsg("toRewriteFormat(Term): %T\n\n", toRewriteFormat(Term));
         gsVerboseMsg("fromInner(toRewriteFormat(Term)): %T\n\n\n", fromRewriteFormat(toRewriteFormat(Term)));*/
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
 }
 
@@ -3703,6 +3729,9 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
 /*gsfprintf(stderr,"in: %T\n",Term);
 gsfprintf(stderr,"in: %T\n",fromRewriteFormat(Term));
 gsfprintf(stderr,"in: %P\n",fromRewriteFormat(Term));*/
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 /*gsfprintf(stderr,"out: %T\n",a);
 gsfprintf(stderr,"out: %T\n",fromRewriteFormat(a));
@@ -3713,21 +3742,25 @@ gsfprintf(stderr,"out: %P\n",fromRewriteFormat(a));*/
 void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
+  ATtablePut(subst_store, (ATerm) Var, Expr);
 }
 
 ATerm RewriterCompilingJitty::getSubstitutionInternal(ATermAppl Var)
 {
-  return so_get_subst(Var);
+  return ATtableGet(subst_store, (ATerm) Var);
+//  return so_get_subst(Var);
 }
 
 void RewriterCompilingJitty::clearSubstitution(ATermAppl Var)
 {
   so_clear_subst(Var);
+  ATtableRemove(subst_store, (ATerm) Var);
 }
 
 void RewriterCompilingJitty::clearSubstitutions()
 {
   so_clear_substs();
+  ATtableReset(subst_store);
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()

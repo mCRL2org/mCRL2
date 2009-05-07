@@ -303,43 +303,50 @@ static ATerm toInnerc(ATerm Term)
 ATerm RewriterCompilingInnermost::toRewriteFormat(ATermAppl t)
 {
   int old_opids = num_opids;
+
   ATerm r = toInnerc(toInner(t,true));
+  
+  if ( old_opids != num_opids )
+    need_rebuild = true;
 
-  if ( old_opids < num_opids )
-  {
-    ATunprotectArray((ATerm *) int2term);
-    int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
-    for (int i=old_opids; i<num_opids; i++)
-    {
-	    int2term[i] = NULL;
-    }
-    ATprotectArray((ATerm *) int2term,num_opids);
-
-    ATunprotectArray((ATerm *) innerc_eqns);
-    innerc_eqns = (ATermList *) realloc(innerc_eqns,num_opids*sizeof(ATermList));
-    for (int i=old_opids; i<num_opids; i++)
-    {
-	    innerc_eqns[i] = NULL;
-    }
-    ATprotectArray((ATerm *) innerc_eqns,num_opids);
-
-    ATermList l = ATtableKeys(term2int);
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      int i = ATgetInt((ATermInt) ATtableGet(term2int,ATgetFirst(l)));
-      if ( i >= old_opids )
-      {
-	      int2term[i] = ATAgetFirst(l);
-	      innerc_eqns[i] = NULL;
-      }
-    }
-  }
+//  if ( old_opids < num_opids )
+//  {
+//    ATunprotectArray((ATerm *) int2term);
+//    int2term = (ATermAppl *) realloc(int2term,num_opids*sizeof(ATermAppl));
+//    for (int i=old_opids; i<num_opids; i++)
+//    {
+//	    int2term[i] = NULL;
+//    }
+//    ATprotectArray((ATerm *) int2term,num_opids);
+//
+//    ATunprotectArray((ATerm *) innerc_eqns);
+//    innerc_eqns = (ATermList *) realloc(innerc_eqns,num_opids*sizeof(ATermList));
+//    for (int i=old_opids; i<num_opids; i++)
+//    {
+//	    innerc_eqns[i] = NULL;
+//    }
+//    ATprotectArray((ATerm *) innerc_eqns,num_opids);
+//
+//    ATermList l = ATtableKeys(term2int);
+//    for (; !ATisEmpty(l); l=ATgetNext(l))
+//    {
+//      int i = ATgetInt((ATermInt) ATtableGet(term2int,ATgetFirst(l)));
+//      if ( i >= old_opids )
+//      {
+//	      int2term[i] = ATAgetFirst(l);
+//	      innerc_eqns[i] = NULL;
+//      }
+//    }
+//  }
 
   return r;
 }
 
 ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm t)
 {
+  if ( need_rebuild )
+    BuildRewriteSystem();
+
 	if ( ATisInt(t) )
 	{
 		return int2term[ATgetInt((ATermInt) t)];
@@ -1474,16 +1481,56 @@ static int getArity(ATermAppl op)
   return arity;
 }
 
+bool RewriterCompilingInnermost::addRewriteRule(ATermAppl Rule)
+{
+  ATermList n;
+
+  try
+  {
+    CheckRewriteRule(Rule);
+  } catch ( std::runtime_error &e ) {
+    gsWarningMsg("%s\n",e.what());
+    return false;
+  }
+
+  ATerm u = toInner(ATAgetArgument(Rule,2),true);
+  ATerm head;
+  ATermList args;
+
+  if ( ATisInt(u) )
+  {
+          head = u;
+          args = ATmakeList0();
+  } else {
+          head = ATgetFirst((ATermList) u);
+          args = ATgetNext((ATermList) u);
+  }
+  if ( (n = (ATermList) ATtableGet(tmp_eqns,head)) == NULL )
+  {
+    n = ATempty;
+  }
+  n = ATinsert(n,
+      	(ATerm) ATmakeList4(
+      		ATgetArgument(Rule,0),
+      		toInner(ATAgetArgument(Rule,1),true),
+      		(ATerm) args,
+      		toInner(ATAgetArgument(Rule,3),true)));
+  ATtablePut(tmp_eqns,head,(ATerm) n);
+
+  return true;
+}
+
+bool RewriterCompilingInnermost::removeRewriteRule(ATermAppl Rule)
+{
+  return false;
+}
+
 void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
 {
-  ATermList l,n;
-  ATermTable tmp_eqns;
-  ATermInt i;
-  int j;
-  FILE *f;
-  char *s,*t;
-  void *h;
-
+  ATermList l;
+  
+  made_files = false;
+  need_rebuild = true;
 
   tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
 
@@ -1491,60 +1538,36 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
 
   true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
 
-/*&  l = opid_eqns;
-//  gsfprintf(stderr,"OPIDEQNS %T\n\n",l);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    // XXX only adds the last rule where lhs is an opid; this might go "wrong" if
-    // this rule is removed later
-    ATtablePut(
-      tmp_eqns,
-      OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),
-      (ATerm) ATmakeList1((ATerm)
-                ATmakeList4(
-                  (ATerm) ATmakeList0(),
-                  toInner(ATAgetArgument(ATAgetFirst(l),1),true),   // condition.
-                  (ATerm) ATmakeList0(),
-                  toInner(ATAgetArgument(ATAgetFirst(l),3),true)))); // rhs.
-  }
-
-  l = dataappl_eqns;*/
-//  gsfprintf(stderr,"DATAAPPL_EQNS %T\n\n",l);
   l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    try
-    {
-      CheckRewriteRule(ATAgetFirst(l));
-    } catch ( std::runtime_error &e ) {
-      gsWarningMsg("%s\n",e.what());
-      continue;
-    }
-
-    ATerm u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
-    ATerm head;
-    ATermList args;
-
-    if ( ATisInt(u) )
-    {
-	    head = u;
-	    args = ATmakeList0();
-    } else {
-	    head = ATgetFirst((ATermList) u);
-	    args = ATgetNext((ATermList) u);
-    }
-    if ( (n = (ATermList) ATtableGet(tmp_eqns,head)) == NULL )
-    {
-      n = ATempty;
-    }
-    n = ATinsert(n,
-		(ATerm) ATmakeList4(
-			ATgetArgument(ATAgetFirst(l),0),
-			toInner(ATAgetArgument(ATAgetFirst(l),1),true),
-			(ATerm) args,
-			toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
-    ATtablePut(tmp_eqns,head,(ATerm) n);
+    addRewriteRule(ATAgetFirst(l));
   }
+
+  int2term = NULL;
+  innerc_eqns = NULL;
+}
+
+static void cleanup_file(char *f)
+{
+  if ( unlink(f) )
+  {
+	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
+  }
+  free(f);
+}
+
+void RewriterCompilingInnermost::BuildRewriteSystem()
+{
+  ATermList l;
+  ATermInt i;
+  int j;
+  FILE *f;
+  char *s,*t;
+  void *h;
+
+  free(int2term);
+  free(innerc_eqns);
 
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
@@ -2205,39 +2228,43 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
 
   so_rewr_init();
 
+  for (ATermList keys=ATtableKeys(subst_store); !ATisEmpty(keys); keys=ATgetNext(keys))
+  {
+    so_set_subst((ATermAppl) ATgetFirst(keys),ATtableGet(subst_store,ATgetFirst(keys)));
+  }
+
+  need_rebuild = false;
+#ifndef NDEBUG
+  if ( !gsDebug )
+#endif
+  { cleanup_file(file_c);
+    cleanup_file(file_o);
+    cleanup_file(file_so);
+#ifndef NDEBUG
+  } else {
+    made_files = true;
+#endif
+  }
+
   free(t);
   free(s);
-}
-
-static void cleanup_file(char *f)
-{
-  if ( unlink(f) )
-  {
-	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
-  }
-  free(f);
 }
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataSpec)
 {
   term2int = ATtableCreate(100,75);
+  subst_store = ATtableCreate(100,75);
   initialise_common();
   CompileRewriteSystem(DataSpec);
-#ifndef NDEBUG
-  if (!gsDebug)
-#endif
-  { cleanup_file(file_c);
-    cleanup_file(file_o);
-    cleanup_file(file_so);
-  }
 }
 
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
 {
   finalise_common();
   ATtableDestroy(term2int);
+  ATtableDestroy(subst_store);
 #ifndef NDEBUG
-  if (gsDebug)
+  if ( made_files )
   { cleanup_file(file_c);
     cleanup_file(file_o);
     cleanup_file(file_so);
@@ -2251,6 +2278,9 @@ ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList l)
   { return ATempty;
   }
 
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   return ATinsertA(
            rewriteInternalList(ATgetNext(l)),
            so_rewr(ATAgetFirst(l)));
@@ -2258,32 +2288,42 @@ ATermList RewriterCompilingInnermost::rewriteInternalList(ATermList l)
 
 ATermAppl RewriterCompilingInnermost::rewrite(ATermAppl Term)
 {
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
 }
 
 ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
 {
+  if ( need_rebuild )
+    BuildRewriteSystem();
+ 
   return (ATerm) so_rewr((ATermAppl) Term);
 }
 
 void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
+  ATtablePut(subst_store, (ATerm) Var, Expr);
 }
 
 ATerm RewriterCompilingInnermost::getSubstitutionInternal(ATermAppl Var)
 {
-  return so_get_subst(Var);
+  return ATtableGet(subst_store, (ATerm) Var);
+//  return so_get_subst(Var);
 }
 
 void RewriterCompilingInnermost::clearSubstitution(ATermAppl Var)
 {
   so_clear_subst(Var);
+  ATtableRemove(subst_store, (ATerm) Var);
 }
 
 void RewriterCompilingInnermost::clearSubstitutions()
 {
   so_clear_substs();
+  ATtableReset(subst_store);
 }
 
 RewriteStrategy RewriterCompilingInnermost::getStrategy()
