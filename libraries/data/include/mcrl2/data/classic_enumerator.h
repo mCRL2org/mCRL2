@@ -262,48 +262,6 @@ namespace mcrl2 {
 
         /** \brief Constructs iterator representing a sequence of expressions
          *
-         * \param[in] specification specification containing the definitions of sorts
-         * \param[in] variables the set of variables for which to find valuatations
-         * \param[in] condition the condition used for filtering generated substitutions
-         **/
-        classic_enumerator(data_specification const& specification,
-            std::set< variable_type > const& variables,
-            expression_type const& condition = sort_bool_::true_()) {
-
-          implementation_type::create(m_impl, specification, variables, condition);
-        }
-
-        /** \brief Constructs iterator representing a sequence of expressions
-         *
-         * \param[in] specification specification containing the definitions of sorts
-         * \param[in] variables the set of variables for which to find valuatations
-         * \param[in] condition the condition used for filtering generated substitutions
-         * \param[in] substitution template for the substitution that is returned
-         **/
-        classic_enumerator(data_specification const& specification,
-            std::set< variable_type > const& variables,
-            expression_type const& condition,
-            substitution_type const& substitution) {
-
-          implementation_type::create(m_impl, specification, variables, condition, substitution);
-        }
-
-        /** \brief Constructs iterator representing a sequence of expressions
-         *
-         * Convenience function for enumeration over a single variable
-         * \param[in] specification specification containing the definitions of sorts
-         * \param[in] variable the variable for which to find valuatations
-         * \param[in] condition the condition used for filtering generated substitutions
-         **/
-        classic_enumerator(data_specification const& specification,
-            variable_type const& variable,
-            expression_type const& condition = sort_bool_::true_()) {
-
-          implementation_type::create(m_impl, specification, make_set(variable), condition);
-        }
-
-        /** \brief Constructs iterator representing a sequence of expressions
-         *
          * Convenience function for enumeration over a single variable
          * \param[in] specification specification containing the definitions of sorts
          * \param[in] variable the variable for which to find valuatations

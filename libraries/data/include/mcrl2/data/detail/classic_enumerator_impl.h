@@ -193,17 +193,6 @@ namespace mcrl2 {
           }
 
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
-             data_specification const& specification, std::set< variable_type > const& v,
-             expression_type const& c, substitution_type const& s = substitution_type()) {
-
-            /// Limitations in EnumeratorStandard force passing a rewriter
-            Evaluator evaluator(specification);
-
-            create(target, boost::shared_ptr< shared_context_type >(
-                  new shared_context_type(specification, evaluator)), v, c, evaluator, s);
-          }
-
-          static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
                                std::set< variable_type > const& v, expression_type const& c,
                                Evaluator& e, substitution_type const& s = substitution_type()) {

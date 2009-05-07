@@ -137,7 +137,7 @@ namespace data {
       mutable atermpp::aterm_appl                                      m_specification;
 #else
       /// \brief for data implementation/reconstruction
-      mutable detail::rewrite_conversion_helper                        m_conversion_helper;
+      mutable boost::shared_ptr< detail::rewrite_conversion_helper >   m_conversion_helper;
 #endif
 
     protected:
@@ -275,13 +275,13 @@ namespace data {
       template < typename Expression >
       data_expression implement(Expression const& expression) const
       {
-        return m_conversion_helper.implement(expression);
+        return m_conversion_helper->implement(expression);
       }
 
       /// \brief Performs data reconstruction after rewriting (should become obsolete)
       data_expression reconstruct(atermpp::aterm_appl expression) const
       {
-        return m_conversion_helper.reconstruct(expression);
+        return m_conversion_helper->reconstruct(expression);
       }
 #endif // OLD_CONVERSION
 
@@ -313,7 +313,7 @@ namespace data {
 #ifdef OLD_CONVERSION
           m_specification(implement(d))
 #else
-          m_conversion_helper(d, *m_rewriter)
+          m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
 #endif
       {
 #ifdef OLD_CONVERSION

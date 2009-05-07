@@ -56,7 +56,9 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
          std::set< variable > const& v,
                  data_expression const& c, size_t t) {
 
-  for (classic_enumerator< > i(d, v, c); --t != 0 && i != classic_enumerator< >(); ++i) {
+  rewriter evaluator(d);
+
+  for (classic_enumerator< > i(d, v, evaluator, c); --t != 0 && i != classic_enumerator< >(); ++i) {
     std::cout << mcrl2::core::pp((*i)(c)) << std::endl;
   }
 }
@@ -152,21 +154,22 @@ void empty_test() {
   typedef classic_enumerator< mutable_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
 
   // test manual construction of evaluator with rewriter
-  data::rewriter evaluator;
+  data::data_specification specification;
+  data::rewriter           evaluator(specification);
 
   std::set< variable > variables;
 
   unsigned int count = 0;
 
   // explicit with condition evaluator and condition
-  for (enumerator_type i(data_specification(), variables, evaluator); i != enumerator_type(); ++i, ++count) {
+  for (enumerator_type i(specification, variables, evaluator); i != enumerator_type(); ++i, ++count) {
     BOOST_CHECK(i->begin() == i->end()); // trivial valuation
   }
 
   BOOST_CHECK(count == 1);
 
   // explicit with condition but without condition evaluator
-  for (enumerator_type i(data_specification(), variables); i != enumerator_type(); ++i, ++count) {
+  for (enumerator_type i(specification, variables, evaluator); i != enumerator_type(); ++i, ++count) {
     BOOST_CHECK(i->begin() == i->end()); //trivial valuation
   }
 
@@ -174,7 +177,7 @@ void empty_test() {
 
   variables.insert(variable("y", sort_nat::nat()));
 
-  for (enumerator_type i(data_specification(), variables, sort_bool_::false_()); i != enumerator_type(); ++i) {
+  for (enumerator_type i(specification, variables, evaluator, sort_bool_::false_()); i != enumerator_type(); ++i) {
     BOOST_CHECK(false);
   }
 }

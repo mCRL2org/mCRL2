@@ -155,21 +155,25 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
       }
     };
 
+    legacy_rewriter m_evaluator;
+
   public:
 
     legacy_enumerator_factory(standard_factory const& other) :
-          mcrl2::data::enumerator_factory< Enumerator >(extractor(other).get_context(), legacy_rewriter(extractor(other).get_evaluator()))
+          mcrl2::data::enumerator_factory< Enumerator >(extractor(other).get_context()),
+          m_evaluator(extractor(other).get_evaluator())
     {
     }
 
     legacy_enumerator_factory(legacy_enumerator_factory const& other) :
-          mcrl2::data::enumerator_factory< Enumerator >(other.m_enumeration_context, other.m_evaluator)
+          mcrl2::data::enumerator_factory< Enumerator >(other.m_enumeration_context),
+          m_evaluator(other.m_evaluator)
     {
     }
 
     Enumerator make(ATermList v, atermpp::aterm const& c)
     {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), c);
+      return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), m_evaluator, c);
     }
 
 
