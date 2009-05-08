@@ -738,9 +738,9 @@ std::set<data::variable> compute_free_variables(const pbes<Container>& p)
 template <typename Container, typename OutIter>
 void traverse_sort_expressions(const pbes<Container>& p, OutIter dest)
 {
-  data::traverse_sort_expressions(p.equations());
-  data::traverse_sort_expressions(p.free_variables());
-  traverse_sort_expressions(p.initial_state());
+  data::traverse_sort_expressions(p.equations(), dest);
+  data::traverse_sort_expressions(p.free_variables(), dest);
+  traverse_sort_expressions(p.initial_state(), dest);
 }
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
