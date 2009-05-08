@@ -292,7 +292,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             context_variables.insert(var);
           }
           else 
-          { throw mcrl2::runtime_error("unknown command (try ':h' for help)");
+          { throw mcrl2::runtime_error("unknown command (try 'h' for help)");
           }
         }
         catch (mcrl2::runtime_error &e)  // Catch errors in the input.
