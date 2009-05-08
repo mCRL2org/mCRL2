@@ -8,8 +8,6 @@
 //
 /// \file confluence_checker.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <cstdlib>
 #include <cstring>
 #include <string>

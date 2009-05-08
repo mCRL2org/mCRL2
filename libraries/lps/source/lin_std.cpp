@@ -9,8 +9,6 @@
 /// \file lin_std.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 /* This file contains the implementation of an mCRL2 lineariser.
 
    It is based on the implementation of the mCRL lineariser, on which work

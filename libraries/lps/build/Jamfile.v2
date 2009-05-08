@@ -3,18 +3,8 @@ project lps
        ;
 
 mcrl2-library lps
-       :
+       : implementations.cpp
          lin_std.cpp
-         binary.cpp
-         sumelm.cpp
-         suminst.cpp
-         untime.cpp
-         nextstate_standard.cpp
-         confluence_checker.cpp
-         disjointness_checker.cpp
-         invariant_checker.cpp
-         invariant_eliminator.cpp
-         data_elimination.cpp
        : <library>/libraries//data
          <include>../include
          <use>/site-config//boost

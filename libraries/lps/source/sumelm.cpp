@@ -9,8 +9,6 @@
 /// \file lpsbinary.cpp
 /// \brief
 
-#include "boost.hpp" // precompiled headers
-
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 #include <mcrl2/atermpp/aterm_list.h>

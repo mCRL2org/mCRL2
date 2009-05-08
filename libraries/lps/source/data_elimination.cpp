@@ -8,8 +8,6 @@
 //
 /// \file data_elimination.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_elimination.h"
 #include "mcrl2/lps/specification.h"

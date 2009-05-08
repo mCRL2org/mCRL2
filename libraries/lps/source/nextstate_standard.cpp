@@ -8,8 +8,6 @@
 //
 /// \file nextstate_standard.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>

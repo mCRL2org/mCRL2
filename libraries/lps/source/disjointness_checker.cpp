@@ -9,8 +9,6 @@
 /// \file source/disjointness_checker.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 #include "mcrl2/lps/disjointness_checker.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"

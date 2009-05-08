@@ -8,8 +8,6 @@
 //
 // \file: mcrl2/lps/untime.cpp
 
-#include "boost.hpp" // precompiled headers
-
 //Aterms
 #include <mcrl2/atermpp/aterm.h>
 

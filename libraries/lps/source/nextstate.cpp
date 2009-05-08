@@ -8,8 +8,6 @@
 //
 /// \file libnextstate.cpp
 
-#include "boost.hpp" // precompiled headers
-
 #include <aterm2.h>
 #include <mcrl2/lps/nextstate.h>
 #include <mcrl2/lps/nextstate/standard.h>

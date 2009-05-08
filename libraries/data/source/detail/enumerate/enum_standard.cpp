@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <cstdlib>
 #include <sstream>
 #include <aterm2.h>
@@ -399,6 +397,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                                 error = true;
                                 fs_reset();
                         }
+
                         for (; !ATisEmpty(l); l=ATgetNext(l))
                         {
                                 ATermAppl cons_tup = (ATermAppl) ATgetFirst(l);

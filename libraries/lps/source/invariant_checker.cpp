@@ -9,8 +9,6 @@
 /// \file source/invariant_checker.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
-
 #include <sstream>
 #include <cstring>
 
