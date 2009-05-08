@@ -122,7 +122,6 @@ private:
     play_func_enum timer_func;
     int timer_interval;
     ATerm current_state;
-    mcrl2::lps::specification m_specification;
 
 private:
     // WDR: handler declarations for XSimMain

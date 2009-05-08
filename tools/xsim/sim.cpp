@@ -27,7 +27,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
@@ -157,14 +156,33 @@ int main(int argc, char **argv)
       return EXIT_SUCCESS;
     }
 
-    mcrl2::lps::specification lps_specification;
+    FILE *SpecStream = fopen(options.lps_file_argument.c_str(), "rb");
 
-    lps_specification.load(options.lps_file_argument);
+    if ( SpecStream == NULL )
+    {
+      throw mcrl2::runtime_error("could not open input file '" +
+                     options.lps_file_argument + "' for reading\n");
+    }
+    ATermAppl Spec = (ATermAppl) ATreadFromFile(SpecStream);
+    ATprotectAppl(&Spec);
+    if ( Spec == NULL )
+    {
+      fclose(SpecStream);
+      throw mcrl2::runtime_error("could not read LPS from '" +
+                     options.lps_file_argument + "'\n");
+    }
+    assert(Spec != NULL);
+    if (!gsIsLinProcSpec(Spec)) {
+      fclose(SpecStream);
+      throw mcrl2::runtime_error("'" +
+                     options.lps_file_argument + "' does not contain an LPS\n");
+    }
+    assert(gsIsLinProcSpec(Spec));
 
     StandardSimulator simulator;
     simulator.rewr_strat = options.rewrite_strategy;
     simulator.use_dummies = options.use_dummies;
-    simulator.LoadSpec(lps_specification);
+    simulator.LoadSpec(Spec);
 
     gsMessage("initial state: [ ");
     PrintState(simulator.GetState(),simulator.GetNextState());

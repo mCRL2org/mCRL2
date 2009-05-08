@@ -12,10 +12,9 @@
 #define __simulator_H__
 
 #include <string>
-#include <memory>
-#include "aterm2.h"
+#include <aterm2.h>
 
-#include "mcrl2/lps/nextstate.h"
+#include <mcrl2/lps/nextstate.h>
 #include "mcrl2/data/rewriter.h"
 #include "simbase.h"
 
@@ -26,7 +25,7 @@ public:
     StandardSimulator();
     virtual ~StandardSimulator();
 
-    virtual void LoadSpec(mcrl2::lps::specification const& spec);
+    virtual void LoadSpec(ATermAppl spec);
     /* Load mCRL2 specification spec for simulation */
     virtual void LoadView(const std::string &filename);
     /* Load DLL filename as simulation view */
@@ -86,8 +85,6 @@ private:
     ATermList ecart;
     viewlist views;
     ATermIndexedSet seen_states;
-    std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
-    std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > > m_enumerator_factory;
     NextState *nextstate;
     NextStateGenerator *nextstategen;
 

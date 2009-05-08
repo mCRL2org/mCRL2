@@ -340,13 +340,25 @@ void XSimMain::SetInteractiveness(bool interactive)
 
 void XSimMain::LoadFile(const wxString &filename)
 {
-    try
+    FILE *f;
+
+    if ( (f = fopen(filename.fn_str(),"rb")) == NULL )
     {
-       m_specification.load(std::string(filename.fn_str()));
+	    wxMessageDialog msg(this, wxT("Failed to open file."),
+		wxT("Error"), wxOK|wxICON_ERROR);
+	    msg.ShowModal();
+	    return;
     }
-    catch (std::exception const& e)
+
+    ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
+    fclose(f);
+
+    if ( (Spec == NULL) || !gsIsLinProcSpec(Spec) )
     {
-       wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"), wxOK|wxICON_ERROR).ShowModal();
+	    wxMessageDialog msg(this, wxT("Invalid file."),
+		wxT("Error"), wxOK|wxICON_ERROR);
+	    msg.ShowModal();
+	    return;
     }
 
     SetTitle(base_title+wxT(" - ")+filename);
@@ -354,7 +366,7 @@ void XSimMain::LoadFile(const wxString &filename)
     ldtrcitem->Enable(true);
     svtrcitem->Enable(true);
 
-    simulator->LoadSpec(m_specification);
+    simulator->LoadSpec(Spec);
 }
 
 void XSimMain::LoadDLL(const wxString &filename)
