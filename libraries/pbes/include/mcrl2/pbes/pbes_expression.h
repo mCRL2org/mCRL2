@@ -27,7 +27,7 @@
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
-#include "mcrl2/pbes/detail/sort_expression_visitor.h"
+#include "mcrl2/pbes/detail/pbes_sort_expression_visitor.h"
 
 namespace mcrl2 {
 
@@ -1000,7 +1000,7 @@ namespace pbes_system {
 template <typename OutIter>
 void traverse_sort_expressions(const pbes_expression& p, OutIter dest)
 {
-  detail::sort_expression_visitor<pbes_expression> visitor;
+  detail::pbes_sort_expression_visitor<pbes_expression> visitor;
   visitor.visit(p);
   for (std::set<data::sort_expression>::iterator i = visitor.result.begin(); i != visitor.result.end(); ++i)
   {

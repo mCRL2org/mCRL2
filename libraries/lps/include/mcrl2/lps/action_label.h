@@ -105,11 +105,7 @@ bool is_action_label(atermpp::aterm_appl t)
 template <typename OutIter>
 void traverse_sort_expressions(const action_label& l, OutIter dest)
 {
-  const data::sort_expression_list& s = l.sorts();
-  for (data::sort_expression_list::const_iterator i = s.begin(); i != s.end(); ++i)
-  {
-    *dest++ = *i;
-  }
+  data::traverse_sort_expressions(l.sorts(), dest);
 }
 
 } // namespace lps

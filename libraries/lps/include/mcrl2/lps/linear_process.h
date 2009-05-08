@@ -342,25 +342,13 @@ template <typename OutIter>
 void traverse_sort_expressions(const linear_process& p, OutIter dest)
 {
   // free variables
-  const data::variable_list& v = p.free_variables();
-  for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    *dest++ = i->sort();
-  }
+  data::traverse_sort_expressions(p.free_variables(), dest);
 
   // process parameters
-  const data::variable_list& w = p.process_parameters();
-  for (data::variable_list::const_iterator i = w.begin(); i != w.end(); ++i)
-  {
-    *dest++ = i->sort();
-  }
+  data::traverse_sort_expressions(p.process_parameters(), dest);
 
   // summands
-  const summand_list& s = p.summands();
-  for (summand_list::const_iterator i = s.begin(); i != s.end(); ++i)
-  {
-    traverse_sort_expressions(*i, dest);
-  }
+  data::traverse_sort_expressions(p.summands(), dest);
 }
 
 } // namespace lps

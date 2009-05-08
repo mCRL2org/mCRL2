@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/sort_expression_visitor.h
-/// \brief Add your file description here.
+/// \file mcrl2/pbes/detail/pbes_sort_expression_visitor.h
+/// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_SORT_EXPRESSION_VISITOR_H
-#define MCRL2_PBES_DETAIL_SORT_EXPRESSION_VISITOR_H
+#ifndef MCRL2_PBES_DETAIL_PBES_SORT_EXPRESSION_VISITOR_H
+#define MCRL2_PBES_DETAIL_PBES_SORT_EXPRESSION_VISITOR_H
 
 #include <set>
 #include "mcrl2/data/sort_expression.h"
@@ -23,7 +23,7 @@ namespace pbes_system {
 namespace detail {
 
 template <typename Term>
-struct sort_expression_visitor: public pbes_expression_visitor<Term>
+struct pbes_sort_expression_visitor: public pbes_expression_visitor<Term>
 {
   typedef pbes_expression_visitor<Term> super;
   typedef typename super::term_type term_type;
@@ -49,4 +49,4 @@ struct sort_expression_visitor: public pbes_expression_visitor<Term>
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_SORT_EXPRESSION_VISITOR_H
+#endif // MCRL2_PBES_DETAIL_PBES_SORT_EXPRESSION_VISITOR_H

@@ -377,14 +377,9 @@ void traverse_sort_expressions(const multi_action& m, OutIter dest)
 {
   if (m.has_time())
   {
-    *dest++ = m.time().sort();
+    data::traverse_sort_expressions(m.time(), dest);
   }
-
-  const action_list& a = m.actions();
-  for (action_list::const_iterator i = a.begin(); i != a.end(); ++i)
-  {
-    traverse_sort_expressions(*i, dest);
-  }
+  data::traverse_sort_expressions(m.actions(), dest);
 }
 
 } // namespace lps

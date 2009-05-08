@@ -314,11 +314,7 @@ template <typename OutIter>
 void traverse_sort_expressions(const specification& spec, OutIter dest)
 {
   // action labels
-  const action_label_list l = spec.action_labels();
-  for (action_label_list::const_iterator i = l.begin(); i != l.end(); ++i)
-  {
-    traverse_sort_expressions(*i, dest);
-  }
+  data::traverse_sort_expressions(spec.action_labels(), dest);
 
   // linear process
   traverse_sort_expressions(spec.process(), dest);

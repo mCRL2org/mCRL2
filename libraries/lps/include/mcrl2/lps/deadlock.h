@@ -91,7 +91,7 @@ void traverse_sort_expressions(const deadlock& d, OutIter dest)
 {
   if (d.has_time())
   {
-    *dest++ = d.time().sort();
+    data::traverse_sort_expressions(d.time(), dest);
   }
 }
 

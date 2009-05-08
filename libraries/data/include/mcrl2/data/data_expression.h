@@ -175,6 +175,14 @@ namespace mcrl2 {
       return convert< data_expression_list >(r);
     }
 
+    /// \brief Traverses the data expression, and writes all sort expressions
+    /// that are encountered to the output range [dest, ...).
+    template <typename OutIter>
+    void traverse_sort_expressions(const data_expression& d, OutIter dest)
+    {
+      *dest++ = d.sort();     
+    }
+
   } // namespace data
 
 } // namespace mcrl2

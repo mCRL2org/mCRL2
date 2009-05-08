@@ -102,6 +102,14 @@ namespace lps {
       }
   };
 
+  /// \brief Traverses the variable list, and writes all sort expressions
+  /// that are encountered to the output range [dest, ...).
+  template <typename OutIter>
+  void traverse_sort_expressions(const process_identifier& pi, OutIter dest)
+  {
+    data::traverse_sort_expressions(pi.sorts(), dest);
+  }
+
   /// \brief Process equation
   // <ProcEqn> ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
   class process_equation: public atermpp::aterm_appl

@@ -125,12 +125,7 @@ template <typename OutIter>
 void traverse_sort_expressions(const action& a, OutIter dest)
 {
   traverse_sort_expressions(a.label(), dest);
-  
-  const data::data_expression_list& d = a.arguments();
-  for (data::data_expression_list::const_iterator i = d.begin(); i != d.end(); ++i)
-  {
-    *dest++ = i->sort();
-  }
+  data::traverse_sort_expressions(a.arguments(), dest);
 }
 
 } // namespace lps

@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
+#include "mcrl2/data/detail/traverse_sort_expressions.h"
 #include "mcrl2/data/detail/convert.h"
 
 namespace mcrl2 {
@@ -151,6 +152,17 @@ namespace mcrl2 {
     {
       return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
     }
+
+    /// \brief Traverses the sort expression, and writes all sort expressions
+    /// that are encountered to the output range [dest, ...).
+    template <typename OutIter>
+    void traverse_sort_expressions(const sort_expression& s, OutIter dest)
+    {
+      *dest++ = s;
+    }
+    
+    // Bring the traversal function for containers in scope.
+    using data::detail::traverse_sort_expressions;
 
   } // namespace data
 

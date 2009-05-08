@@ -191,6 +191,15 @@ namespace detail {
       return convert< assignment_vector >(boost::make_iterator_range(r));
     }
 
+    /// \brief Traverses the assignment, and writes all sort expressions
+    /// that are encountered to the output range [dest, ...).
+    template <typename OutIter>
+    void traverse_sort_expressions(const assignment& a, OutIter dest)
+    {
+      *dest++ = a.lhs().sort();
+      *dest++ = a.rhs().sort(); // TODO: can this be removed?
+    }
+
   } // namespace data
 
 } // namespace mcrl2
