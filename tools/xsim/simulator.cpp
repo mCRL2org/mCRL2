@@ -28,7 +28,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "simulator.h"
 
-using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
@@ -81,21 +80,15 @@ StandardSimulator::~StandardSimulator()
 	ATunprotectList(&ecart);
 }
 
-void StandardSimulator::LoadSpec(ATermAppl spec)
+void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
 {
-    assert( (spec != NULL) && gsIsLinProcSpec(spec) );
-
-    ATermList l = ATLgetArgument(ATAgetArgument(spec,2),1);
-    state_vars = ATmakeList0();
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-	    state_vars = ATinsert(state_vars,ATgetFirst(l));
-    }
-    state_vars = ATreverse(state_vars);
+    state_vars = spec.process().process_parameters();
 
     delete nextstategen;
     delete nextstate;
-    nextstate = createNextState(mcrl2::lps::specification(spec),!use_dummies,GS_STATE_VECTOR,rewr_strat);
+    m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
+    m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), *m_rewriter));
+    nextstate = createNextState(spec, *m_enumerator_factory, !use_dummies,GS_STATE_VECTOR);
     nextstategen = NULL;
     initial_state = nextstate->getInitialState();
 
@@ -104,7 +97,7 @@ void StandardSimulator::LoadSpec(ATermAppl spec)
     Reset(initial_state);
 }
 
-void StandardSimulator::LoadView(const string &filename)
+void StandardSimulator::LoadView(const std::string &filename)
 {
   gsErrorMsg("cannot open DLLs without wxWidgets\n");
 }
@@ -406,7 +399,7 @@ ATermList StandardSimulator::traceRedo()
 	return ATLgetFirst(trace);
 }
 
-void StandardSimulator::LoadTrace(const string &filename)
+void StandardSimulator::LoadTrace(const std::string &filename)
 {
 	Trace tr(filename);
 
@@ -415,7 +408,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 
 	if ( (state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL) )
 	{
-                string s = "initial state of trace is not a valid state for this specification";
+          std::string s = "initial state of trace is not a valid state for this specification";
                 throw s;
 	}
 
@@ -453,22 +446,22 @@ void StandardSimulator::LoadTrace(const string &filename)
 		    }
 		    if ( !found )
 		    {
-                            stringstream ss;
-                            ss << "could not perform action " << idx << " (";
-                            PrintPart_CXX(ss,(ATerm) act,ppDefault);
-                            ss << ") from trace";
-                            throw ss.str();
+                      std::stringstream ss;
+                      ss << "could not perform action " << idx << " (";
+                      PrintPart_CXX(ss,(ATerm) act,ppDefault);
+                      ss << ") from trace";
+                      throw ss.str();
 		    }
 	    } else {
 		    // Perhaps trace was in plain text format; try pp-ing actions
 		    // XXX Only because libtrace cannot parse text (yet)
 		    ATermAppl Transition;
 		    ATerm NewState;
-		    string s(ATgetName(ATgetAFun(act)));
+                    std::string s(ATgetName(ATgetAFun(act)));
 		    bool found = false;
 		    while ( nextstategen->next(&Transition,&NewState) )
 		    {
-			    string t = PrintPart_CXX((ATerm) Transition, ppDefault);
+                      std::string t = PrintPart_CXX((ATerm) Transition, ppDefault);
 			    if ( s == t )
 			    {
 				    if ( (tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL) )
@@ -482,7 +475,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 		    }
 		    if ( !found )
 		    {
-                            stringstream ss;
+                      std::stringstream ss;
                             ss << "could not perform action " << idx << " (" << ATwriteToString((ATerm) act) << ") from trace";
                             throw ss.str();
 		    }
@@ -500,7 +493,7 @@ void StandardSimulator::LoadTrace(const string &filename)
 	}
 }
 
-void StandardSimulator::SaveTrace(const string &filename)
+void StandardSimulator::SaveTrace(const std::string &filename)
 {
 	Trace tr;
 	if ( !ATisEmpty(trace) )

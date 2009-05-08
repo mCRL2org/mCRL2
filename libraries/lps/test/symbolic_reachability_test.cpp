@@ -218,8 +218,11 @@ int test_main(int argc, char** argv) {
 
     model = convert(model);
 
+    data::rewriter        rewriter(model.data());
+    data::enumerator_factory< data::classic_enumerator< > > enumerator_factory(model.data(), rewriter);
+
     // Note the second argument that specifies that don't care variables are not treated specially
-    NextState* explorer = createNextState(model, false);
+    NextState* explorer = createNextState(model, enumerator_factory, false);
 
     std::stack< ATerm >     stack;
     atermpp::set< ATerm >   known;

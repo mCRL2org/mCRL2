@@ -140,46 +140,45 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
     struct extractor : public standard_factory
     {
-      extractor(standard_factory const& other) : standard_factory(other)
+      extractor(standard_factory& other) : standard_factory(other)
       {
       }
 
-      boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type > const& get_context()
+      standard_factory::evaluator_type get_evaluator()
       {
-        return this->m_enumeration_context;
-      }
-
-      standard_factory::evaluator_type& get_evaluator()
-      {
-        return const_cast< standard_factory::evaluator_type& >(this->m_evaluator);
+        return *(standard_factory::m_evaluator);
       }
     };
 
-    legacy_rewriter m_evaluator;
+    legacy_rewriter m_local_evaluator;
+
+    legacy_enumerator_factory(standard_factory::evaluator_type const& evaluator) :
+          m_local_evaluator(evaluator)
+    {
+      this->m_evaluator = &m_local_evaluator;
+    }
 
   public:
 
-    legacy_enumerator_factory(standard_factory const& other) :
-          mcrl2::data::enumerator_factory< Enumerator >(extractor(other).get_context()),
-          m_evaluator(extractor(other).get_evaluator())
+    static legacy_enumerator_factory create(standard_factory& other)
     {
+      return legacy_enumerator_factory(extractor(other).get_evaluator());
     }
 
     legacy_enumerator_factory(legacy_enumerator_factory const& other) :
-          mcrl2::data::enumerator_factory< Enumerator >(other.m_enumeration_context),
-          m_evaluator(other.m_evaluator)
+          m_local_evaluator(other.m_local_evaluator)
     {
     }
 
-    Enumerator make(ATermList v, atermpp::aterm const& c)
+    Enumerator make(ATermList v, ATerm c)
     {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), m_evaluator, c);
+      return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), atermpp::aterm(c));
     }
 
 
     legacy_rewriter& get_evaluator()
     {
-      return const_cast< legacy_rewriter& >(this->m_evaluator);
+      return m_local_evaluator;
     }
 };
 
@@ -280,7 +279,7 @@ struct ns_info
             mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
             legacy_rewriter, legacy_selector > enumerator_type;
 
-        typedef mcrl2::data::enumerator_factory< enumerator_type > enumerator_factory_type;
+        typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
         mcrl2::data::data_specification const&       m_specification;
         legacy_enumerator_factory< enumerator_type > m_enumerator_factory;
@@ -310,9 +309,9 @@ struct ns_info
         }
 
         ns_info(mcrl2::data::data_specification const& specification,
-                mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& factory) :
+                mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
           m_specification(specification),
-          m_enumerator_factory(factory),
+          m_enumerator_factory(enumerator_factory_type::create(factory)),
           m_rewriter(m_enumerator_factory.get_evaluator()) {
 
           // Configure selector to compare with term that represents false
@@ -365,7 +364,7 @@ class NextStateStandard : public NextState
 	friend class NextStateGeneratorStandard;
 	public:
                 typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory_type;
-		NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type const& e);
+		NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type& e);
 		~NextStateStandard();
 
 		void prioritise(const char *action);

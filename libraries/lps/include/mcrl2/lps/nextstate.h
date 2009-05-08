@@ -234,44 +234,20 @@ class NextState
 /**
  * \brief Create a NextState object.
  * \param spec                A mCRL2 LPS containing the process to be explored.
- * \param allow_free_vars     Whether to allow free variables or to substitute
- *                            them  with dummy values.
- * \param state_format        Format to store the state in (internally).
  * \param e                   Enumerator to use for finding solutions of
  *                            conditions.
- * \param clean_up_enumerator Whether or not to delete the enumerator object on
- *                            destruction of the returned NextState object.
- * \param strategy            The strategy to use for state exploration.
- * \return A NextState object with the given parameters.
- **/
-NextState *createNextState(
-                mcrl2::lps::specification const& spec,
-		bool allow_free_vars,
-		int state_format,
-		mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > const& e,
-		NextStateStrategy strategy = nsStandard
-		);
-
-/**
- * \brief Create a NextState object.
- * \param spec                A mCRL2 LPS containing the process to be explored.
  * \param allow_free_vars     Whether to allow free variables or to substitute
  *                            them  with dummy values.
  * \param state_format        Format to store the state in (internally).
- * \param rewrite_strategy    The strategy to use for rewriting data
- *                            expressions.
- * \param enumerator_strategy The strategy to use for enumerating solutions of
- *                            conditions.
  * \param strategy            The strategy to use for state exploration.
  * \return A NextState object with the given parameters.
  **/
 NextState *createNextState(
                 mcrl2::lps::specification const& spec,
-		bool allow_free_vars = true,
+		mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& e,
+		bool allow_free_vars,
 		int state_format = GS_STATE_VECTOR,
-		mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::rewriter::jitty,
-		NextStateStrategy strategy = nsStandard,
-		mcrl2::data::detail::EnumerateStrategy enumerator_strategy = mcrl2::data::detail::ENUM_STANDARD
+		NextStateStrategy strategy = nsStandard
 		);
 
 #endif

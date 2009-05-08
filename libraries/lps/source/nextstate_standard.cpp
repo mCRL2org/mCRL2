@@ -477,7 +477,7 @@ ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList
 }
 
 NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format,
-         enumerator_factory_type const& enumerator_factory) : info(spec.data(), enumerator_factory)
+         enumerator_factory_type& enumerator_factory) : info(spec.data(), enumerator_factory)
 {
         ATermList l,m,n,free_vars;
 
@@ -941,9 +941,9 @@ ATerm NextStateGeneratorStandard::get_state() const
 
 NextState *createNextState(
   mcrl2::lps::specification const& spec,
+  NextStateStandard::enumerator_factory_type& e,
   bool allow_free_vars,
   int state_format,
-  NextStateStandard::enumerator_factory_type const& e,
   NextStateStrategy strategy
 )
 {

@@ -225,11 +225,14 @@ struct lps2torx_tool {
     gsVerboseMsg("initialising...\n");
     torx_data td(10000);
 
+    data::rewriter rewriter(lps_specification.data(), strategy);
+    mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
+
     NextState *nstate = createNextState(
       lps_specification,
+      enumerator_factory,
       !usedummies,
-      stateformat,
-      strategy
+      stateformat
     );
 
     ATerm initial_state = nstate->getInitialState();
