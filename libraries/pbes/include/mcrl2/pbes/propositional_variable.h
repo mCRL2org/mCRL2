@@ -98,7 +98,7 @@ typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 template <typename OutIter>
 void traverse_sort_expressions(const propositional_variable& v, OutIter dest)
 {
-  data::traverse_sort_expressions(v.parameters());
+  data::traverse_sort_expressions(v.parameters(), dest);
 }
 
 /// \brief Returns true if the term t is a propositional variable declaration
@@ -194,7 +194,7 @@ typedef atermpp::term_list<propositional_variable_instantiation> propositional_v
 template <typename OutIter>
 void traverse_sort_expressions(const propositional_variable_instantiation& v, OutIter dest)
 {
-  data::traverse_sort_expressions(v.parameters());
+  data::traverse_sort_expressions(v.parameters(), dest);
 }
 
 /// \brief Returns true if the term t is a propositional variable instantiation
