@@ -251,7 +251,7 @@ namespace lps {
         atermpp::aterm_appl::iterator i = t.begin();
         m_data            = atermpp::aterm_appl(*i++);
         m_action_labels   = atermpp::aterm_appl(*i++)(0);
-        process_equation_list l = atermpp::aterm_list(*i++);
+        process_equation_list l = atermpp::aterm_appl(*i++)(0);
         m_initial_process = atermpp::aterm_appl(*i);
         m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
       }
