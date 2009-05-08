@@ -133,13 +133,11 @@ using namespace mcrl2::data::detail;
 
 // Squadt protocol interface and utility pseudo-library
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include "mcrl2/utilities/squadt_interface.h"
+#include "mcrl2/utilities/mcrl2_squadt_interface.h"
 
 class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface, public LPS_Conf_Check {
 
   private:
-
-    boost::shared_ptr < tipi::datatype::enumeration > smt_solver_enumeration;
 
   public:
 
@@ -175,12 +173,6 @@ const char* option_rewrite_strategy    = "rewrite_strategy";
 const char* option_smt_solver          = "smt_solver";
 
 squadt_interactor::squadt_interactor() {
-  tipi::datatype::enumeration< SMT_Solver_Type > smt_solver_enumeration;
-
-  smt_solver_enumeration.
-    add(solver_type_cvc_fast, "none")
-    add(solver_type_ario, "ario")
-    add(solver_type_cvc, "cvc");
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
@@ -194,7 +186,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi::datatype;
   using namespace tipi::layout::elements;
 
-  std::string infilename = c.get_input(lps_file_for_input).get_location();
+  std::string infilename = c.get_input(lps_file_for_input).location();
 
   // Set defaults for options
   if (!c.option_exists(option_generate_invariants)) {
@@ -224,7 +216,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   mcrl2::utilities::squadt::radio_button_helper < SMT_Solver_Type > solver_selector(d);
 
   // Helper for strategy selection
-  mcrl2::utilities::squadt::radio_button_helper < mcrl2::data::rewriter::strategy > strategy_selector(d);
+  //  mcrl2::utilities::squadt::radio_button_helper < mcrl2::data::rewriter::strategy > strategy_selector(d);
 
   layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
@@ -234,18 +226,20 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
         append(solver_selector.associate(solver_type_ario, "ario")).
         append(solver_selector.associate(solver_type_cvc, "CVC3", true)));
 
-  m.append(d.create< horizontal_box >().
-                append(d.create< label >().set_text("Rewrite strategy")).
-                append(strategy_selector.associate(GS_REWR_INNER, "inner")).
-#ifdef MCRL2_INNERC_AVAILABLE
-                append(strategy_selector.associate(GS_REWR_INNERC, "innerc")).
-#endif
-#ifdef MCRL2_JITTYC_AVAILABLE
-                append(strategy_selector.associate(GS_REWR_JITTY, "jitty")).
-                append(strategy_selector.associate(GS_REWR_JITTYC, "jittyc")));
-#else
-                append(strategy_selector.associate(GS_REWR_JITTY, "jitty")));
-#endif
+// Following becomes superfluous when using tool-class
+//
+//  m.append(d.create< horizontal_box >().
+//                append(d.create< label >().set_text("Rewrite strategy")).
+//                append(strategy_selector.associate(GS_REWR_INNER, "inner")).
+//#ifdef MCRL2_INNERC_AVAILABLE
+//                append(strategy_selector.associate(GS_REWR_INNERC, "innerc")).
+//#endif
+//#ifdef MCRL2_JITTYC_AVAILABLE
+//                append(strategy_selector.associate(GS_REWR_JITTY, "jitty")).
+//                append(strategy_selector.associate(GS_REWR_JITTYC, "jittyc")));
+//#else
+//                append(strategy_selector.associate(GS_REWR_JITTY, "jitty")));
+//#endif
 
   checkbox&   generate_invariants = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_generate_invariants));
   checkbox&   check_invariant     = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_check_invariant));
@@ -277,9 +271,9 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
             append(time_limit)));
 
   // Set default values for options if the configuration specifies them
-  if (c.option_exists(option_rewrite_strategy)) {
-    strategy_selector.set_selection(c.get_option_argument< mcrl2::data::rewriter::strategy >(option_rewrite_strategy, 0));
-  }
+  //if (c.option_exists(option_rewrite_strategy)) {
+  //  strategy_selector.set_selection(c.get_option_argument< mcrl2::data::rewriter::strategy >(option_rewrite_strategy, 0));
+  //}
   if (c.option_exists(option_invariant)) {
     invariant.set_text(c.get_option_argument< std::string >(option_invariant));;
   }
@@ -293,7 +287,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   m.append(d.create< label >().set_text(" ")).
     append(okay_button, layout::right);
 
-  send_display_layout(d.set_manager(m));
+  send_display_layout(d.manager(m));
 
   /* Wait for the OK button to be pressed */
   okay_button.await_change();
@@ -312,7 +306,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_output(lps_file_for_output, tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
   }
 
-  using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
+  //using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
 
   if (invariant.get_text().empty()) {
     c.remove_option(option_invariant);
@@ -327,7 +321,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
     c.add_option(option_time_limit).set_argument_value< 0, tipi::datatype::natural >(time_limit.get_text());
   }
 
-  c.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
+  // c.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
   c.get_option(option_smt_solver).set_argument_value< 0 >(solver_selector.get_selection());
 
   send_clear_display();
@@ -360,7 +354,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
 
   label& message = d.create< label >();
 
-  d.set_manager(d.create< vertical_box >().
+  d.manager(d.create< vertical_box >().
                         append(message.set_text("Linearisation in progress"), layout::left));
 
   send_display_layout(d);
