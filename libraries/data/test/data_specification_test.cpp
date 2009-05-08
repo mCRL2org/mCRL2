@@ -334,8 +334,16 @@ void test_is_certainly_finite()
   spec.add_sort(s0);
   spec.add_constructor(f);
   spec.add_constructor(g);
+
   BOOST_CHECK(spec.is_certainly_finite(s));
   BOOST_CHECK(!spec.is_certainly_finite(s0));
+
+  spec.import_system_defined_sort(sort_real_::real_());
+  BOOST_CHECK(spec.is_certainly_finite(sort_bool_::bool_()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_pos::pos()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_nat::nat()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_int_::int_()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_real_::real_()));
 
   basic_sort s1("S1");
   basic_sort s2("S2");

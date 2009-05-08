@@ -280,12 +280,6 @@ int main(int argc, char **argv) {
   MCRL2_ATERM_INIT(argc, argv)
 
   try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
-
     t_tool_options options;
 
     if (parse_command_line(argc, argv, options)) {
