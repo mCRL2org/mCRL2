@@ -1,0 +1,13 @@
+project process
+       : source-location ../source
+       ;
+
+mcrl2-library process
+       :
+       : <library>/libraries//data
+         <include>../include
+         <use>/site-config//boost
+       :
+       : <include>../include
+         <use>/site-config//boost
+       ;
