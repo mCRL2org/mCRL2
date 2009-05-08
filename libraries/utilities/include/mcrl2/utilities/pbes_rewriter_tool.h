@@ -177,4 +177,8 @@ namespace tools {
 
 } // namespace mcrl2
 
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+# include "mcrl2/utilities/squadt_pbes_rewriter_tool.h"
+#endif
+
 #endif // MCRL2_UTILITIES_PBES_REWRITER_TOOL_H
