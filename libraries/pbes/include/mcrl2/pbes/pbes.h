@@ -733,24 +733,14 @@ std::set<data::variable> compute_free_variables(const pbes<Container>& p)
   return result;
 }
 
-/// \brief Traverses the summand, and writes all sort expressions
+/// \brief Traverses the PBES, and writes all sort expressions
 /// that are encountered to the output range [dest, ...).
 template <typename Container, typename OutIter>
 void traverse_sort_expressions(const pbes<Container>& p, OutIter dest)
 {
-  // equations
-  for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-  {
-    traverse_sort_expressions(*i, dest);
-  }
-
-  // free variables
-  for (atermpp::set<data::variable>::const_iterator i = p.free_variables().begin(); i != p.free_variables().end(); ++i)
-  {
-    *dest++ = i->sort();
-  }
-
-  traverse_sort_expressions(p.initial_state(), dest);
+  data::traverse_sort_expressions(p.equations());
+  data::traverse_sort_expressions(p.free_variables());
+  traverse_sort_expressions(p.initial_state());
 }
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.

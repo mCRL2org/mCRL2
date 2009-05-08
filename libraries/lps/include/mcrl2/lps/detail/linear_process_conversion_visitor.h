@@ -326,7 +326,7 @@ namespace detail {
       data::variable_list m_process_parameters;
       result.clear();
 
-      for (process_equation_list::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (atermpp::vector<process_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         data::variable_list parameters = i->variables2();
         if (m_process_parameters != data::variable_list() && m_process_parameters != parameters)

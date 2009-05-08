@@ -118,7 +118,7 @@ void test_process(std::string text)
   //          << core::pp(spec.actions()) << std::endl
   //          << data::pp(spec.equations()) << std::endl
   //          << data::pp(spec.init()) << std::endl;
-  for (process_equation_list::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
+  for (atermpp::vector<process_equation>::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
   {
     visit_process_expression(i->expression());
     build_process_expression(i->expression());
