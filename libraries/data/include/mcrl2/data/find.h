@@ -360,6 +360,15 @@ bool search_sort_expression(Container t, const sort_expression& s)
 /// \brief Returns all sort expressions that occur in the term t
 /// \param t an expression
 /// \return All sort expressions that occur in the term t
+template <typename Container, typename OutputIterator>
+void find_all_sort_expressions(Container t, OutputIterator o)
+{
+  detail::find_all_if(t, is_sort_expression, o);
+}
+
+/// \brief Returns all sort expressions that occur in the term t
+/// \param t an expression
+/// \return All sort expressions that occur in the term t
 template <typename Container>
 std::set<sort_expression> find_all_sort_expressions(Container t)
 {

@@ -67,24 +67,9 @@ namespace mcrl2 {
         /// \brief Context shared by enumerators
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
-        static Evaluator& get_dummy()
-        {
-          static Evaluator m_dummy;
-
-          return m_dummy;
-        }
-
         /// \brief Default constructor (avoid use)
         enumerator_factory()
         {
-        }
-
-        /// \brief Constructor with shared context and evaluator instance
-        /// \param[in] context the shared context for enumerators
-        /// \param[in] evaluator a reference to an evaluator
-        enumerator_factory(boost::shared_ptr< shared_context_type > const& context) :
-               m_evaluator(&get_dummy()),
-               m_enumeration_context(context) {
         }
 
         /// \brief Constructor with shared context and evaluator instance
@@ -105,11 +90,6 @@ namespace mcrl2 {
         }
 
         /// \brief Constructor with data specification (does not copy evaluator)
-        enumerator_factory(data_specification const& specification) :
-               m_evaluator(&get_dummy()), m_enumeration_context(new shared_context_type(specification, *m_evaluator)) {
-        }
-
-        /// \brief Constructor with data specification (does not copy evaluator)
         enumerator_factory(data_specification const& specification, Evaluator& evaluator) :
                m_evaluator(&evaluator), m_enumeration_context(new shared_context_type(specification, *m_evaluator)) {
         }
@@ -123,8 +103,6 @@ namespace mcrl2 {
         enumerator_type make(variable_type const& variable, expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
-          BOOST_ASSERT(m_evaluator != &get_dummy());
-
           return enumerator_type(m_enumeration_context, variable, condition, substitution, *m_evaluator);
         }
 
@@ -136,8 +114,6 @@ namespace mcrl2 {
          **/
         enumerator_type make(std::set< variable_type > const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
-
-          BOOST_ASSERT(m_evaluator != &get_dummy());
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, *m_evaluator);
         }
@@ -204,7 +180,6 @@ namespace mcrl2 {
           make(std::set< variable_type > const& variables,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
-          BOOST_ASSERT(m_evaluator != &get_dummy());
 
           return classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
                                                         (m_enumeration_context, variables, condition, substitution, *m_evaluator);

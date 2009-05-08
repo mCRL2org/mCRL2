@@ -134,6 +134,10 @@ namespace mcrl2 {
         void make_system_defined_complete();
 
         ///\brief Adds system defined sorts when necessary to make the specification complete
+        /// \param[in] an equation that is added to a specification that is system-defined complete 
+        void make_system_defined_complete(data_equation const&);
+
+        ///\brief Adds system defined sorts when necessary to make the specification complete
         /// \param[in] s a sort that is added to a specification that is system-defined complete 
         void make_system_defined_complete(sort_expression const&);
 
@@ -392,7 +396,6 @@ namespace mcrl2 {
       {
         assert(!search_mapping(f));
         add_function(m_constructors, f);
-        make_system_defined_complete(f.sort());
       }
 
       /// \brief Adds a constructor to this specification, and marks it as
@@ -418,7 +421,6 @@ namespace mcrl2 {
       {
         assert(!search_constructor(f));
         add_function(m_mappings, f);
-        make_system_defined_complete(f.sort());
       }
 
       /// \brief Adds a mapping to this specification, and marks it as system
@@ -442,6 +444,7 @@ namespace mcrl2 {
       void add_equation(const data_equation& e)
       {
         m_equations.insert(e);
+        make_system_defined_complete(e);
       }
 
       /// \brief Adds an equation to this specification, and marks it as system
@@ -453,7 +456,7 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of equations_const_range
       void add_system_defined_equation(const data_equation& e)
       {
-        add_equation(e);
+        m_equations.insert(e);
         m_sys_equations.put(e,e);
       }
 

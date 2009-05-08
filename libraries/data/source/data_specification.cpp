@@ -167,6 +167,19 @@ namespace mcrl2 {
             }
           }
 
+          /// \brief Adds the sorts on which a sort expression depends
+          ///
+          /// \param[in] s A sort expression.
+          /// \return All sorts on which s depends.
+          template < typename ForwardTraversalIterator >
+          void add(boost::iterator_range< ForwardTraversalIterator > const& range)
+          {
+            for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
+            {
+              add(*i);
+            }
+          }
+
           /// \brief Reset internal structures to default after construction
           void clear()
           {
@@ -192,7 +205,6 @@ namespace mcrl2 {
             return m_result.end();
           }
       };
-
     } // namespace detail
     /// \endcond
 
@@ -326,6 +338,11 @@ namespace mcrl2 {
         dependent_sorts.add((r.front().sort().is_function_sort()) ? r.front().sort() :
                                       function_sort(sort_bool_::bool_(), r.front().sort()));
       }
+      // equations
+      for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
+      { // make function sort in case of constants to add the corresponding sort as needed
+        dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(r.front())));
+      }
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
@@ -341,11 +358,11 @@ namespace mcrl2 {
       }
     }
 
-    void data_specification::make_system_defined_complete(sort_expression const& s)
+    void data_specification::make_system_defined_complete(data_equation const& e)
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(s);
+      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)));
 
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
@@ -353,11 +370,20 @@ namespace mcrl2 {
           import_system_defined_sort(*i);
         }
       }
+    }
+
+    void data_specification::make_system_defined_complete(sort_expression const& s)
+    {
+      detail::dependent_sort_helper dependent_sorts(*this);
 
       // for compatibilty with specifications imported from ATerm
-      if (s.is_standard() && (!search_sort(s) || constructors(s).empty()))
+      dependent_sorts.add(s);
+
+      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
-        import_system_defined_sort(s);
+        if (i->is_standard() && (!search_sort(*i) || constructors(*i).empty())) {
+          import_system_defined_sort(*i);
+        }
       }
     }
 

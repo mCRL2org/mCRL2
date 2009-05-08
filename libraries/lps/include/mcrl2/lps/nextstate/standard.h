@@ -37,6 +37,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   }
 
   legacy_rewriter() {
+    assert(false);
   }
 
   ATerm translate(ATermAppl t) const
@@ -144,29 +145,32 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
       {
       }
 
-      standard_factory::evaluator_type get_evaluator()
+      standard_factory::evaluator_type evaluator()
       {
         return *(standard_factory::m_evaluator);
       }
+
+      boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type > context()
+      {
+        return boost::static_pointer_cast<
+          typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type >(standard_factory::m_enumeration_context);
+      }
     };
 
-    legacy_rewriter m_local_evaluator;
-
-    legacy_enumerator_factory(standard_factory::evaluator_type const& evaluator) :
-          m_local_evaluator(evaluator)
-    {
-      this->m_evaluator = &m_local_evaluator;
-    }
+    boost::shared_ptr< legacy_rewriter > m_local_evaluator;
 
   public:
 
-    static legacy_enumerator_factory create(standard_factory& other)
+    // \attention not exception safe
+    legacy_enumerator_factory(standard_factory& other) :
+      mcrl2::data::enumerator_factory< Enumerator >(extractor(other).context(), *(new legacy_rewriter(extractor(other).evaluator())))
     {
-      return legacy_enumerator_factory(extractor(other).get_evaluator());
+      m_local_evaluator.reset(this->m_evaluator);
     }
 
     legacy_enumerator_factory(legacy_enumerator_factory const& other) :
-          m_local_evaluator(other.m_local_evaluator)
+        mcrl2::data::enumerator_factory< Enumerator >(other),
+        m_local_evaluator(other.m_local_evaluator)
     {
     }
 
@@ -178,7 +182,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
     legacy_rewriter& get_evaluator()
     {
-      return m_local_evaluator;
+      return *m_local_evaluator;
     }
 };
 
@@ -311,7 +315,7 @@ struct ns_info
         ns_info(mcrl2::data::data_specification const& specification,
                 mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
           m_specification(specification),
-          m_enumerator_factory(enumerator_factory_type::create(factory)),
+          m_enumerator_factory(factory),
           m_rewriter(m_enumerator_factory.get_evaluator()) {
 
           // Configure selector to compare with term that represents false
