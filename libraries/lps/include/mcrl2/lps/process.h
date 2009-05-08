@@ -254,6 +254,7 @@ namespace lps {
         process_equation_list l = atermpp::aterm_appl(*i++)(0);
         m_initial_process = atermpp::aterm_appl(*i);
         m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
+        complete_data_specification(*this);
       }
 
     public:
