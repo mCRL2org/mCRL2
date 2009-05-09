@@ -158,12 +158,12 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
 
   if (verbose)
   {
-    std::cout << "Removing the constant process parameters: ";
+    std::clog << "Removing the constant process parameters: ";
     for (std::set<data::variable>::iterator i = constant_parameters.begin(); i != constant_parameters.end(); ++i)
     {
-      std::cout << data::pp(*i) << " ";
+      std::clog << data::pp(*i) << " ";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
   }
 
   specification result = repair_free_variables(spec);

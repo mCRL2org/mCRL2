@@ -101,17 +101,15 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   lg_error = false;
 
-  lps::specification lps_specification;
-
-  lps_specification.load(lgopts->specification);
+  lgopts->specification.load(lgopts->filename);
 
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    lps_specification = remove_unused_data(lps_specification);
+    lgopts->specification = remove_unused_data(lgopts->specification);
   }
 
-  basefilename = strdup(lgopts->specification.c_str());
+  basefilename = strdup(lgopts->filename.c_str());
   char *s = strrchr(basefilename,'.');
   if ( s != NULL )
   {
@@ -146,10 +144,10 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
 
-  data::rewriter rewriter(lps_specification.data(), lgopts->strat);
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
+  lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
+  lgopts->m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(lgopts->specification.data(), *(lgopts->m_rewriter)));
 
-  nstate = createNextState(lps_specification,enumerator_factory,!lgopts->usedummies,lgopts->stateformat);
+  nstate = createNextState(lgopts->specification,*(lgopts->m_enumerator_factory),!lgopts->usedummies,lgopts->stateformat);
 
   if ( lgopts->priority_action != "" )
   {
@@ -170,7 +168,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
-    lts_opts.spec = specification_to_aterm(lps_specification);
+    lts_opts.spec = specification_to_aterm(lgopts->specification);
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
     lgopts->outformat = mcrl2::lts::lts_none;

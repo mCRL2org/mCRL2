@@ -308,7 +308,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      basic_rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
+      basic_rewriter(data_specification const& d, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
 #ifdef OLD_CONVERSION
           m_specification(implement(d))
@@ -355,6 +355,10 @@ namespace data {
   };
 
   /// \brief Rewriter that operates on data expressions.
+  //
+  /// \attention As long as normalisation of sorts remains necessary, the data
+  /// specification object used for construction *must* exist during the
+  /// lifetime of the rewriter object.
   class rewriter: public basic_rewriter<data_expression>
   {
     public:

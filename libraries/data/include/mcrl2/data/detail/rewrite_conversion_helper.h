@@ -63,6 +63,11 @@ namespace mcrl2 {
             return m_data_specification->normalise(expression);
           }
 
+          function_symbol implement(function_symbol const& f)
+          {
+            return function_symbol(f.name(), implement(f.sort()));
+          }
+
           variable implement(variable const& v)
           {
             return variable(v.name(), implement(v.sort()));
@@ -269,6 +274,10 @@ namespace mcrl2 {
             else if (expression.is_variable())
             {
               return implement(variable(expression));
+            }
+            else if (expression.is_function_symbol())
+            {
+              return implement(function_symbol(expression));
             }
             else if (expression.is_abstraction())
             {

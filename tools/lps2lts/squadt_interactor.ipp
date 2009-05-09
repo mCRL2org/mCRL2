@@ -458,7 +458,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   lts_generation_options lgopts;
   status_display         display(*this, lgopts);
 
-  lgopts.specification = configuration.get_input(lps_file_for_input).location();
+  lgopts.filename = configuration.get_input(lps_file_for_input).location();
 
   if (configuration.category() == tipi::tool::category::transformation) {
     lgopts.lts = configuration.get_output(lts_file_for_output).location();

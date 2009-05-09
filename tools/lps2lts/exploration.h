@@ -13,6 +13,7 @@
 
 #include <string>
 #include <limits>
+#include <memory>
 
 #include <boost/bind.hpp>
 
@@ -71,7 +72,10 @@ struct lts_generation_options {
   unsigned long long bithashsize;
   unsigned long todo_max;
   unsigned long initial_table_size;
-  std::string specification;
+  std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
+  std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
+  mcrl2::lps::specification specification;
+  std::string filename;
   std::string lts;
 };
 

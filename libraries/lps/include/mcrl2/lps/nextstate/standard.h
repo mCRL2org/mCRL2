@@ -152,8 +152,8 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
       boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type > context()
       {
-        return boost::static_pointer_cast<
-          typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type >(standard_factory::m_enumeration_context);
+        return boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type >(
+            new typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type(*standard_factory::m_enumeration_context, *standard_factory::m_evaluator));
       }
     };
 
@@ -196,6 +196,7 @@ namespace mcrl2 {
     // possible to replace only the methods below (since these are the only
     // onse to make any specific assumptions about the format).
     namespace detail {
+
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
       bool classic_enumerator_impl< mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
@@ -237,15 +238,7 @@ namespace mcrl2 {
         m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
                     m_shared_context->m_enumerator.findSolutions(atermpp::reverse(variables), m_condition, false)));
 
-        while (increment())
-        {
-          if (legacy_selector::test(m_evaluator(m_condition, m_substitution)))
-          {
-            return true;
-          }
-        }
-
-        return false;
+        return increment();
       }
     }
 
@@ -285,9 +278,9 @@ struct ns_info
 
         typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
-        mcrl2::data::data_specification const&       m_specification;
-        legacy_enumerator_factory< enumerator_type > m_enumerator_factory;
-        legacy_rewriter&                             m_rewriter; // only for translation to/from rewrite format
+        mcrl2::data::data_specification const&                            m_specification;
+        boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
+        legacy_rewriter&                                                  m_rewriter; // only for translation to/from rewrite format
 
 	int num_summands;
 	ATermAppl *summands;
@@ -301,7 +294,7 @@ struct ns_info
 	unsigned int *current_id;
 
         enumerator_type get_sols(ATermList v, ATerm c) {
-          return m_enumerator_factory.make(v, c);
+          return m_enumerator_factory->make(v, c);
         }
 
         ATermAppl export_term(ATerm term) {
@@ -315,8 +308,8 @@ struct ns_info
         ns_info(mcrl2::data::data_specification const& specification,
                 mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
           m_specification(specification),
-          m_enumerator_factory(factory),
-          m_rewriter(m_enumerator_factory.get_evaluator()) {
+          m_enumerator_factory(new enumerator_factory_type(factory)),
+          m_rewriter(m_enumerator_factory->get_evaluator()) {
 
           // Configure selector to compare with term that represents false
           legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool_::false_());

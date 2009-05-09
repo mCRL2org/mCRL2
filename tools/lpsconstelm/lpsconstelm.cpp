@@ -38,7 +38,7 @@ using namespace mcrl2::data;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class lpsconstelm_tool: public squadt_tool<  rewriter_tool<input_output_tool> >
+class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 {
   protected:
 

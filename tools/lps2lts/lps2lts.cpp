@@ -223,7 +223,7 @@ bool parse_command_line(int ac, char** av, lts_generation_options& options) {
       parser.error("too many file arguments");
     }
     if (0 < parser.arguments.size()) {
-      options.specification = parser.arguments[0];
+      options.filename = parser.arguments[0];
     }
     if (1 < parser.arguments.size()) {
       options.lts = parser.arguments[1];

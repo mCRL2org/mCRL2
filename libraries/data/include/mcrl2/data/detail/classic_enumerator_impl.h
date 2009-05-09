@@ -33,28 +33,67 @@ namespace mcrl2 {
     /// \cond INTERNAL
     namespace detail {
 
+      // trick for accessing data conversions to/from rewritable format 
+      template < typename Evaluator >
+      struct compatibility_evaluator {
+        typedef Evaluator actual_type;
+      };
+
+      template < >
+      struct compatibility_evaluator< rewriter > : public rewriter {
+        typedef compatibility_evaluator actual_type;
+
+        compatibility_evaluator(rewriter const& e) : rewriter(e) {
+        }
+
+        atermpp::aterm convert_to(data_expression const& e) const {
+          return this->m_rewriter->toRewriteFormat(basic_rewriter< data_expression >::implement(e));
+        }
+
+        data_expression convert_from(atermpp::aterm const& e) {
+          return basic_rewriter< data_expression >::reconstruct(this->m_rewriter->fromRewriteFormat(e));
+        }
+
+        detail::Rewriter& get_rewriter() {
+          return *const_cast< detail::Rewriter* >(m_rewriter.get());
+        }
+      };
+
       // Shared context
       // Does not contain iterator specific state information. Used for
       // both performance and for making the iterators Multi Pass such that
       // they can be used with Boost.Graph.
+      template < typename Evaluator >
       class classic_enumerator_context {
 
-        template < typename MutableSubstitution, typename Evaluator, typename Selector >
+        template < typename X, typename Y, typename Z >
         friend class classic_enumerator_impl;
+
+        // Only for second constructor below
+        template < typename E >
+        friend class classic_enumerator_context;
 
         private:
 
-          data_specification const&  m_specification;
-          detail::EnumeratorStandard m_enumerator;    // embedded rewriter should not be part of context
+          data_specification const&                                    m_specification;
+          typename compatibility_evaluator< Evaluator >::actual_type   m_evaluator;     // Only here for conversion trick
+          detail::EnumeratorStandard                                   m_enumerator;    // embedded rewriter should not be part of context
 
         public:
 
           /// Limitations in EnumeratorStandard force passing a rewriter
-          /// e.get_rewriter() is not required but at this moment data::rewriter is the currently only model of Evaluator
-          template < typename Evaluator >
           classic_enumerator_context(data_specification const& specification, Evaluator const& evaluator) :
                     m_specification(specification),
-                    m_enumerator(specification, &const_cast< detail::Rewriter& >(evaluator.get_rewriter())) {
+                    m_evaluator(evaluator),
+                    m_enumerator(specification, &m_evaluator.get_rewriter()) {
+          }
+
+          /// Not for ordinary use, here for extraction trick used in NextState
+          template < typename AlternativeEvaluator >
+          classic_enumerator_context(classic_enumerator_context< AlternativeEvaluator >& other, AlternativeEvaluator const& evaluator) :
+                    m_specification(other.m_specification),
+                    m_evaluator(evaluator),
+                    m_enumerator(m_specification, &m_evaluator.get_rewriter()) {
           }
       };
 
@@ -71,61 +110,39 @@ namespace mcrl2 {
           typedef MutableSubstitution                               substitution_type;
           typedef typename MutableSubstitution::expression_type     expression_type;
           typedef typename MutableSubstitution::variable_type       variable_type;
-          typedef classic_enumerator_context                        shared_context_type;
+          typedef classic_enumerator_context< Evaluator >           shared_context_type;
 
         private:
 
-          boost::shared_ptr< shared_context_type >         m_shared_context;
+          boost::shared_ptr< shared_context_type >                     m_shared_context;
 
           // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
-          boost::shared_ptr< EnumeratorSolutionsStandard > m_generator;
+          boost::shared_ptr< EnumeratorSolutionsStandard >             m_generator;
 
-          Evaluator&                                       m_evaluator;
+          typename compatibility_evaluator< Evaluator >::actual_type&  m_evaluator;
 
-          expression_type                                  m_condition;
+          expression_type                                              m_condition;
 
-          MutableSubstitution                              m_substitution;
+          MutableSubstitution                                          m_substitution;
 
         private:
-
-          // do not use directly, use the create method
-          classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
-                                      expression_type const& c, substitution_type const& s) :
-                             m_shared_context(context), m_evaluator(context->m_specification), m_condition(c), m_substitution(s) {
-
-            m_evaluator(c); // adds the proper rewrite rules (for legacy Enumerator/Rewriter)
-          }
 
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
                                expression_type const& c, substitution_type const& s, Evaluator& e) :
-                             m_shared_context(context), m_evaluator(e), m_condition(c), m_substitution(s) {
-
-            m_evaluator(c); // adds the proper rewrite rules (for legacy Enumerator/Rewriter)
+                             m_shared_context(context), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
           }
 
           bool initialise(std::set< variable_type > const& v) {
-            // trick for accessing data implementation
-            struct local : public basic_rewriter< expression_type > {
-              local(basic_rewriter< expression_type > const& e) : basic_rewriter< expression_type >(e) {
-              }
-
-              atermpp::aterm translate(data_expression const& e) const {
-                return basic_rewriter< expression_type >::m_rewriter->toRewriteFormat(basic_rewriter< expression_type >::implement(e));
-              }
-            };
-
-            local converter(m_evaluator);
-
             // Apply translation (effectively type normalisation) to variables
             atermpp::aterm_list variables;
 
             for (typename std::set< variable_type >::const_iterator i = v.begin(); i != v.end(); ++i) {
-              variables = atermpp::push_back(variables, converter.translate(*i));
+              variables = atermpp::push_back(variables, m_evaluator.convert_to(*i));
             }
 
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(variables, converter.translate(m_condition), false)));
+                        m_shared_context->m_enumerator.findSolutions(variables, m_evaluator.convert_to(m_condition), false)));
 
             return increment();
           }
@@ -135,22 +152,12 @@ namespace mcrl2 {
           // Copy constructor; note that copies share share state due to limitations in the underlying implementation
           classic_enumerator_impl(classic_enumerator_impl const& other) :
                                                  m_shared_context(other.m_shared_context),
-                                                 m_substitution(other.m_substitution),
-                                                 m_generator(other.m_generator) {
+                                                 m_generator(other.m_generator),
+                                                 m_evaluator(other.m_evaluator),
+                                                 m_substitution(other.m_substitution) {
           }
 
           bool increment() {
-            // trick for accessing data implementation
-            struct local : public basic_rewriter< expression_type > {
-              local(basic_rewriter< expression_type > const& e) : basic_rewriter< expression_type >(e) {
-              }
-
-              expression_type translate(atermpp::aterm const& e) {
-                return basic_rewriter< expression_type >::reconstruct(basic_rewriter< expression_type >::m_rewriter->fromRewriteFormat(e));
-              }
-            };
-
-            local converter(m_evaluator);
 
             ATermList assignment_list;
 
@@ -162,7 +169,7 @@ namespace mcrl2 {
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
                 m_substitution[static_cast< variable_type >((*i)(0))] =
-                               converter.translate((*i)(1));
+                               m_evaluator.convert_from((*i)(1));
               }
 
               if (Selector::test(m_evaluator(m_condition, m_substitution))) {
