@@ -73,18 +73,9 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
 
     bool run()
     {
-      if (gsVerbose)
-      {
-        std::clog << "lpsrewr parameters:" << std::endl;
-        std::clog << "  input file:         " << m_input_filename << std::endl;
-        std::clog << "  output file:        " << m_output_filename << std::endl;
-        std::clog << "  benchmark:          " << (m_benchmark?"YES":"NO") << std::endl;
-        std::clog << "  number of times:    " << m_bench_times << std::endl;
-      }
-
       lps::specification specification;
 
-      specification.load(m_input_filename);
+      specification.load(input_filename());
 
       mcrl2::data::rewriter rewriter = create_rewriter(specification.data());
 
@@ -96,7 +87,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
       {
         specification = rewrite_lps(specification, rewriter);
       }
-      specification.save(m_output_filename);
+      specification.save(output_filename());
 
       return true;
     }
