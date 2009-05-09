@@ -17,6 +17,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
@@ -159,7 +160,7 @@ namespace core {
     static inline
     variable_sequence_type free_variables(term_type t)
     {
-      std::set<variable_type> v = data::find_all_variables(t);
+      std::set<variable_type> v = data::find_all_free_variables(t);
       return variable_sequence_type(v.begin(), v.end());
     }
 
@@ -204,7 +205,62 @@ namespace data {
   /// \brief expression traits (currently nothing more than core::term_traits)
   template < typename Expression >
   struct expression_traits : public core::term_traits< Expression >
-  { };
+  {
+    // Iterator range for arguments of function applications
+    typedef application::arguments_const_range arguments_const_range;
+    typedef abstraction::variables_const_range bound_variables_const_range;
+
+    bool is_true(data_expression const& e)
+    {
+      return sort_bool_::is_true__function_symbol(e);
+    }
+
+    bool is_false(data_expression const& e)
+    {
+      return sort_bool_::is_false__function_symbol(e);
+    }
+
+    bool is_application(data_expression const& e)
+    {
+      return e.is_application();
+    }
+
+    bool is_abstraction(data_expression const& e)
+    {
+      return e.is_abstraction();
+    }
+
+    data_expression head(application const& e)
+    {
+      return e.head();
+    }
+
+    arguments_const_range arguments(application const& e)
+    {
+      return e.arguments();
+    }
+
+    bound_variables_const_range variables(abstraction const& a)
+    {
+      return a.variables();
+    }
+
+    data_expression body(abstraction const& a)
+    {
+      return a.body();
+    }
+
+    data_expression replace_body(abstraction const& variable_binder, data_expression const& new_body)
+    {
+      return abstraction(variable_binder.binding_operator(), variable_binder.variables(), new_body);
+    }
+
+    template < typename ForwardTraversalIterator >
+    application make_application(data_expression const& e, boost::iterator_range< ForwardTraversalIterator > const& arguments)
+    {
+      return application(e, arguments);
+    }
+  };
 }
 
 } // namespace mcrl2

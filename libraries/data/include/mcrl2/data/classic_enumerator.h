@@ -240,20 +240,6 @@ namespace mcrl2 {
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }
 
-        classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
-                   variable_type const& variable, expression_type const& condition,
-                   substitution_type const& substitution) {
-
-          implementation_type::create(m_impl, context, make_set(variable), condition);
-        }
-
-        classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
-                   std::set< variable_type > const& variables, expression_type const& condition,
-                   substitution_type const& substitution) {
-
-          implementation_type::create(m_impl, context, variables, condition);
-        }
-
       public:
 
         /// \brief Constructs the past-end iterator

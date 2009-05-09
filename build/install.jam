@@ -89,16 +89,21 @@ rule install-libraries ( names * : requirements * ) {
     }
 
     rule install-libraries ( name headers ? : sources * : requirements * ) {
-      if $(headers) {
-        install install-libraries : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
-        install install-libraries : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
 
-        alias $(name) : install-libraries $(headers) ;
+      if $(sources) {
+        if $(headers) {
+          install install-libraries : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+          install install-libraries : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
 
+          alias $(name) : install-libraries $(headers) ;
+        }
+        else {
+          install $(name) : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
+          install $(name) : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
+        }
       }
       else {
-        install $(name) : $(sources) : <link>shared <install-dependencies>on <install-type>SHARED_LIB $(requirements) ;
-        install $(name) : $(sources) : <link>static <install-dependencies>on <install-type>STATIC_LIB $(requirements) ;
+        alias $(name) ;
       }
     }
   }
@@ -127,22 +132,20 @@ rule install-libraries ( names * : requirements * ) {
       else if [ MATCH (.*/include/$(names)/.*) : $(headers) ] {
         headers = [ MATCH (.*/include/$(names)/.*) : $(headers) ] ;
       }
-    }
 
-    local short-headers ;
+      local short-headers ;
 
-    for local header in $(headers) {
-      short-headers += [ path.relative-to $(project-source) $(header) ] ;
-    }
+      for local header in $(headers) {
+        short-headers += [ path.relative-to $(project-source) $(header) ] ;
+      }
 
-    local header-root = [ path.relative-to [ $(project).get location ]
-                [ path.join $(project-source) [ path.parent $(short-headers[1]) ] ] ] ;
+      local header-root = [ path.relative-to [ $(project).get location ]
+                  [ path.join $(project-source) [ path.parent $(short-headers[1]) ] ] ] ;
 
-    while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
-      header-root = [ path.parent $(header-root) ] ;
-    }
+      while $(header-root:B) != "include" && $(header-root:B) != "mcrl2" {
+        header-root = [ path.parent $(header-root) ] ;
+      }
 
-    if $(headers) {
       modules.call-in $(m) : install-headers $(short-headers) : <location>$(includedir) <install-source-root>$(header-root) ;
       modules.call-in $(m) : install-libraries install install-headers : $(names) : $(requirements) ;
     }
