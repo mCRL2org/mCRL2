@@ -28,6 +28,8 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <iterator>
+#include <algorithm>
 #include <sstream>
 #include <memory>
 #include "mcrl2/lps/lin_std.h"
@@ -4639,7 +4641,10 @@ static ATermAppl dummyterm(
   /* Third construct a new constant, and yield it. */
   if (allow_the_introduction_of_a_dummy_mapping)
   {
-    ATermAppl dummymapping=gsMakeOpId(fresh_name(pp(targetsort).c_str()),targetsort);
+    std::string name(pp(targetsort)); // not optimal, but works
+    std::remove(name.begin(), name.end(), ' ');
+    name.resize(std::remove(name.begin(), name.end(), ' ') - name.begin());
+    ATermAppl dummymapping=gsMakeOpId(fresh_name(name.c_str()),targetsort);
     insertmapping(dummymapping,spec,true);
     return dummymapping;
   }
@@ -9310,9 +9315,10 @@ mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_option
   //initialise local data structures
   initialize_data();
 
+  data::data_specification data_specification(ATAgetArgument(spec,0));
   if (mayrewrite) {
     rewr.reset(new mcrl2::data::rewriter(
-                data::data_specification(), lin_options.rewrite_strategy));
+                data_specification, lin_options.rewrite_strategy));
   }
   specificationbasictype *spec_int = create_spec(spec);
   if (spec_int == NULL)
