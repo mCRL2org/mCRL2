@@ -181,22 +181,15 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
     bool run()
     { FILE* OutStream = stdout;
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "pnml2mcrl2 parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-      }
-
-      if (!m_output_filename.empty()) {
-        OutStream = fopen(m_output_filename.c_str(),"w");
+      if (!output_filename().empty()) {
+        OutStream = fopen(output_filename().c_str(),"w");
     
         if (OutStream == 0) {
-          throw mcrl2::runtime_error("cannot open file '" + m_output_filename + "' for writing\n");
+          throw mcrl2::runtime_error("cannot open file '" + output_filename() + "' for writing\n");
         }
       }
     
-      bool result = do_pnml2mcrl2(m_input_filename.c_str(), OutStream);
+      bool result = do_pnml2mcrl2(input_filename().c_str(), OutStream);
     
       fclose(OutStream);
     
