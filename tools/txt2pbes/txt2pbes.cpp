@@ -23,72 +23,42 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 using namespace mcrl2::data::detail;
 
-struct t_tool_options
+class txt2pbes_tool: public input_output_tool
 {
-  std::string infilename;
-  std::string outfilename;
+  public:
+    txt2pbes_tool()
+      : input_output_tool(NAME, AUTHOR,
+          "parse a textual description of a PBES",
+          "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
+          "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
+          "The textual description should adhere to the BNF syntax description at "
+          "<http://mcrl2.org/wiki/index.php/Language_reference/PBES_syntax>."
+        )
+    {}
 
-  t_tool_options()
-  {}
-};
-
-bool parse_command_line(int ac, char **av, t_tool_options& tool_options)
-{
-  interface_description clinterface(av[0], NAME, AUTHOR,
-    "parse a textual description of a PBES",
-    "[OPTION]... [INFILE [OUTFILE]]\n",
-    "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
-    "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
-    "The textual description should adhere to the BNF syntax description at "
-    "<http://mcrl2.org/wiki/index.php/Language_reference/PBES_syntax>."
-  );
-  command_line_parser parser(clinterface, ac, av);
-
-  if (parser.continue_execution()) {
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    if (0 < parser.arguments.size()) {
-      tool_options.infilename = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      tool_options.outfilename = parser.arguments[1];
-    }
-  }
-
-  return parser.continue_execution();
-}
-
-int main(int argc, char** argv)
-{
-  MCRL2_ATERM_INIT(argc, argv)
-
-  try {
-    //parse command line
-    t_tool_options tool_options;
-
-    if (parse_command_line(argc, argv, tool_options)) {
+    bool run()
+    {
       ATermAppl result = NULL;
       //parse specification
-      if (tool_options.infilename.empty()) {
+      if (input_filename().empty()) {
         //parse specification from stdin
         gsVerboseMsg("parsing input from stdin...\n");
         result = parse_pbes_spec(std::cin);
       } else {
-        //parse specification from infilename
-        std::ifstream instream(tool_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+        //parse specification from input_filename()
+        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open()) {
-          throw mcrl2::runtime_error("cannot open input file '" + tool_options.infilename + "'");
+          throw mcrl2::runtime_error("cannot open input file '" + input_filename() + "'");
         }
-        gsVerboseMsg("parsing input file '%s'...\n", tool_options.infilename.c_str());
+        gsVerboseMsg("parsing input file '%s'...\n", input_filename().c_str());
         result = parse_pbes_spec(instream);
         instream.close();
       }
@@ -112,19 +82,19 @@ int main(int argc, char** argv)
         throw mcrl2::runtime_error("PBES is not monotonic");
       }
       //store the result
-      if (tool_options.outfilename.empty()) {
+      if (output_filename().empty()) {
         gsVerboseMsg("saving result to stdout...\n");
       } else {
-        gsVerboseMsg("saving result to '%s'...\n", tool_options.outfilename.c_str());
+        gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
       }
       mcrl2::pbes_system::pbes<> p(result);
-      p.save(tool_options.outfilename);
+      p.save(output_filename());
+      return true;
     }
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
+};
 
-  return EXIT_SUCCESS;
+int main(int argc, char** argv)
+{
+  MCRL2_ATERM_INIT(argc, argv)
+  return txt2pbes_tool().execute(argc, argv);
 }
