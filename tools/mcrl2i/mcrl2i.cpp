@@ -130,24 +130,10 @@ static const std::string help_text=
 
 class mcrl2i_tool: public rewriter_tool<input_tool> 
 {
-  protected:
-    typedef rewriter_tool<input_tool> super;
-
-  /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
-    {
-      super::parse_options(parser);
-    }
-
-    void add_options(interface_description& desc)
-    {
-      super::add_options(desc);
-    }
-
   public:
     /// Constructor.
     mcrl2i_tool()
-      : super(
+      : rewriter_tool<input_tool>(
           TOOLNAME,
           AUTHORS,
           "Interpreter for the mCRL2 data language",
@@ -161,30 +147,23 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     /// Runs the algorithm.
     bool run()
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Settings of mcrl2i:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  rewrite strategy:   " << m_rewrite_strategy << std::endl;
-      }
-
       data_specification spec;
-      if (!m_input_filename.empty())
+      if (!input_filename().empty())
       { try 
         { // Try to read a linear specification
           mcrl2::lps::specification p;
-          p.load(m_input_filename);
+          p.load(input_filename());
           spec=p.data();
         }
         catch (mcrl2::runtime_error e)
         { try 
           { // Try to read a pbes.
             mcrl2::pbes_system::pbes <> p;
-            p.load(m_input_filename);
+            p.load(input_filename());
             spec=p.data();
           }
           catch (mcrl2::runtime_error &e)
-          { std::cout << "Could not read " << m_input_filename << " as an LPS or a PBES. " << e.what() <<
+          { std::cout << "Could not read " << input_filename() << " as an LPS or a PBES. " << e.what() <<
                     "\nUsing standard data types only;\n";
             spec=data_specification();
           }
