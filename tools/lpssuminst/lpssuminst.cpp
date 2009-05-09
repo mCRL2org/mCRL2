@@ -40,7 +40,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       super::parse_options(parser);
       m_suminst_opts.tau_only    = 0 < parser.options.count("tau");
-      m_suminst_opts.finite_only = 0 < parser.options.count("remove-equations");
+      m_suminst_opts.finite_only = 0 < parser.options.count("finite");
     }
 
   public:
@@ -60,7 +60,7 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      lps::specification lps_specification;
+       lps::specification lps_specification;
 
        lps_specification.load(m_input_filename);
 

@@ -210,55 +210,75 @@ namespace data {
     typedef application::arguments_const_range arguments_const_range;
     typedef abstraction::variables_const_range bound_variables_const_range;
 
-    bool is_true(data_expression const& e)
+    static bool is_true(data_expression const& e)
     {
       return sort_bool_::is_true__function_symbol(e);
     }
 
-    bool is_false(data_expression const& e)
+    static bool is_false(data_expression const& e)
     {
       return sort_bool_::is_false__function_symbol(e);
     }
 
-    bool is_application(data_expression const& e)
+    static bool is_application(data_expression const& e)
     {
       return e.is_application();
     }
 
-    bool is_abstraction(data_expression const& e)
+    static bool is_abstraction(data_expression const& e)
     {
       return e.is_abstraction();
     }
 
-    data_expression head(application const& e)
+    static data_expression head(application const& e)
     {
       return e.head();
     }
 
-    arguments_const_range arguments(application const& e)
+    static arguments_const_range arguments(application const& e)
     {
       return e.arguments();
     }
 
-    bound_variables_const_range variables(abstraction const& a)
+    static bound_variables_const_range variables(abstraction const& a)
     {
       return a.variables();
     }
 
-    data_expression body(abstraction const& a)
+    static data_expression body(abstraction const& a)
     {
       return a.body();
     }
 
-    data_expression replace_body(abstraction const& variable_binder, data_expression const& new_body)
+    static data_expression replace_body(abstraction const& variable_binder, data_expression const& new_body)
     {
       return abstraction(variable_binder.binding_operator(), variable_binder.variables(), new_body);
     }
 
     template < typename ForwardTraversalIterator >
-    application make_application(data_expression const& e, boost::iterator_range< ForwardTraversalIterator > const& arguments)
+    static application make_application(data_expression const& e, boost::iterator_range< ForwardTraversalIterator > const& arguments)
     {
       return application(e, arguments);
+    }
+
+    static data_expression false_()
+    {
+      return sort_bool_::false_();
+    }
+
+    static data_expression true_()
+    {
+      return sort_bool_::true_();
+    }
+
+    static data_expression and_(data_expression const& e1, data_expression const& e2)
+    {
+      return sort_bool_::and_(e1, e1);
+    }
+
+    static data_expression or_(data_expression const& e1, data_expression const& e2)
+    {
+      return sort_bool_::or_(e1, e1);
     }
   };
 }
