@@ -7,6 +7,7 @@ tool lysa2mcrl2
          lysaconverter.cpp
          lysa.cpp
          string_template.cpp
+         strategy.cpp
          /libraries//data
        : <status>experimental
        ;

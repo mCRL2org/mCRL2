@@ -49,7 +49,7 @@ class StringTemplateFile
 protected:
 	map<string, string> format_strings;
 public:
-	StringTemplateFile(string filename);
+	StringTemplateFile(string filecontent);
 	StringTemplate get(string id);
   string fmt_string(string id);
 	string all(string id, map<string, string> substitutions);

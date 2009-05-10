@@ -1,6 +1,7 @@
 #include "string_template.h"
 #include <boost/xpressive/xpressive.hpp>
 #include <boost/foreach.hpp>
+#include <sstream>
 #include <iostream>
 #include <boost/algorithm/string/replace.hpp>
 
@@ -11,7 +12,12 @@ void StringTemplate::replace(string key, string value)
 {
 	//subject = regex_replace(subject, as_xpr("%" + key + "%"), value );
 	//replace_all(subject, "%" + key + "%", value);
-	subject = replace_all_copy(subject, "%" + key + "%", value);
+  string k_var = "%" + key + "%";
+	//subject = replace_all_copy(subject, k_var, value);
+
+  sregex rex = as_xpr("%") >> key >> as_xpr("%"); //((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
+  string new_subject = regex_replace(subject, rex, value);
+  subject = new_subject;
 }
 /**
  * always returns false. this way, multiple has, replace_by pairs can be 
@@ -57,9 +63,11 @@ void StringTemplate::finalise()
   subject = regex_replace(subject, rex, std::string("$1$2"));
 }
 
-StringTemplateFile::StringTemplateFile(string filename)
+StringTemplateFile::StringTemplateFile(string filecontent)
 {
-	ifstream f(filename.c_str());
+	//ifstream f(filename.c_str());
+  cout << filecontent;
+  istringstream f(filecontent);
 	string fmtline;
 	while(getline(f, fmtline))
 	{

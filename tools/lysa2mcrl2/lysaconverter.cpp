@@ -805,7 +805,7 @@ namespace lysa
 			proc_defs.str() + 
       st.get();
 
-		string preamble;
+		/*string preamble;
 		{
       ifstream inf(options.preamble_file_name.c_str());
 			string s;
@@ -813,8 +813,8 @@ namespace lysa
 			{
 				preamble += s + "\n";
 			}
-		}
-		return preamble + mcrl2;
+		}*/
+		return options.strategy->getPreamble() + mcrl2;
 	}
 }
 

@@ -18,6 +18,7 @@
 #include <cstdio>
 
 #include <boost/smart_ptr.hpp>
+#include "strategy.h"
 
 /*
 * we use the standard mCRL2 toolset functions for console messages. these functions
@@ -58,12 +59,13 @@ namespace lysa
   struct lysa_options
   {
     string prefix;	           //prefix for LySa identifiers
-    string fmt_file_name;      //filename of format strings
-    string preamble_file_name; //filename of preamble (or empty)
+    //string fmt_file_name;      //DEPRECATED: filename of format strings
+    //string preamble_file_name; //DEPRECATED: filename of preamble (or empty)
     bool make_symbolic;        //if true, make a symbolic attacker
     string attacker_index;     //if nonempty, add CPDYonAttackerIndex to every
                                //destorig and set attackerIndex map
     string zero_action;        //if nonempty, first this action before delta'ing if Zero is encountered
+    Strategy* strategy;           //a strategy determines which format and preamble is used, and whether make_symbolic is true.
   };
 
   enum Calculus { LySa, TypedLySa, Unknown };

@@ -1,0 +1,770 @@
+
+
+% standard library :-)
+
+map 
+  forall_Value: List(Value) # (Value->Bool) -> Bool;
+  exists_Value: List(Value) # (Value->Bool) -> Bool;
+  filter_Value: List(Value) # (Value->Bool) -> List(Value);
+  uniq_Value: List(Value) -> List(Value);
+  collect2_Value: List(Value) # List(Value) # (Value#Value->Value) -> List(Value);
+  collect_Value:  List(Value) # (Value->Value) -> List(Value);
+  assert_Value: Bool # Value -> Value;
+  FAIL_Value: Value -> Value;
+var
+  d, d': Value;
+  l, l': List(Value);
+  ll: List(List(Value));
+  f: (Value->Bool);
+  ft2: (Value#Value->Value);
+  ft: (Value->Value);
+  b: Bool;
+eqn
+  %bounded forall over list elements
+  forall_Value(d |> l, f) = f(d) && forall_Value(l, f);
+  forall_Value([], f) = true;
+
+  %bounded exists over list elements
+  exists_Value(d |> l, f) = f(d) || exists_Value(l, f);
+  exists_Value([], f) = false;
+  
+  %list filter: discareds elements for this f(d) does not hold
+  filter_Value(d |> l, f) = if(f(d), d |> filter_Value(l, f), filter_Value(l, f));
+  filter_Value([], f) = [];
+  
+  %uniqueness filter: discards duplicates in list
+  uniq_Value(d |> l) = if(d in l, uniq_Value(l), d |> uniq_Value(l));
+  uniq_Value([]) = [];
+  
+  %collect: applies function ft to every list element
+  collect_Value(d |> l, ft) = ft(d) |> collect_Value(l, ft);
+  collect_Value([], ft) = [];
+  
+  %collect2: applies function ft2 to every two elements at the same position 
+  %in the two lists until the end of at least one list is reached
+  collect2_Value(d |> l, d' |> l', ft2) = ft2(d, d') |> collect2_Value(l, l', ft2);
+  collect2_Value(l, [], ft2) = [];
+  collect2_Value([], l, ft2) = [];
+  
+  %assert: FAIL_Value is not implemented, so if b does not hold, a rewriting error occurs
+  assert_Value(b, d) = if(b, d, FAIL_Value(d));
+
+map 
+  forall_Ciphertext: List(Ciphertext) # (Ciphertext->Bool) -> Bool;
+  exists_Ciphertext: List(Ciphertext) # (Ciphertext->Bool) -> Bool;
+  filter_Ciphertext: List(Ciphertext) # (Ciphertext->Bool) -> List(Ciphertext);
+  uniq_Ciphertext: List(Ciphertext) -> List(Ciphertext);
+  collect2_Ciphertext: List(Ciphertext) # List(Ciphertext) # (Ciphertext#Ciphertext->Ciphertext) -> List(Ciphertext);
+  collect_Ciphertext:  List(Ciphertext) # (Ciphertext->Ciphertext) -> List(Ciphertext);
+  assert_Ciphertext: Bool # Ciphertext -> Ciphertext;
+  FAIL_Ciphertext: Ciphertext -> Ciphertext;
+var
+  d, d': Ciphertext;
+  l, l': List(Ciphertext);
+  ll: List(List(Ciphertext));
+  f: (Ciphertext->Bool);
+  ft2: (Ciphertext#Ciphertext->Ciphertext);
+  ft: (Ciphertext->Ciphertext);
+  b: Bool;
+eqn
+  %bounded forall over list elements
+  forall_Ciphertext(d |> l, f) = f(d) && forall_Ciphertext(l, f);
+  forall_Ciphertext([], f) = true;
+
+  %bounded exists over list elements
+  exists_Ciphertext(d |> l, f) = f(d) || exists_Ciphertext(l, f);
+  exists_Ciphertext([], f) = false;
+  
+  %list filter: discareds elements for this f(d) does not hold
+  filter_Ciphertext(d |> l, f) = if(f(d), d |> filter_Ciphertext(l, f), filter_Ciphertext(l, f));
+  filter_Ciphertext([], f) = [];
+  
+  %uniqueness filter: discards duplicates in list
+  uniq_Ciphertext(d |> l) = if(d in l, uniq_Ciphertext(l), d |> uniq_Ciphertext(l));
+  uniq_Ciphertext([]) = [];
+  
+  %collect: applies function ft to every list element
+  collect_Ciphertext(d |> l, ft) = ft(d) |> collect_Ciphertext(l, ft);
+  collect_Ciphertext([], ft) = [];
+  
+  %collect2: applies function ft2 to every two elements at the same position 
+  %in the two lists until the end of at least one list is reached
+  collect2_Ciphertext(d |> l, d' |> l', ft2) = ft2(d, d') |> collect2_Ciphertext(l, l', ft2);
+  collect2_Ciphertext(l, [], ft2) = [];
+  collect2_Ciphertext([], l, ft2) = [];
+  
+  %assert: FAIL_Ciphertext is not implemented, so if b does not hold, a rewriting error occurs
+  assert_Ciphertext(b, d) = if(b, d, FAIL_Ciphertext(d));
+
+map 
+  forall_Name: List(Name) # (Name->Bool) -> Bool;
+  exists_Name: List(Name) # (Name->Bool) -> Bool;
+  filter_Name: List(Name) # (Name->Bool) -> List(Name);
+  uniq_Name: List(Name) -> List(Name);
+  collect2_Name: List(Name) # List(Name) # (Name#Name->Name) -> List(Name);
+  collect_Name:  List(Name) # (Name->Name) -> List(Name);
+  assert_Name: Bool # Name -> Name;
+  FAIL_Name: Name -> Name;
+var
+  d, d': Name;
+  l, l': List(Name);
+  ll: List(List(Name));
+  f: (Name->Bool);
+  ft2: (Name#Name->Name);
+  ft: (Name->Name);
+  b: Bool;
+eqn
+  %bounded forall over list elements
+  forall_Name(d |> l, f) = f(d) && forall_Name(l, f);
+  forall_Name([], f) = true;
+
+  %bounded exists over list elements
+  exists_Name(d |> l, f) = f(d) || exists_Name(l, f);
+  exists_Name([], f) = false;
+  
+  %list filter: discareds elements for this f(d) does not hold
+  filter_Name(d |> l, f) = if(f(d), d |> filter_Name(l, f), filter_Name(l, f));
+  filter_Name([], f) = [];
+  
+  %uniqueness filter: discards duplicates in list
+  uniq_Name(d |> l) = if(d in l, uniq_Name(l), d |> uniq_Name(l));
+  uniq_Name([]) = [];
+  
+  %collect: applies function ft to every list element
+  collect_Name(d |> l, ft) = ft(d) |> collect_Name(l, ft);
+  collect_Name([], ft) = [];
+  
+  %collect2: applies function ft2 to every two elements at the same position 
+  %in the two lists until the end of at least one list is reached
+  collect2_Name(d |> l, d' |> l', ft2) = ft2(d, d') |> collect2_Name(l, l', ft2);
+  collect2_Name(l, [], ft2) = [];
+  collect2_Name([], l, ft2) = [];
+  
+  %assert: FAIL_Name is not implemented, so if b does not hold, a rewriting error occurs
+  assert_Name(b, d) = if(b, d, FAIL_Name(d));
+
+
+
+map 
+  forall_n: Nat # (Nat->Bool) -> Bool;
+  exists_n: Nat # (Nat->Bool) -> Bool;
+  get_Values_from_Ciphertexts: List(Ciphertext) -> List(Value);
+  get_ValueLists_from_Ciphertexts: List(Ciphertext) -> List(Values);
+  FAIL_ASSERT: Bool;
+  assert: Bool -> Bool;
+var 
+  n, i: Nat;
+  fn: Nat -> Bool;
+  a, a', v, v': Value;
+  vs, vs': List(Value);
+  l, l': List(Value);
+  lc: List(Ciphertext);
+  c: Ciphertext;
+  b: Bool;
+eqn 
+  %forall and exists over indices from 0 to n
+  forall_n(0, fn) = true;
+  (n>0) -> forall_n(n, fn) = fn(Int2Nat(n-1)) && forall_n(Int2Nat(n-1), fn);
+  exists_n(0, fn) = false;
+  (n>0) -> exists_n(n, fn) = fn(Int2Nat(n-1)) || exists_n(Int2Nat(n-1), fn);
+  
+  %assert: FAIL_ASSERT is not implemented, so if b does not hold, a rewriting error occurs
+  assert(b) = if(b, b, FAIL_ASSERT);
+  
+  %auxiliary function that turns a list of ciphertexts into a list of values
+  get_Values_from_Ciphertexts(c |> lc) = _vs(c) ++ get_Values_from_Ciphertexts(lc);
+  get_Values_from_Ciphertexts([]) = [];
+  
+  %auxiliary function that turns a list of ciphertexts into a list of lists of values
+  get_ValueLists_from_Ciphertexts(c |> lc) = _vs(c) |> get_ValueLists_from_Ciphertexts(lc);
+  get_ValueLists_from_Ciphertexts([]) = [];
+
+sort Anno = struct at(_cp: CP, _do: List(CP)) | at_s(_cp_s: CP) | AnnoLeft;
+map
+  AnnoDY: Anno;
+  AnnoNone: Anno;
+var
+  vs: Values;
+  a, a': Anno;
+eqn
+  AnnoDY   = at_s(CPDY);
+  AnnoNone = at_s(UCP);
+
+sort Values = List(Value);
+
+sort Ciphertext = struct Cpair(_vs: List(Value), _a: Anno);
+
+sort SName = List(Name);
+
+sort SCiphertext = struct SCpair(_ns: List(Name), _cs: List(Ciphertext));
+
+sort Value = struct
+    N (_n: Name)?is_N
+  | C (_c: Ciphertext)?is_C
+  | SN(_sn: SName)?is_SN
+  | SC(_sc: SCiphertext)?is_SC
+  | invalid
+  | any_name
+  | any_ciphertext
+  | id
+  ;
+
+  
+% more intuitive names for ciphertext elements
+map
+  key: Ciphertext -> Value;
+  els: Ciphertext -> List(Value);
+  encrypt: Values # Value # Anno -> Value;
+  encrypt: Values # Value -> Value;
+  encrypt: Values # Anno -> Value;
+  encrypt: Values -> Value;
+  set_anno: Value # Anno -> Value;
+var 
+  c: Ciphertext;
+  k: Value;
+  vs: Values;
+  ad, a, a': Anno;
+eqn
+  key(c) = head(_vs(c));
+  els(c) = tail(_vs(c));
+  encrypt(vs, k, ad) = C(Cpair(k |> vs, ad));
+  encrypt(vs, k)     = C(Cpair(k |> vs, AnnoNone));
+  encrypt(vs, ad)    = C(Cpair(vs, ad));
+  encrypt(vs)        = C(Cpair(vs, AnnoNone));
+  set_anno(C(Cpair(vs, a)), a') = C(Cpair(vs, a'));
+
+
+map 
+  _ns: Value -> List(Name);
+  _cs: Value -> List(Ciphertext);
+  like_N: Value -> Bool;
+  like_C: Value -> Bool;
+  is_any: Value -> Bool;
+  SC_: List(Name) # List(Ciphertext) -> Value;
+  addToSC: SCiphertext # Name -> SCiphertext;
+  addToSC: SCiphertext # Ciphertext -> SCiphertext;
+  addToSC: SCiphertext # SName -> SCiphertext;
+  addToSC: SCiphertext # SCiphertext -> SCiphertext;
+  addToSC: SCiphertext # Value -> SCiphertext;
+  
+  simplify: Value -> Value;
+  ensure_valid: Value -> Value;
+  is_valid: Value -> Bool;
+var
+  n, n': Name;
+  c, c': Ciphertext;
+  sn, sn': SName;
+  sc, sc': SCiphertext;
+  v: Value;
+  ns: List(Name);
+  cs: List(Ciphertext);
+eqn
+  _ns(SC(sc)) = _ns(sc);
+  _cs(SC(sc)) = _cs(sc);
+  like_N(v) = (is_N(v) || is_SN(v));
+  like_C(v) = (is_C(v) || is_SC(v));
+  is_any(v) = (v in [any_name, any_ciphertext]);
+  SC_(ns, cs) = SC(SCpair(ns, cs));
+  
+  addToSC(SCpair(ns, cs), n) = SCpair(if(n in ns, ns, n |> ns), cs);
+  addToSC(SCpair(ns, cs), c) = SCpair(ns, if(c in cs, cs, c |> cs));
+  addToSC(SCpair(ns, cs), sn) = SCpair(uniq_Name(ns ++ sn), cs);
+  addToSC(SCpair(ns, cs), sc) = SCpair(uniq_Name(ns ++ _ns(sc)), uniq_Ciphertext(cs ++ _cs(sc)));
+  addToSC(sc', N(n))   = addToSC(sc', n);
+  addToSC(sc', SN(sn)) = addToSC(sc', sn);
+  addToSC(sc', C(c))   = addToSC(sc', c);
+  addToSC(sc', SC(sc)) = addToSC(sc', sc);
+
+
+
+  % simplify simply makes some obvious changes to data representation.
+  % behaviour of values on either side should be equal under pmatch, but
+  % the right hand side is, generally, easier to read.
+  simplify(N(n)) = N(n);
+  simplify(C(c)) = ensure_valid(C(c));
+  
+  simplify(SN([])) = invalid;
+  simplify(SN([n])) = N(n);
+  simplify(SN(n |> n' |> sn)) = SN(n |> n' |> sn);
+  
+  simplify(SC(SCpair([], [])))  = invalid;
+  simplify(SC(SCpair([], [c]))) = C(c);
+  simplify(SC(SCpair(n |> ns, c |> c' |> cs)))  = SC(SCpair(n |> ns, c |> c' |> cs));
+  
+
+
+
+  ensure_valid(v) = if(is_valid(v), v, invalid);
+
+  is_valid(invalid)  = false;
+  is_valid(N(n))   = true;
+  is_valid(SN(sn)) = (sn != []);
+  is_valid(C(c))   = (_vs(c) != []) && forall_Value(_vs(c), lambda v: Value.is_valid(v));
+  is_valid(SC(SCpair([], []))) = false;
+  
+  % pmatch should ensure that SC's never contain the value invalid - assert raises a rewrite error or returns true.
+(ns != []) || (cs != []) ->
+  is_valid(SC(SCpair(ns, cs))) = assert(
+                        forall_Ciphertext(cs, lambda c: Ciphertext.is_valid(C(c)))
+                      );
+
+sort DecryptResult = struct rm_fail(Anno, Anno)?rm_failed | rm_pass;
+
+map 
+  can_match: Ciphertext  # Ciphertext # Ciphertext -> Bool;
+  can_match: SCiphertext # Ciphertext # Ciphertext -> Bool;
+  can_match: SCiphertext # Values     # Values -> Bool;
+
+  can_match: Value       # Ciphertext # Ciphertext -> Bool;
+  can_match: Value       # Value      # Value -> Bool;
+  
+  replace_ids: Ciphertext # Ciphertext -> Ciphertext;
+  replace_ids: Values     # Values     -> Values;
+  
+  pmatch:   Value       # Value        -> Value; 
+  pmatch:   SName       # SName        -> SName;
+  pmatch_r: Ciphertext  # Ciphertext   -> Ciphertext;
+  pmatch_r: List(Value) # List(Value)  -> List(Value);
+  pmatch_r: SCiphertext # Ciphertext   -> SCiphertext;
+  pmatch_l: SCiphertext # Ciphertext   -> SCiphertext;
+  pmatch_r: SCiphertext # SCiphertext  -> SCiphertext;
+  
+  pmatch_cs_c_r:  List(Ciphertext) # Ciphertext  -> List(Ciphertext);
+  pmatch_cs_c_l:  List(Ciphertext) # Ciphertext  -> List(Ciphertext);
+  pmatch_cs_sc_r: List(Ciphertext) # SCiphertext -> List(Ciphertext);
+  pmatch_cs_sc_l: List(Ciphertext) # SCiphertext -> List(Ciphertext);
+  
+  can_make_c_r: SCiphertext # Ciphertext -> List(Ciphertext);
+  can_make_c_l: SCiphertext # Ciphertext -> List(Ciphertext);
+  
+  can_make_v: SCiphertext # Value       -> Value;
+  can_make_v: Value       # SCiphertext -> Value;
+  
+var
+  q, P, P', v, v': Value;
+  LQ, LP, LP', LP'', vs, vs', vs'': List(Value);
+  
+  n, n': Name;
+  c, c', cp, cp', cp'': Ciphertext;
+  sn, sn': SName;
+  sc, sc': SCiphertext;  
+  cs, cs': List(Ciphertext);
+  ns, ns': List(Name);
+  a, a', ao, ad: Anno;
+eqn
+%%can_match:  Ciphertext # Ciphertext # Ciphertext -> Bool;
+  % performs a pattern match while taking annotations into account.
+  % note: the annotation in cp is disregarded.
+  can_match(c, cp, cp'')  = C(cp') == match
+  whr
+    match = pmatch(C(c), C(Cpair(_vs(cp), AnnoLeft))),
+    cp' = replace_ids(cp, cp'')
+  end;
+
+%%can_match: SCiphertext # Ciphertext # Ciphertext -> Bool;
+  % performs a pattern match while taking annotations into account.
+  % note: the annotation in cp is disregarded.
+  % there will be more than one possibility if more than one C in sc 
+  % could be matched to cp.
+  can_match(sc, cp, cp'') = assert(_ns(match)==[]) && (cp' in _cs(match)) 
+  whr
+    % pmatch without simplification, so that we are certain an SC is obtained.
+    match = pmatch_r(sc, Cpair(_vs(cp), AnnoLeft)), 
+    cp' = replace_ids(cp, cp'') 
+  end;
+  
+%%can_match:  SCiphertext # Values # Values -> Bool;
+  % performs a pattern match while disregarding annotations, i.e. 
+  % treating ciphertexts simply as a list of values
+  % note: the annotation in cp is disregarded.
+  % there will be more than one possibility if more than one C in sc
+  % could be matched to vs.
+  can_match(sc, vs, vs'') = 
+    assert(_ns(match)==[]) && (vs' in get_ValueLists_from_Ciphertexts(_cs(match))) 
+  whr
+    % pmatch without simplification, so that we are certain an SC is obtained.
+    match = pmatch_r(sc, Cpair(vs, AnnoLeft)), 
+    vs' = replace_ids(vs, vs'') 
+  end;
+  
+%%can_match forwarders
+  can_match(C(c),   cp, cp') = can_match(c,  cp, cp');
+  can_match(SC(sc), cp, cp') = can_match(sc, cp, cp');
+  can_match(N(n),   cp, cp') = false;
+  can_match(SN(sn), cp, cp') = false;
+  can_match(v, C(cp), C(cp')) = can_match(v,  cp, cp');
+  
+
+
+%%remove_ids: Ciphertext # Ciphertext -> Ciphertext;
+  % removes the special "id" value which may only occur in LP', and replaces it by
+  % the corresponding value in LP. this indicates that the value cannot be changed by
+  % pmatch, which is the case for literal values in the protocol text.
+  %
+  % this is a purely cosmetic feature to make reading and hand-writing protocols in
+  % mCRL2 easier and more user-friendly.
+  replace_ids(Cpair(vs, a), Cpair(vs', a')) = Cpair(replace_ids(vs, vs'), a');
+  replace_ids(vs, vs') = collect2_Value(vs, vs', lambda v, v': Value.if(v'==id, v, v'));
+
+
+
+%%pmatch: Value # Value -> Value
+
+  pmatch(N(n), N(n'))      = simplify(SN(pmatch([n], [n'])));
+  pmatch(SN(sn), N(n))     = simplify(SN(pmatch(sn,  [n] )));
+  pmatch(N(n), SN(sn))     = simplify(SN(pmatch(sn,  [n] )));
+  pmatch(SN(sn), SN(sn'))  = simplify(SN(pmatch(sn,  sn' )));
+  
+  pmatch(C(c), C(c'))      = simplify( C(pmatch_r(c,  c')));
+  pmatch(SC(sc), C(c))     = simplify(SC(pmatch_r(sc, c)));
+  pmatch(C(c), SC(sc))     = simplify(SC(pmatch_l(sc, c)));
+  pmatch(SC(sc), SC(sc'))  = simplify(SC(pmatch_r(sc, sc')));
+
+
+  pmatch(any_name, N(n)) = N(n);
+  pmatch(any_name, SN(sn)) = SN(sn);
+  pmatch(any_name, C(c)) = invalid;
+  pmatch(any_name, SC(sc)) = SN(_ns(sc));
+  pmatch(any_ciphertext, N(n)) = invalid;
+  pmatch(any_ciphertext, SN(sn)) = invalid;
+  pmatch(any_ciphertext, C(c)) = C(c);
+  pmatch(any_ciphertext, SC(sc)) = SC(sc);
+  pmatch(any_ciphertext, any_name) = invalid;
+
+  is_any(v') -> pmatch(v, v') = pmatch(v', v);
+  
+(like_N(v) != like_N(v')) && !is_any(v) && !is_any(v') ->
+  pmatch(v, v')    = invalid;
+  
+  pmatch(invalid, v) = invalid;
+  pmatch(v, invalid) = invalid;
+
+
+%%pmatch: SName # SName -> SName;
+  %compute simple intersection
+  pmatch(n |> sn, sn') = if(n in sn', n |> pmatch(sn, sn'), pmatch(sn, sn'));
+  pmatch([], sn') = [];
+
+
+%%pmatch: Ciphertext  # Ciphertext  -> Ciphertext;
+  pmatch_r(Cpair(vs, ad), Cpair(vs', ao)) = 
+    Cpair(pmatch_r(vs, vs'), if(ao==AnnoLeft, ad, ao));
+
+%%pmatch: List(Value) # List(Value)  -> List(Value);
+  % collect the pmatch of every two elements in the lists.
+  pmatch_r(v |> vs, v' |> vs') =
+    if(is_valid(pvv) && recurse != [invalid], 
+      pvv |> recurse,
+      [invalid]
+    ) 
+    whr 
+      pvv = pmatch(v, v'),
+      recurse = pmatch_r(vs, vs')
+    end;
+    
+  pmatch_r([], v |> vs) = [invalid];
+  pmatch_r(vs, []) = if(vs==[], [], [invalid]);
+  % cannot do pmatch([],[]) because of ambiguity
+  
+
+%%pmatch: SCiphertext # Ciphertext  -> SCiphertext;
+  pmatch_r(sc, c) = SCpair([], pmatch_cs_c_r(_cs(sc), c) ++ can_make_c_r(sc, c));
+  pmatch_l(sc, c) = SCpair([], pmatch_cs_c_l(_cs(sc), c) ++ can_make_c_l(sc, c));
+  
+  
+%%pmatch_cs_c: List(Ciphertext) # Ciphertext -> List(Ciphertext)
+  % finds all the c's in cs that can be matched with c, and returns the matches in a list
+  %
+  % _r-version guarantees that the annotation of the second argument is preserved
+  pmatch_cs_c_r(c |> cs, c') = 
+    if(is_valid(C(pcc)),
+      pcc |> recurse,
+      recurse
+    )
+    whr
+      pcc = pmatch_r(c, c'),
+      recurse = pmatch_cs_c_r(cs, c')
+    end;
+    
+  % _l-version guarantees that the annotation of the second argument is preserved
+  % does not differ from _r-version except the r/l'ness of the subroutines called
+  pmatch_cs_c_l(c |> cs, c') = 
+    if(is_valid(C(pcc)),
+      pcc |> recurse,
+      recurse
+    )
+    whr
+      pcc = pmatch_r(c', c),
+      recurse = pmatch_cs_c_l(cs, c')
+    end;
+    
+  pmatch_cs_c_r([], c') = [];
+  pmatch_cs_c_l([], c') = [];
+
+%%can_make_c: SCiphertext # Ciphertext -> List(Ciphertext)
+  % matches each v in c' to either sc's names or sc itself, or returns the empty list if
+  % at least one v cannot be matched. returns a list with one or zero elements.
+  %
+  % _r-version guarantees that the annotation of the second argument is preserved
+  can_make_c_r(sc, Cpair(v |> vs, a)) = 
+    if(is_valid(cmv) && recurse != [],
+      [Cpair(cmv |> _vs(recurse.0), if(a==AnnoLeft, AnnoDY, a))],
+      []
+    )
+    whr
+      cmv = can_make_v(sc, v),
+      recurse = can_make_c_r(sc, Cpair(vs, a))
+    end;
+    
+  % _l-version guarantees that the annotation of the second argument is preserved
+  % differs from _r-version in order of can_make_v arguments, and that the DY annotation
+  % is always appended, because this ciphertext has been created from names in the SC;
+  % these names must have been known by the attacker, so it is in fact a ciphertext sent
+  % by the attacker.
+  can_make_c_l(sc, Cpair(v |> vs, a)) = 
+    if(is_valid(cmv) && recurse != [],
+      [Cpair(cmv |> _vs(recurse.0), AnnoDY)],
+      []
+    )
+    whr
+      cmv = can_make_v(v, sc),
+      recurse = can_make_c_l(sc, Cpair(vs, a))
+    end;
+    
+  can_make_c_r(sc, Cpair([], a)) = [Cpair([], a)];
+  can_make_c_l(sc, Cpair([], a)) = [Cpair([], a)];
+    
+%%can_make_v: SCiphertext # Value -> Value;
+%%can_make_v: Value # SCiphertext -> Value;
+  % properly matches a value against a sciphertext, depending on the value's type.
+  % always preserves the annotation of the second argument (unless is_any(v))
+  can_make_v(sc, v) =
+    if(is_any(v),
+      pmatch(v, SC(sc)),
+      if(like_C(v),
+        pmatch(SC(sc), v),
+        pmatch(SN(_ns(sc)), v)
+      )
+    );
+    
+  can_make_v(v, sc) =
+    if(is_any(v),
+      pmatch(v, SC(sc)),
+      if(like_C(v),
+        pmatch(v, SC(sc)),
+        pmatch(v, SN(_ns(sc)))
+      )
+    );
+    
+    
+%%pmatch: SCiphertext # SCiphertext -> SCiphertext;
+  pmatch_r(SCpair(ns, cs), SCpair(ns', cs')) = %SCpair([],[]);
+    SCpair(
+      pmatch(ns, ns'), %intersect names
+      uniq_Ciphertext( pmatch_cs_sc_r(cs, SCpair(ns', cs')) ++ 
+        pmatch_cs_sc_l(cs', SCpair(ns, cs)) )
+    );
+  
+
+%%pmatch_cs_sc: List(Ciphertext) # SCiphertext -> List(Ciphertext)
+  % finds all the c's in cs that can be matched with sc, and returns the matches in a list
+  pmatch_cs_sc_r(c |> cs, sc) = 
+    if(is_valid(SC(pc)),
+      _cs(pc) ++ recurse,  % ok to discard _ns(pc) because pmatch: SC#C does not fill it.
+      recurse
+    )
+    whr
+      pc = pmatch_l(sc, c),
+      recurse = pmatch_cs_sc_r(cs, sc)
+    end;
+
+  pmatch_cs_sc_l(c |> cs, sc) = 
+    if(is_valid(SC(pc)),
+      _cs(pc) ++ recurse,  % ok to discard _ns(pc) because pmatch: SC#C does not fill it.
+      recurse
+    )
+    whr
+      pc = pmatch_r(sc, c),
+      recurse = pmatch_cs_sc_r(cs, sc)
+    end;
+    
+  pmatch_cs_sc_r([], sc) = [];    
+  pmatch_cs_sc_l([], sc) = [];
+
+
+
+
+
+
+
+
+
+sort Message = List(Value);
+
+map 
+  matchDO: Anno#Anno -> Bool;
+  fails_rm : Anno#Anno -> Bool;
+var 
+  o, d: CP;
+  O, D: List(CP);
+  ad, ao: Anno;
+eqn
+  matchDO(at(d, D), at(o, O)) = (d in O) && (o in D);
+  matchDO(at_s(d),  at(o, O)) = (d in O);
+  matchDO(at(d, D), at_s(o))  = (o in D);
+  matchDO(at_s(d),  at_s(o))  = true;
+
+  fails_rm(ad, ao) = !matchDO(ad, ao);
+
+
+sort Knowledge = SCiphertext;
+sort KnowledgeUpdate = struct KU(_kn: Knowledge, _dc: List(Ciphertext));
+
+map 
+  update_knowledge: Knowledge # Message -> KnowledgeUpdate;
+  update_knowledge: KnowledgeUpdate # Message -> KnowledgeUpdate;
+  
+  propagate: KnowledgeUpdate -> KnowledgeUpdate;
+  
+  cs_can_decrypt: List(Ciphertext) # SCiphertext -> List(List(Ciphertext));
+
+var
+  ku: KnowledgeUpdate;
+  dc: List(Ciphertext);
+  kn, kn': Knowledge;
+  v, v', k: Value;
+  c, c': Ciphertext;
+  n, n': Name;
+  sc, sc': SCiphertext;
+  sn, sn': SName;
+  ns: List(Name);
+  cs: List(Ciphertext);
+  m: Message;
+eqn
+  update_knowledge(kn, m) = propagate(update_knowledge(KU(kn, []), m));
+
+  update_knowledge(ku, []) = ku;
+  update_knowledge(KU(kn, dc), v |> m) = update_knowledge(KU(addToSC(kn, v), dc), m);
+  
+%%propagate: KnowledgeUpdate -> KnowledgeUpdate;
+  % fixed point recursion: as long as there are undecrypted ciphertexts in the knowledge
+  % that can be decrypted, keep doing so.
+  %
+  % this is suboptimal, because in fact we only need to try to decrypt newly received /
+  % decrypted names and ciphertexts. this is much simpler, however.
+  
+  propagate(KU(SCpair(ns, cs), dc)) = 
+    if(cs_key_known_pair.0 == [],
+      KU(SCpair(ns, cs), dc),
+      update_knowledge(
+        KU(SCpair(ns, cs_key_known_pair.1), cs_key_known_pair.0 ++ dc), 
+        uniq_Value(get_Values_from_Ciphertexts(cs_key_known_pair.0))
+      )
+    )
+    whr
+      cs_key_known_pair = cs_can_decrypt(cs, SCpair(ns, cs))
+    end;
+
+
+%%cs_can_decrypt: List(Ciphertext) # SCiphertext -> List(List(Ciphertext));
+  % returns a pair of lists of ciphertexts. the first element contains ciphertexts that
+  % can be decrypted. the second element contains ciphertexts that cannot be decrypted.
+  %
+  % loops through the ciphertexts to see if the key can be pmatched to (found in) sc.
+  % if so, the pattern matched result replaces the key, and the whole is prepended to the 
+  % first list in returned list.
+  %
+  % otherwise, it is appended to the second list.
+  %
+  % this effectively means that if a ciphertext has a symbolic key which can only be partly
+  % matched, the other values represented by the key are discarded. this is allright, because
+  % one matched key already suffices for unlocking the other elements of the ciphertext, and
+  % an empty ciphertext with only a key has no value to the attacker, because it cannot find
+  % that key until it otherwise receives it, somehow.
+  
+  cs_can_decrypt(c |> cs, sc) =
+    if(is_valid(pk),
+      [_c(encrypt(els(c), pk, _a(c))) |> recurse.0, recurse.1],
+      [recurse.0, c |> recurse.1]
+    )
+    whr
+      pk = pmatch(key(c), SC(sc)),
+      recurse = cs_can_decrypt(cs, sc)
+    end;
+    
+  cs_can_decrypt([], sc) = [[],[]];
+
+
+act 
+  send, recvA, c, s: Message;
+  recv, sendA, r: Message # SCiphertext;
+  FAIL: Value # Value # Anno; %Anno#Anno;
+  zero;
+  
+
+
+proc decrypt(x: Value, p: Value, p': Value, ao: Anno) =
+  sum ad:Anno.
+    can_match(x, p, set_anno(p', ad)) ->   
+      matchDO(ad, ao) -> 
+        tau
+      <>
+        FAIL(x, set_anno(p, ad), ao).delta;
+
+
+proc read(p: Values, p': Values) =
+  sum sc_dy: SCiphertext.can_match(sc_dy, p, p') ->
+    recv(p, sc_dy);
+
+
+map
+  filter_ku_rm: KnowledgeUpdate -> KnowledgeUpdate;
+var
+  kn: Knowledge;
+  cs: List(Ciphertext);
+eqn
+  filter_ku_rm(KU(kn, cs)) = 
+    KU(kn, filter_Ciphertext(cs, lambda c: Ciphertext.fails_rm(_a(c), AnnoDY)));
+
+  
+proc DYinit(ns: List(Name)) = DY(SCpair(ns, []));
+
+proc DY(kn: Knowledge) = 
+  (
+    sum m: Message.
+      recvA(m).
+      (
+        %single-point domain sum for not having to compute ku twice.
+        sum ku:KnowledgeUpdate.(ku==filter_ku_rm(update_knowledge(kn, m))) ->
+        
+          % list was empty? good, the attacker did not decrypt anything it wasn't allowed to.
+          (_dc(ku)==[]) ->
+            DY(_kn(ku))
+          <> 
+            % otherwise, we raise a FAIL for every not-allowed decryption by the attacker. 
+            (
+              sum c: Ciphertext.(c in _dc(ku)) ->
+                FAIL(C(c), any_ciphertext, AnnoDY).delta
+            )
+      )
+  )
++
+  (
+    sum c_dy: Values.
+      sendA(c_dy, kn).
+      DY(kn)
+  );
+
+
+map 
+  CPDYonAttackerIndex: List(Nat) -> List(CP);
+  attackerIndex: Nat;
+var
+  ln: List(Nat);
+  n: Nat;
+eqn 
+  CPDYonAttackerIndex([]) = [];
+  CPDYonAttackerIndex(n |> ln) = if(n==attackerIndex, [CPDY], CPDYonAttackerIndex(ln));
+
+
+% end of preamble.

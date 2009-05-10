@@ -32,6 +32,7 @@ bool _getch() { return true; }
 #include "lysaparser.hpp"
 #include "lysalexer.h"
 #include "lysaconverter.h"
+#include "strategy.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -109,6 +110,12 @@ class lysa2mcrl2_tool: public input_output_tool
     void add_options(interface_description& desc)
     {
       input_output_tool::add_options(desc);
+      desc.add_option("strategy", 
+        make_optional_argument("STRATEGY", "symbolic"), 
+        "FIXME", 
+        's');
+      
+      /*
       desc.add_option("no-attacker", 
         "Produces a specification without support for a symbolic attacker. "
         "This makes the specification significantly simpler and the state space significantly "
@@ -130,6 +137,7 @@ class lysa2mcrl2_tool: public input_output_tool
         "Use the format strings in FILENAME to build mCRL2 expressions. Defaults to "
         "symbolic.fmt (or straightforward.fmt is -n is present).",
         'f');
+      */
 
       desc.add_option("attacker-index", 
         make_mandatory_argument("NUM"), 
@@ -163,7 +171,15 @@ class lysa2mcrl2_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       input_output_tool::parse_options(parser);
+      
+      if(parser.options.count("strategy"))
+      {
+        options.strategy = lysa::Strategy::get(parser.option_argument("strategy"));
+      }
 
+      options.make_symbolic = options.strategy->makeSymbolicAttacker();
+
+      /*
       if(parser.options.count("no-attacker"))
       {
         options.make_symbolic = false;
@@ -186,6 +202,7 @@ class lysa2mcrl2_tool: public input_output_tool
       {
         options.fmt_file_name = parser.option_argument("fmt-file");
       }
+      */
 
       if(parser.options.count("prefix-idents"))
       {
