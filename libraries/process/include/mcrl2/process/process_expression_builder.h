@@ -55,9 +55,9 @@ struct process_expression_builder
     return process_expression();
   }
               
-  /// \brief Visit process node
+  /// \brief Visit process_variable node
   /// \return The result of visiting the node
-  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
@@ -160,9 +160,9 @@ struct process_expression_builder
     return process_expression();
   }
               
-  /// \brief Visit binit node
+  /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
   }
@@ -174,9 +174,9 @@ struct process_expression_builder
     return process_expression();
   }
               
-  /// \brief Visit lmerge node
+  /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
   }
@@ -212,14 +212,14 @@ struct process_expression_builder
         result = action(l, v);
       }
     }
-    else if (tr::is_process(x))
+    else if (tr::is_process_variable(x))
     {
-      process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
-      result = visit_process(x, pi, v, a);
+      process_identifier pi = process_variable(x).identifier();
+      data::data_expression_list v = process_variable(x).expressions();
+      result = visit_process_variable(x, pi, v, a);
       if (!is_finished(result))
       {
-        result = process(pi, v);
+        result = process_variable(pi, v);
       }
     }
     else if (tr::is_process_assignment(x))
@@ -359,14 +359,14 @@ struct process_expression_builder
         result = if_then_else(d, visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_binit(x))
+    else if (tr::is_bounded_init(x))
     {
-      process_expression left = binit(x).left();
-      process_expression right = binit(x).right();
-      result = visit_binit(x, left, right, a);
+      process_expression left = bounded_init(x).left();
+      process_expression right = bounded_init(x).right();
+      result = visit_bounded_init(x, left, right, a);
       if (!is_finished(result))
       {
-        result = binit(visit(left, a), visit(right, a));
+        result = bounded_init(visit(left, a), visit(right, a));
       }
     }
     else if (tr::is_merge(x))
@@ -379,14 +379,14 @@ struct process_expression_builder
         result = merge(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_lmerge(x))
+    else if (tr::is_left_merge(x))
     {
-      process_expression left = lmerge(x).left();
-      process_expression right = lmerge(x).right();
-      result = visit_lmerge(x, left, right, a);
+      process_expression left = left_merge(x).left();
+      process_expression right = left_merge(x).right();
+      result = visit_left_merge(x, left, right, a);
       if (!is_finished(result))
       {
-        result = lmerge(visit(left, a), visit(right, a));
+        result = left_merge(visit(left, a), visit(right, a));
       }
     }
     else if (tr::is_choice(x))
@@ -437,9 +437,9 @@ struct process_expression_builder<void>
     return process_expression();
   }
               
-  /// \brief Visit process node
+  /// \brief Visit process_variable node
   /// \return The result of visiting the node
-  virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+  virtual process_expression visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return process_expression();
   }
@@ -542,9 +542,9 @@ struct process_expression_builder<void>
     return process_expression();
   }
               
-  /// \brief Visit binit node
+  /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
@@ -556,9 +556,9 @@ struct process_expression_builder<void>
     return process_expression();
   }
               
-  /// \brief Visit lmerge node
+  /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
@@ -592,14 +592,14 @@ struct process_expression_builder<void>
         result = action(l, v);
       }
     }
-    else if (tr::is_process(x))
+    else if (tr::is_process_variable(x))
     {
-      process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
-      result = visit_process(x, pi, v);
+      process_identifier pi = process_variable(x).identifier();
+      data::data_expression_list v = process_variable(x).expressions();
+      result = visit_process_variable(x, pi, v);
       if (!is_finished(result))
       {
-        result = process(pi, v);
+        result = process_variable(pi, v);
       }
     }
     else if (tr::is_process_assignment(x))
@@ -739,14 +739,14 @@ struct process_expression_builder<void>
         result = if_then_else(d, visit(left), visit(right));
       }
     }
-    else if (tr::is_binit(x))
+    else if (tr::is_bounded_init(x))
     {
-      process_expression left = binit(x).left();
-      process_expression right = binit(x).right();
-      result = visit_binit(x, left, right);
+      process_expression left = bounded_init(x).left();
+      process_expression right = bounded_init(x).right();
+      result = visit_bounded_init(x, left, right);
       if (!is_finished(result))
       {
-        result = binit(visit(left), visit(right));
+        result = bounded_init(visit(left), visit(right));
       }
     }
     else if (tr::is_merge(x))
@@ -759,14 +759,14 @@ struct process_expression_builder<void>
         result = merge(visit(left), visit(right));
       }
     }
-    else if (tr::is_lmerge(x))
+    else if (tr::is_left_merge(x))
     {
-      process_expression left = lmerge(x).left();
-      process_expression right = lmerge(x).right();
-      result = visit_lmerge(x, left, right);
+      process_expression left = left_merge(x).left();
+      process_expression right = left_merge(x).right();
+      result = visit_left_merge(x, left, right);
       if (!is_finished(result))
       {
-        result = lmerge(visit(left), visit(right));
+        result = left_merge(visit(left), visit(right));
       }
     }
     else if (tr::is_choice(x))

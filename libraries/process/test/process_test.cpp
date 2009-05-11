@@ -124,11 +124,11 @@ void test_process(std::string text)
   {
     visit_process_expression(i->expression());
     build_process_expression(i->expression());
-    bool linear = mcrl2::process::detail::linear_process_expression_visitor().is_linear(*i);
+    bool linear = process::detail::linear_process_expression_visitor().is_linear(*i);
     std::cerr << core::pp(*i) << " is " << (linear ? "" : "not") << "linear" << std::endl;
     if (linear)
     {
-      mcrl2::process::detail::linear_process_conversion_visitor visitor;
+      process::detail::linear_process_conversion_visitor visitor;
       visitor.convert(*i);
       std::cerr << "summands:\n";
       summand_list s(visitor.result.begin(), visitor.result.end());

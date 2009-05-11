@@ -75,11 +75,9 @@ namespace detail {
     /// \brief FUNCTION_DESCRIPTION
     /// \param x A process expression
     /// \return RETURN_DESCRIPTION
-    bool is_process_variable(const process_expression& x)
+    bool is_process(const process_expression& x)
     {
-      return tr::is_process(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
+      return tr::is_process_variable(x)
           || tr::is_process_assignment(x)
           ;
     }
@@ -90,8 +88,6 @@ namespace detail {
     bool is_timed_deadlock(const process_expression& x)
     {
       return tr::is_delta(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || tr::is_at_time(x)
           ;
     }
@@ -102,11 +98,7 @@ namespace detail {
     bool is_multiaction(const process_expression& x)
     {
       return tr::is_tau(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || tr::is_sync(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || tr::is_action(x)
           ;
     }
@@ -153,11 +145,7 @@ namespace detail {
     bool is_alternative(const process_expression& x)
     {
       return tr::is_sum(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || is_conditional_action_prefix(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || is_conditional_deadlock(x)
           ;
     }
@@ -174,12 +162,12 @@ namespace detail {
           ;
     }
 
-    /// \brief Visit process node
+    /// \brief Visit process_variable node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param pi A process identifier
     /// \param v A sequence of data expressions
-    bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+    bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
     {
       return continue_recursion;
     }
@@ -303,15 +291,15 @@ namespace detail {
     /// \param right A process expression
     bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
     {
-      if (!is_timed_multiaction(left) || !is_process_variable(right))
+      if (!is_timed_multiaction(left) || !is_process(right))
       {
         throw non_linear_process();
       }
-      if (!tr::is_process(right))
+      if (!tr::is_process_variable(right))
       {
         throw std::runtime_error("unexpected error in visit_seq");
       }
-      process q = right;
+      process_variable q = right;
       if (q.identifier() != eqn.name())
       {
         throw non_linear_process();
@@ -345,12 +333,12 @@ namespace detail {
       return continue_recursion;
     }
 
-    /// \brief Visit binit node
+    /// \brief Visit bounded_init node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -367,12 +355,12 @@ namespace detail {
       return continue_recursion;
     }
 
-    /// \brief Visit lmerge node
+    /// \brief Visit left_merge node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -408,7 +396,7 @@ namespace detail {
       {
         return false;
       }
-      if (!tr::is_process(p.init().expression()))
+      if (!tr::is_process_variable(p.init().expression()))
       {
         return false;
       }

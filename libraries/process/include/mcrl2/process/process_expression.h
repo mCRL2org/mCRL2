@@ -73,12 +73,12 @@ using lps::action;
 
   /// \brief Process variable
   // Process(<ProcVarId>, <DataExpr>*)
-  class process: public process_expression
+  class process_variable: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      process(atermpp::aterm_appl term)
+      process_variable(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_Process(m_term));
@@ -87,7 +87,7 @@ using lps::action;
       /// \brief Constructor.
       /// \param pi A process identifier
       /// \param v A sequence of data expressions
-      process(const process_identifier pi, const data::data_expression_list& v)
+      process_variable(const process_identifier pi, const data::data_expression_list& v)
         : process_expression(core::detail::gsMakeProcess(pi,
                         atermpp::term_list<data::data_expression>(v.begin(), v.end())))
       {}
@@ -609,12 +609,12 @@ using lps::action;
 
   // BInit(<ProcExpr>, <ProcExpr>)
   /// \brief Bounded initialization operator for process expressions
-  class binit: public process_expression
+  class bounded_init: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      binit(atermpp::aterm_appl term)
+      bounded_init(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_BInit(m_term));
@@ -623,7 +623,7 @@ using lps::action;
       /// \brief Constructor.
       /// \param left A process expression
       /// \param right A process expression
-      binit(const process_expression& left, const process_expression& right)
+      bounded_init(const process_expression& left, const process_expression& right)
         : process_expression(core::detail::gsMakeBInit(left, right))
       {}
 
@@ -683,12 +683,12 @@ using lps::action;
 
   // LMerge(<ProcExpr>, <ProcExpr>)
   /// \brief Left-merge operator for process expressions
-  class lmerge: public process_expression
+  class left_merge: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      lmerge(atermpp::aterm_appl term)
+      left_merge(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_LMerge(m_term));
@@ -697,7 +697,7 @@ using lps::action;
       /// \brief Constructor.
       /// \param left A process expression
       /// \param right A process expression
-      lmerge(const process_expression& left, const process_expression& right)
+      left_merge(const process_expression& left, const process_expression& right)
         : process_expression(core::detail::gsMakeLMerge(left, right))
       {}
 
@@ -780,7 +780,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_process(const process_expression& t)
+    bool is_process_variable(const process_expression& t)
     {
       return core::detail::gsIsProcess(t);
     }
@@ -915,7 +915,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_binit(const process_expression& t)
+    bool is_bounded_init(const process_expression& t)
     {
       return core::detail::gsIsBInit(t);
     }
@@ -933,7 +933,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_lmerge(const process_expression& t)
+    bool is_left_merge(const process_expression& t)
     {
       return core::detail::gsIsLMerge(t);
     }

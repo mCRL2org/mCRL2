@@ -265,7 +265,7 @@ namespace detail {
     bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
-      process p = right;
+      process_variable p = right;
       m_next_state = data::make_assignment_list(m_equation.variables2(), p.expressions());
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
@@ -296,12 +296,12 @@ namespace detail {
       return continue_recursion;
     }
 
-    /// \brief Visit binit node
+    /// \brief Visit bounded_init node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -318,12 +318,12 @@ namespace detail {
       return continue_recursion;
     }
 
-    /// \brief Visit lmerge node
+    /// \brief Visit left_merge node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -393,11 +393,11 @@ namespace detail {
         convert(*i);
       }
       lps::linear_process lp(data::variable_list(), m_process_parameters, lps::summand_list(result.begin(), result.end()));
-      if (!tr::is_process(p.init().expression()))
+      if (!tr::is_process_variable(p.init().expression()))
       {
         std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
       }
-      process q = p.init().expression();
+      process_variable q = p.init().expression();
       lps::process_initializer init(p.init().variables(), data::make_assignment_list(m_process_parameters, q.expressions()));
       return lps::specification(p.data(), p.action_labels(), lp, init);
     }

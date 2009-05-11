@@ -57,15 +57,15 @@ struct process_expression_visitor
   virtual void leave_action()
   {}
 
-  /// \brief Visit process node
+  /// \brief Visit process_variable node
   /// \return The result of visiting the node
-  virtual bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
+  virtual bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process node
-  virtual void leave_process()
+  /// \brief Leave process_variable node
+  virtual void leave_process_variable()
   {}
 
   /// \brief Visit process_assignment node
@@ -222,15 +222,15 @@ struct process_expression_visitor
   virtual void leave_if_then_else()
   {}
 
-  /// \brief Visit binit node
+  /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave binit node
-  virtual void leave_binit()
+  /// \brief Leave bounded_init node
+  virtual void leave_bounded_init()
   {}
 
   /// \brief Visit merge node
@@ -244,15 +244,15 @@ struct process_expression_visitor
   virtual void leave_merge()
   {}
 
-  /// \brief Visit lmerge node
+  /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave lmerge node
-  virtual void leave_lmerge()
+  /// \brief Leave left_merge node
+  virtual void leave_left_merge()
   {}
 
   /// \brief Visit choice node
@@ -281,12 +281,12 @@ struct process_expression_visitor
       visit_action(x, l, v, a);
       leave_action();
     }
-    else if (tr::is_process(x))
+    else if (tr::is_process_variable(x))
     {
-      process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
-      visit_process(x, pi, v, a);
-      leave_process();
+      process_identifier pi = process_variable(x).identifier();
+      data::data_expression_list v = process_variable(x).expressions();
+      visit_process_variable(x, pi, v, a);
+      leave_process_variable();
     }
     else if (tr::is_process_assignment(x))
     {
@@ -419,16 +419,16 @@ struct process_expression_visitor
       }
       leave_if_then_else();
     }
-    else if (tr::is_binit(x))
+    else if (tr::is_bounded_init(x))
     {
-      process_expression left = binit(x).left();
-      process_expression right = binit(x).right();
-      bool result = visit_binit(x, left, right, a);
+      process_expression left = bounded_init(x).left();
+      process_expression right = bounded_init(x).right();
+      bool result = visit_bounded_init(x, left, right, a);
       if (result) {
         visit(left, a);
         visit(right, a);
       }
-      leave_binit();
+      leave_bounded_init();
     }
     else if (tr::is_merge(x))
     {
@@ -441,16 +441,16 @@ struct process_expression_visitor
       }
       leave_merge();
     }
-    else if (tr::is_lmerge(x))
+    else if (tr::is_left_merge(x))
     {
-      process_expression left = lmerge(x).left();
-      process_expression right = lmerge(x).right();
-      bool result = visit_lmerge(x, left, right, a);
+      process_expression left = left_merge(x).left();
+      process_expression right = left_merge(x).right();
+      bool result = visit_left_merge(x, left, right, a);
       if (result) {
         visit(left, a);
         visit(right, a);
       }
-      leave_lmerge();
+      leave_left_merge();
     }
     else if (tr::is_choice(x))
     {
@@ -500,15 +500,15 @@ struct process_expression_visitor<void>
   virtual void leave_action()
   {}
 
-  /// \brief Visit process node
+  /// \brief Visit process_variable node
   /// \return The result of visiting the node
-  virtual bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+  virtual bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process node
-  virtual void leave_process()
+  /// \brief Leave process_variable node
+  virtual void leave_process_variable()
   {}
 
   /// \brief Visit process_assignment node
@@ -665,15 +665,15 @@ struct process_expression_visitor<void>
   virtual void leave_if_then_else()
   {}
 
-  /// \brief Visit binit node
+  /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave binit node
-  virtual void leave_binit()
+  /// \brief Leave bounded_init node
+  virtual void leave_bounded_init()
   {}
 
   /// \brief Visit merge node
@@ -687,15 +687,15 @@ struct process_expression_visitor<void>
   virtual void leave_merge()
   {}
 
-  /// \brief Visit lmerge node
+  /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave lmerge node
-  virtual void leave_lmerge()
+  /// \brief Leave left_merge node
+  virtual void leave_left_merge()
   {}
 
   /// \brief Visit choice node
@@ -724,12 +724,12 @@ struct process_expression_visitor<void>
       visit_action(x, l, v);
       leave_action();
     }
-    else if (tr::is_process(x))
+    else if (tr::is_process_variable(x))
     {
-      process_identifier pi = process(x).identifier();
-      data::data_expression_list v = process(x).expressions();
-      visit_process(x, pi, v);
-      leave_process();
+      process_identifier pi = process_variable(x).identifier();
+      data::data_expression_list v = process_variable(x).expressions();
+      visit_process_variable(x, pi, v);
+      leave_process_variable();
     }
     else if (tr::is_process_assignment(x))
     {
@@ -862,16 +862,16 @@ struct process_expression_visitor<void>
       }
       leave_if_then_else();
     }
-    else if (tr::is_binit(x))
+    else if (tr::is_bounded_init(x))
     {
-      process_expression left = binit(x).left();
-      process_expression right = binit(x).right();
-      bool result = visit_binit(x, left, right);
+      process_expression left = bounded_init(x).left();
+      process_expression right = bounded_init(x).right();
+      bool result = visit_bounded_init(x, left, right);
       if (result) {
         visit(left);
         visit(right);
       }
-      leave_binit();
+      leave_bounded_init();
     }
     else if (tr::is_merge(x))
     {
@@ -884,16 +884,16 @@ struct process_expression_visitor<void>
       }
       leave_merge();
     }
-    else if (tr::is_lmerge(x))
+    else if (tr::is_left_merge(x))
     {
-      process_expression left = lmerge(x).left();
-      process_expression right = lmerge(x).right();
-      bool result = visit_lmerge(x, left, right);
+      process_expression left = left_merge(x).left();
+      process_expression right = left_merge(x).right();
+      bool result = visit_left_merge(x, left, right);
       if (result) {
         visit(left);
         visit(right);
       }
-      leave_lmerge();
+      leave_left_merge();
     }
     else if (tr::is_choice(x))
     {

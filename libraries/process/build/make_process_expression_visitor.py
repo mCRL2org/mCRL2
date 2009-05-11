@@ -3,7 +3,7 @@ import string
 from path import *
 
 TEXT = '''action(const lps::action_label& l, const data::data_expression_list& v) (label, arguments)
-process(const process_identifier pi, const data::data_expression_list& v) (identifier, expressions)
+process_variable(const process_identifier pi, const data::data_expression_list& v) (identifier, expressions)
 process_assignment(const process_identifier& pi, const data::assignment_list& v) (identifier, assignments)
 delta() ()
 tau() ()
@@ -18,9 +18,9 @@ at_time(const process_expression& left, const data::data_expression& d) (express
 seq(const process_expression& left, const process_expression& right) (left, right)
 if_then(const data::data_expression& d, const process_expression& right) (condition, left)
 if_then_else(const data::data_expression& d, const process_expression& left, const process_expression& right) (condition, left, right)
-binit(const process_expression& left, const process_expression& right) (left, right)
+bounded_init(const process_expression& left, const process_expression& right) (left, right)
 merge(const process_expression& left, const process_expression& right) (left, right)
-lmerge(const process_expression& left, const process_expression& right) (left, right)
+left_merge(const process_expression& left, const process_expression& right) (left, right)
 choice(const process_expression& left, const process_expression& right) (left, right)'''
 
 PROCESS_EXPRESSION_VISITOR_CODE = r'''/// \\brief Visitor class for process expressions.
@@ -388,7 +388,7 @@ def make_process_term_traits(filename):
 
     terms = [
       ('action'             , 'Action'           ),
-      ('process'            , 'Process'          ),
+      ('process_variable'   , 'Process'          ),
       ('process_assignment' , 'ProcessAssignment'),
       ('delta'              , 'Delta'            ),
       ('tau'                , 'Tau'              ),
@@ -403,9 +403,9 @@ def make_process_term_traits(filename):
       ('seq'                , 'Seq'              ),
       ('if_then'            , 'IfThen'           ),
       ('if_then_else'       , 'IfThenElse'       ),
-      ('binit'              , 'BInit'            ),
+      ('bounded_init'       , 'BInit'            ),
       ('merge'              , 'Merge'            ),
-      ('lmerge'             , 'LMerge'           ),
+      ('left_merge'         , 'LMerge'           ),
       ('choice'             , 'Choice'           ),
     ]
 
