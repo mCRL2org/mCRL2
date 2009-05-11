@@ -65,6 +65,7 @@ namespace process {
 
       /// \brief Constructor.
       /// \param term A term
+      /// \param t A term
       process_specification(atermpp::aterm_appl t)
       {
         assert(core::detail::check_term_ProcSpec(t));
@@ -78,42 +79,58 @@ namespace process {
           m_initial_process(init)
       {}
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       const data::data_specification& data() const
       {
         return m_data;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       data::data_specification& data()
       {
         using namespace atermpp;
         return m_data;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       const lps::action_label_list& action_labels() const
       {
         return m_action_labels;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       lps::action_label_list& action_labels()
       {
         return m_action_labels;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       const atermpp::vector<process_equation>& equations() const
       {
         return m_equations;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       atermpp::vector<process_equation>& equations()
       {
         return m_equations;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       const process_initialization& init() const
       {
         return m_initial_process;
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       process_initialization& init()
       {
         return m_initial_process;
@@ -122,6 +139,8 @@ namespace process {
 
   /// \brief Traverses the process specification, and writes all sort expressions
   /// that are encountered to the output range [dest, ...).
+  /// \param spec A process specification
+  /// \param dest An output iterator
   template <typename OutIter>
   void traverse_sort_expressions(const process_specification& spec, OutIter dest)
   {
@@ -149,6 +168,7 @@ namespace process {
 
   /// \brief Conversion to ATermAppl.
   /// \return The specification converted to ATerm format.
+  /// \param spec A process specification
   inline
   ATermAppl process_specification_to_aterm(const process_specification& spec)
   {
@@ -161,6 +181,8 @@ namespace process {
   }
   
   /// \brief Pretty print function
+  /// \param spec A process specification
+  /// \return RETURN_DESCRIPTION
   inline std::string pp(const process_specification& spec)
   {
     return core::pp(process_specification_to_aterm(spec));

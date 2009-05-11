@@ -37,26 +37,32 @@ namespace process {
       }
 
       process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list< data::sort_expression >(sorts.begin(), sorts.end())))
+        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
       {}
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       core::identifier_string name() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       data::sort_expression_list sorts() const
       {
         using namespace atermpp;
         return data::sort_expression_list(
-          atermpp::term_list_iterator< data::sort_expression >(list_arg2(*this)),
-          atermpp::term_list_iterator< data::sort_expression >());
+          atermpp::term_list_iterator<data::sort_expression>(list_arg2(*this)),
+          atermpp::term_list_iterator<data::sort_expression>());
       }
   };
 
   /// \brief Traverses the process identifier, and writes all sort expressions
   /// that are encountered to the output range [dest, ...).
+  /// \param pi A process identifier
+  /// \param dest An output iterator
   template <typename OutIter>
   void traverse_sort_expressions(const process_identifier& pi, OutIter dest)
   {

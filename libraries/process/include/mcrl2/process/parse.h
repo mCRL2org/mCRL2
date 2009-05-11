@@ -22,6 +22,9 @@ namespace mcrl2 {
 
 namespace process {
 
+  /// \brief Parses a process specification from a string
+  /// \param spec A string
+  /// \return The parse result
   inline
   process_specification parse_process_specification(const std::string& spec)
   {

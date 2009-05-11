@@ -43,36 +43,49 @@ namespace process {
         assert(core::detail::check_term_ProcEqn(m_term));
       }
 
+      /// \brief Constructor.
+      /// \param variables1 A sequence of data variables
+      /// \param name A process identifier
+      /// \param variables2 A sequence of data variables
+      /// \param expression A process expression
       process_equation(data::variable_list variables1, process_identifier name, data::variable_list variables2, process_expression expression)
         : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
-                                atermpp::term_list< data::variable >(variables1.begin(), variables1.end()),
+                                atermpp::term_list<data::variable>(variables1.begin(), variables1.end()),
                                 name,
-                                atermpp::term_list< data::variable >(variables2.begin(), variables2.end()),
+                                atermpp::term_list<data::variable>(variables2.begin(), variables2.end()),
                                 expression))
       {}
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       data::variable_list variables1() const
       {
         using namespace atermpp;
         return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg1(*this)),
-          atermpp::term_list_iterator< data::variable >());
+          atermpp::term_list_iterator<data::variable>(list_arg1(*this)),
+          atermpp::term_list_iterator<data::variable>());
       }
 
+      /// \brief Returns the name of the process equation
+      /// \return The name of the process equation
       process_identifier name() const
       {
         using namespace atermpp;
         return arg2(*this);
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       data::variable_list variables2() const
       {
         using namespace atermpp;
         return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg3(*this)),
-          atermpp::term_list_iterator< data::variable >());
+          atermpp::term_list_iterator<data::variable>(list_arg3(*this)),
+          atermpp::term_list_iterator<data::variable>());
       }
 
+      /// \brief Returns the expression of the process equation
+      /// \return The expression of the process equation
       process_expression expression() const
       {
         using namespace atermpp;
@@ -82,6 +95,8 @@ namespace process {
 
   /// \brief Traverses the process equation, and writes all sort expressions
   /// that are encountered to the output range [dest, ...).
+  /// \param eq A process equation
+  /// \param dest An output iterator
   template <typename OutIter>
   void traverse_sort_expressions(const process_equation& eq, OutIter dest)
   {

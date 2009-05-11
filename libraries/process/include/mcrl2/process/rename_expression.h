@@ -39,12 +39,16 @@ namespace process {
         : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
       {}
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       core::identifier_string source() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       core::identifier_string target() const
       {
         using namespace atermpp;

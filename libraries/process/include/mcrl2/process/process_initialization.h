@@ -44,17 +44,21 @@ namespace process {
 
       process_initialization(data::variable_list variables, process_expression expression)
         : atermpp::aterm_appl(core::detail::gsMakeProcessInit(
-              atermpp::term_list< data::variable >(variables.begin(), variables.end()), expression))
+              atermpp::term_list<data::variable>(variables.begin(), variables.end()), expression))
       {}
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       data::variable_list variables() const
       {
         using namespace atermpp;
         return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg1(*this)),
-          atermpp::term_list_iterator< data::variable >());
+          atermpp::term_list_iterator<data::variable>(list_arg1(*this)),
+          atermpp::term_list_iterator<data::variable>());
       }
 
+      /// \brief FUNCTION_DESCRIPTION
+      /// \return RETURN_DESCRIPTION
       process_expression expression() const
       {
         using namespace atermpp;
@@ -64,6 +68,8 @@ namespace process {
 
   /// \brief Traverses the process equation, and writes all sort expressions
   /// that are encountered to the output range [dest, ...).
+  /// \param init A process initialization
+  /// \param dest An output iterator
   template <typename OutIter>
   void traverse_sort_expressions(const process_initialization& init, OutIter dest)
   {

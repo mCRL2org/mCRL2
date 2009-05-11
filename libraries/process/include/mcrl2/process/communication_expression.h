@@ -38,12 +38,16 @@ namespace process {
         : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
       {}
 
+      /// \brief Returns the name of the action
+      /// \return The name of the action
       multi_action_name action_name() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
+      /// \brief Returns the name of the communication expression
+      /// \return The name of the communication expression
       core::identifier_string name() const
       {
         using namespace atermpp;

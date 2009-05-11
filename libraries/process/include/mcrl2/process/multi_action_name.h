@@ -37,6 +37,8 @@ namespace process {
         : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
       {}
 
+      /// \brief Returns the names of the multi-action
+      /// \return The names of the multi-action
       core::identifier_string_list names() const
       {
         using namespace atermpp;

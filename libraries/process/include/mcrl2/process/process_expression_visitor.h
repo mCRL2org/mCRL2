@@ -46,6 +46,9 @@ struct process_expression_visitor
 
   /// \brief Visit action node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param l An action label
+  /// \param v A sequence of data expressions
   virtual bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
   {
     return continue_recursion;
@@ -57,6 +60,9 @@ struct process_expression_visitor
 
   /// \brief Visit process node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param pi A process identifier
+  /// \param v A sequence of data expressions
   virtual bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return continue_recursion;
@@ -68,6 +74,9 @@ struct process_expression_visitor
 
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param pi A process identifier
+  /// \param v A sequence of assignments to data variables
   virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
   {
     return continue_recursion;
@@ -79,6 +88,7 @@ struct process_expression_visitor
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
+  /// \param x A process expression
   virtual bool visit_delta(const process_expression& x, Arg& /* a */)
   {
     return continue_recursion;
@@ -90,6 +100,7 @@ struct process_expression_visitor
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
+  /// \param x A process expression
   virtual bool visit_tau(const process_expression& x, Arg& /* a */)
   {
     return continue_recursion;
@@ -101,6 +112,9 @@ struct process_expression_visitor
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param v A sequence of data variables
+  /// \param right A process expression
   virtual bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -112,6 +126,9 @@ struct process_expression_visitor
 
   /// \brief Visit block node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of identifiers
+  /// \param right A process expression
   virtual bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -123,6 +140,9 @@ struct process_expression_visitor
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of identifiers
+  /// \param right A process expression
   virtual bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -134,6 +154,9 @@ struct process_expression_visitor
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param r A sequence of rename expressions
+  /// \param right A process expression
   virtual bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -145,6 +168,9 @@ struct process_expression_visitor
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param c A sequence of communication expressions
+  /// \param right A process expression
   virtual bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -156,6 +182,9 @@ struct process_expression_visitor
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of multi-action names
+  /// \param right A process expression
   virtual bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -167,6 +196,9 @@ struct process_expression_visitor
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -178,6 +210,9 @@ struct process_expression_visitor
 
   /// \brief Visit at_time node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param d A data expression
   virtual bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
   {
     return continue_recursion;
@@ -189,6 +224,9 @@ struct process_expression_visitor
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -200,6 +238,9 @@ struct process_expression_visitor
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param d A data expression
+  /// \param right A process expression
   virtual bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -211,6 +252,10 @@ struct process_expression_visitor
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param d A data expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -222,6 +267,9 @@ struct process_expression_visitor
 
   /// \brief Visit binit node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -233,6 +281,9 @@ struct process_expression_visitor
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -244,6 +295,9 @@ struct process_expression_visitor
 
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -255,6 +309,9 @@ struct process_expression_visitor
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
@@ -267,7 +324,7 @@ struct process_expression_visitor
   /// \brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
-  /// \param x A term
+  /// \param x A process expression
   /// \param a An additional argument for the recursion
   void visit(const process_expression& x, Arg& a)
   {
@@ -488,6 +545,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit action node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param l An action label
+  /// \param v A sequence of data expressions
   virtual bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
   {
     return continue_recursion;
@@ -499,6 +559,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param pi A process identifier
+  /// \param v A sequence of data expressions
   virtual bool visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return continue_recursion;
@@ -510,6 +573,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param pi A process identifier
+  /// \param v A sequence of assignments to data variables
   virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
   {
     return continue_recursion;
@@ -521,6 +587,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
+  /// \param x A process expression
   virtual bool visit_delta(const process_expression& x)
   {
     return continue_recursion;
@@ -532,6 +599,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
+  /// \param x A process expression
   virtual bool visit_tau(const process_expression& x)
   {
     return continue_recursion;
@@ -543,6 +611,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param v A sequence of data variables
+  /// \param right A process expression
   virtual bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
   {
     return continue_recursion;
@@ -554,6 +625,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit block node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of identifiers
+  /// \param right A process expression
   virtual bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return continue_recursion;
@@ -565,6 +639,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of identifiers
+  /// \param right A process expression
   virtual bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return continue_recursion;
@@ -576,6 +653,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param r A sequence of rename expressions
+  /// \param right A process expression
   virtual bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
   {
     return continue_recursion;
@@ -587,6 +667,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param c A sequence of communication expressions
+  /// \param right A process expression
   virtual bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
   {
     return continue_recursion;
@@ -598,6 +681,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param s A sequence of multi-action names
+  /// \param right A process expression
   virtual bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
   {
     return continue_recursion;
@@ -609,6 +695,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -620,6 +709,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit at_time node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param d A data expression
   virtual bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
   {
     return continue_recursion;
@@ -631,6 +723,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -642,6 +737,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param d A data expression
+  /// \param right A process expression
   virtual bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
   {
     return continue_recursion;
@@ -653,6 +751,10 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param d A data expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -664,6 +766,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit binit node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -675,6 +780,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -686,6 +794,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -697,6 +808,9 @@ struct process_expression_visitor<void>
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
+  /// \param x A process expression
+  /// \param left A process expression
+  /// \param right A process expression
   virtual bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return continue_recursion;
@@ -710,7 +824,7 @@ struct process_expression_visitor<void>
   /// \brief Visits the nodes of the process expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
-  /// \param x A term
+  /// \param x A process expression
   void visit(const process_expression& x)
   {
     typedef core::term_traits<process_expression> tr;

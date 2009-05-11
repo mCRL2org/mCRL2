@@ -70,6 +70,7 @@ namespace detail {
     struct unsupported_linear_process
     {};
 
+    /// \brief FUNCTION_DESCRIPTION
     void clear_summand()
     {
       m_sum_variables = data::variable_list();
@@ -82,6 +83,7 @@ namespace detail {
       m_next_state = data::assignment_list();
     }
 
+    /// \brief FUNCTION_DESCRIPTION
     void add_summand()
     {
       if (m_summand == lps::summand())
@@ -118,6 +120,7 @@ namespace detail {
 
     /// \brief Visit delta node
     /// \return The result of visiting the node
+    /// \param x A process expression
     bool visit_delta(const process_expression& x)
     {
       m_deadlock = lps::deadlock();
@@ -128,6 +131,7 @@ namespace detail {
 
     /// \brief Visit tau node
     /// \return The result of visiting the node
+    /// \param x A process expression
     bool visit_tau(const process_expression& x)
     {
       m_multi_action = lps::multi_action();
@@ -138,6 +142,9 @@ namespace detail {
 
     /// \brief Visit action node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param l An action label
+    /// \param v A sequence of data expressions
     bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
     {
       m_multi_action = lps::multi_action(x);
@@ -147,6 +154,9 @@ namespace detail {
 
     /// \brief Visit sum node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param v A sequence of data variables
+    /// \param right A process expression
     bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
     {
       visit(right);
@@ -157,6 +167,9 @@ namespace detail {
 
     /// \brief Visit block node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param s A sequence of identifiers
+    /// \param right A process expression
     bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
     {
       throw non_linear_process();
@@ -165,6 +178,9 @@ namespace detail {
 
     /// \brief Visit hide node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param s A sequence of identifiers
+    /// \param right A process expression
     bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
     {
       throw non_linear_process();
@@ -173,6 +189,9 @@ namespace detail {
 
     /// \brief Visit rename node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param r A sequence of rename expressions
+    /// \param right A process expression
     bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
     {
       throw non_linear_process();
@@ -181,6 +200,9 @@ namespace detail {
 
     /// \brief Visit comm node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param c A sequence of communication expressions
+    /// \param right A process expression
     bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
     {
       throw non_linear_process();
@@ -189,6 +211,9 @@ namespace detail {
 
     /// \brief Visit allow node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param s A sequence of multi-action names
+    /// \param right A process expression
     bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
     {
       throw non_linear_process();
@@ -197,6 +222,9 @@ namespace detail {
 
     /// \brief Visit sync node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
@@ -210,6 +238,9 @@ namespace detail {
 
     /// \brief Visit at_time node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param d A data expression
     bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
       visit(left);
@@ -228,6 +259,9 @@ namespace detail {
 
     /// \brief Visit seq node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
@@ -239,6 +273,9 @@ namespace detail {
 
     /// \brief Visit if_then node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param d A data expression
+    /// \param right A process expression
     bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
     {
       visit(right);
@@ -249,6 +286,10 @@ namespace detail {
 
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param d A data expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
@@ -257,6 +298,9 @@ namespace detail {
 
     /// \brief Visit binit node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
@@ -265,6 +309,9 @@ namespace detail {
 
     /// \brief Visit merge node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
@@ -273,6 +320,9 @@ namespace detail {
 
     /// \brief Visit lmerge node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       throw non_linear_process();
@@ -281,6 +331,9 @@ namespace detail {
 
     /// \brief Visit choice node
     /// \return The result of visiting the node
+    /// \param x A process expression
+    /// \param left A process expression
+    /// \param right A process expression
     bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
@@ -297,6 +350,7 @@ namespace detail {
     }
 
     /// \brief Returns true if the process equation e is linear.
+    /// \param e A process equation
     void convert(const process_equation& e)
     {
       clear_summand();
@@ -321,6 +375,8 @@ namespace detail {
     /// \brief Converts a process_specification into a specification.
     /// Throws \p unsupported_linear_process if an unsupported linear process expression is encountered.
     /// Throws \p non_linear_process if the process is not linear.
+    /// \param p A process specification
+    /// \return RETURN_DESCRIPTION
     lps::specification convert(const process_specification& p)
     {
       data::variable_list m_process_parameters;
