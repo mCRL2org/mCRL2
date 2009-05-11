@@ -45,6 +45,15 @@ namespace atermpp
         assert(t.size() == 0);
       }
 
+/*
+      /// \brief Constructor.
+      /// \param t A term containing a string.
+      aterm_string(const aterm_string& t)
+        : aterm_appl(t)
+      {
+        assert(t.size() == 0);
+      }
+
       /// Allow construction from an aterm. The aterm must be of the right type, and may have no children.
       /// \param t A term containing a string.
       aterm_string(aterm t)
@@ -53,6 +62,7 @@ namespace atermpp
         assert(t.type() == AT_APPL);
         assert(aterm_appl(t).size() == 0);
       }
+*/
 
       /// Allow construction from a string.
       /// \param s A string.

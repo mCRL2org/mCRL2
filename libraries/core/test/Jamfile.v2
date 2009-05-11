@@ -28,6 +28,7 @@ for file in [ glob-tree *.mcrl2 : .svn ] {
 test-suite core
     : [ run test_lib.cpp ]
       $(tests-with-files)
+      [ run identifier_string_test.cpp ]
       [ run beta_reduce_test.cpp ]
       [ run text_utility_test.cpp ]
       [ run sequence_test.cpp ]
