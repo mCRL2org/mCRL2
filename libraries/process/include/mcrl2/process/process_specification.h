@@ -22,6 +22,7 @@
 
 namespace mcrl2 {
 
+/// \brief The main namespace for the Process library.
 namespace process {
 
   class process_specification;
