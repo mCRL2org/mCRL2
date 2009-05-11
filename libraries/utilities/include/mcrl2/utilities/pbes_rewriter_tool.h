@@ -138,9 +138,10 @@ namespace tools {
       pbes_rewriter_tool(const std::string& name,
                          const std::string& author,
                          const std::string& what_is,
-                         const std::string& tool_description
+                         const std::string& tool_description,
+                         std::string known_issues = ""
                         )
-        : Tool(name, author, what_is, tool_description)
+        : Tool(name, author, what_is, tool_description, known_issues)
       {}
 
       /// \brief Returns the rewriter type

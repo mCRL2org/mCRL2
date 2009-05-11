@@ -61,9 +61,10 @@ namespace tools {
       input_output_tool(const std::string& name,
                  const std::string& author,
                  const std::string& what_is,
-                 const std::string& tool_description
+                 const std::string& tool_description,
+                 std::string known_issues = ""
                 )
-        : input_tool(name, author, what_is, tool_description)
+        : input_tool(name, author, what_is, tool_description, known_issues)
       {
       }
 

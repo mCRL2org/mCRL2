@@ -43,6 +43,9 @@ namespace tools {
       /// The description of the tool
       std::string m_tool_description;
 
+      /// Known issues of the tool
+      std::string m_known_issues;
+
       /// \brief Add options to an interface description.
       /// \param desc An interface description
       virtual void add_options(interface_description& desc)
@@ -72,12 +75,14 @@ namespace tools {
       tool(const std::string& name,
                   const std::string& author,
                   const std::string& what_is,
-                  const std::string& tool_description
+                  const std::string& tool_description,
+                  std::string known_issues = ""
                  )
         : m_name            (name),
           m_author          (author),
           m_what_is         (what_is),
-          m_tool_description(tool_description)
+          m_tool_description(tool_description),
+          m_known_issues    (known_issues)
       {
       }
 
@@ -96,7 +101,7 @@ namespace tools {
       int execute(int argc, char* argv[])
       {
         try {
-          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description);
+          interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description, m_known_issues);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
 	  if (parser.continue_execution())
