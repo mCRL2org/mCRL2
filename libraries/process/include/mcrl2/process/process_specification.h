@@ -28,7 +28,7 @@ namespace process {
   ATermAppl process_specification_to_aterm(const process_specification& spec);
   void complete_data_specification(process_specification&);
 
-  /// \brief Process specification
+  /// \brief Process specification consisting of a data specification, action labels, a sequence of process equations and a process initialization.
   //<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
   class process_specification
   {

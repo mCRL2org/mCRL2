@@ -22,7 +22,7 @@ namespace mcrl2 {
 
 namespace process {
 
-  /// \brief Renaming expression
+  /// \brief Rename expression
   //<RenameExpr>   ::= RenameExpr(<String>, <String>)
   class rename_expression: public atermpp::aterm_appl
   {

@@ -22,7 +22,9 @@ namespace mcrl2 {
 namespace process {
 
 //--- start generated text ---//
-/// \brief Visitor class for visiting the nodes of a process expression. During traversal
+/// \brief Modifying visitor class for process expressions.
+///
+/// During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns process_expression(), the recursion is continued
 /// in the children of this node, otherwise not.
@@ -48,9 +50,6 @@ struct process_expression_builder
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param l An action label
-  /// \param v A sequence of data expressions
   virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
@@ -58,9 +57,6 @@ struct process_expression_builder
               
   /// \brief Visit process node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param pi A process identifier
-  /// \param v A sequence of data expressions
   virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
@@ -68,9 +64,6 @@ struct process_expression_builder
               
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param pi A process identifier
-  /// \param v A sequence of assignments to data variables
   virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
   {
     return process_expression();
@@ -78,7 +71,6 @@ struct process_expression_builder
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  /// \param x A process expression
   virtual process_expression visit_delta(const process_expression& x, Arg& /* a */)
   {
     return process_expression();
@@ -86,7 +78,6 @@ struct process_expression_builder
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  /// \param x A process expression
   virtual process_expression visit_tau(const process_expression& x, Arg& /* a */)
   {
     return process_expression();
@@ -94,9 +85,6 @@ struct process_expression_builder
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param v A sequence of data variables
-  /// \param right A process expression
   virtual process_expression visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -104,9 +92,6 @@ struct process_expression_builder
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -114,9 +99,6 @@ struct process_expression_builder
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -124,9 +106,6 @@ struct process_expression_builder
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param r A sequence of rename expressions
-  /// \param right A process expression
   virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -134,9 +113,6 @@ struct process_expression_builder
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param c A sequence of communication expressions
-  /// \param right A process expression
   virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -144,9 +120,6 @@ struct process_expression_builder
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of multi-action names
-  /// \param right A process expression
   virtual process_expression visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -154,9 +127,6 @@ struct process_expression_builder
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -164,9 +134,6 @@ struct process_expression_builder
               
   /// \brief Visit at_time node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param d A data expression
   virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
   {
     return process_expression();
@@ -174,9 +141,6 @@ struct process_expression_builder
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -184,9 +148,6 @@ struct process_expression_builder
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param right A process expression
   virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -194,10 +155,6 @@ struct process_expression_builder
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -205,9 +162,6 @@ struct process_expression_builder
               
   /// \brief Visit binit node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -215,9 +169,6 @@ struct process_expression_builder
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -225,9 +176,6 @@ struct process_expression_builder
               
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -235,9 +183,6 @@ struct process_expression_builder
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
   {
     return process_expression();
@@ -462,7 +407,8 @@ struct process_expression_builder
   }
 };
 
-/// \brief Visitor class for visiting the nodes of a process expression.
+/// \brief Modifying visitor class for process expressions.
+///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
 template <>
@@ -486,9 +432,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param l An action label
-  /// \param v A sequence of data expressions
   virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
   {
     return process_expression();
@@ -496,9 +439,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit process node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param pi A process identifier
-  /// \param v A sequence of data expressions
   virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return process_expression();
@@ -506,9 +446,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param pi A process identifier
-  /// \param v A sequence of assignments to data variables
   virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
   {
     return process_expression();
@@ -516,7 +453,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  /// \param x A process expression
   virtual process_expression visit_delta(const process_expression& x)
   {
     return process_expression();
@@ -524,7 +460,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  /// \param x A process expression
   virtual process_expression visit_tau(const process_expression& x)
   {
     return process_expression();
@@ -532,9 +467,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param v A sequence of data variables
-  /// \param right A process expression
   virtual process_expression visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
   {
     return process_expression();
@@ -542,9 +474,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
@@ -552,9 +481,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of identifiers
-  /// \param right A process expression
   virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
@@ -562,9 +488,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param r A sequence of rename expressions
-  /// \param right A process expression
   virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
   {
     return process_expression();
@@ -572,9 +495,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param c A sequence of communication expressions
-  /// \param right A process expression
   virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
   {
     return process_expression();
@@ -582,9 +502,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param s A sequence of multi-action names
-  /// \param right A process expression
   virtual process_expression visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
   {
     return process_expression();
@@ -592,9 +509,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -602,9 +516,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit at_time node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param d A data expression
   virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
   {
     return process_expression();
@@ -612,9 +523,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -622,9 +530,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param right A process expression
   virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
   {
     return process_expression();
@@ -632,10 +537,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param d A data expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -643,9 +544,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit binit node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -653,9 +551,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -663,9 +558,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -673,9 +565,6 @@ struct process_expression_builder<void>
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  /// \param x A process expression
-  /// \param left A process expression
-  /// \param right A process expression
   virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
@@ -685,8 +574,7 @@ struct process_expression_builder<void>
   /// \brief Visits the nodes of the process expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
-  /// \param x A process expression
-  /// \return RETURN_DESCRIPTION
+  /// \param x A term
   process_expression visit(const process_expression& x)
   {
     typedef core::term_traits<process_expression> tr;

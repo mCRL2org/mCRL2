@@ -23,7 +23,9 @@ merge(const process_expression& left, const process_expression& right) (left, ri
 lmerge(const process_expression& left, const process_expression& right) (left, right)
 choice(const process_expression& left, const process_expression& right) (left, right)'''
 
-PROCESS_EXPRESSION_VISITOR_CODE = r'''/// \\brief A visitor class for process expressions. There is a visit_<node> and a leave_<node>
+PROCESS_EXPRESSION_VISITOR_CODE = r'''/// \\brief Visitor class for process expressions.
+///
+/// There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
 /// must be overridden to add behavior. If the visit_<node> function returns true,
 /// the recursion is continued in the children of the node.
@@ -57,7 +59,8 @@ struct process_expression_visitor
   }
 };
 
-/// \\brief Visitor class for visiting the nodes of a process expression.
+/// \\brief Visitor class for process expressions.
+///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
 template <>
@@ -91,7 +94,9 @@ struct process_expression_visitor<void>
 };
 '''
 
-PROCESS_EXPRESSION_BUILDER_CODE = r'''/// \\brief Visitor class for visiting the nodes of a process expression. During traversal
+PROCESS_EXPRESSION_BUILDER_CODE = r'''/// \\brief Modifying visitor class for process expressions.
+///
+/// During traversal
 /// of the nodes, the expression is rebuilt from scratch.
 /// If a visit_<node> function returns process_expression(), the recursion is continued
 /// in the children of this node, otherwise not.
@@ -137,7 +142,8 @@ struct process_expression_builder
   }
 };
 
-/// \\brief Visitor class for visiting the nodes of a process expression.
+/// \\brief Modifying visitor class for process expressions.
+///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
 template <>

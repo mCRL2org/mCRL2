@@ -71,7 +71,7 @@ using lps::action;
       }
   };
 
-  /// \brief Process
+  /// \brief Process definition (?)
   // Process(<ProcVarId>, <DataExpr>*)
   class process: public process_expression
   {
@@ -111,7 +111,7 @@ using lps::action;
       }
   };
 
-  /// \brief ProcessAssignment
+  /// \brief Assignment operator for process expressions
   //ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
   class process_assignment: public process_expression
   {
@@ -151,7 +151,7 @@ using lps::action;
       }
   };
 
-  /// \brief Delta
+  /// \brief Deadlock process
   // Delta
   class delta: public process_expression
   {
@@ -170,7 +170,7 @@ using lps::action;
       {}
   };
 
-  /// \brief Tau
+  /// \brief The special process expression tau
   // Tau
   class tau: public process_expression
   {
@@ -189,7 +189,7 @@ using lps::action;
       {}
   };
 
-  /// \brief Sum
+  /// \brief Sum operator for process expressions
   // Sum(<DataVarId>+, <ProcExpr>)
   class sum: public process_expression
   {
@@ -228,7 +228,7 @@ using lps::action;
       }
   };
 
-  /// \brief Block
+  /// \brief Blocking operator for process expressions
   // Block(<String>*, <ProcExpr>)
   class block: public process_expression
   {
@@ -265,7 +265,7 @@ using lps::action;
       }
   };
 
-  /// \brief Hide
+  /// \brief Hiding operator for process expressions
   // Hide(<String>*, <ProcExpr>)
   class hide: public process_expression
   {
@@ -302,7 +302,7 @@ using lps::action;
       }
   };
 
-  /// \brief Rename
+  /// \brief Rename operator for process expressions
   // Rename(<RenameExpr>*, <ProcExpr>)
   class rename: public process_expression
   {
@@ -339,7 +339,7 @@ using lps::action;
       }
   };
 
-  /// \brief Comm
+  /// \brief Communication operator for process expressions
   // Comm(<CommExpr>*, <ProcExpr>)
   class comm: public process_expression
   {
@@ -376,7 +376,7 @@ using lps::action;
       }
   };
 
-  /// \brief Allow
+  /// \brief Allow operator for process expressions
   // Allow(<MultActName>*, <ProcExpr>)
   class allow: public process_expression
   {
@@ -413,7 +413,7 @@ using lps::action;
       }
   };
 
-  /// \brief Sync
+  /// \brief Synchronization operator for process expressions
   // Sync(<ProcExpr>, <ProcExpr>)
   class sync: public process_expression
   {
@@ -451,7 +451,7 @@ using lps::action;
   };
 
   // AtTime(<ProcExpr>, <DataExpr>)
-  /// \brief AtTime
+  /// \brief At operator for process expressions
   class at_time: public process_expression
   {
     public:
@@ -488,7 +488,7 @@ using lps::action;
   };
 
   // Seq(<ProcExpr>, <ProcExpr>)
-  /// \brief Seq
+  /// \brief Sequential composition operator for process expressions
   class seq: public process_expression
   {
     public:
@@ -525,7 +525,7 @@ using lps::action;
   };
 
   // IfThen(<DataExpr>, <ProcExpr>)
-  /// \brief IfThen
+  /// \brief If-then operator for process expressions
   class if_then: public process_expression
   {
     public:
@@ -562,7 +562,7 @@ using lps::action;
   };
 
   // IfThenElse(<DataExpr>, <ProcExpr>, <ProcExpr>)
-  /// \brief IfThenElse
+  /// \brief If-then-else operator for process expressions
   class if_then_else: public process_expression
   {
     public:
@@ -608,7 +608,7 @@ using lps::action;
   };
 
   // BInit(<ProcExpr>, <ProcExpr>)
-  /// \brief BInit
+  /// \brief BInit (don't know how to describe this)
   class binit: public process_expression
   {
     public:
@@ -645,7 +645,7 @@ using lps::action;
   };
 
   // Merge(<ProcExpr>, <ProcExpr>)
-  /// \brief Merge
+  /// \brief Merge operator for process expressions
   class merge: public process_expression
   {
     public:
@@ -682,7 +682,7 @@ using lps::action;
   };
 
   // LMerge(<ProcExpr>, <ProcExpr>)
-  /// \brief LMerge
+  /// \brief Left-merge operator for process expressions
   class lmerge: public process_expression
   {
     public:
@@ -719,7 +719,7 @@ using lps::action;
   };
 
   // Choice(<ProcExpr>, <ProcExpr>)
-  /// \brief Choice
+  /// \brief Choice operator for process expressions
   class choice: public process_expression
   {
     public:
@@ -766,9 +766,9 @@ namespace core {
     typedef process::process_expression process_expression;
 
     //--- start generated text ---//
-    
+
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_action(const process_expression& t)
@@ -777,7 +777,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_process(const process_expression& t)
@@ -786,7 +786,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_process_assignment(const process_expression& t)
@@ -795,7 +795,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_delta(const process_expression& t)
@@ -804,7 +804,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_tau(const process_expression& t)
@@ -813,7 +813,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_sum(const process_expression& t)
@@ -822,7 +822,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_block(const process_expression& t)
@@ -831,7 +831,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_hide(const process_expression& t)
@@ -840,7 +840,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_rename(const process_expression& t)
@@ -849,7 +849,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_comm(const process_expression& t)
@@ -858,7 +858,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_allow(const process_expression& t)
@@ -867,7 +867,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_sync(const process_expression& t)
@@ -876,7 +876,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_at_time(const process_expression& t)
@@ -885,7 +885,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_seq(const process_expression& t)
@@ -894,7 +894,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_if_then(const process_expression& t)
@@ -903,7 +903,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_if_then_else(const process_expression& t)
@@ -912,7 +912,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_binit(const process_expression& t)
@@ -921,7 +921,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_merge(const process_expression& t)
@@ -930,7 +930,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_lmerge(const process_expression& t)
@@ -939,7 +939,7 @@ namespace core {
     }
 
     /// \brief Test for the value true
-    /// \param t A process expression
+    /// \param t A term
     /// \return True if it is the value \p true
     static inline
     bool is_choice(const process_expression& t)
