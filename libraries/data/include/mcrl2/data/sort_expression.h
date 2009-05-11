@@ -150,7 +150,8 @@ namespace mcrl2 {
     inline
     bool is_sort_expression(atermpp::aterm_appl t)
     {
-      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t);
+      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t) ||
+             core::detail::gsIsSortStruct(t) || core::detail::gsIsSortCons(t);
     }
 
     /// \brief Traverses the sort expression, and writes all sort expressions

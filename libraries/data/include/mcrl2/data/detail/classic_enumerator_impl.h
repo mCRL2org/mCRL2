@@ -172,6 +172,7 @@ namespace mcrl2 {
                                m_evaluator.convert_from((*i)(1));
               }
 
+              // Only do filtering, termination detection is taken care of by underlying implementation
               if (Selector::test(m_evaluator(m_condition, m_substitution))) {
                 return true;
               }
