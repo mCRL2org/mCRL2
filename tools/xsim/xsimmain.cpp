@@ -340,25 +340,14 @@ void XSimMain::SetInteractiveness(bool interactive)
 
 void XSimMain::LoadFile(const wxString &filename)
 {
-    FILE *f;
-
-    if ( (f = fopen(filename.fn_str(),"rb")) == NULL )
+    try
     {
-	    wxMessageDialog msg(this, wxT("Failed to open file."),
-		wxT("Error"), wxOK|wxICON_ERROR);
-	    msg.ShowModal();
-	    return;
+       m_specification.load(std::string(filename.fn_str()));
     }
-
-    ATermAppl Spec = (ATermAppl) ATreadFromFile(f);
-    fclose(f);
-
-    if ( (Spec == NULL) || !gsIsLinProcSpec(Spec) )
+    catch (std::exception const& e)
     {
-	    wxMessageDialog msg(this, wxT("Invalid file."),
-		wxT("Error"), wxOK|wxICON_ERROR);
-	    msg.ShowModal();
-	    return;
+       wxMessageDialog(this, wxString(e.what(), wxConvLocal), wxT("Error"), wxOK|wxICON_ERROR).ShowModal();
+       return;
     }
 
     SetTitle(base_title+wxT(" - ")+filename);
@@ -366,7 +355,7 @@ void XSimMain::LoadFile(const wxString &filename)
     ldtrcitem->Enable(true);
     svtrcitem->Enable(true);
 
-    simulator->LoadSpec(Spec);
+    simulator->LoadSpec(m_specification);
 }
 
 void XSimMain::LoadDLL(const wxString &filename)
@@ -399,6 +388,7 @@ void XSimMain::Initialise(ATermList Pars)
 	    state_varnames = ATinsert(state_varnames,ATgetArgument(ATAgetFirst(Pars),0));
     }
     state_varnames = ATreverse(state_varnames);
+    current_state = NULL;
 }
 
 void XSimMain::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
