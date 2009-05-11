@@ -22,6 +22,7 @@ namespace mcrl2 {
 namespace process {
 
   //<MultActName>  ::= MultActName(<String>+)
+  /// \brief Multi-action name
   class multi_action_name: public atermpp::aterm_appl
   {
     public:

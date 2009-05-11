@@ -71,7 +71,7 @@ using lps::action;
       }
   };
 
-  /// \brief Process definition (?)
+  /// \brief Process variable
   // Process(<ProcVarId>, <DataExpr>*)
   class process: public process_expression
   {
@@ -608,7 +608,7 @@ using lps::action;
   };
 
   // BInit(<ProcExpr>, <ProcExpr>)
-  /// \brief BInit (don't know how to describe this)
+  /// \brief Bounded initialization operator for process expressions
   class binit: public process_expression
   {
     public:

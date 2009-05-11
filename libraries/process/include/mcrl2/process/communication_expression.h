@@ -23,6 +23,7 @@ namespace mcrl2 {
 namespace process {
 
   //<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
+  /// \brief Communication expression
   class communication_expression: public atermpp::aterm_appl
   {
     public:

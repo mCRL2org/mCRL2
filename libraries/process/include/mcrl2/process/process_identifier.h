@@ -23,7 +23,7 @@ namespace mcrl2 {
 
 namespace process {
 
-  /// \brief process identifier
+  /// \brief Process identifier
   //<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
   class process_identifier: public atermpp::aterm_appl
   {
