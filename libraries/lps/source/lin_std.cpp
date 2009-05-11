@@ -4641,7 +4641,7 @@ static ATermAppl dummyterm(
   /* Third construct a new constant, and yield it. */
   if (allow_the_introduction_of_a_dummy_mapping)
   {
-    std::string name(pp(targetsort)); // not optimal, but works
+    std::string name("dummy(" + pp(targetsort) + ")"); // not optimal, but works
     name.resize(std::remove(name.begin(), name.end(), ' ') - name.begin());
     ATermAppl dummymapping=gsMakeOpId(fresh_name(name.c_str()),targetsort);
     insertmapping(dummymapping,spec,true);
