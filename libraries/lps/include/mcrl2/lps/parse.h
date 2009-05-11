@@ -12,8 +12,8 @@
 #ifndef MCRL2_LPS_PARSE_H
 #define MCRL2_LPS_PARSE_H
 
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
-#include "mcrl2/lps/process.h"
+#include "mcrl2/process/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/process/parse.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -30,8 +30,8 @@ namespace lps {
   /// \return The parsed specification
   specification parse_linear_process_specification(const std::string& text)
   {
-    process_specification pspec = parse_process_specification(text);
-    detail::linear_process_conversion_visitor visitor;
+    process::process_specification pspec = mcrl2::process::parse_process_specification(text);
+    process::detail::linear_process_conversion_visitor visitor;
     return visitor.convert(pspec);
   }
 

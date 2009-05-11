@@ -6,32 +6,29 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/process.h
-/// \brief Process classes and process expressions.
+/// \file mcrl2/process/process_expression.h
+/// \brief add your file description here.
 
-#ifndef MCRL2_LPS_PROCESS_H
-#define MCRL2_LPS_PROCESS_H
-
-#include <functional>
+#ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_H
+#define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/detail/algorithms.h"
+#include "mcrl2/process/process_identifier.h"
+#include "mcrl2/process/rename_expression.h"
+#include "mcrl2/process/communication_expression.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
-  class process_specification;
-  ATermAppl process_specification_to_aterm(const process_specification& spec);
-  void complete_data_specification(process_specification&);
+// Make the LPS action visible.
+using lps::action;
 
 //<ProcExpr>     ::= <ParamId>                                             [- tc]
 //                 | IdAssignment(<String>, <IdInit>*)                     [- tc]
@@ -55,6 +52,7 @@ namespace lps {
 //                 | Merge(<ProcExpr>, <ProcExpr>)
 //                 | LMerge(<ProcExpr>, <ProcExpr>)
 //                 | Choice(<ProcExpr>, <ProcExpr>)
+
   /// \brief Process expression
   class process_expression: public atermpp::aterm_appl
   {
@@ -72,365 +70,6 @@ namespace lps {
         assert(core::detail::check_rule_ProcExpr(m_term));
       }
   };
-
-  /// \brief process identifier
-  //<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
-  class process_identifier: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      process_identifier(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_ProcVarId(m_term));
-      }
-
-      process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list< data::sort_expression >(sorts.begin(), sorts.end())))
-      {}
-
-      core::identifier_string name() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
-
-      data::sort_expression_list sorts() const
-      {
-        using namespace atermpp;
-        return data::sort_expression_list(
-          atermpp::term_list_iterator< data::sort_expression >(list_arg2(*this)),
-          atermpp::term_list_iterator< data::sort_expression >());
-      }
-  };
-
-  /// \brief Traverses the process identifier, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_identifier& pi, OutIter dest)
-  {
-    data::traverse_sort_expressions(pi.sorts(), dest);
-  }
-
-  /// \brief Process equation
-  // <ProcEqn> ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
-  class process_equation: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      process_equation()
-        : atermpp::aterm_appl(core::detail::constructProcEqn())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      process_equation(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_ProcEqn(m_term));
-      }
-
-      process_equation(data::variable_list variables1, process_identifier name, data::variable_list variables2, process_expression expression)
-        : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
-                                atermpp::term_list< data::variable >(variables1.begin(), variables1.end()),
-                                name,
-                                atermpp::term_list< data::variable >(variables2.begin(), variables2.end()),
-                                expression))
-      {}
-
-      data::variable_list variables1() const
-      {
-        using namespace atermpp;
-        return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg1(*this)),
-          atermpp::term_list_iterator< data::variable >());
-      }
-
-      process_identifier name() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-
-      data::variable_list variables2() const
-      {
-        using namespace atermpp;
-        return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg3(*this)),
-          atermpp::term_list_iterator< data::variable >());
-      }
-
-      process_expression expression() const
-      {
-        using namespace atermpp;
-        return arg4(*this);
-      }
-  };
-
-  /// \brief Traverses the process equation, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_equation& eq, OutIter dest)
-  {
-    data::traverse_sort_expressions(eq.variables1(), dest);
-    data::traverse_sort_expressions(eq.variables2(), dest);
-  }
-
-  /// \brief Read-only singly linked list of process equations
-  typedef atermpp::term_list<process_equation> process_equation_list;
-
-  /// \brief Process initialization
-  //<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)
-  class process_initialization: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      process_initialization()
-        : atermpp::aterm_appl(mcrl2::core::detail::constructProcessInit())
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      process_initialization(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_ProcessInit(m_term));
-      }
-
-      process_initialization(data::variable_list variables, process_expression expression)
-        : atermpp::aterm_appl(core::detail::gsMakeProcessInit(
-              atermpp::term_list< data::variable >(variables.begin(), variables.end()), expression))
-      {}
-
-      data::variable_list variables() const
-      {
-        using namespace atermpp;
-        return data::variable_list(
-          atermpp::term_list_iterator< data::variable >(list_arg1(*this)),
-          atermpp::term_list_iterator< data::variable >());
-      }
-
-      process_expression expression() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-  };
-
-  /// \brief Traverses the process equation, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_initialization& init, OutIter dest)
-  {
-    data::traverse_sort_expressions(init.variables(), dest);
-  }
-
-  /// \brief Process specification
-  //<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
-  class process_specification
-  {
-    protected:
-      /// \brief The data specification of the specification
-      data::data_specification m_data;
-      
-      /// \brief The action specification of the specification
-      action_label_list m_action_labels;
-      
-      /// \brief The equations of the specification
-      atermpp::vector<process_equation> m_equations;
-      
-      /// \brief The initial state of the specification
-      process_initialization m_initial_process;
-      
-      /// \brief Initializes the specification with an ATerm.
-      /// \param t A term
-      void construct_from_aterm(atermpp::aterm_appl t)
-      {
-        atermpp::aterm_appl::iterator i = t.begin();
-        m_data            = atermpp::aterm_appl(*i++);
-        m_action_labels   = atermpp::aterm_appl(*i++)(0);
-        process_equation_list l = atermpp::aterm_appl(*i++)(0);
-        m_initial_process = atermpp::aterm_appl(*i);
-        m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
-        complete_data_specification(*this);
-      }
-
-    public:
-      /// \brief Constructor.
-      process_specification()
-      {}
-
-      /// \brief Constructor.
-      /// \param term A term
-      process_specification(atermpp::aterm_appl t)
-      {
-        assert(core::detail::check_term_ProcSpec(t));
-        construct_from_aterm(t);
-      }
-
-      process_specification(data::data_specification data, action_label_list action_labels, process_equation_list equations, process_initialization init)
-        : m_data(data),
-          m_action_labels(action_labels),
-          m_equations(equations.begin(), equations.end()),
-          m_initial_process(init)
-      {}
-
-      const data::data_specification& data() const
-      {
-        return m_data;
-      }
-
-      data::data_specification& data()
-      {
-        using namespace atermpp;
-        return m_data;
-      }
-
-      const action_label_list& action_labels() const
-      {
-        return m_action_labels;
-      }
-
-      action_label_list& action_labels()
-      {
-        return m_action_labels;
-      }
-
-      const atermpp::vector<process_equation>& equations() const
-      {
-        return m_equations;
-      }
-
-      atermpp::vector<process_equation>& equations()
-      {
-        return m_equations;
-      }
-
-      const process_initialization& init() const
-      {
-        return m_initial_process;
-      }
-
-      process_initialization& init()
-      {
-        return m_initial_process;
-      }
-  };
-
-  /// \brief Traverses the process specification, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_specification& spec, OutIter dest)
-  {
-    data::traverse_sort_expressions(spec.action_labels(), dest);
-    data::traverse_sort_expressions(spec.equations(), dest);
-    traverse_sort_expressions(spec.init(), dest);
-  }
-
-  inline
-  process_specification parse_process_specification(const std::string& spec)
-  {
-    std::stringstream spec_stream;
-    spec_stream << spec;
-    ATermAppl result = detail::parse_specification(spec_stream);
-    result           = detail::type_check_specification(result);
-    result           = detail::alpha_reduce(result);
-    result           = data::detail::internal_format_conversion(result);
-    return atermpp::aterm_appl(result);
-  }
-
-  /// \brief Renaming expression
-  //<RenameExpr>   ::= RenameExpr(<String>, <String>)
-  class rename_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      rename_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_RenameExpr(m_term));
-      }
-
-      rename_expression(core::identifier_string source, core::identifier_string target)
-        : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
-      {}
-
-      core::identifier_string source() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
-
-      core::identifier_string target() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-  };
-
-  /// \brief Read-only singly linked list of rename expressions
-  typedef atermpp::term_list<rename_expression> rename_expression_list;
-
-  //<MultActName>  ::= MultActName(<String>+)
-  class multi_action_name: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      multi_action_name(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_MultActName(m_term));
-      }
-
-      multi_action_name(core::identifier_string_list names)
-        : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
-      {}
-
-      core::identifier_string_list names() const
-      {
-        using namespace atermpp;
-        return list_arg1(arg1(*this));
-      }
-  };
-
-  /// \brief Read-only singly linked list of multi_action_name expressions
-  typedef atermpp::term_list<multi_action_name> multi_action_name_list;
-
-  //<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
-  class communication_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      communication_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_CommExpr(m_term));
-      }
-
-      communication_expression(multi_action_name action_name, core::identifier_string name)
-        : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
-      {}
-
-      multi_action_name action_name() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
-
-      core::identifier_string name() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-  };
-
-  /// \brief Read-only singly linked list of communication expressions
-  typedef atermpp::term_list<rename_expression> communication_expression_list;
 
   /// \brief Process
   // Process(<ProcVarId>, <DataExpr>*)
@@ -992,69 +631,15 @@ namespace lps {
       }
   };
 
-  /// \brief Adds all sorts that appear in the process specification spec
-  ///  to the data specification of spec.
-  /// \param spec A process specification
-  inline
-  void complete_data_specification(process_specification& spec)
-  {
-    std::set<data::sort_expression> s;
-    traverse_sort_expressions(spec, std::inserter(s, s.end()));
-    for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
-    {
-      if (i->is_standard())
-      {
-        spec.data().import_system_defined_sort(*i);
-      }
-    }
-  }
-
-  /// \brief Conversion to ATermAppl.
-  /// \return The specification converted to ATerm format.
-  inline
-  ATermAppl process_specification_to_aterm(const process_specification& spec)
-  {
-    return core::detail::gsMakeProcSpec(
-        data::detail::data_specification_to_aterm_data_spec(spec.data()),
-        core::detail::gsMakeActSpec(spec.action_labels()),
-        core::detail::gsMakeProcEqnSpec(process_equation_list(spec.equations().begin(), spec.equations().end())),
-        spec.init()
-    );
-  }
-  
-  /// \brief Pretty print function
-  inline std::string pp(const process_specification& spec)
-  {
-    return core::pp(process_specification_to_aterm(spec));
-  }
-  
-  /// \brief Equality operator
-  inline
-  bool operator==(const process_specification& spec1, const process_specification& spec2)
-  {
-    return process_specification_to_aterm(spec1) == process_specification_to_aterm(spec2);
-  }
-  
-  /// \brief Inequality operator
-  inline
-  bool operator!=(const process_specification& spec1, const process_specification& spec2)
-  {
-    return !(spec1 == spec2);
-  }
-
-} // namespace lps
-
-} // namespace mcrl2
-
-namespace mcrl2 {
+} // namespace process
 
 namespace core {
 
   /// \brief Contains type information for process expressions.
   template <>
-  struct term_traits<lps::process_expression>
+  struct term_traits<process::process_expression>
   {
-    typedef lps::process_expression process_expression;
+    typedef process::process_expression process_expression;
 
 //--- start generated text ---//
 
@@ -1244,4 +829,4 @@ namespace core {
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_PROCESS_H
+#endif // MCRL2_PROCESS_PROCESS_EXPRESSION_H

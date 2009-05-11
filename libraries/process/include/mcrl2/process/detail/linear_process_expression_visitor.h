@@ -9,16 +9,16 @@
 /// \file mcrl2/lps/detail/linear_process_expression_visitor.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
-#define MCRL2_LPS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
+#ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
+#define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
 
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/lps/process.h"
-#include "mcrl2/lps/process_expression_visitor.h"
+#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/process_expression_visitor.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 namespace detail {
 
@@ -322,8 +322,8 @@ namespace detail {
 
 } // namespace detail
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
+#endif // MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H

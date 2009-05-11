@@ -6,6 +6,7 @@ project libraries/lps/test
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
        <define>MCRL2_WITH_GARBAGE_COLLECTION
+       <include>../../process/include
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
@@ -16,7 +17,6 @@ test-suite lps
       [ run specification_test.cpp ]
       [ run replace_test.cpp ]
       [ run constelm_test.cpp ]
-      [ run process_test.cpp ]
       [ run action_rename_test.cpp ]
       [ run data_specification_test.cpp ]
       [ run linearization_test.cpp ]

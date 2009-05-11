@@ -2,12 +2,12 @@ import re
 import string
 from path import *
 
-TEXT = '''action(const action_label& l, const data::data_expression_list& v) (label, arguments)
+TEXT = '''action(const lps::action_label& l, const data::data_expression_list& v) (label, arguments)
 process(const process_identifier pi, const data::data_expression_list& v) (identifier, expressions)
-process_assignment(const process_identifier& pi, const data::data_assignment_list& v) (identifier, assignments)
+process_assignment(const process_identifier& pi, const data::assignment_list& v) (identifier, assignments)
 delta() ()
 tau() ()
-sum(const data::data_variable_list& v, const process_expression& right) (variables, expression)
+sum(const data::variable_list& v, const process_expression& right) (variables, expression)
 block(const core::identifier_string_list& s, const process_expression& right) (names, expression)
 hide(const core::identifier_string_list& s, const process_expression& right) (names, expression)
 rename(const rename_expression_list& r, const process_expression& right) (rename_expressions, expression)
@@ -412,6 +412,6 @@ def make_process_term_traits(filename):
                   text)
     path(filename).write_text(text)
 
-make_process_expression_visitor('../include/mcrl2/lps/process_expression_visitor.h')
-make_process_expression_builder('../include/mcrl2/lps/process_expression_builder.h')
-make_process_term_traits('../include/mcrl2/lps/process.h')
+make_process_expression_visitor('../include/mcrl2/process/process_expression_visitor.h')
+make_process_expression_builder('../include/mcrl2/process/process_expression_builder.h')
+make_process_term_traits('../include/mcrl2/process/process_expression.h')

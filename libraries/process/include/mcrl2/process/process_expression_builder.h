@@ -6,19 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/process_expression_builder.h
+/// \file mcrl2/process/process_expression_builder.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_PROCESS_EXPRESSION_BUILDER_H
-#define MCRL2_LPS_PROCESS_EXPRESSION_BUILDER_H
+#ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_BUILDER_H
+#define MCRL2_PROCESS_PROCESS_EXPRESSION_BUILDER_H
 
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/process.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 //--- start generated text ---//
 /// \brief Visitor class for visiting the nodes of a process expression. During traversal
@@ -44,21 +45,21 @@ struct process_expression_builder
   /// \brief Destructor.
   virtual ~process_expression_builder()
   { }
-
+              
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit process node
   /// \return The result of visiting the node
   virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
   virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
@@ -201,7 +202,7 @@ struct process_expression_builder
     process_expression result;
     if (tr::is_action(x))
     {
-      action_label l = action(x).label();
+      lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       result = visit_action(x, l, v, a);
       if (!is_finished(result))
@@ -425,140 +426,140 @@ struct process_expression_builder<void>
   /// \brief Destructor.
   virtual ~process_expression_builder()
   { }
-
+              
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
+  virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit process node
   /// \return The result of visiting the node
   virtual process_expression visit_process(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
   virtual process_expression visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit delta node
   /// \return The result of visiting the node
   virtual process_expression visit_delta(const process_expression& x)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit tau node
   /// \return The result of visiting the node
   virtual process_expression visit_tau(const process_expression& x)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit sum node
   /// \return The result of visiting the node
   virtual process_expression visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit block node
   /// \return The result of visiting the node
   virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit hide node
   /// \return The result of visiting the node
   virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit rename node
   /// \return The result of visiting the node
   virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit comm node
   /// \return The result of visiting the node
   virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit allow node
   /// \return The result of visiting the node
   virtual process_expression visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit sync node
   /// \return The result of visiting the node
   virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit at_time node
   /// \return The result of visiting the node
   virtual process_expression visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit seq node
   /// \return The result of visiting the node
   virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit if_then node
   /// \return The result of visiting the node
   virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
   virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit binit node
   /// \return The result of visiting the node
   virtual process_expression visit_binit(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit merge node
   /// \return The result of visiting the node
   virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit lmerge node
   /// \return The result of visiting the node
   virtual process_expression visit_lmerge(const process_expression& x, const process_expression& left, const process_expression& right)
   {
     return process_expression();
   }
-
+              
   /// \brief Visit choice node
   /// \return The result of visiting the node
   virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
@@ -580,7 +581,7 @@ struct process_expression_builder<void>
     process_expression result;
     if (tr::is_action(x))
     {
-      action_label l = action(x).label();
+      lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       result = visit_action(x, l, v);
       if (!is_finished(result))
@@ -784,8 +785,8 @@ struct process_expression_builder<void>
 };
 //--- end generated text ---//
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_PROCESS_EXPRESSION_BUILDER_H
+#endif // MCRL2_PROCESS_PROCESS_EXPRESSION_BUILDER_H

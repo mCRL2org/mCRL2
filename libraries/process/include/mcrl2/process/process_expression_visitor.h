@@ -6,19 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/process_expression_visitor.h
+/// \file mcrl2/process/process_expression_visitor.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_PROCESS_EXPRESSION_VISITOR_H
-#define MCRL2_LPS_PROCESS_EXPRESSION_VISITOR_H
+#ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_VISITOR_H
+#define MCRL2_PROCESS_PROCESS_EXPRESSION_VISITOR_H
 
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/process.h"
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/process/process_expression.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 //--- start generated text ---//
 /// \brief A visitor class for process expressions. There is a visit_<node> and a leave_<node>
@@ -45,7 +46,7 @@ struct process_expression_visitor
 
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v, Arg& /* a */)
+  virtual bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -273,7 +274,7 @@ struct process_expression_visitor
     typedef core::term_traits<process_expression> tr;
     if (tr::is_action(x))
     {
-      action_label l = action(x).label();
+      lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       visit_action(x, l, v, a);
       leave_action();
@@ -487,7 +488,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual bool visit_action(const process_expression& x, const action_label& l, const data::data_expression_list& v)
+  virtual bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
   {
     return continue_recursion;
   }
@@ -715,7 +716,7 @@ struct process_expression_visitor<void>
     typedef core::term_traits<process_expression> tr;
     if (tr::is_action(x))
     {
-      action_label l = action(x).label();
+      lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       visit_action(x, l, v);
       leave_action();
@@ -907,8 +908,8 @@ struct process_expression_visitor<void>
 };
 //--- end generated text ---//
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_PROCESS_EXPRESSION_VISITOR_H
+#endif // MCRL2_PROCESS_PROCESS_EXPRESSION_VISITOR_H

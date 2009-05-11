@@ -13,18 +13,20 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/process.h"
-#include "mcrl2/lps/process_expression_visitor.h"
-#include "mcrl2/lps/process_expression_builder.h"
-#include "mcrl2/lps/detail/linear_process_expression_visitor.h"
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/core/garbage_collection.h"
-
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/process_expression_visitor.h"
+#include "mcrl2/process/process_expression_builder.h"
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/detail/linear_process_expression_visitor.h"
+#include "mcrl2/process/detail/linear_process_conversion_visitor.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
+using namespace mcrl2::process;
 
 void visit_process_expression(const process_expression& x)
 {
@@ -122,11 +124,11 @@ void test_process(std::string text)
   {
     visit_process_expression(i->expression());
     build_process_expression(i->expression());
-    bool linear = detail::linear_process_expression_visitor().is_linear(*i);
+    bool linear = mcrl2::process::detail::linear_process_expression_visitor().is_linear(*i);
     std::cerr << core::pp(*i) << " is " << (linear ? "" : "not") << "linear" << std::endl;
     if (linear)
     {
-      detail::linear_process_conversion_visitor visitor;
+      mcrl2::process::detail::linear_process_conversion_visitor visitor;
       visitor.convert(*i);
       std::cerr << "summands:\n";
       summand_list s(visitor.result.begin(), visitor.result.end());

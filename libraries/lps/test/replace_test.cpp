@@ -17,9 +17,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/process.h"
-#include "mcrl2/lps/detail/linear_process_expression_visitor.h"
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;

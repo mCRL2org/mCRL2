@@ -18,7 +18,7 @@
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/specification.h>
-#include "mcrl2/lps/detail/linear_process_expression_visitor.h"
+#include "mcrl2/process/detail/linear_process_expression_visitor.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -93,15 +93,15 @@ const std::string case_8 =
 const std::string removed_8 = "id_ID s31_P_init1 s32_P_init1 xi xi01 xi05 xi06 xi07";
 
 inline
-bool is_linear(const process_specification& pspec)
+bool is_linear(const process::process_specification& pspec)
 {
-  return lps::detail::linear_process_expression_visitor().is_linear(pspec);
+  return process::detail::linear_process_expression_visitor().is_linear(pspec);
 }
 
 void test_parelm(const std::string& spec_text, const std::string& expected_result)
 {
   specification s0;
-  process_specification pspec = parse_process_specification(spec_text);
+  process::process_specification pspec = process::parse_process_specification(spec_text);
   if (is_linear(pspec))
   {
     s0 = parse_linear_process_specification(spec_text);
