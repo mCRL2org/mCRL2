@@ -3,10 +3,10 @@ project libraries/lps/test
        <use>/site-config//boost
        <toolset>msvc:<asynch-exceptions>on
        <source>/libraries//lps
+       <source>/libraries//process
        <source>/site-config//boost_filesystem
        <source>/site-config//boost_system
        <define>MCRL2_WITH_GARBAGE_COLLECTION
-       <include>../../process/include
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
