@@ -1,5 +1,5 @@
 project process
-       : source-location ../source
+       : source-location ..
        ;
 
 mcrl2-library process
