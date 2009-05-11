@@ -34,7 +34,7 @@ obj command_line_interfacing
       ;
 
 mcrl2-library utilities
-      : source/command_line_interface.cpp
+      :
       : <use>/site-config//boost
       :
       : <include>../include
