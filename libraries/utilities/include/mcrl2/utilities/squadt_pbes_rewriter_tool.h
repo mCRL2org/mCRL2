@@ -114,8 +114,9 @@ namespace mcrl2 {
           squadt_tool(const std::string& name,
                         const std::string& author,
                         const std::string& what_is,
-                        const std::string& tool_description)
-            : super_type(name, author, what_is, tool_description)
+                        const std::string& tool_description,
+                        std::string known_issues = "")
+            : super_type(name, author, what_is, tool_description, known_issues)
           {}
       };
     }
