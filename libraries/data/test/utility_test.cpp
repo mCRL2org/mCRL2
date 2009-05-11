@@ -79,7 +79,9 @@ void list_construction_test() {
   expressions.push_back(true_());
   expressions.push_back(false_());
 
-  mcrl2::data::rewriter R(data_specification(), rewriter::innermost);
+  data_specification specification;
+
+  mcrl2::data::rewriter R(specification, rewriter::innermost);
 
   representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],

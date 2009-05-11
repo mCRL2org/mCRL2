@@ -365,7 +365,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter(data_specification const& d = data_specification(), strategy s = jitty) :
+      rewriter(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
          basic_rewriter<data_expression>(d, s)
       { }
 
@@ -374,6 +374,15 @@ namespace data {
       rewriter(rewriter const& r) :
          basic_rewriter<data_expression>(r)
       { }
+
+      /// \brief Default specification used if no specification is specified at construction
+      /// \param d A data specification
+      static data_specification& default_specification()
+      {
+        static data_specification specification;
+
+        return specification;
+      }
 
       /// \brief Rewrites a data expression.
       /// \param d A data expression
@@ -411,7 +420,7 @@ namespace data {
       /// \brief Constructor.
       /// \param d A data specification
       /// \param s A rewriter strategy.
-      rewriter_with_variables(data_specification const& d = data_specification(), strategy s = jitty) :
+      rewriter_with_variables(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
           basic_rewriter<data_expression>(d, s)
       { }
 
