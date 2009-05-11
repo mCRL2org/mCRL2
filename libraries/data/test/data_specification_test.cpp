@@ -534,6 +534,12 @@ void test_normalisation()
   BOOST_CHECK(specification.normalise(list(B)) == list(bag(A)));
 }
 
+void test_copy_simple()
+{
+  std::clog << "test_copy_simple" << std::endl;
+  data_specification specification = data_specification();
+}
+
 void test_copy()
 {
   std::clog << "test_copy" << std::endl;
@@ -581,6 +587,9 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_normalisation();
+  core::garbage_collect();
+
+  test_copy_simple();
   core::garbage_collect();
 
   test_copy();
