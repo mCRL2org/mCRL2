@@ -29,7 +29,7 @@ class Sorts
     Sorts( ){ };
     ~Sorts(){};
     void algorithm(int parameter_at_index);
-    mcrl2::data::basic_sort unfoldParameter;
+    mcrl2::data::sort_expression unfoldParameter;
   private:
     mcrl2::data::data_specification m_data_specification;
     mcrl2::lps::linear_process m_lps;
@@ -37,6 +37,7 @@ class Sorts
     std::set<mcrl2::data::function_symbol> consSet;
     std::set<mcrl2::data::function_symbol> mapSet;
     mcrl2::data::basic_sort sort_new;
+    std::string unfold_parameter_name;
     mcrl2::data::function_symbol_vector affectedConstructors;
     //Functions
     mcrl2::data::basic_sort generateFreshSort( std::string str );
@@ -65,7 +66,7 @@ class Sorts
 
     std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
     mcrl2::data::data_expression_vector unfoldConstructor( mcrl2::data::data_expression de, mcrl2::data::function_symbol_vector AffectedMappings, mcrl2::data::function_symbol Detmap, mcrl2::data::function_symbol_vector pi );
-    mcrl2::data::basic_sort getSortOfProcessParameter(int parameter_at_index);
+    mcrl2::data::sort_expression getSortOfProcessParameter(int parameter_at_index);
 //    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > i, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap );
 //    void deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss );
 //    mcrl2::data::structured_sort complete_structured_sort(mcrl2::data::structured_sort s );

@@ -1,0 +1,4 @@
+proc P( n:Nat ) = ( n < 5 ) -> tau.P(n+1);
+           
+
+init P(0);

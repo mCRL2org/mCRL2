@@ -22,7 +22,7 @@ using namespace mcrl2::data;
 /* Remarks
 - replace on vectors does not work
 - vector pretty print does not work
-- alias::name() [basic_sort] is results in a basic sort, therefore differs form basic_sort::name() [string]
+- alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
 Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_process const& lps)
@@ -33,16 +33,29 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
   for (data_specification::sorts_const_range::const_iterator i =  s.sorts().begin();
                                                              i != s.sorts().end();
                                                              ++i){
+    bool processed = false;
     if (i->is_basic_sort()) {
-      gsDebugMsg("\t Found sort: %s\n", basic_sort( *i ).name().c_str() );
+      gsDebugMsg("\tFound Basic Sort: %s\n", basic_sort( *i ).name().c_str() );
       sort_names.insert( (basic_sort(*i)).name() );
-    } else {
-      cerr << *i << endl;
-     // assert(false);
+      processed = true;
+    }
+
+    if (i->is_alias()){
+      gsDebugMsg("\tFound Alias Sort: %s\n", alias( *i ).name().name().c_str() );
+      sort_names.insert( (alias(*i)).name().name() );
+      processed = true;
+    }
+
+    if (i->is_structured_sort()){
+      gsDebugMsg("\tFound Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
+      processed = true;
+    }
+    
+    if (!processed){
+      cerr << "Failed to preprocess sort: "<< *i << endl;
+      abort(); 
     }
   };
-
-  gsVerboseMsg("Specification has %d sorts\n", sortSet.size() );
 
   {
     data_specification::constructors_const_range fsl= s.constructors();
@@ -52,6 +65,7 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
       consSet.insert(*i);
       mapping_and_constructor_names.insert( i -> name() );
     };
+    gsDebugMsg("\t");
     gsVerboseMsg("Specification has %d constructors\n", consSet.size() );
   }
 
@@ -63,96 +77,10 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
       mapSet.insert(*i);
       mapping_and_constructor_names.insert( i -> name() );
     };
+    gsDebugMsg("\t");
     gsVerboseMsg("Specification has %d mappings \n", mapSet.size() );
   }
 };
-
-//mcrl2::data::structured_sort Sorts::complete_structured_sort(mcrl2::data::structured_sort s )
-//{
-//  using namespace mcrl2::data;
-//
-//  cout << mcrl2::data::pp( s.constructor_functions() ) << endl; 
-//
-//  function_symbol_vector constructor_functions = s.constructor_functions();
-//  
-//  for(function_symbol_vector::iterator i = constructor_functions.begin()
-//                                     ; i != constructor_functions.end()
-//                                     ; ++i
-//  )
-//  {
-//    cout << endl;
-//    cout << *i << endl;
-//    cout << i-> name() << "++"<<i->sort() << endl;
-//
-//    // Dit is voor genereren constructor functions
-//    if (i->sort().is_structured_sort() )
-//    {
-//      cout << "s_sort" << endl;
-//      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(i->sort() ).struct_constructors();
-//      for(structured_sort::constructor_const_range::iterator j = sc.begin()
-//                                                           ; j != sc.end()
-//                                                           ; ++j
-//      )
-//      {
-//        if ( i->name() == j->name() )
-//        {
-//          cout << "name" << j -> name() << endl;
-//          cout << "args  " << j->arguments() << endl;
-///*          function_symbol_vector fsv = j->projection_functions( *j );
-//          for( function_symbol_vector::iterator k =  fsv.begin()
-//                                              ; k != fsv.end()
-//                                              ; ++k
-//          )
-//          {
-//            cout << "--" << j->arguments()  << endl;
-//          }
-//*/
-//          cout << "rec " << j->recogniser_function( *j ) << endl;
-//        }
-//      }
-//    }
-//
-//    if (i->sort().is_function_sort())
-//    {
-//// complete_structured_sort( structured_sort( function_sort(i->sort()).codomain() ) );
-//      cout << "f_sort" << endl;
-//      mcrl2::data::structured_sort::constructor_const_range sc = structured_sort(structured_sort( function_sort(i->sort()).codomain() ) ).struct_constructors();
-//      for(structured_sort::constructor_const_range::iterator j = sc.begin()
-//                                                           ; j != sc.end()
-//                                                           ; ++j
-//      )
-//      {
-//        if ( i->name() == j->name() )
-//        {
-//          cout << "name" << j -> name() << endl;
-//          cout << "args  " << j->arguments() << endl;
-//          structured_sort_constructor::arguments_const_range args = j->arguments();
-//          for( structured_sort_constructor::arguments_const_range::iterator k =  args.begin()
-//                                              ; k != args.end()
-//                                              ; ++k
-//          )
-//          {
-//            cout << "-->" << *k  << endl;
-//          }
-//          cout << "rec " << j->recogniser_function( *j ) << endl;
-//        }
-//      }
-//    }
-//
-//  }
-// 
-//  structured_sort result;
-// 
-//
-//  return result; 
-//
-//}
-
-//void Sorts::deriveConstrutorsFromStructuredSort( mcrl2::data::structured_sort ss )
-//{
-//
-//  return;
-//}
 
 mcrl2::data::basic_sort Sorts::generateFreshSort( std::string str )
 {
@@ -160,6 +88,7 @@ mcrl2::data::basic_sort Sorts::generateFreshSort( std::string str )
   mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
   generator.add_identifiers( sort_names );
   mcrl2::core::identifier_string nstr = generator( str );
+  gsDebugMsg("\t");
   gsVerboseMsg("Generated a fresh sort for %s\n", string(str).c_str() );
   gsDebugMsg("Generated sort: \t%s\n", string(nstr).c_str() );
   sort_names.insert(nstr);
@@ -177,85 +106,19 @@ mcrl2::core::identifier_string Sorts::generateFreshConMapFuncName(std::string st
   return nstr;
 }
 
-
 function_symbol_vector Sorts::determineAffectedConstructors()
 {
   data_specification::constructors_const_range t = m_data_specification.constructors( unfoldParameter );
   function_symbol_vector k = function_symbol_vector( t.begin(), t.end() );    
   
   gsDebugMsg("k:\t");
-  gsVerboseMsg("%s has %d constructor function(s)\n", unfoldParameter.name().c_str() , k.size() );
+  gsVerboseMsg("%s has %d constructor function(s)\n", unfold_parameter_name.c_str() , k.size() );
   for( function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i )
   {
     gsDebugMsg( "\t%s\n", i->to_string().c_str() );
   }
   return k;
 }
-
-//function_symbol_vector Sorts::determineAffectedMappings(function_symbol_vector k)
-//{
-//  using namespace mcrl2::data;
-//
-//  function_symbol_vector m;
-//  set< sort_expression > m_visited;
-//
-//  for( function_symbol_vector::iterator i  = k.begin();
-//                                        i != k.end();
-//                                        ++i){
-//    if( i->sort().is_function_sort() )
-//    {
-//      function_sort fs = function_sort(i->sort());
-//
-//      boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
-//      for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
-//      {
-//         /* Following 'if' statement avoids re-determination of affected mappings for function sorts */
-//        if( m_visited.find( *j ) == m_visited.end() )
-//        {
-//          m_visited.insert( *j );
-//          for( data_specification::mappings_const_range r(m_data_specification.mappings( *j ));
-//                                                !r.empty();
-//                                                  r.advance_begin(1) )
-//          {
-//            if( (r.front().sort()).is_function_sort()  )  
-//            {
-//              function_sort::domain_const_range domain(function_sort(r.front().sort()).domain());
-//
-//              if (( domain.size() == 1) && (domain[0] == unfoldParameter) )
-//              {
-//                m.push_back( r.front() );
-//              }
-//            }
-//          } 
-//        }
-//      }
-//    }
-//    if( i ->sort().is_structured_sort() )
-//    {
-//     //  function_symbol_vector proj_func = mcrl2::data::structured_sort( *i ).projection_functions( );
-//
-//      abort();
-//
-//      //cout << "xxx"<< mcrl2::data::pp(structured_sort(*i).constructor_functions()) << endl;
-//
-//      std::string prefix = "ss_pi_";
-//      mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
-//      m.push_back( function_symbol( fresh_name , function_sort( sort_new, *i ) ) );
-//      gsDebugMsg("\t%s\n", function_symbol( fresh_name , sort_new ).to_string().c_str() );
-//      mapping_and_constructor_names.insert(fresh_name);
-//     // function_symbol_vector recq_func = mcrl2::data::structured_sort( *i ).recogniser_functions( );
-//    }
-//  }
-// 
-//  gsDebugMsg("m:\t");
-//  gsVerboseMsg("%s has %d mapping function(s)\n", unfoldParameter.name().c_str() , m.size() );
-//  for( function_symbol_vector::iterator i = m.begin(); i != m.end(); ++i )
-//  {
-//    gsDebugMsg( "\t%s\n", i->to_string().c_str() );
-//  }
-//
-//  return m;
-//}
 
 
 function_symbol_vector Sorts::newSorts( mcrl2::data::function_symbol_vector k )
@@ -425,22 +288,15 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
       data_expression_vector dal;
       for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); ++j )
       {
-//         cout << "j: " <<*j << endl;
-         if( j -> is_basic_sort() )
-         {
            if ((int)sort_vars[*j].size() == sort_index[ *j] )
            {
              istr = generator( dstr );
-             data_expression v = variable( istr, basic_sort( *j ) );
+             data_expression v = variable( istr, *j );
              sort_vars[*j].push_back(v);
            }
            variable y = sort_vars[*j].at( sort_index[*j]);
            sort_index[*j] = sort_index[*j]+1;
            dal.push_back(y);
-         } else {
-           gsVerboseMsg("Expected only basic sorts in a domain");
-           assert(false);
-         }
       }
       data_expression lhs = application( Detmap , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
@@ -456,6 +312,13 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
         del.push_back( data_equation( lhs, dal[f] ) );
         ++f;
       }
+    }
+
+    if(i -> sort().is_structured_sort())
+    {
+      data_expression lhs = application( Detmap , *i );
+      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
+      del.push_back( data_equation( lhs, set_of_new_sorts[e] ) );
 
     }
   e++;
@@ -505,7 +368,7 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
        mcrl2::data::variable_vector process_parameters_injection;
 
        /* Generate fresh process parameter for new Sort */
-       mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name());
+       mcrl2::core::identifier_string idstr = generateFreshProcessParameterName( unfold_parameter_name );
        process_parameters_injection.push_back( mcrl2::data::variable( idstr , sort_new ) );
 
        gsDebugMsg("\t");
@@ -523,7 +386,7 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
            function_sort::domain_range dom = function_sort(j -> sort()).domain();
            for(function_sort::domain_range::iterator k = dom.begin(); k != dom.end(); ++k)
            {
-             mcrl2::core::identifier_string idstr = generateFreshProcessParameterName(unfoldParameter.name()); 
+             mcrl2::core::identifier_string idstr = generateFreshProcessParameterName( unfold_parameter_name ); 
              process_parameters_injection.push_back( mcrl2::data::variable( idstr ,  *k  ) );
              gsDebugMsg( "\tInjected process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
            }
@@ -535,8 +398,15 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
            gsDebugMsg("\tNo processed parameter are injected for basic sort: %s\n", j->to_string().c_str() );
            processed = true;
          }
+
+         if (j -> sort().is_structured_sort())
+         {
+           processed = true;
+         }
+
          if (!processed) {
-           cerr << pp(*j) << "Is not processed" << endl;
+           cerr << pp(*j) << " is not processed" << endl;
+           cerr << *j << endl;
            abort();
          } 
        }
@@ -555,12 +425,7 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
    gsVerboseMsg("New LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
 
   /* Reconstruct summands */
-  /* NOTE: list has no push_back function */
   mcrl2::lps::summand_vector new_summands;
-
-
-  //Prepare variable substitution
-  //std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> varsub = variableSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
 
   //Prepare parameter substitution
   std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameterSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
@@ -572,10 +437,6 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
   //Traversing summands for process unfolding
   {
-
-    /***
-      Assignments
-    ***/
 
     mcrl2::data::assignment_list ass = j-> assignments();
     //Create new left-hand assignment_list 
@@ -608,20 +469,6 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
         mcrl2::data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedConstructors, Detmap, pi );
         //Replace unfold parameters in affected assignments
-/*        mcrl2::data::data_expression_vector new_ins;
-        for( std::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
-                                                                                                  ; i != parsub.end()
-                                                                                                  ; ++i) 
-        { 
-          for(mcrl2::data::data_expression_vector::iterator l = ins.begin()
-                                                              ; l != ins.end()
-                                                              ; ++l )
-          {
-            new_ins.push_back(replace(*l, i->first, i->second ));
-          } 
-        } */
-//        new_ass_right.insert(new_ass_right.end(), new_ins.begin(), new_ins.end());
-
         new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
       } else {
         new_ass_right.push_back( k-> rhs() );
@@ -660,48 +507,6 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
 }
 
-//std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::variableSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
-//{
-//   std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
-//   data_expression de;
-//   set<mcrl2::data::variable_vector::iterator> used_iters;
-//
-//   for(std::map<mcrl2::data::variable, mcrl2::data::variable_vector >::iterator i = proc_par_to_proc_par_inj.begin()
-//      ; i != proc_par_to_proc_par_inj.end()
-//      ; ++i)
-//   {
-//     for( mcrl2::data::function_symbol_vector::iterator m = AffectedConstructors.begin()
-//                                                    ; m != AffectedConstructors.end()
-//                                                    ; ++m )
-//     {
-//       if (m -> sort().is_function_sort())
-//       {
-//         function_sort::domain_range dom = function_sort( m -> sort() ). domain();
-//         data_expression_vector arg;
-//
-//         for(function_sort::domain_range::iterator n = dom.begin(); n != dom.end(); ++n  )
-//         {
-//           for (mcrl2::data::variable_vector::iterator o = i->second.begin()
-//                                              ; o != i->second.end()
-//                                              ; ++o)
-//           {
-//             if (o -> sort() == *n && used_iters.find(o) == used_iters.end() )
-//             {
-//               used_iters.insert( o );
-//               arg.push_back( *o );
-//               break;
-//             }
-//           }
-//         }
-//         de = mcrl2::data::application( *m, arg ) ;
-//       }
-//     }
-//     gsVerboseMsg( "variable substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( de ).c_str());
-//     result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  de ) );
-//   }
-//  return result ;
-//}
-
 std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
 {
    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
@@ -726,6 +531,11 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::para
                                                     ; ++m )
      {
        if (m -> sort().is_basic_sort())
+       {
+         dev.push_back( *m );
+       }
+
+       if (m -> sort().is_structured_sort())
        {
          dev.push_back( *m );
        }
@@ -784,7 +594,7 @@ mcrl2::data::data_expression_vector Sorts::unfoldConstructor( data_expression de
     return result;
 }
 
-mcrl2::data::basic_sort Sorts::getSortOfProcessParameter(int parameter_at_index)
+mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_index)
 {
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
@@ -800,12 +610,30 @@ mcrl2::data::basic_sort Sorts::getSortOfProcessParameter(int parameter_at_index)
     abort();
   }
 
-  if (!lps_proc_pars[parameter_at_index].sort().is_basic_sort() )
+/*  if (!lps_proc_pars[parameter_at_index].sort().is_basic_sort() )
   {
     cerr << "Process parameter at given index is no basic sort: " << lps_proc_pars[parameter_at_index].sort()  << endl;
+  }*/
+
+  if(lps_proc_pars[parameter_at_index].sort().is_basic_sort())
+  {
+    unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
   }
 
-  return basic_sort(lps_proc_pars[parameter_at_index].sort());
+  if(lps_proc_pars[parameter_at_index].sort().is_alias())
+  {
+    unfold_parameter_name = alias(lps_proc_pars[parameter_at_index]).name().name();
+  }
+
+  if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())
+  {
+    mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+    generator.add_identifiers( sort_names );
+    mcrl2::core::identifier_string nstr = generator( "S" );
+    unfold_parameter_name = nstr; 
+  }
+
+  return lps_proc_pars[parameter_at_index].sort();
 }
 
 
@@ -823,7 +651,7 @@ void Sorts::algorithm(int parameter_at_index)
    function_symbol Detmap;
 
    /*   Alg */
-   /*     1 */ sort_new = generateFreshSort( unfoldParameter.name() );
+   /*     1 */ sort_new = generateFreshSort( unfold_parameter_name );
    /*     2 */ k = determineAffectedConstructors();
    /*     3 */ //m = determineAffectedMappings( k );
    /*     4 */ set_of_new_sorts = newSorts( k );
