@@ -71,14 +71,14 @@ using lps::action;
       }
   };
 
-  /// \brief Process variable
+  /// \brief Process instance
   // Process(<ProcVarId>, <DataExpr>*)
-  class process_variable: public process_expression
+  class process_instance: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      process_variable(atermpp::aterm_appl term)
+      process_instance(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_Process(m_term));
@@ -87,7 +87,7 @@ using lps::action;
       /// \brief Constructor.
       /// \param pi A process identifier
       /// \param v A sequence of data expressions
-      process_variable(const process_identifier pi, const data::data_expression_list& v)
+      process_instance(const process_identifier pi, const data::data_expression_list& v)
         : process_expression(core::detail::gsMakeProcess(pi,
                         atermpp::term_list<data::data_expression>(v.begin(), v.end())))
       {}
@@ -100,9 +100,9 @@ using lps::action;
         return arg1(*this);
       }
 
-      /// \brief Returns the arguments of the process expression
+      /// \brief Returns the arguments of the process instance
       /// \return The arguments of the process expression
-      data::data_expression_list expressions() const
+      data::data_expression_list actual_parameters() const
       {
         using namespace atermpp;
         return data::data_expression_list(
@@ -111,14 +111,14 @@ using lps::action;
       }
   };
 
-  /// \brief Assignment operator for process expressions
+  /// \brief Process instance assignment
   //ProcessAssignment(<ProcVarId>, <DataVarIdInit>*)
-  class process_assignment: public process_expression
+  class process_instance_assignment: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      process_assignment(atermpp::aterm_appl term)
+      process_instance_assignment(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_ProcessAssignment(m_term));
@@ -127,21 +127,21 @@ using lps::action;
       /// \brief Constructor.
       /// \param pi A process identifier
       /// \param v A sequence of assignments to data variables
-      process_assignment(const process_identifier& pi, const data::assignment_list& v)
+      process_instance_assignment(const process_identifier& pi, const data::assignment_list& v)
         : process_expression(core::detail::gsMakeProcessAssignment(pi,
                         atermpp::term_list<data::data_expression>(v.begin(), v.end())))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the process identifier of the instance
+      /// \return The process identifier of the instance
       process_identifier identifier() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the assignments of the instance
+      /// \return The assignments of the instance
       data::assignment_list assignments() const
       {
         using namespace atermpp;
@@ -170,7 +170,7 @@ using lps::action;
       {}
   };
 
-  /// \brief The special process expression tau
+  /// \brief The silent step process expression tau
   // Tau
   class tau: public process_expression
   {
@@ -209,9 +209,9 @@ using lps::action;
         : process_expression(core::detail::gsMakeSum(atermpp::term_list<data::variable>(v.begin(), v.end()), right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      data::variable_list variables() const
+      /// \brief Returns the bound variables of the sum
+      /// \return The bound variables of the sum
+      data::variable_list bound_variables() const
       {
         using namespace atermpp;
         return data::variable_list(
@@ -219,9 +219,9 @@ using lps::action;
           atermpp::term_list_iterator<data::variable>());
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the sum
+      /// \return The operand of the sum
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -248,17 +248,17 @@ using lps::action;
         : process_expression(core::detail::gsMakeBlock(s, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      core::identifier_string_list names() const
+      /// \brief Returns the set of blocked names
+      /// \return The set of blocked names
+      core::identifier_string_list block_set() const
       {
         using namespace atermpp;
         return list_arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the block expression
+      /// \return The operand of the block expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -285,17 +285,17 @@ using lps::action;
         : process_expression(core::detail::gsMakeHide(s, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      core::identifier_string_list names() const
+      /// \brief Returns the set of hidden names
+      /// \return The set of hidden names
+      core::identifier_string_list hide_set() const
       {
         using namespace atermpp;
         return list_arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the hide expression
+      /// \return The operand of the hide expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -322,17 +322,17 @@ using lps::action;
         : process_expression(core::detail::gsMakeRename(r, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      rename_expression_list rename_expressions() const
+      /// \brief Returns the set of rename rules
+      /// \return The set of rename rules
+      rename_expression_list rename_set() const
       {
         using namespace atermpp;
         return list_arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the rename expression
+      /// \return The operand of the rename expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -359,17 +359,17 @@ using lps::action;
         : process_expression(core::detail::gsMakeComm(c, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      communication_expression_list communication_expressions() const
+      /// \brief Returns the set of communications
+      /// \return The set of communications
+      communication_expression_list comm_set() const
       {
         using namespace atermpp;
         return list_arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the comm expression
+      /// \return The operand of the comm expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -392,21 +392,21 @@ using lps::action;
       /// \brief Constructor.
       /// \param s A sequence of multi-action names
       /// \param right A process expression
-      allow(const multi_action_name_list& s, const process_expression& right)
+      allow(const action_name_multiset_list& s, const process_expression& right)
         : process_expression(core::detail::gsMakeAllow(s, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      multi_action_name_list names()
+      /// \brief Returns the set of allowed multi-actions
+      /// \return The set of allowed multi-actions
+      action_name_multiset_list allow_set()
       {
         using namespace atermpp;
         return list_arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the allow expression
+      /// \return The operand of the allow expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -433,16 +433,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeSync(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the sync expression
+      /// \return The left operand of the sync expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the sync expression
+      /// \return The right operand of the sync expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -452,12 +452,12 @@ using lps::action;
 
   // AtTime(<ProcExpr>, <DataExpr>)
   /// \brief At operator for process expressions
-  class at_time: public process_expression
+  class at: public process_expression
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      at_time(atermpp::aterm_appl term)
+      at(atermpp::aterm_appl term)
         : process_expression(term)
       {
         assert(core::detail::check_term_AtTime(m_term));
@@ -466,21 +466,21 @@ using lps::action;
       /// \brief Constructor.
       /// \param left A process expression
       /// \param d A data expression
-      at_time(const process_expression& left, const data::data_expression& d)
+      at(const process_expression& left, const data::data_expression& d)
         : process_expression(core::detail::gsMakeAtTime(left, d))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression expression() const
+      /// \brief Returns the operand of the at expression
+      /// \return The operand of the at expression
+      process_expression operand() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      data::data_expression time() const
+      /// \brief Returns the time stamp of the at expression
+      /// \return The time stamp of the at expression
+      data::data_expression time_stamp() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -507,16 +507,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeSeq(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the seq expression
+      /// \return The left operand of the seq expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the seq expression
+      /// \return The right operand of the seq expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -544,17 +544,17 @@ using lps::action;
         : process_expression(core::detail::gsMakeIfThen(d, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the condition of the if-then expression
+      /// \return The condition of the if-then expression
       data::data_expression condition() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression left() const
+      /// \brief Returns the then case of the if-then expression
+      /// \return The then case of the if-then expression
+      process_expression then_case() const
       {
         using namespace atermpp;
         return arg2(*this);
@@ -582,25 +582,25 @@ using lps::action;
         : process_expression(core::detail::gsMakeIfThenElse(d, left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the condition of the if-then-else
+      /// \return The condition of the if-then-else
       data::data_expression condition() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression left() const
+      /// \brief Returns the then case of the if-then-else expression
+      /// \return The then case of the if-then-else expression
+      process_expression then_case() const
       {
         using namespace atermpp;
         return arg2(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      process_expression right() const
+      /// \brief Returns the then case of the if-then-else expression
+      /// \return The then case of the if-then-else expression
+      process_expression else_case() const
       {
         using namespace atermpp;
         return arg3(*this);
@@ -627,16 +627,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeBInit(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the bounded initialization expression
+      /// \return The left operand of the bounded initialization expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the bounded initialization expression
+      /// \return The right operand of the bounded initialization expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -664,16 +664,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeMerge(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the merge expression
+      /// \return The left operand of the merge expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the merge expression
+      /// \return The right operand of the merge expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -701,16 +701,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeLMerge(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the left-merge expression
+      /// \return The left operand of the left-merge expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the left-merge expression
+      /// \return The right operand of the left-merge expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -738,16 +738,16 @@ using lps::action;
         : process_expression(core::detail::gsMakeChoice(left, right))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the left operand of the choice expression
+      /// \return The left operand of the choice expression
       process_expression left() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the right operand of the choice expression
+      /// \return The right operand of the choice expression
       process_expression right() const
       {
         using namespace atermpp;
@@ -780,7 +780,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_process_variable(const process_expression& t)
+    bool is_process_instance(const process_expression& t)
     {
       return core::detail::gsIsProcess(t);
     }
@@ -789,7 +789,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_process_assignment(const process_expression& t)
+    bool is_process_instance_assignment(const process_expression& t)
     {
       return core::detail::gsIsProcessAssignment(t);
     }
@@ -879,7 +879,7 @@ namespace core {
     /// \param t A term
     /// \return True if it is the value \p true
     static inline
-    bool is_at_time(const process_expression& t)
+    bool is_at(const process_expression& t)
     {
       return core::detail::gsIsAtTime(t);
     }

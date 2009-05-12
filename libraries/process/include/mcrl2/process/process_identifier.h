@@ -17,7 +17,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/process/multi_action_name.h"
+#include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2 {
 
@@ -40,16 +40,16 @@ namespace process {
         : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the name of the process identifier
+      /// \return The name of the process identifier
       core::identifier_string name() const
       {
         using namespace atermpp;
         return arg1(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the sorts of the process identifier
+      /// \return The sorts of the process identifier
       data::sort_expression_list sorts() const
       {
         using namespace atermpp;

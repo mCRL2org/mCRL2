@@ -3,21 +3,21 @@ import string
 from path import *
 
 TEXT = '''action(const lps::action_label& l, const data::data_expression_list& v) (label, arguments)
-process_variable(const process_identifier pi, const data::data_expression_list& v) (identifier, expressions)
-process_assignment(const process_identifier& pi, const data::assignment_list& v) (identifier, assignments)
+process_instance(const process_identifier pi, const data::data_expression_list& v) (identifier, actual_parameters)
+process_instance_assignment(const process_identifier& pi, const data::assignment_list& v) (identifier, assignments)
 delta() ()
 tau() ()
-sum(const data::variable_list& v, const process_expression& right) (variables, expression)
-block(const core::identifier_string_list& s, const process_expression& right) (names, expression)
-hide(const core::identifier_string_list& s, const process_expression& right) (names, expression)
-rename(const rename_expression_list& r, const process_expression& right) (rename_expressions, expression)
-comm(const communication_expression_list& c, const process_expression& right) (communication_expressions, expression)
-allow(const multi_action_name_list& s, const process_expression& right) (names, expression)
+sum(const data::variable_list& v, const process_expression& right) (bound_variables, operand)
+block(const core::identifier_string_list& s, const process_expression& right) (block_set, operand)
+hide(const core::identifier_string_list& s, const process_expression& right) (hide_set, operand)
+rename(const rename_expression_list& r, const process_expression& right) (rename_set, operand)
+comm(const communication_expression_list& c, const process_expression& right) (comm_set, operand)
+allow(const multi_action_name_list& s, const process_expression& right) (allow_set, operand)
 sync(const process_expression& left, const process_expression& right) (left, right)
-at_time(const process_expression& left, const data::data_expression& d) (expression, time)
+at(const process_expression& left, const data::data_expression& d) (operand, time_stamp)
 seq(const process_expression& left, const process_expression& right) (left, right)
-if_then(const data::data_expression& d, const process_expression& right) (condition, left)
-if_then_else(const data::data_expression& d, const process_expression& left, const process_expression& right) (condition, left, right)
+if_then(const data::data_expression& d, const process_expression& right) (condition, then_case)
+if_then_else(const data::data_expression& d, const process_expression& left, const process_expression& right) (condition, then_case, else_case)
 bounded_init(const process_expression& left, const process_expression& right) (left, right)
 merge(const process_expression& left, const process_expression& right) (left, right)
 left_merge(const process_expression& left, const process_expression& right) (left, right)
@@ -387,26 +387,26 @@ def make_process_term_traits(filename):
 '''
 
     terms = [
-      ('action'             , 'Action'           ),
-      ('process_variable'   , 'Process'          ),
-      ('process_assignment' , 'ProcessAssignment'),
-      ('delta'              , 'Delta'            ),
-      ('tau'                , 'Tau'              ),
-      ('sum'                , 'Sum'              ),
-      ('block'              , 'Block'            ),
-      ('hide'               , 'Hide'             ),
-      ('rename'             , 'Rename'           ),
-      ('comm'               , 'Comm'             ),
-      ('allow'              , 'Allow'            ),
-      ('sync'               , 'Sync'             ),
-      ('at_time'            , 'AtTime'           ),
-      ('seq'                , 'Seq'              ),
-      ('if_then'            , 'IfThen'           ),
-      ('if_then_else'       , 'IfThenElse'       ),
-      ('bounded_init'       , 'BInit'            ),
-      ('merge'              , 'Merge'            ),
-      ('left_merge'         , 'LMerge'           ),
-      ('choice'             , 'Choice'           ),
+      ('action'                      , 'Action'           ),
+      ('process_instance'            , 'Process'          ),
+      ('process_instance_assignment' , 'ProcessAssignment'),
+      ('delta'                       , 'Delta'            ),
+      ('tau'                         , 'Tau'              ),
+      ('sum'                         , 'Sum'              ),
+      ('block'                       , 'Block'            ),
+      ('hide'                        , 'Hide'             ),
+      ('rename'                      , 'Rename'           ),
+      ('comm'                        , 'Comm'             ),
+      ('allow'                       , 'Allow'            ),
+      ('sync'                        , 'Sync'             ),
+      ('at'                          , 'AtTime'           ),
+      ('seq'                         , 'Seq'              ),
+      ('if_then'                     , 'IfThen'           ),
+      ('if_then_else'                , 'IfThenElse'       ),
+      ('bounded_init'                , 'BInit'            ),
+      ('merge'                       , 'Merge'            ),
+      ('left_merge'                  , 'LMerge'           ),
+      ('choice'                      , 'Choice'           ),
     ]
 
     rtext = ''

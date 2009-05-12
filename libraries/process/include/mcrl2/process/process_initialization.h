@@ -47,9 +47,9 @@ namespace process {
               atermpp::term_list<data::variable>(variables.begin(), variables.end()), expression))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      data::variable_list variables() const
+      /// \brief Returns the free variables of the process initialization
+      /// \return The free variables of the process initialization
+      data::variable_list free_variables() const
       {
         using namespace atermpp;
         return data::variable_list(
@@ -57,8 +57,8 @@ namespace process {
           atermpp::term_list_iterator<data::variable>());
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the expression of the process initialization
+      /// \return The expression of the process initialization
       process_expression expression() const
       {
         using namespace atermpp;
@@ -73,7 +73,7 @@ namespace process {
   template <typename OutIter>
   void traverse_sort_expressions(const process_initialization& init, OutIter dest)
   {
-    data::traverse_sort_expressions(init.variables(), dest);
+    data::traverse_sort_expressions(init.free_variables(), dest);
   }
 
 } // namespace process

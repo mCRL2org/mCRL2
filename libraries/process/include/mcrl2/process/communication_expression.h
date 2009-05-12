@@ -16,7 +16,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/process/multi_action_name.h"
+#include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2 {
 
@@ -35,13 +35,13 @@ namespace process {
         assert(core::detail::check_term_CommExpr(m_term));
       }
 
-      communication_expression(multi_action_name action_name, core::identifier_string name)
+      communication_expression(action_name_multiset action_name, core::identifier_string name)
         : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
       {}
 
       /// \brief Returns the name of the action
       /// \return The name of the action
-      multi_action_name action_name() const
+      action_name_multiset action_name() const
       {
         using namespace atermpp;
         return arg1(*this);

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/process/multi_action_name.h
+/// \file mcrl2/process/action_name_multiset.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PROCESS_MULTI_ACTION_NAME_H
-#define MCRL2_PROCESS_MULTI_ACTION_NAME_H
+#ifndef MCRL2_PROCESS_ACTION_NAME_MULTISET_H
+#define MCRL2_PROCESS_ACTION_NAME_MULTISET_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
@@ -22,19 +22,19 @@ namespace mcrl2 {
 namespace process {
 
   //<MultActName>  ::= MultActName(<String>+)
-  /// \brief Multi-action name
-  class multi_action_name: public atermpp::aterm_appl
+  /// \brief Multiset of action names
+  class action_name_multiset: public atermpp::aterm_appl
   {
     public:
       /// \brief Constructor.
       /// \param term A term
-      multi_action_name(atermpp::aterm_appl term)
+      action_name_multiset(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_term_MultActName(m_term));
       }
 
-      multi_action_name(core::identifier_string_list names)
+      action_name_multiset(core::identifier_string_list names)
         : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
       {}
 
@@ -47,11 +47,11 @@ namespace process {
       }
   };
 
-  /// \brief Read-only singly linked list of multi_action_name expressions
-  typedef atermpp::term_list<multi_action_name> multi_action_name_list;
+  /// \brief Read-only singly linked list of action_name_multiset expressions
+  typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 
 } // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_PROCESS_MULTI_ACTION_NAME_H
+#endif // MCRL2_PROCESS_ACTION_NAME_MULTISET_H

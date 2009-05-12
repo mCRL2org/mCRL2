@@ -44,21 +44,21 @@ namespace process {
       }
 
       /// \brief Constructor.
-      /// \param variables1 A sequence of data variables
+      /// \param free_variables A sequence of data variables
       /// \param name A process identifier
-      /// \param variables2 A sequence of data variables
+      /// \param formal_parameters A sequence of data variables
       /// \param expression A process expression
-      process_equation(data::variable_list variables1, process_identifier name, data::variable_list variables2, process_expression expression)
+      process_equation(data::variable_list free_variables, process_identifier name, data::variable_list formal_parameters, process_expression expression)
         : atermpp::aterm_appl(core::detail::gsMakeProcEqn(
-                                atermpp::term_list<data::variable>(variables1.begin(), variables1.end()),
+                                atermpp::term_list<data::variable>(free_variables.begin(), free_variables.end()),
                                 name,
-                                atermpp::term_list<data::variable>(variables2.begin(), variables2.end()),
+                                atermpp::term_list<data::variable>(formal_parameters.begin(), formal_parameters.end()),
                                 expression))
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      data::variable_list variables1() const
+      /// \brief Returns the free variables of the equation
+      /// \return The free variables of the equation
+      data::variable_list free_variables() const
       {
         using namespace atermpp;
         return data::variable_list(
@@ -68,15 +68,15 @@ namespace process {
 
       /// \brief Returns the name of the process equation
       /// \return The name of the process equation
-      process_identifier name() const
+      process_identifier identifier() const
       {
         using namespace atermpp;
         return arg2(*this);
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
-      data::variable_list variables2() const
+      /// \brief Returns the formal parameters of the equation
+      /// \return The formal parameters of the equation
+      data::variable_list formal_parameters() const
       {
         using namespace atermpp;
         return data::variable_list(
@@ -100,8 +100,8 @@ namespace process {
   template <typename OutIter>
   void traverse_sort_expressions(const process_equation& eq, OutIter dest)
   {
-    data::traverse_sort_expressions(eq.variables1(), dest);
-    data::traverse_sort_expressions(eq.variables2(), dest);
+    data::traverse_sort_expressions(eq.free_variables(), dest);
+    data::traverse_sort_expressions(eq.formal_parameters(), dest);
   }
 
   /// \brief Read-only singly linked list of process equations

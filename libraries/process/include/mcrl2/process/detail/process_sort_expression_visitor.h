@@ -6,19 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/process_sort_expression_visitor.h
+/// \file mcrl2/process/detail/process_sort_expression_visitor.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H
-#define MCRL2_LPS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H
+#ifndef MCRL2_PROCESS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H
+#define MCRL2_PROCESS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H
 
 #include <set>
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/lps/process_expression_visitor.h"
+#include "mcrl2/process/process_expression_visitor.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace process {
 
 namespace detail {
 
@@ -40,7 +40,7 @@ struct process_sort_expression_visitor: public process_expression_visitor<Term>
 
   /// \brief Visit process_assignment node
   /// \return The result of visiting the node
-  bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+  bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
   {
     traverse_sort_expressions(pi, std::inserter(result, result.end()));
     traverse_sort_expressions(v, std::inserter(result, result.end()));
@@ -57,7 +57,7 @@ struct process_sort_expression_visitor: public process_expression_visitor<Term>
 
   /// \brief Visit at_time node
   /// \return The result of visiting the node
-  bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+  bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
   {
     *dest++ = d.sort();
     return continue_recursion;
@@ -82,8 +82,8 @@ struct process_sort_expression_visitor: public process_expression_visitor<Term>
 
 } // namespace detail
 
-} // namespace lps
+} // namespace process
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H
+#endif // MCRL2_PROCESS_DETAIL_PROCESS_SORT_EXPRESSION_VISITOR_H

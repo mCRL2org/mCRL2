@@ -57,26 +57,26 @@ struct process_expression_visitor
   virtual void leave_action()
   {}
 
-  /// \brief Visit process_variable node
+  /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
+  virtual bool visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_variable node
-  virtual void leave_process_variable()
+  /// \brief Leave process_instance node
+  virtual void leave_process_instance()
   {}
 
-  /// \brief Visit process_assignment node
+  /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
+  virtual bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_assignment node
-  virtual void leave_process_assignment()
+  /// \brief Leave process_instance_assignment node
+  virtual void leave_process_instance_assignment()
   {}
 
   /// \brief Visit delta node
@@ -158,7 +158,7 @@ struct process_expression_visitor
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right, Arg& /* a */)
+  virtual bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -178,15 +178,15 @@ struct process_expression_visitor
   virtual void leave_sync()
   {}
 
-  /// \brief Visit at_time node
+  /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
+  virtual bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave at_time node
-  virtual void leave_at_time()
+  /// \brief Leave at node
+  virtual void leave_at()
   {}
 
   /// \brief Visit seq node
@@ -281,19 +281,19 @@ struct process_expression_visitor
       visit_action(x, l, v, a);
       leave_action();
     }
-    else if (tr::is_process_variable(x))
+    else if (tr::is_process_instance(x))
     {
-      process_identifier pi = process_variable(x).identifier();
-      data::data_expression_list v = process_variable(x).expressions();
-      visit_process_variable(x, pi, v, a);
-      leave_process_variable();
+      process_identifier pi = process_instance(x).identifier();
+      data::data_expression_list v = process_instance(x).actual_parameters();
+      visit_process_instance(x, pi, v, a);
+      leave_process_instance();
     }
-    else if (tr::is_process_assignment(x))
+    else if (tr::is_process_instance_assignment(x))
     {
-      process_identifier pi = process_assignment(x).identifier();
-      data::assignment_list v = process_assignment(x).assignments();
-      visit_process_assignment(x, pi, v, a);
-      leave_process_assignment();
+      process_identifier pi = process_instance_assignment(x).identifier();
+      data::assignment_list v = process_instance_assignment(x).assignments();
+      visit_process_instance_assignment(x, pi, v, a);
+      leave_process_instance_assignment();
     }
     else if (tr::is_delta(x))
     {
@@ -307,8 +307,8 @@ struct process_expression_visitor
     }
     else if (tr::is_sum(x))
     {
-      data::variable_list v = sum(x).variables();
-      process_expression right = sum(x).expression();
+      data::variable_list v = sum(x).bound_variables();
+      process_expression right = sum(x).operand();
       bool result = visit_sum(x, v, right, a);
       if (result) {
         visit(right, a);
@@ -317,8 +317,8 @@ struct process_expression_visitor
     }
     else if (tr::is_block(x))
     {
-      core::identifier_string_list s = block(x).names();
-      process_expression right = block(x).expression();
+      core::identifier_string_list s = block(x).block_set();
+      process_expression right = block(x).operand();
       bool result = visit_block(x, s, right, a);
       if (result) {
         visit(right, a);
@@ -327,8 +327,8 @@ struct process_expression_visitor
     }
     else if (tr::is_hide(x))
     {
-      core::identifier_string_list s = hide(x).names();
-      process_expression right = hide(x).expression();
+      core::identifier_string_list s = hide(x).hide_set();
+      process_expression right = hide(x).operand();
       bool result = visit_hide(x, s, right, a);
       if (result) {
         visit(right, a);
@@ -337,8 +337,8 @@ struct process_expression_visitor
     }
     else if (tr::is_rename(x))
     {
-      rename_expression_list r = rename(x).rename_expressions();
-      process_expression right = rename(x).expression();
+      rename_expression_list r = rename(x).rename_set();
+      process_expression right = rename(x).operand();
       bool result = visit_rename(x, r, right, a);
       if (result) {
         visit(right, a);
@@ -347,8 +347,8 @@ struct process_expression_visitor
     }
     else if (tr::is_comm(x))
     {
-      communication_expression_list c = comm(x).communication_expressions();
-      process_expression right = comm(x).expression();
+      communication_expression_list c = comm(x).comm_set();
+      process_expression right = comm(x).operand();
       bool result = visit_comm(x, c, right, a);
       if (result) {
         visit(right, a);
@@ -357,8 +357,8 @@ struct process_expression_visitor
     }
     else if (tr::is_allow(x))
     {
-      multi_action_name_list s = allow(x).names();
-      process_expression right = allow(x).expression();
+      action_name_multiset_list s = allow(x).allow_set();
+      process_expression right = allow(x).operand();
       bool result = visit_allow(x, s, right, a);
       if (result) {
         visit(right, a);
@@ -376,15 +376,15 @@ struct process_expression_visitor
       }
       leave_sync();
     }
-    else if (tr::is_at_time(x))
+    else if (tr::is_at(x))
     {
-      process_expression left = at_time(x).expression();
-      data::data_expression d = at_time(x).time();
-      bool result = visit_at_time(x, left, d, a);
+      process_expression left = at(x).operand();
+      data::data_expression d = at(x).time_stamp();
+      bool result = visit_at(x, left, d, a);
       if (result) {
         visit(left, a);
       }
-      leave_at_time();
+      leave_at();
     }
     else if (tr::is_seq(x))
     {
@@ -400,7 +400,7 @@ struct process_expression_visitor
     else if (tr::is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
-      process_expression right = if_then(x).left();
+      process_expression right = if_then(x).then_case();
       bool result = visit_if_then(x, d, right, a);
       if (result) {
         visit(right, a);
@@ -410,8 +410,8 @@ struct process_expression_visitor
     else if (tr::is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
-      process_expression left = if_then_else(x).left();
-      process_expression right = if_then_else(x).right();
+      process_expression left = if_then_else(x).then_case();
+      process_expression right = if_then_else(x).else_case();
       bool result = visit_if_then_else(x, d, left, right, a);
       if (result) {
         visit(left, a);
@@ -500,26 +500,26 @@ struct process_expression_visitor<void>
   virtual void leave_action()
   {}
 
-  /// \brief Visit process_variable node
+  /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+  virtual bool visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_variable node
-  virtual void leave_process_variable()
+  /// \brief Leave process_instance node
+  virtual void leave_process_instance()
   {}
 
-  /// \brief Visit process_assignment node
+  /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+  virtual bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave process_assignment node
-  virtual void leave_process_assignment()
+  /// \brief Leave process_instance_assignment node
+  virtual void leave_process_instance_assignment()
   {}
 
   /// \brief Visit delta node
@@ -601,7 +601,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
+  virtual bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
   {
     return continue_recursion;
   }
@@ -621,15 +621,15 @@ struct process_expression_visitor<void>
   virtual void leave_sync()
   {}
 
-  /// \brief Visit at_time node
+  /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+  virtual bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
   {
     return continue_recursion;
   }
 
-  /// \brief Leave at_time node
-  virtual void leave_at_time()
+  /// \brief Leave at node
+  virtual void leave_at()
   {}
 
   /// \brief Visit seq node
@@ -724,19 +724,19 @@ struct process_expression_visitor<void>
       visit_action(x, l, v);
       leave_action();
     }
-    else if (tr::is_process_variable(x))
+    else if (tr::is_process_instance(x))
     {
-      process_identifier pi = process_variable(x).identifier();
-      data::data_expression_list v = process_variable(x).expressions();
-      visit_process_variable(x, pi, v);
-      leave_process_variable();
+      process_identifier pi = process_instance(x).identifier();
+      data::data_expression_list v = process_instance(x).actual_parameters();
+      visit_process_instance(x, pi, v);
+      leave_process_instance();
     }
-    else if (tr::is_process_assignment(x))
+    else if (tr::is_process_instance_assignment(x))
     {
-      process_identifier pi = process_assignment(x).identifier();
-      data::assignment_list v = process_assignment(x).assignments();
-      visit_process_assignment(x, pi, v);
-      leave_process_assignment();
+      process_identifier pi = process_instance_assignment(x).identifier();
+      data::assignment_list v = process_instance_assignment(x).assignments();
+      visit_process_instance_assignment(x, pi, v);
+      leave_process_instance_assignment();
     }
     else if (tr::is_delta(x))
     {
@@ -750,8 +750,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_sum(x))
     {
-      data::variable_list v = sum(x).variables();
-      process_expression right = sum(x).expression();
+      data::variable_list v = sum(x).bound_variables();
+      process_expression right = sum(x).operand();
       bool result = visit_sum(x, v, right);
       if (result) {
         visit(right);
@@ -760,8 +760,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_block(x))
     {
-      core::identifier_string_list s = block(x).names();
-      process_expression right = block(x).expression();
+      core::identifier_string_list s = block(x).block_set();
+      process_expression right = block(x).operand();
       bool result = visit_block(x, s, right);
       if (result) {
         visit(right);
@@ -770,8 +770,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_hide(x))
     {
-      core::identifier_string_list s = hide(x).names();
-      process_expression right = hide(x).expression();
+      core::identifier_string_list s = hide(x).hide_set();
+      process_expression right = hide(x).operand();
       bool result = visit_hide(x, s, right);
       if (result) {
         visit(right);
@@ -780,8 +780,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_rename(x))
     {
-      rename_expression_list r = rename(x).rename_expressions();
-      process_expression right = rename(x).expression();
+      rename_expression_list r = rename(x).rename_set();
+      process_expression right = rename(x).operand();
       bool result = visit_rename(x, r, right);
       if (result) {
         visit(right);
@@ -790,8 +790,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_comm(x))
     {
-      communication_expression_list c = comm(x).communication_expressions();
-      process_expression right = comm(x).expression();
+      communication_expression_list c = comm(x).comm_set();
+      process_expression right = comm(x).operand();
       bool result = visit_comm(x, c, right);
       if (result) {
         visit(right);
@@ -800,8 +800,8 @@ struct process_expression_visitor<void>
     }
     else if (tr::is_allow(x))
     {
-      multi_action_name_list s = allow(x).names();
-      process_expression right = allow(x).expression();
+      action_name_multiset_list s = allow(x).allow_set();
+      process_expression right = allow(x).operand();
       bool result = visit_allow(x, s, right);
       if (result) {
         visit(right);
@@ -819,15 +819,15 @@ struct process_expression_visitor<void>
       }
       leave_sync();
     }
-    else if (tr::is_at_time(x))
+    else if (tr::is_at(x))
     {
-      process_expression left = at_time(x).expression();
-      data::data_expression d = at_time(x).time();
-      bool result = visit_at_time(x, left, d);
+      process_expression left = at(x).operand();
+      data::data_expression d = at(x).time_stamp();
+      bool result = visit_at(x, left, d);
       if (result) {
         visit(left);
       }
-      leave_at_time();
+      leave_at();
     }
     else if (tr::is_seq(x))
     {
@@ -843,7 +843,7 @@ struct process_expression_visitor<void>
     else if (tr::is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
-      process_expression right = if_then(x).left();
+      process_expression right = if_then(x).then_case();
       bool result = visit_if_then(x, d, right);
       if (result) {
         visit(right);
@@ -853,8 +853,8 @@ struct process_expression_visitor<void>
     else if (tr::is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
-      process_expression left = if_then_else(x).left();
-      process_expression right = if_then_else(x).right();
+      process_expression left = if_then_else(x).then_case();
+      process_expression right = if_then_else(x).else_case();
       bool result = visit_if_then_else(x, d, left, right);
       if (result) {
         visit(left);

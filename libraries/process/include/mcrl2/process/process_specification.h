@@ -80,58 +80,58 @@ namespace process {
           m_initial_process(init)
       {}
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the data specification
+      /// \return The data specification
       const data::data_specification& data() const
       {
         return m_data;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the data specification
+      /// \return The data specification
       data::data_specification& data()
       {
         using namespace atermpp;
         return m_data;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the action label specification
+      /// \return The action label specification
       const lps::action_label_list& action_labels() const
       {
         return m_action_labels;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the action label specification
+      /// \return The action label specification
       lps::action_label_list& action_labels()
       {
         return m_action_labels;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the equations of the process specification
+      /// \return The equations of the process specification
       const atermpp::vector<process_equation>& equations() const
       {
         return m_equations;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the equations of the process specification
+      /// \return The equations of the process specification
       atermpp::vector<process_equation>& equations()
       {
         return m_equations;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the initialization of the process specification
+      /// \return The initialization of the process specification
       const process_initialization& init() const
       {
         return m_initial_process;
       }
 
-      /// \brief FUNCTION_DESCRIPTION
-      /// \return RETURN_DESCRIPTION
+      /// \brief Returns the initialization of the process specification
+      /// \return The initialization of the process specification
       process_initialization& init()
       {
         return m_initial_process;
@@ -183,7 +183,7 @@ namespace process {
   
   /// \brief Pretty print function
   /// \param spec A process specification
-  /// \return RETURN_DESCRIPTION
+  /// \return A pretty print representation of the specification
   inline std::string pp(const process_specification& spec)
   {
     return core::pp(process_specification_to_aterm(spec));

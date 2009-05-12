@@ -70,7 +70,7 @@ namespace detail {
     struct unsupported_linear_process
     {};
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Clears the current summand
     void clear_summand()
     {
       m_sum_variables = data::variable_list();
@@ -83,7 +83,7 @@ namespace detail {
       m_next_state = data::assignment_list();
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Adds a summand to the result
     void add_summand()
     {
       if (m_summand == lps::summand())
@@ -214,7 +214,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of multi-action names
     /// \param right A process expression
-    bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
+    bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -236,12 +236,12 @@ namespace detail {
       return stop_recursion;
     }
 
-    /// \brief Visit at_time node
+    /// \brief Visit at node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param d A data expression
-    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
       visit(left);
       if (tr::is_delta(x))
@@ -265,8 +265,8 @@ namespace detail {
     bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
-      process_variable p = right;
-      m_next_state = data::make_assignment_list(m_equation.variables2(), p.expressions());
+      process_instance p = right;
+      m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
     }
@@ -376,7 +376,7 @@ namespace detail {
     /// Throws \p unsupported_linear_process if an unsupported linear process expression is encountered.
     /// Throws \p non_linear_process if the process is not linear.
     /// \param p A process specification
-    /// \return RETURN_DESCRIPTION
+    /// \return The converted specification
     lps::specification convert(const process_specification& p)
     {
       data::variable_list m_process_parameters;
@@ -384,7 +384,7 @@ namespace detail {
 
       for (atermpp::vector<process_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-        data::variable_list parameters = i->variables2();
+        data::variable_list parameters = i->formal_parameters();
         if (m_process_parameters != data::variable_list() && m_process_parameters != parameters)
         {
           std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
@@ -393,12 +393,12 @@ namespace detail {
         convert(*i);
       }
       lps::linear_process lp(data::variable_list(), m_process_parameters, lps::summand_list(result.begin(), result.end()));
-      if (!tr::is_process_variable(p.init().expression()))
+      if (!tr::is_process_instance(p.init().expression()))
       {
         std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
       }
-      process_variable q = p.init().expression();
-      lps::process_initializer init(p.init().variables(), data::make_assignment_list(m_process_parameters, q.expressions()));
+      process_instance q = p.init().expression();
+      lps::process_initializer init(p.init().free_variables(), data::make_assignment_list(m_process_parameters, q.actual_parameters()));
       return lps::specification(p.data(), p.action_labels(), lp, init);
     }
   };

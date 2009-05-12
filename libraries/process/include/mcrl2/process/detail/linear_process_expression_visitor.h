@@ -47,15 +47,15 @@ namespace detail {
     /// \brief Returns true if the process assignment a matches with the
     /// process equation eqn.
     /// \param a A process assignment
-    /// \return RETURN_DESCRIPTION
-    bool check_process_assignment(const process_assignment& a) const
+    /// \return True if the process assignment a matches with the process equation eqn.
+    bool check_process_instance_assignment(const process_instance_assignment& a) const
     {
-      if (a.identifier() != eqn.name())
+      if (a.identifier() != eqn.identifier())
       {
         return false;
       }
       data::assignment_list a1 = a.assignments();
-      data::variable_list v = eqn.variables1();
+      data::variable_list v = eqn.free_variables();
       if (a1.size() != v.size())
       {
         return false;
@@ -72,29 +72,29 @@ namespace detail {
       return true;
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a process instance
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a process instance
     bool is_process(const process_expression& x)
     {
-      return tr::is_process_variable(x)
-          || tr::is_process_assignment(x)
+      return tr::is_process_instance(x)
+          || tr::is_process_instance_assignment(x)
           ;
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a deadlock
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a deadlock
     bool is_timed_deadlock(const process_expression& x)
     {
       return tr::is_delta(x)
-          || tr::is_at_time(x)
+          || tr::is_at(x)
           ;
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a multi-action
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a multi-action
     bool is_multiaction(const process_expression& x)
     {
       return tr::is_tau(x)
@@ -103,45 +103,45 @@ namespace detail {
           ;
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a multi-action
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a multi-action
     bool is_timed_multiaction(const process_expression& x)
     {
-      return tr::is_at_time(x)
+      return tr::is_at(x)
           || is_multiaction(x);
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is an action prefix
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is an action prefix
     bool is_action_prefix(const process_expression& x)
     {
       return tr::is_seq(x)
           || is_timed_multiaction(x);
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a conditional deadlock
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a conditional deadlock
     bool is_conditional_deadlock(const process_expression& x)
     {
       return tr::is_if_then(x)
           || is_timed_deadlock(x);
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a conditional action prefix.
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a conditional action prefix.
     bool is_conditional_action_prefix(const process_expression& x)
     {
       return tr::is_if_then(x)
           || is_action_prefix(x);
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is an alternative composition
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is an alternative composition
     bool is_alternative(const process_expression& x)
     {
       return tr::is_sum(x)
@@ -150,37 +150,35 @@ namespace detail {
           ;
     }
 
-    /// \brief FUNCTION_DESCRIPTION
+    /// \brief Returns true if the argument is a linear process
     /// \param x A process expression
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the argument is a linear process
     bool is_linear_process_term(const process_expression& x)
     {
       return tr::is_choice(x)
-          /// \brief FUNCTION_DESCRIPTION
-          /// \return RETURN_DESCRIPTION
           || is_alternative(x)
           ;
     }
 
-    /// \brief Visit process_variable node
+    /// \brief Visit process_instance node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param pi A process identifier
     /// \param v A sequence of data expressions
-    bool visit_process_variable(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+    bool visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
     {
       return continue_recursion;
     }
 
-    /// \brief Visit process_assignment node
+    /// \brief Visit process_instance_assignment node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param pi A process identifier
     /// \param v A sequence of assignments to data variables
-    bool visit_process_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+    bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
     {
-      process_assignment a = x;
-      if (!check_process_assignment(a))
+      process_instance_assignment a = x;
+      if (!check_process_instance_assignment(a))
       {
         throw non_linear_process();
       }
@@ -250,7 +248,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of multi-action names
     /// \param right A process expression
-    bool visit_allow(const process_expression& x, const multi_action_name_list& s, const process_expression& right)
+    bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -270,12 +268,12 @@ namespace detail {
       return continue_recursion;
     }
 
-    /// \brief Visit at_time node
+    /// \brief Visit at node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param left A process expression
     /// \param d A data expression
-    bool visit_at_time(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
       if (!is_multiaction(left) && !tr::is_delta(left))
       {
@@ -295,12 +293,12 @@ namespace detail {
       {
         throw non_linear_process();
       }
-      if (!tr::is_process_variable(right))
+      if (!tr::is_process_instance(right))
       {
         throw std::runtime_error("unexpected error in visit_seq");
       }
-      process_variable q = right;
-      if (q.identifier() != eqn.name())
+      process_instance q = right;
+      if (q.identifier() != eqn.identifier())
       {
         throw non_linear_process();
       }
@@ -368,7 +366,7 @@ namespace detail {
 
     /// \brief Returns true if the process equation e is linear.
     /// \param e A process equation
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the process equation e is linear.
     bool is_linear(const process_equation& e)
     {
       eqn = e;
@@ -385,7 +383,7 @@ namespace detail {
 
     /// \brief Returns true if the process specification is linear.
     /// \param p A process specification
-    /// \return RETURN_DESCRIPTION
+    /// \return True if the process specification is linear.
     bool is_linear(const process_specification& p)
     {
       if (p.equations().size() != 1)
@@ -396,7 +394,7 @@ namespace detail {
       {
         return false;
       }
-      if (!tr::is_process_variable(p.init().expression()))
+      if (!tr::is_process_instance(p.init().expression()))
       {
         return false;
       }
