@@ -19,7 +19,6 @@
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace.h"
-#include "squadt_interactor.h"
 #include "exploration.h"
 #include "lts.h"
 #include "mcrl2/atermpp/vector.h"
