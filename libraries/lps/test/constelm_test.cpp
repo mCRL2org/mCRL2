@@ -9,6 +9,8 @@
 /// \file constelm_test.cpp
 /// \brief Add your file description here.
 
+#define MCRL2_LPSCONSTELM_DEBUG
+
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
@@ -234,7 +236,7 @@ std::string case_8 =
 
 // examples/games/domineering.mcrl2
 std::string case_9 =
-  "sort Position = struct Full | Empty;\n"
+  "sort Position = struct F | E;\n"
   "Row = List(Position);\n"
   "Board = List(List(Position));\n"
   "\n"
@@ -251,45 +253,45 @@ std::string case_9 =
   "x,y: Pos;\n"
   "eqn  N  =  5;\n"
   "M  =  5;\n"
-  "At(x, y, [])  =  Empty;\n"
+  "At(x, y, [])  =  E;\n"
   "y == 1  ->  At(x, y, r |> b)  =  At(x, r);\n"
   "y > 1  ->  At(x, y, r |> b)  =  At(x, Int2Pos(y - 1), b);\n"
-  "At(y, [])  =  Empty;\n"
+  "At(y, [])  =  E;\n"
   "x == 1  ->  At(x, p |> r)  =  p;\n"
   "x > 1  ->  At(x, p |> r)  =  At(Int2Pos(x - 1), r);\n"
   "y == 1  ->  Put(p, x, y, r |> b)  =  Put(p, x, r) |> b;\n"
   "y > 1  ->  Put(p, x, y, r |> b)  =  r |> Put(p, x, Int2Pos(y - 1), b);\n"
   "x == 1  ->  Put(p, x, p' |> r)  =  p |> r;\n"
   "x > 1  ->  Put(p, x, p' |> r)  =  p' |> Put(p, Int2Pos(x - 1), r);\n"
-  "y == M  ->  NoVerticalSpot(x, y, b)  =  true;\n"
-  "x < N && y < M  ->  NoVerticalSpot(x, y, b)  =  (At(x, y, b) == Full || At(x, y + 1, b) == Full) && NoVerticalSpot(x + 1, y, b);\n"
-  "x == N && y < M  ->  NoVerticalSpot(x, y, b)  =  (At(x, y, b) == Full || At(x, y + 1, b) == Full) && NoVerticalSpot(1, y + 1, b);\n"
-  "x == N  ->  NoHorizontalSpot(x, y, b)  =  true;\n"
-  "x < N && y < M  ->  NoHorizontalSpot(x, y, b)  =  (At(x, y, b) == Full || At(x + 1, y, b) == Full) && NoHorizontalSpot(x, y + 1, b);\n"
-  "x < N && y == M  ->  NoHorizontalSpot(x, y, b)  =  (At(x, y, b) == Full || At(x + 1, y, b) == Full) && NoHorizontalSpot(x + 1, 1, b);\n"
+  "y == M  ->  NoVerticalSpot(x, y,b)  =  true;\n"
+  "x < N && y < M  ->  NoVerticalSpot(x, y, b)  =  (At(x, y, b) == F || At(x, y + 1, b) == F) && NoVerticalSpot(x + 1, y, b);\n"
+  "x == N && y < M  ->  NoVerticalSpot(x, y, b)  =  (At(x, y, b) == F || At(x, y + 1, b) == F) && NoVerticalSpot(1, y + 1, b);\n"
+  "x == N  ->  NoHorizontalSpot(x, y,b)  =  true;\n"
+  "x < N && y < M  ->  NoHorizontalSpot(x, y, b)  =  (At(x, y, b) == F || At(x + 1, y, b) == F) && NoHorizontalSpot(x, y + 1, b);\n"
+  "x < N && y == M  ->  NoHorizontalSpot(x, y, b)  =  (At(x, y, b) == F || At(x + 1, y, b) == F) && NoHorizontalSpot(x + 1, 1, b);\n"
   "\n"
   "act  Player1,Player2: Pos # Pos # Pos # Pos;\n"
   "Player1Wins,Player2Wins;\n"
   "\n"
-  "proc P(b_Domineering: List(List(struct Full | Empty)), Player1Moves_Domineering: Bool) =\n"
-  "(Player1Moves_Domineering && (At(1, 1, b_Domineering) == Full || At(1, 2, b_Domineering) == Full) && (At(2, 1, b_Domineering) == Full || At(2, 2, b_Domineering) == Full) && (At(3, 1, b_Domineering) == Full || At(3, 2, b_Domineering) == Full) && (At(4, 1, b_Domineering) == Full || At(4, 2, b_Domineering) == Full) && (At(5, 1, b_Domineering) == Full || At(5, 2, b_Domineering) == Full) && (At(1, 2, b_Domineering) == Full || At(1, 3, b_Domineering) == Full) && (At(2, 2, b_Domineering) == Full || At(2, 3, b_Domineering) == Full) && (At(3, 2, b_Domineering) == Full || At(3, 3, b_Domineering) == Full) && (At(4, 2, b_Domineering) == Full || At(4, 3, b_Domineering) == Full) && (At(5, 2, b_Domineering) == Full || At(5, 3, b_Domineering) == Full) && (At(1, 3, b_Domineering) == Full || At(1, 4, b_Domineering) == Full) && (At(2, 3, b_Domineering) == Full || At(2, 4, b_Domineering) == Full) && (At(3, 3, b_Domineering) == Full || At(3, 4, b_Domineering) == Full) && (At(4, 3, b_Domineering) == Full || At(4, 4, b_Domineering) == Full) && (At(5, 3, b_Domineering) == Full || At(5, 4, b_Domineering) == Full) && (At(1, 4, b_Domineering) == Full || At(1, 5, b_Domineering) == Full) && (At(2, 4, b_Domineering) == Full || At(2, 5, b_Domineering) == Full) && (At(3, 4, b_Domineering) == Full || At(3, 5, b_Domineering) == Full) && (At(4, 4, b_Domineering) == Full || At(4, 5, b_Domineering) == Full) && At(5, 4, b_Domineering) == Full || At(5, 5, b_Domineering) == Full) ->\n"
+  "proc P(b: List(List(struct F | E)), c: Bool) =\n"
+  "(c && (At(1,1,b) == F || At(1,2,b) == F) && (At(2,1,b) == F || At(2,2,b) == F) && (At(3,1,b) == F || At(3,2,b) == F) && (At(4,1,b) == F || At(4,2,b) == F) && (At(5,1,b) == F || At(5,2,b) == F) && (At(1,2,b) == F || At(1,3,b) == F) && (At(2,2,b) == F || At(2,3,b) == F) && (At(3,2,b) == F || At(3,3,b) == F) && (At(4,2,b) == F || At(4,3,b) == F) && (At(5,2,b) == F || At(5,3,b) == F) && (At(1,3,b) == F || At(1,4,b) == F) && (At(2,3,b) == F || At(2,4,b) == F) && (At(3,3,b) == F || At(3,4,b) == F) && (At(4,3,b) == F || At(4,4,b) == F) && (At(5,3,b) == F || At(5,4,b) == F) && (At(1,4,b) == F || At(1,5,b) == F) && (At(2,4,b) == F || At(2,5,b) == F) && (At(3,4,b) == F || At(3,5,b) == F) && (At(4,4,b) == F || At(4,5,b) == F) && At(5,4,b) == F || At(5,5,b) == F) ->\n"
   "Player2Wins .\n"
-  "P(b_Domineering, Player1Moves_Domineering)\n"
-  "+ sum x_Domineering1,y_Domineering1: Pos.\n"
-  "(!Player1Moves_Domineering && x_Domineering1 < 5 && y_Domineering1 <= 5 && At(x_Domineering1, y_Domineering1, b_Domineering) == Empty && At(succ(x_Domineering1), y_Domineering1, b_Domineering) == Empty) ->\n"
-  "Player2(x_Domineering1, y_Domineering1, x_Domineering1 + 1, y_Domineering1) .\n"
-  "P(Put(Full, succ(x_Domineering1), y_Domineering1, Put(Full, x_Domineering1, y_Domineering1, b_Domineering)), true)\n"
-  "+ (!Player1Moves_Domineering && (At(1, 1, b_Domineering) == Full || At(2, 1, b_Domineering) == Full) && (At(1, 2, b_Domineering) == Full || At(2, 2, b_Domineering) == Full) && (At(1, 3, b_Domineering) == Full || At(2, 3, b_Domineering) == Full) && (At(1, 4, b_Domineering) == Full || At(2, 4, b_Domineering) == Full) && (At(1, 5, b_Domineering) == Full || At(2, 5, b_Domineering) == Full) && (At(2, 1, b_Domineering) == Full || At(3, 1, b_Domineering) == Full) && (At(2, 2, b_Domineering) == Full || At(3, 2, b_Domineering) == Full) && (At(2, 3, b_Domineering) == Full || At(3, 3, b_Domineering) == Full) && (At(2, 4, b_Domineering) == Full || At(3, 4, b_Domineering) == Full) && (At(2, 5, b_Domineering) == Full || At(3, 5, b_Domineering) == Full) && (At(3, 1, b_Domineering) == Full || At(4, 1, b_Domineering) == Full) && (At(3, 2, b_Domineering) == Full || At(4, 2, b_Domineering) == Full) && (At(3, 3, b_Domineering) == Full || At(4, 3, b_Domineering) == Full) && (At(3, 4, b_Domineering) == Full || At(4, 4, b_Domineering) == Full) && (At(3, 5, b_Domineering) == Full || At(4, 5, b_Domineering) == Full) && (At(4, 1, b_Domineering) == Full || At(5, 1, b_Domineering) == Full) && (At(4, 2, b_Domineering) == Full || At(5, 2, b_Domineering) == Full) && (At(4, 3, b_Domineering) == Full || At(5, 3, b_Domineering) == Full) && (At(4, 4, b_Domineering) == Full || At(5, 4, b_Domineering) == Full) && At(4, 5, b_Domineering) == Full || At(5, 5, b_Domineering) == Full) ->\n"
+  "P(b, c)\n"
+  "+ sum x1,y1: Pos.\n"
+  "(!c && x1 < 5 && y1 <= 5 && At(x1, y1, b) == E && At(succ(x1), y1, b) == E) ->\n"
+  "Player2(x1, y1, x1 + 1, y1) .\n"
+  "P(Put(F, succ(x1), y1, Put(F, x1, y1, b)), true)\n"
+  "+ (!c && (At(1,1,b) == F || At(2,1,b) == F) && (At(1,2,b) == F || At(2,2,b) == F) && (At(1,3,b) == F || At(2,3,b) == F) && (At(1,4,b) == F || At(2,4,b) == F) && (At(1,5,b) == F || At(2,5,b) == F) && (At(2,1,b) == F || At(3,1,b) == F) && (At(2,2,b) == F || At(3,2,b) == F) && (At(2,3,b) == F || At(3,3,b) == F) && (At(2,4,b) == F || At(3,4,b) == F) && (At(2,5,b) == F || At(3,5,b) == F) && (At(3,1,b) == F || At(4,1,b) == F) && (At(3,2,b) == F || At(4,2,b) == F) && (At(3,3,b) == F || At(4,3,b) == F) && (At(3,4,b) == F || At(4,4,b) == F) && (At(3,5,b) == F || At(4,5,b) == F) && (At(4,1,b) == F || At(5,1,b) == F) && (At(4,2,b) == F || At(5,2,b) == F) && (At(4,3,b) == F || At(5,3,b) == F) && (At(4,4,b) == F || At(5,4,b) == F) && At(4,5,b) == F || At(5,5,b) == F) ->\n"
   "Player1Wins .\n"
-  "P(b_Domineering, Player1Moves_Domineering)\n"
-  "+ sum x_Domineering,y_Domineering: Pos.\n"
-  "(Player1Moves_Domineering && x_Domineering <= 5 && y_Domineering < 5 && At(x_Domineering, y_Domineering, b_Domineering) == Empty && At(x_Domineering, succ(y_Domineering), b_Domineering) == Empty) ->\n"
-  "Player1(x_Domineering, y_Domineering, x_Domineering, y_Domineering + 1) .\n"
-  "P(Put(Full, x_Domineering, succ(y_Domineering), Put(Full, x_Domineering, y_Domineering, b_Domineering)), false)\n"
+  "P(b, c)\n"
+  "+ sum x,y: Pos.\n"
+  "(c && x <= 5 && y < 5 && At(x, y, b) == E && At(x, succ(y), b) == E) ->\n"
+  "Player1(x, y, x, y + 1) .\n"
+  "P(Put(F, x, succ(y), Put(F, x, y, b)), false)\n"
   "+ true ->\n"
   "delta;\n"
   "\n"
-  "init P((Empty |> Empty |> Empty |> Empty |> Empty |> []) |> (Empty |> Empty |> Empty |> Empty |> Empty |> []) |> (Empty |> Empty |> Empty |> Empty |> Empty |> []) |> (Empty |> Empty |> Empty |> Empty |> Empty |> []) |> (Empty |> Empty |> Empty |> Empty |> Empty |> []) |> [], true);\n"
+  "init P((E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> [], true);\n"
   ;
 const std::string removed_9 = "";
 

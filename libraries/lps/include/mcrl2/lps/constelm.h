@@ -112,6 +112,9 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
 
       if (rc == false_())
       {
+#ifdef MCRL2_LPSCONSTELM_DEBUG
+      std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(replacements) << " -> " << pp(rc) << std::endl;
+#endif
         continue;
       }
       for (data::assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
@@ -119,14 +122,28 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
         std::map<data::variable, data::data_expression>::iterator k = replacements.find(j->lhs());
         if (k != replacements.end())
         {
-          data::data_expression d  = j->lhs();  // process parameter
+          data::variable        d  = j->lhs();  // process parameter
           data::data_expression g  = j->rhs();  // assigned value
-          data::data_expression x = opt::or_(opt::not_(rc), not_equal_to(d, g));
-          if (r(x, make_map_substitution_adapter(replacements)) == true_())
+          if (r(d, make_map_substitution_adapter(replacements)) != r(g, make_map_substitution_adapter(replacements)))
           {
             replacements.erase(k);
             has_changed = true;
+#ifdef MCRL2_LPSCONSTELM_DEBUG
+            std::cerr << "POSSIBLE CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
+                      << "      value before: " << pp(r(j->lhs(), make_map_substitution_adapter(replacements))) << "\n"
+                      << "      value after:  " << pp(r(j->rhs(), make_map_substitution_adapter(replacements))) << "\n"
+                      << "      replacements: " << data::to_string(replacements) << std::endl;
+#endif
           }
+#ifdef MCRL2_LPSCONSTELM_DEBUG
+          else
+          {
+            std::cerr << "NO CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
+                      << "      value before: " << pp(r(j->lhs(), make_map_substitution_adapter(replacements))) << "\n"
+                      << "      value after:  " << pp(r(j->rhs(), make_map_substitution_adapter(replacements))) << "\n"
+                      << "      replacements: " << data::to_string(replacements) << std::endl;
+          }
+#endif
         }
       }
       if (has_changed)
