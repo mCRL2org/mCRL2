@@ -6,15 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
-#include <boost/bind.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>
-#include <boost/integer_traits.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/lexical_cast.hpp>
+#include "boost/bind.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/noncopyable.hpp"
+#include "boost/foreach.hpp"
+#include "boost/integer_traits.hpp"
+#include "boost/tuple/tuple.hpp"
+#include "boost/lexical_cast.hpp"
 
 #include "tipi/detail/utility/generic_visitor.hpp"
 #include "tipi/detail/visitors.hpp"

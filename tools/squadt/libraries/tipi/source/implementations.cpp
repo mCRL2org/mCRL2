@@ -1,0 +1,16 @@
+#include "boost.hpp" // precompiled headers
+
+#include "basic_datatype.cpp"
+#include "command_line_interface.cpp"
+#include "common.cpp"
+#include "configuration.cpp"
+#include "display.cpp"
+#include "mime_type.cpp"
+#include "restore_visitor.cpp"
+#include "store_visitor.cpp"
+#include "detail/event_handlers.cpp"
+#include "transport/socket_listener.cpp"
+#include "transport/socket_transceiver.cpp"
+#include "transport/transporter.cpp"
+#include "controller/capabilities.cpp"
+#include "tool/capabilities.cpp"

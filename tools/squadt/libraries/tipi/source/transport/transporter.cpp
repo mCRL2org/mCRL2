@@ -6,22 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <algorithm>
 #include <functional>
 
-#include <boost/asio/ip/address.hpp>
-#include <boost/bind.hpp>
-#include <boost/ref.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include "boost/asio/ip/address.hpp"
+#include "boost/bind.hpp"
+#include "boost/ref.hpp"
+#include "boost/foreach.hpp"
+#include "boost/thread/recursive_mutex.hpp"
 
-#include <tipi/detail/transport/detail/transporter.ipp>
-#include <tipi/detail/transport/detail/transceiver.ipp>
-#include <tipi/detail/transport/detail/socket_listener.hpp>
-#include <tipi/detail/transport/detail/direct_transceiver.hpp>
-#include <tipi/detail/transport/detail/socket_transceiver.hpp>
+#include "tipi/detail/transport/detail/transporter.ipp"
+#include "tipi/detail/transport/detail/transceiver.ipp"
+#include "tipi/detail/transport/detail/socket_listener.hpp"
+#include "tipi/detail/transport/detail/direct_transceiver.hpp"
+#include "tipi/detail/transport/detail/socket_transceiver.hpp"
 
 namespace transport {
 

@@ -6,15 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
 #include <sstream>
 #include <fstream>
 
-#include <boost/filesystem/path.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>
-#include <boost/xpressive/xpressive_static.hpp>
+#include "boost/filesystem/path.hpp"
+#include "boost/noncopyable.hpp"
+#include "boost/foreach.hpp"
+#include "boost/xpressive/xpressive_static.hpp"
 
 #include "tipi/report.hpp"
 #include "tipi/detail/visitors.hpp"

@@ -6,9 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "boost.hpp" // precompiled headers
-
-#include <boost/xpressive/xpressive_static.hpp>
+#include "boost/xpressive/xpressive_static.hpp"
 
 #include "tipi/mime_type.hpp"
 
