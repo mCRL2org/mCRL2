@@ -9,6 +9,8 @@
 /// \file state.cpp
 /// \brief State class implementation.
 
+#include "wx.hpp" // precompiled headers
+
 #include "state.h"
 #include <cmath>
 #include <workarounds.h> // for M_PI

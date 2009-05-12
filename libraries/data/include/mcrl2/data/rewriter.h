@@ -389,9 +389,7 @@ namespace data {
       /// \return The normal form of d.
       data_expression operator()(const data_expression& d) const
       {
-        data_expression implemented(implement(d));
-        data_expression reconstructed(reconstruct(m_rewriter->rewrite(implemented)));
-        return reconstructed;
+        return reconstruct(m_rewriter->rewrite(implement(d)));
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function

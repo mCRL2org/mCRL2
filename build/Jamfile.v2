@@ -142,8 +142,7 @@ local boost-requirements =
 
 cpp-pch boost.pch
             : precompile/boost.hpp
-            : <include>./precompile
-              $(boost-requirements)
+            : $(boost-requirements)
               <link>shared:<define>BOOST_SYSTEM_DYN_LINK=1
               <link>shared:<define>BOOST_FILESYSTEM_DYN_LINK=1
               <link>shared:<define>BOOST_THREAD_USE_DLL=1
@@ -282,16 +281,13 @@ if $(WX_CPPFLAGS) {
 
   cpp-pch wx.pch
            : precompile/wx.hpp
-           : <include>./precompile
-             $(wx-requirements)
-             <link>shared:<use>boost.pch/<link>shared
-             <link>static:<use>boost.pch/<link>static
+           : $(wx-requirements)
+            <use>boost.pch
            :
-           : <toolset>msvc:<cxxflags>/FIwx.hpp
+           : <define>BOOST_THREAD_POSIX
+             <toolset>msvc:<cxxflags>/FIwx.hpp
+             <use>boost.pch
              <target-os>windows,<include>intel:<cxxflags>/FIwx.hpp
-             <link>shared:<use>boost.pch/<link>shared
-             <link>static:<use>boost.pch/<link>static
-             <define>BOOST_THREAD_POSIX
            ;
 
   libraries-from-string wx_base

@@ -9,6 +9,8 @@
 /// \file transition.cpp
 /// \brief Transition class implementation.
 
+#include "wx.hpp" // precompiled headers
+
 #include "transition.h"
 #include <cmath>
 
