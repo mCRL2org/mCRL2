@@ -107,7 +107,7 @@ void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
   lps::specification spec       = lps::mcrl22lps("init tau + tau;");
-  modal::state_formula formula  = modal::detail::mcf2statefrm("nu X. [true]X", spec);
+  modal_formula::state_formula formula  = modal_formula::detail::mcf2statefrm("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
@@ -120,7 +120,7 @@ void test_normalize3()
     "proc P = tau.P;\n"
     "init P;        \n"
   );
-  modal::state_formula formula = modal::detail::mcf2statefrm("![true*]<true>true", spec);
+  modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();

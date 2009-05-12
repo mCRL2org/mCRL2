@@ -26,8 +26,8 @@
 
 using namespace mcrl2;
 using namespace pbes_system;
-using modal::detail::mcf2statefrm;
-using modal::state_formula;
+using modal_formula::detail::mcf2statefrm;
+using modal_formula::state_formula;
 using lps::mcrl22lps;
 using lps::specification;
 

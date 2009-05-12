@@ -37,7 +37,7 @@ using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
-using namespace mcrl2::modal;
+using namespace mcrl2::modal_formula;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::utilities::tools;
 
@@ -176,7 +176,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
     {
       specification spec;
       spec.load(input_filename());
-      state_formula formula = modal::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
       return lps2pbes(spec, formula, timed);
     }
 

@@ -104,7 +104,7 @@ class pbes_equation: public atermpp::aterm_appl
     /// \return True if the predicate formula on the right hand side contains no predicate variables.
     bool is_solved() const
     {
-      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), modal::state_frm::is_var);
+      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), modal_formula::state_frm::is_var);
       return t == atermpp::aterm(); // true if nothing was found
     }
 

@@ -112,7 +112,7 @@ namespace detail {
   /// \param formula A term
   /// \return The converted regular formula
   inline
-  modal::state_formula translate_regular_formula(ATermAppl formula)
+  modal_formula::state_formula translate_regular_formula(ATermAppl formula)
   {
     ATermAppl result = core::translate_reg_frms(formula);
     if (result == NULL)

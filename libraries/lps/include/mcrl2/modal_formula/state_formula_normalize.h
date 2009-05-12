@@ -17,7 +17,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 /// \cond INTERNAL_DOCS
 //
@@ -141,7 +141,7 @@ state_formula normalize(state_formula f)
   return state_formula();
 }
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

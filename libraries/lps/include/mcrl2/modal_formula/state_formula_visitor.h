@@ -17,7 +17,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -365,7 +365,7 @@ struct state_formula_visitor
   }
 };
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

@@ -77,7 +77,7 @@ void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
   using namespace pbes_system;
 
   lps::specification spec = lps::mcrl22lps(lps_spec);
-  modal::state_formula formula = modal::detail::mcf2statefrm(mcf_formula, spec);
+  modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(mcf_formula, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
 }

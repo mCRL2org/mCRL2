@@ -20,7 +20,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 namespace state_frm {
 
@@ -156,7 +156,7 @@ std::set<data::variable> compute_free_state_formula_variables(const state_formul
   return visitor.result;
 }
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

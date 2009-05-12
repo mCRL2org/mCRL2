@@ -28,7 +28,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 namespace detail {
 
@@ -94,7 +94,7 @@ namespace detail {
 
 } // namespace detail
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

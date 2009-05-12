@@ -163,7 +163,7 @@ void test_abp()
 {
   bool timed = false;
   lps::specification spec      = lps::mcrl22lps(ABP_SPECIFICATION);
-  modal::state_formula formula = modal::detail::mcf2statefrm(FORMULA, spec);
+  modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(FORMULA, spec);
 
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   int result = pbes_system::pbes_gauss_elimination(p);

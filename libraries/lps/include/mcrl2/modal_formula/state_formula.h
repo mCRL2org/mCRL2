@@ -26,7 +26,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula
@@ -518,7 +518,7 @@ namespace state_frm
       return atermpp::find_if(*this, state_frm::is_timed_subterm()) != atermpp::aterm();
     }
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

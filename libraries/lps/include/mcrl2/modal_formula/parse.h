@@ -18,7 +18,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
   /// \brief Reads a state formula from a stream
   /// \param from An input stream
@@ -31,7 +31,7 @@ namespace modal {
     return from;
   }
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

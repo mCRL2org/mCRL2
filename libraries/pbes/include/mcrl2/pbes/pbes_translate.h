@@ -108,9 +108,9 @@ class pbes_translate_algorithm
     /// \param l A sequence of data variables
     /// \param f A modal formula
     /// \return The function result
-    data::variable_list Par(core::identifier_string x, data::variable_list l, modal::state_formula f)
+    data::variable_list Par(core::identifier_string x, data::variable_list l, modal_formula::state_formula f)
     {
-      using namespace modal::state_frm;
+      using namespace modal_formula::state_frm;
       using data::detail::operator+;
 
       if (is_data(f)) {
@@ -145,7 +145,7 @@ class pbes_translate_algorithm
         else
         {
           data::variable_list xf = detail::mu_variables(f);
-          modal::state_formula g = arg3(f);
+          modal_formula::state_formula g = arg3(f);
           return xf + Par(x, l + xf, g);
         }
       } else if (is_yaled_timed(f)) {
@@ -163,12 +163,12 @@ class pbes_translate_algorithm
     /// \param formula A modal formula
     /// \param spec A linear process specification
     /// \return The preprocessed formula
-    modal::state_formula preprocess_formula(const modal::state_formula& formula, const lps::specification& spec)
+    modal_formula::state_formula preprocess_formula(const modal_formula::state_formula& formula, const lps::specification& spec)
     {
       using namespace detail;
-      using namespace modal::state_frm;
+      using namespace modal_formula::state_frm;
 
-      modal::state_formula f = formula;
+      modal_formula::state_formula f = formula;
       std::set<core::identifier_string> formula_variable_names = data::detail::find_variable_names(formula);
       std::set<core::identifier_string> spec_variable_names = data::detail::find_variable_names(specification_to_aterm(spec));
       std::set<core::identifier_string> spec_names = core::find_identifiers(specification_to_aterm(spec));
@@ -176,7 +176,7 @@ class pbes_translate_algorithm
       // rename data variables in f, to prevent name clashes with data variables in spec
       data::set_identifier_generator generator;
       generator.add_identifiers(spec_variable_names);
-      f = modal::rename_variables(f, generator);
+      f = modal_formula::rename_variables(f, generator);
 
       // rename predicate variables in f, to prevent name clashes
       data::xyz_identifier_generator xyz_generator;
@@ -221,7 +221,7 @@ class pbes_translate_algorithm
     /// \param formula A state formula
     /// \param spec A specification
     /// \return The result of the translation
-    virtual pbes<> run(const modal::state_formula& formula, const lps::specification& spec) = 0;
+    virtual pbes<> run(const modal_formula::state_formula& formula, const lps::specification& spec) = 0;
 };
 
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
@@ -233,13 +233,13 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     /// \param a A timed multi-action
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
+    pbes_expression sat_top(const lps::multi_action& a, modal_formula::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
 #endif
-      using namespace modal::act_frm;
-      using namespace modal::accessors;
+      using namespace modal_formula::act_frm;
+      using namespace modal_formula::accessors;
       namespace d = data;
       namespace p = pbes_expr_optimized;
 
@@ -255,7 +255,7 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         result = b;
       } else if (is_at(b)) {
         data::data_expression t = a.time();
-        modal::action_formula alpha = arg(b);
+        modal_formula::action_formula alpha = arg(b);
         data::data_expression t1 = time(b);
         result = p::and_(sat_top(a, alpha), d::equal_to(t, t1));
       } else if (is_not(b)) {
@@ -269,13 +269,13 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
       } else if (is_forall(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
-        modal::action_formula alpha = arg(b);
+        modal_formula::action_formula alpha = arg(b);
         data::variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
         result = p::forall(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else if (is_exists(b)) {
         data::variable_list x = var(b);
         assert(x.size() > 0);
-        modal::action_formula alpha = arg(b);
+        modal_formula::action_formula alpha = arg(b);
         data::variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), a.time(), b)));
         result = p::exists(y, sat_top(a, alpha.substitute(make_list_substitution(x, y))));
       } else {
@@ -294,7 +294,7 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     /// \param T A data variable
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
-    pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::variable T, std::set<std::string>& context)
+    pbes_expression RHS(modal_formula::state_formula f0, modal_formula::state_formula f, lps::linear_process lps, data::variable T, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<RHS>" << pp(f) << std::flush;
@@ -302,7 +302,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using namespace pbes_expr_optimized;
       using namespace pbes_system::accessors;
       using lps::summand_list;
-      namespace s = modal::state_frm;
+      namespace s = modal_formula::state_frm;
       namespace d = data;
       using data::detail::operator+;
 
@@ -334,8 +334,8 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           result = pbes_expr::exists(s::var(f), RHS(f0, s::arg(f), lps, T, context));
         } else if (s::is_must(f)) {
           atermpp::vector<pbes_expression> v;
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
           {
             if (i->is_delta())
@@ -367,8 +367,8 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           result = join_and(v.begin(), v.end());
         } else if (s::is_may(f)) {
           atermpp::vector<pbes_expression> v;
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
           {
             if (i->is_delta())
@@ -462,12 +462,12 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, T, context));
         } else if (s::is_must(f)) {
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           result = RHS(f0, s::may(alpha, s::not_(phi)), lps, T, context);
         } else if (s::is_may(f)) {
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           result = RHS(f0, s::must(alpha, s::not_(phi)), lps, T, context);
         } else if (s::is_delay_timed(f)) {
           data::data_expression t = s::time(f);
@@ -480,7 +480,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = s::name(f);
           data::assignment_list xf = s::ass(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::state_formula phi = s::arg(f);
           if (s::is_mu(f))
           {
             result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, T, context);
@@ -505,13 +505,13 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     /// \param lps A linear process
     /// \param T A data variable
     /// \return The function result
-    atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, data::variable T)
+    atermpp::vector<pbes_equation> E(modal_formula::state_formula f0, modal_formula::state_formula f, lps::linear_process lps, data::variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
-      using namespace modal::state_frm;
-      using namespace modal::accessors;
+      using namespace modal_formula::state_frm;
+      using namespace modal_formula::accessors;
       using data::detail::operator+;
       atermpp::vector<pbes_equation> result;
 
@@ -543,7 +543,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          modal::state_formula g = arg(f);
+          modal_formula::state_formula g = arg(f);
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
           std::set<std::string> context;
@@ -589,7 +589,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          modal::state_formula g = not_(arg(f));
+          modal_formula::state_formula g = not_(arg(f));
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, T + xf + xp + Par(X, data::variable_list(), f0));
           std::set<std::string> context;
@@ -619,15 +619,15 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     /// \param formula A modal formula
     /// \param spec A linear process specification
     /// \return The result of the translation
-    pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
+    pbes<> run(const modal_formula::state_formula& formula, const lps::specification& spec)
     {
-      using namespace modal::state_frm;
+      using namespace modal_formula::state_frm;
       using data::detail::operator+;
 
       lps::linear_process lps = spec.process();
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
-      modal::state_formula f = preprocess_formula(formula, spec);
+      modal_formula::state_formula f = preprocess_formula(formula, spec);
 
       // make sure the lps is timed
       data::variable T = fresh_variable(make_list(f, lps), data::sort_real_::real_(), "T");
@@ -668,13 +668,13 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
     /// \param a A sequence of actions
     /// \param b An action formula
     /// \return The function result
-    pbes_expression sat_top(const lps::multi_action& a, modal::action_formula b)
+    pbes_expression sat_top(const lps::multi_action& a, modal_formula::action_formula b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
 #endif
-      using namespace modal::act_frm;
-      using namespace modal::accessors;
+      using namespace modal_formula::act_frm;
+      using namespace modal_formula::accessors;
       namespace p = pbes_expr_optimized;
 
       pbes_expression result;
@@ -697,7 +697,7 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
         result = p::imp(sat_top(a, left(b)), sat_top(a, right(b)));
       } else if (is_forall(b)) {
         data::variable_list x = var(b);
-        modal::action_formula alpha = arg(b);
+        modal_formula::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
           data::variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b)));
@@ -707,7 +707,7 @@ std::cerr << "\n<sat>" << a.to_string() << " " << pp(b) << std::flush;
           result = sat_top(a, alpha);
       } else if (is_exists(b)) {
         data::variable_list x = var(b);
-        modal::action_formula alpha = arg(b);
+        modal_formula::action_formula alpha = arg(b);
         if (x.size() > 0)
         {
           data::variable_list y = fresh_variables(x, data::detail::find_variable_name_strings(make_list(a.actions(), b)));
@@ -730,7 +730,7 @@ std::cerr << "\n<satresult>" << pp(result) << std::flush;
     /// \param lps A linear process
     /// \param context A set of strings that may not be used for naming a fresh variable
     /// \return The function result
-    pbes_expression RHS(modal::state_formula f0, modal::state_formula f, lps::linear_process lps, std::set<std::string>& context)
+    pbes_expression RHS(modal_formula::state_formula f0, modal_formula::state_formula f, lps::linear_process lps, std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<RHS>" << pp(f) << std::flush;
@@ -740,7 +740,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using namespace accessors;
       using lps::summand_list;
       using data::detail::operator+;
-      namespace s = modal::state_frm;
+      namespace s = modal_formula::state_frm;
 
       pbes_expression result;
 
@@ -771,8 +771,8 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           result = pbes_expr::exists(s::var(f), RHS(f0, s::arg(f), lps, context));
         } else if (s::is_must(f)) {
           atermpp::vector<pbes_expression> v;
-          modal::action_formula alpha(s::act(f));
-          modal::state_formula phi(s::arg(f));
+          modal_formula::action_formula alpha(s::act(f));
+          modal_formula::state_formula phi(s::arg(f));
           for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
           {
             if (i->is_delta())
@@ -800,8 +800,8 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           result = join_and(v.begin(), v.end());
         } else if (s::is_may(f)) {
           atermpp::vector<pbes_expression> v;
-          modal::action_formula alpha(s::act(f));
-          modal::state_formula phi(s::arg(f));
+          modal_formula::action_formula alpha(s::act(f));
+          modal_formula::state_formula phi(s::arg(f));
           for (summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
           {
             if (i->is_delta())
@@ -867,12 +867,12 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(s::var(f), RHS(f0, s::not_(s::arg(f)), lps, context));
         } else if (s::is_must(f)) {
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           result = RHS(f0, s::may(alpha, s::not_(phi)), lps, context);
         } else if (s::is_may(f)) {
-          modal::action_formula alpha = s::act(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::action_formula alpha = s::act(f);
+          modal_formula::state_formula phi = s::arg(f);
           result = RHS(f0, s::must(alpha, s::not_(phi)), lps, context);
         } else if (s::is_delay(f)) {
           result = RHS(f0, s::yaled(), lps, context);
@@ -883,7 +883,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
         } else if (s::is_mu(f) || (s::is_nu(f))) {
           core::identifier_string X = s::name(f);
           data::assignment_list xf = s::ass(f);
-          modal::state_formula phi = s::arg(f);
+          modal_formula::state_formula phi = s::arg(f);
           if (s::is_mu(f))
           {
             result = RHS(f0, s::mu(X, xf, s::not_(phi)), lps, context);
@@ -907,13 +907,13 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
     /// \param f A modal formula
     /// \param lps A linear process
     /// \return The function result
-    atermpp::vector<pbes_equation> E(modal::state_formula f0, modal::state_formula f, lps::linear_process lps)
+    atermpp::vector<pbes_equation> E(modal_formula::state_formula f0, modal_formula::state_formula f, lps::linear_process lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
-      using namespace modal::state_frm;
-      using namespace modal::accessors;
+      using namespace modal_formula::state_frm;
+      using namespace modal_formula::accessors;
       using data::detail::operator+;
       atermpp::vector<pbes_equation> result;
 
@@ -947,7 +947,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          modal::state_formula g = arg(f);
+          modal_formula::state_formula g = arg(f);
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
           std::set<std::string> context;
@@ -993,7 +993,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           core::identifier_string X = name(f);
           data::variable_list xf = detail::mu_variables(f);
           data::variable_list xp = lps.process_parameters();
-          modal::state_formula g = not_(arg(f));
+          modal_formula::state_formula g = not_(arg(f));
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::nu() : fixpoint_symbol::mu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
           std::set<std::string> context;
@@ -1023,14 +1023,14 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     /// \param formula A modal formula
     /// \param spec A linear process specification
     /// \return The result of the translation
-    pbes<> run(const modal::state_formula& formula, const lps::specification& spec)
+    pbes<> run(const modal_formula::state_formula& formula, const lps::specification& spec)
     {
-      using namespace modal::state_frm;
+      using namespace modal_formula::state_frm;
       using data::detail::operator+;
       lps::linear_process lps = spec.process();
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
-      modal::state_formula f = preprocess_formula(formula, spec);
+      modal_formula::state_formula f = preprocess_formula(formula, spec);
 
       // compute the equations
       atermpp::vector<pbes_equation> e = E(f, f, lps);
@@ -1053,13 +1053,13 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     }
 };
 
-/// \brief Translates a modal::state_formula and a lps::specification to a pbes. If the pbes evaluates
+/// \brief Translates a modal_formula::state_formula and a lps::specification to a pbes. If the pbes evaluates
 /// to true, the formula holds for the lps::specification.
 /// \param formula A modal formula
 /// \param spec A linear process specification
 /// \param timed determines whether the timed or untimed variant of the algorithm is chosen
 /// \return The resulting pbes
-inline pbes<> pbes_translate(const modal::state_formula& formula, const lps::specification& spec, bool timed = false)
+inline pbes<> pbes_translate(const modal_formula::state_formula& formula, const lps::specification& spec, bool timed = false)
 {
   if (formula.has_time() || spec.process().has_time())
   {

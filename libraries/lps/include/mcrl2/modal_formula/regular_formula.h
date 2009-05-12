@@ -23,7 +23,7 @@
 
 namespace mcrl2 {
 
-namespace modal {
+namespace modal_formula {
 
 ///////////////////////////////////////////////////////////////////////////////
 // regular_formula
@@ -70,7 +70,7 @@ class regular_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of regular expressions
 typedef atermpp::term_list<regular_formula> regular_formula_list;
 
-} // namespace modal
+} // namespace modal_formula
 
 } // namespace mcrl2
 

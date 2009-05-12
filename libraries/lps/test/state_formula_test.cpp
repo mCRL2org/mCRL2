@@ -30,8 +30,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
+using namespace mcrl2::modal_formula;
+using namespace mcrl2::modal_formula::detail;
 
 const std::string SPECIFICATION =
 "act a:Nat;                              \n"

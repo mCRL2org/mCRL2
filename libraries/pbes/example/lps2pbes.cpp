@@ -22,8 +22,8 @@ using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-using namespace mcrl2::modal;
-using namespace mcrl2::modal::detail;
+using namespace mcrl2::modal_formula;
+using namespace mcrl2::modal_formula::detail;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::pbes_expr;
 
