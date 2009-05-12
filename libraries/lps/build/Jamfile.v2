@@ -6,6 +6,7 @@ mcrl2-library lps
        : implementations.cpp
          lin_std.cpp
        : <library>/libraries//data
+         <library>/libraries//process
          <include>../include
          <use>/site-config//boost
        :
