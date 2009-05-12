@@ -304,13 +304,13 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
 
       /* Equations for projection functions */
       int f = 0;
-      for(function_symbol_vector::iterator j = pi.begin(); j != pi.end(); ++j){
-        //cout << mcrl2::data::pp(dal) << endl;
-      
-        data_expression lhs = application( *j, mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
-        gsDebugMsg("\tAdded \"pi\" equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
-        del.push_back( data_equation( lhs, dal[f] ) );
-        ++f;
+   
+      while (!pi.empty() && f < std::distance(dal.begin(), dal.end()) ){
+          data_expression lhs = application( pi.front(), mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
+          gsDebugMsg("\tAdded \"pi\" equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
+          del.push_back( data_equation( lhs, dal[f] ) );
+          ++f;
+          pi.erase(pi.begin());
       }
     }
 
