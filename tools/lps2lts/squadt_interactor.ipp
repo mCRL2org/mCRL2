@@ -22,8 +22,6 @@
 
 #include "mcrl2/core/messaging.h"
 
-#include "squadt_interactor.h"
-
 #include "workarounds.h" // for strdup
 
 const char*  ::squadt_interactor::option_lts_type             = "lts_type";
@@ -66,12 +64,6 @@ static bool initialise_types() {
     add(es_random, "random");
 
   return true;
-}
-
-squadt_interactor::squadt_interactor() {
-  static bool initialised = initialise_types();
-
-  static_cast< void > (initialised); // harmless, and prevents unused variable warnings
 }
 
 void squadt_interactor::set_capabilities(tipi::tool::capabilities &cp) const {

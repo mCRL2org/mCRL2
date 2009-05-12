@@ -17,10 +17,11 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2::lts;
+using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
@@ -197,163 +198,192 @@ class t_tool_options {
 
 using namespace std;
 
-void process(t_tool_options const& tool_options) {
-  lts l;
+typedef squadt_tool< input_output_tool > ltsconvert_base;
+class ltsconvert_tool : public ltsconvert_base
+{
+  private:
+    t_tool_options tool_options;
 
-  tool_options.read_lts(l);
-
-  if ( tool_options.equivalence != lts_eq_none )
-  {
-    gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
-    gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
-    l.reduce(tool_options.equivalence, tool_options.eq_opts);
-    gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-  }
-
-  if ( tool_options.determinise )
-  {
-    gsVerboseMsg("determinising LTS...\n");
-    gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-    l.determinise();
-    gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
-  }
-
-  tool_options.write_lts(l);
-}
-
-bool parse_command_line(int ac, char** av, t_tool_options& tool_options) {
-  interface_description clinterface(av[0], NAME, AUTHOR,
-    "convert and optionally minimise an LTS",
-    "[OPTION]... [INFILE [OUTFILE]]\n",
-    "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
-    "requested format after applying the selected minimisation method (default is\n"
-    "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"
-    "stdin is used.\n"
-    "\n"
-    "The output format is determined by the extension of OUTFILE, whereas the input\n"
-    "format is determined by the content of INFILE. Options --in and --out can be\n"
-    "used to force the input and output formats. The supported formats are:\n"
-    + lts::supported_lts_formats_text(lts_mcrl2)
-  );
-
-  clinterface.add_option("no-reach",
-      "do not perform a reachability check on the input LTS");
-  clinterface.add_option("no-state",
-      "leave out state information when saving in dot format", 'n');
-  clinterface.add_option("determinise", "determinise LTS", 'D');
-  clinterface.add_option("lps", make_mandatory_argument("FILE"),
-      "use FILE as the LPS from which the input LTS was generated; this might"
-      "be needed to store the correct parameter names of states when saving "
-      "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
-  clinterface.add_option("in", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the input format", 'i').
-    add_option("out", make_mandatory_argument("FORMAT"),
-      "use FORMAT as the output format", 'o');
-  clinterface.add_option("equivalence", make_mandatory_argument("NAME"),
-      "generate an equivalent LTS, preserving equivalence NAME:\n"
-      +lts::supported_lts_equivalences_text(allowed_eqs())
-      , 'e');
-  clinterface.add_option("add",
-      "do not minimise but save a copy of the original LTS extended with a "
-      "state parameter indicating the bisimulation class a state belongs to "
-      "(only for mCRL2)", 'a');
-  clinterface.add_option("tau", make_mandatory_argument("ACTNAMES"),
-      "consider actions with a name in the comma separated list ACTNAMES to "
-      "be internal (tau) actions in addition to those defined as such by "
-      "the input");
-
-  command_line_parser parser(clinterface, ac, av);
-
-  if (parser.continue_execution()) {
-    if (parser.options.count("lps")) {
-      if (1 < parser.options.count("lps")) {
-        std::cerr << "warning: multiple LPS files specified; can only use one\n";
-      }
-
-      tool_options.lpsfile = parser.option_argument("lps");
-    }
-    if (parser.options.count("in")) {
-      if (1 < parser.options.count("in")) {
-        std::cerr << "warning: multiple input formats specified; can only use one\n";
-      }
-
-      tool_options.intype = lts::parse_format(parser.option_argument("in"));
-
-      if (tool_options.intype == lts_none) {
-        std::cerr << "warning: format '" << parser.option_argument("in") <<
-                     "' is not recognised; option ignored" << std::endl;
-      }
-    }
-    if (parser.options.count("out")) {
-      if (1 < parser.options.count("out")) {
-        std::cerr << "warning: multiple output formats specified; can only use one\n";
-      }
-
-      tool_options.outtype = lts::parse_format(parser.option_argument("out"));
-
-      if (tool_options.outtype == lts_none) {
-        std::cerr << "warning: format '" << parser.option_argument("out") <<
-                     "' is not recognised; option ignored" << std::endl;
-      }
+  public:
+    ltsconvert_tool() :
+      ltsconvert_base(NAME,AUTHOR,
+        "convert and optionally minimise an LTS",
+        "Convert the labelled transition system (LTS) from INFILE to OUTFILE in the\n"
+        "requested format after applying the selected minimisation method (default is\n"
+        "none). If OUTFILE is not supplied, stdout is used. If INFILE is not supplied,\n"
+        "stdin is used.\n"
+        "\n"
+        "The output format is determined by the extension of OUTFILE, whereas the input\n"
+        "format is determined by the content of INFILE. Options --in and --out can be\n"
+        "used to force the input and output formats. The supported formats are:\n"
+        + lts::supported_lts_formats_text(lts_mcrl2)
+      )
+    {
     }
 
-    if (parser.options.count("equivalence")) {
+    bool run()
+    {
+      lts l;
 
-      tool_options.equivalence = lts::parse_equivalence(
-          parser.option_argument("equivalence"));
+      tool_options.read_lts(l);
 
-      if ( allowed_eqs().count(tool_options.equivalence) == 0 )
+      if ( tool_options.equivalence != lts_eq_none )
       {
-        parser.error("option -e/--equivalence has illegal argument '" +
-            parser.option_argument("equivalence") + "'");
+        gsVerboseMsg("reducing LTS (modulo %s)...\n", lts::name_of_equivalence(tool_options.equivalence).c_str());
+        gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
+        l.reduce(tool_options.equivalence, tool_options.eq_opts);
+        gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
-    }
 
-    if (parser.options.count("tau")) {
-      lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
-    }
-
-    tool_options.determinise                       = 0 < parser.options.count("determinise");
-    tool_options.check_reach                       = parser.options.count("no-reach") == 0;
-    tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
-    tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
-
-    if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
-      parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
-    }
-
-    if (2 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-    else {
-      if (0 < parser.arguments.size()) {
-        tool_options.set_source(parser.arguments[0]);
+      if ( tool_options.determinise )
+      {
+        gsVerboseMsg("determinising LTS...\n");
+        gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        l.determinise();
+        gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
       }
-      else {
-        if ( tool_options.intype == lts_none ) {
-          gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
-          tool_options.intype = lts_aut;
+
+      tool_options.write_lts(l);
+
+      return true;
+    }
+
+  private:
+    void add_options(interface_description &desc)
+    {
+      ltsconvert_base::add_options(desc);
+  
+      desc.add_option("no-reach",
+          "do not perform a reachability check on the input LTS");
+      desc.add_option("no-state",
+          "leave out state information when saving in dot format", 'n');
+      desc.add_option("determinise", "determinise LTS", 'D');
+      desc.add_option("lps", make_mandatory_argument("FILE"),
+          "use FILE as the LPS from which the input LTS was generated; this might"
+          "be needed to store the correct parameter names of states when saving "
+          "in fsm format and to convert non-mCRL2 LTSs to a mCRL2 LTS", 'l');
+      desc.add_option("in", make_mandatory_argument("FORMAT"),
+          "use FORMAT as the input format", 'i').
+        add_option("out", make_mandatory_argument("FORMAT"),
+          "use FORMAT as the output format", 'o');
+      desc.add_option("equivalence", make_mandatory_argument("NAME"),
+          "generate an equivalent LTS, preserving equivalence NAME:\n"
+          +lts::supported_lts_equivalences_text(allowed_eqs())
+          , 'e');
+      desc.add_option("add",
+          "do not minimise but save a copy of the original LTS extended with a "
+          "state parameter indicating the bisimulation class a state belongs to "
+          "(only for mCRL2)", 'a');
+      desc.add_option("tau", make_mandatory_argument("ACTNAMES"),
+          "consider actions with a name in the comma separated list ACTNAMES to "
+          "be internal (tau) actions in addition to those defined as such by "
+          "the input");
+    }
+
+    void parse_options(const command_line_parser &parser)
+    {
+      if (parser.options.count("lps")) {
+        if (1 < parser.options.count("lps")) {
+          std::cerr << "warning: multiple LPS files specified; can only use one\n";
+        }
+
+        tool_options.lpsfile = parser.option_argument("lps");
+      }
+      if (parser.options.count("in")) {
+        if (1 < parser.options.count("in")) {
+          std::cerr << "warning: multiple input formats specified; can only use one\n";
+        }
+
+        tool_options.intype = lts::parse_format(parser.option_argument("in"));
+
+        if (tool_options.intype == lts_none) {
+          std::cerr << "warning: format '" << parser.option_argument("in") <<
+                       "' is not recognised; option ignored" << std::endl;
         }
       }
-      if (1 < parser.arguments.size()) {
-        tool_options.set_target(parser.arguments[1]);
+      if (parser.options.count("out")) {
+        if (1 < parser.options.count("out")) {
+          std::cerr << "warning: multiple output formats specified; can only use one\n";
+        }
+
+        tool_options.outtype = lts::parse_format(parser.option_argument("out"));
+
+        if (tool_options.outtype == lts_none) {
+          std::cerr << "warning: format '" << parser.option_argument("out") <<
+                       "' is not recognised; option ignored" << std::endl;
+        }
+      }
+
+      if (parser.options.count("equivalence")) {
+
+        tool_options.equivalence = lts::parse_equivalence(
+            parser.option_argument("equivalence"));
+
+        if ( allowed_eqs().count(tool_options.equivalence) == 0 )
+        {
+          parser.error("option -e/--equivalence has illegal argument '" +
+              parser.option_argument("equivalence") + "'");
+        }
+      }
+
+      if (parser.options.count("tau")) {
+        lts_reduce_add_tau_actions(tool_options.eq_opts, parser.option_argument("tau"));
+      }
+
+      tool_options.determinise                       = 0 < parser.options.count("determinise");
+      tool_options.check_reach                       = parser.options.count("no-reach") == 0;
+      tool_options.print_dot_state                   = parser.options.count("no-state") == 0;
+      tool_options.eq_opts.reduce.add_class_to_state = 0 < parser.options.count("add");
+
+      if ( tool_options.determinise && (tool_options.equivalence != lts_eq_none) ) {
+        parser.error("cannot use option -D/--determinise together with LTS reduction options\n");
+      }
+
+      if (2 < parser.arguments.size()) {
+        parser.error("too many file arguments");
       }
       else {
-        if ( tool_options.outtype == lts_none ) {
-          if ( !tool_options.lpsfile.empty() ) {
-            gsWarningMsg("no output format set; using fsm because --lps was used\n");
-            tool_options.outtype = lts_fsm;
-          } else {
-            gsWarningMsg("no output format set or detected; using default (aut)\n");
-            tool_options.outtype = lts_aut;
+        if (0 < parser.arguments.size()) {
+          tool_options.set_source(parser.arguments[0]);
+        }
+        else {
+          if ( tool_options.intype == lts_none ) {
+            gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+            tool_options.intype = lts_aut;
+          }
+        }
+        if (1 < parser.arguments.size()) {
+          tool_options.set_target(parser.arguments[1]);
+        }
+        else {
+          if ( tool_options.outtype == lts_none ) {
+            if ( !tool_options.lpsfile.empty() ) {
+              gsWarningMsg("no output format set; using fsm because --lps was used\n");
+              tool_options.outtype = lts_fsm;
+            } else {
+              gsWarningMsg("no output format set or detected; using default (aut)\n");
+              tool_options.outtype = lts_aut;
+            }
           }
         }
       }
     }
-  }
 
-  return parser.continue_execution();
-}
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  public:
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities&) const;
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration&);
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const&) const;
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration&);
+#endif
+};
 
 // SQuADT protocol interface
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -370,30 +400,7 @@ static const char* option_no_state_information               = "no_state_informa
 static const char* option_tau_actions                        = "tau_actions";                           ///< the actions that should be recognised as tau
 static const char* option_add_bisimulation_equivalence_class = "add_bisimulation_equivalence_class";    ///< adds bisimulation equivalence class to the state information of a state instead of actually reducing modulo bisimulation [mCRL2 specific]
 
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_tool_interface {
-
-  private:
-
-  public:
-
-    /** \brief constructor */
-    squadt_interactor() {
-    }
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities&) const;
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&);
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const&) const;
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration&);
-};
-
-void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
+void ltsconvert_tool::set_capabilities(tipi::tool::capabilities& c) const {
   std::set< lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
   for (std::set< lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
@@ -401,7 +408,7 @@ void squadt_interactor::set_capabilities(tipi::tool::capabilities& c) const {
   }
 }
 
-void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
+void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
   using namespace tipi;
   using namespace tipi::layout;
   using namespace tipi::layout::elements;
@@ -574,7 +581,7 @@ void squadt_interactor::user_interactive_configuration(tipi::configuration& c) {
   send_clear_display();
 }
 
-bool squadt_interactor::check_configuration(tipi::configuration const& c) const {
+bool ltsconvert_tool::check_configuration(tipi::configuration const& c) const {
   bool result = true;
 
   result &= c.input_exists(lts_file_for_input);
@@ -590,7 +597,7 @@ bool squadt_interactor::check_configuration(tipi::configuration const& c) const 
   return (result);
 }
 
-bool squadt_interactor::perform_task(tipi::configuration& c) {
+bool ltsconvert_tool::perform_task(tipi::configuration& c) {
   t_tool_options tool_options;
 
   if (c.input_exists(lps_file_auxiliary)) {
@@ -625,7 +632,7 @@ bool squadt_interactor::perform_task(tipi::configuration& c) {
     }
   }
 
-  process(tool_options);
+  run();
 
   send_clear_display();
 
@@ -638,23 +645,7 @@ int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
 
-  try {
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    if (mcrl2::utilities::squadt::interactor< squadt_interactor >::free_activation(argc, argv)) {
-      return EXIT_SUCCESS;
-    }
-#endif
+  ltsconvert_tool tool;
 
-    t_tool_options options;
-
-    if (parse_command_line(argc, argv, options)) {
-      process(options);
-    }
-  }
-  catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return tool.execute(argc,argv);
 }

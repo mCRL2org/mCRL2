@@ -90,25 +90,25 @@ extern ATermTable *lab_src_tgt, *lab_tgt_src;
 #define Push(kind, lft, rgh) ((Pi[Pi_pt].mode=kind),(Pi[Pi_pt].left=lft), \
 (Pi[Pi_pt].right=rgh),Pi_pt+1)
 
-int  parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int *classes);
-void doHelp(char *);
-void doVersion();
-int  doReduce(void);
-int  doBranchReduce(void);
-int  doCompare(void);
-int  doBranchCompare(void);
+//int  parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int *classes);
+//void doHelp(char *);
+//void doVersion();
+//int  doReduce(void);
+//int  doBranchReduce(void);
+//int  doCompare(void);
+//int  doBranchCompare(void);
 SVCstateIndex ReadData(void);
-ATerm Term(Symbol s, int d);
+//ATerm Term(Symbol s, int d);
 void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2);
 int WriteData(SVCstateIndex initState, int tau_toops);
 int WriteDataAddParam(SVCfile *f, SVCstateIndex initState, int tau_toops);
 void add_tau_action(char *s);
-void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right);
-void Check(void);
+//void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right);
+//void Check(void);
 void StartSplitting(void);
 void Reduce(void);
 void ReduceBranching(void);
 void SCC(void);
 int Compare(SVCstateIndex init1,SVCstateIndex init2);
 int CompareBranching(SVCstateIndex init1,SVCstateIndex init2);
-SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool tauloops);
+//SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool tauloops);
