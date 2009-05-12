@@ -704,7 +704,7 @@ mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_i
 }
 
 
-void Sorts::algorithm(int parameter_at_index)
+mcrl2::lps::specification Sorts::algorithm(int parameter_at_index)
 {
    unfoldParameter = getSortOfProcessParameter( parameter_at_index);
 
@@ -739,9 +739,14 @@ void Sorts::algorithm(int parameter_at_index)
   boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
   m_data_specification.add_mappings( set_of_new_sorts_range );
 
+  boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range(data_equations.second));
+  m_data_specification.add_equations( dev_range );
+
   mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, new_lps, new_init );
+
+//  cout << pp(new_spec) << endl;
 
   assert(  new_spec.is_well_typed() );
 
-  return; 
+  return new_spec; 
 }

@@ -29,7 +29,7 @@ class Sorts
     Sorts( mcrl2::lps::specification spec);
     Sorts( ){ };
     ~Sorts(){};
-    void algorithm(int parameter_at_index);
+    mcrl2::lps::specification algorithm(int parameter_at_index);
     mcrl2::data::sort_expression unfoldParameter;
   private:
     mcrl2::data::data_specification m_data_specification;

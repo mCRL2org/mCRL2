@@ -89,12 +89,9 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       Sorts sorts( lps_specification );
 
-      //lps::specification result = sorts.algorithm();
-      sorts.algorithm( m_index );
+      lps_specification = sorts.algorithm( m_index );
 
-      //result.save(m_output_filename);
-      std::cerr << "The following assertion will be removed upon tool finalization" << std::endl;
-      assert(false);
+      lps_specification.save(m_output_filename);
 
       return true;
     }
