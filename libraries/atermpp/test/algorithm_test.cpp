@@ -90,8 +90,8 @@ void test_operators()
   }
 
   {
-    atermpp::aterm_string a1 = make_term("a1");
-    atermpp::aterm_string a2 = make_term("a2");
+    atermpp::aterm_string a1("a1");
+    atermpp::aterm_string a2("a2");
     bool b = (a1 < a2);
   }
 
