@@ -25,13 +25,16 @@ using namespace mcrl2::data;
 - alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
-Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_process const& lps)
+Sorts::Sorts( mcrl2::lps::specification spec)
 {
   gsDebugMsg("Preprocessing\n");
-  m_data_specification = s;
-  m_lps = lps;
-  for (data_specification::sorts_const_range::const_iterator i =  s.sorts().begin();
-                                                             i != s.sorts().end();
+  m_data_specification = spec.data() ;
+  m_lps = spec.process();
+  m_init_process = spec.initial_process();
+  m_action_label_list = spec.action_labels();
+
+  for (data_specification::sorts_const_range::const_iterator i =  m_data_specification.sorts().begin();
+                                                             i != m_data_specification.sorts().end();
                                                              ++i){
     bool processed = false;
     if (i->is_basic_sort()) {
@@ -58,7 +61,7 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
   };
 
   {
-    data_specification::constructors_const_range fsl= s.constructors();
+    data_specification::constructors_const_range fsl= m_data_specification.constructors();
     for (data_specification::constructors_const_range::const_iterator i = fsl.begin();
                                                                       i != fsl.end();
                                                                       ++i){
@@ -70,7 +73,7 @@ Sorts::Sorts(mcrl2::data::data_specification const& s, mcrl2::lps::linear_proces
   }
 
   {
-    data_specification::mappings_const_range fsl= s.mappings();
+    data_specification::mappings_const_range fsl= m_data_specification.mappings();
     for (data_specification::mappings_const_range::const_iterator i = fsl.begin();
                                                                   i != fsl.end();
                                                                   ++i){
@@ -338,7 +341,7 @@ mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::str
   return idstr;
 }
 
-void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, int parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, int parameter_at_index, function_symbol_vector pi)
 {
    /* Get process parameters from lps */
    mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -354,6 +357,7 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
    }
 
 
+   gsDebugMsg("Updating LPS\n");
    /* Create new process parameters */
    mcrl2::data::variable_vector new_process_parameters;
    for(mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
@@ -503,8 +507,71 @@ void Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedCons
 
   gsVerboseMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
   assert( new_lps.is_well_typed());
-  return;
 
+  return new_lps;
+}
+
+mcrl2::lps::process_initializer Sorts::updateInit(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, int parameter_at_index, function_symbol_vector pi)
+{
+  //
+  //update inital process  
+  //
+  gsDebugMsg("Updating initialization\n\n");
+  
+  data::assignment_list ass = m_init_process.assignments();
+  //Create new left-hand assignment_list 
+  mcrl2::data::data_expression_vector new_ass_left;
+  for(mcrl2::data::assignment_list::iterator k = ass.begin()
+                                               ; k != ass.end()
+                                               ; ++k)
+  {
+    if (proc_par_to_proc_par_inj.find( k-> lhs() ) != proc_par_to_proc_par_inj.end() )
+    {
+      for ( mcrl2::data::variable_vector::iterator l =  proc_par_to_proc_par_inj[ k -> lhs() ].begin()
+                                                     ; l != proc_par_to_proc_par_inj[ k -> lhs() ].end()
+                                                     ; ++l )
+      {
+       new_ass_left.push_back( *l );
+      }
+    } else {
+      new_ass_left.push_back( k-> lhs() );
+    }
+  }
+  //Create new right-hand assignment_list 
+  //Unfold parameters
+  mcrl2::data::data_expression_vector new_ass_right;
+  for(mcrl2::data::assignment_list::iterator k = ass.begin()
+                                               ; k != ass.end()
+                                               ; ++k)
+  {
+    if (std::distance( ass.begin(), k ) == parameter_at_index)
+    {
+
+      mcrl2::data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedConstructors, Detmap, pi );
+      //Replace unfold parameters in affected assignments
+      new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
+    } else {
+      new_ass_right.push_back( k-> rhs() );
+    }
+  }
+
+  //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
+  //cout << mcrl2::data::pp(new_ass_left)  << endl;
+  //cout << mcrl2::data::pp(new_ass_right)  << endl;
+ 
+  assert( new_ass_left.size() == new_ass_right.size() );
+  mcrl2::data::assignment_vector new_ass;
+  while (!new_ass_left.empty())
+  {
+    new_ass.push_back( mcrl2::data::assignment( new_ass_left.front(), new_ass_right.front() ) );
+    new_ass_left.erase( new_ass_left.begin() );
+    new_ass_right.erase( new_ass_right.begin() );
+  }
+
+  mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer (m_init_process.free_variables(), mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()) );
+  gsVerboseMsg("%s\n", pp( new_init ).c_str() );
+ 
+  return new_init;
 }
 
 std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
@@ -640,30 +707,41 @@ mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_i
 void Sorts::algorithm(int parameter_at_index)
 {
    unfoldParameter = getSortOfProcessParameter( parameter_at_index);
-   //unfoldParameter = m_data_specification.find_referenced_sort(getSortOfProcessParameter( parameter_at_index ));
 
    /* Var Dec */
-//   function_symbol_vector m;
    function_symbol_vector k;
    function_symbol_vector set_of_new_sorts;
    function_symbol_vector set_of_ProjectorFunctions;
    function_symbol Cmap;
    function_symbol Detmap;
-
+   std::pair< variable_vector, data_equation_vector > data_equations;
    /*   Alg */
    /*     1 */ sort_new = generateFreshSort( unfold_parameter_name );
    /*     2 */ k = determineAffectedConstructors();
-   /*     3 */ //m = determineAffectedMappings( k );
    /*     4 */ set_of_new_sorts = newSorts( k );
    /*     5 */ sortSet.insert( set_of_new_sorts.begin(), set_of_new_sorts.end() );
                sortSet.insert( sort_new );
    /*     6 */ Cmap = createCMap( k.size() );
    /*     7 */ Detmap = createDetMap( );
    /*  8-12 */ set_of_ProjectorFunctions = createProjectorFunctions(k);
-   /* 13-xx */ createFunctionSection(set_of_ProjectorFunctions, Cmap, set_of_new_sorts, k, Detmap);
+   /* 13-xx */ data_equations = createFunctionSection(set_of_ProjectorFunctions, Cmap, set_of_new_sorts, k, Detmap);
 
    /*----------------*/
+   mcrl2::lps::linear_process new_lps = updateLPS(Cmap, k, Detmap, parameter_at_index, set_of_ProjectorFunctions);
+   mcrl2::lps::process_initializer new_init = updateInit(Cmap, k, Detmap, parameter_at_index, set_of_ProjectorFunctions);
 
-   updateLPS(Cmap, k, Detmap, parameter_at_index, set_of_ProjectorFunctions);
+  //Reconstruct specification
+  m_data_specification.add_sort( sort_new );
+  boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(set_of_ProjectorFunctions));
+  m_data_specification.add_mappings( pi_range );
+  m_data_specification.add_mapping( Detmap );
+  m_data_specification.add_mapping( Cmap );
+  boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
+  m_data_specification.add_mappings( set_of_new_sorts_range );
 
+  mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, new_lps, new_init );
+
+  assert(  new_spec.is_well_typed() );
+
+  return; 
 }

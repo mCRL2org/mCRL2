@@ -87,11 +87,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
-      lps::linear_process lps = lps_specification.process();
-
-      data_specification data_spec = lps_specification.data();
-
-      Sorts sorts( data_spec, lps );
+      Sorts sorts( lps_specification );
 
       //lps::specification result = sorts.algorithm();
       sorts.algorithm( m_index );
