@@ -656,7 +656,10 @@ lps::specification action_rename(
                                      lps_new_condition_temp.begin(),
                                      lps_new_condition_temp.end());
 
-            lps_new_sum_vars.insert(lps_new_sum_vars.end(),lps_new_sum_vars.begin(),lps_new_sum_vars.end());
+            atermpp::vector < variable_list > lps_new_sum_vars_temp(lps_new_sum_vars);
+            lps_new_sum_vars.insert(lps_new_sum_vars.end(),
+                                    lps_new_sum_vars_temp.begin(),
+                                    lps_new_sum_vars_temp.end());
           }
 
         }//end if(equal_signatures(...))
@@ -676,10 +679,8 @@ lps::specification action_rename(
       atermpp::vector < variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
       for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
-      {
-        //create a summand for the new lps
-        summand lps_new_summand = summand(
-                                           *i_sumvars,
+      { //create a summand for the new lps
+        summand lps_new_summand = summand( *i_sumvars,
                                            *i_cond,
                                            (*i_act).first,
                                            reverse((*i_act).second),
