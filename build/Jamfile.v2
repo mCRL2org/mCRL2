@@ -60,7 +60,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
         local library-name = [ MATCH "-?l([^ ]+)[ ]*$" : $(part) ] ;
 
         if ! $(library-name) in $(library-targets) {
-          lib $(library-name)
+          searched-lib $(library-name)
               :
               : <name>$(library-name) $(library_search_paths)
               :
@@ -92,7 +92,7 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
           library_search_paths += <search>$(search_path) ;
         }
         else if ! [ MATCH "-.*" : $(part) ] {
-          lib $(name)$(part)
+          searched-lib $(name)$(part)
               :
               : <name>$(part) $(library_search_paths)
               :
@@ -109,20 +109,20 @@ local rule libraries-from-string ( name : ldflags + : requirements * : default *
 }
 
 # OpenGL configuration
-lib GLU : : <target-os>windows <name>glu32 ;
-lib GLU : : <target-os>cygwin <name>glu32 ;
-lib GLU : : <target-os>solaris <name>GLU ;
+searched-lib GLU : : <target-os>windows <name>glu32 ;
+searched-lib GLU : : <target-os>cygwin <name>glu32 ;
+searched-lib GLU : : <target-os>solaris <name>GLU ;
 
-lib GL : : <name>GL <link>shared ;
+searched-lib GL : : <name>GL <link>shared ;
 
 alias opengl : GL
              : <target-os>solaris:<source>GLU
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
-lib opengl   : GLU
+searched-lib opengl   : GLU
              : <target-os>windows
                <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
-lib opengl   : GLU
+searched-lib opengl   : GLU
              : <target-os>cygwin
                <name>"opengl32"
                <search>"$(OPENGL_LPATH)" : : <include>"$(OPENGL_IPATH)" ;
@@ -184,7 +184,7 @@ local rule boost-library ( name link ? : requirements * : usage-requirements * :
                         : $(requirements) <threading>multi : : $(requirements) $(usage-requirements) ;
   }
   else if $(BOOST_INCLUDE_PATH) {
-    lib boost_$(name)
+    searched-lib boost_$(name)
            :
            : <library-path>"$(BOOST_LIBRARY_PATH)"
              <name>"boost_$(name)-mt"
@@ -206,27 +206,27 @@ boost-library test : <toolset>msvc:<asynch-exceptions>on : <use>boost ;
 boost-library system : ;
 
 if $(DL) {
-  lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
+  searched-lib dl : : <name>"dl" <os>LINUX:<link>shared <os>CYGWIN:<link>static <os>SOLARIS:<link>shared ;
 }
 else {
   alias dl : : : : <define>NO_DYNLOAD ;
 }
 
-lib   m  : : <name>"m" ;
+searched-lib   m  : : <name>"m" ;
 alias m  : : <target-os>windows ;
-lib   z  : : <name>"z" ;
+searched-lib   z  : : <name>"z" ;
 
 alias dynamic_loading : : <target-os>windows <define>NO_DYNLOAD : : <define>NO_DYNLOAD ;
 alias dynamic_loading : : <target-os>freebsd ;
 alias dynamic_loading : dl ;
 
 # Socket library on SunOS/Solaris system
-lib nsl : : <name>nsl ;
-lib ws2 : : <name>"ws2_32" ;
+searched-lib nsl : : <name>nsl ;
+searched-lib ws2 : : <name>"ws2_32" ;
 
 alias socket ;
-lib   socket : : <target-os>solaris <name>socket : : <library>nsl ;
-lib   socket :
+searched-lib   socket : : <target-os>solaris <name>socket : : <library>nsl ;
+searched-lib   socket :
              : <target-os>windows
                <name>wsock32
              :
@@ -235,7 +235,7 @@ lib   socket :
                <library>ws2
              ;
 
-lib   socket :
+searched-lib   socket :
              : <target-os>cygwin
                <name>wsock32
              :
@@ -245,8 +245,8 @@ lib   socket :
              ;
 
 if $(CADP_HEADERS) {
-  lib bcg : : <name>BCG <search>"$(CADP_LIBRARIES)" ;
-  lib bcg_io : : <name>BCG_IO <search>"$(CADP_LIBRARIES)" ;
+  searched-lib bcg : : <name>BCG <search>"$(CADP_LIBRARIES)" ;
+  searched-lib bcg_io : : <name>BCG_IO <search>"$(CADP_LIBRARIES)" ;
 
   alias BCG : bcg bcg_io : : : <include>"$(CADP_HEADERS)" <define>USE_BCG ;
 }
@@ -255,9 +255,9 @@ else {
 }
 
 if $(USE_CVC) {
-  lib gmp : : <name>gmp ;
+  searched-lib gmp : : <name>gmp ;
 
-  lib cvc
+  searched-lib cvc
       : gmp
       : <name>cvc3
         <search>"$(USE_CVC)/lib"
