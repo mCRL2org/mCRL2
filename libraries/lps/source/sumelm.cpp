@@ -296,8 +296,7 @@ namespace lps {
   ///This checks the following:
   ///X(..) = sum d. d=e -> a(..) . X(..)
   ///and returns X(..) = e -> a(..) . X(..)
-  static inline
-  lps::summand substitute_equalities(const lps::summand& summand_)
+  lps::summand sumelm(const lps::summand& summand_)
   {
     lps::summand new_summand = summand_;
 
@@ -320,8 +319,7 @@ namespace lps {
 
   ///Take an lps specification, apply equality sum elimination to it,
   ///and return an lps specification
-  static inline
-  lps::specification substitute_equalities_(const lps::specification& specification)
+  lps::specification sumelm(const lps::specification& specification)
   {
     gsVerboseMsg("Substituting equality conditions in summands\n");
     lps::linear_process lps = specification.process();
@@ -335,22 +333,12 @@ namespace lps {
     {
       gsVerboseMsg("Summand %d: ", ++index);
 
-      new_summand_list = push_front(new_summand_list, substitute_equalities(*i));
+      new_summand_list = push_front(new_summand_list, sumelm(*i));
     }
     new_summand_list = reverse(new_summand_list);
 
     new_specification = specification;
     new_specification.process() = set_summands(lps, new_summand_list);
-    return new_specification;
-  }
-
-  ///Returns an LPS specification in which the timed arguments have been rewritten
-  lps::specification sumelm(const lps::specification& specification)
-  {
-    gsVerboseMsg("Applying sum elimination on an LPS of %d summands\n", specification.process().summands().size());
-
-    lps::specification new_specification = specification;
-    new_specification = substitute_equalities_(new_specification); // new_specification used for future concerns, possibly disabling substitute_equalities_
     return new_specification;
   }
 

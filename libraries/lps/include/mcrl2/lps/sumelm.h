@@ -18,7 +18,18 @@ namespace mcrl2 {
 
 namespace lps {
 
+  /// \brief Apply the sum elimination lemma to each of the summands in a
+  ///        specification.
+  /// \param s a specification
+  /// \return specification s from which superfluous sum variables have been
+  ///         eliminated.
   specification sumelm(const specification& s);
+
+  /// \brief Apply the sum elimination lemma to a summand.
+  /// \param s a summand
+  /// \return summand s from which superfluous sum variables have been
+  ///         eliminated.
+  summand sumelm(const summand& s);
 
 } // namespace lps
 
