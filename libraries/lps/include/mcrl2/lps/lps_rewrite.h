@@ -24,6 +24,7 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 
@@ -61,47 +62,49 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
   { // Rewrite the condition.
     data::data_expression new_condition=r(i->condition());
 
-    // Rewrite the actions.
-    action_list new_actions, actions=i->actions();
-    for (action_list::const_iterator j = actions.begin(); j != actions.end(); ++j)
-    {
-      data::data_expression_list new_arguments, arguments=j->arguments();
-      for (data::data_expression_list::iterator k=arguments.begin();
-            k!=arguments.end(); ++k)
+    if (new_condition!=data::sort_bool_::false_())
+    { // The summand cannot be ignored and must be added. So, rewrite the actions.
+      action_list new_actions, actions=i->actions();
+      for (action_list::const_iterator j = actions.begin(); j != actions.end(); ++j)
       {
-        new_arguments = atermpp::push_front(new_arguments, r(*k));
+        data::data_expression_list new_arguments, arguments=j->arguments();
+        for (data::data_expression_list::iterator k=arguments.begin();
+              k!=arguments.end(); ++k)
+        {
+          new_arguments = atermpp::push_front(new_arguments, r(*k));
+        }
+  
+        new_actions=push_front(new_actions,action(j->label(), atermpp::reverse(new_arguments)));
       }
-
-      new_actions=push_front(new_actions,action(j->label(), atermpp::reverse(new_arguments)));
+      new_actions=reverse(new_actions);
+  
+      // Rewrite the assignments in the next state of the summand.
+      data::assignment_list new_assignments, assignments=i->assignments();
+      for (data::assignment_list::iterator j=assignments.begin();
+             j!=assignments.end(); ++j)
+      {
+        new_assignments = atermpp::push_front(new_assignments, data::assignment(j->lhs(),r(j->rhs())));
+      }
+  
+      // Construct a new summand, with or without time.
+      summand new_summand;
+      if (i->has_time())
+      { new_summand=summand(i->summation_variables(),
+                            new_condition,
+                            i->is_delta(),
+                            new_actions,
+                            r(i->time()),
+                            atermpp::reverse(new_assignments));
+      }
+      else
+      { new_summand=summand(i->summation_variables(),
+                            new_condition,
+                            i->is_delta(),
+                            new_actions,
+                            atermpp::reverse(new_assignments));
+      }
+      new_summands=push_front(new_summands,new_summand);
     }
-    new_actions=reverse(new_actions);
-
-    // Rewrite the assignments in the next state of the summand.
-    data::assignment_list new_assignments, assignments=i->assignments();
-    for (data::assignment_list::iterator j=assignments.begin();
-           j!=assignments.end(); ++j)
-    {
-      new_assignments = atermpp::push_front(new_assignments, data::assignment(j->lhs(),r(j->rhs())));
-    }
-
-    // Construct a new summand, with or without time.
-    summand new_summand;
-    if (i->has_time())
-    { new_summand=summand(i->summation_variables(),
-                          new_condition,
-                          i->is_delta(),
-                          new_actions,
-                          r(i->time()),
-                          atermpp::reverse(new_assignments));
-    }
-    else
-    { new_summand=summand(i->summation_variables(),
-                          new_condition,
-                          i->is_delta(),
-                          new_actions,
-                          atermpp::reverse(new_assignments));
-    }
-    new_summands=push_front(new_summands,new_summand);
   }
   new_summands=reverse(new_summands);
 
