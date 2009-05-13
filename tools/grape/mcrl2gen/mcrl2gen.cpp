@@ -136,25 +136,13 @@ list_of_varupdate grape::mcrl2gen::get_process_reference_initialisation(wxXmlNod
     }
   }
 
-  list_of_decl preamble_params;
-  list_of_decl_init preamble_vars;
   wxString proc_ref_prop = get_child_value(reference, _T("propertyof"));
   wxXmlNode *referenced_diagram = 0;
   referenced_diagram = get_diagram(p_doc_root, proc_ref_prop);
 
-  // parsed parameter initialisation to ref_inits
   try
   {
-    validate_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
-  }
-  catch(...)
-  {
-    return inits;
-  }
-
-  try
-  {
-    validate_reference_parameters(reference, diagram_name, inits, preamble_params, datatype_spec);
+    validate_reference_parameters(p_doc_root, reference, diagram_name, inits, datatype_spec);
   }
   catch(...)
   {
@@ -228,7 +216,15 @@ arr_channel_id grape::mcrl2gen::get_reference_channels(wxXmlNode *p_doc_root, wx
   wxXmlNode *objects = get_child(p_architecture_diagram, _T("objectlist"));
   wxXmlNode *channel_list = get_child(objects, _T("channellist"));
 
-  list_of_action reference_actions = get_process_actions(p_doc_root, p_reference.m_diagram_id, datatype_spec);
+  list_of_action reference_actions;
+  if (p_reference.m_is_process_reference)
+  {
+    reference_actions = get_process_actions(p_doc_root, p_reference.m_diagram_id, datatype_spec);
+  }
+  else
+  {
+    reference_actions = get_architecture_visibles(p_doc_root, p_reference.m_diagram_id, datatype_spec);
+  }
   // determine channels associated with reference
   for (wxXmlNode *channel_child = channel_list->GetChildren(); channel_child != 0;  channel_child = channel_child->GetNext())
   {
@@ -375,18 +371,21 @@ arr_channel_id grape::mcrl2gen::get_reference_renamed_actions(arr_channel_id &p_
   return new_ren;
 }
 
-arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms)
+arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms, ATermAppl &datatype_spec)
 {
   // initialize variables
   arr_channel_comm comms;
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));
   wxXmlNode *objects = get_child(p_architecture_diagram, _T("objectlist"));
   wxXmlNode *channel_comms = get_child(objects, _T("channelcommunicationlist"));
+  unsigned int comm_counter = 0;
 
   for(wxXmlNode *child = channel_comms->GetChildren(); child != 0; child = child->GetNext())
   {
     channel_comm current;
-    current.m_name = wxEmptyString;
+    wxString comm_id;
+    comm_id.Printf(_T("%d"), comm_counter++);
+    current.m_name = _T("comm") + diagram_name + comm_id;
     current.m_channels.Empty();
     current.m_id = get_child_value(child, _T("id"));
 
@@ -413,6 +412,7 @@ arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXm
       }
     }
     comms.Add(current);
+
     // get channel communication type
     wxString channel_communication_type = get_child_value(child, _T("channelcommunicationtype"));
     if (channel_communication_type == _T("blocked"))
@@ -427,6 +427,7 @@ arr_channel_comm grape::mcrl2gen::get_communications(wxXmlNode *p_doc_root, wxXm
     {
       p_visible_comms.Add(current);
     }
+
   }
   return comms;
 }
@@ -540,41 +541,6 @@ arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode *p_doc_
   return ren;
 }
 
-void grape::mcrl2gen::compact_list_action(list_of_action &p_actions, list_of_action &new_actions)
-{
-  // compact members
-  for (unsigned int i=0; i<p_actions.GetCount(); ++i)
-  {
-    bool found = false;
-    for (unsigned int j=0; j<new_actions.GetCount(); ++j)
-    {
-      if (new_actions[j].get_name() == p_actions[i].get_name())
-      {
-        list_of_dataexpression acts_params = new_actions[j].get_parameters();
-        list_of_dataexpression actions_params = p_actions[i].get_parameters();
-        if (acts_params.GetCount() == actions_params.GetCount())
-        {
-          found = true;
-          unsigned int k = 0;
-          while ( found && k < acts_params.GetCount() )
-          {
-            found = acts_params[k].get_type() == actions_params[k].get_type();
-            ++k;
-	        }
-          if (found)
-          {
-            break;
-          }
-        }
-      }
-    }
-    if (!found)
-    {
-      new_actions.Add(p_actions[i]);
-    }
-  }
-}
-
 bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, wxString &p_diagram_id, bool p_verbose, bool p_save)
 {
   try
@@ -629,9 +595,9 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       for (unsigned int i=0; i<arch_refs.GetCount(); ++i)
       {
         bool found = false;
-        for (unsigned int j=0; j<arch_in_mcrl2.GetCount(); ++j)
+        for (unsigned int j=0; j<arch_to_mcrl2.GetCount(); ++j)
         {
-          if (arch_refs[i] == arch_in_mcrl2[j])
+          if (arch_refs[i] == arch_to_mcrl2[j])
           {
             found = true;
             break;
@@ -717,43 +683,53 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       // add channel communications
       for (unsigned int i=0; i<comms.GetCount(); ++i)
       {
+        arr_channel_id actions_found, new_actions_found;
         for (unsigned int j=0; j<comms[i].m_channels.GetCount(); ++j)
         {
-          bool found = false;
-          for (unsigned int k=j+1; k<comms[i].m_channels.GetCount(); ++k)
+          wxString channel_id = comms[i].m_channels[j].m_channel_id;
+          new_actions_found.Empty();
+          for (unsigned int k=0; k<refs.GetCount(); ++k)
           {
-            if (comms[i].m_channels[j].m_channel.get_parameters().GetCount() == comms[i].m_channels[k].m_channel.get_parameters().GetCount())
+            arr_channel_id comm_actions = refs[k].m_renamed;
+            for (unsigned int l=0; l<comm_actions.GetCount(); ++l)
             {
-              if (comms[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+              if (comm_actions[l].m_channel_id == channel_id)
               {
-                found = true;
-                break;
-              }
-              else
-              {
-                for (unsigned int l=0; l<comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                bool act_found = false;
+                for (unsigned m=0; m<actions_found.GetCount(); ++m)
                 {
-                  found = true;
-                  if (comms[i].m_channels[j].m_channel.get_parameters()[l].get_type() != comms[i].m_channels[k].m_channel.get_parameters()[l].get_type())
+                  if (comm_actions[l].m_channel.get_parameters().GetCount() == actions_found[m].m_channel.get_parameters().GetCount())
                   {
-                    found = false;
-                    break;
+                    act_found = true;
+                    list_of_dataexpression actions_params = comm_actions[l].m_channel.get_parameters();
+                    list_of_dataexpression actions_found_params = actions_found[m].m_channel.get_parameters();
+                    unsigned int n = 0;
+                    while (act_found && n < actions_params.GetCount())
+                    {
+                      act_found = actions_params[n].get_type() == actions_found_params[n].get_type();
+                      ++n;
+                    }
+                    if (act_found)
+                    {
+                      break;
+                    }
                   }
                 }
-                if (found)
+                if (act_found || actions_found.IsEmpty())
                 {
-                  break;
+                  new_actions_found.Add( comm_actions[l]);
                 }
               }
             }
           }
-          if (!found)
-          {
-            action ren;
-            ren.set_name( comms[i].m_name );
-            ren.set_parameters( comms[i].m_channels[j].m_channel.get_parameters() );
-            actions.Add(ren);
-          }
+          actions_found = new_actions_found;
+        }
+        action ren;
+        ren.set_name( comms[i].m_name );
+        for (unsigned int j = 0; j < actions_found.GetCount(); ++j)
+        {
+          ren.set_parameters( actions_found[j].m_channel.get_parameters() );
+          actions.Add(ren);
         }
       }
     }
@@ -1212,14 +1188,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   arr_channel_comm blocked_comms;
   arr_channel_comm hidden_comms;
   arr_channel_comm visible_comms;
-  p_channel_comms = get_communications(p_doc_root, diagram, p_refs, blocked_comms, hidden_comms, visible_comms);
-  unsigned int comm_counter = 0;
-  for (unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
-  {
-    wxString comm_id;
-    comm_id.Printf(_T("%d"), comm_counter++);
-    p_channel_comms[i].m_name = _T("comm") + diagram_name + comm_id;
-  }
+  p_channel_comms = get_communications(p_doc_root, diagram, p_refs, blocked_comms, hidden_comms, visible_comms, datatype_spec);
   if (p_verbose)
   {
     for (unsigned int i=0; i<p_channel_comms.GetCount(); ++i)
@@ -1231,26 +1200,18 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
         {
           if (p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount() == p_channel_comms[i].m_channels[k].m_channel.get_parameters().GetCount())
             {
-              if (p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount() == 0)
+              found = true;
+              for (unsigned int l=0; l<p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
               {
-                found = true;
-                break;
-              }
-              else
-              {
-                found = true;
-                for (unsigned int l=0; l<p_channel_comms[i].m_channels[j].m_channel.get_parameters().GetCount(); ++l)
+                if (p_channel_comms[i].m_channels[j].m_channel.get_parameters()[l].get_type() != p_channel_comms[i].m_channels[k].m_channel.get_parameters()[l].get_type())
                 {
-                  if (p_channel_comms[i].m_channels[j].m_channel.get_parameters()[l].get_type() != p_channel_comms[i].m_channels[k].m_channel.get_parameters()[l].get_type())
-                  {
-                    found = false;
-                    break;
-                  }
-                }
-                if (found)
-                {
+                  found = false;
                   break;
                 }
+              }
+              if (found)
+              {
+                break;
               }
             }
         }
@@ -2010,7 +1971,7 @@ wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXm
   list_of_varupdate ref_inits;
   try
   {
-    validate_reference_parameters(p_reference_state, p_diagram_name, ref_inits, p_preamble_parameter_decls, datatype_spec);
+    validate_reference_parameters(p_doc_root, p_reference_state, p_diagram_name, ref_inits, datatype_spec);
   }
   catch(...)
   {}
@@ -2169,7 +2130,6 @@ void grape::mcrl2gen::architecture_diagram_mcrl2_actions(wxXmlNode *p_doc_root, 
   // infer possible actions for this diagram
   aref.m_actions = get_architecture_visibles(p_doc_root, reference_id, datatype_spec);
   p_possibles.Add(aref);
-  return;
 }
 
 wxString grape::mcrl2gen::architecture_diagram_mcrl2_init(wxString &p_diagram_name)

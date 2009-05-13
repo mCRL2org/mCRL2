@@ -204,8 +204,7 @@ void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
   m_event_handler->Redo();
   wxCommandEvent event;
   event_menu_deselect_all(event);
-  m_statusbar->PopStatusText();
-  m_statusbar->PushStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
+  m_statusbar->SetStatusText( _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties.") );
   update_bars();
 
   // mark as modified

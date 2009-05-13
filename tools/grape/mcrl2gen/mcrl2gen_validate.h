@@ -224,6 +224,16 @@ namespace grape
     list_of_action get_process_actions(wxXmlNode *p_doc_root, wxString &p_diagram_id, ATermAppl &datatype_spec);
 
     /**
+     * Action list compacting function.
+     * Removes duplicate actions from the list.
+     * @param p_actions The array of actions.
+     * @param new_actions The array of new actions.
+     * @pre p_actions and new_actions are valid lists of actions.
+     * @post All actions of p_actions that are not in new_actions are add to new_actions.
+     */
+    void compact_list_action(list_of_action &p_actions, list_of_action &new_actions);
+
+    /**
      * Diagram acyclicy checking function.
      * Recursively checks if a diagram is referencing itself (direct or indirect).
      * @param p_doc_root The XML GraPE specification containing the diagrams.
@@ -345,16 +355,16 @@ namespace grape
     /**
      * Parameter initialisation validation function.
      * Validates the parameter initialisation as it occurs inside a process reference or reference state.
+     * @param p_doc_root The XML GraPE specification containing the list of reference states.
      * @param p_reference The XML process reference.
      * @param p_diagram_name The name of the process diagram the reference is in.
      * @param p_parameter_initialisation The list of variable updates representing the parameter initialisation.
-     * @param p_preamble_parameter_decls The list of parameters belonging to the referenced process.
      * @param datatype_spec The datatype specification.
      * @return True if the list of reference parameter initialisations is valid, false otherwise.
      * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
      * @post p_parameter_initialisation contains the list of paramter initialisations and error messages are produced if necessary.
      */
-    bool validate_reference_parameters(wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, list_of_decl &p_preamble_parameter_decls, ATermAppl &datatype_spec);
+    bool validate_reference_parameters(wxXmlNode *p_doc_root, wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec);
 
     /**
      * State list validation function.

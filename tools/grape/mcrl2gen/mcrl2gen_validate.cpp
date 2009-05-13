@@ -381,39 +381,24 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
                     {
                       if ( actions[i].get_parameters().GetCount() == actions_found[j].get_parameters().GetCount() )
                       {
-                        if ( actions[i].get_parameters().GetCount() == 0 )
+                        act_found = true;
+                        list_of_dataexpression actions_params = actions[i].get_parameters();
+                        list_of_dataexpression actions_found_params = actions_found[j].get_parameters();
+                        unsigned int k = 0;
+                        while (act_found && k < actions_params.GetCount())
                         {
-                          act_found = true;
-                          break;
+                          act_found = actions_params[k].get_type() == actions_found_params[k].get_type();
+                          ++k;
                         }
-                        else
+                        if (act_found)
                         {
-                          list_of_dataexpression actions_params = actions[i].get_parameters();
-                          list_of_dataexpression actions_found_params = actions_found[j].get_parameters();
-                          act_found = true;
-                          unsigned int k = 0;
-                          while (act_found && k < actions_params.GetCount())
-                          {
-                            act_found = actions_params[k].get_type() == actions_found_params[k].get_type();
-                            ++k;
-                          }
-                          if (act_found)
-                          {
-                            break;
-                          }
+                          break;
                         }
                       }
                     } // end for (actions_found)
-                    if (act_found)
+                    if (act_found || actions_found.IsEmpty())
                     {
                       new_actions_found.Add( actions[i] );
-                    }
-                    else
-                    {
-                      if (actions_found.IsEmpty())
-                      {
-                        new_actions_found.Add( actions[i] );
-                      }
                     }
                   } 
                 } // end for (actions)
@@ -535,45 +520,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
       }
     }
 
-    // loop through acts
-    for(unsigned int i=0; i<acts.GetCount(); ++i)
-    {
-	    bool found = false;
-	    for(unsigned int j=0; j<actions.GetCount(); ++j)
-	    {
-	      if ( acts[i].get_name() == actions[j].get_name() )
-		    {
-		      if ( acts[i].get_parameters().GetCount() == actions[j].get_parameters().GetCount() )
-		      {
-			      if ( acts[i].get_parameters().GetCount() == 0 )
-			      {
-			        found = true;
-              break;
-			      }
-			      else
-			      {
-			        list_of_dataexpression acts_params = acts[i].get_parameters();
-			        list_of_dataexpression actions_params = actions[j].get_parameters();
-              found = true;
-              unsigned int k = 0;
-              while ( found && k < acts_params.GetCount() )
-              {
-                found = acts_params[k].get_type() == actions_params[k].get_type();
-                ++k;
-			        }
-              if (found)
-              {
-                break;
-              }
-			      }
-		      }
-		    }
-	    }
-	    if (!found)
-	    {
-	      actions.Add(acts[i]);
-	    }
-    }
+    compact_list_action(acts, actions);
 
     wxXmlNode *refs = get_child(objects, _T("referencestatelist"));
     if(refs == 0)
@@ -601,6 +548,41 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
 
   // done
   return actions;
+}
+
+void grape::mcrl2gen::compact_list_action(list_of_action &p_actions, list_of_action &new_actions)
+{
+  // compact members
+  for (unsigned int i=0; i<p_actions.GetCount(); ++i)
+  {
+    bool found = false;
+    for (unsigned int j=0; j<new_actions.GetCount(); ++j)
+    {
+      if (new_actions[j].get_name() == p_actions[i].get_name())
+      {
+        list_of_dataexpression acts_params = new_actions[j].get_parameters();
+        list_of_dataexpression actions_params = p_actions[i].get_parameters();
+        if (acts_params.GetCount() == actions_params.GetCount())
+        {
+          found = true;
+          unsigned int k = 0;
+          while ( found && k < acts_params.GetCount() )
+          {
+            found = acts_params[k].get_type() == actions_params[k].get_type();
+            ++k;
+	        }
+          if (found)
+          {
+            break;
+          }
+        }
+      }
+    }
+    if (!found)
+    {
+      new_actions.Add(p_actions[i]);
+    }
+  }
 }
 
 bool grape::mcrl2gen::is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString p_checked)
@@ -1205,23 +1187,10 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
     wxString ref_id = get_child_value(referenced_diagram, _T("id"));
 
     // check parameter initialisation
-    list_of_decl preamble_params;
-    list_of_decl_init preamble_vars;
-    // map parameter initialisation to ref_inits
-    try
-    {
-      validate_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
-    }
-    catch(...)
-    {
-      cerr << "+ Process diagram " << ref_name.ToAscii() << " has an invalid preamble." << endl;
-      return false;
-    }
-
     list_of_varupdate ref_inits;
     try
     {
-      validate_reference_parameters(ref_state, diagram_name, ref_inits, preamble_params, datatype_spec);
+      validate_reference_parameters(p_doc_root, ref_state, diagram_name, ref_inits, datatype_spec);
     }
     catch(...)
     {
@@ -1240,17 +1209,34 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
   return true;
 }
 
-bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, list_of_decl &p_preamble_parameter_decls, ATermAppl &datatype_spec)
+bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec)
 {
   // initialize variables
   p_parameter_initialisation.Empty();
   list_of_decl variable_decls;  // must be empty
+  list_of_decl preamble_parameter_decls;
   list_of_decl_init preamble_variable_decls; // must be empty
-  atermpp::table vars = get_variable_table(p_preamble_parameter_decls, preamble_variable_decls, variable_decls, datatype_spec);
 
   if(p_reference->GetName() == _T("processreference") || p_reference->GetName() == _T("referencestate"))
   {
     wxString diagram_name = get_child_value(p_reference, _T("name"));
+    wxString referenced_diagram_id = get_child_value(p_reference, _T("propertyof"));
+    wxXmlNode *referenced_diagram = get_diagram(p_doc_root, referenced_diagram_id);
+    try
+    {
+      validate_preamble(referenced_diagram, preamble_parameter_decls, preamble_variable_decls, datatype_spec);
+    }
+    catch(...)
+    {
+      cerr << "+ Process diagram " << diagram_name.ToAscii() << " referenced in " << p_diagram_name << " has an invalid preamble." << endl;
+      throw CONVERSION_ERROR;
+      return false;
+    }
+
+    // make variable table
+    variable_decls.Empty();
+    preamble_variable_decls.Empty();
+    atermpp::table vars = get_variable_table(preamble_parameter_decls, preamble_variable_decls, variable_decls, datatype_spec);
 
     // get parameter assignment list
     wxXmlNode *param_list = get_child(p_reference, _T("parameterassignmentlist"));
@@ -1345,22 +1331,23 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_reference, wxSt
     }
 
     // check preamble params count = reference initialisation count
-    if(p_preamble_parameter_decls.GetCount() != p_parameter_initialisation.GetCount())
+    if(preamble_parameter_decls.GetCount() != p_parameter_initialisation.GetCount())
     {
       // not the same number of parameters
       cerr << "+ Diagram " << p_diagram_name.ToAscii()
            << " contains a process reference to process diagram " << diagram_name.ToAscii()
            << " that does not contain the same number of parameters." << endl;
+      throw CONVERSION_ERROR;
       return false;
     }
 
     // loop through preamble parameters
-    for(unsigned int i=0; i<p_preamble_parameter_decls.GetCount(); ++i)
+    for(unsigned int i=0; i<preamble_parameter_decls.GetCount(); ++i)
     {
       bool found = false;
       for(unsigned int j=0; j<p_parameter_initialisation.GetCount(); ++j)
       {
-        if(p_parameter_initialisation[j].get_lhs() == p_preamble_parameter_decls[i].get_name())
+        if(p_parameter_initialisation[j].get_lhs() == preamble_parameter_decls[i].get_name())
         {
           found = true;
           break;
@@ -1370,8 +1357,9 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_reference, wxSt
       {
         cerr << "+ Diagram " << p_diagram_name.ToAscii()
              << " contains a process reference to process diagram " << diagram_name.ToAscii()
-             << " that has a parameter initialisation in which parameter " << p_preamble_parameter_decls[i].get_name().ToAscii()
+             << " that has a parameter initialisation in which parameter " << preamble_parameter_decls[i].get_name().ToAscii()
              << " does not occur." << endl;
+        throw CONVERSION_ERROR;
         return false;
       }
     }
@@ -1471,7 +1459,7 @@ bool grape::mcrl2gen::validate_state_connection(wxXmlNode *p_process_diagram, wx
   // loop through reference states
   for(wxXmlNode *ref_state = ref_states->GetChildren(); ref_state != 0; ref_state = ref_state->GetNext())
   {
-    wxString ref_state_id = get_child_value(ref_state, _T("from"));
+    wxString ref_state_id = get_child_value(ref_state, _T("id"));
     if(p_transition_id == ref_state_id)
     {
       return true;
@@ -2178,25 +2166,11 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
       }
     }
 
-    // check parameter initializations
-    wxString ref_name = get_child_value(referenced_diagram, _T("name"));
-    list_of_decl preamble_params;
-    list_of_decl_init preamble_vars;
-    // parsed parameter initialisation to ref_inits
-    try
-    {
-      validate_preamble(referenced_diagram, preamble_params, preamble_vars, datatype_spec);
-    }
-    catch(...)
-    {
-      return false;
-    }
-
     // check parameter initialisation
     list_of_varupdate ref_inits;
     try
     {
-      validate_reference_parameters(proc_ref, diagram_name, ref_inits, preamble_params, datatype_spec);
+      validate_reference_parameters(p_doc_root, proc_ref, diagram_name, ref_inits, datatype_spec);
     }
     catch(...)
     {

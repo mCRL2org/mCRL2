@@ -64,6 +64,7 @@ namespace grape
      * @param p_architecture_diagram An XML architecture diagram.
      * @param p_reference_id The identifier of the process reference to infer the parameter initialisation of.
      * @param p_reference_name The name of the process reference to infer the parameter initialisation of.
+     * @param datatype_spec The datatype specification.
      * @return A list containing the parameter declarations and initialisations of the inferred process reference.
      * @pre p_doc_root is a valid pointer to an XML specification, p_architecture_diagram is a valid pointer to an XML architecture diagram, p_reference_id is a valid reference to an identifier of a process reference and p_reference_name is a valid reference to a name of a process reference.
      * @post A list containing the parameter declarations and initialisations of the inferred process reference is returned or error messages are produced.
@@ -97,6 +98,7 @@ namespace grape
      * Infers the channels of a given reference.
      * @param p_architecture_diagram The XML architecture diagram containing the reference.
      * @param p_reference_id The identifier of the reference to infer the channels of.
+     * @param datatype_spec The datatype specification.
      * @return An array of channel names, tupled with unique identifiers, containing the names of the channels present on the reference p_reference_id.
      * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_reference_id is a valid reference to a reference identifier.
      * @post An array containing the names and identifiers of all channels of the given reference is returned or error messages are produced.
@@ -147,11 +149,12 @@ namespace grape
      * @param p_blocked_comms The list of blocked channel communications.
      * @param p_hidden_comms The list of hidden channel communications.
      * @param p_visible_comms The list of visible channel communications.
+     * @param datatype_spec The datatype specification.
      * @return An array of channel communications in this diagram.
      * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_blocked_comms, p_hidden_comms and p_visible_comms are empty.
      * @post An array of channel communications in this diagram is returned and p_blocked_comms, p_hidden_comms and p_visible_comms contain the correct communications or error messages are produced.
      */
-    arr_channel_comm get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms);
+    arr_channel_comm get_communications(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_blocked_comms, arr_channel_comm &p_hidden_comms, arr_channel_comm &p_visible_comms, ATermAppl &datatype_spec);
 
     /**
      * Renamed channels and channel communications inference function.
@@ -165,16 +168,6 @@ namespace grape
      * @post An array of "renameds" is returned or error messages are produced.
      */
     arr_renamed get_communication_channel_renamed(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, arr_action_reference &p_refs, arr_channel_comm &p_communications);
-
-    /**
-     * Action list compacting function.
-     * Removes duplicate actions from the list.
-     * @param p_actions The array of actions.
-     * @param new_actions The array of new actions.
-     * @pre p_actions and new_actions are valid lists of actions.
-     * @post All actions of p_actions that are not in new_actions are add to new_actions.
-     */
-    void compact_list_action(list_of_action &p_actions, list_of_action &new_actions);
 
     /**
      * Architecture diagram to mcrl2 export function.
@@ -220,10 +213,12 @@ namespace grape
      * Converts an XML architecture diagram to an mCRL2 specification.
      * @param p_doc_root An XML specification containing the architecture diagram.
      * @param p_diagram_id The identifier of the architecture diagram to convert.
-     * @param p_verbose Flag to set for verbose output.
      * @param p_refs An array of references, containing the actions inside each reference in this architecture diagram.
      * @param p_renameds An array of renamed actions.
      * @param p_channel_comms An array of channel communications.
+     * @param p_specs An array containing the mCRL2 specifications constructed during the convertion process.
+     * @param datatype_spec The datatype specification.
+     * @param p_verbose Flag to set for verbose output.
      * @return A string containing the mCRL2 specification of the architecture diagram.
      * @pre p_doc_root is a valid pointer to an XML specification, p_diagram_id is a valid reference to an identifier of a valid architecture diagram and p_refs is a valid reference to an array of references (may be empty).
      * @post A string containing the mCRL2 specification for the converted architecture diagram is returned and p_refs, p_renameds and p_channel_comms are updated according to the diagram or error messages are produced and the empty string is returned.
@@ -265,6 +260,7 @@ namespace grape
      * @param p_process_diagram The XML process diagram to construct an internal process specification for.
      * @param p_preamble_parameter_decls The preamble's parameter declaration of the process diagram to construct an internal process specification for.
      * @param p_preamble_local_var_decls The preamble's local variable declarations of the process diagram to construct an internal process specification for.
+     * @param datatype_spec The datatype specification.
      * @return The internal process specification or the empty string if construction failed.
      * @pre p_doc_root is a valid pointer to an XML node, p_process_diagram is a valid pointer to an XML process diagram, p_preamble_parameter_decls is a valid reference to a parameter declaration and p_preamble_local_var_decls is a valid reference to a local variable declaration.
      * @post The internal process specification is returned or the empty string is returned and error messages are produced.

@@ -26,13 +26,13 @@
                             <y>-0.955000</y>
                         </coord>
                         <size>
-                            <width>0.250000</width>
-                            <height>0.250000</height>
+                            <width>-1.437500</width>
+                            <height>-0.375000</height>
                         </size>
                         <linetype>straight</linetype>
                         <breakpointlist/>
                         <from>47</from>
-                        <to>48</to>
+                        <to>49</to>
                         <label>
                             <variabledeclarations/>
                             <condition/>
@@ -43,14 +43,16 @@
                                 </action>
                             </actions>
                             <timestamp/>
-                            <variableupdates/>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
                         </label>
                     </nonterminatingtransition>
                     <nonterminatingtransition>
                         <id>62</id>
                         <coord>
-                            <x>1.515833</x>
-                            <y>-0.833333</y>
+                            <x>1.366667</x>
+                            <y>-1.053333</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -93,7 +95,7 @@
                             <variabledeclarations>
                                 <variabledeclaration>d:D</variabledeclaration>
                             </variabledeclarations>
-                            <condition>b</condition>
+                            <condition/>
                             <actions>
                                 <action>
                                     <name>r3</name>
@@ -110,8 +112,8 @@
                     <nonterminatingtransition>
                         <id>59</id>
                         <coord>
-                            <x>0.225000</x>
-                            <y>-0.886667</y>
+                            <x>0.093333</x>
+                            <y>-0.990000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -137,8 +139,8 @@
                     <nonterminatingtransition>
                         <id>58</id>
                         <coord>
-                            <x>0.935000</x>
-                            <y>-0.973333</y>
+                            <x>0.503333</x>
+                            <y>-0.966667</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -152,7 +154,7 @@
                             <variabledeclarations>
                                 <variabledeclaration>d:D</variabledeclaration>
                             </variabledeclarations>
-                            <condition>!b</condition>
+                            <condition/>
                             <actions>
                                 <action>
                                     <name>r3</name>
@@ -169,8 +171,8 @@
                     <nonterminatingtransition>
                         <id>57</id>
                         <coord>
-                            <x>0.481667</x>
-                            <y>-1.040000</y>
+                            <x>0.300000</x>
+                            <y>-0.940000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -211,7 +213,7 @@
                     <state>
                         <id>48</id>
                         <coord>
-                            <x>2.001667</x>
+                            <x>1.968334</x>
                             <y>-1.340000</y>
                         </coord>
                         <size>
@@ -388,8 +390,8 @@
                     <nonterminatingtransition>
                         <id>79</id>
                         <coord>
-                            <x>1.074167</x>
-                            <y>-1.331667</y>
+                            <x>1.076667</x>
+                            <y>-1.333333</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -856,6 +858,7 @@
                             <timestamp/>
                             <variableupdates>
                                 <variableupdate>b:=!b</variableupdate>
+                                <variableupdate>x:=d1</variableupdate>
                             </variableupdates>
                         </label>
                     </nonterminatingtransition>
