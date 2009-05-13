@@ -682,24 +682,13 @@ mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_i
 {
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
-  gsDebugMsg( "\n\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
-  gsDebugMsg( "\tIndex parameters to unfold: %d\n\n", parameter_at_index );
-  if(    (int(lps_proc_pars.size()) <= parameter_at_index) )
+  gsDebugMsg( "\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
+  gsDebugMsg( "\tIndex parameters to unfold: %d\n", parameter_at_index );
+  if(    (int(lps_proc_pars.size()) <= parameter_at_index) || parameter_at_index < 0  )
   {
-    cerr << "Given index out of bounds. Index value should be less or equal than " << lps_proc_pars.size()-1 <<"." << endl;
+    cerr << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
     abort();
   }
-
-  if (parameter_at_index < 0 )
-  {
-    cerr << "Given index out of bounds. Index value should be greater or equal than 0. " << endl;
-    abort();
-  }
-
-/*  if (!lps_proc_pars[parameter_at_index].sort().is_basic_sort() )
-  {
-    cerr << "Process parameter at given index is no basic sort: " << lps_proc_pars[parameter_at_index].sort()  << endl;
-  }*/
 
   if(lps_proc_pars[parameter_at_index].sort().is_basic_sort())
   {
