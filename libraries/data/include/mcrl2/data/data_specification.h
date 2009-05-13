@@ -47,7 +47,17 @@ namespace mcrl2 {
 
     /// \brief data specification.
     ///
-    /// \invariant The specification is complete with respect to standard sorts
+    /// \invariant The specification is complete with respect to standard sorts:
+    ///  - for every s in sorts() all system-defined sorts in s are in sorts()
+    ///  - for every f in constructors() all system-defined sorts in f.sort() are in sorts()
+    ///  - for every f in mappings() all system-defined sorts in f.sort() are in sorts()
+    ///  - for every e in equations() all system-defined sorts occurring in subexpressions of e are in sorts()
+    ///  - for every s in sorts() the specification has the standard mappings/equations
+    ///  - for sorts of non-standard mappings/equations:
+    ///    - for every non-standard f in constructors() standard mappings/equations for f.sort() are in mappings() 
+    ///    - for every non-standard f in mappings() standard mappings/equations for f.sort() are in mappings() 
+    ///    - for every non-standard e in equations() all sorts of subexpressions are contained in mappings()
+    /// \invariant For every system defined sort s, if search_sort(s) if and only if search_function(s)
     class data_specification
     {
       protected:
@@ -130,16 +140,16 @@ namespace mcrl2 {
         friend data_specification  remove_all_system_defined(data_specification const&);
         friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
-        ///\brief Adds system defined sorts when necessary to make the specification complete
-        void make_system_defined_complete();
+        ///\brief Adds system defined sorts and standard mappings for all internally used sorts
+        void make_complete();
 
         ///\brief Adds system defined sorts when necessary to make the specification complete
-        /// \param[in] an equation that is added to a specification that is system-defined complete 
-        void make_system_defined_complete(data_equation const&);
+        template < typename DependentSortHelper >
+        void make_complete(DependentSortHelper const&);
 
-        ///\brief Adds system defined sorts when necessary to make the specification complete
-        /// \param[in] s a sort that is added to a specification that is system-defined complete 
-        void make_system_defined_complete(sort_expression const&);
+        /// \brief Helper function for make_complete() methods
+        template < typename Term >
+        void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
 
         ///\brief Removes system defined sorts including constructors, mappings and equations
         void purge_system_defined();
@@ -187,12 +197,28 @@ namespace mcrl2 {
           { // add aliases as names for sort expressions that are non-aliases
             add_alias(s);
           }
+          else if (s.is_standard())
+          {
+            sort_expression normalised(normalise(s));
+
+            if (!search_sort(normalised))
+            {
+              m_sorts.insert(normalised);
+
+              import_system_defined_sort(normalise(s));
+            }
+          }
           else if (!s.is_function_sort()) // do not add function sorts
           {
-            m_sorts.insert(s);
+            sort_expression normalised(normalise(s));
 
-            add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(s)));
-            add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(s)));
+            m_sorts.insert(normalised);
+
+            if (mappings(normalised).empty())
+            { // standard functions for the sort
+              add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(normalised)));
+              add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(normalised)));
+            }
           }
         }
 
@@ -213,7 +239,7 @@ namespace mcrl2 {
       ///\brief Default constructor
       data_specification()
       {
-        make_system_defined_complete();
+        make_complete();
       }
 
       ///\brief Constructor
@@ -222,7 +248,7 @@ namespace mcrl2 {
       data_specification(const atermpp::aterm_appl& t)
       {
         build_from_aterm(t);
-        make_system_defined_complete();
+        make_complete();
       }
 
       ///\brief Constructor
@@ -237,7 +263,7 @@ namespace mcrl2 {
         add_constructors(constructors);
         add_mappings(mappings);
         add_equations(equations);
-        make_system_defined_complete();
+        make_complete();
       }
 
       /// \brief Gets the sort declarations
@@ -327,7 +353,7 @@ namespace mcrl2 {
       void add_sort(const sort_expression& s)
       {
         insert_sort(s);
-        make_system_defined_complete(s);
+        make_complete(s);
       }
 
       /// \brief Adds a sort to this specification, and marks it as system
@@ -380,11 +406,8 @@ namespace mcrl2 {
           }
         }
 
-        if (s.reference().is_standard())
-        {
-          // Make sure that the sort is also part of the specification
-          add_sort(s.reference());
-        }
+        // Make sure that the sort is also part of the specification
+        add_sort(s.reference());
       }
 
       /// \brief Adds a constructor to this specification
@@ -396,6 +419,7 @@ namespace mcrl2 {
       {
         assert(!search_mapping(f));
         add_function(m_constructors, f);
+        make_complete(f.sort());
       }
 
       /// \brief Adds a constructor to this specification, and marks it as
@@ -421,6 +445,7 @@ namespace mcrl2 {
       {
         assert(!search_constructor(f));
         add_function(m_mappings, f);
+        make_complete(f.sort());
       }
 
       /// \brief Adds a mapping to this specification, and marks it as system
@@ -444,7 +469,7 @@ namespace mcrl2 {
       void add_equation(const data_equation& e)
       {
         m_equations.insert(e);
-        make_system_defined_complete(e);
+        make_complete(e);
       }
 
       /// \brief Adds an equation to this specification, and marks it as system
@@ -514,6 +539,8 @@ namespace mcrl2 {
         {
           add_system_defined_constructor(*i);
         }
+
+        make_complete(fl);
       }
 
       /// \brief Adds mappings to this specification
@@ -542,6 +569,8 @@ namespace mcrl2 {
         {
           add_system_defined_mapping(*i);
         }
+
+        make_complete(fl);
       }
 
       /// \brief Adds equations to this specification
@@ -570,10 +599,47 @@ namespace mcrl2 {
         {
           add_system_defined_equation(*i);
         }
+
+        make_complete(el);
       }
 
+      ///\brief Adds system defined sorts when necessary to make the specification complete
+      /// \param[in] range an iterator range of objects: data/sort expressions,
+      ///  equations, assignments for which the specificaiton should be complete
+      /// \pre specification is complete, but not necessarily with respect to sorts in e
+      /// \post specification has all constructors/mappings/equations for sorts referenced in range
+      template < typename ForwardTraversalIterator >
+      void make_complete(boost::iterator_range< ForwardTraversalIterator > const& range)
+      {
+        std::set< sort_expression > sorts;
+ 
+        for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
+        {
+          gather_sorts(*i, sorts);
+        }
+ 
+        make_complete(sorts);
+      }
+
+      ///\brief Adds system defined sorts when necessary to make the specification complete
+      /// \param[in] e a data expression that is added to a specification that is system-defined complete 
+      /// \pre specification is complete, but not necessarily with respect to sorts in e
+      /// \post specification has all constructors/mappings/equations for sorts in e
+      void make_complete(data_expression const& e);
+
+      ///\brief Adds system defined sorts when necessary to make the specification complete
+      /// \param[in] e a equation that is added to a specification that is system-defined complete 
+      /// \pre specification is complete, but not necessarily with respect to sorts in e
+      /// \post specification has all constructors/mappings/equations for sorts in e
+      void make_complete(data_equation const& e);
+
+      ///\brief Adds system defined sorts when necessary to make the specification complete
+      /// \param[in] s a sort that is added to a specification that is system-defined complete 
+      /// \pre specification is complete, but not necessarily with respect to s
+      /// \post specification has all constructors/mappings/equations for s
+      void make_complete(sort_expression const& s);
+
       /// \brief Normalises a sort expression by replacing aliases by sort expressions
-      /// TODO finish for container sorts and structured sorts
       /// \param[in] e a sort expression
       /// \result normalise(e) = normalise(normalise(e))
       sort_expression normalise(sort_expression const& e) const;
@@ -864,14 +930,23 @@ namespace mcrl2 {
       }
 
       /// \brief Returns true if the data specification contains the constructor
+      /// \param[in] f the symbol to look for
       bool search_mapping(const function_symbol& f) const
       {
-        constructors_const_range range(m_mappings.equal_range(f.sort().target_sort()));
+        mappings_const_range range(m_mappings.equal_range(f.sort().target_sort()));
 
         return std::find(range.begin(), range.end(), f) != range.end();
       }
 
+      /// \brief Returns true if the data specification contains a mapping or constructor that matches f
+      /// \param[in] f the symbol to look for
+      bool search_function(const function_symbol& f) const
+      {
+        return search_constructor(f) || search_mapping(f);
+      }
+
       /// \brief Returns true if the data specification contains the constructor
+      /// \param[in] e the equation to look for
       bool search_equation(const data_equation& e) const
       {
         return std::find(m_equations.begin(), m_equations.end(), e) != m_equations.end();

@@ -83,7 +83,7 @@ void test_sorts()
 
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
 
   basic_sort s2("S2");
   sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
@@ -154,7 +154,7 @@ void test_constructors()
   boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
   boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
-  data_specification spec(remove_all_system_defined(data_specification()));
+  data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
   data_specification spec1(spec);
@@ -164,12 +164,15 @@ void test_constructors()
   spec.add_constructor(h);
   spec1.add_constructors(fghl_range);
 
+  remove_all_system_defined(spec);
+  remove_all_system_defined(spec1);
+
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl_range);
   BOOST_CHECK(constructors.size() == 3);
-  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
-  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
-  BOOST_CHECK(std::find(constructors.begin(), constructors.end(), h) != constructors.end());
+  BOOST_CHECK(spec.search_constructor(f));
+  BOOST_CHECK(spec.search_constructor(g));
+  BOOST_CHECK(spec.search_constructor(h));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(spec.constructors() == spec1.constructors());
@@ -222,21 +225,21 @@ void test_functions()
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
-  data_specification spec1(remove_all_system_defined(spec));
+  data_specification spec1(spec);
   spec.add_mapping(f);
   spec.add_mapping(g);
   spec.add_mapping(h);
   spec1.add_mappings(fghl_range);
 
   remove_all_system_defined(spec);
+  remove_all_system_defined(spec1);
 
-  function_symbol_vector mappings(boost::copy_range< function_symbol_vector >(spec.mappings()));
-  BOOST_CHECK(mappings.size() == 3);
-  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
-  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) != mappings.end());
-  BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) != mappings.end());
+  BOOST_CHECK(boost::distance(spec.mappings()) == 3);
+  BOOST_CHECK(spec.search_mapping(f));
+  BOOST_CHECK(spec.search_mapping(g));
+  BOOST_CHECK(spec.search_mapping(h));
 
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(boost::distance(spec.mappings(s)) == 2);
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), f) != spec.mappings(s).end());
   BOOST_CHECK(std::find(spec.mappings(s).begin(), spec.mappings(s).end(), g) != spec.mappings(s).end());
@@ -441,7 +444,11 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
 
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification));
+  data_specification copy = specification;
+
+  remove_all_system_defined(copy);
+
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
 
   specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
@@ -458,7 +465,18 @@ void test_system_defined()
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("F")));
   BOOST_CHECK(specification.constructors(basic_sort("F")) == specification.constructors(specification.find_referenced_sort(basic_sort("F"))));
 
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(specification)), specification));
+  copy = specification;
+
+  remove_all_system_defined(copy);
+
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
+
+  // Check for presence of function sort
+  BOOST_CHECK(!specification.mappings(function_sort(basic_sort("D"), sort_bool_::bool_())).empty());
+
+  specification.add_mapping(function_symbol("f", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())));
+
+  BOOST_CHECK(!specification.mappings(function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())).empty());
 }
 
 void test_utility_functionality()

@@ -85,56 +85,72 @@ namespace mcrl2 {
             }
           }
 
-          void add_generic(const sort_expression& s)
+          void add_generic(const basic_sort& s)
           {
-            if (s.is_basic_sort())
-            {
-              sort_expression actual_sort = m_specification.find_referenced_sort(s);
+            sort_expression actual_sort = m_specification.find_referenced_sort(s);
 
-              if (actual_sort != s && !actual_sort.is_basic_sort()) {
-                add_generic_and_check(actual_sort);
-              }
-              else {
-                for (data_specification::constructors_const_range r(m_specification.constructors(actual_sort)); !r.empty(); r.advance_begin(1))
+            if (actual_sort != s && !actual_sort.is_basic_sort()) {
+              add_generic_and_check(actual_sort);
+            }
+            else {
+              for (data_specification::constructors_const_range r(m_specification.constructors(actual_sort)); !r.empty(); r.advance_begin(1))
+              {
+                if (r.front().sort().is_function_sort())
                 {
-                  if (r.front().sort().is_function_sort())
-                  {
-                    function_sort f_sort(r.front().sort());
+                  function_sort f_sort(r.front().sort());
 
-                    for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
-                    {
-                      add_generic_and_check(i.front());
-                    }
+                  for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
+                  {
+                    add_generic_and_check(i.front());
                   }
                 }
               }
             }
+          }
+
+          void add_generic(const container_sort& s)
+          {
+            add_generic_and_check(container_sort(s).element_sort());
+          }
+
+          void add_generic(const function_sort& s)
+          {
+            for (function_sort::domain_const_range i(s.domain()); !i.empty(); i.advance_begin(1))
+            {
+              add_generic_and_check(i.front());
+            }
+
+            add_generic_and_check(s.codomain());
+          }
+
+          void add_generic(const structured_sort& s)
+          {
+            for (structured_sort::constructor_const_range r(s.struct_constructors()); !r.empty(); r.advance_begin(1))
+            {
+              for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
+              {
+                add_generic_and_check(j.front().sort());
+              }
+            }
+          }
+
+          void add_generic(const sort_expression& s)
+          {
+            if (s.is_basic_sort())
+            {
+              add_generic(basic_sort(s));
+            }
             else if (s.is_container_sort())
             {
-              add_generic_and_check(container_sort(s).element_sort());
+              add_generic(container_sort(s));
             }
             else if (s.is_function_sort())
             {
-              function_sort f_sort(s);
-
-              for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
-              {
-                add_generic_and_check(i.front());
-              }
-
-              add_generic_and_check(f_sort.codomain());
+              add_generic(function_sort(s));
             }
             else if (s.is_structured_sort())
             {
-              structured_sort::constructor_const_range scl(structured_sort(s).struct_constructors());
-
-              for (structured_sort::constructor_const_range::const_iterator i = scl.begin(); i != scl.end(); ++i)
-              {
-                for (structured_sort_constructor::arguments_const_range j(i->arguments()); !j.empty(); j.advance_begin(1))
-                {
-                  add_generic_and_check(j.front().sort());
-                }
-              }
+              add_generic(structured_sort(s));
             }
             else if (s.is_alias())
             {
@@ -158,9 +174,14 @@ namespace mcrl2 {
           /// \brief Adds the sorts on which a sort expression depends
           ///
           /// \param[in] s A sort expression.
+          /// \param[in] assume_self_dependence add the sort as well as all dependent sorts
           /// \return All sorts on which s depends.
-          void add(const sort_expression& s)
+          void add(const sort_expression& s, bool assume_self_dependence = false)
           {
+            if (assume_self_dependence)
+            {
+              m_result.insert(s);
+            }
             if (m_visited_sorts.find(s) == m_visited_sorts.end())
             {
               add_generic(s);
@@ -170,13 +191,14 @@ namespace mcrl2 {
           /// \brief Adds the sorts on which a sort expression depends
           ///
           /// \param[in] s A sort expression.
+          /// \param[in] assume_self_dependence add the sort as well as all dependent sorts
           /// \return All sorts on which s depends.
           template < typename ForwardTraversalIterator >
-          void add(boost::iterator_range< ForwardTraversalIterator > const& range)
+          void add(boost::iterator_range< ForwardTraversalIterator > const& range, bool assume_self_dependence = false)
           {
             for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
             {
-              add(*i);
+              add(*i, assume_self_dependence);
             }
           }
 
@@ -261,7 +283,11 @@ namespace mcrl2 {
       assert(sort.is_standard());
 
       // add sorts, constructors, mappings and equations
-      if (sort == sort_real_::real_())
+      if (sort == sort_bool_::bool_())
+      {
+        sort_bool_::add_bool__to_specification(*this);
+      }
+      else if (sort == sort_real_::real_())
       {
         sort_real_::add_real__to_specification(*this);
       }
@@ -307,84 +333,123 @@ namespace mcrl2 {
         add_system_defined_equations(boost::make_iterator_range(s_sort.projection_equations(sort)));
         add_system_defined_equations(boost::make_iterator_range(s_sort.recogniser_equations(sort)));
       }
+
+      add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(sort)));
+      add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(sort)));
+    }
+
+    // Assumes that a system defined sort s is not (full) part of the specification if:
+    //  - the set of sorts does not contain s
+    //  - the specification has no constructors for s
+    template < >
+    void data_specification::make_complete(detail::dependent_sort_helper const& dependent_sorts)
+    {
+      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
+      {
+        sort_expression normalised(normalise(*i));
+
+        if (normalised.is_standard())
+        { // || constructors(normalised).empty()) {
+          if (!search_sort(normalised))
+          {
+            m_sorts.insert(normalised);
+
+            import_system_defined_sort(normalised);
+          }
+        }
+        else if (normalised.is_function_sort() && mappings(normalised).empty())
+        { // no if : Bool # *i # *i -> *i for function sort *i, add standard functions
+          add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(normalised)));
+          add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(normalised)));
+        }
+      }
     }
 
     ///\brief Adds standard sorts when necessary
     ///
     /// Assumes that if constructors of a sort are part of the specification,
     /// then the sort was already imported.
-    void data_specification::make_system_defined_complete()
+    void data_specification::make_complete()
     {
-      if (m_sorts.find(sort_bool_::bool_()) == m_sorts.end()) {
-        sort_bool_::add_bool__to_specification(*this);
-      }
-
       detail::dependent_sort_helper dependent_sorts(*this);
+
+      // make sure that sort bool is part of the specification
+      dependent_sorts.add(sort_bool_::bool_(), true);
 
       // sorts
       for (sorts_const_range r(sorts()); !r.empty(); r.advance_begin(1))
       {
-        dependent_sorts.add(function_sort(sort_bool_::bool_(), r.front()));
+        dependent_sorts.add(r.front(), true);
       }
       // constructors
       for (constructors_const_range r(constructors()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add((r.front().sort().is_function_sort()) ? r.front().sort() :
-                                      function_sort(sort_bool_::bool_(), r.front().sort()));
+        dependent_sorts.add(r.front().sort(), true);
       }
       // mappings
       for (mappings_const_range r(mappings()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add((r.front().sort().is_function_sort()) ? r.front().sort() :
-                                      function_sort(sort_bool_::bool_(), r.front().sort()));
+        dependent_sorts.add(r.front().sort(), true);
       }
       // equations
       for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(r.front())));
+        dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(r.front())), true);
       }
 
-      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
-      {
-        if (i->is_standard())
-        {
-          sort_expression normalised(normalise(*i));
-
-          if (constructors(normalised).empty())
-          {
-            import_system_defined_sort(normalised);
-          }
-        }
-      }
+      make_complete(dependent_sorts);
     }
 
-    void data_specification::make_system_defined_complete(data_equation const& e)
+    template < typename Term >
+    void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
+    {
+      find_all_sort_expressions(term, std::inserter(sorts, sorts.end()));
+    }
+
+    template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
+
+    template < >
+    void data_specification::make_complete(std::set< sort_expression > const& sorts)
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)));
-
-      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
+      for (std::set< sort_expression >::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
       {
-        if (i->is_standard() && (!search_sort(*i) || constructors(*i).empty())) {
-          import_system_defined_sort(*i);
-        }
+        dependent_sorts.add(*i);
       }
+
+      make_complete(dependent_sorts);
     }
 
-    void data_specification::make_system_defined_complete(sort_expression const& s)
+    void data_specification::make_complete(data_expression const& e)
+    {
+      detail::dependent_sort_helper dependent_sorts(*this);
+
+      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)), true);
+
+      make_complete(dependent_sorts);
+    }
+
+    void data_specification::make_complete(data_equation const& e)
+    {
+      detail::dependent_sort_helper dependent_sorts(*this);
+
+      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)), true);
+
+      make_complete(dependent_sorts);
+    }
+
+    void data_specification::make_complete(sort_expression const& s)
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
       // for compatibilty with specifications imported from ATerm
-      dependent_sorts.add(s);
+      dependent_sorts.add(s, true);
 
-      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
-      {
-        if (i->is_standard() && (!search_sort(*i) || constructors(*i).empty())) {
-          import_system_defined_sort(*i);
-        }
-      }
+      make_complete(dependent_sorts);
     }
 
     void data_specification::purge_system_defined()
@@ -549,21 +614,11 @@ namespace mcrl2 {
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
             renamings[name] = reference;
-
-            import_system_defined_sort(reference);
           }
           else
           {
             other_names.insert(std::pair< sort_expression, sort_expression >(reference, name));
           }
-        }
-        else if (i->is_standard())
-        {
-          import_system_defined_sort(*i);
-        }
-        else
-        {
-          add_sort(*i);
         }
       }
 
@@ -587,6 +642,14 @@ namespace mcrl2 {
         add_alias(alias(i->second, atermpp::bottom_up_replace(i->first, renaming_substitution)));
       }
 
+      for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
+      {
+        if (!i->is_alias())
+        {
+          add_sort(atermpp::bottom_up_replace(*i, renaming_substitution));
+        }
+      }
+
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {
         function_symbol new_function(atermpp::bottom_up_replace(*i, renaming_substitution));
@@ -607,7 +670,12 @@ namespace mcrl2 {
       }
       for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
       {
-        m_equations.insert(atermpp::bottom_up_replace(*i, renaming_substitution));
+        data_equation new_equation(atermpp::bottom_up_replace(*i, renaming_substitution));
+
+        if (!search_equation(new_equation))
+        {
+          m_equations.insert(new_equation);
+        }
       }
     }
 
