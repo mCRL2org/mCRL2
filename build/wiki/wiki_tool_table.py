@@ -98,32 +98,32 @@ chi2mcrl2         | -               | ? | ?
 diagraphica       | not applicable  | ? | ?
 formulacheck      | -               | ? | ?
 grape             | not applicable  | ? | ?
-lps2lts           | -               | ? | ?
+lps2lts           | +               | ? | ?
 lps2pbes          | +               | ? | ?
-lps2torx          | -               | ? | ?
+lps2torx          | +               | ? | ?
 lpsactionrename   | +               | ? | ?
 lpsbinary         | +               | ? | ?
 lpsbisim2pbes     | +               | ? | ?
 lpsconfcheck      | -               | ? | ?
 lpsconstelm       | +               | ? | ?
-lpsinfo           | -               | ? | ?
+lpsinfo           | +               | ? | ?
 lpsinvelm         | -               | ? | ?
 lpsparelm         | +               | ? | ?
 lpsparunfold      | +               | ? | ?
-lpspp             | -               | ? | ?
+lpspp             | +               | ? | ?
 lpsrealelm        | +               | ? | ?
 lpsrewr           | +               | ? | ?
 lpssumelm         | +               | ? | ?
 lpssuminst        | +               | ? | ?
 lpsuntime         | +               | ? | ?
-ltscompare        | -               | ? | ?
-ltsconvert        | -               | ? | ?
+ltscompare        | +               | ? | ?
+ltsconvert        | +               | ? | ?
 ltsgraph          | not applicable  | ? | ?
-ltsinfo           | -               | ? | ?
-ltsmin            | -               | ? | ?
+ltsinfo           | +               | ? | ?
+ltsmin            | +               | ? | ?
 ltsview           | not applicable  | ? | ?
-lysa2mcrl2        | -               | ? | ?
-mcrl22lps         | -               | ? | ?
+lysa2mcrl2        | +               | ? | ?
+mcrl22lps         | +               | ? | ?
 mcrl2i            | +               | ? | ?
 mcrl2pp           | -               | ? | ?
 pbes2bes          | +               | ? | ?
@@ -133,13 +133,13 @@ pbesinfo          | +               | ? | ?
 pbesparelm        | +               | ? | ?
 pbespareqelm      | +               | ? | ?
 pbespgsolve       | +               | ? | ?
-pbespp            | -               | ? | ?
+pbespp            | +               | ? | ?
 pbesrewr          | +               | ? | ?                                                              
-pnml2mcrl2        | -               | ? | ?
+pnml2mcrl2        | +               | ? | ?
 squadt            | not applicable  | ? | ?
-tbf2lps           | -               | ? | ?                                                               
-tracepp           | -               | ? | ?
-txt2pbes          | -               | ? | ?
+tbf2lps           | +               | ? | ?                                                               
+tracepp           | +               | ? | ?
+txt2pbes          | +               | ? | ?
 xsim              | not applicable  | ? | ?                                                                      
 '''                                                                                            
 
