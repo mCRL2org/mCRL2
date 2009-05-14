@@ -14,6 +14,7 @@ boostbook doc
 
     <dependency>../libraries/data/doc//concept_manual
     <dependency>../libraries/data/doc//data_manual
+    <dependency>../libraries/process/doc//process_manual
     <dependency>../libraries/lps/doc//lps_manual
     <dependency>../libraries/pbes/doc//pbes_manual
     <dependency>../libraries/utilities/doc//utilities_manual
@@ -22,6 +23,7 @@ boostbook doc
 
     <implicit-dependency>../libraries/data/doc//concept_manual
     <implicit-dependency>../libraries/data/doc//data_manual
+    <implicit-dependency>../libraries/process/doc//pbes_manual
     <implicit-dependency>../libraries/lps/doc//lps_manual
     <implicit-dependency>../libraries/pbes/doc//pbes_manual
     <implicit-dependency>../libraries/utilities/doc//utilities_manual
