@@ -168,7 +168,7 @@ namespace mcrl2 {
         /// \brief Constructor
         ///
         /// \param[in] name The name of the constructor.
-        /// \param[in] arguments The arguments of the constructor.
+        /// \param[in] arguments iterator range over structured_sort_constructor_argument (arguments of the constructor).
         /// \param[in] recogniser The name of the recogniser.
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
@@ -202,7 +202,7 @@ namespace mcrl2 {
         /// \brief Constructor
         ///
         /// \param[in] name The name of the constructor.
-        /// \param[in] arguments The arguments of the constructor.
+        /// \param[in] arguments iterator range over structured_sort_constructor_argument (arguments of the constructor).
         /// \pre name is not empty.
         template < typename ForwardTraversalIterator >
         structured_sort_constructor(const std::string& name,
@@ -630,7 +630,7 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] struct_constructors The list of constructors.
+        /// \param[in] struct_constructors iterator range over structured_sort_constructor (constructors of the structured sort).
         /// \post struct_constructors is empty.
         template < typename ForwardTraversalIterator >
         structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
