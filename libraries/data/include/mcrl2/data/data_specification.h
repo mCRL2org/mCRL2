@@ -216,8 +216,7 @@ namespace mcrl2 {
 
             if (mappings(normalised).empty())
             { // standard functions for the sort
-              add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(normalised)));
-              add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(normalised)));
+              add_standard_mappings_and_equations(normalised);
             }
           }
         }
@@ -231,6 +230,25 @@ namespace mcrl2 {
           if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
           {
             container.insert(std::make_pair(index_sort, f));
+          }
+        }
+
+        void add_standard_mappings_and_equations(sort_expression const& sort)
+        {
+          function_symbol_vector symbols(standard_generate_functions_code(sort));
+
+          for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
+          {
+            add_function(m_mappings, *i);
+            m_sys_mappings.put(*i,*i);
+          }
+
+          data_equation_vector   equations(standard_generate_equations_code(sort));
+
+          for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
+          {
+            m_equations.insert(*i);
+            m_sys_equations.put(*i,*i);
           }
         }
 
@@ -483,6 +501,7 @@ namespace mcrl2 {
       {
         m_equations.insert(e);
         m_sys_equations.put(e,e);
+        make_complete(e);
       }
 
       /// \brief Adds sorts to this specification
@@ -597,7 +616,8 @@ namespace mcrl2 {
       {
         for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
         {
-          add_system_defined_equation(*i);
+          m_equations.insert(*i);
+          m_sys_equations.put(*i,*i);
         }
 
         make_complete(el);

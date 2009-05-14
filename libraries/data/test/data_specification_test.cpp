@@ -287,7 +287,7 @@ void test_equations()
   boost::iterator_range<variable_vector::const_iterator> x_range(xl);
   data_equation fxx(x_range, x, fx, x);
 
-  data_specification spec(remove_all_system_defined(data_specification()));
+  data_specification spec;
   data_specification spec1;
   spec.add_sort(s);
   spec.add_sort(s0);
@@ -297,9 +297,12 @@ void test_equations()
   boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
   spec1.add_equations(fxxl_range);
 
-  compare_for_equality(spec, spec1);
-  BOOST_CHECK(remove_all_system_defined(spec).equations() == fxxl_range);
-  BOOST_CHECK(remove_all_system_defined(spec1).equations() == fxxl_range);
+  remove_all_system_defined(spec);
+  remove_all_system_defined(spec1);
+
+  BOOST_CHECK(compare_for_equality(spec, spec1));
+  BOOST_CHECK(spec.equations() == fxxl_range);
+  BOOST_CHECK(spec1.equations() == fxxl_range);
 
   data_equation fxf(x_range, x, fx, f);
   data_equation_vector fxfl(make_vector(fxf));
@@ -307,7 +310,7 @@ void test_equations()
   spec.add_system_defined_equation(fxf);
   spec1.add_system_defined_equations(fxfl_range);
 
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(spec.is_system_defined(fxf));
   BOOST_CHECK(!spec.is_system_defined(fxx));
   BOOST_CHECK(spec1.is_system_defined(fxf));
@@ -319,7 +322,7 @@ void test_equations()
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
   spec.remove_equations(fxfl_range);
   spec1.remove_equation(fxf);
-  compare_for_equality(spec, spec1);
+  BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
 void test_is_certainly_finite()

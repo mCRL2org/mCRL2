@@ -334,8 +334,7 @@ namespace mcrl2 {
         add_system_defined_equations(boost::make_iterator_range(s_sort.recogniser_equations(sort)));
       }
 
-      add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(sort)));
-      add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(sort)));
+      add_standard_mappings_and_equations(sort);
     }
 
     // Assumes that a system defined sort s is not (full) part of the specification if:
@@ -359,8 +358,7 @@ namespace mcrl2 {
         }
         else if (normalised.is_function_sort() && mappings(normalised).empty())
         { // no if : Bool # *i # *i -> *i for function sort *i, add standard functions
-          add_system_defined_mappings(boost::make_iterator_range(standard_generate_functions_code(normalised)));
-          add_system_defined_equations(boost::make_iterator_range(standard_generate_equations_code(normalised)));
+          add_standard_mappings_and_equations(normalised);
         }
       }
     }
@@ -418,7 +416,7 @@ namespace mcrl2 {
 
       for (std::set< sort_expression >::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
       {
-        dependent_sorts.add(*i);
+        dependent_sorts.add(*i, true);
       }
 
       make_complete(dependent_sorts);

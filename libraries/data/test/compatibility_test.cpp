@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/utility.h"
 
 using namespace mcrl2;
 using namespace atermpp;
