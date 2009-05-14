@@ -5158,7 +5158,7 @@ static enumeratedtype *create_enumeratedtype
       insertsort(gsMakeSortRef(ATAgetArgument(sort_id, 0), sort_struct), spec, true);
 
       //store new declarations in return value w
-      w->sortId = sort_id;
+      w->sortId = sort_struct;
       w->elementnames = data::convert< data::function_symbol_list >(
                 data::structured_sort(data::sort_expression(sort_struct)).
                                         constructor_functions());
