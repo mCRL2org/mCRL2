@@ -19,6 +19,7 @@
 #include "mcrl2/lps/action_label.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_initialization.h"
+#include "mcrl2/process/detail/linear_process_expression_visitor.h"
 
 namespace mcrl2 {
 
@@ -203,6 +204,27 @@ namespace process {
     return !(spec1 == spec2);
   }
 
+  /// \brief Returns true if the process specification is linear.
+  /// \param p A process specification
+  /// \return True if the process specification is linear.
+  bool is_linear(const process_specification& p)
+  {
+    if (p.equations().size() != 1)
+    {
+      return false;
+    }
+    detail::linear_process_expression_visitor visitor;
+    if (!visitor.is_linear(*p.equations().begin()))
+    {
+      return false;
+    }
+    if (!is_process_instance(p.init().expression()))
+    {
+      return false;
+    }
+    return true;
+  }
+  
 } // namespace process
 
 } // namespace mcrl2

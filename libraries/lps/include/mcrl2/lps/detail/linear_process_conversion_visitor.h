@@ -9,8 +9,8 @@
 /// \file mcrl2/lps/detail/linear_process_conversion_visitor.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
-#define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
+#ifndef MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
+#define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 
 #include <stdexcept>
 #include "mcrl2/atermpp/vector.h"
@@ -406,4 +406,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
+#endif // MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H

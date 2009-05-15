@@ -295,17 +295,11 @@ std::string case_9 =
   ;
 const std::string removed_9 = "";
 
-inline
-bool is_linear(const process::process_specification& pspec)
-{
-  return process::detail::linear_process_expression_visitor().is_linear(pspec);
-}
-
 void test_constelm(const std::string& spec_text, const std::string& expected_result)
 {
   specification s0;
   process::process_specification pspec = process::parse_process_specification(spec_text);
-  if (is_linear(pspec))
+  if (process::is_linear(pspec))
   {
     s0 = parse_linear_process_specification(spec_text);
   }

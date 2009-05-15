@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/algorithms.h
+/// \file mcrl2/core/detail/algorithms.h
 /// \brief Add your file description here.
 
-#ifndef LPS_DETAIL_LPS2PBES
-#define LPS_DETAIL_LPS2PBES
+#ifndef MCRL2_CORE_DETAIL_ALGORITHMS_H
+#define MCRL2_CORE_DETAIL_ALGORITHMS_H
 
 #include <stdexcept>
 #include <sstream>
@@ -25,14 +25,11 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/lps/lin_types.h"
-#include "mcrl2/lps/lin_std.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace core {
 
 namespace detail {
 
@@ -72,16 +69,6 @@ namespace detail {
     return result;
   }
 
-  /// \brief Applies linearization to a specification
-  /// \param spec A term
-  /// \param options Options for the algorithm
-  /// \return The linearized specification
-  inline
-  specification linearise(ATermAppl spec, t_lin_options options)
-  {
-    return linearise_std(spec, options);
-  }
-
   /// \brief Reads a state formula from an input stream
   /// \param from An input stream
   /// \return A term in an undocumented format
@@ -108,22 +95,10 @@ namespace detail {
     return result;
   }
 
-  /// \brief Converts a regular formula to a state formula
-  /// \param formula A term
-  /// \return The converted regular formula
-  inline
-  modal_formula::state_formula translate_regular_formula(ATermAppl formula)
-  {
-    ATermAppl result = core::translate_reg_frms(formula);
-    if (result == NULL)
-      throw mcrl2::runtime_error("formula translation error");
-    return result;
-  }
-
 } // namespace detail
 
-} // namespace lps
+} // namespace core
 
 } // namespace mcrl2
 
-#endif // LPS_DETAIL_LPS2PBES
+#endif // MCRL2_CORE_DETAIL_ALGORITHMS_H

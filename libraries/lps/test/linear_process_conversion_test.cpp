@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Wieger Wesselink, Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,35 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file process_test.cpp
+/// \file linear_process_conversion_test.cpp
 /// \brief Add your file description here.
 
-#include <iostream>
-#include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/process_expression_visitor.h"
-#include "mcrl2/process/process_expression_builder.h"
 #include "mcrl2/process/parse.h"
-#include "mcrl2/process/detail/linear_process_expression_visitor.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;
-
-void visit_process_expression(const process_expression& x)
-{
-  process_expression_visitor<> visitor;
-  visitor.visit(x);
-}
-
-void build_process_expression(const process_expression& x)
-{
-  process_expression_builder<> visitor;
-  visitor.visit(x);
-}
+using namespace mcrl2::lps;
 
 const std::string SPEC1 =
   "act a;                  \n"
@@ -105,11 +92,21 @@ const std::string ABS_SPEC_LINEARIZED =
 void test_process(std::string text)
 {
   process_specification spec = parse_process_specification(text);
+  specification sp = parse_linear_process_specification(text);
+  std::cout << "<spec>" << core::pp(specification_to_aterm(sp)) << std::endl;
 
   for (atermpp::vector<process_equation>::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
   {
-    visit_process_expression(i->expression());
-    build_process_expression(i->expression());
+    bool linear = process::detail::linear_process_expression_visitor().is_linear(*i);
+    std::cerr << core::pp(*i) << " is " << (linear ? "" : "not") << "linear" << std::endl;
+    if (linear)
+    {
+      process::detail::linear_process_conversion_visitor visitor;
+      visitor.convert(*i);
+      std::cerr << "summands:\n";
+      summand_list s(visitor.result.begin(), visitor.result.end());
+      std::cerr << core::pp(s) << std::endl;
+    }
   }
 }
 

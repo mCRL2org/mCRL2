@@ -15,7 +15,7 @@
 #include <string>
 #include <sstream>
 #include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/lps/detail/algorithms.h"
+#include "mcrl2/core/detail/algorithms.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
@@ -30,9 +30,9 @@ namespace process {
   {
     std::stringstream spec_stream;
     spec_stream << spec;
-    ATermAppl result = lps::detail::parse_specification(spec_stream);
-    result           = lps::detail::type_check_specification(result);
-    result           = lps::detail::alpha_reduce(result);
+    ATermAppl result = core::detail::parse_specification(spec_stream);
+    result           = core::detail::type_check_specification(result);
+    result           = core::detail::alpha_reduce(result);
     result           = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);
   }

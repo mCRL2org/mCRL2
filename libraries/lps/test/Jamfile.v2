@@ -14,6 +14,8 @@ include $(TOP)/build/testing/header_test.jam ;
 test-suite lps
     :
       #[ run pp_test.cpp ]
+      [ run linear_process_conversion_test.cpp ]
+      [ run free_variables_test.cpp ]
       [ run specification_test.cpp ]
       [ run replace_test.cpp ]
       [ run constelm_test.cpp ]

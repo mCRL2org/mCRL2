@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/linear_process_expression_visitor.h
+/// \file mcrl2/process/detail/linear_process_expression_visitor.h
 /// \brief add your file description here.
 
 #ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
@@ -371,26 +371,6 @@ namespace detail {
         visit(e.expression());
       }
       catch(non_linear_process&)
-      {
-        return false;
-      }
-      return true;
-    }
-
-    /// \brief Returns true if the process specification is linear.
-    /// \param p A process specification
-    /// \return True if the process specification is linear.
-    bool is_linear(const process_specification& p)
-    {
-      if (p.equations().size() != 1)
-      {
-        return false;
-      }
-      if (!is_linear(*p.equations().begin()))
-      {
-        return false;
-      }
-      if (!is_process_instance(p.init().expression()))
       {
         return false;
       }

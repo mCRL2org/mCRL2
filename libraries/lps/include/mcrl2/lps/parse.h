@@ -12,9 +12,9 @@
 #ifndef MCRL2_LPS_PARSE_H
 #define MCRL2_LPS_PARSE_H
 
-#include "mcrl2/process/detail/linear_process_conversion_visitor.h"
-#include "mcrl2/process/parse.h"
+#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/process/parse.h"
 
 namespace mcrl2 {
 
