@@ -12,7 +12,7 @@ block(const core::identifier_string_list& s, const process_expression& right) (b
 hide(const core::identifier_string_list& s, const process_expression& right) (hide_set, operand)
 rename(const rename_expression_list& r, const process_expression& right) (rename_set, operand)
 comm(const communication_expression_list& c, const process_expression& right) (comm_set, operand)
-allow(const multi_action_name_list& s, const process_expression& right) (allow_set, operand)
+allow(const action_name_multiset_list& s, const process_expression& right) (allow_set, operand)
 sync(const process_expression& left, const process_expression& right) (left, right)
 at(const process_expression& left, const data::data_expression& d) (operand, time_stamp)
 seq(const process_expression& left, const process_expression& right) (left, right)
@@ -54,7 +54,6 @@ struct process_expression_visitor
   /// \param a An additional argument for the recursion
   void visit(const process_expression& x, Arg& a)
   {
-    typedef core::term_traits<process_expression> tr;
 %s
   }
 };
@@ -88,7 +87,6 @@ struct process_expression_visitor<void>
   /// \param x A term
   void visit(const process_expression& x)
   {
-    typedef core::term_traits<process_expression> tr;
 %s
   }
 };
@@ -129,14 +127,13 @@ struct process_expression_builder
   /// \\return The visit result
   process_expression visit(const process_expression& x, Arg& a)
   {
-    typedef core::term_traits<process_expression> tr;
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit>" << tr::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
 %s
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
@@ -172,14 +169,13 @@ struct process_expression_builder<void>
   /// \param x A term
   process_expression visit(const process_expression& x)
   {
-    typedef core::term_traits<process_expression> tr;
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit>" << tr::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
 %s
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
@@ -253,10 +249,10 @@ def make_process_expression_visitor(filename):
     
         #--- generate code fragments like this
         #
-        #    if (tr::is_imp(e))
+        #    if (is_imp(e))
         #    {
-        #      term_type l = tr::left(e);
-        #      term_type r = tr::right(e);
+        #      term_type l = left(e);
+        #      term_type r = right(e);
         #      bool result = visit_imp(e, l, r);
         #      if (result) {
         #        visit(l);
@@ -265,7 +261,7 @@ def make_process_expression_visitor(filename):
         #      leave_imp();
         #    }
         text = ''
-        text = text + '%sif (tr::is_%s(x))\n' % (else_text, node)
+        text = text + '%sif (is_%s(x))\n' % (else_text, node)
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
@@ -326,17 +322,17 @@ def make_process_expression_builder(filename):
     
         #--- generate code fragments like this
         #
-        #    if (tr::is_and(x))
+        #    if (is_and(x))
         #    {
-        #      process_expression l = tr::left(x);
-        #      process_expression r = tr::right(x);
+        #      process_expression l = left(x);
+        #      process_expression r = right(x);
         #      result = visit_and(x, l, r, a);
         #      if (!is_finished(result)) {
         #        result = core::optimized_and(visit(l, a), visit(r, a));
         #      }
         #    }  
         text = ''
-        text = text + '%sif (tr::is_%s(x))\n' % (else_text, node)
+        text = text + '%sif (is_%s(x))\n' % (else_text, node)
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
@@ -374,12 +370,12 @@ def make_process_expression_builder(filename):
                   text)
     path(filename).write_text(text)
 
-def make_process_term_traits(filename):
+def make_process_is_functions(filename):
     TERM_TRAITS_TEXT = r'''
-    /// \\brief Test for the value true
+    /// \\brief Test for a %s expression
     /// \\param t A term
-    /// \\return True if it is the value \p true
-    static inline
+    /// \\return True if it is a %s expression
+    inline
     bool is_%s(const process_expression& t)
     {
       return core::detail::gsIs%s(t);
@@ -411,7 +407,7 @@ def make_process_term_traits(filename):
 
     rtext = ''
     for t in terms:
-        rtext = rtext + TERM_TRAITS_TEXT % t
+        rtext = rtext + TERM_TRAITS_TEXT % (t[0], t[0], t[0], t[1])
     text = path(filename).text()
     text = re.compile(r'//--- start generated text ---//.*//--- end generated text ---//', re.S).sub(
                   '//--- start generated text ---//\n' + rtext + '//--- end generated text ---//',
@@ -420,4 +416,4 @@ def make_process_term_traits(filename):
 
 make_process_expression_visitor('../include/mcrl2/process/process_expression_visitor.h')
 make_process_expression_builder('../include/mcrl2/process/process_expression_builder.h')
-make_process_term_traits('../include/mcrl2/process/process_expression.h')
+make_process_is_functions('../include/mcrl2/process/process_expression.h')

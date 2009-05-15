@@ -12,7 +12,6 @@
 #ifndef MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
 #define MCRL2_PROCESS_DETAIL_LINEAR_PROCESS_EXPRESSION_VISITOR_H
 
-#include "mcrl2/core/term_traits.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/process_expression_visitor.h"
 
@@ -26,9 +25,6 @@ namespace detail {
   /// Use the is_linear() member function for this.
   struct linear_process_expression_visitor: public process_expression_visitor<void>
   {
-    /// \brief The traits class for process expressions.
-    typedef core::term_traits<process_expression> tr;
-
     /// \brief The process equation that is checked.
     process_equation eqn;
 
@@ -77,8 +73,8 @@ namespace detail {
     /// \return True if the argument is a process instance
     bool is_process(const process_expression& x)
     {
-      return tr::is_process_instance(x)
-          || tr::is_process_instance_assignment(x)
+      return is_process_instance(x)
+          || is_process_instance_assignment(x)
           ;
     }
 
@@ -87,8 +83,8 @@ namespace detail {
     /// \return True if the argument is a deadlock
     bool is_timed_deadlock(const process_expression& x)
     {
-      return tr::is_delta(x)
-          || tr::is_at(x)
+      return is_delta(x)
+          || is_at(x)
           ;
     }
 
@@ -97,9 +93,9 @@ namespace detail {
     /// \return True if the argument is a multi-action
     bool is_multiaction(const process_expression& x)
     {
-      return tr::is_tau(x)
-          || tr::is_sync(x)
-          || tr::is_action(x)
+      return is_tau(x)
+          || is_sync(x)
+          || is_action(x)
           ;
     }
 
@@ -108,7 +104,7 @@ namespace detail {
     /// \return True if the argument is a multi-action
     bool is_timed_multiaction(const process_expression& x)
     {
-      return tr::is_at(x)
+      return is_at(x)
           || is_multiaction(x);
     }
 
@@ -117,7 +113,7 @@ namespace detail {
     /// \return True if the argument is an action prefix
     bool is_action_prefix(const process_expression& x)
     {
-      return tr::is_seq(x)
+      return is_seq(x)
           || is_timed_multiaction(x);
     }
 
@@ -126,7 +122,7 @@ namespace detail {
     /// \return True if the argument is a conditional deadlock
     bool is_conditional_deadlock(const process_expression& x)
     {
-      return tr::is_if_then(x)
+      return is_if_then(x)
           || is_timed_deadlock(x);
     }
 
@@ -135,7 +131,7 @@ namespace detail {
     /// \return True if the argument is a conditional action prefix.
     bool is_conditional_action_prefix(const process_expression& x)
     {
-      return tr::is_if_then(x)
+      return is_if_then(x)
           || is_action_prefix(x);
     }
 
@@ -144,7 +140,7 @@ namespace detail {
     /// \return True if the argument is an alternative composition
     bool is_alternative(const process_expression& x)
     {
-      return tr::is_sum(x)
+      return is_sum(x)
           || is_conditional_action_prefix(x)
           || is_conditional_deadlock(x)
           ;
@@ -155,7 +151,7 @@ namespace detail {
     /// \return True if the argument is a linear process
     bool is_linear_process_term(const process_expression& x)
     {
-      return tr::is_choice(x)
+      return is_choice(x)
           || is_alternative(x)
           ;
     }
@@ -275,7 +271,7 @@ namespace detail {
     /// \param d A data expression
     bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
-      if (!is_multiaction(left) && !tr::is_delta(left))
+      if (!is_multiaction(left) && !is_delta(left))
       {
         throw non_linear_process();
       }
@@ -293,7 +289,7 @@ namespace detail {
       {
         throw non_linear_process();
       }
-      if (!tr::is_process_instance(right))
+      if (!is_process_instance(right))
       {
         throw std::runtime_error("unexpected error in visit_seq");
       }
@@ -394,7 +390,7 @@ namespace detail {
       {
         return false;
       }
-      if (!tr::is_process_instance(p.init().expression()))
+      if (!is_process_instance(p.init().expression()))
       {
         return false;
       }

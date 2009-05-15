@@ -273,39 +273,38 @@ struct process_expression_visitor
   /// \param a An additional argument for the recursion
   void visit(const process_expression& x, Arg& a)
   {
-    typedef core::term_traits<process_expression> tr;
-    if (tr::is_action(x))
+    if (is_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       visit_action(x, l, v, a);
       leave_action();
     }
-    else if (tr::is_process_instance(x))
+    else if (is_process_instance(x))
     {
       process_identifier pi = process_instance(x).identifier();
       data::data_expression_list v = process_instance(x).actual_parameters();
       visit_process_instance(x, pi, v, a);
       leave_process_instance();
     }
-    else if (tr::is_process_instance_assignment(x))
+    else if (is_process_instance_assignment(x))
     {
       process_identifier pi = process_instance_assignment(x).identifier();
       data::assignment_list v = process_instance_assignment(x).assignments();
       visit_process_instance_assignment(x, pi, v, a);
       leave_process_instance_assignment();
     }
-    else if (tr::is_delta(x))
+    else if (is_delta(x))
     {
       visit_delta(x, a);
       leave_delta();
     }
-    else if (tr::is_tau(x))
+    else if (is_tau(x))
     {
       visit_tau(x, a);
       leave_tau();
     }
-    else if (tr::is_sum(x))
+    else if (is_sum(x))
     {
       data::variable_list v = sum(x).bound_variables();
       process_expression right = sum(x).operand();
@@ -315,7 +314,7 @@ struct process_expression_visitor
       }
       leave_sum();
     }
-    else if (tr::is_block(x))
+    else if (is_block(x))
     {
       core::identifier_string_list s = block(x).block_set();
       process_expression right = block(x).operand();
@@ -325,7 +324,7 @@ struct process_expression_visitor
       }
       leave_block();
     }
-    else if (tr::is_hide(x))
+    else if (is_hide(x))
     {
       core::identifier_string_list s = hide(x).hide_set();
       process_expression right = hide(x).operand();
@@ -335,7 +334,7 @@ struct process_expression_visitor
       }
       leave_hide();
     }
-    else if (tr::is_rename(x))
+    else if (is_rename(x))
     {
       rename_expression_list r = rename(x).rename_set();
       process_expression right = rename(x).operand();
@@ -345,7 +344,7 @@ struct process_expression_visitor
       }
       leave_rename();
     }
-    else if (tr::is_comm(x))
+    else if (is_comm(x))
     {
       communication_expression_list c = comm(x).comm_set();
       process_expression right = comm(x).operand();
@@ -355,7 +354,7 @@ struct process_expression_visitor
       }
       leave_comm();
     }
-    else if (tr::is_allow(x))
+    else if (is_allow(x))
     {
       action_name_multiset_list s = allow(x).allow_set();
       process_expression right = allow(x).operand();
@@ -365,7 +364,7 @@ struct process_expression_visitor
       }
       leave_allow();
     }
-    else if (tr::is_sync(x))
+    else if (is_sync(x))
     {
       process_expression left = sync(x).left();
       process_expression right = sync(x).right();
@@ -376,7 +375,7 @@ struct process_expression_visitor
       }
       leave_sync();
     }
-    else if (tr::is_at(x))
+    else if (is_at(x))
     {
       process_expression left = at(x).operand();
       data::data_expression d = at(x).time_stamp();
@@ -386,7 +385,7 @@ struct process_expression_visitor
       }
       leave_at();
     }
-    else if (tr::is_seq(x))
+    else if (is_seq(x))
     {
       process_expression left = seq(x).left();
       process_expression right = seq(x).right();
@@ -397,7 +396,7 @@ struct process_expression_visitor
       }
       leave_seq();
     }
-    else if (tr::is_if_then(x))
+    else if (is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).then_case();
@@ -407,7 +406,7 @@ struct process_expression_visitor
       }
       leave_if_then();
     }
-    else if (tr::is_if_then_else(x))
+    else if (is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).then_case();
@@ -419,7 +418,7 @@ struct process_expression_visitor
       }
       leave_if_then_else();
     }
-    else if (tr::is_bounded_init(x))
+    else if (is_bounded_init(x))
     {
       process_expression left = bounded_init(x).left();
       process_expression right = bounded_init(x).right();
@@ -430,7 +429,7 @@ struct process_expression_visitor
       }
       leave_bounded_init();
     }
-    else if (tr::is_merge(x))
+    else if (is_merge(x))
     {
       process_expression left = merge(x).left();
       process_expression right = merge(x).right();
@@ -441,7 +440,7 @@ struct process_expression_visitor
       }
       leave_merge();
     }
-    else if (tr::is_left_merge(x))
+    else if (is_left_merge(x))
     {
       process_expression left = left_merge(x).left();
       process_expression right = left_merge(x).right();
@@ -452,7 +451,7 @@ struct process_expression_visitor
       }
       leave_left_merge();
     }
-    else if (tr::is_choice(x))
+    else if (is_choice(x))
     {
       process_expression left = choice(x).left();
       process_expression right = choice(x).right();
@@ -716,39 +715,38 @@ struct process_expression_visitor<void>
   /// \param x A term
   void visit(const process_expression& x)
   {
-    typedef core::term_traits<process_expression> tr;
-    if (tr::is_action(x))
+    if (is_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
       visit_action(x, l, v);
       leave_action();
     }
-    else if (tr::is_process_instance(x))
+    else if (is_process_instance(x))
     {
       process_identifier pi = process_instance(x).identifier();
       data::data_expression_list v = process_instance(x).actual_parameters();
       visit_process_instance(x, pi, v);
       leave_process_instance();
     }
-    else if (tr::is_process_instance_assignment(x))
+    else if (is_process_instance_assignment(x))
     {
       process_identifier pi = process_instance_assignment(x).identifier();
       data::assignment_list v = process_instance_assignment(x).assignments();
       visit_process_instance_assignment(x, pi, v);
       leave_process_instance_assignment();
     }
-    else if (tr::is_delta(x))
+    else if (is_delta(x))
     {
       visit_delta(x);
       leave_delta();
     }
-    else if (tr::is_tau(x))
+    else if (is_tau(x))
     {
       visit_tau(x);
       leave_tau();
     }
-    else if (tr::is_sum(x))
+    else if (is_sum(x))
     {
       data::variable_list v = sum(x).bound_variables();
       process_expression right = sum(x).operand();
@@ -758,7 +756,7 @@ struct process_expression_visitor<void>
       }
       leave_sum();
     }
-    else if (tr::is_block(x))
+    else if (is_block(x))
     {
       core::identifier_string_list s = block(x).block_set();
       process_expression right = block(x).operand();
@@ -768,7 +766,7 @@ struct process_expression_visitor<void>
       }
       leave_block();
     }
-    else if (tr::is_hide(x))
+    else if (is_hide(x))
     {
       core::identifier_string_list s = hide(x).hide_set();
       process_expression right = hide(x).operand();
@@ -778,7 +776,7 @@ struct process_expression_visitor<void>
       }
       leave_hide();
     }
-    else if (tr::is_rename(x))
+    else if (is_rename(x))
     {
       rename_expression_list r = rename(x).rename_set();
       process_expression right = rename(x).operand();
@@ -788,7 +786,7 @@ struct process_expression_visitor<void>
       }
       leave_rename();
     }
-    else if (tr::is_comm(x))
+    else if (is_comm(x))
     {
       communication_expression_list c = comm(x).comm_set();
       process_expression right = comm(x).operand();
@@ -798,7 +796,7 @@ struct process_expression_visitor<void>
       }
       leave_comm();
     }
-    else if (tr::is_allow(x))
+    else if (is_allow(x))
     {
       action_name_multiset_list s = allow(x).allow_set();
       process_expression right = allow(x).operand();
@@ -808,7 +806,7 @@ struct process_expression_visitor<void>
       }
       leave_allow();
     }
-    else if (tr::is_sync(x))
+    else if (is_sync(x))
     {
       process_expression left = sync(x).left();
       process_expression right = sync(x).right();
@@ -819,7 +817,7 @@ struct process_expression_visitor<void>
       }
       leave_sync();
     }
-    else if (tr::is_at(x))
+    else if (is_at(x))
     {
       process_expression left = at(x).operand();
       data::data_expression d = at(x).time_stamp();
@@ -829,7 +827,7 @@ struct process_expression_visitor<void>
       }
       leave_at();
     }
-    else if (tr::is_seq(x))
+    else if (is_seq(x))
     {
       process_expression left = seq(x).left();
       process_expression right = seq(x).right();
@@ -840,7 +838,7 @@ struct process_expression_visitor<void>
       }
       leave_seq();
     }
-    else if (tr::is_if_then(x))
+    else if (is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).then_case();
@@ -850,7 +848,7 @@ struct process_expression_visitor<void>
       }
       leave_if_then();
     }
-    else if (tr::is_if_then_else(x))
+    else if (is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).then_case();
@@ -862,7 +860,7 @@ struct process_expression_visitor<void>
       }
       leave_if_then_else();
     }
-    else if (tr::is_bounded_init(x))
+    else if (is_bounded_init(x))
     {
       process_expression left = bounded_init(x).left();
       process_expression right = bounded_init(x).right();
@@ -873,7 +871,7 @@ struct process_expression_visitor<void>
       }
       leave_bounded_init();
     }
-    else if (tr::is_merge(x))
+    else if (is_merge(x))
     {
       process_expression left = merge(x).left();
       process_expression right = merge(x).right();
@@ -884,7 +882,7 @@ struct process_expression_visitor<void>
       }
       leave_merge();
     }
-    else if (tr::is_left_merge(x))
+    else if (is_left_merge(x))
     {
       process_expression left = left_merge(x).left();
       process_expression right = left_merge(x).right();
@@ -895,7 +893,7 @@ struct process_expression_visitor<void>
       }
       leave_left_merge();
     }
-    else if (tr::is_choice(x))
+    else if (is_choice(x))
     {
       process_expression left = choice(x).left();
       process_expression right = choice(x).right();

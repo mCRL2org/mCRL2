@@ -58,9 +58,6 @@ namespace detail {
     /// \brief Contains intermediary results.
     lps::summand m_summand;
 
-    /// \brief The traits class for process expressions.
-    typedef core::term_traits<process_expression> tr;
-
     /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
     {};
@@ -244,7 +241,7 @@ namespace detail {
     bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
     {
       visit(left);
-      if (tr::is_delta(x))
+      if (is_delta(x))
       {
         m_deadlock.time() = d;
 // std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
@@ -337,12 +334,12 @@ namespace detail {
     bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
-      if (!tr::is_choice(left))
+      if (!is_choice(left))
       {
         add_summand();
       }
       visit(right);
-      if (!tr::is_choice(right))
+      if (!is_choice(right))
       {
         add_summand();
       }
@@ -393,7 +390,7 @@ namespace detail {
         convert(*i);
       }
       lps::linear_process lp(data::variable_list(), m_process_parameters, lps::summand_list(result.begin(), result.end()));
-      if (!tr::is_process_instance(p.init().expression()))
+      if (!is_process_instance(p.init().expression()))
       {
         std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
       }

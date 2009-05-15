@@ -197,12 +197,11 @@ struct process_expression_builder
   /// \return The visit result
   process_expression visit(const process_expression& x, Arg& a)
   {
-    typedef core::term_traits<process_expression> tr;
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit>" << tr::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (tr::is_action(x))
+    if (is_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
@@ -212,7 +211,7 @@ struct process_expression_builder
         result = action(l, v);
       }
     }
-    else if (tr::is_process_instance(x))
+    else if (is_process_instance(x))
     {
       process_identifier pi = process_instance(x).identifier();
       data::data_expression_list v = process_instance(x).actual_parameters();
@@ -222,7 +221,7 @@ struct process_expression_builder
         result = process_instance(pi, v);
       }
     }
-    else if (tr::is_process_instance_assignment(x))
+    else if (is_process_instance_assignment(x))
     {
       process_identifier pi = process_instance_assignment(x).identifier();
       data::assignment_list v = process_instance_assignment(x).assignments();
@@ -232,7 +231,7 @@ struct process_expression_builder
         result = process_instance_assignment(pi, v);
       }
     }
-    else if (tr::is_delta(x))
+    else if (is_delta(x))
     {
       result = visit_delta(x, a);
       if (!is_finished(result))
@@ -240,7 +239,7 @@ struct process_expression_builder
         result = delta();
       }
     }
-    else if (tr::is_tau(x))
+    else if (is_tau(x))
     {
       result = visit_tau(x, a);
       if (!is_finished(result))
@@ -248,7 +247,7 @@ struct process_expression_builder
         result = tau();
       }
     }
-    else if (tr::is_sum(x))
+    else if (is_sum(x))
     {
       data::variable_list v = sum(x).bound_variables();
       process_expression right = sum(x).operand();
@@ -258,7 +257,7 @@ struct process_expression_builder
         result = sum(v, visit(right, a));
       }
     }
-    else if (tr::is_block(x))
+    else if (is_block(x))
     {
       core::identifier_string_list s = block(x).block_set();
       process_expression right = block(x).operand();
@@ -268,7 +267,7 @@ struct process_expression_builder
         result = block(s, visit(right, a));
       }
     }
-    else if (tr::is_hide(x))
+    else if (is_hide(x))
     {
       core::identifier_string_list s = hide(x).hide_set();
       process_expression right = hide(x).operand();
@@ -278,7 +277,7 @@ struct process_expression_builder
         result = hide(s, visit(right, a));
       }
     }
-    else if (tr::is_rename(x))
+    else if (is_rename(x))
     {
       rename_expression_list r = rename(x).rename_set();
       process_expression right = rename(x).operand();
@@ -288,7 +287,7 @@ struct process_expression_builder
         result = rename(r, visit(right, a));
       }
     }
-    else if (tr::is_comm(x))
+    else if (is_comm(x))
     {
       communication_expression_list c = comm(x).comm_set();
       process_expression right = comm(x).operand();
@@ -298,7 +297,7 @@ struct process_expression_builder
         result = comm(c, visit(right, a));
       }
     }
-    else if (tr::is_allow(x))
+    else if (is_allow(x))
     {
       action_name_multiset_list s = allow(x).allow_set();
       process_expression right = allow(x).operand();
@@ -308,7 +307,7 @@ struct process_expression_builder
         result = allow(s, visit(right, a));
       }
     }
-    else if (tr::is_sync(x))
+    else if (is_sync(x))
     {
       process_expression left = sync(x).left();
       process_expression right = sync(x).right();
@@ -318,7 +317,7 @@ struct process_expression_builder
         result = sync(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_at(x))
+    else if (is_at(x))
     {
       process_expression left = at(x).operand();
       data::data_expression d = at(x).time_stamp();
@@ -328,7 +327,7 @@ struct process_expression_builder
         result = at(visit(left, a), d);
       }
     }
-    else if (tr::is_seq(x))
+    else if (is_seq(x))
     {
       process_expression left = seq(x).left();
       process_expression right = seq(x).right();
@@ -338,7 +337,7 @@ struct process_expression_builder
         result = seq(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_if_then(x))
+    else if (is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).then_case();
@@ -348,7 +347,7 @@ struct process_expression_builder
         result = if_then(d, visit(right, a));
       }
     }
-    else if (tr::is_if_then_else(x))
+    else if (is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).then_case();
@@ -359,7 +358,7 @@ struct process_expression_builder
         result = if_then_else(d, visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_bounded_init(x))
+    else if (is_bounded_init(x))
     {
       process_expression left = bounded_init(x).left();
       process_expression right = bounded_init(x).right();
@@ -369,7 +368,7 @@ struct process_expression_builder
         result = bounded_init(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_merge(x))
+    else if (is_merge(x))
     {
       process_expression left = merge(x).left();
       process_expression right = merge(x).right();
@@ -379,7 +378,7 @@ struct process_expression_builder
         result = merge(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_left_merge(x))
+    else if (is_left_merge(x))
     {
       process_expression left = left_merge(x).left();
       process_expression right = left_merge(x).right();
@@ -389,7 +388,7 @@ struct process_expression_builder
         result = left_merge(visit(left, a), visit(right, a));
       }
     }
-    else if (tr::is_choice(x))
+    else if (is_choice(x))
     {
       process_expression left = choice(x).left();
       process_expression right = choice(x).right();
@@ -401,7 +400,7 @@ struct process_expression_builder
     }
     
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
@@ -577,12 +576,11 @@ struct process_expression_builder<void>
   /// \param x A term
   process_expression visit(const process_expression& x)
   {
-    typedef core::term_traits<process_expression> tr;
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit>" << tr::pp(x) << std::endl;
+  std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (tr::is_action(x))
+    if (is_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
@@ -592,7 +590,7 @@ struct process_expression_builder<void>
         result = action(l, v);
       }
     }
-    else if (tr::is_process_instance(x))
+    else if (is_process_instance(x))
     {
       process_identifier pi = process_instance(x).identifier();
       data::data_expression_list v = process_instance(x).actual_parameters();
@@ -602,7 +600,7 @@ struct process_expression_builder<void>
         result = process_instance(pi, v);
       }
     }
-    else if (tr::is_process_instance_assignment(x))
+    else if (is_process_instance_assignment(x))
     {
       process_identifier pi = process_instance_assignment(x).identifier();
       data::assignment_list v = process_instance_assignment(x).assignments();
@@ -612,7 +610,7 @@ struct process_expression_builder<void>
         result = process_instance_assignment(pi, v);
       }
     }
-    else if (tr::is_delta(x))
+    else if (is_delta(x))
     {
       result = visit_delta(x);
       if (!is_finished(result))
@@ -620,7 +618,7 @@ struct process_expression_builder<void>
         result = delta();
       }
     }
-    else if (tr::is_tau(x))
+    else if (is_tau(x))
     {
       result = visit_tau(x);
       if (!is_finished(result))
@@ -628,7 +626,7 @@ struct process_expression_builder<void>
         result = tau();
       }
     }
-    else if (tr::is_sum(x))
+    else if (is_sum(x))
     {
       data::variable_list v = sum(x).bound_variables();
       process_expression right = sum(x).operand();
@@ -638,7 +636,7 @@ struct process_expression_builder<void>
         result = sum(v, visit(right));
       }
     }
-    else if (tr::is_block(x))
+    else if (is_block(x))
     {
       core::identifier_string_list s = block(x).block_set();
       process_expression right = block(x).operand();
@@ -648,7 +646,7 @@ struct process_expression_builder<void>
         result = block(s, visit(right));
       }
     }
-    else if (tr::is_hide(x))
+    else if (is_hide(x))
     {
       core::identifier_string_list s = hide(x).hide_set();
       process_expression right = hide(x).operand();
@@ -658,7 +656,7 @@ struct process_expression_builder<void>
         result = hide(s, visit(right));
       }
     }
-    else if (tr::is_rename(x))
+    else if (is_rename(x))
     {
       rename_expression_list r = rename(x).rename_set();
       process_expression right = rename(x).operand();
@@ -668,7 +666,7 @@ struct process_expression_builder<void>
         result = rename(r, visit(right));
       }
     }
-    else if (tr::is_comm(x))
+    else if (is_comm(x))
     {
       communication_expression_list c = comm(x).comm_set();
       process_expression right = comm(x).operand();
@@ -678,7 +676,7 @@ struct process_expression_builder<void>
         result = comm(c, visit(right));
       }
     }
-    else if (tr::is_allow(x))
+    else if (is_allow(x))
     {
       action_name_multiset_list s = allow(x).allow_set();
       process_expression right = allow(x).operand();
@@ -688,7 +686,7 @@ struct process_expression_builder<void>
         result = allow(s, visit(right));
       }
     }
-    else if (tr::is_sync(x))
+    else if (is_sync(x))
     {
       process_expression left = sync(x).left();
       process_expression right = sync(x).right();
@@ -698,7 +696,7 @@ struct process_expression_builder<void>
         result = sync(visit(left), visit(right));
       }
     }
-    else if (tr::is_at(x))
+    else if (is_at(x))
     {
       process_expression left = at(x).operand();
       data::data_expression d = at(x).time_stamp();
@@ -708,7 +706,7 @@ struct process_expression_builder<void>
         result = at(visit(left), d);
       }
     }
-    else if (tr::is_seq(x))
+    else if (is_seq(x))
     {
       process_expression left = seq(x).left();
       process_expression right = seq(x).right();
@@ -718,7 +716,7 @@ struct process_expression_builder<void>
         result = seq(visit(left), visit(right));
       }
     }
-    else if (tr::is_if_then(x))
+    else if (is_if_then(x))
     {
       data::data_expression d = if_then(x).condition();
       process_expression right = if_then(x).then_case();
@@ -728,7 +726,7 @@ struct process_expression_builder<void>
         result = if_then(d, visit(right));
       }
     }
-    else if (tr::is_if_then_else(x))
+    else if (is_if_then_else(x))
     {
       data::data_expression d = if_then_else(x).condition();
       process_expression left = if_then_else(x).then_case();
@@ -739,7 +737,7 @@ struct process_expression_builder<void>
         result = if_then_else(d, visit(left), visit(right));
       }
     }
-    else if (tr::is_bounded_init(x))
+    else if (is_bounded_init(x))
     {
       process_expression left = bounded_init(x).left();
       process_expression right = bounded_init(x).right();
@@ -749,7 +747,7 @@ struct process_expression_builder<void>
         result = bounded_init(visit(left), visit(right));
       }
     }
-    else if (tr::is_merge(x))
+    else if (is_merge(x))
     {
       process_expression left = merge(x).left();
       process_expression right = merge(x).right();
@@ -759,7 +757,7 @@ struct process_expression_builder<void>
         result = merge(visit(left), visit(right));
       }
     }
-    else if (tr::is_left_merge(x))
+    else if (is_left_merge(x))
     {
       process_expression left = left_merge(x).left();
       process_expression right = left_merge(x).right();
@@ -769,7 +767,7 @@ struct process_expression_builder<void>
         result = left_merge(visit(left), visit(right));
       }
     }
-    else if (tr::is_choice(x))
+    else if (is_choice(x))
     {
       process_expression left = choice(x).left();
       process_expression right = choice(x).right();
@@ -781,7 +779,7 @@ struct process_expression_builder<void>
     }
     
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
-  std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+  std::cerr << "<visit result>" << pp(result) << std::endl;
 #endif
     return result;
   }
