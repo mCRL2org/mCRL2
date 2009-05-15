@@ -87,9 +87,9 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
-      Sorts sorts( lps_specification );
+      lpsparunfold lpsparunfold( lps_specification );
 
-      lps_specification = sorts.algorithm( m_index );
+      lps_specification = lpsparunfold.algorithm( m_index );
 
       lps_specification.save(m_output_filename);
 

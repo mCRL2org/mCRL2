@@ -25,7 +25,7 @@ using namespace mcrl2::data;
 - alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
-Sorts::Sorts( mcrl2::lps::specification spec)
+lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
 {
   gsDebugMsg("Preprocessing\n");
   m_data_specification = spec.data() ;
@@ -61,31 +61,31 @@ Sorts::Sorts( mcrl2::lps::specification spec)
   };
 
   {
+    int size = mapping_and_constructor_names.size();
     data_specification::constructors_const_range fsl= m_data_specification.constructors();
     for (data_specification::constructors_const_range::const_iterator i = fsl.begin();
                                                                       i != fsl.end();
                                                                       ++i){
-      consSet.insert(*i);
       mapping_and_constructor_names.insert( i -> name() );
     };
     gsDebugMsg("\t");
-    gsVerboseMsg("Specification has %d constructors\n", consSet.size() );
+    gsVerboseMsg("Specification has %d constructors\n",  mapping_and_constructor_names.size() - size );
   }
 
   {
+    int size = mapping_and_constructor_names.size();
     data_specification::mappings_const_range fsl= m_data_specification.mappings();
     for (data_specification::mappings_const_range::const_iterator i = fsl.begin();
                                                                   i != fsl.end();
                                                                   ++i){
-      mapSet.insert(*i);
       mapping_and_constructor_names.insert( i -> name() );
     };
     gsDebugMsg("\t");
-    gsVerboseMsg("Specification has %d mappings \n", mapSet.size() );
+    gsVerboseMsg("Specification has %d mappings \n", mapping_and_constructor_names.size() - size );
   }
 };
 
-mcrl2::data::basic_sort Sorts::generateFreshSort( std::string str )
+mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str )
 {
   //Generate a fresh Basic Sort
   mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
@@ -98,7 +98,7 @@ mcrl2::data::basic_sort Sorts::generateFreshSort( std::string str )
   return basic_sort( std::string(nstr) );
 }
 
-mcrl2::core::identifier_string Sorts::generateFreshConMapFuncName(std::string str)
+mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapping_name(std::string str)
 {
   //Generate a fresh name for a constructor of mapping
   mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
@@ -109,9 +109,9 @@ mcrl2::core::identifier_string Sorts::generateFreshConMapFuncName(std::string st
   return nstr;
 }
 
-function_symbol_vector Sorts::determineAffectedConstructors()
+function_symbol_vector lpsparunfold::determine_affected_constructors()
 {
-  data_specification::constructors_const_range t = m_data_specification.constructors( unfoldParameter );
+  data_specification::constructors_const_range t = m_data_specification.constructors( m_unfold_process_parameter );
   function_symbol_vector k = function_symbol_vector( t.begin(), t.end() );    
   
   gsDebugMsg("k:\t");
@@ -124,7 +124,7 @@ function_symbol_vector Sorts::determineAffectedConstructors()
 }
 
 
-function_symbol_vector Sorts::newSorts( mcrl2::data::function_symbol_vector k )
+function_symbol_vector lpsparunfold::new_constructors( mcrl2::data::function_symbol_vector k )
 {
   using namespace mcrl2::data;
 
@@ -134,9 +134,9 @@ function_symbol_vector Sorts::newSorts( mcrl2::data::function_symbol_vector k )
   {
 
     std::string prefix = "c_";
-    mcrl2::core::identifier_string fresh_name = generateFreshConMapFuncName( prefix.append( i -> name() ) );
-    set_of_new_sorts.push_back( function_symbol( fresh_name , sort_new ) );
-    gsDebugMsg("\t%s\n", function_symbol( fresh_name , sort_new ).to_string().c_str() );
+    mcrl2::core::identifier_string fresh_name = generate_fresh_constructor_and_mapping_name( prefix.append( i -> name() ) );
+    set_of_new_sorts.push_back( function_symbol( fresh_name , fresh_basic_sort ) );
+    gsDebugMsg("\t%s\n", function_symbol( fresh_name , fresh_basic_sort ).to_string().c_str() );
     mapping_and_constructor_names.insert(fresh_name);
 
   }
@@ -145,20 +145,20 @@ function_symbol_vector Sorts::newSorts( mcrl2::data::function_symbol_vector k )
   return set_of_new_sorts;
 }
 
-mcrl2::data::function_symbol Sorts::createCMap(int k)
+mcrl2::data::function_symbol lpsparunfold::create_case_function(int k)
 {
   mcrl2::data::function_symbol fs;
   std::string str = "C_";
-  str.append( sort_new.name() );
-  mcrl2::core::identifier_string idstr = generateFreshConMapFuncName( str );
+  str.append( fresh_basic_sort.name() );
+  mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name( str );
   mcrl2::data::sort_expression_vector fsl;
-  fsl.push_back(sort_new);
+  fsl.push_back(fresh_basic_sort);
   for(int i = 0; i < k; ++i)
   {
-    fsl.push_back( unfoldParameter );
+    fsl.push_back( m_unfold_process_parameter );
   }
 
-  fs = function_symbol( idstr , mcrl2::data::function_sort( fsl, unfoldParameter ));
+  fs = function_symbol( idstr , mcrl2::data::function_sort( fsl, m_unfold_process_parameter ));
 
   gsDebugMsg("\t");
   gsVerboseMsg("Created C map: %s\n", fs.to_string().c_str());
@@ -166,24 +166,24 @@ mcrl2::data::function_symbol Sorts::createCMap(int k)
   return fs;
 }
 
-mcrl2::data::function_symbol Sorts::createDetMap()
+mcrl2::data::function_symbol lpsparunfold::create_determine_function()
 {
   mcrl2::data::function_symbol fs;
   std::string str = "Det_";
-  str.append( sort_new.name() );
-  mcrl2::core::identifier_string idstr = generateFreshConMapFuncName( str );
+  str.append( fresh_basic_sort.name() );
+  mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name( str );
   mcrl2::data::sort_expression_list fsl;
-  fs = function_symbol( idstr , mcrl2::data::function_sort( unfoldParameter , sort_new ));
+  fs = function_symbol( idstr , mcrl2::data::function_sort( m_unfold_process_parameter , fresh_basic_sort ));
   gsDebugMsg("\t%s\n", fs.to_string().c_str());
 
   return fs;
 }
 
-mcrl2::data::function_symbol_vector Sorts::createProjectorFunctions(function_symbol_vector k)
+mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(function_symbol_vector k)
 {
   mcrl2::data::function_symbol_vector sfs;
   std::string str = "pi_";
-  str.append( sort_new.name() );
+  str.append( fresh_basic_sort.name() );
 
   std::set<mcrl2::data::sort_expression> processed;
   for( function_symbol_vector::iterator i = k.begin() ; i != k.end(); ++i )
@@ -194,8 +194,8 @@ mcrl2::data::function_symbol_vector Sorts::createProjectorFunctions(function_sym
       boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
       for(sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++ )
       {
-          mcrl2::core::identifier_string idstr = generateFreshConMapFuncName( str );
-          sfs.push_back(function_symbol( idstr , mcrl2::data::function_sort( unfoldParameter , *j )));
+          mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name( str );
+          sfs.push_back(function_symbol( idstr , mcrl2::data::function_sort( m_unfold_process_parameter , *j )));
           processed.insert( *j );
       }
     }
@@ -207,7 +207,7 @@ mcrl2::data::function_symbol_vector Sorts::createProjectorFunctions(function_sym
   return sfs;
 }
 
-std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(function_symbol_vector pi, function_symbol Cmap, function_symbol_vector set_of_new_sorts, function_symbol_vector k, function_symbol Detmap)
+data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector pi, function_symbol case_function, function_symbol_vector set_of_new_sorts, function_symbol_vector k, function_symbol determine_function)
 {
   variable_vector vars;        /* Equation variables  */
   data_equation_vector del;    /* Generated equations */
@@ -223,17 +223,17 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
   generator.add_identifiers( var_names );
   mcrl2::core::identifier_string istr = generator( fstr );
 
-  variable lv = variable( istr, unfoldParameter );
+  variable lv = variable( istr, m_unfold_process_parameter );
   for(int i = 0 ; i < int(k.size()) ; ++i){
     istr = generator( fstr );
-    v = variable( istr, unfoldParameter );
+    v = variable( istr, m_unfold_process_parameter );
     vars.push_back( v );
   }
   vars.push_back(lv);
 
   /* Creating variable for detector function */
   istr = generator( cstr );
-  v = variable( istr, sort_new );
+  v = variable( istr, fresh_basic_sort );
   vars.push_back( v );
 
   /* Create Equations */
@@ -246,7 +246,7 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
     for(int j = 0 ; j < int(k.size()) ; ++j){
       args.push_back(vars[ j ]);
     }
-    data_expression lhs = application(  Cmap , mcrl2::data::data_expression_list(args.begin() , args.end()) );
+    data_expression lhs = application(  case_function , mcrl2::data::data_expression_list(args.begin() , args.end()) );
 
     gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_all_variables( lhs );
@@ -263,7 +263,7 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
         args.push_back(vars[ e ]);
     }
     boost::iterator_range<data_expression_vector::const_iterator> arg (args); /* Omslachtig */
-    data_expression lhs = application(  Cmap , arg );
+    data_expression lhs = application(  case_function , arg );
     gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_all_variables( lhs );
     svars.insert(vars[e] );
@@ -282,7 +282,7 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
 
     if( i -> sort().is_basic_sort() )
     {
-      data_expression lhs = application( Detmap, *i );
+      data_expression lhs = application( determine_function, *i );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > svars = find_all_variables( lhs );
       set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
@@ -309,7 +309,7 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
            sort_index[*j] = sort_index[*j]+1;
            dal.push_back(y);
       }
-      data_expression lhs = application( Detmap , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
+      data_expression lhs = application( determine_function , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > svars = find_all_variables( lhs );
       set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
@@ -333,7 +333,7 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
 
     if(i -> sort().is_structured_sort())
     {
-      data_expression lhs = application( Detmap , *i );
+      data_expression lhs = application( determine_function , *i );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > vars = find_all_variables( lhs );
       set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
@@ -344,12 +344,10 @@ std::pair< variable_vector, data_equation_vector > Sorts::createFunctionSection(
   e++;
   }
 
-  std::pair< variable_vector, data_equation_vector> tuple =  std::make_pair( vars , del );
-
-  return tuple;
+  return del;
 }
 
-mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::string str)
+mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str)
 {
   mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
   generator.add_identifiers( process_parameter_names );
@@ -358,7 +356,7 @@ mcrl2::core::identifier_string Sorts::generateFreshProcessParameterName(std::str
   return idstr;
 }
 
-mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, int parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol case_function , function_symbol_vector affected_constructors, function_symbol determine_function, int parameter_at_index, function_symbol_vector pi)
 {
    /* Get process parameters from lps */
    mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
@@ -389,14 +387,14 @@ mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symb
        mcrl2::data::variable_vector process_parameters_injection;
 
        /* Generate fresh process parameter for new Sort */
-       mcrl2::core::identifier_string idstr = generateFreshProcessParameterName( unfold_parameter_name );
-       process_parameters_injection.push_back( mcrl2::data::variable( idstr , sort_new ) );
+       mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name );
+       process_parameters_injection.push_back( mcrl2::data::variable( idstr , fresh_basic_sort ) );
 
        gsDebugMsg("\t");
-       gsVerboseMsg("Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( sort_new ).c_str());
+       gsVerboseMsg("Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
 
-       for(mcrl2::data::function_symbol_vector::iterator j = AffectedConstructors.begin()
-                                                ; j != AffectedConstructors.end()
+       for(mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
+                                                ; j != affected_constructors.end()
                                                 ; ++j )
        {
          //cout << *j << endl;  
@@ -407,7 +405,7 @@ mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symb
            function_sort::domain_range dom = function_sort(j -> sort()).domain();
            for(function_sort::domain_range::iterator k = dom.begin(); k != dom.end(); ++k)
            {
-             mcrl2::core::identifier_string idstr = generateFreshProcessParameterName( unfold_parameter_name ); 
+             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name ); 
              process_parameters_injection.push_back( mcrl2::data::variable( idstr ,  *k  ) );
              gsDebugMsg( "\tInjected process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
            }
@@ -442,14 +440,13 @@ mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symb
        new_process_parameters.push_back( *i );
      }
    }
-   gsDebugMsg("\t");
-   gsVerboseMsg("New LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
+   gsDebugMsg("\tNew LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
 
   /* Reconstruct summands */
   mcrl2::lps::summand_vector new_summands;
 
   //Prepare parameter substitution
-  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameterSubstitution(proc_par_to_proc_par_inj, AffectedConstructors, Cmap );
+  std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function );
 
   mcrl2::lps::summand_list s = m_lps.summands();
   for(mcrl2::lps::summand_list::iterator j = s.begin()
@@ -488,7 +485,7 @@ mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symb
       if (std::distance( ass.begin(), k ) == parameter_at_index)
       {
 
-        mcrl2::data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedConstructors, Detmap, pi );
+        mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, pi );
         //Replace unfold parameters in affected assignments
         new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
       } else {
@@ -522,13 +519,13 @@ mcrl2::lps::linear_process Sorts::updateLPS(function_symbol Cmap , function_symb
 
   mcrl2::lps::linear_process new_lps = mcrl2::lps::linear_process(m_lps.free_variables(),mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end()), mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
-  gsVerboseMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
+  gsDebugMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
   assert( new_lps.is_well_typed());
 
   return new_lps;
 }
 
-mcrl2::lps::process_initializer Sorts::updateInit(function_symbol Cmap , function_symbol_vector AffectedConstructors, function_symbol Detmap, int parameter_at_index, function_symbol_vector pi)
+mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initialization(function_symbol case_function , function_symbol_vector AffectedConstructors, function_symbol determine_function, int parameter_at_index, function_symbol_vector pi)
 {
   //
   //update inital process  
@@ -564,7 +561,7 @@ mcrl2::lps::process_initializer Sorts::updateInit(function_symbol Cmap , functio
     if (std::distance( ass.begin(), k ) == parameter_at_index)
     {
 
-      mcrl2::data::data_expression_vector ins = unfoldConstructor(k -> rhs(), AffectedConstructors, Detmap, pi );
+      mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, pi );
       //Replace unfold parameters in affected assignments
       new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
     } else {
@@ -586,12 +583,12 @@ mcrl2::lps::process_initializer Sorts::updateInit(function_symbol Cmap , functio
   }
 
   mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer (m_init_process.free_variables(), mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()) );
-  gsVerboseMsg("%s\n", pp( new_init ).c_str() );
+  gsDebugMsg("%s\n", pp( new_init ).c_str() );
  
   return new_init;
 }
 
-std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::parameterSubstitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector AffectedConstructors, mcrl2::data::function_symbol Cmap )
+std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfold::parameter_substitution(std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj, mcrl2::data::function_symbol_vector k, mcrl2::data::function_symbol case_function )
 {
    std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> result;
    data_expression_vector dev;
@@ -610,8 +607,8 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::para
 
      dev.push_back( data_expression( i->second.front() ));
 
-     for( mcrl2::data::function_symbol_vector::iterator m = AffectedConstructors.begin()
-                                                    ; m != AffectedConstructors.end()
+     for( mcrl2::data::function_symbol_vector::iterator m = k.begin()
+                                                    ; m != k.end()
                                                     ; ++m )
      {
        if (m -> sort().is_basic_sort())
@@ -647,18 +644,14 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> Sorts::para
        }
      }
      gsDebugMsg("");
-     gsVerboseMsg( "parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( Cmap, dev  ) ).c_str());
-     result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( Cmap, dev ) ) );
+     gsVerboseMsg( "parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( case_function, dev  ) ).c_str());
+     result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( case_function, dev ) ) );
    }
   return result ;
 }
 
-mcrl2::data::data_expression_vector Sorts::unfoldConstructor( data_expression de, function_symbol_vector am, function_symbol Detmap, function_symbol_vector pi )
+mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor( data_expression de, function_symbol determine_function, function_symbol_vector pi )
 {
-    /* input  : de, det, pi
-       output : < det(de), pi_0(de), ... ,pi_n(de) >
-    */
-
     mcrl2::data::data_expression_vector result;
     {
       /* Unfold parameter if function symbol occurs  */
@@ -666,7 +659,7 @@ mcrl2::data::data_expression_vector Sorts::unfoldConstructor( data_expression de
       data_expression_vector new_ass;
 
       /* Det function */
-      new_ass.push_back( mcrl2::data::application( Detmap, de ) ) ;
+      new_ass.push_back( mcrl2::data::application( determine_function, de ) ) ;
 
       for(function_symbol_vector::iterator i = pi.begin(); i != pi.end(); ++i )
       {
@@ -678,7 +671,7 @@ mcrl2::data::data_expression_vector Sorts::unfoldConstructor( data_expression de
     return result;
 }
 
-mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_index)
+mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int parameter_at_index)
 {
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
@@ -712,47 +705,44 @@ mcrl2::data::sort_expression Sorts::getSortOfProcessParameter(int parameter_at_i
 }
 
 
-mcrl2::lps::specification Sorts::algorithm(int parameter_at_index)
+mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
 {
-   unfoldParameter = getSortOfProcessParameter( parameter_at_index);
+   m_unfold_process_parameter = sort_at_process_parameter_index( parameter_at_index);
 
    /* Var Dec */
    function_symbol_vector k;
    function_symbol_vector set_of_new_sorts;
-   function_symbol_vector set_of_ProjectorFunctions;
-   function_symbol Cmap;
-   function_symbol Detmap;
-   std::pair< variable_vector, data_equation_vector > data_equations;
+   function_symbol_vector projection_functions;
+   function_symbol case_function;
+   function_symbol determine_function;
+   data_equation_vector data_equations;
+
    /*   Alg */
-   /*     1 */ sort_new = generateFreshSort( unfold_parameter_name );
-   /*     2 */ k = determineAffectedConstructors();
-   /*     4 */ set_of_new_sorts = newSorts( k );
-   /*     5 */ sortSet.insert( set_of_new_sorts.begin(), set_of_new_sorts.end() );
-               sortSet.insert( sort_new );
-   /*     6 */ Cmap = createCMap( k.size() );
-   /*     7 */ Detmap = createDetMap( );
-   /*  8-12 */ set_of_ProjectorFunctions = createProjectorFunctions(k);
-   /* 13-xx */ data_equations = createFunctionSection(set_of_ProjectorFunctions, Cmap, set_of_new_sorts, k, Detmap);
+   /*     1 */ fresh_basic_sort = generate_fresh_basic_sort( unfold_parameter_name );
+   /*     2 */ k = determine_affected_constructors();
+   /*     4 */ set_of_new_sorts = new_constructors( k );
+   /*     6 */ case_function = create_case_function( k.size() );
+   /*     7 */ determine_function = create_determine_function( );
+   /*  8-12 */ projection_functions = create_projection_functions(k);
+   /* 13-xx */ data_equations = create_data_equations( projection_functions, case_function, set_of_new_sorts, k, determine_function);
 
    /*----------------*/
-   mcrl2::lps::linear_process new_lps = updateLPS(Cmap, k, Detmap, parameter_at_index, set_of_ProjectorFunctions);
-   mcrl2::lps::process_initializer new_init = updateInit(Cmap, k, Detmap, parameter_at_index, set_of_ProjectorFunctions);
+   mcrl2::lps::linear_process new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
+   mcrl2::lps::process_initializer new_init = update_linear_process_initialization(case_function, k, determine_function, parameter_at_index, projection_functions);
 
   //Reconstruct specification
-  m_data_specification.add_sort( sort_new );
-  boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(set_of_ProjectorFunctions));
+  m_data_specification.add_sort( fresh_basic_sort );
+  boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(projection_functions));
   m_data_specification.add_mappings( pi_range );
-  m_data_specification.add_mapping( Detmap );
-  m_data_specification.add_mapping( Cmap );
+  m_data_specification.add_mapping( determine_function );
+  m_data_specification.add_mapping( case_function );
   boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
   m_data_specification.add_mappings( set_of_new_sorts_range );
 
-  boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range(data_equations.second));
+  boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
   m_data_specification.add_equations( dev_range );
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, new_lps, new_init );
-
-//  cout << pp(new_spec) << endl;
 
   assert(  new_spec.is_well_typed() );
 
