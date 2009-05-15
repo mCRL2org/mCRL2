@@ -648,7 +648,8 @@ namespace lysa
 			string indices = join(*name.indices, ", ");
 			if(!indices.empty()) indices = "(" + indices + ")";
 
-			StringTemplate st(templates.get("name"));
+			//StringTemplate st(templates.get("name"));
+			StringTemplate st(templates, "name");
 			st["name"] << name.name << indices;
 
 			return st.get();

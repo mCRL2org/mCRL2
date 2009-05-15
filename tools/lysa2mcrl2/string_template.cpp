@@ -10,14 +10,34 @@ using namespace boost::xpressive;
 
 void StringTemplate::replace(string key, string value)
 {
-	//subject = regex_replace(subject, as_xpr("%" + key + "%"), value );
-	//replace_all(subject, "%" + key + "%", value);
   string k_var = "%" + key + "%";
-	//subject = replace_all_copy(subject, k_var, value);
 
-  sregex rex = as_xpr("%") >> key >> as_xpr("%"); //((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
-  string new_subject = regex_replace(subject, rex, value);
-  subject = new_subject;
+  //hardcoding replace_all(subject, k_var, value);
+  bool inVar = false;
+  int len = subject.size();
+  int k_var_len = k_var.size();
+  ostringstream new_subject;
+
+  for(int i=0; i!=len; i++)
+  {
+    //find percent sign that marks start of variable
+    if(subject[i]=='%')
+    {
+      //if the following chars indeed correspond to the key,
+      // replace it by the value in the output;
+      // and skip over the following characters.
+      if(subject.compare(i, k_var_len, k_var)==0)
+      {
+        new_subject << value;
+        //move to ending %-sign (-1 because "continue" still does the i++).
+        i += k_var_len - 1;
+        continue;
+      }
+    }
+    new_subject << subject[i];
+  }
+
+  subject = new_subject.str();
 }
 /**
  * always returns false. this way, multiple has, replace_by pairs can be 
@@ -53,10 +73,13 @@ ostringstream& StringTemplate::operator[] (string key)
 
 void StringTemplate::finalise()
 {
-  pair<string, shared_ptr<ostringstream> > v;
-  BOOST_FOREACH(v, streams)
+  //pair<string, shared_ptr<ostringstream> > v;
+  //BOOST_FOREACH(v, streams)
+  for(map<string, shared_ptr<ostringstream> >::iterator i = streams.begin(); i != streams.end(); i++)
   {
-    this->replace(v.first, v.second->str());
+    string key(i->first);
+    string value(i->second->str());
+    this->replace(key, value);
   }
   //removes dangling commas, right next to a bracket.
   sregex rex = ((s1=as_xpr("[")|"(") >> *_s >> "," >> *_s) | (*_s >> "," >> *_s >> (s2=as_xpr(")")|"]"|":"));
@@ -66,7 +89,7 @@ void StringTemplate::finalise()
 StringTemplateFile::StringTemplateFile(string filecontent)
 {
 	//ifstream f(filename.c_str());
-  cout << filecontent;
+  
   istringstream f(filecontent);
 	string fmtline;
 	while(getline(f, fmtline))

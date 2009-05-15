@@ -100,6 +100,7 @@ class lysa2mcrl2_tool: public input_output_tool
       	outfile << converted_spec;
       	outfile.close();
       }
+      delete options.strategy;
       return true;
     }
 
@@ -172,7 +173,7 @@ class lysa2mcrl2_tool: public input_output_tool
     {
       input_output_tool::parse_options(parser);
       
-      if(parser.options.count("strategy"))
+      //if(parser.options.count("strategy"))
       {
         options.strategy = lysa::Strategy::get(parser.option_argument("strategy"));
       }
