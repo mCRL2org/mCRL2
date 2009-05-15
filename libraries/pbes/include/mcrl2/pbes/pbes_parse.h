@@ -51,6 +51,7 @@ namespace pbes_system {
     result = data::detail::internal_format_conversion(result);
 
     p = pbes<Container>(result);
+    complete_data_specification(p);
     return from;
   }
 
