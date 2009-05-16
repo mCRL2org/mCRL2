@@ -12,6 +12,7 @@
 #ifndef MCRL2_CORE_TEXT_UTILITY_H
 #define MCRL2_CORE_TEXT_UTILITY_H
 
+#include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <iterator>
