@@ -21,16 +21,32 @@ namespace lps {
 
 namespace detail {
 
-  /// \brief Function object for applying a rewriter to LPS data types.
+  /// \brief Function object for converting a data rewriter into a rewriter that
+  /// applies a substitution.
   template <typename DataRewriter, typename Substitution>
+  struct rewriter_adapter
+  {
+    const DataRewriter& R_;
+    const Substitution& sigma_;
+    
+    rewriter_adapter(const DataRewriter& R, const Substitution& sigma)
+      : R_(R), sigma_(sigma)
+    {}
+    
+    data::data_expression operator()(const data::data_expression& t) const
+    {
+      return R_(t, sigma_);
+    }
+  };
+  
+  /// \brief Function object for applying a data rewriter to LPS data types.
+  template <typename DataRewriter>
   struct lps_rewriter
   {
     const DataRewriter& R;
-    const Substitution& sigma;
   
-    lps_rewriter(const DataRewriter& R_, const Substitution& sigma_)
-      : R(R_),
-        sigma(sigma_)                       
+    lps_rewriter(const DataRewriter& R_)
+      : R(R_)
     {}
 
     template <typename TermList>
@@ -41,28 +57,28 @@ namespace detail {
       std::vector<value_type> v(l.begin(), l.end());
       for (typename std::vector<value_type>::iterator i = v.begin(); i != v.end(); ++i)
       {
-        (*this)(*i);
+        rewrite(*i);
       }
       return TermList(v.begin(), v.end());
     }   
 
     /// \brief Applies the rewriter to a data expression
     /// \param d A data expression
-    void operator()(data::data_expression& d) const    
+    void rewrite(data::data_expression& d) const    
     {                                         
-      d = R(d, sigma);
+      d = R(d);
     } 
   
     /// \brief Applies the rewriter to an assignment
     /// \param a An assignment
-    void operator()(data::assignment& a) const
+    void rewrite(data::assignment& a) const
     {
-      a = data::assignment(a.lhs(), R(a.rhs(), sigma)); 
+      a = data::assignment(a.lhs(), R(a.rhs())); 
     } 
   
     /// \brief Applies the rewriter to an action
     /// \param a An action
-    void operator()(action& a) const
+    void rewrite(action& a) const
     {
       data::data_expression_list l = rewrite_list(a.arguments());
       a = action(a.label(), l); 
@@ -70,41 +86,41 @@ namespace detail {
     
     /// \brief Applies the rewriter to a deadlock
     /// \param d A deadlock
-    void operator()(deadlock& d) const
+    void rewrite(deadlock& d) const
     {
       if (d.has_time())
       {
-        (*this)(d.time());
+        rewrite(d.time());
       }
     } 
   
     /// \brief Applies the rewriter to a multi-action
     /// \param a A multi-action
-    void operator()(multi_action& a) const
+    void rewrite(multi_action& a) const
     {
       if (a.has_time())
       {
-        (*this)(a.time());
+        rewrite(a.time());
       }
       a.actions() = rewrite_list(a.actions());
     } 
   
     /// \brief Applies the rewriter to a summand
     /// \param s A summand
-    void operator()(summand& s) const
+    void rewrite(summand& s) const
     {
       data::data_expression c = s.condition();
-      (*this)(c);
+      rewrite(c);
       if (s.is_delta())
       {
         deadlock delta = s.deadlock();
-        (*this)(delta);
+        rewrite(delta);
         s = summand(s.summation_variables(), c, delta);
       }
       else
       {
         multi_action m = s.multi_action();
-        (*this)(m);
+        rewrite(m);
         data::assignment_list a = rewrite_list(s.assignments());
         s = summand(s.summation_variables(), c, m, a);
       }
@@ -112,7 +128,7 @@ namespace detail {
   
     /// \brief Applies the rewriter to a process_initializer
     /// \param s A process_initializer
-    void operator()(process_initializer& i) const
+    void rewrite(process_initializer& i) const
     {
       data::assignment_list a = rewrite_list(i.assignments());
       i = process_initializer(i.free_variables(), a);
@@ -120,7 +136,7 @@ namespace detail {
   
     /// \brief Applies the rewriter to a linear_process
     /// \param s A linear_process
-    void operator()(linear_process& p) const
+    void rewrite(linear_process& p) const
     {
       summand_list l = rewrite_list(p.summands());
       p = linear_process(p.free_variables(), p.process_parameters(), l);
@@ -128,18 +144,24 @@ namespace detail {
   
     /// \brief Applies the rewriter to a linear process specification
     /// \param spec A linear process specification
-    void operator()(specification& spec) const
+    void rewrite(specification& spec) const
     {
-      (*this)(spec.process());
-      (*this)(spec.initial_process());
-    } 
+      rewrite(spec.process());
+      rewrite(spec.initial_process());
+    }
+    
+    template <typename Term>
+    void operator()(Term& t)
+    {
+      rewrite(t);
+    }
   };
-  
+
   /// \brief Utility function to create an lps_rewriter.
-  template <typename DataRewriter, typename Substitution>    
-  lps_rewriter<DataRewriter, Substitution> make_lps_rewriter(const DataRewriter& R, const Substitution& sigma)        
+  template <typename DataRewriter>    
+  lps_rewriter<DataRewriter> make_lps_rewriter(const DataRewriter& R)        
   {
-    return lps_rewriter<DataRewriter, Substitution>(R, sigma);
+    return lps_rewriter<DataRewriter>(R);
   } 
 
 } // namespace detail
