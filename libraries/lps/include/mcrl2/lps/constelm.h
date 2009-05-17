@@ -23,6 +23,7 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/remove_parameters.h"
 
 namespace mcrl2 {
@@ -195,6 +196,208 @@ specification constelm(const specification& spec, DataRewriter& r, bool verbose 
   assert(result.is_well_typed());
   return result;
 }
+
+struct default_free_variable_solver
+{
+  typedef std::map<data::variable, data::data_expression> variable_map;
+  
+  /// \brief Attempts to find a valuation for free variables that makes the condition
+  /// !R(c, sigma) or (R(d1, sigma) = R(g, sigma)) true.
+  template <typename Rewriter, typename Substitution>
+  variable_map solve(const data::variable_list& V,
+                     const data::data_expression& /* c */,
+                     const data::data_expression& g,
+                     const data::variable& /* d */,
+                     const data::data_expression& d1,
+                     const Rewriter& R,
+                     const Substitution& sigma
+                    )
+    {
+      variable_map result;
+      data::data_expression r = R(g, sigma);
+      if (r.is_variable())
+      {
+        data::variable v = r;
+        if (std::find(V.begin(), V.end(), v) != V.end())
+        {
+          result[v] = d1;
+        }
+      }
+      return result;
+    }
+};
+
+/// \brief Algorithm class for elimination of constant parameters
+// TODO: add default template argument for free variable solver
+class constelm_algorithm: public lps::detail::lps_rewriter_algorithm
+{
+  protected:
+    typedef std::map<data::variable, data::data_expression> variable_map;
+    
+    /// \brief If true, then the algorithm is allowed to instantiate free variables
+    /// as a side effect.
+    bool m_instantiate_free_variables;
+
+    /// \brief If true, verbose output is printed.
+    bool m_verbose;
+
+    /// \brief Maps process parameters to their index.
+    std::map<data::variable, unsigned int> m_index_of;
+   
+    /// \brief Applies the next state substitution to the variable v.
+    const data::data_expression& next_state(const summand& s, const data::variable& v) const
+    {
+      const data::assignment_list& a = s.assignments();
+      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+      {
+        if (i->lhs() == v)
+        {
+          return i->rhs();
+        }
+      }
+      return v; // no assignment to v found, so return v itself
+    }
+
+    // /// \brief Returns true if ... 
+    // template <typename DataRewriter, typename Substitution>
+    // bool is_constant(const data::variable& dj, const summand& s, DataRewriter& R, Substitution& sigma) const
+    // {
+    //   data::data_expression gj = next_state(s, dj);
+    //   if (R(s.condition(), sigma) == data::sort_bool_::false_() || R(gj, sigma) == d1)
+    //   {
+    //     return true;
+    //   }
+    // }
+
+  public:
+    
+    /// \brief Constructor
+    constelm_algorithm(specification& spec, data::rewriter::strategy s = data::rewriter::jitty)
+      : lps::detail::lps_rewriter_algorithm(spec, s)
+    {}
+    
+    /// \brief Runs the constelm algorithm
+    /// \param p A linear process
+    /// \param d1 An initial value for the linear process p
+    /// \param R A data rewriter
+    /// \param instantiate_free_variables If true, the algorithm is allowed to instantiate free variables
+    /// as a side effect
+    template <typename DataRewriter>
+    void run(bool instantiate_free_variables = false, bool verbose = false)
+    {
+      // TODO: use convert<> for this?
+      data::data_expression_list state = spec.initial_process().state();
+      data::data_expression_vector d1(state.begin(), state.end());
+      linear_process& p = spec.process();
+
+      m_instantiate_free_variables = instantiate_free_variables;
+      m_verbose = verbose;
+
+      data::variable_list V = p.free_variables();
+      const data::variable_list& d = p.process_parameters();
+
+      // initialize m_index_of
+      unsigned index = 0;
+      for (data::variable_list::const_iterator i = d.begin(); i != d.end(); ++i)
+      {               
+        m_index_of[*i] = index++;
+      }   
+        
+      data::data_expression_vector x(d1.begin(), d1.end());
+      std::set<data::variable> G(d.begin(), d.end());
+      std::set<data::variable> dG;
+      
+      // Contains substitutins to free variables
+      variable_map sigma;
+
+      std::map<data::variable, std::set<data::variable> > undo;
+
+      do
+      {
+        dG.clear();
+        for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+        {
+          const summand& s = *i;  
+          const data::data_expression& c_i = s.condition();
+          data::data_expression Rc = R(c_i, sigma);
+          if (Rc != data::sort_bool_::false_())
+          {                                 
+            for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
+            {
+              unsigned int index_j = m_index_of[*j];
+              const data::variable& d_j = *j;
+              const data::data_expression& g_ij = next_state(s, d_j);
+              
+              // TODO: give map_substitution_adapter a map interface to avoid ugly code like below?
+              if (R(d_j, data::make_map_substitution_adapter(sigma)) != R(g_ij, data::make_map_substitution_adapter(sigma)))
+              {
+                variable_map W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, d1[index_j], R, sigma);
+                if (!W.empty())
+                {
+                  for (variable_map::const_iterator w = W.begin(); w != W.end(); ++w)
+                  {
+                    sigma[w->first] = w->second;
+                    undo[d_j].insert(w->first);
+                  }
+                }         
+                else
+                {
+                  G.erase(d_j);
+                  dG.insert(d_j);
+                  x[index_j] = d_j;
+                  std::set<data::variable>& var = undo[d_j];
+                  for (std::set<data::variable>::iterator w = var.begin(); w != var.end(); ++w)
+                  {
+                    sigma[*w] = *w;
+                  }
+                  undo[d_j].clear();
+                }
+              }
+            }
+          }
+        }
+      } while (!dG.empty());
+      
+      // report the results
+      if (m_verbose)
+      {
+        std::cout << "Removing the constant process parameters: ";
+        for (std::set<data::variable>::iterator i = G.begin(); i != G.end(); ++i)
+        {
+          std::clog << data::pp(*i) << " ";
+        }
+        std::clog << std::endl;       
+
+        if (!sigma.empty())
+        {
+          std::clog << "Applied the following free variable substitutions: " << data::to_string(sigma);
+        }
+      }
+
+      // save the instantiated free variables for later use
+      std::set<data::variable> instantiated_free_variables;
+      for (variable_map::iterator k = sigma.begin(); k != sigma.end(); ++k)
+      {
+        instantiated_free_variables.insert(k->first);
+      }
+      
+      // add the constant parameter substitutions to sigma
+      for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
+      {
+        unsigned int index_j = m_index_of[*j];
+        sigma[*j] = d1[index_j];
+      }
+
+      // rewrite the specification spec with the substitutions in sigma
+      rewrite(data::make_map_substitution_adapter(sigma));
+      
+      // remove the constant parameters from the specification spec
+      remove_formal_parameters(G);
+      
+      // remove the instantiated free variables from the specification spec
+      remove_free_variables(instantiated_free_variables);
+    }
+};
 
 } // namespace lps
 
