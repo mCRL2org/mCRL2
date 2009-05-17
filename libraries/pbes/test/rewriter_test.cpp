@@ -24,6 +24,7 @@
 #include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -31,25 +32,6 @@
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
-
-/// Parse a string of the form "b: Bool := true, n: Nat := 0", and add them
-/// to the substition function sigma.
-template <typename SubstitutionFunction>
-void parse_substitutions(std::string text, SubstitutionFunction& sigma)
-{
-  std::vector<std::string> substitutions = core::split(text, ";");
-  for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
-  {
-    std::vector<std::string> words = core::regex_split(*i, ":=");
-    if (words.size() != 2)
-    {
-      continue;
-    }
-    data::variable v = data::parse_variable(words[0]);
-    data::data_expression e = data::parse_data_expression(words[1]);
-    sigma[v] = e;
-  }
-}
 
 const std::string VARIABLE_SPECIFICATION =
   "datavar         \n"
@@ -118,7 +100,7 @@ template <typename Rewriter1, typename Rewriter2>
 void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl, std::string substitutions)
 {
   data::mutable_substitution<data::variable, data::data_expression_with_variables> sigma;
-  parse_substitutions(substitutions, sigma);
+  data::detail::parse_substitutions(substitutions, sigma);
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
   if (R1(d1, sigma) != R2(d2))
