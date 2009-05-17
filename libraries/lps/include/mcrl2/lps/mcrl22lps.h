@@ -20,6 +20,8 @@
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/process/parse.h"
 
 namespace mcrl2 {
 
@@ -36,7 +38,7 @@ namespace lps {
   } 
   
   /// \brief Generates a linearized process specification from a specification in text.
-  /// \param spec A string
+  /// \param spec A string containing a process specification
   /// \param options Options for the linearization algorithm.
   /// \return The linearized specification.
   inline
@@ -53,6 +55,36 @@ namespace lps {
     result                     = core::detail::alpha_reduce(result);
     result                     = data::detail::internal_format_conversion(result);
     return linearise(result, options);
+  }
+
+  /// \brief Generates a linearized process specification from a specification in text.
+  /// Bypasses the linearizer if the process is already in linear form
+  /// \param spec A string containing a process specification
+  /// \param options Options for the linearization algorithm.
+  /// \return The linearized specification.
+  inline
+  specification mcrl22lps_linear(const std::string& text, t_lin_options options = t_lin_options())
+  {
+    process::process_specification pspec = process::parse_process_specification(text);
+    if (process::is_linear(pspec))
+    {
+      return parse_linear_process_specification(text);
+    }
+    else
+    {
+      return mcrl22lps(text, options);
+    }
+   
+    // TODO: why does this implementation behave differently?
+    // try
+    // {
+    //   return parse_linear_process_specification(text);
+    // }
+    // catch(std::runtime_error)
+    // {
+    //   // skip
+    // }
+    // return mcrl22lps(text, options);
   }
 
 } // namespace lps
