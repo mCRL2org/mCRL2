@@ -59,6 +59,13 @@ namespace lps {
         return m_actions;
       }
 
+      /// \brief Returns the sequence of actions.
+      /// \return The sequence of actions.
+      action_list& actions()
+      {
+        return m_actions;
+      }
+
       /// \brief Returns the time.
       /// \return The time.
       const data::data_expression& time() const

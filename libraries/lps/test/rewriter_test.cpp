@@ -15,10 +15,14 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
+#include "mcrl2/lps/detail/lps_rewriter.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
@@ -134,6 +138,48 @@ void test3()
   BOOST_CHECK(spec1.process().summands().size()==2);
 }
 
+// N.B. This test doesn't work due to the different representations of numbers
+// that are used before and after rewriting :-(
+// Checks if rewriting the specification src with the substitutions sigma
+// results in the specification dest.
+void test_lps_rewriter(std::string src_text, std::string dest_text, std::string sigma_text)
+{
+  lps::specification src  = mcrl22lps_linear(src_text);
+  lps::specification dest = mcrl22lps_linear(dest_text);
+
+  // rewrite the specification src                                         
+  data::rewriter R(src.data());
+  data::mutable_substitution<data::variable, data::data_expression> sigma;
+  data::detail::parse_substitutions(sigma_text, src.data(), sigma);
+  lps::detail::make_lps_rewriter(R, sigma)(src);                   
+
+  if (src != dest)
+  {
+    std::cerr << "--- test failed ---" << std::endl;
+    std::cerr << pp(src.process().summands()) << std::endl;
+    std::cerr << pp(src.initial_process()) << std::endl;
+    std::cerr << "-------------------" << std::endl;
+    std::cerr << pp(dest.process().summands()) << std::endl;
+    std::cerr << pp(dest.initial_process()) << std::endl;
+  }
+  BOOST_CHECK(src == dest);
+}
+                    
+void test_lps_rewriter()
+{
+  std::string src =
+    "act  c:Pos#Nat;                          \n"
+    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
+    "init P(1+1,2+2);                         \n";
+
+  std::string dest =
+    "act  c:Pos#Nat;                          \n"
+    "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+3);   \n"
+    "init P(2,4);                             \n";
+    
+  test_lps_rewriter(src, dest, "");
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -144,6 +190,8 @@ int test_main(int argc, char* argv[])
   core::garbage_collect();
   test3();
   core::garbage_collect();
+  //test_lps_rewriter();
+  //core::garbage_collect();
 
   return 0;
 }
