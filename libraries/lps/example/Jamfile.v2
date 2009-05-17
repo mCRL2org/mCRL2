@@ -3,11 +3,13 @@ project libraries/lps/example
        <use>/site-config//boost
        <source>/libraries//core
        <source>/libraries//lps
+       <source>/libraries//utilities
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <define>MCRL2_REVISION=\"\\\"0\\\"\"
    ;
 
+exe lpsrewr         : lpsrewr.cpp : <squadt-connectivity>implemented ;
 exe lpsparelm       : lpsparelm.cpp : ;
 exe lpsconstelm     : lpsconstelm.cpp : ;
 exe parelm          : parelm.cpp : ;
@@ -20,6 +22,7 @@ exe utility1        : utility1.cpp : ;
 
 install dist
    :
+     lpsrewr
      lpsparelm
      lpsconstelm
      parelm
