@@ -376,7 +376,9 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       }
 
       // rewrite the specification spec with the substitutions in sigma
-      super::rewrite(data::make_map_substitution_adapter(sigma));
+      // N.B. The temporary tmp is needed by g++
+      data::map_substitution_adapter<variable_map> tmp = data::make_map_substitution_adapter(sigma);
+      super::rewrite(tmp);
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
