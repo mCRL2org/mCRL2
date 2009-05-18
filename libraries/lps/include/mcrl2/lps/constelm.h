@@ -235,6 +235,10 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 {
   protected:
     typedef std::map<data::variable, data::data_expression> variable_map;
+      
+    // Needed to qualify the attributes of the super class, since g++ refuses to recognize
+    // them without a super:: in front of it.
+    typedef lps::detail::lps_rewriter_algorithm<DataRewriter> super;
 
     /// \brief If true, then the algorithm is allowed to instantiate free variables
     /// as a side effect.
@@ -259,12 +263,12 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
     void run(bool instantiate_free_variables = false)
     {
       m_instantiate_free_variables = instantiate_free_variables;
-      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
+      data::data_expression_vector e = data::convert<data::data_expression_vector>(super::m_spec.initial_process().state());
         
       // optimization: rewrite e
-      e = lps::detail::lps_rewriter<DataRewriter>(R).rewrite_list(e);
+      e = lps::detail::lps_rewriter<DataRewriter>(super::R).rewrite_list(e);
 
-      linear_process& p = m_spec.process();
+      linear_process& p = super::m_spec.process();
       data::variable_list V = p.free_variables();
       const data::variable_list& d = p.process_parameters();
 
@@ -275,13 +279,13 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
         m_index_of[*i] = index++;
       }
 
-      std::set<data::variable> G(d.begin(), d.end());
-      std::set<data::variable> dG;
-      
       // sigma contains substitutions of free variables and process parameters
       variable_map sigma;
       data::data_expression_vector::iterator e_i = e.begin();
-      for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
+ 
+      std::set<data::variable> G(d.begin(), d.end());
+      std::set<data::variable> dG;
+           for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
       {
         sigma[*i] = *e_i;
       }
@@ -296,24 +300,24 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
         {
           const summand& s = *i;
           const data::data_expression& c_i = s.condition();
-          if (R(c_i, data::make_map_substitution_adapter(sigma)) != data::sort_bool_::false_())
+          if (super::R(c_i, data::make_map_substitution_adapter(sigma)) != data::sort_bool_::false_())
           {
             for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
             {
               unsigned int index_j = m_index_of[*j];
               const data::variable& d_j = *j;
-              data::data_expression g_ij = next_state(s, d_j);
+              data::data_expression g_ij = super::next_state(s, d_j);
 
               // TODO: give mutable_substitution a map interface to avoid ugly code like below?
-              if (R(g_ij, data::make_map_substitution_adapter(sigma)) != R(d_j, data::make_map_substitution_adapter(sigma)))
+              if (super::R(g_ij, data::make_map_substitution_adapter(sigma)) != super::R(d_j, data::make_map_substitution_adapter(sigma)))
               {
 #ifdef MCRL2_LPSCONSTELM_DEBUG
             std::cerr << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
-                      << "      value after:  " << pp(R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
+                      << "      value before: " << pp(super::R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
+                      << "      value after:  " << pp(super::R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
 #endif
-                variable_map W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, data::make_map_substitution_adapter(sigma));
+                variable_map W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], super::R, data::make_map_substitution_adapter(sigma));
                 if (!W.empty())
                 {
                   for (variable_map::const_iterator w = W.begin(); w != W.end(); ++w)
@@ -339,8 +343,8 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
               else
               {
                 std::cerr << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
-                      << "      value after:  " << pp(R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
+                      << "      value before: " << pp(super::R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
+                      << "      value after:  " << pp(super::R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
               }
 #endif
@@ -349,14 +353,14 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 #ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(R(c_i, data::make_map_substitution_adapter(sigma))) << std::endl;
+            std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(super::R(c_i, data::make_map_substitution_adapter(sigma))) << std::endl;
           }
 #endif
         }
       } while (!dG.empty());
 
       // report the results
-      if (m_verbose)
+      if (super::m_verbose)
       {
         std::cout << "Removing the constant process parameters: ";
         for (std::set<data::variable>::iterator i = G.begin(); i != G.end(); ++i)
@@ -372,7 +376,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       }
 
       // rewrite the specification spec with the substitutions in sigma
-      rewrite(data::make_map_substitution_adapter(sigma));
+      super::rewrite(data::make_map_substitution_adapter(sigma));
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
@@ -380,7 +384,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       {
         constant_parameters.insert(i->first);
       }
-      remove_parameters(constant_parameters);
+      super::remove_parameters(constant_parameters);
     }
 };
 
