@@ -319,10 +319,10 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
   // check if the parelm result is correct
   if (set1 != set2)
   {
-    std::cerr << "--- failed test ---\n";
-    std::cerr << spec_text << std::endl;
-    std::cerr << "expected result " << boost::algorithm::join(set1, " ") << std::endl;
-    std::cerr << "computed result " << boost::algorithm::join(set2, " ") << std::endl;
+    std::clog << "--- failed test ---\n";
+    std::clog << spec_text << std::endl;
+    std::clog << "expected result " << boost::algorithm::join(set1, " ") << std::endl;
+    std::clog << "computed result " << boost::algorithm::join(set2, " ") << std::endl;
   }
   BOOST_CHECK(set1 == set2);
 

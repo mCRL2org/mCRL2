@@ -115,7 +115,7 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
       if (rc == false_())
       {
 #ifdef MCRL2_LPSCONSTELM_DEBUG
-      std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(replacements) << " -> " << pp(rc) << std::endl;
+      std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(replacements) << " -> " << pp(rc) << std::endl;
 #endif
         continue;
       }
@@ -131,7 +131,7 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
             replacements.erase(k);
             has_changed = true;
 #ifdef MCRL2_LPSCONSTELM_DEBUG
-            std::cerr << "POSSIBLE CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
+            std::clog << "POSSIBLE CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
                       << "      value before: " << pp(r(j->lhs(), make_map_substitution_adapter(replacements))) << "\n"
                       << "      value after:  " << pp(r(j->rhs(), make_map_substitution_adapter(replacements))) << "\n"
                       << "      replacements: " << data::to_string(replacements) << std::endl;
@@ -140,7 +140,7 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
 #ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::cerr << "NO CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
+            std::clog << "NO CHANGE FOR PARAMETER " << pp(j->lhs()) << "\n"
                       << "      value before: " << pp(r(j->lhs(), make_map_substitution_adapter(replacements))) << "\n"
                       << "      value after:  " << pp(r(j->rhs(), make_map_substitution_adapter(replacements))) << "\n"
                       << "      replacements: " << data::to_string(replacements) << std::endl;
@@ -247,6 +247,20 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
     /// \brief Maps process parameters to their index.
     std::map<data::variable, unsigned int> m_index_of;
 
+    // TODO: this can be removed after a suitable map substitution has been defined
+    template <typename MapContainer>
+    void set_map_element(MapContainer& m, typename MapContainer::key_type key, typename MapContainer::mapped_type value) const
+    {
+      if (key == value)
+      {
+        m.erase(key);
+      }
+      else
+      {
+        m[key] = value;
+      }
+    }
+
   public:
 
     /// \brief Constructor
@@ -287,7 +301,8 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       std::set<data::variable> dG;
            for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
       {
-        sigma[*i] = *e_i;
+        set_map_element(sigma, *i, *e_i);
+        //sigma[*i] = *e_i;
       }
 
       // undo contains undo information of instantiations of free variables
@@ -316,7 +331,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
               if (super::R(g_ij, data::make_map_substitution_adapter(sigma)) != super::R(d_j, data::make_map_substitution_adapter(sigma)))
               {
 #ifdef MCRL2_LPSCONSTELM_DEBUG
-            std::cerr << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
+            std::clog << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
                       << "      value before: " << pp(super::R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      value after:  " << pp(super::R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
@@ -326,18 +341,21 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
                 {
                   for (variable_map::const_iterator w = W.begin(); w != W.end(); ++w)
                   {
-                    sigma[w->first] = w->second;
+                    set_map_element(sigma, w->first, w->second);
+                    //sigma[w->first] = w->second;
                     undo[d_j].insert(w->first);
                   }
                 }
                 else
                 {
                   dG.insert(d_j);
-                  sigma[d_j] = d_j;
+                  set_map_element(sigma, d_j, d_j);
+                  //sigma[d_j] = d_j;
                   std::set<data::variable>& var = undo[d_j];
                   for (std::set<data::variable>::iterator w = var.begin(); w != var.end(); ++w)
                   {
-                    sigma[*w] = *w;
+                    set_map_element(sigma, *w, *w);
+                    //sigma[*w] = *w;
                   }
                   undo[d_j].clear();
                 }
@@ -345,7 +363,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 #ifdef MCRL2_LPSCONSTELM_DEBUG
               else
               {
-                std::cerr << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
+                std::clog << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
                       << "      value before: " << pp(super::R(d_j, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      value after:  " << pp(super::R(g_ij, data::make_map_substitution_adapter(sigma))) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
@@ -356,7 +374,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 #ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(super::R(c_i, data::make_map_substitution_adapter(sigma))) << std::endl;
+            std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(super::R(c_i, data::make_map_substitution_adapter(sigma))) << std::endl;
           }
 #endif
         }
