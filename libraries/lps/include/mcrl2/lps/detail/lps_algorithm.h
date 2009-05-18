@@ -47,6 +47,7 @@ namespace detail {
       /// \brief Applies the next state substitution to the variable v.
       data::data_expression next_state(const summand& s, const data::variable& v) const
       {
+        assert(!s.is_delta());
         const data::assignment_list& a = s.assignments();
         for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
         {

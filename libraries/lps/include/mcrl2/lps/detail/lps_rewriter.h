@@ -54,7 +54,7 @@ namespace detail {
     {
       // TODO: how to make this function efficient?
       typedef typename TermList::value_type value_type;
-      std::vector<value_type> v(l.begin(), l.end());
+      atermpp::vector<value_type> v(l.begin(), l.end());
       for (typename std::vector<value_type>::iterator i = v.begin(); i != v.end(); ++i)
       {
         rewrite(*i);

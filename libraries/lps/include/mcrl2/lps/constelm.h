@@ -164,7 +164,7 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
 /// \param verbose If true, verbose output is generated
 /// \return The transformed specification
 template <typename DataRewriter>
-specification constelm(const specification& spec, DataRewriter& r, bool verbose = false)
+specification constelm1(const specification& spec, DataRewriter& r, bool verbose = false)
 {
   using core::pp;
 
@@ -298,6 +298,10 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
         dG.clear();
         for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
         {
+          if (i->is_delta())
+          {
+            continue;
+          }
           const summand& s = *i;
           const data::data_expression& c_i = s.condition();
           if (super::R(c_i, data::make_map_substitution_adapter(sigma)) != data::sort_bool_::false_())
@@ -328,7 +332,6 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
                 }
                 else
                 {
-                  G.erase(d_j);
                   dG.insert(d_j);
                   sigma[d_j] = d_j;
                   std::set<data::variable>& var = undo[d_j];
@@ -356,6 +359,10 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
             std::cerr << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(super::R(c_i, data::make_map_substitution_adapter(sigma))) << std::endl;
           }
 #endif
+        }
+        for (std::set<data::variable>::iterator k = dG.begin(); k != dG.end(); ++k)
+        {
+          G.erase(*k);
         }
       } while (!dG.empty());
 
@@ -396,7 +403,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 /// \param verbose If true, verbose output is generated
 /// \return The transformed specification
 template <typename DataRewriter>
-specification constelm1(const specification& spec, const DataRewriter& R, bool verbose = false, bool instantiate_free_variables = false)
+specification constelm(const specification& spec, const DataRewriter& R, bool verbose = false, bool instantiate_free_variables = false)
 {
   specification result = spec;
   constelm_algorithm<DataRewriter> algorithm(result, R, verbose);
