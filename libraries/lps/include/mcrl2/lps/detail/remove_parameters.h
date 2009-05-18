@@ -25,6 +25,24 @@ namespace lps {
 namespace detail {
 
 /// \brief Removes the parameters in to_be_removed from l.
+/// \param l A sequence of data variables
+/// \param to_be_removed A set of variables, not necessarily elements of l
+/// \return The removal result
+inline
+data::variable_list remove_parameters(const data::variable_list& l, const std::set<data::variable>& to_be_removed)
+{
+  std::vector<data::variable> result;
+  for (data::variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+  {
+    if (to_be_removed.find(*i) == to_be_removed.end())
+    {
+      result.push_back(*i);
+    }
+  }
+  return data::variable_list(result.begin(), result.end());
+}
+
+/// \brief Removes the parameters in to_be_removed from l.
 /// \param l A sequence of assignments to data variables
 /// \param to_be_removed A subset of parameters of l
 /// \return The removal result
@@ -43,23 +61,19 @@ data::assignment_list remove_parameters(const data::assignment_list& l, const st
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<data::variable>& to_be_removed)
 {
-  data::variable_vector v(data::make_variable_vector(p.process_parameters()));
-  atermpp::vector<summand>  s(p.summands().begin(), p.summands().end());
+  // remove process parameters
+  linear_process result = set_process_parameters(p, remove_parameters(p.process_parameters(), to_be_removed));
 
-  for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
-  {
-    v.erase(std::remove(v.begin(), v.end(), *i), v.end());
-  }
-
-  for (std::vector<summand>::iterator i = s.begin(); i != s.end(); ++i)
+  // remove parameters from assignment lists in summands
+  atermpp::vector<summand> new_summands(p.summands().begin(), p.summands().end());
+  for (std::vector<summand>::iterator i = new_summands.begin(); i != new_summands.end(); ++i)
   {
     *i = set_assignments(*i, remove_parameters(i->assignments(), to_be_removed));
   }
+  result = set_summands(result, summand_list(new_summands.begin(), new_summands.end()));
 
-  data::variable_list new_process_parameters(v.begin(), v.end());
-  summand_list new_summands(s.begin(), s.end());
-  linear_process result = set_process_parameters(p, new_process_parameters);
-  result = set_summands(result, new_summands);
+  // remove free variables
+  result = set_free_variables(result, remove_parameters(p.free_variables(), to_be_removed));
 
   return result;
 }

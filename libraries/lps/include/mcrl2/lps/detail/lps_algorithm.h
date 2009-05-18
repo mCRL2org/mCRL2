@@ -31,45 +31,60 @@ namespace detail {
   class lps_algorithm
   {
     protected:
-      specification& spec;
+      /// \brief The specification that is processed by the algorithm
+      specification& m_spec;
+     
+      /// \brief If true, verbose output is written
+      bool m_verbose;
 
     public:
-      lps_algorithm(specification& s)
-        : spec(s)
+      /// \brief Constructor
+      lps_algorithm(specification& spec, bool verbose = false)
+        : m_spec(spec),
+          m_verbose(verbose)
       {}
 
-      /// \brief Removes formal parameters from the specification spec
-      void remove_formal_parameters(const std::set<data::variable>& to_be_removed)
+      /// \brief Applies the next state substitution to the variable v.
+      data::data_expression next_state(const summand& s, const data::variable& v) const
+      {
+        const data::assignment_list& a = s.assignments();
+        for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+        {
+          if (i->lhs() == v)
+          {
+            return i->rhs();
+          }
+        }
+        return v; // no assignment to v found, so return v itself
+      }
+
+      /// \brief Removes formal parameters from the specification
+      void remove_parameters(const std::set<data::variable>& to_be_removed)
       {
         // TODO: make the algorithm in place, to avoid copying the specification
-        spec = lps::detail::remove_parameters(spec, to_be_removed);
-      }
-      
-      /// \brief Removes free variables from the specification spec
-      void remove_free_variables(const std::set<data::variable>& to_be_removed)
-      {
-        // spec.free_variables().erase(to_be_removed.begin(), to_be_removed.end());       
-      }
+        m_spec = lps::detail::remove_parameters(m_spec, to_be_removed);       
+      }     
   };
 
   /// \brief Algorithm class for algorithms on linear process specifications
   /// that use a rewriter.
+  template <typename DataRewriter>
   class lps_rewriter_algorithm: public lps_algorithm
   {
     protected:
-      data::rewriter R;
+      const DataRewriter& R;
 
     public:
-      lps_rewriter_algorithm(specification& spec, data::rewriter::strategy s = data::rewriter::jitty)
-        : lps_algorithm(spec),
-          R(spec.data(), s)
+      lps_rewriter_algorithm(specification& spec, const DataRewriter& rewr, bool verbose = false)
+        : lps_algorithm(spec, verbose),
+          R(rewr)
       {}
 
       /// \brief Rewrites the specification
       /// \brief sigma A substitution
       void rewrite()
       {
-        lps::detail::make_lps_rewriter(R).rewrite(spec);
+        lps::detail::make_lps_rewriter(R).rewrite(m_spec);
       }
 
       /// \brief Rewrites the specification with a substitution.
@@ -77,8 +92,8 @@ namespace detail {
       template <typename Substitution>
       void rewrite(Substitution& sigma)
       {
-        lps::detail::rewriter_adapter<data::rewriter, Substitution> Rsigma(R, sigma);
-        lps::detail::make_lps_rewriter(Rsigma).rewrite(spec);
+        lps::detail::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
+        lps::detail::make_lps_rewriter(Rsigma).rewrite(m_spec);
       }
   };
   
