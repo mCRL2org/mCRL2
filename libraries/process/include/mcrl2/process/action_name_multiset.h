@@ -27,6 +27,11 @@ namespace process {
   {
     public:
       /// \brief Constructor.
+      action_name_multiset()
+        : atermpp::aterm_appl(core::detail::constructMultActName())
+      {}
+
+      /// \brief Constructor.
       /// \param term A term
       action_name_multiset(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
@@ -34,6 +39,7 @@ namespace process {
         assert(core::detail::check_term_MultActName(m_term));
       }
 
+      /// \brief Constructor.
       action_name_multiset(core::identifier_string_list names)
         : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
       {}

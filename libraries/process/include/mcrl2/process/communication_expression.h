@@ -28,6 +28,11 @@ namespace process {
   {
     public:
       /// \brief Constructor.
+      communication_expression()
+        : atermpp::aterm_appl(core::detail::constructCommExpr())
+      {}
+
+      /// \brief Constructor.
       /// \param term A term
       communication_expression(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
@@ -35,6 +40,7 @@ namespace process {
         assert(core::detail::check_term_CommExpr(m_term));
       }
 
+      /// \brief Constructor.
       communication_expression(action_name_multiset action_name, core::identifier_string name)
         : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
       {}

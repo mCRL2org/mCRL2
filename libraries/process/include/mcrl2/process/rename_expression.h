@@ -29,12 +29,19 @@ namespace process {
     public:
       /// \brief Constructor.
       /// \param term A term
+      rename_expression()
+        : atermpp::aterm_appl(core::detail::constructRenameExpr())
+      {}
+
+      /// \brief Constructor.
+      /// \param term A term
       rename_expression(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
       {
         assert(core::detail::check_term_RenameExpr(m_term));
       }
 
+      /// \brief Constructor.
       rename_expression(core::identifier_string source, core::identifier_string target)
         : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
       {}

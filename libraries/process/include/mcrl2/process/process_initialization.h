@@ -31,7 +31,7 @@ namespace process {
       /// \brief Constructor.
       /// \param term A term
       process_initialization()
-        : atermpp::aterm_appl(mcrl2::core::detail::constructProcessInit())
+        : atermpp::aterm_appl(core::detail::constructProcessInit())
       {}
 
       /// \brief Constructor.
