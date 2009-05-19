@@ -143,94 +143,162 @@ std::string case_6 =
   ;
 const std::string removed_6 = "i";
 
-std::string case_7 =
-  "% Test Case 7 -- Free Variables                                                  \n"
-  "%                                                                                \n"
-  "% Process parameters s3, j and i are marked constant and all occurrences are     \n"
-  "% substituted.                                                                   \n"
-  "%                                                                                \n"
-  "% If \"--no-condition\" is used only j is marked constant and all occurrences of \n"
-  "% are substituted.                                                               \n"
-  "                                                                                 \n"
-  "act action :Nat;                                                                 \n"
-  "                                                                                 \n"
-  "proc P(i,j: Nat) = (i > 5) -> action(i). P(i+1,j) +                              \n"
-  "                   (i == 5) -> action(j). Q(j);                                  \n"
-  "     Q(i: Nat)   = action(i). Q(i);                                              \n"
-  "                                                                                 \n"
-  "init P(0,0);                                                                     \n"
-  "                                                                                 \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "%% NOTE:                                                  %%                     \n"
-  "%% =====                                                  %%                     \n"
-  "%%                                                        %%                     \n"
-  "%% Use: mcrl22lps --no-cluster $DIR$/case7.mcrl2          %%                     \n"
-  "%%                                                        %%                     \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "                                                                                 \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "%%                                                        %%                     \n"
-  "%% var  freevar,freevar0: Nat;                            %%                     \n"
-  "%% proc P(s3: Pos, j,i: Nat) =                            %%                     \n"
-  "%%        (s3 == 2) ->                                    %%                     \n"
-  "%%          action(i) .                                   %%                     \n"
-  "%%          P(s3 := 2, j := freevar0)                     %%                     \n"
-  "%%      + (s3 == 1 && 5 < i ) ->                          %%                     \n"
-  "%%          action(i) .                                   %%                     \n"
-  "%%          P(s3 := 1, i := i + 1)                        %%                     \n"
-  "%%      + (s3 == 1 && i == 5) ->                          %%                     \n"
-  "%%          action(j) .                                   %%                     \n"
-  "%%          P(s3 := 2, j := freevar, i := j);             %%                     \n"
-  "%%                                                        %%                     \n"
-  "%% init P(s3 := 1, j := 0, i := 0);                       %%                     \n"
-  "%%                                                        %%                     \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
+std::string case_6a =
+  "%--- case 6 linearized ---%                                        \n"
+  "act  action: Nat;                                                  \n"
+  "                                                                   \n"
+  "proc P(s3_P: Pos, i_P: Nat) =                                      \n"
+  "       sum e_P: Bool.                                              \n"
+  "         (if(e_P, true, true) && if(e_P, s3_P == 2, s3_P == 1)) -> \n"
+  "         action(i_P) .                                             \n"
+  "         P(if(e_P, 1, 2), i_P)                                     \n"
+  "     + true ->                                                     \n"
+  "         delta;                                                    \n"
+  "                                                                   \n"
+  "init P(1, 0);                                                      \n"
   ;
+const std::string removed_6a = "i_P";
 
-std::string case_8 =
-  "% Test Case 8 -- Free Variables                                                  \n"
-  "%                                                                                \n"
-  "% No constant parameters are found                                               \n"
-  "%                                                                                \n"
-  "% lpsconstelm cannot detect (i==5)                                               \n"
-  "                                                                                 \n"
-  "act action: Nat;                                                                 \n"
-  "                                                                                 \n"
-  "proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +                                \n"
-  "                   (i == 5) -> action(i).Y(i, i);                                \n"
-  "     Y(i,j: Nat) = action(j).Y(i,j);                                             \n"
-  "                                                                                 \n"
-  "init X(0);                                                                       \n"
-  "                                                                                 \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "%% NOTE:                                                  %%                     \n"
-  "%% =====                                                  %%                     \n"
-  "%%                                                        %%                     \n"
-  "%% Use: mcrl22lps --no-cluster $DIR$/case8.mcrl2          %%                     \n"
-  "%%                                                        %%                     \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "                                                                                 \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
-  "%%                                                        %%                     \n"
-  "%% act  action: Nat;                                      %%                     \n"
-  "%%                                                        %%                     \n"
-  "%% var  freevar0: Nat;                                    %%                     \n"
-  "%% proc P(s3: Pos, i,j: Nat) =                            %%                     \n"
-  "%%       (s3 == 2) ->                                     %%                     \n"
-  "%%         action(j) .                                    %%                     \n"
-  "%%         P(s3 := 2)                                     %%                     \n"
-  "%%     + (s3 == 1 && i < 5) ->                            %%                     \n"
-  "%%         action(i) .                                    %%                     \n"
-  "%%         P(s3 := 1, i := i + 1, j := freevar0)          %%                     \n"
-  "%%     + (s3 == 1 && i == 5) ->                           %%                     \n"
-  "%%         action(i) .                                    %%                     \n"
-  "%%         P(s3 := 2, j := i);                            %%                     \n"
-  "%%                                                        %%                     \n"
-  "%% var  freevar: Nat;                                     %%                     \n"
-  "%% init P(s3 := 1, i := 0, j := freevar);                 %%                     \n"
-  "%%                                                        %%                     \n"
-  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
+std::string case_6b =
+  "%--- case 6 linearized no-cluster ---%                             \n"
+  "act  action: Nat;                                                  \n"
+  "                                                                   \n"
+  "proc P(s3_P: Pos, i_P: Nat) =                                      \n"
+  "       (s3_P == 2) ->                                              \n"
+  "         action(i_P) .                                             \n"
+  "         P(1, i_P)                                                 \n"
+  "     + (s3_P == 1) ->                                              \n"
+  "         action(i_P) .                                             \n"
+  "         P(2, i_P)                                                 \n"
+  "     + true ->                                                     \n"
+  "         delta;                                                    \n"
+  "                                                                   \n"
+  "init P(1, 0);                                                      \n"
   ;
+const std::string removed_6b = "i_P";
+
+// % Test Case 7 -- Free Variables
+// %
+// % Process parameters s3, j and i are marked constant and all occurrences are
+// % substituted.
+// %
+// % If \"--no-condition\" is used only j is marked constant and all occurrences of
+// % are substituted.
+//
+// act action :Nat;
+//
+// proc P(i,j: Nat) = (i > 5) -> action(i). P(i+1,j) +
+//                    (i == 5) -> action(j). Q(j);
+//      Q(i: Nat)   = action(i). Q(i);
+//
+// init P(0,0);
+//
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %% NOTE:                                                  %%
+// %% =====                                                  %%
+// %%                                                        %%
+// %% Use: mcrl22lps --no-cluster $DIR$/case7.mcrl2          %%
+// %%                                                        %%
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %%                                                        %%
+// %% var  freevar,freevar0: Nat;                            %%
+// %% proc P(s3: Pos, j,i: Nat) =                            %%
+// %%        (s3 == 2) ->                                    %%
+// %%          action(i) .                                   %%
+// %%          P(s3 := 2, j := freevar0)                     %%
+// %%      + (s3 == 1 && 5 < i ) ->                          %%
+// %%          action(i) .                                   %%
+// %%          P(s3 := 1, i := i + 1)                        %%
+// %%      + (s3 == 1 && i == 5) ->                          %%
+// %%          action(j) .                                   %%
+// %%          P(s3 := 2, j := freevar, i := j);             %%
+// %%                                                        %%
+// %% init P(s3 := 1, j := 0, i := 0);                       %%
+// %%                                                        %%
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+std::string case_7 =
+  "act  action: Nat;                 \n"
+  "                                  \n"
+  "var  dc,dc1: Nat;                 \n"
+  "proc P(s3_P: Pos, j_P,i_P: Nat) = \n"
+  "       (s3_P == 2) ->             \n"
+  "         action(i_P) .            \n"
+  "         P(2, dc1, i_P)           \n"
+  "     + (s3_P == 1 && i_P == 5) -> \n"
+  "         action(j_P) .            \n"
+  "         P(2, dc, j_P)            \n"
+  "     + (s3_P == 1 && i_P > 5) ->  \n"
+  "         action(i_P) .            \n"
+  "         P(1, j_P, i_P + 1);      \n"
+  "                                  \n"
+  "init P(1, 0, 0);                  \n"
+  ;
+const std::string removed_7 = "i_P j_P s3_P";
+
+// % Test Case 8 -- Free Variables                                                 
+// %                                                                               
+// % No constant parameters are found                                              
+// %                                                                               
+// % lpsconstelm cannot detect (i==5)                                              
+//                                                                                 
+// act action: Nat;                                                                
+//                                                                                 
+// proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +                               
+//                    (i == 5) -> action(i).Y(i, i);                               
+//      Y(i,j: Nat) = action(j).Y(i,j);                                            
+//                                                                                 
+// init X(0);                                                                      
+//                                                                                 
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %% NOTE:                                                  %%
+// %% =====                                                  %%
+// %%                                                        %%
+// %% Use: mcrl22lps --no-cluster $DIR$/case8.mcrl2          %%
+// %%                                                        %%
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// %%                                                        %%
+// %% act  action: Nat;                                      %%
+// %%                                                        %%
+// %% var  freevar0: Nat;                                    %%
+// %% proc P(s3: Pos, i,j: Nat) =                            %%
+// %%       (s3 == 2) ->                                     %%
+// %%         action(j) .                                    %%
+// %%         P(s3 := 2)                                     %%
+// %%     + (s3 == 1 && i < 5) ->                            %%
+// %%         action(i) .                                    %%
+// %%         P(s3 := 1, i := i + 1, j := freevar0)          %%
+// %%     + (s3 == 1 && i == 5) ->                           %%
+// %%         action(i) .                                    %%
+// %%         P(s3 := 2, j := i);                            %%
+// %%                                                        %%
+// %% var  freevar: Nat;                                     %%
+// %% init P(s3 := 1, i := 0, j := freevar);                 %%
+// %%                                                        %%
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+std::string case_8 =
+  "act  action: Nat;                 \n"
+  "                                  \n"
+  "var  dc1: Nat;                    \n"
+  "proc P(s3_X: Pos, i_X,j_X: Nat) = \n"
+  "       (s3_X == 2) ->             \n"
+  "         action(j_X) .            \n"
+  "         P(2, i_X, j_X)           \n"
+  "     + (s3_X == 1 && i_X == 5) -> \n"
+  "         action(i_X) .            \n"
+  "         P(2, i_X, i_X)           \n"
+  "     + (s3_X == 1 && i_X < 5) ->  \n"
+  "         action(i_X) .            \n"
+  "         P(1, i_X + 1, dc1);      \n"
+  "                                  \n"
+  "var  dc: Nat;                     \n"
+  "init P(1, 0, dc);                 \n"
+  ;
+const std::string removed_8 = "";
 
 // examples/games/domineering.mcrl2
 std::string case_9 =
@@ -301,7 +369,7 @@ void test_constelm(const std::string& spec_text, const std::string& expected_res
   variable_list v0 = s0.process().process_parameters();
   variable_list v1 = s1.process().process_parameters();
 
-  // create a set of strings set1 that contains the names of expected removed parameters
+  // create a set of strings set1 that contains the names of expected removed parameters and free
   std::vector<std::string> removed = core::regex_split(expected_result, "\\s");
   std::set<std::string> set1;
   set1.insert(removed.begin(), removed.end());
@@ -343,6 +411,15 @@ int test_main(int argc, char* argv[])
   test_constelm(case_4, removed_4);
   core::garbage_collect();
   test_constelm(case_5, removed_5);
+  core::garbage_collect();
+  test_constelm(case_6a, removed_6a);
+  core::garbage_collect();
+  test_constelm(case_6b, removed_6b);
+  core::garbage_collect();
+// TODO: uncomment these tests when free variables can be parsed
+//  test_constelm(case_7, removed_7);
+  core::garbage_collect();
+//  test_constelm(case_8, removed_8);
   core::garbage_collect();
   test_constelm(case_9, removed_9);
   core::garbage_collect();
