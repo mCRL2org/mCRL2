@@ -23,6 +23,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/regfrmtrans.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/lps/specification.h"
 
@@ -89,6 +90,7 @@ namespace detail {
     f = type_check_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
     spec = lps::specification(reconstructed_spec); // Force the data specification to be recomputed
+    f = data::detail::internal_format_conversion(spec.data(), f);
     return f;
   }
 

@@ -3,7 +3,7 @@ project libraries/lps/example
        <use>/site-config//boost
        <source>/libraries//core
        <source>/libraries//lps
-       <source>/libraries//utilities
+       <source>/libraries/utilities//command_line_interfacing
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <define>MCRL2_REVISION=\"\\\"0\\\"\"

@@ -387,6 +387,22 @@ void test_normalize()
 */
 }
 
+void test_type_checking()
+{
+  using namespace state_frm;
+
+  specification context = mcrl22lps(
+    "sort B = struct d;"
+    "act a: List(B);"
+    "init a([d]);"
+  );
+
+  state_formula formula = mcf2statefrm("<a([d])>true", context);
+
+  BOOST_CHECK(is_may(formula));
+  BOOST_CHECK(static_cast< atermpp::aterm_appl >(formula) != 0);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -394,6 +410,8 @@ int test_main(int argc, char* argv[])
   test_rename();
   core::garbage_collect();
   test_normalize();
+  core::garbage_collect();
+  test_type_checking();
   core::garbage_collect();
 
   return 0;
