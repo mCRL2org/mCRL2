@@ -8,7 +8,7 @@
 %TCIDATA{Version=5.50.0.2890}
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
-%TCIDATA{LastRevised=Monday, May 18, 2009 14:31:29}
+%TCIDATA{LastRevised=Monday, May 18, 2009 17:35:41}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -423,7 +423,6 @@ w_{0}]:=w_{1}$ \\
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=undo[j]\cup
 \{w_{0}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad $\textbf{else} \\ 
-$\qquad \qquad \qquad \qquad \qquad \qquad G:=G\setminus \{d_{j}\}$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \Delta G:=\Delta G\cup \{d_{j}\}$
 \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack d_{j}]:=d_{j}$ \\ 
@@ -431,6 +430,7 @@ $\qquad \qquad \qquad \qquad \qquad \qquad $\textbf{for }$w\in undo[j]$
 \textbf{do} \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad \qquad \sigma \lbrack w]:=w$ \\ 
 $\qquad \qquad \qquad \qquad \qquad \qquad undo[j]:=\emptyset $ \\ 
+$\qquad G:=G\setminus \Delta G$ \\ 
 $\text{\textbf{while }}(\Delta G\neq \emptyset )$ \\ 
 $\text{\textbf{return} \textsc{RemoveConstantParameters(}}p,\overline{d}%
 ,\sigma \text{\textsc{)}},$ \\ \hline
