@@ -57,7 +57,7 @@ namespace process {
   };
 
   /// \brief Read-only singly linked list of communication expressions
-  typedef atermpp::term_list<rename_expression> communication_expression_list;
+  typedef atermpp::term_list<communication_expression> communication_expression_list;
 
 } // namespace process
 
