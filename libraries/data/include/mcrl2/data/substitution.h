@@ -156,7 +156,7 @@ namespace mcrl2 {
         typedef typename atermpp::map< variable_type, expression_type >::const_iterator const_iterator;
 
         /// \brief Iterator type for non-constant element access
-        typedef typename atermpp::map< variable_type, expression_type >::const_iterator iterator;
+        typedef typename atermpp::map< variable_type, expression_type >::iterator       iterator;
 
       protected:
 
@@ -170,9 +170,7 @@ namespace mcrl2 {
           return m_map.begin();
         }
 
-        /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-        iterator begin() {
-          return m_map.begin();
+        const_iterator find() {
         }
 
         /// \brief Returns an iterator pointing past the end of the sequence of assignments
@@ -180,9 +178,9 @@ namespace mcrl2 {
           return m_map.end();
         }
 
-        /// \brief Returns an iterator pointing past the end of the sequence of assignments
-        iterator end() {
-          return m_map.end();
+        /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
+        iterator find(variable_type const& v) const {
+          return m_map.find(v);
         }
 
         /// \brief Apply on single single variable expression
@@ -298,6 +296,12 @@ namespace mcrl2 {
         /// \brief type used to represent expressions
         typedef Expression  expression_type;
 
+        /// \brief constant iterator type for individual assignments
+        typedef typename substitution< Variable, Expression, SubstitutionProcedure >::const_iterator const_iterator;
+
+        /// \brief iterator type for individual assignments
+        typedef typename substitution< Variable, Expression, SubstitutionProcedure >::iterator       iterator;
+
         /// \brief Wrapper class for internal storage and substitution updates using operator()
         class assignment {
 
@@ -364,6 +368,25 @@ namespace mcrl2 {
          **/
         assignment operator[](variable_type const& v) {
           return assignment(v, this->m_map);
+        }
+
+        using substitution< Variable, Expression, SubstitutionProcedure >::begin;
+        using substitution< Variable, Expression, SubstitutionProcedure >::end;
+        using substitution< Variable, Expression, SubstitutionProcedure >::find;
+
+        /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
+        iterator begin() {
+          return this->m_map.begin();
+        }
+
+        /// \brief Returns an iterator pointing past the end of the sequence of assignments
+        iterator end() {
+          return this->m_map.end();
+        }
+
+        /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
+        iterator find(variable_type const& v) {
+          return this->m_map.find(v);
         }
     };
 
