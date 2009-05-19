@@ -750,13 +750,7 @@ void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
   traverse_sort_expressions(p, std::inserter(s, s.end()));
-  for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
-  {
-    if (i->is_standard())
-    {
-      p.data().import_system_defined_sort(*i);
-    }
-  }
+  p.data().make_complete(boost::make_iterator_range(s));
 }
 
 } // namespace pbes_system

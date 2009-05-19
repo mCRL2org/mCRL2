@@ -13,6 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBES_SORT_EXPRESSION_VISITOR_H
 
 #include <set>
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
@@ -38,7 +39,7 @@ struct pbes_sort_expression_visitor: public pbes_expression_visitor<Term>
   /// \return The result of visiting the node
   bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
-    result.insert(d.sort());
+    data::find_all_sort_expressions(d, std::inserter(result, result.end()));
     return true;
   }
 };

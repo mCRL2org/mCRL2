@@ -655,6 +655,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
+      complete_data_specification(result);
       return result;
     }
 };
@@ -1049,6 +1050,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
+      complete_data_specification(result);
+      return result;
       return result;
     }
 };

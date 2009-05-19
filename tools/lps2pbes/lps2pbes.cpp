@@ -23,6 +23,8 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/core/regfrmtrans.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
@@ -136,8 +138,11 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       }
 
       // prepare specification for type-checking
-      lps_spec.data() = mcrl2::data::remove_all_system_defined(lps_spec.data());
-      ATermAppl reconstructed_spec = specification_to_aterm(lps_spec);
+      specification lps_spec_copy(lps_spec);
+
+      // make copy because type checking needs a specification without system defined sorts
+      lps_spec_copy.data() = mcrl2::data::remove_all_system_defined(lps_spec_copy.data());
+      ATermAppl reconstructed_spec = specification_to_aterm(lps_spec_copy);
 
       //type check formula
       gsVerboseMsg("type checking...\n");
@@ -160,6 +165,11 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (end_phase == PH_REG_FRM_TRANS) {
         return result;
       }
+
+      // Translating to internal format
+      result = data::detail::internal_format_conversion(lps_spec.data(), result);
+      // Add any system defined sorts needed by this 
+      lps_spec.data().make_complete(boost::make_iterator_range(data::find_all_sort_expressions(result)));
 
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
