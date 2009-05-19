@@ -115,20 +115,20 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       opt_data_elm                  = parser.options.count("unused-data") == 0;
       opt_outputformat              = "none";
       opt_strategy                  = lazy;
-    
+
       if (parser.options.count("output")) { // Output format
         std::string format = parser.option_argument("output");
-    
+
         if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes"))) {
           parser.error("unknown output format specified (got `" + format + "')");
         }
-    
+
         opt_outputformat = format;
       }
-    
+
       if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
         int strategy = parser.option_argument_as< int >("strategy");
-    
+
         switch (strategy) {
           case 0:
            opt_strategy = lazy;
@@ -208,7 +208,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           "do not remove unused parts of the data specification",
           'u');
     }
-    
+
   public:
     bool run()
     {
@@ -231,7 +231,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       if (!p.is_well_typed())
       { throw mcrl2::runtime_error("The pbes is not well typed\n");
       }
-    
+
       p.normalize();
       if (opt_data_elm)
       { p = remove_unused_data(p);
@@ -275,8 +275,8 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
-                                                             data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
                           pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
                               // repeatedly. 
@@ -294,15 +294,15 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           const bool enumerate_infinite_sorts1 = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
-                                                             data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
                           pbesr1(datarv, datae, enumerate_infinite_sorts1);
           pbesrewr(p,pbesr1);  // Simplify p such that this does not need to be done
                                // repeatedly, without expanding quantifiers over infinite
                                // domains. 
           const bool enumerate_infinite_sorts2 = true;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, 
-                                                             data::data_enumerator<> > 
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
                           pbesr2(datarv, datae, enumerate_infinite_sorts2);
           bes_equations=::bes::boolean_equation_system(p,
                             pbesr2,
@@ -313,11 +313,11 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
           break;
         }
         case pfnf:
-        { 
+        {
           throw mcrl2::runtime_error("The pfnf boolean equation rewriter cannot be used\n");
         }
         case prover:
-        { 
+        {
           throw mcrl2::runtime_error("The prover based rewriter cannot be used\n");
         }
       }
@@ -337,7 +337,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
         save_bes_in_pbes_format(m_output_filename,bes_equations,p);
         return true;
       }
-    
+
       assert(opt_outputformat=="none");
       bool result=solve_bes(bes_equations,
                             opt_use_hashtables,
