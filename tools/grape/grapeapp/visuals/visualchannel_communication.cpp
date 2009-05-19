@@ -147,7 +147,6 @@ grape_direction visualchannel_communication::is_on_border( libgrape::coordinate 
   return GRAPE_DIR_NONE;
 }
 
-
 int visualchannel_communication::get_communication_selected()
 {
   return m_communication_selected;

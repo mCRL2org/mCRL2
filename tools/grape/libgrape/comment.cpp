@@ -53,6 +53,7 @@ void comment::attach_to_object( object* p_object )
 
 void comment::detach_from_object( void )
 {
+  m_connected_to->detach_comment(this);
   m_connected_to = 0;
 }
 

@@ -27,6 +27,7 @@ namespace grape
     class visualcomment : public visual_object
     {
       private:
+        bool m_reference_selected; /**< Selected reference of the comment. */
       protected:
       public:
 
@@ -81,6 +82,9 @@ namespace grape
          * @return The coordinate
          */
         coordinate get_reference_coordinate( void );
+        
+        /** @return Returns whether the reference of the comment is selected. */
+        bool get_reference_selected();
     };
   } // namespace grapeapp
 } // namespace grape

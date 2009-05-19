@@ -55,12 +55,12 @@ void visualpreamble::draw( void )
   draw_filled_rectangle( center, preamble_width, preamble_height, false, g_color_preamble );
 
   // draw preamble variable declarations
-  grape_glcanvas::get_font_renderer()->draw_text( "Parameters", x, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(par.fn_str()), x, x+preamble_width*0.5, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
+  grape_glcanvas::get_font_renderer()->draw_text( "Parameters", x+0.01f, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(par.fn_str()), x+0.01f, x+preamble_width*0.5-0.01f, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
 
   // draw preamble parameter declarations
-  grape_glcanvas::get_font_renderer()->draw_text( "Local Variables", x+preamble_width*0.5, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(var.fn_str()), x+preamble_width*0.5, x+preamble_width, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
+  grape_glcanvas::get_font_renderer()->draw_text( "Local Variables", x+preamble_width*0.5+0.01f, y+preamble_height-0.025f, 0.0015f, al_right, al_top );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(var.fn_str()), x+preamble_width*0.5+0.01f, x+preamble_width-0.01f, y+preamble_height-0.05f, y, 0.0015f, al_left, al_top );
 
   // draw vertical line
   coordinate p_middle_top = {preamble_x_coordinate, y+0.025f};

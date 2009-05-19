@@ -49,11 +49,11 @@ void visualreference_state::draw( void )
   draw_reference( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 
   // draw reference state name
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_name().fn_str()), x, x+width, y+height, y+height*0.75, 0.0015f, al_center, al_center );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_name().fn_str()), x+0.01f, x+width-0.01f, y + height-0.01f, y + height * 0.75+0.01f, 0.0015f, al_center, al_center );
 
   // draw reference state text
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_text().fn_str()), x, x+width, y+height*0.75, y, 0.0015f, al_left, al_top );
-
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(ref_state->get_text().fn_str()), x+0.01f, x+width-0.01f, y + height * 0.75-0.01f, y+0.01f, 0.0015f, al_left, al_top );
+  
   // draw bounding box; only drawn if the object is selected
   draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
 }

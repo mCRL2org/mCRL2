@@ -14,6 +14,7 @@
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "dialogs/textdialog.h"
+#include "../visuals/visualcomment.h"
 
 #include "event_comment.h"
 
@@ -93,7 +94,23 @@ bool grape_event_remove_comment::Do(  void  )
 {
   diagram* dia_ptr = find_diagram( m_in_diagram );
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
-  dia_ptr->remove_comment( comm_ptr );
+  
+  if ( comm_ptr )
+  {
+    visualcomment* vis_comm_ptr = static_cast<visualcomment*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
+    
+    bool reference_selected = vis_comm_ptr->get_reference_selected();
+    
+    // if there is no valid selected communication
+    if (reference_selected) 
+    {
+      // remove the selected channel
+      comm_ptr->detach_from_object();
+    } else {
+      // remove the entire comment
+      dia_ptr->remove_comment( comm_ptr );
+    }
+  }
 
   finish_modification();
   return true;
@@ -103,7 +120,12 @@ bool grape_event_remove_comment::Undo(  void  )
 {
   // find the diagram the comment was removed from
   diagram* dia_ptr = find_diagram( m_in_diagram );
-  comment* new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
+  
+  comment* new_comm = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
+  // only recreate the comment if it was removed
+  if (new_comm) new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
+  
+  //re-attach all detached objects
   new_comm->set_text( m_text );
   if ( m_object != -1 )
   {
