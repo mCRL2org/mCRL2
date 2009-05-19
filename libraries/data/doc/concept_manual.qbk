@@ -45,5 +45,10 @@ semantics.
  [ [ s\[v\] = e   ] [             ] [ post: s(v) == e ] ]
  [ [ s\[v\] = v   ] [             ] [ post: s(v) == v ] ] ]
 
+The `mutable_substition` template class implements the Mutable Substitution
+concept. In addition, it has a number additional member functions in common
+with a `std::map`.
+
+
 [endsect]
 

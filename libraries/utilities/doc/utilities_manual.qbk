@@ -7,4 +7,5 @@
     [dirname pbes]
 ]
 
+[include introduction.qbk]
 [include tools.qbk]
