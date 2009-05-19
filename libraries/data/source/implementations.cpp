@@ -1,8 +1,6 @@
 #include "boost.hpp" // precompiled headers
 
 #include "mcrl2/core/messaging.h" //workaround
-//#include "data_implementation_concrete.cpp"
-//#include "data_reconstruct.cpp"
 #include "data_specification.cpp"
 #include "standard.cpp"
 #include "detail/enumerate/enum_standard.cpp"

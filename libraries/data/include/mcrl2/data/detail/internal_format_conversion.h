@@ -252,6 +252,16 @@ namespace mcrl2 {
         return copy;
       }
 
+      /// \brief Convenience overload for converting data/sort expressions using with atermpp:: functionality
+      /// \param[in] term sort or data expression
+      inline
+      atermpp::aterm_appl internal_format_conversion(data_specification const& specification, atermpp::aterm_appl term)
+      {
+        internal_format_conversion_helper converter(specification);
+
+        return atermpp::replace(term, converter);
+      }
+
       /// \brief Convenience overload for use with atermpp:: functionality
       /// \param[in] term process, linear process specification or pbes
       inline

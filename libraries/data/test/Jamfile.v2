@@ -14,8 +14,6 @@ test-suite data
     :
       [ run sort_expression_test.cpp ]
       [ run data_expression_test.cpp ]
-      #[ run data_reconstruct_expr_test.cpp ]
-      #[ run data_reconstruct_spec_test.cpp ]
       [ run data_equation_test.cpp ]
       [ run data_specification_test.cpp ]
       [ run bool_test.cpp ]
@@ -24,7 +22,6 @@ test-suite data
       [ run data_utility_test.cpp ]
       [ run compatibility_test.cpp ]
       [ run parser_test.cpp ]
-      #[ run implement_data_types_test.cpp ]
       [ run rewriter_test.cpp ]
       [ run rewriting_test.cpp ]
       [ run representative_generator_test.cpp ]
@@ -32,5 +29,6 @@ test-suite data
       [ run enumerator_test.cpp ]
       [ run classic_enumerator_test.cpp ]
       [ run substitution_test.cpp ]
+      [ run print_test.cpp ]
       [ compile-headers ../include ]
     ;

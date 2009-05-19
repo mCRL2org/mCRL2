@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_REWRITER_H
 #define MCRL2_DATA_REWRITER_H
 
-//#define OLD_CONVERSION
-
 #include <functional>
 #include <algorithm>
 #include <sstream>
@@ -22,12 +20,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
-#ifdef OLD_CONVERSION
-# include "mcrl2/data/detail/implement_data_types.h"
-# include "mcrl2/core/aterm_ext.h" // for gsMakeSubst_Appl
-#else
-# include "mcrl2/data/detail/rewrite_conversion_helper.h"
-#endif
+#include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/atermpp/algorithm.h"
@@ -126,19 +119,8 @@ namespace data {
 
     protected:
 
-#ifdef OLD_CONVERSION
-      /// \brief for data implementation
-      mutable atermpp::aterm_list                                      m_substitution_context;
-
-      /// \brief for data reconstruction 
-      mutable mutable_substitution< data_expression, data_expression > m_reconstruction_context;
-
-      /// \brief for data implementation/reconstruction
-      mutable atermpp::aterm_appl                                      m_specification;
-#else
       /// \brief for data implementation/reconstruction
       mutable boost::shared_ptr< detail::rewrite_conversion_helper >   m_conversion_helper;
-#endif
 
     protected:
 
@@ -146,130 +128,10 @@ namespace data {
       template < typename CompatibleExpression >
       basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
                        basic_rewriter< atermpp::aterm >(other),
-#ifdef OLD_CONVERSION
-                       m_substitution_context(other.m_substitution_context),
-                       m_reconstruction_context(other.m_substitution_context),
-                       m_specification(other.m_specification)
-#else
                        m_conversion_helper(other.m_conversion_helper)
-#endif
       {
-#ifdef OLD_CONVERSION
-        m_specification.protect();
-        m_substitution_context.protect();
-#endif
       }
 
-#ifdef OLD_CONVERSION
-      /// \brief Performs data implementation before rewriting (should become obsolete)
-      /// \param[in] specification a data specification.
-      ATermAppl implement(data_specification const& specification)
-      {
-        atermpp::aterm_appl result(detail::data_specification_to_aterm_data_spec(specification));
-
-        std::set< alias > known_aliases(convert< std::set< alias > >(specification.aliases()));
-
-        // Convert to data specification again to get the additional aliases that have been introduced (legacy)
-        data_specification  specification_with_more_aliases(result);
-
-        for (data_specification::aliases_const_range r(specification_with_more_aliases.aliases()); !r.empty(); r.advance_begin(1))
-        {
-          if (r.front().reference().is_container_sort() || r.front().reference().is_structured_sort())
-          {
-            m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().reference(), r.front().name()), m_substitution_context);
-
-            // only for sorts that have been introduced for conversion to
-            // ATerm; newly introduced sort are treated as an implementation
-            // detail that should not leak to the outside world.
-            if (known_aliases.find(r.front()) == known_aliases.end())
-            {
-              m_reconstruction_context[r.front().name()] = r.front().reference();
-            }
-          }
-          else
-          {
-            m_substitution_context = core::gsAddSubstToSubsts(core::gsMakeSubst_Appl(r.front().name(), r.front().reference()), m_substitution_context);
-          }
-        }
-
-        m_specification = result;
-
-        // add rewrite rules (needed only for lambda expressions)
-        for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))
-        {
-          if (!add_rule(r.front()))
-          {
-            throw mcrl2::runtime_error("Could not add rewrite rule!");
-          }
-        }
-
-        return result;
-      }
-
-      /// \brief Performs data implementation before rewriting (should become obsolete)
-      /// \param[in] expression an expression.
-      template < typename ExpressionOrEquation >
-      ATermAppl implement(ExpressionOrEquation const& expression) const
-      {
-        ATermList substitution_context = m_substitution_context;
-        ATermList data_equations       = ATmakeList0();
-
-        core::detail::t_data_decls declarations = core::detail::get_data_decls(m_specification);
-
-        ATermAppl implemented = detail::impl_exprs_appl(expression,
-                        &substitution_context, &declarations, &data_equations);
-
-        if (!ATisEmpty(data_equations)) {
-          using namespace atermpp;
-
-          atermpp::term_list< data::data_equation > new_equations(data_equations);
-
-          std::set< sort_expression > known_sorts(
-                atermpp::term_list_iterator< sort_expression >(atermpp::list_arg1(atermpp::arg1(m_specification))),
-                atermpp::term_list_iterator< sort_expression >());
-
-          // add equations for standard functions for new sorts
-          for (atermpp::term_list_iterator< sort_expression > i(declarations.sorts);
-                           i != atermpp::term_list_iterator< sort_expression >(); ++i) {
-
-             if (known_sorts.find(*i) == known_sorts.end())
-             {
-               data_equation_vector equations(standard_generate_equations_code(*i));
-
-               new_equations = atermpp::term_list< data_equation >
-                                      (equations.begin(), equations.end()) + new_equations;
-             }
-          }
-
-          // update reconstruction context
-          for (atermpp::term_list_iterator< atermpp::aterm_appl > i(substitution_context); i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i)
-          {
-            m_reconstruction_context[sort_expression((*i)(1))] = sort_expression((*i)(0));
-          }
-
-          // add rewrite rules
-          for (atermpp::term_list< data::data_equation >::const_iterator r = new_equations.begin();
-                                                                        r != new_equations.end(); ++r) {
-
-            if (!m_rewriter->addRewriteRule(*r)) {
-              throw mcrl2::runtime_error("Could not add rewrite rule! (" + pp(*r) + ")");
-            }
-          }
-
-          m_specification = core::detail::set_data_decls(m_specification, declarations);
-        }
-
-        m_substitution_context = substitution_context;
-
-        return implemented;
-      }
-
-      /// \brief Performs data reconstruction after rewriting (should become obsolete)
-      data_expression reconstruct(ATermAppl expression) const
-      {
-        return data_expression(atermpp::replace(expression, m_reconstruction_context));
-      }
-#else
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] expression an expression.
       template < typename Expression >
@@ -283,7 +145,6 @@ namespace data {
       {
         return m_conversion_helper->reconstruct(expression);
       }
-#endif // OLD_CONVERSION
 
     public:
 
@@ -291,18 +152,8 @@ namespace data {
       /// \param r A rewriter
       basic_rewriter(basic_rewriter const& other) :
           basic_rewriter< atermpp::aterm >(other),
-#ifdef OLD_CONVERSION
-          m_substitution_context(other.m_substitution_context),
-          m_reconstruction_context(other.m_reconstruction_context),
-          m_specification(other.m_specification)
-#else
           m_conversion_helper(other.m_conversion_helper)
-#endif
       {
-#ifdef OLD_CONVERSION
-        m_specification.protect();
-        m_substitution_context.protect();
-#endif
       }
 
       /// \brief Constructor.
@@ -310,16 +161,8 @@ namespace data {
       /// \param s A rewriter strategy.
       basic_rewriter(data_specification const& d, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
-#ifdef OLD_CONVERSION
-          m_specification(implement(d))
-#else
           m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
-#endif
       {
-#ifdef OLD_CONVERSION
-        m_specification.protect();
-        m_substitution_context.protect();
-#endif
       }
 
       /// \brief Adds an equation to the rewrite rules.
@@ -345,13 +188,6 @@ namespace data {
       {
         return *m_rewriter;
       }
-
-#ifdef OLD_CONVERSION
-      virtual ~basic_rewriter() {
-        m_specification.unprotect();
-        m_substitution_context.unprotect();
-      }
-#endif
   };
 
   /// \brief Rewriter that operates on data expressions.

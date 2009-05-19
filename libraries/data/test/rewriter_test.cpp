@@ -24,7 +24,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/implement_data_types.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/core/garbage_collection.h"
 
