@@ -18,7 +18,6 @@
 // #include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/data_implementation_concrete.h"
 #include "mcrl2/data/structured_sort.h"
 
 // using namespace atermpp;
