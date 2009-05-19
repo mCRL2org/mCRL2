@@ -29,6 +29,11 @@ namespace process {
   {
     public:
       /// \brief Constructor.
+      process_identifier()
+        : atermpp::aterm_appl(core::detail::constructProcVarId())
+      {}
+
+      /// \brief Constructor.
       /// \param term A term
       process_identifier(atermpp::aterm_appl term)
         : atermpp::aterm_appl(term)
@@ -36,6 +41,7 @@ namespace process {
         assert(core::detail::check_term_ProcVarId(m_term));
       }
 
+      /// \brief Constructor.
       process_identifier(core::identifier_string name, data::sort_expression_list sorts)
         : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
       {}
