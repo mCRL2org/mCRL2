@@ -194,7 +194,7 @@ rule tool ( name : sources * : requirements * : defaults * : usage-requirements 
   if ! <build>no in $(build-requirements) {
     exe $(name) : $(sources)
                 : $(build-requirements)
-                  <library>/libraries/utilities//command_line_interfacing
+                  <library>/libraries/utilities//command_line_interface
                 : $(defaults) : $(usage-requirements) ;
 
     # generate install targets

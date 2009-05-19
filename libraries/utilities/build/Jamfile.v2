@@ -25,7 +25,7 @@ obj squadt_interface
         <include>../include
       ;
 
-obj command_line_interfacing
+obj command_line_interface
       : source/command_line_interface.cpp
       : <use>/site-config//boost
       :

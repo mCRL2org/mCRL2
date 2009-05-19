@@ -35,7 +35,7 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
         local additional-requirements = [ MATCH .*/(<[^>]*>.*)?$ : $(source) ] ;
 
         if $(additional-requirements) {
-          source = [ MATCH (.*)/<?[^>]*>?.*$ : $(source) ] ;
+          source = [ MATCH (.*)/<.*$ : $(source) ] ;
         }
 
         obj $(source:B).o : $(source) : $(additional-requirements) $(requirements) : $(defaults) : $(usage-requirements) ;
