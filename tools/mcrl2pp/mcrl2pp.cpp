@@ -35,11 +35,6 @@ using namespace mcrl2;
 
 //local declarations
 
-int main(int argc, char *argv[]);
-//main function where:
-//  argc represents the number of arguments
-//  argv represents the arguments
-
 struct t_tool_options {
   std::string  specification_file_name;
   std::string  output_file_name;
@@ -94,8 +89,6 @@ struct t_tool_options {
 };
 
 static void print_specification_file_name(t_tool_options const& tool_options);
-
-static std::string pp_format_to_string(t_pp_format pp_format);
 
 //implementation
 
@@ -165,15 +158,3 @@ void print_specification_file_name(t_tool_options const& tool_options)
   }
 }
 
-std::string pp_format_to_string(t_pp_format pp_format)
-{
-  if (pp_format == ppDefault) {
-    return "default";
-  } else if (pp_format == ppDebug) {
-    return "debug";
-  } else if (pp_format == ppInternal) {
-    return "internal";
-  } else {
-    throw mcrl2::runtime_error("unknown pretty print format");
-  }
-}

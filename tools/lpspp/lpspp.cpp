@@ -32,15 +32,6 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 
-//local declarations
-
-int main(int argc, char *argv[]);
-//main function where:
-//  argc represents the number of arguments
-//  argv represents the arguments
-
-static std::string pp_format_to_string(t_pp_format pp_format);
-
 class lpspp_tool: public input_output_tool
 {
   public:
@@ -132,21 +123,6 @@ class lpspp_tool: public input_output_tool
       }
     }
 };
-
-//implementation
-
-std::string pp_format_to_string(t_pp_format pp_format)
-{
-  if (pp_format == ppDefault) {
-    return "default";
-  } else if (pp_format == ppDebug) {
-    return "debug";
-  } else if (pp_format == ppInternal) {
-    return "internal";
-  } else {
-    throw mcrl2::runtime_error("unknown pretty print format");
-  }
-}
 
 int main(int argc, char* argv[])
 {
