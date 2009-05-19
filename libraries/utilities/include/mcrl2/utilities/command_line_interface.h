@@ -139,7 +139,7 @@ namespace mcrl2 {
 
         Report bugs at <http://www.mcrl2.org/issuetracker>.
 
-        See also the manual at <http://www.mcrl2.org/wiki/index.php/demo-tool>.
+        See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/demo-tool>.
        \endverbatim
      * Printing version information.
      *

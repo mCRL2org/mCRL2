@@ -476,7 +476,7 @@ namespace mcrl2 {
 
       s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
         << std::endl
-        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/User_manual/" << m_name << ">.\n";
+        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
       return s.str();
     }
@@ -577,7 +577,7 @@ namespace mcrl2 {
            "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
            "There is NO WARRANTY, to the extent permitted by law.\n";
       s << ".SH \"SEE ALSO\"" << std::endl
-        << "See also the manual at <http://www.mcrl2.org/wiki/index.php/User_manual/" << m_name << ">.\n";
+        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
       return s.str();
     }

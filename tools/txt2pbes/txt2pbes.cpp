@@ -40,7 +40,7 @@ class txt2pbes_tool: public input_output_tool
           "Parse the textual description of a PBES from INFILE and write it to OUTFILE. "
           "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used.\n\n"
           "The textual description should adhere to the BNF syntax description at "
-          "<http://mcrl2.org/wiki/index.php/Language_reference/PBES_syntax>."
+          "<http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/PBES_syntax>."
         )
     {}
 

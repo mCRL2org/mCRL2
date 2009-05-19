@@ -189,7 +189,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
       "present, stdout is used. If INFILE is not present, stdin is used.\n"
       "\n"
-      "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/wiki/index.php/mu-calculus_syntax>."
+      "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/mu-calculus_syntax>."
       )
     {}
 
