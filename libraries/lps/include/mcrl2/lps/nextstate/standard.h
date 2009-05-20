@@ -176,7 +176,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
     Enumerator make(ATermList v, ATerm c)
     {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(mcrl2::data::convert< std::set< atermpp::aterm_appl > >(v), atermpp::aterm(c));
+      return mcrl2::data::enumerator_factory< Enumerator >::make(boost::make_iterator_range(atermpp::aterm_list(v)), atermpp::aterm(c));
     }
 
 
@@ -224,13 +224,14 @@ namespace mcrl2 {
 
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
+      template < typename ForwardIteratorRange >
       bool classic_enumerator_impl< mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
-                  legacy_rewriter, legacy_selector >::initialise(std::set< atermpp::aterm_appl > const& v) {
+                  legacy_rewriter, legacy_selector >::initialise(boost::iterator_range< ForwardIteratorRange > const& v) {
 
         atermpp::term_list< data::variable > variables;
 
         // normalise variables
-        for (std::set< atermpp::aterm_appl >::const_iterator i = v.begin(); i != v.end(); ++i)
+        for (ForwardIteratorRange i = v.begin(); i != v.end(); ++i)
         {
           variables = atermpp::push_front(variables, variable(variable(*i).name(), m_shared_context->m_specification.normalise(variable(*i).sort())));
         }

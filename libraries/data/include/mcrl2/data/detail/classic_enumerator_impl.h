@@ -133,11 +133,13 @@ namespace mcrl2 {
                              m_shared_context(context), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
           }
 
-          bool initialise(std::set< variable_type > const& v) {
+          /// \param[in] v iterator range of the enumeration variables
+          template < typename ForwardTraversalIterator >
+          bool initialise(boost::iterator_range< ForwardTraversalIterator > const& v) {
             // Apply translation (effectively type normalisation) to variables
             atermpp::aterm_list variables;
 
-            for (typename std::set< variable_type >::const_iterator i = v.begin(); i != v.end(); ++i) {
+            for (ForwardTraversalIterator i = v.begin(); i != v.end(); ++i) {
               variables = atermpp::push_back(variables, m_evaluator.convert_to(*i));
             }
 
@@ -189,9 +191,11 @@ namespace mcrl2 {
             return m_substitution;
           }
 
+          /// \param[in] v iterator range of the enumeration variables
+          template < typename ForwardTraversalIterator >
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
-                  std::set< variable_type > const& v, expression_type const& c, substitution_type const& s = substitution_type()) {
+                  boost::iterator_range< ForwardTraversalIterator > const& v, expression_type const& c, substitution_type const& s = substitution_type()) {
 
             target.reset(new classic_enumerator_impl(context, c, s));
 
@@ -200,9 +204,11 @@ namespace mcrl2 {
             }
           }
 
+          /// \param[in] v iterator range of the enumeration variables
+          template < typename ForwardTraversalIterator >
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
-                               std::set< variable_type > const& v, expression_type const& c,
+                               boost::iterator_range< ForwardTraversalIterator > const& v, expression_type const& c,
                                Evaluator& e, substitution_type const& s = substitution_type()) {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
@@ -212,8 +218,10 @@ namespace mcrl2 {
             }
           }
 
+          /// \param[in] v iterator range of the enumeration variables
+          template < typename ForwardTraversalIterator >
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
-              data_specification const& specification, std::set< variable_type > const& v,
+              data_specification const& specification, boost::iterator_range< ForwardTraversalIterator > const& v,
               expression_type const& c, Evaluator& e, substitution_type const& s = substitution_type()) {
 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);

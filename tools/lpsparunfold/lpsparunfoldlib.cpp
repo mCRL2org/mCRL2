@@ -38,13 +38,13 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                              ++i){
     bool processed = false;
     if (i->is_basic_sort()) {
-      gsDebugMsg("\tFound Basic Sort: %s\n", basic_sort( *i ).name().c_str() );
+      gsDebugMsg("\tFound Basic Sort: %s\n", std::string(basic_sort( *i ).name()).c_str() );
       sort_names.insert( (basic_sort(*i)).name() );
       processed = true;
     }
 
     if (i->is_alias()){
-      gsDebugMsg("\tFound Alias Sort: %s\n", alias( *i ).name().name().c_str() );
+      gsDebugMsg("\tFound Alias Sort: %s\n", std::string(alias( *i ).name().name()).c_str() );
       sort_names.insert( (alias(*i)).name().name() );
       processed = true;
     }
@@ -382,7 +382,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
      if( std::distance( lps_proc_pars.begin(), i ) == parameter_at_index )
      {
        gsDebugMsg("");
-       gsVerboseMsg("Unfold parameter %s found at index %d\n", i->name().c_str(), std::distance( lps_proc_pars.begin(), i ) );
+       gsVerboseMsg("Unfold parameter %s found at index %d\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
        gsDebugMsg("Inject process parameters\n");
        mcrl2::data::variable_vector process_parameters_injection;
 
