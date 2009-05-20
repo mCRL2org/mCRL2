@@ -106,7 +106,7 @@ namespace lps {
   /// have rhs as a right hand side.
   static inline
   void sumelm_add_replacement(std::map<data_expression, data_expression>& replacements,
-                         const data_expression lhs, const data_expression rhs)
+                         const data_expression& lhs, const data_expression& rhs)
   {
     // First apply already present substitutions to rhs
     data_expression new_rhs = sumelm_replace(rhs, replacements);
@@ -123,7 +123,7 @@ namespace lps {
   ///\pre is_and(t) || is_equal_to(t)
   ///\return lefthandside of t
   static inline
-  data_expression lhs(const data_expression t)
+  data_expression lhs(const data_expression& t)
   {
     assert(sort_bool_::is_and__application(t) || is_equal_to_application(t));
     return *(application(t).arguments().begin());
@@ -132,7 +132,7 @@ namespace lps {
   ///\pre is_and(t) || is_equal_to(t)
   ///\return righthandside of t
   static inline
-  data_expression rhs(const data_expression t)
+  data_expression rhs(const data_expression& t)
   {
     assert(sort_bool_::is_and__application(t) || is_equal_to_application(t));
     return *(++application(t).arguments().begin());
@@ -141,24 +141,10 @@ namespace lps {
   ///\pre is_equal_to(t); t is of form a == b
   ///\return b == a
   static inline
-  data_expression swap_equality(const data_expression t)
+  data_expression swap_equality(const data_expression& t)
   {
     assert(is_equal_to_application(t));
     return data::equal_to(rhs(t), lhs(t));
-  }
-
-  ///Apply substitution to the righthand sides of the assignments in dl
-  static inline
-  assignment_vector substitute_rhs(const assignment_list& dl, const assignment& substitution)
-  {
-    assignment_vector result;
-
-    for(assignment_list::const_iterator i = dl.begin(); i != dl.end(); ++i)
-    {
-      result.push_back(assignment(i->lhs(), substitute(substitution, i->rhs())));
-    }
-
-    return result;
   }
 
   ////////////////////////////////////////////////////////////
