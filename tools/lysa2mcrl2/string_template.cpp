@@ -13,7 +13,6 @@ void StringTemplate::replace(string key, string value)
   string k_var = "%" + key + "%";
 
   //hardcoding replace_all(subject, k_var, value);
-  bool inVar = false;
   int len = subject.size();
   int k_var_len = k_var.size();
   ostringstream new_subject;
@@ -40,7 +39,7 @@ void StringTemplate::replace(string key, string value)
   subject = new_subject.str();
 }
 /**
- * always returns false. this way, multiple has, replace_by pairs can be 
+ * always returns false. this way, multiple has, replace_by pairs can be
  * combined in && and || clauses using short circuiting
  */
 bool StringTemplate::replace_by(string value)
@@ -62,13 +61,13 @@ bool StringTemplate::has(string key)
 }
 
 ostringstream& StringTemplate::operator[] (string key)
-{ 
-  if(!streams.count(key)) 
-  { 
+{
+  if(!streams.count(key))
+  {
     shared_ptr<ostringstream> os(new ostringstream());
     streams.insert(make_pair(key, os));
   }
-  return *(streams[key]); 
+  return *(streams[key]);
 }
 
 void StringTemplate::finalise()
@@ -89,7 +88,7 @@ void StringTemplate::finalise()
 StringTemplateFile::StringTemplateFile(string filecontent)
 {
 	//ifstream f(filename.c_str());
-  
+
   istringstream f(filecontent);
 	string fmtline;
 	while(getline(f, fmtline))
@@ -102,7 +101,7 @@ StringTemplateFile::StringTemplateFile(string filecontent)
 		if(regex_match(fmtline, matches, rex))
 		{
 			format_strings[matches[1]] = matches[2];
-		}		
+		}
 	}
 }
 
