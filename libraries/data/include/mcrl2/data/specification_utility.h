@@ -9,6 +9,9 @@
 /// \file mcrl2/data/specification_utility.cpp
 /// \brief Utility functionality for working with specficiations
 
+#ifndef MCRL2_DATA_SPECIFICATION_UTILITY_H__
+#define MCRL2_DATA_SPECIFICATION_UTILITY_H__
+
 #include <set>
 #include <string>
 #include <vector>
@@ -17,7 +20,9 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/algorithm.h"
+
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/replace.h"
 
 namespace mcrl2 {
   namespace data {
@@ -116,7 +121,8 @@ namespace mcrl2 {
     template < typename Element >
     bool compare_modulo_order(
       atermpp::term_list< Element > olde,
-      atermpp::term_list< Element > newe) {
+      atermpp::term_list< Element > newe)
+    {
 
       std::set< Element > oldset(olde.begin(), olde.end());
       std::set< Element > newset(newe.begin(), newe.end());
@@ -171,10 +177,11 @@ namespace mcrl2 {
 
     /// \brief compares equations of two lists of equations disregarding duplicates, equation order and variable naming
     bool compare_modulo_order_and_alpha(
-      using detail::equation_smaller;
-
       atermpp::term_list< mcrl2::data::data_equation > olde,
-      atermpp::term_list< mcrl2::data::data_equation > newe) {
+      atermpp::term_list< mcrl2::data::data_equation > newe)
+    {
+
+      using detail::equation_smaller;
 
       std::set< mcrl2::data::data_equation, equation_smaller > oldset(olde.begin(), olde.end());
       std::set< mcrl2::data::data_equation, equation_smaller > newset(newe.begin(), newe.end());

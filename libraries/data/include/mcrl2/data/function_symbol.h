@@ -12,11 +12,7 @@
 #ifndef MCRL2_DATA_FUNCTION_SYMBOL_H
 #define MCRL2_DATA_FUNCTION_SYMBOL_H
 
-#include "boost/range/iterator_range.hpp"
-
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"

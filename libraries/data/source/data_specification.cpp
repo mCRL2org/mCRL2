@@ -623,7 +623,7 @@ namespace mcrl2 {
       // Step two: Normalise names for container sorts
       for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
       {
-        if (basic_sort(i->first).name().find("@legacy_") != 0)
+        if (std::string(basic_sort(i->first).name()).find("@legacy_") != 0)
         {
           std::map< sort_expression, sort_expression > partial_renamings(renamings);
 

@@ -26,6 +26,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
