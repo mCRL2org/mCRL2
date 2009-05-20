@@ -656,15 +656,15 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   float distance_begin_to_control = sqrt( pow( p_control.m_y - p_begin.m_y, 2 ) + pow( p_control.m_x - p_begin.m_x, 2 ) );
   float distance_control_to_end = sqrt( pow( p_end.m_y - p_control.m_y, 2 ) + pow( p_end.m_x - p_control.m_x, 2 ) );
   float strength = distance_begin_to_control/(distance_begin_to_control + distance_control_to_end);
-  float distance_min;
-  if (distance_begin_to_control < distance_control_to_end) distance_min = distance_begin_to_control; else distance_min = distance_control_to_end;
+  float distance_left = distance_begin_to_control * 0.5;
+  float distance_right = distance_control_to_end * 0.5;
 
   coordinate p_right = {(1-strength)*p_begin.m_x + strength*p_control.m_x, (1-strength)*p_begin.m_y + strength*p_control.m_y};
   coordinate p_left = {(1-strength)*p_control.m_x + strength*p_end.m_x, (1-strength)*p_control.m_y + strength*p_end.m_y};
   float angle_control = atan2(( p_left.m_x - p_right.m_x), ( p_left.m_y - p_right.m_y));
 
-  coordinate p_control_left = {p_control.m_x + distance_min * sin( angle_control - M_PI ), p_control.m_y + distance_min * cos( angle_control - M_PI )};
-  coordinate p_control_right = {p_control.m_x + distance_min * sin( angle_control - M_PI*2 ), p_control.m_y + distance_min * cos( angle_control - M_PI*2 )};
+  coordinate p_control_left = {p_control.m_x + distance_left * sin( angle_control - M_PI ), p_control.m_y + distance_left * cos( angle_control - M_PI )};
+  coordinate p_control_right = {p_control.m_x + distance_right * sin( angle_control - M_PI*2 ), p_control.m_y + distance_right * cos( angle_control - M_PI*2 )};
 
   //draw bezier
   coordinate pre_pnt;
@@ -675,13 +675,13 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
     pre_pnt = pnt;
     if (i <= 20)
     {
-      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05));  
+      pnt = get_coordinate_from_controlpoints(p_begin, p_control_left, p_control, float(i*0.05f));  
     }
     else
     {
-      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05));
+      pnt = get_coordinate_from_controlpoints(p_control, p_control_right, p_end, float((i-20)*0.05f));
       // calculate angle of midpoint
-      if (i == 21) angle_middle = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x)) + M_PI*0.5;
+      if (i == 21) angle_middle = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x)) + M_PI*0.5f;
     };
     draw_line(pre_pnt, pnt, p_selected, g_color_black);
   }
@@ -690,11 +690,11 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   float angle_arrow = atan2((pre_pnt.m_y-pnt.m_y), (pre_pnt.m_x-pnt.m_x));
 
   // draw arrow head based on calculated angle
-  float one_side_x = pnt.m_x + 0.03 * cos( angle_arrow - M_PI/4 );
-  float one_side_y = pnt.m_y + 0.03 * sin( angle_arrow - M_PI/4 );
-  float other_side_x = pnt.m_x + 0.03 * cos( angle_arrow + M_PI/4 );
-  float other_side_y = pnt.m_y + 0.03 * sin( angle_arrow + M_PI/4 );
-
+  float one_side_x = pnt.m_x + 0.03f * cos( angle_arrow - M_PI/4 );
+  float one_side_y = pnt.m_y + 0.03f * sin( angle_arrow - M_PI/4 );
+  float other_side_x = pnt.m_x + 0.03f * cos( angle_arrow + M_PI/4 );
+  float other_side_y = pnt.m_y + 0.03f * sin( angle_arrow + M_PI/4 );
+    
   // draw transition arrow
   glBegin(GL_TRIANGLES);
     glVertex3f( pnt.m_x, pnt.m_y, 0.0f);
@@ -703,8 +703,8 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   glEnd();
 
   // keep angle between 0..pi
-  while (angle_middle < 0.0f) angle_middle += static_cast<float> ( M_PI );
-  while (angle_middle >= M_PI) angle_middle -= static_cast<float> ( M_PI );
+  while (angle_middle < 0.0f) angle_middle += M_PI;
+  while (angle_middle >= M_PI) angle_middle -= M_PI;
   
   // align text
   Alignment align_horizontal = al_center;
@@ -722,15 +722,15 @@ void grape::grapeapp::draw_nonterminating_transition( const coordinate p_begin, 
   //draw control point
   if (p_selected)
   {
-    draw_line_rectangle(p_control, static_cast<float>(0.03), static_cast<float>(0.03), false, g_color_black);
+    draw_line_rectangle(p_control, 0.03f, 0.03f, false, g_color_black);
   }
   else
   {
-    draw_filled_rectangle(p_control, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+    draw_filled_rectangle(p_control, 0.015f, 0.015f, false, g_color_black);
   };
 
-  draw_filled_rectangle(p_begin, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
-  draw_filled_rectangle(p_end, static_cast<float>(0.015), static_cast<float>(0.015), false, g_color_black);
+  draw_filled_rectangle(p_begin, 0.015f, 0.015f, false, g_color_black);
+  draw_filled_rectangle(p_end, 0.015f, 0.015f, false, g_color_black);
 }
 
 void grape::grapeapp::draw_terminating_transition( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const wxString &p_label_text )
@@ -922,7 +922,7 @@ void grape::grapeapp::draw_reference(const coordinate &p_center, float p_width, 
 
   coordinate points[36];
 
-    // top right corner
+  // top right corner
   for (unsigned int i=0; i < 90; i+=10)
   {
     float degInRad = i * DEG2RAD;

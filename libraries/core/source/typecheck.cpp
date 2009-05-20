@@ -341,11 +341,11 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
       if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
     }
     else {
-      gsErrorMsg("type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
+      gsErrorMsg("+ type checking of sort expressions failed (%T is not a sort expression)\n",sort_expr);
     }
   }
   else {
-      gsErrorMsg("reading Sorts from LPS failed\n");
+      gsErrorMsg("+ reading Sorts from LPS failed\n");
   }
 
   gstcDataDestroy();
@@ -388,7 +388,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
     gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
     if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
-      gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
+      gsErrorMsg("+ type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
     } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
       bool destroy_vars=(Vars == NULL);
       if(destroy_vars) Vars=ATtableCreate(63,50);
@@ -396,10 +396,10 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
       ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?gsMakeSortUnknown():sort_expr);
       if(destroy_vars) ATtableDestroy(Vars);
       if(Type && !gsIsSortUnknown(Type)) Result=data;
-      else gsErrorMsg("type checking of data expression failed\n");
+      else gsErrorMsg("+ type checking of data expression failed\n");
     }
   } else {
-    gsErrorMsg("reading from LPS failed\n");
+    gsErrorMsg("+ reading from LPS failed\n");
   }
   gstcDataDestroy();
 
@@ -448,11 +448,11 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
       ATtableDestroy(Vars);
     }
     else {
-      gsErrorMsg("type checking of multiactions failed (%T is not a multiaction)\n",mult_act);
+      gsErrorMsg("+ type checking of multiactions failed (%T is not a multiaction)\n",mult_act);
     }
   }
   else {
-      gsErrorMsg("reading from LPS failed\n");
+      gsErrorMsg("+ reading from LPS failed\n");
   }
   gstcDataDestroy();
   return Result;
@@ -513,20 +513,20 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
          ATtableDestroy(Vars);
        }
        else {
-         gsErrorMsg("reading functions from LPS failed\n");
+         gsErrorMsg("+ reading functions from LPS failed\n");
        }
     }
     else {
-      gsErrorMsg("reading structure constructors from LPS failed.\n");
+      gsErrorMsg("+ reading structure constructors from LPS failed.\n");
     }
   }
   else {
-    gsErrorMsg("reading sorts from LPS failed\n");
+    gsErrorMsg("+ reading sorts from LPS failed\n");
   }
   gstcDataDestroy();
   if (Result != NULL) {
     if (!check_monotonicity(Result)) {
-      gsErrorMsg("state formula is not monotonic\n");
+      gsErrorMsg("+ state formula is not monotonic\n");
       Result = NULL;
     }
   }
@@ -616,7 +616,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
            ATermList VarList=ATLgetArgument(Rule,0);
            if(!gstcVarsUnique(VarList)){
              b = false;
-             gsErrorMsg("the variables in action rename rule %P are not unique\n",VarList,Rule);
+             gsErrorMsg("+ the variables in action rename rule %P are not unique\n",VarList,Rule);
              break;
            }
 
@@ -656,15 +656,15 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
          gsDebugMsg ("type checking phase finished\n");
        }
        else {
-         gsErrorMsg("reading functions from LPS failed\n");
+         gsErrorMsg("+ reading functions from LPS failed\n");
        }
     }
     else {
-      gsErrorMsg("reading structure constructors from LPS failed\n");
+      gsErrorMsg("+ reading structure constructors from LPS failed\n");
     }
   }
   else {
-    gsErrorMsg("reading sorts from LPS failed\n");
+    gsErrorMsg("+ reading sorts from LPS failed\n");
   }
 
 finally:
@@ -770,12 +770,12 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
     ATermTable NewVars=gstcAddVars2Table(Vars,data_vars);
     if(!NewVars) {
       ATtableDestroy(Vars);
-      gsErrorMsg("type error while typechecking data variables\n");
+      gsErrorMsg("+ type error while typechecking data variables\n");
       return NULL;
     }
     ATtableDestroy(Vars);
   } else {
-    gsErrorMsg("reading from LPS failed\n");
+    gsErrorMsg("+ reading from LPS failed\n");
   }
   gstcDataDestroy();
 
@@ -1180,29 +1180,29 @@ static ATbool gstcReadInSorts (ATermList Sorts, bool high_level){
     ATermAppl Sort=ATAgetFirst(Sorts);
     ATermAppl SortName=ATAgetArgument(Sort,0);
     if(high_level && ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))){
-      gsErrorMsg("attempt to redeclare sort Bool\n");
+      gsErrorMsg("+ attempt to redeclare sort Bool\n");
       return ATfalse;
     }
     if(high_level && ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))){
-      gsErrorMsg("attempt to redeclare sort Pos\n");
+      gsErrorMsg("+ attempt to redeclare sort Pos\n");
       return ATfalse;
     }
     if(high_level && ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))){
-      gsErrorMsg("attempt to redeclare sort Nat\n");
+      gsErrorMsg("+ attempt to redeclare sort Nat\n");
       return ATfalse;
     }
     if(high_level && ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
-      gsErrorMsg("attempt to redeclare sort Int\n");
+      gsErrorMsg("+ attempt to redeclare sort Int\n");
       return ATfalse;
     }
     if(high_level && ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))){
-      gsErrorMsg("attempt to redeclare sort Real\n");
+      gsErrorMsg("+ attempt to redeclare sort Real\n");
       return ATfalse;
     }
     if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0
        || ATAtableGet(context.defined_sorts, (ATerm)SortName)){
 
-      gsErrorMsg("double declaration of sort %P\n",SortName);
+      gsErrorMsg("+ double declaration of sort %P\n",SortName);
       return ATfalse;
     }
     if(gsIsSortId(Sort)) ATindexedSetPut(context.basic_sorts, (ATerm)SortName, &nnew);
@@ -1258,7 +1258,7 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps, bool high_level){
       if(!gstcAddFunction(gsMakeOpId(FuncName,FuncType),"function",high_level)) { return ATfalse; }
     }
     else{
-      if(!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant",high_level)) { gsErrorMsg("could not add constant\n"); return ATfalse; }
+      if(!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant",high_level)) { gsErrorMsg("+ could not add constant\n"); return ATfalse; }
     }
 
     if(constr_number){
@@ -1269,12 +1269,12 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps, bool high_level){
         ATermAppl ConstructorType=FuncType;
         if(gsIsSortArrow(ConstructorType)) ConstructorType=ATAgetArgument(ConstructorType,1);
 	ConstructorType=gstcUnwindType(ConstructorType);
-	if(!gsIsSortId(ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-        if(ATisEqual(gsMakeSortIdBool(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-        if(ATisEqual(gsMakeSortIdPos(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-        if(ATisEqual(gsMakeSortIdNat(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-        if(ATisEqual(gsMakeSortIdInt(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-        if(ATisEqual(gsMakeSortIdReal(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+	if(!gsIsSortId(ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdBool(),ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdPos(),ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdNat(),ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdInt(),ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+        if(ATisEqual(gsMakeSortIdReal(),ConstructorType)) { gsErrorMsg("+ Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
       }
     }
 
@@ -1302,7 +1302,7 @@ static ATbool gstcReadInActs (ATermList Acts){
       // action name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(ActType, Types)){
-	gsErrorMsg("double declaration of action %P\n", ActName);
+	gsErrorMsg("+ double declaration of action %P\n", ActName);
 	return ATfalse;
       }
       else{
@@ -1323,7 +1323,7 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
     ATermAppl ProcName=ATAgetArgument(ATAgetArgument(Proc,1),0);
 
     if(ATLtableGet(context.actions, (ATerm)ProcName)){
-      gsErrorMsg("declaration of both process and action %P\n", ProcName);
+      gsErrorMsg("+ declaration of both process and action %P\n", ProcName);
       return ATfalse;
     }
 
@@ -1340,7 +1340,7 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
       // process name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(ProcType, Types)){
-	gsErrorMsg("double declaration of process %P\n", ProcName);
+	gsErrorMsg("+ double declaration of process %P\n", ProcName);
 	return ATfalse;
       }
       else{
@@ -1351,7 +1351,7 @@ static ATbool gstcReadInProcsAndInit (ATermList Procs, ATermAppl Init){
 
     //check that all formal parameters of the process are unique.
     ATermList ProcVars=ATLgetArgument(Proc,2);
-    if(!gstcVarsUnique(ProcVars)){ gsErrorMsg("the formal variables in process %P are not unique\n",Proc); return ATfalse;}
+    if(!gstcVarsUnique(ProcVars)){ gsErrorMsg("+ the formal variables in process %P are not unique\n",Proc); return ATfalse;}
 
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATLgetArgument(Proc,2));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,1),(ATerm)ATAgetArgument(Proc,3));
@@ -1389,12 +1389,12 @@ static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit){
     }
     else{
       // temporarily prohibit overloading here
-      gsErrorMsg("attempt to overload propositional variable %P\n", PBName); return ATfalse;
+      gsErrorMsg("+ attempt to overload propositional variable %P\n", PBName); return ATfalse;
       // the table context.PBs contains a list of types for each
       // PBES name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(PBType, Types)){
-	gsErrorMsg("double declaration of propositional variable %P\n", PBName);
+	gsErrorMsg("+ double declaration of propositional variable %P\n", PBName);
 	return ATfalse;
       }
       else{
@@ -1404,7 +1404,7 @@ static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit){
     ATtablePut(context.PBs,(ATerm)PBName,(ATerm)Types);
 
     //check that all formal parameters of the PBES are unique.
-    if(!gstcVarsUnique(ATconcat(PBVars,PBFreeVars))){ gsErrorMsg("the formal and/or free variables in PBES %P are not unique\n",PBEqn); return ATfalse;}
+    if(!gstcVarsUnique(ATconcat(PBVars,PBFreeVars))){ gsErrorMsg("+ the formal and/or free variables in PBES %P are not unique\n",PBEqn); return ATfalse;}
 
     //This is a fake ProcVarId (There is no PBVarId)
     ATermAppl Index=gsMakeProcVarId(PBName,PBType);
@@ -1468,7 +1468,7 @@ static ATbool gstcTransformVarConsTypeData(void){
     ATermAppl Eqn=ATAgetFirst(Eqns);
     ATermList VarList=ATLgetArgument(Eqn,0);
 
-    if(!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("the variables in equation declaration %P are not unique\n",VarList,Eqn); break;}
+    if(!gstcVarsUnique(VarList)){ b = false; gsErrorMsg("+ the variables in equation declaration %P are not unique\n",VarList,Eqn); break;}
 
     ATermTable NewDeclaredVars=gstcAddVars2Table(DeclaredVars,VarList);
     if(!NewDeclaredVars){ b = false; break; }
@@ -1476,31 +1476,31 @@ static ATbool gstcTransformVarConsTypeData(void){
 
     ATermAppl Left=ATAgetArgument(Eqn,2);
     ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeSortUnknown(),FreeVars,false,true);
-    if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
+    if(!LeftType){ b = false; gsErrorMsg("+ the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
     if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
 
     ATermAppl Cond=ATAgetArgument(Eqn,1);
     if(!gsIsNil(Cond) && !(gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,gsMakeSortIdBool()))){ b = false; break; }
     ATermAppl Right=ATAgetArgument(Eqn,3);
     ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
-    if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
+    if(!RightType){ b = false; gsErrorMsg("+ the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
 
     //If the types are not uniquly the same now: do once more:
     if(!gstcEqTypesA(LeftType,RightType)){
       gsDebugMsg("Doing again for the equation %P, LeftType: %P, RightType: %P\n",Eqn,LeftType,RightType);
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
-      if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
+      if(!Type){gsErrorMsg("+ types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
       Left=ATAgetArgument(Eqn,2);
       ATtableReset(FreeVars);
       LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,Type,FreeVars,true);
-      if(!LeftType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
+      if(!LeftType){ b = false; gsErrorMsg("+ types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
       if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
       Right=ATAgetArgument(Eqn,3);
       RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
-      if(!RightType){ b = false; gsErrorMsg("types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
+      if(!RightType){ b = false; gsErrorMsg("+ types of the left- and right-hand-sides of the equation %P do not match\n",Eqn); break; }
       Type=gstcTypeMatchA(LeftType,RightType);
-      if(!Type){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
-      if(gstcHasUnknown(Type)){gsErrorMsg("types of the left- (%P) and right- (%P) hand-sides of the equation %P cannot be uniquely determined\n",LeftType,RightType,Eqn); b = false; break; }
+      if(!Type){gsErrorMsg("+ types of the left- (%P) and right- (%P) hand-sides of the equation %P do not match\n",LeftType,RightType,Eqn); b = false; break; }
+      if(gstcHasUnknown(Type)){gsErrorMsg("+ types of the left- (%P) and right- (%P) hand-sides of the equation %P cannot be uniquely determined\n",LeftType,RightType,Eqn); b = false; break; }
     }
     ATtableReset(DeclaredVars);
     NewEqns=ATinsert(NewEqns,(ATerm)gsMakeDataEqn(VarList,Cond,Left,Right));
@@ -1608,7 +1608,7 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level){
   if(gsIsSortId(SortExpr)){
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
     if(!gstcIsSortDeclared(SortName))
-      {gsErrorMsg("basic or defined sort %P is not declared\n",SortName); return ATfalse; }
+      {gsErrorMsg("+ basic or defined sort %P is not declared\n",SortName); return ATfalse; }
     return ATtrue;
   }
 
@@ -1637,7 +1637,7 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr, bool high_level){
     return ATtrue;
   }
 
-  gsErrorMsg("this is not a sort expression %T\n",SortExpr);
+  gsErrorMsg("+ this is not a sort expression %T\n",SortExpr);
   return ATfalse;
 }
 
@@ -1654,7 +1654,7 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr){
   if(gsIsSortId(SortExpr)){
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
     if(!gstcIsSortDeclared(SortName))
-      {gsErrorMsg("basic or defined sort %P is not declared\n",SortName);return ATfalse;}
+      {gsErrorMsg("+ basic or defined sort %P is not declared\n",SortName);return ATfalse;}
     return ATtrue;
   }
 
@@ -1716,13 +1716,13 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg, bool high_level){
   ATermAppl Sort = gsGetSort(OpId);
 
   if(ATAtableGet(context.constants, (ATerm)Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/){
-    gsErrorMsg("double declaration of %s %P\n", msg, Name);
+    gsErrorMsg("+ double declaration of %s %P\n", msg, Name);
     return ATfalse;
   }
 
   if(ATLtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name)){
     if(high_level){
-      gsErrorMsg("attempt to declare a constant with the name that is a built-in identifier (%P)\n", Name);
+      gsErrorMsg("+ attempt to declare a constant with the name that is a built-in identifier (%P)\n", Name);
       return ATfalse;
     } else {
       // In this case we ignore the constant, i.e. don't add it to the context.constants
@@ -1747,7 +1747,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
 
   if(ATAtableGet(gssystem.constants, (ATerm)Name)){
     if(high_level){
-      gsErrorMsg("attempt to redeclare the system constant with %s %P\n", msg, Name);
+      gsErrorMsg("+ attempt to redeclare the system constant with %s %P\n", msg, Name);
       return ATfalse;
     }
     else {
@@ -1776,7 +1776,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
      !ATisEqual(Name,gsMakeOpIdNameCount())
     ){
     if(high_level){
-      gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
+      gsErrorMsg("+ attempt to redeclare the system function with %s %P\n", msg, Name);
       return ATfalse;
     }
     else {
@@ -1790,7 +1790,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
   // function name. We need to check if there is already such a type
   // in the list. If so -- error, otherwise -- add
   if (Types && gstcInTypesA(Sort, Types)){
-    gsErrorMsg("double declaration of %s %P\n", msg, Name);
+    gsErrorMsg("+ double declaration of %s %P\n", msg, Name);
     return ATfalse;
   }
   else{
@@ -1798,7 +1798,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool high_level){
     Types=ATappend(Types,(ATerm)Sort);
     ATtablePut(context.functions,(ATerm)Name,(ATerm)Types);
   }
-  gsDebugMsg("Read-in %s %T Type %T\n",msg,Name,Types);
+  gsDebugMsg("+ Read-in %s %T Type %T\n",msg,Name,Types);
   return Result;
 }
 
@@ -1902,14 +1902,14 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
         action=ATfalse;
       }
       else{
-        gsErrorMsg("action or process %P not declared\n", Name);
+        gsErrorMsg("+ action or process %P not declared\n", Name);
         return NULL;
       }
     }
   }
   else {
     if(!(ParList=ATLtableGet(context.PBs,(ATerm)Name))){
-      gsErrorMsg("propositional variable %P not declared\n", Name);
+      gsErrorMsg("+ propositional variable %P not declared\n", Name);
       return NULL;
     }
   }
@@ -1930,7 +1930,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   }
 
   if(ATisEmpty(ParList)) {
-    gsErrorMsg("no %s %P with %d parameter%s is declared (while typechecking %P)\n",
+    gsErrorMsg("+ no %s %P with %d parameter%s is declared (while typechecking %P)\n",
       msg, Name, nFactPars, (nFactPars != 1)?"s":"", ProcTerm);
     return NULL;
   }
@@ -1957,7 +1957,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
 
     ATermAppl NewPosType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,PosType); //gstcExpandNumTypesDown(PosType));
 
-    if(!NewPosType) {gsErrorMsg("cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
+    if(!NewPosType) {gsErrorMsg("+ cannot typecheck %P as type %P (while typechecking %P)\n",Par,gstcExpandNumTypesDown(PosType),ProcTerm);return NULL;}
     NewPars=ATinsert(NewPars,(ATerm)Par);
     NewPosTypeList=ATinsert(NewPosTypeList,(ATerm)NewPosType);
   }
@@ -1978,7 +1978,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
 
       ATermAppl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,&Par);
       if(!CastedNewPosType)
-	{gsErrorMsg("cannot cast %P to %P (while typechecking %P in %P)\n",NewPosType,PosType,Par,ProcTerm);return NULL;}
+	{gsErrorMsg("+ cannot cast %P to %P (while typechecking %P in %P)\n",NewPosType,PosType,Par,ProcTerm);return NULL;}
 
       NewPars=ATinsert(NewPars,(ATerm)Par);
       CastedPosTypeList=ATinsert(CastedPosTypeList,(ATerm)CastedNewPosType);
@@ -1989,7 +1989,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
     PosTypeList=gstcAdjustNotInferredList(NewPosTypeList,ParList);
   }
 
-  if(!PosTypeList) {gsErrorMsg("no %s %P with type %P is declared (while typechecking %P)\n",msg,Name,NewPosTypeList,ProcTerm);return NULL;}
+  if(!PosTypeList) {gsErrorMsg("+ no %s %P with type %P is declared (while typechecking %P)\n",msg,Name,NewPosTypeList,ProcTerm);return NULL;}
 
   if(gstcIsNotInferredL(PosTypeList)){
     gsWarningMsg("ambiguous %s %P\n",msg,Name);
@@ -2019,7 +2019,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     gsDebugMsg("typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
     ATermAppl Name=ATAgetArgument(ProcTerm,0);
     ATermList ParList=ATLtableGet(context.processes,(ATerm)Name);
-    if (!ParList) { gsErrorMsg("process %P not declared\n", Name); return NULL; }
+    if (!ParList) { gsErrorMsg("+ process %P not declared\n", Name); return NULL; }
  
     // Put the assignments into a table 
     ATermTable As=ATtableCreate(63,50);
@@ -2047,8 +2047,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       ParList=ATreverse(NewParList);
     }
 
-    if(ATisEmpty(ParList)) { ATtableDestroy(As); gsErrorMsg("no process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
-    if(!ATisEmpty(ATgetNext(ParList))) { ATtableDestroy(As); gsErrorMsg("ambiguous process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
+    if(ATisEmpty(ParList)) { ATtableDestroy(As); gsErrorMsg("+ no process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
+    if(!ATisEmpty(ATgetNext(ParList))) { ATtableDestroy(As); gsErrorMsg("+ ambiguous process %P containing all assignments in %P\n", Name, ProcTerm); return NULL; }
 
     // get the formal parameter names
     ATermList ActualPars=ATmakeList0();
@@ -2067,7 +2067,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     gsDebugMsg("transformed into a process call without short-hand assignments %T\n\n", gsMakeParamId(Name,ActualPars));
  
     ATermAppl TypeCheckedProcTerm=gstcRewrActProc(Vars, gsMakeParamId(Name,ActualPars));
-    if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("the previous type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
+    if(!TypeCheckedProcTerm) {ATtableDestroy(As); gsErrorMsg("+ the previous type error occurred while typechecking the process call with short-hand assignments %P\n", ProcTerm); return NULL; }
     
    gsDebugMsg("successfully typechecked it into %T\n\n", TypeCheckedProcTerm);    
 
@@ -2117,7 +2117,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	ATermAppl Act=ATAgetFirst(ActList);
 
 	//Actions must be declared
-	if(!ATtableGet(context.actions,(ATerm)Act)) {gsErrorMsg("%s an undefined action %P (typechecking %P)\n",msg,Act,ProcTerm); return NULL;}
+	if(!ATtableGet(context.actions,(ATerm)Act)) {gsErrorMsg("+ %s an undefined action %P (typechecking %P)\n",msg,Act,ProcTerm); return NULL;}
 	ATbool nnew;
 	ATindexedSetPut(Acts,(ATerm)Act,&nnew);
 	if(!nnew) gsWarningMsg("%s action %P twice (typechecking %P)\n",msg,Act,ProcTerm);
@@ -2143,17 +2143,17 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	//Actions must be declared and of the same types
 	ATermList TypesFrom,TypesTo;
 	if(!(TypesFrom=ATLtableGet(context.actions,(ATerm)ActFrom)))
-	  {gsErrorMsg("renaming an undefined action %P (typechecking %P)\n",ActFrom,ProcTerm);return NULL;}
+	  {gsErrorMsg("+ renaming an undefined action %P (typechecking %P)\n",ActFrom,ProcTerm);return NULL;}
 	if(!(TypesTo=ATLtableGet(context.actions,(ATerm)ActTo)))
-	  {gsErrorMsg("renaming into an undefined action %P (typechecking %P)\n",ActTo,ProcTerm);return NULL;}
+	  {gsErrorMsg("+ renaming into an undefined action %P (typechecking %P)\n",ActTo,ProcTerm);return NULL;}
 
 	TypesTo=gstcTypeListsIntersect(TypesFrom,TypesTo);
 	if(!TypesTo || ATisEmpty(TypesTo))
-	  {gsErrorMsg("renaming action %P into action %P: these two have no common type (typechecking %P)\n",ActTo,ActFrom,ProcTerm);return NULL;}
+	  {gsErrorMsg("+ renaming action %P into action %P: these two have no common type (typechecking %P)\n",ActTo,ActFrom,ProcTerm);return NULL;}
 
 	ATbool nnew;
 	ATindexedSetPut(ActsFrom,(ATerm)ActFrom,&nnew);
-	if(!nnew) {gsErrorMsg("renaming action %P twice (typechecking %P)\n",ActFrom,ProcTerm);return NULL;}
+	if(!nnew) {gsErrorMsg("+ renaming action %P twice (typechecking %P)\n",ActFrom,ProcTerm);return NULL;}
      }
       ATindexedSetDestroy(ActsFrom);
     }
@@ -2174,7 +2174,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  ATermAppl ActTo=ATAgetArgument(Comm,1);
 
 	  if(ATgetLength(MActFrom)==1) {
-	    gsErrorMsg("using synchronization as renaming/hiding of action %P into %P (typechecking %P)\n",
+	    gsErrorMsg("+ using synchronization as renaming/hiding of action %P into %P (typechecking %P)\n",
 	      ATgetFirst(MActFrom),ActTo,ProcTerm);
             return NULL;
           }
@@ -2185,17 +2185,17 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  if(!gsIsNil(ActTo)){
 	    ResTypes=ATLtableGet(context.actions,(ATerm)ActTo);
 	    if(!ResTypes)
-	      {gsErrorMsg("synchronizing to an undefined action %P (typechecking %P)\n",ActTo,ProcTerm);return NULL;}
+	      {gsErrorMsg("+ synchronizing to an undefined action %P (typechecking %P)\n",ActTo,ProcTerm);return NULL;}
 	  }
 
 	  for(;!ATisEmpty(MActFrom);MActFrom=ATgetNext(MActFrom)){
 	    ATermAppl Act=ATAgetFirst(MActFrom);
 	    ATermList Types=ATLtableGet(context.actions,(ATerm)Act);
 	    if(!Types)
-	      {gsErrorMsg("synchronizing an undefined action %P in (multi)action %P (typechecking %P)\n",Act,MActFrom,ProcTerm);return NULL;}
+	      {gsErrorMsg("+ synchronizing an undefined action %P in (multi)action %P (typechecking %P)\n",Act,MActFrom,ProcTerm);return NULL;}
 	    ResTypes=(ResTypes)?gstcTypeListsIntersect(ResTypes,Types):Types;
 	    if(!ResTypes || ATisEmpty(ResTypes))
-	      {gsErrorMsg("synchronizing action %P from (multi)action %P into action %P: these have no common type (typechecking %P), ResTypes: %T\n",
+	      {gsErrorMsg("+ synchronizing action %P from (multi)action %P into action %P: these have no common type (typechecking %P), ResTypes: %T\n",
 			  Act,BackupMActFrom,ActTo,ProcTerm,ResTypes);return NULL;}
 	  }
 	  MActFrom=BackupMActFrom;
@@ -2211,7 +2211,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  for(;!ATisEmpty(Acts);Acts=ATgetNext(Acts)){
 	    ATermAppl Act=ATAgetFirst(Acts);
 	    if(ATindexOf(ActsFrom,(ATerm)Act,0)>=0)
-	      {gsErrorMsg("synchronizing action %P in different ways (typechecking %P)\n",Act,ProcTerm);return NULL;}
+	      {gsErrorMsg("+ synchronizing action %P in different ways (typechecking %P)\n",Act,ProcTerm);return NULL;}
 	    else ActsFrom=ATinsert(ActsFrom,(ATerm)Act);
 	  }
 	}
@@ -2233,7 +2233,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 	  for(;!ATisEmpty(MAct);MAct=ATgetNext(MAct)){
 	    ATermAppl Act=ATAgetFirst(MAct);
 	    if(!ATLtableGet(context.actions,(ATerm)Act))
-	      {gsErrorMsg("allowing an undefined action %P in (multi)action %P (typechecking %P)\n",Act,MAct,ProcTerm);return NULL;}
+	      {gsErrorMsg("+ allowing an undefined action %P in (multi)action %P (typechecking %P)\n",Act,MAct,ProcTerm);return NULL;}
 	  }
 
 	  MAct=ATLgetArgument(ATAgetFirst(MActList),0);
@@ -2270,7 +2270,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       //upcasting
       ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
       if(!CastedNewType)
-	{gsErrorMsg("cannot (up)cast time value %P to type Real\n",Time);return NULL;}
+	{gsErrorMsg("+ cannot (up)cast time value %P to type Real\n",Time);return NULL;}
     }
 
     return gsMakeAtTime(NewProc,Time);
@@ -2303,12 +2303,12 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(ProcTerm,0));
     if(!NewVars) {
       ATtableDestroy(CopyVars);
-      gsErrorMsg("type error while typechecking %P\n",ProcTerm);
+      gsErrorMsg("+ type error while typechecking %P\n",ProcTerm);
       return NULL;
     }
     ATermAppl NewProc=gstcTraverseActProcVarConstP(NewVars,ATAgetArgument(ProcTerm,1));
     ATtableDestroy(CopyVars);
-    if(!NewProc) {gsErrorMsg("while typechecking %P\n",ProcTerm);return NULL;}
+    if(!NewProc) {gsErrorMsg("+ while typechecking %P\n",ProcTerm);return NULL;}
     return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
   }
 
@@ -2348,12 +2348,12 @@ static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
     ATermTable NewVars=gstcAddVars2Table(CopyVars,ATLgetArgument(PBESTerm,0));
     if(!NewVars) {
       ATtableDestroy(CopyVars);
-      gsErrorMsg("type error while typechecking %P\n",PBESTerm);
+      gsErrorMsg("+ type error while typechecking %P\n",PBESTerm);
       return NULL;
     }
     ATermAppl NewPBES=gstcTraversePBESVarConstPB(NewVars,ATAgetArgument(PBESTerm,1));
     ATtableDestroy(CopyVars);
-    if(!NewPBES) {gsErrorMsg("while typechecking %P\n",PBESTerm);return NULL;}
+    if(!NewPBES) {gsErrorMsg("+ while typechecking %P\n",PBESTerm);return NULL;}
     return ATsetArgument(PBESTerm,(ATerm)NewPBES,1);
   }
 
@@ -2381,7 +2381,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
   if(gsIsBinder(*DataTerm)){
     //The variable declaration of a binder should have at least 1 declaration
     if(ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
-      {gsErrorMsg("binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
+      {gsErrorMsg("+ binder %P should have at least one declared variable\n",*DataTerm); return NULL;}
 
     ATermAppl BindingOperator = ATAgetArgument(*DataTerm, 0);
     ATermTable CopyAllowedVars=ATtableCreate(63,50);
@@ -2398,7 +2398,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       //A Set/bag comprehension should have exactly one variable declared
       VarDecls=ATgetNext(VarDecls);
       if(ATAgetFirst(VarDecls) != NULL)
-        {gsErrorMsg("set/bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
+        {gsErrorMsg("+ set/bag comprehension %P should have exactly one declared variable\n", *DataTerm); return NULL;}
 
       ATermAppl NewType=ATAgetArgument(VarDecl,1);
       ATermList VarList=ATmakeList1((ATerm)VarDecl);
@@ -2422,7 +2422,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       } else return NULL;
 
       if(!(NewType=gstcTypeMatchA(NewType,PosType))){
-        gsErrorMsg("a set or bag comprehension of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
+        gsErrorMsg("+ a set or bag comprehension of type %P does not match possible type %P (while typechecking %P)\n",ATAgetArgument(VarDecl,1),PosType,*DataTerm);
         return NULL;
       }
 
@@ -2463,7 +2463,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 
       ATermList ArgTypes=gstcGetVarTypes(VarList);
       ATermAppl NewType=gstcUnArrowProd(ArgTypes,PosType);
-      if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
+      if(!NewType) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); gsErrorMsg("+ no functions with arguments %P among %P (while typechecking %P)\n", ArgTypes,PosType,*DataTerm);return NULL;}
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
@@ -2530,7 +2530,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       ATermAppl Name = ATAgetArgument(Arg0,0);
       if(Name == gsMakeOpIdNameListEnum()) {
         ATermAppl Type=gstcUnList(PosType);
-        if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "list", PosType,Arguments);  return NULL;}
+        if(!Type) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "list", PosType,Arguments);  return NULL;}
 
 	ATermList OldArguments=Arguments;
 
@@ -2562,7 +2562,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       }
       if(Name == gsMakeOpIdNameSetEnum()) {
         ATermAppl Type=gstcUnSet(PosType);
-        if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "set", PosType,Arguments);  return NULL;}
+        if(!Type) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "set", PosType,Arguments);  return NULL;}
 
         ATermList OldArguments=Arguments;
 
@@ -2571,7 +2571,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
+          if(!Type0) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
         }
@@ -2582,7 +2582,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
+          if(!Type0) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
         }
@@ -2593,7 +2593,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       }
       if(Name == gsMakeOpIdNameBagEnum()) {
         ATermAppl Type=gstcUnBag(PosType);
-        if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
+        if(!Type) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
 
         ATermList OldArguments=Arguments;
 
@@ -2604,9 +2604,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
+          if(!Type0) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+          if(!Type1) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
           Type=Type0;
@@ -2620,9 +2620,9 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           Arguments=ATgetNext(Arguments);
           ATermAppl Argument1=ATAgetFirst(Arguments);
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
+          if(!Type0) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous,warn_upcasting);
-          if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+          if(!Type1) {gsErrorMsg("+ not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
           NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
           Type=Type0;
@@ -2657,7 +2657,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     if(!NewType) {
       if(was_ambiguous) was_ambiguous=false;
       else if(gsIsOpId(Data)||gsIsDataVarId(Data)) gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
-      gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
+      gsErrorMsg("+ type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
       return NULL;
     }
 
@@ -2689,11 +2689,11 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	  gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
 	  ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
 	  if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
-	  //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+	  //if(!NewArgType) {gsErrorMsg("+ needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
 	  if(!NewArgType) NewArgType=NeededType;
 	  NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
 	  gsDebugMsg("Result of Doing again gstcTraverseVarConsTypeD: DataTerm %T\n",Arg);
-          if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          if(!NewArgType) {gsErrorMsg("+ needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
           Type=NewArgType;
         }
 	NewArguments=ATinsert(NewArguments,(ATerm)Arg);
@@ -2712,7 +2712,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     if(!NewType) {
       if(was_ambiguous) was_ambiguous=false;
       else gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
-      gsErrorMsg("type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
+      gsErrorMsg("+ type error while trying to cast %P to type %P\n",gsMakeDataAppl(Data,Arguments),PosType);
       return NULL;
     }
 
@@ -2738,10 +2738,10 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
           gsDebugMsg("Doing again on %T, Type: %T, Needed type: %T\n",Arg,Type,NeededType);
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if(!NewArgType) NewArgType=gstcTypeMatchA(NeededType,gstcExpandNumTypesUp(Type));
-          //if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          //if(!NewArgType) {gsErrorMsg("+ needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
           if(!NewArgType) NewArgType=NeededType;
           NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
-          if(!NewArgType) {gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
+          if(!NewArgType) {gsErrorMsg("+ needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);return NULL;}
           Type=NewArgType;
           }
 
@@ -2777,7 +2777,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       //upcasting
       ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
       if(!CastedNewType)
-        {gsErrorMsg("cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
+        {gsErrorMsg("+ cannot (up)cast number %P to type %P\n",*DataTerm, PosType);return NULL;}
       return CastedNewType;
     }
 
@@ -2787,7 +2787,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
       *DataTerm=gsMakeDataVarId(Name,Type);
 
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
-        gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
+        gsErrorMsg("+ variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
         return NULL;
       }
 
@@ -2797,7 +2797,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	//upcasting
 	ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
 	if(!CastedNewType)
-	  {gsErrorMsg("cannot (up)cast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
+	  {gsErrorMsg("+ cannot (up)cast variable %P to type %P\n",*DataTerm,PosType);return NULL;}
 
 	Type=CastedNewType;
       }
@@ -2810,7 +2810,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     }
 
     if((Type=ATAtableGet(context.constants,(ATerm)Name))){
-      if(!(Type=gstcTypeMatchA(Type,PosType))) {gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);return NULL;}
+      if(!(Type=gstcTypeMatchA(Type,PosType))) {gsErrorMsg("+ no constant %P with type %P\n",*DataTerm,PosType);return NULL;}
       *DataTerm=gsMakeOpId(Name,Type);
       return Type;
     }
@@ -2824,7 +2824,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
 	  NewParList=ATinsert(NewParList,(ATerm)Par);
       }
       ParList=ATreverse(NewParList);
-      if(ATisEmpty(ParList)) {gsErrorMsg("no system constant %P with type %P\n",*DataTerm,PosType);return NULL;}
+      if(ATisEmpty(ParList)) {gsErrorMsg("+ no system constant %P with type %P\n",*DataTerm,PosType);return NULL;}
 
       if(ATgetLength(ParList)==1){
 	Type=ATAgetFirst(ParList);
@@ -2844,7 +2844,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
     else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
     if(!ParList){
-      gsErrorMsg("unknown operation %P\n",Name);
+      gsErrorMsg("+ unknown operation %P\n",Name);
       return NULL;
     }
 
@@ -2876,7 +2876,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     if(Type){
       variable=true;
       if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
-        gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
+        gsErrorMsg("+ variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
         return NULL;
       }
 
@@ -2889,7 +2889,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     if(nFactPars==0){
       if((Type=ATAtableGet(DeclaredVars,(ATerm)Name))) {
         if(!gstcTypeMatchA(Type,PosType)){
-          gsErrorMsg("the type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          gsErrorMsg("+ the type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
           return NULL;
         }
         *DataTerm=gsMakeDataVarId(Name,Type);
@@ -2897,7 +2897,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       }
       else if((Type=ATAtableGet(context.constants,(ATerm)Name))) {
         if(!gstcTypeMatchA(Type,PosType)){
-          gsErrorMsg("the type %P of constant %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
+          gsErrorMsg("+ the type %P of constant %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
           return NULL;
         }
         *DataTerm=gsMakeOpId(Name,Type);
@@ -2917,7 +2917,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	  }
 	}
 	else{
-	  gsErrorMsg("unknown constant %P\n",Name);
+	  gsErrorMsg("+ unknown constant %P\n",Name);
 	  return NULL;
 	}
       }
@@ -2934,8 +2934,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
     }
 
     if(!ParList) {
-      if(nFactPars>=0) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
-      else gsErrorMsg("unknown operation %P\n",Name);
+      if(nFactPars>=0) gsErrorMsg("+ unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
+      else gsErrorMsg("+ unknown operation %P\n",Name);
       return NULL;
     }
     gsDebugMsg("Possible types for Op/Var %T with %d argument%s are (ParList: %T; PosType: %T)\n",
@@ -3019,10 +3019,10 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       ATermAppl Sort;
       if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=gsMakeSortsPossible(CandidateParList);
       *DataTerm=gsMakeOpId(Name,Sort);
-      if(nFactPars>=0) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
+      if(nFactPars>=0) gsErrorMsg("+ unknown operation/variable %P with %d argument%s that matches type %P\n",
         Name, nFactPars, (nFactPars != 1)?"s":"", PosType);
       else
-        gsErrorMsg("unknown operation/variable %P that matches type %P\n",Name,PosType);
+        gsErrorMsg("+ unknown operation/variable %P that matches type %P\n",Name,PosType);
       return NULL;
     }
 
@@ -3039,7 +3039,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing if matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchIf(Type);
 	if(!NewType){
-	  gsErrorMsg("the function if has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function if has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3055,7 +3055,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing ==, !=, <, <=, >= or > matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchEqNeqComparison(Type);
 	if(!NewType){
-	  gsErrorMsg("the function %P has incompatible argument types %P (while typechecking %P)\n",ATAgetArgument(*DataTerm,0),Type,*DataTerm);
+	  gsErrorMsg("+ the function %P has incompatible argument types %P (while typechecking %P)\n",ATAgetArgument(*DataTerm,0),Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3065,7 +3065,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing |> matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListOpCons(Type);
 	if(!NewType){
-	  gsErrorMsg("the function |> has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function |> has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3075,7 +3075,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing <| matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListOpSnoc(Type);
 	if(!NewType){
-	  gsErrorMsg("the function <| has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function <| has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3085,7 +3085,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing |> matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListOpConcat(Type);
 	if(!NewType){
-	  gsErrorMsg("the function |> has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function |> has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3095,7 +3095,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing @ matching Type %T, PosType %T, DataTerm: %T\n",Type,PosType,*DataTerm);
 	ATermAppl NewType=gstcMatchListOpEltAt(Type);
 	if(!NewType){
-	  gsErrorMsg("the function @ has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function @ has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3106,7 +3106,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing {R,L}head matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListOpHead(Type);
 	if(!NewType){
-	  gsErrorMsg("the function {R,L}head has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function {R,L}head has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3117,7 +3117,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing {R,L}tail matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListOpTail(Type);
 	if(!NewType){
-	  gsErrorMsg("the function {R,L}tail has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function {R,L}tail has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3127,7 +3127,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing Set2Bag matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchSetOpSet2Bag(Type);
 	if(!NewType){
-	  gsErrorMsg("the function Set2Bag has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function Set2Bag has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3137,7 +3137,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing {List,Set,Bag} matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
 	if(!NewType){
-	  gsErrorMsg("the function {List,Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function {List,Set,Bag}In has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3149,7 +3149,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing {Set,Bag}{Union,Difference,Intersect} matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
 	if(!NewType){
-	  gsErrorMsg("the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3159,7 +3159,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing SetCompl matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
 	if(!NewType){
-	  gsErrorMsg("the function SetCompl has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function SetCompl has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3169,7 +3169,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing Bag2Set matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchBagOpBag2Set(Type);
 	if(!NewType){
-	  gsErrorMsg("the function Bag2Set has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function Bag2Set has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3179,7 +3179,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	gsDebugMsg("Doing BagCount matching Type %T, PosType %T\n",Type,PosType);
 	ATermAppl NewType=gstcMatchBagOpBagCount(Type);
 	if(!NewType){
-	  gsErrorMsg("the function BagCount has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+	  gsErrorMsg("+ the function BagCount has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
 	  return NULL;
 	}
 	Type=NewType;
@@ -3195,8 +3195,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
       was_ambiguous=true;
       if(strict_ambiguous){
         gsDebugMsg("ambiguous operation %P (ParList %T)\n",Name,ParList);
-	if(nFactPars>=0) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
-        else gsErrorMsg("ambiguous operation %P\n", Name);
+	if(nFactPars>=0) gsErrorMsg("+ ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
+        else gsErrorMsg("+ ambiguous operation %P\n", Name);
         return NULL;
       }
       else{
@@ -4160,7 +4160,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
     if(found) {
       ATermAppl Sort;
       if(ATgetLength(PosTypes)==1) Sort=ATAgetFirst(PosTypes); else Sort=gsMakeSortsPossible(PosTypes);
-      gsErrorMsg("this is, for instance, because cannot cast %P to type %P\n",ATAgetFirst(l),Sort);
+      gsErrorMsg("+ this is, for instance, because cannot cast %P to type %P\n",ATAgetFirst(l),Sort);
       break;
     }
   }
@@ -4222,7 +4222,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
      //upcasting
      ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
      if(!CastedNewType)
-       {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
+       {gsErrorMsg("+ cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
    }
    return ATsetArgument(StateFrm,(ATerm)Time,0);
   }
@@ -4231,13 +4231,13 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATermAppl StateVarName=ATAgetArgument(StateFrm,0);
     ATermList TypeList=ATLtableGet(StateVars,(ATerm)StateVarName);
     if(!TypeList){
-      gsErrorMsg("undefined state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      gsErrorMsg("+ undefined state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
       return NULL;
     }
 
     ATermList Pars=ATLgetArgument(StateFrm,1);
     if(ATgetLength(TypeList)!=ATgetLength(Pars)){
-      gsErrorMsg("incorrect number of parameters for state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
+      gsErrorMsg("+ incorrect number of parameters for state variable %P (typechecking state formula %P)\n",StateVarName,StateFrm);
       return NULL;
     }
 
@@ -4248,7 +4248,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl ParType=ATAgetFirst(TypeList);
       ATermAppl NewParType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(ParType));
       if(!NewParType){
-        gsErrorMsg("typechecking %P\n",StateFrm);
+        gsErrorMsg("+ typechecking %P\n",StateFrm);
         success=ATfalse;
         break;
       }
@@ -4257,7 +4257,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         //upcasting
         NewParType=gstcUpCastNumericType(ParType,NewParType,&Par);
         if(!NewParType){
-          gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
+          gsErrorMsg("+ cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
           success=ATfalse;
           break;
         }
@@ -4286,14 +4286,14 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
 
       ATermAppl VarName=ATAgetArgument(ATAgetArgument(o,0),0);
       if(ATAtableGet(FormPars,(ATerm)VarName)){
-        gsErrorMsg("non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
+        gsErrorMsg("+ non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
         success=ATfalse;
         break;
       }
 
       ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1);
       if(!gstcIsSortExprDeclared(VarType)){
-        gsErrorMsg("the previous type error occurred while typechecking %P\n",StateFrm);
+        gsErrorMsg("+ the previous type error occurred while typechecking %P\n",StateFrm);
         success=ATfalse;
         break;
       }
@@ -4303,7 +4303,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl VarInit=ATAgetArgument(o,1);
       ATermAppl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
       if(!VarInitType){
-        gsErrorMsg("typechecking %P\n",StateFrm);
+        gsErrorMsg("+ typechecking %P\n",StateFrm);
         success=ATfalse;
         break;
       }
@@ -4312,7 +4312,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         //upcasting
         VarInitType=gstcUpCastNumericType(VarType,VarInitType,&VarInit);
         if(!VarInitType){
-          gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
+          gsErrorMsg("+ cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
           success=ATfalse;
           break;
         }
@@ -4338,7 +4338,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATermAppl NewArg=gstcTraverseStateFrm(CopyVars,CopyStateVars,ATAgetArgument(StateFrm,2));
     ATtableDestroy(CopyStateVars);
     ATtableDestroy(CopyVars);
-    if(!NewArg) {gsErrorMsg("while typechecking %P\n",StateFrm);return NULL;}
+    if(!NewArg) {gsErrorMsg("+ while typechecking %P\n",StateFrm);return NULL;}
     return ATsetArgument(StateFrm,(ATerm)NewArg,2);
   }
 
@@ -4428,7 +4428,7 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm){
      //upcasting
      ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
      if(!CastedNewType)
-       {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
+       {gsErrorMsg("+ cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
    }
    return ATsetArgument(ATsetArgument(ActFrm,(ATerm)NewArg1,0),(ATerm)Time,1);
   }

@@ -307,125 +307,132 @@ namespace mcrl2 {
         std::string::size_type startpos = 0;
         double y = 0;
         temps = s;
-        // caluclate the maximum height of the text
-        while (startpos < temps.length())
-        {
-          std::string::size_type findid = temps.find_first_of('\n');
+        
+        
+        
+        // do not draw anything if the text would not fit inside the box
+        if ((CHARWIDTH*scale < xRgt-xLft) && (CHARHEIGHT*scale < yTop-yBot))
+        {  
+          // caluclate the maximum height of the text
+          while (startpos < temps.length())
+          {
+            std::string::size_type findid = temps.find_first_of('\n');
 
-          if ((findid < 0) || (findid > startpos + addpos))
-          {
-             // if there is not a new line character
-             // just take the next part of the string
-             subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
-             startpos = startpos + addpos;
-          }
-          else
-          {
-            if (findid <= startpos + addpos)
+            if ((findid < 0) || (findid > startpos + addpos))
             {
-              // if we found a new line character
-              // cut the string at the new line position
-              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-              startpos = 0;
-              temps = temps.substr(findid+1);
+               // if there is not a new line character
+               // just take the next part of the string
+               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+               startpos = startpos + addpos;
             }
-          }
-          y = y - CHARHEIGHT*scale;
-
-          //update maximum width and height
-          maxheight = maxheight + CHARHEIGHT * scale;
-
-          // break if we are outside the boundingbox
-          if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
-        }
-
-        startpos = 0;
-        temps = s;
-        y = 0;
-        // print text
-        while (startpos < s.length())
-        {
-          std::string::size_type findid = temps.find_first_of('\n');
-
-          if ((findid < 0) || (findid > startpos + addpos))
-          {
-             // if there is not a new line character
-             // just take the next part of the string
-             subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
-             startpos = startpos + addpos;
-          }
-          else  
-          {
-            if (findid <= startpos + addpos)
+            else
             {
-              // if we found a new line character
-              // cut the string at the new line position
-              subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
-              startpos = 0;
-              temps = temps.substr(findid+1);
+              if (findid <= startpos + addpos)
+              {
+                // if we found a new line character
+                // cut the string at the new line position
+                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+                startpos = 0;
+                temps = temps.substr(findid+1);
+              }
             }
-          }
-      
-          bool moretext = startpos >= s.length();
-          bool lastlineinbox = (y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop);          
-          // print dots if there are more lines and we are at the bottem of our bounding box    
-          if ( !moretext && lastlineinbox ) 
-          {
-            //only shorten the text if the dots would be outside the bounding box
-            if (CHARWIDTH * scale * (subs.length() + 3) > xRgt-xLft) subs = subs.substr(0, subs.length()-3);
-            subs = subs.append("...");
+            y = y - CHARHEIGHT*scale;
+
+            //update maximum width and height
+            maxheight = maxheight + CHARHEIGHT * scale;
+
+            // break if we are outside the boundingbox
+            if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
           }
 
-          // set correct horizontal alignment
-          switch(align_horizontal)
+          startpos = 0;
+          temps = s;
+          y = 0;
+          // print text
+          while (startpos < s.length())
           {
-            case al_left:
-            {
-              transx = xLft;
-              break;
-            }
-            case al_center:
-            {
-              transx = xLft + .5 * (xRgt - xLft - CHARWIDTH * scale * subs.length());
-              break;
-            }
-            case al_right: // Fall through to default case
-            default:
-            {
-              transx = xRgt - CHARWIDTH * scale * subs.length();
-              break;
-            }
-          }
+            std::string::size_type findid = temps.find_first_of('\n');
 
-          // set correct vertical alignment
-          switch(align_vertical)
-          {
-            case al_top:
+            if ((findid < 0) || (findid > startpos + addpos))
             {
-              transy = yTop + y;
-              break;
+               // if there is not a new line character
+               // just take the next part of the string
+               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+               startpos = startpos + addpos;
             }
-            case al_center:
+            else  
             {
-              transy = yTop + y + .5*(yBot - yTop + maxheight);
-              break;
+              if (findid <= startpos + addpos)
+              {
+                // if we found a new line character
+                // cut the string at the new line position
+                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+                startpos = 0;
+                temps = temps.substr(findid+1);
+              }
             }
-            case al_bottom: // Fall through to default case
-            default:
+        
+            bool moretext = startpos >= s.length();
+            bool lastlineinbox = (y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop);          
+            // print dots if there are more lines and we are at the bottem of our bounding box    
+            if ( !moretext && lastlineinbox ) 
             {
-              transy = yBot + maxheight + y;
-              break;
+              //only shorten the text if the dots would be outside the bounding box
+              if (CHARWIDTH * scale * (subs.length() + 3) > xRgt-xLft) subs = subs.substr(0, subs.length()-3);
+              subs = subs.append("...");
             }
-          }
 
-          // display text
-          draw_text(subs, transx, transy , scale, al_right, al_center);
-                    
-          // break if we are outside the boundingbox
-          if ((y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop)) break;
-          
-          // calculate new y position
-          y = y - CHARHEIGHT*scale;
+            // set correct horizontal alignment
+            switch(align_horizontal)
+            {
+              case al_left:
+              {
+                transx = xLft;
+                break;
+              }
+              case al_center:
+              {
+                transx = xLft + .5 * (xRgt - xLft - CHARWIDTH * scale * subs.length());
+                break;
+              }
+              case al_right: // Fall through to default case
+              default:
+              {
+                transx = xRgt - CHARWIDTH * scale * subs.length();
+                break;
+              }
+            }
+
+            // set correct vertical alignment
+            switch(align_vertical)
+            {
+              case al_top:
+              {
+                transy = yTop + y;
+                break;
+              }
+              case al_center:
+              {
+                transy = yTop + y + .5*(yBot - yTop + maxheight);
+                break;
+              }
+              case al_bottom: // Fall through to default case
+              default:
+              {
+                transy = yBot + maxheight + y;
+                break;
+              }
+            }
+
+            // display text
+            draw_text(subs, transx, transy , scale, al_right, al_center);
+                      
+            // break if we are outside the boundingbox
+            if ((y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop)) break;
+            
+            // calculate new y position
+            y = y - CHARHEIGHT*scale;
+          }
         }
       }
 

@@ -45,7 +45,7 @@ void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
   else
   {
     // display message in box
-    wxMessageBox( _T("Error messages: \n")+p_main_frame->get_logpanel()->GetValue(), _T("Error"), wxOK | wxICON_ERROR );
+    wxMessageBox( _T("The diagram is invalid: \n")+p_main_frame->get_logpanel()->GetValue(), _T("Validation"), wxOK | wxICON_ERROR );
   }    
 }
 

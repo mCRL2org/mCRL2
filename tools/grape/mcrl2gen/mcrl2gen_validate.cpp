@@ -589,10 +589,22 @@ bool grape::mcrl2gen::is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString 
 {
   // check the references in the last diagram added to p_checked
   wxXmlNode *diag = get_diagram(p_doc_root, p_checked.Last());
-  wxXmlNode *objects = get_child(diag, _T("objectlist"));
-  wxXmlNode *arch_ref_list = get_child(objects, _T("architecturereferencelist"));
-  wxXmlNode *proc_ref_list = get_child(objects, _T("referencestatelist"));
-  wxXmlNode *init_des_list = get_child(objects, _T("initialdesignatorlist"));
+  wxXmlNode *objects = 0;
+  wxXmlNode *arch_ref_list = 0;
+  wxXmlNode *proc_ref_list = 0;
+  wxXmlNode *init_des_list = 0;
+  // only ask for child if the diagram exists
+  if (diag != 0) 
+  {
+    objects = get_child(diag, _T("objectlist"));
+    // only ask for lists if the object exists
+    if (objects != 0)
+    {
+      arch_ref_list = get_child(objects, _T("architecturereferencelist"));
+      proc_ref_list = get_child(objects, _T("referencestatelist"));
+      init_des_list = get_child(objects, _T("initialdesignatorlist"));
+    }
+  }
 
   if (arch_ref_list != 0)
   {
@@ -708,10 +720,10 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
 
   if(!is_valid)
   {
-    cerr << "+ Specification is not valid." << endl;
+    // cerr << "+ Specification is not valid." << endl;
     return false;
   }
-  cerr << "+ Specification is valid." << endl;
+  cerr << "Specification is valid." << endl;
   return true;
 }
 
@@ -776,11 +788,11 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
 
   if(!validate_process_diagram(doc_root, process_diagram, datatype_spec))
   {
-    cerr << "+ Process diagram is not valid." << endl;
+    //cerr << "+ Process diagram is not valid." << endl;
     return false;
   }
 
-  cerr << "+ Process diagram is valid." << endl;
+  cerr << "Process diagram is valid." << endl;
   return true;
 }
 
@@ -1937,11 +1949,11 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
 
   if(!validate_architecture_diagram(doc_root, arch_diagram, datatype_spec))
   {
-    cerr << "+ Architecture diagram is not valid." << endl;
+    //cerr << "+ Architecture diagram is not valid." << endl;
     return false;
   }
 
-  cerr << "+ Architecture diagram is valid." << endl;
+  cerr << "Architecture diagram is valid." << endl;
   return true;
 }
 
@@ -2003,9 +2015,9 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
 {
   // an architecture reference is valid when it refers to an existing diagram and every associated channel name is unique
   // initialize variables
-  wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));
+  wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));  // get diagram name
   wxArrayString arch_refs;
-  wxArrayString arch_diags;
+  wxArrayString arch_diags;  
 
   // loop through all architecture references
   bool is_valid = true;
@@ -2078,6 +2090,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
       arch_diags.Add(ref_propertyof);
     }
   }
+  
   if (!is_valid)
   {
       cerr << "+ Architecture diagram " << diagram_name.ToAscii()
