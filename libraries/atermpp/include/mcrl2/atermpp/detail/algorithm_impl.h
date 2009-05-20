@@ -68,9 +68,15 @@ namespace detail {
     {
       bool term_changed = false;
       boost::shared_array< ATerm > t(new ATerm[n]);
+      for (unsigned int i = 0; i < n; ++i)
+      {
+        t[i] = 0;
+      }
+      ATprotectArray(t.get(), n);
       for (unsigned int i = 0; i < n; i++)
       {
         t[i] = f(a(i));
+
         if (t[i] != a(i))
         {
           term_changed = true;
@@ -80,6 +86,8 @@ namespace detail {
       {
         a = ATmakeApplArray(a.function(), t.get());
       }
+      ATunprotectArray(t.get());
+//      ATunprotectArray(t.get());
     }
     return a;
   }
