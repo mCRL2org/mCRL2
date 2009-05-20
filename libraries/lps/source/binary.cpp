@@ -6,19 +6,15 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsbinary.cpp
+/// \file binary.cpp
 /// \brief
 
-//Aterms
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/table.h"
 
 //LPS Framework
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/lps/linear_process.h"
 #include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_utility.h"
@@ -30,12 +26,10 @@
 
 #include "mcrl2/lps/binary.h"
 
-// For Aterm library extension functions
-using namespace mcrl2::core;
 using namespace atermpp;
+using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
-using namespace mcrl2::lps;
 
 namespace mcrl2 {
 
@@ -47,6 +41,7 @@ namespace lps {
 
 ///\pre n>0
 ///\return ceil(log_2(n))
+static
 unsigned int log2(unsigned int n)
 {
   int result = 0;
@@ -65,31 +60,17 @@ unsigned int log2(unsigned int n)
 }
 
 ///\return 2^n
+static
 unsigned int powerof2_(unsigned int n)
 {
   assert(n < (8 * sizeof(unsigned int)));
   return 1 << n;
 }
 
-///\pre cl is a list of constructors
-///\return all sorts s in sl that are finite and not bool
-///\deprecated this function does not seem to be used
-sort_expression_vector get_finite_sorts_not_bool(const data::data_specification& d, const sort_expression_list& sl)
-{
-  sort_expression_vector result;
-  for(sort_expression_list::const_iterator i = sl.begin(); i != sl.end(); ++i)
-  {
-    if (!sort_bool_::is_bool_(*i) && d.is_certainly_finite(*i))
-    {
-      result.push_back(*i);
-    }
-  }
-  return result;
-}
-
 ///\pre 0 <= n <= list.size() = m, list is [0..m), list == original list
 ///\post list contains elements [n..m)
 ///\return list containing elements [0..n)
+static
 data_expression_list split_at(data_expression_list& list, unsigned int n)
 {
   assert (n <= list.size());
@@ -113,6 +94,7 @@ data_expression_list split_at(data_expression_list& list, unsigned int n)
 
 ///\pre enumerated_elements.size() <= 2^new_parameters.size()
 ///\return if then else tree from enumerated_elements in terms of new_parameters
+static
 data_expression make_if_tree(const variable_list& new_parameters,
                              const data_expression_list& enumerated_elements)
 {
@@ -166,6 +148,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
 // a mapping variable -> enumerated elements is stored in enumerated_elements_table
 /// \return data variable list with the new process parameters (i.e. with all variables of a
 /// finite type != bool replaced by a vector of boolean variables.
+static
 variable_list replace_enumerated_parameters(const lps::specification& specification,
                                                  data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
                                                  table& new_parameters_table,
@@ -237,6 +220,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
 
 ///Replace all occurrences of variables of a finite sort != bool in expression with an if-then-else tree
 ///of boolean variables
+static
 data_expression replace_enumerated_parameters_in_data_expression(data_expression expression,
                                                                  table& new_parameters_table,
                                                                  table& enumerated_elements_table)
@@ -252,6 +236,7 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
 }
 
 ///Replace all occurrences of variables of a finite sort != bool with a vector of boolean variables
+static
 variable_list replace_enumerated_parameters_in_variables(const variable_list& list,
                                                                    table& new_parameters_table,
                                                                    table& enumerated_elements_table)
@@ -277,6 +262,7 @@ variable_list replace_enumerated_parameters_in_variables(const variable_list& li
 
 ///Calculate the new assignments for parameter, this returns a assignment_list with || expressions as the
 ///righthandsides.
+static
 assignment_list replace_enumerated_parameter_in_assignment(const assignment& argument,
                                                                      const data_expression& parameter,
                                                                      variable_list new_parameters,
@@ -325,6 +311,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
 }
 
 ///Replace all assignments in which the left-hand side == parameter with a vector of boolean assignments.
+static
 assignment_list replace_enumerated_parameter_in_assignments(const assignment_list& list,
                                                                       const data_expression& parameter,
                                                                       const variable_list& new_parameters,
@@ -349,6 +336,7 @@ assignment_list replace_enumerated_parameter_in_assignments(const assignment_lis
 }
 
 ///Replace all assignments of finite sorts != bool with a vector of boolean assignments.
+static
 assignment_list replace_enumerated_parameters_in_assignments(const assignment_list& list,
                                                                        table& new_parameters_table,
                                                                        table& enumerated_elements_table)
@@ -373,6 +361,7 @@ assignment_list replace_enumerated_parameters_in_assignments(const assignment_li
 }
 
 ///Replace all parameters of finite sorts != bool in list with an if tree of booleans.
+static
 action_list replace_enumerated_parameters_in_actions(action_list list,
                                                      table& new_parameters_table,
                                                      table& enumerated_elements_table)
@@ -387,6 +376,7 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
 }
 
 ///Replace all parameters of finite sorts != bool in summand with a vector of booleans
+static
 summand replace_enumerated_parameters_in_summand(const summand& summand_,
                                                      table& new_parameters_table,
                                                      table& enumerated_elements_table)
@@ -407,6 +397,7 @@ summand replace_enumerated_parameters_in_summand(const summand& summand_,
 }
 
 ///Replace all parameters of finite sorts != bool in list with a vector of booleans
+static
 summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
                                                        table& new_parameters_table,
                                                        table& enumerated_elements_table)
@@ -423,6 +414,7 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
 }
 
 ///Replace all parameters of finite sorts != bool in lps with a vector of booleans
+static
 linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& lps,
                                          table& new_parameters_table,
                                          table& enumerated_elements_table)
@@ -438,6 +430,7 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
 }
 
 /// Replace all parameters of finite sorts != bool in specification with a vector of booleans
+static
 specification replace_enumerated_parameters_in_specification(const lps::specification& specification,
                                                              table& new_parameters_table,
                                                              table& enumerated_elements_table)
