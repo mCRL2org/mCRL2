@@ -11,10 +11,6 @@
 
 //LPS Framework
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/standard.h"
-#include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/core/messaging.h"
 
 #include "mcrl2/lps/sumelm.h"
@@ -22,7 +18,6 @@
 // For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
 
 namespace mcrl2 {
 

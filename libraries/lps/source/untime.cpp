@@ -8,37 +8,20 @@
 //
 // \file: mcrl2/lps/untime.cpp
 
-//Aterms
-#include <mcrl2/atermpp/aterm.h>
-
-//LPS framework
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/linear_process.h"
-//mCRL2 data
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/utility.h"
-
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-
 #include "mcrl2/lps/untime.h"
-#include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/atermpp/map.h"
 
-
-// For Aterm library extension functions
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2;
 
 namespace mcrl2 {
 
 namespace lps {
 
 ///\return specification, in which all delta summands have been removed, and replaced with a single true->delta
-static lps::specification remove_deltas(const lps::specification& spec) {
+static
+lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;
   for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
@@ -72,7 +55,8 @@ static lps::specification remove_deltas(const lps::specification& spec) {
 ///         new value for x is either x, or the value that is assigned to last action time, which is the time
 ///         tag of the action in that summand.
 
-static mcrl2::data::data_expression calculate_time_invariant(
+static
+mcrl2::data::data_expression calculate_time_invariant(
                    const lps::specification& spec, 
                    const mcrl2::data::variable &last_action_time) 
 {

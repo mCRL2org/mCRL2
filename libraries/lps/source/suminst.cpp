@@ -9,24 +9,17 @@
 /// \file suminst.cpp
 /// \brief
 
-//LPS Framework
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/detail/sort_utility.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/data/detail/data_functional.h"
 
 //Enumerator
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/suminst.h"
 
-//using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
-using namespace mcrl2;
 
 namespace mcrl2 {
 

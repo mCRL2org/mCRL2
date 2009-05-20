@@ -10,20 +10,14 @@
 /// \brief
 
 #include "mcrl2/atermpp/table.h"
-
-//LPS Framework
-#include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/specification_utility.h"
-#include "mcrl2/core/messaging.h"
+
 //Enumerator
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/binary.h"
 
 using namespace atermpp;
