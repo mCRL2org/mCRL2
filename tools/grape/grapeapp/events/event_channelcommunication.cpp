@@ -32,14 +32,67 @@ grape_event_add_channel_communication::grape_event_add_channel_communication( gr
   architecture_diagram* dia_ptr = dynamic_cast<architecture_diagram*> ( m_main_frame->get_glcanvas()->get_diagram() );
   assert( dia_ptr != 0 );// The diagram has to exist and be of the specified type, or else this event could not have been generated.
   m_in_diagram = dia_ptr->get_id();
+  m_detached_comm_1.Empty();  
+  m_detached_comm_2.Empty();  
+
+  // This code is for detaching already connected channel communications. Which doesn't allow or-communications.
+  // To allow or communications: comment the code below
+  arr_channel_communication_ptr* comm_ptr_list_1 = p_chan_1->get_channel_communications();
+  for (unsigned int i = 0; i < comm_ptr_list_1->GetCount(); ++i)
+  {
+    channel_communication* comm_ptr_1 = comm_ptr_list_1->Item(i);  
+    if ( comm_ptr_1 )  
+    {  
+      grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr_1, p_chan_1 );
+      m_detached_comm_1.Add( event );
+    }
+  }  
+  arr_channel_communication_ptr* comm_ptr_list_2 = p_chan_2->get_channel_communications();
+  for (unsigned int i = 0; i < comm_ptr_list_2->GetCount(); ++i)
+  {
+    channel_communication* comm_ptr_2 = comm_ptr_list_2->Item(i);
+    if ( comm_ptr_2 )  
+    {
+      bool found = false;
+      for (unsigned int j = 0; j < comm_ptr_list_1->GetCount(); ++j)
+      {
+        if (comm_ptr_2 == comm_ptr_list_1->Item(j) && comm_ptr_2->count_channel() == 2)
+        {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr_2, p_chan_2 );
+        m_detached_comm_2.Add( event );
+      }
+    }
+  }  
+  // end detaching
 }
 
 grape_event_add_channel_communication::~grape_event_add_channel_communication( void )
 {
+  m_detached_comm_1.Clear();
+  m_detached_comm_2.Clear();
 }
 
 bool grape_event_add_channel_communication::Do( void )
 {
+  // These 2 for loops are to perform the channel communication detach events for the channel communications that are already connected to the channels.
+  // To allow or communications: comment the 2 for loops
+  for (unsigned int i = 0; i < m_detached_comm_1.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm_1[i];
+    event.Do();
+  }
+  for (unsigned int i = 0; i < m_detached_comm_2.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm_2[i];
+    event.Do();
+  }
+  // end detaching
   architecture_diagram* dia_ptr = dynamic_cast<architecture_diagram*> ( find_diagram( m_in_diagram ) );
   assert( dia_ptr != 0 ); // Has to be the case or the event wouldn't have been generated.
 
@@ -71,6 +124,20 @@ bool grape_event_add_channel_communication::Undo( void )
   chan_1->set_channel_type(m_channel_type_1);
   chan_2->set_channel_type(m_channel_type_2);
 
+  // These 2 for loops are to perform the undo of the channel communication detach events for the channel communications that are already connected to the channels.
+  // To allow or communications: comment the 2 for loops
+  for (unsigned int i = 0; i < m_detached_comm_1.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm_1[i];
+    event.Undo();
+  }
+  for (unsigned int i = 0; i < m_detached_comm_2.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm_2[i];
+    event.Undo();
+  }
+  // end detaching
+
   finish_modification();
   return true;
 }
@@ -99,6 +166,17 @@ grape_event_remove_channel_communication::grape_event_remove_channel_communicati
     channel* chan_ptr = p_c_comm->get_attached_channel( i );
     m_channels.Add( chan_ptr->get_id() );
   }
+  visualchannel_communication* vis_comm_ptr = static_cast<visualchannel_communication*> (m_main_frame->get_glcanvas()->get_visual_object( p_c_comm ) );
+  m_communication_selected = vis_comm_ptr->get_communication_selected();
+  if (m_communication_selected == -1)
+  {
+    m_communication_channel = -1;
+  }
+  else
+  {
+    channel* chan = p_c_comm->get_attached_channel( m_communication_selected );
+    m_communication_channel = chan->get_id();
+  }
   assert( m_channels.GetCount() >= 2 ); // Channel communication should have two or more channels, else it cannot exist.
 }
 
@@ -116,18 +194,23 @@ bool grape_event_remove_channel_communication::Do( void )
 
   if ( comm_ptr )
   {
-    visualchannel_communication* vis_comm_ptr = static_cast<visualchannel_communication*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
-    int communication_selected = vis_comm_ptr->get_communication_selected();
-    
     // if there is no valid selected communication
-    if ( (communication_selected == -1) || (communication_selected > static_cast<signed>(comm_ptr->count_channel())) || (comm_ptr->count_channel() == 2) ) 
+    if ( (m_communication_selected == -1) || (m_communication_selected > static_cast<signed>(comm_ptr->count_channel())) || (comm_ptr->count_channel() == 2) ) 
     {
       // remove the entire channel communication
       dia_ptr->remove_channel_communication( comm_ptr );
     } else {
       // remove the selected channel
-      channel* chan = comm_ptr->get_attached_channel( communication_selected );
-      comm_ptr->detach_channel( chan );
+      channel* chan = dynamic_cast<channel*> ( find_object( m_communication_channel, CHANNEL, dia_ptr->get_id() ) );
+      //channel* chan = comm_ptr->get_attached_channel( m_communication_selected );
+      if (comm_ptr->has_channel(chan))
+      {
+        dia_ptr->detach_channel_from_channel_communication(chan, comm_ptr);
+      }
+      else
+      {
+        return false;
+      }
     }
 
     finish_modification();
@@ -169,7 +252,12 @@ bool grape_event_remove_channel_communication::Undo( void )
     new_comm->set_channel_communication_type( m_channel_communication_type );
   } else {
     // Reattach channel
-    for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
+    channel* chan = dynamic_cast<channel*> ( find_object( m_communication_channel, CHANNEL, dia_ptr->get_id() ) );
+    if (chan != 0)
+    {
+      dia_ptr->attach_channel_communication_to_channel( comm_ptr, chan );
+    }
+/*  for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
     {
       channel* chan =  dynamic_cast<channel*> ( find_object( m_channels.Item( i ), CHANNEL, dia_ptr->get_id() ) );
       // if the channel communication is not yet connected with chan
@@ -179,6 +267,7 @@ bool grape_event_remove_channel_communication::Undo( void )
         dia_ptr->attach_channel_communication_to_channel( comm_ptr, chan );
       }
     }
+*/
   }
   finish_modification();
   return true;
@@ -192,15 +281,40 @@ grape_event_attach_channel_communication::grape_event_attach_channel_communicati
   diagram* dia_ptr = m_main_frame->get_glcanvas()->get_diagram();
   m_diagram = dia_ptr->get_id();
 
+  m_detached_comm.Empty();
+
+  // This code is for detaching already connected channel communications. Which doesn't allow or-communications.
+  // To allow or communications: comment the code below
+  arr_channel_communication_ptr* comm_ptr_list = p_channel->get_channel_communications();
+  for (unsigned int i = 0; i < comm_ptr_list->GetCount(); ++i)
+  {
+    channel_communication* comm_ptr = comm_ptr_list->Item(i);  
+    if ( comm_ptr )  
+    {  
+      grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, p_channel );
+      m_detached_comm.Add( event );
+    }
+  }  
+  // end detaching
+
   assert( ( p_channel->get_diagram() == dia_ptr ) && ( p_channel_communication->get_diagram() == dia_ptr ) );
 }
 
 grape_event_attach_channel_communication::~grape_event_attach_channel_communication(  void  )
 {
+  m_detached_comm.Clear();
 }
 
 bool grape_event_attach_channel_communication::Do(  void  )
 {
+  // This code is for detaching already connected channel communications. Which doesn't allow or-communications.
+  // To allow or communications: comment the code below
+  for (unsigned int i = 0; i < m_detached_comm.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm[i];
+    event.Do();
+  }
+  // end detaching
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
   channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication ) );
   channel* chan_ptr = static_cast<channel*> ( find_object( m_channel ) );
@@ -219,6 +333,14 @@ bool grape_event_attach_channel_communication::Undo(  void  )
 
   dia_ptr->detach_channel_from_channel_communication( chan_ptr, comm_ptr );
 
+  // This code is for detaching already connected channel communications. Which doesn't allow or-communications.
+  // To allow or communications: comment the code below
+  for (unsigned int i = 0; i < m_detached_comm.GetCount(); ++i)
+  {
+    grape_event_detach_channel_communication event = m_detached_comm[i];
+    event.Undo();
+  }
+  // end detaching
   finish_modification();
   return true;
 }
@@ -232,11 +354,11 @@ grape_event_detach_channel_communication::grape_event_detach_channel_communicati
   diagram* dia_ptr = m_main_frame->get_glcanvas()->get_diagram();
   m_diagram = dia_ptr->get_id();
 
-  m_remove_event = 0;
-  if ( p_channel_communication->count_channel() <= 2 )
-  {
+//  m_remove_event = 0;
+//  if ( p_channel_communication->count_channel() <= 2 )
+//  {
     m_remove_event = new grape_event_remove_channel_communication( m_main_frame, p_channel_communication, static_cast<architecture_diagram*> ( dia_ptr ) );
-  }
+//  }
 }
 
 grape_event_detach_channel_communication::~grape_event_detach_channel_communication(  void  )
@@ -247,12 +369,14 @@ bool grape_event_detach_channel_communication::Do(  void  )
 {
   architecture_diagram* dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram ) );
   channel_communication* comm_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION, dia_ptr->get_id() ) );
-  if ( m_remove_event ) // make a choice between deleting the channel communication
+//  if ( m_remove_event ) // make a choice between deleting the channel communication
+  if (comm_ptr->count_channel() == 2)
   {
     m_remove_event->Do();
   }
   else // or just detaching one channel
   {
+    m_remove_event = 0;
     channel* chan_ptr = static_cast<channel*> ( find_object( m_channel, CHANNEL, dia_ptr->get_id() ) );
     dia_ptr->detach_channel_from_channel_communication( chan_ptr, comm_ptr );
   }

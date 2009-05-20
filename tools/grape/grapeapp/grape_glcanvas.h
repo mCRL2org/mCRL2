@@ -29,8 +29,6 @@ namespace grape
     {
       IDLE = 0,
       SELECT,
-      ATTACH,
-      DETACH,
       ADD_TERMINATING_TRANSITION,
       ADD_NONTERMINATING_TRANSITION,
       ADD_INITIAL_DESIGNATOR,

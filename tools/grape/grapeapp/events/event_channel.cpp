@@ -96,7 +96,7 @@ grape_event_remove_channel::grape_event_remove_channel( grape_frame *p_main_fram
     arr_channel_communication_ptr* chan_comm_ptr = p_chan->get_channel_communications();
     for ( unsigned int j = 0; j < chan_comm_ptr->GetCount(); ++j )
     {
-      channel_communication* comm = chan_comm_ptr->Item( j );
+      channel_communication* comm = static_cast<channel_communication*>(chan_comm_ptr->Item( j ));
       if ( comm != 0 )
       {
         grape_event_detach_channel_communication* event =new grape_event_detach_channel_communication( m_main_frame, comm, p_chan );
@@ -196,51 +196,6 @@ bool grape_event_change_channel::Undo( void )
   channel_ptr->set_channel_type( m_old_channel.get_channel_type() );
    
   finish_modification();
-  return true;
-}
-
-
-grape_event_detach_channel::grape_event_detach_channel( grape_frame *p_main_frame, channel* p_channel )
-: grape_event_base( p_main_frame, true, _T( "detach channel from channel communication" ) )
-{
-  m_channel = p_channel;
-
-  arr_channel_communication_ptr* comms = m_channel->get_channel_communications();
-  for ( unsigned int i = 0; i < comms->GetCount(); ++i )
-  {
-    channel_communication* comm_ptr = comms->Item( i );
-    if ( comm_ptr != 0 )
-    {
-      grape_event_detach_channel_communication* event = new grape_event_detach_channel_communication( m_main_frame, comm_ptr, m_channel );
-      m_channel_communication.Add( event );
-    }
-  }
-}
-
-grape_event_detach_channel::~grape_event_detach_channel( void )
-{
-  m_channel_communication.Clear();
-}
-
-bool grape_event_detach_channel::Do( void )
-{
-  // Perform remove event Do for channel communications.
-  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
-  {
-    grape_event_detach_channel_communication event = m_channel_communication.Item( i );
-    event.Do();
-  }
-  return true;
-}
-
-bool grape_event_detach_channel::Undo( void )
-{
-  // Perform remove event Undo for channel communications.
-  for ( unsigned int i = 0; i < m_channel_communication.GetCount(); ++i )
-  {
-    grape_event_detach_channel_communication event = m_channel_communication.Item( i );
-    event.Undo();
-  }
   return true;
 }
 

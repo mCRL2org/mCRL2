@@ -40,6 +40,7 @@ grape_frame::grape_frame( const wxString &p_filename )
 , m_specification( 0 )
 , m_mode( GRAPE_MODE_NONE )
 {
+  m_current_diagram = 0;
   // initialize widgets
   m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype specification") );
   m_process_diagram_list = new grape_listbox(this, GRAPE_PROCESS_DIAGRAM_LIST, this);
@@ -333,8 +334,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
 
   // toolbar + tools menu
   EVT_TOOL(GRAPE_TOOL_SELECT, grape_frame::event_tool_selected)
-//  EVT_TOOL(GRAPE_TOOL_ATTACH, grape_frame::event_tool_selected)
-  EVT_TOOL(GRAPE_TOOL_DETACH, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_REFERENCE_STATE, grape_frame::event_tool_selected)
   EVT_TOOL(GRAPE_TOOL_ADD_STATE, grape_frame::event_tool_selected)
@@ -368,7 +367,7 @@ wxHtmlHelpController* grape_frame::get_help_controller( void )
   return m_help_controller;
 }
 
-void grape_frame::toggle_view( grape_mode p_mode )
+void grape_frame::toggle_view( grape_mode old_mode, grape_mode p_mode )
 {
   if ( p_mode == GRAPE_MODE_DATASPEC ) // switching to dts
   {
@@ -385,11 +384,14 @@ void grape_frame::toggle_view( grape_mode p_mode )
     m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_glcanvas);
     m_glcanvas->Show();
     m_datatext->Hide();
-    if ( m_glcanvas->get_diagram() )
+    if ( m_glcanvas->get_diagram() && (m_glcanvas->get_diagram() != m_current_diagram || p_mode == GRAPE_MODE_PROC || p_mode == GRAPE_MODE_ARCH || old_mode == GRAPE_MODE_DATASPEC))
     {
       grape_event_select_diagram *event = new grape_event_select_diagram( this, m_glcanvas->get_diagram()->get_name() );
       m_event_handler->Submit( event, false );
-
+    }
+    m_current_diagram = m_glcanvas->get_diagram();
+    if (m_current_diagram)
+    {
       if ( !m_architecture_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() ) )
       {
         m_process_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() );
@@ -453,6 +455,7 @@ void grape_frame::set_mode( grape_mode p_mode )
     return;
   }
 
+  grape_mode old_mode = m_mode;
   m_mode = p_mode;
 
   switch( p_mode )
@@ -508,7 +511,7 @@ void grape_frame::set_mode( grape_mode p_mode )
   }
 
   set_toolbar( p_mode );
-  toggle_view( p_mode );
+  toggle_view( old_mode, p_mode );
 }
 
 grape_mode grape_frame::get_mode( void )
@@ -573,20 +576,6 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
       {
         case SELECT:
           status_text = _T("Click -> select object. Drag -> move object. Drag border -> resize object. Double click -> edit object properties."); break;
-        case ATTACH:
-          {
-            if ( m_architecture_diagram_list->GetSelection() != wxNOT_FOUND )
-            {
-              status_text = _T("Drag from visible / blocked to channel (communication), channel communication to channel, comment to an object or vice versa.");
-            }
-            else
-            {
-              status_text = _T("Drag from (terminating) transition / initial designator to state / process reference, comment to an object or vice versa.");
-            }
-            break;
-          }
-        case DETACH:
-          status_text = _T("Click one of the attached objects to detach it."); break;
         case ADD_COMMENT:
           status_text = _T("Click to add a comment"); break;
         case ADD_TERMINATING_TRANSITION:

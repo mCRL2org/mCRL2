@@ -177,16 +177,8 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetBitmap( g_icons[ _T("toolselect") ] );
   m_menu_tools->Append( item );
 
-//  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ATTACH, _T("Attach objects"), _T("Attach objects to eachother") );
-//  item->SetBitmap( g_icons[ _T("attach") ] );
-//  m_menu_tools->Append( item );
-
   m_menu_tools->AppendSeparator();
 
-  item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_DETACH, _T("Detach objects"), _T("Detach objects from eachother") );
-  item->SetBitmap( g_icons[ _T("detach") ] );
-  m_menu_tools->Append( item );
-  
   item = new wxMenuItem( m_menu_tools, GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, _T("Add Architecture reference"), _T("Add Architecture reference") );
   item->SetBitmap( g_icons[ _T("archref") ] );
   m_menu_tools->Append( item );
@@ -299,7 +291,6 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );
-//  Enable(GRAPE_TOOL_ATTACH, in_diagram );
   Enable(GRAPE_TOOL_ADD_COMMENT, in_diagram );
 
   Enable(GRAPE_MENU_RENAME_DIAGRAM, in_diagram );
@@ -309,8 +300,6 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_EXPORTIMAGE, in_diagram);
 
   // architecture diagram specific items
-  //  Enable(GRAPE_TOOL_DETACH, in_diagram );
-  Enable(GRAPE_TOOL_DETACH, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_ARCHITECTURE_REFERENCE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_PROCESS_REFERENCE, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );
   Enable(GRAPE_TOOL_ADD_CHANNEL, (p_mode & GRAPE_MENUMODE_ARCH) != 0 );

@@ -43,8 +43,6 @@ namespace grape
       // toolbar tools
       // both diagram tools
       GRAPE_TOOL_SELECT,
-      GRAPE_TOOL_ATTACH,
-      GRAPE_TOOL_DETACH,
       GRAPE_TOOL_ADD_COMMENT,
       // process diagram tools
       GRAPE_TOOL_ADD_TERMINATING_TRANSITION,

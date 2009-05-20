@@ -149,42 +149,6 @@ namespace grape
     };
 
     /**
-     * \short Represents the event to detach a channel.
-     */
-    class grape_event_detach_channel : public grape_event_base
-    {
-      private:
-        channel*   m_channel; /**< The channel that is to be detached. */
-        arr_event_detach_channel_communication m_channel_communication; /**< Backup of the removed channel communication that the channel was attached to, if applicable. */
-      public:
-
-        /**
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         * @param p_channel that is to be detached.
-         */
-        grape_event_detach_channel( grape_frame *p_main_frame, channel* p_channel );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_detach_channel( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
-
-    /**
      * Array of remove channel events.
      */
     WX_DECLARE_OBJARRAY( grape_event_remove_channel, arr_event_remove_channel );

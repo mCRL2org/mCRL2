@@ -1427,8 +1427,6 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
       result = result && open_architecture_references( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_channels( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_channel_communications( p_spec, arch_dia_node, new_architecture_diagram );
-//      result = result && open_visibles( p_spec, arch_dia_node, new_architecture_diagram );
-//      result = result && open_blockeds( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_comments( p_spec, arch_dia_node, new_architecture_diagram );
     }
     else
@@ -1770,8 +1768,6 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               coordinate channel_coordinate = { 0.0f, 0.0f };
               float channel_height = 0.1f;
               float channel_width = 0.1f;
-//              arr_channel_communication_ptr channel_communications;
-//              channel_communications.Empty();
               wxString channel_name = _T( "" );
               wxString channel_rename_to = _T( "" );
               channel_type channel_channel_type = VISIBLE_CHANNEL;
@@ -1860,30 +1856,26 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
                   identifier.ToLong( &dummy_id );
                   channel_reference_id = ( unsigned int ) dummy_id;
                 }
-/*                else if ( what_info == _T( "connectionlist" ) )
+                else if ( what_info == _T( "connectionlist" ) )
                 {
                   wxXmlNode* connected_channel_communication = channel_information->GetChildren();
+                  int count = 0;
                   while ( connected_channel_communication )
                   {
-                    if ( connected_channel_communication->GetName() == _T( "connectedtochannelcommunication" ) )
-                    {
-                      wxString identifier = connected_channel_communication->GetNodeContent();
-                      long dummy_id;
-                      identifier.ToLong( &dummy_id );
-                      unsigned int channel_communication_identifier = ( unsigned int ) dummy_id;
-                      channel_communication* chan_comm_ptr = dynamic_cast<channel_communication*> ( architecture_diagram::find_object( p_arch_dia_ptr, channel_communication_identifier ) );
-                      channel_communications.Add( chan_comm_ptr );
-                    }
-                    else
+                    if ( connected_channel_communication->GetName() != _T( "connectedtochannelcommunication" ) )
                     {
                       // invalid node name! 
                       return false;
                     }
-
+                    ++count;
                     connected_channel_communication = connected_channel_communication->GetNext();
                   }
+                  // This constraint is added to not allow or communications
+                  if (count > 1)
+                  {
+                    return false;
+                  }
                 } 
-*/
                 else if ( what_info == _T( "channeltype" ) )
                 {                
                   wxString c_channel_type = channel_information->GetNodeContent();                  
@@ -1917,14 +1909,6 @@ bool grape::libgrape::open_channels( grape_specification* p_spec, wxXmlNode* p_a
               // set channel type              
               chan_ptr->set_channel_type(channel_channel_type);
 
-              // set channel communications
-/*              for ( unsigned int i = 0; i < channel_communications.GetCount(); ++i )
-              {
-                channel_communication* chan_comm_ptr = channel_communications.Item( i );
-                chan_ptr->attach_channel_communication(chan_comm_ptr);
-                p_arch_dia_ptr->attach_channel_communication_to_channel( comm_ptr,  chan_ptr );
-              }
-*/
               // retrieve the next channel
               channel_node = channel_node->GetNext();
             }
@@ -2111,294 +2095,6 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
 
               // retrieve the next channel communication
               communication_node = communication_node->GetNext();
-            }
-            // break from the while loop; there can only be one statelist
-            break;
-          } // end if
-          object_node = object_node->GetNext();
-        }
-      }
-      arch_dia_info_node = arch_dia_info_node->GetNext();
-    }
-  }
-  else
-  {
-    /* invalid node name! */
-    return false;
-  }
-
-  return true;
-}
-
-bool grape::libgrape::open_visibles( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
-{
-  wxString node_name = p_arch_dia_node->GetName();
-  if ( node_name == _T( "architecturediagram" ) )
-  {
-    wxXmlNode* arch_dia_info_node = p_arch_dia_node->GetChildren();
-    // search for information about the diagram; find the list of objects
-    while ( arch_dia_info_node )
-    {
-      wxString what_info = arch_dia_info_node->GetName();
-      if ( what_info == _T( "objectlist" ) )
-      {
-        // search for the list of architecture references
-        wxXmlNode* object_node = arch_dia_info_node->GetChildren();
-        while ( object_node )
-        {
-          wxString what_object = object_node->GetName();
-          if ( what_object == _T( "visiblelist" ) )
-          {
-            wxXmlNode* visible_node = object_node->GetChildren();
-            while ( visible_node )
-            {
-              unsigned int visible_identifier = 0;
-              coordinate visible_coordinate = { 0.0f, 0.0f };
-              float visible_height = 0.1f;
-              float visible_width = 0.1f;
-              wxString visible_name = _T( "" );
-              unsigned int visible_connection_id = 0;
-
-              wxXmlNode* visible_information = visible_node->GetChildren();
-              while ( visible_information )
-              {
-                wxString what_info = visible_information->GetName();
-                if ( what_info == _T( "name" ) )
-                {
-                  visible_name = visible_information->GetNodeContent();
-                }
-                else if ( what_info == _T( "id" ) )
-                {
-                  wxString identifier = visible_information->GetNodeContent();
-                  long dummy_id;
-                  identifier.ToLong( &dummy_id );
-                  visible_identifier = ( unsigned int ) dummy_id;
-                  if ( g_max_id < dummy_id )
-                  {
-                     g_max_id = dummy_id;
-                  }
-                }
-                else if ( what_info == _T( "size" ) )
-                {
-                  wxXmlNode* size_info = visible_information->GetChildren();
-                  while ( size_info )
-                  {
-                    if ( size_info->GetName() == _T( "width" ) )
-                    {
-                      wxString width = size_info->GetNodeContent();
-                      double dummy_width;
-                      width.ToDouble( &dummy_width );
-                      visible_width = ( float ) dummy_width;
-                    }
-                    else if ( size_info->GetName() == _T( "height" ) )
-                    {
-                      wxString height = size_info->GetNodeContent();
-                      double dummy_height;
-                      height.ToDouble( &dummy_height );
-                      visible_height = ( float ) dummy_height;
-                    }
-                    else
-                    {
-                      /* invalid node name! */
-                      return false;
-                    }
-                    size_info = size_info->GetNext();
-                  }
-                }
-                else if ( what_info == _T( "coord" ) )
-                {
-                  wxXmlNode* size_info = visible_information->GetChildren();
-                  while ( size_info )
-                  {
-                    if ( size_info->GetName() == _T( "x" ) )
-                    {
-                      wxString x = size_info->GetNodeContent();
-                      double dummy_x;
-                      x.ToDouble( &dummy_x );
-                      visible_coordinate.m_x = ( float ) dummy_x;
-                    }
-                    else if ( size_info->GetName() == _T( "y" ) )
-                    {
-                      wxString y = size_info->GetNodeContent();
-                      double dummy_y;
-                      y.ToDouble( &dummy_y );
-                      visible_coordinate.m_y = ( float ) dummy_y;
-                    }
-                    else
-                    {
-                      /* invalid node name! */
-                      return false;
-                    }
-                    size_info = size_info->GetNext();
-                  }
-                }
-                else if ( what_info == _T( "propertyof" ) )
-                {
-                  wxString identifier = visible_information->GetNodeContent();
-                  long dummy_id;
-                  identifier.ToLong( &dummy_id );
-                  visible_connection_id = ( unsigned int ) dummy_id;
-                }
-                else
-                {
-                  /* invalid! NB: linetype */
-//                  return false;
-                }
-
-                // find the next piece of information about the state
-                visible_information = visible_information->GetNext();
-              }
-/*
-              connection* conn_ptr = dynamic_cast<connection*> ( architecture_diagram::find_object( p_arch_dia_ptr, visible_connection_id ) );
-
-              // create the visible
-              visible* vis_ptr = p_arch_dia_ptr->add_visible( visible_identifier, visible_coordinate, visible_width, visible_height, conn_ptr );
-              // set the visible name
-              vis_ptr->set_name( visible_name );
-
-              // retrieve the next visible
-              visible_node = visible_node->GetNext();
-*/
-            }
-            // break from the while loop; there can only be one statelist
-            break;
-          } // end if
-          object_node = object_node->GetNext();
-        }
-      }
-      arch_dia_info_node = arch_dia_info_node->GetNext();
-    }
-  }
-  else
-  {
-    /* invalid node name! */
-  }
-
-  return true;
-}
-
-bool grape::libgrape::open_blockeds( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr )
-{
-  wxString node_name = p_arch_dia_node->GetName();
-  if ( node_name == _T( "architecturediagram" ) )
-  {
-    wxXmlNode* arch_dia_info_node = p_arch_dia_node->GetChildren();
-    // search for information about the diagram; find the list of objects
-    while ( arch_dia_info_node )
-    {
-      wxString what_info = arch_dia_info_node->GetName();
-      if ( what_info == _T( "objectlist" ) )
-      {
-        // search for the list of architecture references
-        wxXmlNode* object_node = arch_dia_info_node->GetChildren();
-        while ( object_node )
-        {
-          wxString what_object = object_node->GetName();
-          if ( what_object == _T( "blockedlist" ) )
-          {
-            wxXmlNode* blocked_node = object_node->GetChildren();
-            while ( blocked_node )
-            {
-              unsigned int blocked_identifier = 0;
-              coordinate blocked_coordinate = { 0.0f, 0.0f };
-              float blocked_height = 0.1f;
-              float blocked_width = 0.1f;
-              unsigned int blocked_connection_id = 0;
-
-              wxXmlNode* blocked_information = blocked_node->GetChildren();
-              while ( blocked_information )
-              {
-                wxString what_info = blocked_information->GetName();
-                if ( what_info == _T( "id" ) )
-                {
-                  wxString identifier = blocked_information->GetNodeContent();
-                  long dummy_id;
-                  identifier.ToLong( &dummy_id );
-                  blocked_identifier = ( unsigned int ) dummy_id;
-                  if ( g_max_id < dummy_id )
-                  {
-                     g_max_id = dummy_id;
-                  }
-                }
-                else if ( what_info == _T( "size" ) )
-                {
-                  wxXmlNode* size_info = blocked_information->GetChildren();
-                  while ( size_info )
-                  {
-                    if ( size_info->GetName() == _T( "width" ) )
-                    {
-                      wxString width = size_info->GetNodeContent();
-                      double dummy_width;
-                      width.ToDouble( &dummy_width );
-                      blocked_width = ( float ) dummy_width;
-                    }
-                    else if ( size_info->GetName() == _T( "height" ) )
-                    {
-                      wxString height = size_info->GetNodeContent();
-                      double dummy_height;
-                      height.ToDouble( &dummy_height );
-                      blocked_height = ( float ) dummy_height;
-                    }
-                    else
-                    {
-                      /* invalid node name! */
-                      return false;
-                    }
-                    size_info = size_info->GetNext();
-                  }
-                }
-                else if ( what_info == _T( "coord" ) )
-                {
-                  wxXmlNode* size_info = blocked_information->GetChildren();
-                  while ( size_info )
-                  {
-                    if ( size_info->GetName() == _T( "x" ) )
-                    {
-                      wxString x = size_info->GetNodeContent();
-                      double dummy_x;
-                      x.ToDouble( &dummy_x );
-                      blocked_coordinate.m_x = ( float ) dummy_x;
-                    }
-                    else if ( size_info->GetName() == _T( "y" ) )
-                    {
-                      wxString y = size_info->GetNodeContent();
-                      double dummy_y;
-                      y.ToDouble( &dummy_y );
-                      blocked_coordinate.m_y = ( float ) dummy_y;
-                    }
-                    else
-                    {
-                      /* invalid node name! */
-                      return false;
-                    }
-                    size_info = size_info->GetNext();
-                  }
-                }
-                else if ( what_info == _T( "propertyof" ) )
-                {
-                  wxString identifier = blocked_information->GetNodeContent();
-                  long dummy_id;
-                  identifier.ToLong( &dummy_id );
-                  blocked_connection_id = ( unsigned int ) dummy_id;
-                }
-                else
-                {
-                  /* invalid! NB: linetype */
-//                  return false;
-                }
-
-                // find the next piece of information about the state
-                blocked_information = blocked_information->GetNext();
-              }
-/*
-              connection* conn_ptr = dynamic_cast<connection*> ( architecture_diagram::find_object( p_arch_dia_ptr, blocked_connection_id ) );
-
-              // create the blocked
-              p_arch_dia_ptr->add_blocked( blocked_identifier, blocked_coordinate, blocked_width, blocked_height, conn_ptr );
-
-              // retrieve the next blocked
-              blocked_node = blocked_node->GetNext();
-*/
             }
             // break from the while loop; there can only be one statelist
             break;

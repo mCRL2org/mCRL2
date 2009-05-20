@@ -70,6 +70,7 @@ namespace grape
         grape_mode            m_mode;                       /**< The frame's mode. */
         unsigned int                  m_counter;                    /**< The counter for new id's. */
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
+        diagram             *m_current_diagram;       /**< The current diagram showed on the glcanvas. */
 
         DECLARE_EVENT_TABLE();                        /**< The event table of this frame. */
 
@@ -94,7 +95,7 @@ namespace grape
          * for a value of GRAPE_MODE_DATASPEC the frame will show the
          * data specification editor.
          */
-        void toggle_view( grape_mode p_mode );
+        void toggle_view( grape_mode old_mode, grape_mode p_mode );
 
         /**
          * Sets the window title, with a filename and the modified status.

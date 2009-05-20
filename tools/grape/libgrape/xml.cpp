@@ -580,8 +580,6 @@ void grape::libgrape::add_architecture_diagram_list( wxXmlNode* p_root, arr_arch
       { // children of xml_objectlist
 
         add_comment_list( xml_objectlist, &arch_dia );
-//        add_blocked_list( xml_objectlist, &arch_dia );
-//        add_visible_list( xml_objectlist, &arch_dia );
         add_channel_communication_list( xml_objectlist, &arch_dia );
         add_channel_list( xml_objectlist, &arch_dia );
         add_architecture_reference_list( xml_objectlist, &arch_dia );
@@ -679,17 +677,6 @@ void grape::libgrape::add_channel_list( wxXmlNode* p_objectlist, architecture_di
         new wxXmlNode( xml_channel_connected, wxXML_TEXT_NODE, _T( "value" ), text_connected );
 
       }
-      /* node <onchannelcommunication> */
-/*      wxXmlNode* xml_channel_comm = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onchannelcommunication" ) );
-
-      channel_communication* chan_comm_ptr = channel_ptr->get_channel_communication();
-
-      if ( chan_comm_ptr != 0 )
-      {
-        wxString comm = wxString::Format( _T( "%u" ), chan_comm_ptr->get_id() );
-        new wxXmlNode( xml_channel_comm, wxXML_TEXT_NODE, _T( "value" ), comm );
-      }
-*/
       /* node <onreference> */
       wxXmlNode* xml_channel_prop = new wxXmlNode( xml_channel, wxXML_ELEMENT_NODE, _T( "onreference" ) );
 

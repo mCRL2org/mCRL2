@@ -158,24 +158,6 @@ namespace grape
     bool open_channel_communications( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr );
 
     /**
-     * Subfunction of xml_open that recreates all visibles.
-     * @param p_spec The GraPE Specification to be created.
-     * @param p_proc_dia_node The node containing the information needed for the visibles.
-     * @param p_proc_dia_ptr A pointer to the diagram the visibles are to be added to.
-     * @return Returns whether the visibles were succesfully recreated.
-     */
-    bool open_visibles( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr );
-
-    /**
-     * Subfunction of xml_open that recreates all blockeds.
-     * @param p_spec The GraPE Specification to be created.
-     * @param p_proc_dia_node The node containing the information needed for the blockeds.
-     * @param p_proc_dia_ptr A pointer to the diagram the blockeds are to be added to.
-     * @return Returns whether the blockeds were succesfully recreated.
-     */
-    bool open_blockeds( grape_specification* p_spec, wxXmlNode* p_arch_dia_node, architecture_diagram* p_arch_dia_ptr );
-
-    /**
      * Subfunction of xml_open that recreates all comments.
      * @param p_spec The GraPE Specification to be created.
      * @param p_proc_dia_node The node containing the information needed for the comments.

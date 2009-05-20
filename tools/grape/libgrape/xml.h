@@ -106,22 +106,6 @@ namespace grape
 
     /**
      * GraPE Specification to XML converter subfunction.
-     * Takes a parent node and pointer to the architecture diagram whose blocked are to be processed and adds a blockedlist-node as child of the parent node.
-     * @param p_objectlist The root of the blocked list.
-     * @param p_arch_dia. The diagram whose blocked are to be processed.
-     */
-    void add_blocked_list( wxXmlNode* p_objectlist, architecture_diagram* p_arch_dia );
-
-    /**
-     * GraPE Specification to XML converter subfunction.
-     * Takes a parent node and pointer to the architecture diagram whose visibles are to be processed and adds a visiblelist-node as child of the parent node.
-     * @param p_objectlist The root of the visible list.
-     * @param p_arch_dia. The diagram whose visibles are to be processed.
-     */
-    void add_visible_list( wxXmlNode* p_objectlist, architecture_diagram* p_arch_dia );
-
-    /**
-     * GraPE Specification to XML converter subfunction.
      * Takes a parent node and pointer to the architecture diagram whose channel communications are to be processed and adds a visiblelist-node as child of the parent node.
      * @param p_objectlist The root of the channel communication list.
      * @param p_arch_dia. The diagram whose channel communications are to be processed.

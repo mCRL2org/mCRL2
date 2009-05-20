@@ -67,10 +67,6 @@ void grape_frame::event_tool_selected(wxCommandEvent& p_event)
   {
     case GRAPE_TOOL_SELECT:
       newstate = SELECT; break;
-    case GRAPE_TOOL_ATTACH:
-      newstate = ATTACH; break;
-    case GRAPE_TOOL_DETACH:
-      newstate = DETACH; break;
     case GRAPE_TOOL_ADD_COMMENT:
       newstate = ADD_COMMENT; break;
     case GRAPE_TOOL_ADD_TERMINATING_TRANSITION:
@@ -185,7 +181,6 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
   // undo last event
   if(m_event_handler->CanUndo())
   {
-    set_mode(GRAPE_MODE_SPEC);
     m_event_handler->Undo();
     wxCommandEvent event;
     event_menu_deselect_all(event);
@@ -200,7 +195,6 @@ void grape_frame::event_menu_undo(wxCommandEvent& WXUNUSED(p_event))
 void grape_frame::event_menu_redo(wxCommandEvent& WXUNUSED(p_event))
 {
   // redo last event
-  set_mode(GRAPE_MODE_SPEC);
   m_event_handler->Redo();
   wxCommandEvent event;
   event_menu_deselect_all(event);

@@ -38,6 +38,9 @@ namespace grape
         channel_type                  m_channel_type_1; /**< Channel type of the first clicked channel. */
         channel_type                  m_channel_type_2; /**< Channel type of the second clicked channel. */
         unsigned int                  m_in_diagram; /**< Identifier of the diagram the channel communication is added to. */
+        arr_event_detach_channel_communication  m_detached_comm_1; /**< Array of detached channel communications from channel 1. */
+        arr_event_detach_channel_communication  m_detached_comm_2; /**< Array of detached channel communications from channel 2. */
+
       public:
 
         /**
@@ -84,7 +87,9 @@ namespace grape
         unsigned int                            m_in_diagram;  /**< Identifier of the diagram from which the channel was deleted. */
         wxArrayLong                     m_channels;     /**< Identifiers of the channels the channel communication was attached to. */
         channel_communication_type      m_channel_communication_type;   /**< Backup of the channel communication type. */
-      public:
+        int                             m_communication_selected; /**< Backup of the communication id of which the communication was selected. */
+        int                             m_communication_channel; /**< Backup of the channel id of which the communication was selected. */
+    public:
 
         /**
          * Initializes the event.
@@ -123,7 +128,8 @@ namespace grape
         unsigned int      m_channel_communication; /**< The channel communication to which a channel is added. */
         unsigned int      m_channel; /**< The channel that is added to the channel communication. */
         unsigned int      m_diagram; /**< Identifier of the diagram in which the change was made. */
-      public:
+        arr_event_detach_channel_communication  m_detached_comm; /**< The channel communication array of the channels that are detached, if applicable */
+    public:
 
         /**
          * Initialization constructor.
