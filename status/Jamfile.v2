@@ -21,6 +21,7 @@ build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
 build-project ../libraries/utilities/test ;
 build-project ../tools/mcrl22lps/test ;
+build-project ../tools/lpsparunfold/test ;
 
 import set ;
 
@@ -29,13 +30,13 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
 
   all-tools = [ path.glob-tree $(TOP)/tools/ : Jamfile.v2 ] ;
 
-  for tool in [ MATCH .*/tools/(.*)/Jamfile.v2 : $(all-tools) ] {
+  for tool in [ MATCH .*/tools/([^/]*)/Jamfile.v2 : $(all-tools) ] {
     use-project /tools/$(tool) : ../tools/$(tool) ;
   }
 
-  local lps-tools  = [ MATCH .*/tools/(lps.*)/Jamfile.v2 : $(all-tools) ] ;
-  local pbes-tools = [ MATCH .*/tools/(pbes.*)/Jamfile.v2 : $(all-tools) ] ;
-  local lts-tools  = [ MATCH .*/tools/(lts.*)/Jamfile.v2 : $(all-tools) ] ;
+  local lps-tools  = [ MATCH .*/tools/(lps[^/]*)/Jamfile.v2 : $(all-tools) ] ;
+  local pbes-tools = [ MATCH .*/tools/(pbes[^/]*)/Jamfile.v2 : $(all-tools) ] ;
+  local lts-tools  = [ MATCH .*/tools/(lts[^/]*)/Jamfile.v2 : $(all-tools) ] ;
 
   lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
   lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] ] ;
