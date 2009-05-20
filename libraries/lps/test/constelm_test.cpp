@@ -9,7 +9,7 @@
 /// \file constelm_test.cpp
 /// \brief Add your file description here.
 
-#define MCRL2_LPSCONSTELM_DEBUG
+//#define MCRL2_LPSCONSTELM_DEBUG
 
 #include <iostream>
 #include <string>
@@ -20,6 +20,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -38,7 +39,7 @@ std::string case_1 =
   "                                                                                 \n"
   "init P(0);                                                                       \n"
   ;
-const std::string removed_1 = "i";
+const std::string expected_1 = "process_parameter_names = ";
 
 std::string case_2 =
   "% Test Case 2 -- No Free Variables                                               \n"
@@ -51,7 +52,7 @@ std::string case_2 =
   "                                                                                 \n"
   "init P(0);                                                                       \n"
   ;
-const std::string removed_2 = "";
+const std::string expected_2 = "process_parameter_names = i";
 
 std::string case_3 =
   "% Test Case 3 -- No Free Variables                                               \n"
@@ -65,7 +66,7 @@ std::string case_3 =
   "                                                                                 \n"
   "init P(0,5);                                                                     \n"
   ;
-const std::string removed_3 = "j";
+const std::string expected_3 = "process_parameter_names = i";
 
 std::string case_4 =
   "% Test Case 4 -- No Free Variables                                               \n"
@@ -95,7 +96,7 @@ std::string case_4 =
   "%%                                                        %%                     \n"
   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
   ;
-const std::string removed_4 = "j";
+const std::string expected_4 = "process_parameter_names = i";
 
 std::string case_5 =
   "% Test Case 5 -- No Free Variables                                               \n"
@@ -114,7 +115,7 @@ std::string case_5 =
   "                                                                                 \n"
   "init P(0,x);                                                                     \n"
   ;
-const std::string removed_5 = "j";
+const std::string expected_5 = "process_parameter_names = i";
 
 std::string case_6 =
   "% Test Case 6 -- No Free Variables                                               \n"
@@ -141,7 +142,6 @@ std::string case_6 =
   "%%                                                        %%                     \n"
   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                     \n"
   ;
-const std::string removed_6 = "i";
 
 std::string case_6a =
   "%--- case 6 linearized ---%                                        \n"
@@ -157,7 +157,7 @@ std::string case_6a =
   "                                                                   \n"
   "init P(1, 0);                                                      \n"
   ;
-const std::string removed_6a = "i_P";
+const std::string expected_6a = "process_parameter_names = s3_P";
 
 std::string case_6b =
   "%--- case 6 linearized no-cluster ---%                             \n"
@@ -175,7 +175,7 @@ std::string case_6b =
   "                                                                   \n"
   "init P(1, 0);                                                      \n"
   ;
-const std::string removed_6b = "i_P";
+const std::string expected_6b = "process_parameter_names = s3_P";
 
 // % Test Case 7 -- Free Variables
 // %
@@ -236,7 +236,6 @@ std::string case_7 =
   "                                  \n"
   "init P(1, 0, 0);                  \n"
   ;
-const std::string removed_7 = "i_P j_P s3_P";
 
 // % Test Case 8 -- Free Variables                                                 
 // %                                                                               
@@ -298,7 +297,6 @@ std::string case_8 =
   "var  dc: Nat;                     \n"
   "init P(1, 0, dc);                 \n"
   ;
-const std::string removed_8 = "";
 
 // examples/games/domineering.mcrl2
 std::string case_9 =
@@ -359,70 +357,48 @@ std::string case_9 =
   "\n"
   "init P((E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> (E |> E |> E |> E |> E |> []) |> [], true);\n"
   ;
-const std::string removed_9 = "";
+const std::string expected_9 = "process_parameter_names = b, c";
 
 void test_constelm(const std::string& spec_text, const std::string& expected_result)
 {
   specification s0 = parse_linear_process_specification(spec_text);
-  data::rewriter datar(s0.data());
-  specification s1 = constelm(s0, datar, true);
-  variable_list v0 = s0.process().process_parameters();
-  variable_list v1 = s1.process().process_parameters();
-
-  // create a set of strings set1 that contains the names of expected removed parameters and free
-  std::vector<std::string> removed = core::regex_split(expected_result, "\\s");
-  std::set<std::string> set1;
-  set1.insert(removed.begin(), removed.end());
-
-  // create a set of strings set2 that contains the names of actually removed parameters
-  std::set<std::string> set2;
-  for (variable_list::const_iterator i = v0.begin(); i != v0.end(); i++)
+  data::rewriter R(s0.data());
+  bool verbose = false;
+  bool instantiate_free_variables = false;
+  specification s1 = constelm(s0, R, verbose, instantiate_free_variables);
+  lps::detail::specification_property_map info1(s1);  
+  lps::detail::specification_property_map info2(expected_result);
+  std::string result = info1.compare(info2);
+  if (!result.empty())
   {
-    if (std::find(v1.begin(), v1.end(), *i) == v1.end())
-    {
-      set2.insert(i->name());
-    }
+    std::cerr << "\n------ FAILED TEST ------" << std::endl;
+    std::cerr << "--- expected result" << std::endl;
+    std::cerr << expected_result << std::endl;
+    std::cerr << "--- found result" << std::endl;
+    std::cerr << info1.to_string() << std::endl;
+    std::cerr << "--- differences" << std::endl;
+    std::cerr << result << std::endl;
   }
+  BOOST_CHECK(result.empty());
+}
 
-  // check if the parelm result is correct
-  if (set1 != set2)
-  {
-    std::clog << "--- failed test ---\n";
-    std::clog << spec_text << std::endl;
-    std::clog << "expected result " << boost::algorithm::join(set1, " ") << std::endl;
-    std::clog << "computed result " << boost::algorithm::join(set2, " ") << std::endl;
-  }
-  BOOST_CHECK(set1 == set2);
-
-  // check if the number of free variables is unchanged
-  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
+void test_constelm()
+{
+  test_constelm(case_1,  expected_1);
+  test_constelm(case_2,  expected_2);
+  test_constelm(case_3,  expected_3);
+  test_constelm(case_4,  expected_4);
+  test_constelm(case_5,  expected_5);
+  test_constelm(case_6a, expected_6a);
+  test_constelm(case_6b, expected_6b);
+  test_constelm(case_9,  expected_9);
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_constelm(case_1, removed_1);
-  core::garbage_collect();
-  test_constelm(case_2, removed_2);
-  core::garbage_collect();
-  test_constelm(case_3, removed_3);
-  core::garbage_collect();
-  test_constelm(case_4, removed_4);
-  core::garbage_collect();
-  test_constelm(case_5, removed_5);
-  core::garbage_collect();
-  test_constelm(case_6a, removed_6a);
-  core::garbage_collect();
-  test_constelm(case_6b, removed_6b);
-  core::garbage_collect();
-// TODO: uncomment these tests when free variables can be parsed
-//  test_constelm(case_7, removed_7);
-  core::garbage_collect();
-//  test_constelm(case_8, removed_8);
-  core::garbage_collect();
-  test_constelm(case_9, removed_9);
-  core::garbage_collect();
+  
+  test_constelm();
 
   return 0;
 }

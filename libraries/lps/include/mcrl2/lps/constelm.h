@@ -387,7 +387,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       // report the results
       if (super::m_verbose)
       {
-        std::cout << "Removing the constant process parameters: ";
+        std::clog << "Removing the constant process parameters: ";
         for (std::set<data::variable>::iterator i = G.begin(); i != G.end(); ++i)
         {
           std::clog << data::pp(*i) << " ";

@@ -17,6 +17,7 @@
 #include <mcrl2/lps/parse.h>
 #include <mcrl2/lps/parelm.h>
 #include <mcrl2/lps/specification.h>
+#include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -27,25 +28,25 @@ const std::string case_1(
   "act a;\n\n"
   "proc X(i: Nat) = a.X(i);\n\n"
   "init X(2);\n");
-const std::string removed_1 = "i";
+const std::string expected_1 = "process_parameter_names = ";
 
 const std::string case_2(
   "act a: Nat;\n\n"
   "proc X(i,j: Nat) = a(i). X(i,j);\n\n"
   "init X(0,1);\n");
-const std::string removed_2 = "j";
+const std::string expected_2 = "process_parameter_names = i";
 
 const std::string case_3(
   "act a;\n\n"
   "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
   "init X(0,1);\n");
-const std::string removed_3 = "j";
+const std::string expected_3 = "process_parameter_names = i";
 
 const std::string case_4(
   "act a;\n\n"
   "proc X(i,j: Nat) = a@i.X(i,j);\n\n"
   "init X(0,4);\n");
-const std::string removed_4 = "j";
+const std::string expected_4 = "process_parameter_names = i";
 
 const std::string case_5(
   "act a: Nat;\n"
@@ -53,7 +54,7 @@ const std::string case_5(
   "proc X(i,j,k: Nat) =  a(i).X(k,j,k) +\n"
   "                         b.X(j,j,k);\n\n"
   "init X(1,2,3);");
-const std::string removed_5 = "";
+const std::string expected_5 = "process_parameter_names = i, j, k";
 
 // % non-linear process corresponding to case 6
 // act act1, act2, act3: Nat;
@@ -79,7 +80,6 @@ const std::string case_6 =
   "var  dc: Nat;                      \n"
   "init P(1, 0, dc);                  \n"
   ;
-const std::string removed_6 = "";
 
 const std::string case_7(
   "act act1, act2, act3: Nat;\n\n"
@@ -87,7 +87,7 @@ const std::string case_7(
   "                       (i == 5) -> act3(i).X(i, j, 4);\n\n"
   "init X(0,5, 1);\n"
 );
-const std::string removed_7 = "";
+const std::string expected_7 = "process_parameter_names = i, z, j";
 
 // Example given by Jan Friso. Parameter xi08 is erroneously found.
 const std::string case_8 =
@@ -106,67 +106,44 @@ const std::string case_8 =
   "                                                                                                                     \n"
   " init P(1, 1, 0, equal, equal, equal, larger, equal, larger, equal, equal, equal, equal);                            \n"
   ;
-const std::string removed_8 = "id_ID s31_P_init1 s32_P_init1 xi xi01 xi05 xi06 xi07";
+const std::string expected_8 = "xi00, xi02, xi03, xi04, xi08";
 
 void test_parelm(const std::string& spec_text, const std::string& expected_result)
 {
   specification s0 = parse_linear_process_specification(spec_text);
   specification s1 = parelm(s0);
-  variable_list v0 = s0.process().process_parameters();
-  variable_list v1 = s1.process().process_parameters();
-
-  // create a set of strings set1 that contains the names of expected removed parameters
-  std::vector<std::string> removed = core::regex_split(expected_result, "\\s");
-  std::set<std::string> set1;
-  set1.insert(removed.begin(), removed.end());
-
-  // create a set of strings set2 that contains the names of actually removed parameters
-  std::set<std::string> set2;
-  for (variable_list::iterator i = v0.begin(); i != v0.end(); i++)
+  lps::detail::specification_property_map info1(s1);  
+  lps::detail::specification_property_map info2(expected_result);
+  std::string result = info1.compare(info2);
+  if (!result.empty())
   {
-    if (std::find(v1.begin(), v1.end(), *i) == v1.end())
-    {
-      set2.insert(i->name());
-    }
+    std::cerr << "--- failed test ---" << std::endl;
+    std::cerr << "- expected result -" << std::endl;
+    std::cerr << expected_result << std::endl;
+    std::cerr << "- found result -" << std::endl;
+    std::cerr << info1.to_string() << std::endl;
+    std::cerr << "- differences -" << std::endl;
+    std::cerr << result << std::endl;
   }
-  
-  // check if the parelm result is correct
-  if (set1 != set2)
-  {
-    std::cerr << "--- failed test ---\n";
-    std::cerr << spec_text << std::endl;
-    std::cerr << "expected result " << boost::algorithm::join(set1, " ") << std::endl;
-    std::cerr << "computed result " << boost::algorithm::join(set2, " ") << std::endl;
-  }
-  BOOST_CHECK(set1 == set2);
+  BOOST_CHECK(result.empty());
+}
 
-  // check if both implementations of parelm behave consistently
-  BOOST_CHECK(parelm(s0).process().process_parameters() == parelm2(s0).process().process_parameters());
-
-  // check if the number of free variables is unchanged
-  BOOST_CHECK(s0.process().free_variables().size() == s1.process().free_variables().size());
+void test_parelm()
+{
+  test_parelm(case_1, expected_1);
+  test_parelm(case_2, expected_2);
+  test_parelm(case_3, expected_3);
+  test_parelm(case_4, expected_4);
+  test_parelm(case_5, expected_5);
+  test_parelm(case_7, expected_7);
+  test_parelm(case_8, expected_8);
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_parelm(case_1, removed_1);
-  core::garbage_collect();
-  test_parelm(case_2, removed_2);
-  core::garbage_collect();
-  test_parelm(case_3, removed_3);
-  core::garbage_collect();
-  test_parelm(case_4, removed_4);
-  core::garbage_collect();
-  test_parelm(case_5, removed_5);
-  core::garbage_collect();
-  //test_parelm(case_6, removed_6);
-  core::garbage_collect();
-  test_parelm(case_7, removed_7);
-  core::garbage_collect();
-  test_parelm(case_8, removed_8);
-  core::garbage_collect();
+  test_parelm();
 
   return 0;
 }

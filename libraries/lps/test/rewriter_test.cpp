@@ -127,12 +127,13 @@ const std::string SPECIFICATION3=
 "                    tau.P(a+1,pred(a))+  \n"
 "                    c(a,0).P(a,b);       \n"
 "init P(1+1,0);                           \n";
-
 void test3()
-{ specification spec = parse_linear_process_specification(SPECIFICATION3);
+{
+  specification spec = parse_linear_process_specification(SPECIFICATION3);
   rewriter r(spec.data());
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
+  specification spec1 = rewrite_lps(spec, r);
+  BOOST_CHECK(spec1 == rewrite_lps(spec1, r));
+std::cout << "SSSSSSSSSSSSSSSSSSSSSSSSSSSS\n" << pp(spec1) << std::endl;
   BOOST_CHECK(spec1.process().summands().size()==2);
 }
 
