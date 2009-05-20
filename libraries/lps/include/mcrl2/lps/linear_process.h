@@ -263,9 +263,9 @@ class linear_process: public atermpp::aterm_appl
     }
   };
 
-/// \brief Returns the free variables that occur in the specification
+/// \brief Returns the free variables that occur in the linear process
 /// \param process A linear process
-/// \return The free variables that occur in the specification
+/// \return The free variables that occur in the linear process
 inline
 std::set<data::variable> compute_free_variables(const linear_process& process)
 {

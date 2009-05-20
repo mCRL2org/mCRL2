@@ -208,6 +208,23 @@ class specification
       return m_initial_process;
     }
 
+    /// \brief Computes the used free variables, and puts them in the free
+    /// variable declarations of the process and the initial_process.
+    void repair_free_variables()
+    {
+      std::set<data::variable> free_variables = compute_free_variables(process());
+      std::set<data::variable> v = compute_free_variables(initial_process());
+      free_variables.insert(v.begin(), v.end());
+      for (std::set<data::variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+      {
+        std::cout << "FREEVAR: " << pp(*i) << std::endl;
+      }
+      data::variable_list freevars = data::convert<data::variable_list>(free_variables);
+      std::cout << "FREEVARS: " << pp(freevars) << std::endl;
+      m_process = set_free_variables(m_process, freevars);
+      m_initial_process = process_initializer(freevars, m_initial_process.assignments());
+    }
+    
     /// \brief Indicates whether the specification is well typed.
     /// \return True if
     /// <ul>

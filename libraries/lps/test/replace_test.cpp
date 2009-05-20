@@ -29,11 +29,12 @@ const std::string SPEC =
   "proc P(b: Bool) =        \n"
   "       sum c: Bool.      \n"
   "         (b == c) ->     \n"
-  "         a.P(c);         \n"
+  "         a .             \n"
+  "         P(c);           \n"
   "                         \n"
   "init P(true);            \n"
   ;
-
+  
 void test_replace()
 {
   specification spec = parse_linear_process_specification(SPEC);

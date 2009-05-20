@@ -17,7 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -363,7 +363,7 @@ const std::string removed_9 = "";
 
 void test_constelm(const std::string& spec_text, const std::string& expected_result)
 {
-  specification s0 = mcrl22lps_linear(spec_text);
+  specification s0 = parse_linear_process_specification(spec_text);
   data::rewriter datar(s0.data());
   specification s1 = constelm(s0, datar, true);
   variable_list v0 = s0.process().process_parameters();

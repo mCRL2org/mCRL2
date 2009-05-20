@@ -13,7 +13,6 @@
 #include <string>
 #include <algorithm>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
@@ -21,7 +20,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/lps/detail/lps_rewriter.h"
-#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -87,7 +85,7 @@ const std::string SPECIFICATION1 =
 
 void test1()
 {
-  specification spec = mcrl22lps(SPECIFICATION1);
+  specification spec = parse_linear_process_specification(SPECIFICATION1);
   rewriter r(spec.data());
 
   data_expression n1    = find_mapping(spec.data(), "_1");
@@ -116,7 +114,7 @@ const std::string SPECIFICATION2=
 "init P(1+1,2+2);                         \n";
 
 void test2()
-{ specification spec = mcrl22lps(SPECIFICATION2);
+{ specification spec = parse_linear_process_specification(SPECIFICATION2);
   rewriter r(spec.data());
   specification spec1=rewrite_lps(spec,r);
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
@@ -131,7 +129,7 @@ const std::string SPECIFICATION3=
 "init P(1+1,0);                           \n";
 
 void test3()
-{ specification spec = mcrl22lps(SPECIFICATION3);
+{ specification spec = parse_linear_process_specification(SPECIFICATION3);
   rewriter r(spec.data());
   specification spec1=rewrite_lps(spec,r);
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
@@ -144,8 +142,8 @@ void test3()
 // results in the specification dest.
 void test_lps_rewriter(std::string src_text, std::string dest_text, std::string sigma_text)
 {
-  lps::specification src  = mcrl22lps_linear(src_text);
-  lps::specification dest = mcrl22lps_linear(dest_text);
+  lps::specification src  = parse_linear_process_specification(src_text);
+  lps::specification dest = parse_linear_process_specification(dest_text);
 
   // rewrite the specification src                                         
   data::rewriter R(src.data());

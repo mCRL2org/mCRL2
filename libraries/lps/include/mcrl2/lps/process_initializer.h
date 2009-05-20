@@ -12,11 +12,13 @@
 #ifndef MCRL2_LPS_PROCESS_INITIALIZER_H
 #define MCRL2_LPS_PROCESS_INITIALIZER_H
 
+#include <iterator>
 #include <cassert>
 #include <string>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -120,6 +122,20 @@ class process_initializer: public atermpp::aterm_appl
       return true;
     }
 };
+
+/// \brief Returns the free variables that occur in the process initializer
+/// \param init A process initializer 
+/// \return The free variables that occur in the process initializer
+inline
+std::set<data::variable> compute_free_variables(const process_initializer& init)
+{
+  std::set<data::variable> result;
+  for (data::assignment_list::const_iterator i = init.assignments().begin(); i != init.assignments().end(); ++i)
+  {
+    data::find_all_free_variables(i->rhs(), std::inserter(result, result.end()));
+  }
+  return result;
+}
 
 /// \brief Traverses the process initializer, and writes all sort expressions
 /// that are encountered to the output range [dest, ...).
