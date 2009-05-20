@@ -67,7 +67,7 @@ namespace atermpp
       /// Allow construction from a string.
       /// \param s A string.
       /// \param quoted A boolean indicating if the string is quoted.
-      aterm_string(std::string s, bool quoted = true)
+      aterm_string(std::string const& s, bool quoted = true)
         : aterm_appl(quoted ? str2appl(s) : make_term(s))
       {
         assert(type() == AT_APPL);
@@ -89,6 +89,13 @@ namespace atermpp
       operator std::string() const
       {
         return function().name();
+      }
+
+      /// \brief Conversion operator
+      /// \return The term converted to string
+      bool operator==(char const* const other) const
+      {
+        return std::string(function().name()) == other;
       }
   };
 

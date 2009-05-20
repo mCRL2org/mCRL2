@@ -189,13 +189,17 @@ namespace mcrl2 {
         public:
 
           typedef std::output_iterator_tag iterator_category;
-          typedef atermpp::aterm_appl value_type;
-          typedef void                difference_type;
-          typedef void                pointer;
-          typedef void                reference;
+          typedef Expression               value_type;
+          typedef void                     difference_type;
+          typedef void                     pointer;
+          typedef void                     reference;
 
           struct proxy {
             OutputIterator m_sink;
+
+            void operator=(Expression const& p) {
+              *m_sink = p;
+            }
 
             void operator=(atermpp::aterm_appl p) {
               *m_sink = static_cast< Expression >(p);
@@ -215,19 +219,67 @@ namespace mcrl2 {
 
         public:
 
-        proxy& operator*() {
-          return m_proxy;
-        }
+          proxy& operator*() {
+            return m_proxy;
+          }
 
-        conversion_insert_iterator& operator++() {
-          return *this;
-        }
-        conversion_insert_iterator& operator++(int) {
-          return *this;
-        }
+          conversion_insert_iterator& operator++() {
+            return *this;
+          }
 
-        conversion_insert_iterator(OutputIterator const& sink) : m_proxy(sink) {
-        }
+          conversion_insert_iterator& operator++(int) {
+            return *this;
+          }
+
+          conversion_insert_iterator(OutputIterator const& sink) : m_proxy(sink) {
+          }
+      };
+
+      template < typename Expression, typename Predicate, typename OutputIterator >
+      class filter_insert_iterator {
+
+        public:
+
+          typedef std::output_iterator_tag iterator_category;
+          typedef Expression               value_type;
+          typedef void                     difference_type;
+          typedef void                     pointer;
+          typedef void                     reference;
+
+          struct proxy {
+            Predicate      m_filter;
+            OutputIterator m_sink;
+
+            void operator=(Expression const& p) {
+              if (m_filter(p)) {
+                *m_sink = static_cast< typename OutputIterator::value_type >(p);
+              }
+            }
+
+            proxy(Predicate const& filter, OutputIterator const& sink) : m_filter(filter), m_sink(sink) {
+            }
+          };
+
+        private:
+
+          proxy m_proxy;
+
+        public:
+
+          proxy& operator*() {
+            return m_proxy;
+          }
+
+          filter_insert_iterator& operator++() {
+            return *this;
+          }
+
+          filter_insert_iterator& operator++(int) {
+            return *this;
+          }
+
+          filter_insert_iterator(Predicate const& m_filter, OutputIterator const& sink) : m_proxy(m_filter, sink) {
+          }
       };
 
       // factory method
@@ -235,6 +287,24 @@ namespace mcrl2 {
       inline conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >
       make_inserter(Container& c, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
         return conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >(std::inserter(c, c.end()));
+      }
+
+      // factory method
+      // \param[in] predicate is a filter predicate
+      // \parampin] filter is a filter predicate
+      template < typename Container, typename Predicate >
+      inline filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >
+      make_filter_inserter(Container& c, Predicate const& filter, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
+        return filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >(filter, std::inserter(c, c.end()));
+      }
+
+      // factory method
+      // \param[in] predicate is a filter predicate
+      // \parampin] filter is a filter predicate
+      template < typename Expression, typename Predicate, typename OutputIterator >
+      inline filter_insert_iterator< Expression, Predicate, OutputIterator >
+      make_filter_inserter(Predicate const& filter, OutputIterator& o) {
+        return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
       }
 
       template < typename Container, typename Range >

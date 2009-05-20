@@ -76,7 +76,7 @@ namespace mcrl2 {
 
         /// \brief Returns the name of the variable.
         inline
-        std::string name() const
+        core::identifier_string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }

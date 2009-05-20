@@ -325,64 +325,75 @@ bool search_free_variable(Container container, const variable& d)
   return result.find(d) != result.end();
 }
 
-
-/// \brief Returns true if the term has a given sort identifier as subterm.
-/// \param t an expression
-/// \param s A sort identifier
-/// \return True if the term has a given sort identifier as subterm.
-template <typename Container>
-bool search_basic_sort(Container t, const basic_sort& s)
-{
-  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
-}
-
-/// \brief Returns all sort identifiers that occur in the term t
-/// \param t an expression
-/// \return All sort identifiers that occur in the term t
-template <typename Container >
-std::set<basic_sort> find_all_basic_sorts(Container t)
-{
-  std::set<basic_sort> result;
-  detail::find_all_if(t, boost::bind(&detail::is_basic_sort, _1), detail::make_inserter(result));
-  return result;
-}
-
 /// \brief Returns true if the term has a given sort expression as subterm.
-/// \param t an expression
-/// \param s A sort expression
+/// \param[in] t an expression
+/// \param[in] s A sort expression
 /// \return True if the term has a given sort expression as subterm.
 template <typename Container>
-bool search_sort_expression(Container t, const sort_expression& s)
+bool search_sort_expression(Container const& t, const sort_expression& s)
 {
   return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
 
 /// \brief Returns all sort expressions that occur in the term t
-/// \param t an expression
+/// \param[in] t an expression
+/// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
 template <typename Container, typename OutputIterator>
-void find_all_sort_expressions(Container t, OutputIterator o)
+void find_all_sort_expressions(Container const& t, OutputIterator o)
 {
   detail::find_all_if(t, is_sort_expression, o);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
-/// \param t an expression
+/// \param[in] t an expression
 /// \return All sort expressions that occur in the term t
 template <typename Container>
-std::set<sort_expression> find_all_sort_expressions(Container t)
+std::set<sort_expression> find_all_sort_expressions(Container const& t)
 {
   std::set<sort_expression> result;
   detail::find_all_if(t, is_sort_expression, detail::make_inserter(result));
   return result;
 }
 
+/// \brief Returns true if the term has a given sort identifier as subterm.
+/// \param[in] t an expression
+/// \param[in] s A sort identifier
+/// \return True if the term has a given sort identifier as subterm.
+template <typename Container>
+bool search_basic_sort(Container const& t, const basic_sort& s)
+{
+  return search_sort_expression(t, s);
+}
+
+/// \brief Returns all sort identifiers that occur in the term t
+/// \param[in] t an expression
+/// \param[out] o an output iterator
+/// \return All sort identifiers that occur in the term t
+template <typename Container, typename OutputIterator>
+void find_all_basic_sorts(Container const& t, OutputIterator o)
+{
+  find_all_sort_expressions(t, detail::make_filter_inserter< sort_expression >(boost::bind(&detail::is_basic_sort, _1), o));
+}
+
+/// \brief Returns all basic sorts that occur in the term t
+/// \param[in] t an expression
+/// \param[in] o an output iterator
+/// \return All sort expressions that occur in the term t
+template < typename Container >
+std::set<basic_sort> find_all_basic_sorts(Container const& t)
+{
+  std::set<basic_sort> result;
+  find_all_basic_sorts(t, detail::make_inserter(result));
+  return result;
+}
+
 /// \brief Returns true if the term has a given data expression as subterm.
-/// \param t an expression
-/// \param s A data expression
+/// \param[in] t an expression
+/// \param[in] s A data expression
 /// \return True if the term has a given data expression as subterm.
 template <typename Container >
-bool search_data_expression(Container t, const data_expression& s)
+bool search_data_expression(Container const& t, const data_expression& s)
 {
   return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
 }
@@ -391,7 +402,7 @@ bool search_data_expression(Container t, const data_expression& s)
 /// \param t an expression
 /// \return All data expressions that occur in the term t
 template <typename Container >
-std::set<data_expression> find_all_data_expressions(Container t)
+std::set<data_expression> find_all_data_expressions(Container const& t)
 {
   std::set<data_expression> result;
   detail::find_all_if(t, is_data_expression, detail::make_inserter(result));
@@ -416,7 +427,7 @@ function_symbol find_mapping(data_specification const& data, std::string const& 
 /// \param s A string
 /// \return The found constructor
 inline
-function_symbol find_constructor(data_specification data, std::string s)
+function_symbol find_constructor(data_specification const& data, std::string const& s)
 {
   data_specification::constructors_const_range r(data.constructors());
   data_specification::constructors_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));

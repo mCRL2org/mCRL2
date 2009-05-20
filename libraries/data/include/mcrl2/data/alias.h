@@ -56,7 +56,7 @@ namespace mcrl2 {
         inline
         basic_sort name() const
         {
-          return basic_sort(std::string(atermpp::aterm_string(atermpp::arg1(*this))));
+          return basic_sort(atermpp::aterm_string(atermpp::arg1(*this)));
         }
 
         /// \brief Returns the sort to which the name refers.

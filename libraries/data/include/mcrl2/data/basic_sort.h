@@ -52,12 +52,19 @@ namespace mcrl2 {
         /// \param[in] s The name of the sort that is created.
         /// \post This is a sort with name s.
         basic_sort(const std::string& s)
-          : sort_expression(mcrl2::core::detail::gsMakeSortId(mcrl2::core::identifier_string(s)))
+          : sort_expression(mcrl2::core::detail::gsMakeSortId(core::identifier_string(s)))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] s The name of the sort that is created.
+        /// \post This is a sort with name s.
+        basic_sort(const core::identifier_string& s)
+          : sort_expression(mcrl2::core::detail::gsMakeSortId(s))
         {}
 
         /// \brief Returns the name of this sort.
-        inline
-        std::string name() const
+        core::identifier_string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }

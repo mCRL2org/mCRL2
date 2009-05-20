@@ -334,7 +334,7 @@ namespace detail {
         unsigned int result = 0;
         for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
         {
-          result = (std::max)(result, i->first.size());
+          result = (std::max)(static_cast< size_t >(result), i->first.size());
         }
         return result;
       }
