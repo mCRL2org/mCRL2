@@ -6,17 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lpsbinary.cpp
+/// \file suminst.cpp
 /// \brief
 
-//Aterms
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/table.h"
-
 //LPS Framework
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/data/find.h"
@@ -27,12 +20,10 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 
-#include <mcrl2/lps/suminst.h>
+#include "mcrl2/lps/suminst.h"
 
 //using namespace std;
-// For Aterm library extension functions
 using namespace mcrl2::core;
-using namespace atermpp;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2;
@@ -45,36 +36,8 @@ namespace lps {
 // Helper functions
 /////
 
-///\return a list of all variables of sort s in vl
-variable_list get_occurrences(const variable_list& vl, const sort_expression& s)
-{
-  variable_list result;
-  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
-  {
-    if (i->sort() == s)
-    {
-      result = push_front(result, *i);
-    }
-  }
-  result = reverse(result);
-  return result;
-}
-
-///\return the list of all variables in vl, which are unequal to v
-variable_list filter(const variable_list& vl, const variable& v)
-{
-  variable_list result;
-  for (variable_list::const_iterator i = vl.begin(); i != vl.end(); ++i)
-  {
-    if (!(*i == v))
-    {
-      result = push_front(result, *i);
-    }
-  }
-  return result;
-}
-
 ///\return the list of all date_variables in vl, that are not in rl
+static
 variable_list filter(const variable_list& vl, const std::set< variable >& rl)
 {
   variable_list result;
@@ -91,6 +54,7 @@ variable_list filter(const variable_list& vl, const std::set< variable >& rl)
 
 ///\pre fl is a list of constructors
 ///\return a list of finite sorts in sl
+static
 std::set< sort_expression > get_finite_sorts(const data::data_specification& d, const sort_expression_list& sl)
 {
   std::set< sort_expression > result;
@@ -114,6 +78,7 @@ std::set< sort_expression > get_finite_sorts(const data::data_specification& d, 
 }
 
 ///\return a list of all variables of a sort that occurs in sl
+static
 std::set< variable > get_variables(const variable_list& vl, std::set< sort_expression > const& sl)
 {
   std::set< variable > result;
@@ -135,6 +100,7 @@ std::set< variable > get_variables(const variable_list& vl, std::set< sort_expre
 ///\pre specification is the specification belonging to summand
 ///\post the instantiated version of summand has been appended to result
 ///\return none
+static
 void instantiate_summand(const lps::specification& specification, const lps::summand& summand_, lps::summand_list& result, enumerator_factory< classic_enumerator< > >& enumerator_factory, const t_suminst_options& o)
 {
   int nr_summands = 0; // Counter for the number of new summands, used for verbose output
@@ -223,6 +189,7 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
 
 ///Takes the summand list sl, instantiates it,
 ///and returns the instantiated summand list
+static
 lps::summand_list instantiate_summands(const lps::specification& specification,
                                      const lps::summand_list& sl,
                                      enumerator_factory< classic_enumerator< > >& enumerator,

@@ -28,6 +28,7 @@ using namespace mcrl2::lps;
  */
 void test_case_1()
 {
+  std::clog << "Test case 1" << std::endl;
   const std::string text(
     "sort S = struct s1 | s2;\n"
     "map f : S -> Bool;\n"
@@ -50,6 +51,7 @@ void test_case_1()
 /// Sum variable y does not occur in the summand, and therefore must be removed.
 void test_case_2()
 {
+  std::clog << "Test case 2" << std::endl;
   const std::string text(
     "act a,b;\n"
     "proc P = sum y:Int . a . b . P;\n"
@@ -73,6 +75,7 @@ void test_case_2()
  */
 void test_case_3()
 {
+  std::clog << "Test case 3" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (4 == y) -> a . P;\n"
@@ -94,6 +97,7 @@ void test_case_3()
  */
 void test_case_4()
 {
+  std::clog << "Test case 4" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (y == 4) -> a . P;\n"
@@ -115,6 +119,7 @@ void test_case_4()
  */
 void test_case_5()
 {
+  std::clog << "Test case 5" << std::endl;
   const std::string text(
     "act a,b:Int;\n"
     "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
@@ -158,6 +163,7 @@ void test_case_5()
  */
 void test_case_6()
 {
+  std::clog << "Test case 6" << std::endl;
   const std::string text(
     "act a;\n"
     "proc P = sum y:Int . (y == y + 1) -> a . P;\n"
@@ -201,6 +207,7 @@ void test_case_6()
  */
 void test_case_7()
 {
+  std::clog << "Test case 7" << std::endl;
   const std::string text(
     "sort D = struct d1 | d2 | d3;\n"
     "map g : D -> D;\n"
@@ -231,6 +238,7 @@ void test_case_7()
  */
 void test_case_8()
 {
+  std::clog << "Test case 8" << std::endl;
   const std::string text(
     "sort D = struct d1 | d2 | d3;\n"
     "act a;\n"
@@ -259,6 +267,7 @@ void test_case_8()
  */
 void test_case_9()
 {
+  std::clog << "Test case 9" << std::endl;
   const std::string text(
     "proc P = sum y:Bool . y -> delta . P;\n"
     "init P;\n"
@@ -281,6 +290,7 @@ void test_case_9()
 ///Test case for issue #380
 void test_case_10()
 {
+  std::clog << "Test case 10" << std::endl;
   const std::string text(
   "act a:Nat;\n"
   "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
