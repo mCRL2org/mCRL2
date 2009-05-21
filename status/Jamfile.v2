@@ -21,7 +21,6 @@ build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
 build-project ../libraries/utilities/test ;
 build-project ../tools/mcrl22lps/test ;
-build-project ../tools/lpsparunfold/test ;
 
 import set ;
 
