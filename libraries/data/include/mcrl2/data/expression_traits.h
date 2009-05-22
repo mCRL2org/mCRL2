@@ -206,6 +206,9 @@ namespace data {
   template < typename Expression >
   struct expression_traits : public core::term_traits< Expression >
   {
+    // Type of expression that represents variables
+    typedef mcrl2::data::variable variable_type;
+
     // Iterator range for arguments of function applications
     typedef application::arguments_const_range arguments_const_range;
     typedef abstraction::variables_const_range bound_variables_const_range;

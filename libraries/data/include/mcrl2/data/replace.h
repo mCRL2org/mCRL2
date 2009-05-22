@@ -288,6 +288,8 @@ Container replace_variables(Container const& container, ReplaceFunction replace_
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function)
 {
+  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
+
   detail::replace_free_variables_helper< ReplaceFunction& > replacer(replace_function);
 
   return detail::replace_free_variables(replacer, container);
@@ -306,6 +308,7 @@ Container replace_free_variables(Container const& container, ReplaceFunction rep
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function, std::set< variable > const& bound)
 {
+  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
   detail::replace_free_variables_helper< ReplaceFunction > replacer(replace_function, bound);
 
   return detail::replace_free_variables(replacer, container);

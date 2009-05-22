@@ -204,7 +204,7 @@ namespace mcrl2 {
             {
               m_sorts.insert(normalised);
 
-              import_system_defined_sort(normalise(s));
+              import_system_defined_sort(normalised);
             }
           }
           else if (!s.is_function_sort()) // do not add function sorts

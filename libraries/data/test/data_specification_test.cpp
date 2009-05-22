@@ -480,6 +480,23 @@ void test_system_defined()
   specification.add_mapping(function_symbol("f", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())));
 
   BOOST_CHECK(!specification.mappings(function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())).empty());
+
+  // Manually structured sort
+  atermpp::vector< data::structured_sort_constructor_argument > arguments;
+
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("Q")));
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("R")));
+  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("S")));
+
+  atermpp::vector< data::structured_sort_constructor > constructors;
+  constructors.push_back(data::structured_sort_constructor("a",
+     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(data::structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
+  constructors.push_back(data::structured_sort_constructor("b",
+     boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
+
+  specification.add_sort(alias(basic_sort("D"), data::structured_sort(boost::make_iterator_range(constructors))));
 }
 
 void test_utility_functionality()
@@ -555,28 +572,29 @@ void test_normalisation()
   BOOST_CHECK(specification.normalise(list(B)) == list(bag(A)));
 }
 
-void test_copy_simple()
-{
-  std::clog << "test_copy_simple" << std::endl;
-  data_specification specification = data_specification();
-}
-
 void test_copy()
 {
   std::clog << "test_copy" << std::endl;
 
-  data_specification specification(parse_data_specification(
+  data_specification specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
     "sort A = S;"
     "sort S;"
-    "map f: Set(S);"));
+    "map f: Set(S);");
+
+  BOOST_CHECK(specification.search_constructor(sort_bool_::true_()));
 
   data_specification other;
   other = specification;
 
   BOOST_CHECK(other == specification);
 
+  specification = data_specification();
+
+  core::garbage_collect();
+
   BOOST_CHECK(other.normalise(basic_sort("A")) == basic_sort("S"));
+  BOOST_CHECK(!specification.search_sort(basic_sort("A")));
 }
 
 int test_main(int argc, char** argv)
@@ -608,9 +626,6 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_normalisation();
-  core::garbage_collect();
-
-  test_copy_simple();
   core::garbage_collect();
 
   test_copy();
