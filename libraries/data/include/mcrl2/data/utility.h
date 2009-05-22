@@ -73,7 +73,7 @@ namespace mcrl2 {
 
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
-    /// \param[in,out] c applies substitution function on elements of container
+    /// \param[in,out] c applies substitution function to elements of container
     /// \deprecated
     template < typename Expression, typename SubstitutionFunction >
     atermpp::term_list< Expression > substitute(SubstitutionFunction const& f, atermpp::term_list< Expression > c)
@@ -90,7 +90,7 @@ namespace mcrl2 {
 
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
-    /// \param[in] c applies substitution function on elements of container
+    /// \param[in] c applies substitution function to elements of container
     /// \return a vector of Expressions, such that the result is the vector of
     ///         elements in c with f applied to them.
     /// \deprecated
@@ -110,7 +110,7 @@ namespace mcrl2 {
 
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
-    /// \param[in] c applies substitution function on elements of container
+    /// \param[in] c applies substitution function to elements of container
     /// \param[out] o output iterator to which the elements of c with f applied
     ///             to them are added.
     /// \deprecated
