@@ -99,17 +99,20 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     return m_rewriter->getSubstitutionInternal(t);
   }
 
-  void set_internally_associated_value(ATermAppl t, ATerm e)
+  /// Note the internal state of the rewriter changes so constness is violated
+  void set_internally_associated_value(ATermAppl t, ATerm e) const
   {
     m_rewriter->setSubstitutionInternal(t, e);
   }
 
-  void set_internally_associated_value(ATermAppl t, ATermAppl e)
+  /// Note the internal state of the rewriter changes so constness is violated
+  void set_internally_associated_value(ATermAppl t, ATermAppl e) const
   {
     m_rewriter->setSubstitution(t, e);
   }
 
-  void clear_internally_associated_value(ATermAppl t)
+  /// Note the internal state of the rewriter changes so constness is violated
+  void clear_internally_associated_value(ATermAppl t) const
   {
     m_rewriter->clearSubstitution(t);
   }
@@ -157,7 +160,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
       }
     };
 
-    boost::shared_ptr< legacy_rewriter > m_local_evaluator;
+    boost::shared_ptr< const legacy_rewriter > m_local_evaluator;
 
   public:
 
@@ -180,7 +183,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     }
 
 
-    legacy_rewriter& get_evaluator()
+    legacy_rewriter const& get_evaluator()
     {
       return *m_local_evaluator;
     }
@@ -281,7 +284,7 @@ struct ns_info
 
         mcrl2::data::data_specification const&                            m_specification;
         boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
-        legacy_rewriter&                                                  m_rewriter; // only for translation to/from rewrite format
+        legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
 	int num_summands;
 	ATermAppl *summands;
