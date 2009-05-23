@@ -207,6 +207,7 @@ namespace process {
   /// \brief Returns true if the process specification is linear.
   /// \param p A process specification
   /// \return True if the process specification is linear.
+  inline
   bool is_linear(const process_specification& p)
   {
     if (p.equations().size() != 1)
