@@ -9,8 +9,8 @@
 /// \file mcrl2/data/classic_enumerator.h
 /// \brief Template class for createing enumerator components
 
-#ifndef _MCRL2_DATA_ENUMERATION__HPP_
-#define _MCRL2_DATA_ENUMERATION__HPP_
+#ifndef _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
+#define _MCRL2_DATA_CLASSIC_ENUMERATOR__HPP_
 
 #include <set>
 
@@ -228,7 +228,7 @@ namespace mcrl2 {
 
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              variable_type const& variable, expression_type const& condition,
-             substitution_type const& substitution, Evaluator& evaluator) {
+             substitution_type const& substitution, Evaluator const& evaluator) {
 
           implementation_type::create(m_impl, context, boost::make_iterator_range(make_set(variable)), condition, evaluator, substitution);
         }
@@ -236,7 +236,7 @@ namespace mcrl2 {
         template < typename ForwardTraversalIterator >
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
              boost::iterator_range< ForwardTraversalIterator > const& variables, expression_type const& condition,
-             substitution_type const& substitution, Evaluator& evaluator) {
+             substitution_type const& substitution, Evaluator const& evaluator) {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }
@@ -272,7 +272,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             std::set< variable_type > const& variables,
-            Evaluator& evaluator,
+            Evaluator const& evaluator,
             expression_type const& condition = sort_bool_::true_()) {
 
             implementation_type::create(m_impl, specification, boost::make_iterator_range(variables), condition, evaluator);
@@ -288,7 +288,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             std::set< variable_type > const& variables,
-            Evaluator& evaluator,
+            Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
 
@@ -306,7 +306,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
-            Evaluator& evaluator,
+            Evaluator const& evaluator,
             expression_type const& condition = sort_bool_::true_()) {
 
           implementation_type::create(m_impl, specification,
@@ -324,7 +324,7 @@ namespace mcrl2 {
          **/
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
-            Evaluator& evaluator,
+            Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
 

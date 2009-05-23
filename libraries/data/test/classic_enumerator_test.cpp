@@ -253,7 +253,7 @@ void mutually_recursive_test(const size_t count) {
 void check_concepts() {
   using namespace mcrl2::data::concepts;
 
-  BOOST_CONCEPT_ASSERT((Evaluator< rewriter, mutable_substitution< > >));
+  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_substitution< > >));
 
   BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
 }

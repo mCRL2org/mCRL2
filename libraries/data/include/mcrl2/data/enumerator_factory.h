@@ -65,7 +65,7 @@ namespace mcrl2 {
         typedef typename enumerator_type::shared_context_type              shared_context_type;
 
         /// \brief Reference to a possibly external evaluator object
-        Evaluator*                               m_evaluator;
+        Evaluator const*                         m_evaluator;
         /// \brief Context shared by enumerators
         boost::shared_ptr< shared_context_type > m_enumeration_context;
 
@@ -77,7 +77,7 @@ namespace mcrl2 {
         /// \brief Constructor with shared context and evaluator instance
         /// \param[in] context the shared context for enumerators
         /// \param[in] evaluator a reference to an evaluator
-        enumerator_factory(boost::shared_ptr< shared_context_type > const& context, Evaluator& evaluator) :
+        enumerator_factory(boost::shared_ptr< shared_context_type > const& context, Evaluator const& evaluator) :
                m_evaluator(&evaluator),
                m_enumeration_context(context) {
         }
@@ -92,7 +92,7 @@ namespace mcrl2 {
         }
 
         /// \brief Constructor with data specification (does not copy evaluator)
-        enumerator_factory(data_specification const& specification, Evaluator& evaluator) :
+        enumerator_factory(data_specification const& specification, Evaluator const& evaluator) :
                m_evaluator(&evaluator), m_enumeration_context(new shared_context_type(specification, *m_evaluator)) {
         }
 
@@ -140,7 +140,7 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        enumerator_type make(std::set< variable_type > const& variables, Evaluator& evaluator,
+        enumerator_type make(std::set< variable_type > const& variables, Evaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -155,7 +155,7 @@ namespace mcrl2 {
          * \param[in] substitution template for substitutions
          **/
         template < typename ForwardTraversalIterator >
-        enumerator_type make(boost::iterator_range< ForwardTraversalIterator > const& variables, Evaluator& evaluator,
+        enumerator_type make(boost::iterator_range< ForwardTraversalIterator > const& variables, Evaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeEvaluator >
         classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
-          make(std::set< variable_type > const& variables, AlternativeEvaluator& evaluator,
+          make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -189,7 +189,7 @@ namespace mcrl2 {
          **/
         template < typename ForwardTraversalIterator, typename AlternativeEvaluator >
         classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
-          make(boost::iterator_range< ForwardTraversalIterator > const& variables, AlternativeEvaluator& evaluator,
+          make(boost::iterator_range< ForwardTraversalIterator > const& variables, AlternativeEvaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -208,7 +208,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeSelector >
         classic_enumerator< substitution_type, evaluator_type, AlternativeSelector >
-          make(std::set< variable_type > const& variables, evaluator_type& evaluator,
+          make(std::set< variable_type > const& variables, evaluator_type const& evaluator,
             expression_type const& condition = expression_traits< expression_type >::true_(),
             substitution_type const& substitution = substitution_type()) const {
 
@@ -225,7 +225,7 @@ namespace mcrl2 {
          **/
         template < typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-          make(std::set< variable_type > const& variables, AlternativeEvaluator& evaluator,
+          make(std::set< variable_type > const& variables, AlternativeEvaluator const& evaluator,
                          expression_type const& condition = sort_bool_::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
@@ -242,7 +242,7 @@ namespace mcrl2 {
          **/
         template < typename ForwardTraversalIterator, typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-          make(boost::iterator_range< ForwardTraversalIterator > const& variables, AlternativeEvaluator& evaluator,
+          make(boost::iterator_range< ForwardTraversalIterator > const& variables, AlternativeEvaluator const& evaluator,
                          expression_type const& condition = sort_bool_::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 

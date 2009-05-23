@@ -56,7 +56,7 @@ namespace mcrl2 {
 
         C                           c;
         S                           s;
-        typename S::expression_type e;
+        typename C::expression_type e;
 
         BOOST_CONCEPT_USAGE(Evaluator) {
           e = c(e);

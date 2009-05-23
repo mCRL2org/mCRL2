@@ -233,29 +233,29 @@ namespace data {
       return e.is_abstraction();
     }
 
-    static data_expression head(application const& e)
+    static data_expression head(data_expression const& e)
     {
-      return e.head();
+      return application(e).head();
     }
 
-    static arguments_const_range arguments(application const& e)
+    static arguments_const_range arguments(data_expression const& e)
     {
-      return e.arguments();
+      return application(e).arguments();
     }
 
-    static bound_variables_const_range variables(abstraction const& a)
+    static bound_variables_const_range variables(data_expression const& a)
     {
-      return a.variables();
+      return abstraction(a).variables();
     }
 
-    static data_expression body(abstraction const& a)
+    static data_expression body(data_expression const& a)
     {
-      return a.body();
+      return abstraction(a).body();
     }
 
-    static data_expression replace_body(abstraction const& variable_binder, data_expression const& new_body)
+    static data_expression replace_body(data_expression const& variable_binder, data_expression const& new_body)
     {
-      return abstraction(variable_binder.binding_operator(), variable_binder.variables(), new_body);
+      return abstraction(abstraction(variable_binder).binding_operator(), abstraction(variable_binder).variables(), new_body);
     }
 
     template < typename ForwardTraversalIterator >

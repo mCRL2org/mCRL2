@@ -50,7 +50,7 @@ namespace mcrl2 {
           return this->m_rewriter->toRewriteFormat(basic_rewriter< data_expression >::implement(e));
         }
 
-        data_expression convert_from(atermpp::aterm const& e) {
+        data_expression convert_from(atermpp::aterm const& e) const {
           return basic_rewriter< data_expression >::reconstruct(this->m_rewriter->fromRewriteFormat(e));
         }
 
@@ -114,22 +114,22 @@ namespace mcrl2 {
 
         private:
 
-          boost::shared_ptr< shared_context_type >                     m_shared_context;
+          boost::shared_ptr< shared_context_type >                           m_shared_context;
 
           // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
-          boost::shared_ptr< EnumeratorSolutionsStandard >             m_generator;
+          boost::shared_ptr< EnumeratorSolutionsStandard >                   m_generator;
 
-          typename compatibility_evaluator< Evaluator >::actual_type&  m_evaluator;
+          typename compatibility_evaluator< Evaluator >::actual_type const&  m_evaluator;
 
-          expression_type                                              m_condition;
+          expression_type                                                    m_condition;
 
-          MutableSubstitution                                          m_substitution;
+          MutableSubstitution                                                m_substitution;
 
         private:
 
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
-                               expression_type const& c, substitution_type const& s, Evaluator& e) :
+                               expression_type const& c, substitution_type const& s, Evaluator const& e) :
                              m_shared_context(context), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
           }
 
@@ -209,7 +209,7 @@ namespace mcrl2 {
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
                                boost::iterator_range< ForwardTraversalIterator > const& v, expression_type const& c,
-                               Evaluator& e, substitution_type const& s = substitution_type()) {
+                               Evaluator const& e, substitution_type const& s = substitution_type()) {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
@@ -222,7 +222,7 @@ namespace mcrl2 {
           template < typename ForwardTraversalIterator >
           static void create(boost::shared_ptr< classic_enumerator_impl >& target,
               data_specification const& specification, boost::iterator_range< ForwardTraversalIterator > const& v,
-              expression_type const& c, Evaluator& e, substitution_type const& s = substitution_type()) {
+              expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type()) {
 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }

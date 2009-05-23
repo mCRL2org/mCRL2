@@ -13,8 +13,6 @@
 #define MCRL2_DATA_FRESH_VARIABLE_GENERATOR_H
 
 #include <string>
-#include <vector>
-#include <set>
 
 #include "boost/assert.hpp"
 
@@ -22,13 +20,8 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/find.h"
 
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/application.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
 

@@ -45,6 +45,9 @@ namespace data {
       /// \brief The term type of the rewriter.
       typedef Term term_type;
 
+      /// \brief The type for expressions manipulated by the rewriter.
+      typedef Term expression_type;
+
       /// \brief The strategy of the rewriter.
       enum strategy
       {
@@ -114,8 +117,10 @@ namespace data {
     friend class enumerator;
 
     public:
+      /// \brief The term type of the rewriter.
+      typedef data_expression                                     expression_type;
       /// \brief The variable type of the rewriter.
-      typedef core::term_traits< data_expression >::variable_type variable_type;
+      typedef core::term_traits< expression_type >::variable_type variable_type;
 
     protected:
 

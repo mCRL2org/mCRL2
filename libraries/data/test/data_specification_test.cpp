@@ -484,19 +484,14 @@ void test_system_defined()
   // Manually structured sort
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
 
+  // sort that references itself by a name
   arguments.push_back(data::structured_sort_constructor_argument(basic_sort("Q")));
-  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("R")));
-  arguments.push_back(data::structured_sort_constructor_argument(basic_sort("S")));
 
   atermpp::vector< data::structured_sort_constructor > constructors;
-  constructors.push_back(data::structured_sort_constructor("a",
+  constructors.push_back(data::structured_sort_constructor("q",
      boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(data::structured_sort_constructor("b",
-     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
-  constructors.push_back(data::structured_sort_constructor("b",
-     boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
 
-  specification.add_sort(alias(basic_sort("D"), data::structured_sort(boost::make_iterator_range(constructors))));
+  specification.add_sort(alias(basic_sort("Q"), data::structured_sort(boost::make_iterator_range(constructors))));
 }
 
 void test_utility_functionality()

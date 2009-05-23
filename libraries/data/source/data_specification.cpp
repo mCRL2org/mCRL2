@@ -236,25 +236,25 @@ namespace mcrl2 {
       {
         return find_referenced_sort(e);
       }
-      else
+      else if (e.is_function_sort())
       {
-        if (e.is_function_sort())
-        {
-          atermpp::vector< sort_expression > new_domain;
+        atermpp::vector< sort_expression > new_domain;
 
-          for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
-          {
-            new_domain.push_back(normalise(r.front()));
-          }
+        for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
+        {
+          new_domain.push_back(normalise(r.front()));
+        }
 
-          return function_sort(new_domain, normalise(function_sort(e).codomain()));
-        }
-        else if (e.is_container_sort())
-        {
-          return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
-        }
-        else if (e.is_structured_sort())
-        {
+        return function_sort(new_domain, normalise(function_sort(e).codomain()));
+      }
+      else if (e.is_container_sort())
+      {
+        return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
+      }
+      else if (e.is_structured_sort())
+      {
+        if (m_aliases_by_sort.find(e) == m_aliases_by_sort.end())
+        { // only normalise when no name has been introduced for the sort (needed for recursive structured sorts)
           atermpp::vector< structured_sort_constructor > new_constructors;
 
           for (structured_sort::constructor_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
