@@ -66,7 +66,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       mcrl2::data::rewriter data_rewriter(lps_specification.data());
 
-      mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter);
+      mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter, mcrl2::core::gsVerbose);
       r.save(m_output_filename);
       return true;
     }
