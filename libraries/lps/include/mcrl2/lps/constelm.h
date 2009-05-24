@@ -299,7 +299,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
  
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
-           for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
+      for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
       {
         set_map_element(sigma, *i, *e_i);
         //sigma[*i] = *e_i;

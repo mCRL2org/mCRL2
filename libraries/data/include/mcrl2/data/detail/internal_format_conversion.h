@@ -60,7 +60,7 @@ namespace mcrl2 {
             std::string name(expression.name());
 
             // expression may represent a number, if so, replace by its internal representation
-            if (expression.sort().is_standard() && (name.find_first_not_of("-/0123456789") == std::string::npos)) // crude but efficient
+            if (expression.sort().is_system_defined() && (name.find_first_not_of("-/0123456789") == std::string::npos)) // crude but efficient
             {
               return number(expression.sort(), name);
             }

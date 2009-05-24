@@ -134,8 +134,8 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
     if (sorts.find(*i) == sorts.end()) {
-      // sort *i is not well-typed, a standard sort or an alias 
-      if (!(i->is_standard()) && i->is_alias()) {
+      // sort *i is not well-typed, a system defined sort or an alias 
+      if (!(i->is_system_defined()) && i->is_alias()) {
         alias sort_alias(*i);
 
         if (sorts.find(sort_alias.name()) == sorts.end()) {

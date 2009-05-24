@@ -196,7 +196,7 @@ namespace mcrl2 {
           { // add aliases as names for sort expressions that are non-aliases
             add_alias(s);
           }
-          else if (s.is_standard())
+          else if (s.is_system_defined())
           {
             sort_expression normalised(normalise(s));
 

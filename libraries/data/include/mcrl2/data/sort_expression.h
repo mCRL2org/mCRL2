@@ -89,7 +89,7 @@ namespace mcrl2 {
 
         /// \brief Returns true iff the expression represents a standard sort.
         inline
-        bool is_standard() const
+        bool is_system_defined() const
         {
           using namespace core::detail;
 

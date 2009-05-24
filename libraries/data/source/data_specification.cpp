@@ -277,10 +277,10 @@ namespace mcrl2 {
       return e;
     }
 
-    /// \pre sort.is_standard()
+    /// \pre sort.is_system_defined()
     void data_specification::import_system_defined_sort(sort_expression const& sort)
     {
-      assert(sort.is_standard());
+      assert(sort.is_system_defined());
 
       // add sorts, constructors, mappings and equations
       if (sort == sort_bool_::bool_())
@@ -347,7 +347,7 @@ namespace mcrl2 {
       {
         sort_expression normalised(normalise(*i));
 
-        if (normalised.is_standard())
+        if (normalised.is_system_defined())
         { // || constructors(normalised).empty()) {
           if (!search_sort(normalised))
           {

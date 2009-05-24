@@ -161,7 +161,7 @@ namespace process {
     traverse_sort_expressions(spec, std::inserter(s, s.end()));
     for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
     {
-      if (i->is_standard())
+      if (i->is_system_defined())
       {
         spec.data().import_system_defined_sort(*i);
       }
