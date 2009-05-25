@@ -12,17 +12,12 @@
 #ifndef MCRL2_LPS_ACTION_RENAME_H
 #define MCRL2_LPS_ACTION_RENAME_H
 
-#include <sstream>
 #include "mcrl2/exception.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/lps/rename.h"
-#include "mcrl2/lps/sumelm.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"

@@ -282,7 +282,7 @@ ATerm readATerm(istream &is)
 	}
         is.clear();
 
-	ATerm t = ATreadFromBinaryString((unsigned char *) buf,len);
+	ATerm t = ATreadFromBinaryString((unsigned char *) buf, static_cast< int >(len));
         if ( t == NULL )
         {
           throw runtime_error("failed to read ATerm from stream");

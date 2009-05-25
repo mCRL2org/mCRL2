@@ -13,21 +13,10 @@
 /// data terms in it are rewritten, including those in the rewrite
 /// rules. This is not always desirable.
 
-#include <cstdio>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
-#include <aterm2.h>
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
