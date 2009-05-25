@@ -544,7 +544,7 @@ class svc_buffer
 {
   private:
     unsigned char buffer[56];
-    unsigned int buffer_size;
+    std::streamsize buffer_size;
     unsigned int pos;
     unsigned int count;
     istream *input;
@@ -700,7 +700,7 @@ lts_type p_lts::detect_type(istream &is)
   streampos init_pos = is.tellg();
   char buf[32]; is.read(buf,32);
   if ( is.eof() ) is.clear();
-  streamsize r = is.gcount();
+  std::streamsize r = is.gcount();
   is.seekg(init_pos);
 
   // detect lts_aut
@@ -754,7 +754,7 @@ lts_type p_lts::detect_type(istream &is)
   // detect lts_svc, lts_mcrl and lts_mcrl2
   if ( r >= 18 )
   {
-    svc_buffer sbuf((unsigned char *) buf,r);
+    svc_buffer sbuf((unsigned char *) buf, static_cast< unsigned int >(r));
     sbuf.get_bit(); // indexed flag
     svc_int header_pos = sbuf.get_int(); // header pos
     if ( header_pos.flag == 0 )

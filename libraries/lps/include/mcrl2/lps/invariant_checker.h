@@ -14,6 +14,7 @@
 #ifndef INVARIANT_CHECKER_H
 #define INVARIANT_CHECKER_H
 
+#include <string>
 #include "aterm2.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -70,7 +71,7 @@ class Invariant_Checker {
     ATermList f_summands;
     bool f_counter_example;
     bool f_all_violations;
-    char* f_dot_file_name;
+    std::string f_dot_file_name;
     void print_counter_example();
     void save_dot_file(int a_summand_number);
     bool check_init(ATermAppl a_invariant);
@@ -90,7 +91,7 @@ class Invariant_Checker {
       bool a_apply_induction = false,
       bool a_counter_example = false,
       bool a_all_violations = false,
-      char const* a_dot_file_name = 0
+      std::string const& a_dot_file_name = std::string()
     );
     ~Invariant_Checker();
 

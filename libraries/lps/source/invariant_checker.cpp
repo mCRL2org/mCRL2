@@ -45,7 +45,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     void Invariant_Checker::save_dot_file(int a_summand_number) {
-      if (f_dot_file_name != 0) {
+      if (f_dot_file_name.empty()) {
         std::ostringstream v_file_name(f_dot_file_name);
 
         if (a_summand_number == -1) {
@@ -147,7 +147,7 @@ using namespace mcrl2::core;
 
     Invariant_Checker::Invariant_Checker(
       ATermAppl a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_counter_example, bool a_all_violations, char const* a_dot_file_name
+      bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
     ):
       f_bdd_prover(ATAgetArgument(a_lps,0), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
@@ -155,11 +155,7 @@ using namespace mcrl2::core;
       f_summands = ATLgetArgument(ATAgetArgument(a_lps, 2), 2);
       f_counter_example = a_counter_example;
       f_all_violations = a_all_violations;
-      if (a_dot_file_name == 0) {
-        f_dot_file_name = 0;
-      } else {
-        f_dot_file_name = strdup(a_dot_file_name);
-      }
+      f_dot_file_name = a_dot_file_name;
     }
 
     // --------------------------------------------------------------------------------------------

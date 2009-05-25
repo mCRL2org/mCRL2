@@ -14,29 +14,18 @@
 #define TOOLNAME "lpsactionrename"
 #define AUTHOR "Jan Friso Groote and Tom Haenen"
 
-#include <cstdio>
-#include <cerrno>
-#include <cstdlib>
-#include <cstring>
-#include <cassert>
 #include <iostream>
-#include <fstream>
 #include <algorithm>
-#include <aterm2.h>
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lps_rewrite.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/action_rename.h"
-#include <mcrl2/utilities/input_output_tool.h>
-#include <mcrl2/utilities/rewriter_tool.h>
-#include <mcrl2/utilities/squadt_tool.h>
+#include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;

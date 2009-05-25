@@ -261,20 +261,12 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared private ----------------------------------------
 
     void Confluence_Checker::save_dot_file(int a_summand_number_1, int a_summand_number_2) {
-      char* v_file_name;
-      char* v_file_name_suffix;
+      if (f_dot_file_name.empty()) {
+        std::ostringstream v_file_name(f_dot_file_name);
 
-      if (f_dot_file_name != 0) {
-        v_file_name_suffix = (char*) malloc((NrOfChars(a_summand_number_1) + NrOfChars(a_summand_number_2) + 7) * sizeof(char));
-        sprintf(v_file_name_suffix, "-%d-%d.dot", a_summand_number_1, a_summand_number_2);
-        v_file_name = (char*) malloc((strlen(f_dot_file_name) + strlen(v_file_name_suffix) + 1) * sizeof(char));
-        strcpy(v_file_name, f_dot_file_name);
-        strcat(v_file_name, v_file_name_suffix);
-        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name);
-        free(v_file_name);
-        v_file_name = 0;
-        free(v_file_name_suffix);
-        v_file_name_suffix = 0;
+        v_file_name << "-" << a_summand_number_1 << "-" << a_summand_number_2 << ".dot";
+
+        f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
       }
     }
 
@@ -422,7 +414,7 @@ using namespace mcrl2::core::detail;
 
     Confluence_Checker::Confluence_Checker(
       ATermAppl a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, char* a_dot_file_name
+      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, std::string const& a_dot_file_name
     ):
       f_disjointness_checker(ATAgetArgument(a_lps, 2)),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
@@ -436,18 +428,13 @@ using namespace mcrl2::core::detail;
       f_no_marking = a_no_marking;
       f_check_all = a_check_all;
       f_counter_example = a_counter_example;
-      if (a_dot_file_name == 0) {
-        f_dot_file_name = 0;
-      } else {
-        f_dot_file_name = strdup(a_dot_file_name);
-      }
+      f_dot_file_name = a_dot_file_name;
       f_generate_invariants = a_generate_invariants;
     }
 
     // --------------------------------------------------------------------------------------------
 
     Confluence_Checker::~Confluence_Checker() {
-      free(f_dot_file_name);
     }
 
     // --------------------------------------------------------------------------------------------

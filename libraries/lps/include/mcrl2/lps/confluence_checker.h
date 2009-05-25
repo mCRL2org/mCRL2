@@ -15,6 +15,7 @@
 #ifndef CONFLUENCE_CHECKER_H
 #define CONFLUENCE_CHECKER_H
 
+#include <string>
 #include "aterm2.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
@@ -152,7 +153,7 @@ class Confluence_Checker {
     bool f_counter_example;
 
     /// \brief The prefix for the names of the files written in dot format.
-    char* f_dot_file_name;
+    std::string f_dot_file_name;
 
     /// \brief Flag indicating whether or not invariants are generated and checked each time a
     /// \brief summand is encountered that is not confluent with the tau summand at hand.
@@ -192,7 +193,7 @@ class Confluence_Checker {
       bool a_check_all = false,
       bool a_counter_example = false,
       bool a_generate_invariants = false,
-      char* a_dot_file_name = 0
+      std::string const& a_dot_file_name = std::string()
     );
 
     /// \brief Destructor that frees the memory used by Confluence_Checker::f_dot_file_name.

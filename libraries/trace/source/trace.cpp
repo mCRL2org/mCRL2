@@ -258,7 +258,7 @@ ATerm readATerm(istream &is)
 #define RAT_INIT_BUF_SIZE (64*1024)
 	unsigned int buf_size = RAT_INIT_BUF_SIZE;
 	char *buf = NULL;
-	unsigned int len = 0;
+	std::streamsize len = 0;
 
 	while ( !is.eof() )
 	{
