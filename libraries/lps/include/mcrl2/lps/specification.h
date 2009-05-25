@@ -68,6 +68,18 @@ class specification
     /// \brief The initial state of the specification
     process_initializer m_initial_process;
 
+    /// \brief Computes the used free variables, and puts them in the free
+    /// variable declarations of the process and the initial_process.
+    void repair_free_variables()
+    {
+      std::set<data::variable> free_variables = compute_free_variables(process());
+      std::set<data::variable> v = compute_free_variables(initial_process());
+      free_variables.insert(v.begin(), v.end());
+      data::variable_list freevars = data::convert<data::variable_list>(free_variables);
+      m_process = set_free_variables(m_process, freevars);
+      m_initial_process = process_initializer(freevars, m_initial_process.assignments());
+    }
+    
     /// \brief Initializes the specification with an ATerm.
     /// \param t A term
     void construct_from_aterm(atermpp::aterm_appl t)
@@ -77,6 +89,7 @@ class specification
       m_action_labels   = atermpp::aterm_appl(*i++)(0);
       m_process         = atermpp::aterm_appl(*i++);
       m_initial_process = atermpp::aterm_appl(*i);
+      repair_free_variables();
     }
 
     /// \brief Conversion to ATermAppl.
@@ -208,18 +221,6 @@ class specification
       return m_initial_process;
     }
 
-    /// \brief Computes the used free variables, and puts them in the free
-    /// variable declarations of the process and the initial_process.
-    void repair_free_variables()
-    {
-      std::set<data::variable> free_variables = compute_free_variables(process());
-      std::set<data::variable> v = compute_free_variables(initial_process());
-      free_variables.insert(v.begin(), v.end());
-      data::variable_list freevars = data::convert<data::variable_list>(free_variables);
-      m_process = set_free_variables(m_process, freevars);
-      m_initial_process = process_initializer(freevars, m_initial_process.assignments());
-    }
-    
     /// \brief Indicates whether the specification is well typed.
     /// \return True if
     /// <ul>
