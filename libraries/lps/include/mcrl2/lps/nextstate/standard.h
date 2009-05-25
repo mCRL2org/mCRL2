@@ -116,6 +116,11 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   {
     m_rewriter->clearSubstitution(t);
   }
+
+  mcrl2::data::detail::Rewriter& get_rewriter() const
+  {
+    return *const_cast< mcrl2::data::detail::Rewriter* >(m_rewriter.get());
+  }
 };
 
 // Uses static context so code is not reentrant

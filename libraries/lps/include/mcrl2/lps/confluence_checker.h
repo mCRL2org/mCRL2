@@ -183,7 +183,7 @@ class Confluence_Checker {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     Confluence_Checker(
-      ATermAppl a_lps,
+      mcrl2::lps::specification const& a_lps,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,

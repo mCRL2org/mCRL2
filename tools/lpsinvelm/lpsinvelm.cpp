@@ -314,7 +314,7 @@ using namespace mcrl2::data::detail;
     bool LPS_Inv_Elm::check_invariant() {
       if (!f_no_check) {
         Invariant_Checker v_invariant_checker(
-          f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name.c_str()
+          mcrl2::lps::specification(f_lps), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name
         );
 
         return v_invariant_checker.check_invariant(f_invariant);

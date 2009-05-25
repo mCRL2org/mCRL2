@@ -846,9 +846,9 @@ namespace squadt {
      }
   
      std::streamsize xsputn(const char * s, std::streamsize n) {
-       m_crc_computer.process_bytes(s, n);
+       m_crc_computer.process_bytes(s, static_cast< size_t >(n));
   
-       pbump(n);
+       pbump(static_cast< int >(n));
   
        return n;
      }

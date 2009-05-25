@@ -178,20 +178,11 @@ namespace data {
         return m_rewriter->addRewriteRule(const_cast< basic_rewriter const* >(this)->implement(equation));
       }
 
-      /// \brief Returns a reference to the Rewriter object that is used for the implementation.
-      /// \return A reference to the wrapped Rewriter object.
+      /// \brief Returns the rewrite strategy
       /// \deprecated
-      detail::Rewriter const& get_rewriter() const
+      strategy get_strategy() const
       {
-        return *m_rewriter;
-      }
-
-      /// \brief Returns a reference to the Rewriter object that is used for the implementation.
-      /// \return A reference to the wrapped Rewriter object.
-      /// \deprecated
-      detail::Rewriter& get_rewriter()
-      {
-        return *m_rewriter;
+        return static_cast< strategy >(m_rewriter->getStrategy());
       }
   };
 

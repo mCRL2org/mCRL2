@@ -228,22 +228,21 @@ using namespace mcrl2::core::detail;
 
   // --------------------------------------------------------------------------------------------
 
-  bool has_ctau_action(ATermAppl a_lps) {
+  bool has_ctau_action(mcrl2::lps::specification const& a_lps) {
     ATermList v_action_specification;
     ATermAppl v_action;
     ATermAppl v_ctau_action;
-    bool v_has_ctau_action = false;
 
     v_ctau_action = make_ctau_act_id();
-    v_action_specification = ATLgetArgument(ATAgetArgument(a_lps, 1), 0);
+    v_action_specification = a_lps.action_labels();
     while (!ATisEmpty(v_action_specification)) {
       v_action = ATAgetFirst(v_action_specification);
       if (v_action == v_ctau_action) {
-        v_has_ctau_action = true;
+        return true;
       }
       v_action_specification = ATgetNext(v_action_specification);
     }
-    return v_has_ctau_action;
+    return false;
   }
 
   // --------------------------------------------------------------------------------------------
@@ -413,18 +412,19 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      ATermAppl a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, std::string const& a_dot_file_name
     ):
-      f_disjointness_checker(ATAgetArgument(a_lps, 2)),
+      f_disjointness_checker(a_lps.process()),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(ATAgetArgument(a_lps,0), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       if (has_ctau_action(a_lps)) {
         throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
       }
 
-      f_lps = a_lps;
+      // FIXME
+      f_lps = specification_to_aterm(a_lps);
       f_no_marking = a_no_marking;
       f_check_all = a_check_all;
       f_counter_example = a_counter_example;
@@ -476,7 +476,7 @@ using namespace mcrl2::core::detail;
       v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 2);
       ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equation, 2);
 
-      if (v_is_marked && !has_ctau_action(f_lps)) {
+      if (v_is_marked && !has_ctau_action(mcrl2::lps::specification(f_lps))) {
         v_lps = add_ctau_action(v_lps);
       }
 
