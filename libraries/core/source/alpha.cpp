@@ -1490,6 +1490,10 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
   }
   else if ( gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
 	    || gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsBInit(a)){
+
+    // Yarick, 2009-05-25: do not distribute comm over seq compositions.
+    if ( gsIsSeq(a) ) return gsMakeComm(C,a);
+
     // all distributing rules together
     short ia1=0,ia2=1,args=2;
     if(gsIsIfThen(a) || gsIsIfThenElse(a) || gsIsSum(a)) { ia1=1; ia2=2; }
@@ -1511,6 +1515,9 @@ static ATermAppl PushComm(ATermList C, ATermAppl a){
     if(args==2) a=ATsetArgument(a,(ATerm)q,ia2);
 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
+
+    // Yarick, 2009-05-25: do not distribute comm over seq compositions.
+    if ( gsIsSeq(a) ) return gsMakeComm(C,a);
 
     return a;
   }
