@@ -99,6 +99,19 @@ struct variable_name: public std::unary_function<variable, core::identifier_stri
   }
 };
 
+/// \brief Function object that returns the name of a data variable
+template < typename Expression >
+struct sort_of_expression: public std::unary_function< Expression, sort_expression >
+{
+  /// \brief Function call operator
+  /// \param v A data variable
+  /// \return The function result
+  sort_expression operator()(const Expression& e) const
+  {
+    return e.sort();
+  }
+};
+
 /// \brief Function object that returns the sort of a data variable
 struct variable_sort: public std::unary_function<variable, sort_expression>
 {

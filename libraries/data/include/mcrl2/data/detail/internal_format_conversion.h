@@ -29,7 +29,6 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2 {
 

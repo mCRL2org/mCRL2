@@ -15,7 +15,6 @@
 #include "boost/assert.hpp"
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/abstraction.h"
@@ -25,6 +24,7 @@
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/exception.h"
@@ -132,14 +132,14 @@ namespace mcrl2 {
 
               if (!bound_variables.empty())
               { // function with non-empty domain
-                atermpp::aterm_appl body(implement(expression.body()));
+                data_expression body(implement(expression.body()));
                 atermpp::term_list< variable > free_variables(implement(
                                                  boost::make_iterator_range(find_all_free_variables(expression))));
 
-                function_sort   new_function_sort(sort_expression_list(gsGetSorts(bound_variables)), sort_expression(gsGetSort(body)));
+                function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 
                 data_expression new_function(symbol_generator((free_variables.empty()) ? new_function_sort :
-                                      function_sort(sort_expression_list(gsGetSorts(free_variables)), new_function_sort)));
+                                      function_sort(make_sort_range(free_variables), new_function_sort)));
 
                 // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body
                 if (free_variables.empty())
@@ -183,11 +183,11 @@ namespace mcrl2 {
             }
             else if (expression.is_exists())
             {
-              return data_expression(gsMakeDataExprExists(abstract_body));
+              return application(function_symbol("exists", abstract_body.sort()), abstract_body);
             }
             else if (expression.is_forall())
             {
-              return data_expression(gsMakeDataExprForall(abstract_body));
+              return application(function_symbol("forall", abstract_body.sort()), abstract_body);
             }
 
             return abstract_body;

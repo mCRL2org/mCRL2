@@ -22,6 +22,7 @@
 
 #include "boost/format.hpp"
 #include "boost/utility/enable_if.hpp"
+#include "boost/iterator/transform_iterator.hpp"
 
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -107,6 +108,35 @@ namespace mcrl2 {
       return result;
     }
 
+    /// \brief Gives a sequence of sorts for a given sequence of expressions
+    /// 
+    /// A sequence is a container (as per the STL Container concept) or
+    /// iterator range type. The template class / is_container governs what is
+    /// recognised as a container.
+    //
+    /// \param[in] r range of iterators that refer expression objects
+    /// \return s1, s2, ..., s3 such that sn = t.front().sort() where t = r.advance_begin(n)
+    /// \note Behaviour is lazy, no intermediate containers are constructed
+    template < typename Container >
+    boost::iterator_range< boost::transform_iterator<
+       detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > >
+    make_sort_range(Container const& container, typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0)
+    {
+      return boost::iterator_range< boost::transform_iterator<
+        detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > >(container);
+    }
+
+    /// \brief Gives a sequence of sorts for a given sequence of expressions
+    /// Overload for specific case that the container is an atermpp::term_list
+    /// \overload
+    template < typename Expression >
+    boost::iterator_range< boost::transform_iterator<
+       detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >
+    make_sort_range(atermpp::term_list< Expression > const& container)
+    {
+      return boost::iterator_range< boost::transform_iterator<
+        detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >(container);
+    }
 
     /// \brief Applies a substitution function to all elements of a container
     /// \param[in] f substitution function
