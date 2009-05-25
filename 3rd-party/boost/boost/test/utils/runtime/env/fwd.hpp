@@ -7,17 +7,13 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50557 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : environment subsystem forward declarations
 // ***************************************************************************
 
 #ifndef BOOST_RT_ENV_FWD_HPP_062604GER
 #define BOOST_RT_ENV_FWD_HPP_062604GER
-
-#ifdef UNDER_CE
-#error Windows CE does not support environment variables.
-#endif
 
 // Boost.Runtime.Parameter
 #include <boost/test/utils/runtime/config.hpp>

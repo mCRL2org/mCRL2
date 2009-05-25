@@ -8,7 +8,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50322 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : provides execution monitor implementation for all supported
 //  configurations, including Microsoft structured exception based, unix signals
@@ -200,9 +200,7 @@ report_error( execution_exception::error_code ec, char const* format, ... )
     va_list args;
     va_start( args, format );
 
-    BOOST_TEST_VSNPRINTF( buf, sizeof(buf)-1, format, args ); 
-    buf[sizeof(buf)-1] = 0;
-
+    BOOST_TEST_VSNPRINTF( buf, sizeof(buf), format, args );
     va_end( args );
 
     throw execution_exception( ec, buf );

@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 49865 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : generators and helper macros for parameterized tests
 // ***************************************************************************
@@ -82,7 +82,7 @@ public:
     , m_par_end( par_end )
     {}
 
-    virtual test_unit* next() const
+    test_unit* next() const
     {
         if( m_par_begin == m_par_end )
             return (test_unit*)0;

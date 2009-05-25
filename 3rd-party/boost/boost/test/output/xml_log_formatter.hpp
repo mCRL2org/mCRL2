@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 48785 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : contains XML Log formatter definition
 // ***************************************************************************

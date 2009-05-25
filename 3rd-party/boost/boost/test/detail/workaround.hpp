@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50467 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : contains mics. workarounds 
 // ***************************************************************************
@@ -41,9 +41,6 @@ std::ptrdiff_t distance( T const& x_, T const& y_ )
 
     return res;
 }
-
-//____________________________________________________________________________//
-
 #else
 using std::distance;
 #endif

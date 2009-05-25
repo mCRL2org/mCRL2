@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47155 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : simple helpers for creating cusom output manipulators
 // ***************************************************************************

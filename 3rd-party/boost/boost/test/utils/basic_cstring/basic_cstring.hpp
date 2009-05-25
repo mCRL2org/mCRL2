@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 48772 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : class basic_cstring wraps C string and provide std_string like 
 //                interface

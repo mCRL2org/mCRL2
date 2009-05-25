@@ -14,8 +14,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id$
-// $Date: 2008-10-10 12:23:28 +0200 (Fri, 10 Oct 2008) $
-// $Revision: 49245 $
+// $Date: 2008-10-11 08:46:00 +0200 (Sat, 11 Oct 2008) $
+// $Revision: 49271 $
 
 #   include <boost/mpl/aux_/config/ctps.hpp>
 #   include <boost/mpl/aux_/config/static_constant.hpp>

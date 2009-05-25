@@ -7,10 +7,10 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50356 $
+//  Version     : $Revision: 49312 $
 //
-//  Description : privides core implementation for Unit Test Framework.
-//                Extensions can be provided in separate files
+//  Description : privide core implementation for Unit Test Framework.
+//  Extensions could be provided in separate files
 // ***************************************************************************
 
 #ifndef BOOST_TEST_UNIT_TEST_SUITE_IPP_012205GER
@@ -161,7 +161,7 @@ test_suite::add( test_unit_generator const& gen, unsigned timeout )
 void
 test_suite::remove( test_unit_id id )
 {
-    std::vector<test_unit_id>::iterator it = std::find( m_members.begin(), m_members.end(), id );
+    std::vector<test_unit_id>::iterator it = std::find( m_members.begin(), m_members.begin(), id );
 
     if( it != m_members.end() )
         m_members.erase( it );
@@ -173,7 +173,7 @@ test_unit_id
 test_suite::get( const_string tu_name ) const
 {
     BOOST_TEST_FOREACH( test_unit_id, id, m_members ) {
-        if( tu_name == framework::get( id, ut_detail::test_id_2_unit_type( id ) ).p_name.get() )
+        if( tu_name == framework::get( id, test_id_2_unit_type( id ) ).p_name.get() )
             return id;
     }
 
@@ -228,7 +228,7 @@ traverse_test_tree( test_suite const& suite, test_tree_visitor& V )
 void
 traverse_test_tree( test_unit_id id, test_tree_visitor& V )
 {
-    if( ut_detail::test_id_2_unit_type( id ) == tut_case )
+    if( test_id_2_unit_type( id ) == tut_case )
         traverse_test_tree( framework::get<test_case>( id ), V );
     else
         traverse_test_tree( framework::get<test_suite>( id ), V );

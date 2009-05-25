@@ -17,12 +17,6 @@
 #include <boost/pending/indirect_cmp.hpp>
 #include <boost/graph/exception.hpp>
 #include <boost/pending/relaxed_heap.hpp>
-#include <boost/smart_ptr.hpp>
-#include <boost/graph/detail/d_ary_heap.hpp>
-#include <boost/graph/two_bit_color_map.hpp>
-#include <boost/property_map.hpp>
-#include <boost/vector_property_map.hpp>
-#include <boost/type_traits.hpp>
 
 #ifdef BOOST_GRAPH_DIJKSTRA_TESTING
 #  include <boost/pending/mutable_queue.hpp>
@@ -31,8 +25,6 @@
 namespace boost {
 
 #ifdef BOOST_GRAPH_DIJKSTRA_TESTING
-  // This is a misnomer now: it now just refers to the "default heap", which is
-  // currently d-ary (d=4) but can be changed by a #define.
   static bool dijkstra_relaxed_heap = true;
 #endif
 
@@ -98,18 +90,18 @@ namespace boost {
 
       template <class Edge, class Graph>
       void tree_edge(Edge e, Graph& g) {
-        bool decreased = relax(e, g, m_weight, m_predecessor, m_distance,
-                               m_combine, m_compare);
-        if (decreased)
+        m_decreased = relax(e, g, m_weight, m_predecessor, m_distance,
+                            m_combine, m_compare);
+        if (m_decreased)
           m_vis.edge_relaxed(e, g);
         else
           m_vis.edge_not_relaxed(e, g);
       }
       template <class Edge, class Graph>
       void gray_target(Edge e, Graph& g) {
-        bool decreased = relax(e, g, m_weight, m_predecessor, m_distance,
-                               m_combine, m_compare);
-        if (decreased) {
+        m_decreased = relax(e, g, m_weight, m_predecessor, m_distance,
+                            m_combine, m_compare);
+        if (m_decreased) {
           m_Q.update(target(e, g));
           m_vis.edge_relaxed(e, g);
         } else
@@ -142,116 +134,42 @@ namespace boost {
       DistanceMap m_distance;
       BinaryFunction m_combine;
       BinaryPredicate m_compare;
+      bool m_decreased;
       D m_zero;
     };
 
   } // namespace detail
 
-  namespace detail {
-    template <class Graph, class IndexMap, class Value, bool KnownNumVertices>
-    struct vertex_property_map_generator_helper {};
-
-    template <class Graph, class IndexMap, class Value>
-    struct vertex_property_map_generator_helper<Graph, IndexMap, Value, true> {
-      typedef boost::iterator_property_map<Value*, IndexMap> type;
-      static type build(const Graph& g, const IndexMap& index, boost::scoped_array<Value>& array_holder) {
-        array_holder.reset(new Value[num_vertices(g)]);
-        std::fill(array_holder.get(), array_holder.get() + num_vertices(g), Value());
-        return make_iterator_property_map(array_holder.get(), index);
-      }
-    };
-
-    template <class Graph, class IndexMap, class Value>
-    struct vertex_property_map_generator_helper<Graph, IndexMap, Value, false> {
-      typedef boost::vector_property_map<Value, IndexMap> type;
-      static type build(const Graph& g, const IndexMap& index, boost::scoped_array<Value>& array_holder) {
-        return make_vector_property_map(index);
-      }
-    };
-
-    template <class Graph, class IndexMap, class Value>
-    struct vertex_property_map_generator {
-      typedef boost::is_base_and_derived<
-                boost::vertex_list_graph_tag,
-                typename boost::graph_traits<Graph>::traversal_category>
-              known_num_vertices;
-      typedef vertex_property_map_generator_helper<Graph, IndexMap, Value, known_num_vertices::value> helper;
-      typedef typename helper::type type;
-      static type build(const Graph& g, const IndexMap& index, boost::scoped_array<Value>& array_holder) {
-        return helper::build(g, index, array_holder);
-      }
-    };
-  }
-
-  namespace detail {
-    template <class Graph, class IndexMap, bool KnownNumVertices>
-    struct default_color_map_generator_helper {};
-
-    template <class Graph, class IndexMap>
-    struct default_color_map_generator_helper<Graph, IndexMap, true> {
-      typedef boost::two_bit_color_map<IndexMap> type;
-      static type build(const Graph& g, const IndexMap& index) {
-        size_t nv = num_vertices(g);
-        return boost::two_bit_color_map<IndexMap>(nv, index);
-      }
-    };
-
-    template <class Graph, class IndexMap>
-    struct default_color_map_generator_helper<Graph, IndexMap, false> {
-      typedef boost::vector_property_map<boost::two_bit_color_type, IndexMap> type;
-      static type build(const Graph& g, const IndexMap& index) {
-        return make_vector_property_map(index);
-      }
-    };
-
-    template <class Graph, class IndexMap>
-    struct default_color_map_generator {
-      typedef boost::is_base_and_derived<
-                boost::vertex_list_graph_tag,
-                typename boost::graph_traits<Graph>::traversal_category>
-              known_num_vertices;
-      typedef default_color_map_generator_helper<Graph, IndexMap, known_num_vertices::value> helper;
-      typedef typename helper::type type;
-      static type build(const Graph& g, const IndexMap& index) {
-        return helper::build(g, index);
-      }
-    };
-  }
-
   // Call breadth first search with default color map.
-  template <class Graph, class DijkstraVisitor,
+  template <class VertexListGraph, class DijkstraVisitor,
             class PredecessorMap, class DistanceMap,
             class WeightMap, class IndexMap, class Compare, class Combine,
             class DistZero>
   inline void
   dijkstra_shortest_paths_no_init
-    (const Graph& g,
-     typename graph_traits<Graph>::vertex_descriptor s,
+    (const VertexListGraph& g,
+     typename graph_traits<VertexListGraph>::vertex_descriptor s,
      PredecessorMap predecessor, DistanceMap distance, WeightMap weight,
      IndexMap index_map,
      Compare compare, Combine combine, DistZero zero,
      DijkstraVisitor vis)
   {
-    typedef
-      detail::default_color_map_generator<Graph, IndexMap>
-      ColorMapHelper;
-    typedef typename ColorMapHelper::type ColorMap;
-    ColorMap color =
-      ColorMapHelper::build(g, index_map);
+    std::vector<default_color_type> color(num_vertices(g));
+    default_color_type c = white_color;
     dijkstra_shortest_paths_no_init( g, s, predecessor, distance, weight,
       index_map, compare, combine, zero, vis,
-        color);
+        make_iterator_property_map(&color[0], index_map, c));
   }
 
   // Call breadth first search
-  template <class Graph, class DijkstraVisitor,
+  template <class VertexListGraph, class DijkstraVisitor,
             class PredecessorMap, class DistanceMap,
             class WeightMap, class IndexMap, class Compare, class Combine,
             class DistZero, class ColorMap>
   inline void
   dijkstra_shortest_paths_no_init
-    (const Graph& g,
-     typename graph_traits<Graph>::vertex_descriptor s,
+    (const VertexListGraph& g,
+     typename graph_traits<VertexListGraph>::vertex_descriptor s,
      PredecessorMap predecessor, DistanceMap distance, WeightMap weight,
      IndexMap index_map,
      Compare compare, Combine combine, DistZero zero,
@@ -260,7 +178,7 @@ namespace boost {
     typedef indirect_cmp<DistanceMap, Compare> IndirectCmp;
     IndirectCmp icmp(distance, compare);
 
-    typedef typename graph_traits<Graph>::vertex_descriptor Vertex;
+    typedef typename graph_traits<VertexListGraph>::vertex_descriptor Vertex;
 
 #ifdef BOOST_GRAPH_DIJKSTRA_TESTING
     if (!dijkstra_relaxed_heap) {
@@ -268,6 +186,7 @@ namespace boost {
         MutableQueue;
 
       MutableQueue Q(num_vertices(g), icmp, index_map);
+
       detail::dijkstra_bfs_visitor<DijkstraVisitor, MutableQueue, WeightMap,
         PredecessorMap, DistanceMap, Combine, Compare>
       bfs_vis(vis, Q, weight, predecessor, distance, combine, compare, zero);
@@ -277,21 +196,9 @@ namespace boost {
     }
 #endif // BOOST_GRAPH_DIJKSTRA_TESTING
 
-#ifdef BOOST_GRAPH_DIJKSTRA_USE_RELAXED_HEAP
     typedef relaxed_heap<Vertex, IndirectCmp, IndexMap> MutableQueue;
+
     MutableQueue Q(num_vertices(g), icmp, index_map);
-#else // Now the default: use a d-ary heap
-      boost::scoped_array<std::size_t> index_in_heap_map_holder;
-      typedef
-        detail::vertex_property_map_generator<Graph, IndexMap, std::size_t>
-        IndexInHeapMapHelper;
-      typedef typename IndexInHeapMapHelper::type IndexInHeapMap;
-      IndexInHeapMap index_in_heap =
-        IndexInHeapMapHelper::build(g, index_map, index_in_heap_map_holder);
-      typedef d_ary_heap_indirect<Vertex, 4, IndexInHeapMap, DistanceMap, Compare>
-        MutableQueue;
-      MutableQueue Q(distance, index_in_heap, compare);
-#endif
 
     detail::dijkstra_bfs_visitor<DijkstraVisitor, MutableQueue, WeightMap,
       PredecessorMap, DistanceMap, Combine, Compare>
@@ -314,10 +221,12 @@ namespace boost {
      Compare compare, Combine combine, DistInf inf, DistZero zero,
      DijkstraVisitor vis)
   {
-    boost::two_bit_color_map<IndexMap> color(num_vertices(g), index_map);
+    std::vector<default_color_type> color(num_vertices(g));
+    default_color_type c = white_color;
     dijkstra_shortest_paths(g, s, predecessor, distance, weight, index_map,
                             compare, combine, inf, zero, vis,
-                            color);
+                            make_iterator_property_map(&color[0], index_map,
+                                                       c));
   }
 
   // Initialize distances and call breadth first search
@@ -399,16 +308,18 @@ namespace boost {
       std::vector<D> distance_map(n);
 
       // Default for color map
-      typename std::vector<two_bit_color_type>::size_type
+      typename std::vector<default_color_type>::size_type
         m = is_default_param(color) ? num_vertices(g) : 1;
-      boost::two_bit_color_map<IndexMap> color_map(m, index_map);
+      std::vector<default_color_type> color_map(m);
 
       detail::dijkstra_dispatch2
         (g, s, choose_param(distance, make_iterator_property_map
                             (distance_map.begin(), index_map,
                              distance_map[0])),
          weight, index_map, params,
-         choose_param(color, color_map));
+         choose_param(color, make_iterator_property_map
+                      (color_map.begin(), index_map,
+                       color_map[0])));
     }
   } // namespace detail
 

@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 48775 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : implements compiler like Log formatter
 // ***************************************************************************

@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50354 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : some generic identification policies implementation
 // ***************************************************************************
@@ -19,7 +19,6 @@
 #include <boost/test/utils/runtime/config.hpp>
 
 #include <boost/test/utils/runtime/cla/id_policy.hpp>
-#include <boost/test/utils/runtime/cla/parameter.hpp>
 
 namespace boost {
 
@@ -34,9 +33,9 @@ namespace cla {
 BOOST_RT_PARAM_INLINE void
 basic_naming_policy::usage_info( format_stream& fs ) const
 {
-    fs << p_prefix << p_name << p_separator;
+    fs << m_prefix << m_name << m_separator;
 
-    if( p_separator->empty() )
+    if( m_separator.empty() )
         fs << BOOST_RT_PARAM_LITERAL( ' ' );
 }
 
@@ -45,10 +44,10 @@ basic_naming_policy::usage_info( format_stream& fs ) const
 BOOST_RT_PARAM_INLINE bool
 basic_naming_policy::match_prefix( argv_traverser& tr ) const
 {
-    if( !tr.match_front( p_prefix.get() ) )
+    if( !tr.match_front( m_prefix ) )
         return false;
 
-    tr.trim( p_prefix->size() );
+    tr.trim( m_prefix.size() );
     return true;
 }
 
@@ -57,34 +56,29 @@ basic_naming_policy::match_prefix( argv_traverser& tr ) const
 BOOST_RT_PARAM_INLINE bool
 basic_naming_policy::match_name( argv_traverser& tr ) const
 {
-    if( !tr.match_front( p_name.get() ) )
+    if( !tr.match_front( m_name ) )
         return false;
 
-    tr.trim( p_name->size() );
+    tr.trim( m_name.size() );
     return true;
 }
 
 //____________________________________________________________________________//
     
 BOOST_RT_PARAM_INLINE bool
-basic_naming_policy::match_separator( argv_traverser& tr, bool optional_value ) const
+basic_naming_policy::match_separator( argv_traverser& tr ) const
 {
-    if( p_separator->empty() ) {
+    if( m_separator.empty() ) {
         if( !tr.token().is_empty() )
             return false;
 
         tr.trim( 1 );
     }
     else {
-        if( !tr.match_front( p_separator.get() ) ) {
-            // if parameter has optional value separator is optional as well
-            if( optional_value && ( tr.eoi() || tr.match_front( ' ' ) ) ) {
-                return true;
-            }
+        if( !tr.match_front( m_separator ) )
             return false;
-        }
 
-        tr.trim( p_separator->size() );
+        tr.trim( m_separator.size() );
     }
 
     return true;
@@ -93,7 +87,7 @@ basic_naming_policy::match_separator( argv_traverser& tr, bool optional_value ) 
 //____________________________________________________________________________//
 
 BOOST_RT_PARAM_INLINE bool
-basic_naming_policy::matching( parameter const& p, argv_traverser& tr, bool ) const
+basic_naming_policy::matching( parameter const&, argv_traverser& tr, bool ) const
 {
     if( !match_prefix( tr ) )
         return false;
@@ -101,7 +95,7 @@ basic_naming_policy::matching( parameter const& p, argv_traverser& tr, bool ) co
     if( !match_name( tr ) )
         return false;
 
-    if( !match_separator( tr, p.p_optional_value ) )
+    if( !match_separator( tr ) )
         return false;
 
     return true;

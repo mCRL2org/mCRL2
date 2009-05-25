@@ -16,10 +16,8 @@
 
 #include <vector>
 #include <iostream>
-#include <string>
 #include <cstdio>
 #include <cstring>
-#include <cstdlib>
 
 #include <boost/graph/graph_traits.hpp>
 
@@ -136,13 +134,13 @@ int read_dimacs_max_flow(Graph& g,
 
       if (
           /* reading problem line: type of problem, no of nodes, no of arcs */
-          std::sscanf ( in_line.c_str(), "%*c %3s %ld %ld", pr_type, &n, &m )
+          sscanf ( in_line.c_str(), "%*c %3s %ld %ld", pr_type, &n, &m )
           != P_FIELDS
           )
         /*wrong number of parameters in the problem line*/
         { err_no = EN2; goto error; }
 
-      if ( std::strcmp ( pr_type, PROBLEM_TYPE ) )
+      if ( strcmp ( pr_type, PROBLEM_TYPE ) )
         /*wrong problem type*/
         { err_no = EN3; goto error; }
 
@@ -162,7 +160,7 @@ int read_dimacs_max_flow(Graph& g,
         { err_no = EN8; goto error; }
 
       /* reading source  or sink */
-      k = std::sscanf ( in_line.c_str(),"%*c %ld %c", &i, &nd );
+      k = sscanf ( in_line.c_str(),"%*c %ld %c", &i, &nd );
       --i; // index from 0
       if ( k < NODE_FIELDS )
         /* node line is incorrect */
@@ -210,8 +208,8 @@ int read_dimacs_max_flow(Graph& g,
 
       if (
           /* reading an arc description */
-          std::sscanf ( in_line.c_str(),"%*c %ld %ld %ld",
-                        &tail, &head, &cap )
+          sscanf ( in_line.c_str(),"%*c %ld %ld %ld",
+                   &tail, &head, &cap )
           != ARC_FIELDS
           )
         /* arc description is not correct */
@@ -271,10 +269,10 @@ int read_dimacs_max_flow(Graph& g,
   /* ---------------------------------- */
  error:  /* error found reading input */
 
-  std::printf ( "\nline %ld of input - %s\n",
-                no_lines, err_message[err_no] );
+  printf ( "\nline %ld of input - %s\n",
+           no_lines, err_message[err_no] );
 
-  std::exit (1);
+  exit (1);
   return (0); /* to avoid warning */
 }
 /* --------------------   end of parser  -------------------*/

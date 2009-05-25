@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50358 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : main function implementation for Unit Test Framework
 // ***************************************************************************
@@ -103,10 +103,10 @@ public:
 #if defined(__BORLANDC__) || BOOST_WORKAROUND( BOOST_MSVC, < 1300 )
     explicit        test_case_filter( const_string ) : m_depth( 0 ) {}
 #else
-    explicit        test_case_filter( const_string tc_to_run ) 
+    explicit        test_case_filter( const_string tc_to_tun ) 
     : m_depth( 0 )
     {
-        string_token_iterator tit( tc_to_run, (dropped_delimeters = "/", kept_delimeters = dt_none) );
+        string_token_iterator tit( tc_to_tun, (dropped_delimeters = "/", kept_delimeters = dt_none) );
 
         while( tit != string_token_iterator() ) {
             m_filters.push_back( 
@@ -186,11 +186,8 @@ unit_test_main( init_unit_test_func init_func, int argc, char* argv[] )
         results_reporter::make_report();
 
         return runtime_config::no_result_code() 
-                    ? boost::exit_success
+                    ? boost::exit_success 
                     : results_collector.results( framework::master_test_suite().p_id ).result_code();
-    }
-    catch( framework::nothing_to_test const& ) {
-        return boost::exit_success;
     }
     catch( framework::internal_error const& ex ) {
         results_reporter::get_stream() << "Boost.Test framework internal error: " << ex.what() << std::endl;

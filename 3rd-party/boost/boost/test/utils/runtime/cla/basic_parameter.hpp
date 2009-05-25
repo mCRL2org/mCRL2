@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50354 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : generic custom parameter generator
 // ***************************************************************************
@@ -23,9 +23,6 @@
 // Boost.Test
 #include <boost/test/utils/rtti.hpp>
 
-// Boost
-#include <boost/utility/base_from_member.hpp>
-
 namespace boost {
 
 namespace BOOST_RT_PARAM_NAMESPACE {
@@ -37,12 +34,11 @@ namespace cla {
 // ************************************************************************** //
 
 template<typename T, typename IdPolicy>
-class basic_parameter : private base_from_member<IdPolicy>, public typed_parameter<T> {
+class basic_parameter : public typed_parameter<T> {
 public:
     // Constructors
     explicit    basic_parameter( cstring n ) 
-    : base_from_member<IdPolicy>()
-    , typed_parameter<T>( base_from_member<IdPolicy>::member )
+    : typed_parameter<T>( m_id_policy )
     {
         this->accept_modifier( name = n );
     }
@@ -53,8 +49,11 @@ public:
     {
         typed_parameter<T>::accept_modifier( m );
 
-        base_from_member<IdPolicy>::member.accept_modifier( m );
+        m_id_policy.accept_modifier( m );
     }
+
+private:
+    IdPolicy    m_id_policy;
 };
 
 //____________________________________________________________________________//

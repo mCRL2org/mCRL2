@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50354 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : generic typed_argument_factory implementation
 // ***************************************************************************
@@ -147,7 +147,7 @@ typed_argument_factory<T>::produce_using( parameter& p, argv_traverser& tr )
         m_value_handler( p, *value );
 
     if( !p.p_multiplicable )
-        arg.reset( p.p_optional_value && (rtti::type_id<T>() != rtti::type_id<bool>())
+        arg.reset( p.p_optional_value 
             ? (argument*)new typed_argument<boost::optional<T> >( p, value )
             : (argument*)new typed_argument<T>( p, *value ) );
     else {

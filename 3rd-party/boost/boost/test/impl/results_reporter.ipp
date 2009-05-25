@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50355 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : result reporting facilties
 // ***************************************************************************
@@ -129,8 +129,6 @@ set_format( output_format rf )
         break;
     case XML:
         set_format( new output::xml_report_formatter );
-        break;
-    default:
         break;
     }
 }

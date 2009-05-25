@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50354 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : positional parameter model
 // ***************************************************************************
@@ -27,7 +27,7 @@ namespace BOOST_RT_PARAM_NAMESPACE {
 namespace cla {
 
 // ************************************************************************** //
-// **************              trivial_id_policy               ************** //
+// **************              single_name_policy              ************** //
 // ************************************************************************** //
 
 class trivial_id_policy : public identification_policy {

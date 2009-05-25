@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50350 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : Facilities to perform interaction-based testing
 // ***************************************************************************
@@ -66,7 +66,8 @@ manager::instance_ptr( bool reset, manager* new_ptr )
     
     if( reset ) {
         if( new_ptr ) {
-            BOOST_TEST_SETUP_ASSERT( ptr == &dummy, BOOST_TEST_L( "Can't run two interation based test the same time" ) );
+            if( ptr != &dummy )
+                throw unit_test::framework::setup_error( BOOST_TEST_L( "Couldn't run two interation based test the same time" ) );
                 
             ptr = new_ptr;
         }

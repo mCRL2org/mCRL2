@@ -7,17 +7,13 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 50557 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : defines and implements inline model of program environment 
 // ***************************************************************************
 
 #ifndef BOOST_RT_ENV_ENVIRONMENT_HPP_062604GER
 #define BOOST_RT_ENV_ENVIRONMENT_HPP_062604GER
-
-#ifdef UNDER_CE
-#error Windows CE does not support environment variables.
-#endif
 
 // Boost.Runtime.Parameter
 #include <boost/test/utils/runtime/config.hpp>

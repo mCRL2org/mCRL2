@@ -7,7 +7,7 @@
 //
 //  File        : $RCSfile$
 //
-//  Version     : $Revision: 47155 $
+//  Version     : $Revision: 49312 $
 //
 //  Description : defines facility to hide input traversing details
 // ***************************************************************************

@@ -12,8 +12,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id$
-// $Date: 2008-10-10 23:59:29 +0200 (Fri, 10 Oct 2008) $
-// $Revision: 49260 $
+// $Date: 2008-10-11 08:54:06 +0200 (Sat, 11 Oct 2008) $
+// $Revision: 49273 $
 
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/aux_/type_wrapper.hpp>
