@@ -113,13 +113,26 @@ void enumerate< data_enumerator< > >(data_specification const& d,
 
 #include "mcrl2/data/detail/enum/enumerator.h"
 
+class legacy_rewriter : public mcrl2::data::rewriter
+{
+  public:
+
+    legacy_rewriter(data_specification const& s) : mcrl2::data::rewriter(s)
+    {
+    }
+
+    mcrl2::data::detail::Rewriter& get_rewriter() {
+      return *m_rewriter.get();
+    }
+};
+
 // specialisation for data::detail::Enumerator
 template <>
 void enumerate< detail::Enumerator >(data_specification const& d,
                                 std::set< variable > const& v,
                                     data_expression const& c, size_t t) {
 
-  data::rewriter                            rewriter(d);
+  legacy_rewriter rewriter(d);
 
   rewriter(c); // forces data implementation and that proper rewrite rules are added
 
