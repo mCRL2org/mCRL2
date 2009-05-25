@@ -11,9 +11,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lpsconfcheck"
-#define AUTHOR "Luc Engelen"
-
 #include <string>
 #include <fstream>
 
