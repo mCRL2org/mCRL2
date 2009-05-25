@@ -48,7 +48,7 @@ int test_main(int argc, char* argv[])
       ;
     
  
-    specification s0 = mcrl22lps_linear(case_1);
+    specification s0 = parse_linear_process_specification(case_1);
     variable_list p0 = s0.process().process_parameters();
 
     /* Requirements */
