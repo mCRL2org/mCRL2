@@ -54,22 +54,6 @@ namespace mcrl2 {
           }
 
           static bool initialise_enumerated_type_conversions() {
-#ifdef __LIBREWRITE_H
-            tipi::datatype::enumeration< mcrl2::data::rewriter::strategy > strategy_enumeration;
-
-            strategy_enumeration.
-              add(mcrl2::data::rewriter::innermost, "inner").
-# ifdef MCRL2_INNERC_AVAILABLE
-              add(mcrl2::data::rewriter::innermost_compiling, "innerc").
-# endif
-# ifdef MCRL2_JITTYC_AVAILABLE
-              add(mcrl2::data::rewriter::jitty, "jitty").
-              add(mcrl2::data::rewriter::jitty_compiling, "jittyc");
-# else
-              add(mcrl2::data::rewriter::jitty, "jitty");
-# endif
-#endif
-
 #ifdef __LIBLTS_H
             using namespace mcrl2::lts;
 

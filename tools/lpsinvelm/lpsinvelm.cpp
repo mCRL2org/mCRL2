@@ -20,13 +20,12 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/parser.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/lps/invariant_checker.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/utilities/command_line_rewriting.h"
@@ -107,7 +106,7 @@ using namespace mcrl2::data::detail;
       size_t f_time_limit;
 
       /// \brief The LPS provided as input.
-      ATermAppl f_lps;
+      mcrl2::lps::specification f_lps;
 
       /// \brief The invariant provided as input.
       ATermAppl f_invariant;
@@ -268,39 +267,23 @@ using namespace mcrl2::data::detail;
     void LPS_Inv_Elm::read_input() {
 
       //read the LPS
-      mcrl2::lps::specification lps_specification;
-      lps_specification.load(f_lps_file_name);
-
-      // temporary measure, until the invariant and confluence checkers use the lps framework
-      f_lps = specification_to_aterm(lps_specification);
-      mcrl2::lps::specification copy(lps_specification);
-      copy.data() = remove_all_system_defined(lps_specification.data());
-      ATermAppl f_mlps = specification_to_aterm(copy);
+      f_lps.load(f_lps_file_name);
 
       //parse the invariant formula from infilename
-      std::ifstream instream(f_invariant_file_name.c_str());
-      if (!instream.is_open()) {
-        throw mcrl2::runtime_error("cannot open input file '" + f_invariant_file_name +"'");
-      }
-      gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
-      f_invariant = parse_data_expr(instream);
-      instream.close();
-      if(!f_invariant){
-        exit(1);
-      }
+      if (!f_invariant_file_name.empty())
+      {
+        std::ifstream instream(f_invariant_file_name.c_str());
 
-      //typecheck the invariant formula
-      ATermList vars = ATLgetArgument(ATAgetArgument(f_mlps, 2), 1);
-      ATermTable var_table = ATtableCreate(63,50);
-      for (; !ATisEmpty(vars); vars = ATgetNext(vars)) {
-        ATermAppl var = ATAgetFirst(vars);
-        ATtablePut(var_table, ATgetArgument(var, 0), ATgetArgument(var, 1));
-      }
-      f_invariant = type_check_data_expr(f_invariant, mcrl2::data::sort_bool_::bool_(), f_mlps, var_table);
-      ATtableDestroy(var_table);
-      if(!f_invariant){
-        gsErrorMsg("Typechecking of the invariant formula failed.\n");
-        exit(1);
+        if (!instream.is_open())
+        {
+          throw mcrl2::runtime_error("cannot open input file '" + f_invariant_file_name + "'");
+        }
+
+        gsVerboseMsg("parsing input file '%s'...\n", f_invariant_file_name.c_str());
+
+        f_invariant = parse_data_expression(instream, f_lps.data());
+
+        instream.close();
       }
     }
 
@@ -314,7 +297,7 @@ using namespace mcrl2::data::detail;
     bool LPS_Inv_Elm::check_invariant() {
       if (!f_no_check) {
         Invariant_Checker v_invariant_checker(
-          mcrl2::lps::specification(f_lps), f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name
+          f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_counter_example, f_all_violations, f_dot_file_name
         );
 
         return v_invariant_checker.check_invariant(f_invariant);
@@ -338,7 +321,7 @@ using namespace mcrl2::data::detail;
           f_lps, f_strategy, f_time_limit, f_path_eliminator, f_solver_type, f_apply_induction, f_simplify_all
         );
 
-        f_lps = v_invariant_eliminator.simplify(f_invariant, f_summand_number);
+        f_lps = mcrl2::lps::specification(v_invariant_eliminator.simplify(f_invariant, f_summand_number));
       }
     }
 
@@ -349,8 +332,7 @@ using namespace mcrl2::data::detail;
 
     void LPS_Inv_Elm::write_result() {
       if (!f_no_elimination) {
-        mcrl2::lps::specification lps_specification(f_lps);
-        lps_specification.save(f_output_file_name);
+        f_lps.save(f_output_file_name);
       }
     }
 

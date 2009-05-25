@@ -24,8 +24,8 @@
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/prover_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
-#include "mcrl2/utilities/command_line_proving.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -45,7 +45,7 @@ using namespace mcrl2::utilities::tools;
 /// \brief tau-summands of an LPS are confluent. The tau-actions of all confluent tau-summands can be
 /// \brief renamed to ctau, depending on the flag m_no_marking.
 
-class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
+class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_output_tool> > >
 {
   private:
     /// \brief The name of a file containing an invariant that is used to check confluence.
@@ -84,9 +84,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
     /// \brief The flag indicating whether or not a path eliminator is used.
     bool m_path_eliminator;
 
-    /// \brief The type of SMT solver used by the path eliminator.
-    SMT_Solver_Type m_solver_type;
-
     /// \brief The flag indicating whether or not induction should be applied.
     bool m_apply_induction;
 
@@ -94,7 +91,7 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
     /// \brief If no invariant was provided, the constant true is used as invariant.
     data_expression m_invariant;
 
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    typedef squadt_tool< prover_tool< rewriter_tool<input_output_tool> > > super;
 
     void parse_options(const command_line_parser& parser)
     {
@@ -137,7 +134,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
       if (parser.options.count("smt-solver"))
       {
         m_path_eliminator = true;
-        m_solver_type     = parser.option_argument_as< SMT_Solver_Type >("smt-solver");
       }
     }
 
@@ -191,7 +187,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
     m_dot_file_name(""),
     m_time_limit(0),
     m_path_eliminator(false),
-    m_solver_type(solver_type_ario),
     m_apply_induction(false),
     m_invariant(mcrl2::data::sort_bool_::true_())
   {}
@@ -218,12 +213,10 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
       instream.close();
     }
 
-    mcrl2::data::rewriter r = create_rewriter(specification.data());
-
-    if (check_invariant(specification, r))
+    if (check_invariant(specification))
     {
       Confluence_Checker v_confluence_checker(
-        specification, r.get_strategy(), m_time_limit, m_path_eliminator, m_solver_type, m_apply_induction, m_no_marking, m_check_all, m_counter_example,
+        specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_no_marking, m_check_all, m_counter_example,
         m_generate_invariants, m_dot_file_name);
 
       specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
@@ -243,11 +236,11 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
   /// m_invariant_file_name differs from 0.
   /// \return true, if the invariant holds or no invariant is specified.
   ///         false, if the invariant does not hold.
-  bool check_invariant(lps::specification const& specification, data::rewriter const& r) const
+  bool check_invariant(lps::specification const& specification) const
   {
     if (!m_invariant_file_name.empty()) {
       if (!m_no_check) {
-        Invariant_Checker v_invariant_checker(specification, r.get_strategy(), m_time_limit, m_path_eliminator, m_solver_type, false, false, false, m_dot_file_name);
+        Invariant_Checker v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
 
         return v_invariant_checker.check_invariant(m_invariant);
       }
@@ -271,7 +264,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
 #define option_invariant           = "invariant";
 #define option_time_limit          = "time_limit";
 #define option_rewrite_strategy    = "rewrite_strategy";
-#define option_smt_solver          = "smt_solver";
 
   void set_capabilities(tipi::tool::capabilities& c) const
   {
@@ -315,20 +307,9 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
     /* Create display */
     tipi::tool_display d;
     
-    // Helper for linearisation method selection
-    mcrl2::utilities::squadt::radio_button_helper < SMT_Solver_Type > solver_selector(d);
-    
-    // Helper for strategy selection
-    //  mcrl2::utilities::squadt::radio_button_helper < mcrl2::data::rewriter::strategy > strategy_selector(d);
-    
     layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
     
-    m.append(d.create< horizontal_box >().
-          append(d.create< label >().set_text("SMT prover: ")).
-          append(solver_selector.associate(solver_type_cvc_fast, "none")).
-          append(solver_selector.associate(solver_type_ario, "ario")).
-          append(solver_selector.associate(solver_type_cvc, "CVC3", true)));
-
+    add_solver_option(d, m);
     add_rewrite_option(d, m);
     
     checkbox&   generate_invariants = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_generate_invariants));
@@ -393,8 +374,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
       c.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
     }
     
-    //using mcrl2::utilities::squadt::rewrite_strategy_enumeration;
-    
     if (invariant.get_text().empty()) {
       c.remove_option(option_invariant);
     }
@@ -407,9 +386,6 @@ class confcheck_tool : public squadt_tool< rewriter_tool<input_output_tool> >
     else {
       c.add_option(option_time_limit).set_argument_value< 0, tipi::datatype::natural >(time_limit.get_text());
     }
-    
-    // c.get_option(option_rewrite_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-    c.get_option(option_smt_solver).set_argument_value< 0 >(solver_selector.get_selection());
     
     // let squadt_tool update configuration for rewriter and input/output files
     update_configuration(configuration);

@@ -177,13 +177,6 @@ namespace data {
       {
         return m_rewriter->addRewriteRule(const_cast< basic_rewriter const* >(this)->implement(equation));
       }
-
-      /// \brief Returns the rewrite strategy
-      /// \deprecated
-      strategy get_strategy() const
-      {
-        return static_cast< strategy >(m_rewriter->getStrategy());
-      }
   };
 
   /// \brief Rewriter that operates on data expressions.

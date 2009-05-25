@@ -42,12 +42,13 @@ using namespace mcrl2::core::detail;
   // Class Invariant_Eliminator - Functions declared public ---------------------------------------
 
     Invariant_Eliminator::Invariant_Eliminator(
-      ATermAppl a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+      mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_simplify_all
     ):
-      f_bdd_prover(ATAgetArgument(a_lps, 0), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
-      f_lps = a_lps;
+      // FIXME
+      f_lps = specification_to_aterm(a_lps);
       f_simplify_all = a_simplify_all;
     }
 

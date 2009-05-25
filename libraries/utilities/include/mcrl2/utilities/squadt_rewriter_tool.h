@@ -33,7 +33,7 @@ namespace mcrl2 {
 
         protected:
 
-          /// \brief actives convesion from rewriter::strategy to string and vice versa
+          /// \brief activates convesion from rewriter::strategy to string and vice versa
           bool activate_strategy_conversion()
           {
             tipi::datatype::enumeration< mcrl2::data::rewriter::strategy > strategy_enumeration;
