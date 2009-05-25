@@ -40,7 +40,7 @@ namespace mcrl2 {
     {
       public:
 
-        /// \brief Constructor.
+        /// \brief Default constructor.
         ///
         data_expression()
           : atermpp::aterm_appl(core::detail::constructOpId())

@@ -18,6 +18,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/rename.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"

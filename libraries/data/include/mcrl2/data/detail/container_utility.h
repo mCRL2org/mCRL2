@@ -158,7 +158,17 @@ namespace mcrl2 {
       };
 
       template < typename T >
+      struct is_container_impl< std::multiset< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
       struct is_container_impl< atermpp::set< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
+      struct is_container_impl< atermpp::multiset< T > > {
         typedef boost::true_type type;
       };
 
@@ -180,6 +190,36 @@ namespace mcrl2 {
       // type condition for use with boost::enable_if
       template < typename T >
       struct is_container : public is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
+      { };
+
+      template < typename T >
+      struct is_set_impl {
+        typedef boost::false_type type;
+      };
+
+      template < typename T >
+      struct is_set_impl< std::set< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
+      struct is_set_impl< std::multiset< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
+      struct is_set_impl< atermpp::set< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
+      struct is_set_impl< atermpp::multiset< T > > {
+        typedef boost::true_type type;
+      };
+
+      // type condition for use with boost::enable_if
+      template < typename T >
+      struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
 
       // Used for converting terms to expressions before inserting into a sequence

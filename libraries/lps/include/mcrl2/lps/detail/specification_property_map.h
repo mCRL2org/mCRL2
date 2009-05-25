@@ -26,6 +26,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/detail/convert.h"
+#include "mcrl2/data/detail/specification_property_map.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -53,74 +54,37 @@ namespace detail {
   /// \li used_action_label_count      The number of used action labels
   /// \li used_multi_actions           The used multi-actions (sets of label names)
   /// \li used_multi_action_count      The number of used multi-actions
-  class specification_property_map
+  class specification_property_map : protected mcrl2::data::detail::specification_property_map< specification_property_map >
   {
     protected:
-      /// \brief Contains a normalized string representation of the properties.
-      std::map<std::string, std::string> m_data;
 
-      //--------------------------------------------//
-      // print functions
-      //--------------------------------------------//     
-      std::string print(unsigned int n) const
-      {
-        std::ostringstream out;
-        out << n;
-        return out.str();
-      }
+      // Allow base class access to protected functions
+      friend class data::detail::specification_property_map< specification_property_map >;
 
-      std::string print(std::string s) const
-      {       
-        return s;
-      }
+      typedef data::detail::specification_property_map< specification_property_map > part;
 
-      std::string print(const core::identifier_string& s) const
-      {       
-        return s;
-      }
+      using part::print;
 
-      std::string print(const data::variable& v) const
-      {
-        return pp(v) + ":" + pp(v.sort());
-      }
-      
       std::string print(const action_label l) const
       {
         return core::pp(l.name());
       }
 
-      template <typename T>
-      std::string print(const std::set<T>& v, bool print_separators = true) const
+      std::string print(const action& a) const
       {
-        std::set<std::string> elements;
-        for (typename std::set<T>::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          elements.insert(print(*i));
-        }
-        std::string result = boost::algorithm::join(elements, ", ");
-        if (print_separators)
-        {
-          result = "{" + result + "}";
-        }                
-        return result;
+        return core::pp(a);
       }
-           
-      template <typename T>
-      std::string print(const std::multiset<T>& v, bool print_separators = true) const
+
+      std::string print(const deadlock& d) const
       {
-        std::multiset<std::string> elements;
-        for (typename std::multiset<T>::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          elements.insert(print(*i));
-        }
-        std::string result = boost::algorithm::join(elements, ",");
-        if (print_separators)
-        {
-          result = "{" + result + "}";
-        }
-        return result;
-      } 
-       
+        return "<pp(deadlock) Not yet implemented>";
+      }
+
+      std::string print(const multi_action& m) const
+      {
+        return "<pp(multi_action) Not yet implemented>";
+      }
+
       std::string print(const std::set<std::multiset<action_label> >& v) const
       {
         std::set<std::string> elements;
@@ -131,91 +95,8 @@ namespace detail {
         return boost::algorithm::join(elements, "; ");
       }
 
-      //--------------------------------------------//
-      // parse functions
-      //--------------------------------------------//     
-      unsigned int parse_unsigned_int(std::string text) const
-      {
-        text = core::remove_whitespace(text);
-        return boost::lexical_cast<unsigned int>(text);
-      }
-
-      std::set<std::string> parse_set_string(std::string text) const
-      {
-        std::vector<std::string> v;
-        boost::algorithm::split(v, text, boost::algorithm::is_any_of(","));
-        std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
-        return std::set<std::string>(v.begin(), v.end());
-      }
-      
-      std::set<std::multiset<std::string> > parse_set_multiset_string(std::string text) const
-      {
-        std::set<std::multiset<std::string> > result;
-
-        std::set<std::string> multisets; 
-        boost::algorithm::split(multisets, text, boost::algorithm::is_any_of(";"));
-        for (std::set<std::string>::iterator i = multisets.begin(); i != multisets.end(); ++i)
-        {
-          std::string s = core::regex_replace("[{}]", "", *i);
-          std::vector<std::string> v;
-          boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
-          std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
-          result.insert(std::multiset<std::string>(v.begin(), v.end()));
-        }
-        return result;
-      }
-
-      //--------------------------------------------//
-      // compare functions
-      //--------------------------------------------//     
-      /// \brief Compares two integers, and returns a message if they are different.
-      /// If if they are equal the empty string is returned.
-      std::string compare(std::string property, unsigned int x, unsigned int y) const
-      {
-        if (x != y)
-        {
-          std::ostringstream out;
-          out << "Difference in property " << property << " detected: " << x << " versus " << y << "\n";
-          return out.str();
-        }
-        return "";
-      }
-
-      /// \brief Compares two sets and returns a string with the differences encountered.
-      /// Elements present in the first one but not in the second are printed with a '+'
-      /// in front of it, elements present in the seconde but not in the first one with a '-'
-      /// in front of it. A value x of the type T is printed using print(x), so this
-      /// operation must be defined.
-      /// If no differences are found the empty string is returned.
-      template <typename T>
-      std::string compare(std::string property, const std::set<T>& x, const std::set<T>& y) const
-      {
-        std::ostringstream out;
-        
-        // compute elements in x but not in y
-        std::set<T> plus;
-        std::set_difference(x.begin(), x.end(), y.begin(), y.end(), std::inserter(plus, plus.end()));
-
-        // compute elements in y but not in x
-        std::set<T> minus;
-        std::set_difference(y.begin(), y.end(), x.begin(), x.end(), std::inserter(minus, minus.end()));
-
-        if (!plus.empty() || !minus.empty())
-        {
-          out << "Difference in property " << property << " detected:";
-          for (typename std::set<T>::iterator i = plus.begin(); i != plus.end(); ++i)
-          {
-            out << " +" << print(*i);
-          }
-          for (typename std::set<T>::iterator i = minus.begin(); i != minus.end(); ++i)
-          {
-            out << " -" << print(*i);
-          }
-          out << "\n";
-          return out.str();
-        }
-        return "";
-      }
+      // part class compare functions
+      using part::compare;
 
       std::string compare_property(std::string property, std::string x, std::string y) const
       {
@@ -236,10 +117,10 @@ namespace detail {
         else if(property == "used_action_labels"          ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
         else if(property == "used_action_label_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         else if(property == "used_multi_actions"          ) { return compare(property, parse_set_multiset_string(x), parse_set_multiset_string(y)); }
-        else if(property == "used_multi_action_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }        
+        else if(property == "used_multi_action_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         return "ERROR: unknown property " + property + " encountered!";
       }
-      
+
       //--------------------------------------------//
       // compute functions
       //--------------------------------------------//     
@@ -325,40 +206,6 @@ namespace detail {
         return compute_free_variables(spec.process());
       }
 
-      //--------------------------------------------//
-      // miscellaneous functions
-      //--------------------------------------------//     
-      /// \brief Returns the maximum length of the property names
-      unsigned int max_key_length() const
-      {
-        unsigned int result = 0;
-        for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
-        {
-          result = (std::max)(static_cast< size_t >(result), i->first.size());
-        }
-        return result;
-      }
-
-      std::string align(const std::string& s, unsigned int n) const
-      {
-        if (s.size() >= n)
-        {
-          return s;
-        }
-        return s + std::string(n - s.size(), ' ');
-      }
-
-      std::set<core::identifier_string> names(const std::set<data::variable>& v) const
-      {
-        std::set<core::identifier_string> result;
-        for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          // TODO: change this when the interface of variable has been repaired
-          result.insert(atermpp::arg1(*i));
-        }
-        return result;
-      }
-      
     public:
       /// \li summand_count                = NUMBER   
       /// \li tau_summand_count            = NUMBER
@@ -433,36 +280,13 @@ namespace detail {
         m_data["used_multi_actions"          ] = print(used_multi_actions            );
         m_data["used_multi_action_count"     ] = print(used_multi_action_count       );
       }
-      
-      /// \brief Returns a string representation of the properties
-      std::string to_string() const
-      {
-        unsigned int n = max_key_length();
-        std::vector<std::string> lines;         
-        for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
-        {          
-          lines.push_back(align(i->first, n) + " = " + i->second);
-        }
-        return boost::algorithm::join(lines, "\n");
-      } 
-      
-      const std::map<std::string, std::string>& data() const
-      {                       
-        return m_data;
-      }
-       
+
+      using part::to_string;
+      using part::data;
+
       std::string compare(const specification_property_map& other) const
       {
-        std::ostringstream out;
-        for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)
-        {
-          std::map<std::string, std::string>::const_iterator j = other.data().find(i->first);
-          if (j != other.data().end())
-          {
-            out << compare_property(i->first, i->second, j->second);
-          }
-        }
-        return out.str();
+        return part::compare(other);
       }
   };
 

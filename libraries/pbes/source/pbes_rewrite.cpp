@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/detail/sort_utility.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/find.h"
 
@@ -104,7 +104,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 				result = expr;
 
 			//If the forall  has only finite data variables, make a conjunction out of it.
-			else if (data.is_certainly_finite(boost::make_iterator_range(get_sorts(data_vars))))
+			else if (data.is_certainly_finite(mcrl2::data::make_sort_range(data_vars)))
 			{
 				pbes_expression_list and_list = get_and_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_and(and_list.begin(), and_list.end());
@@ -142,7 +142,7 @@ pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification da
 			if (is_true(expr) || is_false(expr))
 				result = expr;
 			//If the exists  has only finite data variables, make a conjunction out of it.
-			else if (data.is_certainly_finite(boost::make_iterator_range(get_sorts(data_vars))))
+			else if (data.is_certainly_finite(mcrl2::data::make_sort_range(data_vars)))
 			{
 				pbes_expression_list or_list = get_or_expressions(get_all_possible_expressions(data_vars, expr, data), data, rewriter);
 				result = join_or(or_list.begin(), or_list.end());

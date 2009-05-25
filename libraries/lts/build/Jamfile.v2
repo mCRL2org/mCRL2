@@ -8,8 +8,8 @@ project lts
 mcrl2-library lts
        : [ glob source/*.cpp ]
        : <library>/libraries//svc
-         <library>/libraries//lps
          <library>/site-config//BCG
+         <use>/libraries//lps
        :
        : <include>../include
          <library>/site-config//BCG
