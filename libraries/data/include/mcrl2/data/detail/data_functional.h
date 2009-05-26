@@ -27,7 +27,6 @@
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"
-#include "mcrl2/data/detail/data_utility.h"
 
 namespace mcrl2 {
 
@@ -37,6 +36,18 @@ namespace detail {
 
 inline bool is_basic_sort(atermpp::aterm_appl p) {
   return sort_expression(p).is_basic_sort();
+}
+
+inline bool is_function_sort(atermpp::aterm_appl p) {
+  return sort_expression(p).is_function_sort();
+}
+
+inline bool is_container_sort(atermpp::aterm_appl p) {
+  return sort_expression(p).is_container_sort();
+}
+
+inline bool is_structured_sort(atermpp::aterm_appl p) {
+  return sort_expression(p).is_structured_sort();
 }
 
 inline bool is_variable(atermpp::aterm_appl p) {
@@ -114,7 +125,7 @@ struct variable_name: public std::unary_function<variable, core::identifier_stri
   }
 };
 
-/// \brief Function object that returns the name of a data variable
+/// \brief Function object that returns the name of a data expression
 template < typename Expression >
 struct sort_of_expression: public std::unary_function< Expression, sort_expression >
 {
@@ -127,17 +138,8 @@ struct sort_of_expression: public std::unary_function< Expression, sort_expressi
   }
 };
 
-/// \brief Function object that returns the sort of a data variable
-struct variable_sort: public std::unary_function<variable, sort_expression>
-{
-  /// \brief Function call operator
-  /// \param v A data variable
-  /// \return The function result
-  sort_expression operator()(const variable& v) const
-  {
-    return v.sort();
-  }
-};
+/// \brief Function object that returns the name of a data variable
+typedef sort_of_expression< variable > sort_of_variable;
 
 struct sort_has_name
 {

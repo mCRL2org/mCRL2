@@ -111,7 +111,7 @@ class pbes_translate_algorithm
     data::variable_list Par(core::identifier_string x, data::variable_list l, modal_formula::state_formula f)
     {
       using namespace modal_formula::state_frm;
-      using data::detail::operator+;
+      using data::operator+;
 
       if (is_data(f)) {
         return data::variable_list();
@@ -304,7 +304,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using lps::summand_list;
       namespace s = modal_formula::state_frm;
       namespace d = data;
-      using data::detail::operator+;
+      using data::operator+;
 
       pbes_expression result;
 
@@ -512,7 +512,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal_formula::state_frm;
       using namespace modal_formula::accessors;
-      using data::detail::operator+;
+      using data::operator+;
       atermpp::vector<pbes_equation> result;
 
       if (!is_not(f))
@@ -622,7 +622,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     pbes<> run(const modal_formula::state_formula& formula, const lps::specification& spec)
     {
       using namespace modal_formula::state_frm;
-      using data::detail::operator+;
+      using data::operator+;
 
       lps::linear_process lps = spec.process();
 
@@ -740,7 +740,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using namespace data::detail;
       using namespace accessors;
       using lps::summand_list;
-      using data::detail::operator+;
+      using data::operator+;
       namespace s = modal_formula::state_frm;
 
       pbes_expression result;
@@ -915,7 +915,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal_formula::state_frm;
       using namespace modal_formula::accessors;
-      using data::detail::operator+;
+      using data::operator+;
       atermpp::vector<pbes_equation> result;
 
       if (!is_not(f))
@@ -1027,7 +1027,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
     pbes<> run(const modal_formula::state_formula& formula, const lps::specification& spec)
     {
       using namespace modal_formula::state_frm;
-      using data::detail::operator+;
+      using data::operator+;
       lps::linear_process lps = spec.process();
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed

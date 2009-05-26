@@ -600,8 +600,8 @@ class pbes
 
       // check 1)
       if (!data::detail::check_sorts(
-              boost::make_transform_iterator(declared_free_variables.begin(), data::detail::variable_sort()),
-              boost::make_transform_iterator(declared_free_variables.end()  , data::detail::variable_sort()),
+              boost::make_transform_iterator(declared_free_variables.begin(), data::detail::sort_of_variable()),
+              boost::make_transform_iterator(declared_free_variables.end()  , data::detail::sort_of_variable()),
               declared_sorts
              )
          )
@@ -619,8 +619,8 @@ class pbes
       {
         const data::variable_list& variables = i->variable().parameters();
         if (!data::detail::check_sorts(
-               boost::make_transform_iterator(variables.begin(), data::detail::variable_sort()),
-               boost::make_transform_iterator(variables.end()  , data::detail::variable_sort()),
+               boost::make_transform_iterator(variables.begin(), data::detail::sort_of_variable()),
+               boost::make_transform_iterator(variables.end()  , data::detail::sort_of_variable()),
                declared_sorts
               )
            )
@@ -636,8 +636,8 @@ class pbes
 
       // check 3)
       if (!data::detail::check_sorts(
-              boost::make_transform_iterator(quantifier_variables.begin(), data::detail::variable_sort()),
-              boost::make_transform_iterator(quantifier_variables.end()  , data::detail::variable_sort()),
+              boost::make_transform_iterator(quantifier_variables.begin(), data::detail::sort_of_variable()),
+              boost::make_transform_iterator(quantifier_variables.end()  , data::detail::sort_of_variable()),
               declared_sorts
              )
          )
