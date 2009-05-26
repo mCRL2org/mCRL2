@@ -35,6 +35,12 @@ const std::string SPEC2 =
   "init X(2);              \n"
   ;
 
+const std::string SPEC3 =
+  "act a : Bool;                      \n"
+  "proc X = sum b,c:Bool . (b && c) -> a(b).X; \n"
+  "init X;                            \n"
+  ;
+
 const std::string ABS_SPEC_LINEARIZED = 
   "sort D = struct d1 | d2;                                                                                                     \n"
   "     Error = struct e;                                                                                                       \n"
@@ -114,10 +120,16 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
+  std::clog << "SPEC1" << std::endl;
   test_process(SPEC1);
   core::garbage_collect();
+  std::clog << "SPEC2" << std::endl;
   test_process(SPEC2);
   core::garbage_collect();
+  std::clog << "SPEC3" << std::endl;
+  test_process(SPEC3);
+  core::garbage_collect();
+  std::clog << "ABS_SPEC_LINEARIZED" << std::endl;
   test_process(ABS_SPEC_LINEARIZED);
   core::garbage_collect();
 

@@ -439,6 +439,23 @@ void test_lambda()
     "  (n in select(lambda x : Nat.x mod 2 == 0, [1, 2, 3])) -> a(n).delta;\n"));
 }
 
+const std::string no_free_variables_case_1(
+  "act a,b:Int;\n"
+  "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
+  "init P;\n"
+);
+
+void test_no_free_variables()
+{
+  t_lin_options options;
+  options.nofreevars = true;
+
+  specification spec;
+  spec = mcrl22lps(no_free_variables_case_1, options);
+  BOOST_CHECK(spec.initial_process().free_variables().empty());
+  BOOST_CHECK(spec.process().free_variables().empty());
+}
+
 int test_main(int argc, char** argv )
 {
   MCRL2_ATERM_INIT(argc, argv)
@@ -452,6 +469,8 @@ int test_main(int argc, char** argv )
   test_large_specification();
   core::garbage_collect();
   test_lambda();
+  core::garbage_collect();
+  test_no_free_variables();
   core::garbage_collect();
 
   return 0;
