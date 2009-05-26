@@ -772,7 +772,7 @@ summand generate_summand(const summand_information &summand_info,
   data_expression_list extra_zeta_values_reverse=reverse(extra_zeta_values);
   data_expression_list::iterator extra_zeta_value=extra_zeta_values_reverse.begin();
 
-  for(atermpp::vector < data_expression >::const_iterator 
+  for(atermpp::vector < data_expression >::const_iterator
                 j = summand_info.get_new_values_for_xi_variables_begin();
                 j != summand_info.get_new_values_for_xi_variables_end(); ++j,++c_complete)
   {

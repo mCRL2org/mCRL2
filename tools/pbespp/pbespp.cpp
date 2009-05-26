@@ -86,12 +86,12 @@ class pbespp_tool: public input_output_tool
       std::string str_in  = (input_filename().empty())?"stdin":("'" + input_filename() + "'");
       std::string str_out = (output_filename().empty())?"stdout":("'" + output_filename() + "'");
       ATermAppl spec = (ATermAppl) mcrl2::core::detail::load_aterm(input_filename());
-    
+
       mcrl2::data::data_specification data_spec(ATAgetArgument(spec, 0));
-    
+
       spec = ATsetArgument(spec, atermpp::aterm((mcrl2::data::detail::data_specification_to_aterm_data_spec(
         (format != ppDebug) ? mcrl2::data::remove_all_system_defined(data_spec) : data_spec))), 0);
-    
+
       if (!mcrl2::core::detail::gsIsPBES(spec)) {
         throw mcrl2::runtime_error(str_in + " does not contain an PBES");
       }

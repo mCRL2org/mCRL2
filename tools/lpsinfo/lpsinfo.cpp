@@ -15,7 +15,6 @@
 
 //C++
 #include <exception>
-#include <cstdio>
 #include <set>
 #include <algorithm>
 #include <sstream>
@@ -44,9 +43,9 @@ inline std::string to_string (const T& t)
   return ss.str();
 }
 
-static inline unsigned int get_number_of_tau_summands(const linear_process &lps) 
+static inline unsigned int get_number_of_tau_summands(const linear_process &lps)
 { unsigned int num_of_tau = 0;
-  for(summand_list::iterator current_summand = lps.summands().begin(); 
+  for(summand_list::iterator current_summand = lps.summands().begin();
             current_summand != lps.summands().end(); ++current_summand)
   { if (current_summand->is_tau())
     { ++num_of_tau;
@@ -95,12 +94,12 @@ static inline std::set<action_label > get_unused_actions(specification lps_speci
   }
   return actionSet;
 }
-  
-class lpsinfo_tool: public squadt_tool<input_tool> 
+
+class lpsinfo_tool: public squadt_tool<input_tool>
 {
   protected:
     typedef squadt_tool< input_tool> super;
-  
+
   public:
     lpsinfo_tool()
       : super(
@@ -120,7 +119,8 @@ class lpsinfo_tool: public squadt_tool<input_tool>
     }
 
   public:
-    bool run() 
+
+    bool run()
     {
       specification lps_specification;
 
@@ -152,31 +152,34 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       cout << "Number of used multi-actions      : " << used_multiactions(lps).size() << endl;
       cout << "Number of declared sorts          : " << boost::distance(lps_specification.data().sorts()) << endl;
 
-      return EXIT_SUCCESS;
+      return true;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
     /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const 
+    void set_capabilities(tipi::tool::capabilities& c) const
     { c.add_input_configuration("lps_in", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::reporting);
     }
 
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration&) 
+    void user_interactive_configuration(tipi::configuration&)
     {}
 
     /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const 
+    bool check_configuration(tipi::configuration const& c) const
     {
       return c.input_exists("lps_in");
     }
 
     /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) 
+    bool perform_task(tipi::configuration& c)
     {
       using namespace tipi;
       using namespace tipi::layout;
       using namespace tipi::layout::elements;
+
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
       specification lps_specification;
 

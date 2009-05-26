@@ -89,8 +89,8 @@ class sumelm_tool: public squadt_tool< input_output_tool >
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& configuration)
     {
-      m_input_filename  = configuration.get_input("main-input").location();
-      m_output_filename = configuration.get_output("main-output").location();
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(configuration);
 
       return run() == 0;
     }

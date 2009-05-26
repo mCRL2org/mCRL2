@@ -22,8 +22,6 @@
 #include "aterm2.h"
 #include "chilexer.h"
 #include "translate.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
 
 //Tool framework
@@ -45,7 +43,7 @@ using namespace mcrl2::utilities::tools;
 static ATermAppl translate_file(t_options &options);
 
 // Main
-class chi2mcrl2_tool: public squadt_tool< input_output_tool> 
+class chi2mcrl2_tool: public squadt_tool< input_output_tool>
 {
   protected:
     typedef squadt_tool< input_output_tool> super;
@@ -63,13 +61,13 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
           "\n\n")
     {}
 
-  private:   
+  private:
 
     t_options options;
 
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
-      
+
       options.no_statepar = false;
       if (parser.options.count("no-state")) {
         options.no_statepar = true;
@@ -85,8 +83,7 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
 
   public:
     bool run()
-    { 
-
+    {
       std::string mcrl2spec;
       CAsttransform asttransform;
       options.infilename = input_filename().c_str();
@@ -96,7 +93,7 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
       gsDebugMsg("Set options");
 
       asttransform.set_options(options);
- 
+
       gsDebugMsg("Transforming AST to mcrl2 specification\n");
       if (asttransform.translator(result))
         {
@@ -107,7 +104,7 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
 
       if (!output_filename().empty()) {
         OutStream = fopen(output_filename().c_str(),"w");
-    
+
         if (OutStream == 0) {
           throw mcrl2::runtime_error("cannot open file '" + output_filename() + "' for writing\n");
         }
@@ -116,12 +113,12 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
       fputs (mcrl2spec.c_str(), OutStream);
 
       fclose(OutStream);
-     
+
       return result;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-    void set_capabilities(tipi::tool::capabilities& c) const 
+    void set_capabilities(tipi::tool::capabilities& c) const
     {
       c.add_input_configuration("main-input", tipi::mime_type("chi", tipi::mime_type::text), tipi::tool::category::transformation);
     }
@@ -137,23 +134,21 @@ class chi2mcrl2_tool: public squadt_tool< input_output_tool>
         }
       }
     }
-    
-    bool check_configuration(tipi::configuration const& c) const 
+
+    bool check_configuration(tipi::configuration const& c) const
     {
-      return c.input_exists("main-input") ||
+      return c.input_exists("main-input") &&
              c.output_exists("main-output");
     }
-    
-    bool perform_task(tipi::configuration& c) 
-    { using namespace tipi;
-    
-      m_input_filename  = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location(); 
-    
+
+    bool perform_task(tipi::configuration& c)
+    {
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
       return run();
     }
 #endif
-
 };
 
 ATermAppl translate_file(t_options &options)

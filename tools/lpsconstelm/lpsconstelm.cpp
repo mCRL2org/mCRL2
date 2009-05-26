@@ -13,17 +13,6 @@
 #define NAME "lpsconstelm"
 #define AUTHOR "Frank Stappers"
 
-//C/C++
-#include <iostream>
-#include <vector>
-#include <set>
-#include <string>
-#include <iterator>
-#include <fstream>
-#include <cstdio>
-#include <cstdlib>
-#include <fstream>
-
 //mCRL2
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/constelm.h"
@@ -96,8 +85,8 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
-      m_input_filename  = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location();
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
       return run();
     }

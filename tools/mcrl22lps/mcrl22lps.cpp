@@ -101,8 +101,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
           "stop linearisation and output the mCRL2 specification after phase PHASE: "
           "'pa' (parsing), "
           "'tc' (type checking), "
-          "'ar' (alphabet reduction), or "
-          "'di' (data implementation)"
+          "'ar' (alphabet reduction)"
           , 'p');
       desc.add_option("pretty",
           "return a pretty printed version of the output", 'P');
@@ -234,11 +233,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
           return result;
         }
       }
-      if (result == NULL)
-      {
-        gsErrorMsg("data implementation failed\n");
-        return NULL;
-      }
       if (m_linearisation_options.end_phase == phDataImpl) {
         return result;
       }
@@ -286,13 +280,13 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       if ((m_linearisation_options.end_phase == phNone) && (!m_linearisation_options.pretty)) {
         mcrl2::lps::specification spec(
                      linearise_std(mcrl2::data::detail::internal_format_conversion(result), m_linearisation_options));
-        if (m_linearisation_options.outfilename.empty()) 
+        if (m_linearisation_options.outfilename.empty())
         { gsVerboseMsg("saving result to stdout...\n");
-        } else 
+        } else
         { gsVerboseMsg("saving result to '%s'...\n", m_linearisation_options.outfilename.c_str());
         }
         spec.save(m_linearisation_options.outfilename);
-      } else 
+      } else
       { if (m_linearisation_options.outfilename.empty()) {
           PrintPart_CXX(std::cout, (ATerm) result, (m_linearisation_options.pretty)?ppDefault:ppInternal);
           std::cout << std::endl;

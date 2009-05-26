@@ -53,14 +53,14 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
 
       if (parser.options.count("max")>0)
       { max_iterations = parser.option_argument_as< unsigned int > ("max");
-      } 
+      }
     }
-  
+
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.
-        add_option("max", 
+        add_option("max",
                    make_mandatory_argument("NUM"),
                    "perform at most NUM iterations");
     }
@@ -106,13 +106,12 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  
     void set_capabilities(tipi::tool::capabilities& capabilities) const
     {
       // The tool has only one main input combination
       capabilities.add_input_configuration("main-input", tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::transformation);
     }
-    
+
     void user_interactive_configuration(tipi::configuration& configuration)
     {
       if (configuration.fresh()) {
@@ -121,19 +120,19 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
         }
       }
     }
-    
+
     bool check_configuration(tipi::configuration const& configuration) const
     {
       return (configuration.input_exists("main-input") &&
               configuration.output_exists("main-output")
              );
     }
-    
+
     bool perform_task(tipi::configuration& configuration)
     {
       synchronise_with_configuration(configuration);
       max_iterations = DEFAULT_MAX_ITERATIONS;
-       
+
       const bool result = run();
       send_clear_display();
       return result;

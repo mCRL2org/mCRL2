@@ -57,8 +57,6 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-  protected:
-
     /** \brief configures tool capabilities */
     void set_capabilities(tipi::tool::capabilities& c) const
     {

@@ -66,8 +66,8 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
 
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
-      m_input_filename  = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location();
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
 
       return run();
     }

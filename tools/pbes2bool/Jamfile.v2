@@ -4,4 +4,5 @@ tool pbes2bool
        : pbes2bool.cpp
          /libraries//pbes
        : <squadt-connectivity>implemented
+         <use>/libraries//lps # for mu calculus functionality
        ;

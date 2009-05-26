@@ -82,8 +82,8 @@ static string trim_spaces(const string &str)
   return s;
 }
 
-static data_expression parse_term(const string &term_string, 
-                                  const data_specification &spec, 
+static data_expression parse_term(const string &term_string,
+                                  const data_specification &spec,
                                   atermpp::set < variable > context_variables,
                                   const atermpp::set < variable > &local_variables = atermpp::set < variable >())
 { context_variables.insert(local_variables.begin(),local_variables.end());
@@ -91,8 +91,8 @@ static data_expression parse_term(const string &term_string,
 }
 
 static void declare_variables(
-                   const string &vars, 
-                   atermpp::set <variable> &context_variables, 
+                   const string &vars,
+                   atermpp::set <variable> &context_variables,
                    data_specification &spec)
 { parse_variables(vars + ";",std::inserter(context_variables,context_variables.begin()),
                               context_variables.begin(), context_variables.end(),spec);
@@ -102,14 +102,14 @@ static void declare_variables(
 // iff it does. If a match is found, remove match from the beginning
 // of s.
 static bool match_and_remove(string &s, const string &match)
-{ if (s.substr(0,match.size())==match) 
+{ if (s.substr(0,match.size())==match)
   { s=s.substr(match.size());
     return true;
   }
   return false;
 }
 
-static const std::string help_text=      
+static const std::string help_text=
           "The following commands are available to manipulate mcrl2 data expressions.\n"
           "Essentially, there are commands to rewrite and type expressions, as well as generating\n"
           "the solutions for a boolean expression. The expressions can contain assigned or \n"
@@ -128,7 +128,7 @@ static const std::string help_text=
           "VARLIST is of the form x,y,...: S; ... v,w,...: T)\n";
 
 
-class mcrl2i_tool: public rewriter_tool<input_tool> 
+class mcrl2i_tool: public rewriter_tool<input_tool>
 {
   public:
     /// Constructor.
@@ -149,14 +149,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     {
       data_specification spec;
       if (!input_filename().empty())
-      { try 
+      { try
         { // Try to read a linear specification
           mcrl2::lps::specification p;
           p.load(input_filename());
           spec=p.data();
         }
         catch (mcrl2::runtime_error e)
-        { try 
+        { try
           { // Try to read a pbes.
             mcrl2::pbes_system::pbes <> p;
             p.load(input_filename());
@@ -173,11 +173,11 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       // Import all standard data types should be available even if they are
       // not port of the loaded lps or pbes.
       spec.import_system_defined_sort(sort_real_::real_());
-      
+
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
       rewriter rewr(spec,m_rewrite_strategy);
-      enumerator_factory < classic_enumerator<> > e(spec,rewr); 
+      enumerator_factory < classic_enumerator<> > e(spec,rewr);
       atermpp::set < variable > context_variables;
       atermpp::map < variable, data_expression > assignments;
 
@@ -202,29 +202,29 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           if (match_and_remove(s,"q") || match_and_remove(s,"quit"))
           { if ( cin.eof() ) cout << endl;
             done = true;
-          } 
+          }
           else if (match_and_remove(s,"h") || match_and_remove(s,"help"))
           { cout << help_text;
-          } 
+          }
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
-          { 
+          {
             rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
             if (new_strategy!=m_rewrite_strategy)
             { m_rewrite_strategy=new_strategy;
               rewr=rewriter(spec,m_rewrite_strategy);
             }
-          } 
+          }
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
           { data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(term.sort()) << endl; 
+            cout << pp(term.sort()) << endl;
           }
           else if (match_and_remove(s,"v ") || match_and_remove(s,"var "))
           { declare_variables(s,context_variables,spec);
-          } 
+          }
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           { data_expression term = parse_term(s,spec,context_variables);
             cout << pp(rewr(term,make_map_substitution_adapter(assignments))) << "\n";
-          } 
+          }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
             atermpp::set <variable> vars;
@@ -239,10 +239,10 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
             for (classic_enumerator< > i =
                  e.make(data::convert < std::set <variable > >(vars),rewr,term);
-                                                          i != classic_enumerator<>() ; ++i) 
-            { 
+                                                          i != classic_enumerator<>() ; ++i)
+            {
               cout << "[";
-              for ( atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v ) 
+              for ( atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v )
               { cout << pp(*v) << " := " << pp((*i)(*v));
                 if ( boost::next(v)!=vars.end() )
                 { cout << ", ";
@@ -270,7 +270,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             assignments[var]=term;
             context_variables.insert(var);
           }
-          else 
+          else
           { throw mcrl2::runtime_error("unknown command (try 'h' for help)");
           }
         }
