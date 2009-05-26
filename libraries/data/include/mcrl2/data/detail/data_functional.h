@@ -66,6 +66,21 @@ struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
   }
 };
 
+/// Tests if a term is a sort, and if it is equal to s
+struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
+{
+  sort_expression s;
+
+  compare_sort(sort_expression s_)
+    : s(s_)
+  {}
+
+  bool operator()(atermpp::aterm_appl t) const
+  {
+    return is_sort_expression(t) && s == t;
+  }
+};
+
 /// \brief Function object that determines if a term is equal to a given data variable.
 struct compare_variable: public compare_term<variable>
 {

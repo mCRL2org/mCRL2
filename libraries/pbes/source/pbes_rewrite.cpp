@@ -35,7 +35,7 @@ using namespace mcrl2::core;
 //                 | PBESForall(<DataVarId>+, <PBExpr>)
 //                 | PBESExists(<DataVarId>+, <PBExpr>)
 //                 | <PropVarInst>
-pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification data, Rewriter *rewriter)
+pbes_expression pbes_expression_rewrite(pbes_expression p, data_specification const& data, Rewriter *rewriter)
 {
 	pbes_expression result;
 
@@ -224,7 +224,7 @@ bool occurs_inL(atermpp::aterm_appl l, variable v)
   return atermpp::find_if(l, mcrl2::data::detail::compare_variable(v)) != atermpp::aterm_appl();
 }
 
-pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_expression pbexp, data_specification data)
+pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_expression pbexp, data_specification const& data)
 {
 	// Create a pbes_expression for each possible instantiations of the variables and put those in a list.
 	atermpp::set< pbes_expression > set_result;
@@ -244,16 +244,10 @@ pbes_expression_list get_all_possible_expressions(variable_list data_vars, pbes_
 		}
 		set_result = intermediate;
 	}
-	pbes_expression_list result;
-	for (atermpp::set< pbes_expression >::iterator exp = set_result.begin(); exp != set_result.end(); exp++)
-	{
-		result = push_front(result, *exp);
-	}
-
-	return reverse(result);
+	return pbes_expression_list(set_result.begin(), set_result.end());
 }
 
-pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_specification data, Rewriter *rewriter)
+pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_specification const& data, Rewriter *rewriter)
 {
 	// From a pbes_expression_list: Remove all expressions which are true.
 	// Return a list with only one element False, if an element in the original list is false.
@@ -278,7 +272,7 @@ pbes_expression_list get_and_expressions(pbes_expression_list and_list, data_spe
 	return reverse(result);
 }
 
-pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_specification data, Rewriter *rewriter)
+pbes_expression_list get_or_expressions(pbes_expression_list or_list, data_specification const& data, Rewriter *rewriter)
 {
 	// From a pbes_expression_list: Remove all expressions which are false.
 	// Return a list with only one element False, if an element in the original list is true.

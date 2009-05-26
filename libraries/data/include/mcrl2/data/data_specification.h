@@ -899,6 +899,17 @@ namespace mcrl2 {
       ///      false otherwise.
       bool is_certainly_finite(const sort_expression& s) const;
 
+      /// \brief Checks whether a sort is a constructor sort
+      ///
+      /// \param[in] s A sort expression
+      /// \return true if s is a constructor sort
+      bool is_constructor_sort(const sort_expression& s) const
+      {
+        assert(search_sort(s));
+
+        return !s.is_function_sort() && !constructors(s).empty();
+      }
+
       /// \brief Checks whether all sort expressions are certainly finite.
       ///
       /// \param[in] s A range of sort expressions

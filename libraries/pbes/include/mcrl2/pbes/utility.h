@@ -555,7 +555,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       { constructor_sorts_found=false;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (!data::detail::is_constructorsort(i->sort(),data))
+          if (!data.is_constructor_sort(i->sort()))
           { /* The sort of variable i is not a constructor sort.  */
              data_vars = atermpp::push_front(data_vars, *i);
           }
@@ -589,7 +589,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   for( data::sort_expression_list::const_iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; ++s )
                   {
-                    constructor_sorts_found=constructor_sorts_found || data::detail::is_constructorsort(*s,data);
+                    constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
                     data::variable new_variable=variable_generator(*s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
@@ -666,7 +666,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       { constructor_sorts_found=false;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (!data::detail::is_constructorsort(i->sort(),data))
+          if (!data.is_constructor_sort(i->sort()))
           { /* The sort of variable i is not a constructor sort.  */
              data_vars = atermpp::push_front(data_vars, *i);
           }
@@ -700,7 +700,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   for( data::sort_expression_list::const_iterator s=dsorts.begin() ;
                        s!=dsorts.end() ; ++s )
                   {
-                    constructor_sorts_found=constructor_sorts_found || data::detail::is_constructorsort(*s,data);
+                    constructor_sorts_found=constructor_sorts_found || data.is_constructor_sort(*s);
                     data::variable new_variable=variable_generator(*s);
                     ++no_variables;
                     if ((no_variables % 100)==0)
