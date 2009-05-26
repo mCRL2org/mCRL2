@@ -46,20 +46,20 @@ class bisimulation_algorithm
 {
   public:
     /// \brief The iterator type for non-delta summands
-    typedef action_summand_vector::iterator my_iterator;
+    typedef lps::action_summand_vector::const_iterator my_iterator;
 
   protected:
     /// \brief A map type for mapping summands to strings.
-    typedef std::map<ATermAppl, std::string> name_map;
+    typedef std::map<const lps::action_summand*, std::string> name_map;
 
     /// \brief Maps summands to strings.
     name_map summand_names;
 
-    /// \brief Store the ATerm of the model.
-    ATermAppl model_ptr;
+    /// \brief Store the address of the model.
+    const lps::linear_process* model_ptr;
 
-    /// \brief Store a ATerm of the specification.
-    ATermAppl spec_ptr;
+    /// \brief Store the address of the specification.
+    const lps::linear_process* spec_ptr;
 
     /// \brief Generates a name for an action_list.
     /// \param l A sequence of actions
@@ -84,7 +84,7 @@ class bisimulation_algorithm
     /// \return The name of the summand referred to by \p i
     std::string summand_name(my_iterator i) const
     {
-      ATermAppl t = *i;
+      const lps::action_summand* t = &(*i);
       name_map::const_iterator j = summand_names.find(t);
       assert(j != summand_names.end());
       return j->second;
@@ -95,7 +95,7 @@ class bisimulation_algorithm
     /// \return True if p is the linear process of the model.
     bool is_from_model(const linear_process& p) const
     {
-      return ATermAppl(p) == model_ptr;
+      return &p == model_ptr;
     }
 
     /// \brief Returns a name of a linear process.
@@ -120,8 +120,8 @@ class bisimulation_algorithm
       set_identifier_generator generator;
       for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
-        std::string name = generator(action_list_name(i->actions()));
-        ATermAppl t = *i;
+        std::string name = generator(action_list_name(i->multi_action().actions()));
+        const lps::action_summand* t = &(*i);
         summand_names[t] = name;
       }
     }
@@ -287,8 +287,8 @@ public:
       summand_names.clear();
       set_summand_names(model);
       set_summand_names(spec);
-      model_ptr = ATermAppl(model);
-      spec_ptr  = ATermAppl(spec);
+      model_ptr = &model;
+      spec_ptr  = &spec;
       assert(is_from_model(model));
       assert(!is_from_model(spec));
     }
@@ -589,7 +589,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       using namespace pbes_expr_optimized;
       const variable_list& d1 = q.process_parameters();
       data_expression_list      gi = i->next_state(p.process_parameters());
-      multi_action              ai = i->actions();
+      multi_action              ai = i->multi_action().actions();
       if (i->is_tau())
       {
         return close2(p, q, i, gi, data_expression_list(d1.begin(), d1.end()));
@@ -602,7 +602,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           data_expression      cj = j->condition();
           variable_list        e1 = j->summation_variables();
           data_expression_list gj = j->next_state(q.process_parameters());
-          multi_action         aj = j->actions();
+          multi_action         aj = j->multi_action().actions();
           pbes_expression      expr = pbes_expr::exists(e1, and_(and_(cj, equals(ai, aj)), close2(p, q, i, gi, gj)));
           v.push_back(expr);
         }
@@ -649,7 +649,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       //const variable_list& d  = p.process_parameters();
       //const variable_list& d1 = q.process_parameters();
       data_expression_list        gi = i->next_state(p.process_parameters());
-      action_list                 ai = i->actions();
+      action_list                 ai = i->multi_action().actions();
       std::vector<pbes_expression> v;
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
@@ -672,7 +672,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(p, q));
+        std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(lps::linear_process_to_aterm(p), lps::linear_process_to_aterm(q)));
         variable_list e1_new = fresh_variables(e1, used_names);
         data_expression    cj_new = substitute(make_list_substitution(e1, e1_new), cj);
         data_expression_list gj_new = substitute(make_list_substitution(e1, e1_new), gj);

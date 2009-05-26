@@ -781,11 +781,36 @@ class action_summand: public summand_base
       return m_assignments;
     }
 
+    // TODO: check if this is correct (where is the documentation of the internal format?)
+    /// \brief Returns true if the multi-action corresponding to this summand is equal to tau.
+    /// \return True if the multi-action corresponding to this summand is equal to tau.
+    bool is_tau() const
+    {
+      return multi_action().actions().empty();
+    }
+
     /// \brief Returns true if time is available.
     /// \return True if time is available.
     bool has_time() const
     {
       return m_multi_action.has_time();
+    }
+
+    /// \brief Returns the next state corresponding to this summand.
+    /// \details The next state is constructed out of the assignments in
+    /// this summand, by substituting the assignments to the list of
+    /// variables that are an argument of this function. In general this
+    /// argument is the list with the process parameters of this process.
+    /// \param process_parameters A sequence of data variables
+    /// \return A symbolic representation of the next states
+    data::data_expression_list next_state(const data::variable_list& process_parameters) const
+    {
+      data::data_expression_vector result;
+
+      substitute(data::assignment_list_substitution(assignments()),
+                        process_parameters, std::inserter(result, result.end()));
+
+      return data::make_data_expression_list(result);
     }
 
     /// \brief Checks if the summand is well typed
