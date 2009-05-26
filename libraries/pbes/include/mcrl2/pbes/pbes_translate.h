@@ -630,8 +630,8 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       modal_formula::state_formula f = preprocess_formula(formula, spec);
 
       // make sure the lps is timed
-      data::variable T = fresh_variable(make_list(f, lps), data::sort_real_::real_(), "T");
-      atermpp::aterm_list context = make_list(T, spec.initial_process(), lps, f);
+      data::variable T = fresh_variable(make_list(f, lps::linear_process_to_aterm(lps)), data::sort_real_::real_(), "T");
+      atermpp::aterm_list context = make_list(T, spec.initial_process(), lps::linear_process_to_aterm(lps), f);
       lps = lps::detail::make_timed_lps(lps, context);
 
       // compute the equations

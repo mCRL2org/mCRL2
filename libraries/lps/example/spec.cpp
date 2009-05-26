@@ -108,12 +108,13 @@ int main(int argc, char* argv[])
   cout << "d2 = " << pp(d2) << " " << d2.to_string() << endl;
   cin.get();
 
-  for (summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  summand_list summands = spec.process().summands();
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
-//    cout << "summand " << pp(*i) << endl;
+    cout << "summand " << pp(*i) << endl;
   }
 
-  summand s = spec.process().summands().front();
+  summand s = summands.front();
   cout << "actions:" << endl;
   for (action_list::iterator i = s.actions().begin(); i != s.actions().end(); ++i)
   {

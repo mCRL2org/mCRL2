@@ -414,12 +414,9 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
                                          table& enumerated_elements_table)
 {
   gsDebugMsg("replace enumerated parameters in linear process\n");
-  linear_process result;
-
-  result = linear_process(lps.free_variables(),
-               replace_enumerated_parameters_in_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table),
-               replace_enumerated_parameters_in_summands(lps.summands(), new_parameters_table, enumerated_elements_table));
-
+  linear_process result = lps;
+  result.process_parameters() = replace_enumerated_parameters_in_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table);
+  result.set_summands(replace_enumerated_parameters_in_summands(lps.summands(), new_parameters_table, enumerated_elements_table));
   return result;
 }
 
@@ -463,7 +460,7 @@ specification binary(const lps::specification& spec,
   // (they make sure we can't build up an intermediate result!)
   variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
-  result.process() = set_process_parameters(result.process(), new_process_parameters);
+  result.process().process_parameters() = new_process_parameters;
   gsDebugMsg("Finished processing\n");
 
   return result;

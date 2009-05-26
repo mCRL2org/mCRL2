@@ -16,6 +16,7 @@
 #include <set>
 #include <vector>
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/data/detail/convert.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -61,19 +62,21 @@ data::assignment_list remove_parameters(const data::assignment_list& l, const st
 inline
 linear_process remove_parameters(const linear_process& p, const std::set<data::variable>& to_be_removed)
 {
+  linear_process result = p;
+
   // remove process parameters
-  linear_process result = set_process_parameters(p, remove_parameters(p.process_parameters(), to_be_removed));
+  result.process_parameters() = remove_parameters(result.process_parameters(), to_be_removed);
 
   // remove parameters from assignment lists in summands
-  atermpp::vector<summand> new_summands(p.summands().begin(), p.summands().end());
+  atermpp::vector<summand> new_summands = data::convert<atermpp::vector<summand> >(p.summands());
   for (std::vector<summand>::iterator i = new_summands.begin(); i != new_summands.end(); ++i)
   {
     *i = set_assignments(*i, remove_parameters(i->assignments(), to_be_removed));
   }
-  result = set_summands(result, summand_list(new_summands.begin(), new_summands.end()));
+  result.set_summands(data::convert<summand_list>(new_summands));
 
   // remove free variables
-  result = set_free_variables(result, remove_parameters(p.free_variables(), to_be_removed));
+  result.free_variables() = remove_parameters(p.free_variables(), to_be_removed);
 
   return result;
 }

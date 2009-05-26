@@ -62,7 +62,8 @@ int main(int argc, char* argv[])
   }
   cin.get();
 
-  summand summand_ = *lps.summands().begin();
+  summand_list summands = lps.summands();
+  summand summand_ = summands.begin();
   data_expression d = summand_.condition();
   cout << "d = " << d << endl;
   for (variable_list::iterator j = summand_.summation_variables().begin(); j != summand_.summation_variables().end(); ++j)

@@ -157,6 +157,24 @@ namespace core {
     return result;
   }
 
+  /// \brief Joins a sequence of strings. This is a replacement for
+  /// boost::algorithm::join, since it gives stack overflow errors with
+  /// Visual C++ express 9.0 under some circumstances.
+  template <typename Container>
+  std::string string_join(const Container& c, const std::string& separator)
+  {
+    std::ostringstream out;
+    for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+    {
+      if (i != c.begin())
+      {
+        out << separator;
+      }
+      out << *i;
+    }
+    return out.str();
+  }
+
 } // namespace core
 
 } // namespace mcrl2

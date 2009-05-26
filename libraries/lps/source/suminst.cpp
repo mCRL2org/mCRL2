@@ -219,15 +219,15 @@ lps::specification instantiate_sums(const lps::specification& specification, rew
   gsVerboseMsg("Instantiating...\n");
   lps::linear_process lps = specification.process();
 
-  gsVerboseMsg("Input: %d summands.\n", lps.summands().size());
+  gsVerboseMsg("Input: %d summands.\n", lps.summand_count());
 
   // Some use of internal format because we need it for the rewriter
   enumerator_factory< classic_enumerator< > > enumerator(specification.data(), r);
 
   lps::summand_list sl = instantiate_summands(specification, lps.summands(), enumerator, o);
-  lps = set_summands(lps, sl);
+  lps.set_summands(sl);
 
-  gsVerboseMsg("Output: %d summands.\n", lps.summands().size());
+  gsVerboseMsg("Output: %d summands.\n", lps.summand_count());
 
   return lps::specification(specification.data(), specification.action_labels(), lps, specification.initial_process());
 }

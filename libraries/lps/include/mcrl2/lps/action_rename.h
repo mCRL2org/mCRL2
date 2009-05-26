@@ -692,13 +692,12 @@ lps::specification action_rename(
 
   gsVerboseMsg("simplifying the result...\n");
 
+  linear_process new_process = lps_old_spec.process();
+  new_process.set_summands(lps_old_summands); // These are the renamed sumands.
   specification lps_new_spec = specification(
                                           lps_old_spec.data(),
                                           lps_old_spec.action_labels(),
-                                          linear_process(
-                                                      lps_old_spec.process().free_variables(),
-                                                      lps_old_spec.process().process_parameters(),
-                                                      lps_old_summands), // These are the renamed sumands.
+                                          new_process,
                                           lps_old_spec.initial_process());
 
   gsVerboseMsg("new lps complete\n");

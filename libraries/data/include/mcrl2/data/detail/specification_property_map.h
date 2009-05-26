@@ -18,7 +18,7 @@
 #include <set>
 #include <sstream>
 #include <utility>
-#include <boost/algorithm/string/join.hpp>
+// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
@@ -116,7 +116,7 @@ namespace detail {
           elements.insert(static_cast< Derived const& >(*this).print(*i));
         }
 
-        return boost::algorithm::join(elements, ", ");
+        return core::string_join(elements, ", ");
       }
 
       template < typename Container >
@@ -361,7 +361,7 @@ namespace detail {
         {
           lines.push_back(align(i->first, n) + " = " + i->second);
         }
-        return boost::algorithm::join(lines, "\n");
+        return core::string_join(lines, "\n");
       }
 
       const std::map<std::string, std::string>& data() const

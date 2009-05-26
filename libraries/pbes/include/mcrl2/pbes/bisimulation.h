@@ -46,7 +46,7 @@ class bisimulation_algorithm
 {
   public:
     /// \brief The iterator type for non-delta summands
-    typedef non_delta_summand_list::iterator my_iterator;
+    typedef action_summand_vector::iterator my_iterator;
 
   protected:
     /// \brief A map type for mapping summands to strings.
@@ -118,7 +118,7 @@ class bisimulation_algorithm
     void set_summand_names(const linear_process& p)
     {
       set_identifier_generator generator;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         std::string name = generator(action_list_name(i->actions()));
         ATermAppl t = *i;
@@ -174,7 +174,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Ypqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -186,7 +186,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Y1pqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -198,7 +198,7 @@ public:
     }
 
     /// \brief Creates a name for the propositional variable Y2pqi
-    /// \pre The iterator i must be in p.non_delta_summands().
+    /// \pre The iterator i must be in p.action_summands().
     /// \param p A linear process
     /// \param q A linear process
     /// \param i A summand iterator
@@ -332,7 +332,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression    ci = i->condition();
         const variable_list& d  = p.process_parameters();
@@ -357,7 +357,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       if (i->is_tau())
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           if (!j->is_tau())
           {
@@ -374,7 +374,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       else
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           data_expression      cj = j->condition();
           variable_list        e1 = j->summation_variables();
@@ -400,7 +400,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       const variable_list& d  = p.process_parameters();
       const variable_list& d1 = q.process_parameters();
       variable_list e  = i->summation_variables();
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
@@ -438,13 +438,13 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
         equations.push_back(e1);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));
@@ -482,7 +482,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression  ci = i->condition();
         variable_list    e  = i->summation_variables();
@@ -503,7 +503,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       data_expression_list gi = i->next_state(p.process_parameters());
 
       std::vector<pbes_expression> result;
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         data_expression       cj = j->condition();
         variable_list         e1 = j->summation_variables();
@@ -567,7 +567,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> result;
-      for (my_iterator i = p.non_delta_summands().begin(); i != p.non_delta_summands().end(); ++i)
+      for (my_iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
       {
         data_expression    ci = i->condition();
         const variable_list& d  = p.process_parameters();
@@ -597,7 +597,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       else
       {
         std::vector<pbes_expression> v;
-        for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+        for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
         {
           data_expression      cj = j->condition();
           variable_list        e1 = j->summation_variables();
@@ -620,7 +620,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> v;
       const variable_list& d1 = q.process_parameters();
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
@@ -651,7 +651,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       data_expression_list        gi = i->next_state(p.process_parameters());
       action_list                 ai = i->actions();
       std::vector<pbes_expression> v;
-      for (my_iterator j = q.non_delta_summands().begin(); j != q.non_delta_summands().end(); ++j)
+      for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
         if (!j->is_tau())
         {
@@ -704,7 +704,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(m, s, i), d + d1 + e), close1(m, s, i));
@@ -712,7 +712,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         equations.push_back(e1);
         equations.push_back(e2);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y1(s, m, i), d1 + d + e), close1(s, m, i));
@@ -765,13 +765,13 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
       equations.push_back(pbes_equation(nu(), propositional_variable(X(s, m), d1 + d), var(X(m, s), d + d1)));
 
       // E2
-      for (my_iterator i = m.non_delta_summands().begin(); i != m.non_delta_summands().end(); ++i)
+      for (my_iterator i = m.action_summands().begin(); i != m.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(m, s, i), d + d1 + e), close(m, s, i));
         equations.push_back(e1);
       }
-      for (my_iterator i = s.non_delta_summands().begin(); i != s.non_delta_summands().end(); ++i)
+      for (my_iterator i = s.action_summands().begin(); i != s.action_summands().end(); ++i)
       {
         variable_list e  = i->summation_variables();
         pbes_equation e1(mu(), propositional_variable(Y(s, m, i), d1 + d + e), close(s, m, i));

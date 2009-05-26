@@ -103,7 +103,7 @@ void test1()
   BOOST_CHECK(r(application(plus, n4, n5)) == r(application(plus, n2, n7)));
   specification spec1=rewrite_lps(spec,r);
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summands().size()==1);
+  BOOST_CHECK(spec1.process().summand_count() == 1);
   // test destructor
   rewriter r1 = r;
 }
@@ -118,7 +118,7 @@ void test2()
   rewriter r(spec.data());
   specification spec1=rewrite_lps(spec,r);
   BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summands().size()==1);
+  BOOST_CHECK(spec1.process().summand_count() == 1);
 }
 
 const std::string SPECIFICATION3=
@@ -133,8 +133,7 @@ void test3()
   rewriter r(spec.data());
   specification spec1 = rewrite_lps(spec, r);
   BOOST_CHECK(spec1 == rewrite_lps(spec1, r));
-std::cout << "SSSSSSSSSSSSSSSSSSSSSSSSSSSS\n" << pp(spec1) << std::endl;
-  BOOST_CHECK(spec1.process().summands().size()==2);
+  BOOST_CHECK(spec1.process().summand_count()==3);
 }
 
 // N.B. This test doesn't work due to the different representations of numbers

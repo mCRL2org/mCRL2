@@ -76,7 +76,7 @@ class specification
       std::set<data::variable> v = compute_free_variables(initial_process());
       free_variables.insert(v.begin(), v.end());
       data::variable_list freevars = data::convert<data::variable_list>(free_variables);
-      m_process = set_free_variables(m_process, freevars);
+      m_process.free_variables() = freevars;
       m_initial_process = process_initializer(freevars, m_initial_process.assignments());
     }
     
@@ -99,7 +99,7 @@ class specification
       return core::detail::gsMakeLinProcSpec(
           data::detail::data_specification_to_aterm_data_spec(m_data),
           core::detail::gsMakeActSpec(m_action_labels),
-          m_process,
+          linear_process_to_aterm(m_process),
           m_initial_process
       );
     }
@@ -237,9 +237,10 @@ class specification
     {
       std::set<data::sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
       std::set<action_label> declared_labels = mcrl2::data::detail::make_set(action_labels());
+      summand_list summands = process().summands();
 
       // check 1)
-      for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
+      for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
       {
         if (!(mcrl2::data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
         {
@@ -270,7 +271,7 @@ class specification
       }
 
       // check 5)
-      for (summand_list::iterator i = process().summands().begin(); i != process().summands().end(); ++i)
+      for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
       {
         if (!(detail::check_action_labels(i->actions(), declared_labels)))
         {
@@ -313,7 +314,8 @@ specification repair_free_variables(const specification& spec)
   freevars.insert(fv2.begin(), fv2.end());
   data::variable_list new_free_vars(freevars.begin(), freevars.end());
 
-  linear_process      new_process = set_free_variables(spec.process(), new_free_vars);
+  linear_process new_process = spec.process();
+  new_process.free_variables() = new_free_vars;
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());
 
   specification result(spec.data(), spec.action_labels(), new_process, new_init);
@@ -354,7 +356,7 @@ ATermAppl specification_to_aterm(const specification& spec)
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data()),
       core::detail::gsMakeActSpec(spec.action_labels()),
-      spec.process(),
+      linear_process_to_aterm(spec.process()),
       spec.initial_process()
   );
 }

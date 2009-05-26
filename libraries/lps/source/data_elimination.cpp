@@ -66,8 +66,9 @@ specification remove_unused_data(specification& spec, bool keep_basis)
 		elim.keep_sort(vb->sort());
 	}
 
-	summand_list::iterator b = l.summands().begin();
-	summand_list::iterator e = l.summands().end();
+  summand_list summands = l.summands();
+	summand_list::iterator b = summands.begin();
+	summand_list::iterator e = summands.end();
 	for (; b != e; b++)
 	{
 		variable_list::iterator sb = (*b).summation_variables().begin();

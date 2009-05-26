@@ -59,6 +59,20 @@ namespace detail {
         return v; // no assignment to v found, so return v itself
       }
 
+      /// \brief Applies the next state substitution to the variable v.
+      data::data_expression next_state(const action_summand& s, const data::variable& v) const
+      {
+        const data::assignment_list& a = s.assignments();
+        for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+        {
+          if (i->lhs() == v)
+          {
+            return i->rhs();
+          }
+        }
+        return v; // no assignment to v found, so return v itself
+      }
+
       /// \brief Removes formal parameters from the specification
       void remove_parameters(const std::set<data::variable>& to_be_removed)
       {

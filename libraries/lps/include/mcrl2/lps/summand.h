@@ -18,9 +18,11 @@
 #include <iterator>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/real.h"
@@ -85,7 +87,7 @@ class summand: public atermpp::aterm_appl
 
     /// \brief Constructor.
     summand()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructLinearProcessSummand())
+      : atermpp::aterm_appl(core::detail::constructLinearProcessSummand())
     {}
 
     /// \brief Constructor.
@@ -285,26 +287,6 @@ class summand: public atermpp::aterm_appl
       return data::make_data_expression_list(result);
     }
 
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-//    template <typename Substitution>
-//    summand substitute(Substitution f) const
-//    {
-//      action_list actions;
-//      data::data_expression condition = substitute(f, m_condition);
-//      if (!m_delta)
-//      {
-//        actions = substitute(f, m_actions);
-//      }
-//      data::data_expression time = substitute(f, m_time);
-//
-//      return summand(m_summation_variables, condition, m_delta, actions, time, m_assignments);
-//    }
-
     /// \brief Checks if the summand is well typed
     /// \return Returns true if
     /// <ul>
@@ -328,26 +310,26 @@ class summand: public atermpp::aterm_appl
       // check 2)
       if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
       {
-        std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: time " << core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
       if (!data::sort_bool_::is_bool_(m_condition.sort()))
       {
-        std::cerr << "summand::is_well_typed() failed: condition " << mcrl2::core::pp(m_condition) << " doesn't have type bool." << std::endl;
+        std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
       }
 
       // check 4)
-      if (!mcrl2::data::detail::unique_names(m_summation_variables))
+      if (!data::detail::unique_names(m_summation_variables))
       {
         std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
         return false;
       }
 
       // check 5)
-      if (sequence_contains_duplicates(
+      if (data::detail::sequence_contains_duplicates(
                boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
                boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
               )
@@ -526,8 +508,378 @@ void traverse_sort_expressions(const summand& s, OutIter dest)
   data::traverse_sort_expressions(s.assignments(), dest);
 }
 
+/// \brief Base class for LPS summands.
+// <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
+//                    <DataExprOrNil>, <Assignment>*)
+//<MultActOrDelta>
+//               ::= <MultAct>
+//                 | Delta
+// <MultAct>      ::= MultAct(<ParamId>*)                                   (- tc)
+//                  | MultAct(<Action>*)                                    (+ tc)
+class summand_base
+{
+  friend struct atermpp::aterm_traits<summand_base>;
+
+  protected:
+    /// \brief The summation variables of the summand
+    data::variable_list m_summation_variables;
+
+    /// \brief The condition of the summand
+    data::data_expression m_condition;
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect()
+    {
+      m_summation_variables.protect();
+      m_condition.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect()
+    {
+      m_summation_variables.unprotect();
+      m_condition.unprotect();
+    }
+
+    /// \brief Mark the term for not being garbage collected.
+    void mark()
+    {
+      m_summation_variables.mark();
+      m_condition.mark();
+    }
+
+  public:
+    /// \brief Constructor.
+    summand_base()
+    {}
+
+    /// \brief Constructor.
+    summand_base(const data::variable_list& summation_variables, const data::data_expression& condition)
+      : m_summation_variables(summation_variables),
+        m_condition(condition)
+    {}
+
+    /// \brief Returns the sequence of summation variables.
+    /// \return The sequence of summation variables.
+    data::variable_list& summation_variables()
+    {
+      return m_summation_variables;
+    }
+
+    /// \brief Returns the sequence of summation variables.
+    /// \return The sequence of summation variables.
+    const data::variable_list& summation_variables() const
+    {
+      return m_summation_variables;
+    }
+
+    /// \brief Returns the condition expression.
+    /// \return The condition expression.
+    const data::data_expression& condition() const
+    {
+      return m_condition;
+    }
+
+    /// \brief Returns the condition expression.
+    /// \return The condition expression.
+    data::data_expression& condition()
+    {
+      return m_condition;
+    }
+
+    /// \brief Checks if the summand is well typed
+    /// \return Returns true if
+    /// <ul>
+    /// <li>the condition has sort Bool</li>
+    /// <li>the summation variables have unique names</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
+      // check 1)
+      if (!data::sort_bool_::is_bool_(m_condition.sort()))
+      {
+        std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
+        return false;
+      }
+
+      // check 2)
+      if (!data::detail::unique_names(m_summation_variables))
+      {
+        std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
+        return false;
+      }
+      return true;
+    }
+};
+
+/// \brief LPS summand containing a deadlock.
+class deadlock_summand: public summand_base
+{
+  friend struct atermpp::aterm_traits<deadlock_summand>;
+
+  protected:
+    /// \brief The super class
+    typedef summand_base super;
+    
+    /// \brief The deadlock of the summand
+    lps::deadlock m_deadlock;
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect()
+    {
+      super::protect();
+      m_deadlock.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect()
+    {
+      super::unprotect();
+      m_deadlock.unprotect();
+    }
+
+    /// \brief Mark the term for not being garbage collected.
+    void mark()
+    {
+      super::mark();
+      m_deadlock.mark();
+    }
+
+    /// \brief Returns true if time is available.
+    /// \return True if time is available.
+    bool has_time() const
+    {
+      return m_deadlock.has_time();
+    }
+
+  public:
+    /// \brief Constructor.
+    // TODO: check if the default constructor results in a deadlock summand
+    deadlock_summand()
+    {}
+
+    /// \brief Constructor.
+    deadlock_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::deadlock& delta)
+      : summand_base(summation_variables, condition),
+        m_deadlock(delta)
+    {}
+
+    /// \brief Returns the deadlock of this summand.
+    const lps::deadlock& deadlock() const
+    {
+      return m_deadlock;
+    }
+
+    /// \brief Returns the deadlock of this summand.
+    lps::deadlock& deadlock()
+    {
+      return m_deadlock;
+    }
+};
+
+/// \brief Vector of deadlock summands
+typedef atermpp::vector<deadlock_summand> deadlock_summand_vector;
+
+/// \brief Conversion to ATermAppl.
+/// \return The deadlock summand converted to ATerm format.
+inline
+summand deadlock_summand_to_aterm(const deadlock_summand& s)
+{
+  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+         s.summation_variables(),
+         s.condition(),
+         core::detail::gsMakeDelta(),
+         s.deadlock().time(),
+         data::assignment_list()
+        );
+  return atermpp::aterm_appl(result);
+}
+
+/// \brief LPS summand containing a multi-action.
+class action_summand: public summand_base
+{
+  friend struct atermpp::aterm_traits<action_summand>;
+
+  protected:
+    /// \brief The super class
+    typedef summand_base super;
+    
+    /// \brief The summation variables of the summand
+    lps::multi_action m_multi_action;
+
+    /// \brief The assignments of the next state
+    data::assignment_list m_assignments;
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect()
+    {
+      super::protect();
+      m_multi_action.protect();
+      m_assignments.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect()
+    {
+      super::unprotect();
+      m_multi_action.unprotect();
+      m_assignments.unprotect();
+    }
+
+    /// \brief Mark the term for not being garbage collected.
+    void mark()
+    {
+      super::mark();
+      m_multi_action.mark();
+      m_assignments.mark();
+    }
+
+  public:
+    /// \brief Constructor.
+    // TODO: check if the default constructor results in a deadlock summand
+    action_summand()
+    {}
+
+    /// \brief Constructor.
+    action_summand(const data::variable_list& summation_variables, const data::data_expression& condition, const lps::multi_action& action, const data::assignment_list& assignments)
+      : summand_base(summation_variables, condition),
+        m_multi_action(action),
+        m_assignments(assignments)
+    {}
+
+    /// \brief Returns the multi-action of this summand.
+    const lps::multi_action& multi_action() const
+    {
+      return m_multi_action;
+    }
+
+    /// \brief Returns the multi-action of this summand.
+    lps::multi_action& multi_action()
+    {
+      return m_multi_action;
+    }
+
+    /// \brief Returns the sequence of assignments.
+    /// \return The sequence of assignments.
+    const data::assignment_list& assignments() const
+    {
+      return m_assignments;
+    }
+
+    /// \brief Returns the sequence of assignments.
+    /// \return The sequence of assignments.
+    data::assignment_list& assignments()
+    {
+      return m_assignments;
+    }
+
+    /// \brief Returns true if time is available.
+    /// \return True if time is available.
+    bool has_time() const
+    {
+      return m_multi_action.has_time();
+    }
+
+    /// \brief Checks if the summand is well typed
+    /// \return Returns true if
+    /// <ul>
+    /// <li>the data assignments are well typed</li>
+    /// <li>the left hand sides of the data assignments are unique</li>
+    /// <li>the multi action is well typed
+    /// </ul>
+    bool is_well_typed() const
+    {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
+      // check 1)
+      for (data::assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
+      {
+        if (!i->is_well_typed())
+          return false;
+      }
+
+      // check 2)
+      if (data::detail::sequence_contains_duplicates(
+               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
+               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
+              )
+         )
+      {
+        std::cerr << "summand::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
+        return false;
+      }
+      // check 3)
+      return super::is_well_typed() && m_multi_action.is_well_typed();
+    }
+};
+
+/// \brief Vector of action summands
+typedef atermpp::vector<action_summand> action_summand_vector;
+
+/// \brief Conversion to ATermAppl.
+/// \return The action summand converted to ATerm format.
+inline
+summand action_summand_to_aterm(const action_summand& s)
+{
+  ATermAppl result = core::detail::gsMakeLinearProcessSummand(
+         s.summation_variables(),
+         s.condition(),
+         core::detail::gsMakeMultAct(s.multi_action().actions()),
+         s.multi_action().time(),
+         s.assignments()
+        );
+  return atermpp::aterm_appl(result);
+}
+
 } // namespace lps
 
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+
+template<>
+struct aterm_traits<mcrl2::lps::summand_base>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::summand_base t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::summand_base t) { t.unprotect(); }
+  static void mark(mcrl2::lps::summand_base t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::summand_base t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::summand_base& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps::deadlock_summand>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::deadlock_summand t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::deadlock_summand t) { t.unprotect(); }
+  static void mark(mcrl2::lps::deadlock_summand t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::deadlock_summand t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::deadlock_summand& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps::action_summand>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_summand t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::action_summand t) { t.unprotect(); }
+  static void mark(mcrl2::lps::action_summand t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::action_summand t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_summand& t)    { return &t.term(); }
+};
+
+} // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_SUMMAND_H

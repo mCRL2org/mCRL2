@@ -274,7 +274,8 @@ namespace lps {
 
     int index = 0;
     // Apply sum elimination on each of the summands in the summand_ list.
-    for (lps::summand_list::const_iterator i = lps.summands().begin(); i != lps.summands().end(); ++i)
+    lps::summand_list summands = lps.summands();
+    for (lps::summand_list::const_iterator i = summands.begin(); i != summands.end(); ++i)
     {
       gsVerboseMsg("Summand %d: ", ++index);
 
@@ -283,7 +284,7 @@ namespace lps {
     new_summand_list = reverse(new_summand_list);
 
     new_specification = specification;
-    new_specification.process() = set_summands(lps, new_summand_list);
+    new_specification.process().set_summands(new_summand_list);
     return new_specification;
   }
 

@@ -137,13 +137,13 @@ int test_main(int argc, char** argv)
 
   // find all action labels in lps
   std::set<action_label> labels;
-  find_all_if(lps, is_action_label, inserter(labels, labels.end()));
+  find_all_if(linear_process_to_aterm(lps), is_action_label, inserter(labels, labels.end()));
 
   core::garbage_collect();
 
   // find all data variables in lps
   std::set<variable> variables;
-  find_all_if(lps, is_variable, inserter(variables, variables.end()));
+  find_all_if(linear_process_to_aterm(lps), is_variable, inserter(variables, variables.end()));
 
   core::garbage_collect();
 
@@ -156,7 +156,7 @@ int test_main(int argc, char** argv)
 
   // find all existential quantifications in lps
   std::set<data_expression> existential_quantifications;
-  find_all_if(lps, local::is_exists, inserter(existential_quantifications, existential_quantifications.end()));
+  find_all_if(linear_process_to_aterm(lps), local::is_exists, inserter(existential_quantifications, existential_quantifications.end()));
 
   core::garbage_collect();
 

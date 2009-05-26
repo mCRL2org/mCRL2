@@ -9,6 +9,7 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/data/detail/convert.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
@@ -116,7 +117,7 @@ void group_information::gather(mcrl2::lps::specification const& l) {
   std::set< variable > parameters = find_all_variables(specification.process_parameters());
 
   // the list of summands
-  std::vector< lps::summand > summands(specification.summands().begin(), specification.summands().end());
+  std::vector< lps::summand > summands = data::convert<std::vector<lps::summand> >(specification.summands());
 
   m_group_indices.resize(summands.size());
 
@@ -158,7 +159,7 @@ void group_information::gather(mcrl2::lps::specification const& l) {
 void check_info(mcrl2::lps::specification const& model) {
   group_information info(model);
 
-  BOOST_CHECK(info.number_of_groups() == model.process().summands().size());
+  BOOST_CHECK(info.number_of_groups() == model.process().summand_count());
 
 #ifdef SHOW_INFO
   for (size_t i = 0; i < info.number_of_groups(); ++i) {
@@ -178,22 +179,6 @@ void check_info(mcrl2::lps::specification const& model) {
     std::cerr << "}" << std::endl;
   }
 #endif
-}
-
-mcrl2::lps::specification convert(mcrl2::lps::specification const& l) {
-  mcrl2::lps::linear_process lp(l.process());
-
-  mcrl2::lps::summand_list summands;
-
-  for (mcrl2::lps::non_delta_summand_list::iterator i = lp.non_delta_summands().begin(); i != lp.non_delta_summands().end(); ++i) {
-    summands = push_front(summands, *i);
-  }
-
-  summands = reverse(summands);
-
-  return mcrl2::lps::specification(l.data(), l.action_labels(),
-            mcrl2::lps::linear_process(lp.free_variables(), lp.process_parameters(), summands),
-               l.initial_process());
 }
 
 int test_main(int argc, char** argv) {
@@ -216,7 +201,7 @@ int test_main(int argc, char** argv) {
   if (1 < argc) {
     model.load(argv[1]);
 
-    model = convert(model);
+    model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
     data::enumerator_factory< data::classic_enumerator< > > enumerator_factory(model.data(), rewriter);
@@ -235,7 +220,7 @@ int test_main(int argc, char** argv) {
 
       stack.pop();
 
-      for (size_t i = 0; i < model.process().summands().size(); ++i) {
+      for (size_t i = 0; i < model.process().summand_count(); ++i) {
         ATerm     state;
         ATermAppl transition;
 

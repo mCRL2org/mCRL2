@@ -389,7 +389,9 @@ namespace detail {
         m_process_parameters = parameters;
         convert(*i);
       }
-      lps::linear_process lp(data::variable_list(), m_process_parameters, lps::summand_list(result.begin(), result.end()));
+      // TODO: clean this up
+      lps::linear_process lp(data::variable_list(), m_process_parameters, lps::deadlock_summand_vector(), lps::action_summand_vector());
+      lp.set_summands(lps::summand_list(result.begin(), result.end()));
       if (!is_process_instance(p.init().expression()))
       {
         std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;

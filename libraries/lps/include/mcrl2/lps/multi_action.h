@@ -12,9 +12,12 @@
 #ifndef MCRL2_LPS_MULTI_ACTION_H
 #define MCRL2_LPS_MULTI_ACTION_H
 
+#include <iterator>
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
-#include "mcrl2/lps/action.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/lps/action.h"
 
 namespace mcrl2 {
 
@@ -24,6 +27,9 @@ namespace lps {
 /// \detail Multi actions consist of a list of actions together with an optional time tag.
   class multi_action
   {
+    friend class action_summand;
+    friend struct atermpp::aterm_traits<multi_action>;
+
     protected:
       /// \brief The actions of the summand
       action_list m_actions;
@@ -31,6 +37,29 @@ namespace lps {
       /// \brief The time of the summand. If <tt>m_time == data::data_expression()</tt>
       /// the multi action has no time.
       data::data_expression m_time;
+
+      /// \brief Protects the term from being freed during garbage collection.
+      void protect()
+      {
+        m_time.protect();
+        m_actions.protect();
+      }
+      
+      /// \brief Unprotect the term.
+      /// Releases protection of the term which has previously been protected through a
+      /// call to protect.
+      void unprotect()
+      {
+        m_time.unprotect();
+        m_actions.unprotect();
+      }
+      
+      /// \brief Mark the term for not being garbage collected.
+      void mark()
+      {
+        m_time.mark();
+        m_actions.mark();
+      }
 
     public:
       /// \brief Constructor
@@ -131,7 +160,36 @@ namespace lps {
       {
         return !(*this == other);
       }
+
+    /// \brief Checks if the summand is well typed
+    /// \return Returns true if
+    /// <ul>
+    /// <li>the (optional) time has sort Real</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      // check 1)
+      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
+      {
+        std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
+        return false;
+      }
+      return true;
+    }
   };
+
+/*
+  /// \brief Returns the set of free variables that appear in the multi-action.
+  /// \param bound_variables A set of bound variables
+  /// \return The set of free variables that appear in the multi-action.
+  inline
+  std::set<data::variable> find_free_variables(const multi_action& m, const std::set<data::variable>& bound_variables)
+  {
+    std::set<data::variable> used_variables;
+    lps::detail::find_all_free_variables(m.actions(), std::inserter(used_variables, used_variables.end()));
+    return mcrl2::data::detail::set_difference(used_variables, bound_variables);
+  }
+*/
 
 /// \cond INTERNAL_DOCS
 namespace detail {
@@ -392,5 +450,20 @@ void traverse_sort_expressions(const multi_action& m, OutIter dest)
 } // namespace lps
 
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::lps::multi_action>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::multi_action t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::multi_action t) { t.unprotect(); }
+  static void mark(mcrl2::lps::multi_action t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::multi_action t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::multi_action& t)    { return &t.term(); }
+};
+} // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_MULTI_ACTION_H

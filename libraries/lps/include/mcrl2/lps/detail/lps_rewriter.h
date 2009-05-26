@@ -139,7 +139,7 @@ namespace detail {
     void rewrite(linear_process& p) const
     {
       summand_list l = rewrite_list(p.summands());
-      p = linear_process(p.free_variables(), p.process_parameters(), l);
+      p.set_summands(l);
     }
   
     /// \brief Applies the rewriter to a linear process specification

@@ -57,7 +57,8 @@ namespace detail {
   std::set<core::identifier_string> summand_variable_names(const linear_process& p)
   {
     std::set<core::identifier_string> result;
-    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    summand_list summands = p.summands();
+    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {
       data::variable_list summation_variables(i->summation_variables());
       result.insert(

@@ -12,8 +12,10 @@
 #ifndef MCRL2_LPS_DEADLOCK_H
 #define MCRL2_LPS_DEADLOCK_H
 
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h" // for pp
+#include "mcrl2/data/real.h"
 
 namespace mcrl2 {
 
@@ -21,10 +23,33 @@ namespace lps {
 
   class deadlock
   {
+    friend class deadlock_summand;
+    friend struct atermpp::aterm_traits<deadlock>;
+    
     protected:
       /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
       /// the multi action has no time.
       data::data_expression m_time;
+
+      /// \brief Protects the term from being freed during garbage collection.
+      void protect()
+      {
+        m_time.protect();
+      }
+      
+      /// \brief Unprotect the term.
+      /// Releases protection of the term which has previously been protected through a
+      /// call to protect.
+      void unprotect()
+      {
+        m_time.unprotect();
+      }
+      
+      /// \brief Mark the term for not being garbage collected.
+      void mark()
+      {
+        m_time.mark();
+      }
 
     public:
       /// \brief Constructor
@@ -82,6 +107,23 @@ namespace lps {
       {
         return !(*this == other);
       }
+    /// \brief Checks if the summand is well typed
+    /// \return Returns true if
+    /// <ul>
+    /// <li>the (optional) time has sort Real</li>
+    /// </ul>
+    bool is_well_typed() const
+    {
+      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
+
+      // check 1)
+      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
+      {
+        std::cerr << "deadlock_summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
+        return false;
+      }
+      return true;
+    }
   };
 
 /// \brief Traverses the deadlock, and writes all sort expressions
@@ -98,5 +140,20 @@ void traverse_sort_expressions(const deadlock& d, OutIter dest)
 } // namespace lps
 
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::lps::deadlock>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::deadlock t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::deadlock t) { t.unprotect(); }
+  static void mark(mcrl2::lps::deadlock t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::deadlock t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::deadlock& t)    { return &t.term(); }
+};
+} // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_LPS_DEADLOCK_H

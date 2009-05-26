@@ -96,14 +96,12 @@ specification rewrite_lps(const specification &spec, const Rewriter &r)
     }
   }
   new_summands=reverse(new_summands);
-
+  linear_process new_process = lpe;
+  lpe.set_summands(new_summands);
   return specification(
                 spec.data(),
                 spec.action_labels(),
-                linear_process(
-                    lpe.free_variables(),
-                    lpe.process_parameters(),
-                    new_summands),
+                new_process,
                 process_initializer(
                         spec.initial_process().free_variables(),
                         atermpp::reverse(new_initial_assignments)));

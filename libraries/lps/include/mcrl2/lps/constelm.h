@@ -54,7 +54,8 @@ std::map<data::variable, data::data_expression> compute_constant_parameters(cons
   do
   {
     has_changed = false;
-    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    summand_list summands = p.summands();
+    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {
       data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
       if (rc == false_())
@@ -108,7 +109,8 @@ std::map<data::variable, data::data_expression> compute_constant_parameters_subs
   do
   {
     has_changed = false;
-    for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+    summand_list summands = p.summands();
+    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
     {
       data::data_expression rc = r(i->condition(), make_map_substitution_adapter(replacements));
 
@@ -311,13 +313,9 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       do
       {
         dG.clear();
-        for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
+        for (action_summand_vector::iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
         {
-          if (i->is_delta())
-          {
-            continue;
-          }
-          const summand& s = *i;
+          const action_summand& s = *i;
           const data::data_expression& c_i = s.condition();
           if (super::R(c_i, data::make_map_substitution_adapter(sigma)) != data::sort_bool_::false_())
           {

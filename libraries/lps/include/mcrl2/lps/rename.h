@@ -72,7 +72,7 @@ template <typename IdentifierGenerator>
 linear_process rename_process_parameters(const linear_process& p, IdentifierGenerator& generator)
 {
   std::pair<std::vector<data::variable>, std::vector<data::variable> > r = rename_process_parameters_helper(p, generator);
-  return atermpp::partial_replace(p, lps::detail::make_variable_replacer(r.first, r.second));
+  return atermpp::partial_replace(linear_process_to_aterm(p), lps::detail::make_variable_replacer(r.first, r.second));
 }
 
 /// \brief Renames the process parameters in the process p, such that none of them
@@ -98,7 +98,7 @@ specification rename_process_parameters(const specification& spec, IdentifierGen
 {
   std::pair<std::vector<data::variable>, std::vector<data::variable> > r = rename_process_parameters_helper(spec.process(), generator);
 
-  linear_process new_process              = atermpp::partial_replace(spec.process()        , lps::detail::make_variable_replacer(r.first, r.second));
+  linear_process new_process              = atermpp::partial_replace(linear_process_to_aterm(spec.process()), lps::detail::make_variable_replacer(r.first, r.second));
   process_initializer new_initial_process = atermpp::partial_replace(spec.initial_process(), lps::detail::make_variable_replacer(r.first, r.second));
 
   specification result = spec;
@@ -147,7 +147,7 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
       dest.push_back(data::variable(new_name, i->sort()));
     }
   }
-  return atermpp::partial_replace(p, lps::detail::make_variable_replacer(src, dest));
+  return atermpp::partial_replace(linear_process_to_aterm(p), lps::detail::make_variable_replacer(src, dest));
 }
 
 /// \brief Renames the free variables in the process p, such that none of them
@@ -201,7 +201,9 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
     new_summands.push_back(atermpp::partial_replace(*i, lps::detail::make_variable_replacer(src, dest)));
   }
 
-  return set_summands(p, summand_list(new_summands.begin(), new_summands.end()));
+  linear_process result = p;
+  result.set_summands(data::convert<summand_list>(new_summands));
+  return result;
 }
 
 /// \brief Renames the summation variables in the process p, such that none of them

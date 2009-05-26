@@ -72,7 +72,8 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(!lps.has_time());
   core::garbage_collect();
 
-  summand s = lps.summands().front();
+  summand_list summands = lps.summands();
+  summand s = summands.front();
   BOOST_CHECK(!s.has_time());
   core::garbage_collect();
 

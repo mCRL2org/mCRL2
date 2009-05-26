@@ -65,11 +65,13 @@ struct make_timed_lps_summand
 /// \param context A term
 /// \return A timed linear process
 inline
-linear_process make_timed_lps(linear_process lps, atermpp::aterm context)
+linear_process make_timed_lps(const linear_process& lps, atermpp::aterm context)
 {
   data::set_identifier_generator generator(context);
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand<data::set_identifier_generator>(generator));
-  return set_summands(lps, new_summands);
+  linear_process result = lps;
+  result.set_summands(new_summands);
+  return result;
 }
 
 /// \brief Function object that can be used by the partial_replace algorithm

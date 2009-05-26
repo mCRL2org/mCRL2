@@ -24,7 +24,8 @@ static
 lps::specification remove_deltas(const lps::specification& spec) {
   lps::specification result;
   lps::summand_list summands;
-  for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  lps::summand_list psummands = spec.process().summands();
+  for (lps::summand_list::iterator i = psummands.begin(); i != psummands.end(); ++i)
   {
     if (!(i->is_delta()))
     {
@@ -43,7 +44,7 @@ lps::specification remove_deltas(const lps::specification& spec) {
   summands = atermpp::reverse(summands);
 
   result = spec;
-  result.process() = lps::set_summands(spec.process(), summands);
+  result.process().set_summands(summands);
 
   return result;
 }
@@ -81,7 +82,8 @@ mcrl2::data::data_expression calculate_time_invariant(
   }
   assert(j==time_variable_candidates.end());
 
-  for (lps::summand_list::iterator i = spec.process().summands().begin(); i != spec.process().summands().end(); ++i)
+  lps::summand_list summands = spec.process().summands();
+  for (lps::summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     if (!(i->is_delta()))
     { const data::data_expression_list summand_arguments=i->next_state(parameters);
@@ -132,7 +134,7 @@ lps::specification untime(const lps::specification& spec) {
   data::variable_vector untime_process_parameters; // Updated process parameters
   data::variable last_action_time; // Extra parameter to display the last action time
 
-  gsVerboseMsg("Untiming %d summands\n", lps.summands().size());
+  gsVerboseMsg("Untiming %d summands\n", spec.process().summand_count());
 
   //If an lps has got no time at the initialization, return the original lps with all present delta's removed, and replaced with one true->delta.
   if (!lps.has_time())
@@ -152,7 +154,8 @@ lps::specification untime(const lps::specification& spec) {
   // If a summand has time, remove it, create new conditions for time, and add it to the new summand list (untime_summand_list)
   // If a summand does not contain time, first introduce time, and then untime it.
   int j = 0; //Counter only used for verbose output (keep track of the summand number
-  for (lps::summand_list::iterator i = lps.summands().begin(); i != lps.summands().end(); ++i,++j)
+  lps::summand_list summands = lps.summands();
+  for (lps::summand_list::iterator i = summands.begin(); i != summands.end(); ++i,++j)
   {
     gsVerboseMsg("Untiming summand %d\n", j);
 
@@ -232,7 +235,9 @@ lps::specification untime(const lps::specification& spec) {
   untime_summand_list = atermpp::reverse(untime_summand_list);
 
   // Create new LPS, this equals lps, except for the new summand list and the additional process parameter.
-  untime_lps = lps::linear_process(lps.free_variables(), data::make_variable_list(untime_process_parameters), untime_summand_list);
+  untime_lps = lps;
+  untime_lps.process_parameters() = data::make_variable_list(untime_process_parameters);
+  untime_lps.set_summands(untime_summand_list);
 
   // Create new initial_variables and initial_state in order to correctly initialize.
   data::assignment_list untime_initial_assignments = spec.initial_process().assignments();

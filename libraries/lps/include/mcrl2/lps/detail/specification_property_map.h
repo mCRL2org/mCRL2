@@ -18,7 +18,7 @@
 #include <set>
 #include <sstream>
 #include <utility>
-#include <boost/algorithm/string/join.hpp>
+// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
@@ -92,8 +92,10 @@ namespace detail {
         {
           elements.insert(print(*i));
         }
-        return boost::algorithm::join(elements, "; ");
+        return core::string_join(elements, "; ");
       }
+
+
 
       // part class compare functions
       using part::compare;
@@ -128,13 +130,8 @@ namespace detail {
       std::set<std::multiset<action_label> > compute_used_multi_actions(const specification& spec) const
       {
         std::set<std::multiset<action_label> > result;
-        summand_list summands = spec.process().summands();
-        for(summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
+        for(action_summand_vector::const_iterator i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
         {
-          if (i->is_delta())
-          {
-            continue;
-          }
           action_list a = i->multi_action().actions();
           std::multiset<action_label> labels;
           for (action_list::iterator j = a.begin(); j != a.end(); ++j)
@@ -149,13 +146,8 @@ namespace detail {
       std::set<action_label> compute_used_action_labels(const specification& spec) const
       {
         std::set<action_label> result;
-        summand_list summands = spec.process().summands();
-        for(summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
+        for(action_summand_vector::const_iterator i = spec.process().action_summands().begin(); i != spec.process().action_summands().end(); ++i)
         {
-          if (i->is_delta())
-          {
-            continue;
-          }
           action_list a = i->multi_action().actions();
           for (action_list::iterator j = a.begin(); j != a.end(); ++j)
           {
@@ -172,20 +164,6 @@ namespace detail {
         for(summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
         {
           if (i->is_tau())
-          {
-            result++;
-          }
-        }
-        return result;
-      }
-
-      unsigned int compute_delta_summand_count(const specification& spec) const
-      {
-        unsigned int result = 0;
-        summand_list summands = spec.process().summands();
-        for(summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
-        {
-          if (i->is_delta())
           {
             result++;
           }
@@ -245,9 +223,9 @@ namespace detail {
       /// Initializes the specification_property_map with a linear process specification
       specification_property_map(const specification& spec)
       {
-        unsigned int                           summand_count                = spec.process().summands().size();
+        unsigned int                           summand_count                = spec.process().summand_count();
         unsigned int                           tau_summand_count            = compute_tau_summand_count(spec);
-        unsigned int                           delta_summand_count          = compute_delta_summand_count(spec);
+        unsigned int                           delta_summand_count          = spec.process().deadlock_summands().size();
         std::set<data::variable>               declared_free_variables      = compute_declared_free_variables(spec);
         unsigned int                           declared_free_variable_count = declared_free_variables.size();
         std::set<data::variable>               used_free_variables          = compute_used_free_variables(spec);
