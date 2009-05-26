@@ -9,7 +9,7 @@ mcrl2-library lts
        : [ glob source/*.cpp ]
        : <library>/libraries//svc
          <library>/site-config//BCG
-         <use>/libraries//lps
+         <library>/libraries//lps
        :
        : <include>../include
          <library>/site-config//BCG
