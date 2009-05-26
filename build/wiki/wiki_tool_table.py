@@ -96,7 +96,7 @@ TOOLITEM = '''|-
 TOOLS = '''
 chi2mcrl2         | -               | ? | ? 
 diagraphica       | not applicable  | ? | ?
-formulacheck      | -               | ? | ?
+formulacheck      | +               | ? | ?
 grape             | not applicable  | ? | ?
 lps2lts           | +               | ? | ?
 lps2pbes          | +               | ? | ?
@@ -104,10 +104,10 @@ lps2torx          | +               | ? | ?
 lpsactionrename   | +               | ? | ?
 lpsbinary         | +               | ? | ?
 lpsbisim2pbes     | +               | ? | ?
-lpsconfcheck      | -               | ? | ?
+lpsconfcheck      | +               | ? | ?
 lpsconstelm       | +               | ? | ?
 lpsinfo           | +               | ? | ?
-lpsinvelm         | -               | ? | ?
+lpsinvelm         | +               | ? | ?
 lpsparelm         | +               | ? | ?
 lpsparunfold      | +               | ? | ?
 lpspp             | +               | ? | ?

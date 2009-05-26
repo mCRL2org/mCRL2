@@ -2,5 +2,6 @@ project toolset/formulacheck ;
 
 tool formulacheck
        : formulacheck.cpp
-         /libraries//data
+         /libraries//lps
+         /libraries//pbes
        ;
