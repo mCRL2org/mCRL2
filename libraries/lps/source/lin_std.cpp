@@ -9309,8 +9309,6 @@ mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_option
   statenames = lin_options.statenames;
   mayrewrite = !lin_options.norewrite;
   allowFreeDataVariablesInProcesses = !lin_options.nofreevars;
-// NOTE temporarily enabled because results are not what they should be
-  allowFreeDataVariablesInProcesses = true; // !lin_options.nofreevars;
   nodeltaelimination = lin_options.nodeltaelimination;
   add_delta = lin_options.add_delta;
   //initialise local data structures

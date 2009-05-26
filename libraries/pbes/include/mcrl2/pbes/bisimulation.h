@@ -37,7 +37,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using data::detail::operator+;
+using data::operator+;
 using namespace data;
 using namespace lps;
 
