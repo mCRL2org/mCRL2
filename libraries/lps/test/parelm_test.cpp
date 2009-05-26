@@ -106,7 +106,7 @@ const std::string case_8 =
   "                                                                                                                     \n"
   " init P(1, 1, 0, equal, equal, equal, larger, equal, larger, equal, equal, equal, equal);                            \n"
   ;
-const std::string expected_8 = "xi00, xi02, xi03, xi04, xi08";
+const std::string expected_8 = "process_parameter_names = xi00, xi02, xi03, xi04, xi08";
 
 void test_parelm(const std::string& spec_text, const std::string& expected_result)
 {
