@@ -90,7 +90,8 @@ using boost::system::system_category;
 //
 // TODO: find out what macros indicate dirent::d_type present in more libraries
 # if defined(BOOST_WINDOWS_API) \
-  || defined(_DIRENT_HAVE_D_TYPE) // defined by GNU C library if d_type present
+  || (defined(_DIRENT_HAVE_D_TYPE) /* defined by GNU C library if d_type present */ \
+    && !(defined(__SUNPRO_CC) && !defined(__sun)))  // _DIRENT_HAVE_D_TYPE wrong for Sun compiler on Linux
 #   define BOOST_FILESYSTEM_STATUS_CACHE
 # endif
 
@@ -198,6 +199,7 @@ namespace
       if ((ec.value() == ERROR_FILE_NOT_FOUND)
         || (ec.value() == ERROR_PATH_NOT_FOUND)
         || (ec.value() == ERROR_INVALID_NAME) // "tools/jam/src/:sys:stat.h", "//foo"
+        || (ec.value() == ERROR_INVALID_DRIVE) // USB card reader with no card inserted
         || (ec.value() == ERROR_INVALID_PARAMETER) // ":sys:stat.h"
         || (ec.value() == ERROR_BAD_PATHNAME) // "//nosuch" on Win64
         || (ec.value() == ERROR_BAD_NETPATH)) // "//nosuch" on Win32
