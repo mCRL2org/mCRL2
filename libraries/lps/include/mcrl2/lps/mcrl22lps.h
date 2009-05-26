@@ -18,7 +18,6 @@
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/lps/lin_types.h"
-#include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"

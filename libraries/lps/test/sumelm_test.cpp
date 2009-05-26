@@ -37,7 +37,7 @@ void test_case_1()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -54,11 +54,12 @@ void test_case_2()
   std::clog << "Test case 2" << std::endl;
   const std::string text(
     "act a,b;\n"
-    "proc P = sum y:Int . a . b . P;\n"
-    "init P;\n"
+    "proc P(s3_P: Pos) = sum y_P: Int. (s3_P == 1) -> a . P(2)\n"
+    "                  + (s3_P == 2) -> b . P(1);\n"
+    "init P(1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -82,7 +83,7 @@ void test_case_3()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -104,7 +105,7 @@ void test_case_4()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -126,6 +127,8 @@ void test_case_5()
     "init P;\n"
   );
 
+  // FIXME, this test case requires the parser to allow parsing of free
+  // variables.
   specification s0 = mcrl22lps(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
@@ -170,7 +173,7 @@ void test_case_6()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
@@ -216,7 +219,7 @@ void test_case_7()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
@@ -246,7 +249,7 @@ void test_case_8()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
@@ -269,11 +272,11 @@ void test_case_9()
 {
   std::clog << "Test case 9" << std::endl;
   const std::string text(
-    "proc P = sum y:Bool . y -> delta . P;\n"
+    "proc P = sum y:Bool . y -> delta;\n"
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
@@ -297,7 +300,7 @@ void test_case_10()
   "init P(0);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = parse_linear_process_specification(text);
   specification s1 = sumelm(s0);
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
