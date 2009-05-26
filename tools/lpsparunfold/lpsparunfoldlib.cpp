@@ -517,9 +517,12 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     new_summands.push_back( new_summand );
   }
 
-  mcrl2::lps::linear_process new_lps = mcrl2::lps::linear_process(m_lps.free_variables(),mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end()), mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
+  mcrl2::lps::linear_process new_lps;
+  new_lps.free_variables() = m_lps.free_variables();
+  new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
+  new_lps.set_summands(mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
-  gsDebugMsg("\nNew LPS:\n%s\n", pp(new_lps).c_str() );
+  gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str() );
   assert( new_lps.is_well_typed());
 
   return new_lps;

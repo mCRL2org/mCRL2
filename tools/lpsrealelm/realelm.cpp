@@ -1106,13 +1106,12 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   process_parameters = reverse(process_parameters);
 
   // New lps
-  lps = linear_process(lps.free_variables(), process_parameters, summands);
-  // s = set_lps(s, lps);
+  lps.process_parameters() = process_parameters;
+  lps.set_summands(summands);
 
   // New process initializer
   assignment_list initialization(determine_process_initialization(s.initial_process().assignments(), context, r,c));
   process_initializer init(s.initial_process().free_variables(), initialization);
-  // s = set_initial_process(s, init);
 
   return specification(s.data(),
                        s.action_labels()+new_act_declarations,
