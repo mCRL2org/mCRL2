@@ -26,6 +26,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
@@ -512,7 +513,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal_formula::state_frm;
       using namespace modal_formula::accessors;
-      using data::operator+;
+      using namespace data;
       atermpp::vector<pbes_equation> result;
 
       if (!is_not(f))
@@ -915,7 +916,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace modal_formula::state_frm;
       using namespace modal_formula::accessors;
-      using data::operator+;
+      using namespace data;
       atermpp::vector<pbes_equation> result;
 
       if (!is_not(f))
