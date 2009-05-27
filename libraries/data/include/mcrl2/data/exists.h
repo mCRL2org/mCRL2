@@ -44,37 +44,14 @@ namespace mcrl2 {
 
         /// Constructor.
         ///
-        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
         /// \param[in] body The body of the exists abstraction.
         /// \pre variables is not empty.
-        exists(const variable_list& variables,
-               const data_expression& body)
+        template < typename Container >
+        exists(const Container& variables,
+               const data_expression& body,
+               typename detail::enable_if_container< Container, variable >::type* = 0)
           : abstraction("exists", variables, body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the exists abstraction.
-        /// \pre variables is not empty.
-        exists(const variable_vector& variables,
-               const data_expression& body)
-          : abstraction("exists", make_variable_list(variables), body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the exists abstraction.
-        /// \pre variables is not empty.
-        template < typename ForwardTraversalIterator >
-        exists(const boost::iterator_range< ForwardTraversalIterator >& variables,
-               const data_expression& body)
-          : abstraction("exists", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }

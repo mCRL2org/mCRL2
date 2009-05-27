@@ -49,43 +49,20 @@ namespace mcrl2 {
         /// \pre variables is not empty.
         lambda(const variable& variable,
                const data_expression& body)
-          : abstraction("lambda", make_list(variable), body)
+          : abstraction("lambda", convert< variable_list >(make_list(variable)), body)
         {
         }
 
         /// Constructor.
         ///
-        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
         /// \param[in] body The body of the lambda abstraction.
         /// \pre variables is not empty.
-        lambda(const variable_list& variables,
-               const data_expression& body)
+        template < typename Container >
+        lambda(const Container& variables,
+               const data_expression& body,
+               typename detail::enable_if_container< Container, variable >::type* = 0)
           : abstraction("lambda", variables, body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty vector of binding variables.
-        /// \param[in] body The body of the lambda abstraction.
-        /// \pre variables is not empty.
-        lambda(const variable_vector& variables,
-               const data_expression& body)
-          : abstraction("lambda", make_variable_list(variables), body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the lambda abstraction.
-        /// \pre variables is not empty.
-        template < typename ForwardIteratorRange >
-        lambda(const boost::iterator_range< ForwardIteratorRange >& variables,
-               const data_expression& body)
-          : abstraction("lambda", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }

@@ -16,6 +16,9 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool_;
@@ -35,7 +38,12 @@ void test_application_print() {
   BOOST_CHECK(pp(application(g, false_(), sort_nat::nat(10))) == "g(false, 10)");
 }
 
-void test_lambda_print() {
+void test_abstraction_print() {
+  variable_vector x(make_vector(variable("x", sort_nat::nat())));
+  variable_vector xy(make_vector(x[0], variable("y", sort_nat::nat())));
+
+  BOOST_CHECK(pp(lambda(x, equal_to(variable("x", sort_nat::nat()), sort_nat::nat(10)))) == "lambda x: Nat. x == 10");
+  std::cerr << pp(lambda(x, equal_to(variable("x", sort_nat::nat()), sort_nat::nat(10)))) << std::endl;
 }
 
 void test_set_print() {
@@ -52,7 +60,7 @@ int test_main(int argc, char** argv) {
 
   test_function_symbol_print();
   test_application_print();
-  test_lambda_print();
+  test_abstraction_print();
   test_set_print();
   test_bag_print();
   test_structured_sort_print();

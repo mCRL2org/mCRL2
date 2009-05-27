@@ -1495,9 +1495,9 @@ namespace mcrl2 {
            sort_pos::add_pos_to_specification(specification);
          }
          specification.add_system_defined_sort(int_());
-         specification.add_system_defined_constructors(boost::make_iterator_range(int__generate_constructors_code()));
-         specification.add_system_defined_mappings(boost::make_iterator_range(int__generate_functions_code()));
-         specification.add_system_defined_equations(boost::make_iterator_range(int__generate_equations_code()));
+         specification.add_system_defined_constructors(int__generate_constructors_code());
+         specification.add_system_defined_mappings(int__generate_functions_code());
+         specification.add_system_defined_equations(int__generate_equations_code());
       }
     } // namespace sort_int_
 

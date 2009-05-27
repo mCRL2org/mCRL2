@@ -71,7 +71,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fbag_empty", "fbag_empty"));
-          constructors.push_back(structured_sort_constructor("@fbag_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(sort_pos::pos(), "headcount"), structured_sort_constructor_argument(fbag(s), "tail"))), "fbag_cons"));
+          constructors.push_back(structured_sort_constructor("@fbag_cons", make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(sort_pos::pos(), "headcount"), structured_sort_constructor_argument(fbag(s), "tail")), "fbag_cons"));
           return structured_sort(constructors);
         }
 
@@ -996,9 +996,9 @@ namespace mcrl2 {
            sort_nat::add_nat_to_specification(specification);
          }
          specification.add_system_defined_sort(fbag(element));
-         specification.add_system_defined_constructors(boost::make_iterator_range(fbag_generate_constructors_code(element)));
-         specification.add_system_defined_mappings(boost::make_iterator_range(fbag_generate_functions_code(element)));
-         specification.add_system_defined_equations(boost::make_iterator_range(fbag_generate_equations_code(element)));
+         specification.add_system_defined_constructors(fbag_generate_constructors_code(element));
+         specification.add_system_defined_mappings(fbag_generate_functions_code(element));
+         specification.add_system_defined_equations(fbag_generate_equations_code(element));
       }
     } // namespace sort_fbag
 

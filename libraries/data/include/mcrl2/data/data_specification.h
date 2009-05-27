@@ -41,6 +41,8 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail {
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
+
+      class dependent_sort_helper;
     }
     /// \endcond
 
@@ -143,8 +145,7 @@ namespace mcrl2 {
         void make_complete();
 
         ///\brief Adds system defined sorts when necessary to make the specification complete
-        template < typename DependentSortHelper >
-        void make_complete(DependentSortHelper const&);
+        void make_complete(detail::dependent_sort_helper const&);
 
         /// \brief Helper function for make_complete() methods
         template < typename Term >
@@ -500,32 +501,35 @@ namespace mcrl2 {
       {
         m_equations.insert(e);
         m_sys_equations.put(e,e);
-        make_complete(e);
       }
 
       /// \brief Adds sorts to this specification
       ///
-      /// \param[in] sl A range of sort expressions.
+      /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
       /// \note this operation does not invalidate iterators of sorts_const_range
-      template < typename ForwardTraversalIterator >
-      void add_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
+      template < typename Container >
+      void add_sorts(const Container& sl,
+              typename detail::enable_if_container< Container, sort_expression >::type* = 0)
       {
-        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
+        for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
         {
           add_sort(*i);
         }
+
+        make_complete(sl);
       }
 
       /// \brief Adds sorts to this specification, and marks them as system
       /// defined.
       ///
-      /// \param[in] sl A range of sort expressions.
+      /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
       /// \post for all s in sl: is_system_defined(s)
       /// \note this operation does not invalidate iterators of sorts_const_range
-      template < typename ForwardTraversalIterator >
-      void add_system_defined_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
+      template < typename Container >
+      void add_system_defined_sorts(const Container& sl,
+              typename detail::enable_if_container< Container, sort_expression >::type* = 0)
       {
-        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
+        for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
         {
           add_system_defined_sort(*i);
         }
@@ -533,93 +537,99 @@ namespace mcrl2 {
 
       /// \brief Adds constructors to this specification
       ///
-      /// \param[in] fl A range of function symbols.
+      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
       /// \note this operation does not invalidate iterators of constructors_const_range
-      template < typename ForwardTraversalIterator >
-      void add_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
+      template < typename Container >
+      void add_constructors(const Container& fl,
+              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
       {
-        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
+        for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_constructor(*i);
         }
+
+        make_complete(fl);
       }
 
       /// \brief Adds constructors to this specification, and marks them as
       ///        system defined.
       ///
-      /// \param[in] fl A range of function symbols.
+      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
       /// \post for all f in fl: is_system_defined(f)
       /// \note this operation does not invalidate iterators of constructors_const_range
-      template < typename ForwardTraversalIterator >
-      void add_system_defined_constructors(const boost::iterator_range< ForwardTraversalIterator >& fl)
+      template < typename Container >
+      void add_system_defined_constructors(const Container& fl,
+              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
       {
-        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
+        for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_system_defined_constructor(*i);
         }
-
-        make_complete(fl);
       }
 
       /// \brief Adds mappings to this specification
       ///
-      /// \param[in] fl A range of function symbols.
+      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
       /// \note this operation does not invalidate iterators of mappings_const_range
-      template < typename ForwardTraversalIterator >
-      void add_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
+      template < typename Container >
+      void add_mappings(const Container& fl,
+              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
       {
-        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
+        for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_mapping(*i);
         }
+
+        make_complete(fl);
       }
 
       /// \brief Adds mappings to this specification, and marks them as system
       ///        defined.
       ///
-      /// \param[in] fl A range of function symbols.
+      /// \param[in] fl A container with function symbols (objects of type convertible to function_symbol).
       /// \post for all f in fl: is_system_defined(f)
       /// \note this operation does not invalidate iterators of mappings_const_range
-      template < typename ForwardTraversalIterator >
-      void add_system_defined_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
+      template < typename Container >
+      void add_system_defined_mappings(const Container& fl,
+              typename detail::enable_if_container< Container, function_symbol >::type* = 0)
       {
-        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
+        for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           add_system_defined_mapping(*i);
         }
-
-        make_complete(fl);
       }
 
       /// \brief Adds equations to this specification
       ///
-      /// \param[in] el A range of equations.
+      /// \param[in] fl A container with equations (objects of type convertible to data_equation).
       /// \note this operation does not invalidate iterators of equations_const_range
-      template < typename ForwardTraversalIterator >
-      void add_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
+      template < typename Container >
+      void add_equations(const Container& el,
+              typename detail::enable_if_container< Container, data_equation >::type* = 0)
       {
-        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
+        for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
         {
           add_equation(*i);
         }
+
+        make_complete(el);
       }
 
       /// \brief Adds equations to this specification, and marks them as system
       ///        defined.
       ///
-      /// \param[in] el A range of equations.
+      /// \param[in] fl A container with equations (objects of type convertible to data_equation).
       /// \post for all e in el: is_system_defined(e)
       /// \note this operation does not invalidate iterators of equations_const_range
-      template < typename ForwardTraversalIterator >
-      void add_system_defined_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
+      template < typename Container >
+      void add_system_defined_equations(const Container& el,
+              typename detail::enable_if_container< Container, data_equation >::type* = 0)
       {
-        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
+        for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
         {
           m_equations.insert(*i);
           m_sys_equations.put(*i,*i);
         }
-
-        make_complete(el);
       }
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
@@ -627,16 +637,17 @@ namespace mcrl2 {
       ///  equations, assignments for which the specificaiton should be complete
       /// \pre specification is complete, but not necessarily with respect to sorts in e
       /// \post specification has all constructors/mappings/equations for sorts referenced in range
-      template < typename ForwardTraversalIterator >
-      void make_complete(boost::iterator_range< ForwardTraversalIterator > const& range)
+      template < typename Container >
+      void make_complete(Container const& range,
+              typename detail::enable_if_container< Container >::type* = 0)
       {
         std::set< sort_expression > sorts;
- 
-        for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
+
+        for (typename Container::const_iterator i = range.begin(); i != range.end(); ++i)
         {
           gather_sorts(*i, sorts);
         }
- 
+
         make_complete(sorts);
       }
 

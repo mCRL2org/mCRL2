@@ -87,7 +87,6 @@ namespace detail {
         a = ATmakeApplArray(a.function(), t.get());
       }
       ATunprotectArray(t.get());
-//      ATunprotectArray(t.get());
     }
     return a;
   }

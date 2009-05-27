@@ -185,14 +185,47 @@ namespace mcrl2 {
       };
 
       template < typename T >
+      struct is_container_impl< atermpp::term_list< T > > {
+        typedef boost::true_type type;
+      };
+
+      template < typename T >
       struct is_container_impl< boost::iterator_range< T > > {
         typedef boost::true_type type;
       };
 
-      // type condition for use with boost::enable_if
+      template < bool C, typename Container, typename Value >
+      struct lazy_check_value_type {
+        typedef boost::false_type type;
+      };
+
+      template < typename Container, typename ValueType >
+      struct lazy_check_value_type< true, Container, ValueType > {
+        typedef typename boost::is_convertible< typename Container::value_type, ValueType >::type type;
+      };
+
+      /// type condition for use with boost::enable_if
+      /// T the type to be tested
+      /// \pre V is void or T::value_type convertible to V
+      template < typename T, typename V = void >
+      struct is_container {
+        typedef typename lazy_check_value_type< is_container< T, void >::type::value, T, V >::type type;
+      };
+
+      /// type condition for use with boost::enable_if
+      /// T is the container type
       template < typename T >
-      struct is_container : public is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
+      struct is_container< T, void > : public
+        is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
+
+      /// type condition for use with boost::enable_if
+      /// T the type to be tested
+      /// \pre V is void or T::value_type convertible to V
+      template < typename T, typename V = void >
+      struct enable_if_container : public
+        boost::enable_if< typename detail::is_container< T, V >::type >
+      {};
 
       template < typename T >
       struct is_set_impl {

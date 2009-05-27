@@ -60,37 +60,14 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] domain The domain of the sort.
+        /// \param[in] domain The domain of the sort (objects convertible to type sort_expression).
         /// \param[in] codomain The codomain of the sort.
         /// \pre domain is not empty.
-        template < typename ForwardTraversalIterator >
-        function_sort(const typename boost::iterator_range< ForwardTraversalIterator >& domain,
-                      const sort_expression& codomain)
+        template < typename Container >
+        function_sort(const Container& domain,
+                      const sort_expression& codomain,
+                      typename detail::enable_if_container< Container, sort_expression >::type* = 0)
           : sort_expression(mcrl2::core::detail::gsMakeSortArrow(convert< sort_expression_list >(domain), codomain))
-        {
-          assert(!domain.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] domain The domain of the sort.
-        /// \param[in] codomain The codomain of the sort.
-        /// \pre domain is not empty.
-        function_sort(const sort_expression_vector& domain,
-                      const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(convert< sort_expression_list >(domain), codomain))
-        {
-          assert(!domain.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] domain The domain of the sort.
-        /// \param[in] codomain The codomain of the sort.
-        /// \pre domain is not empty.
-        function_sort(const sort_expression_list& domain,
-                      const sort_expression& codomain)
-          : sort_expression(mcrl2::core::detail::gsMakeSortArrow(domain, codomain))
         {
           assert(!domain.empty());
         }

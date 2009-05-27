@@ -58,35 +58,12 @@ namespace mcrl2 {
         ///
         /// \param[in] body The body of the where_clause.
         /// \param[in] declarations The variable declarations of the where
-        ///            clause.
-        template < typename ForwardTraversalIterator >
+        ///            clause (objects of type assignment).
+        template < typename Container >
         where_clause(const data_expression& body,
-                     const boost::iterator_range< ForwardTraversalIterator >& declarations)
-          : data_expression(core::detail::gsMakeWhr(body, atermpp::term_list<assignment>(declarations.begin(), declarations.end())))
-        {
-          assert(!declarations.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] body The body of the where_clause.
-        /// \param[in] declarations The variable declarations of the where
-        ///            clause.
-        where_clause(const data_expression& body,
-                     const assignment_vector& declarations)
-          : data_expression(core::detail::gsMakeWhr(body, atermpp::term_list<assignment>(declarations.begin(), declarations.end())))
-        {
-          assert(!declarations.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] body The body of the where_clause.
-        /// \param[in] declarations The variable declarations of the where
-        ///            clause.
-        where_clause(const data_expression& body,
-                     const assignment_list& declarations)
-          : data_expression(core::detail::gsMakeWhr(body, declarations))
+                     const Container& declarations,
+                     typename detail::enable_if_container< Container, assignment >::type* = 0)
+          : data_expression(core::detail::gsMakeWhr(body, convert< assignment_list >(declarations)))
         {
           assert(!declarations.empty());
         }

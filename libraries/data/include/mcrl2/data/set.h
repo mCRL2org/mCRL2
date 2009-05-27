@@ -917,9 +917,9 @@ namespace mcrl2 {
            sort_fset::add_fset_to_specification(specification, element);
          }
          specification.add_system_defined_sort(set_(element));
-         specification.add_system_defined_constructors(boost::make_iterator_range(set__generate_constructors_code(element)));
-         specification.add_system_defined_mappings(boost::make_iterator_range(set__generate_functions_code(element)));
-         specification.add_system_defined_equations(boost::make_iterator_range(set__generate_equations_code(element)));
+         specification.add_system_defined_constructors(set__generate_constructors_code(element));
+         specification.add_system_defined_mappings(set__generate_functions_code(element));
+         specification.add_system_defined_equations(set__generate_equations_code(element));
       }
     } // namespace sort_set_
 

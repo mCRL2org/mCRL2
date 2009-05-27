@@ -822,9 +822,9 @@ namespace mcrl2 {
            sort_pos::add_pos_to_specification(specification);
          }
          specification.add_system_defined_sort(list(element));
-         specification.add_system_defined_constructors(boost::make_iterator_range(list_generate_constructors_code(element)));
-         specification.add_system_defined_mappings(boost::make_iterator_range(list_generate_functions_code(element)));
-         specification.add_system_defined_equations(boost::make_iterator_range(list_generate_equations_code(element)));
+         specification.add_system_defined_constructors(list_generate_constructors_code(element));
+         specification.add_system_defined_mappings(list_generate_functions_code(element));
+         specification.add_system_defined_equations(list_generate_equations_code(element));
       }
     } // namespace sort_list
 

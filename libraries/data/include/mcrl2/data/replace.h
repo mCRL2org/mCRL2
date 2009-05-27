@@ -80,23 +80,23 @@ namespace mcrl2 {
 
         public:
 
-          data_expression replace(data_expression const& e)
+          data_expression operator()(data_expression const& e)
           {
             if (e.is_abstraction())
             {
-              return replace(abstraction(e));
+              return (*this)(abstraction(e));
             }
             else if (e.is_variable())
             {
-              return replace(variable(e));
+              return (*this)(variable(e));
             }
             else if (e.is_where_clause())
             {
-              return replace(where_clause(e));
+              return (*this)(where_clause(e));
             }
             else if (e.is_application())
             {
-              return replace(application(e));
+              return (*this)(application(e));
             }
 
             return e;
@@ -104,7 +104,7 @@ namespace mcrl2 {
 
           assignment replace(assignment const& a)
           {
-            return assignment(replace(a.lhs()), replace(a.rhs()));
+            return assignment((*this)(a.lhs()), (*this)(a.rhs()));
           }
 
           where_clause replace(where_clause const& w)
@@ -117,28 +117,28 @@ namespace mcrl2 {
             {
               bound_variables.insert(r.front().lhs());
 
-              declarations.push_back(replace(r.front()));
+              declarations.push_back((*this)(r.front()));
             }
 
             m_bound.swap(bound_variables);
 
-            data_expression new_body(replace(w.body()));
+            data_expression new_body((*this)(w.body()));
 
             m_bound.swap(bound_variables);
 
             return where_clause(new_body, boost::make_iterator_range(declarations));
           }
 
-          application replace(application const& a)
+          application operator()(application const& a)
           {
             atermpp::vector< data_expression > arguments;
 
             for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
             {
-              arguments.push_back(replace(r.front()));
+              arguments.push_back((*this)(r.front()));
             }
 
-            return application(replace(a.head()), arguments);
+            return application((*this)(a.head()), arguments);
           }
 
           bool check_replacement_assumption(variable const& v)
@@ -152,14 +152,14 @@ namespace mcrl2 {
             return result.empty();
           }
 
-          data_expression replace(variable const& v)
+          data_expression operator()(variable const& v)
           {
             BOOST_ASSERT((m_bound.find(v) != m_bound.end()) || check_replacement_assumption(v));
 
             return (m_bound.find(v) != m_bound.end()) ? static_cast< data_expression >(v) : m_replace_function(v);
           }
 
-          abstraction replace(abstraction const& a)
+          abstraction operator()(abstraction const& a)
           {
             std::set< variable > bound_variables(boost::copy_range< std::set< variable > >(a.variables()));
 
@@ -167,7 +167,7 @@ namespace mcrl2 {
 
             m_bound.swap(bound_variables);
 
-            data_expression new_body(replace(a.body()));
+            data_expression new_body((*this)(a.body()));
 
             m_bound.swap(bound_variables);
 
@@ -203,7 +203,7 @@ namespace mcrl2 {
 
         for (typename atermpp::term_list< Expression >::const_iterator i = t.begin(); i != t.end(); ++i)
         {
-          result = atermpp::push_front(result, context.replace(*i));
+          result = atermpp::push_front(result, context(*i));
         }
 
         return atermpp::reverse(result);
@@ -212,7 +212,7 @@ namespace mcrl2 {
       template < typename ReplaceFunction >
       data_expression replace_free_variables(replace_free_variables_helper< ReplaceFunction >& context, data_expression const& t)
       {
-        return context.replace(t);
+        return context(t);
       }
 
       template < typename Container, typename ReplaceFunction >
@@ -225,7 +225,7 @@ namespace mcrl2 {
 
         for (typename Container::const_iterator i = t.begin(); i != t.end(); ++i)
         {
-          *o = context.replace(*i);
+          *o = context(*i);
         }
 
         return result;
@@ -238,14 +238,20 @@ namespace mcrl2 {
       }
 
       template <typename T, typename ReplaceFunction >
+      atermpp::term_list< T > partial_replace(atermpp::term_list< T > const& t, ReplaceFunction r)
+      {
+        return atermpp::partial_replace(t, r);
+      }
+
+      template <typename T, typename ReplaceFunction >
       T partial_replace(T const& t, ReplaceFunction r, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
       {
         T result;
 
-        typename std::insert_iterator< T > j(result, result.end());
+        typename std::insert_iterator< T > o(result, result.end());
 
         for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-          *j = atermpp::partial_replace(*i, r);
+          *o = atermpp::partial_replace(*i, r);
         }
 
         return result;
@@ -443,7 +449,7 @@ struct replace_data_expressions_helper
 /// \param r A replace function
 /// \return The replacement result
 template <typename Term, typename ReplaceFunction>
-Term replace_data_expressions(Term const t, ReplaceFunction r)
+Term replace_data_expressions(Term t, ReplaceFunction r)
 {
   BOOST_CONCEPT_ASSERT((boost::UnaryFunction<ReplaceFunction, data_expression, data_expression>));
   return detail::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));

@@ -59,41 +59,14 @@ namespace mcrl2 {
         /// \brief Constructor.
         ///
         /// \param[in] head The data expression that is applied.
-        /// \param[in] arguments The data expressions that head is applied to.
+        /// \param[in] arguments The data expressions that head is applied to (objects of type data_expression or derived).
         /// \pre head.sort() is a function sort.
         /// \pre arguments is not empty.
+        template < typename Container >
         application(const data_expression& head,
-                    const data_expression_list& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, arguments))
-        {
-          assert(head.sort().is_function_sort());
-          assert(!arguments.empty());
-        }
-
-        /// \brief Constructor.
-        ///
-        /// \param[in] head The data expression that is applied.
-        /// \param[in] arguments The data expressions that head is applied to.
-        /// \pre head.sort() is a function sort.
-        /// \pre arguments is not empty.
-        application(const data_expression& head,
-                    const data_expression_vector& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, convert< atermpp::aterm_list >(arguments)))
-        {
-          assert(head.sort().is_function_sort());
-          assert(!arguments.empty());
-        }
-
-        /// \brief Constructor.
-        ///
-        /// \param[in] head The data expression that is applied.
-        /// \param[in] arguments The data expressions that head is applied to.
-        /// \pre head.sort() is a function sort.
-        /// \pre arguments is not empty.
-        template <typename ForwardIterator >
-        application(const data_expression& head,
-                    const typename boost::iterator_range< ForwardIterator >& arguments)
-          : data_expression(core::detail::gsMakeDataAppl(head, convert< atermpp::aterm_list >(arguments)))
+                    const Container& arguments,
+                    typename detail::enable_if_container< Container, data_expression >::type* = 0)
+          : data_expression(core::detail::gsMakeDataAppl(head, convert< data_expression_list >(arguments)))
         {
           assert(head.sort().is_function_sort());
           assert(!arguments.empty());

@@ -44,37 +44,14 @@ namespace mcrl2 {
 
         /// Constructor.
         ///
-        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
         /// \param[in] body The body of the forall abstraction.
         /// \pre variables is not empty.
-        forall(const variable_list& variables,
-               const data_expression& body)
+        template < typename Container >
+        forall(const Container& variables,
+               const data_expression& body,
+               typename detail::enable_if_container< Container, variable >::type* = 0)
           : abstraction("forall", variables, body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the forall abstraction.
-        /// \pre variables is not empty.
-        forall(const variable_vector& variables,
-               const data_expression& body)
-          : abstraction("forall", make_variable_list(variables), body)
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the forall abstraction.
-        /// \pre variables is not empty.
-        template < typename ForwardTraversalIterator >
-        forall(const boost::iterator_range< ForwardTraversalIterator >& variables,
-               const data_expression& body)
-          : abstraction("forall", make_variable_list(variables), body)
         {
           assert(!variables.empty());
         }

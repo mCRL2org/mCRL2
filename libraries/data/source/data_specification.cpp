@@ -125,7 +125,7 @@ namespace mcrl2 {
 
           void add_generic(const structured_sort& s)
           {
-            for (structured_sort::constructor_const_range r(s.struct_constructors()); !r.empty(); r.advance_begin(1))
+            for (structured_sort::constructors_const_range r(s.struct_constructors()); !r.empty(); r.advance_begin(1))
             {
               for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
               {
@@ -257,7 +257,7 @@ namespace mcrl2 {
         { // only normalise when no name has been introduced for the sort (needed for recursive structured sorts)
           atermpp::vector< structured_sort_constructor > new_constructors;
 
-          for (structured_sort::constructor_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
+          for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
           {
             atermpp::vector< structured_sort_constructor_argument > new_arguments;
 
@@ -266,11 +266,10 @@ namespace mcrl2 {
               new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
             }
 
-            new_constructors.push_back(structured_sort_constructor(r.front().name(),
-                         boost::make_iterator_range(new_arguments), r.front().recogniser()));
+            new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
           }
 
-          return structured_sort(boost::make_iterator_range(new_constructors));
+          return structured_sort(new_constructors);
         }
       }
 
@@ -326,12 +325,12 @@ namespace mcrl2 {
 
         structured_sort s_sort(sort);
 
-        add_system_defined_constructors(boost::make_iterator_range(s_sort.constructor_functions(sort)));
-        add_system_defined_mappings(boost::make_iterator_range(s_sort.projection_functions(sort)));
-        add_system_defined_mappings(boost::make_iterator_range(s_sort.recogniser_functions(sort)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.constructor_equations(sort)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.projection_equations(sort)));
-        add_system_defined_equations(boost::make_iterator_range(s_sort.recogniser_equations(sort)));
+        add_system_defined_constructors(s_sort.constructor_functions(sort));
+        add_system_defined_mappings(s_sort.projection_functions(sort));
+        add_system_defined_mappings(s_sort.recogniser_functions(sort));
+        add_system_defined_equations(s_sort.constructor_equations(sort));
+        add_system_defined_equations(s_sort.projection_equations(sort));
+        add_system_defined_equations(s_sort.recogniser_equations(sort));
       }
 
       add_standard_mappings_and_equations(sort);
@@ -340,7 +339,6 @@ namespace mcrl2 {
     // Assumes that a system defined sort s is not (full) part of the specification if:
     //  - the set of sorts does not contain s
     //  - the specification has no constructors for s
-    template < >
     void data_specification::make_complete(detail::dependent_sort_helper const& dependent_sorts)
     {
       for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
@@ -410,7 +408,8 @@ namespace mcrl2 {
     template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
 
     template < >
-    void data_specification::make_complete(std::set< sort_expression > const& sorts)
+    void data_specification::make_complete(std::set< sort_expression > const& sorts,
+                         detail::enable_if_container< std::set< sort_expression > >::type*)
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 

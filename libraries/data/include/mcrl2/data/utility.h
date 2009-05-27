@@ -108,6 +108,21 @@ namespace mcrl2 {
       return result;
     }
 
+    /// \brief Applies a substitution function to all elements of a container
+    /// \param[in] f substitution function
+    /// \param[in] c applies substitution function to elements of container
+    /// \param[out] o output iterator to which the elements of c with f applied
+    ///             to them are added.
+    /// \deprecated
+    template < typename Container, typename SubstitutionFunction, typename OutputIterator >
+    void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
+    {
+      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i, ++o)
+      {
+        *o = f(*i);
+      }
+    }
+
     /// \brief Gives a sequence of sorts for a given sequence of expressions
     /// 
     /// A sequence is a container (as per the STL Container concept) or
@@ -136,21 +151,6 @@ namespace mcrl2 {
     {
       return boost::iterator_range< boost::transform_iterator<
         detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >(container);
-    }
-
-    /// \brief Applies a substitution function to all elements of a container
-    /// \param[in] f substitution function
-    /// \param[in] c applies substitution function to elements of container
-    /// \param[out] o output iterator to which the elements of c with f applied
-    ///             to them are added.
-    /// \deprecated
-    template < typename Container, typename SubstitutionFunction, typename OutputIterator >
-    void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
-    {
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i, ++o)
-      {
-        *o = f(*i);
-      }
     }
 
     /// \brief Pretty prints a data specification

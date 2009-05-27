@@ -22,7 +22,6 @@
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/core/garbage_collection.h"

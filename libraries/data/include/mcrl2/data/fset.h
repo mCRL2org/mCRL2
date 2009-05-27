@@ -68,7 +68,7 @@ namespace mcrl2 {
         {
           structured_sort_constructor_vector constructors;
           constructors.push_back(structured_sort_constructor("@fset_empty", "fset_empty"));
-          constructors.push_back(structured_sort_constructor("@fset_cons", boost::make_iterator_range(make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(fset(s), "tail"))), "fset_cons"));
+          constructors.push_back(structured_sort_constructor("@fset_cons", make_vector(structured_sort_constructor_argument(s, "head"), structured_sort_constructor_argument(fset(s), "tail")), "fset_cons"));
           return structured_sort(constructors);
         }
 
@@ -712,9 +712,9 @@ namespace mcrl2 {
            sort_bool_::add_bool__to_specification(specification);
          }
          specification.add_system_defined_sort(fset(element));
-         specification.add_system_defined_constructors(boost::make_iterator_range(fset_generate_constructors_code(element)));
-         specification.add_system_defined_mappings(boost::make_iterator_range(fset_generate_functions_code(element)));
-         specification.add_system_defined_equations(boost::make_iterator_range(fset_generate_equations_code(element)));
+         specification.add_system_defined_constructors(fset_generate_constructors_code(element));
+         specification.add_system_defined_mappings(fset_generate_functions_code(element));
+         specification.add_system_defined_equations(fset_generate_equations_code(element));
       }
     } // namespace sort_fset
 

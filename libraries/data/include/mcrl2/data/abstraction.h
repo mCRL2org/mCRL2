@@ -115,34 +115,17 @@ namespace mcrl2 {
         /// \param[in] binding_operator The binding operator of the abstraction.
         ///              This may be one of "lambda", "forall",
         ///              "exists", "setcomprehension", "bagcomprehension".
-        /// \param[in] variables A nonempty list of binding variables.
+        /// \param[in] variables A nonempty list of binding variables (objects of type variable)
         /// \param[in] body The body of the abstraction.
         /// \pre binding_operator is one of "lambda", "forall", "exists",
         ///      "setcomprehension" or "bagcomprehension".
         /// \pre variables is not empty.
+        template < typename Container >
         abstraction(const std::string& binding_operator,
-                    const variable_list& variables,
-                    const data_expression& body)
-          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), variables, body))
-        {
-          assert(!variables.empty());
-        }
-
-        /// Constructor.
-        ///
-        /// \param[in] binding_operator The binding operator of the abstraction.
-        ///              This may be one of "lambda", "forall",
-        ///              "exists", "setcomprehension", "bagcomprehension".
-        /// \param[in] variables A nonempty list of binding variables.
-        /// \param[in] body The body of the abstraction.
-        /// \pre binding_operator is one of "lambda", "forall", "exists",
-        ///      "setcomprehension" or "bagcomprehension".
-        /// \pre variables is not empty.
-        template < typename ForwardTraversalIterator >
-        abstraction(const std::string& binding_operator,
-                    const boost::iterator_range< ForwardTraversalIterator >& variables,
-                    const data_expression& body)
-          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), make_variable_list(variables), body))
+                    const Container& variables,
+                    const data_expression& body,
+                    typename detail::enable_if_container< Container, variable >::type* = 0)
+          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), convert< variable_list >(variables), body))
         {
           assert(!variables.empty());
         }

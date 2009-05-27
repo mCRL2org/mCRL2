@@ -14,8 +14,9 @@
 
 #include <string>
 #include <iterator>
-#include <boost/range/iterator_range.hpp>
-#include <boost/iterator/transform_iterator.hpp>
+#include "boost/utility/enable_if.hpp"
+#include "boost/range/iterator_range.hpp"
+#include "boost/iterator/transform_iterator.hpp"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -168,14 +169,15 @@ namespace mcrl2 {
         /// \brief Constructor
         ///
         /// \param[in] name The name of the constructor.
-        /// \param[in] arguments iterator range over structured_sort_constructor_argument (arguments of the constructor).
+        /// \param[in] arguments a container of constructor arguments (of type structured_sort_constructor_argument)
         /// \param[in] recogniser The name of the recogniser.
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
-        template < typename ForwardTraversalIterator >
+        template < typename Container >
         structured_sort_constructor(const std::string& name,
-                                    const typename boost::iterator_range< ForwardTraversalIterator >& arguments,
-                                    const std::string& recogniser)
+                                    const Container& arguments,
+                                    const std::string& recogniser = "",
+                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
                                   convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
                                   (recogniser.empty()) ? core::detail::gsMakeNil()
@@ -195,21 +197,6 @@ namespace mcrl2 {
                                   atermpp::term_list<structured_sort_constructor_argument>(),
                                   (recogniser.empty()) ? core::detail::gsMakeNil()
                                                : static_cast< ATermAppl >(atermpp::aterm_string(recogniser))))
-        {
-          assert(!name.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] name The name of the constructor.
-        /// \param[in] arguments iterator range over structured_sort_constructor_argument (arguments of the constructor).
-        /// \pre name is not empty.
-        template < typename ForwardTraversalIterator >
-        structured_sort_constructor(const std::string& name,
-                                    const typename boost::iterator_range< ForwardTraversalIterator >& arguments)
-          : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                   convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
-                   core::detail::gsMakeNil()))
         {
           assert(!name.empty());
         }
@@ -350,7 +337,7 @@ namespace mcrl2 {
         function_symbol_vector constructor_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
-          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+          for(constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
             result.push_back(i.front().constructor_function(s));
           }
@@ -360,7 +347,7 @@ namespace mcrl2 {
         function_symbol_vector projection_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
-          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+          for(constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
             function_symbol_vector projections(i.front().projection_functions(s));
 
@@ -375,7 +362,7 @@ namespace mcrl2 {
         function_symbol_vector recogniser_functions(const sort_expression& s) const
         {
           function_symbol_vector result;
-          for(constructor_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+          for(constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
             if (!i.front().recogniser().empty()) {
               result.push_back(i.front().recogniser_function(s));
@@ -497,7 +484,7 @@ namespace mcrl2 {
         {
           data_equation_vector result;
 
-          for (constructor_const_range i(struct_constructors());
+          for (constructors_const_range i(struct_constructors());
                                          i.begin() != i.end(); i.advance_begin(1))
           {
             if (!i.front().argument_sorts().empty())
@@ -535,11 +522,11 @@ namespace mcrl2 {
         {
           data_equation_vector result;
 
-          constructor_const_range cl(struct_constructors());
+          constructors_const_range cl(struct_constructors());
 
-          for (constructor_const_range::iterator i = cl.begin(); i != cl.end(); ++i)
+          for (constructors_const_range::iterator i = cl.begin(); i != cl.end(); ++i)
           {
-            for (constructor_const_range::iterator j = cl.begin(); j != cl.end(); ++j)
+            for (constructors_const_range::iterator j = cl.begin(); j != cl.end(); ++j)
             {
               if(!j->recogniser().empty())
               {
@@ -579,9 +566,9 @@ namespace mcrl2 {
       public:
 
         /// \brief iterator range over list of constructor declarations
-        typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructor_range;
+        typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructors_range;
         /// \brief iterator range over constant list of constructor declarations
-        typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructor_const_range;
+        typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructors_const_range;
 
         /// \brief iterator range over list of constructor functions
         typedef boost::iterator_range< function_symbol_list::iterator >                   constructor_function_range;
@@ -617,38 +604,18 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] struct_constructors The list of constructors.
-        /// \post struct_constructors is empty.
-        structured_sort(const structured_sort_constructor_list& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(struct_constructors))
+        /// \param[in] constructors A container with constructors (of type structured_sort_constructor)
+        /// \pre !constructors.empty()
+        template < typename Container >
+        structured_sort(const Container& constructors, typename detail::enable_if_container< Container, structured_sort_constructor >::type* = 0)
+          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(constructors)))
         {
-          assert(!struct_constructors.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] struct_constructors The list of constructors.
-        /// \post struct_constructors is empty.
-        structured_sort(const structured_sort_constructor_vector& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(struct_constructors)))
-        {
-          assert(!struct_constructors.empty());
-        }
-
-        /// \brief Constructor
-        ///
-        /// \param[in] struct_constructors iterator range over structured_sort_constructor (constructors of the structured sort).
-        /// \post struct_constructors is empty.
-        template < typename ForwardTraversalIterator >
-        structured_sort(const boost::iterator_range< ForwardTraversalIterator >& struct_constructors)
-          : sort_expression(mcrl2::core::detail::gsMakeSortStruct(convert< atermpp::term_list<structured_sort_constructor> >(struct_constructors)))
-        {
-          assert(!struct_constructors.empty());
+          assert(!constructors.empty());
         }
 
         /// \brief Returns the struct constructors of this sort
         ///
-        constructor_const_range struct_constructors() const
+        constructors_const_range struct_constructors() const
         {
           return boost::make_iterator_range(structured_sort_constructor_list(atermpp::arg1(*this)));
         }

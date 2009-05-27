@@ -1772,9 +1772,9 @@ namespace mcrl2 {
            sort_nat::add_nat_to_specification(specification);
          }
          specification.add_system_defined_sort(real_());
-         specification.add_system_defined_constructors(boost::make_iterator_range(real__generate_constructors_code()));
-         specification.add_system_defined_mappings(boost::make_iterator_range(real__generate_functions_code()));
-         specification.add_system_defined_equations(boost::make_iterator_range(real__generate_equations_code()));
+         specification.add_system_defined_constructors(real__generate_constructors_code());
+         specification.add_system_defined_mappings(real__generate_functions_code());
+         specification.add_system_defined_equations(real__generate_equations_code());
       }
     } // namespace sort_real_
 
