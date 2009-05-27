@@ -120,7 +120,7 @@ std::set<data::variable> compute_insignificant_parameters(const linear_process& 
 /// \param spec A linear process specification
 /// \return The transformed specification
 inline
-specification parelm(const specification& spec)
+specification parelm(specification& spec)
 {
   std::set<data::variable> to_be_removed = compute_insignificant_parameters(spec.process());
 
@@ -132,16 +132,18 @@ specification parelm(const specification& spec)
   }
   mcrl2::core::gsVerboseMsg("\n");
 
-  specification result = detail::remove_parameters(spec, to_be_removed);
-  assert(result.is_well_typed());
-  return result;
+  detail::remove_parameters(spec, to_be_removed);
+  assert(spec.is_well_typed());
+
+  // TODO: make the algorithm in place, so don't return a value
+  return spec;
 }
 
 /// \brief Removes zero or more insignificant parameters from the specification spec.
 /// \param spec A linear process specification
 /// \return The transformed specification
 inline
-specification parelm2(const specification& spec)
+specification parelm2(specification& spec)
 {
   data::variable_vector process_parameters(data::make_variable_vector(spec.process().process_parameters()));
 
@@ -207,9 +209,9 @@ specification parelm2(const specification& spec)
   }
   mcrl2::core::gsVerboseMsg("\n");
 
-  specification result = detail::remove_parameters(spec, to_be_removed);
-  assert(result.is_well_typed());
-  return result;
+  detail::remove_parameters(spec, to_be_removed);
+  assert(spec.is_well_typed());
+  return spec;
 }
 
 } // namespace lps

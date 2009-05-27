@@ -76,8 +76,7 @@ namespace detail {
       /// \brief Removes formal parameters from the specification
       void remove_parameters(const std::set<data::variable>& to_be_removed)
       {
-        // TODO: make the algorithm in place, to avoid copying the specification
-        m_spec = lps::detail::remove_parameters(m_spec, to_be_removed);       
+        lps::detail::remove_parameters(m_spec, to_be_removed);       
       }     
   };
 

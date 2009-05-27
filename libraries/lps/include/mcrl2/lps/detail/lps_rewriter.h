@@ -62,6 +62,15 @@ namespace detail {
       return TermList(v.begin(), v.end());
     }   
 
+    template <typename Container>
+    void rewrite_container(Container& c) const
+    {
+      for (typename Container::iterator i = c.begin(); i != c.end(); ++i)
+      {
+        rewrite(*i);
+      }
+    }   
+
     /// \brief Applies the rewriter to a data expression
     /// \param d A data expression
     void rewrite(data::data_expression& d) const    
@@ -107,25 +116,21 @@ namespace detail {
   
     /// \brief Applies the rewriter to a summand
     /// \param s A summand
-    void rewrite(summand& s) const
+    void rewrite(action_summand& s) const
     {
-      data::data_expression c = s.condition();
-      rewrite(c);
-      if (s.is_delta())
-      {
-        deadlock delta = s.deadlock();
-        rewrite(delta);
-        s = summand(s.summation_variables(), c, delta);
-      }
-      else
-      {
-        multi_action m = s.multi_action();
-        rewrite(m);
-        data::assignment_list a = rewrite_list(s.assignments());
-        s = summand(s.summation_variables(), c, m, a);
-      }
+      rewrite(s.condition());
+      rewrite(s.multi_action());
+      s.assignments() = rewrite_list(s.assignments());
     }
-  
+
+    /// \brief Applies the rewriter to a summand
+    /// \param s A summand
+    void rewrite(deadlock_summand& s) const
+    {
+      rewrite(s.condition());
+      rewrite(s.deadlock());
+    }
+    
     /// \brief Applies the rewriter to a process_initializer
     /// \param s A process_initializer
     void rewrite(process_initializer& i) const
@@ -138,8 +143,8 @@ namespace detail {
     /// \param s A linear_process
     void rewrite(linear_process& p) const
     {
-      summand_list l = rewrite_list(p.summands());
-      p.set_summands(l);
+      rewrite_container(p.action_summands());
+      rewrite_container(p.deadlock_summands());
     }
   
     /// \brief Applies the rewriter to a linear process specification

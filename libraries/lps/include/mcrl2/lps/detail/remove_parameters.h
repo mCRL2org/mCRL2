@@ -58,42 +58,30 @@ data::assignment_list remove_parameters(const data::assignment_list& l, const st
 /// \brief Removes the parameters in to_be_removed from p.
 /// \param p A linear process
 /// \param to_be_removed A subset of the process parameters of p
-/// \return The removal result
 inline
-linear_process remove_parameters(const linear_process& p, const std::set<data::variable>& to_be_removed)
+void remove_parameters(linear_process& p, const std::set<data::variable>& to_be_removed)
 {
-  linear_process result = p;
-
   // remove process parameters
-  result.process_parameters() = remove_parameters(result.process_parameters(), to_be_removed);
+  p.process_parameters() = remove_parameters(p.process_parameters(), to_be_removed);
 
   // remove parameters from assignment lists in summands
-  atermpp::vector<summand> new_summands = data::convert<atermpp::vector<summand> >(p.summands());
-  for (std::vector<summand>::iterator i = new_summands.begin(); i != new_summands.end(); ++i)
+  for (action_summand_vector::iterator i = p.action_summands().begin(); i != p.action_summands().end(); ++i)
   {
-    *i = set_assignments(*i, remove_parameters(i->assignments(), to_be_removed));
+    i->assignments() = remove_parameters(i->assignments(), to_be_removed);
   }
-  result.set_summands(data::convert<summand_list>(new_summands));
 
   // remove free variables
-  result.free_variables() = remove_parameters(p.free_variables(), to_be_removed);
-
-  return result;
+  p.free_variables() = remove_parameters(p.free_variables(), to_be_removed);
 }
 
 /// \brief Removes the parameters in to_be_removed from spec.
 /// \param spec A linear process specification
 /// \param to_be_removed A set of data variables
-/// \return The removal result
 inline
-specification remove_parameters(const specification& spec, const std::set<data::variable>& to_be_removed)
+void remove_parameters(specification& spec, const std::set<data::variable>& to_be_removed)
 {
-  process_initializer new_initial_state(spec.initial_process().free_variables(), remove_parameters(spec.initial_process().assignments(), to_be_removed));
-  linear_process new_process = remove_parameters(spec.process(), to_be_removed);
-  specification result = spec;
-  result.process() = new_process;
-  result.initial_process() = new_initial_state;
-  return result;
+  spec.initial_process() = process_initializer(spec.initial_process().free_variables(), remove_parameters(spec.initial_process().assignments(), to_be_removed));
+  remove_parameters(spec.process(), to_be_removed);
 }
 
 } // namespace detail
