@@ -27,6 +27,14 @@ namespace lps {
 
 namespace detail {
 
+  struct is_trivial_summand
+  {
+    bool operator()(const summand_base& s) const
+    {
+      return s.condition() == data::sort_bool_::false_();
+    }
+  };
+  
   /// \brief Algorithm class for algorithms on linear process specifications.
   class lps_algorithm
   {
@@ -77,7 +85,23 @@ namespace detail {
       void remove_parameters(const std::set<data::variable>& to_be_removed)
       {
         lps::detail::remove_parameters(m_spec, to_be_removed);       
-      }     
+      }
+      
+      /// \brief Removes parameters with a single element sort
+      void remove_trivial_sorts()
+      {
+        std::cerr << "remove_trivial_sorts is not implemented yet!!!" << std::endl;
+      }
+      
+      /// \brief Removes summands with condition equal to false
+      void remove_trivial_summands()
+      {
+        action_summand_vector& v = m_spec.process().action_summands();
+        v.erase(std::remove_if(v.begin(), v.end(), is_trivial_summand()), v.end());
+
+        deadlock_summand_vector& w = m_spec.process().deadlock_summands();
+        w.erase(std::remove_if(w.begin(), w.end(), is_trivial_summand()), w.end());
+      }
   };
 
   /// \brief Algorithm class for algorithms on linear process specifications

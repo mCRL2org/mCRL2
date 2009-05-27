@@ -1,4 +1,4 @@
-/// Author(s): F.P.M. (Frank) Stappers
+/// Author(s): F.P.M. (Frank) Stappers, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -32,17 +32,54 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
   protected:
 
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    
+    bool m_instantiate_free_variables;
+    bool m_ignore_conditions;
+    bool m_remove_trivial_summands;
+    bool m_remove_trivial_sorts;
+    
+    /// Parse the non-default options.
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+
+      m_instantiate_free_variables = parser.options.count("instantiate-free-variables") > 0;
+      m_ignore_conditions          = parser.options.count("ignore-conditions") > 0;
+      m_remove_trivial_summands    = parser.options.count("remove-trivial-summands") > 0;
+      m_remove_trivial_sorts       = parser.options.count("remove-trivial-sorts") > 0;
+    }
+    
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc
+        // boolean flag (default off)
+        .add_option("instantiate-free-variables",
+          "allow free variables to be instantiated as a side effect of the algorithm"
+          "NOTE: this functionality is untested!",
+          'f')
+        .add_option("ignore-conditions",
+          "ignore conditions by assuming they evaluate to true",
+          'c')
+        .add_option("remove-trivial-summands",
+          "remove summands with condition false",
+          't')
+        .add_option("remove-trivial-sorts",
+          "remove parameters with single element sorts",
+          's')
+        ;
+    }
 
   public:
 
     lpsconstelm_tool()
       : super(
           "lpsconstelm",
-          "Frank Stappers",
+          "Wieger Wesselink",
           "removes constant parameters from an LPS",
           "Removes constant process parameters from the LPS in INFILE and write the result "
-          "to OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-          "stdin is used."
+          "to OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not"
+          "present, standard input is used."
         )
     {}
 
@@ -50,13 +87,28 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      lps::specification lps_specification;
-      lps_specification.load(m_input_filename);
+      lps::specification spec;
+      spec.load(m_input_filename);
+      mcrl2::data::rewriter R = create_rewriter();
 
-      mcrl2::data::rewriter data_rewriter(lps_specification.data());
+      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, mcrl2::core::gsVerbose);
 
-      mcrl2::lps::specification r = mcrl2::lps::constelm(lps_specification, data_rewriter, mcrl2::core::gsVerbose);
-      r.save(m_output_filename);
+      // preprocess: remove single element sorts
+      if (m_remove_trivial_sorts)
+      {
+        algorithm.remove_trivial_sorts();
+      }
+
+      // apply constelm
+      algorithm.run(m_instantiate_free_variables);
+
+      // postprocess: remove trivial summands
+      if (m_remove_trivial_summands)
+      {
+        algorithm.remove_trivial_summands();
+      }
+      
+      spec.save(m_output_filename);
       return true;
     }
 
