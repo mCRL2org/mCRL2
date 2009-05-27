@@ -1231,7 +1231,7 @@
                             <height>0.250000</height>
                         </size>
                         <channelcommunicationtype>visible</channelcommunicationtype>
-                        <rename>c2</rename>
+                        <name>c2</name>
                         <connectionlist>
                             <connectedtochannel>19</connectedtochannel>
                             <connectedtochannel>9</connectedtochannel>
@@ -1248,7 +1248,7 @@
                             <height>0.250000</height>
                         </size>
                         <channelcommunicationtype>visible</channelcommunicationtype>
-                        <rename>c3</rename>
+                        <name>c3</name>
                         <connectionlist>
                             <connectedtochannel>10</connectedtochannel>
                             <connectedtochannel>12</connectedtochannel>
@@ -1265,7 +1265,7 @@
                             <height>0.250000</height>
                         </size>
                         <channelcommunicationtype>visible</channelcommunicationtype>
-                        <rename>c5</rename>
+                        <name>c5</name>
                         <connectionlist>
                             <connectedtochannel>13</connectedtochannel>
                             <connectedtochannel>15</connectedtochannel>
@@ -1282,7 +1282,7 @@
                             <height>0.250000</height>
                         </size>
                         <channelcommunicationtype>visible</channelcommunicationtype>
-                        <rename>c6</rename>
+                        <name>c6</name>
                         <connectionlist>
                             <connectedtochannel>17</connectedtochannel>
                             <connectedtochannel>18</connectedtochannel>
