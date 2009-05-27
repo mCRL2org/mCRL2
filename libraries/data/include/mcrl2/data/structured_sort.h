@@ -254,6 +254,13 @@ namespace mcrl2 {
         /// \brief Returns the constructor function for this constructor,
         ///        assuming it is internally represented with sort s.
         /// \param s Sort expression this sort is internally represented as.
+        ///
+        /// In general, constructor_function is used with s the structured
+        /// sort of which this constructor is a part.
+        /// Consider for example struct c|d, be a structured sort, where
+        /// this constructor is c, then this.constructor_function(struct c|d)
+        /// returns the fuction symbol c : struct c|d, i.e. the function c of
+        /// sort struct c|d.
         function_symbol constructor_function(const sort_expression& s) const
         {
           argument_sorts_const_range arguments(argument_sorts());
