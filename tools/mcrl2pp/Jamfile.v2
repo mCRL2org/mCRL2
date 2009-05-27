@@ -1,7 +1,0 @@
-project toolset/mcrl2pp ;
-
-tool mcrl2pp
-       : mcrl2pp.cpp
-         /libraries//data
-       : <status>experimental
-       ;
