@@ -17,10 +17,14 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/data_specification.h"
 
+#include "mcrl2/core/deprecation.h"
+
 namespace mcrl2 {
 
   namespace data {
     namespace detail {
+
+      DEPRECATED(data::data_expression_vector enumerate_constructors(data::data_specification const& d, data::sort_expression s));
 
       /// Undocumented function.
       /// \deprecated
