@@ -102,6 +102,73 @@ const std::string ABS_SPEC_LINEARIZED =
   "init P(1, d2, true, 1, d2, false, 1, false, 1, d2, true);                                                                    \n"
   ;
 
+// CASE?? specifications were borrowed from sumelm_test.
+  
+std::string CASE1 =
+    "sort S = struct s1 | s2;\n"
+    "map f : S -> Bool;\n"
+    "act a : S # Bool;\n"
+    "proc P = sum c : S, b : Bool . (b == f(c) && c == s2) -> a(c, b) . P;\n"
+    "init P;\n"
+    ;
+
+std::string CASE2 =
+    "act a,b;\n"
+    "proc P(s3_P: Pos) = sum y_P: Int. (s3_P == 1) -> a . P(2)\n"
+    "                  + (s3_P == 2) -> b . P(1);\n"
+    "init P(1);\n"
+    ;
+
+std::string CASE3 =
+    "act a;\n"
+    "proc P = sum y:Int . (4 == y) -> a . P;\n"
+    "init P;\n"
+    ;
+  
+std::string CASE4 =
+    "act a;\n"
+    "proc P = sum y:Int . (y == 4) -> a . P;\n"
+    "init P;\n"
+    ;
+
+std::string CASE5 =
+    "act a,b:Int;\n"
+    "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
+    "init P;\n"
+    ;
+
+std::string CASE6 =
+    "act a;\n"
+    "proc P = sum y:Int . (y == y + 1) -> a . P;\n"
+    "init P;\n"
+    ;
+
+std::string CASE7 =
+    "sort D = struct d1 | d2 | d3;\n"
+    "map g : D -> D;\n"
+    "act a;\n"
+    "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && e == g(e) && e == f) -> a . P(d);\n"
+    "init P(d1);\n"
+    ;
+
+std::string CASE8 =
+    "sort D = struct d1 | d2 | d3;\n"
+    "act a;\n"
+    "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && d == f) -> a . P(d);\n"
+    "init P(d1);\n"
+    ;        
+
+std::string CASE9 =
+    "proc P = sum y:Bool . y -> delta;\n"
+    "init P;\n"
+    ;   
+
+std::string CASE10 =
+  "act a:Nat;\n"
+  "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
+  "init P(0);\n"
+  ;
+    
 void test_process(std::string text)
 {
   process_specification spec = parse_process_specification(text);
@@ -111,6 +178,19 @@ void test_process(std::string text)
     visit_process_expression(i->expression());
     build_process_expression(i->expression());
   }
+  core::garbage_collect();
+}
+
+void test_linear(const std::string& text, bool result = true)
+{
+  process_specification p = parse_process_specification(text);
+  if (is_linear(p) != result)
+  {  
+    std::cerr << "--- Failed linearity test ---" << std::endl;  
+    std::cerr << text << std::endl;
+  }
+  BOOST_CHECK(is_linear(p) == result);
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -118,12 +198,20 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_process(SPEC1);
-  core::garbage_collect();
   test_process(SPEC2);
-  core::garbage_collect();
   test_process(ABS_SPEC_LINEARIZED);
+  test_linear(CASE1);
+  test_linear(CASE2);
+  test_linear(CASE3);
+  test_linear(CASE4);
+  test_linear(CASE5, false);
+  test_linear(CASE6);
+  test_linear(CASE7);
+  test_linear(CASE8);
+  test_linear(CASE9);
+  test_linear(CASE10);
   core::garbage_collect();
-
+  
   return 0;
 }
 
