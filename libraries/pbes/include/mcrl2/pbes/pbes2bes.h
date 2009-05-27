@@ -25,7 +25,6 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
-#include "pbes_rewrite.h"
 
 namespace mcrl2 {
 
