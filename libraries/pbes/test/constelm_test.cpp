@@ -18,6 +18,8 @@
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
+#include "mcrl2/pbes/detail/pbes_property_map.h"
+
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -32,7 +34,7 @@ std::string t1 =
 "                             \n"
 "init X(0);                   \n"
 ;
-std::string x1 = "X n";
+std::string x1 = "binding_variables = X";
 
 std::string t2 =
 "% simple test, n is NOT constant \n"
@@ -42,7 +44,7 @@ std::string t2 =
 "                                 \n"
 "init X(0);                       \n"
 ;
-std::string x2 = "";
+std::string x2 = "binding_variables = X(n: Nat)";
 
 std::string t3 =
 "% multiple parameters: n1 is constant, n2 is not \n"
@@ -52,7 +54,7 @@ std::string t3 =
 "                                                 \n"
 "init X(0, 1);                                    \n"
 ;
-std::string x3 = "X n1";
+std::string x3 = "binding_variables = X(n2: Nat)";
 
 std::string t4 =
 "% conditions: n is not constant, even if conditions are enabled\n"
@@ -62,7 +64,7 @@ std::string t4 =
 "                                                               \n"
 "init X(0);                                                     \n"
 ;
-std::string x4 = "";
+std::string x4 = "binding_variables = X(n: Nat)";
 
 std::string t5 =
 "% conditions: n is constant if conditions are enabled \n"
@@ -72,7 +74,7 @@ std::string t5 =
 "                                                      \n"
 "init X(5);                                            \n"
 ;
-std::string x5 = "X n";
+std::string x5 = "binding_variables = X";
 
 std::string t6 =
 "% reachability: n1 is not constant, equation Y is not reachable and should be removed \n"
@@ -82,7 +84,7 @@ std::string t6 =
 "                                                                                      \n"
 "init X(5);                                                                            \n"
 ;
-std::string x6 = "Y";
+std::string x6 = "binding_variables = X(n1: Nat)";
 
 std::string t7 =
 "% multiple edges from one vertex, one edge invalidates the assertion of the other: no constants should be found \n"
@@ -93,7 +95,7 @@ std::string t7 =
 "init                                                                                                            \n"
 "   X1(2,1);                                                                                                     \n"
 ;
-std::string x7 = "";
+std::string x7 = "binding_variables = X1(n1,m1: Nat), X2(n2: Nat)";
 
 std::string t8 =
 "% conditions: parameters b,c and d will always be removed, with conditions on, parameter \n"
@@ -106,7 +108,7 @@ std::string t8 =
 "init                                                                                     \n"
 "X(false,true,true,5);                                                                    \n"
 ;
-std::string x8 = "X b c d";
+std::string x8 = "binding_variables = X(n: Nat)";
 
 std::string t9 =
 "% conditions: universal quantification which can be solved, n1 and n2 are \n"
@@ -117,7 +119,7 @@ std::string t9 =
 "                                                                          \n"
 "init X(1,2);                                                              \n"
 ;
-std::string x9 = "X n1 n2";
+std::string x9 = "binding_variables = X";
 
 std::string t10 =
 "% conditions: existential quantification which can be solved, n1 and n2 \n"
@@ -128,7 +130,7 @@ std::string t10 =
 "                                                                        \n"
 "init X(1,2);                                                            \n"
 ;
-std::string x10 = "X n1 n2";
+std::string x10 = "binding_variables = X";
 
 std::string t11 =
 "% conditions: universal quantification which cannot be solved \n"
@@ -140,7 +142,7 @@ std::string t11 =
 "                                                              \n"
 "init X(1,2);                                                  \n"
 ;
-std::string x11 = "";
+std::string x11 = "binding_variables = X(n1,n2: Nat)";
 
 std::string t12 =
 "% example 4.2.1 from \"Tools for PBES\" report                                     \n"
@@ -157,7 +159,7 @@ std::string t12 =
 "init                                                                               \n"
 "   X4(0,0,0);                                                                      \n"
 ;
-std::string x12 = "X1 o1\nX2 n2\nX4 n4 o4";
+std::string x12 = "binding_variables = X1(n1,m1,p1: Nat), X2(m2: Nat), X3(n3: Nat), X4(m4: Nat), X5(n5,m5: Nat)";
 
 std::string t13 =
 "pbes nu X =           \n"
@@ -167,7 +169,7 @@ std::string t13 =
 "                      \n"
 "init X;               \n"
 ;
-std::string x13 = "Y b";
+std::string x13 = "binding_variables = X, Y";
 
 std::string t14 =
 "pbes nu X(m:Nat) =           \n"
@@ -175,20 +177,14 @@ std::string t14 =
 "                             \n"
 "init X(0);                   \n"
 ;
-std::string x14 = "";
+std::string x14 = "binding_variables = X(m: Nat)";
 
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
 
-  std::cout << "----------------------------------" << std::endl;
-  std::cout << pbes_spec << std::endl;
-  std::cout << "---" << std::endl;
-
-  core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
   pbes<> q = p;
-  core::gsSetVerboseMsg();
 
   // data rewriter
   data::rewriter datar(q.data());
@@ -201,53 +197,23 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
 
   // run the algorithm
   algorithm.run(q, compute_conditions, remove_equations);
-  std::map<propositional_variable, std::vector<variable> > removed_parameters = algorithm.redundant_parameters();
-  std::set<propositional_variable> removed_equations = algorithm.redundant_equations();
 
-  std::set<std::string> lines1;
-  for (std::map<propositional_variable, std::vector<variable> >::const_iterator i = removed_parameters.begin(); i != removed_parameters.end(); ++i)
+  pbes_system::detail::pbes_property_map info1(q);  
+  pbes_system::detail::pbes_property_map info2(expected_result);
+  std::string diff = info1.compare(info2);
+  if (!diff.empty())
   {
-    std::string line = core::pp(i->first.name());
-    std::set<std::string> v;
-    for (std::vector<variable>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-    {
-      v.insert(core::pp(*j));
-    }
-    for (std::set<std::string>::const_iterator j = v.begin(); j != v.end(); ++j)
-    {
-      line = line + " " + *j;
-    }
-    lines1.insert(line);
+    std::cerr << "\n------ FAILED TEST ------" << std::endl;
+    std::cerr << "--- expected result" << std::endl;
+    std::cerr << expected_result << std::endl;
+    std::cerr << "--- found result" << std::endl;
+    std::cerr << info1.to_string() << std::endl;
+    std::cerr << "--- differences" << std::endl;
+    std::cerr << diff << std::endl;
   }
-  for (std::set<propositional_variable>::iterator i = removed_equations.begin(); i != removed_equations.end(); ++i)
-  {
-    lines1.insert(core::pp(i->name()));
-  }
+  BOOST_CHECK(diff.empty());
 
-  std::set<std::string> lines2;
-  boost::algorithm::split(lines2, expected_result, boost::algorithm::is_any_of("\n"));
-  lines2.erase("");
-
-  std::string s1;
-  for (std::set<std::string>::iterator i = lines1.begin(); i != lines1.end(); ++i)
-  {
-    s1 = s1 + *i + "\n";
-  }
-
-  std::string s2;
-  for (std::set<std::string>::iterator i = lines2.begin(); i != lines2.end(); ++i)
-  {
-    s2 = s2 + *i + "\n";
-  }
-
-  if (s1 != s2)
-  {
-    std::cout << "s1 = #" << s1 << "#" << std::endl;
-    std::cout << "s2 = #" << s2 << "#" << std::endl;
-  }
-  BOOST_CHECK(s1 == s2);
-
-  std::cout << core::pp(q) << std::endl;
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
@@ -255,33 +221,19 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_pbes(t1 , x1 , false);
-  core::garbage_collect();
   test_pbes(t2 , x2 , false);
-  core::garbage_collect();
   test_pbes(t3 , x3 , false);
-  core::garbage_collect();
   test_pbes(t4 , x4 , true);
-  core::garbage_collect();
   test_pbes(t5 , x5 , true);
-  core::garbage_collect();
   test_pbes(t6 , x6 , false);
-  core::garbage_collect();
   test_pbes(t7 , x7 , false);
-  core::garbage_collect();
   test_pbes(t8 , x8 , true);
-  core::garbage_collect();
   test_pbes(t9 , x9 , true);
-  core::garbage_collect();
   test_pbes(t10, x10, true);
-  core::garbage_collect();
   test_pbes(t11, x11, true);
-  core::garbage_collect();
   test_pbes(t12, x12, false);
-  core::garbage_collect();
   test_pbes(t13, x13, false);
-  core::garbage_collect();
   test_pbes(t14, x14, false);
-  core::garbage_collect();
 
   return 0;
 }
