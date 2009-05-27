@@ -26,7 +26,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/detail/convert.h"
-#include "mcrl2/data/detail/specification_property_map.h"
+#include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -36,34 +36,37 @@ namespace lps {
 namespace detail {
 
   /// \brief Stores the following properties of a linear process specification:
-  /// \li summand_count                The number of summands
-  /// \li tau_summand_count            The number of tau summands
-  /// \li delta_summand_count          The number of delta summands
-  /// \li declared_free_variables      The declared free variables
-  /// \li declared_free_variable_names The names of the declared free variables
-  /// \li declared_variable_count      The number of declared free variables
-  /// \li used_free_variables          The used free variables
-  /// \li used_free_variables_names    The names of the used free variables
-  /// \li used_free_variable_count     The number of used free variables
-  /// \li process_parameters           The process parameters
-  /// \li process_parameter_names      The names of the process parameters
-  /// \li process_parameter_count      The number of process parameters
-  /// \li declared_action_labels       The names of the declared action labels
-  /// \li declared_action_label_count  The number of declared action labels
-  /// \li used_action_labels           The names of the used action labels
-  /// \li used_action_label_count      The number of used action labels
-  /// \li used_multi_actions           The used multi-actions (sets of label names)
-  /// \li used_multi_action_count      The number of used multi-actions
-  class specification_property_map : protected mcrl2::data::detail::specification_property_map< specification_property_map >
+  /// <table>
+  /// <tr><th>property                    </th><th>description                                 </th><th>format                                </th></tr>
+  /// <tr><td>summand_count               </td><td>The number of summands                      </td><td>NUMBER                                </td></tr>
+  /// <tr><td>tau_summand_count           </td><td>The number of tau summands                  </td><td>NUMBER                                </td></tr>
+  /// <tr><td>delta_summand_count         </td><td>The number of delta summands                </td><td>NUMBER                                </td></tr>
+  /// <tr><td>declared_free_variables     </td><td>The declared free variables                 </td><td>NAME:SORT; ... ; NAME:SORT            </td></tr>
+  /// <tr><td>declared_free_variable_names</td><td>The names of the declared free variables    </td><td>NAME; ... ; NAME                      </td></tr>
+  /// <tr><td>declared_variable_count     </td><td>The number of declared free variables       </td><td>NUMBER                                </td></tr>
+  /// <tr><td>used_free_variables         </td><td>The used free variables                     </td><td>NAME:SORT; ... ; NAME:SORT            </td></tr>
+  /// <tr><td>used_free_variables_names   </td><td>The names of the used free variables        </td><td>NAME; ... ; NAME                      </td></tr>
+  /// <tr><td>used_free_variable_count    </td><td>The number of used free variables           </td><td>NUMBER                                </td></tr>
+  /// <tr><td>process_parameters          </td><td>The process parameters                      </td><td>NAME:SORT; ... ; NAME:SORT            </td></tr>
+  /// <tr><td>process_parameter_names     </td><td>The names of the process parameters         </td><td>NAME; ... ; NAME                      </td></tr>
+  /// <tr><td>process_parameter_count     </td><td>The number of process parameters            </td><td>NUMBER                                </td></tr>
+  /// <tr><td>declared_action_labels      </td><td>The names of the declared action labels     </td><td>NAME; ... ; NAME                      </td></tr>
+  /// <tr><td>declared_action_label_count </td><td>The number of declared action labels        </td><td>NUMBER                                </td></tr>
+  /// <tr><td>used_action_labels          </td><td>The names of the used action labels         </td><td>NAME; ... ; NAME                      </td></tr>
+  /// <tr><td>used_action_label_count     </td><td>The number of used action labels            </td><td>NUMBER                                </td></tr>
+  /// <tr><td>used_multi_actions          </td><td>The used multi-actions (sets of label names)</td><td>{NAME,...,NAME}; ... ; {NAME,...,NAME}</td></tr>
+  /// <tr><td>used_multi_action_count     </td><td>The number of used multi-actions            </td><td>NUMBER
+  /// </table>
+  class specification_property_map : protected mcrl2::data::detail::data_property_map< specification_property_map >
   {
     protected:
 
       // Allow base class access to protected functions
-      friend class data::detail::specification_property_map< specification_property_map >;
+      friend class data::detail::data_property_map< specification_property_map >;
 
-      typedef data::detail::specification_property_map< specification_property_map > part;
+      typedef data::detail::data_property_map< specification_property_map > super;
 
-      using part::print;
+      using super::print;
 
       std::string print(const action_label l) const
       {
@@ -95,10 +98,8 @@ namespace detail {
         return core::string_join(elements, "; ");
       }
 
-
-
-      // part class compare functions
-      using part::compare;
+      // super class compare functions
+      using super::compare;
 
       std::string compare_property(std::string property, std::string x, std::string y) const
       {
@@ -185,86 +186,52 @@ namespace detail {
       }
 
     public:
-      /// \li summand_count                = NUMBER   
-      /// \li tau_summand_count            = NUMBER
-      /// \li delta_summand_count          = NUMBER
-      /// \li declared_free_variables      = NAME:SORT; ... ; NAME:SORT
-      /// \li declared_free_variable_names = NAME; ... ; NAME
-      /// \li declared_variable_count      = NUMBER
-      /// \li used_free_variables          = NAME:SORT; ... ; NAME:SORT
-      /// \li used_free_variable_names     = NAME; ... ; NAME
-      /// \li used_free_variable_count     = NUMBER
-      /// \li process_parameters           = NAME:SORT; ... ; NAME:SORT
-      /// \li process_parameter_names      = NAME; ... ; NAME
-      /// \li process_parameter_count      = NUMBER
-      /// \li declared_action_labels       = NAME; ... ; NAME
-      /// \li declared_action_label_count  = NUMBER
-      /// \li used_action_labels           = NAME; ... ; NAME
-      /// \li used_action_label_count      = NUMBER
-      /// \li used_multi_actions           = {NAME,...,NAME}; ... ; {NAME,...,NAME}
-      /// \li used_multi_action_count      = NUMBER
+      /// \brief Constructor.
       /// The strings may appear in a random order, and not all of them need to be present
       specification_property_map(const std::string& text)
-      {
-        std::vector<std::string> lines = core::split(text, "\n");
-        for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
-        {
-          std::vector<std::string> words = core::split(*i, "=");
-          if (words.size() == 2)
-          {
-            boost::trim(words[0]);
-            boost::trim(words[1]);
-            m_data[words[0]] = words[1];
-          }
-        }
-      }
+        : super(text)
+      {}
 
       /// \brief Constructor
       /// Initializes the specification_property_map with a linear process specification
       specification_property_map(const specification& spec)
       {
-        unsigned int                           summand_count                = spec.process().summand_count();
-        unsigned int                           tau_summand_count            = compute_tau_summand_count(spec);
-        unsigned int                           delta_summand_count          = spec.process().deadlock_summands().size();
-        std::set<data::variable>               declared_free_variables      = compute_declared_free_variables(spec);
-        unsigned int                           declared_free_variable_count = declared_free_variables.size();
-        std::set<data::variable>               used_free_variables          = compute_used_free_variables(spec);
-        unsigned int                           used_free_variable_count     = used_free_variables.size();
-        std::set<data::variable>               process_parameters           = data::convert<std::set<data::variable> >(spec.process().process_parameters());
-        unsigned int                           process_parameter_count      = process_parameters.size();
-        std::set<action_label>                 declared_action_labels       = data::convert<std::set<action_label> >(spec.action_labels());
-        unsigned int                           declared_action_label_count  = declared_action_labels.size();
-        std::set<action_label>                 used_action_labels           = compute_used_action_labels(spec);
-        unsigned int                           used_action_label_count      = used_action_labels.size();
-        std::set<std::multiset<action_label> > used_multi_actions           = compute_used_multi_actions(spec);
-        unsigned int                           used_multi_action_count      = used_multi_actions.size();
+        unsigned int                           summand_count           = spec.process().summand_count();
+        unsigned int                           tau_summand_count       = compute_tau_summand_count(spec);
+        unsigned int                           delta_summand_count     = spec.process().deadlock_summands().size();
+        std::set<data::variable>               declared_free_variables = compute_declared_free_variables(spec);
+        std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
+        std::set<data::variable>               process_parameters      = data::convert<std::set<data::variable> >(spec.process().process_parameters());
+        std::set<action_label>                 declared_action_labels  = data::convert<std::set<action_label> >(spec.action_labels());
+        std::set<action_label>                 used_action_labels      = compute_used_action_labels(spec);
+        std::set<std::multiset<action_label> > used_multi_actions      = compute_used_multi_actions(spec);
 
         m_data["summand_count"               ] = print(summand_count                 );
         m_data["tau_summand_count"           ] = print(tau_summand_count             );
         m_data["delta_summand_count"         ] = print(delta_summand_count           );
         m_data["declared_free_variables"     ] = print(declared_free_variables, false);
         m_data["declared_free_variable_names"] = print(names(declared_free_variables), false);
-        m_data["declared_free_variable_count"] = print(declared_free_variable_count  );
+        m_data["declared_free_variable_count"] = print(declared_free_variables.size());
         m_data["used_free_variables"         ] = print(used_free_variables, false    );
         m_data["used_free_variable_names"    ] = print(names(used_free_variables), false);
-        m_data["used_free_variable_count"    ] = print(used_free_variable_count      );
+        m_data["used_free_variable_count"    ] = print(used_free_variables.size()    );
         m_data["process_parameters"          ] = print(process_parameters, false     );
         m_data["process_parameter_names"     ] = print(names(process_parameters), false);
-        m_data["process_parameter_count"     ] = print(process_parameter_count       );
+        m_data["process_parameter_count"     ] = print(process_parameters.size()     );
         m_data["declared_action_labels"      ] = print(declared_action_labels, false );
-        m_data["declared_action_label_count" ] = print(declared_action_label_count   );
+        m_data["declared_action_label_count" ] = print(declared_action_labels.size() );
         m_data["used_action_labels"          ] = print(used_action_labels, false     );
-        m_data["used_action_label_count"     ] = print(used_action_label_count       );
+        m_data["used_action_label_count"     ] = print(used_action_labels.size()     );
         m_data["used_multi_actions"          ] = print(used_multi_actions            );
-        m_data["used_multi_action_count"     ] = print(used_multi_action_count       );
+        m_data["used_multi_action_count"     ] = print(used_multi_actions.size()     );
       }
 
-      using part::to_string;
-      using part::data;
+      using super::to_string;
+      using super::data;
 
       std::string compare(const specification_property_map& other) const
       {
-        return part::compare(other);
+        return super::compare(other);
       }
   };
 

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/specification_property_map.h
+/// \file mcrl2/data/detail/data_property_map.h
 /// \brief A property map containing properties of an LPS specification.
 
-#ifndef MCRL2_DATA_DETAIL_SPECIFICATION_PROPERTY_MAP_H
-#define MCRL2_DATA_DETAIL_SPECIFICATION_PROPERTY_MAP_H
+#ifndef MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
+#define MCRL2_DATA_DETAIL_DATA_PROPERTY_MAP_H
 
 #include <algorithm>
 #include <iterator>
@@ -35,48 +35,30 @@ namespace data {
 
 namespace detail {
 
-  /// \brief Stores the following properties of a linear process specification:
-  /// \li summand_count                The number of summands
-  /// \li tau_summand_count            The number of tau summands
-  /// \li delta_summand_count          The number of delta summands
-  /// \li declared_free_variables      The declared free variables
-  /// \li declared_free_variable_names The names of the declared free variables
-  /// \li declared_variable_count      The number of declared free variables
-  /// \li used_free_variables          The used free variables
-  /// \li used_free_variables_names    The names of the used free variables
-  /// \li used_free_variable_count     The number of used free variables
-  /// \li process_parameters           The process parameters
-  /// \li process_parameter_names      The names of the process parameters
-  /// \li process_parameter_count      The number of process parameters
-  /// \li declared_action_labels       The names of the declared action labels
-  /// \li declared_action_label_count  The number of declared action labels
-  /// \li used_action_labels           The names of the used action labels
-  /// \li used_action_label_count      The number of used action labels
-  /// \li used_multi_actions           The used multi-actions (sets of label names)
-  /// \li used_multi_action_count      The number of used multi-actions
-  /// 
+  /// \brief Base class for storing properties of mCRL2 types.
+  /// Properties are (key, value) pairs stored as strings in <tt>KEY = VALUE</tt>
+  /// format. The data_property_map has some predefined functions for
+  /// types in the Data Library.
   /// The optional type argument is used by derived classes. The type
   /// represents the name of a derived class as per CRTP.
   template < typename Derived = void >
-  class specification_property_map
+  class data_property_map
   {
     protected:
 
-      /// Aadd start/end separators for non-set container types
+      /// \brief Add start/end separators for non-set container types
       template < typename Container >
       static std::string add_separators(std::string const& c, typename boost::enable_if< typename detail::is_set< Container >::type >::type* = 0)
       {
         return "[" + c + "]";
       }
 
-      /// Aadd start/end separators for set container types
+      /// \brief Add start/end separators for set container types
       template < typename Container >
       static std::string add_separators(std::string const& c, typename boost::disable_if< typename detail::is_set< Container >::type >::type* = 0)
       {
         return "{" + c + "}";
       }
-
-    protected:
 
       /// \brief Contains a normalized string representation of the properties.
       std::map<std::string, std::string> m_data;
@@ -216,26 +198,12 @@ namespace detail {
         return "";
       }
 
+      /// \brief Compares two values x and y of a given property. This function should
+      /// be redefined in derived classes.
+      /// \return An empty string if the two values are equal, otherwise a string indicating
+      /// the differences between the two.
       std::string compare_property(std::string property, std::string x, std::string y) const
       {
-//        if     (property == "summand_count"               ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "tau_summand_count"           ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "delta_summand_count"         ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "declared_free_variables"     ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "declared_free_variable_names") { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "declared_free_variable_count") { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "used_free_variables"         ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "used_free_variable_names"    ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "used_free_variable_count"    ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "process_parameters"          ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "process_parameter_names"     ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "process_parameter_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "declared_action_labels"      ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "declared_action_label_count" ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "used_action_labels"          ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-//        else if(property == "used_action_label_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
-//        else if(property == "used_multi_actions"          ) { return compare(property, parse_set_multiset_string(x), parse_set_multiset_string(y)); }
-//        else if(property == "used_multi_action_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         return "ERROR: unknown property " + property + " encountered!";
       }
 
@@ -262,10 +230,13 @@ namespace detail {
         return s + std::string(n - s.size(), ' ');
       }
 
-      std::set<core::identifier_string> names(const std::set<data::variable>& v) const
+      /// \brief Collects the names of the elements of the container.
+      /// The name of element x is retrieved by x.name().
+      template <typename Container>
+      std::set<core::identifier_string> names(const Container& v) const
       {
         std::set<core::identifier_string> result;
-        for (std::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+        for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
         {
           result.insert(i->name());
         }
@@ -273,31 +244,13 @@ namespace detail {
       }
 
       /// \brief Default constructor for derived types
-      specification_property_map()
+      data_property_map()
       {
       }
 
-    public:
-      /// \li summand_count                = NUMBER   
-      /// \li tau_summand_count            = NUMBER
-      /// \li delta_summand_count          = NUMBER
-      /// \li declared_free_variables      = NAME:SORT; ... ; NAME:SORT
-      /// \li declared_free_variable_names = NAME; ... ; NAME
-      /// \li declared_variable_count      = NUMBER
-      /// \li used_free_variables          = NAME:SORT; ... ; NAME:SORT
-      /// \li used_free_variable_names     = NAME; ... ; NAME
-      /// \li used_free_variable_count     = NUMBER
-      /// \li process_parameters           = NAME:SORT; ... ; NAME:SORT
-      /// \li process_parameter_names      = NAME; ... ; NAME
-      /// \li process_parameter_count      = NUMBER
-      /// \li declared_action_labels       = NAME; ... ; NAME
-      /// \li declared_action_label_count  = NUMBER
-      /// \li used_action_labels           = NAME; ... ; NAME
-      /// \li used_action_label_count      = NUMBER
-      /// \li used_multi_actions           = {NAME,...,NAME}; ... ; {NAME,...,NAME}
-      /// \li used_multi_action_count      = NUMBER
-      /// The strings may appear in a random order, and not all of them need to be present
-      specification_property_map(const std::string& text)
+      /// \brief Initializes the property map with text containing lines in
+      /// <tt>KEY = VALUE</tt> format.
+      void parse_text(const std::string& text)
       {
         std::vector<std::string> lines = core::split(text, "\n");
         for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
@@ -311,45 +264,12 @@ namespace detail {
           }
         }
       }
-
-      /// \brief Constructor
-      /// Initializes the specification_property_map with a linear process specification
-      specification_property_map(const data_specification& spec)
+      
+    public:
+      /// The strings may appear in a random order, and not all of them need to be present
+      data_property_map(const std::string& text)
       {
-//        unsigned int                           summand_count                = spec.process().summands().size();
-//        unsigned int                           tau_summand_count            = compute_tau_summand_count(spec);
-//        unsigned int                           delta_summand_count          = compute_delta_summand_count(spec);
-//        std::set<data::variable>               declared_free_variables      = compute_declared_free_variables(spec);
-//        unsigned int                           declared_free_variable_count = declared_free_variables.size();
-//        std::set<data::variable>               used_free_variables          = compute_used_free_variables(spec);
-//        unsigned int                           used_free_variable_count     = used_free_variables.size();
-//        std::set<data::variable>               process_parameters           = data::convert<std::set<data::variable> >(spec.process().process_parameters());
-//        unsigned int                           process_parameter_count      = process_parameters.size();
-//        std::set<action_label>                 declared_action_labels       = data::convert<std::set<action_label> >(spec.action_labels());
-//        unsigned int                           declared_action_label_count  = declared_action_labels.size();
-//        std::set<action_label>                 used_action_labels           = compute_used_action_labels(spec);
-//        unsigned int                           used_action_label_count      = used_action_labels.size();
-//        std::set<std::multiset<action_label> > used_multi_actions           = compute_used_multi_actions(spec);
-//        unsigned int                           used_multi_action_count      = used_multi_actions.size();
-//
-//        m_data["summand_count"               ] = print(summand_count                 );
-//        m_data["tau_summand_count"           ] = print(tau_summand_count             );
-//        m_data["delta_summand_count"         ] = print(delta_summand_count           );
-//        m_data["declared_free_variables"     ] = print(declared_free_variables, false);
-//        m_data["declared_free_variable_names"] = print(names(declared_free_variables), false);
-//        m_data["declared_free_variable_count"] = print(declared_free_variable_count  );
-//        m_data["used_free_variables"         ] = print(used_free_variables, false    );
-//        m_data["used_free_variable_names"    ] = print(names(used_free_variables), false);
-//        m_data["used_free_variable_count"    ] = print(used_free_variable_count      );
-//        m_data["process_parameters"          ] = print(process_parameters, false     );
-//        m_data["process_parameter_names"     ] = print(names(process_parameters), false);
-//        m_data["process_parameter_count"     ] = print(process_parameter_count       );
-//        m_data["declared_action_labels"      ] = print(declared_action_labels, false );
-//        m_data["declared_action_label_count" ] = print(declared_action_label_count   );
-//        m_data["used_action_labels"          ] = print(used_action_labels, false     );
-//        m_data["used_action_label_count"     ] = print(used_action_label_count       );
-//        m_data["used_multi_actions"          ] = print(used_multi_actions            );
-//        m_data["used_multi_action_count"     ] = print(used_multi_action_count       );
+        parse_text(text);
       }
 
       /// \brief Returns a string representation of the properties
@@ -364,12 +284,17 @@ namespace detail {
         return core::string_join(lines, "\n");
       }
 
+      /// \brief Returns the stored properties
       const std::map<std::string, std::string>& data() const
       {
         return m_data;
       }
 
-      std::string compare(const specification_property_map& other) const
+      /// \brief Compares this property map with another property map.
+      /// The function compare_property must be defined properly for all
+      /// available properties.
+      /// \return A string describing the differences found.
+      std::string compare(const data_property_map& other) const
       {
         std::ostringstream out;
         for (std::map<std::string, std::string>::const_iterator i = m_data.begin(); i != m_data.end(); ++i)

@@ -71,6 +71,11 @@ namespace data {
 #endif
       };
 
+      detail::Rewriter* get_rewriter()
+      {
+        return m_rewriter.get();
+      }
+
     protected:
 
       /// \brief Constructor.
