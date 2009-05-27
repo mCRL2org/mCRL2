@@ -30,7 +30,7 @@ namespace grape
     class grape_channel_communication_dlg : protected wxDialog
     {
       private:
-        wxTextCtrl       *m_rename_input;       /**< The rename input field shown in the dialog. */
+        wxTextCtrl       *m_name_input;       /**< The name input field shown in the dialog. */
         wxComboBox       *m_combobox;           /**< The property combobox shown in the dialog. */
 
         /**

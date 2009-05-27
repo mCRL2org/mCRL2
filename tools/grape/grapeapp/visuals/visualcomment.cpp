@@ -53,8 +53,8 @@ void visualcomment::draw( void )
 
   if (attached_object != 0)
   {
-    // draw attached object line
-    draw_line( m_object->get_coordinate(), attached_object->get_coordinate(), m_reference_selected);
+    // draw dashed attached object line
+    draw_line( m_object->get_coordinate(), attached_object->get_coordinate(), m_reference_selected, g_color_black, true);
   }
 
   // draw comment

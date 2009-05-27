@@ -532,11 +532,18 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
   return result;
 }
 
-void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color )
+void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color, const bool is_dashed )
 {
   // set color of line
   set_color( p_color, p_selected );
 
+  if (is_dashed)
+  {
+    //enable dashed line
+    glLineStipple(1, 0x3F07);
+    glEnable(GL_LINE_STIPPLE);
+  }
+   
   // draw line
   glBegin(GL_LINE_STRIP);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
@@ -544,6 +551,12 @@ void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_
     glVertex3f( p_end.m_x, p_end.m_y, 0.0f);
     glVertex3f( p_begin.m_x, p_begin.m_y, 0.0f);
   glEnd();
+  
+  if (is_dashed)
+  {
+    //disable dashed line
+    glDisable(GL_LINE_STIPPLE);
+  }
 }
 
 void grape::grapeapp::draw_designator( const coordinate &p_begin, float p_width, float p_height, bool p_selected )

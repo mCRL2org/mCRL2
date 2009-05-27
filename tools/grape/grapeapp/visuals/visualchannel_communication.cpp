@@ -56,14 +56,14 @@ void visualchannel_communication::draw( void )
 
   float x = m_object->get_coordinate().m_x;
   float y = m_object->get_coordinate().m_y;
-  wxString rename_to = cc->get_rename_to();
+  wxString name_to = cc->get_name_to();
 
   // draw channel
   draw_channel( m_object->get_coordinate(), static_cast<float>(0.02), m_object->get_selected(), comm->get_channel_communication_type() );
 
   
   // only find empty position if there is text
-  if (rename_to != _T("")) 
+  if (name_to != _T("")) 
   {
     static float* rotation = 0;
     rotation = new float[(comm->count_channel()+1)];
@@ -109,7 +109,7 @@ void visualchannel_communication::draw( void )
     if ((empty_rotation >= 1.25f*M_PI) && (empty_rotation < 1.75f*M_PI)) align_vertical = al_bottom;
     
     // draw text 
-    grape_glcanvas::get_font_renderer()->draw_text("-> " + std::string(rename_to.fn_str()), x + 0.05f*cos(empty_rotation), y + 0.025f + 0.05f*sin(empty_rotation), 0.0015f, align_horizontal, align_vertical);   
+    grape_glcanvas::get_font_renderer()->draw_text(std::string(name_to.fn_str()), x + 0.05f*cos(empty_rotation), y + 0.025f + 0.05f*sin(empty_rotation), 0.0015f, align_horizontal, align_vertical);   
     if (rotation != 0) {
       delete rotation;
     }

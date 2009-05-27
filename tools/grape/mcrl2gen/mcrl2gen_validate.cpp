@@ -723,7 +723,7 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
     // cerr << "+ Specification is not valid." << endl;
     return false;
   }
-  cerr << "Specification is valid." << endl;
+  cerr << "Specification is valid.";
   return true;
 }
 
@@ -745,7 +745,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATe
     ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(r);
     if(a_parsed_mcrl2_datatype_specification == 0)
     {
-      cerr << "+ Could not parse the datatype specification." << endl;
+      cerr << "+ Could not parse the data type specification." << endl;
       return false;
     }
     else
@@ -754,7 +754,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATe
       ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
       if(a_type_checked_mcrl2_datatype_specification == 0)
       {
-        cerr << "+ Could not type check the datatype specification." << endl;
+        cerr << "+ Could not type check the data type specification." << endl;
         return false;
       }
       // update datatype specification
@@ -792,7 +792,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
     return false;
   }
 
-  cerr << "Process diagram is valid." << endl;
+  cerr << "Process diagram is valid.";
   return true;
 }
 
@@ -1953,7 +1953,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
     return false;
   }
 
-  cerr << "Architecture diagram is valid." << endl;
+  cerr << "Architecture diagram is valid.";
   return true;
 }
 

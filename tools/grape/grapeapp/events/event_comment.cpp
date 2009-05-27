@@ -102,14 +102,14 @@ bool grape_event_remove_comment::Do(  void  )
     bool reference_selected = vis_comm_ptr->get_reference_selected();
     
     // if there is no valid selected communication
-    if (reference_selected) 
+    if (reference_selected)
     {
       // remove the selected channel
       comm_ptr->detach_from_object();
     } else {
       // remove the entire comment
       dia_ptr->remove_comment( comm_ptr );
-    }
+   }
   }
 
   finish_modification();
@@ -123,7 +123,7 @@ bool grape_event_remove_comment::Undo(  void  )
   
   comment* new_comm = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
   // only recreate the comment if it was removed
-  if (new_comm) new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
+  if (new_comm == 0) new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
   
   //re-attach all detached objects
   new_comm->set_text( m_text );
@@ -222,7 +222,7 @@ bool grape_event_attach_comment::Undo( void )
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comment, COMMENT ) );
   dia_ptr->detach_comment_from_object( comm_ptr );
 
-  // reattach if it was attached before
+  // re-attach if it was attached before
   if ( m_connected_to != -1 )
   {
     object* obj_ptr = find_object( m_connected_to );

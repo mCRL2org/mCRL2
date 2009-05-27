@@ -101,10 +101,16 @@ grape_label_dialog::grape_label_dialog( const label &p_label )
   vsizer->Add( var_updates_sizer );
   
   vsizer->AddSpacer( 10 );
-  
-  // add preview
+    
+  // create preview
   m_preview_text = new wxStaticText( this, wxID_ANY, m_label->get_text() );
   vsizer->Add(m_preview_text );
+  
+  // create sizer
+  wxSizer *preview_sizer = new wxBoxSizer(wxHORIZONTAL);
+  preview_sizer->Add( new wxStaticText( this, wxID_ANY, _T("Preview: ") ) );
+  preview_sizer->Add( m_preview_text );
+  vsizer->Add( preview_sizer );
   
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();

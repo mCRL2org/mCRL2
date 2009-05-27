@@ -180,7 +180,7 @@ namespace grape
      * @param p_parent The parent node of the element tree.
      * @param p_name The name.
      */
-    void write_name( wxXmlNode *p_parent, const wxString &p_name );
+    void write_name_to( wxXmlNode *p_parent, const wxString &p_name );
 
     /**
      * Writes an element tree representing a rename.

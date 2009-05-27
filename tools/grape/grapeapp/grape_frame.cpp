@@ -42,7 +42,7 @@ grape_frame::grape_frame( const wxString &p_filename )
 {
   m_current_diagram = 0;
   // initialize widgets
-  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Datatype specification") );
+  m_dataspecbutton = new wxToggleButton( this, GRAPE_DATATYPE_SPEC_BUTTON, _T("Data type specification") );
   m_process_diagram_list = new grape_listbox(this, GRAPE_PROCESS_DIAGRAM_LIST, this);
   m_architecture_diagram_list = new grape_listbox(this, GRAPE_ARCHITECTURE_DIAGRAM_LIST, this);
   m_splitter = new wxSplitterWindow( this, GRAPE_SPLITTER );
@@ -555,7 +555,7 @@ void grape_frame::update_menubar( void )
   {
     m_menubar->Enable( wxID_DELETE, false );
     m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
-    m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
+    //m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
   }
 }
@@ -564,7 +564,7 @@ void grape_frame::update_statusbar( wxCommandEvent& p_event )
 {
   if ( m_mode == GRAPE_MODE_DATASPEC )
   {
-    m_statusbar->SetStatusText( _T("In the text field you can enter a datatype specification") );
+    m_statusbar->SetStatusText( _T("In the text field you can enter a data type specification") );
   }
   else
   {

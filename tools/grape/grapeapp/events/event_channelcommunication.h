@@ -82,7 +82,7 @@ namespace grape
         coordinate                      m_coordinate;   /**< Backup of the coordinate of the channel communication. */
         float                           m_width;        /**< Backup of the width of the channel communication. */
         float                           m_height;       /**< Backup of the height of the channel communicatione. */
-        wxString                        m_rename;       /**< Rename of the channel communication. */
+        wxString                        m_name;       /**< Name of the channel communication. */
         wxArrayLong                     m_comments;     /**< Identifiers of the list of comments attached to the channel communication. */
         unsigned int                            m_in_diagram;  /**< Identifier of the diagram from which the channel was deleted. */
         wxArrayLong                     m_channels;     /**< Identifiers of the channels the channel communication was attached to. */
@@ -209,7 +209,7 @@ namespace grape
         unsigned int        m_channel_communication; /**< A pointer to the channel communication of which the name is to be changed. */        
         channel_communication             m_old_channel_communication; /**< Containing the previous channel communication. */
         channel_communication             m_new_channel_communication; /**< Containing the new channel communication. */
-        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the rename action. */
+        bool                m_pressed_ok; /**< A boolean indicating whether the user confirmed the name action. */
       public:
 
         /**

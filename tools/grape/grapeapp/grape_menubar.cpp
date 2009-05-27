@@ -64,14 +64,14 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   m_menu_file->AppendSeparator();
 
-  item = new wxMenuItem( m_menu_file, GRAPE_MENU_EXPORTTEXT, _T("&Export datatype specification to text"), _T("Export current datatype specification to text") );
+  item = new wxMenuItem( m_menu_file, GRAPE_MENU_EXPORTTEXT, _T("&Export data type specification to text"), _T("Export current data type specification to text") );
   item->SetBitmap( g_icons[ _T("text") ] );
   m_menu_file->Append( item );
-
+/*
   item = new wxMenuItem( m_menu_file, wxID_PRINT );
   m_menu_file->Append( item );
   m_menu_file->Enable(wxID_PRINT, false);
-
+*/
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_EXIT );
@@ -92,7 +92,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   m_menu_edit->Append( item );
 
   m_menu_edit->AppendSeparator();
-
+/*
   item = new wxMenuItem( m_menu_edit, wxID_CUT );
   item->SetBitmap( g_icons[ _T("cut") ] );
   m_menu_edit->Append( item );
@@ -107,7 +107,7 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetBitmap( g_icons[ _T("paste") ] );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(wxID_PASTE, false);
-
+*/
   item = new wxMenuItem( m_menu_edit, wxID_DELETE, _T("&Remove\tDel"), _T("Remove selected objects") );
   item->SetBitmap( g_icons[ _T("del") ] );
   m_menu_edit->Append( item );
@@ -120,18 +120,18 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   m_menu_edit->Enable(GRAPE_MENU_PROPERTIES, false);
 
   m_menu_edit->AppendSeparator();
-
+/*
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_SELECT_ALL, _T("Select &All\tCtrl-A"), _T("Select all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_SELECT_ALL, false);
-
+*/
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DESELECT_ALL, _T("&Deselect \tShift-Ctrl-A"), _T("Deselect all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_DESELECT_ALL, false);
-
+  *
   m_menu_edit->AppendSeparator();
 
-  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit Datatype specification"), _T("Edit Datatype specification"), wxITEM_CHECK );
+  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit Data type specification"), _T("Edit Data type specification"), wxITEM_CHECK );
   m_menu_edit->Append( item );
 
   Append(m_menu_edit, _T("&Edit"));
@@ -272,21 +272,21 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_VALIDATE, in_diagram);
   Enable(GRAPE_MENU_EXPORTTEXT, in_spec);
 // Low prioritiy, not implemented; disabled
-  Enable(wxID_PRINT, false );
+  //Enable(wxID_PRINT, false );
   Enable(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, in_spec);
   Enable(GRAPE_MENU_ADD_PROCESS_DIAGRAM, in_spec);
 
 // Low priority, not implemented; disabled
-  Enable(wxID_CUT, false );
+ // Enable(wxID_CUT, false );
 // Low priority, not implemented; disabled
-  Enable(wxID_COPY, false );
+ // Enable(wxID_COPY, false );
 // Low priority, not implemented; disabled
-  Enable(wxID_PASTE, false );
+ // Enable(wxID_PASTE, false );
 
   Enable(wxID_DELETE, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_PROPERTIES, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
-  Enable(GRAPE_MENU_SELECT_ALL, false );
+  //Enable(GRAPE_MENU_SELECT_ALL, false );
   Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 

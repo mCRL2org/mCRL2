@@ -1954,7 +1954,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
             while ( communication_node )
             {
               unsigned int communication_identifier = 0;
-              wxString communication_rename_to = _T( "" );
+              wxString communication_name_to = _T( "" );
               channel_communication_type communication_channel_type = VISIBLE_CHANNEL_COMMUNICATION;
               coordinate communication_coordinate = { 0.0f, 0.0f };
               float communication_height = 0.1f;
@@ -1976,9 +1976,9 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                   {
                      g_max_id = dummy_id;
                   }
-                } else if ( what_info == _T( "rename" ) )
+                } else if ( what_info == _T( "name" ) )
                 { 
-                  communication_rename_to = communication_information->GetNodeContent();
+                  communication_name_to = communication_information->GetNodeContent();
                 }
                 else if ( what_info == _T( "size" ) )
                 {
@@ -2078,7 +2078,7 @@ bool grape::libgrape::open_channel_communications( grape_specification* p_spec, 
                 channel_communication* comm_ptr = p_arch_dia_ptr->add_channel_communication( communication_identifier, communication_coordinate, channels.Item( 0 ), channels.Item( 1 ) );
                 comm_ptr->set_width( communication_width );
                 comm_ptr->set_height( communication_height );
-                comm_ptr->set_rename_to( communication_rename_to );
+                comm_ptr->set_name_to( communication_name_to );
                 comm_ptr->set_channel_communication_type( communication_channel_type );
                 for ( unsigned int i = 2; i < channels.GetCount(); ++i )
                 {

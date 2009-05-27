@@ -274,7 +274,7 @@ namespace grape
      * @param p_end The end coordinate of the to be drawn line.
      * @param A flag indicating whether the object is selected.
      */
-    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color = g_color_black );
+    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color = g_color_black, const bool is_dashed = false );
 
     /**
      * Initial designator (arrow) draw function.

@@ -38,7 +38,7 @@ channel_communication::channel_communication( const channel_communication &p_cha
 : object( p_channel_comm )
 {
   m_communication = p_channel_comm.m_communication;
-  m_rename_to = p_channel_comm.m_rename_to;
+  m_name_to = p_channel_comm.m_name_to;
   set_channel_communication_type(p_channel_comm.get_channel_communication_type());
 }
 
@@ -71,14 +71,14 @@ channel_communication::~channel_communication( void )
   m_communication.Clear();
 }
 
-wxString channel_communication::get_rename_to(void) const
+wxString channel_communication::get_name_to(void) const
 {
-  return m_rename_to;
+  return m_name_to;
 }
 
-void channel_communication::set_rename_to( const wxString &p_rename_to)
+void channel_communication::set_name_to( const wxString &p_name_to)
 {
-  m_rename_to = p_rename_to;
+  m_name_to = p_name_to;
 }
 
 void channel_communication::attach_channel( channel* p_channel )

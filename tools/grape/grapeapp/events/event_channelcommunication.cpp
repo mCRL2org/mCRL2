@@ -149,7 +149,7 @@ grape_event_remove_channel_communication::grape_event_remove_channel_communicati
   m_coordinate = p_c_comm->get_coordinate();
   m_width = p_c_comm->get_width();
   m_height = p_c_comm->get_height();
-  m_rename = p_c_comm->get_rename_to();
+  m_name = p_c_comm->get_name_to();
   m_comments.Empty();
   for ( unsigned int i = 0; i < p_c_comm->count_comment(); ++i )
   {
@@ -248,7 +248,7 @@ bool grape_event_remove_channel_communication::Undo( void )
       dia_ptr->attach_channel_communication_to_channel( new_comm, chan );
     }
 
-    new_comm->set_rename_to( m_rename );
+    new_comm->set_name_to( m_name );
     new_comm->set_channel_communication_type( m_channel_communication_type );
   } else {
     // Reattach channel
@@ -441,7 +441,7 @@ bool grape_event_change_channel_communication::Do( void )
   }
 
   channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
-  channel_communication_ptr->set_rename_to( m_new_channel_communication.get_rename_to() );
+  channel_communication_ptr->set_name_to( m_new_channel_communication.get_name_to() );
   channel_communication_ptr->set_channel_communication_type( m_new_channel_communication.get_channel_communication_type() );
  
   finish_modification();
@@ -451,7 +451,7 @@ bool grape_event_change_channel_communication::Do( void )
 bool grape_event_change_channel_communication::Undo( void )
 {
   channel_communication* channel_communication_ptr = static_cast<channel_communication*> ( find_object( m_channel_communication, CHANNEL_COMMUNICATION ) );
-  channel_communication_ptr->set_rename_to( m_old_channel_communication.get_rename_to() );
+  channel_communication_ptr->set_name_to( m_old_channel_communication.get_name_to() );
   channel_communication_ptr->set_channel_communication_type( m_old_channel_communication.get_channel_communication_type() );
    
   finish_modification();
