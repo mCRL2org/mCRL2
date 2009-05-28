@@ -79,7 +79,7 @@ namespace mcrl2 {
 
           bool Initialize(int& argc, wxChar** argv) {
             try {
-              m_execute = execute(argc, argv);
+              m_execute = execute(argc, argv) == 0;
             }
             catch (std::exception& e) {
               if (wxApp::Initialize(argc, argv)) {
@@ -91,19 +91,13 @@ namespace mcrl2 {
 
                 return false;
               }
-
-              return true;
-            }
-
-            if (!wxApp::Initialize(argc, argv) && m_execute) {
-              return false;
             }
 
             return true;
           }
 
           // Tool class compatibility
-          bool execute(int& argc, wxChar** argv) {
+          int execute(int& argc, wxChar** argv) {
             std::vector< boost::shared_array< char > >   arguments;
             boost::shared_array< char* >                 converted_arguments(new char*[argc]);
 
@@ -118,8 +112,11 @@ namespace mcrl2 {
               converted_arguments[i] = arguments.back().get();
             }
 
-std::cerr << "HELLO EXECUTING" << std::endl;
             return ToolBase::execute(argc, converted_arguments.get());
+          }
+
+          bool pre_run() {
+            return !wxApp::Initialize(argc, argv);
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -233,15 +230,6 @@ std::cerr << "HELLO EXECUTING" << std::endl;
           }
 
         public:
-
-          bool run() {
-std::cerr << "HELLO" << std::endl;
-            if (!wxApp::Initialize(argc, argv) && m_execute) {
-              return static_cast< Derived& >(*this).run();
-            }
-
-            return true;
-          }
 
           /** \brief Preferred constructor
            *  \param[in] tool_name   The name of the tool

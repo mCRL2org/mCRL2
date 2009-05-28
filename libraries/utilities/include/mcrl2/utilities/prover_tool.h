@@ -13,7 +13,7 @@
 #define MCRL2_UTILITIES_PROVER_TOOL_H
 
 #include <iostream>
-#include "mcrl2/data/detail/prover.h"
+#include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
 namespace mcrl2 {

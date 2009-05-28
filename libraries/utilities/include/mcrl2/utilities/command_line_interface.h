@@ -44,9 +44,6 @@ namespace mcrl2 {
       template < typename T >
       struct initialiser;
 
-      void register_rewriting_options(interface_description&);
-      void register_proving_options(interface_description&);
-
       /// Helper class to prevent uninitialised variable warnings
       template < typename T, bool = boost::is_pod< T >::value >
       struct instance_of;
@@ -107,8 +104,6 @@ namespace mcrl2 {
      *   add_option("timeout", make_optional_argument("SEC", "2"), "option with optional argument (default 2)").
      *   add_option("tool", make_mandatory_argument("FOO"), "option with mandatory argument").
      *   add_option("language", make_mandatory_argument("LANG", "english"), "option with mandatory argument (default english)").
-     *   add_rewriting_options().
-     *   add_prover_options();
      * \endcode
      *
      * Printing an interface description.
@@ -597,28 +592,6 @@ namespace mcrl2 {
         interface_description& add_option(std::string const& long_identifier,
                                           std::string const& description,
                                           char const short_identifier = '\0');
-
-        /**
-         * \brief Adds options for the rewriter
-         * Adds a single option called `rewrite' with a mandatory argument.
-         * \return *this
-         **/
-        interface_description& add_rewriting_options() {
-          detail::register_rewriting_options(*this);
-
-          return *this;
-        }
-
-        /**
-         * \brief Adds options for the prover
-         * Adds a single option called `smt-solver' with a mandatory argument.
-         * \return *this
-         **/
-        interface_description& add_prover_options() {
-          detail::register_proving_options(*this);
-
-          return *this;
-        }
 
         /**
          * \brief Generates a human readable interface description (used for -h,--help)

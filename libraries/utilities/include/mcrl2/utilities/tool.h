@@ -79,6 +79,13 @@ namespace tools {
 #endif
       }
 
+      /// \brief Executed only if run would be executed and invoked before run.
+      /// \return Whether run should still be executed
+      virtual bool pre_run()
+      {
+        return true;
+      }
+
       /// \brief Checks if the number of positional options is OK.
       /// By default this function handles standart options: -v, -d and -q
       /// \param parser A command line parser
@@ -130,7 +137,7 @@ namespace tools {
             check_positional_options(parser);
             parse_options(parser);
            
-            if (!run())
+            if (pre_run() && !run())
             {
               return EXIT_FAILURE;
             }
