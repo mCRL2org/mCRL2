@@ -208,9 +208,7 @@ namespace mcrl2 {
       /// T the type to be tested
       /// \pre V is void or T::value_type convertible to V
       template < typename T, typename V = void >
-      struct is_container {
-        typedef typename lazy_check_value_type< is_container< T, void >::type::value, T, V >::type type;
-      };
+      struct is_container;
 
       /// type condition for use with boost::enable_if
       /// T is the container type
@@ -218,6 +216,11 @@ namespace mcrl2 {
       struct is_container< T, void > : public
         is_container_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
+
+      template < typename T, typename V >
+      struct is_container {
+        typedef typename lazy_check_value_type< is_container< T, void >::type::value, T, V >::type type;
+      };
 
       /// type condition for use with boost::enable_if
       /// T the type to be tested
