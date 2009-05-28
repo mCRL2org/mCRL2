@@ -103,36 +103,36 @@ namespace mcrl2 {
         /// \brief iterator range over constant list of sort expressions
         typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
 
-        /// \brief iterator over constructors
+        /// \brief iterator over aliases (objects of type function_symbol)
         typedef boost::transform_iterator< convert_to_alias, rtl_aliases_map::iterator >              aliases_iterator;
-        /// \brief const iterator over constructors
+        /// \brief const iterator over aliases (objects of type function_symbol)
         typedef boost::transform_iterator< convert_to_alias, rtl_aliases_map::const_iterator >        aliases_const_iterator;
-        /// \brief iterator range over list of sort expressions
+        /// \brief iterator range over list of aliases
         typedef boost::iterator_range< aliases_iterator >                                             aliases_range;
-        /// \brief iterator range over constant list of sort expressions
+        /// \brief iterator range over constant list of aliases
         typedef boost::iterator_range< aliases_const_iterator >                                       aliases_const_range;
 
-        /// \brief iterator over constructors
+        /// \brief iterator over constructors (objects of type function_symbol)
         typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          constructors_iterator;
-        /// \brief const iterator over constructors
+        /// \brief const iterator over constructors (objects of type function_symbol)
         typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    constructors_const_iterator;
-        /// \brief iterator range over constructors
+        /// \brief iterator range over constructors (objects of type function_symbol)
         typedef boost::iterator_range< constructors_iterator >                                        constructors_range;
-        /// \brief const iterator range over constructors
+        /// \brief const iterator range over constructors (objects of type function_symbol)
         typedef boost::iterator_range< constructors_const_iterator >                                  constructors_const_range;
 
-        /// \brief iterator over constructors
+        /// \brief iterator over mappings (objects of type function_symbol)
         typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          mappings_iterator;
-        /// \brief const iterator over constructors
+        /// \brief const iterator over mappings (objects of type function_symbol)
         typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    mappings_const_iterator;
-        /// \brief iterator range over constructors
+        /// \brief iterator range over mappings (objects of type function_symbol)
         typedef boost::iterator_range< mappings_iterator >                                            mappings_range;
-        /// \brief const iterator range over constructors
+        /// \brief const iterator range over mappings (objects of type function_symbol)
         typedef boost::iterator_range< mappings_const_iterator >                                      mappings_const_range;
 
-        /// \brief iterator range over list of data equations
+        /// \brief iterator range over list of data equations (objects of type data_equation)
         typedef boost::iterator_range< atermpp::set< data_equation >::iterator >                      equations_range;
-        /// \brief iterator range over constant list of data equations
+        /// \brief iterator range over constant list of data equations (objects of type data_equation)
         typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >                equations_const_range;
 
       private:
