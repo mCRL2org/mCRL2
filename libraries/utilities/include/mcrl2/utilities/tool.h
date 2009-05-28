@@ -15,9 +15,12 @@
 #include <cstdlib>
 #include <string>
 #include <stdexcept>
-#include "mcrl2/core/messaging.h"
+
+#ifndef MCRL2_TOOL_CLASSES_NO_CORE
+# include "mcrl2/core/messaging.h"
+#endif
+
 #include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_messaging.h"
 
 namespace mcrl2 {
 
@@ -55,13 +58,32 @@ namespace tools {
       /// \param parser A command line parser
       virtual void parse_options(const command_line_parser& parser)
       {
+        if (parser.options.count("quiet")) {
+          if (parser.options.count("debug")) {
+            parser.error("options -q/--quiet and -d/--debug cannot be used together\n");
+          }
+          if (parser.options.count("verbose")) {
+            parser.error("options -q/--quiet and -v/--verbose cannot be used together\n");
+          }
+        }
+#ifndef MCRL2_TOOL_CLASSES_NO_CORE
+        if (parser.options.count("quiet")) {
+          mcrl2::core::gsSetQuietMsg();
+        }
+        if (parser.options.count("verbose")) {
+          mcrl2::core::gsSetVerboseMsg();
+        }
+        if (parser.options.count("debug")) {
+          mcrl2::core::gsSetDebugMsg();
+        }
+#endif
       }
 
       /// \brief Checks if the number of positional options is OK.
-      /// By default this function does nothing.
+      /// By default this function handles standart options: -v, -d and -q
       /// \param parser A command line parser
       virtual void check_positional_options(const command_line_parser& parser)
-      {}
+      { }
 
       /// \brief Returns the synopsis of the tool
       /// \return The string "[OPTION]...\n"
@@ -83,8 +105,7 @@ namespace tools {
           m_what_is         (what_is),
           m_tool_description(tool_description),
           m_known_issues    (known_issues)
-      {
-      }
+      {}
 
       /// \brief Destructor.
       virtual ~tool()

@@ -13,6 +13,7 @@
 #define MCRL2_SPECIFIC_SQUADT_INTERFACE_H_
 
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/deprecation.h"
 
 #include "mcrl2/utilities/squadt_interface.h"
 

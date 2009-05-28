@@ -10,9 +10,6 @@
 
 #include "wx.hpp" // precompiled headers
 
-#define NAME "squadt"
-#define AUTHOR "Jeroen van der Wulp"
-
 #include "boost/version.hpp"
 #include "boost/thread/condition.hpp"
 #include "boost/thread/thread.hpp"
@@ -21,7 +18,8 @@
 #include "boost/bind.hpp"
 #include "boost/filesystem/convenience.hpp"
 
-#include "mcrl2/utilities/command_line_interface.h"
+#define MCRL2_TOOL_CLASSES_NO_CORE
+#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/wx_tool.h"
 
 #include "settings_manager.hpp"
@@ -49,12 +47,14 @@ inline boost::filesystem::path parent_path(boost::filesystem::path const& p) {
 }
 
 using namespace squadt::GUI;
+using namespace mcrl2::utilities;
 
 /* SQuADt class declaration */
-class SQuADt : public mcrl2::utilities::wx::tool< SQuADt > {
-  friend class mcrl2::utilities::wx::tool< SQuADt >;
+class SQuADt : public mcrl2::utilities::wx::tool< SQuADt, mcrl2::utilities::tools::input_tool > {
 
   private:
+
+    typedef mcrl2::utilities::wx::tool< SQuADt, mcrl2::utilities::tools::input_tool > super;
 
     // Optional action to execute after GUI construction
     boost::function < void (squadt::GUI::main*) > action;
@@ -62,43 +62,19 @@ class SQuADt : public mcrl2::utilities::wx::tool< SQuADt > {
     // Port number to listen on for incoming TCP connections
     tipi::tcp_port                                tcp_port_number;
 
-  private:
+  protected:
 
-    bool parse_command_line(int& argc, wxChar** argv);
-
-    bool DoInit();
-
-  public:
-
-    SQuADt() : mcrl2::utilities::wx::tool< SQuADt >("SQuADT",
-                  "Graphical environment that provides a uniform interface"
-                  " for using all kinds of other connected tools.",
-                  std::vector< std::string >(1, "Jeroen van der Wulp")) {
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("create", "create new project in PATH", 'c').
+           add_option("port", make_mandatory_argument("PORT"), "listen on TCP port number PORT", 'p');
     }
-};
 
-IMPLEMENT_APP(SQuADt)
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
 
-bool SQuADt::parse_command_line(int& argc, wxChar** argv) {
-  using namespace mcrl2::utilities;
-
-  if (0 < argc) {
-    interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()), NAME, AUTHOR,
-        "interactive integration of software tools",
-        "[OPTION]... [PATH]\n",
-        "Graphical environment that provides a uniform interface for using all kinds of "
-        "other connected tools. If PATH is provided, it provides an existing project in "
-        "PATH.");
-
-    clinterface.
-      add_option("create", "create new project in PATH", 'c').
-      add_option("port", make_mandatory_argument("PORT"), "listen on TCP port number PORT", 'p');
-
-    tcp_port_number = 10949;
-
-    command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
-
-    if (parser.continue_execution()) {
       // default log level
       tipi::utility::logger::log_level default_log_level = 1;
 
@@ -144,18 +120,38 @@ bool SQuADt::parse_command_line(int& argc, wxChar** argv) {
       tipi::controller::communicator::get_default_logger().set_filter_level(default_log_level);
     }
 
-    return parser.continue_execution();
-  }
 
-  return true;
-}
+    bool parse_command_line(int& argc, wxChar** argv);
+
+    std::string synopsis() const
+    {
+      return "[OPTION]... [PATH]";
+    }
+
+  public:
+
+    bool run();
+
+    SQuADt() : super(
+        "SQuADT", // tool name
+        "interactive integration of software tools",
+        "Graphical environment that provides a uniform interface"
+        " for using all kinds of other connected tools.", // GUI specific
+        "Graphical environment that provides a uniform interface for using all kinds of "
+        "other connected tools. If PATH is provided, it provides an existing project in "
+        "PATH.",
+        std::vector< std::string >(1, "Jeroen van der Wulp")), tcp_port_number(10949)
+    { }
+};
+
+IMPLEMENT_APP(SQuADt)
 
 /*
  * SQuADt class implementation
  *
  * Must return true because static initialisation might not have completed
  */
-bool SQuADt::DoInit() {
+bool SQuADt::run() {
   using namespace squadt;
   using namespace squadt::GUI;
 

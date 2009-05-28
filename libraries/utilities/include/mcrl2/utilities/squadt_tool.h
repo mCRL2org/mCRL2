@@ -37,7 +37,7 @@ namespace mcrl2 {
 
 #include "boost/bind.hpp"
 
-# include "mcrl2/utilities/mcrl2_squadt_interface.h"
+# include "mcrl2/utilities/squadt_interface.h"
 # include "mcrl2/utilities/input_output_tool.h"
 # include "mcrl2/utilities/tipi_ext.h"
 
@@ -50,9 +50,104 @@ namespace mcrl2 {
         };
       }
 
-      /// \brief Base class for tools that use a squadt interactor
+      /// \cond INTERNAL_DOCS
+      template < class Tool >
+      void relay_message(const ::mcrl2::core::messageType, const char*);
+      /// \endcond
+
+      /**
+       * \brief Base class for mCRL2 tools that work in a squadt context
+       *
+       * In addition to the functionality provided by the tool_interface class,
+       * logging system used by most tools in the mCRL2 toolset is initialised
+       * such that messages are relayed to sqaudt.
+       *
+       * \note only works for one object at a time due to the global nature of
+       * the logging system
+       **/
       template < typename Tool >
-      class squadt_tool: public Tool, public mcrl2::utilities::squadt::mcrl2_tool_interface {
+      class squadt_tool: public Tool,
+#if defined(__WXWINDOWS__)
+                         public squadt::basic_wx_tool_interface< squadt::tool_interface >
+#else
+                         public squadt::tool_interface
+#endif
+      {
+#if defined(__WXWINDOWS__)
+        typedef squadt::basic_wx_tool_interface< squadt::tool_interface > super;
+#else
+        typedef squadt::tool_interface super;
+#endif
+
+        /// \brief relays messages from the mCRL2 messaging system
+        friend void relay_message< squadt_tool >(const ::mcrl2::core::messageType, const char* data);
+
+        private:
+
+          /* send status message, used only to relay messages */
+          static squadt_tool*& get_reporter() {
+            static squadt_tool* reporter;
+
+            return reporter;
+          }
+
+          using super::send_report;
+
+          void send_report(const tipi::report::type t, std::string const& d) {
+            super::send_report(t, d);
+          }
+
+          static bool initialise_enumerated_type_conversions() {
+#ifdef __LIBLTS_H
+            using namespace mcrl2::lts;
+
+            tipi::datatype::enumeration< mcrl2::lts::lts_equivalence > transformation_methods;
+
+            std::set< mcrl2::lts::lts_equivalence > const& equivalences(mcrl2::lts::lts::supported_lts_equivalences());
+
+            for (std::set< mcrl2::lts::lts_equivalence >::const_iterator i = equivalences.begin(); i != equivalences.end(); ++i) {
+              transformation_methods.add(*i, mcrl2::lts::lts::string_for_equivalence(*i));
+            }
+
+            tipi::datatype::enumeration< mcrl2::lts::lts_type > storage_types;
+
+            std::set< mcrl2::lts::lts_type > const& formats(mcrl2::lts::lts::supported_lts_formats());
+
+            for (std::set< mcrl2::lts::lts_type >::const_iterator i = formats.begin(); i != formats.end(); ++i) {
+              storage_types.add(*i, mcrl2::lts::lts::string_for_type(*i));
+            }
+#endif
+
+            return true;
+          }
+
+          void initialise() {
+            mcrl2::core::gsSetCustomMessageHandler(relay_message< squadt_tool >);
+
+            static bool initialised = initialise_enumerated_type_conversions();
+
+            static_cast< void >(initialised);
+
+            get_reporter() = this;
+
+            tipi::utility::logger::log_level l = tipi::utility::logger::get_default_filter_level();
+
+            mcrl2::core::gsSetNormalMsg();
+
+            if (2 < l) {
+              mcrl2::core::gsSetVerboseMsg();
+
+              if (3 < l) {
+                mcrl2::core::gsSetDebugMsg();
+              }
+            }
+          }
+
+          /** \brief finalisation after termination signal has been received */
+          void finalise() {
+            /* Unregister message relay */
+            mcrl2::core::gsSetCustomMessageHandler(0);
+          }
 
         public:
 
@@ -72,7 +167,8 @@ namespace mcrl2 {
             : Tool(name, author, what_is, tool_description)
           {}
 
-          int execute(int argc, char** argv)
+          template < typename Char >
+          int execute(int& argc, Char* argv[])
           {
             try {
               if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
@@ -89,6 +185,29 @@ namespace mcrl2 {
             return EXIT_SUCCESS;
           }
       };
+
+      /// \cond INTERNAL_DOCS
+      /** \brief Used to relay messages generated using core::print */
+      template < class Tool >
+      inline void relay_message(const ::mcrl2::core::messageType t, const char* data) {
+        tipi::report::type report_type;
+
+        switch (t) {
+          case mcrl2::core::gs_notice:
+            report_type = tipi::report::notice;
+            break;
+          case mcrl2::core::gs_warning:
+            report_type = tipi::report::warning;
+            break;
+          case mcrl2::core::gs_error:
+          default:
+            report_type = tipi::report::error;
+            break;
+        }
+
+        Tool::get_reporter()->send_report(report_type, std::string(data));
+      }
+      /// \endcond
 
       template <>
       void squadt_tool< input_tool >::update_configuration(tipi::configuration&) {

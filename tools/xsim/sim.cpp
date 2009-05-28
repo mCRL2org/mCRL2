@@ -217,14 +217,9 @@ class sim_tool : public rewriter_tool< input_tool > {
             }
           } else if ( (s.substr(0,2) == "g ") || (s.substr(0,5) == "goto ") )
           {
-            if ( s.substr(0,2) == "g " )
-            {
-              s = s.substr(2);
-            } else {
-              s = s.substr(5);
-            }
+            std::istringstream sin(((s[1] == ' ') ? s.substr(2) : s.substr(5)));
             int idx;
-            sscanf(s.c_str(),"%i",&idx);
+            sin >> idx;
             if ( idx >= 0 && idx < simulator.GetTraceLength() )
             {
               simulator.SetTracePos(idx);
@@ -257,13 +252,7 @@ class sim_tool : public rewriter_tool< input_tool > {
             }
           } else if ( (s.substr(0,2) == "s ") || (s.substr(0,5) == "save ") )
           {
-            std::string filename;
-            if ( s.substr(0,2) == "s " )
-            {
-              filename = s.substr(2);
-            } else {
-              filename = s.substr(5);
-            }
+            std::string filename((s[1] == ' ') ? s.substr(2) : s.substr(5));
             try
             {
               simulator.SaveTrace(filename);
@@ -274,13 +263,7 @@ class sim_tool : public rewriter_tool< input_tool > {
             }
           } else if ( (s.substr(0,2) == "l ") || (s.substr(0,5) == "load ") )
           {
-            std::string filename;
-            if ( s.substr(0,2) == "l " )
-            {
-              filename = s.substr(2);
-            } else {
-              filename = s.substr(5);
-            }
+            std::string filename((s[1] == ' ') ? s.substr(2) : s.substr(5));
             try
             {
               simulator.LoadTrace(filename);

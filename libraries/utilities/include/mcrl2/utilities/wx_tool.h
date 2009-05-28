@@ -19,9 +19,12 @@
 #include <wx/aboutdlg.h>
 
 #include "boost/bind.hpp"
+#include "boost/shared_array.hpp"
+#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/case_conv.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/input_tool.h" // temporary measure
 
 namespace mcrl2 {
   namespace utilities {
@@ -51,10 +54,11 @@ namespace mcrl2 {
        * The type parameter is the name of the class that implements the
        * wxWidgets application (using the Curiously Recurring Template
        * Pattern). Instead deriving directly of the application class (say A)
-       * from wxApp it should derive from wx::tool< A >.
+       * from wxApp it should derive from wx::tool< A, B >. Where B is an
+       * instance of another tool class.
        **/
-      template < typename CRTP >
-      class tool : public wxApp {
+      template < typename Derived, typename ToolBase = void >
+      class tool : public wxApp, public ToolBase {
 
         private:
 
@@ -75,7 +79,7 @@ namespace mcrl2 {
 
           inline bool Initialize(int& argc, wxChar** argv) {
             try {
-              m_execute = static_cast< CRTP& >(*this).parse_command_line(argc, argv);
+              m_execute = execute(argc, argv);
             }
             catch (std::exception& e) {
               if (wxApp::Initialize(argc, argv)) {
@@ -96,6 +100,25 @@ namespace mcrl2 {
             }
 
             return true;
+          }
+
+          // Tool class compatibility
+          inline bool execute(int& argc, wxChar** argv) {
+            std::vector< boost::shared_array< char > >   arguments;
+            boost::shared_array< char* >                 converted_arguments(new char*[argc]);
+
+            for (int i = 0; i < argc; ++i)
+            {
+              std::string argument(wxString(argv[i], wxConvLocal).fn_str());
+
+              arguments.push_back(boost::shared_array< char >(new char[argument.size() + 1]));
+
+              std::copy(argument.begin(), argument.end(), arguments.back().get());
+
+              converted_arguments[i] = arguments.back().get();
+            }
+
+            return ToolBase::execute(argc, converted_arguments.get());
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -146,7 +169,7 @@ namespace mcrl2 {
           // Helper class for wxEventHandling
           class wx_handler : public wxEvtHandler {
 
-              wx::tool< CRTP > const& m_wx_tool;
+              wx::tool< Derived, ToolBase > const& m_wx_tool;
 
             public:
 
@@ -160,7 +183,7 @@ namespace mcrl2 {
                                + boost::to_lower_copy(m_wx_tool.m_tool_name)).c_str(), wxConvLocal));
               }
 
-              wx_handler(wx::tool< CRTP > const& wx_tool) : m_wx_tool(wx_tool) {
+              wx_handler(wx::tool< Derived, ToolBase > const& wx_tool) : m_wx_tool(wx_tool) {
               }
           };
 
@@ -188,9 +211,13 @@ namespace mcrl2 {
             return EXIT_SUCCESS;
           }
 
-          inline bool OnInit() {
+          bool run() {
+            return true;
+          }
+
+          bool OnInit() {
             if (m_execute) {
-              if (static_cast< CRTP& >(*this).DoInit()) {
+              if (static_cast< Derived& >(*this).run()) {
                 if (!m_parse_error.empty()) {
                   wxMessageDialog(GetTopWindow(), wxString(m_parse_error.c_str(), wxConvLocal),
                                      wxT("Command line parsing error"), wxOK|wxICON_ERROR).ShowModal();
@@ -214,17 +241,43 @@ namespace mcrl2 {
           /** \brief Preferred constructor
            *  \param[in] tool_name   The name of the tool
            *  \param[in] description A one line description of the tool
+           *  \param[in] description_gui A one line description of the tool (GUI specific)
            *  \param[in] developers  The developers of the tool
            *  \param[in] documenters The documenters of the tool
            **/
           inline tool(std::string const& tool_name,
+                      std::string const& what_is,
+                      std::string const& description_gui,
+                      std::string const& description,
+                      std::vector< std::string > const& developers,
+                      std::string const& known_issues = "",
+                      std::vector< std::string > const& documenters = std::vector< std::string >()) :
+                          ToolBase(boost::to_lower_copy(tool_name),
+				   boost::join(developers, ","),
+                                   what_is, description, known_issues),
+                          m_execute(true), m_tool_name(tool_name),
+                          m_description(description_gui), m_developers(developers),
+                          m_documenters(documenters) {
+          }
+      };
+
+      /// Backward compatibility (temporary measure)
+      /// \deprecated
+      template < typename Derived >
+      class tool< Derived, void > : public tool< Derived, tools::input_tool >
+      {
+        public:
+          bool run() {
+            return static_cast< Derived& >(*this).DoInit();
+          }
+
+          inline tool(std::string const& tool_name,
                       std::string const& description,
                       std::vector< std::string > const& developers,
                       std::vector< std::string > const& documenters = std::vector< std::string >()) :
-                          m_execute(true), m_tool_name(tool_name),
-                          m_description(description), m_developers(developers),
-                          m_documenters(documenters) {
-          }
+                          tool< Derived, tools::input_tool >(
+                                   tool_name, "", description, description, developers, "", documenters)
+          { }
       };
     }
   }

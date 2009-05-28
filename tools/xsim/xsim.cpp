@@ -29,30 +29,64 @@
 #include "xsimmain.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/utilities/command_line_interface.h"
-#include "mcrl2/utilities/command_line_rewriting.h"
-#include "mcrl2/utilities/command_line_messaging.h"
 #include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
-/* The optional input file that should contain an LPS */
-std::string lps_file_argument;
+using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
 
-// Squadt protocol interface
+//------------------------------------------------------------------------------
+// XSim
+//------------------------------------------------------------------------------
+class XSim: public wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > >
+{
+  typedef wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > > super;
+
+private:
+    bool dummies;
+
+protected:
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
+    }
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      dummies = 0 < parser.options.count("dummy");
+    }
+
+public:
+    XSim() : super("XSim",
+      "graphical simulation of an LPS", // what-is
+      "Simulator for linear process specifications.", // GUI specific description
+      "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
+      "loaded into the simulator.", // description
+       std::vector< std::string >(1, "Muck van Weerdenburg"))
+    { }
+
+    // Graphical subsystem needs to be initialised first, DoInit starts the application instead of run()
+    bool run()
+    {
+      XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
+      frame->simulator->use_dummies = dummies;
+      frame->simulator->rewr_strat  = rewrite_strategy();
+      frame->Show(true);
+    
+      if (!this->m_input_filename.empty()) {
+        frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
+      }
+    
+      return true;
+    }
+
 #ifdef ENABLE_SQUADT_CONNECTIVITY
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
-
-using namespace mcrl2::utilities::squadt;
-
-const char* lps_file_for_input = "lps_in";
-
-class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interface {
-
-  public:
-
     // Special initialisation
     void initialise() {
       gsSetCustomMessageHandler(xsim_message_handler);
@@ -61,7 +95,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
     // Configures tool capabilities.
     void set_capabilities(tipi::tool::capabilities& c) const {
       /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-      c.add_input_configuration(lps_file_for_input,
+      c.add_input_configuration("main-input",
            tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
     }
 
@@ -70,7 +104,7 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
 
     // Check an existing configuration object to see if it is usable
     bool check_configuration(tipi::configuration const& c) const {
-      bool valid = c.input_exists(lps_file_for_input);
+      bool valid = c.input_exists("main-input");
 
       if (!valid) {
         send_error("Invalid input combination!");
@@ -79,67 +113,13 @@ class squadt_interactor : public mcrl2::utilities::squadt::mcrl2_wx_tool_interfa
      return valid;
    }
 
-    bool perform_task(tipi::configuration& c) {
-      lps_file_argument = c.get_input(lps_file_for_input).location();
+   bool perform_task(tipi::configuration& c) {
+     this->m_input_filename = c.get_input("main-input").location();
 
-      return mcrl2_wx_tool_interface::perform_task(c);
-    }
-};
+     return super::perform_task(c);
+   }
 #endif
-
-//------------------------------------------------------------------------------
-// XSim
-//------------------------------------------------------------------------------
-class XSim: public mcrl2::utilities::wx::tool< XSim >
-{
-private:
-    mcrl2::data::rewriter::strategy rewrite_strategy;
-    bool            dummies;
-
-public:
-    XSim() : mcrl2::utilities::wx::tool< XSim >("XSim",
-      "Simulator for linear process specifications.",
-      std::vector< std::string >(1, "Muck van Weerdenburg")) {
-    }
-
-    bool DoInit();
-
-    bool parse_command_line(int argc, wxChar** argv);
 };
-
-bool XSim::parse_command_line(int argc, wxChar** argv) {
-
-  using namespace ::mcrl2::utilities;
-
-  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-    NAME, AUTHOR,
-    "graphical simulation of an LPS",
-    "[OPTION]... [INFILE]\n",
-    "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
-    "loaded into the simulator.");
-
-  clinterface.add_rewriting_options();
-
-  clinterface.
-    add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
-
-  command_line_parser parser(clinterface, argc, argv);
-
-  if (parser.continue_execution()) {
-    dummies = 0 < parser.options.count("dummy");
-
-    rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
-
-    if (0 < parser.arguments.size()) {
-      lps_file_argument = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-  }
-
-  return parser.continue_execution();
-}
 
 static XSim *this_xsim = NULL;
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
@@ -180,20 +160,6 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
   }
 }
 
-bool XSim::DoInit()
-{
-  XSimMain *frame = new XSimMain( 0, -1, wxT("XSim"), wxPoint(-1,-1), wxSize(500,400) );
-  frame->simulator->use_dummies = dummies;
-  frame->simulator->rewr_strat  = rewrite_strategy;
-  frame->Show(true);
-
-  if (!lps_file_argument.empty()) {
-    frame->LoadFile(wxString(lps_file_argument.c_str(), wxConvLocal));
-  }
-
-  return true;
-}
-
 IMPLEMENT_APP_NO_MAIN(XSim)
 IMPLEMENT_WX_THEME_SUPPORT
 
@@ -205,24 +171,12 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 
   MCRL2_ATERM_INIT(0, lpCmdLine)
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if(interactor< squadt_interactor >::free_activation(hInstance, hPrevInstance, lpCmdLine, nCmdShow)) {
-    return EXIT_SUCCESS;
-  }
-#endif
-
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
 int main(int argc, char **argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if(interactor< squadt_interactor >::free_activation(argc, argv)) {
-    return EXIT_SUCCESS;
-  }
-#endif
 
   return wxEntry(argc, argv);
 }
