@@ -112,7 +112,7 @@ namespace tipi {
 
         *current = '\0';
 
-        delete argv_store;
+        delete [] argv_store;
       }
     }
 

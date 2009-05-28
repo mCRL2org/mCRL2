@@ -374,7 +374,7 @@ bool grape_event_drag::Do( void )
           // set length of dynamic array
           if (s_orig_ntt != 0)
           {
-            delete s_orig_ntt;
+            delete [] s_orig_ntt;
           }
           s_orig_ntt = new coordinate[state->count_transition_endstate()];
 
