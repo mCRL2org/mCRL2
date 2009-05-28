@@ -151,6 +151,9 @@ namespace mcrl2 {
         template < typename Term >
         void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
 
+        /// \brief Helper function for make_complete() methods
+        void make_complete_helper(std::set< sort_expression > const&);
+
         ///\brief Removes system defined sorts including constructors, mappings and equations
         void purge_system_defined();
 
@@ -648,7 +651,7 @@ namespace mcrl2 {
           gather_sorts(*i, sorts);
         }
 
-        make_complete(sorts);
+        make_complete_helper(sorts);
       }
 
       ///\brief Adds system defined sorts when necessary to make the specification complete

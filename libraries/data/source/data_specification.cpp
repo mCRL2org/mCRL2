@@ -407,9 +407,7 @@ namespace mcrl2 {
     template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&);
     template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
 
-    template < >
-    void data_specification::make_complete(std::set< sort_expression > const& sorts,
-                         detail::enable_if_container< std::set< sort_expression > >::type*)
+    void data_specification::make_complete_helper(std::set< sort_expression > const& sorts)
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
