@@ -21,6 +21,8 @@ namespace mcrl2 {
 
 namespace lps {
 
+  /// \brief Represents a deadlock
+  /// \detail A deadlock is 'delta' with an optional time tag.
   class deadlock
   {
     friend class deadlock_summand;
