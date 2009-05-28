@@ -37,6 +37,9 @@ namespace mcrl2 {
 
 #include "boost/bind.hpp"
 
+// On OS X, a macro called `check' may have been imported
+#undef check
+
 # include "mcrl2/utilities/squadt_interface.h"
 # include "mcrl2/utilities/input_output_tool.h"
 # include "mcrl2/utilities/tipi_ext.h"
@@ -210,21 +213,21 @@ namespace mcrl2 {
       /// \endcond
 
       template <>
-      void squadt_tool< input_tool >::update_configuration(tipi::configuration&) {
+      inline void squadt_tool< input_tool >::update_configuration(tipi::configuration&) {
       }
 
       template <>
-      void squadt_tool< input_output_tool >::update_configuration(tipi::configuration& c) {
+      inline void squadt_tool< input_output_tool >::update_configuration(tipi::configuration& c) {
         input_output_tool::m_output_filename = c.get_output("main-output").location();
       }
 
       template <>
-      void squadt_tool< input_tool >::synchronise_with_configuration(tipi::configuration& c) {
+      inline void squadt_tool< input_tool >::synchronise_with_configuration(tipi::configuration& c) {
         input_tool::m_input_filename = c.get_input("main-input").location();
       }
 
       template <>
-      void squadt_tool< input_output_tool >::synchronise_with_configuration(tipi::configuration& c) {
+      inline void squadt_tool< input_output_tool >::synchronise_with_configuration(tipi::configuration& c) {
         if (!c.output_exists("main-output")) {
           c.add_output("main-output",
               tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));

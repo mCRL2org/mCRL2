@@ -73,11 +73,11 @@ namespace mcrl2 {
 
         private:
 
-          static inline wxString wx_cast(std::string const& source) {
+          static wxString wx_cast(std::string const& source) {
             return wxString(source.c_str(), wxConvLocal);
           };
 
-          inline bool Initialize(int& argc, wxChar** argv) {
+          bool Initialize(int& argc, wxChar** argv) {
             try {
               m_execute = execute(argc, argv);
             }
@@ -103,7 +103,7 @@ namespace mcrl2 {
           }
 
           // Tool class compatibility
-          inline bool execute(int& argc, wxChar** argv) {
+          bool execute(int& argc, wxChar** argv) {
             std::vector< boost::shared_array< char > >   arguments;
             boost::shared_array< char* >                 converted_arguments(new char*[argc]);
 
@@ -118,6 +118,7 @@ namespace mcrl2 {
               converted_arguments[i] = arguments.back().get();
             }
 
+std::cerr << "HELLO EXECUTING" << std::endl;
             return ToolBase::execute(argc, converted_arguments.get());
           }
 
@@ -131,7 +132,7 @@ namespace mcrl2 {
               }
           };
 
-          inline void OnAbout() const {
+          void OnAbout() const {
             about_information information;
 
             //set tool name
@@ -188,7 +189,7 @@ namespace mcrl2 {
           };
 
           // Needed for successful termination
-          inline int OnRun() {
+          int OnRun() {
             if (m_execute) {
               if (wxWindow* window = GetTopWindow()) {
  	        wx_handler* handler = new wx_handler(*this);
@@ -211,10 +212,6 @@ namespace mcrl2 {
             return EXIT_SUCCESS;
           }
 
-          bool run() {
-            return true;
-          }
-
           bool OnInit() {
             if (m_execute) {
               if (static_cast< Derived& >(*this).run()) {
@@ -231,12 +228,20 @@ namespace mcrl2 {
         protected:
 
           /// \brief Override for wxApp::OnExit
-          inline virtual int OnExit() {
+          virtual int OnExit() {
             return wxApp::OnExit();
           }
 
         public:
 
+          bool run() {
+std::cerr << "HELLO" << std::endl;
+            if (!wxApp::Initialize(argc, argv) && m_execute) {
+              return static_cast< Derived& >(*this).run();
+            }
+
+            return true;
+          }
 
           /** \brief Preferred constructor
            *  \param[in] tool_name   The name of the tool
@@ -245,7 +250,7 @@ namespace mcrl2 {
            *  \param[in] developers  The developers of the tool
            *  \param[in] documenters The documenters of the tool
            **/
-          inline tool(std::string const& tool_name,
+          tool(std::string const& tool_name,
                       std::string const& what_is,
                       std::string const& description_gui,
                       std::string const& description,
@@ -271,7 +276,7 @@ namespace mcrl2 {
             return static_cast< Derived& >(*this).DoInit();
           }
 
-          inline tool(std::string const& tool_name,
+          tool(std::string const& tool_name,
                       std::string const& description,
                       std::vector< std::string > const& developers,
                       std::vector< std::string > const& documenters = std::vector< std::string >()) :
