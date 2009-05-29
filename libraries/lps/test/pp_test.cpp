@@ -13,6 +13,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/detail/lps_printer.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -57,15 +58,24 @@ const std::string ABP_SPEC=
   "  );                                                                       \n"
   ;
 
+void test_lps_printer()
+{
+  using namespace mcrl2::lps;
+
+  lps::detail::lps_printer<std::ostream> print(std::cout);
+  specification spec = mcrl22lps(ABP_SPEC);
+  print(spec);
+  print(spec.process());
+  print.print_container(spec.process().action_summands());
+  print.print_list(spec.process().process_parameters());
+  print.print_list(spec.process().free_variables());
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  using namespace mcrl2::lps;
-  specification spec = mcrl22lps(ABP_SPEC);
-  std::string text = core::pp(spec);
-  specification spec2 = mcrl22lps(text);
-  core::garbage_collect();
+  test_lps_printer();
 
   return 0;
 }

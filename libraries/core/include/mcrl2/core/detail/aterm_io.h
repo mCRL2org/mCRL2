@@ -93,6 +93,14 @@ namespace detail {
       }
     }
 
+    /// \brief Specialization for aterm_appl.
+    inline
+    void save_aterm(atermpp::aterm_appl term, const std::string& filename, bool binary = true)
+    {
+      ATermAppl t = term;
+      save_aterm(reinterpret_cast<ATerm>(t), filename, binary);
+    }
+
 } // namespace detail
 
 } // namespace core

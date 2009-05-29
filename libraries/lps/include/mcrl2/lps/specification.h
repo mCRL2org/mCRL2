@@ -36,7 +36,7 @@ namespace mcrl2 {
 namespace lps {
 
 class specification;
-ATermAppl specification_to_aterm(const specification&);
+atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 
 /// \brief Linear process specification.
@@ -168,7 +168,7 @@ class specification
       assert(is_well_typed());
       specification tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
-      core::detail::save_aterm(reinterpret_cast<ATerm>(specification_to_aterm(tmp)), filename, binary);
+      core::detail::save_aterm(specification_to_aterm(tmp), filename, binary);
     }
 
     /// \brief Returns the linear process of the specification.
@@ -351,7 +351,7 @@ void complete_data_specification(lps::specification& spec)
 /// \brief Conversion to ATermAppl.
 /// \return The specification converted to ATerm format.
 inline
-ATermAppl specification_to_aterm(const specification& spec)
+atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data()),
