@@ -85,62 +85,63 @@ TEXT = '''== Tools ==
 
 {| class="wikitable" align="center"
 |-
-! Tool !! Uses tool classes || Has regression tests || LPS / Data
+! Tool !! Uses tool classes || Has regression tests || Not using libraries
 TOOLTEXT|}
 '''
 
 TOOLITEM = '''|-
-| [[User manual/TOOL|TOOL]] ||align="center" COLOR1| VALUE1 ||align="center"| VALUE2 ||align="center"| VALUE3
+| [[User manual/TOOL|TOOL]] ||align="center" COLOR1| VALUE1 ||align="center"| VALUE2 ||align="center" COLOR3| VALUE3
 '''
 
 TOOLS = '''
-chi2mcrl2         | -               | ? | ? 
-diagraphica       | not applicable  | ? | ?
-formulacheck      | +               | ? | ?
-grape             | not applicable  | ? | ?
-lps2lts           | +               | ? | ?
-lps2pbes          | +               | ? | ?
-lps2torx          | +               | ? | ?
-lpsactionrename   | +               | ? | ?
-lpsbinary         | +               | ? | ?
-lpsbisim2pbes     | +               | ? | ?
-lpsconfcheck      | +               | ? | ?
-lpsconstelm       | +               | ? | ?
-lpsinfo           | +               | ? | ?
-lpsinvelm         | +               | ? | ?
-lpsparelm         | +               | ? | ?
-lpsparunfold      | +               | ? | ?
-lpspp             | +               | ? | ?
-lpsrealelm        | +               | ? | ?
-lpsrewr           | +               | ? | ?
-lpssumelm         | +               | ? | ?
-lpssuminst        | +               | ? | ?
-lpsuntime         | +               | ? | ?
+chi2mcrl2         | +               | ? | ? (Process Library)
+diagraphica       | not applicable  | ? | not applicable
+formulacheck      | +               | ? | -
+grape             | not applicable  | ? | -
+lps2lts           | +               | ? | -
+lps2pbes          | +               | ? | +
+lps2torx          | +               | ? | -
+lpsactionrename   | +               | ? | +
+lpsbinary         | +               | ? | +
+lpsbisim2pbes     | +               | ? | +
+lpsconfcheck      | +               | ? | +
+lpsconstelm       | +               | ? | +
+lpsinfo           | +               | ? | +
+lpsinvelm         | +               | ? | +
+lpsparelm         | +               | ? | +
+lpsparunfold      | +               | ? | +
+lpspp             | +               | ? | -
+lpsrealelm        | +               | ? | +
+lpsrewr           | +               | ? | +
+lpssumelm         | +               | ? | +
+lpssuminst        | +               | ? | +
+lpsuntime         | +               | ? | +
 ltscompare        | +               | ? | ?
 ltsconvert        | +               | ? | ?
-ltsgraph          | not applicable  | ? | ?
+ltsgraph          | not applicable  | ? | not applicable
 ltsinfo           | +               | ? | ?
 ltsmin            | +               | ? | ?
 ltsview           | not applicable  | ? | ?
-lysa2mcrl2        | +               | ? | ?
-mcrl22lps         | +               | ? | ?
-mcrl2i            | +               | ? | ?
-mcrl2pp           | -               | ? | ?
-pbes2bes          | +               | ? | ?
-pbes2bool         | +               | ? | ?
-pbesconstelm      | +               | ? | ?
-pbesinfo          | +               | ? | ?
-pbesparelm        | +               | ? | ?
-pbespareqelm      | +               | ? | ?
-pbespgsolve       | +               | ? | ?
-pbespp            | +               | ? | ?
-pbesrewr          | +               | ? | ?                                                              
-pnml2mcrl2        | +               | ? | ?
-squadt            | not applicable  | ? | ?
-tbf2lps           | +               | ? | ?                                                               
+lysa2mcrl2        | +               | ? | +
+mcrl22lps         | +               | ? | -
+mcrl2i            | +               | ? | +
+mcrl2pp           | -               | ? | -
+pbes2bes          | +               | ? | +
+pbes2bool         | +               | ? | +
+pbesconstelm      | +               | ? | +
+pbesinfo          | +               | ? | +
+pbesparelm        | +               | ? | +
+pbespareqelm      | +               | ? | +
+pbespgsolve       | +               | ? | +
+pbespp            | +               | ? | -
+pbesrewr          | +               | ? | +                                                              
+pnml2mcrl2        | +               | ? | -
+sim               | not applicable  | ? | -                                                                      
+squadt            | not applicable  | ? | not applicable
+tbf2lps           | +               | ? | -                                                               
 tracepp           | +               | ? | ?
-txt2pbes          | +               | ? | ?
-xsim              | not applicable  | ? | ?                                                                      
+txt2pbes          | +               | ? | -
+xsim              | not applicable  | ? | -                                                                      
 '''                                                                                            
 
 text = ''
@@ -159,8 +160,17 @@ for line in tools:
         color1 = ''
     if words[1] in '+-':
         words[1] = ''
+    if words[3] == '-':
+        color3 = 'bgcolor="red"'
+    elif words[3] == '+':
+        color3 = 'bgcolor="lightgreen"'
+    else:
+        color3 = ''
+    if words[3] in '+-':
+        words[3] = ''
     item = re.sub('TOOL'  , words[0], item)
     item = re.sub('COLOR1', color1, item)
+    item = re.sub('COLOR3', color3, item)
     item = re.sub('VALUE1', words[1], item)
     item = re.sub('VALUE2', words[2], item)
     item = re.sub('VALUE3', words[3], item)

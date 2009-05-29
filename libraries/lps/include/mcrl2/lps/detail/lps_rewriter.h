@@ -49,8 +49,9 @@ namespace detail {
       : R(R_)
     {}
 
+    /// \brief Applies the rewriter to the elements of a term list
     template <typename TermList>
-    TermList rewrite_list(const TermList& l) const
+    TermList rewrite_list_copy(const TermList& l) const
     {
       // TODO: how to make this function efficient?
       typedef typename TermList::value_type value_type;
@@ -62,6 +63,14 @@ namespace detail {
       return TermList(v.begin(), v.end());
     }   
 
+    /// \brief Applies the rewriter to the elements of a term list
+    template <typename TermList>
+    void rewrite_list(TermList& l) const
+    {
+      l = rewrite_list_copy(l);
+    }
+
+    /// \brief Applies the rewriter to the elements of a container
     template <typename Container>
     void rewrite_container(Container& c) const
     {
@@ -73,24 +82,30 @@ namespace detail {
 
     /// \brief Applies the rewriter to a data expression
     /// \param d A data expression
+    data::data_expression rewrite_copy(data::data_expression& d) const    
+    {                                         
+      return R(d);
+    } 
+  
+    /// \brief Applies the rewriter to a data expression
+    /// \param d A data expression
     void rewrite(data::data_expression& d) const    
     {                                         
-      d = R(d);
+      d = rewrite_copy(d);
     } 
   
     /// \brief Applies the rewriter to an assignment
     /// \param a An assignment
     void rewrite(data::assignment& a) const
     {
-      a = data::assignment(a.lhs(), R(a.rhs())); 
+      a = data::assignment(a.lhs(), rewrite_copy(a.rhs())); 
     } 
   
     /// \brief Applies the rewriter to an action
     /// \param a An action
     void rewrite(action& a) const
     {
-      data::data_expression_list l = rewrite_list(a.arguments());
-      a = action(a.label(), l); 
+      a = action(a.label(), rewrite_list_copy(a.arguments())); 
     }
     
     /// \brief Applies the rewriter to a deadlock
@@ -111,7 +126,7 @@ namespace detail {
       {
         rewrite(a.time());
       }
-      a.actions() = rewrite_list(a.actions());
+      rewrite_list(a.actions());
     } 
   
     /// \brief Applies the rewriter to a summand
@@ -120,7 +135,7 @@ namespace detail {
     {
       rewrite(s.condition());
       rewrite(s.multi_action());
-      s.assignments() = rewrite_list(s.assignments());
+      rewrite_list(s.assignments());
     }
 
     /// \brief Applies the rewriter to a summand
@@ -135,8 +150,7 @@ namespace detail {
     /// \param s A process_initializer
     void rewrite(process_initializer& i) const
     {
-      data::assignment_list a = rewrite_list(i.assignments());
-      i = process_initializer(i.free_variables(), a);
+      i = process_initializer(i.free_variables(), rewrite_list_copy(i.assignments()));
     }
   
     /// \brief Applies the rewriter to a linear_process

@@ -36,7 +36,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     bool m_instantiate_free_variables;
     bool m_ignore_conditions;
     bool m_remove_trivial_summands;
-    bool m_remove_trivial_sorts;
+    bool m_remove_singleton_sorts;
     
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
@@ -46,7 +46,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       m_instantiate_free_variables = parser.options.count("instantiate-free-variables") > 0;
       m_ignore_conditions          = parser.options.count("ignore-conditions") > 0;
       m_remove_trivial_summands    = parser.options.count("remove-trivial-summands") > 0;
-      m_remove_trivial_sorts       = parser.options.count("remove-trivial-sorts") > 0;
+      m_remove_singleton_sorts     = parser.options.count("remove-singleton-sorts") > 0;
     }
     
     void add_options(interface_description& desc)
@@ -64,7 +64,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         .add_option("remove-trivial-summands",
           "remove summands with condition false",
           't')
-        .add_option("remove-trivial-sorts",
+        .add_option("remove-singleton-sorts",
           "remove parameters with single element sorts",
           's')
         ;
@@ -94,9 +94,9 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       lps::constelm_algorithm<data::rewriter> algorithm(spec, R, mcrl2::core::gsVerbose);
 
       // preprocess: remove single element sorts
-      if (m_remove_trivial_sorts)
+      if (m_remove_singleton_sorts)
       {
-        algorithm.remove_trivial_sorts();
+        algorithm.remove_singleton_sorts();
       }
 
       // apply constelm

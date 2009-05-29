@@ -17,6 +17,7 @@
 #include <vector>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"  
 #include "mcrl2/lps/detail/lps_rewriter.h"  
 #include "mcrl2/lps/detail/remove_parameters.h"  
@@ -27,11 +28,35 @@ namespace lps {
 
 namespace detail {
 
+  /// \brief Function object that checks if a summand has a false condition
   struct is_trivial_summand
   {
     bool operator()(const summand_base& s) const
     {
       return s.condition() == data::sort_bool_::false_();
+    }
+  };
+  
+  /// \brief Function object that checks if a sort is a singleton sort.
+  /// Note that it is an approximation, meaning that in some cases it
+  /// may return false whereas in reality the answer is true.
+  struct is_singleton_sort
+  {
+    const data::data_specification& m_data_spec;
+
+    is_singleton_sort(const data::data_specification& data_spec)
+      : m_data_spec(data_spec)
+    {}
+
+    bool operator()(const data::sort_expression& s) const
+    {
+      data::data_specification::constructors_const_range c = m_data_spec.constructors(s);
+      if (boost::distance(c) != 1)
+      {
+        return false;
+      }
+      data::function_symbol f = *c.begin();
+      return !f.sort().is_function_sort();
     }
   };
   
@@ -87,10 +112,20 @@ namespace detail {
         lps::detail::remove_parameters(m_spec, to_be_removed);       
       }
       
-      /// \brief Removes parameters with a single element sort
-      void remove_trivial_sorts()
+      /// \brief Removes parameters with a singleton sort
+      void remove_singleton_sorts()
       {
-        std::cerr << "remove_trivial_sorts is not implemented yet!!!" << std::endl;
+        data::mutable_substitution<> sigma;
+        const data::variable_list& p = m_spec.process().process_parameters();
+        for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
+        {
+          if (is_singleton_sort(m_spec.data())(i->sort()))
+          {
+            sigma[*i] = *m_spec.data().constructors(i->sort()).begin();
+          }
+        }
+        // lps::detail::lps_substituter(sigma)(m_spec);
+        // remove_parameters(m_spec.process().process_parameters(), ...);
       }
       
       /// \brief Removes summands with condition equal to false

@@ -15,8 +15,10 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/detail/lps_replacer.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -48,11 +50,56 @@ void test_replace()
   std::cout << "<t>" << pp(t) << std::endl;
 }
 
+std::string SPEC1a =
+  "act  action: Nat;         \n"
+  "                          \n"
+  "proc P(s: Pos, i: Nat) =  \n"
+  "       (s == 2) ->        \n"
+  "         action(i) .      \n"
+  "         P(1, i)          \n"
+  "     + (s == 1) ->        \n"
+  "         action(i) .      \n"
+  "         P(2, i)          \n"
+  "     + true ->            \n"
+  "         delta;           \n"
+  "                          \n"
+  "init P(1, 0);             \n"
+  ;
+
+std::string SPEC1b =
+  "act  action: Nat;         \n"
+  "                          \n"
+  "proc P(s: Pos, i: Nat) =  \n"
+  "       (s == 2) ->        \n"
+  "         action(3) .      \n"
+  "         P(1, 4)          \n"
+  "     + (s == 1) ->        \n"
+  "         action(4) .      \n"
+  "         P(2, 4)          \n"
+  "     + true ->            \n"
+  "         delta;           \n"
+  "                          \n"
+  "init P(1, 0);             \n"
+  ;
+
+void test_lps_replacer()
+{
+  specification spec1 = parse_linear_process_specification(SPEC1a);
+  specification spec2 = parse_linear_process_specification(SPEC1a);
+  data::mutable_substitution<> sigma;
+  sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
+  sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
+  lps::detail::lps_replacer<data::mutable_substitution<> > subst(sigma);
+  subst(spec1);
+  // BOOST_CHECK(pp(spec1.process()) == pp(spec2.process()));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_replace();
+  test_lps_replacer();
   core::garbage_collect();
 
   return 0;
