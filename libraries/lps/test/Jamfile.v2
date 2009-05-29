@@ -13,6 +13,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
+      [ run remove_parameters_test.cpp ]
       [ run specification_property_map_test.cpp ]
       [ run pp_test.cpp ]
       [ run linear_process_conversion_test.cpp ]

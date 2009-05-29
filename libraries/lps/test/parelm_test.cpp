@@ -108,35 +108,23 @@ const std::string case_8 =
   ;
 const std::string expected_8 = "process_parameter_names = xi00, xi02, xi03, xi04, xi08";
 
-void test_parelm(const std::string& spec_text, const std::string& expected_result)
+void test_parelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification s0 = parse_linear_process_specification(spec_text);
   specification s1 = parelm(s0);
-  lps::detail::specification_property_map info1(s1);  
-  lps::detail::specification_property_map info2(expected_result);
-  std::string result = info1.compare(info2);
-  if (!result.empty())
-  {
-    std::cerr << "--- failed test ---" << std::endl;
-    std::cerr << "- expected result -" << std::endl;
-    std::cerr << expected_result << std::endl;
-    std::cerr << "- found result -" << std::endl;
-    std::cerr << info1.to_string() << std::endl;
-    std::cerr << "- differences -" << std::endl;
-    std::cerr << result << std::endl;
-  }
-  BOOST_CHECK(result.empty());
+  lps::detail::specification_property_map info(s1);  
+  BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
 }
 
 void test_parelm()
 {
-  test_parelm(case_1, expected_1);
-  test_parelm(case_2, expected_2);
-  test_parelm(case_3, expected_3);
-  test_parelm(case_4, expected_4);
-  test_parelm(case_5, expected_5);
-  test_parelm(case_7, expected_7);
-  test_parelm(case_8, expected_8);
+  test_parelm("case_1", case_1, expected_1);
+  test_parelm("case_2", case_2, expected_2);
+  test_parelm("case_3", case_3, expected_3);
+  test_parelm("case_4", case_4, expected_4);
+  test_parelm("case_5", case_5, expected_5);
+  test_parelm("case_7", case_7, expected_7);
+  test_parelm("case_8", case_8, expected_8);
 }
 
 int test_main(int argc, char* argv[])

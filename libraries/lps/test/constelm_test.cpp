@@ -40,7 +40,7 @@ std::string case_1 =
   "                                                                                 \n"
   "init P(0);                                                                       \n"
   ;
-const std::string expected_1 = "process_parameter_names = ";
+const std::string expected_1 = "process_parameter_names =";
 
 std::string case_2 =
   "% Test Case 2 -- No Free Variables                                               \n"
@@ -360,39 +360,27 @@ std::string case_9 =
   ;
 const std::string expected_9 = "process_parameter_names = b, c";
 
-void test_constelm(const std::string& spec_text, const std::string& expected_result)
+void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification s0 = parse_linear_process_specification(spec_text);
   data::rewriter R(s0.data());
   bool verbose = false;
   bool instantiate_free_variables = false;
   specification s1 = constelm(s0, R, verbose, instantiate_free_variables);
-  lps::detail::specification_property_map info1(s1);  
-  lps::detail::specification_property_map info2(expected_result);
-  std::string result = info1.compare(info2);
-  if (!result.empty())
-  {
-    std::cerr << "\n------ FAILED TEST ------" << std::endl;
-    std::cerr << "--- expected result" << std::endl;
-    std::cerr << expected_result << std::endl;
-    std::cerr << "--- found result" << std::endl;
-    std::cerr << info1.to_string() << std::endl;
-    std::cerr << "--- differences" << std::endl;
-    std::cerr << result << std::endl;
-  }
-  BOOST_CHECK(result.empty());
+  lps::detail::specification_property_map info(s1);  
+  BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
 }
 
 void test_constelm()
 {
-  test_constelm(case_1,  expected_1);
-  test_constelm(case_2,  expected_2);
-  test_constelm(case_3,  expected_3);
-  test_constelm(case_4,  expected_4);
-  test_constelm(case_5,  expected_5);
-  test_constelm(case_6a, expected_6a);
-  test_constelm(case_6b, expected_6b);
-  test_constelm(case_9,  expected_9);
+  test_constelm("case_1" , case_1,  expected_1);
+  test_constelm("case_2" , case_2,  expected_2);
+  test_constelm("case_3" , case_3,  expected_3);
+  test_constelm("case_4" , case_4,  expected_4);
+  test_constelm("case_5" , case_5,  expected_5);
+  test_constelm("case_6a", case_6a, expected_6a);
+  test_constelm("case_6b", case_6b, expected_6b);
+  test_constelm("case_9" , case_9,  expected_9);
 }
 
 void test_abp()

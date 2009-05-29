@@ -309,6 +309,27 @@ namespace detail {
       }
   };
 
+  template <typename PropertyMap>
+  bool compare_property_maps(const std::string& message, const PropertyMap& map1, const std::string& expected_result)
+  {
+    PropertyMap map2(expected_result);
+    std::string result = map1.compare(map2);
+    if (!result.empty())
+    {
+      std::cerr << "------------------------------" << std::endl;
+      std::cerr << "          Failed test         " << std::endl;
+      std::cerr << "------------------------------" << std::endl;
+      std::cerr << message << std::endl;
+      std::cerr << "--- expected result ---" << std::endl;
+      std::cerr << expected_result << std::endl;
+      std::cerr << "--- found result ---" << std::endl;
+      std::cerr << map1.to_string() << std::endl;
+      std::cerr << "--- differences ---" << std::endl;
+      std::cerr << result << std::endl;
+    }
+    return result.empty();
+  }
+
 } // namespace detail
 
 } // namespace data
