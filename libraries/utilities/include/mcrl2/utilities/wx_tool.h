@@ -77,9 +77,17 @@ namespace mcrl2 {
             return wxString(source.c_str(), wxConvLocal);
           };
 
+          bool pre_run() {
+            m_execute = true;
+
+            return false;
+          }
+
           bool Initialize(int& argc, wxChar** argv) {
             try {
-              m_execute = execute(argc, argv) == 0;
+              bool result = execute(argc, argv);
+
+              m_execute = (m_execute || result) && wxApp::Initialize(argc, argv);
             }
             catch (std::exception& e) {
               if (wxApp::Initialize(argc, argv)) {
@@ -113,10 +121,6 @@ namespace mcrl2 {
             }
 
             return ToolBase::execute(argc, converted_arguments.get());
-          }
-
-          bool pre_run() {
-            return !wxApp::Initialize(argc, argv);
           }
 
           class about_information : public wxAboutDialogInfo {
@@ -248,7 +252,7 @@ namespace mcrl2 {
                           ToolBase(boost::to_lower_copy(tool_name),
 				   boost::join(developers, ","),
                                    what_is, description, known_issues),
-                          m_execute(true), m_tool_name(tool_name),
+                          m_execute(false), m_tool_name(tool_name),
                           m_description(description_gui), m_developers(developers),
                           m_documenters(documenters) {
           }

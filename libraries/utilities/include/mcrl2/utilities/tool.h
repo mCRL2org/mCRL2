@@ -57,6 +57,18 @@ namespace tools {
       /// \brief Parse non-standard options
       /// \param parser A command line parser
       virtual void parse_options(const command_line_parser& parser)
+      { }
+
+      /// \brief Executed only if run would be executed and invoked before run.
+      /// \return Whether run should still be executed
+      virtual bool pre_run()
+      {
+        return true;
+      }
+
+      /// \brief Parse standard options
+      /// \param parser A command line parser
+      virtual void check_standard_options(const command_line_parser& parser)
       {
         if (parser.options.count("quiet")) {
           if (parser.options.count("debug")) {
@@ -77,13 +89,6 @@ namespace tools {
           mcrl2::core::gsSetDebugMsg();
         }
 #endif
-      }
-
-      /// \brief Executed only if run would be executed and invoked before run.
-      /// \return Whether run should still be executed
-      virtual bool pre_run()
-      {
-        return true;
       }
 
       /// \brief Checks if the number of positional options is OK.
@@ -132,12 +137,14 @@ namespace tools {
           interface_description clinterface(argv[0], m_name, m_author, m_what_is, synopsis(), m_tool_description, m_known_issues);
           add_options(clinterface);
           command_line_parser parser(clinterface, argc, argv);
+          check_standard_options(parser);
+           
 	  if (parser.continue_execution())
 	  {
             check_positional_options(parser);
             parse_options(parser);
-           
-            if (pre_run() && !run())
+
+            if (!pre_run() || !run())
             {
               return EXIT_FAILURE;
             }

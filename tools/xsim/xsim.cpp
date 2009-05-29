@@ -63,6 +63,9 @@ protected:
     }
 
 public:
+
+    static XSim* instance;
+
     XSim() : super("XSim",
       "graphical simulation of an LPS", // what-is
       "Simulator for linear process specifications.", // GUI specific description
@@ -83,6 +86,8 @@ public:
         frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
       }
     
+      instance = this;
+
       return true;
     }
 
@@ -121,16 +126,16 @@ public:
 #endif
 };
 
-static XSim *this_xsim = NULL;
+XSim* XSim::instance = NULL;
+
 void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 {
   using namespace ::mcrl2::utilities;
   using namespace mcrl2::core;
 
-  if ( this_xsim == NULL )
+  if ( XSim::instance == NULL )
   {
-    fprintf(stderr,"%s",msg);
-    fprintf(stderr,"this message was brought to you by XSim (all rights reserved)\n");
+    std::cerr << msg << "this message was brought to you by XSim (all rights reserved)" << std::endl;
   } else {
     const char *msg_end = msg+std::strlen(msg)-1;
     while ( (msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')) )
