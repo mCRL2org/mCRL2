@@ -385,20 +385,6 @@ namespace mcrl2 {
         return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
       }
 
-      template < typename Container, typename Range >
-      struct range_factory {
-        static Range make_range(Container const& c) {
-          return Range(c);
-        }
-      };
-
-      template < typename Range >
-      struct range_factory< ATermList, Range > {
-        static Range make_range(ATermList c) {
-          return Range(typename Range::iterator(atermpp::aterm_list(c)), typename Range::iterator());
-        }
-      };
-
       template < typename Expression >
       class random_access_list {
 
@@ -444,15 +430,6 @@ namespace mcrl2 {
     detail::random_access_list< Expression > add_random_access(ATermList list)
     {
       return detail::random_access_list< Expression >(list);
-    }
-
-    /// \brief Convenience function for creating iterator ranges for ATermList or other containers
-    /// \seealso boost::make_iterator_range
-    template < typename Iterator, typename Container >
-    typename boost::iterator_range< Iterator >
-    make_iterator_range(Container const& c)
-    {
-      return detail::range_factory< Container, boost::iterator_range< Iterator > >::make_range(c);
     }
 
     /// \brief Returns the concatenation of the lists l and m

@@ -219,7 +219,7 @@ namespace mcrl2 {
         ///
         argument_sorts_const_range argument_sorts() const
         {
-          return data::make_iterator_range< argument_sorts_iterator >(arguments());
+          return boost::iterator_range< argument_sorts_iterator >(arguments());
         }
 
         /// \brief Returns the arguments of the constructor, without the
