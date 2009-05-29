@@ -789,7 +789,6 @@ We provide an overview of the classes with a short description, we also describe
     \item[is\_structured\_sort] Returns \true iff this expression is a structured sort.
     \item[is\_container\_sort] Returns \true iff this expression is a container sort.
     \item[is\_function\_sort] Returns \true iff this expression is a function sort.
-    \item[is\_alias] Returns \true iff this expression a sort alias.
    \end{description}}
 
 
@@ -1087,6 +1086,7 @@ A data specification represents a signature $\Sigma$ with an associated set of e
     \item[is\_certainly\_finite(s)] Returns true iff sort $s$ is definately finite.
     \item[default\_expression] Returns a valid data expression according to this data specification of the given sort s. If no valid expression can be found, an exception is thrown. It returns a minimal term. When selecting function symbols, constructor symbols have a preference over mappings. For each sort, the same term is returned.
     \item[add\_sort] Adds a sort to the specification.
+    \item[add\_alias] Adds an alias, so a name for a (possibly new) sort to the specification.
     \item[add\_constructor] Adds a constructor to the specification.
     \item[add\_mapping] Adds a mapping to the specification.
     \item[add\_equation] Adds an equation to the specification.
