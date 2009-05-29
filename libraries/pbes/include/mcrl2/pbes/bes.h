@@ -595,7 +595,7 @@ namespace bes {
         {
           throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
         }
-        atermpp::aterm t = ATermAppl(*this);
+        atermpp::aterm_appl t = ATermAppl(*this);
         core::detail::save_aterm(t, filename, binary);
       }
 

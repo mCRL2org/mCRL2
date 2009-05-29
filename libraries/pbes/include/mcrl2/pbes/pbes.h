@@ -442,7 +442,7 @@ class pbes
 
       pbes<Container> tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm t = ATermAppl(tmp);
+      atermpp::aterm_appl t = ATermAppl(tmp);
       core::detail::save_aterm(t, filename, binary);
     }
 
