@@ -80,7 +80,7 @@ namespace tools {
       {
         Tool::add_options(desc);
 
-        desc.add_option("smt-solver", interface_description::mandatory_argument< smt_solver_type >("SOLVER"),
+        desc.add_option("smt-solver", make_mandatory_argument< smt_solver_type >("SOLVER"),
           "use SOLVER to remove inconsistent paths from the internally used "
           "BDDs (by default, no path elimination is applied):\n"
           "  'ario' for the SMT solver Ario, or\n"
