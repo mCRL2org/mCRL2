@@ -282,7 +282,9 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       data::data_expression_vector e = data::convert<data::data_expression_vector>(super::m_spec.initial_process().state());
         
       // optimization: rewrite e
-      lps::detail::lps_rewriter<DataRewriter>(super::R).rewrite_list(e);
+      // For some reason g++ doesn't like these statements to be combined...
+      lps::detail::lps_rewriter<DataRewriter> rewr(super::R);
+      rewr.rewrite_list(e);
 
       linear_process& p = super::m_spec.process();
       data::variable_list V = p.free_variables();

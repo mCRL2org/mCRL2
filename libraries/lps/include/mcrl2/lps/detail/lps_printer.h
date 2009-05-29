@@ -65,7 +65,7 @@ namespace detail {
     /// \param a An assignment
     void print(const data::assignment& a) const
     {
-      out << pp(d);
+      out << pp(a);
     } 
   
     /// \brief Applies the pretty printer to an action

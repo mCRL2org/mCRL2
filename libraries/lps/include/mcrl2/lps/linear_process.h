@@ -334,6 +334,13 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
   );
 }
 
+/// \brief Pretty print the linear process
+inline
+std::string pp(const linear_process& p)
+{
+  return core::pp(linear_process_to_aterm(p));
+}
+
 /// \brief Returns the free variables that occur in the linear process
 /// \param process A linear process
 /// \return The free variables that occur in the linear process

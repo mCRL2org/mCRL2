@@ -65,7 +65,7 @@ namespace detail {
 
     /// \brief Applies the substitution to a data expression
     /// \param d A data expression
-    data::data_expression substitute_copy(data::data_expression& d) const    
+    data::data_expression substitute_copy(const data::data_expression& d) const    
     {                                         
       return data::replace_free_variables(d, sigma);
     } 
@@ -81,7 +81,7 @@ namespace detail {
     /// \param a An assignment
     void substitute(data::assignment& a) const
     {
-      a = data::assignment(a.lhs(), substitute_copy(a.rhs())); 
+      a = data::assignment(a.lhs(), substitute_copy(a.rhs()));
     } 
   
     /// \brief Applies the substitution to an action
@@ -153,7 +153,7 @@ namespace detail {
     }
     
     template <typename Term>
-    void operator()(Term& t)
+    void operator()(Term& t) const
     {
       substitute(t);
     }

@@ -70,10 +70,10 @@ std::string SPEC1b =
   "act  action: Nat;         \n"
   "                          \n"
   "proc P(s: Pos, i: Nat) =  \n"
-  "       (s == 2) ->        \n"
-  "         action(3) .      \n"
+  "       (3 == 2) ->        \n"
+  "         action(4) .      \n"
   "         P(1, 4)          \n"
-  "     + (s == 1) ->        \n"
+  "     + (3 == 1) ->        \n"
   "         action(4) .      \n"
   "         P(2, 4)          \n"
   "     + true ->            \n"
@@ -85,13 +85,22 @@ std::string SPEC1b =
 void test_lps_replacer()
 {
   specification spec1 = parse_linear_process_specification(SPEC1a);
-  specification spec2 = parse_linear_process_specification(SPEC1a);
+  specification spec2 = parse_linear_process_specification(SPEC1b);
   data::mutable_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
   lps::detail::lps_replacer<data::mutable_substitution<> > subst(sigma);
+
+  data::data_expression d;
+  subst(d);
+  data::assignment a;
+  subst(a);
+
   subst(spec1);
-  // BOOST_CHECK(pp(spec1.process()) == pp(spec2.process()));
+  std::cerr << pp(spec1.process()) << std::endl;
+  std::cerr << "-------------------------------------" << std::endl;
+  std::cerr << pp(spec2.process()) << std::endl;
+  BOOST_CHECK(pp(spec1.process()) == pp(spec2.process()));
 }
 
 int test_main(int argc, char* argv[])

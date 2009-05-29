@@ -82,7 +82,7 @@ namespace detail {
 
     /// \brief Applies the rewriter to a data expression
     /// \param d A data expression
-    data::data_expression rewrite_copy(data::data_expression& d) const    
+    data::data_expression rewrite_copy(const data::data_expression& d) const    
     {                                         
       return R(d);
     } 
