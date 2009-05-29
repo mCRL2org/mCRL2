@@ -168,12 +168,12 @@ LTSView::LTSView() :
     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
     "\n"
     "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
-    developers())
+    developers()),
+  lts(0)
 { }
 
 bool LTSView::DoInit()
 {
-  lts = NULL;
   rankStyle = ITERATIVE;
   fsmStyle = false;
   colourCounter = 0;

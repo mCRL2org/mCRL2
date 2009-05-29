@@ -161,7 +161,8 @@ DiaGraph::DiaGraph() : mcrl2::utilities::wx::tool< DiaGraph >("DiaGraphica",
     "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n"
     "uses the TinyXML parser (tinyxml.sourceforge.net). \n"
     "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-                std::vector< std::string >(1, "Johannes Pretorius")) {
+                std::vector< std::string >(1, "Johannes Pretorius")),
+  graph(0) {
 // -------------------------
 }
 
