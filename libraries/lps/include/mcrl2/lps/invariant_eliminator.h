@@ -18,6 +18,7 @@
 #include "aterm2.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
+#include "mcrl2/lps/specification.h"
 
   /// The class Invariant_Eliminator is initialized with an LPS using the constructor
   /// Invariant_Eliminator::Invariant_Eliminator. After initialization, the method Invariant_Eliminator::simplify can be

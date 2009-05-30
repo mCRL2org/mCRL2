@@ -18,9 +18,11 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"  
-#include "mcrl2/lps/detail/lps_rewriter.h"  
-#include "mcrl2/lps/detail/remove_parameters.h"  
+#include "mcrl2/lps/rewrite.h"  
+#include "mcrl2/lps/substitute.h"  
+#include "mcrl2/lps/remove_parameters.h"  
 
 namespace mcrl2 {
 
@@ -106,26 +108,53 @@ namespace detail {
         return v; // no assignment to v found, so return v itself
       }
 
+      /// \brief Attempts to eliminate the free variables of the specification, by substituting
+      /// a constant value for them. If no constant value is found for one of the variables,
+      /// an exception is thrown.
+      void instantiate_free_variables()
+      {
+        data::mutable_substitution<> sigma;
+        data::representative_generator default_expression_generator(m_spec.data());
+        std::set<data::variable> to_be_removed;
+        const data::variable_list& v = m_spec.process().free_variables();
+        for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+        {
+          data::data_expression d = default_expression_generator(i->sort());
+          if (d == data::data_expression())
+          {
+            throw mcrl2::runtime_error("Error in specification::instantiate_free_variables: could not instantiate " + pp(*i));
+          }
+          sigma[*i] = d;
+          to_be_removed.insert(*i);
+        }
+        lps::substitute(m_spec, sigma);
+        lps::remove_parameters(m_spec, to_be_removed);
+        assert(m_spec.process().free_variables().empty());
+        assert(m_spec.initial_process().free_variables().empty());
+      }
+
       /// \brief Removes formal parameters from the specification
       void remove_parameters(const std::set<data::variable>& to_be_removed)
       {
-        lps::detail::remove_parameters(m_spec, to_be_removed);       
+        lps::remove_parameters(m_spec, to_be_removed);       
       }
       
       /// \brief Removes parameters with a singleton sort
       void remove_singleton_sorts()
       {
         data::mutable_substitution<> sigma;
+        std::set<data::variable> to_be_removed;
         const data::variable_list& p = m_spec.process().process_parameters();
         for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
         {
           if (is_singleton_sort(m_spec.data())(i->sort()))
           {
             sigma[*i] = *m_spec.data().constructors(i->sort()).begin();
+            to_be_removed.insert(*i);
           }
         }
-        // lps::detail::lps_substituter(sigma)(m_spec);
-        // remove_parameters(m_spec.process().process_parameters(), ...);
+        lps::substitute(m_spec, sigma);
+        lps::remove_parameters(m_spec, to_be_removed);
       }
       
       /// \brief Removes summands with condition equal to false
@@ -157,7 +186,7 @@ namespace detail {
       /// \brief sigma A substitution
       void rewrite()
       {
-        lps::detail::make_lps_rewriter(R).rewrite(m_spec);
+        lps::rewrite(m_spec, R);
       }
 
       /// \brief Rewrites the specification with a substitution.
@@ -165,8 +194,7 @@ namespace detail {
       template <typename Substitution>
       void rewrite(Substitution& sigma)
       {
-        lps::detail::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
-        lps::detail::make_lps_rewriter(Rsigma).rewrite(m_spec);
+        lps::rewrite(m_spec, R, sigma);
       }
   };
   

@@ -87,7 +87,7 @@ namespace detail {
     /// \param s A process_initializer
     void remove(process_initializer& i) const
     {
-      i = process_initializer(i.free_variables(), remove_list_copy(i.assignments()));
+      i = process_initializer(remove_list_copy(i.free_variables()), remove_list_copy(i.assignments()));
     }
   
     /// \brief Removes parameters from a linear_process
