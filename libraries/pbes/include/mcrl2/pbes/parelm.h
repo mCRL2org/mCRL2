@@ -27,7 +27,6 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/remove_parameters.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
