@@ -362,12 +362,12 @@ const std::string expected_9 = "process_parameter_names = b, c";
 
 void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
-  specification s0 = parse_linear_process_specification(spec_text);
-  data::rewriter R(s0.data());
+  specification spec = parse_linear_process_specification(spec_text);
+  data::rewriter R(spec.data());
   bool verbose = false;
   bool instantiate_free_variables = false;
-  specification s1 = constelm(s0, R, verbose, instantiate_free_variables);
-  lps::detail::specification_property_map info(s1);  
+  constelm(spec, R, verbose, instantiate_free_variables);
+  lps::detail::specification_property_map info(spec);  
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
 }
 
@@ -428,8 +428,8 @@ void test_abp()
   data::rewriter R(spec.data());
   bool verbose = false;
   bool instantiate_free_variables = false;
-  specification s1 = constelm(spec, R, verbose, instantiate_free_variables);
-  BOOST_CHECK(s1.is_well_typed());
+  constelm(spec, R, verbose, instantiate_free_variables);
+  BOOST_CHECK(spec.is_well_typed());
 }
 
 int test_main(int argc, char* argv[])
