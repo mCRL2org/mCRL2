@@ -82,7 +82,7 @@ namespace detail {
         else if(property == "used_free_variable_count"    ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         else if(property == "binding_variables"           ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
         else if(property == "binding_variable_names"      ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
-        else if(property == "occurring_variables"         ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
+        else if(property == "occurring_variables"         ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
         else if(property == "occurring_variable_names"    ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
         return "ERROR: unknown property " + property + " encountered!";
       }

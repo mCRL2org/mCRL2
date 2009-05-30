@@ -58,7 +58,7 @@ int test_main(int argc, char* argv[])
   pbes_system::detail::pbes_property_map info1(p);
   std::cerr << info1.to_string() << std::endl;
   pbes_system::detail::pbes_property_map info2(INFO);
-  std::string diff = info1.compare(info2) << std::endl;
+  std::string diff = info1.compare(info2);
   BOOST_CHECK(diff.empty());
   core::garbage_collect();
 
