@@ -388,6 +388,11 @@ namespace mcrl2 {
         iterator find(variable_type const& v) {
           return this->m_map.find(v);
         }
+        
+        /// \brief Returns true if the sequence of assignments is empty
+        bool empty() const {
+          return this->m_map.empty();
+        }
     };
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].
