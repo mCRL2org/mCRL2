@@ -26,6 +26,9 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/text_utility.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/data/detail/container_utility.h"
 
