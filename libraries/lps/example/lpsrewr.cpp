@@ -8,7 +8,7 @@
 /// \brief Tool for rewriting a linear process specification.
 
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -17,22 +17,6 @@ using namespace mcrl2;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
-
-template <typename DataRewriter>
-class lpsrewr_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewriter>
-{ 
-  public:
-    typedef typename lps::detail::lps_rewriter_algorithm<DataRewriter> super;
-    
-    lpsrewr_algorithm(lps::specification& spec, const DataRewriter& R)
-      : lps::detail::lps_rewriter_algorithm<DataRewriter>(spec, R)
-    {}
-    
-    void run()
-    {
-      super::rewrite();
-    }
-};
 
 class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 {
@@ -56,8 +40,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
       lps::specification spec;
       spec.load(input_filename());
       data::rewriter R = create_rewriter(spec.data());
-      lpsrewr_algorithm<data::rewriter> algorithm(spec, R);
-      algorithm.run();
+      lps::rewrite(spec, R);
       spec.save(output_filename());
       return true;
     }
