@@ -19,7 +19,6 @@
 #include "mcrl2/lps/lin_std.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/process/parse.h"
 
 namespace mcrl2 {
@@ -31,9 +30,9 @@ namespace lps {
   /// \param options Options for the algorithm
   /// \return The linearized specification
   inline
-  specification linearise(const process::process_specification spec, t_lin_options options)
+  specification linearise(const process::process_specification& spec, t_lin_options options)
   {
-    return linearise_std(spec, options);
+    return linearise_std(process::process_specification_to_aterm(spec), options);
   } 
   
   /// \brief Generates a linearized process specification from a specification in text.
@@ -41,19 +40,10 @@ namespace lps {
   /// \param options Options for the linearization algorithm.
   /// \return The linearized specification.
   inline
-  specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
+  specification mcrl22lps(const std::string& text, t_lin_options options = t_lin_options())
   {
-    // lin_std_initialize_global_variables();
-
-    // the lineariser expects data from a stream...
-    std::stringstream spec_stream;
-    spec_stream << spec;
-
-    atermpp::aterm_appl result = core::detail::parse_specification(spec_stream);
-    result                     = core::detail::type_check_specification(result);
-    result                     = core::detail::alpha_reduce(result);
-    result                     = data::detail::internal_format_conversion(result);
-    return linearise(result, options);
+    process::process_specification spec = process::parse_process_specification(text);
+    return linearise(spec, options);
   }
 
 } // namespace lps
