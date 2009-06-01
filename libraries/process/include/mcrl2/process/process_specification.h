@@ -26,6 +26,9 @@ namespace mcrl2 {
 /// \brief The main namespace for the Process library.
 namespace process {
 
+  template <typename Object, typename OutIter>
+  void traverse_sort_expressions(const Object& o, OutIter dest);
+
   class process_specification;
   ATermAppl process_specification_to_aterm(const process_specification& spec);
   void complete_data_specification(process_specification&);
@@ -139,18 +142,6 @@ namespace process {
       }
   };
 
-  /// \brief Traverses the process specification, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  /// \param spec A process specification
-  /// \param dest An output iterator
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_specification& spec, OutIter dest)
-  {
-    data::traverse_sort_expressions(spec.action_labels(), dest);
-    data::traverse_sort_expressions(spec.equations(), dest);
-    traverse_sort_expressions(spec.init(), dest);
-  }
-
   /// \brief Adds all sorts that appear in the process specification spec
   ///  to the data specification of spec.
   /// \param spec A process specification
@@ -230,4 +221,10 @@ namespace process {
 
 } // namespace mcrl2
 
+#ifndef MCRL2_PROCESS_TRAVERSE_H
+#include "mcrl2/process/traverse.h"
+#endif
+
 #endif // MCRL2_PROCESS_PROCESS_SPECIFICATION_H
+
+

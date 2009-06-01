@@ -93,17 +93,6 @@ namespace process {
       }
   };
 
-  /// \brief Traverses the process equation, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  /// \param eq A process equation
-  /// \param dest An output iterator
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_equation& eq, OutIter dest)
-  {
-    data::traverse_sort_expressions(eq.free_variables(), dest);
-    data::traverse_sort_expressions(eq.formal_parameters(), dest);
-  }
-
   /// \brief Read-only singly linked list of process equations
   typedef atermpp::term_list<process_equation> process_equation_list;
 

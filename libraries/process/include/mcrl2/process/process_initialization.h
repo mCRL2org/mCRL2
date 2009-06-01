@@ -66,16 +66,6 @@ namespace process {
       }
   };
 
-  /// \brief Traverses the process equation, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  /// \param init A process initialization
-  /// \param dest An output iterator
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_initialization& init, OutIter dest)
-  {
-    data::traverse_sort_expressions(init.free_variables(), dest);
-  }
-
 } // namespace process
 
 } // namespace mcrl2

@@ -65,16 +65,6 @@ namespace process {
       }
   };
 
-  /// \brief Traverses the process identifier, and writes all sort expressions
-  /// that are encountered to the output range [dest, ...).
-  /// \param pi A process identifier
-  /// \param dest An output iterator
-  template <typename OutIter>
-  void traverse_sort_expressions(const process_identifier& pi, OutIter dest)
-  {
-    data::traverse_sort_expressions(pi.sorts(), dest);
-  }
-
 } // namespace process
 
 } // namespace mcrl2
