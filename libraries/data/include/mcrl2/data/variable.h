@@ -137,14 +137,6 @@ namespace mcrl2 {
       return convert< variable_vector >(boost::make_iterator_range(r));
     }
 
-    /// \brief Traverses the variable, and writes all sort expressions
-    /// that are encountered to the output range [dest, ...).
-    template <typename OutIter>
-    void traverse_sort_expressions(const variable& v, OutIter dest)
-    {
-      *dest++ = v.sort();
-    }
-
   } // namespace data
 
 } // namespace mcrl2
