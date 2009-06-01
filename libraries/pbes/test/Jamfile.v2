@@ -13,9 +13,10 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite pbes
     :
+      [ run sort_traverser_test.cpp ]
       [ run pbes_property_map_test.cpp ]
-      [ run bes_test.cpp ]
-      [ run parity_game_test.cpp ]
+#      [ run bes_test.cpp ]
+#      [ run parity_game_test.cpp ]
       [ run pbes2bes_test.cpp ]
       [ run boolean_expression_test.cpp ]
       [ run boolean_operator_test.cpp ]

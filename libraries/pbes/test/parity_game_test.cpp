@@ -278,7 +278,7 @@ int test_main(int argc, char** argv)
 
   test_parity_game_generator();
   core::garbage_collect();
-  test_parity_game_generator2();
+  //test_parity_game_generator2();
   core::garbage_collect();
   test_bes_examples();
   core::garbage_collect();

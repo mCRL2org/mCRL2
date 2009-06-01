@@ -93,14 +93,6 @@ class propositional_variable: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of propositional variable declarations
 typedef atermpp::term_list<propositional_variable> propositional_variable_list;
 
-/// \brief Traverses the propositional variable, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const propositional_variable& v, OutIter dest)
-{
-  data::traverse_sort_expressions(v.parameters(), dest);
-}
-
 /// \brief Returns true if the term t is a propositional variable declaration
 /// \param t A term
 /// \return True if the term t is a propositional variable declaration
@@ -188,14 +180,6 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
 
 /// \brief Read-only singly linked list of propositional variables instantiations
 typedef atermpp::term_list<propositional_variable_instantiation> propositional_variable_instantiation_list;
-
-/// \brief Traverses the propositional variable, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const propositional_variable_instantiation& v, OutIter dest)
-{
-  data::traverse_sort_expressions(v.parameters(), dest);
-}
 
 /// \brief Returns true if the term t is a propositional variable instantiation
 /// \param t A term

@@ -55,6 +55,9 @@ using mcrl2::core::pp;
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
+template <typename Object, typename OutIter>
+void traverse_sort_expressions(const Object& o, OutIter dest);
+
 /// \cond INTERNAL_DOCS
 
   /// \brief Normalizes a PBES equation
@@ -733,16 +736,6 @@ std::set<data::variable> compute_free_variables(const pbes<Container>& p)
   return result;
 }
 
-/// \brief Traverses the PBES, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename Container, typename OutIter>
-void traverse_sort_expressions(const pbes<Container>& p, OutIter dest)
-{
-  data::traverse_sort_expressions(p.equations(), dest);
-  data::traverse_sort_expressions(p.free_variables(), dest);
-  traverse_sort_expressions(p.initial_state(), dest);
-}
-
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 template <typename Container>
@@ -771,5 +764,9 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 };
 }
 /// \endcond
+
+#ifndef MCRL2_PBES_TRAVERSE_H
+#include "mcrl2/pbes/traverse.h"
+#endif
 
 #endif // MCRL2_PBES_PBES_H
