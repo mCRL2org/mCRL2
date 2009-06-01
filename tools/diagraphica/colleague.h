@@ -28,7 +28,7 @@ public:
     // -- contstructors and destructors -----------------------------
     Colleague( Mediator* m );
     Colleague( const Colleague &colleague );
-    ~Colleague();
+    virtual ~Colleague();
 
 protected:
     // -- data members ----------------------------------------------

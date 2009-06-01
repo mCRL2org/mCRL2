@@ -21,6 +21,9 @@ Bundle::Bundle()
 // -------------
 {
     index = -1;
+    parent = NULL;
+    inCluster = NULL;
+    outCluster = NULL;
 }
 
 

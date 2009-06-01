@@ -39,7 +39,9 @@ namespace grape
          * Initializes visual_object.
          * @pre: p_channel should be pointed to an existing channel
          */
-        visual_object( void ) {};
+        visual_object( void ) {
+          m_object = NULL;
+        };
 
         visual_object( const visual_object &p_vis_object ) { m_object = p_vis_object.m_object; }
 

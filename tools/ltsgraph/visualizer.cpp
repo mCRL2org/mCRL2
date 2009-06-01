@@ -26,6 +26,7 @@ Visualizer::Visualizer(LTSGraph* app)
   showHandles = false;
   showTransLabels = true;
   showStateLabels = true;
+  showStateVector = false;
   fr = NULL;
 }
 
