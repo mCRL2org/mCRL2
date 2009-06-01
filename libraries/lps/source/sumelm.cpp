@@ -159,7 +159,7 @@ namespace lps {
     }
 
     new_summand = set_summation_variables(summand_, data::make_variable_list(new_summation_variables));
-    gsVerboseMsg("Removed %d summation variables\n", num_removed);
+    gsDebugMsg("Removed %d summation variables\n", num_removed);
 
     return new_summand;
   }

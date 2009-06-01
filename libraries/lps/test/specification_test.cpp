@@ -80,8 +80,8 @@ void test_system_defined_sorts()
     "init X(0,1);\n");
 
   specification spec = mcrl22lps(SPEC);
-  complete_data_specification(spec);
-  std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
+  // complete_data_specification(spec);
+  // std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
 
   boost::iterator_range<data_specification::constructors_const_iterator> r = spec.data().constructors(data::sort_nat::nat());
   

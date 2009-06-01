@@ -34,6 +34,8 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
+#include "gc.h" // Required for ad hoc garbage collection.
+
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data::detail;
@@ -299,7 +301,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
           outstream.close();
         }
       }
-
+      AT_collect();
       return true;
     }
 
@@ -594,7 +596,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
       }
       else {
-        mcrl2::lps::specification specification(linearise_std(input_result, m_linearisation_options));
+        mcrl2::lps::specification specification(linearise_std(
+                   mcrl2::process::process_specification(input_result), m_linearisation_options));
         //store the result
         specification.save(m_linearisation_options.outfilename);
 
@@ -613,7 +616,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
+  
   return mcrl22lps_tool().execute(argc, argv);
 }
 

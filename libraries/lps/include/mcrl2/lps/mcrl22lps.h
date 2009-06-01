@@ -31,7 +31,7 @@ namespace lps {
   /// \param options Options for the algorithm
   /// \return The linearized specification
   inline
-  specification linearise(ATermAppl spec, t_lin_options options)
+  specification linearise(const process::process_specification spec, t_lin_options options)
   {
     return linearise_std(spec, options);
   } 
@@ -43,7 +43,7 @@ namespace lps {
   inline
   specification mcrl22lps(const std::string& spec, t_lin_options options = t_lin_options())
   {
-    lin_std_initialize_global_variables();
+    // lin_std_initialize_global_variables();
 
     // the lineariser expects data from a stream...
     std::stringstream spec_stream;

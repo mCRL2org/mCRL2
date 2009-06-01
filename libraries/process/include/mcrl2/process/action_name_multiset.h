@@ -49,7 +49,6 @@ namespace process {
       core::identifier_string_list names() const
       {
         using namespace atermpp;
-        // return list_arg1(arg1(*this));
         return list_arg1(*this);
       }
   };
