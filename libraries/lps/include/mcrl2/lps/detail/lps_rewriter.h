@@ -160,7 +160,7 @@ namespace detail {
       rewrite_container(p.action_summands());
       rewrite_container(p.deadlock_summands());
     }
-  
+
     /// \brief Applies the rewriter to a linear process specification
     /// \param spec A linear process specification
     void rewrite(specification& spec) const
@@ -168,7 +168,14 @@ namespace detail {
       rewrite(spec.process());
       rewrite(spec.initial_process());
     }
-    
+
+    /// \brief Applies the rewriter to the elements of a term list
+    template <typename TermList>
+    void rewrite(TermList& l) const
+    {
+      l = rewrite_list_copy(l);
+    }
+
     template <typename Term>
     void operator()(Term& t)
     {

@@ -435,18 +435,6 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
       return result;
     }
 
-/// \brief Traverses the multi action, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const multi_action& m, OutIter dest)
-{
-  if (m.has_time())
-  {
-    data::traverse_sort_expressions(m.time(), dest);
-  }
-  data::traverse_sort_expressions(m.actions(), dest);
-}
-
 } // namespace lps
 
 } // namespace mcrl2

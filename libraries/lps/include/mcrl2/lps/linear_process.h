@@ -375,21 +375,6 @@ std::set<action_label> compute_action_labels(const linear_process& process)
   return result;
 }
 
-/// \brief Traverses the linear process, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const linear_process& p, OutIter dest)
-{
-  // free variables
-  data::traverse_sort_expressions(p.free_variables(), dest);
-
-  // process parameters
-  data::traverse_sort_expressions(p.process_parameters(), dest);
-
-  // summands
-  data::traverse_sort_expressions(p.summands(), dest);
-}
-
 } // namespace lps
 
 } // namespace mcrl2

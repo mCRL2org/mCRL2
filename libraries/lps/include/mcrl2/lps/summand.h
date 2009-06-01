@@ -482,32 +482,6 @@ summand replace_data_expressions(const summand& s,
 /// \brief Read-only singly linked list of summands
 typedef atermpp::term_list<summand> summand_list;
 
-/// \brief Traverses the summand, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const summand& s, OutIter dest)
-{
-  // summation variables
-  data::traverse_sort_expressions(s.summation_variables(), dest);
-
-  // condition
-  data::traverse_sort_expressions(s.condition(), dest);
-
-  // deadlock
-  if (s.is_delta())
-  {
-    traverse_sort_expressions(s.deadlock(), dest);
-  }
-  // multi action
-  else
-  {
-    traverse_sort_expressions(s.multi_action(), dest);
-  }
-  
-  // next state
-  data::traverse_sort_expressions(s.assignments(), dest);
-}
-
 /// \brief Base class for LPS summands.
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
 //                    <DataExprOrNil>, <Assignment>*)

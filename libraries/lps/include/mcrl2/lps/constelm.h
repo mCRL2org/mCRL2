@@ -62,25 +62,25 @@ struct default_free_variable_solver
 /// \brief Algorithm class for elimination of constant parameters
 // TODO: add default template argument for free variable solver
 template <typename DataRewriter>
-class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewriter>
+class constelm_algorithm: public lps::detail::lps_algorithm
 {
   protected:
-    // Needed to qualify the attributes of the super class, since g++ refuses to recognize
-    // them without a super:: in front of it.
-    typedef lps::detail::lps_rewriter_algorithm<DataRewriter> super;
-
     /// \brief If true, then the algorithm is allowed to instantiate free variables
     /// as a side effect.
     bool m_instantiate_free_variables;
 
     /// \brief Maps process parameters to their index.
     std::map<data::variable, unsigned int> m_index_of;
+    
+    /// \brief The rewriter used by the constelm algorithm.
+    const DataRewriter& R;
 
   public:
 
     /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R, bool verbose = false)
-      : lps::detail::lps_rewriter_algorithm<DataRewriter>(spec, R, verbose)
+    constelm_algorithm(specification& spec, const DataRewriter& R_, bool verbose = false)
+      : lps::detail::lps_algorithm(spec, verbose),
+        R(R_)
     {}
 
     /// \brief Runs the constelm algorithm
@@ -92,14 +92,12 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
     void run(bool instantiate_free_variables = false)
     {
       m_instantiate_free_variables = instantiate_free_variables;
-      data::data_expression_vector e = data::convert<data::data_expression_vector>(super::m_spec.initial_process().state());
+      data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
         
       // optimization: rewrite e
-      // For some reason g++ doesn't like these statements to be combined...
-      lps::detail::lps_rewriter<DataRewriter> rewr(super::R);
-      rewr.rewrite_list(e);
+      lps::rewrite(e, R);
 
-      linear_process& p = super::m_spec.process();
+      linear_process& p = m_spec.process();
       data::variable_list V = p.free_variables();
       const data::variable_list& d = p.process_parameters();
 
@@ -131,23 +129,23 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
         {
           const action_summand& s = *i;
           const data::data_expression& c_i = s.condition();
-          if (super::R(c_i, sigma) != data::sort_bool_::false_())
+          if (R(c_i, sigma) != data::sort_bool_::false_())
           {
             for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
             {
               unsigned int index_j = m_index_of[*j];
               const data::variable& d_j = *j;
-              data::data_expression g_ij = super::next_state(s, d_j);
+              data::data_expression g_ij = next_state(s, d_j);
 
-              if (super::R(g_ij, sigma) != super::R(d_j, sigma))
+              if (R(g_ij, sigma) != R(d_j, sigma))
               {
 #ifdef MCRL2_LPSCONSTELM_DEBUG
             std::clog << "POSSIBLE CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(super::R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(super::R(g_ij, sigma)) << "\n"
+                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
+                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
 #endif
-                data::mutable_substitution<> W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], super::R, sigma);
+                data::mutable_substitution<> W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
                   for (data::mutable_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
@@ -172,8 +170,8 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
               else
               {
                 std::clog << "NO CHANGE FOR PARAMETER " << pp(d_j) << "\n"
-                      << "      value before: " << pp(super::R(d_j, sigma)) << "\n"
-                      << "      value after:  " << pp(super::R(g_ij, sigma)) << "\n"
+                      << "      value before: " << pp(R(d_j, sigma)) << "\n"
+                      << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
               }
 #endif
@@ -182,7 +180,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
 #ifdef MCRL2_LPSCONSTELM_DEBUG
           else
           {
-            std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(super::R(c_i, sigma)) << std::endl;
+            std::clog << "CONDITION IS FALSE: " << pp(i->condition()) << data::to_string(sigma) << " -> " << pp(R(c_i, sigma)) << std::endl;
           }
 #endif
         }
@@ -193,7 +191,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       } while (!dG.empty());
 
       // report the results
-      if (super::m_verbose)
+      if (m_verbose)
       {
         std::clog << "Removing the following parameters: ";
         for (std::set<data::variable>::iterator i = G.begin(); i != G.end(); ++i)
@@ -203,8 +201,8 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
         std::clog << std::endl;
       }
 
-      // rewrite the specification with sigma
-      lps::rewrite(super::m_spec, super::R, sigma);
+      // rewrite the specification with substitution sigma
+      lps::rewrite(m_spec, R, sigma);
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
@@ -212,7 +210,7 @@ class constelm_algorithm: public lps::detail::lps_rewriter_algorithm<DataRewrite
       {
         constant_parameters.insert(i->first);
       }
-      lps::remove_parameters(super::m_spec, constant_parameters);
+      lps::remove_parameters(m_spec, constant_parameters);
     }
 };
 

@@ -34,8 +34,11 @@ namespace mcrl2 {
 
 /// \brief The main namespace for the LPS library.
 namespace lps {
+                     
+template <typename Object, typename OutIter>
+void traverse_sort_expressions(const Object& o, OutIter dest);
 
-class specification;
+class specification;   
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
 
@@ -323,21 +326,6 @@ specification repair_free_variables(const specification& spec)
   return result;
 }
 
-/// \brief Traverses the linear process specification, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const specification& spec, OutIter dest)
-{
-  // action labels
-  data::traverse_sort_expressions(spec.action_labels(), dest);
-
-  // linear process
-  traverse_sort_expressions(spec.process(), dest);
-
-  // initial process
-  traverse_sort_expressions(spec.initial_process(), dest);
-}
-
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 inline
@@ -381,8 +369,14 @@ bool operator!=(const specification& spec1, const specification& spec2)
   return !(spec1 == spec2);
 }
 
-} // namespace lps
+} // namespace lps                                                                                         
 
-} // namespace mcrl2
+} // namespace mcrl2                                                                                        
 
-#endif // MCRL2_LPS_SPECIFICATION_H
+#ifndef MCRL2_LPS_TRAVERSE_H
+#include "mcrl2/lps/traverse.h"
+#endif
+
+#endif // MCRL2_LPS_SPECIFICATION_H                                                                                       
+
+

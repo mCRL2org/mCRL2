@@ -100,14 +100,6 @@ bool is_action_label(atermpp::aterm_appl t)
   return core::detail::gsIsActId(t);
 }
 
-/// \brief Traverses the action label, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const action_label& l, OutIter dest)
-{
-  data::traverse_sort_expressions(l.sorts(), dest);
-}
-
 } // namespace lps
 
 } // namespace mcrl2

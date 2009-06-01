@@ -128,17 +128,6 @@ namespace lps {
     }
   };
 
-/// \brief Traverses the deadlock, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const deadlock& d, OutIter dest)
-{
-  if (d.has_time())
-  {
-    data::traverse_sort_expressions(d.time(), dest);
-  }
-}
-
 } // namespace lps
 
 } // namespace mcrl2

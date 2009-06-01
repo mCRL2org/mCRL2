@@ -138,18 +138,6 @@ std::set<data::variable> compute_free_variables(const process_initializer& init)
   return result;
 }
 
-/// \brief Traverses the process initializer, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const process_initializer& init, OutIter dest)
-{
-  // free variables
-  data::traverse_sort_expressions(init.free_variables(), dest);
-
-  // next state
-  data::traverse_sort_expressions(init.assignments(), dest);
-}
-
 } // namespace lps
 
 } // namespace mcrl2

@@ -168,36 +168,6 @@ namespace detail {
       }
   };
 
-  /// \brief Algorithm class for algorithms on linear process specifications
-  /// that use a rewriter.
-  template <typename DataRewriter>
-  class lps_rewriter_algorithm: public lps_algorithm
-  {
-    protected:
-      const DataRewriter& R;
-
-    public:
-      lps_rewriter_algorithm(specification& spec, const DataRewriter& rewr, bool verbose = false)
-        : lps_algorithm(spec, verbose),
-          R(rewr)
-      {}
-
-      /// \brief Rewrites the specification
-      /// \brief sigma A substitution
-      void rewrite()
-      {
-        lps::rewrite(m_spec, R);
-      }
-
-      /// \brief Rewrites the specification with a substitution.
-      /// \brief sigma A substitution
-      template <typename Substitution>
-      void rewrite(Substitution& sigma)
-      {
-        lps::rewrite(m_spec, R, sigma);
-      }
-  };
-  
 } // namespace detail
 
 } // namespace lps
