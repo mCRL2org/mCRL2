@@ -474,7 +474,7 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
         object *obj_ptr = m_touched_visual_object->get_selectable_object();        
      
         // update canvas if we are dragging a comment
-        if (m_touched_visual_object->get_selectable_object()->get_type() == COMMENT) 
+        if (obj_ptr && (obj_ptr->get_type() == COMMENT))
         {  
           draw();
         }

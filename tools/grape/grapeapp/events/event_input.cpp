@@ -493,10 +493,10 @@ bool grape_event_drag::Do( void )
           // test if the reference on the comment is selected
           if (v_com->is_inside_reference(s_coord_mousedown))
           {
-            if ((visual_endobject != 0) && (visual_endobject->get_type() != COMMENT)) //only attach if it is not attached to a comment
+            if (visual_endobject && (visual_endobject->get_type() != COMMENT)) //only attach if it is not attached to a comment
             { 
               object* end_object_ptr = visual_endobject->get_selectable_object();      
-              if ((end_object_ptr != begin_object_ptr))
+              if (end_object_ptr && (end_object_ptr != begin_object_ptr))
               {
                 grape_event_attach_comment* event = new grape_event_attach_comment( m_main_frame, com, end_object_ptr );
                 m_main_frame->get_event_handler()->Submit( event, true );
