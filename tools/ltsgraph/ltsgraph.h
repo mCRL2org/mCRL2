@@ -52,8 +52,6 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
     bool colouring;
     wxColour brushColour;
 
-    bool parse_command_line(int argc, wxChar** argv);
-
   public:
     LTSGraph();
 

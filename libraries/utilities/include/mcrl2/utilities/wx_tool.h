@@ -116,6 +116,9 @@ namespace mcrl2 {
               arguments.push_back(boost::shared_array< char >(new char[argument.size() + 1]));
 
               std::copy(argument.begin(), argument.end(), arguments.back().get());
+              
+              // Make sure that the string is zero terminated
+              arguments.back()[argument.size()] = '\0';
 
               converted_arguments[i] = arguments.back().get();
             }
