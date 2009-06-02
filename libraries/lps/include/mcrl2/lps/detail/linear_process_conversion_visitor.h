@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DETAIL_LINEAR_PROCESS_CONVERSION_VISITOR_H
 
 #include <stdexcept>
+#include "mcrl2/exception.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
@@ -29,7 +30,10 @@ namespace detail {
   struct linear_process_conversion_visitor: public process_expression_visitor<void>
   {
     /// \brief The result of the conversion.
-    atermpp::vector<lps::summand> result;
+    lps::action_summand_vector m_action_summands;
+
+    /// \brief The result of the conversion.
+    lps::deadlock_summand_vector m_deadlock_summands;
 
     /// \brief The process equation that is checked.
     process_equation m_equation;
@@ -56,22 +60,50 @@ namespace detail {
     data::data_expression m_condition;
 
     /// \brief Contains intermediary results.
-    lps::summand m_summand;
+    lps::action_summand m_action_summand;
+
+    /// \brief Contains intermediary results.
+    lps::deadlock_summand m_deadlock_summand;
+
+    /// \brief Checks if a process_equation matches with a process instance
+    bool match_initial_process(const process_equation& eq, const process_instance& init) const
+    {
+      if (eq.identifier() != init.identifier())
+      {
+        return false;
+      }
+      data::variable_list v = eq.formal_parameters();
+      data::data_expression_list e = init.actual_parameters();
+      if (v.size() != e.size())
+      {
+        return false;
+      }
+      data::variable_list::const_iterator i = v.begin();
+      data::data_expression_list::const_iterator j = e.begin();
+      for (; i != v.end(); ++i, ++j)
+      {
+        if (i->sort() != j->sort())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 
     /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
-    {};
-
-    /// \brief Exception that is thrown to denote that a linear process is encountered
-    /// that can not be transformed into PROCESS format. For example P = a.
-    struct unsupported_linear_process
-    {};
+    {
+      process_expression expr;
+      
+      non_linear_process(const process_expression& p)
+        : expr(p)
+      {}
+    };
 
     /// \brief Clears the current summand
     void clear_summand()
     {
       m_sum_variables = data::variable_list();
-      m_summand = lps::summand();
       m_deadlock = lps::deadlock();
       m_deadlock_changed = false;
       m_multi_action = lps::multi_action();
@@ -83,28 +115,17 @@ namespace detail {
     /// \brief Adds a summand to the result
     void add_summand()
     {
-      if (m_summand == lps::summand())
+      if ((m_multi_action != lps::multi_action()) || m_multi_action_changed)
       {
-        if ( (m_multi_action != lps::multi_action()) || m_multi_action_changed)
-        {
-          if (m_next_state == data::assignment_list())
-          {
-            throw unsupported_linear_process();
-          }
-          m_summand = lps::summand(m_sum_variables, m_condition, m_multi_action, m_next_state);
-        }
-        else if ( (m_deadlock != lps::deadlock()) || m_deadlock_changed)
-        {
-          m_summand = lps::summand(m_sum_variables, m_condition, m_deadlock);
-        }
-        else
-        {
-          return;
-        }
+        m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
+        clear_summand();
       }
-      result.push_back(m_summand);
+      else if ((m_deadlock != lps::deadlock()) || m_deadlock_changed)
+      {
+        m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
+        clear_summand();
+      }
 // std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
-      clear_summand();
     }
   
     /// \brief These names can be used as return types of the visit functions, to make
@@ -169,7 +190,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -180,7 +201,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -191,7 +212,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -202,7 +223,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -213,7 +234,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -262,7 +283,20 @@ namespace detail {
     bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
     {
       visit(left);
+
+      // Check 1) The expression right must be a process instance
+      if (!is_process_instance(right))
+      {
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered with an unexpected right hand side");
+      }
       process_instance p = right;
+
+      // Check 2) The process equation and and the process instance must match
+      if (!match_initial_process(m_equation, p))
+      {
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
+      }
+
       m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
@@ -289,7 +323,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -300,7 +334,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -311,7 +345,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -322,7 +356,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
     {
-      throw non_linear_process();
+      throw non_linear_process(x);
       return continue_recursion;
     }
 
@@ -351,54 +385,50 @@ namespace detail {
     void convert(const process_equation& e)
     {
       clear_summand();
-      try
-      {
-        m_equation = e;
-        visit(m_equation.expression());
-        add_summand(); // needed if it is not a choice
-      }
-      catch(unsupported_linear_process)
-      {
-        result.clear();
-        std::cerr << "Unsupported linear expression encountered in linear_process_conversion_visitor" << std::endl;
-      }
-      catch(non_linear_process)
-      {
-        result.clear();
-        std::cerr << "Non-linear expression encountered in linear_process_conversion_visitor" << std::endl;
-      }
+      visit(m_equation.expression());
+      add_summand(); // needed if it is not a choice
     }
 
     /// \brief Converts a process_specification into a specification.
-    /// Throws \p unsupported_linear_process if an unsupported linear process expression is encountered.
-    /// Throws \p non_linear_process if the process is not linear.
+    /// Throws \p non_linear_process if a non-linear sub-expression is encountered.
+    /// Throws \p mcrl2::runtime_error in the following cases:
+    /// \li The number of equations is not equal to one
+    /// \li The initial process is not a process instance, or it does not match with the equation
+    /// \li A sequential process is found with a right hand side that is not a process instance,
+    /// or it doesn't match the equation
     /// \param p A process specification
     /// \return The converted specification
     lps::specification convert(const process_specification& p)
     {
-      data::variable_list m_process_parameters;
-      result.clear();
+      m_action_summands.clear();
+      m_deadlock_summands.clear();
 
-      for (atermpp::vector<process_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      // Check 1) The number of equations must be one
+      if (p.equations().size() != 1)
       {
-        data::variable_list parameters = i->formal_parameters();
-        if (m_process_parameters != data::variable_list() && m_process_parameters != parameters)
-        {
-          std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
-        }
-        m_process_parameters = parameters;
-        convert(*i);
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the number of process equations is not equal to 1!");
       }
-      // TODO: clean this up
-      lps::linear_process lp(data::variable_list(), m_process_parameters, lps::deadlock_summand_vector(), lps::action_summand_vector());
-      lp.set_summands(lps::summand_list(result.begin(), result.end()));
+      m_equation = p.equations().front();
+
+      // Check 2) The initial process must be a process instance
       if (!is_process_instance(p.init().expression()))
       {
-        std::cerr << "fatal error in linear_process_conversion_visitor" << std::endl;
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process has an unexpected value");
       }
-      process_instance q = p.init().expression();
-      lps::process_initializer init(p.init().free_variables(), data::make_assignment_list(m_process_parameters, q.actual_parameters()));
-      return lps::specification(p.data(), p.action_labels(), lp, init);
+      process_instance init = p.init().expression();
+
+      // Check 3) The process equation and and the initial process instance must match
+      if (!match_initial_process(m_equation, init))
+      {
+        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process does not match the process equation");
+      }
+
+      // Do the conversion
+      convert(m_equation);
+
+      lps::linear_process proc(m_equation.free_variables(), m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
+      lps::process_initializer proc_init(m_equation.free_variables(), data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
+      return lps::specification(p.data(), p.action_labels(), proc, proc_init);
     }
   };
 

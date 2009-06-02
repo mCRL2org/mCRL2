@@ -22,12 +22,13 @@ namespace mcrl2 {
 namespace lps {
 
   inline
-  /// \brief Parses an mCRL2 specification containing a linear process
-  /// If the process is not linear, in debug mode an assertion will be triggered.
-  /// Throws detail::linear_process_conversion_visitor::non_linear_process if the process
-  /// contains a non-linear process expression.
-  /// Throws detail::linear_process_conversion_visitor::unsupported_linear_process if
-  /// the process contains an unsupported linear process expression.
+  /// \brief Parses an mCRL2 specification containing a linear process 
+  /// Throws \p non_linear_process if a non-linear sub-expression is encountered.
+  /// Throws \p mcrl2::runtime_error in the following cases:
+  /// \li The number of equations is not equal to one
+  /// \li The initial process is not a process instance, or it does not match with the equation
+  /// \li A sequential process is found with a right hand side that is not a process instance,
+  /// or it doesn't match the equation
   /// \param text A string containing a linear mCRL2 specification
   /// \return The parsed specification
   specification parse_linear_process_specification(const std::string& text)

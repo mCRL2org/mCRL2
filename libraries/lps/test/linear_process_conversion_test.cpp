@@ -96,21 +96,26 @@ const std::string ABS_SPEC_LINEARIZED =
 
 void test_process(std::string text)
 {
-  process_specification spec = parse_process_specification(text);
-  specification sp = parse_linear_process_specification(text);
-  std::cout << "<spec>" << core::pp(specification_to_aterm(sp)) << std::endl;
+  process_specification pspec = parse_process_specification(text);
+  specification lspec = parse_linear_process_specification(text);
 
-  for (atermpp::vector<process_equation>::iterator i = spec.equations().begin(); i != spec.equations().end(); ++i)
+  bool linear = is_linear(pspec);
+  if (linear)
   {
-    bool linear = process::detail::linear_process_expression_visitor().is_linear(*i);
-    std::cerr << core::pp(*i) << " is " << (linear ? "" : "not") << "linear" << std::endl;
-    if (linear)
+    process::detail::linear_process_conversion_visitor visitor;
+    specification spec = visitor.convert(pspec);
+  }
+  else
+  {
+    try
     {
       process::detail::linear_process_conversion_visitor visitor;
-      visitor.convert(*i);
-      std::cerr << "summands:\n";
-      summand_list s(visitor.result.begin(), visitor.result.end());
-      std::cerr << core::pp(s) << std::endl;
+      specification spec = visitor.convert(pspec);
+      BOOST_CHECK(false); // not supposed to arrive here
+    }
+    catch(...)
+    {
+      // skip
     }
   }
 }
