@@ -598,7 +598,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       }
       else {
         mcrl2::lps::specification specification(linearise_std(
-                   mcrl2::process::process_specification(input_result), m_linearisation_options));
+                   mcrl2::process::process_specification_to_aterm(mcrl2::process::process_specification(input_result)), m_linearisation_options));
         //store the result
         specification.save(m_linearisation_options.outfilename);
 
