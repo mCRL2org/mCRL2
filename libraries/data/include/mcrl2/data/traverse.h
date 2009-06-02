@@ -58,6 +58,39 @@ OutIter traverse_sort_expressions(const assignment& a, OutIter dest)
   return dest;
 }
 
+/// \brief Traverses the variable, and writes all variables
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+OutIter traverse_variables(const variable& v, OutIter dest)
+{
+  *dest++ = v;
+  return dest;
+}
+
+/// \brief Traverses the data expression, and writes all variables
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+OutIter traverse_variables(const data_expression& d, OutIter dest)
+{
+  // TODO: make this implementation more efficient
+  std::set<data::variable> v = data::find_all_variables(d);
+  for (std::set<data::variable>::iterator i = v.begin(); i != v.end(); ++i)
+  {
+    *dest++ = *i;
+  }
+  return dest;
+}
+
+/// \brief Traverses the assignment, and writes all variables
+/// that are encountered to the output range [dest, ...).
+template <typename OutIter>
+OutIter traverse_variables(const assignment& a, OutIter dest)
+{
+  dest = traverse_variables(a.lhs(), dest);
+  dest = traverse_variables(a.rhs(), dest);
+  return dest;
+}
+
 } // namespace data
 
 } // namespace mcrl2

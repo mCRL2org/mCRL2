@@ -10,6 +10,7 @@
 /// \brief add your file description here.
 
 #include "mcrl2/lps/detail/lps_sort_traverser.h"
+#include "mcrl2/lps/detail/lps_variable_traverser.h"
 
 #ifndef MCRL2_LPS_TRAVERSE_H
 #define MCRL2_LPS_TRAVERSE_H
@@ -24,6 +25,15 @@ namespace lps {
   void traverse_sort_expressions(const Object& o, OutIter dest)
   {
     lps::detail::lps_sort_traverser<OutIter> r(dest);
+    r(o);
+  }
+
+  /// \brief Traverses all variables in the data type o, and writes them
+  /// to the output iterator dest.
+  template <typename Object, typename OutIter>
+  void traverse_variables(const Object& o, OutIter dest)
+  {
+    lps::detail::lps_variable_traverser<OutIter> r(dest);
     r(o);
   }
 

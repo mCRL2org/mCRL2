@@ -9,6 +9,8 @@
 /// \file parelm_test.cpp
 /// \brief Add your file description here.
 
+//#define MCRL2_LPS_PARELM_DEBUG
+
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
@@ -110,10 +112,15 @@ const std::string expected_8 = "process_parameter_names = xi00, xi02, xi03, xi04
 
 void test_parelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
-  specification s0 = parse_linear_process_specification(spec_text);
-  specification s1 = parelm(s0);
-  lps::detail::specification_property_map info(s1);  
-  BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
+  specification spec1 = parse_linear_process_specification(spec_text);
+  specification spec2 = spec1;
+  parelm(spec1, true);
+  parelm(spec2, false);
+  lps::detail::specification_property_map info1(spec1);  
+  lps::detail::specification_property_map info2(spec2);  
+  BOOST_CHECK(data::detail::compare_property_maps(message + "a", info1, expected_result));
+  BOOST_CHECK(data::detail::compare_property_maps(message + "b", info2, expected_result));
+  core::garbage_collect();
 }
 
 void test_parelm()
