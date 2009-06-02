@@ -18,10 +18,11 @@
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/lps_rewrite.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/detail/lps_rewriter.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/detail/specification_property_map.h"
 
 using namespace std;
 using namespace atermpp;
@@ -101,9 +102,13 @@ void test1()
 
   // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(application(plus, n4, n5)) == r(application(plus, n2, n7)));
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
-  BOOST_CHECK(spec1.process().summand_count() == 1);
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+  lps::detail::specification_property_map info(spec);
+  lps::detail::specification_property_map info1(spec1);
+  BOOST_CHECK(info.to_string() == info1.to_string());
+
   // test destructor
   rewriter r1 = r;
 }
@@ -114,14 +119,23 @@ const std::string SPECIFICATION2=
 "init P(1+1,2+2);                         \n";
 
 void test2()
-{ specification spec = parse_linear_process_specification(SPECIFICATION2);
+{
+  specification spec = parse_linear_process_specification(SPECIFICATION2);
   rewriter r(spec.data());
-  specification spec1=rewrite_lps(spec,r);
-  BOOST_CHECK(spec1==rewrite_lps(spec1,r));
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+
+  specification spec2 = spec1;
+  lps::rewrite(spec2, r);
+
+  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map info2(spec2);
+  BOOST_CHECK(info1.to_string() == info2.to_string());
   BOOST_CHECK(spec1.process().summand_count() == 1);
 }
 
-const std::string SPECIFICATION3=
+const std::string SPECIFICATION3 =
 "act  c:Pos#Nat;                          \n"
 "proc P(a:Pos,b:Nat)=tau.P(a+1,b+1+2)+    \n"
 "                    tau.P(a+1,pred(a))+  \n"
@@ -131,9 +145,17 @@ void test3()
 {
   specification spec = parse_linear_process_specification(SPECIFICATION3);
   rewriter r(spec.data());
-  specification spec1 = rewrite_lps(spec, r);
-  BOOST_CHECK(spec1 == rewrite_lps(spec1, r));
-  BOOST_CHECK(spec1.process().summand_count()==3);
+
+  specification spec1 = spec;
+  lps::rewrite(spec1, r);
+
+  specification spec2 = spec1;
+  lps::rewrite(spec2, r);
+
+  lps::detail::specification_property_map info1(spec1);
+  lps::detail::specification_property_map info2(spec2);
+  BOOST_CHECK(info1.to_string() == info2.to_string());
+  BOOST_CHECK(spec1.process().summand_count() == 3);
 }
 
 // N.B. This test doesn't work due to the different representations of numbers
@@ -162,6 +184,7 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
     std::cerr << pp(dest.initial_process()) << std::endl;
   }
   BOOST_CHECK(src == dest);
+  core::garbage_collect();
 }
                     
 void test_lps_rewriter()
@@ -184,13 +207,9 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test1();
-  core::garbage_collect();
   test2();
-  core::garbage_collect();
   test3();
-  core::garbage_collect();
   //test_lps_rewriter();
-  //core::garbage_collect();
 
   return 0;
 }
