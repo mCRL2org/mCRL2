@@ -318,8 +318,8 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_MENU(wxID_PASTE, grape_frame::event_menu_paste)
   EVT_MENU(wxID_DELETE, grape_frame::event_menu_delete)
   EVT_MENU(GRAPE_MENU_PROPERTIES, grape_frame::event_menu_properties)
-  EVT_MENU(GRAPE_MENU_SELECT_ALL, grape_frame::event_menu_select_all)
-  EVT_MENU(GRAPE_MENU_DESELECT_ALL, grape_frame::event_menu_deselect_all)
+  //EVT_MENU(GRAPE_MENU_SELECT_ALL, grape_frame::event_menu_select_all)
+  //EVT_MENU(GRAPE_MENU_DESELECT_ALL, grape_frame::event_menu_deselect_all)
   EVT_MENU(GRAPE_MENU_DATATYPESPEC, grape_frame::event_datatype_spec)
 
   // diagram menu
@@ -547,14 +547,14 @@ void grape_frame::update_menubar( void )
   {
     bool object_selected = dia_ptr->count_selected_objects() > 0;
     m_menubar->Enable( wxID_DELETE, object_selected );
-    m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, object_selected );
+    //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, object_selected );
     // m_menubar->Enable( GRAPE_MENU_SELECT_ALL, m_glcanvas->count_visual_object() > 1 ); // 1 because the visibility frame or the preamble are also visual objects, wich can not be selected
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, dia_ptr->count_selected_objects() == 1 );
   }
   else
   {
     m_menubar->Enable( wxID_DELETE, false );
-    m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
+    //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
     //m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
   }

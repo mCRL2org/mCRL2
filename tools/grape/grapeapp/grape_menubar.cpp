@@ -124,14 +124,14 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_SELECT_ALL, _T("Select &All\tCtrl-A"), _T("Select all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_SELECT_ALL, false);
-*/
+
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DESELECT_ALL, _T("&Deselect \tShift-Ctrl-A"), _T("Deselect all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_DESELECT_ALL, false);
-  *
+  
   m_menu_edit->AppendSeparator();
-
-  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit Data type specification"), _T("Edit Data type specification"), wxITEM_CHECK );
+*/
+  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit data type specification"), _T("Edit Data type specification"), wxITEM_CHECK );
   m_menu_edit->Append( item );
 
   Append(m_menu_edit, _T("&Edit"));
@@ -287,7 +287,7 @@ void grape_menubar::set_mode( int p_mode )
   Enable(GRAPE_MENU_PROPERTIES, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
   //Enable(GRAPE_MENU_SELECT_ALL, false );
-  Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
+  //Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );

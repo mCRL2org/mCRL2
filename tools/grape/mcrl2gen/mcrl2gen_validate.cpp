@@ -306,12 +306,12 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
       // get channel communication id
       wxString channel_communication_id = get_child_value(channel_communication_node, _T("id"));
       // get visible channel communication name
-      wxString channel_communication_visible_name = get_child_value(channel_communication_node, _T("rename"));
+      wxString channel_communication_visible_name = get_child_value(channel_communication_node, _T("name"));
       if (channel_communication_visible_name.IsEmpty())
       {
-        // ERROR: visible channel communication is not renamed
+        // ERROR: visible channel communication is not named
         cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
-             << " has a visible channel communication that is not renamed." << endl;
+             << " has a visible channel communication that is unnamed." << endl;
         throw CONVERSION_ERROR;
         return visibles;
       }
@@ -2258,12 +2258,12 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
     if (channel_communication_type == _T("visible"))
     {
       // get visible channel communication name
-      wxString channel_communication_visible_name = get_child_value(comm, _T("rename"));
+      wxString channel_communication_visible_name = get_child_value(comm, _T("name"));
       if (channel_communication_visible_name.IsEmpty())
       {
-        // ERROR: visible channel communication is not renamed
+        // ERROR: visible channel communication is not named
         cerr << "+ Architecture diagram " << diagram_name.ToAscii()
-             << " contains a visible channel communication that is not renamed." << endl;
+             << " contains a visible channel communication that is unnamed." << endl;
         return false;
       }
     }

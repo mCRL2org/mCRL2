@@ -126,8 +126,14 @@ void diagram::attach_comment_to_object( comment* p_comm, object* p_object )
 void diagram::detach_comment_from_object( comment* p_comm )
 {
   object* object_ptr = p_comm->get_attached_object();
-  object_ptr->detach_comment( p_comm );
-  p_comm->detach_from_object();
+  if (object_ptr)
+  {
+    object_ptr->detach_comment( p_comm );
+  }
+  if (p_comm)
+  {
+    p_comm->detach_from_object();
+  }
 }
 
 void diagram::select_object( object* p_object )

@@ -30,10 +30,6 @@ namespace grape
       GRAPE_MENU_VALIDATE,
       GRAPE_MENU_VALIDATE_DIAGRAM,
 
-      // diagram manipulation
-      GRAPE_MENU_SELECT_ALL,
-      GRAPE_MENU_DESELECT_ALL,
-
       // dialog boxes appear when these are invoked
       GRAPE_MENU_ADD_PROCESS_DIAGRAM,
       GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM,

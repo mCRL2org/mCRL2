@@ -26,7 +26,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
   
   // create name text
-  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("name:"), wxDefaultPosition, wxSize(100, 25) );
+  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create name input
   m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
@@ -41,7 +41,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->AddSpacer( 5 );
   
   // create rename text
-  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("rename:"), wxDefaultPosition, wxSize(100, 25) );
+  wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("Rename:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create rename input
   m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
@@ -56,7 +56,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->AddSpacer( 5 );
   
   // create property text
-  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("property:"), wxDefaultPosition, wxSize(100, 25) );
+  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(100, 25) );
       
   // select the correct property of the channel
   int index = p_channel.get_channel_type();

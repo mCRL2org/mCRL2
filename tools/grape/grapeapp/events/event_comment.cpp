@@ -109,7 +109,7 @@ bool grape_event_remove_comment::Do(  void  )
     } else {
       // remove the entire comment
       dia_ptr->remove_comment( comm_ptr );
-   }
+    }
   }
 
   finish_modification();
@@ -123,23 +123,34 @@ bool grape_event_remove_comment::Undo(  void  )
   
   comment* new_comm = static_cast<comment*> ( find_object( m_comm, COMMENT, dia_ptr->get_id() ) );
   // only recreate the comment if it was removed
-  if (new_comm == 0) new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
-  
-  //re-attach all detached objects
-  new_comm->set_text( m_text );
-  if ( m_object != -1 )
+  if (new_comm == 0) 
+  {
+    new_comm = dia_ptr->add_comment( m_comm, m_coordinate, m_width, m_height );
+
+    //re-attach all detached objects
+    new_comm->set_text( m_text );
+    if ( m_object )
+    {
+      object* obj_ptr = find_object( m_object );
+      if ( obj_ptr )
+      {
+        dia_ptr->attach_comment_to_object( new_comm, obj_ptr );
+      }
+    }
+    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    {
+      unsigned int identifier = m_comments.Item( i );
+      comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
+      dia_ptr->attach_comment_to_object( comm_ptr, new_comm );
+    }
+  }
+  else
   {
     object* obj_ptr = find_object( m_object );
     if ( obj_ptr )
     {
       dia_ptr->attach_comment_to_object( new_comm, obj_ptr );
-    }
-  }
-  for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
-  {
-    unsigned int identifier = m_comments.Item( i );
-    comment* comm_ptr = static_cast<comment*> ( find_object( identifier, COMMENT, dia_ptr->get_id() ) );
-    dia_ptr->attach_comment_to_object( comm_ptr, new_comm );
+    }    
   }
 
   finish_modification();

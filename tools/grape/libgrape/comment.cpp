@@ -28,11 +28,6 @@ comment::comment( const comment &p_comment )
 
 comment::~comment( void )
 {
-  // Remove references to the comment.
-  if ( m_connected_to != 0 )
-  {
-    m_connected_to->detach_comment( this );
-  }
 }
 
 wxString comment::get_text( void ) const
@@ -48,12 +43,11 @@ void comment::set_text( wxString &p_text )
 void comment::attach_to_object( object* p_object )
 {
   m_connected_to = p_object;
-  p_object->attach_comment(this);
+  m_connected_to->attach_comment( this );
 }
 
 void comment::detach_from_object( void )
 {
-  m_connected_to->detach_comment(this);
   m_connected_to = 0;
 }
 

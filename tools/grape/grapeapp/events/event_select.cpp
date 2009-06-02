@@ -45,7 +45,7 @@ bool grape_event_select::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   // refresh visuals
   m_main_frame->get_glcanvas()->reload_visual_objects();
   return true;
@@ -77,7 +77,7 @@ bool grape_event_select_all::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   return true;
 }
 
@@ -108,7 +108,7 @@ bool grape_event_plus_select::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, true );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, true );
   return true;
 }
 
@@ -141,7 +141,7 @@ bool grape_event_deselect::Do( void )
   {
     // update menubar
     m_main_frame->get_menubar()->Enable( wxID_DELETE, false );
-    m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
+    //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
   }
   return true;
 }
@@ -173,7 +173,7 @@ bool grape_event_deselect_all::Do( void )
 
   // update menubar
   m_main_frame->get_menubar()->Enable( wxID_DELETE, false );
-  m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
+  //m_main_frame->get_menubar()->Enable( GRAPE_MENU_DESELECT_ALL, false );
   return true;
 }
 

@@ -26,7 +26,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
   // create name text
-  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("name:"), wxDefaultPosition, wxSize(100, 25) );
+  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25) );
   
   // create name input
   m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );            
@@ -40,7 +40,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wnd_sizer->AddSpacer( 5 );
 
   // create property text
-  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("property:"), wxDefaultPosition, wxSize(100, 25) );
+  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(100, 25) );
   
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
