@@ -27,7 +27,7 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/remove_parameters.h"
+#include "mcrl2/lps/remove_parameters.h"
 
 namespace mcrl2 {
 
@@ -132,7 +132,7 @@ specification parelm(specification& spec)
   }
   mcrl2::core::gsVerboseMsg("\n");
 
-  detail::remove_parameters(spec, to_be_removed);
+  lps::remove_parameters(spec, to_be_removed);
   assert(spec.is_well_typed());
 
   // TODO: make the algorithm in place, so don't return a value
@@ -209,7 +209,7 @@ specification parelm2(specification& spec)
   }
   mcrl2::core::gsVerboseMsg("\n");
 
-  detail::remove_parameters(spec, to_be_removed);
+  lps::remove_parameters(spec, to_be_removed);
   assert(spec.is_well_typed());
   return spec;
 }
