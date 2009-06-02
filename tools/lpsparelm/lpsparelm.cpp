@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
+using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
 
 class lps_parelm_tool : public squadt_tool< input_output_tool >
@@ -34,10 +35,10 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
     }
 
     bool run() {
-      mcrl2::lps::specification lps_specification;
-      lps_specification.load(m_input_filename);
-      mcrl2::lps::specification r = mcrl2::lps::parelm(lps_specification);
-      r.save(m_output_filename);
+      lps::specification spec;
+      spec.load(m_input_filename);
+      lps::parelm(spec);
+      spec.save(m_output_filename);
       return true;
     }
 
