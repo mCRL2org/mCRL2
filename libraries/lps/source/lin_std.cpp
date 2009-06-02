@@ -5165,13 +5165,12 @@ class specification_basic_type:public boost::noncopyable
       if (var==var1)
       { return true;
       }
-    #ifdef NDEBUG
+    
       // Names of variables cannot be the same, even if they have different types.
       if (var.name()==var1.name())
-      { throw mcrl2::runtime_error("variable conflict " + pp(var) ":" + pp(var.sort()) + " versus " + 
-                   pp(var1) + ":" + pp(var1.sort) + ".");
+      { throw mcrl2::runtime_error("variable conflict " + pp(var) + ":" + pp(var.sort()) + " versus " + 
+                   pp(var1) + ":" + pp(var1.sort()) + ".");
       }
-    #endif
     
       result=occursinvarandremove(var,vl);
       vl=push_front(vl,var1);
