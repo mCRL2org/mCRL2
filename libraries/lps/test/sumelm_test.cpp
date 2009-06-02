@@ -12,10 +12,11 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/specification.h>
-#include <mcrl2/lps/sumelm.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/sumelm.h"
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/parse.h"
 
 using namespace atermpp;
 using namespace mcrl2;
