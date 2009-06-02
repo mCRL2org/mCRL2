@@ -15,8 +15,10 @@
 #include <aterm2.h>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lin_types.h"
+#include <mcrl2/process/process_specification.h>
 
-mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_options);
+mcrl2::lps::specification linearise_std(const mcrl2::process::process_specification spec, 
+                                        const t_lin_options lin_options);
 //Pre:  spec_term is an mCRL2 specification that adheres to the internal
 //      structure after data implementation
 //      lin_options represents the options that should be used during
@@ -28,6 +30,5 @@ mcrl2::lps::specification linearise_std(ATermAppl spec, t_lin_options lin_option
 
 /// \brief Function to initialize the global variables in the file lin_std.cpp.
 /// Needed when the linearization algorithm is called more than once.
-void lin_std_initialize_global_variables();
 
 #endif // MCRL2_LPS_LIN_STD_H

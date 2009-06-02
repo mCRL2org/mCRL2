@@ -282,7 +282,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       //store the result
       if ((m_linearisation_options.end_phase == phNone) && (!m_linearisation_options.pretty)) {
         mcrl2::lps::specification spec(
-                     linearise_std(mcrl2::data::detail::internal_format_conversion(result), m_linearisation_options));
+                     linearise_std(mcrl2::process::process_specification(mcrl2::data::detail::internal_format_conversion(result)), 
+                                       m_linearisation_options));
         if (m_linearisation_options.outfilename.empty())
         { gsVerboseMsg("saving result to stdout...\n");
         } else
@@ -598,7 +599,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       }
       else {
         mcrl2::lps::specification specification(linearise_std(
-                   mcrl2::process::process_specification_to_aterm(mcrl2::process::process_specification(input_result)), m_linearisation_options));
+                   mcrl2::process::process_specification(input_result), m_linearisation_options));
         //store the result
         specification.save(m_linearisation_options.outfilename);
 

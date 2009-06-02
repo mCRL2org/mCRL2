@@ -32,7 +32,7 @@ namespace lps {
   inline
   specification linearise(const process::process_specification& spec, t_lin_options options)
   {
-    return linearise_std(process::process_specification_to_aterm(spec), options);
+    return linearise_std(spec, options);
   } 
   
   /// \brief Generates a linearized process specification from a specification in text.
