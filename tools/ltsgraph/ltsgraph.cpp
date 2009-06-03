@@ -128,17 +128,17 @@ void LTSGraph::openFile(std::string const &path)
 
   // Get file's basename
 
-  Importer* imp;
+  std::auto_ptr<Importer> imp;
   // Create (on stack) appropriate importer imp
   if ( ext == "xml")
   {
     // path points to an XML layout file, so create an XML importer
-    imp = new XMLImporter();
+    imp.reset(new XMLImporter());
   }
   else
   {
     // Assume we have an LTS file, so create an LTS importer
-    imp = new LTSImporter();
+    imp.reset(new LTSImporter());
   }
 
   graph = imp->importFile(path);

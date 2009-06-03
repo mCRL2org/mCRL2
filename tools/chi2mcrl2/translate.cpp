@@ -863,7 +863,8 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
                                 ++itRAT)
       { if (itRAT->nextstate == terminate_state.state)
         {
-          collect_streams.insert(itRAT->stream);
+          int stream = itRAT->stream;
+          collect_streams.insert(stream);
         }
       }
       if (!collect_streams.empty())
