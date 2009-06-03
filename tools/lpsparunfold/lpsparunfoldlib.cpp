@@ -83,7 +83,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
     gsDebugMsg("\t");
     gsVerboseMsg("Specification has %d mappings \n", mapping_and_constructor_names.size() - size );
   }
-};
+}
 
 mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str )
 {

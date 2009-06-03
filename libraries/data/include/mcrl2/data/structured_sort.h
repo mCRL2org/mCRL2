@@ -292,13 +292,13 @@ namespace mcrl2 {
     namespace sort_fset {
       function_symbol_vector fset_generate_constructors_code(const sort_expression&);
       data_equation_vector fset_generate_equations_code(const sort_expression&);
-    };
+    }
 
     // declare for friendship
     namespace sort_fbag {
       function_symbol_vector fbag_generate_constructors_code(const sort_expression&);
       data_equation_vector fbag_generate_equations_code(const sort_expression&);
-    };
+    }
 
     namespace detail {
       void impl_sort_struct(ATermAppl, ATermAppl, ATermList*, mcrl2::core::detail::t_data_decls*, bool, ATermList*);

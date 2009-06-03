@@ -45,7 +45,7 @@ class MarkStateRuleDialog : public wxDialog {
     wxCheckListBox* valuesListBox;
     LTS*  lts;
     void loadValues(wxString paramName);
-    DECLARE_EVENT_TABLE();
+    DECLARE_EVENT_TABLE()
 };
 
 #endif
