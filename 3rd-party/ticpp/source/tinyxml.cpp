@@ -1540,6 +1540,7 @@ TiXmlNode* TiXmlStylesheetReference::Clone() const
 	return clone;
 }
 
+
 void TiXmlUnknown::Print( FILE* cfile, int depth ) const
 {
 	for ( int i=0; i<depth; i++ )
@@ -1959,3 +1960,10 @@ bool TiXmlPrinter::Visit( const TiXmlUnknown& unknown )
 	return true;
 }
 
+bool TiXmlPrinter::Visit( const TiXmlStylesheetReference& stylesheet )
+{
+	    DoIndent();
+	    stylesheet.Print( 0, 0, &buffer );
+	    DoLineBreak();
+	    return true;
+}
