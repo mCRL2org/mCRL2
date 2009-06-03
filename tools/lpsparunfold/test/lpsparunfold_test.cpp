@@ -18,7 +18,8 @@
 #include "mcrl2/lps/mcrl22lps.h"
 #include "../lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/core/garbage_collection.h" 
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
