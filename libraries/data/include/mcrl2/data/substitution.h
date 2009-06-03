@@ -142,7 +142,7 @@ namespace mcrl2 {
      * substitution procedure.
      **/
     template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
-    class substitution {
+    class substitution : public std::unary_function< Expression, Expression > {
 
       public:
 
@@ -168,9 +168,6 @@ namespace mcrl2 {
         /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
         const_iterator begin() const {
           return m_map.begin();
-        }
-
-        const_iterator find() {
         }
 
         /// \brief Returns an iterator pointing past the end of the sequence of assignments

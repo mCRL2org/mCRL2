@@ -113,7 +113,7 @@ namespace atermpp
         {
           arguments.push_back(aterm_traits<typename std::iterator_traits<Iter>::value_type>::term(*i));
         }
-        m_term = ATmakeApplArray(sym, &(arguments.front()));
+        m_term = reinterpret_cast< ATerm >(ATmakeApplArray(sym, &(arguments.front())));
       }
 
       /// \brief Constructor.

@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_CONTAINER_UTILITY_H
 #define MCRL2_DATA_DETAIL_CONTAINER_UTILITY_H
 
+#include <algorithm>
 #include <set>
 #include <vector>
 
@@ -230,6 +231,54 @@ namespace mcrl2 {
         boost::enable_if< typename detail::is_container< T, V >::type >
       {};
 
+      /// type condition for use with boost::enable_if
+      /// T the type to be tested
+      /// \pre V is void or T::value_type convertible to V
+      template < typename T, typename V = void >
+      struct disable_if_container : public
+        boost::disable_if< typename detail::is_container< T, V >::type >
+      {};
+
+      // Condition for recognising types that represent containers
+      template < typename Container, typename Result >
+      struct result_container {
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< std::set< Element >, Result > {
+        typedef std::set< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< std::multiset< Element >, Result > {
+        typedef std::multiset< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< atermpp::set< Element >, Result > {
+        typedef atermpp::set< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< atermpp::multiset< Element >, Result > {
+        typedef atermpp::multiset< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< atermpp::vector< Element >, Result > {
+        typedef atermpp::vector< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< std::vector< Element >, Result > {
+        typedef std::vector< Result > type;
+      };
+
+      template < typename Element, typename Result >
+      struct result_container< atermpp::term_list< Element >, Result > {
+        typedef atermpp::term_list< Result > type;
+      };
+
       template < typename T >
       struct is_set_impl {
         typedef boost::false_type type;
@@ -410,6 +459,39 @@ namespace mcrl2 {
             return term_list_random_iterator< Expression >(m_list);
           }
       };
+
+      template < typename Container, typename ReplaceFunction, typename OutputIterator >
+      void apply(Container const& container, ReplaceFunction function, OutputIterator o, typename detail::enable_if_container< Container >::type* = 0)
+      {
+        for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+        {
+          *o = function(*i);
+        }
+      }
+
+      template < typename Expression, typename ReplaceFunction >
+      typename ReplaceFunction::result_type apply_copy(Expression const& expression, ReplaceFunction function, typename detail::disable_if_container< Expression >::type* = 0)
+      {
+        return function(expression);
+      }
+
+      template < typename Container, typename ReplaceFunction >
+      Container apply_copy(Container const& container, ReplaceFunction function, typename detail::enable_if_container< Container >::type* = 0)
+      {
+        Container result;
+
+        typename std::insert_iterator< Container > o(result, result.end());
+
+        apply(container, o);
+
+        return result;
+      }
+
+      template < typename MutableContainer, typename UnaryFunction >
+      void apply(MutableContainer& container, UnaryFunction function)
+      {
+        std::for_each(container.begin(), container.end(), function);
+      }
     } // namespace detail
 
     /**

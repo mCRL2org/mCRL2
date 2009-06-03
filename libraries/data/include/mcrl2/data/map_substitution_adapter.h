@@ -21,7 +21,7 @@ namespace data {
 
   /// \brief An adapter that turns a mapping from variables to expressions into a substitution.
   template <typename MapContainer>
-  class map_substitution_adapter
+  class map_substitution_adapter : public std::unary_function< typename MapContainer::mapped_type, typename MapContainer::mapped_type >
   {
     public:
       /// \brief type used to represent variables
