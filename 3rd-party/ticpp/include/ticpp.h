@@ -143,6 +143,8 @@ namespace ticpp
 		virtual bool Visit( const Text& /*text*/ )					{ return true; }
 		/// Visit a comment node
 		virtual bool Visit( const Comment& /*comment*/ )			{ return true; }
+
+                using TiXmlVisitor::Visit;
 	};
 
 	/** Wrapper around TiXmlBase */
@@ -1280,6 +1282,7 @@ namespace ticpp
 	class Comment : public NodeImp< TiXmlComment >
 	{
 	public:
+                using NodeImp< TiXmlComment >::operator=;
 
 		/**
 		Constructor.
@@ -1301,6 +1304,7 @@ namespace ticpp
 	class Text : public NodeImp< TiXmlText >
 	{
 	public:
+                using NodeImp< TiXmlText >::operator=;
 
 		/**
 		Constructor.
@@ -1344,6 +1348,8 @@ namespace ticpp
 	class Document : public NodeImp< TiXmlDocument >
 	{
 	public:
+                using NodeImp< TiXmlDocument >::operator=;
+
 		/**
 		Default	Constructor.
 		Create an empty document, that has no name.
@@ -1422,6 +1428,8 @@ namespace ticpp
 	class Element : public NodeImp< TiXmlElement >
 	{
 	public:
+                using NodeImp< TiXmlElement >::operator=;
+
 		/**
 		Default Constructor.
 		*/
@@ -1765,6 +1773,8 @@ namespace ticpp
 	class Declaration : public NodeImp< TiXmlDeclaration >
 	{
 	public:
+                using NodeImp< TiXmlDeclaration >::operator=;
+
 		/**
 		Default	Constructor. Construct an empty declaration.
 		*/
@@ -1800,6 +1810,7 @@ namespace ticpp
 	class StylesheetReference : public NodeImp< TiXmlStylesheetReference >
 	{
 	public:
+                using NodeImp< TiXmlStylesheetReference >::operator=;
 		/**
 		Default	Constructor. Construct an empty declaration.
 		*/

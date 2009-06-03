@@ -8,8 +8,7 @@ lib ticpp
        : [ glob *.cpp ]
        : <define>TIXML_USE_TICPP
        :
-       : <define>TIXML_USE_TICPP
-         <include>../include
+       :
        ;
 
 install-libraries ticpp ;
