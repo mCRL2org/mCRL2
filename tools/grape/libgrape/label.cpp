@@ -10,11 +10,17 @@
 
 #include <wx/tokenzr.h>
 
+#include <sstream>
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "label.h"
 #include "action.h"
 #include "dataexpression.h"
 
+using namespace mcrl2::core;
+using namespace mcrl2::core::detail;
 using namespace grape::libgrape;
+using namespace std;
 
 label::label( void )
 {
@@ -64,63 +70,22 @@ list_of_action &label::get_actions( void )
 
 void label::set_actions_text( const wxString &p_actions )
 { 
-  wxString text = p_actions;
-  text.Trim(true); text.Trim(false);
-  wxString sub_text; 
-  wxString text_out; 
-  int brackets_cnt = 0;
-  int tmp_index = -1;
-  int index = -1;
-  
-  // loop until we parsed all actions
   m_actions.Clear(); 
-  while (!text.IsEmpty())
-  {
-    index = text.First(_T("|"));
-    if (index == -1) index = text.Len();
-    
-    action action;
-      
-    // check if there is an open bracket
-    tmp_index = text.First(_T("("));
-    if (tmp_index == -1 || tmp_index > index)
-    { 
-      tmp_index = text.Len();   
-      action.set_name(text.SubString(0, index-1));
-      m_actions.Add(action);
-    
-      sub_text = text.SubString(0, index-1);  
-    } else
-    { 
-      action.set_name(text.SubString(0, tmp_index-1));
-      
-      sub_text = text.SubString(tmp_index+1, index-1);  
-        
-      // check if there is a close bracket on the same level
-      brackets_cnt = 0;
-      tmp_index = -1;
-      int sub_text_length = sub_text.Len();
-      while ((tmp_index+1) <= sub_text_length)
-      {    
-        tmp_index += 1;
-        wxString c = sub_text.GetChar(tmp_index);
-        if (c == _T("(")) brackets_cnt += 1;
-        if (c == _T(")"))
-        {
-          if (brackets_cnt == 0) break;
-          brackets_cnt -= 1;          
-        }
-      }
-      sub_text = sub_text.SubString(0, tmp_index-1);  
 
-      // parse all parameters
-      action.set_parameters_text(sub_text);
-      
-      // add action into the action list
+  istringstream r(string(p_actions.mb_str()).c_str());
+  ATermAppl a_parsed_multi_action = mcrl2::core::parse_mult_act(r);
+  if ( a_parsed_multi_action )
+  {
+    for(ATermList l = ATLgetArgument(a_parsed_multi_action,0); !ATisEmpty(l); l = ATgetNext(l))
+    {
+      action action;
+      ATermAppl a = ATAgetFirst(l);
+      string a_name = gsATermAppl2String(ATAgetArgument(a,0));
+      action.set_name(_T(a_name));
+      action.set_parameters_text(ATLgetArgument(a,1));
       m_actions.Add(action);
-    }         
-    text = text.SubString(index+1, text.Len());
-  } 
+    }
+  }
 }
         
 wxString label::get_actions_text( void ) const
@@ -219,29 +184,50 @@ void label::set_variable_updates_text(wxString p_variable_updates )
 {
   wxString text = p_variable_updates; 
   text.Trim(true); text.Trim(false);
-  wxString sub_text; 
-  wxString text_out; 
-  int index = -1;
-  
+  wxString lhs, rhs, rlhs, delimiter;
+  int index = -1, index2 = -1;
+  int loop = 0;
   // loop until we parsed all variable updates
   m_variable_updates.Clear(); 
   while (!text.IsEmpty())
   {
-    index = text.First(_T(","));
-    if (index == -1) index = text.Len();
-    
-    varupdate varupdate;
-        
-    sub_text = text.SubString(0, index-1);  
-
-    // parse all varupdate
-    varupdate.set_varupdate(sub_text);
-      
-    // add varupdate into the varupdate list
-    m_variable_updates.Add(varupdate);
-          
-    text = text.SubString(index+1, text.Len());
-  }   
+    index = text.Find(_T(":="));
+    if (index == wxNOT_FOUND && loop == 0)
+    {
+      return;
+    }
+    if (index == wxNOT_FOUND && loop != 0)
+    {
+      index = text.Len();
+    }
+    if (loop == 0)
+    {
+      lhs = text.Mid(0, index);
+    }
+    else
+    {
+      rlhs = text.Mid(0, index);
+      delimiter = _T(",");
+      index2 = rlhs.Find(delimiter.GetChar(0), true);
+      if (index2 == wxNOT_FOUND || text.Find(_T(":=")) == wxNOT_FOUND)
+      {
+        index2 = rlhs.Len();
+      }
+      rhs = rlhs.Mid(0, index2);
+      lhs.Trim(true); lhs.Trim(false);
+      rhs.Trim(true); rhs.Trim(false);
+      if (!IsEmpty(lhs) && !IsEmpty(rhs))
+      {
+        varupdate varupdate;
+        varupdate.set_lhs(lhs);
+        varupdate.set_rhs(rhs);
+        m_variable_updates.Add(varupdate);
+      }
+      lhs = rlhs.Mid(index2 + 1);
+    }
+    text = text.Mid(index + 2);
+    ++loop;
+  }
 }
 
 void label::set_declarations_text( wxString p_declarations )

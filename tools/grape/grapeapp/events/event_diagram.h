@@ -265,40 +265,6 @@ namespace grape
     };
 
     /**
-     * \short Represents the specification validation event.
-     */
-    class grape_event_validate_specification : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_validate_specification(grape_frame *p_main_frame);
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_validate_specification(void);
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do(void);
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo(void);
-    };
-
-    /**
      * \short Represents the validation event for the currently viewed diagram.
      */
     class grape_event_validate_diagram : public grape_event_base

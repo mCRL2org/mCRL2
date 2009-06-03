@@ -268,12 +268,6 @@ namespace grape
         void event_menu_exportmcrl2(wxCommandEvent& p_event);
 
         /**
-         * Event handler for specification validation.
-         * @param p_event The generated event.
-         */
-        void event_menu_validate_specification(wxCommandEvent &p_event);
-
-        /**
          * Event handler for diagram validation.
          * @param p_event The generated event.
          */

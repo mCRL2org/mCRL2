@@ -27,7 +27,6 @@ namespace grape
       GRAPE_MENU_EXPORTMCRL2,
       GRAPE_MENU_EXPORTIMAGE,
       GRAPE_MENU_EXPORTTEXT,
-      GRAPE_MENU_VALIDATE,
       GRAPE_MENU_VALIDATE_DIAGRAM,
 
       // dialog boxes appear when these are invoked

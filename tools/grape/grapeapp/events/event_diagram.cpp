@@ -685,8 +685,11 @@ grape_event_export_current_diagram_image::~grape_event_export_current_diagram_im
 bool grape_event_export_current_diagram_image::Do( void )
 {
 
+  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  wxString diagram_name = export_diagram->get_name();
+
   // display save dialog
-  wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
+  wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T( "_" ) + diagram_name, _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
   int result = save_dialog.ShowModal();
 
   if ( result == wxID_OK )
@@ -842,6 +845,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
   wxString diagram_id;
   diagram_id.Printf(_T("%d"), export_diagram->get_id());
+  wxString diagram_name = export_diagram->get_name();
   architecture_diagram *arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
     
   // export process diagram
@@ -864,7 +868,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   }
 
   // display save dialog
-  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), _T(""), _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T("_") + diagram_name, _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   if (save_dialog.ShowModal() == wxID_CANCEL ) return false;
   
   // get filename
@@ -924,36 +928,6 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 bool grape_event_export_current_diagram_mcrl2::Undo(void)
 {
   // cannot be undone
-  return true;
-}
-
-grape_event_validate_specification::grape_event_validate_specification(grape_frame *p_main_frame)
-: grape_event_base(p_main_frame, false, _T("validate specification"))
-{
-}
-
-grape_event_validate_specification::~grape_event_validate_specification(void)
-{
-}
-
-bool grape_event_validate_specification::Do(void)
-{
-  // clear logpanel
-  m_main_frame->get_logpanel()->Clear();
-
-  // convert specification to XML
-  wxString empty_filename = wxEmptyString;
-  grape_specification *validate_spec = m_main_frame->get_grape_specification();
-  wxXmlDocument validate_doc = xml_convert(*validate_spec, empty_filename, 2, false);
-  convert_spaces(validate_doc);
-
-  display_message(m_main_frame, validate(validate_doc));
-    
-  return true;
-}
-
-bool grape_event_validate_specification::Undo(void)
-{
   return true;
 }
 

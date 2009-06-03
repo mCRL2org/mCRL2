@@ -58,12 +58,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
   m_menu_file->AppendSeparator();
 
-  item = new wxMenuItem( m_menu_file, GRAPE_MENU_VALIDATE, _T("&Validate specification\tShift+F5"), _T("Validates current specification") );
-  item->SetBitmap( g_icons[ _T("validate") ] );
-  m_menu_file->Append(item);
-
-  m_menu_file->AppendSeparator();
-
   item = new wxMenuItem( m_menu_file, GRAPE_MENU_EXPORTTEXT, _T("&Export data type specification to text"), _T("Export current data type specification to text") );
   item->SetBitmap( g_icons[ _T("text") ] );
   m_menu_file->Append( item );
@@ -128,10 +122,10 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DESELECT_ALL, _T("&Deselect \tShift-Ctrl-A"), _T("Deselect all objects in current diagram") );
   m_menu_edit->Append( item );
   m_menu_edit->Enable(GRAPE_MENU_DESELECT_ALL, false);
-  
+
   m_menu_edit->AppendSeparator();
 */
-  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit data type specification"), _T("Edit Data type specification"), wxITEM_CHECK );
+  item = new wxMenuItem( m_menu_edit, GRAPE_MENU_DATATYPESPEC, _T("Edit data type specification"), _T("Edit data type specification"), wxITEM_CHECK );
   m_menu_edit->Append( item );
 
   Append(m_menu_edit, _T("&Edit"));
@@ -269,7 +263,6 @@ void grape_menubar::set_mode( int p_mode )
   Enable(wxID_CLOSE, in_spec);
   Enable(wxID_SAVE, in_spec);
   Enable(wxID_SAVEAS, in_spec);
-  Enable(GRAPE_MENU_VALIDATE, in_diagram);
   Enable(GRAPE_MENU_EXPORTTEXT, in_spec);
 // Low prioritiy, not implemented; disabled
   //Enable(wxID_PRINT, false );

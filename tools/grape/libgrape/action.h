@@ -11,6 +11,7 @@
 #ifndef LIBGRAPE_ACTION_H
 #define LIBGRAPE_ACTION_H
 
+#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
 #include "dataexpression.h"
 
 namespace grape
@@ -77,7 +78,7 @@ namespace grape
          * Parameter assignment function.
          * @param p_parameters String containing the parameters of the action.
          */
-        void set_parameters_text( wxString p_parameters );
+        void set_parameters_text( ATermList p_parameters );
         
         /**
          * Parameter assignment function.

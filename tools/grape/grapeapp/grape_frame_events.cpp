@@ -140,12 +140,6 @@ void grape_frame::event_menu_exportmcrl2(wxCommandEvent& WXUNUSED(p_event))
   m_event_handler->Submit(event, false);
 }
 
-void grape_frame::event_menu_validate_specification(wxCommandEvent &WXUNUSED(p_event))
-{
-  grape_event_validate_specification *event = new grape_event_validate_specification(this);
-  m_event_handler->Submit(event, false);
-}
-
 void grape_frame::event_menu_validate_diagram(wxCommandEvent &WXUNUSED(p_event))
 {
   grape_event_validate_diagram *event = new grape_event_validate_diagram(this);

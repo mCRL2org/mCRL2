@@ -306,7 +306,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_MENU(GRAPE_MENU_EXPORTMCRL2, grape_frame::event_menu_exportmcrl2)
   EVT_MENU(GRAPE_MENU_EXPORTIMAGE, grape_frame::event_menu_exportimage)
   EVT_MENU(GRAPE_MENU_EXPORTTEXT, grape_frame::event_menu_exporttext)
-  EVT_MENU(GRAPE_MENU_VALIDATE, grape_frame::event_menu_validate_specification)
   EVT_MENU(wxID_PRINT, grape_frame::event_menu_print)
   EVT_MENU(wxID_EXIT, grape_frame::event_menu_quit)
 

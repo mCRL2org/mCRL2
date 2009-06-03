@@ -792,7 +792,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
     return false;
   }
 
- // cerr << "Process diagram is valid.";
+  cerr << "Process diagram is valid.";
   return true;
 }
 
@@ -1731,7 +1731,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           ATermAppl a_parsed_action_identifier = parse_identifier(action_name);
           if ( a_parsed_action_identifier == 0 )
           {
-            // ERROR: variable declaration is not valid
+            // ERROR: action identifier is not valid
             cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action name "
                  << action_name.ToAscii() << " could not be parsed." << endl;
             throw CONVERSION_ERROR;
@@ -1747,7 +1747,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           ATermAppl a_parsed_action_param_expr = parse_data_expr(action_param);
           if ( a_parsed_action_param_expr == 0 )
           {
-            // ERROR: variable declaration is not valid
+            // ERROR: action parameter is not valid
             cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter "
                  << action_param.ToAscii() << " could not be parsed." << endl;
             throw CONVERSION_ERROR;
@@ -1954,7 +1954,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
     return false;
   }
 
-//  cerr << "Architecture diagram is valid.";
+  cerr << "Architecture diagram is valid.";
   return true;
 }
 
@@ -1982,16 +1982,31 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   }
 
   // validate all diferent objects
+  bool is_not_empty = false;
   for(wxXmlNode *curr_list = object_list->GetChildren(); curr_list != 0; curr_list = curr_list->GetNext())
   {
     if(curr_list->GetName() == _T("architecturereferencelist"))
     {
+      if (curr_list->GetChildren() != 0)
+      {
+        is_not_empty = true;
+      }
       architecture_reference_list_is_valid = validate_architecture_reference_list(p_doc_root, p_architecture_diagram, curr_list, datatype_spec);
     }
     else if(curr_list->GetName() == _T("processreferencelist"))
     {
+      if (curr_list->GetChildren() != 0)
+      {
+        is_not_empty = true;
+      }
       process_reference_list_is_valid = validate_process_reference_list(p_doc_root, p_architecture_diagram, curr_list, datatype_spec);
     }
+  }
+
+  if (!is_not_empty)
+  {
+    cerr << "Architecture diagram " << diagram_name.ToAscii() << " is empty." << endl;
+    return false;
   }
 
   if(architecture_reference_list_is_valid && process_reference_list_is_valid)
