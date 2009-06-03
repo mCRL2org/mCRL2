@@ -110,58 +110,29 @@ namespace lps {
   // Functions for sumelm operations
   //
 
-  ///Apply a simple form of sum elimination in the case a summation
-  ///variable does not occur within the summand at all
   static inline
   lps::summand remove_unused_variables(const lps::summand& summand_)
   {
-    struct local {
-      static bool is_variable(atermpp::aterm p) {
-        return data_expression(p).is_variable();
-      }
-    };
-
     //gsVerboseMsg("Summand: %s\n", pp(summand_).c_str());
-    int num_removed = 0;
-    lps::summand new_summand;
     // New summation variable list, all variables in this list occur in other terms in the summand.
     variable_vector new_summation_variables;
 
     // Construct a set with all variables occurring in the summand.
     // This reduces the running time from O(|summand| * |summation variables|)
     // to O(|summand| + |summation variables|)
-    atermpp::set<data_expression> occurring_vars;
-    partial_find_all_if(summand_.condition(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
-    partial_find_all_if(summand_.actions(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
-    partial_find_all_if(summand_.time(), boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
+    atermpp::set<variable> occurring_vars;
+    lps::find_all_free_variables(summand_.condition(), std::inserter(occurring_vars, occurring_vars.end()));
+    lps::find_all_free_variables(summand_.actions(), std::inserter(occurring_vars, occurring_vars.end()));
+    lps::find_all_free_variables(summand_.time(), std::inserter(occurring_vars, occurring_vars.end()));
+    lps::find_all_free_variables(summand_.assignments(), std::inserter(occurring_vars, occurring_vars.end()));
 
-    assignment_list assignments(summand_.assignments());
-
-    for (assignment_list::const_iterator i(assignments.begin()); i != assignments.end(); ++i)
-    {
-      partial_find_all_if(*i, boost::bind(&local::is_variable, _1), is_sort_expression, std::inserter(occurring_vars, occurring_vars.end()));
-    }
-
-    variable_vector summation_variables(data::make_variable_vector(summand_.summation_variables()));
-
-    for (variable_vector::const_iterator i = summation_variables.begin();
-                                       i != summation_variables.end(); ++i)
-    {
-      //Check whether variable occurs in other terms of summand
-      //If variable occurs leave the variable, so add variable to new list
-      if (occurring_vars.find(*i) != occurring_vars.end())
-      {
-        new_summation_variables.push_back(*i);
-      } else {
-        ++num_removed;
-      }
-      //else remove the variable, i.e. do not add it to the new list (skip)
-    }
-
-    new_summand = set_summation_variables(summand_, data::make_variable_list(new_summation_variables));
-    gsDebugMsg("Removed %d summation variables\n", num_removed);
-
-    return new_summand;
+    atermpp::set<variable> summation_variables(convert<atermpp::set<variable> >(summand_.summation_variables()));
+    std::set_intersection(summation_variables.begin(), summation_variables.end(),
+                        occurring_vars.begin(), occurring_vars.end(),
+                        std::inserter(new_summation_variables, new_summation_variables.end()));
+    
+    gsDebugMsg("Removed %d summation variables\n", summation_variables.size() - new_summation_variables.size());
+    return set_summation_variables(summand_, data::make_variable_list(new_summation_variables));
   }
 
   //Recursively apply sum elimination on a summand.
@@ -243,22 +214,20 @@ namespace lps {
   ///and returns X(..) = e -> a(..) . X(..)
   lps::summand sumelm(const lps::summand& summand_)
   {
-    lps::summand new_summand = summand_;
-
     //Apply elimination and store result
     std::map<data_expression, data_expression> substitutions;
-    data_expression new_condition = recursive_substitute_equalities(new_summand, new_summand.condition(), substitutions);
+    data_expression new_condition = recursive_substitute_equalities(summand_, summand_.condition(), substitutions);
 
     //Apply the substitutions that were returned from the recursive call
-    new_summand = summand(new_summand.summation_variables(),
+    lps::summand result = summand(summand_.summation_variables(),
                               sumelm_replace(new_condition, substitutions),
-                              new_summand.is_delta(),
-                              sumelm_replace(new_summand.actions(), substitutions),
-                              sumelm_replace(new_summand.time(), substitutions),
-                              data::make_assignment_list(sumelm_assignment_list_replace(new_summand.assignments(), substitutions)));
+                              summand_.is_delta(),
+                              sumelm_replace(summand_.actions(), substitutions),
+                              sumelm_replace(summand_.time(), substitutions),
+                              data::make_assignment_list(sumelm_assignment_list_replace(summand_.assignments(), substitutions)));
     //Take the summand with substitution, and remove the summation variables that are now not needed
-    new_summand = remove_unused_variables(new_summand);
-    return new_summand;
+    result = remove_unused_variables(result);
+    return result;
   }
 
 

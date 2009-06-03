@@ -50,7 +50,7 @@ namespace mcrl2 {
         }
 
         void find_all_if(summand const& s)
-        {
+        { // TODO exclude summation variables (as these are bound)
           find_all_if(s.condition());
           find_all_if(s.actions());
           find_all_if(s.time());
