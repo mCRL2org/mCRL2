@@ -45,7 +45,11 @@ void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
   else
   {
     // display message in box
-    wxMessageBox( _T("The diagram is invalid: \n")+p_main_frame->get_logpanel()->GetValue(), _T("Validation"), wxOK | wxICON_ERROR );
+    wxString message = p_main_frame->get_logpanel()->GetValue();
+    message.Replace(_T("\n"), _T("\n\n"));
+    message.Replace(_T("\n+ "), _T("\nData type specification cannot be parsed/type checked: "));
+    
+    wxMessageBox( message, _T("Validation error"), wxOK | wxICON_ERROR );
   }    
 }
 

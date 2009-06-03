@@ -86,7 +86,7 @@ wxXmlNode *grape::mcrl2gen::get_diagram(wxXmlNode *p_doc_root, wxString &p_diagr
     if(proc_diag_list == 0)
     {
       // ERROR: <grape> does not contain <processdiagramlist>
-      cerr << "+ The specification does not contain any process diagrams." << endl;
+      cerr << "The specification does not contain any process diagrams." << endl;
       throw CONVERSION_ERROR;
       return 0;
     }
@@ -105,7 +105,7 @@ wxXmlNode *grape::mcrl2gen::get_diagram(wxXmlNode *p_doc_root, wxString &p_diagr
     if(arch_diag_list == 0)
     {
       // ERROR: <grape> does not contain <architecturediagramlist>
-      cerr << "+ The specification does not contain any architecture diagrams." << endl;
+      cerr << "The specification does not contain any architecture diagrams." << endl;
       throw CONVERSION_ERROR;
       return 0;
     }
@@ -181,7 +181,7 @@ list_of_action grape::mcrl2gen::get_architecture_visibles(wxXmlNode *p_doc_root,
   if(objects == 0)
   {
     // ERROR: <architecturediagram> has no objects.
-    cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+    cerr << "Architecture diagram " << diagram_name.ToAscii()
          << " does not contain any objects." << endl;
     throw CONVERSION_ERROR;
     return visibles;
@@ -277,7 +277,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
   if (channels == 0)
   {
     // ERROR: <objectlist> has no <channellist>
-    cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
+    cerr << "Architecture diagram " << p_diagram_name.ToAscii()
          << " does not contain any channels." << endl;
     throw CONVERSION_ERROR;
     return visibles;
@@ -288,7 +288,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
   if (channel_communications == 0)
   {
     // ERROR: <objectlist> has no <channelcommunicationlist>
-    cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
+    cerr << "Architecture diagram " << p_diagram_name.ToAscii()
          << " does not contain any channel communications." << endl;
     throw CONVERSION_ERROR;
     return visibles;
@@ -310,7 +310,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
       if (channel_communication_visible_name.IsEmpty())
       {
         // ERROR: visible channel communication is not named
-        cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
+        cerr << "Architecture diagram " << p_diagram_name.ToAscii()
              << " has a visible channel communication that is unnamed." << endl;
         throw CONVERSION_ERROR;
         return visibles;
@@ -320,7 +320,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
       if (channel_list == 0)
       {
         // ERROR: <channelcommunication> has no <connectionlist>
-        cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
+        cerr << "Architecture diagram " << p_diagram_name.ToAscii()
              << " does not contain any channel communication connections." << endl;
         throw CONVERSION_ERROR;
         return visibles;
@@ -338,7 +338,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
         else
         {
           // ERROR: <connectionlist> has no <connectedtochannels>
-          cerr << "+ Architecture diagram " << p_diagram_name.ToAscii()
+          cerr << "Architecture diagram " << p_diagram_name.ToAscii()
                << " does not contain any channel communication connection reference." << endl;
           throw CONVERSION_ERROR;
           return visibles;
@@ -460,7 +460,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
     if(objects == 0)
     {
       // ERROR: <processdiagram> does not contain <objectlist>
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain any objects." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain any objects." << endl;
       throw CONVERSION_ERROR;
       return actions;
     }
@@ -476,7 +476,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
           if(child_trans->GetName() != _T("terminatingtransition"))
           {
             // WARNING: <terminatingtransitionlist> has no child <terminatingtransition>
-            cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain a terminating transition where it should." << endl;
+            cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain a terminating transition where it should." << endl;
             break;
           }
           // parse trans_label = <label>
@@ -501,7 +501,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
           if(child_trans->GetName() != _T("nonterminatingtransition"))
           {
             // WARNING: <nonterminatingtransitionlist> has no child <nonterminatingtransition>
-            cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain a non-terminating transition where it should." << endl;
+            cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain a non-terminating transition where it should." << endl;
             break;
           }
           // parse trans_label = <label>
@@ -526,7 +526,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
     if(refs == 0)
     {
       // ERROR
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " does not contain any process references." << endl;
       return actions;
     }
@@ -537,7 +537,7 @@ list_of_action grape::mcrl2gen::get_process_actions(wxXmlNode *p_doc_root, wxStr
       if(ref_id.IsEmpty())
       {
         // ERROR
-        cerr << "+ Process diagram " << diagram_name.ToAscii()
+        cerr << "Process diagram " << diagram_name.ToAscii()
              << " contains process references which do not reference an existing process diagram." << endl;
         return actions;
       }
@@ -618,7 +618,7 @@ bool grape::mcrl2gen::is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString 
         if(p_checked[i] == ref_propertyof)
         {
           wxString ref_name = get_child_value(arch_ref, _T("name"));
-          cerr << "+ Architecture diagram " << ref_name.ToAscii()
+          cerr << "Architecture diagram " << ref_name.ToAscii()
                << " contains an (indirect) reference to itself." << endl;
           return false;
         }
@@ -648,7 +648,7 @@ bool grape::mcrl2gen::is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString 
         if(p_checked[i] == ref_propertyof)
         {
           wxString ref_name = get_child_value(proc_ref, _T("name"));
-          cerr << "+ Process diagram " << ref_name.ToAscii()
+          cerr << "Process diagram " << ref_name.ToAscii()
                << " contains an (indirect) reference to itself." << endl;
           return false;
         }
@@ -720,10 +720,10 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
 
   if(!is_valid)
   {
-    // cerr << "+ Specification is not valid." << endl;
+    // cerr << "Specification is not valid." << endl;
     return false;
   }
-  cerr << "Specification is valid.";
+ // cerr << "Specification is valid.";
   return true;
 }
 
@@ -745,7 +745,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATe
     ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(r);
     if(a_parsed_mcrl2_datatype_specification == 0)
     {
-      cerr << "+ Could not parse the data type specification." << endl;
+      cerr << "Could not parse the data type specification." << endl;
       return false;
     }
     else
@@ -754,7 +754,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATe
       ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
       if(a_type_checked_mcrl2_datatype_specification == 0)
       {
-        cerr << "+ Could not type check the data type specification." << endl;
+        cerr << "Could not type check the data type specification." << endl;
         return false;
       }
       // update datatype specification
@@ -782,17 +782,17 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
   }
   catch(...)
   {
-    cerr << "+ Process diagram " << p_diagram_id.ToAscii() << " is not present." << endl;
+    cerr << "Process diagram " << p_diagram_id.ToAscii() << " is not present." << endl;
     return false;
   }
 
   if(!validate_process_diagram(doc_root, process_diagram, datatype_spec))
   {
-    //cerr << "+ Process diagram is not valid." << endl;
+    //cerr << "Process diagram is not valid." << endl;
     return false;
   }
 
-  cerr << "Process diagram is valid.";
+ // cerr << "Process diagram is valid.";
   return true;
 }
 
@@ -808,7 +808,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
   wxString diagram_name = get_child_value(p_process_diagram, _T("name")); // get diagram name
   if(diagram_name.IsEmpty())
   {
-    cerr << "+ Process diagram " << diagram_id.ToAscii() << " has no name." << endl;
+    cerr << "Process diagram " << diagram_id.ToAscii() << " has no name." << endl;
     return false;
   }
 
@@ -821,7 +821,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
   }
   catch(...)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " has an invalid preamble." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " has an invalid preamble." << endl;
     return false;
   }
 
@@ -829,7 +829,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
   wxXmlNode *object_list = get_child(p_process_diagram, _T("objectlist"));
   if(object_list == 0)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains no list of objects." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " contains no list of objects." << endl;
     return false;
   }
 
@@ -875,7 +875,7 @@ bool grape::mcrl2gen::validate_preamble(wxXmlNode *p_process_diagram, list_of_de
     if(child == 0)
     {
       // ERROR: <processdiagram> does not contain <preambledeclarations>
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not have a preamble." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " does not have a preamble." << endl;
       throw CONVERSION_ERROR;
       return false;
     }
@@ -887,7 +887,7 @@ bool grape::mcrl2gen::validate_preamble(wxXmlNode *p_process_diagram, list_of_de
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " has an invalid local variable list." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " has an invalid local variable list." << endl;
       throw CONVERSION_ERROR;
       return false;
     }
@@ -899,14 +899,14 @@ bool grape::mcrl2gen::validate_preamble(wxXmlNode *p_process_diagram, list_of_de
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " has an invalid local variable list." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " has an invalid local variable list." << endl;
       throw CONVERSION_ERROR;
       return false;
     }
     return true;
   }
   // ERROR: XML invalid
-  cerr << "+ Validate_preamble called without a valid XML process diagram." << endl;
+  cerr << "Validate_preamble called without a valid XML process diagram." << endl;
   throw CONVERSION_ERROR;
   return false;
 }
@@ -930,7 +930,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( !var_decl.set_decl_init( var_text ) )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -941,7 +941,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( a_parsed_local_var_id == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble. The variable name '" << var_decl.get_name().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -952,7 +952,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( a_parsed_local_var_sort == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble. The variable type '" << var_decl.get_type().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -963,7 +963,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( a_type_checked_local_var_sort == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble. The variable type '" << var_decl.get_type().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -974,7 +974,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( a_parsed_local_var_expr == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble. The variable value '" << var_decl.get_value().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -985,7 +985,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
         if ( a_type_checked_local_var_expr == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid local variable " << var_text.ToAscii()
                << " declaration in its preamble. The variable value '" << var_decl.get_value().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -994,7 +994,7 @@ bool grape::mcrl2gen::validate_preamble_local_variables(wxXmlNode *p_preamble, w
       else
       {
         // ERROR: XML invalid
-        cerr << "+ Validate_preamble_local_variables called without a valid XML process diagram." << endl;
+        cerr << "Validate_preamble_local_variables called without a valid XML process diagram." << endl;
         throw CONVERSION_ERROR;
         return false;
       }
@@ -1024,7 +1024,7 @@ bool grape::mcrl2gen::validate_preamble_parameters(wxXmlNode *p_preamble, wxStri
         if ( !param_decl.set_decl( param_text ) )
         {
           // ERROR: parameter declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii() << " declaration in its preamble." << endl;
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii() << " declaration in its preamble." << endl;
           throw CONVERSION_ERROR;
           return false;
         }
@@ -1034,7 +1034,7 @@ bool grape::mcrl2gen::validate_preamble_parameters(wxXmlNode *p_preamble, wxStri
         if ( a_parsed_param_id == 0 )
         {
           // ERROR: parameter declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
                << " declaration in its preamble. The parameter name '" << param_decl.get_name().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1045,18 +1045,19 @@ bool grape::mcrl2gen::validate_preamble_parameters(wxXmlNode *p_preamble, wxStri
         if ( a_parsed_param_sort == 0 )
         {
           // ERROR: parameter declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
                << " declaration in its preamble. The parameter type '" << param_decl.get_type().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
         }
 
         // type check parameter type (sortexpression)
-        ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );
+        ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );          
         if ( a_type_checked_param_sort == 0 )
         {
+          
           // ERROR: parameter declaration is not valid
-          cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
+          cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
                << " declaration in its preamble. The parameter type '" << param_decl.get_type().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1065,7 +1066,7 @@ bool grape::mcrl2gen::validate_preamble_parameters(wxXmlNode *p_preamble, wxStri
       else
       {
         // ERROR: XML invalid
-        cerr << "+ Validate_preamble_parameters called without a valid XML process diagram." << endl;
+        cerr << "Validate_preamble_parameters called without a valid XML process diagram." << endl;
         throw CONVERSION_ERROR;
         return false;
       }
@@ -1087,12 +1088,12 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_doc_root, wx
   }
   if(num_designators < 1)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain an initial designator." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain an initial designator." << endl;
     return false;
   }
   if(num_designators > 1)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains more than one initial designator." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " contains more than one initial designator." << endl;
     return false;
   }
 
@@ -1103,7 +1104,7 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_doc_root, wx
   if(attached_id == _T("-1"))
   {
     // not attached
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains an unconnected initial designator." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " contains an unconnected initial designator." << endl;
     return false;
   }
   // search attached state
@@ -1113,7 +1114,7 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_doc_root, wx
   wxXmlNode *state_list = get_child(object_list, _T("statelist"));
   if(state_list == 0)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain a list of states." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain a list of states." << endl;
     return false;
   }
 
@@ -1131,7 +1132,7 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_doc_root, wx
   wxXmlNode *reference_state_list = get_child(object_list, _T("referencestatelist"));
   if(reference_state_list == 0)
   {
-    cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain a list of reference states." << endl;
+    cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain a list of reference states." << endl;
     return false;
   }
 
@@ -1152,7 +1153,7 @@ bool grape::mcrl2gen::validate_initial_designator_list(wxXmlNode *p_doc_root, wx
     }
   }
   // ERROR: initial designator is connected to a non existing state
-  cerr << "+ Process diagram " << diagram_name.ToAscii() << " does not contain a (reference) state connected to the initial designator." << endl;
+  cerr << "Process diagram " << diagram_name.ToAscii() << " does not contain a (reference) state connected to the initial designator." << endl;
   return false;
 }
 
@@ -1170,14 +1171,14 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
     if(ref_state_prop == _T("-1"))
     {
       // no target diagram
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a process reference which does not refer to a process diagram." << endl;
       return false;
     }
     if(referenced_diagram == 0)
     {
       // target diagram not found
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a process reference that does not refer to an existing process diagram." << endl;
       return false;
     }
@@ -1206,14 +1207,14 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " has a reference state with an invalid list of reference parameters." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " has a reference state with an invalid list of reference parameters." << endl;
       return false;
     }
 
     // check state-transition connections
     if(!validate_transition_connection(p_process_diagram, ref_state_id))
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a process reference to process diagram " << ref_name.ToAscii() << " that is not connected to a transition." << endl;
       return false;
     }
@@ -1240,7 +1241,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " referenced in " << p_diagram_name << " has an invalid preamble." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " referenced in " << p_diagram_name << " has an invalid preamble." << endl;
       throw CONVERSION_ERROR;
       return false;
     }
@@ -1255,7 +1256,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
     if(param_list == 0)
     {
       // ERROR: <referencestate> does not contain <parameterassignmentlist>
-      cerr << "+ Diagram " << p_diagram_name.ToAscii()
+      cerr << "Diagram " << p_diagram_name.ToAscii()
            << " has a process reference " << diagram_name.ToAscii()
            << " that does not contain any parameter assignments." << endl;
       throw CONVERSION_ERROR;
@@ -1272,7 +1273,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( !parameter_assignment.set_varupdate( parameter_assignment_text ) )
         {
           // ERROR: parameter assignment is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii()
                << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii() << "." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1283,7 +1284,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( a_parsed_parameter_assignment_id == 0 )
         {
           // ERROR: parameter assignment is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
                << ". The parameter name '" << parameter_assignment.get_lhs().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1294,7 +1295,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( a_parsed_parameter_assignment_lhs_expression == 0 )
         {
           // ERROR: parameter assignment is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
                << ". The parameter name '" << parameter_assignment.get_lhs().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1304,7 +1305,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( a_type_checked_parameter_assignment_lhs_expression == 0 )
         {
           // ERROR: parameter assignment lhs is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
                << ". The parameter name '" << parameter_assignment.get_lhs().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1315,7 +1316,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( a_parsed_parameter_assignment_expr == 0 )
         {
           // ERROR: parameter assignment is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
                << ". The parameter assignment value '" << parameter_assignment.get_rhs().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1325,7 +1326,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
         if ( a_type_checked_parameter_assignment_expr == 0 )
         {
           // ERROR: parameter assignment is not valid
-          cerr << "+ Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
+          cerr << "Process reference to process diagram " << diagram_name.ToAscii() << " contains an invalid parameter assignment " << parameter_assignment_text.ToAscii()
                << ". The parameter assignment value '" << parameter_assignment.get_rhs().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1335,7 +1336,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
       else
       {
         // ERROR: parameter assignment is not valid
-        cerr << "+ Process reference to process diagram " << diagram_name.ToAscii()
+        cerr << "Process reference to process diagram " << diagram_name.ToAscii()
              << " contains an invalid parameter assignment." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1346,7 +1347,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
     if(preamble_parameter_decls.GetCount() != p_parameter_initialisation.GetCount())
     {
       // not the same number of parameters
-      cerr << "+ Diagram " << p_diagram_name.ToAscii()
+      cerr << "Diagram " << p_diagram_name.ToAscii()
            << " contains a process reference to process diagram " << diagram_name.ToAscii()
            << " that does not contain the same number of parameters." << endl;
       throw CONVERSION_ERROR;
@@ -1367,7 +1368,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
       }
       if(!found)
       {
-        cerr << "+ Diagram " << p_diagram_name.ToAscii()
+        cerr << "Diagram " << p_diagram_name.ToAscii()
              << " contains a process reference to process diagram " << diagram_name.ToAscii()
              << " that has a parameter initialisation in which parameter " << preamble_parameter_decls[i].get_name().ToAscii()
              << " does not occur." << endl;
@@ -1378,7 +1379,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
     return true;
   }
   // ERROR: XML invalid
-  cerr << "+ Validate_reference_parameters called without a valid XML process reference." << endl;
+  cerr << "Validate_reference_parameters called without a valid XML process reference." << endl;
   throw CONVERSION_ERROR;
   return false;
 }
@@ -1397,7 +1398,7 @@ bool grape::mcrl2gen::validate_state_list(wxXmlNode *p_process_diagram, wxXmlNod
     // check state-transition connections
     if (!validate_transition_connection(p_process_diagram, state_id))
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a state " << state_name.ToAscii() << " that is not connected to a transition." << endl;
       return false;
     }
@@ -1492,7 +1493,7 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
 
     if(trans_from.IsEmpty() || trans_from == _T("-1") || !validate_state_connection(p_process_diagram, trans_from))
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a terminating transition that is not connected to a state or process reference." << endl;
       return false;
     }
@@ -1505,7 +1506,7 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains a terminating transition with an invalid transition label." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " contains a terminating transition with an invalid transition label." << endl;
       return false;
     }
   }
@@ -1526,7 +1527,7 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
     if(trans_from.IsEmpty() || trans_from == _T("-1") || trans_to.IsEmpty() || trans_to == _T("-1")
       || !validate_state_connection(p_process_diagram, trans_from) || !validate_state_connection(p_process_diagram, trans_to))
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii()
+      cerr << "Process diagram " << diagram_name.ToAscii()
            << " contains a non terminating transition that is not conntected to a state or process reference." << endl;
       return false;
     }
@@ -1539,7 +1540,7 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
     }
     catch(...)
     {
-      cerr << "+ Process diagram " << diagram_name.ToAscii() << " contains a non terminating transition with an invalid transition label." << endl;
+      cerr << "Process diagram " << diagram_name.ToAscii() << " contains a non terminating transition with an invalid transition label." << endl;
       return false;
     }
   }
@@ -1586,7 +1587,7 @@ bool grape::mcrl2gen::validate_transition_label(wxXmlNode *p_process_diagram, li
     return true;
   }
   // ERROR: transition label is not valid
-  cerr << "+ Validate_transition_label called without a valid XML process diagram." << endl;
+  cerr << "Validate_transition_label called without a valid XML process diagram." << endl;
   throw CONVERSION_ERROR;
   return false;
 }
@@ -1612,7 +1613,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_declarations(wxXmlNode 
         if ( !variable_decl.set_decl( variable_declaration_text ) )
         {
           // ERROR: transition label is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii()
+          cerr << "Process diagram " << p_diagram_name.ToAscii()
                << " contains a transition label with an invalid variable declaration "
                << variable_declaration_text.ToAscii() << "." << endl;
           throw CONVERSION_ERROR;
@@ -1624,7 +1625,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_declarations(wxXmlNode 
         if ( a_parsed_var_decl_id == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
                << ". The variable name '" << variable_decl.get_name().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1635,7 +1636,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_declarations(wxXmlNode 
         if ( a_parsed_var_decl_sort == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
                << ". The variable type '" << variable_decl.get_type().ToAscii() << "' could not be parsed." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1646,7 +1647,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_declarations(wxXmlNode 
         if ( a_type_checked_var_decl_sort == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains a transition label with an invalid variable declaration " << variable_declaration_text.ToAscii()
                << ". The variable type '" << variable_decl.get_type().ToAscii() << "' could not be type checked." << endl;
           throw CONVERSION_ERROR;
           return false;
@@ -1655,7 +1656,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_declarations(wxXmlNode 
       else
       {
         // ERROR: transition label is not valid
-        cerr << "+ Validate_transition_label_variable_declarations called without a valid XML process diagram." << endl;
+        cerr << "Validate_transition_label_variable_declarations called without a valid XML process diagram." << endl;
         throw CONVERSION_ERROR;
         return false;
       }
@@ -1680,7 +1681,7 @@ bool grape::mcrl2gen::validate_transition_label_condition(wxXmlNode *p_transitio
       if ( a_parsed_condition_expr == 0 )
       {
         // ERROR: condition is not valid
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The condition "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The condition "
              << p_condition.ToAscii() << " could not be parsed." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1690,7 +1691,7 @@ bool grape::mcrl2gen::validate_transition_label_condition(wxXmlNode *p_transitio
       if ( a_type_checked_condition_expr == 0 )
       {
         // ERROR: condition is not valid
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The condition "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The condition "
              << p_condition.ToAscii() << " could not be type checked." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1698,7 +1699,7 @@ bool grape::mcrl2gen::validate_transition_label_condition(wxXmlNode *p_transitio
       if ( !gsIsSortExprBool(gsGetSort(a_type_checked_condition_expr)) )
       {
         // ERROR: condition is of wrong type
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of condition "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of condition "
              << p_condition.ToAscii() << " is not Bool." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1731,7 +1732,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           if ( a_parsed_action_identifier == 0 )
           {
             // ERROR: variable declaration is not valid
-            cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action name "
+            cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action name "
                  << action_name.ToAscii() << " could not be parsed." << endl;
             throw CONVERSION_ERROR;
             return false;
@@ -1747,7 +1748,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           if ( a_parsed_action_param_expr == 0 )
           {
             // ERROR: variable declaration is not valid
-            cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter "
+            cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter "
                  << action_param.ToAscii() << " could not be parsed." << endl;
             throw CONVERSION_ERROR;
             return false;
@@ -1757,7 +1758,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           if ( a_type_checked_action_param_expr == 0 )
           {
             // ERROR: action parameter is not valid
-            cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter "
+            cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The action parameter "
                  << action_param.ToAscii() << " could not be type checked." << endl;
             throw CONVERSION_ERROR;
             return false;
@@ -1776,7 +1777,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
         else
         {
           // ERROR: transition label is not valid
-          cerr << "+ Validate_transition_label_actions called without a valid XML process diagram." << endl;
+          cerr << "Validate_transition_label_actions called without a valid XML process diagram." << endl;
           throw CONVERSION_ERROR;
           return false;
         }
@@ -1802,7 +1803,7 @@ bool grape::mcrl2gen::validate_transition_label_timestamp(wxXmlNode *p_transitio
       if ( a_parsed_timestamp_expr == 0 )
       {
         // ERROR: timestamp is not valid
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The timestamp "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The timestamp "
              << p_timestamp.ToAscii() << " could not be parsed." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1812,7 +1813,7 @@ bool grape::mcrl2gen::validate_transition_label_timestamp(wxXmlNode *p_transitio
       if ( a_type_checked_timestamp_expr == 0 )
       {
         // ERROR: timestamp is not valid
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The timestamp "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The timestamp "
              << p_timestamp.ToAscii() << " could not be type checked." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1820,7 +1821,7 @@ bool grape::mcrl2gen::validate_transition_label_timestamp(wxXmlNode *p_transitio
       if ( !gsIsSortExprReal(gsGetSort(a_type_checked_timestamp_expr)) )
       {
         // ERROR: condition is of wrong type
-        cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of timestamp "
+        cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of timestamp "
              << p_timestamp.ToAscii() << " is not Real." << endl;
         throw CONVERSION_ERROR;
         return false;
@@ -1847,7 +1848,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( !variable_update.set_varupdate( variable_update_text ) )
         {
           // ERROR: transition label is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii()
+          cerr << "Process diagram " << p_diagram_name.ToAscii()
                << " contains a transition label with an invalid variable update "
                << variable_update_text.ToAscii() << "." << endl;
           throw CONVERSION_ERROR;
@@ -1859,7 +1860,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( a_parsed_variable_update_identifier == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
                << variable_update.get_lhs().ToAscii() << " of variable update "
                << variable_update_text.ToAscii() << " could not be parsed." << endl;
           throw CONVERSION_ERROR;
@@ -1870,7 +1871,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( a_parsed_variable_update_lhs_expression == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
                << variable_update.get_lhs().ToAscii() << " of variable update "
                << variable_update_text.ToAscii() << " could not be parsed." << endl;
           throw CONVERSION_ERROR;
@@ -1881,7 +1882,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( a_type_checked_variable_update_lhs_expression == 0 )
         {
           // ERROR: varupdate_lhs is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The left hand side "
                << variable_update.get_lhs().ToAscii() << " of variable update "
                << variable_update_text.ToAscii() << " could not be type checked." << endl;
           throw CONVERSION_ERROR;
@@ -1893,7 +1894,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( a_parsed_varupdate_rhs_expr == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The right hand side "
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The right hand side "
                << variable_update.get_rhs().ToAscii() << " of variable update "
                << variable_update_text.ToAscii() << " could not be parsed." << endl;
           throw CONVERSION_ERROR;
@@ -1905,7 +1906,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         if ( a_type_checked_varupdate_rhs_expr == 0 )
         {
           // ERROR: variable declaration is not valid
-          cerr << "+ Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The right hand side "
+          cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The right hand side "
                << variable_update.get_rhs().ToAscii() << " of variable update "
                << variable_update_text.ToAscii() << " could not be type checked." << endl;
           throw CONVERSION_ERROR;
@@ -1916,7 +1917,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
       else
       {
         // ERROR: transition label is not valid
-        cerr << "+ Validate_transition_label_variable_updates called without a valid XML process diagram." << endl;
+        cerr << "Validate_transition_label_variable_updates called without a valid XML process diagram." << endl;
         throw CONVERSION_ERROR;
         return false;
       }
@@ -1943,17 +1944,17 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlDocument &p_spec, wxStr
   }
   catch(...)
   {
-    cerr << "+ Architecture diagram " << p_diagram_id.ToAscii() << " is not present." << endl;
+    cerr << "Architecture diagram " << p_diagram_id.ToAscii() << " is not present." << endl;
     return false;
   }
 
   if(!validate_architecture_diagram(doc_root, arch_diagram, datatype_spec))
   {
-    //cerr << "+ Architecture diagram is not valid." << endl;
+    //cerr << "Architecture diagram is not valid." << endl;
     return false;
   }
 
-  cerr << "Architecture diagram is valid.";
+//  cerr << "Architecture diagram is valid.";
   return true;
 }
 
@@ -1968,7 +1969,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));  // get diagram name
   if(diagram_name.IsEmpty())
   {
-    cerr << "+ Architecture diagram " << diagram_id.ToAscii() << " has no name." << endl;
+    cerr << "Architecture diagram " << diagram_id.ToAscii() << " has no name." << endl;
     return false;
   }
 
@@ -1976,7 +1977,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   wxXmlNode *object_list = get_child(p_architecture_diagram, _T("objectlist"));
   if(object_list == 0)
   {
-    cerr << "+ Architecture diagram " << diagram_name.ToAscii() << " contains no list of objects." << endl;
+    cerr << "Architecture diagram " << diagram_name.ToAscii() << " contains no list of objects." << endl;
     return false;
   }
 
@@ -2065,7 +2066,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
         {
           if (ref_channels[i] == channel_name)
           {
-            cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+            cerr << "Architecture diagram " << diagram_name.ToAscii()
                  << " contains an architecture reference with multiple channels referring to action "
                  << ref_channels[i].ToAscii() << "." << endl;
             return false;
@@ -2093,7 +2094,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
   
   if (!is_valid)
   {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains an architecture reference that does not refer to an existing architecture diagram." << endl;
       return false;
   }
@@ -2169,7 +2170,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
         {
           if (ref_channels[i] == channel_name)
           {
-            cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+            cerr << "Architecture diagram " << diagram_name.ToAscii()
                  << " contains a process reference with multiple channels referring to action "
                  << ref_channels[i].ToAscii() << "." << endl;
             return false;
@@ -2207,7 +2208,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
   }
   if (!is_valid)
   {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a process reference that does not refer to an existing process diagram." << endl;
       return false;
   }
@@ -2237,7 +2238,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
     wxXmlNode *connectionlist = get_child(comm, _T("connectionlist"));
     if(connectionlist == 0)
     {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a channel communication that is not connected to any channels." << endl;
       return false;
     }
@@ -2248,7 +2249,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
     wxXmlNode *channels = get_child(objects, _T("channellist"));
     if(channels == 0)
     {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a channel communication, but it does not contain any channels." << endl;
       return false;
     }
@@ -2262,7 +2263,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
       if (channel_communication_visible_name.IsEmpty())
       {
         // ERROR: visible channel communication is not named
-        cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a visible channel communication that is unnamed." << endl;
         return false;
       }
@@ -2285,7 +2286,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
       }
       if(!found)
       {
-        cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel communication that is connected to a non-existing channel." << endl;
         return false;
       }
@@ -2309,7 +2310,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
     wxXmlNode *connectionlist = get_child(channel, _T("connectionlist"));
     if(connectionlist == 0)
     {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a channel that is not connected to any channel communications." << endl;
       return false;
     }
@@ -2320,7 +2321,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
     wxXmlNode *comms = get_child(objects, _T("channelcommunicationlist"));
     if(comms == 0)
     {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a channel, but it does not contain any channel communications." << endl;
       return false;
     }
@@ -2342,7 +2343,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
       }
       if (!found)
       {
-        cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel communication that is connected to a non-existing channel communication." << endl;
         return false;
       }
@@ -2393,7 +2394,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
     }
     if(reference == 0)
     {
-      cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
            << " contains a channel that lies on a reference to a non-existing diagram." << endl;
       return false;
     }
@@ -2403,7 +2404,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
       wxString channel_name = get_child_value(channel, _T("name"));
       if(channel_name.IsEmpty())
       {
-        cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel with no name." << endl;
         return false;
       }
@@ -2448,7 +2449,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
       }
       if(!found)
       {
-        cerr << "+ Architecture diagram " << diagram_name.ToAscii()
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel with name \"" << channel_name.ToAscii()
              << "\" that does not correspond to a (visible-) action inside its associated reference." << endl;
         return false;
@@ -2487,7 +2488,7 @@ bool grape::mcrl2gen::validate_diagram_names(wxXmlNode *p_doc_root)
     {
       if(diagram_names[i] == diagram_names[j])
       {
-        cerr << "+ Diagram name " << diagram_names[i].ToAscii() << " is not unique." << endl;
+        cerr << "Diagram name " << diagram_names[i].ToAscii() << " is not unique." << endl;
         return false;
       }
     }
