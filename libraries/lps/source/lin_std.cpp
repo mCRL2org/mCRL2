@@ -213,7 +213,7 @@ class specification_basic_type:public boost::noncopyable
     specification_basic_type(const action_label_list as,
                              const atermpp::vector< process_equation > &ps,
                              const variable_list idvs,
-                             const data_specification ds,
+                             const data_specification& ds,
                              const t_lin_options &opt):
                      acts(),procdatavars(),data(ds),options(opt),
                      timeIsBeingUsed(false)
@@ -452,7 +452,7 @@ class specification_basic_type:public boost::noncopyable
       { 
         long arity=l->sorts().size();
         data_expression_list temp_args;
-        for(unsigned int i=0 ; i<arity; ++i,++e_walker)
+        for(unsigned int i=0 ; i< static_cast< unsigned int >(arity); ++i,++e_walker)
         { assert(e_walker!=args.end());
           temp_args=push_front(temp_args,*e_walker);
         }
@@ -3209,27 +3209,24 @@ class specification_basic_type:public boost::noncopyable
                       application::arguments_range tl,
                       const stacklisttype &stack,
                       const variable_list vars)
-    { data_expression_list result;
+    { data_expression_vector result;
       // TODO. This is not very efficient.
-      atermpp::vector < data_expression > data_vector(make_data_expression_vector(tl));
-      for(atermpp::vector < data_expression >::const_reverse_iterator i=data_vector.rbegin();
-                 i!=data_vector.rend(); ++i) 
-      { result=push_front(result,adapt_term_to_stack(*i,stack,vars));
+      for(application::arguments_range::const_iterator i = tl.begin(); i!=tl.end(); ++i) 
+      { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return result;
+      return convert< data_expression_list >(result);
     }
     
     data_expression_list adapt_termlist_to_stack(
                       const data_expression_list tl,
                       const stacklisttype &stack,
                       const variable_list vars)
-    { data_expression_list result;
+    { data_expression_vector result;
       // TODO. This is not very efficient.
-      const data_expression_list tlr=reverse(tl);
-      for(data_expression_list::const_iterator i=tlr.begin(); i!=tlr.end(); ++i) 
-      { result=push_front(result,adapt_term_to_stack(*i,stack,vars));
+      for(data_expression_list::const_iterator i = tl.begin(); i!=tl.end(); ++i) 
+      { result.push_back(adapt_term_to_stack(*i,stack,vars));
       }
-      return result;
+      return convert< data_expression_list >(result);
     }
     action_list adapt_multiaction_to_stack_rec(
                        const action_list multiAction,
