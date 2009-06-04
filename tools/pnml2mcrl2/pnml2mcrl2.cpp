@@ -30,8 +30,6 @@
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 
-#include "workarounds.h" // for DECL_A
-
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -243,11 +241,10 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
   static AFun ATmakeAFunInt(int name, int arity, ATbool quoted) {
     // input: an integer value (name), it's arity and whether it is quoted or not
     // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
+    std::ostringstream s;
 
-    DECL_A(s,char,NrOfChars(name)+1);
-    sprintf(s, "%d", name);
-    AFun f = ATmakeAFun(s, arity, quoted);
-    FREE_A(s);
+    s << name;
+    AFun f = ATmakeAFun(s.str().c_str(), arity, quoted);
     return f;
   }
 

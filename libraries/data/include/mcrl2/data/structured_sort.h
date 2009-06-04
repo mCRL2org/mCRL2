@@ -22,7 +22,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_symbol.h"
@@ -299,10 +298,6 @@ namespace mcrl2 {
       function_symbol_vector fbag_generate_constructors_code(const sort_expression&);
       data_equation_vector fbag_generate_equations_code(const sort_expression&);
     }
-
-    namespace detail {
-      void impl_sort_struct(ATermAppl, ATermAppl, ATermList*, mcrl2::core::detail::t_data_decls*, bool, ATermList*);
-    }
     /// \endcond
 
     /// \brief structured sort.
@@ -325,9 +320,6 @@ namespace mcrl2 {
         friend data_equation_vector sort_fset::fset_generate_equations_code(const sort_expression&);
         friend function_symbol_vector sort_fbag::fbag_generate_constructors_code(const sort_expression&);
         friend data_equation_vector sort_fbag::fbag_generate_equations_code(const sort_expression&);
-
-        // temporary friend, until data implementation has been phased out
-        friend void detail::impl_sort_struct(ATermAppl, ATermAppl, ATermList*, core::detail::t_data_decls*, bool, ATermList*);
 
         static bool has_recogniser(structured_sort_constructor const& s)
         {

@@ -143,6 +143,6 @@ class lpsrealelm_tool: public squadt_tool < rewriter_tool<input_output_tool> >
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsrealelm_tool().execute(argc, argv);
 }

@@ -81,7 +81,7 @@ void label::set_actions_text( const wxString &p_actions )
       action action;
       ATermAppl a = ATAgetFirst(l);
       string a_name = gsATermAppl2String(ATAgetArgument(a,0));
-      action.set_name(_T(a_name));
+      action.set_name(wxString(a_name.c_str(), wxConvLocal));
       action.set_parameters_text(ATLgetArgument(a,1));
       m_actions.Add(action);
     }
@@ -216,7 +216,7 @@ void label::set_variable_updates_text(wxString p_variable_updates )
       rhs = rlhs.Mid(0, index2);
       lhs.Trim(true); lhs.Trim(false);
       rhs.Trim(true); rhs.Trim(false);
-      if (!IsEmpty(lhs) && !IsEmpty(rhs))
+      if (!lhs.IsEmpty() && !rhs.IsEmpty())
       {
         varupdate varupdate;
         varupdate.set_lhs(lhs);

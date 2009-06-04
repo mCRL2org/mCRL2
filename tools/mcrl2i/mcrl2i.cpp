@@ -285,7 +285,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return mcrl2i_tool().execute(argc, argv);
 }
 

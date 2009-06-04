@@ -228,6 +228,6 @@ class lpsinfo_tool: public squadt_tool<input_tool>
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return lpsinfo_tool().execute(argc, argv);
 }

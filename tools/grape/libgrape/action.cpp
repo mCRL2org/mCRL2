@@ -83,7 +83,7 @@ void action::set_parameters_text( ATermList p_parameters )
     dataexpression dataexpression;
     ATermAppl p = ATAgetFirst(a_args);
     std::string a_param = PrintPart_CXX(ATerm(p));
-    dataexpression.set_expression(_T(a_param));
+    dataexpression.set_expression(wxString(a_param.c_str(), wxConvLocal));
     m_parameters.Add(dataexpression);
   }
 }

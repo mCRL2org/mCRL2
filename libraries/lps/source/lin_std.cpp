@@ -39,7 +39,6 @@
 #include "mcrl2/lps/lin_std.h"
 // #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/detail/data_common.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"

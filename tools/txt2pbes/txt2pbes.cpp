@@ -95,6 +95,6 @@ class txt2pbes_tool: public input_output_tool
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return txt2pbes_tool().execute(argc, argv);
 }
