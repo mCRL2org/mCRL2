@@ -353,8 +353,7 @@ void p_lts::merge(lts *l)
     state_values = (ATerm*)realloc(state_values,states_size*sizeof(ATerm));
     if ( state_values == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (state_iterator i = l->get_states(); i.more(); ++i)
     {
@@ -373,8 +372,7 @@ void p_lts::merge(lts *l)
   transitions = (transition*)realloc(transitions,transitions_size*sizeof(transition));
   if ( transitions == NULL )
   {
-    gsErrorMsg("insufficient memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Insufficient memory.");
   }
 
   // Now add the source and target states of the transitions of LTS l.
@@ -421,8 +419,7 @@ void p_lts::merge(lts *l)
     bool* new_taus = (bool*)malloc(new_nlabels*sizeof(bool));
     if (new_taus == NULL)
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < nlabels; ++i)
     {
@@ -459,8 +456,7 @@ void p_lts::merge(lts *l)
     label_values = (ATerm*)realloc(label_values,labels_size*sizeof(ATerm));
     if ( label_values == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < new_nlabels; ++i)
     {
@@ -489,8 +485,7 @@ void p_lts::merge(lts *l)
     taus = (bool*)realloc(taus,new_nlabels*sizeof(bool));
     if ( taus == NULL )
     {
-      gsErrorMsg("insufficient memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory.");
     }
     for (unsigned int i = 0; i < l->num_labels(); ++i)
     {
@@ -1118,8 +1113,7 @@ unsigned int p_lts::p_add_state(ATerm value)
       state_values = (ATerm *) realloc(state_values,new_states_size*sizeof(ATerm));
       if ( state_values == NULL )
       {
-        gsErrorMsg("insufficient memory to store LTS\n");
-        exit(1);
+        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
       }
       for (unsigned int i=states_size; i<new_states_size; i++)
       {
@@ -1168,8 +1162,7 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
     taus = (bool *) realloc(taus,new_labels_size*sizeof(bool));
     if ( taus == NULL )
     {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
     }
     if ( label_info )
     {
@@ -1180,8 +1173,7 @@ unsigned int p_lts::p_add_label(ATerm value, bool is_tau)
       label_values = (ATerm *) realloc(label_values,new_labels_size*sizeof(ATerm));
       if ( label_values == NULL )
       {
-        gsErrorMsg("insufficient memory to store LTS\n");
-        exit(1);
+        throw mcrl2::runtime_error("Insufficient memory to store LTS.");
       }
       for (unsigned int i=labels_size; i<new_labels_size; i++)
       {
@@ -1227,8 +1219,7 @@ unsigned int p_lts::p_add_transition(unsigned int from,
     transitions = (transition *) realloc(transitions,new_transitions_size*sizeof(transition));
     if ( transitions == NULL )
     {
-      gsErrorMsg("insufficient memory to store LTS\n");
-      exit(1);
+      throw mcrl2::runtime_error("Insufficient memory to store LTS.");
     }
     transitions_size = new_transitions_size;
   }
@@ -1256,8 +1247,7 @@ void p_lts::p_sort_transitions(transition_sort_style ts) {
 unsigned int* p_lts::p_get_transition_indices() {
   unsigned int *A = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
   if (A == NULL) {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
   unsigned int t = 0;
   A[0] = 0;
@@ -1275,8 +1265,7 @@ unsigned int** p_lts::p_get_transition_pre_table()
   unsigned int **A = (unsigned int**)malloc(nlabels*sizeof(unsigned int*));
   if (A == NULL)
   {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
 
   unsigned int t = 0;
@@ -1286,8 +1275,7 @@ unsigned int** p_lts::p_get_transition_pre_table()
     A[l] = (unsigned int*)malloc((nstates+1)*sizeof(unsigned int));
     if (A[l] == NULL)
     {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
 
     A[l][0] = t;
@@ -1801,8 +1789,7 @@ bool lts::reachability_check(bool remove_unreachable)
   #define in_visited(s) (visited[s/visited_bpi] & (1 << (s % visited_bpi)))
   if ( visited == NULL )
   {
-    gsErrorMsg("cannot allocate enough memory for reachability check");
-    exit(1);
+    throw mcrl2::runtime_error("cannot allocate enough memory for reachability check.");
   }
 
   // We try to allocate the memory for the faster algorithm. For ease we
@@ -1983,10 +1970,9 @@ bool lts::reachability_check(bool remove_unreachable)
     unsigned int *label_map = (unsigned int *) malloc(nlabels*sizeof(unsigned int));
     if ( (state_map == NULL) || (label_map == NULL) )
     {
-      gsErrorMsg("not enough memory to remove unreachable states\n");
       free(state_map);
       free(label_map);
-      exit(1);
+      throw mcrl2::runtime_error("Not enough memory to remove unreachable states.");
     }
 
     unsigned int new_nstates = 0;

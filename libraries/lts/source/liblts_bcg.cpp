@@ -145,8 +145,7 @@ bool p_lts::write_to_bcg(string const& filename)
       buf = (char *) realloc(buf,buf_size);
       if ( buf == NULL )
       {
-        gsErrorMsg("insufficient memory to write LTS to BCG\n");
-        exit(1);
+        mcrl2::runtime_error("insufficient memory to write LTS to BCG\n");
       }
     }
     strcpy(buf,label_str.c_str());

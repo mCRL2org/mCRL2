@@ -2214,7 +2214,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
     }
     else
     { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
-      exit(1);
+      e x i t(1);
     } */
   }
   else
@@ -2340,24 +2340,6 @@ static void save_rhs_in_vasy_form(std::ostream &outputfile,
                           variable_index,
                           current_rank,
                           bes_equations);
-    /* const bes_expression y=then_branch(b);
-    const bes_expression z=else_branch(b);
-    if (is_true(y))
-    { if (is_false(z))
-      { save_rhs_in_vasy_form(outputfile,condition(b),variable_index,current_rank,bes_equations);
-      }
-      else
-      { save_rhs_in_vasy_form(outputfile,or_(condition(b),z),variable_index,current_rank,bes_equations);
-      }
-    }
-    else if (is_false(z))
-    { // not is_true(y)
-      save_rhs_in_vasy_form(outputfile,and_(condition(b),y),variable_index,current_rank,bes_equations);
-    }
-    else
-    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in VASY-format.\n");
-      exit(1);
-    } */
   }
   else
   {
@@ -2444,23 +2426,6 @@ static void save_rhs_in_cwi_form(std::ostream &outputfile,
   { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
     save_rhs_in_cwi_form(outputfile,and_optimized(then_branch(b),
                                     or_optimized(condition(b),else_branch(b))),bes_equations);
-    /* if (is_true(y))
-    { if (is_false(z))
-      { save_rhs_in_cwi_form(outputfile,condition(b),bes_equations);
-      }
-      else
-      { save_rhs_in_cwi_form(outputfile,or_(condition(b),z),bes_equations);
-      }
-    }
-    else if (is_false(z))
-    { // not is_true(y)
-      save_rhs_in_cwi_form(outputfile,and_(condition(b),y),bes_equations);
-    }
-    else
-    { ATfprintf(stderr,"WHAT: %t\n",(ATerm)b);
-      gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in CWI-format.\n");
-      exit(1);
-    } */
   }
   else
   {
@@ -2541,24 +2506,6 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
   { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
     return generate_rhs_as_formula(and_optimized(then_branch(b),
                                    or_optimized(condition(b),else_branch(b))));
-    /* const bes_expression y=then_branch(b);
-    const bes_expression z=else_branch(b);
-    if (is_true(y))
-    { if (is_false(z))
-      { generate_rhs_as_formula(condition(b));
-      }
-      else
-      { generate_rhs_as_formula(or_(condition(b),z));
-      }
-    }
-    else if (is_false(z))
-    { // not is_true(y)
-      generate_rhs_as_formula(and_(condition(b),y));
-    }
-    else
-    { gsErrorMsg("The generated equation system is not a monotonic BES. It cannot be saved in PBES-format.\n");
-      exit(1);
-    } */
   }
   else
   {

@@ -14,7 +14,7 @@
 
 #include "workarounds.h" // DECL_A
 
-#define NAME "rewr_innerc"
+#define NAME std::string("rewr_innerc")
 
 #include <cstdio>
 #include <cstdlib>
@@ -216,8 +216,7 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 
 	if ( ATisEmpty((ATermList) Term) )
 	{
-		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
-		exit(1);
+	  throw mcrl2::runtime_error(NAME + ": invalid inner format for a term.");
 	}
 
         //Reconstruct term structure
@@ -277,15 +276,13 @@ static ATerm toInnerc(ATerm Term)
     }
     else
     {
-      gsfprintf(stderr,"%s: invalid inner format term: %T\n\n",NAME,Term);
-      exit(1);
+      throw mcrl2::runtime_error(NAME + ": invalid inner format for a term.");
     }
   }
 
   if ( ATisEmpty((ATermList) Term) )
   {
-    gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
-    exit(1);
+    throw mcrl2::runtime_error(NAME + ": invalid inner format for a term.");
   }
 
   ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));
@@ -1602,8 +1599,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   if ( f == NULL )
   {
 	  perror("fopen");
-          gsErrorMsg("could not create temporary file for rewriter\n");
-	  exit(1);
+          throw mcrl2::runtime_error("Could not create a temporary file for the rewriter");
   }
 
   //
@@ -1613,6 +1609,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
       "#include <string.h>\n"
       "#include <aterm2.h>\n"
       "#include \"assert.h\"\n"
+//      "#include <exception>\n"
 //      "#include \"libstruct.h\"\n"
 //      "#include \"liblowlevel.h\"\n"
 //      "#include \"gssubstitute.h\"\n"
@@ -1742,8 +1739,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 	      "    \n"
 	      "    if ( substs == NULL )\n"
 	      "    {\n"
-	      "      fprintf(stderr,\"Failed to increase the size of a substitution array to %%ld\\n\",newsize);\n"
-	      "      exit(1);\n"
+	      "      fprintf(stderr,\"Failed to increase the size of a substitution array\");\n"
+              "      exit(1);\n"
 	      "    }\n"
 	      "\n"
 	      "    for (long i=substs_size; i<newsize; i++)\n"
@@ -2175,9 +2172,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   gsVerboseMsg("%s\n",t);
   if ( system(t) != 0 )
   {
-    gsErrorMsg("could not compile rewriter\n");
-    unlink(file_c);
-    exit(1);
+    // unlink(file_c); In case of compile errors the .c file is not removed.
+    throw mcrl2::runtime_error("Could not compile rewriter.");
   }
 
   gsVerboseMsg("linking rewriter...\n");
@@ -2185,20 +2181,18 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   gsVerboseMsg("%s\n",t);
   if ( system(t) != 0 )
   {
-    gsErrorMsg("could not link rewriter\n");
     unlink(file_o);
-    unlink(file_c);
-    exit(1);
+    // unlink(file_c); In case of link errors the .c file is not removed.
+    throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
   sprintf(t,"./%s.so",s);
   if ( (h = dlopen(t,RTLD_NOW)) == NULL )
   {
-    gsErrorMsg("cannot load rewriter: %s\n",dlerror());
     unlink(file_so);
     unlink(file_o);
     unlink(file_c);
-    exit(1);
+    throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
   if ( so_rewr_init    == NULL ) gsErrorMsg("%s\n",dlerror());
@@ -2219,11 +2213,10 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
        (so_clear_subst  == NULL ) ||
        (so_clear_substs == NULL ) )
   {
-    gsErrorMsg("cannot load rewriter functions\n");
     unlink(file_so);
     unlink(file_o);
     unlink(file_c);
-    exit(1);
+    throw mcrl2::runtime_error("Cannot load rewriter functions.");
   }
 
   so_rewr_init();

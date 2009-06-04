@@ -446,9 +446,8 @@ lps::specification action_rename(
                        rule_old_argument_i++)
     { if ((!rule_old_argument_i->is_variable()) &&
           (!(find_all_variables(*rule_old_argument_i).empty())))
-      { std::cerr << "The arguments of the lhs " << core::pp(rule_old_action) <<
-                          " are not variables or closed expressions\n";
-        exit(1);
+      { throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
+                          " are not variables or closed expressions");
       }
     }
 
@@ -458,18 +457,16 @@ lps::specification action_rename(
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
-    { std::cerr << "There are variables occurring in rhs " << core::pp(rule_new_action) <<
-                   " of a rename rule not occurring in lhs " << core::pp(rule_old_action) << "\n";
-      exit(1);
+    { throw mcrl2::runtime_error("There are variables occurring in rhs " + core::pp(rule_new_action) +
+                   " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
     }
 
     // Check whether the variables in condition are included in the lefthandside.
     std::set < variable > variables_in_condition = find_all_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
-    { std::cerr << "There are variables occurring in the condition " << core::pp(rule_condition) <<
-                   " of a rename rule not occurring in lhs " << core::pp(rule_old_action) << "\n";
-      exit(1);
+    { throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +
+                   " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
     }
 
     // check for double occurrences of variables in the lhs. Note that variables_in_old_rule
@@ -478,9 +475,8 @@ lps::specification action_rename(
                      i!=rule_old_action.arguments().end() ; i++)
     { if (i->is_variable())
       { if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
-        { std::cerr << "Variable " << core::pp(*i) << " occurs more than once in lhs " <<
-                       core::pp(rule_old_action) << " of an action rename rule\n";
-          exit(1);
+        { throw mcrl2::runtime_error("Variable " + core::pp(*i) + " occurs more than once in lhs " +
+                       core::pp(rule_old_action) + " of an action rename rule");
         }
         else
         { variables_in_old_rule.erase(*i);

@@ -142,8 +142,7 @@ void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 
 		if ( substs == NULL )
 		{
-			gsErrorMsg("Failed to increase the size of a substitution array to %d\n",newsize);
-			exit(1);
+			throw mcrl2::runtime_error("Failed to increase the size of a substitution array.");
 		}
 
 		for (long i=substs_size; i<newsize; i++)

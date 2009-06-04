@@ -206,8 +206,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
   ATermIndexedSet *set = (ATermIndexedSet*) malloc(num_params*sizeof(ATermIndexedSet));
   if ( set == NULL )
   {
-    gsErrorMsg("malloc failed");
-    exit(1);
+    throw mcrl2::runtime_error("malloc failed");
   }
   if ( (type != lts_none) && state_info )
   {
@@ -228,8 +227,7 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
       assert( ((unsigned int) ATgetLength(state_pars)) >= num_params );
       if ( ((unsigned int) ATgetLength(state_pars)) < num_params )
       {
-        gsErrorMsg("invalid state in LTS (it does not have as much parameters as the LPS)\n");
-        exit(1);
+       throw mcrl2::runtime_error("invalid state in LTS (it does not have as much parameters as the LPS)");
       }
 
       for (unsigned int j=0; !ATisEmpty(state_pars); state_pars=ATgetNext(state_pars),j++)

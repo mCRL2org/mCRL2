@@ -12,6 +12,7 @@
 #include <vector>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
+#include "mcrl2/exception.h"
 
 #include "workarounds.h"
 
@@ -45,8 +46,7 @@ tree_set_store::tree_set_store() {
   hashmask = (1 << HASH_CLASS) - 1;
   hashtable = (int*)malloc((hashmask+1)*sizeof(int));
   if (hashtable == NULL) {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("Out of memory.");
   }
   for (unsigned int i=0; i<=hashmask; ++i) {
   	hashtable[i] = EMPTY_LIST;
@@ -71,8 +71,7 @@ void tree_set_store::check_tags() {
     tags_size += TAGS_BLOCK;
     tags = (int*)realloc(tags,tags_size*sizeof(int));
     if (tags == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
   }
 }
@@ -82,16 +81,14 @@ void tree_set_store::check_buckets() {
     buckets_size += BUCKETS_BLOCK;
     buckets = (bucket*)realloc(buckets,buckets_size*sizeof(bucket));
     if (buckets == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
   }
   if (buckets_next*4 >= hashmask*3) {
     hashmask = hashmask + hashmask + 1;
     hashtable = (int*)realloc(hashtable,(hashmask+1)*sizeof(int));
     if (hashtable == NULL) {
-      gsErrorMsg("out of memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Out of memory.");
     }
     unsigned int i,hc;
     for (i=0; i<=hashmask; ++i) {

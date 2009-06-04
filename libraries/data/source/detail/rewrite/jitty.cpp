@@ -12,7 +12,7 @@
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
 
-#define NAME "rewr_jitty"
+#define NAME std::string("rewr_jitty")
 
 #include <cstdio>
 #include <cstdlib>
@@ -24,6 +24,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/exception.h"
 
 #include "workarounds.h" // DECL_A
 
@@ -575,8 +576,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 				return vals[i];
 			}
 		}
-		gsMessage("%s: variable %T not assigned\n",NAME,t);
-		exit(1);
+		throw mcrl2::runtime_error(NAME + ": variable not assigned.");
 	} else {
 		unsigned int arity = ATgetArity(ATgetAFun((ATermAppl) t));
 		unsigned int new_arity = arity;

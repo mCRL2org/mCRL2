@@ -1078,8 +1078,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 
 	if ( ATisEmpty((ATermList) Term) )
 	{
-		gsfprintf(stderr,"%s: invalid inner format term (%T)\n",NAME,Term);
-		exit(1);
+		throw mcrl2::runtime_error(std::string(NAME) + ": invalid inner format term.");
 	}
 
         //Reconstruct term structure

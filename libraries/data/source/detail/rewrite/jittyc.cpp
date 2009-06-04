@@ -433,8 +433,7 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
 
         if ( ATisEmpty((ATermList) Term) )
         {
-                gsErrorMsg("%s: invalid jitty format term (%T)\n",NAME,Term);
-                exit(1);
+             throw mcrl2::runtime_error(std::string(NAME) + ": invalid jitty format term.");
         }
 
         l = (ATermList) Term;
@@ -491,8 +490,7 @@ static AFun get_appl_afun_value(unsigned int arity)
     apples = (AFun *) realloc(apples,num_apples*sizeof(AFun));
     if ( apples == NULL )
     {
-      gsErrorMsg("cannot allocate enough memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Cannot allocate enough memory.");
     }
     char c[10];
     for (; old_num < num_apples; old_num++)
@@ -523,8 +521,7 @@ static ATerm get_int2aterm_value(int i)
     int2aterms = (ATerm *) realloc(int2aterms,num_int2aterms*sizeof(ATerm));
     if ( int2aterms == NULL )
     {
-      gsErrorMsg("cannot allocate enough memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Cannot allocate enough memory.");
     }
     for (unsigned int j=old_num; j < num_int2aterms; j++)
     {
@@ -561,8 +558,7 @@ static ATerm get_rewrappl_value(int i)
     rewrappls = (ATerm *) realloc(rewrappls,num_rewrappls*sizeof(ATerm));
     if ( rewrappls == NULL )
     {
-      gsErrorMsg("cannot allocate enough memory\n");
-      exit(1);
+      throw mcrl2::runtime_error("Cannot allocate enough memory.");
     }
     for (unsigned int j=old_num; j < num_rewrappls; j++)
     {
@@ -2944,8 +2940,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   if ( f == NULL )
   {
 	  perror("fopen");
-          gsErrorMsg("could not create temporary file for rewriter\n");
-	  exit(1);
+          throw mcrl2::runtime_error("Could not create temporary file for rewriter.");
   }
 
   //
@@ -3110,8 +3105,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 	      "    \n"
 	      "    if ( substs == NULL )\n"
 	      "    {\n"
-	      "      fprintf(stderr,\"Failed to increase the size of a substitution array to %%ld\\n\",newsize);\n"
-	      "      exit(1);\n"
+	      "      fprintf(stderr,\"Failed to increase the size of a substitution array\");\n"
+              "      exit(1);\n"
 	      "    }\n"
 	      "\n"
 	      "    for (long i=substs_size; i<newsize; i++)\n"
@@ -3510,7 +3505,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   fprintf(f,
       "          default:\n"
-      "            fprintf(stderr,\"too many arguments for function; rewriter failed\\n\");\n"
+      "            fprintf(stderr,\"too many arguments for function; rewriter failed.\");\n"
       "            exit(1);\n"
       "        }\n"
       "      } else {\n"
@@ -3572,7 +3567,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   fprintf(f,
       "          default:\n"
-      "            fprintf(stderr,\"too many arguments for function; rewriter failed\\n\");\n"
+      "            fprintf(stderr,\"too many arguments for function; rewriter failed\");\n"
       "            exit(1);\n"
       "        }\n"
       "      } else {\n"
@@ -3602,9 +3597,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   gsVerboseMsg("%s\n",t);
   if ( system(t) != 0 )
   {
-    gsErrorMsg("could not compile rewriter\n");
-    unlink(file_c);
-    exit(1);
+    // unlink(file_c); In case of compile errors, the .c file is not removed.
+    throw mcrl2::runtime_error("Could not compile rewriter.");
   }
 
   gsVerboseMsg("linking rewriter...\n");
@@ -3612,20 +3606,18 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   gsVerboseMsg("%s\n",t);
   if ( system(t) != 0 )
   {
-    gsErrorMsg("could not link rewriter\n");
     unlink(file_o);
-    unlink(file_c);
-    exit(1);
+    // unlink(file_c); In case of link errors, the .c file is not removed.
+    throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
   sprintf(t,"./%s.so",s);
   if ( (h = dlopen(t,RTLD_NOW)) == NULL )
   {
-    gsErrorMsg("cannot load rewriter: %s\n",dlerror());
     unlink(file_so);
     unlink(file_o);
     unlink(file_c);
-    exit(1);
+    throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
   if ( so_rewr_init    == NULL ) gsErrorMsg("%s\n",dlerror());
@@ -3646,11 +3638,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
        (so_clear_subst  == NULL ) ||
        (so_clear_substs == NULL ) )
   {
-    gsErrorMsg("cannot load rewriter functions\n");
     unlink(file_so);
     unlink(file_o);
     unlink(file_c);
-    exit(1);
+    throw mcrl2::runtime_error("Cannot load rewriter functions.");
   }
 
   so_rewr_init();

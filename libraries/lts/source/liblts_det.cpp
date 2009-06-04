@@ -141,8 +141,7 @@ void lts::determinise() {
           d_transitions = (transition*)realloc(d_transitions,d_trans_size*
               sizeof(transition));
           if (d_transitions == NULL) {
-            gsErrorMsg("out of memory\n");
-            exit(1);
+            throw mcrl2::runtime_error("Out of memory.");
           }
         }
         d_transitions[d_ntransitions].from  = d_id;

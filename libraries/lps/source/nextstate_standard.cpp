@@ -358,8 +358,7 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
                 }
         }
 
-        gsErrorMsg("could not find dummy of type %T\n",sort);
-        exit(1);
+        throw mcrl2::runtime_error("could not find dummy of type " + pp(sort));
 }
 
 ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)

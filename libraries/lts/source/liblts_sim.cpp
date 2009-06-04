@@ -635,8 +635,7 @@ mcrl2::lts::transition* sim_partitioner::get_transitions(uint& nt,uint& size) co
   transition* ts = (transition*)malloc(size*sizeof(transition));
   if (ts == NULL)
   {
-    gsErrorMsg("out of memory\n");
-    exit(1);
+    throw mcrl2::runtime_error("out of memory");
   }
 
   nt = 0;
@@ -924,9 +923,7 @@ void sim_partitioner::read_partition_from_file(char *fn)
   std::ifstream f(fn);
   if (!f)
   {
-    std::cerr << "error: cannot open partition file for reading"
-      << std::endl;
-    exit(1);
+    throw mcrl2::runtime_error("Cannot open partition file for reading");
   }
   char c = 0;
 
@@ -937,8 +934,7 @@ void sim_partitioner::read_partition_from_file(char *fn)
   {
     if (c != '(')
     {
-      std::cerr << "error: '(' expected but '" << c << "' found\n";
-      exit(1);
+      throw mcrl2::runtime_error("error: '(' expected but '" + c + "' found");
     }
     // found another block; read it
     prev = LIST_END;
@@ -948,9 +944,8 @@ void sim_partitioner::read_partition_from_file(char *fn)
     {
       if (!(f >> s))
       {
-        std::cerr << "error: could not read state ";
-        std::cerr << "while reading block " << s_Sigma << std::endl;
-        exit(1);
+        throw mcrl2::runtime_error("error: could not read state\n"
+                              "while reading block " + s_Sigma + "\n");
       }
       // add state s to partition block s_Pi
       block_Pi[s] = s_Pi;
@@ -967,15 +962,12 @@ void sim_partitioner::read_partition_from_file(char *fn)
 
       if (!(f >> c))
       {
-        std::cerr << "error: could not read ',' or ')' ";
-        std::cerr << "while reading block " << s_Sigma << std::endl;
-        exit(1);
+        throw mcrl2::runtime_error(std::cerr << "error: could not read ',' or ')' \n"
+                                "while reading block " << s_Sigma << std::endl);
       }
       if (c != ',' && c != ')')
       {
-        std::cerr << "error: ',' or ')' expected but '" << c
-          << "' found\n";
-        exit(1);
+        throw mcrl2::runtime_error("error: ',' or ')' expected but '" << c << "' found");
       }
     }
     ++s_Pi;
