@@ -4257,7 +4257,7 @@ class specification_basic_type:public boost::noncopyable
       const action_list multiactionlist1=summand1.actions();
       const action_list multiactionlist2=summand2.actions();
       action_list::const_iterator i2=multiactionlist2.begin();
-      for(action_list::const_iterator i1=multiactionlist1.begin(); i2!=multiactionlist1.end(); ++i1,++i2)
+      for(action_list::const_iterator i1=multiactionlist1.begin(); i1!=multiactionlist1.end(); ++i1,++i2)
       { if (i2==multiactionlist2.end())
         { return false;
         }
