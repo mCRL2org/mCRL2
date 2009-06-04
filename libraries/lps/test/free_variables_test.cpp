@@ -7,11 +7,11 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file free_variables_test.cpp
+/// \brief Add your file description here.
 
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -19,7 +19,7 @@ using namespace mcrl2::lps;
 
 void test_free_variables()
 {
-  lps::specification specification(parse_linear_process_specification(
+  lps::specification specification(mcrl22lps(
     "act a : Bool;\n"
     "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
     "init X;\n"
@@ -30,7 +30,7 @@ void test_free_variables()
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
-  specification = parse_linear_process_specification(
+  specification = mcrl22lps(
     "act a;\n"
     "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
     "init X(true);\n"

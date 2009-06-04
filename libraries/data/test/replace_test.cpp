@@ -215,9 +215,9 @@ void test_data_expression_replace()
   BOOST_CHECK(e_ == x);
 
   std::cerr << mcrl2::data::pp(xl) << std::endl;
-  data_expression_list xl_ = data_expression_map_replace(convert< aterm_list >(el), replacements);
+  data_expression_vector xl_ = data_expression_map_replace(el, replacements);
   std::cerr << mcrl2::data::pp(xl_) << std::endl;
-  BOOST_CHECK(xl_ == convert< data_expression_list >(xl));
+  BOOST_CHECK(xl_ == xl);
 
   data_expression u = sort_real_::plus(sort_real_::real_(4), sort_real_::real_(1));
   data_expression v = sort_real_::plus(y, sort_real_::real_(1));

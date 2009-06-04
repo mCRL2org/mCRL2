@@ -21,68 +21,44 @@
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/expression_manipulator.h"
+#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/detail/concepts.h"
 
 namespace mcrl2 {
 
   namespace data {
 
+//----------------------------------------------------------------------------------------//
+//                                data variable stuff
+//----------------------------------------------------------------------------------------//
     /// \cond INTERNAL_DOCS
     namespace detail {
 
-      // Component for doing top-down replacement of variables by expressions.
-      //
-      // Binding is disregarded.  The Derived type parameter represents the
-      // type of a derived class (as per CRTP).
-      //
-      // The means of specifying and execution of replacement is deferred to the derived class.
-      template < typename Derived >
-      class replace_variables_helper : public expression_manipulator< Derived, data_expression >
+      template <typename ReplaceFunction>
+      struct replace_variables_helper // TODO make proper visitor on structure of data expression
       {
-        public:
+        ReplaceFunction r_;
 
-          using expression_manipulator< Derived, data_expression >::operator();
+        replace_variables_helper(ReplaceFunction r)
+          : r_(r)
+        {}
 
-          where_clause operator()(where_clause const& w)
+        /// \brief Function call operator
+        /// \param t A term
+        /// \return The function result
+        std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
+        {
+          if (data_expression(t).is_variable())
           {
-            atermpp::vector< assignment > declarations;
-
-            for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
-            {
-              declarations.push_back(static_cast< Derived& >(*this)(r.front()));
-            }
-
-            return where_clause(static_cast< Derived& >(*this)(w.body()), boost::make_iterator_range(declarations));
+            return
+              std::pair<atermpp::aterm_appl, bool>(r_(static_cast< variable >(t)), false);
           }
 
-          application operator()(application const& a)
-          {
-            atermpp::vector< data_expression > arguments;
-
-            for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
-            {
-              arguments.push_back(static_cast< Derived& >(*this)(r.front()));
-            }
-
-            return application(static_cast< Derived& >(*this)(a.head()), arguments);
-          }
-
-          abstraction operator()(abstraction const& a)
-          {
-            return abstraction(a.binding_operator(), a.variables(), static_cast< Derived& >(*this)(a.body()));
-          }
-
-        protected:
-
-          replace_variables_helper()
-          {}
+          return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
+        }
       };
 
-      // Component for doing top-down replacement of variables by expressions.
-      //
-      // Binding is disregarded.  The Derived type parameter represents the
-      // type of a derived class (as per CRTP).
+      // Component for doing capture avoiding substitution
       //
       // With a ReplaceFunction with a strict function interface it is not
       // hard to establish whether replacement introduces a variable that
@@ -94,19 +70,44 @@ namespace mcrl2 {
       //
       // An advantage of the chose approach is that names of bound variables do
       // not change as a matter of side-effect.
-      template < typename Derived >
-      class replace_free_variables_helper : public
-              replace_variables_helper< replace_free_variables_helper< Derived > >
+      template <typename ReplaceFunction>
+      class replace_free_variables_helper // TODO make proper visitor on structure of data expression
       {
         protected:
 
           std::set< variable > m_bound;
+          ReplaceFunction      m_replace_function;
 
         public:
 
-          using replace_variables_helper< replace_free_variables_helper< Derived > >::operator();
+          data_expression operator()(data_expression const& e)
+          {
+            if (e.is_abstraction())
+            {
+              return (*this)(abstraction(e));
+            }
+            else if (e.is_variable())
+            {
+              return (*this)(variable(e));
+            }
+            else if (e.is_where_clause())
+            {
+              return (*this)(where_clause(e));
+            }
+            else if (e.is_application())
+            {
+              return (*this)(application(e));
+            }
 
-          where_clause operator()(where_clause const& w)
+            return e;
+          }
+
+          assignment replace(assignment const& a)
+          {
+            return assignment((*this)(a.lhs()), (*this)(a.rhs()));
+          }
+
+          where_clause replace(where_clause const& w)
           {
             std::set< variable > bound_variables(m_bound.begin(), m_bound.end());
 
@@ -128,9 +129,21 @@ namespace mcrl2 {
             return where_clause(new_body, boost::make_iterator_range(declarations));
           }
 
+          application operator()(application const& a)
+          {
+            atermpp::vector< data_expression > arguments;
+
+            for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
+            {
+              arguments.push_back((*this)(r.front()));
+            }
+
+            return application((*this)(a.head()), arguments);
+          }
+
           bool check_replacement_assumption(variable const& v)
           {
-            std::set< variable > free_variables(find_all_free_variables(static_cast< Derived& >(*this)(v)));
+            std::set< variable > free_variables(find_all_free_variables(m_replace_function(v)));
             std::set< variable > result;
 
             std::set_intersection(free_variables.begin(), free_variables.end(),
@@ -143,8 +156,7 @@ namespace mcrl2 {
           {
             BOOST_ASSERT((m_bound.find(v) != m_bound.end()) || check_replacement_assumption(v));
 
-            return (m_bound.find(v) != m_bound.end()) ?
-              static_cast< data_expression >(v) : static_cast< Derived& >(*this)(v);
+            return (m_bound.find(v) != m_bound.end()) ? static_cast< data_expression >(v) : m_replace_function(v);
           }
 
           abstraction operator()(abstraction const& a)
@@ -162,55 +174,98 @@ namespace mcrl2 {
             return abstraction(a.binding_operator(), a.variables(), new_body);
           }
 
-        protected:
-
-          replace_free_variables_helper()
-          {}
-
-          template < typename Container >
-          replace_free_variables_helper(
-                  Container const& bound_by_context,
-                  typename enable_if_container< Container, variable >::type* = 0) :
-                              m_bound(convert< std::set< variable > >(bound_by_context))
-          { }
-
-          virtual ~replace_free_variables_helper()
-          { }
-      };
-
-      // Default specialisation that wraps a function object
-      template < typename ReplaceFunction, template < class > class ReplaceHelper >
-      class replace_function_object_helper :
-               public ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >
-      {
-        protected:
-
-          ReplaceFunction  m_replace_function;
-
         public:
 
-          using ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >::operator();
-
-          data_expression operator()(variable const& v)
+          replace_free_variables_helper(ReplaceFunction replace_function,
+                                        std::set< data::variable > const& bound_by_context) :
+                              m_bound(bound_by_context), m_replace_function(replace_function)
           {
-            return m_replace_function(v);
           }
 
-        public:
-
-          replace_function_object_helper(ReplaceFunction replace_function) :
-                    m_replace_function(replace_function)
-          { }
-
-          // only available if ReplaceHelper has support
-          template < typename Container >
-          replace_function_object_helper(ReplaceFunction replace_function,
-                                        Container const& bound_by_context,
-                                        typename enable_if_container< Container, variable >::type* = 0) :
-                    ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >(bound_by_context),
-                    m_replace_function(replace_function)
-          { }
+          replace_free_variables_helper(ReplaceFunction replace_function) :
+                                               m_replace_function(replace_function)
+          {
+          }
       };
+
+      // The last argument of the functions below is used with boost::enable_if to
+      // activate the correct overload. This way the compiler generates the
+      // necessary code, which would otherwise need to be duplicated *at least*
+      // four times for frequently used containers (currently std::set,
+      // atermpp::set, std::vector, atermpp::vector). Adding overloads for a new
+      // container type only requires instantiation of is_container_impl for the
+      // appropriate type.
+
+      template < typename Expression, typename ReplaceFunction >
+      atermpp::term_list< Expression > replace_free_variables(replace_free_variables_helper< ReplaceFunction >& context, atermpp::term_list< Expression > const& t)
+      {
+        atermpp::term_list< Expression > result;
+
+        for (typename atermpp::term_list< Expression >::const_iterator i = t.begin(); i != t.end(); ++i)
+        {
+          result = atermpp::push_front(result, context(*i));
+        }
+
+        return atermpp::reverse(result);
+      }
+
+      template < typename ReplaceFunction >
+      data_expression replace_free_variables(replace_free_variables_helper< ReplaceFunction >& context, data_expression const& t)
+      {
+        return context(t);
+      }
+
+      template < typename Container, typename ReplaceFunction >
+      Container replace_free_variables(replace_free_variables_helper< ReplaceFunction >& context,
+                                  Container const& t,
+                                  typename boost::enable_if< typename is_container< Container >::type >::type* = 0)
+      {
+        Container                         result;
+        std::insert_iterator< Container > o(result, result.end());
+
+        for (typename Container::const_iterator i = t.begin(); i != t.end(); ++i)
+        {
+          *o = context(*i);
+        }
+
+        return result;
+      }
+
+      template <typename T, typename ReplaceFunction >
+      T partial_replace(T t, ReplaceFunction r, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
+      {
+        return atermpp::partial_replace(t, r);
+      }
+
+      template <typename T, typename ReplaceFunction >
+      atermpp::term_list< T > partial_replace(atermpp::term_list< T > const& t, ReplaceFunction r)
+      {
+        return atermpp::partial_replace(t, r);
+      }
+
+      template <typename T, typename ReplaceFunction >
+      T partial_replace(T const& t, ReplaceFunction r, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+      {
+        T result;
+
+        typename std::insert_iterator< T > o(result, result.end());
+
+        for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
+          *o = atermpp::partial_replace(*i, r);
+        }
+
+        return result;
+      }
+
+      template <typename T, typename ReplaceFunction >
+      T& partial_replace(T& t, ReplaceFunction r, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+      {
+        for (typename T::iterator i = t.begin(); i != t.end(); ++i) {
+          *i = atermpp::partial_replace(*i, r);
+        }
+
+        return t;
+      }
     } // namespace detail
     /// \endcond
 
@@ -223,11 +278,8 @@ namespace mcrl2 {
 template < typename Container, typename ReplaceFunction >
 Container replace_variables(Container const& container, ReplaceFunction replace_function)
 {
-  using namespace detail;
-
   BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
-
-  return replace_function_object_helper< ReplaceFunction&, replace_variables_helper >(replace_function)(container);
+  return detail::partial_replace(container, detail::replace_variables_helper< ReplaceFunction& >(replace_function));
 }
 
 /// \brief Recursively traverses the given expression or expression container,
@@ -242,11 +294,11 @@ Container replace_variables(Container const& container, ReplaceFunction replace_
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function)
 {
-  using namespace detail;
-
   BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
 
-  return replace_function_object_helper< ReplaceFunction&, replace_free_variables_helper >(replace_function)(container);
+  detail::replace_free_variables_helper< ReplaceFunction& > replacer(replace_function);
+
+  return detail::replace_free_variables(replacer, container);
 }
 
 /// \brief Recursively traverses the given expression or expression container,
@@ -262,17 +314,15 @@ Container replace_free_variables(Container const& container, ReplaceFunction rep
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function, std::set< variable > const& bound)
 {
-  using namespace detail;
-
   BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
+  detail::replace_free_variables_helper< ReplaceFunction > replacer(replace_function, bound);
 
-  return detail::apply(container, replace_free_variables_helper< ReplaceFunction >(replace_function, bound));
+  return detail::replace_free_variables(replacer, container);
 }
 
 /// \cond INTERNAL_DOCS
 template <typename VariableContainer, typename ExpressionContainer>
-struct variable_sequence_replace_helper:
-               public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
+struct variable_sequence_replace_helper: public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
 {
   const VariableContainer& variables_;
   const ExpressionContainer& replacements_;
@@ -305,21 +355,19 @@ struct variable_sequence_replace_helper:
 /// \endcond
 
 /// \brief Replaces variables in the term t using the specified sequence of replacements.
-/// \param container An expression or Container
+/// \param t A term
 /// \param variables A sequence of variables
 /// \param replacements A sequence of expressions
 /// \return The replacement result. Each variable in \p t that occurs as the i-th element
 /// of variables is replaced by the i-th element of \p expressions. If the sequence
 /// \p variables contains duplicates, the first match is selected.
-template <typename Container, typename VariableContainer, typename ExpressionContainer>
-Container variable_sequence_replace(Container container,
+template <typename Term, typename VariableContainer, typename ExpressionContainer>
+Term variable_sequence_replace(Term t,
                                const VariableContainer& variables,
                                const ExpressionContainer& replacements
                               )
 {
-  using namespace detail;
-
-  return replace_variables(container, variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
+  return replace_variables(t, variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
 }
 
 /// \cond INTERNAL_DOCS
@@ -370,7 +418,7 @@ Term variable_map_replace(Term t, const MapContainer& replacements)
 
 /// \cond INTERNAL_DOCS
 template <typename ReplaceFunction>
-struct replace_data_expressions_helper : public core::substitution_function<typename ReplaceFunction::result_type, typename ReplaceFunction::result_type>
+struct replace_data_expressions_helper
 {
   const ReplaceFunction& r_;
 
@@ -400,11 +448,11 @@ struct replace_data_expressions_helper : public core::substitution_function<type
 /// \param t A term
 /// \param r A replace function
 /// \return The replacement result
-template <typename Expression, typename ReplaceFunction>
-Expression replace_data_expressions(Expression t, ReplaceFunction r)
+template <typename Term, typename ReplaceFunction>
+Term replace_data_expressions(Term t, ReplaceFunction r)
 {
   BOOST_CONCEPT_ASSERT((boost::UnaryFunction<ReplaceFunction, data_expression, data_expression>));
-  return atermpp::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
+  return detail::partial_replace(t, replace_data_expressions_helper<ReplaceFunction>(r));
 }
 
 /// \cond INTERNAL_DOCS
@@ -459,7 +507,7 @@ Term data_expression_sequence_replace(Term t,
 
 /// \cond INTERNAL_DOCS
 template <typename MapContainer>
-struct data_expression_map_replace_helper : public core::substitution_function<typename MapContainer::key_type, typename MapContainer::mapped_type >
+struct data_expression_map_replace_helper
 {
   const MapContainer& replacements_;
 

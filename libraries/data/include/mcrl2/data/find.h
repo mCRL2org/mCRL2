@@ -119,7 +119,7 @@ namespace detail {
 
   /// TODO migrate to generated visitor structure
   template <typename MatchPredicate, typename OutputIterator>
-  class free_variable_find_all_helper {
+  class free_variable_find_helper {
 
     protected:
 
@@ -129,27 +129,27 @@ namespace detail {
 
     public:
 
-      void operator()(data_expression const& e)
+      void find_all_if(data_expression const& e)
       {
         if (e.is_abstraction())
         {
-          (*this)(abstraction(e));
+          find_all_if(abstraction(e));
         }
         else if (e.is_variable())
         {
-          (*this)(variable(e));
+          find_all_if(variable(e));
         }
         else if (e.is_where_clause())
         {
-          (*this)(where_clause(e));
+          find_all_if(where_clause(e));
         }
         else if (e.is_application())
         {
-          (*this)(application(e));
+          find_all_if(application(e));
         }
       }
 
-      void operator()(where_clause const& w)
+      void find_all_if(where_clause const& w)
       {
         std::set< variable > bound_variables(m_bound.begin(), m_bound.end());
 
@@ -160,28 +160,28 @@ namespace detail {
 
         m_bound.swap(bound_variables);
 
-        (*this)(w.body());
+        find_all_if(w.body());
 
         m_bound.swap(bound_variables);
       }
 
-      void operator()(application const& a)
+      void find_all_if(application const& a)
       {
-        (*this)(a.head());
+        find_all_if(a.head());
 
         for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
         {
-          (*this)(r.front());
+          find_all_if(r.front());
         }
       }
 
-      void operator()(assignment const& a)
+      void find_all_if(assignment const& a)
       {
-        (*this)(a.lhs());
-        (*this)(a.rhs());
+        find_all_if(a.lhs());
+        find_all_if(a.rhs());
       }
 
-      void operator()(variable const& v)
+      void find_all_if(variable const& v)
       {
         if (m_bound.find(v) == m_bound.end() && m_match(v))
         {
@@ -189,7 +189,7 @@ namespace detail {
         }
       }
 
-      void operator()(abstraction const& a)
+      void find_all_if(abstraction const& a)
       {
         std::set< variable > bound_variables(boost::copy_range< std::set< variable > >(a.variables()));
 
@@ -197,21 +197,21 @@ namespace detail {
 
         m_bound.swap(bound_variables);
 
-        (*this)(a.body());
+        find_all_if(a.body());
 
         m_bound.swap(bound_variables);
       }
 
     public:
 
-      free_variable_find_all_helper(MatchPredicate& match,
+      free_variable_find_helper(MatchPredicate& match,
                                 OutputIterator const& destBegin,
                                 std::set< data::variable > const& bound_by_context) :
                           m_bound(bound_by_context), m_match(match), m_iterator(destBegin)
       {
       }
 
-      free_variable_find_all_helper(MatchPredicate& match, OutputIterator const& destBegin) :
+      free_variable_find_helper(MatchPredicate& match, OutputIterator const& destBegin) :
                                            m_match(match), m_iterator(destBegin)
       {
       }
@@ -220,30 +220,30 @@ namespace detail {
   template <typename T, typename MatchPredicate, typename OutputIterator>
   void find_all_free_variables_if(atermpp::term_list< T > const& t, MatchPredicate match, OutputIterator const& destBegin)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
+    free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin);
 
     for (typename atermpp::term_list< T >::const_iterator i = t.begin(); i != t.end(); ++i)
     {
-      context(*i);
+      context.find_all_if(*i);
     }
   }
 
   template <typename MatchPredicate, typename OutputIterator>
   void find_all_free_variables_if(data_expression const& t, MatchPredicate match, OutputIterator const& destBegin)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
+    free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin);
 
-    context(t);
+    context.find_all_if(t);
   }
 
   template <typename T, typename MatchPredicate, typename OutputIterator>
   void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
+    free_variable_find_helper< MatchPredicate, OutputIterator > context(match, destBegin);
 
     for (typename T::const_iterator i = t.begin(); i != t.end(); ++i)
     {
-      context(*i);
+      context.find_all_if(*i);
     }
   }
 }
