@@ -344,11 +344,14 @@ rule platform-configuration ( properties * ) {
   }
 
   if <toolset>gcc in $(properties) { # GCC
-    requirements += <cxxflags>-pipe <cxxflags>-fno-operator-names <cxxflags>-fvisibility-inlines-hidden
+    requirements += <cxxflags>-pipe <cxxflags>-fno-operator-names
                     <cxxflags>-Woverloaded-virtual <cxxflags>-Wstrict-null-sentinel ;
 
     if <warnings>all in $(properties) {
       requirements += <cxxflags>-Wno-long-long ;
+    }
+    if ! <target-os>windows in $(properties) { # MinGW on Windows
+      requirements += <cxxflags>-fvisibility-inlines-hidden ;
     }
 
     if <link>static in $(properties) {
