@@ -10,6 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "mcrl2/exception.h"
 #include "node.h"
 
 #include <string>
@@ -65,7 +66,7 @@ void Node::swapTupleVal(
         tuple[idx2] = temp;
     }
     else
-        throw new string( "Error swapping node tuple values." );
+        throw mcrl2::runtime_error( "Error swapping node tuple values." );
 }
 
 
@@ -99,7 +100,7 @@ void Node::moveTupleVal(
         }
     }
     else
-        throw new string( "Error moving node tuple value." );
+        throw mcrl2::runtime_error( "Error moving node tuple value." );
 }
 
 
@@ -132,11 +133,11 @@ void Node::moveTupleVals( map< int, int > &idcsFrTo )
         }
         catch ( ... )
         {
-            throw new string( "Error moving node tuple values." );
+            throw mcrl2::runtime_error( "Error moving node tuple values." );
         }
     }
     else
-        throw new string( "Error moving node tuple values." );
+        throw mcrl2::runtime_error( "Error moving node tuple values." );
 }
 
 
@@ -228,7 +229,7 @@ double Node::getTupleVal( const size_t &idx )
     if ( 0 <= idx && idx < tuple.size() )
         return tuple[idx];
     else
-        throw new string( "Error retrieving node tuple value." );
+        throw mcrl2::runtime_error( "Error retrieving node tuple value." );
 }
 
 
@@ -247,7 +248,7 @@ Edge* Node::getInEdge( const size_t &idx )
 	if ( 0 <= idx && idx < inEdges.size() )
 		return inEdges[idx];
 	else
-        throw new string( "Error retrieving node incoming edge." );
+        throw mcrl2::runtime_error( "Error retrieving node incoming edge." );
 }
 
 
@@ -266,7 +267,7 @@ Edge* Node::getOutEdge( const size_t &idx )
 	if ( 0 <= idx && idx < outEdges.size() )
 		return outEdges[idx];
 	else
-        throw new string( "Error retrieving node outgoing edge." );
+        throw mcrl2::runtime_error( "Error retrieving node outgoing edge." );
 }
 
 

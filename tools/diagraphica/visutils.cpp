@@ -532,9 +532,8 @@ void VisUtils::mapColorQualPast1(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*8.0, &intPtVal );
+        double dblPtVal = modf( frac*8.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -575,9 +574,8 @@ void VisUtils::mapColorQualPast2(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -619,9 +617,8 @@ void VisUtils::mapColorQualSet1(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*8.0, &intPtVal );
+        double dblPtVal = modf( frac*8.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -663,9 +660,8 @@ void VisUtils::mapColorQualSet2(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -707,9 +703,8 @@ void VisUtils::mapColorQualSet3(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*11.0, &intPtVal );
+        double dblPtVal = modf( frac*11.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -750,9 +745,8 @@ void VisUtils::mapColorQualPair(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*8.0, &intPtVal );
+        double dblPtVal = modf( frac*8.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -793,9 +787,8 @@ void VisUtils::mapColorQualDark(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -836,9 +829,8 @@ void VisUtils::mapColorQualAccent(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -879,9 +871,8 @@ void VisUtils::mapColorSeqOrRd(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -922,9 +913,8 @@ void VisUtils::mapColorSeqGnBu(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -965,9 +955,8 @@ void VisUtils::mapColorSeqGreen(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -999,9 +988,8 @@ void VisUtils::mapColorSeqGreen(
 
     double frac = alpha;
     double intPtVal;
-    double dblPtVal;
 
-    dblPtVal = modf( frac*7.0, &intPtVal );
+    double dblPtVal = modf( frac*7.0, &intPtVal );
 
     colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                      + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -1040,9 +1028,8 @@ void VisUtils::mapColorSeqRed(
     {
         double frac = (double)iter/(double)numr;
         double intPtVal;
-        double dblPtVal;
 
-        dblPtVal = modf( frac*7.0, &intPtVal );
+        double dblPtVal = modf( frac*7.0, &intPtVal );
 
         colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                          + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -1074,9 +1061,8 @@ void VisUtils::mapColorSeqRed(
 
     double frac = alpha;
     double intPtVal;
-    double dblPtVal;
 
-    dblPtVal = modf( frac*7.0, &intPtVal );
+    double dblPtVal = modf( frac*7.0, &intPtVal );
 
     colRGB.r = ( (1.0-dblPtVal)*red[(int)intPtVal]
                      + dblPtVal*red[(int)intPtVal+1] )/255.0;
@@ -1102,8 +1088,6 @@ void VisUtils::hlsToRgb(
 // Out: r, g, b in [0, 1]
 // ------------------------------------------------------------------
 {
-    double var1, var2;
-
     if ( colHLS.s == 0 )
     {
         colRGB.r = colHLS.l;
@@ -1112,12 +1096,13 @@ void VisUtils::hlsToRgb(
     }
     else
     {
+        double var2;
         if ( colHLS.l < 0.5 )
             var2 = colHLS.l * ( colHLS.l+colHLS.s );
         else
             var2 = ( colHLS.l+colHLS.s ) - ( colHLS.s*colHLS.l );
 
-        var1 = 2 * colHLS.l - var2;
+        double var1 = 2 * colHLS.l - var2;
 
         colRGB.r = hlsValue( var1, var2, colHLS.h + 120.0 );
         colRGB.g = hlsValue( var1, var2, colHLS.h );
@@ -1253,7 +1238,6 @@ void VisUtils::drawArc(
 // 'slices' segments.
 // ------------------------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
 
     if ( aglBegDg < aglEndDg )
@@ -1264,8 +1248,8 @@ void VisUtils::drawArc(
     glBegin( GL_LINE_STRIP );
         for ( int i = 0; i <= slices; ++i )
         {
-            xCur = xCtr + radius*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + radius*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + radius*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + radius*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
         }
     glEnd();
@@ -1307,7 +1291,6 @@ void VisUtils::drawArcCW(
 // centered at (xCtr, yCtr). This arc consists of 'slices' segments.
 // ------------------------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
 
     // draw arc
@@ -1319,8 +1302,8 @@ void VisUtils::drawArcCW(
     glBegin( GL_LINE_STRIP );
         for ( int i = 0; i <= slices; ++i )
         {
-            xCur = xCtr + radius*cos( Utils::degrToRad(aglBegDg-i*slice) );
-            yCur = yCtr + radius*sin( Utils::degrToRad(aglBegDg-i*slice) );
+            double xCur = xCtr + radius*cos( Utils::degrToRad(aglBegDg-i*slice) );
+            double yCur = yCtr + radius*sin( Utils::degrToRad(aglBegDg-i*slice) );
             glVertex2f( xCur, yCur );
         }
     glEnd();
@@ -1358,24 +1341,22 @@ void VisUtils::drawArc(
     const double &radius,   const int &slices )
 // ------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
-    double interv;
 
     if ( aglBegDg < aglEndDg )
         slice = (aglEndDg-aglBegDg)/(double)slices;
     else
         slice = ( 360.0-(aglBegDg-aglEndDg) )/(double)slices;
 
-    interv = 0.5*(wthEnd-wthBeg)/(double)slices;
+    double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
 
     glBegin( GL_LINE_LOOP );
         // outside
         {
         for ( int i = 0; i <= slices; ++i )
         {
-            xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
         }
         }
@@ -1383,8 +1364,8 @@ void VisUtils::drawArc(
         {
         for ( int i = slices; i >= 0; --i )
         {
-            xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
         }
         }
@@ -1401,33 +1382,29 @@ void VisUtils::drawArc(
     const double &radius,   const int &slices )
 // ------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
-    double interv;
-    double frac;
-    double r, g, b, a;
 
     if ( aglBegDg < aglEndDg )
         slice = (aglEndDg-aglBegDg)/(double)slices;
     else
         slice = ( 360.0-(aglBegDg-aglEndDg) )/(double)slices;
 
-    interv = 0.5*(wthEnd-wthBeg)/(double)slices;
+    double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
 
     glBegin( GL_LINE_LOOP );
         // outside
         {
         for ( int i = 0; i <= slices; ++i )
         {
-            frac = (double)i/(double)slices;
-            r = (1-frac)*colBeg.r + frac*colEnd.r;
-            g = (1-frac)*colBeg.g + frac*colEnd.g;
-            b = (1-frac)*colBeg.b + frac*colEnd.b;
-            a = (1-frac)*colBeg.a + frac*colEnd.a;
+            double frac = (double)i/(double)slices;
+            double r = (1-frac)*colBeg.r + frac*colEnd.r;
+            double g = (1-frac)*colBeg.g + frac*colEnd.g;
+            double b = (1-frac)*colBeg.b + frac*colEnd.b;
+            double a = (1-frac)*colBeg.a + frac*colEnd.a;
             glColor4f( r, g, b, a );
 
-            xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
         }
         }
@@ -1435,15 +1412,15 @@ void VisUtils::drawArc(
         {
         for ( int i = slices; i >= 0; --i )
         {
-            frac = (double)i/(double)slices;
-            r = (1-frac)*colBeg.r + frac*colEnd.r;
-            g = (1-frac)*colBeg.g + frac*colEnd.g;
-            b = (1-frac)*colBeg.b + frac*colEnd.b;
-            a = (1-frac)*colBeg.a + frac*colEnd.a;
+            double frac = (double)i/(double)slices;
+            double r = (1-frac)*colBeg.r + frac*colEnd.r;
+            double g = (1-frac)*colBeg.g + frac*colEnd.g;
+            double b = (1-frac)*colBeg.b + frac*colEnd.b;
+            double a = (1-frac)*colBeg.a + frac*colEnd.a;
             glColor4f( r, g, b, a );
 
-            xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius-0.5*wthBeg-(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius-0.5*wthBeg-(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
         }
         }
@@ -1459,24 +1436,22 @@ void VisUtils::fillArc(
     const double &radius,   const int &slices )
 // ------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
-    double interv;
 
     if ( aglBegDg < aglEndDg )
         slice = (aglEndDg-aglBegDg)/(double)slices;
     else
         slice = ( 360.0-(aglBegDg-aglEndDg) )/(double)slices;
 
-    interv = 0.5*(wthEnd-wthBeg)/(double)slices;
+    double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
 
     glBegin( GL_QUAD_STRIP );
         {
         for ( int i = 0; i <= slices; ++i )
         {
             // outside
-            xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
 
             // inside
@@ -1498,33 +1473,29 @@ void VisUtils::fillArc(
     const double &radius,   const int &slices )
 //-------------------------------------------------
 {
-    double xCur, yCur;
     double slice;
-    double interv;
-    double frac;
-    double r, g, b, a;
 
     if ( aglBegDg < aglEndDg )
         slice = (aglEndDg-aglBegDg)/(double)slices;
     else
         slice = ( 360.0-(aglBegDg-aglEndDg) )/(double)slices;
 
-    interv = 0.5*(wthEnd-wthBeg)/(double)slices;
+    double interv = 0.5*(wthEnd-wthBeg)/(double)slices;
 
     glBegin( GL_QUAD_STRIP );
         {
         for ( int i = 0; i <= slices; ++i )
         {
-            frac = (double)i/(double)slices;
-            r = (1-frac)*colBeg.r + frac*colEnd.r;
-            g = (1-frac)*colBeg.g + frac*colEnd.g;
-            b = (1-frac)*colBeg.b + frac*colEnd.b;
-            a = (1-frac)*colBeg.a + frac*colEnd.a;
+            double frac = (double)i/(double)slices;
+            double r = (1-frac)*colBeg.r + frac*colEnd.r;
+            double g = (1-frac)*colBeg.g + frac*colEnd.g;
+            double b = (1-frac)*colBeg.b + frac*colEnd.b;
+            double a = (1-frac)*colBeg.a + frac*colEnd.a;
             glColor4f( r, g, b, a );
 
             // outside
-            xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
-            yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
+            double xCur = xCtr + (radius+0.5*wthBeg+(i*interv))*cos( Utils::degrToRad(aglBegDg+i*slice) );
+            double yCur = yCtr + (radius+0.5*wthBeg+(i*interv))*sin( Utils::degrToRad(aglBegDg+i*slice) );
             glVertex2f( xCur, yCur );
 
             // inside
@@ -1687,14 +1658,13 @@ void VisUtils::drawEllipse(
     const int &slices )
 // ----------------------------------------
 {
-    double xCur, yCur;
     double slice = (2*PI)/(double)slices;
 
     glBegin( GL_LINE_LOOP );
         for ( int i = 0; i < slices; ++i )
         {
-            xCur = xCtr + xDOF*sin( i*slice );
-            yCur = yCtr + yDOF*cos( i*slice );
+            double xCur = xCtr + xDOF*sin( i*slice );
+            double yCur = yCtr + yDOF*cos( i*slice );
             glVertex2f( xCur, yCur );
         }
     glEnd();
@@ -1708,14 +1678,13 @@ void VisUtils::fillEllipse(
     const int &slices )
 // ----------------------------------------
 {
-    double xCur, yCur;
     double slice = (2*PI)/(double)slices;
 
     glBegin( GL_POLYGON );
         for ( int i = 0; i < slices; ++i )
         {
-            xCur = xCtr + xDOF*sin( i*slice );
-            yCur = yCtr + yDOF*cos( i*slice );
+            double xCur = xCtr + xDOF*sin( i*slice );
+            double yCur = yCtr + yDOF*cos( i*slice );
             glVertex2f( xCur, yCur );
         }
     glEnd();
@@ -1731,14 +1700,12 @@ void VisUtils::fillEllipse(
     const ColorRGB &cOut )
 // --------------------------------------------------
 {
-    double xCurIn,  yCurIn;
-    double xCurOut, yCurOut;
     double slice = (2*PI)/(double)slices;
 
-    xCurIn  = xCtr + xDOFIn*cos(  0.0 );
-    yCurIn  = yCtr + yDOFIn*sin(  0.0 );
-    xCurOut = xCtr + xDOFOut*cos( 0.0 );
-    yCurOut = yCtr + yDOFOut*sin( 0.0 );
+    double xCurIn  = xCtr + xDOFIn*cos(  0.0 );
+    double yCurIn  = yCtr + yDOFIn*sin(  0.0 );
+    double xCurOut = xCtr + xDOFOut*cos( 0.0 );
+    double yCurOut = yCtr + yDOFOut*sin( 0.0 );
 
     for ( int i = 1; i <= slices; ++i )
     {
@@ -1774,21 +1741,18 @@ void VisUtils::fillEllipse(
     const ColorRGB &cOut )
 // ----------------------------------------------------
 {
-    double xInside,  yInside;
-    double xOutside, yOutside;
-    double sliceRd,  aglBegRd;
+    double aglBegRd = Utils::degrToRad( aglBegDg );
 
-    aglBegRd = Utils::degrToRad( aglBegDg );
-
+    double sliceRd;
     if ( aglBegDg < aglEndDg )
         sliceRd = Utils::degrToRad( (aglEndDg-aglBegDg)/(double)slices );
     else
         sliceRd = Utils::degrToRad( ( 360.0-(aglBegDg-aglEndDg) )/(double)slices );
 
-    xInside  = xCtr + xDOFIn*cos(  aglBegRd );
-    yInside  = yCtr + yDOFIn*sin(  aglBegRd );
-    xOutside = xCtr + xDOFOut*cos( aglBegRd );
-    yOutside = yCtr + yDOFOut*sin( aglBegRd );
+    double xInside  = xCtr + xDOFIn*cos(  aglBegRd );
+    double yInside  = yCtr + yDOFIn*sin(  aglBegRd );
+    double xOutside = xCtr + xDOFOut*cos( aglBegRd );
+    double yOutside = yCtr + yDOFOut*sin( aglBegRd );
 
     for ( int i = 1; i <= slices; ++i )
     {
@@ -1821,19 +1785,15 @@ void VisUtils::drawArrow(
     const double &wHead, const double &lHead )
 // -------------------------------------------
 {
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-
     // calc angle & length of arrow
-    dX   = xTo-xFr;
-    dY   = yTo-yFr;
+    double dX   = xTo-xFr;
+    double dY   = yTo-yFr;
 
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     // calc length base
-    lenBase = lenArw - lHead;
+    double lenBase = lenArw - lHead;
 
     glPushMatrix();
     glTranslatef( xFr, yFr, 0.0 );
@@ -1858,19 +1818,15 @@ void VisUtils::fillArrow(
     const double &wHead, const double &lHead )
 // -------------------------------------------
 {
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-
     // calc angle & length of arrow
-    dX   = xTo-xFr;
-    dY   = yTo-yFr;
+    double dX   = xTo-xFr;
+    double dY   = yTo-yFr;
 
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     // calc length base
-    lenBase = lenArw - lHead;
+    double lenBase = lenArw - lHead;
 
     glPushMatrix();
     glTranslatef( xFr, yFr, 0.0 );
@@ -1895,20 +1851,12 @@ void VisUtils::drawDArrow(
     const double &wHead, const double &lHead )
 // -------------------------------------------
 {
-
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-
     // calc angle & length of arrow
-    dX   = xTo-xFr;
-    dY   = yTo-yFr;
+    double dX   = xTo-xFr;
+    double dY   = yTo-yFr;
 
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
-
-    // calc length base
-    lenBase = lenArw-lHead-lHead;
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     glPushMatrix();
     glTranslatef( xFr, yFr, 0.0 );
@@ -1939,23 +1887,19 @@ void VisUtils::drawArrow(
     const ColorRGB &cTo )
 // ------------------------------------------
 {
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-    double alpha;
     ColorRGB cJnc;
 
     // calc angle & length of arrow
-    dX     = xTo-xFr;
-    dY     = yTo-yFr;
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
+    double dX     = xTo-xFr;
+    double dY     = yTo-yFr;
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     // calc length base
-    lenBase = lenArw-lHead;
+    double lenBase = lenArw-lHead;
 
     // calc junction color
-    alpha = lenBase/lenArw;
+    double alpha = lenBase/lenArw;
     cJnc.r = (1.0-alpha)*cFr.r + alpha*cTo.r;
     cJnc.g = (1.0-alpha)*cFr.g + alpha*cTo.g;
     cJnc.b = (1.0-alpha)*cFr.b + alpha*cTo.b;
@@ -1994,18 +1938,11 @@ void VisUtils::fillArrow(
     const double &lHead )
 // ------------------------------------------
 {
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-
     // calc angle & length of arrow
-    dX     = xTo-xFr;
-    dY     = yTo-yFr;
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
-
-    // calc length base
-    lenBase = lenArw-lHead;
+    double dX     = xTo-xFr;
+    double dY     = yTo-yFr;
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     glPushMatrix();
     glTranslatef( xFr, yFr, 0.0 );
@@ -2039,23 +1976,19 @@ void VisUtils::fillArrow(
     const ColorRGB &cTo )
 // ------------------------------------------
 {
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-    double alpha;
     ColorRGB cJnc;
 
     // calc angle & length of arrow
-    dX     = xTo-xFr;
-    dY     = yTo-yFr;
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
+    double dX     = xTo-xFr;
+    double dY     = yTo-yFr;
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     // calc length base
-    lenBase = lenArw-lHead;
+    double lenBase = lenArw-lHead;
 
     // calc junction color
-    alpha = lenBase/lenArw;
+    double alpha = lenBase/lenArw;
     cJnc.r = (1.0-alpha)*cFr.r + alpha*cTo.r;
     cJnc.g = (1.0-alpha)*cFr.g + alpha*cTo.g;
     cJnc.b = (1.0-alpha)*cFr.b + alpha*cTo.b;
@@ -2098,20 +2031,12 @@ void VisUtils::fillDArrow(
     const double &wHead, const double &lHead )
 // -------------------------------------------
 {
-
-    double dX, dY;
-    double angl, lenArw;
-    double lenBase;
-
     // calc angle & length of arrow
-    dX   = xTo-xFr;
-    dY   = yTo-yFr;
+    double dX   = xTo-xFr;
+    double dY   = yTo-yFr;
 
-    angl   = Utils::calcAngleDg( dX, dY );
-    lenArw = Utils::dist( xFr, yFr, xTo, yTo );
-
-    // calc length base
-    lenBase = lenArw-lHead-lHead;
+    double angl   = Utils::calcAngleDg( dX, dY );
+    double lenArw = Utils::dist( xFr, yFr, xTo, yTo );
 
     glPushMatrix();
     glTranslatef( xFr, yFr, 0.0 );
@@ -3081,11 +3006,6 @@ void VisUtils::genCharTextures(
     GLubyte texChar[CHARSETSIZE][CHARHEIGHT*CHARWIDTH] )
 // -----------------------------------------------------
 {
-    // vars
-    int red = 0;
-    int green = 0;
-    int blue = 0;
-
     // allocate memory
     glGenTextures( CHARSETSIZE, texCharId );
 
@@ -3096,6 +3016,10 @@ void VisUtils::genCharTextures(
         glBindTexture( GL_TEXTURE_2D, texCharId[i] );
         // create image
         wxImage image( characters[i] );
+
+        int red = 0;
+        int green = 0;
+        int blue = 0;
 
         // read in texture
         int count = 0;
@@ -3424,12 +3348,11 @@ void VisUtils::drawLabelInBoundBox(
 
     double charWidth = (CHARWIDTH*scaling);
     double lblLength = label.size()*charWidth;
-    int    numToCrop;
     std::string cropLbl = label;
 
     if ( r >= 1.0 ) // longer than tall or short label
     {
-        numToCrop = (int)ceil( ( lblLength-w )/charWidth );
+        int numToCrop = (int)ceil( ( lblLength-w )/charWidth );
         if ( 0 < numToCrop && static_cast <size_t> (numToCrop) < cropLbl.size() )
         {
 	    int eraseSize = cropLbl.size() - numToCrop;
@@ -3449,7 +3372,7 @@ void VisUtils::drawLabelInBoundBox(
     }
     else // taller than long
     {
-        numToCrop = (int)ceil( ( lblLength-h )/charWidth );
+        int numToCrop = (int)ceil( ( lblLength-h )/charWidth );
         if ( 0 < numToCrop && static_cast  <size_t> (numToCrop) < cropLbl.size() )
         {
             int eraseSize = cropLbl.size() - numToCrop - 2;

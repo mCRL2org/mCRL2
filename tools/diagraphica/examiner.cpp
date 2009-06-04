@@ -396,11 +396,10 @@ void Examiner::handleSizeEvent()
 {
     Visualizer::handleSizeEvent();
 
-    double wth, hgt, pix;
     double bdr     = 10;
-
+    double wth, hgt;
     canvas->getSize( wth, hgt );
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     if ( posFramesHist.size() > 0 )
     {
@@ -554,12 +553,12 @@ void Examiner::calcSettingsDataBased()
 void Examiner::calcPosFrame()
 // --------------------------
 {
-    double wth, hgt, pix;
     double itvHist = hgtHstPix;
     double bdr     = 10;
 
+    double wth, hgt;
     canvas->getSize( wth, hgt );
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     // position & scaling
     posFrame.x = 0.0;
@@ -581,12 +580,12 @@ void Examiner::calcPosFrame()
 void Examiner::calcPosFramesHist()
 // -------------------------------
 {
-    double wth, hgt, pix;
     double itvHist = hgtHstPix;
     double bdr     = 10;
 
+    double wth, hgt;
     canvas->getSize( wth, hgt );
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     vsblHistIdxLft = 0;
     vsblHistIdxRgt = framesHist.size()-1;
@@ -761,11 +760,6 @@ void Examiner::handleHits( const vector< int > &ids )
 void Examiner::handleIconRwnd()
 // ----------------------------
 {
-    double wth, pix;
-
-    wth = canvas->getWidth();
-    pix = canvas->getPixelSize();
-
     if ( framesHist.size() > 0 )
     {
         if ( focusFrameIdx >= 0 )
@@ -798,12 +792,10 @@ void Examiner::handleIconRwnd()
 void Examiner::handleIconLft()
 // ---------------------------
 {
-    double wth, pix;
     double bdr = 12;
-    double dLft, dRgt;
 
-    wth = canvas->getWidth();
-    pix = canvas->getPixelSize();
+    double wth = canvas->getWidth();
+    double pix = canvas->getPixelSize();
 
     if ( framesHist.size() > 0 )
     {
@@ -812,8 +804,8 @@ void Examiner::handleIconLft()
             if ( focusFrameIdx != 0 )
                 focusFrameIdx -= 1;
 
-            dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
-            dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
+            double dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
+            double dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
             if ( dRgt > 0 )
                 offset -= dRgt/pix;
             else if ( dLft > 0 )
@@ -846,12 +838,10 @@ void Examiner::handleIconLft()
 void Examiner::handleIconRgt()
 // ---------------------------
 {
-    double wth, pix;
     double bdr = 12;
-    double dLft, dRgt;
 
-    wth = canvas->getWidth();
-    pix = canvas->getPixelSize();
+    double wth = canvas->getWidth();
+    double pix = canvas->getPixelSize();
 
     if ( framesHist.size() > 0 )
     {
@@ -860,8 +850,8 @@ void Examiner::handleIconRgt()
             if ( focusFrameIdx < framesHist.size()-1 )
                 focusFrameIdx += 1;
 
-            dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
-            dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
+            double dLft = ( -0.5*wth + bdr*pix ) - ( posFramesHist[focusFrameIdx].x - scaleFramesHist*1.0 );
+            double dRgt = ( posFramesHist[focusFrameIdx].x + scaleFramesHist*1.0 + 4*pix) - ( 0.5*wth - bdr*pix );
             if ( dRgt > 0 )
                 offset -= dRgt/pix;
             else if ( dLft > 0 )
@@ -897,7 +887,6 @@ void Examiner::processHits(
 // ------------------------
 {
     GLuint *ptr;
-    int number;
     vector< int > ids;
 
     ptr = (GLuint*) buffer;
@@ -909,7 +898,7 @@ void Examiner::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -919,7 +908,7 @@ void Examiner::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2
@@ -954,12 +943,10 @@ void Examiner::clear()
 void Examiner::drawFrame( const bool &inSelectMode )
 // -------------------------------------------------
 {
-    double pix;
+    double pix = canvas->getPixelSize();
 
     if ( inSelectMode == true )
     {
-        pix = canvas->getPixelSize();
-
         glPushMatrix();
         glTranslatef( posFrame.x, posFrame.y, 0.0 );
         glScalef( scaleFrame, scaleFrame, scaleFrame );
@@ -978,8 +965,6 @@ void Examiner::drawFrame( const bool &inSelectMode )
     }
     else
     {
-        pix = canvas->getPixelSize();
-
         glPushMatrix();
         glTranslatef( posFrame.x, posFrame.y, 0.0 );
         glScalef( scaleFrame, scaleFrame, scaleFrame );
@@ -1039,8 +1024,6 @@ void Examiner::drawFrame( const bool &inSelectMode )
 void Examiner::drawFramesHist( const bool &inSelectMode )
 // ------------------------------------------------------
 {
-    double pix;
-
     if ( inSelectMode == true )
     {
         glPushName( ID_FRAME_HIST );
@@ -1063,7 +1046,7 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
     }
     else
     {
-        pix = canvas->getPixelSize();
+        double pix = canvas->getPixelSize();
         vector< double > valsFrame;
 
         //for ( int i = 0; i < framesHist.size(); ++i )
@@ -1129,11 +1112,11 @@ void Examiner::drawFramesHist( const bool &inSelectMode )
 void Examiner::drawControls( const bool &inSelectMode )
 // ----------------------------------------------------
 {
-    double wth, hgt, pix;
     double itvHist = hgtHstPix;
 
+    double wth, hgt;
     canvas->getSize( wth, hgt );
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
 
     if ( inSelectMode == true )
     {
@@ -1212,7 +1195,8 @@ void Examiner::drawControls( const bool &inSelectMode )
         double x = 0.5*wth - itvSml - pix;
         double y = 0.5*hgt - itvSml - pix;
         double bdr = 10;
-        double dLft, dRgt;
+        double dLft = 0;
+        double dRgt = 0;
 
         if ( posFramesHist.size() > 1 && focusFrameIdx < 0 )
         {
@@ -1223,13 +1207,9 @@ void Examiner::drawControls( const bool &inSelectMode )
         {
             if ( 0 < focusFrameIdx && focusFrameIdx < posFramesHist.size() )
                 dLft = 1;
-            else
-                dLft = 0;
 
             if ( 0 <= focusFrameIdx && focusFrameIdx < posFramesHist.size()-1 )
                 dRgt = 1;
-            else
-                dRgt = 0;
         }
 
         VisUtils::enableLineAntiAlias();

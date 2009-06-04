@@ -726,22 +726,19 @@ void TimeSeries::calcSettingsDataBased()
 void TimeSeries::calcPositions()
 // -----------------------------
 {
-    double pix;
-    double cWth, cHgt;
-    double xLft, xRgt;
-    double yTop, yBot;
-    double yItv;
+    double yItv = 0.0;
 
     double prevItvWdwPerNode = itvWdwPerNode;
     double prevScaleLft      = posScaleTopLft.x;
 
     // calc general info
-    pix = canvas->getPixelSize();
+    double pix = canvas->getPixelSize();
+    double cWth, cHgt;
     canvas->getSize( cWth, cHgt );
-    xLft = -0.5*cWth;
-    xRgt =  0.5*cWth;
-    yTop =  0.5*cHgt;
-    yBot = -0.5*cHgt;
+    double xLft = -0.5*cWth;
+    double xRgt =  0.5*cWth;
+    double yTop =  0.5*cHgt;
+    double yBot = -0.5*cHgt;
 
     // calc positions of slider at top
     posSliderTopLft.x = xLft + 5.0*pix;
@@ -751,18 +748,14 @@ void TimeSeries::calcPositions()
     // calc intervals of slider
     if ( graph->getSizeNodes() > 0 )
     {
-        double fact;
-        double itvPx;
-        double distPx;
-
         nodesItvSlider = 1;
-        distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
+        double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
         itvSlider = 0.0;
 
         while ( itvSlider == 0.0 )
         {
-            fact = (double)(graph->getSizeNodes())/(double)nodesItvSlider;
-            itvPx = distPx/fact;
+            double fact = (double)(graph->getSizeNodes())/(double)nodesItvSlider;
+            double itvPx = distPx/fact;
 
             if ( itvPx >= 5 )
                 itvSlider = itvPx*pix;
@@ -778,9 +771,7 @@ void TimeSeries::calcPositions()
     // calc size of visible window
     if ( graph->getSizeNodes() > 0 )
     {
-        double distPx;
-
-        distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
+        double distPx = (posSliderBotRgt.x - posSliderTopLft.x)/pix;
 
         nodesWdwScale = int (distPx/actPixPerNode);
         if ( graph->getSizeNodes() < nodesWdwScale )
@@ -794,12 +785,10 @@ void TimeSeries::calcPositions()
     // calc intervals of scale
     if ( graph->getSizeNodes() > 0 )
     {
-        double distPx, itvPx;
-
         nodesItvScale = 1;
-        distPx = (posScaleBotRgt.x - posScaleTopLft.x)/pix;
+        double distPx = (posScaleBotRgt.x - posScaleTopLft.x)/pix;
 
-        itvPx = (double)distPx/(double)(nodesWdwScale/nodesItvScale);
+        double itvPx = (double)distPx/(double)(nodesWdwScale/nodesItvScale);
         while ( itvPx <= 3 )
         {
             nodesItvScale *= 10;
@@ -827,8 +816,7 @@ void TimeSeries::calcPositions()
             - 2.0*pix;                  // spacing
         yItv = yDist/(double)attributes.size();
     }
-    else
-        yItv = 0.0;
+
     Position2D pos;
     for ( size_t i = 0; i < attributes.size(); ++i )
     {
@@ -851,7 +839,6 @@ void TimeSeries::calcPositions()
     posValues.clear();
     Attribute* attr;
     Node* node;
-    double alphaHgt;
     for ( size_t i = 0; i < attributes.size(); ++i )
     {
         attr = attributes[i];
@@ -868,6 +855,7 @@ void TimeSeries::calcPositions()
             for ( int j = 0; j< graph->getSizeNodes(); ++j )
             {
                 node = graph->getNode( j );
+                double alphaHgt;
                 if ( attr->getLowerBound() < 0 )
                     alphaHgt = 0.5 + node->getTupleVal( attr->getIndex() )/rge;
                 else
@@ -885,6 +873,7 @@ void TimeSeries::calcPositions()
             {
                 node = graph->getNode( j );
 
+                double alphaHgt;
                 if ( attr->getSizeCurValues() == 1 )
                     alphaHgt = 1.0;
                 else
@@ -904,11 +893,10 @@ void TimeSeries::calcPositions()
     scaleDgrm = 120.0*(pix/2.0);
 
     // update positions of diagrams
-    double prevCorrIdx;
     map< int, Position2D >::iterator it;
     for ( it = showDgrm.begin(); it != showDgrm.end(); ++it )
     {
-        prevCorrIdx = (it->second.x-prevScaleLft)/prevItvWdwPerNode;
+        double prevCorrIdx = (it->second.x-prevScaleLft)/prevItvWdwPerNode;
         it->second.x = posScaleTopLft.x + prevCorrIdx*itvWdwPerNode;
     }
 
@@ -1258,9 +1246,6 @@ void TimeSeries::processHits(
 // --------------------------
 {
     GLuint *ptr;
-    int number;
-    vector< int > ids;
-
     ptr = (GLuint*) buffer;
 
     if ( hits > 0 )
@@ -1270,7 +1255,7 @@ void TimeSeries::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -1280,11 +1265,12 @@ void TimeSeries::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2
 
+        vector< int > ids;
         for ( int i = 0; i < number; ++i )
         {
             ids.push_back( *ptr );
@@ -1658,9 +1644,8 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
     {}
     else
     {
-        double value, iter, numr;
+        double iter, numr;
         ColorRGB colFill, colFade;
-        double zero;
 
         // draw bars
         for ( size_t i = 0; i < posValues.size(); ++i )
@@ -1668,6 +1653,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
             if ( attributes[i]->getSizeCurValues() == 0 )
             // unclustered attribute
             {
+                double zero;
                 if ( attributes[i]->getLowerBound() < 0 )
                     // cater for ranges that include negative values
                     zero = posAxesBotRgt[i].y + 0.5*( posAxesTopLft[i].y - posAxesBotRgt[i].y );
@@ -1676,7 +1662,7 @@ void TimeSeries::drawAttrVals( const bool &inSelectMode )
 
                 for ( int j = 0; j < nodesWdwScale; ++j )
                 {
-                    value = graph->getNode( wdwStartIdx+j )->getTupleVal( attributes[i]->getIndex() );
+                    double value = graph->getNode( wdwStartIdx+j )->getTupleVal( attributes[i]->getIndex() );
                     if ( value >= 0 )
                     {
                         if ( useShading == true )
@@ -1924,7 +1910,6 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
         if ( timerAnim->IsRunning() == true && animIdxDgrm >= 0 )
         {
             Position2D posPvot, posDgrm;
-            double aglDeg, dist;
             map< int, Position2D >::iterator it;
             vector< double >     vals;
             vector< Attribute* > attrs;
@@ -1935,8 +1920,8 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
             posPvot.x = posScaleTopLft.x + (*animFrame /*+ 0.5*/ - wdwStartIdx)*itvWdwPerNode;
             posPvot.y = posScaleTopLft.y /*+ 0.5*ySpacePxl*pix*/;
 
-            aglDeg = Utils::calcAngleDg( posDgrm.x-posPvot.x, posDgrm.y-posPvot.y );
-            dist   = Utils::dist( posPvot.x, posPvot.y, posDgrm.x, posDgrm.y );
+            double aglDeg = Utils::calcAngleDg( posDgrm.x-posPvot.x, posDgrm.y-posPvot.y );
+            double dist   = Utils::dist( posPvot.x, posPvot.y, posDgrm.x, posDgrm.y );
 
             // draw vertical line
             VisUtils::setColorCoolBlue();
@@ -2023,7 +2008,6 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
         else
         {
             Position2D posPvot, posDgrm;
-            double     aglDeg, dist;
             vector< double >     vals;
             vector< Attribute* > attrs;
 
@@ -2035,8 +2019,8 @@ void TimeSeries::drawDiagrams( const bool &inSelectMode )
                 posDgrm = it->second;
                 posDgrm.x -= wdwStartIdx*itvWdwPerNode;
 
-                aglDeg = Utils::calcAngleDg( posDgrm.x-posPvot.x, posDgrm.y-posPvot.y );
-                dist   = Utils::dist( posPvot.x, posPvot.y, posDgrm.x, posDgrm.y );
+                double aglDeg = Utils::calcAngleDg( posDgrm.x-posPvot.x, posDgrm.y-posPvot.y );
+                double dist   = Utils::dist( posPvot.x, posPvot.y, posDgrm.x, posDgrm.y );
 
                 // draw vertical line
                 VisUtils::setColorCoolBlue();
@@ -2152,11 +2136,9 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
         {
             double pix = canvas->getPixelSize();
             Position2D pos1, pos2;
-            string lbl;
             vector< string > lbls;
             vector< Position2D > posTopLft;
             vector< Position2D > posBotRgt;
-            double txtScaling;
             size_t maxLbl = 0;
 
             pos1.x = posScaleTopLft.x + (mouseOverIdx - wdwStartIdx)*itvWdwPerNode;
@@ -2164,13 +2146,14 @@ void TimeSeries::drawMouseOver( const bool &inSelectMode )
             pos2.x = pos1.x;
             pos2.y = posAxesBotRgt[posAxesBotRgt.size()-1].y;
 
-            txtScaling = szeTxt*pix/CHARHEIGHT;
+            double txtScaling = szeTxt*pix/CHARHEIGHT;
 
             VisUtils::setColorCoolBlue();
             VisUtils::drawLine( pos1.x, pos2.x, pos1.y, pos2.y );
 
             for ( size_t i = 0; i < attributes.size(); ++i )
             {
+                string lbl;
                 if ( attributes[i]->getSizeCurValues() == 0 )
                     lbl = Utils::dblToStr( graph->getNode( mouseOverIdx )->getTupleVal( attributes[i]->getIndex() ) );
                 else
@@ -2244,10 +2227,10 @@ if ( inSelectMode == true )
     {
         double pix = canvas->getPixelSize();
         double txtScaling = szeTxt*pix/CHARHEIGHT;
-        string lblTop, lblBot;
 
         for ( size_t i = 0; i < posAxesTopLft.size(); ++i )
         {
+            string lblTop, lblBot;
             if ( attributes[i]->getLowerBound() < 0 )
             {
                 double tmp = Utils::maxx(
@@ -2318,10 +2301,8 @@ void TimeSeries::handleHitSlider()
 // -------------------------------
 {
     double x, y;
-    double distWorld;
-
     canvas->getWorldCoords( xMouseCur, yMouseCur, x, y );
-    distWorld = x - ( posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode );
+    double distWorld = x - ( posSliderTopLft.x + wdwStartIdx*itvSliderPerNode + 0.5*nodesWdwScale*itvSliderPerNode );
 
     dragDistNodes = distWorld/itvSliderPerNode;
 
@@ -2350,17 +2331,15 @@ void TimeSeries::handleHitSlider()
 void TimeSeries::handleDragSliderHdl()
 // -----------------------------------
 {
-    double x1, y1;
-    double x2, y2;
-    double distWorld;
-
 //    draggingSlider = true;
     dragStatus = DRAG_STATUS_SLDR;
 
+    double x1, y1;
+    double x2, y2;
     canvas->getWorldCoords( xMousePrev, yMousePrev, x1, y1 );
     canvas->getWorldCoords( xMouseCur, yMouseCur, x2, y2 );
 
-    distWorld = x2-x1;
+    double distWorld = x2-x1;
     dragDistNodes += (distWorld/itvSliderPerNode);
 
     if ( dragDistNodes < -1 )
@@ -2398,26 +2377,19 @@ void TimeSeries::handleDragSliderHdl()
 void TimeSeries::handleDragSliderHdlLft()
 // --------------------------------------
 {
-    double pix;
-    double xHdl;
+    double pix  = canvas->getPixelSize();
+    double xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
     double xMse, yMse;
-    double distWorld;
-    double distNodes;
-    double distWindow;
-    double pixWindow;
-
-    pix  = canvas->getPixelSize();
-    xHdl = posSliderTopLft.x + wdwStartIdx*itvSliderPerNode;
     canvas->getWorldCoords( xMouseCur, yMouseCur, xMse, yMse );
 
     if ( xMse < posSliderTopLft.x )
         xMse = posSliderTopLft.x;
 
-    distWorld  = xMse-xHdl;
-    distNodes  = Utils::rndToNearestMult( (distWorld/itvSliderPerNode), 1.0 );
+    double distWorld  = xMse-xHdl;
+    double distNodes  = Utils::rndToNearestMult( (distWorld/itvSliderPerNode), 1.0 );
 
-    distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-    pixWindow  = distWindow/pix;
+    double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
+    double pixWindow  = distWindow/pix;
 
     double tempPixPerNode = pixWindow/(double)(nodesWdwScale-distNodes);
     if ( tempPixPerNode < minPixPerNode )
@@ -2437,26 +2409,19 @@ void TimeSeries::handleDragSliderHdlLft()
 void TimeSeries::handleDragSliderHdlRgt()
 // --------------------------------------
 {
-    double pix;
-    double xHdl;
+    double pix  = canvas->getPixelSize();
+    double xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
     double xMse, yMse;
-    double distWorld;
-    double distNodes;
-    double distWindow;
-    double pixWindow;
-
-    pix  = canvas->getPixelSize();
-    xHdl = posSliderTopLft.x + (wdwStartIdx + nodesWdwScale)*itvSliderPerNode;
     canvas->getWorldCoords( xMouseCur, yMouseCur, xMse, yMse );
 
     if ( posSliderBotRgt.x < xMse )
         xMse = posSliderBotRgt.x;
 
-    distWorld  = xMse-xHdl;
-    distNodes  = distWorld/itvSliderPerNode;
+    double distWorld  = xMse-xHdl;
+    double distNodes  = distWorld/itvSliderPerNode;
 
-    distWindow = posSliderBotRgt.x - posSliderTopLft.x;
-    pixWindow  = distWindow/pix;
+    double distWindow = posSliderBotRgt.x - posSliderTopLft.x;
+    double pixWindow  = distWindow/pix;
 
     double tempPixPerNode = pixWindow/(double)(nodesWdwScale+distNodes);
     if ( tempPixPerNode < minPixPerNode )
@@ -2558,7 +2523,6 @@ void TimeSeries::handleDragItems( const int &idx )
     if ( dragStartIdx != idx )
     {
         // sort indices
-        int begIdx, endIdx;
         bool flag = false;
 
         // shift key
@@ -2639,6 +2603,7 @@ void TimeSeries::handleDragItems( const int &idx )
         }
         else
         {
+            int begIdx, endIdx;
             if ( dragStartIdx <= idx )
             {
                 begIdx = dragStartIdx;

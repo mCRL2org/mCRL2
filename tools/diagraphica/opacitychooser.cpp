@@ -578,7 +578,6 @@ void OpacityChooser::processHits(
 // ------------------------------
 {
     GLuint *ptr;
-    int number;
     vector< int > ids;
     
     ptr = (GLuint*) buffer;
@@ -590,7 +589,7 @@ void OpacityChooser::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -600,7 +599,7 @@ void OpacityChooser::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2

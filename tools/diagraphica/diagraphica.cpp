@@ -244,11 +244,9 @@ void DiaGraph::openFile( const string &path )
         // get file size
         fileSize = parser->getFileSize( path );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     try
@@ -367,14 +365,12 @@ void DiaGraph::openFile( const string &path )
 
         critSect = false;
     }
-    catch ( const string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
         delete progressDialog;
         progressDialog = NULL;
 
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
 
         critSect = false;
     }
@@ -405,11 +401,9 @@ void DiaGraph::saveFile( const string &path )
             path,
             graph );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -449,11 +443,9 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
         ! also need to close any other vis windows e.g. corrlplot... !
         */
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -476,11 +468,9 @@ void DiaGraph::handleSaveAttrConfig( const string &path )
             path,
             graph );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -535,14 +525,12 @@ void DiaGraph::handleLoadDiagram( const string &path )
         }
 
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
         delete dgrmNew;
         dgrmNew = NULL;
 
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -569,11 +557,9 @@ void DiaGraph::handleSaveDiagram( const string &path )
             graph,
             editor->getDiagram() );
     }
-    catch ( string* msg )
+    catch ( const mcrl2::runtime_error& e )
     {
-        wxLogError( wxString( msg->c_str(), wxConvUTF8 ) );
-        delete msg;
-        msg = NULL;
+        wxLogError( wxString( e.what(), wxConvUTF8 ) );
     }
 
     // delete parser
@@ -683,12 +669,11 @@ void DiaGraph::getColor( ColorRGB &col )
 {
     wxColourData   data;
     wxColourDialog dialog( frame, &data );
-    wxColour       colTmp;
 
     if ( dialog.ShowModal() == wxID_OK )
     {
         data   = dialog.GetColourData();
-        colTmp = data.GetColour();
+        wxColour colTmp = data.GetColour();
 
         col.r = colTmp.Red()/255.0;
         col.g = colTmp.Green()/255.0;

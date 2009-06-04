@@ -528,26 +528,19 @@ void ArcDiagram::visualize( const bool &inSelectMode )
 void ArcDiagram::drawBundles( const bool &inSelectMode )
 // -----------------------------------------------------
 {
-    double pix;
-    double x, y;
-    double rad, orient, wth;
-    int    segs;
-
-    pix = canvas->getPixelSize();
-
     // selection mode
     if ( inSelectMode == true )
     {
-        segs = SEGM_HINT_HQ;
+        int segs = SEGM_HINT_HQ;
 
         glPushName( ID_BUNDLES );
         for ( size_t i = 0; i < posBundles.size(); ++i )
         {
-            x      = posBundles[i].x;
-            y      = posBundles[i].y;
-            rad    = radiusBundles[i];
-            orient = orientBundles[i];
-            wth    = widthBundles[i];
+            double x      = posBundles[i].x;
+            double y      = posBundles[i].y;
+            double rad    = radiusBundles[i];
+            double orient = orientBundles[i];
+            double wth    = widthBundles[i];
 
             glPushName( i );
             if ( orient < 0 )
@@ -592,7 +585,7 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
             colBrdrFade.a = 0.1*colFill.a;
             */
 
-            segs = SEGM_HINT_HQ;
+            int segs = SEGM_HINT_HQ;
 
             VisUtils::enableLineAntiAlias();
             VisUtils::enableBlending();
@@ -609,11 +602,11 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
                 colBrdrFade   = colFill;
                 colBrdrFade.a = 0.1*colFill.a;
 
-                x      = posBundles[i].x;
-                y      = posBundles[i].y;
-                rad    = radiusBundles[i];
-                orient = orientBundles[i];
-                wth    = widthBundles[i];
+                double x      = posBundles[i].x;
+                double y      = posBundles[i].y;
+                double rad    = radiusBundles[i];
+                double orient = orientBundles[i];
+                double wth    = widthBundles[i];
 
                 if ( orient < 0 )
                 {
@@ -640,15 +633,14 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
         {
             VisUtils::setColorLtGray();
 
-            segs = SEGM_HINT_HQ;
+            int segs = SEGM_HINT_HQ;
 
             for ( size_t i = 0; i < posBundles.size(); ++i )
             {
-                x      = posBundles[i].x;
-                y      = posBundles[i].y;
-                rad    = radiusBundles[i];
-                orient = orientBundles[i];
-                wth    = widthBundles[i];
+                double x      = posBundles[i].x;
+                double y      = posBundles[i].y;
+                double rad    = radiusBundles[i];
+                double orient = orientBundles[i];
 
                 if ( orient < 0 )
                     VisUtils::drawArc( x, y, 180.0, 0.0, rad, segs );
@@ -666,20 +658,14 @@ void ArcDiagram::drawBundles( const bool &inSelectMode )
 void ArcDiagram::drawLeaves( const bool &inSelectMode )
 // ----------------------------------------------------
 {
-    double x, y;
-    double pix;
-    int    segs;
-
-    pix = canvas->getPixelSize();
-
     // selection mode
     if ( inSelectMode == true )
     {
         glPushName( ID_LEAF_NODE );
         for ( size_t i = 0; i < posLeaves.size(); ++i )
         {
-            x = posLeaves[i].x;
-            y = posLeaves[i].y;
+            double x = posLeaves[i].x;
+            double y = posLeaves[i].y;
 
             glPushName( i );
             VisUtils::fillEllipse( x, y, radLeaves, radLeaves, 24 );
@@ -693,7 +679,7 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
         // render high quality
         if ( mouseDrag == MSE_DRAG_FALSE )
         {
-            segs = SEGM_HINT_HQ;
+            int segs = SEGM_HINT_HQ;
             Cluster* clust = NULL;
             ColorRGB colFill;
 
@@ -701,8 +687,8 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
             for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
                 // position
-                x = posLeaves[i].x;
-                y = posLeaves[i].y;
+                double x = posLeaves[i].x;
+                double y = posLeaves[i].y;
 
                 // color
                 //clust   = mapPosToClust[posTreeTopLft.size()-1][i];
@@ -731,8 +717,8 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
             // mark cluster with initial state
             if ( idxInitStLeaves >= 0 )
             {
-                x = posLeaves[idxInitStLeaves].x;
-                y = posLeaves[idxInitStLeaves].y;
+                double x = posLeaves[idxInitStLeaves].x;
+                double y = posLeaves[idxInitStLeaves].y;
 
                 VisUtils::setColorLtGray();
                 VisUtils::fillEllipse( x, y, 0.5*radLeaves, 0.5*radLeaves, segs );
@@ -747,12 +733,12 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
         // render low quality
         else
         {
-            segs = SEGM_HINT_LQ;
+            int segs = SEGM_HINT_LQ;
 
             for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
-                x = posLeaves[i].x;
-                y = posLeaves[i].y;
+                double x = posLeaves[i].x;
+                double y = posLeaves[i].y;
 
                 VisUtils::setColorWhite();
                 VisUtils::fillEllipse( x, y, radLeaves, radLeaves, segs );
@@ -769,12 +755,6 @@ void ArcDiagram::drawLeaves( const bool &inSelectMode )
 void ArcDiagram::drawTree( const bool &inSelectMode )
 // --------------------------------------------------
 {
-    double xLft, xRgt, yTop, yBot;
-    double pix;
-    int    segs;
-
-    pix = canvas->getPixelSize();
-
     // selection mode
     if ( inSelectMode == true )
     {
@@ -784,10 +764,9 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
             glPushName( i );
             for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
             {
-                xLft = posTreeTopLft[i][j].x;
-                xRgt = posTreeBotRgt[i][j].x;
-                yTop = posTreeTopLft[i][j].y;
-                yBot = posTreeBotRgt[i][j].y;
+                double xLft = posTreeTopLft[i][j].x;
+                double xRgt = posTreeBotRgt[i][j].x;
+                double yTop = posTreeTopLft[i][j].y;
 
                 glPushName( j );
                 VisUtils::fillEllipse( 0.5*(xLft+xRgt), yTop, 0.75*radLeaves, 0.75*radLeaves, 24 );
@@ -803,7 +782,7 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
         // render high quality
         if ( mouseDrag == MSE_DRAG_FALSE )
         {
-            segs = SEGM_HINT_HQ;
+            int segs = SEGM_HINT_HQ;
 
             Cluster* clust = NULL;
             ColorRGB colFill;
@@ -817,10 +796,10 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
             {
                 for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
                 {
-                    xLft = posTreeTopLft[i][j].x;
-                    xRgt = posTreeBotRgt[i][j].x;
-                    yTop = posTreeTopLft[i][j].y;
-                    yBot = posTreeBotRgt[i][j].y;
+                    double xLft = posTreeTopLft[i][j].x;
+                    double xRgt = posTreeBotRgt[i][j].x;
+                    double yTop = posTreeTopLft[i][j].y;
+                    double yBot = posTreeBotRgt[i][j].y;
 
                     // color
                     clust   = mapPosToClust[i][j];
@@ -862,16 +841,16 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
         // render low quality
         else
         {
-            segs = SEGM_HINT_LQ;
+            int segs = SEGM_HINT_LQ;
 
             for ( size_t i = 0; i < posTreeTopLft.size()-1; ++i )
             {
                 for ( size_t j = 0; j < posTreeTopLft[i].size(); ++j )
                 {
-                    xLft = posTreeTopLft[i][j].x;
-                    xRgt = posTreeBotRgt[i][j].x;
-                    yTop = posTreeTopLft[i][j].y;
-                    yBot = posTreeBotRgt[i][j].y;
+                    double xLft = posTreeTopLft[i][j].x;
+                    double xRgt = posTreeBotRgt[i][j].x;
+                    double yTop = posTreeTopLft[i][j].y;
+                    double yBot = posTreeBotRgt[i][j].y;
 
                     VisUtils::setColorLtLtGray();
                     VisUtils::fillTriangle(0.5*(xLft+xRgt), yTop, xLft, yBot, xRgt, yBot );
@@ -893,11 +872,8 @@ void ArcDiagram::drawTree( const bool &inSelectMode )
 void ArcDiagram::drawTreeLvls( const bool &inSelectMode )
 // ------------------------------------------------------
 {
-    double wth, pix;
-    double xLft, xRgt, yLin, yTxt;
-
-    wth = canvas->getWidth();
-    pix = canvas->getPixelSize();
+    double wth = canvas->getWidth();
+    double pix = canvas->getPixelSize();
 
     // selection mode
     if ( inSelectMode == true )
@@ -921,12 +897,12 @@ void ArcDiagram::drawTreeLvls( const bool &inSelectMode )
                 {
                     lbl = mapPosToClust[i+1][0]->getAttribute()->getName();
 
-                    yLin =  posTreeBotRgt[i][0].y;
-                    yTxt =  yLin + 0.5*szeTxt*pix + pix;
+                    double yLin =  posTreeBotRgt[i][0].y;
+                    double yTxt =  yLin + 0.5*szeTxt*pix + pix;
 
                     // left
-                    xLft = -0.5*wth + radLeaves;
-                    xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
+                    double xLft = -0.5*wth + radLeaves;
+                    double xRgt =  posTreeTopLft[i][0].x - 2.0*radLeaves;
 
                     VisUtils::setColor( colText );
                     VisUtils::drawLabelRight( texCharId, xLft, yTxt, szeTxt*pix/CHARHEIGHT, lbl );
@@ -952,11 +928,6 @@ void ArcDiagram::drawTreeLvls( const bool &inSelectMode )
 void ArcDiagram::drawBarTree( const bool &inSelectMode )
 // -----------------------------------------------------
 {
-    double xLft, xRgt, yTop, yBot;
-    double pix;
-
-    pix  = canvas->getPixelSize();
-
     // selection mode
     if ( inSelectMode == true )
     {
@@ -968,10 +939,10 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
                 glPushName( i );
                 for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                 {
-                    xLft = posBarTreeTopLft[i][j].x;
-                    xRgt = posBarTreeBotRgt[i][j].x;
-                    yTop = posBarTreeTopLft[i][j].y;
-                    yBot = posBarTreeBotRgt[i][j].y;
+                    double xLft = posBarTreeTopLft[i][j].x;
+                    double xRgt = posBarTreeBotRgt[i][j].x;
+                    double yTop = posBarTreeTopLft[i][j].y;
+                    double yBot = posBarTreeBotRgt[i][j].y;
 
                     glPushName( j );
                     VisUtils::fillRect( xLft, xRgt, yTop, yBot );
@@ -1009,10 +980,10 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
                     for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                     {
                         // position
-                        xLft = posBarTreeTopLft[i][j].x;
-                        xRgt = posBarTreeBotRgt[i][j].x;
-                        yTop = posBarTreeTopLft[i][j].y;
-                        yBot = posBarTreeBotRgt[i][j].y;
+                        double xLft = posBarTreeTopLft[i][j].x;
+                        double xRgt = posBarTreeBotRgt[i][j].x;
+                        double yTop = posBarTreeTopLft[i][j].y;
+                        double yBot = posBarTreeBotRgt[i][j].y;
 
                         // fill color
                         clust   = mapPosToClust[i][j];
@@ -1052,10 +1023,10 @@ void ArcDiagram::drawBarTree( const bool &inSelectMode )
                 {
                     for ( size_t j = 0; j < posBarTreeTopLft[i].size(); ++j )
                     {
-                        xLft = posBarTreeTopLft[i][j].x;
-                        xRgt = posBarTreeBotRgt[i][j].x;
-                        yTop = posBarTreeTopLft[i][j].y;
-                        yBot = posBarTreeBotRgt[i][j].y;
+                        double xLft = posBarTreeTopLft[i][j].x;
+                        double xRgt = posBarTreeBotRgt[i][j].x;
+                        double yTop = posBarTreeTopLft[i][j].y;
+                        double yBot = posBarTreeBotRgt[i][j].y;
 
                         VisUtils::setColorLtLtGray();
                         VisUtils::fillRect( xLft, xRgt, yTop, yBot );
@@ -1076,17 +1047,13 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
     // selection mode
     if ( inSelectMode == true )
     {
-        double x, y;
-        double pix;
-
         glPushName( ID_DIAGRAM );
         for ( size_t i = 0; i < posDgrm.size(); ++i )
         {
             if ( showDgrm[i] == true )
             {
-                x   = posDgrm[i].x;
-                y   = posDgrm[i].y;
-                pix = canvas->getPixelSize();
+                double x   = posDgrm[i].x;
+                double y   = posDgrm[i].y;
 
                 glPushName( i );
                 glPushMatrix();
@@ -1163,24 +1130,19 @@ void ArcDiagram::drawDiagrams( const bool &inSelectMode )
     // rendering mode
     else
     {
-        double xL, yL;
-        double xD, yD;
-        double aglDeg;
-        double dist;
-        double pix;
         string msg;
 
         for ( size_t i = 0; i < posDgrm.size(); ++i )
         {
             if ( showDgrm[i] == true )
             {
-                xL = posLeaves[i].x;
-                yL = posLeaves[i].y;
-                xD = posDgrm[i].x;
-                yD = posDgrm[i].y;
-                aglDeg = Utils::calcAngleDg( xD-xL, yD-yL );
-                dist   = Utils::dist( xL, yL, xD, yD );
-                pix    = canvas->getPixelSize();
+                double xL = posLeaves[i].x;
+                double yL = posLeaves[i].y;
+                double xD = posDgrm[i].x;
+                double yD = posDgrm[i].y;
+                double aglDeg = Utils::calcAngleDg( xD-xL, yD-yL );
+                double dist   = Utils::dist( xL, yL, xD, yD );
+                double pix    = canvas->getPixelSize();
 
                 glPushMatrix();
                 if ( mouseDrag == MSE_DRAG_FALSE )
@@ -1380,14 +1342,8 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
     {
         if ( mouseDrag == MSE_DRAG_FALSE && markLeaves.size() > 0 )
         {
-            double x, y;
-            double frac;
-            double aglBeg, aglEnd;
-            double pix;
-            int    segs;
-
-            pix  = canvas->getPixelSize();
-            segs = SEGM_HINT_HQ;
+            double pix  = canvas->getPixelSize();
+            int segs = SEGM_HINT_HQ;
 
             for ( size_t i = 0; i < posLeaves.size(); ++i )
             {
@@ -1396,14 +1352,14 @@ void ArcDiagram::drawMarkedLeaves( const bool &inSelectMode )
 
                 if ( it != markLeaves.end() )
                 {
-                    x = posLeaves[i].x;
-                    y = posLeaves[i].y;
+                    double x = posLeaves[i].x;
+                    double y = posLeaves[i].y;
 
-                    frac = 1.0/(double)it->second.size();
+                    double frac = 1.0/(double)it->second.size();
                     for ( size_t j = 0; j < it->second.size(); ++j )
                     {
-                        aglBeg = j*frac*360.0;
-                        aglEnd = (j+1)*frac*360.0;
+                        double aglBeg = j*frac*360.0;
+                        double aglEnd = (j+1)*frac*360.0;
 
                         ColorRGB colIn, colOut;
                         colIn = it->second[j];
@@ -1649,24 +1605,20 @@ void ArcDiagram::calcSettingsLeaves()
 {
     if ( graph->getSizeLeaves() > 0 )
     {
-        double w, h, pix;
-        double xLft, xRgt;
-        double numX, fracX;
-        double x,    y;
-        Position2D pos;
-
         // get size of canvas & 1 pixel
+        double w, h;
         canvas->getSize( w, h );
-        pix = canvas->getPixelSize();
+        double pix = canvas->getPixelSize();
 
         // calc lft & rgt boundary
-        xLft = -0.5*Utils::minn( w, h )+20*pix;
-        xRgt =  0.5*Utils::minn( w, h )-20*pix;
+        double xLft = -0.5*Utils::minn( w, h )+20*pix;
+        double xRgt =  0.5*Utils::minn( w, h )-20*pix;
 
         // get number of values on x-axis
-        numX = graph->getSizeLeaves();
+        double numX = graph->getSizeLeaves();
 
         // calc intervals per axis
+        double fracX;
         if ( numX > 1 )
             fracX = ( 1.0/(double)(numX) )*( xRgt-xLft );
         else
@@ -1685,8 +1637,9 @@ void ArcDiagram::calcSettingsLeaves()
         {
         for ( int i = 0; i < numX; ++i )
         {
-            x = xLft + 0.5*fracX + i*fracX;
-            y = 0.0;
+            double x = xLft + 0.5*fracX + i*fracX;
+            double y = 0.0;
+            Position2D pos;
             pos.x = x;
             pos.y = y;
             posLeaves.push_back( pos );
@@ -1707,11 +1660,6 @@ void ArcDiagram::calcSettingsLeaves()
 void ArcDiagram::calcSettingsBundles()
 // -----------------------------------
 {
-    int        idxFr, idxTo;
-    double     maxSize;
-    Position2D pos;
-    double     rad;
-
     if ( graph->getSizeBundles() > 0 )
     {
         // clear prev settings
@@ -1722,7 +1670,7 @@ void ArcDiagram::calcSettingsBundles()
         markBundles.clear();
 
         // max size
-        maxSize = 0;
+        double maxSize = 0;
         {
         for ( int i = 0; i < graph->getSizeBundles(); ++i )
             if ( graph->getBundle(i)->getSizeEdges() > maxSize )
@@ -1733,8 +1681,9 @@ void ArcDiagram::calcSettingsBundles()
         {
         for ( int i = 0; i < graph->getSizeBundles(); ++i )
         {
-            idxFr = graph->getBundle(i)->getInCluster()->getIndex();
-            idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
+            int idxFr = graph->getBundle(i)->getInCluster()->getIndex();
+            int idxTo = graph->getBundle(i)->getOutCluster()->getIndex();
+            Position2D pos;
 
             // position
             if ( idxFr == idxTo )
@@ -1755,6 +1704,7 @@ void ArcDiagram::calcSettingsBundles()
             posBundles.push_back( pos );
 
             // radius
+            double rad;
             if ( idxFr == idxTo )
                 rad = radLeaves;
             else
@@ -1765,7 +1715,7 @@ void ArcDiagram::calcSettingsBundles()
 
             // width
             double frac = (double)graph->getBundle(i)->getSizeEdges()/maxSize;
-            double rad = sqrt( frac*(2.0*radLeaves)*(2.0*radLeaves) );
+            rad = sqrt( frac*(2.0*radLeaves)*(2.0*radLeaves) );
             widthBundles.push_back( rad );
 
             // orientation
@@ -1790,14 +1740,12 @@ void ArcDiagram::calcSettingsTree()
 {
     if ( graph->getRoot() != NULL )
     {
-        double w, h, pix;
-        double yTop;
         // get size of canvas & 1 pixel
+        double w, h;
         canvas->getSize( w, h );
-        pix = canvas->getPixelSize();
 
         // calc lft & rgt boundary
-        yTop = 0.5*Utils::minn( w, h )-2.0*radLeaves;
+        double yTop = 0.5*Utils::minn( w, h )-2.0*radLeaves;
 
         // clear prev settings
         clearSettingsTree();
@@ -1902,16 +1850,13 @@ void ArcDiagram::calcSettingsBarTree()
 {
     if ( graph->getRoot() != NULL )
     {
-        double w, h, pix;
-        double yBot, hght;
-
         // get size of canvas & 1 pixel
+        double w, h;
         canvas->getSize( w, h );
-        pix = canvas->getPixelSize();
 
         // calc lft & rgt boundary
-        yBot = -0.5*Utils::minn( w, h );
-        hght = abs( yBot )-2.0*radLeaves;
+        double yBot = -0.5*Utils::minn( w, h );
+        double hght = abs( yBot )-2.0*radLeaves;
 
         // clear prev settings
         clearSettingsBarTree();
@@ -1953,7 +1898,6 @@ void ArcDiagram::calcPositionsBarTree(
     for ( int i = 0; i < c->getSizeChildren(); ++i )
         calcPositionsBarTree( c->getChild(i), yBot, height );
 
-    double     frac;
     Position2D topLft;
     Position2D botRgt;
     int        lvl = c->getSizeCoord()-1;
@@ -1967,7 +1911,7 @@ void ArcDiagram::calcPositionsBarTree(
         botRgt.x = 0.5*( posBarTreeTopLft[lvl+1][posBarTreeTopLft[lvl+1].size()-1].x
                       +  posBarTreeBotRgt[lvl+1][posBarTreeBotRgt[lvl+1].size()-1].x );
 
-        frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
+        double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
 
         topLft.y = yBot + Utils::fishEye( magnBarTree, frac )*height;
         botRgt.y = yBot;
@@ -1977,7 +1921,7 @@ void ArcDiagram::calcPositionsBarTree(
         topLft.x = posLeaves[c->getIndex()].x - radLeaves;
         botRgt.x = posLeaves[c->getIndex()].x + radLeaves;
 
-        frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
+        double frac = (double)c->getSizeDescNodes()/(double)graph->getSizeNodes();
 
         topLft.y = yBot + Utils::fishEye( magnBarTree, frac )*height;
         botRgt.y = yBot;
@@ -2724,7 +2668,6 @@ void ArcDiagram::processHits(
 // --------------------------
 {
     GLuint *ptr;
-    int number;
     vector< int > ids;
 
     ptr = (GLuint*) buffer;
@@ -2736,7 +2679,7 @@ void ArcDiagram::processHits(
         {
             for ( int i = 0; i < ( hits-1 ); ++i )
             {
-                number = *ptr;
+                int number = *ptr;
                 ++ptr; // number;
                 ++ptr; // z1
                 ++ptr; // z2
@@ -2746,7 +2689,7 @@ void ArcDiagram::processHits(
         }
 
         // last hit
-        number = *ptr;
+        int number = *ptr;
         ++ptr; // number
         ++ptr; // z1
         ++ptr; // z2

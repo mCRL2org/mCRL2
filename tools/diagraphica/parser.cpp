@@ -14,6 +14,7 @@
 
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/exception.h"
 
 
 using namespace std;
@@ -56,9 +57,7 @@ int Parser::getFileSize( const string &path )
     file.open( path.c_str() );
     if ( !file.is_open() )
     {
-        string* msg = new string(
-            "Error opening file for computing file size." );
-        throw msg;
+        throw mcrl2::runtime_error("Error opening file for computing file size.");
     }
 
     try
@@ -75,9 +74,7 @@ int Parser::getFileSize( const string &path )
     }
     catch ( ... )
     {
-        string* msg = new string(
-            "Error computing file size." );
-        throw msg;
+        throw mcrl2::runtime_error("Error computing file size.");
     }
     file.close();
 
@@ -112,11 +109,10 @@ using namespace mcrl2::lts;
     mcrl2::lts::lts l;
 
     if (!l.read_from(path , lts_none)) {
-        string* msg = new string(
+      throw mcrl2::runtime_error(
             "Error opening file for parsing." );
-      throw msg;
     }
-    try{
+
     if(l.has_state_parameters ())
     {
       for(unsigned int i = 0; i < l.num_state_parameters(); ++i )
@@ -248,11 +244,6 @@ using namespace mcrl2::lts;
         }
 
         file.close();*/
-    }
-    catch ( const string* msg )
-    {
-        throw msg;
-    }
 }
 
 
@@ -275,136 +266,121 @@ void Parser::writeFSMFile(
     file.open( path.c_str() );
     if ( !file.is_open() )
     {
-        string* msg = new string(
-            "Error opening file for writing." );
-        throw msg;
+        throw mcrl2::runtime_error("Error opening file for writing.");
     }
 
-    try
+    // get filename
+    begIdx = path.find_last_of( delims );
+    if ( begIdx == string::npos )
+        begIdx = 0;
+    else
+        begIdx += 1;
+    endIdx   = path.size();
+    fileName = path.substr( begIdx, endIdx-begIdx );
+
+    // init progress
+    lineCnt = 0;
+    lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
+    mediator->initProgress(
+        "Saving file",
+        "Writing " + fileName,
+        lineTot );
+
+
+    // write state variable description
+    for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
-        // get filename
-        begIdx = path.find_last_of( delims );
-        if ( begIdx == string::npos )
-            begIdx = 0;
-        else
-            begIdx += 1;
-        endIdx   = path.size();
-        fileName = path.substr( begIdx, endIdx-begIdx );
+        line  = "";
+        line.append( graph->getAttribute( i )->getName() );
+        line.append( "(" );
+        line.append( Utils::intToStr( graph->getAttribute( i )->getSizeOrigValues() ) );
+        line.append( ") " );
+        line.append( graph->getAttribute( i )->getType() );
+        line.append( " " );
 
-        // init progress
-        lineCnt = 0;
-        lineTot = graph->getSizeAttributes() + graph->getSizeNodes() + graph->getSizeEdges();
-        mediator->initProgress(
-            "Saving file",
-            "Writing " + fileName,
-            lineTot );
-
-
-        // write state variable description
+        if ( graph->getAttribute(i)->getSizeOrigValues() != 0 )
         {
-        for ( int i = 0; i < graph->getSizeAttributes(); ++i )
-        {
-            line  = "";
-            line.append( graph->getAttribute( i )->getName() );
-            line.append( "(" );
-            line.append( Utils::intToStr( graph->getAttribute( i )->getSizeOrigValues() ) );
-            line.append( ") " );
-            line.append( graph->getAttribute( i )->getType() );
-            line.append( " " );
-
-            if ( graph->getAttribute(i)->getSizeOrigValues() != 0 )
+            for ( int j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
             {
-                for ( int j = 0; j < graph->getAttribute( i )->getSizeCurValues(); ++j )
-                {
-                    line.append( "\"" );
-                    line.append( graph->getAttribute( i )->getCurValue( j )->getValue() );
-                    line.append( "\"" );
+                line.append( "\"" );
+                line.append( graph->getAttribute( i )->getCurValue( j )->getValue() );
+                line.append( "\"" );
 
-                    if ( j < graph->getAttribute( i )->getSizeCurValues()-1 )
-                        line.append( " " );
-                }
-            }
-            else
-            {
-                line.append( "[" );
-                line.append( Utils::dblToStr( graph->getAttribute( i )->getLowerBound() ) );
-                line.append( ", " );
-                line.append( Utils::dblToStr( graph->getAttribute( i )->getUpperBound() ) );
-                line.append( "]" );
-            }
-
-            line.append( "\n" );
-
-            file << line;
-
-            if ( lineCnt % 1000 == 0 )
-                mediator->updateProgress( lineCnt );
-            ++lineCnt;
-        }
-        }
-
-        // write state vectors
-        line = "---\n";
-        file << line;
-
-        {
-        for ( int i = 0; i < graph->getSizeNodes(); ++i )
-        {
-            line = "";
-
-            for ( int j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
-            {
-                line.append( Utils::dblToStr( graph->getNode(i)->getTupleVal(j) ) );
-
-                if ( j < graph->getNode( i )->getSizeTuple()-1 )
+                if ( j < graph->getAttribute( i )->getSizeCurValues()-1 )
                     line.append( " " );
             }
-
-            line.append( "\n" );
-
-            file << line;
-
-            if ( lineCnt % 1000 == 0 )
-                mediator->updateProgress( lineCnt );
-            ++lineCnt;
         }
+        else
+        {
+            line.append( "[" );
+            line.append( Utils::dblToStr( graph->getAttribute( i )->getLowerBound() ) );
+            line.append( ", " );
+            line.append( Utils::dblToStr( graph->getAttribute( i )->getUpperBound() ) );
+            line.append( "]" );
         }
 
-        // write transitions
-        line = "---\n";
+        line.append( "\n" );
+
         file << line;
 
-        {
-        for ( int i = 0; i < graph->getSizeEdges(); ++i )
-        {
-            line = "";
-
-            line.append( Utils::intToStr( graph->getEdge(i)->getInNode()->getIndex()+1 ) );
-            line.append( " " );
-            line.append( Utils::intToStr( graph->getEdge(i)->getOutNode()->getIndex()+1 ) );
-            line.append( " \"" );
-            line.append( graph->getEdge(i)->getLabel() );
-            line.append( "\"" );
-
-            line.append( "\n" );
-
-            file << line;
-
-            if ( lineCnt % 1000 == 0 )
-                mediator->updateProgress( lineCnt );
-            ++lineCnt;
-        }
-        }
-
-        file.close();
-
-        // close progress
-        mediator->closeProgress();
+        if ( lineCnt % 1000 == 0 )
+            mediator->updateProgress( lineCnt );
+        ++lineCnt;
     }
-    catch ( const string* msg )
+
+    // write state vectors
+    line = "---\n";
+    file << line;
+
+    for ( int i = 0; i < graph->getSizeNodes(); ++i )
     {
-        throw msg;
+        line = "";
+
+        for ( int j = 0; j < graph->getNode(i)->getSizeTuple(); ++j )
+        {
+            line.append( Utils::dblToStr( graph->getNode(i)->getTupleVal(j) ) );
+
+            if ( j < graph->getNode( i )->getSizeTuple()-1 )
+                line.append( " " );
+        }
+
+        line.append( "\n" );
+
+        file << line;
+
+        if ( lineCnt % 1000 == 0 )
+            mediator->updateProgress( lineCnt );
+        ++lineCnt;
     }
+
+    // write transitions
+    line = "---\n";
+    file << line;
+
+    for ( int i = 0; i < graph->getSizeEdges(); ++i )
+    {
+        line = "";
+
+        line.append( Utils::intToStr( graph->getEdge(i)->getInNode()->getIndex()+1 ) );
+        line.append( " " );
+        line.append( Utils::intToStr( graph->getEdge(i)->getOutNode()->getIndex()+1 ) );
+        line.append( " \"" );
+        line.append( graph->getEdge(i)->getLabel() );
+        line.append( "\"" );
+
+        line.append( "\n" );
+
+        file << line;
+
+        if ( lineCnt % 1000 == 0 )
+            mediator->updateProgress( lineCnt );
+        ++lineCnt;
+    }
+
+    file.close();
+
+    // close progress
+    mediator->closeProgress();
 }
 
 
@@ -441,25 +417,16 @@ void Parser::parseAttrConfig(
 
             curNode    = NULL;
         }
-        catch ( const string* msg )
+        catch ( const mcrl2::runtime_error& e )
         {
             curNode = NULL;
 
-            string* errMsg = new string( "Error loading attribute configuration." );
-
-            errMsg->append( "\n" );
-            errMsg->append( *msg );
-
-            delete msg;
-            msg = NULL;
-
-            throw errMsg;
+            throw mcrl2::runtime_error( string("Error loading attribute configuration.\n") + string(e.what()) );
         }
     }
     else
     {
-        string* msg = new string( "Error opening attribute configuration file." );
-        throw msg;
+        throw mcrl2::runtime_error( "Error opening attribute configuration file." );
     }
 }
 
@@ -593,9 +560,8 @@ void Parser::writeAttrConfig(
     }
 	catch ( ... )
 	{
-		string* msg = new string(
-            "Error saving attribute configuration." );
-        throw msg;
+	    throw mcrl2::runtime_error(
+              "Error saving attribute configuration." );
 	}
 }
 
@@ -630,25 +596,16 @@ void Parser::parseDiagram(
 
             curNode    = NULL;
         }
-        catch ( const string* msg )
+        catch ( const mcrl2::runtime_error& e )
         {
             curNode = NULL;
 
-            string* errMsg = new string( "Error loading diagram." );
-
-            errMsg->append( "\n" );
-            errMsg->append( *msg );
-
-            delete msg;
-            msg = NULL;
-
-            throw errMsg;
+            throw mcrl2::runtime_error( string("Error loading diagram.\n") + string(e.what()) );
         }
     }
     else
     {
-        string* msg = new string( "Error opening diagram file." );
-        throw msg;
+        throw mcrl2::runtime_error( "Error opening diagram file." );
     }
 }
 
@@ -1052,9 +1009,8 @@ void Parser::writeDiagram(
     }
     catch ( ... )
     {
-        string* msg = new string(
+        throw mcrl2::runtime_error(
             "Error saving diagram." );
-        throw msg;
     }
 }
 
@@ -1072,20 +1028,15 @@ void Parser::parseStateVarDescr(
 // description (first) part of an fsm file.
 // ------------------------------------------------------------------
 {
-    string token;
-    string name;
-    string card;
-    string type;
-    vector< string > values;
     try
     {
-        string::size_type begIdx;
-        string::size_type endIdx;
+        vector< string > values;
 
         // description
-        begIdx = nextLine.find_first_not_of( delims );
-        endIdx = nextLine.find_first_of( delims );
-        token = nextLine.substr( begIdx, endIdx-begIdx );
+        string::size_type begIdx = nextLine.find_first_not_of( delims );
+        string::size_type endIdx = nextLine.find_first_of( delims );
+        string token = nextLine.substr( begIdx, endIdx-begIdx );
+        string name;
         if ( token == "\n" )
             name = "unspecified";
         else
@@ -1095,12 +1046,13 @@ void Parser::parseStateVarDescr(
         begIdx = nextLine.find_first_not_of( delims, endIdx );
         endIdx = nextLine.find_first_of( delims, begIdx );
         token = nextLine.substr( begIdx, endIdx-begIdx );
-        card = token;
+        string card = token;
 
         // type
         begIdx = nextLine.find_first_not_of( "() ", endIdx );
         endIdx = nextLine.find_first_of( "() ", begIdx );
         token = nextLine.substr( begIdx, endIdx-begIdx );
+        string type;
         if ( token == "\n" )
             // end of line
             type = "Unspecified";
@@ -1171,9 +1123,8 @@ void Parser::parseStateVarDescr(
     }
     catch ( ... )
     {
-        string* msg = new string(
+       throw mcrl2::runtime_error( 
             "Error parsing state description." );
-        throw msg;
     }
 
 }
@@ -1192,16 +1143,12 @@ void Parser::parseStates(
     vector< double > stateVector;
     try
     {
-        string token = "";
-        string::size_type begIdx;
-        string::size_type endIdx;
-
-        begIdx = nextLine.find_first_not_of( delims );
-        endIdx = nextLine.find_first_of( delims );
+        string::size_type begIdx = nextLine.find_first_not_of( delims );
+        string::size_type endIdx = nextLine.find_first_of( delims );
         // get all tokens in line
         while ( begIdx != string::npos )
         {
-            token = nextLine.substr( begIdx, endIdx-begIdx );
+            string token = nextLine.substr( begIdx, endIdx-begIdx );
             if( token != "\n" )
                 stateVector.push_back( Utils::strToDbl( token ) );
             begIdx = nextLine.find_first_not_of( delims, endIdx );
@@ -1213,7 +1160,7 @@ void Parser::parseStates(
     }
     catch ( ... )
     {
-        throw new string( "Error parsing states." );
+        throw mcrl2::runtime_error( "Error parsing states." );
     }
 }
 
@@ -1228,27 +1175,20 @@ void Parser::parseTransitions(
 // transitions (third) part of an fsm file.
 // -----------------------------------------------------------------------
 {
-    int    frStateIdx;
-    int    toStateIdx;
-    string trLbl;
     //vector< string > params;
     try
     {
-        string token    = "";
-        string::size_type begIdx;
-        string::size_type endIdx;
-
         // index of from state
-        begIdx     = nextLine.find_first_not_of( delims );
-        endIdx     = nextLine.find_first_of( delims );
-        token      = nextLine.substr( begIdx, endIdx-begIdx );
-        frStateIdx = Utils::strToInt( token ) - 1;
+        string::size_type begIdx     = nextLine.find_first_not_of( delims );
+        string::size_type endIdx     = nextLine.find_first_of( delims );
+        string token      = nextLine.substr( begIdx, endIdx-begIdx );
+        int frStateIdx = Utils::strToInt( token ) - 1;
 
         // index (1-based) of to state
         begIdx     = nextLine.find_first_not_of( delims, endIdx );
         endIdx     = nextLine.find_first_of( delims, begIdx );
         token      = nextLine.substr( begIdx, endIdx-begIdx );
-        toStateIdx = Utils::strToInt( token ) - 1;
+        int toStateIdx = Utils::strToInt( token ) - 1;
 
         // label of transition
         begIdx = nextLine.find_first_not_of( delims, endIdx );
@@ -1258,7 +1198,7 @@ void Parser::parseTransitions(
             token = nextLine.substr( begIdx, endIdx-begIdx );
         else
             token = "";
-        trLbl = token;
+        string trLbl = token;
         /*
         // transition parameters
         if ( endIdx != string::npos )
@@ -1279,7 +1219,7 @@ void Parser::parseTransitions(
     }
     catch ( ... )
     {
-        throw new string( "Error parsing transitions." );
+        throw mcrl2::runtime_error( "Error parsing transitions." );
     }
 }
 
@@ -1305,18 +1245,18 @@ void Parser::parseAttrConfig(
                 if ( strcmp( curNode->FirstChild()->ToText()->Value(),
                      graph->getFileName().c_str() ) != 0 )
                 {
-                    throw new string( "File names do not match." );
+                    throw mcrl2::runtime_error( "File names do not match." );
                 }
             }
             else
             {
-                throw new string( "No file name specified." );
+                throw mcrl2::runtime_error( "No file name specified." );
             }
             */
 
             // the code below does not check for matching file names
             if ( curNode->FirstChild()->ToText()->Value() == NULL )
-                throw new string( "No file name specified." );
+                throw mcrl2::runtime_error( "No file name specified." );
         }
         // shape
         else if ( strcmp( curNode->Value(), "Attribute") == 0)
@@ -1330,17 +1270,9 @@ void Parser::parseAttrConfig(
                     attrOrigToCurDomains,
                     curNode );
             }
-            catch ( const string* msg )
+            catch ( const mcrl2::runtime_error& e )
             {
-                string* errMsg = new string( "Error parsing attribute." );
-
-                errMsg->append( "\n" );
-                errMsg->append( *msg );
-
-                delete msg;
-                msg = NULL;
-
-                throw errMsg;
+                throw mcrl2::runtime_error( string("Error parsing attribute.\n") + string(e.what()));
             }
         }
         // other
@@ -1393,7 +1325,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing attribute." );
+                throw mcrl2::runtime_error( "Missing attribute." );
             }
         }
         else
@@ -1401,7 +1333,7 @@ void Parser::parseAttr(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing attribute." );
+            throw mcrl2::runtime_error( "Missing attribute." );
         }
     }
     else
@@ -1409,7 +1341,7 @@ void Parser::parseAttr(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing attribute." );
+        throw mcrl2::runtime_error( "Missing attribute." );
     }
 
     // type
@@ -1425,7 +1357,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Types do not match." );
+                throw mcrl2::runtime_error( "Types do not match." );
             }
         }
         else
@@ -1433,7 +1365,7 @@ void Parser::parseAttr(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing type." );
+            throw mcrl2::runtime_error( "Missing type." );
         }
     }
     else
@@ -1441,7 +1373,7 @@ void Parser::parseAttr(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing type." );
+        throw mcrl2::runtime_error( "Missing type." );
     }
 
     // card
@@ -1457,7 +1389,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Cardinalities do not match." );
+                throw mcrl2::runtime_error( "Cardinalities do not match." );
             }
         }
         else
@@ -1465,7 +1397,7 @@ void Parser::parseAttr(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing cardinality." );
+            throw mcrl2::runtime_error( "Missing cardinality." );
         }
     }
     else
@@ -1473,7 +1405,7 @@ void Parser::parseAttr(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing cardinality." );
+        throw mcrl2::runtime_error( "Missing cardinality." );
     }
 
     // update attribute mapping
@@ -1498,7 +1430,7 @@ void Parser::parseAttr(
                     prop = NULL;
                     subp = NULL;
                     ssbp = NULL;
-                    throw new string( "Missing domain value." );
+                    throw mcrl2::runtime_error( "Missing domain value." );
                 }
             }
             else
@@ -1506,7 +1438,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Domain incorrectly specified." );
+                throw mcrl2::runtime_error( "Domain incorrectly specified." );
             }
         }
     }
@@ -1515,7 +1447,7 @@ void Parser::parseAttr(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing domain." );
+        throw mcrl2::runtime_error( "Missing domain." );
     }
 
     // update domain
@@ -1546,7 +1478,7 @@ void Parser::parseAttr(
                     prop = NULL;
                     subp = NULL;
                     ssbp = NULL;
-                    throw new string( "Missing mapping from original to current domain." );
+                    throw mcrl2::runtime_error( "Missing mapping from original to current domain." );
                 }
             }
             else
@@ -1554,7 +1486,7 @@ void Parser::parseAttr(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Mapping from original to current domain incorrectly specified." );
+                throw mcrl2::runtime_error( "Mapping from original to current domain incorrectly specified." );
             }
         }
     }
@@ -1563,7 +1495,7 @@ void Parser::parseAttr(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing mapping from original to current domain." );
+        throw mcrl2::runtime_error( "Missing mapping from original to current domain." );
     }
 
     // update mapping
@@ -1593,18 +1525,18 @@ void Parser::parseDiagram(
                 if ( strcmp( curNode->FirstChild()->ToText()->Value(),
                      graph->getFileName().c_str() ) != 0 )
                 {
-                    throw new string( "File names do not match." );
+                    throw mcrl2::runtime_error( "File names do not match." );
                 }
             }
             else
             {
-                throw new string( "No file name specified." );
+                throw mcrl2::runtime_error( "No file name specified." );
             }
             */
 
             // the code below does not check for matchin file names
             if ( curNode->FirstChild()->ToText()->Value() == NULL )
-                throw new string( "No file name specified." );
+                throw mcrl2::runtime_error( "No file name specified." );
         }
         // shape
         else if ( strcmp( curNode->Value(), "Shape") == 0)
@@ -1613,17 +1545,9 @@ void Parser::parseDiagram(
             {
                 parseShape( graph, dgrmOld, dgrmNew, curNode );
             }
-            catch ( const string* msg )
+            catch ( const mcrl2::runtime_error& e )
             {
-                string* errMsg = new string( "Error parsing shape." );
-
-                errMsg->append( "\n" );
-                errMsg->append( *msg );
-
-                delete msg;
-                msg = NULL;
-
-                throw errMsg;
+                throw mcrl2::runtime_error(string("Error parsing shape.\n") + string(e.what()) );
             }
         }
         // other
@@ -1656,7 +1580,6 @@ void Parser::parseShape(
 
     double xCtr, yCtr;
     double xDFC, yDFC;
-    double xHge, yHge;
     double aglCtr;
 
     int      type;
@@ -1677,7 +1600,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing x-coordinate." );
+            throw mcrl2::runtime_error( "Missing x-coordinate." );
         }
     }
     else
@@ -1685,7 +1608,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing x-coordinate." );
+        throw mcrl2::runtime_error( "Missing x-coordinate." );
     }
 
     // y center
@@ -1701,7 +1624,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing y-coordinate." );
+            throw mcrl2::runtime_error( "Missing y-coordinate." );
         }
     }
     else
@@ -1709,7 +1632,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing y-coordinate." );
+        throw mcrl2::runtime_error( "Missing y-coordinate." );
     }
 
     // x distance from center
@@ -1725,7 +1648,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing x distance from center." );
+            throw mcrl2::runtime_error( "Missing x distance from center." );
         }
     }
     else
@@ -1733,7 +1656,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing x distance from center." );
+        throw mcrl2::runtime_error( "Missing x distance from center." );
     }
 
     // y distance from center
@@ -1749,7 +1672,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing y distance from center." );
+            throw mcrl2::runtime_error( "Missing y distance from center." );
         }
     }
     else
@@ -1757,7 +1680,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing y distance from center." );
+        throw mcrl2::runtime_error( "Missing y distance from center." );
     }
 
     // x hinge
@@ -1766,14 +1689,25 @@ void Parser::parseShape(
          strcmp( prop->Value(), "XHinge" ) == 0 )
     {
         subp = prop->FirstChild();
+// Strange, xHge is not used (Jeroen Keiren 4 June 2009)
+/*
         if ( subp != NULL )
-             xHge = Utils::strToDbl( subp->ToText()->Value() );
+             double xHge = Utils::strToDbl( subp->ToText()->Value() );
+          
         else
         {
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing x hinge." );
+            throw mcrl2::runtime_error( "Missing x hinge." );
+        }
+*/
+        if (subp == NULL)
+        {
+          prop = NULL;
+          subp = NULL;
+          ssbp = NULL;
+          throw mcrl2::runtime_error("Missing x hinge.");
         }
     }
     else
@@ -1781,7 +1715,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing x hinge." );
+        throw mcrl2::runtime_error( "Missing x hinge." );
     }
 
     // y hinge
@@ -1790,14 +1724,24 @@ void Parser::parseShape(
          strcmp( prop->Value(), "YHinge" ) == 0 )
     {
         subp = prop->FirstChild();
+// Strange, yHge is not used (Jeroen Keiren 4 June 2009)
+/*
         if ( subp != NULL )
-            yHge = Utils::strToDbl( subp->ToText()->Value() );
+//            double yHge = Utils::strToDbl( subp->ToText()->Value() );
         else
         {
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing y hinge." );
+            throw mcrl2::runtime_error( "Missing y hinge." );
+        }
+*/
+        if (subp == NULL)
+        {
+          prop = NULL;
+          subp = NULL;
+          ssbp = NULL;
+          throw mcrl2::runtime_error("Missing y hinge.");
         }
     }
     else
@@ -1805,7 +1749,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing y hinge." );
+        throw mcrl2::runtime_error( "Missing y hinge." );
     }
 
     // angle center
@@ -1821,7 +1765,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing angle." );
+            throw mcrl2::runtime_error( "Missing angle." );
         }
     }
     else
@@ -1829,7 +1773,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing angle." );
+        throw mcrl2::runtime_error( "Missing angle." );
     }
 
     // type
@@ -1856,7 +1800,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing type." );
+            throw mcrl2::runtime_error( "Missing type." );
         }
     }
     else
@@ -1864,7 +1808,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing type." );
+        throw mcrl2::runtime_error( "Missing type." );
     }
 
     // line width
@@ -1880,7 +1824,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing line width." );
+            throw mcrl2::runtime_error( "Missing line width." );
         }
     }
     else
@@ -1888,7 +1832,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing line width." );
+        throw mcrl2::runtime_error( "Missing line width." );
     }
 
     // line color
@@ -1909,7 +1853,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing red channel." );
+                throw mcrl2::runtime_error( "Missing red channel." );
             }
         }
         else
@@ -1917,7 +1861,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing red channel." );
+            throw mcrl2::runtime_error( "Missing red channel." );
         }
 
         // green
@@ -1933,7 +1877,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing green channel." );
+                throw mcrl2::runtime_error( "Missing green channel." );
             }
         }
         else
@@ -1941,7 +1885,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing green color." );
+            throw mcrl2::runtime_error( "Missing green color." );
         }
 
         // blue
@@ -1957,7 +1901,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing blue channel." );
+                throw mcrl2::runtime_error( "Missing blue channel." );
             }
         }
         else
@@ -1965,7 +1909,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing blue color." );
+            throw mcrl2::runtime_error( "Missing blue color." );
         }
 
         // alpha
@@ -1981,7 +1925,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing alpha channel." );
+                throw mcrl2::runtime_error( "Missing alpha channel." );
             }
         }
         else
@@ -1989,7 +1933,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing alpha color." );
+            throw mcrl2::runtime_error( "Missing alpha color." );
         }
     }
     else
@@ -1997,7 +1941,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing line color." );
+        throw mcrl2::runtime_error( "Missing line color." );
     }
 
     // fill color
@@ -2018,7 +1962,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing red channel." );
+                throw mcrl2::runtime_error( "Missing red channel." );
             }
         }
         else
@@ -2026,7 +1970,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing red channel." );
+            throw mcrl2::runtime_error( "Missing red channel." );
         }
 
         // green
@@ -2042,7 +1986,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing green channel." );
+                throw mcrl2::runtime_error( "Missing green channel." );
             }
         }
         else
@@ -2050,7 +1994,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing green color." );
+            throw mcrl2::runtime_error( "Missing green color." );
         }
 
         // blue
@@ -2066,7 +2010,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing blue channel." );
+                throw mcrl2::runtime_error( "Missing blue channel." );
             }
         }
         else
@@ -2074,7 +2018,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing blue color." );
+            throw mcrl2::runtime_error( "Missing blue color." );
         }
 
         // alpha
@@ -2090,7 +2034,7 @@ void Parser::parseShape(
                 prop = NULL;
                 subp = NULL;
                 ssbp = NULL;
-                throw new string( "Missing alpha channel." );
+                throw mcrl2::runtime_error( "Missing alpha channel." );
             }
         }
         else
@@ -2098,7 +2042,7 @@ void Parser::parseShape(
             prop = NULL;
             subp = NULL;
             ssbp = NULL;
-            throw new string( "Missing alpha channel." );
+            throw mcrl2::runtime_error( "Missing alpha channel." );
         }
     }
     else
@@ -2106,7 +2050,7 @@ void Parser::parseShape(
         prop = NULL;
         subp = NULL;
         ssbp = NULL;
-        throw new string( "Missing fill color." );
+        throw mcrl2::runtime_error( "Missing fill color." );
     }
 
     // init shape

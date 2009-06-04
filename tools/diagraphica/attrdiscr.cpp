@@ -10,6 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "mcrl2/exception.h"
 #include "attrdiscr.h"
 
 // -- constructors and destructor -----------------------------------
@@ -151,7 +152,7 @@ void AttrDiscr::clusterValues(
     }
     catch( ... )
     {
-        throw new string( "Error clustering attribute domain." );
+        throw mcrl2::runtime_error( "Error clustering attribute domain." );
     }
 }
 
@@ -196,7 +197,7 @@ void AttrDiscr::moveValue(
     }
     catch ( ... )
     {
-        throw new string( "Error moving attribute domain value." );
+        throw mcrl2::runtime_error( "Error moving attribute domain value." );
     }
 }
 
@@ -240,16 +241,9 @@ void AttrDiscr::configValues(
         }
         mapping = NULL;
     }
-    catch( const string* msg )
+    catch( const mcrl2::runtime_error& e )
     {
-        string* errMsg = new string( "Error configuring attribute domain values." );
-        errMsg->append( "\n" );
-        errMsg->append( *msg );
-
-        delete msg;
-        msg = NULL;
-
-        throw errMsg;
+        throw mcrl2::runtime_error(string("Error configuring attribute domain values.\n") + string(e.what()));
     }
 }
 
@@ -280,7 +274,7 @@ Value* AttrDiscr::getOrigValue( int idx )
     if ( 0 <= idx && idx < (int)origValues.size() )
         return origValues[idx];
     else
-        throw new string(
+        throw mcrl2::runtime_error(
             "Error retrieving attribute value from original domain." );
 }
 
@@ -300,7 +294,7 @@ Value* AttrDiscr::getCurValue( int idx )
     if ( 0 <= idx && idx < (int)curValues.size() )
         return curValues[idx];
     else
-        throw new string(
+        throw mcrl2::runtime_error(
             "Error retrieving attribute value from current domain." );
 }
 
@@ -321,7 +315,7 @@ Value* AttrDiscr::mapToValue( double key )
     if ( 0 <= idx && idx < curMap.size() )
         return *curMap[idx];
     else
-        throw new string(
+        throw mcrl2::runtime_error(
             "Error mapping index to current attribute value." );
 }
 

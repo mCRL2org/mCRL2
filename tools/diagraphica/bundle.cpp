@@ -10,6 +10,7 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include "mcrl2/exception.h"
 #include "bundle.h"
 
 // -- constructors and destructors ----------------------------------
@@ -209,7 +210,7 @@ Edge* Bundle::getEdge( const size_t &idx )
     if ( 0 <= idx && idx < edges.size() )
         return edges[idx];
     else
-        throw new string( "Error retrieving bundle edge." );
+        throw mcrl2::runtime_error( "Error retrieving bundle edge." );
 
 }
 
