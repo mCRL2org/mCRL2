@@ -350,12 +350,16 @@ rule platform-configuration ( properties * ) {
     if <warnings>all in $(properties) {
       requirements += <cxxflags>-Wno-long-long ;
     }
-    if ! <target-os>windows in $(properties) { # MinGW on Windows
-      requirements += <cxxflags>-fvisibility-inlines-hidden ;
+    if <link>release in $(properties) {
+      requirements += <cxxflags>-fomit-frame-pointer ;
     }
-
     if <link>static in $(properties) {
       requirements += <linkflags>-export-dynamic ;
+    }
+    else {
+      if ! <target-os>windows in $(properties) && ! <address-model>64 in $(properties) { # MinGW on Windows
+        requirements += <cxxflags>-fvisibility-inlines-hidden ;
+      }
     }
 
     # versions of gcc without signed overflow (breaks ATerm library)
@@ -385,6 +389,13 @@ rule platform-configuration ( properties * ) {
   else if <target-os>darwin in $(properties) {
     if <toolset>darwin in $(properties) { # XCode toolset on OS X
       local cxxflags = -std=c++98 -pipe -fno-operator-names -fvisibility-inlines-hidden -Wstrict-null-sentinel -Woverloaded-virtual ;
+
+      if ! <link>static in $(properties) { # MinGW on Windows
+        cxxflags += -fvisibility-inlines-hidden ;
+      }
+      if <link>release in $(properties) {
+        cxxflags += -fomit-frame-pointer ;
+      }
 
       requirements += <define>__darwin__
                       <cxxflags>$(cxxflags)
