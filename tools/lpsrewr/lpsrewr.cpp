@@ -1,30 +1,19 @@
-// Author(s): Aad Mathijssen
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+// Author(s): Wieger Wesselink
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file lpsrewr.cpp
-/// \brief A tool to rewrite linear process specifications
+/// \brief Tool for rewriting a linear process specification.
 
-#include "boost.hpp" // precompiled headers
-
-#define TOOLNAME "lpsrewr"
-#define AUTHOR "Aad Mathijssen"
-
-#include "mcrl2/lps/lps_rewrite.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2;
-using namespace mcrl2::data;
-using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::lps;
-
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
@@ -34,38 +23,47 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
   protected:
     typedef squadt_tool< rewriter_tool< input_output_tool > > super;
 
-    bool                      m_benchmark;
-    unsigned long             m_bench_times;
+    bool          m_benchmark;
+    unsigned long m_bench_times;
 
-    void add_options(interface_description& desc)
+    void add_options(utilities::interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("benchmark", make_mandatory_argument("NUM"),
+      desc.add_hidden_option("benchmark", utilities::make_mandatory_argument("NUM"),
               "rewrite data expressions NUM times; do not save output", 'b');
     }
 
     /// Parse the non-default options.
-    void parse_options(const command_line_parser& parser)
+    void parse_options(const utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
-
       m_benchmark = (parser.options.count("benchmark")>0);
-
       if (m_benchmark)
-      { m_bench_times = parser.option_argument_as< unsigned long >("benchmark");
+      {
+        m_bench_times = parser.option_argument_as< unsigned long >("benchmark");
+      }
+    }
+
+    template <typename DataRewriter>
+    void run_bench_mark(const lps::specification& spec, const DataRewriter& R)
+    {
+      std::clog << "rewriting LPS " << m_bench_times << " times...\n";
+      for (unsigned long i=0; i < m_bench_times; i++)
+      {
+        lps::specification spec1 = spec;
+        lps::rewrite(spec1, R);
       }
     }
 
   public:
-
     lps_rewriter_tool()
       : super(
-          TOOLNAME,
-          AUTHOR,
+          "lpsrewr",
+          "Wieger Wesselink",
           "rewrite data expressions in an LPS",
           "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
-          "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is"
-          "used."
+          "If OUTFILE is not present, standard output is used. If INFILE is not present,"
+          "standard input is used"
         ),
         m_benchmark(false),
         m_bench_times(1)
@@ -73,22 +71,15 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
 
     bool run()
     {
-      lps::specification specification;
-
-      specification.load(input_filename());
-
-      mcrl2::data::rewriter rewriter = create_rewriter(specification.data());
-
+      lps::specification spec;
+      spec.load(input_filename());
+      data::rewriter R = create_rewriter(spec.data());
       if (m_benchmark)
       {
-        std::clog << "rewriting LPS " << m_bench_times << " times...\n";
+        run_bench_mark(spec, R);
       }
-      for (unsigned long i=0; i < m_bench_times; i++)
-      {
-        specification = rewrite_lps(specification, rewriter);
-      }
-      specification.save(output_filename());
-
+      lps::rewrite(spec, R);     
+      spec.save(output_filename());
       return true;
     }
 
@@ -114,22 +105,16 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
     /** \brief performs the task specified by a configuration */
     bool perform_task(tipi::configuration& c) {
       synchronise_with_configuration(c);
-
       bool result = run();
-
       if (result) {
         send_clear_display();
       }
-
       return (result);
     }
 #endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
-//Main program
-//------------
-
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

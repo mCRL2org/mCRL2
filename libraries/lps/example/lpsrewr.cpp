@@ -23,6 +23,38 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
   protected:
     typedef squadt_tool< rewriter_tool< input_output_tool > > super;
 
+    bool          m_benchmark;
+    unsigned long m_bench_times;
+
+    void add_options(utilities::interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_hidden_option("benchmark", utilities::make_mandatory_argument("NUM"),
+              "rewrite data expressions NUM times; do not save output", 'b');
+    }
+
+    /// Parse the non-default options.
+    void parse_options(const utilities::command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_benchmark = (parser.options.count("benchmark")>0);
+      if (m_benchmark)
+      {
+        m_bench_times = parser.option_argument_as< unsigned long >("benchmark");
+      }
+    }
+
+    template <typename DataRewriter>
+    void run_bench_mark(const lps::specification& spec, const DataRewriter& R)
+    {
+      std::clog << "rewriting LPS " << m_bench_times << " times...\n";
+      for (unsigned long i=0; i < m_bench_times; i++)
+      {
+        lps::specification spec1 = spec;
+        lps::rewrite(spec1, R);
+      }
+    }
+
   public:
     lps_rewriter_tool()
       : super(
@@ -32,7 +64,9 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
           "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
           "If OUTFILE is not present, standard output is used. If INFILE is not present,"
           "standard input is used"
-        )
+        ),
+        m_benchmark(false),
+        m_bench_times(1)
     {}
 
     bool run()
@@ -40,7 +74,11 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
       lps::specification spec;
       spec.load(input_filename());
       data::rewriter R = create_rewriter(spec.data());
-      lps::rewrite(spec, R);
+      if (m_benchmark)
+      {
+        run_bench_mark(spec, R);
+      }
+      lps::rewrite(spec, R);     
       spec.save(output_filename());
       return true;
     }
