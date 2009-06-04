@@ -35,6 +35,17 @@ namespace mcrl2 {
 
 namespace data {
 
+  /// \cond INTERNAL_DOCS
+  namespace detail {
+    inline data_specification const& default_specification()
+    {
+      static data_specification specification;
+
+      return specification;
+    }
+  } // namespace detail
+  /// \endcond  
+
   /// \brief Parses a and type checks a data specification.
   /// \details This function reads a data specification in 
   ///    input string text. It is assumed that the string contains
@@ -59,11 +70,11 @@ namespace data {
   data_specification parse_data_specification(
                                  std::istream& text)
   { ATermAppl spec = core::parse_data_spec(text);
-    if (spec == NULL)
+    if (spec == 0)
       throw mcrl2::runtime_error("Error while parsing data specification");
     // std::cerr << "SPEC " << spec << "\n";
     spec = core::type_check_data_spec(spec);
-    if (spec == NULL)
+    if (spec == 0)
       throw mcrl2::runtime_error("Error while type checking data specification");
     // std::cerr << "SPEC11111 " << spec << "\n";
     return detail::internal_format_conversion(data_specification(spec));
@@ -79,11 +90,7 @@ namespace data {
   inline
   data_specification parse_data_specification(
                                  const std::string& text)
-  { // if (text=="")
-    // { return data_specification();
-    // }
-    std::stringstream spec_stream;
-    spec_stream << text;
+  { std::istringstream spec_stream(text);
     return parse_data_specification(spec_stream);
   }
 
@@ -112,40 +119,38 @@ namespace data {
 
   template < typename Output_iterator, typename Variable_iterator >
   void parse_variables(std::istream &text,
-                                   Output_iterator i,
+                                   Output_iterator o,
                                    const Variable_iterator begin,
                                    const Variable_iterator end,
-                                   const data_specification& data_spec = data_specification())
+                                   const data_specification& data_spec = detail::default_specification())
   { // Parse the variables list.
-    ATermList data_vars = core::parse_data_vars(text);
-    if (data_vars == NULL)
+    variable_list data_vars = core::parse_data_vars(text);
+    if (data_vars == 0)
       throw mcrl2::runtime_error("Error while parsing data variable declarations.");
 
     // Type check the variabl list.
     ATermAppl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                         mcrl2::data::remove_all_system_defined(data_spec));
+
     data_vars = core::type_check_data_vars(data_vars, d);
-    if (data_vars == NULL)
+    if (data_vars == 0)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
-    variable_list v_list=data_vars;
+    data_vars = atermpp::reverse(data_vars);
 
     // Check that variables do not have equal names.
-    for(variable_list::const_iterator v=v_list.begin(); v!=v_list.end(); ++v)
+    for(variable_list::const_iterator v=data_vars.begin(); v!=data_vars.end(); ++v)
     { for(Variable_iterator i=begin; i!=end; ++i)
       { if (v->name()==i->name())
         throw mcrl2::runtime_error("Name conflict of variables " + pp(*i) + " and " + pp(*v) + ".");
       }
-      for(variable_list::const_iterator v1=v_list.begin(); v1!=v_list.end(); ++v1)
+      for(variable_list::const_iterator v1=data_vars.begin(); v1!=data_vars.end(); ++v1)
       { if (((*v1)!=(*v)) && (v1->name()==v->name()))
         throw mcrl2::runtime_error("Name conflict of variables " + pp(*v1) + " and " + pp(*v) + ".");
       }
     }
 
     // Output the variables read via the Output iterator.
-    v_list=reverse(v_list);
-    for(variable_list::const_iterator v=v_list.begin(); v!=v_list.end(); ++v)
-    { *i++ = *v;
-    }
+    std::copy(data_vars.begin(), data_vars.end(), o);
   }
 
   /// \brief Parses and type checks a data variable declaration list checking for double occurrences
@@ -163,10 +168,9 @@ namespace data {
                                    Output_iterator i,
                                    Variable_iterator begin,
                                    Variable_iterator end,
-                                   const data_specification& data_spec = data_specification())
+                                   const data_specification& data_spec = detail::default_specification())
   {
-    std::stringstream spec_stream;
-    spec_stream << text;
+    std::istringstream spec_stream(text);
     parse_variables(spec_stream, i, begin, end, data_spec);
   }
 
@@ -179,7 +183,7 @@ namespace data {
   template <typename Output_iterator>
   void parse_variables(std::istream &text,
                                    Output_iterator i,
-                                   const data_specification& data_spec = data_specification())
+                                   const data_specification& data_spec = detail::default_specification())
   { variable_list v_list;
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
   }
@@ -193,9 +197,31 @@ namespace data {
   template <typename Output_iterator>
   void parse_variables(const std::string &text,
                                    Output_iterator i,
-                                   const data_specification& data_spec = data_specification())
+                                   const data_specification& data_spec = detail::default_specification())
   { variable_list v_list;
     parse_variables(text,i,v_list.begin(),v_list.end(),data_spec);
+  }
+
+  /// \brief Parses and type checks a data variable declaration.
+  /// \details
+  ///    See the information for reading a variable declaration from a string.
+  ///  \param[in] text A textual description of the variable declaration.
+  ///  \param[in] data_spec The data specification that is used for type checking.
+  ///  \return the variable corresponding to the input istream.
+  inline
+  variable parse_variable(const std::string& text,
+                                      const data_specification& data_spec = detail::default_specification())
+  {
+    atermpp::vector < variable > variable_store;
+
+    parse_variables(text + ";", std::back_inserter(variable_store),data_spec);
+
+    if (variable_store.size()==0)
+       throw mcrl2::runtime_error("Input does not contain a variable declaration.");
+    if (variable_store.size()>1)
+       throw mcrl2::runtime_error("Input contains more than one variable declaration.");
+
+    return variable_store.front();
   }
 
   /// \brief Parses and type checks a data variable declaration.
@@ -212,36 +238,11 @@ namespace data {
   ///  \return the variable corresponding to the string text.
   inline
   variable parse_variable(std::istream& text,
-                                      const data_specification& data_spec = data_specification())
-  { atermpp::vector < variable > variable_store;
-    std::string str;
-    // An ugly way to get the stream in text into str. There should be a better way.
-    while (!text.eof())
-    { std::string temporary;
-      text >> temporary;
-      str = str+ temporary;
-    }
-    parse_variables(str + ";",std::back_inserter(variable_store),data_spec);
-    if (variable_store.size()==0)
-       throw mcrl2::runtime_error("Input does not contain a variable declaration.");
-    if (variable_store.size()>1)
-       throw mcrl2::runtime_error("Input contains more than one variable declaration.");
-    return variable_store.front();
-  }
-
-  /// \brief Parses and type checks a data variable declaration.
-  /// \details
-  ///    See the information for reading a variable declaration from a string.
-  ///  \param[in] text A textual description of the variable declaration.
-  ///  \param[in] data_spec The data specification that is used for type checking.
-  ///  \return the variable corresponding to the input istream.
-  inline
-  variable parse_variable(const std::string& text,
-                                      const data_specification& data_spec = data_specification())
+                                      const data_specification& data_spec = detail::default_specification())
   {
-    std::stringstream spec_stream;
-    spec_stream << text;
-    return parse_variable(spec_stream, data_spec);
+    std::ostringstream input;
+    input << text.rdbuf();
+    return parse_variable(input.str(),data_spec);
   }
 
   /// \brief Parses and type checks a data expression.
@@ -262,10 +263,10 @@ namespace data {
   data_expression parse_data_expression(std::istream &text,
                                         const Variable_iterator begin,
                                         const Variable_iterator end,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   {
     ATermAppl data_expr = core::parse_data_expr(text);
-    if (data_expr == NULL)
+    if (data_expr == 0)
       throw mcrl2::runtime_error("error parsing data expression");
     //create ATerm table from begin and end
     atermpp::table variables;
@@ -274,10 +275,10 @@ namespace data {
       // the name of the variable is quoted, which is what the typechecker expects.
       variables.put(atermpp::aterm_string(v->name()),v->sort());
     }
-    data_expr = core::type_check_data_expr(data_expr, NULL,
+    data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(
                         mcrl2::data::remove_all_system_defined(data_spec)), variables);
-    if (data_expr == NULL)
+    if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
     detail::internal_format_conversion_helper converter(data_spec);
     return converter(data_expression(data_expr));
@@ -295,10 +296,9 @@ namespace data {
   data_expression parse_data_expression(const std::string &text,
                                         const Variable_iterator begin,
                                         const Variable_iterator end,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   {
-    std::stringstream spec_stream;
-    spec_stream << text;
+    std::istringstream spec_stream(text);
     return parse_data_expression(spec_stream, begin,end, data_spec);
   }
 
@@ -309,7 +309,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   data_expression parse_data_expression(std::istream &text,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   { variable_list v_list;
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
@@ -321,7 +321,7 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   data_expression parse_data_expression(const std::string &text,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   { variable_list v_list;
     return parse_data_expression(text,v_list.begin(),v_list.end(),data_spec);
   }
@@ -335,7 +335,7 @@ namespace data {
   inline
   data_expression parse_data_expression(const std::string text,
                                         const std::string var_decl,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   { atermpp::vector < variable > variable_store;
     parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
     return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
@@ -347,15 +347,15 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   sort_expression parse_sort_expression(std::istream &text,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   {
     ATermAppl sort_expr = core::parse_sort_expr(text);
-    if (sort_expr == NULL)
+    if (sort_expr == 0)
       throw mcrl2::runtime_error("error parsing sort expression");
     ATermAppl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                                 mcrl2::data::remove_all_system_defined(data_spec));
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
-    if (sort_expr == NULL)
+    if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");
     return sort_expression(sort_expr);
   }
@@ -370,10 +370,9 @@ namespace data {
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
   sort_expression parse_sort_expression(const std::string &text,
-                                        const data_specification& data_spec = data_specification())
+                                        const data_specification& data_spec = detail::default_specification())
   {
-    std::stringstream spec_stream;
-    spec_stream << text;
+    std::istringstream spec_stream(text);
     return parse_sort_expression(spec_stream, data_spec);
   }
 

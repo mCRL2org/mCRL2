@@ -94,6 +94,8 @@ void test_replace()
 {
   using namespace mcrl2::data::sort_bool_;
 
+  std::cerr << "replace" << std::endl;
+
   variable d("d", basic_sort("D"));
   variable e("e", basic_sort("D"));
   variable f("f", basic_sort("D"));
@@ -113,6 +115,8 @@ void test_replace()
 void test_assignment_list()
 {
   using namespace mcrl2::data::sort_bool_;
+
+  std::cerr << "assingment_list replace" << std::endl;
 
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));
@@ -154,6 +158,8 @@ void test_variable_replace()
 {
   using namespace mcrl2::data::sort_bool_;
 
+  std::cerr << "variable replace" << std::endl;
+
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));
   variable d3("d3", basic_sort("D"));
@@ -193,6 +199,7 @@ void test_variable_replace()
 
 void test_data_expression_replace()
 {
+  std::cerr << "expression replace" << std::endl;
   // y:Real
   variable y("y",sort_real_::real_());
   data_expression e(y);
@@ -230,8 +237,9 @@ void test_data_expression_replace()
 
 void test_replace_with_binders()
 {
+  std::cerr << "replace with binders" << std::endl;
   mutable_substitution< variable, data_expression > sigma;
-  data_expression                                   input1(parse_variable("c: Bool"));
+  data_expression                                   input1(variable("c", sort_bool_::bool_()));
   data_expression                                   input2(parse_data_expression("exists b: Bool, c: Bool. if(b, c, b)"));
 
   sigma[variable("c", sort_bool_::bool_())] = sort_bool_::false_();
