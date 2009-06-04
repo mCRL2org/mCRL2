@@ -127,7 +127,7 @@ int test_main(int argc, char** argv)
     }
   };
 
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   test_find_variable();
   core::garbage_collect();

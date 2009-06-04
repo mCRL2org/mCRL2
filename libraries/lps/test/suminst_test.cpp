@@ -169,7 +169,7 @@ void test_case_5(const t_suminst_options& opts)
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERM_INIT(ac, av)
+  MCRL2_ATERMPP_INIT(ac, av)
 
   t_suminst_options opts;
 

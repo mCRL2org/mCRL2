@@ -138,7 +138,7 @@ void test_case_4()
 
 int test_main(int ac, char** av)
 {
-  MCRL2_ATERM_INIT(ac, av)
+  MCRL2_ATERMPP_INIT(ac, av)
 
   test_case_1();
   core::garbage_collect();
