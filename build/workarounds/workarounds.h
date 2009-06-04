@@ -99,13 +99,4 @@ inline char *strdup(const char *s) {
 #define FREE_A(NAME)
 #endif
 
-//Make sure __func__ works (as well as possible)
-#ifndef __func__
-#ifdef __FUNCTION__
-#define __func__ __FUNCTION__
-#else
-#define __func__ __FILE__
-#endif
-#endif
-
 #endif

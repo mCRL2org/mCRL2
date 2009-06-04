@@ -14,7 +14,8 @@
 
 #include <cstdarg>
 #include <cassert>
-#include <aterm2.h>
+#include "aterm2.h"
+#include "boost/current_function.hpp"
 
 namespace mcrl2 {
   /// \brief The main namespace for the Core library.
@@ -72,13 +73,7 @@ namespace mcrl2 {
       void gsDebugMsgFunc(const char *FuncName, const char *Format, ...);
 
       /// \brief Function for printing debug messages.
-#if defined(__func__)
-# define gsDebugMsg(...)        gsDebugMsgFunc(__func__, __VA_ARGS__)
-#elif defined(__FUNCTION__)
-# define gsDebugMsg(...)        gsDebugMsgFunc(__FUNCTION__, __VA_ARGS__)
-#else
-# define gsDebugMsg(...)        gsDebugMsgFunc(__FILE__, __VA_ARGS__)
-#endif
+#define gsDebugMsg(...)        gsDebugMsgFunc(BOOST_CURRENT_FUNCTION, __VA_ARGS__)
 
       /// \brief Replaces message_handler by the function pointer passed as argument.
       void gsSetCustomMessageHandler(void (*)(messageType, const char*));
