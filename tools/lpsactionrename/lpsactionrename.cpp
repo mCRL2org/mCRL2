@@ -14,13 +14,14 @@
 #define TOOLNAME "lpsactionrename"
 #define AUTHOR "Jan Friso Groote and Tom Haenen"
 
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/lps_rewrite.h"
 #include "mcrl2/lps/rename.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/action_rename.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -157,13 +158,13 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       data::rewriter datar;
       if (m_rewrite)
       { datar = create_rewriter(lps_new_spec.data());
-        lps_new_spec = rewrite_lps(lps_new_spec,datar);
+        lps::rewrite(lps_new_spec, datar);
       }
       if(m_sumelm)
       { lps_new_spec = sumelm(lps_new_spec);
         if(m_rewrite)
         {
-          lps_new_spec = rewrite_lps(lps_new_spec,datar);
+          lps::rewrite(lps_new_spec, datar);
         }
       }
       lps_new_spec.save(m_output_filename);
