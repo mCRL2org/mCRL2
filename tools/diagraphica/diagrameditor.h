@@ -109,6 +109,8 @@ public:
     void handleMouseMotionEvent(
         const int &x,
         const int &y );
+    using Visualizer::handleKeyUpEvent;
+    using Visualizer::handleKeyDownEvent;
     void handleKeyUpEvent( const int &keyCode, const int &specialKey );
     void handleKeyDownEvent( const int &keyCode, const int &specialKey );
 

@@ -66,8 +66,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
     long variable = variables->index(propvar);
     if (variable < 0)
     {
-      core::gsErrorMsg("Error: The BES is not closed. Write to cwi-format failed.\n");
-      throw mcrl2::runtime_error("exit!");
+      throw mcrl2::runtime_error("The BES is not closed. Write to cwi-format failed.");
     }
     else
     {
@@ -78,8 +77,7 @@ std::string convert_rhs_to_cwi(pbes_expression p, atermpp::indexed_set *variable
   }
   else
   {
-    core::gsErrorMsg("The used equation system is not a BES. Could not save this in CWI-format.\n");
-    throw mcrl2::runtime_error("exit!");
+    throw mcrl2::runtime_error("The used equation system is not a BES. Could not save this in CWI-format.");
   }
   return result;
 }
@@ -135,8 +133,7 @@ void save_pbes_in_cwi_format(pbes<> pbes_spec, std::string outfilename)
       }
       else
       {
-        core::gsErrorMsg("Could not save PBES to %s\n", outfilename.c_str());
-        throw mcrl2::runtime_error("exit!");
+        throw mcrl2::runtime_error("Could not save PBES to" + outfilename);
       }
     }
     outputfile.close();

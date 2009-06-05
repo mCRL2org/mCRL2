@@ -37,7 +37,7 @@ namespace data {
 
   /// \cond INTERNAL_DOCS
   namespace detail {
-    inline data_specification const& default_specification()
+    inline static data_specification const& default_specification()
     {
       static data_specification specification;
 
@@ -333,8 +333,8 @@ namespace data {
   /// \param[in] var_decl a list of variable declarations
   /// \param[in] data_spec The data specification that is used for type checking. 
   inline
-  data_expression parse_data_expression(const std::string text,
-                                        const std::string var_decl,
+  data_expression parse_data_expression(const std::string& text,
+                                        const std::string& var_decl,
                                         const data_specification& data_spec = detail::default_specification())
   { atermpp::vector < variable > variable_store;
     parse_variables(var_decl,std::back_inserter(variable_store),data_spec);

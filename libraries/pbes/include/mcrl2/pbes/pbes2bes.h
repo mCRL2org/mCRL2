@@ -150,11 +150,11 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
       }
       else if (p->is_variable())
       { // If p is a freevar
-        core::gsErrorMsg("The propositional varaible contains a variable of finite sort.\n");
-        core::gsErrorMsg("Can not handle variables of finite sort when creating a propositional variable name.\n");
-        core::gsErrorMsg("Computation aborted.\n");
-        std::cerr << "Problematic Term: " << mcrl2::core::pp(*p) << std::endl;
-        throw mcrl2::runtime_error("exit!");
+        throw mcrl2::runtime_error(
+          "The propositional variable contains a variable of finite sort.\n"
+          "Can not handle variables of finite sort when creating a propositional variable name.\n"
+          "Computation aborted.\n"
+          "Problematic Term: " + mcrl2::core::pp(*p));
       }
     }
     else
@@ -175,8 +175,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   // Instantiate free variables in the system
   if (!pbes_spec.instantiate_free_variables())
   {
-    core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-    throw mcrl2::runtime_error("exit!");
+    throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
   }
   core::gsVerboseMsg("Using lazy approach...\n");
 
@@ -281,8 +280,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   // Instantiate free variables in the system
   if (!pbes_spec.instantiate_free_variables())
   {
-    core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-    throw mcrl2::runtime_error("exit!");
+    throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
   }
   core::gsVerboseMsg("Using finite approach...\n");
 

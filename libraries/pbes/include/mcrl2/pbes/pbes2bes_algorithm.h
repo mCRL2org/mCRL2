@@ -104,8 +104,7 @@ namespace pbes_system {
       {
         if (!p.instantiate_free_variables())
         {
-          core::gsErrorMsg("Instantiatiation of free variables failed!\n");
-          throw mcrl2::runtime_error("exit!");
+          throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
         }
 
         // initialize equation_index and E
