@@ -53,6 +53,7 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
   }
 
   make test.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
+  make test2.lps : /tools/mcrl22lps//mcrl22lps $(TOP)/examples/academic/abp.mcrl2 : @generate-lps ;
   make test.pbes : /tools/lps2pbes//lps2pbes $(TOP)/examples/modal-formulas/nodeadlock.mcf test.lps : @generate-pbes ;
   make test.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
   make test2.lts : /tools/lps2lts//lps2lts test.lps : @generate-lts ;
@@ -66,6 +67,12 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
     }
     else if $(tool) in lpsactionrename {
       tests += [ run /tools/$(tool)//$(tool) : --renamefile=$(TOP)/status/rename.data : test.lps : <testing.preserve>true ] ;
+    }
+    else if $(tool) in lpsparunfold {
+      tests += [ run /tools/$(tool)//$(tool) : -i0 : test.lps : <testing.preserve>true ] ;
+    }
+    else if $(tool) in lpsbisim2pbes {
+      tests += [ run /tools/$(tool)//$(tool) : : test.lps test2.lps : <testing.preserve>true ] ;
     }
     else {
       tests += [ run /tools/$(tool)//$(tool) : : test.lps : <testing.preserve>true <testing.post-pipes>/tools/lpspp//lpspp ] ;
