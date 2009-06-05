@@ -88,7 +88,12 @@ namespace lysa
     int current_line;
     int current_col;
 
-    ProcessInfo(lysa_options options) : _calculus(Unknown), options(options) {};
+    ProcessInfo(lysa_options options)
+      : _calculus(Unknown),
+        options(options),
+        current_line(0),
+        current_col(0)
+      {};
     Calculus calculus() { return _calculus; };
     void set_calculus(Calculus c);
     void override_calculus(Calculus c);

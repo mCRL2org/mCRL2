@@ -421,7 +421,7 @@ void MainFrame::onResetStatePositions(wxCommandEvent& /*event*/) {
   glCanvas->resetStatePositions();
 }
 
-void MainFrame::createProgressDialog(const string title,const string text) {
+void MainFrame::createProgressDialog(const string& title,const string& text) {
   progDialog = new wxProgressDialog(wxString(title.c_str(),wxConvUTF8),
       wxString(text.c_str(),wxConvUTF8),100,this,
       wxPD_APP_MODAL|wxPD_AUTO_HIDE);

@@ -177,7 +177,6 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   double gamma = alpha + beta;
   double delta = alpha - beta;
 
-  double xFactor, yFactor;
   double cosGamma = cos(gamma);
   double sinGamma = sin(gamma);
   double cosDelta = cos(delta);
@@ -185,7 +184,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
 
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
-    xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
+    double xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
@@ -198,7 +197,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   }
   else
   {
-    yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
+    double yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 

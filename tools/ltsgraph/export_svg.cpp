@@ -253,7 +253,6 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   double gamma = alpha + beta;
   double delta = alpha - beta;
 
-  double xFactor, yFactor;
   double xControl1, yControl1;
   double xControl2, yControl2;
   double cosGamma = cos(gamma);
@@ -263,7 +262,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
 
   if(fabs(cosGamma + cosDelta) > 0.01)
   {
-    xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
+    double xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
@@ -276,7 +275,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   }
   else
   {
-    yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
+    double yFactor = (8 * (yVirtual - yState)) / (3 * (sin(gamma) + sin(delta)));
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 
