@@ -13,7 +13,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"
-#include "mcrl2/liblts_fsmparser.hpp"
+#include "mcrl2/lts/detail/liblts_fsmparser.h"
 
 using namespace mcrl2::core;
 

@@ -62,7 +62,7 @@
 
 
 
-#include "mcrl2/core/detail/mcrl2parser.hpp"
+#include "mcrl2/core/detail/mcrl2parser.h"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -74,7 +74,7 @@
 # undef YYERROR_VERBOSE
 # define YYERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 0
+# define YYERROR_VERBOSE 1
 #endif
 
 /* Enabling the token table.  */
@@ -447,47 +447,47 @@ static const short int yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,   207,   207,   212,   217,   222,   227,   232,   237,   242,
-     247,   252,   257,   269,   278,   282,   291,   300,   305,   314,
-     323,   327,   336,   341,   350,   355,   365,   369,   378,   383,
-     392,   397,   406,   411,   416,   421,   429,   433,   437,   441,
-     445,   453,   457,   461,   472,   481,   485,   494,   499,   508,
-     517,   521,   526,   531,   541,   546,   555,   568,   572,   582,
-     586,   591,   600,   604,   610,   620,   624,   629,   638,   642,
-     648,   658,   662,   667,   672,   681,   685,   691,   697,   703,
-     709,   719,   723,   733,   737,   747,   751,   761,   765,   771,
-     781,   785,   791,   797,   807,   811,   817,   827,   831,   836,
-     841,   850,   854,   859,   868,   872,   881,   886,   895,   900,
-     904,   908,   912,   920,   925,   930,   935,   940,   949,   954,
-     959,   968,   973,   982,   991,  1000,  1012,  1021,  1026,  1035,
-    1040,  1045,  1050,  1059,  1068,  1073,  1082,  1091,  1100,  1105,
-    1114,  1119,  1128,  1137,  1147,  1152,  1161,  1174,  1183,  1188,
-    1204,  1209,  1218,  1223,  1233,  1238,  1250,  1255,  1264,  1269,
-    1278,  1283,  1295,  1304,  1308,  1317,  1321,  1330,  1334,  1339,
-    1348,  1352,  1361,  1365,  1374,  1378,  1387,  1391,  1396,  1405,
-    1409,  1418,  1422,  1431,  1435,  1444,  1448,  1453,  1458,  1467,
-    1471,  1480,  1484,  1493,  1497,  1506,  1510,  1519,  1523,  1532,
-    1536,  1541,  1546,  1555,  1559,  1568,  1572,  1576,  1582,  1586,
-    1594,  1599,  1608,  1613,  1622,  1627,  1632,  1637,  1642,  1651,
-    1656,  1665,  1670,  1679,  1684,  1693,  1702,  1707,  1716,  1721,
-    1730,  1735,  1740,  1749,  1758,  1763,  1772,  1777,  1786,  1791,
-    1800,  1812,  1821,  1826,  1835,  1840,  1845,  1850,  1859,  1868,
-    1873,  1882,  1892,  1905,  1914,  1919,  1928,  1934,  1949,  1961,
-    1970,  1974,  1979,  1984,  1989,  1999,  2003,  2013,  2018,  2027,
-    2036,  2040,  2049,  2053,  2058,  2063,  2068,  2077,  2081,  2086,
-    2095,  2099,  2104,  2109,  2114,  2123,  2127,  2132,  2137,  2142,
-    2147,  2156,  2160,  2165,  2170,  2175,  2184,  2189,  2194,  2199,
-    2204,  2209,  2214,  2222,  2227,  2236,  2240,  2249,  2253,  2262,
-    2266,  2275,  2279,  2288,  2292,  2297,  2306,  2310,  2315,  2324,
-    2329,  2337,  2342,  2347,  2355,  2364,  2368,  2373,  2382,  2386,
-    2395,  2399,  2404,  2413,  2417,  2422,  2431,  2435,  2440,  2449,
-    2453,  2462,  2466,  2475,  2479,  2484,  2493,  2498,  2503,  2508,
-    2513,  2524,  2533,  2538,  2547,  2552,  2557,  2566,  2575,  2580,
-    2598,  2603,  2612,  2617,  2626,  2631,  2643,  2652,  2656,  2661,
-    2670,  2674,  2683,  2687,  2692,  2701,  2705,  2710,  2719,  2723,
-    2728,  2737,  2741,  2750,  2754,  2759,  2768,  2773,  2778,  2783,
-    2788,  2800,  2809,  2814,  2823,  2828,  2833,  2842,  2847,  2856,
-    2861,  2870,  2876,  2886,  2891,  2900,  2906
+       0,   210,   210,   215,   220,   225,   230,   235,   240,   245,
+     250,   255,   260,   272,   281,   285,   294,   303,   308,   317,
+     326,   330,   339,   344,   353,   358,   368,   372,   381,   386,
+     395,   400,   409,   414,   419,   424,   432,   436,   440,   444,
+     448,   456,   460,   464,   475,   484,   488,   497,   502,   511,
+     520,   524,   529,   534,   544,   549,   558,   571,   575,   585,
+     589,   594,   603,   607,   613,   623,   627,   632,   641,   645,
+     651,   661,   665,   670,   675,   684,   688,   694,   700,   706,
+     712,   722,   726,   736,   740,   750,   754,   764,   768,   774,
+     784,   788,   794,   800,   810,   814,   820,   830,   834,   839,
+     844,   853,   857,   862,   871,   875,   884,   889,   898,   903,
+     907,   911,   915,   923,   928,   933,   938,   943,   952,   957,
+     962,   971,   976,   985,   994,  1003,  1015,  1024,  1029,  1038,
+    1043,  1048,  1053,  1062,  1071,  1076,  1085,  1094,  1103,  1108,
+    1117,  1122,  1131,  1140,  1150,  1155,  1164,  1177,  1186,  1191,
+    1207,  1212,  1221,  1226,  1236,  1241,  1253,  1258,  1267,  1272,
+    1281,  1286,  1298,  1307,  1311,  1320,  1324,  1333,  1337,  1342,
+    1351,  1355,  1364,  1368,  1377,  1381,  1390,  1394,  1399,  1408,
+    1412,  1421,  1425,  1434,  1438,  1447,  1451,  1456,  1461,  1470,
+    1474,  1483,  1487,  1496,  1500,  1509,  1513,  1522,  1526,  1535,
+    1539,  1544,  1549,  1558,  1562,  1571,  1575,  1579,  1585,  1589,
+    1597,  1602,  1611,  1616,  1625,  1630,  1635,  1640,  1645,  1654,
+    1659,  1668,  1673,  1682,  1687,  1696,  1705,  1710,  1719,  1724,
+    1733,  1738,  1743,  1752,  1761,  1766,  1775,  1780,  1789,  1794,
+    1803,  1815,  1824,  1829,  1838,  1843,  1848,  1853,  1862,  1871,
+    1876,  1885,  1895,  1908,  1917,  1922,  1931,  1937,  1952,  1964,
+    1973,  1977,  1982,  1987,  1992,  2002,  2006,  2016,  2021,  2030,
+    2039,  2043,  2052,  2056,  2061,  2066,  2071,  2080,  2084,  2089,
+    2098,  2102,  2107,  2112,  2117,  2126,  2130,  2135,  2140,  2145,
+    2150,  2159,  2163,  2168,  2173,  2178,  2187,  2192,  2197,  2202,
+    2207,  2212,  2217,  2225,  2230,  2239,  2243,  2252,  2256,  2265,
+    2269,  2278,  2282,  2291,  2295,  2300,  2309,  2313,  2318,  2327,
+    2332,  2340,  2345,  2350,  2358,  2367,  2371,  2376,  2385,  2389,
+    2398,  2402,  2407,  2416,  2420,  2425,  2434,  2438,  2443,  2452,
+    2456,  2465,  2469,  2478,  2482,  2487,  2496,  2501,  2506,  2511,
+    2516,  2527,  2536,  2541,  2550,  2555,  2560,  2569,  2578,  2583,
+    2601,  2606,  2615,  2620,  2629,  2634,  2646,  2655,  2659,  2664,
+    2673,  2677,  2686,  2690,  2695,  2704,  2708,  2713,  2722,  2726,
+    2731,  2740,  2744,  2753,  2757,  2762,  2771,  2776,  2781,  2786,
+    2791,  2803,  2812,  2817,  2826,  2831,  2836,  2845,  2850,  2859,
+    2864,  2873,  2879,  2889,  2894,  2903,  2909
 };
 #endif
 
@@ -2086,7 +2086,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   switch (yyn)
     {
         case 2:
-#line 208 "mcrl2parser.yy"
+#line 211 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2094,7 +2094,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 3:
-#line 213 "mcrl2parser.yy"
+#line 216 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2102,7 +2102,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 4:
-#line 218 "mcrl2parser.yy"
+#line 221 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2110,7 +2110,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 5:
-#line 223 "mcrl2parser.yy"
+#line 226 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2118,7 +2118,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 6:
-#line 228 "mcrl2parser.yy"
+#line 231 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2126,7 +2126,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 7:
-#line 233 "mcrl2parser.yy"
+#line 236 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2134,7 +2134,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 8:
-#line 238 "mcrl2parser.yy"
+#line 241 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2142,7 +2142,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 9:
-#line 243 "mcrl2parser.yy"
+#line 246 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2150,7 +2150,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 10:
-#line 248 "mcrl2parser.yy"
+#line 251 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2158,7 +2158,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 11:
-#line 253 "mcrl2parser.yy"
+#line 256 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2166,7 +2166,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 12:
-#line 258 "mcrl2parser.yy"
+#line 261 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).term), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list));
       mcrl2_spec_tree = ((*yyvalp).term);
@@ -2174,7 +2174,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 13:
-#line 270 "mcrl2parser.yy"
+#line 273 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed sort expression\n  %T\n", ((*yyvalp).appl));
@@ -2182,14 +2182,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 14:
-#line 279 "mcrl2parser.yy"
+#line 282 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 15:
-#line 283 "mcrl2parser.yy"
+#line 286 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortArrow((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed arrow sort\n  %T\n", ((*yyvalp).appl));
@@ -2197,7 +2197,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 16:
-#line 292 "mcrl2parser.yy"
+#line 295 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed non-arrow domain\n  %T\n", ((*yyvalp).list));
@@ -2205,7 +2205,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 17:
-#line 301 "mcrl2parser.yy"
+#line 304 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed non-arrow domain elements\n  %T\n", ((*yyvalp).list));
@@ -2213,7 +2213,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 18:
-#line 306 "mcrl2parser.yy"
+#line 309 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed non-arrow domain elements\n  %T\n", ((*yyvalp).list));
@@ -2221,7 +2221,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 19:
-#line 315 "mcrl2parser.yy"
+#line 318 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed non-arrow domain element\n  %T\n", ((*yyvalp).appl));
@@ -2229,14 +2229,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 20:
-#line 324 "mcrl2parser.yy"
+#line 327 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 21:
-#line 328 "mcrl2parser.yy"
+#line 331 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortStruct(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed structured sort\n  %T\n", ((*yyvalp).appl));
@@ -2244,7 +2244,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 22:
-#line 337 "mcrl2parser.yy"
+#line 340 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort constructors\n  %T\n", ((*yyvalp).list));
@@ -2252,7 +2252,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 23:
-#line 342 "mcrl2parser.yy"
+#line 345 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort constructors\n  %T\n", ((*yyvalp).list));
@@ -2260,7 +2260,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 24:
-#line 351 "mcrl2parser.yy"
+#line 354 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStructCons((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort constructor\n  %T\n", ((*yyvalp).appl));
@@ -2268,7 +2268,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 25:
-#line 356 "mcrl2parser.yy"
+#line 359 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStructCons((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort constructor\n  %T\n", ((*yyvalp).appl));
@@ -2276,7 +2276,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 26:
-#line 365 "mcrl2parser.yy"
+#line 368 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeNil());
       gsDebugMsg("parsed recogniser\n  %T\n", ((*yyvalp).appl));
@@ -2284,7 +2284,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 27:
-#line 370 "mcrl2parser.yy"
+#line 373 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed recogniser id\n  %T\n", ((*yyvalp).appl));
@@ -2292,7 +2292,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 28:
-#line 379 "mcrl2parser.yy"
+#line 382 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort projections\n  %T\n", ((*yyvalp).list));
@@ -2300,7 +2300,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 29:
-#line 384 "mcrl2parser.yy"
+#line 387 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort projections\n  %T\n", ((*yyvalp).list));
@@ -2308,7 +2308,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 30:
-#line 393 "mcrl2parser.yy"
+#line 396 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStructProj(gsMakeNil(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort projection\n  %T\n", ((*yyvalp).appl));
@@ -2316,7 +2316,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 31:
-#line 398 "mcrl2parser.yy"
+#line 401 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStructProj((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed structured sort projection\n  %T\n", ((*yyvalp).appl));
@@ -2324,7 +2324,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 32:
-#line 407 "mcrl2parser.yy"
+#line 410 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed primary sort\n  %T\n", ((*yyvalp).appl));
@@ -2332,7 +2332,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 33:
-#line 412 "mcrl2parser.yy"
+#line 415 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed sort constant\n  %T\n", ((*yyvalp).appl));
@@ -2340,7 +2340,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 34:
-#line 417 "mcrl2parser.yy"
+#line 420 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed sort constructor\n  %T\n", ((*yyvalp).appl));
@@ -2348,70 +2348,70 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 35:
-#line 422 "mcrl2parser.yy"
+#line 425 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 36:
-#line 430 "mcrl2parser.yy"
+#line 433 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 37:
-#line 434 "mcrl2parser.yy"
+#line 437 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 38:
-#line 438 "mcrl2parser.yy"
+#line 441 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 39:
-#line 442 "mcrl2parser.yy"
+#line 445 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 40:
-#line 446 "mcrl2parser.yy"
+#line 449 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 41:
-#line 454 "mcrl2parser.yy"
+#line 457 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortExprList((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 42:
-#line 458 "mcrl2parser.yy"
+#line 461 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortExprSet((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 43:
-#line 462 "mcrl2parser.yy"
+#line 465 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortExprBag((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
     ;}
     break;
 
   case 44:
-#line 473 "mcrl2parser.yy"
+#line 476 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed data expression\n  %T\n", ((*yyvalp).appl));
@@ -2419,14 +2419,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 45:
-#line 482 "mcrl2parser.yy"
+#line 485 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 46:
-#line 486 "mcrl2parser.yy"
+#line 489 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeWhr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed where clause\n  %T\n", ((*yyvalp).appl));
@@ -2434,7 +2434,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 47:
-#line 495 "mcrl2parser.yy"
+#line 498 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed identifier initialisations\n  %T\n", ((*yyvalp).list));
@@ -2442,7 +2442,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 48:
-#line 500 "mcrl2parser.yy"
+#line 503 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed identifier initialisations\n  %T\n", ((*yyvalp).list));
@@ -2450,7 +2450,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 49:
-#line 509 "mcrl2parser.yy"
+#line 512 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIdInit((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed identifier initialisation\n  %T\n", ((*yyvalp).appl));
@@ -2458,14 +2458,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 50:
-#line 518 "mcrl2parser.yy"
+#line 521 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 51:
-#line 522 "mcrl2parser.yy"
+#line 525 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeLambda(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed lambda abstraction\n  %T\n", ((*yyvalp).appl));
@@ -2473,7 +2473,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 52:
-#line 527 "mcrl2parser.yy"
+#line 530 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeForall(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2481,7 +2481,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 53:
-#line 532 "mcrl2parser.yy"
+#line 535 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeExists(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2489,7 +2489,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 54:
-#line 542 "mcrl2parser.yy"
+#line 545 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed data variable declarations\n  %T\n", ((*yyvalp).list));
@@ -2497,7 +2497,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 55:
-#line 547 "mcrl2parser.yy"
+#line 550 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed data variable declarations\n  %T\n", ((*yyvalp).list));
@@ -2505,7 +2505,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 56:
-#line 556 "mcrl2parser.yy"
+#line 559 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
@@ -2517,14 +2517,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 57:
-#line 569 "mcrl2parser.yy"
+#line 572 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 58:
-#line 573 "mcrl2parser.yy"
+#line 576 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2533,14 +2533,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 59:
-#line 583 "mcrl2parser.yy"
+#line 586 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 60:
-#line 587 "mcrl2parser.yy"
+#line 590 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeForall(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2548,7 +2548,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 61:
-#line 592 "mcrl2parser.yy"
+#line 595 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeExists(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2556,14 +2556,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 62:
-#line 601 "mcrl2parser.yy"
+#line 604 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 63:
-#line 605 "mcrl2parser.yy"
+#line 608 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2572,7 +2572,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 64:
-#line 611 "mcrl2parser.yy"
+#line 614 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2581,14 +2581,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 65:
-#line 621 "mcrl2parser.yy"
+#line 624 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 66:
-#line 625 "mcrl2parser.yy"
+#line 628 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeForall(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2596,7 +2596,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 67:
-#line 630 "mcrl2parser.yy"
+#line 633 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeExists(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2604,14 +2604,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 68:
-#line 639 "mcrl2parser.yy"
+#line 642 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 69:
-#line 643 "mcrl2parser.yy"
+#line 646 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2620,7 +2620,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 70:
-#line 649 "mcrl2parser.yy"
+#line 652 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2629,14 +2629,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 71:
-#line 659 "mcrl2parser.yy"
+#line 662 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 72:
-#line 663 "mcrl2parser.yy"
+#line 666 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeLambda(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed lambda abstraction\n  %T\n", ((*yyvalp).appl));
@@ -2644,7 +2644,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 73:
-#line 668 "mcrl2parser.yy"
+#line 671 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeForall(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2652,7 +2652,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 74:
-#line 673 "mcrl2parser.yy"
+#line 676 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeExists(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2660,14 +2660,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 75:
-#line 682 "mcrl2parser.yy"
+#line 685 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 76:
-#line 686 "mcrl2parser.yy"
+#line 689 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2676,7 +2676,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 77:
-#line 692 "mcrl2parser.yy"
+#line 695 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2685,7 +2685,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 78:
-#line 698 "mcrl2parser.yy"
+#line 701 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2694,7 +2694,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 79:
-#line 704 "mcrl2parser.yy"
+#line 707 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2703,7 +2703,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 80:
-#line 710 "mcrl2parser.yy"
+#line 713 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2712,14 +2712,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 81:
-#line 720 "mcrl2parser.yy"
+#line 723 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 82:
-#line 724 "mcrl2parser.yy"
+#line 727 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2728,14 +2728,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 83:
-#line 734 "mcrl2parser.yy"
+#line 737 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 84:
-#line 738 "mcrl2parser.yy"
+#line 741 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2744,14 +2744,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 85:
-#line 748 "mcrl2parser.yy"
+#line 751 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 86:
-#line 752 "mcrl2parser.yy"
+#line 755 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2760,14 +2760,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 87:
-#line 762 "mcrl2parser.yy"
+#line 765 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 88:
-#line 766 "mcrl2parser.yy"
+#line 769 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2776,7 +2776,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 89:
-#line 772 "mcrl2parser.yy"
+#line 775 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2785,14 +2785,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 90:
-#line 782 "mcrl2parser.yy"
+#line 785 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 91:
-#line 786 "mcrl2parser.yy"
+#line 789 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2801,7 +2801,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 92:
-#line 792 "mcrl2parser.yy"
+#line 795 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2810,7 +2810,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 93:
-#line 798 "mcrl2parser.yy"
+#line 801 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2819,14 +2819,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 94:
-#line 808 "mcrl2parser.yy"
+#line 811 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 95:
-#line 812 "mcrl2parser.yy"
+#line 815 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2835,7 +2835,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 96:
-#line 818 "mcrl2parser.yy"
+#line 821 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
@@ -2844,14 +2844,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 97:
-#line 828 "mcrl2parser.yy"
+#line 831 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 98:
-#line 832 "mcrl2parser.yy"
+#line 835 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed prefix data expression\n  %T\n", ((*yyvalp).appl));
@@ -2859,7 +2859,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 99:
-#line 837 "mcrl2parser.yy"
+#line 840 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed prefix data expression\n  %T\n", ((*yyvalp).appl));
@@ -2867,7 +2867,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 100:
-#line 842 "mcrl2parser.yy"
+#line 845 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed prefix data expression\n  %T\n", ((*yyvalp).appl));
@@ -2875,14 +2875,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 101:
-#line 851 "mcrl2parser.yy"
+#line 854 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 102:
-#line 855 "mcrl2parser.yy"
+#line 858 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeForall(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2890,7 +2890,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 103:
-#line 860 "mcrl2parser.yy"
+#line 863 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeExists(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -2898,14 +2898,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 104:
-#line 869 "mcrl2parser.yy"
+#line 872 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 105:
-#line 873 "mcrl2parser.yy"
+#line 876 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed postfix data expression\n  %T\n", ((*yyvalp).appl));
@@ -2913,7 +2913,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 106:
-#line 882 "mcrl2parser.yy"
+#line 885 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data expressions\n  %T\n", ((*yyvalp).list));
@@ -2921,7 +2921,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 107:
-#line 887 "mcrl2parser.yy"
+#line 890 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data expressions\n  %T\n", ((*yyvalp).list));
@@ -2929,7 +2929,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 108:
-#line 896 "mcrl2parser.yy"
+#line 899 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed primary data expression\n  %T\n", ((*yyvalp).appl));
@@ -2937,35 +2937,35 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 109:
-#line 901 "mcrl2parser.yy"
+#line 904 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 110:
-#line 905 "mcrl2parser.yy"
+#line 908 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 111:
-#line 909 "mcrl2parser.yy"
+#line 912 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 112:
-#line 913 "mcrl2parser.yy"
+#line 916 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 113:
-#line 921 "mcrl2parser.yy"
+#line 924 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
@@ -2973,7 +2973,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 114:
-#line 926 "mcrl2parser.yy"
+#line 929 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
@@ -2981,7 +2981,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 115:
-#line 931 "mcrl2parser.yy"
+#line 934 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
@@ -2989,7 +2989,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 116:
-#line 936 "mcrl2parser.yy"
+#line 939 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
@@ -2997,7 +2997,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 117:
-#line 941 "mcrl2parser.yy"
+#line 944 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data constant\n  %T\n", ((*yyvalp).appl));
@@ -3005,7 +3005,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 118:
-#line 950 "mcrl2parser.yy"
+#line 953 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId(gsMakeOpIdNameListEnum()), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
@@ -3013,7 +3013,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 119:
-#line 955 "mcrl2parser.yy"
+#line 958 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId(gsMakeOpIdNameSetEnum()), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
@@ -3021,7 +3021,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 120:
-#line 960 "mcrl2parser.yy"
+#line 963 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataAppl(gsMakeId(gsMakeOpIdNameBagEnum()), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed data enumeration\n  %T\n", ((*yyvalp).appl));
@@ -3029,7 +3029,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 121:
-#line 969 "mcrl2parser.yy"
+#line 972 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed bag enumeration elements\n  %T\n", ((*yyvalp).list));
@@ -3037,7 +3037,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 122:
-#line 974 "mcrl2parser.yy"
+#line 977 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed bag enumeration elements\n  %T\n", ((*yyvalp).list));
@@ -3045,7 +3045,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 123:
-#line 983 "mcrl2parser.yy"
+#line 986 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList2((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed bag enumeration element\n  %T\n", ((*yyvalp).list));
@@ -3053,7 +3053,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 124:
-#line 992 "mcrl2parser.yy"
+#line 995 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBinder(gsMakeSetBagComp(), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data comprehension\n  %T\n", ((*yyvalp).appl));
@@ -3061,7 +3061,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 125:
-#line 1001 "mcrl2parser.yy"
+#line 1004 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataVarId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data variable declaration\n  %T\n", ((*yyvalp).appl));
@@ -3069,7 +3069,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 126:
-#line 1013 "mcrl2parser.yy"
+#line 1016 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsDataSpecEltsToSpec(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed data specification\n  %T\n", ((*yyvalp).appl));
@@ -3077,7 +3077,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 127:
-#line 1022 "mcrl2parser.yy"
+#line 1025 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data specification elements\n  %T\n", ((*yyvalp).list));
@@ -3085,7 +3085,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 128:
-#line 1027 "mcrl2parser.yy"
+#line 1030 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data specification elements\n  %T\n", ((*yyvalp).list));
@@ -3093,7 +3093,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 129:
-#line 1036 "mcrl2parser.yy"
+#line 1039 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed data specification element\n  %T\n", ((*yyvalp).appl));
@@ -3101,7 +3101,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 130:
-#line 1041 "mcrl2parser.yy"
+#line 1044 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed data specification element\n  %T\n", ((*yyvalp).appl));
@@ -3109,7 +3109,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 131:
-#line 1046 "mcrl2parser.yy"
+#line 1049 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed data specification element\n  %T\n", ((*yyvalp).appl));
@@ -3117,7 +3117,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 132:
-#line 1051 "mcrl2parser.yy"
+#line 1054 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed data specification element\n  %T\n", ((*yyvalp).appl));
@@ -3125,7 +3125,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 133:
-#line 1060 "mcrl2parser.yy"
+#line 1063 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSortSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed sort specification\n  %T\n", ((*yyvalp).appl));
@@ -3133,7 +3133,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 134:
-#line 1069 "mcrl2parser.yy"
+#line 1072 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed sort declarations\n  %T\n", ((*yyvalp).list));
@@ -3141,7 +3141,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 135:
-#line 1074 "mcrl2parser.yy"
+#line 1077 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed sort declarations\n  %T\n", ((*yyvalp).list));
@@ -3149,7 +3149,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 136:
-#line 1083 "mcrl2parser.yy"
+#line 1086 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
@@ -3161,7 +3161,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 137:
-#line 1092 "mcrl2parser.yy"
+#line 1095 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) gsMakeSortRef((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed reference sort declarations\n  %T\n", ((*yyvalp).list));
@@ -3169,7 +3169,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 138:
-#line 1101 "mcrl2parser.yy"
+#line 1104 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).list));
@@ -3177,7 +3177,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 139:
-#line 1106 "mcrl2parser.yy"
+#line 1109 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).list));
@@ -3185,7 +3185,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 140:
-#line 1115 "mcrl2parser.yy"
+#line 1118 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed domain\n  %T\n", ((*yyvalp).list));
@@ -3193,7 +3193,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 141:
-#line 1120 "mcrl2parser.yy"
+#line 1123 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) gsMakeSortArrow((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed domain\n  %T\n", ((*yyvalp).list));
@@ -3201,7 +3201,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 142:
-#line 1129 "mcrl2parser.yy"
+#line 1132 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeConsSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed constructor operation specification\n  %T\n", ((*yyvalp).appl));
@@ -3209,7 +3209,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 143:
-#line 1138 "mcrl2parser.yy"
+#line 1141 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMapSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed operation specification\n  %T\n", ((*yyvalp).appl));
@@ -3217,7 +3217,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 144:
-#line 1148 "mcrl2parser.yy"
+#line 1151 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed operation declarations\n  %T\n", ((*yyvalp).list));
@@ -3225,7 +3225,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 145:
-#line 1153 "mcrl2parser.yy"
+#line 1156 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed operation declarations\n  %T\n", ((*yyvalp).list));
@@ -3233,7 +3233,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 146:
-#line 1162 "mcrl2parser.yy"
+#line 1165 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
@@ -3245,7 +3245,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 147:
-#line 1175 "mcrl2parser.yy"
+#line 1178 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataEqnSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed data equation specification\n  %T\n", ((*yyvalp).appl));
@@ -3253,7 +3253,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 148:
-#line 1184 "mcrl2parser.yy"
+#line 1187 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed data equation section\n  %T\n", ((*yyvalp).list));
@@ -3261,7 +3261,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 149:
-#line 1189 "mcrl2parser.yy"
+#line 1192 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.list));
@@ -3276,7 +3276,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 150:
-#line 1205 "mcrl2parser.yy"
+#line 1208 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data equation declarations\n  %T\n", ((*yyvalp).list));
@@ -3284,7 +3284,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 151:
-#line 1210 "mcrl2parser.yy"
+#line 1213 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed equation declarations\n  %T\n", ((*yyvalp).list));
@@ -3292,7 +3292,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 152:
-#line 1219 "mcrl2parser.yy"
+#line 1222 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataEqn(ATmakeList0(), gsMakeNil(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data equation declaration\n  %T\n", ((*yyvalp).appl));
@@ -3300,7 +3300,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 153:
-#line 1224 "mcrl2parser.yy"
+#line 1227 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataEqn(ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data equation declaration\n  %T\n", ((*yyvalp).appl));
@@ -3308,7 +3308,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 154:
-#line 1234 "mcrl2parser.yy"
+#line 1237 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed data variable declarations\n  %T\n", ((*yyvalp).list));
@@ -3316,7 +3316,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 155:
-#line 1239 "mcrl2parser.yy"
+#line 1242 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed data variable declarations\n  %T\n", ((*yyvalp).list));
@@ -3324,7 +3324,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 156:
-#line 1251 "mcrl2parser.yy"
+#line 1254 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMultAct(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed multi-action\n  %T\n", ((*yyvalp).appl));
@@ -3332,7 +3332,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 157:
-#line 1256 "mcrl2parser.yy"
+#line 1259 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMultAct(ATmakeList0()));
       gsDebugMsg("parsed multi-action\n  %T\n", ((*yyvalp).appl));
@@ -3340,7 +3340,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 158:
-#line 1265 "mcrl2parser.yy"
+#line 1268 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed parameterised id's\n  %T\n", ((*yyvalp).list));
@@ -3348,7 +3348,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 159:
-#line 1270 "mcrl2parser.yy"
+#line 1273 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed parameterised id's\n  %T\n", ((*yyvalp).list));
@@ -3356,7 +3356,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 160:
-#line 1279 "mcrl2parser.yy"
+#line 1282 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeParamId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), ATmakeList0()));
       gsDebugMsg("parsed action or process\n  %T\n", ((*yyvalp).appl));
@@ -3364,7 +3364,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 161:
-#line 1284 "mcrl2parser.yy"
+#line 1287 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeParamId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed action or process\n  %T\n", ((*yyvalp).appl));
@@ -3372,7 +3372,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 162:
-#line 1296 "mcrl2parser.yy"
+#line 1299 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed process expression\n  %T\n", ((*yyvalp).appl));
@@ -3380,14 +3380,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 163:
-#line 1305 "mcrl2parser.yy"
+#line 1308 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 164:
-#line 1309 "mcrl2parser.yy"
+#line 1312 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeChoice((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed choice expression\n  %T\n", ((*yyvalp).appl));
@@ -3395,14 +3395,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 165:
-#line 1318 "mcrl2parser.yy"
+#line 1321 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 166:
-#line 1322 "mcrl2parser.yy"
+#line 1325 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3410,14 +3410,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 167:
-#line 1331 "mcrl2parser.yy"
+#line 1334 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 168:
-#line 1335 "mcrl2parser.yy"
+#line 1338 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMerge((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed merge expression\n  %T\n", ((*yyvalp).appl));
@@ -3425,7 +3425,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 169:
-#line 1340 "mcrl2parser.yy"
+#line 1343 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeLMerge((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed left merge expression\n  %T\n", ((*yyvalp).appl));
@@ -3433,14 +3433,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 170:
-#line 1349 "mcrl2parser.yy"
+#line 1352 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 171:
-#line 1353 "mcrl2parser.yy"
+#line 1356 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3448,14 +3448,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 172:
-#line 1362 "mcrl2parser.yy"
+#line 1365 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 173:
-#line 1366 "mcrl2parser.yy"
+#line 1369 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBInit((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed bounded initialisation expression\n  %T\n", ((*yyvalp).appl));
@@ -3463,14 +3463,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 174:
-#line 1375 "mcrl2parser.yy"
+#line 1378 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 175:
-#line 1379 "mcrl2parser.yy"
+#line 1382 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3478,14 +3478,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 176:
-#line 1388 "mcrl2parser.yy"
+#line 1391 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 177:
-#line 1392 "mcrl2parser.yy"
+#line 1395 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThen((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3493,7 +3493,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 178:
-#line 1397 "mcrl2parser.yy"
+#line 1400 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThenElse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3501,14 +3501,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 179:
-#line 1406 "mcrl2parser.yy"
+#line 1409 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 180:
-#line 1410 "mcrl2parser.yy"
+#line 1413 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3516,14 +3516,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 181:
-#line 1419 "mcrl2parser.yy"
+#line 1422 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 182:
-#line 1423 "mcrl2parser.yy"
+#line 1426 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSeq((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sequential expression\n  %T\n", ((*yyvalp).appl));
@@ -3531,14 +3531,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 183:
-#line 1432 "mcrl2parser.yy"
+#line 1435 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 184:
-#line 1436 "mcrl2parser.yy"
+#line 1439 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSeq((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sequential expression\n  %T\n", ((*yyvalp).appl));
@@ -3546,14 +3546,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 185:
-#line 1445 "mcrl2parser.yy"
+#line 1448 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 186:
-#line 1449 "mcrl2parser.yy"
+#line 1452 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3561,7 +3561,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 187:
-#line 1454 "mcrl2parser.yy"
+#line 1457 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThen((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3569,7 +3569,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 188:
-#line 1459 "mcrl2parser.yy"
+#line 1462 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThenElse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3577,14 +3577,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 189:
-#line 1468 "mcrl2parser.yy"
+#line 1471 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 190:
-#line 1472 "mcrl2parser.yy"
+#line 1475 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3592,14 +3592,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 191:
-#line 1481 "mcrl2parser.yy"
+#line 1484 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 192:
-#line 1485 "mcrl2parser.yy"
+#line 1488 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeAtTime((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed at time expression\n  %T\n", ((*yyvalp).appl));
@@ -3607,14 +3607,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 193:
-#line 1494 "mcrl2parser.yy"
+#line 1497 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 194:
-#line 1498 "mcrl2parser.yy"
+#line 1501 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeAtTime((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed at time expression\n  %T\n", ((*yyvalp).appl));
@@ -3622,14 +3622,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 195:
-#line 1507 "mcrl2parser.yy"
+#line 1510 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 196:
-#line 1511 "mcrl2parser.yy"
+#line 1514 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSync((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sync expression\n  %T\n", ((*yyvalp).appl));
@@ -3637,14 +3637,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 197:
-#line 1520 "mcrl2parser.yy"
+#line 1523 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 198:
-#line 1524 "mcrl2parser.yy"
+#line 1527 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSync((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sync expression\n  %T\n", ((*yyvalp).appl));
@@ -3652,14 +3652,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 199:
-#line 1533 "mcrl2parser.yy"
+#line 1536 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 200:
-#line 1537 "mcrl2parser.yy"
+#line 1540 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3667,7 +3667,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 201:
-#line 1542 "mcrl2parser.yy"
+#line 1545 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThen((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3675,7 +3675,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 202:
-#line 1547 "mcrl2parser.yy"
+#line 1550 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIfThenElse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conditional expression\n  %T\n", ((*yyvalp).appl));
@@ -3683,14 +3683,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 203:
-#line 1556 "mcrl2parser.yy"
+#line 1559 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 204:
-#line 1560 "mcrl2parser.yy"
+#line 1563 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeSum((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed summation\n  %T\n", ((*yyvalp).appl));
@@ -3698,21 +3698,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 205:
-#line 1569 "mcrl2parser.yy"
+#line 1572 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 206:
-#line 1573 "mcrl2parser.yy"
+#line 1576 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 207:
-#line 1577 "mcrl2parser.yy"
+#line 1580 "mcrl2parser.yy"
     {
       //mcrl2yyerror("process assignments are not yet supported");
       // YYABORT
@@ -3721,21 +3721,21 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 208:
-#line 1583 "mcrl2parser.yy"
+#line 1586 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 209:
-#line 1587 "mcrl2parser.yy"
+#line 1590 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 210:
-#line 1595 "mcrl2parser.yy"
+#line 1598 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDelta());
       gsDebugMsg("parsed process constant\n  %T\n", ((*yyvalp).appl));
@@ -3743,7 +3743,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 211:
-#line 1600 "mcrl2parser.yy"
+#line 1603 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeTau());
       gsDebugMsg("parsed process constant\n  %T\n", ((*yyvalp).appl));
@@ -3751,7 +3751,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 212:
-#line 1609 "mcrl2parser.yy"
+#line 1612 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIdAssignment((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), ATmakeList0()));
       gsDebugMsg("parsed identifier assignment\n  %T\n", ((*yyvalp).appl));
@@ -3759,7 +3759,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 213:
-#line 1614 "mcrl2parser.yy"
+#line 1617 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeIdAssignment((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed identifier assignment\n  %T\n", ((*yyvalp).appl));
@@ -3767,7 +3767,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 214:
-#line 1623 "mcrl2parser.yy"
+#line 1626 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeBlock((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process quantification\n  %T\n", ((*yyvalp).appl));
@@ -3775,7 +3775,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 215:
-#line 1628 "mcrl2parser.yy"
+#line 1631 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeHide((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process quantification\n  %T\n", ((*yyvalp).appl));
@@ -3783,7 +3783,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 216:
-#line 1633 "mcrl2parser.yy"
+#line 1636 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRename((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process quantification\n  %T\n", ((*yyvalp).appl));
@@ -3791,7 +3791,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 217:
-#line 1638 "mcrl2parser.yy"
+#line 1641 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeComm((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process quantification\n  %T\n", ((*yyvalp).appl));
@@ -3799,7 +3799,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 218:
-#line 1643 "mcrl2parser.yy"
+#line 1646 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeAllow((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process quantification\n  %T\n", ((*yyvalp).appl));
@@ -3807,7 +3807,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 219:
-#line 1652 "mcrl2parser.yy"
+#line 1655 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       gsDebugMsg("parsed action name set\n  %T\n", ((*yyvalp).list));
@@ -3815,7 +3815,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 220:
-#line 1657 "mcrl2parser.yy"
+#line 1660 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed action name set\n  %T\n", ((*yyvalp).list));
@@ -3823,7 +3823,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 221:
-#line 1666 "mcrl2parser.yy"
+#line 1669 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       gsDebugMsg("parsed renaming expression set\n  %T\n", ((*yyvalp).list));
@@ -3831,7 +3831,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 222:
-#line 1671 "mcrl2parser.yy"
+#line 1674 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed renaming expression set\n  %T\n", ((*yyvalp).list));
@@ -3839,7 +3839,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 223:
-#line 1680 "mcrl2parser.yy"
+#line 1683 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed renaming expressions\n  %T\n", ((*yyvalp).list));
@@ -3847,7 +3847,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 224:
-#line 1685 "mcrl2parser.yy"
+#line 1688 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed renaming expressions\n  %T\n", ((*yyvalp).list));
@@ -3855,7 +3855,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 225:
-#line 1694 "mcrl2parser.yy"
+#line 1697 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRenameExpr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed renaming expression\n  %T\n", ((*yyvalp).appl));
@@ -3863,7 +3863,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 226:
-#line 1703 "mcrl2parser.yy"
+#line 1706 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       gsDebugMsg("parsed communication expression set\n  %T\n", ((*yyvalp).list));
@@ -3871,7 +3871,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 227:
-#line 1708 "mcrl2parser.yy"
+#line 1711 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed communication expression set\n  %T\n", ((*yyvalp).list));
@@ -3879,7 +3879,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 228:
-#line 1717 "mcrl2parser.yy"
+#line 1720 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed communication expressions\n  %T\n", ((*yyvalp).list));
@@ -3887,7 +3887,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 229:
-#line 1722 "mcrl2parser.yy"
+#line 1725 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed communication expressions\n  %T\n", ((*yyvalp).list));
@@ -3895,7 +3895,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 230:
-#line 1731 "mcrl2parser.yy"
+#line 1734 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeCommExpr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), gsMakeNil()));
       gsDebugMsg("parsed communication expression\n  %T\n", ((*yyvalp).appl));
@@ -3903,7 +3903,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 231:
-#line 1736 "mcrl2parser.yy"
+#line 1739 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeCommExpr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), gsMakeNil()));
       gsDebugMsg("parsed communication expression\n  %T\n", ((*yyvalp).appl));
@@ -3911,7 +3911,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 232:
-#line 1741 "mcrl2parser.yy"
+#line 1744 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeCommExpr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed communication expression\n  %T\n", ((*yyvalp).appl));
@@ -3919,7 +3919,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 233:
-#line 1750 "mcrl2parser.yy"
+#line 1753 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMultActName(ATinsert(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list)), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl))));
       gsDebugMsg("parsed left-hand side of communication expression\n  %T\n", ((*yyvalp).appl));
@@ -3927,7 +3927,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 234:
-#line 1759 "mcrl2parser.yy"
+#line 1762 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).list));
@@ -3935,7 +3935,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 235:
-#line 1764 "mcrl2parser.yy"
+#line 1767 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).list));
@@ -3943,7 +3943,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 236:
-#line 1773 "mcrl2parser.yy"
+#line 1776 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       gsDebugMsg("parsed multi action name set\n  %T\n", ((*yyvalp).list));
@@ -3951,7 +3951,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 237:
-#line 1778 "mcrl2parser.yy"
+#line 1781 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed multi action name set\n  %T\n", ((*yyvalp).list));
@@ -3959,7 +3959,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 238:
-#line 1787 "mcrl2parser.yy"
+#line 1790 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed multi action names\n  %T\n", ((*yyvalp).list));
@@ -3967,7 +3967,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 239:
-#line 1792 "mcrl2parser.yy"
+#line 1795 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed multi action names\n  %T\n", ((*yyvalp).list));
@@ -3975,7 +3975,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 240:
-#line 1801 "mcrl2parser.yy"
+#line 1804 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMultActName(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed multi action name\n  %T\n", ((*yyvalp).appl));
@@ -3983,7 +3983,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 241:
-#line 1813 "mcrl2parser.yy"
+#line 1816 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsProcSpecEltsToSpec(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed process specification\n  %T\n", ((*yyvalp).appl));
@@ -3991,7 +3991,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 242:
-#line 1822 "mcrl2parser.yy"
+#line 1825 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process specification elements\n  %T\n", ((*yyvalp).list));
@@ -3999,7 +3999,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 243:
-#line 1827 "mcrl2parser.yy"
+#line 1830 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process specification elements\n  %T\n", ((*yyvalp).list));
@@ -4007,7 +4007,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 244:
-#line 1836 "mcrl2parser.yy"
+#line 1839 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed process specification element\n  %T\n", ((*yyvalp).appl));
@@ -4015,7 +4015,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 245:
-#line 1841 "mcrl2parser.yy"
+#line 1844 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed process specification element\n  %T\n", ((*yyvalp).appl));
@@ -4023,7 +4023,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 246:
-#line 1846 "mcrl2parser.yy"
+#line 1849 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed process specification element\n  %T\n", ((*yyvalp).appl));
@@ -4031,7 +4031,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 247:
-#line 1851 "mcrl2parser.yy"
+#line 1854 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed process specification element\n  %T\n", ((*yyvalp).appl));
@@ -4039,7 +4039,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 248:
-#line 1860 "mcrl2parser.yy"
+#line 1863 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed action specification\n  %T\n", ((*yyvalp).appl));
@@ -4047,7 +4047,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 249:
-#line 1869 "mcrl2parser.yy"
+#line 1872 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed action declarations\n  %T\n", ((*yyvalp).list));
@@ -4055,7 +4055,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 250:
-#line 1874 "mcrl2parser.yy"
+#line 1877 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATconcat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed action declarations\n  %T\n", ((*yyvalp).list));
@@ -4063,7 +4063,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 251:
-#line 1883 "mcrl2parser.yy"
+#line 1886 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
@@ -4076,7 +4076,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 252:
-#line 1893 "mcrl2parser.yy"
+#line 1896 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
@@ -4088,7 +4088,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 253:
-#line 1906 "mcrl2parser.yy"
+#line 1909 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeProcEqnSpec(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed process equation specification\n  %T\n", ((*yyvalp).appl));
@@ -4096,7 +4096,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 254:
-#line 1915 "mcrl2parser.yy"
+#line 1918 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process equation declarations\n  %T\n", ((*yyvalp).list));
@@ -4104,7 +4104,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 255:
-#line 1920 "mcrl2parser.yy"
+#line 1923 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed process equation declarations\n  %T\n", ((*yyvalp).list));
@@ -4112,7 +4112,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 256:
-#line 1929 "mcrl2parser.yy"
+#line 1932 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeProcEqn(
         ATmakeList0(), gsMakeProcVarId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), ATmakeList0()), ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
@@ -4121,7 +4121,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 257:
-#line 1935 "mcrl2parser.yy"
+#line 1938 "mcrl2parser.yy"
     {
       ATermList SortExprs = ATmakeList0();
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.list));
@@ -4135,7 +4135,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 258:
-#line 1950 "mcrl2parser.yy"
+#line 1953 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeProcessInit(ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed initialisation\n  %T\n", ((*yyvalp).appl));
@@ -4143,7 +4143,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 259:
-#line 1962 "mcrl2parser.yy"
+#line 1965 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed state formula\n  %T\n", ((*yyvalp).appl));
@@ -4151,14 +4151,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 260:
-#line 1971 "mcrl2parser.yy"
+#line 1974 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 261:
-#line 1975 "mcrl2parser.yy"
+#line 1978 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4166,7 +4166,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 262:
-#line 1980 "mcrl2parser.yy"
+#line 1983 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4174,7 +4174,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 263:
-#line 1985 "mcrl2parser.yy"
+#line 1988 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateNu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4182,7 +4182,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 264:
-#line 1990 "mcrl2parser.yy"
+#line 1993 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4190,7 +4190,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 265:
-#line 1999 "mcrl2parser.yy"
+#line 2002 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       gsDebugMsg("parsed fixpoint parameters\n  %T\n", ((*yyvalp).list));
@@ -4198,7 +4198,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 266:
-#line 2004 "mcrl2parser.yy"
+#line 2007 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed fixpoint parameters\n  %T\n", ((*yyvalp).list));
@@ -4206,7 +4206,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 267:
-#line 2014 "mcrl2parser.yy"
+#line 2017 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", ((*yyvalp).list));
@@ -4214,7 +4214,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 268:
-#line 2019 "mcrl2parser.yy"
+#line 2022 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", ((*yyvalp).list));
@@ -4222,7 +4222,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 269:
-#line 2028 "mcrl2parser.yy"
+#line 2031 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeDataVarIdInit(gsMakeDataVarId((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed data variable declaration and initialisation\n  %T\n", ((*yyvalp).appl));
@@ -4230,14 +4230,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 270:
-#line 2037 "mcrl2parser.yy"
+#line 2040 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 271:
-#line 2041 "mcrl2parser.yy"
+#line 2044 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateImp((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed implication\n  %T\n", ((*yyvalp).appl));
@@ -4245,14 +4245,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 272:
-#line 2050 "mcrl2parser.yy"
+#line 2053 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 273:
-#line 2054 "mcrl2parser.yy"
+#line 2057 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4260,7 +4260,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 274:
-#line 2059 "mcrl2parser.yy"
+#line 2062 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4268,7 +4268,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 275:
-#line 2064 "mcrl2parser.yy"
+#line 2067 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateNu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4276,7 +4276,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 276:
-#line 2069 "mcrl2parser.yy"
+#line 2072 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4284,14 +4284,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 277:
-#line 2078 "mcrl2parser.yy"
+#line 2081 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 278:
-#line 2082 "mcrl2parser.yy"
+#line 2085 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateAnd((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conjunction\n  %T\n", ((*yyvalp).appl));
@@ -4299,7 +4299,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 279:
-#line 2087 "mcrl2parser.yy"
+#line 2090 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateOr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed disjunction\n  %T\n", ((*yyvalp).appl));
@@ -4307,14 +4307,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 280:
-#line 2096 "mcrl2parser.yy"
+#line 2099 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 281:
-#line 2100 "mcrl2parser.yy"
+#line 2103 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4322,7 +4322,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 282:
-#line 2105 "mcrl2parser.yy"
+#line 2108 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4330,7 +4330,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 283:
-#line 2110 "mcrl2parser.yy"
+#line 2113 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateNu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4338,7 +4338,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 284:
-#line 2115 "mcrl2parser.yy"
+#line 2118 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4346,14 +4346,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 285:
-#line 2124 "mcrl2parser.yy"
+#line 2127 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 286:
-#line 2128 "mcrl2parser.yy"
+#line 2131 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateNot((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix state formula\n  %T\n", ((*yyvalp).appl));
@@ -4361,7 +4361,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 287:
-#line 2133 "mcrl2parser.yy"
+#line 2136 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMust((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix state formula\n  %T\n", ((*yyvalp).appl));
@@ -4369,7 +4369,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 288:
-#line 2138 "mcrl2parser.yy"
+#line 2141 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMay((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix state formula\n  %T\n", ((*yyvalp).appl));
@@ -4377,7 +4377,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 289:
-#line 2143 "mcrl2parser.yy"
+#line 2146 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateYaledTimed((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix state formula\n  %T\n", ((*yyvalp).appl));
@@ -4385,7 +4385,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 290:
-#line 2148 "mcrl2parser.yy"
+#line 2151 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateDelayTimed((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix state formula\n  %T\n", ((*yyvalp).appl));
@@ -4393,14 +4393,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 291:
-#line 2157 "mcrl2parser.yy"
+#line 2160 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 292:
-#line 2161 "mcrl2parser.yy"
+#line 2164 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4408,7 +4408,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 293:
-#line 2166 "mcrl2parser.yy"
+#line 2169 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4416,7 +4416,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 294:
-#line 2171 "mcrl2parser.yy"
+#line 2174 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateNu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4424,7 +4424,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 295:
-#line 2176 "mcrl2parser.yy"
+#line 2179 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateMu((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4432,7 +4432,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 296:
-#line 2185 "mcrl2parser.yy"
+#line 2188 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4440,7 +4440,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 297:
-#line 2190 "mcrl2parser.yy"
+#line 2193 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateVar(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 0), ATLgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 1)));
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4448,7 +4448,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 298:
-#line 2195 "mcrl2parser.yy"
+#line 2198 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateTrue());
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4456,7 +4456,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 299:
-#line 2200 "mcrl2parser.yy"
+#line 2203 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateFalse());
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4464,7 +4464,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 300:
-#line 2205 "mcrl2parser.yy"
+#line 2208 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateYaled());
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4472,7 +4472,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 301:
-#line 2210 "mcrl2parser.yy"
+#line 2213 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeStateDelay());
       gsDebugMsg("parsed primary state formula\n  %T\n", ((*yyvalp).appl));
@@ -4480,14 +4480,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 302:
-#line 2215 "mcrl2parser.yy"
+#line 2218 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 303:
-#line 2223 "mcrl2parser.yy"
+#line 2226 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4495,7 +4495,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 304:
-#line 2228 "mcrl2parser.yy"
+#line 2231 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4503,14 +4503,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 305:
-#line 2237 "mcrl2parser.yy"
+#line 2240 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 306:
-#line 2241 "mcrl2parser.yy"
+#line 2244 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegAlt((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed alternative composition\n  %T\n", ((*yyvalp).appl));
@@ -4518,14 +4518,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 307:
-#line 2250 "mcrl2parser.yy"
+#line 2253 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 308:
-#line 2254 "mcrl2parser.yy"
+#line 2257 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegAlt((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed alternative composition\n  %T\n", ((*yyvalp).appl));
@@ -4533,14 +4533,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 309:
-#line 2263 "mcrl2parser.yy"
+#line 2266 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 310:
-#line 2267 "mcrl2parser.yy"
+#line 2270 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegSeq((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sequential composition\n  %T\n", ((*yyvalp).appl));
@@ -4548,14 +4548,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 311:
-#line 2276 "mcrl2parser.yy"
+#line 2279 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 312:
-#line 2280 "mcrl2parser.yy"
+#line 2283 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegSeq((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed sequential composition\n  %T\n", ((*yyvalp).appl));
@@ -4563,14 +4563,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 313:
-#line 2289 "mcrl2parser.yy"
+#line 2292 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 314:
-#line 2293 "mcrl2parser.yy"
+#line 2296 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegTransOrNil((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed postfix regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4578,7 +4578,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 315:
-#line 2298 "mcrl2parser.yy"
+#line 2301 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegTrans((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed postfix regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4586,14 +4586,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 316:
-#line 2307 "mcrl2parser.yy"
+#line 2310 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 317:
-#line 2311 "mcrl2parser.yy"
+#line 2314 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegTransOrNil((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed postfix regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4601,7 +4601,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 318:
-#line 2316 "mcrl2parser.yy"
+#line 2319 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegTrans((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed postfix regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4609,7 +4609,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 319:
-#line 2325 "mcrl2parser.yy"
+#line 2328 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegNil());
       gsDebugMsg("parsed primary regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4617,14 +4617,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 320:
-#line 2330 "mcrl2parser.yy"
+#line 2333 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 321:
-#line 2338 "mcrl2parser.yy"
+#line 2341 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4632,7 +4632,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 322:
-#line 2343 "mcrl2parser.yy"
+#line 2346 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeRegNil());
       gsDebugMsg("parsed primary regular formula\n  %T\n", ((*yyvalp).appl));
@@ -4640,14 +4640,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 323:
-#line 2348 "mcrl2parser.yy"
+#line 2351 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 324:
-#line 2356 "mcrl2parser.yy"
+#line 2359 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed action formula\n  %T\n", ((*yyvalp).appl));
@@ -4655,14 +4655,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 325:
-#line 2365 "mcrl2parser.yy"
+#line 2368 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 326:
-#line 2369 "mcrl2parser.yy"
+#line 2372 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4670,7 +4670,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 327:
-#line 2374 "mcrl2parser.yy"
+#line 2377 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4678,14 +4678,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 328:
-#line 2383 "mcrl2parser.yy"
+#line 2386 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 329:
-#line 2387 "mcrl2parser.yy"
+#line 2390 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActImp((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed implication\n  %T\n", ((*yyvalp).appl));
@@ -4693,14 +4693,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 330:
-#line 2396 "mcrl2parser.yy"
+#line 2399 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 331:
-#line 2400 "mcrl2parser.yy"
+#line 2403 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4708,7 +4708,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 332:
-#line 2405 "mcrl2parser.yy"
+#line 2408 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4716,14 +4716,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 333:
-#line 2414 "mcrl2parser.yy"
+#line 2417 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 334:
-#line 2418 "mcrl2parser.yy"
+#line 2421 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActAnd((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conjunction\n  %T\n", ((*yyvalp).appl));
@@ -4731,7 +4731,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 335:
-#line 2423 "mcrl2parser.yy"
+#line 2426 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActOr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed disjunction\n  %T\n", ((*yyvalp).appl));
@@ -4739,14 +4739,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 336:
-#line 2432 "mcrl2parser.yy"
+#line 2435 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 337:
-#line 2436 "mcrl2parser.yy"
+#line 2439 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4754,7 +4754,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 338:
-#line 2441 "mcrl2parser.yy"
+#line 2444 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4762,14 +4762,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 339:
-#line 2450 "mcrl2parser.yy"
+#line 2453 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 340:
-#line 2454 "mcrl2parser.yy"
+#line 2457 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActAt((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conjunction\n  %T\n", ((*yyvalp).appl));
@@ -4777,14 +4777,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 341:
-#line 2463 "mcrl2parser.yy"
+#line 2466 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 342:
-#line 2467 "mcrl2parser.yy"
+#line 2470 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActNot((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed prefix action formula\n  %T\n", ((*yyvalp).appl));
@@ -4792,14 +4792,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 343:
-#line 2476 "mcrl2parser.yy"
+#line 2479 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 344:
-#line 2480 "mcrl2parser.yy"
+#line 2483 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4807,7 +4807,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 345:
-#line 2485 "mcrl2parser.yy"
+#line 2488 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -4815,7 +4815,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 346:
-#line 2494 "mcrl2parser.yy"
+#line 2497 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed primary action formula\n  %T\n", ((*yyvalp).appl));
@@ -4823,7 +4823,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 347:
-#line 2499 "mcrl2parser.yy"
+#line 2502 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed primary action formula\n  %T\n", ((*yyvalp).appl));
@@ -4831,7 +4831,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 348:
-#line 2504 "mcrl2parser.yy"
+#line 2507 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActTrue());
       gsDebugMsg("parsed primary action formula\n  %T\n", ((*yyvalp).appl));
@@ -4839,7 +4839,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 349:
-#line 2509 "mcrl2parser.yy"
+#line 2512 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActFalse());
       gsDebugMsg("parsed primary action formula\n  %T\n", ((*yyvalp).appl));
@@ -4847,14 +4847,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 350:
-#line 2514 "mcrl2parser.yy"
+#line 2517 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 351:
-#line 2525 "mcrl2parser.yy"
+#line 2528 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsActionRenameEltsToActionRename(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed action rename specification\n  %T\n", ((*yyvalp).appl));
@@ -4862,7 +4862,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 352:
-#line 2534 "mcrl2parser.yy"
+#line 2537 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename specification element\n  %T\n", ((*yyvalp).list));
@@ -4870,7 +4870,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 353:
-#line 2539 "mcrl2parser.yy"
+#line 2542 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename specification element\n  %T\n", ((*yyvalp).list));
@@ -4878,7 +4878,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 354:
-#line 2548 "mcrl2parser.yy"
+#line 2551 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed action rename specification element\n  %T\n", ((*yyvalp).appl));
@@ -4886,7 +4886,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 355:
-#line 2553 "mcrl2parser.yy"
+#line 2556 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed action rename specification element\n  %T\n", ((*yyvalp).appl));
@@ -4894,7 +4894,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 356:
-#line 2558 "mcrl2parser.yy"
+#line 2561 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed action rename specification element\n  %T\n", ((*yyvalp).appl));
@@ -4902,7 +4902,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 357:
-#line 2567 "mcrl2parser.yy"
+#line 2570 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActionRenameRules((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list)));
       gsDebugMsg("parsed action rename specification\n  %T\n", ((*yyvalp).appl));
@@ -4910,7 +4910,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 358:
-#line 2576 "mcrl2parser.yy"
+#line 2579 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list));
       gsDebugMsg("parsed action rename rule section\n  %T\n", ((*yyvalp).list));
@@ -4918,7 +4918,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 359:
-#line 2581 "mcrl2parser.yy"
+#line 2584 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList0());
       int n = ATgetLength((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.list));
@@ -4935,7 +4935,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 360:
-#line 2599 "mcrl2parser.yy"
+#line 2602 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename rules\n  %T\n", ((*yyvalp).list));
@@ -4943,7 +4943,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 361:
-#line 2604 "mcrl2parser.yy"
+#line 2607 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename rules\n  %T\n", ((*yyvalp).list));
@@ -4951,7 +4951,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 362:
-#line 2613 "mcrl2parser.yy"
+#line 2616 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActionRenameRule(ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename rule\n %T\n", ((*yyvalp).appl));
@@ -4959,7 +4959,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 363:
-#line 2618 "mcrl2parser.yy"
+#line 2621 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeActionRenameRule(ATmakeList0(), gsMakeNil(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed action rename rule\n %T\n", ((*yyvalp).appl));
@@ -4967,7 +4967,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 364:
-#line 2627 "mcrl2parser.yy"
+#line 2630 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed right-hand-side of an action rename rule\n %T\n", ((*yyvalp).appl));
@@ -4975,7 +4975,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 365:
-#line 2632 "mcrl2parser.yy"
+#line 2635 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed right-hand-side of an action rename rule\n %T\n", ((*yyvalp).appl));
@@ -4983,7 +4983,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 366:
-#line 2644 "mcrl2parser.yy"
+#line 2647 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed parameterised boolean expression\n  %T\n", ((*yyvalp).appl));
@@ -4991,14 +4991,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 367:
-#line 2653 "mcrl2parser.yy"
+#line 2656 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 368:
-#line 2657 "mcrl2parser.yy"
+#line 2660 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5006,7 +5006,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 369:
-#line 2662 "mcrl2parser.yy"
+#line 2665 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5014,14 +5014,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 370:
-#line 2671 "mcrl2parser.yy"
+#line 2674 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 371:
-#line 2675 "mcrl2parser.yy"
+#line 2678 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESImp((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed implication\n  %T\n", ((*yyvalp).appl));
@@ -5029,14 +5029,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 372:
-#line 2684 "mcrl2parser.yy"
+#line 2687 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 373:
-#line 2688 "mcrl2parser.yy"
+#line 2691 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5044,7 +5044,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 374:
-#line 2693 "mcrl2parser.yy"
+#line 2696 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5052,14 +5052,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 375:
-#line 2702 "mcrl2parser.yy"
+#line 2705 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 376:
-#line 2706 "mcrl2parser.yy"
+#line 2709 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESAnd((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed conjunction\n  %T\n", ((*yyvalp).appl));
@@ -5067,7 +5067,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 377:
-#line 2711 "mcrl2parser.yy"
+#line 2714 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESOr((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed disjunction\n  %T\n", ((*yyvalp).appl));
@@ -5075,14 +5075,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 378:
-#line 2720 "mcrl2parser.yy"
+#line 2723 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 379:
-#line 2724 "mcrl2parser.yy"
+#line 2727 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5090,7 +5090,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 380:
-#line 2729 "mcrl2parser.yy"
+#line 2732 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5098,14 +5098,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 381:
-#line 2738 "mcrl2parser.yy"
+#line 2741 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 382:
-#line 2742 "mcrl2parser.yy"
+#line 2745 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESNot((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed negation\n  %T\n", ((*yyvalp).appl));
@@ -5113,14 +5113,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 383:
-#line 2751 "mcrl2parser.yy"
+#line 2754 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 384:
-#line 2755 "mcrl2parser.yy"
+#line 2758 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESForall((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5128,7 +5128,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 385:
-#line 2760 "mcrl2parser.yy"
+#line 2763 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESExists((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed quantification\n  %T\n", ((*yyvalp).appl));
@@ -5136,7 +5136,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 386:
-#line 2769 "mcrl2parser.yy"
+#line 2772 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed primary expression\n  %T\n", ((*yyvalp).appl));
@@ -5144,7 +5144,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 387:
-#line 2774 "mcrl2parser.yy"
+#line 2777 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePropVarInst(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 0), ATLgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), 1)));
       gsDebugMsg("parsed primary expression\n  %T\n", ((*yyvalp).appl));
@@ -5152,7 +5152,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 388:
-#line 2779 "mcrl2parser.yy"
+#line 2782 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESTrue());
       gsDebugMsg("parsed primary expression\n  %T\n", ((*yyvalp).appl));
@@ -5160,7 +5160,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 389:
-#line 2784 "mcrl2parser.yy"
+#line 2787 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBESFalse());
       gsDebugMsg("parsed primary expression\n  %T\n", ((*yyvalp).appl));
@@ -5168,14 +5168,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 390:
-#line 2789 "mcrl2parser.yy"
+#line 2792 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
     ;}
     break;
 
   case 391:
-#line 2801 "mcrl2parser.yy"
+#line 2804 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsPBESSpecEltsToSpec(ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed PBES specification\n  %T\n", ((*yyvalp).appl));
@@ -5183,7 +5183,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 392:
-#line 2810 "mcrl2parser.yy"
+#line 2813 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed PBES specification elements\n  %T\n", ((*yyvalp).list));
@@ -5191,7 +5191,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 393:
-#line 2815 "mcrl2parser.yy"
+#line 2818 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed PBES specification elements\n  %T\n", ((*yyvalp).list));
@@ -5199,7 +5199,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 394:
-#line 2824 "mcrl2parser.yy"
+#line 2827 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
      gsDebugMsg("parsed PBES specification element\n  %T\n", ((*yyvalp).appl));
@@ -5207,7 +5207,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 395:
-#line 2829 "mcrl2parser.yy"
+#line 2832 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed PBES specification element\n  %T\n", ((*yyvalp).appl));
@@ -5215,7 +5215,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 396:
-#line 2834 "mcrl2parser.yy"
+#line 2837 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl));
       gsDebugMsg("parsed PBES specification element\n  %T\n", ((*yyvalp).appl));
@@ -5223,7 +5223,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 397:
-#line 2843 "mcrl2parser.yy"
+#line 2846 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBEqnSpec(ATmakeList0(), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", ((*yyvalp).appl));
@@ -5231,7 +5231,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 398:
-#line 2848 "mcrl2parser.yy"
+#line 2851 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBEqnSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.list), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.list))));
       gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", ((*yyvalp).appl));
@@ -5239,7 +5239,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 399:
-#line 2857 "mcrl2parser.yy"
+#line 2860 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", ((*yyvalp).list));
@@ -5247,7 +5247,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 400:
-#line 2862 "mcrl2parser.yy"
+#line 2865 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
       gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", ((*yyvalp).list));
@@ -5255,7 +5255,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 401:
-#line 2871 "mcrl2parser.yy"
+#line 2874 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakePBEqn((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), gsMakePropVarDecl((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl), ATmakeList0()), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.appl)));
@@ -5264,7 +5264,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 402:
-#line 2877 "mcrl2parser.yy"
+#line 2880 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl),
         gsMakePBEqn((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (7))].yystate.yysemantics.yysval.appl), gsMakePropVarDecl((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (7))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (7))].yystate.yysemantics.yysval.list)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((7) - (7))].yystate.yysemantics.yysval.appl)));
@@ -5273,7 +5273,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 403:
-#line 2887 "mcrl2parser.yy"
+#line 2890 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeMu());
       gsDebugMsg("parsed fixpoint\n  %T\n", ((*yyvalp).appl));
@@ -5281,7 +5281,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 404:
-#line 2892 "mcrl2parser.yy"
+#line 2895 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakeNu());
       gsDebugMsg("parsed fixpoint\n  %T\n", ((*yyvalp).appl));
@@ -5289,7 +5289,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 405:
-#line 2901 "mcrl2parser.yy"
+#line 2904 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBInit(ATmakeList0(),
         gsMakePropVarInst(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl), 0), ATLgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl), 1))));
@@ -5298,7 +5298,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     break;
 
   case 406:
-#line 2907 "mcrl2parser.yy"
+#line 2910 "mcrl2parser.yy"
     {
       safe_assign(((*yyvalp).appl), gsMakePBInit((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list),
         gsMakePropVarInst(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl), 0), ATLgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl), 1))));
@@ -6965,7 +6965,7 @@ yypdumpstack (yyGLRStack* yystackp)
 #endif
 
 
-#line 2914 "mcrl2parser.yy"
+#line 2917 "mcrl2parser.yy"
 
 
 //Uncomment the lines below to enable the use of SIZE_MAX

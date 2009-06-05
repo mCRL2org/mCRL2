@@ -162,7 +162,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 ".\\lysaparser.yy"
+#line 1 "lysaparser.yy"
 
 #include "lysa.h"
 #include <stdio.h>
@@ -203,7 +203,7 @@ extern boost::shared_ptr<Expression> parse_tree;
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 
 /* Enabling verbose error messages.  */
@@ -562,13 +562,13 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   114,   114,   120,   125,   128,   144,   152,   160,   168,
-     176,   182,   188,   194,   202,   208,   214,   225,   232,   241,
-     242,   245,   251,   263,   269,   278,   278,   281,   287,   293,
-     302,   307,   313,   321,   326,   332,   340,   346,   354,   360,
-     368,   374,   380,   387,   394,   401,   410,   414,   420,   426,
-     435,   441,   449,   455,   461,   467,   474,   481,   481,   484,
-     490,   496
+       0,   117,   117,   123,   128,   131,   147,   155,   163,   171,
+     179,   185,   191,   197,   205,   211,   217,   228,   235,   244,
+     245,   248,   254,   266,   272,   281,   281,   284,   290,   296,
+     305,   310,   316,   324,   329,   335,   343,   349,   357,   363,
+     371,   377,   383,   390,   397,   404,   413,   417,   423,   429,
+     438,   444,   452,   458,   464,   470,   477,   484,   484,   487,
+     493,   499
 };
 #endif
 
@@ -1591,7 +1591,7 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 115 ".\\lysaparser.yy"
+#line 118 "lysaparser.yy"
     { 
 	parse_tree = (yyvsp[(1) - (1)]);
 	(yyval) = (yyvsp[(1) - (1)]);
@@ -1599,19 +1599,19 @@ yyreduce:
     break;
 
   case 3:
-#line 121 ".\\lysaparser.yy"
+#line 124 "lysaparser.yy"
     {
 		(yyval)->hint(static_pointer_cast<String>((yyvsp[(2) - (2)]))->s);
 	;}
     break;
 
   case 4:
-#line 125 ".\\lysaparser.yy"
+#line 128 "lysaparser.yy"
     { (yyval) = (yyvsp[(2) - (3)]); ;}
     break;
 
   case 5:
-#line 129 ".\\lysaparser.yy"
+#line 132 "lysaparser.yy"
     { 
 	if(static_pointer_cast<String>((yyvsp[(1) - (1)]))->s=="0")
 	{
@@ -1628,7 +1628,7 @@ yyreduce:
     break;
 
   case 6:
-#line 145 ".\\lysaparser.yy"
+#line 148 "lysaparser.yy"
     { 
 	set_current_position((yyloc));
 	semval e(new DY());
@@ -1637,7 +1637,7 @@ yyreduce:
     break;
 
   case 7:
-#line 153 ".\\lysaparser.yy"
+#line 156 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Send((yyvsp[(2) - (5)]), (yyvsp[(5) - (5)])));
@@ -1646,7 +1646,7 @@ yyreduce:
     break;
 
   case 8:
-#line 161 ".\\lysaparser.yy"
+#line 164 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Receive((yyvsp[(2) - (5)]), (yyvsp[(5) - (5)])));
@@ -1655,7 +1655,7 @@ yyreduce:
     break;
 
   case 9:
-#line 169 ".\\lysaparser.yy"
+#line 172 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Decrypt((yyvsp[(2) - (11)]), (yyvsp[(5) - (11)]), (yyvsp[(8) - (11)]), (yyvsp[(9) - (11)]), (yyvsp[(11) - (11)])));
@@ -1664,7 +1664,7 @@ yyreduce:
     break;
 
   case 10:
-#line 177 ".\\lysaparser.yy"
+#line 180 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new New((yyvsp[(3) - (5)]), false, (yyvsp[(5) - (5)])));
@@ -1673,7 +1673,7 @@ yyreduce:
     break;
 
   case 11:
-#line 183 ".\\lysaparser.yy"
+#line 186 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new New((yyvsp[(4) - (6)]), true, (yyvsp[(6) - (6)])));
@@ -1682,7 +1682,7 @@ yyreduce:
     break;
 
   case 12:
-#line 189 ".\\lysaparser.yy"
+#line 192 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new New((yyvsp[(6) - (8)]), false, (yyvsp[(4) - (8)]), (yyvsp[(8) - (8)])));
@@ -1691,7 +1691,7 @@ yyreduce:
     break;
 
   case 13:
-#line 195 ".\\lysaparser.yy"
+#line 198 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new New((yyvsp[(7) - (9)]), true, (yyvsp[(4) - (9)]), (yyvsp[(9) - (9)])));
@@ -1700,7 +1700,7 @@ yyreduce:
     break;
 
   case 14:
-#line 203 ".\\lysaparser.yy"
+#line 206 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Replication((yyvsp[(2) - (2)])));
@@ -1709,7 +1709,7 @@ yyreduce:
     break;
 
   case 15:
-#line 209 ".\\lysaparser.yy"
+#line 212 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new IndexedParallel((yyvsp[(5) - (5)]), (yyvsp[(3) - (5)])));
@@ -1718,7 +1718,7 @@ yyreduce:
     break;
 
   case 16:
-#line 215 ".\\lysaparser.yy"
+#line 218 "lysaparser.yy"
     {
 	set_current_position((yylsp[(2) - (3)]));
 	std::list<semval> l;
@@ -1730,7 +1730,7 @@ yyreduce:
     break;
 
   case 17:
-#line 226 ".\\lysaparser.yy"
+#line 229 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Let(LySa, (yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]), (yyvsp[(6) - (6)])));
@@ -1739,7 +1739,7 @@ yyreduce:
     break;
 
   case 18:
-#line 233 ".\\lysaparser.yy"
+#line 236 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Let(TypedLySa, (yyvsp[(2) - (6)]), (yyvsp[(4) - (6)]), (yyvsp[(6) - (6)])));
@@ -1748,12 +1748,12 @@ yyreduce:
     break;
 
   case 20:
-#line 242 ".\\lysaparser.yy"
+#line 245 "lysaparser.yy"
     { (yyval) = (yyvsp[(2) - (3)]); ;}
     break;
 
   case 21:
-#line 246 ".\\lysaparser.yy"
+#line 249 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Ciphertext(false, (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]), (yyvsp[(6) - (6)])));
@@ -1762,7 +1762,7 @@ yyreduce:
     break;
 
   case 22:
-#line 252 ".\\lysaparser.yy"
+#line 255 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new Ciphertext(true, (yyvsp[(2) - (6)]), (yyvsp[(5) - (6)]), (yyvsp[(6) - (6)])));
@@ -1771,7 +1771,7 @@ yyreduce:
     break;
 
   case 23:
-#line 264 ".\\lysaparser.yy"
+#line 267 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new PMatchTerms((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)])));
@@ -1780,7 +1780,7 @@ yyreduce:
     break;
 
   case 24:
-#line 270 ".\\lysaparser.yy"
+#line 273 "lysaparser.yy"
     {
 	set_current_position((yyloc));
 	semval e(new PMatchTerms((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)])));
@@ -1789,7 +1789,7 @@ yyreduce:
     break;
 
   case 27:
-#line 281 ".\\lysaparser.yy"
+#line 284 "lysaparser.yy"
     { 
 	set_current_position((yyloc));
 	semval e(new Terms());
@@ -1798,7 +1798,7 @@ yyreduce:
     break;
 
   case 28:
-#line 288 ".\\lysaparser.yy"
+#line 291 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Terms((yyvsp[(1) - (1)])));
@@ -1807,7 +1807,7 @@ yyreduce:
     break;
 
   case 29:
-#line 294 ".\\lysaparser.yy"
+#line 297 "lysaparser.yy"
     {
 		dynamic_pointer_cast<Terms>((yyvsp[(1) - (3)]))->push_back((yyvsp[(3) - (3)]));
 		(yyval) = (yyvsp[(1) - (3)]);
@@ -1815,7 +1815,7 @@ yyreduce:
     break;
 
   case 30:
-#line 302 ".\\lysaparser.yy"
+#line 305 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(true));
@@ -1824,7 +1824,7 @@ yyreduce:
     break;
 
   case 31:
-#line 308 ".\\lysaparser.yy"
+#line 311 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(true, (yyvsp[(3) - (4)])));
@@ -1833,7 +1833,7 @@ yyreduce:
     break;
 
   case 32:
-#line 314 ".\\lysaparser.yy"
+#line 317 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(true, (yyvsp[(3) - (8)]), (yyvsp[(6) - (8)])));
@@ -1842,7 +1842,7 @@ yyreduce:
     break;
 
   case 33:
-#line 321 ".\\lysaparser.yy"
+#line 324 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(false));
@@ -1851,7 +1851,7 @@ yyreduce:
     break;
 
   case 34:
-#line 327 ".\\lysaparser.yy"
+#line 330 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(false, (yyvsp[(3) - (4)])));
@@ -1860,7 +1860,7 @@ yyreduce:
     break;
 
   case 35:
-#line 333 ".\\lysaparser.yy"
+#line 336 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Annotation(false, (yyvsp[(3) - (8)]), (yyvsp[(6) - (8)])));
@@ -1869,7 +1869,7 @@ yyreduce:
     break;
 
   case 36:
-#line 341 ".\\lysaparser.yy"
+#line 344 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		semval e(new Cryptopoint((yyvsp[(1) - (2)]), (yyvsp[(2) - (2)])));
@@ -1878,7 +1878,7 @@ yyreduce:
     break;
 
   case 37:
-#line 347 ".\\lysaparser.yy"
+#line 350 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		semval e(new Cryptopoint((yyvsp[(1) - (1)])));
@@ -1887,7 +1887,7 @@ yyreduce:
     break;
 
   case 38:
-#line 355 ".\\lysaparser.yy"
+#line 358 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Cryptopoints((yyvsp[(1) - (1)])));
@@ -1896,7 +1896,7 @@ yyreduce:
     break;
 
   case 39:
-#line 361 ".\\lysaparser.yy"
+#line 364 "lysaparser.yy"
     {
 		dynamic_pointer_cast<Cryptopoints>((yyvsp[(1) - (3)]))->push_back((yyvsp[(3) - (3)]));
 		(yyval) = (yyvsp[(1) - (3)]);
@@ -1904,7 +1904,7 @@ yyreduce:
     break;
 
   case 40:
-#line 369 ".\\lysaparser.yy"
+#line 372 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		semval e(new Name((yyvsp[(1) - (2)]), (yyvsp[(2) - (2)])));
@@ -1913,7 +1913,7 @@ yyreduce:
     break;
 
   case 41:
-#line 375 ".\\lysaparser.yy"
+#line 378 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		semval e(new Name((yyvsp[(1) - (1)])));
@@ -1922,7 +1922,7 @@ yyreduce:
     break;
 
   case 42:
-#line 381 ".\\lysaparser.yy"
+#line 384 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		bool isPlus = static_pointer_cast<String>((yyvsp[(2) - (3)]))->s=="+";
@@ -1932,7 +1932,7 @@ yyreduce:
     break;
 
   case 43:
-#line 388 ".\\lysaparser.yy"
+#line 391 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		bool isPlus = static_pointer_cast<String>((yyvsp[(2) - (2)]))->s=="+";
@@ -1942,7 +1942,7 @@ yyreduce:
     break;
 
   case 44:
-#line 395 ".\\lysaparser.yy"
+#line 398 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		std::string t = static_pointer_cast<String>((yyvsp[(4) - (4)]))->s;
@@ -1952,7 +1952,7 @@ yyreduce:
     break;
 
   case 45:
-#line 402 ".\\lysaparser.yy"
+#line 405 "lysaparser.yy"
     { 
 		set_current_position((yyloc));
 		std::string t = static_pointer_cast<String>((yyvsp[(3) - (3)]))->s;
@@ -1963,14 +1963,14 @@ yyreduce:
     break;
 
   case 46:
-#line 411 ".\\lysaparser.yy"
+#line 414 "lysaparser.yy"
     {
 		(yyval) = (yyvsp[(2) - (3)]);
 	;}
     break;
 
   case 47:
-#line 415 ".\\lysaparser.yy"
+#line 418 "lysaparser.yy"
     {
 		set_current_position((yylsp[(2) - (2)]));
 		semval e(new Indices((yyvsp[(2) - (2)]), true));
@@ -1979,7 +1979,7 @@ yyreduce:
     break;
 
   case 48:
-#line 421 ".\\lysaparser.yy"
+#line 424 "lysaparser.yy"
     {
 		set_current_position((yylsp[(2) - (2)]));
 		semval e(new Indices((yyvsp[(2) - (2)]), true));
@@ -1988,7 +1988,7 @@ yyreduce:
     break;
 
   case 49:
-#line 427 ".\\lysaparser.yy"
+#line 430 "lysaparser.yy"
     {
 		set_current_position((yylsp[(2) - (2)]));
 		semval e(new Indices((yyvsp[(2) - (2)]), true));
@@ -1997,7 +1997,7 @@ yyreduce:
     break;
 
   case 50:
-#line 436 ".\\lysaparser.yy"
+#line 439 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new Indices((yyvsp[(1) - (1)])));
@@ -2006,7 +2006,7 @@ yyreduce:
     break;
 
   case 51:
-#line 442 ".\\lysaparser.yy"
+#line 445 "lysaparser.yy"
     {
 		static_pointer_cast<Indices>((yyvsp[(1) - (3)]))->push_back(static_pointer_cast<String>((yyvsp[(3) - (3)]))->s);
 		semval e((yyvsp[(1) - (3)]));
@@ -2015,7 +2015,7 @@ yyreduce:
     break;
 
   case 52:
-#line 450 ".\\lysaparser.yy"
+#line 453 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IndexDefs((yyvsp[(1) - (1)])));
@@ -2024,7 +2024,7 @@ yyreduce:
     break;
 
   case 53:
-#line 456 ".\\lysaparser.yy"
+#line 459 "lysaparser.yy"
     {
 		dynamic_pointer_cast<IndexDefs>((yyvsp[(1) - (3)]))->push_back((yyvsp[(3) - (3)]));
 		(yyval) = (yyvsp[(1) - (3)]);
@@ -2032,7 +2032,7 @@ yyreduce:
     break;
 
   case 54:
-#line 462 ".\\lysaparser.yy"
+#line 465 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IndexDef((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)])));
@@ -2041,7 +2041,7 @@ yyreduce:
     break;
 
   case 55:
-#line 468 ".\\lysaparser.yy"
+#line 471 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval empty(new String(""));
@@ -2051,7 +2051,7 @@ yyreduce:
     break;
 
   case 56:
-#line 475 ".\\lysaparser.yy"
+#line 478 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IndexDef((yyvsp[(1) - (5)]), (yyvsp[(3) - (5)]), (yyvsp[(5) - (5)])));
@@ -2060,7 +2060,7 @@ yyreduce:
     break;
 
   case 59:
-#line 485 ".\\lysaparser.yy"
+#line 488 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IsetIndices((yyvsp[(2) - (3)])));
@@ -2069,7 +2069,7 @@ yyreduce:
     break;
 
   case 60:
-#line 491 ".\\lysaparser.yy"
+#line 494 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IsetUnion((yyvsp[(1) - (3)]), (yyvsp[(3) - (3)])));
@@ -2078,7 +2078,7 @@ yyreduce:
     break;
 
   case 61:
-#line 497 ".\\lysaparser.yy"
+#line 500 "lysaparser.yy"
     {
 		set_current_position((yyloc));
 		semval e(new IsetDef((yyvsp[(1) - (1)])));
@@ -2308,7 +2308,8 @@ yyreturn:
 }
 
 
-#line 505 ".\\lysaparser.yy"
+#line 508 "lysaparser.yy"
 
 
 //no local functions definitions.
+

@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 33
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -35,7 +35,7 @@
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
 
-#if __STDC_VERSION__ >= 199901L
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -89,6 +88,8 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#endif /* ! C99 */
+
 #endif /* ! FLEXINT_H */
 
 /* begin standard C++ headers. */
@@ -105,11 +106,12 @@ typedef unsigned int flex_uint32_t;
 
 #else	/* ! __cplusplus */
 
-#if __STDC__
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
 
 #define YY_USE_CONST
 
-#endif	/* __STDC__ */
+#endif	/* defined (__STDC__) */
 #endif	/* ! __cplusplus */
 
 #ifdef YY_USE_CONST
@@ -151,7 +153,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -187,14 +197,9 @@ extern int yyleng;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -525,8 +530,8 @@ static yyconst flex_int16_t yy_chk[368] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 ".\\lysalexer.ll"
-#line 2 ".\\lysalexer.ll"
+#line 1 "lysalexer.ll"
+#line 2 "lysalexer.ll"
 
 #include "lysa.h"
 #include <string.h>
@@ -546,7 +551,7 @@ static yyconst flex_int16_t yy_chk[368] =
  */
 typedef boost::shared_ptr<lysa::Expression> semval;
 #define YYSTYPE semval
-#include "lysaparser.hpp"
+#include "lysaparser.h"
 
 
 //fix for newer versions of flex (>= 2.5.31)
@@ -620,7 +625,7 @@ lysaLexer *lexer = NULL;
 
 
 
-#line 624 "lysalexer.cpp"
+#line 629 "lysalexer.cpp"
 
 #define INITIAL 0
 #define INIT 1
@@ -653,7 +658,12 @@ static int yy_flex_strlen (yyconst char * );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -723,9 +733,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 107 ".\\lysalexer.ll"
+#line 107 "lysalexer.ll"
 
-#line 729 "lysalexer.cpp"
+#line 739 "lysalexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -810,38 +820,38 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 108 ".\\lysalexer.ll"
+#line 108 "lysalexer.ll"
 { col_nr += YYLeng();			/* whitespace */ }
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 109 ".\\lysalexer.ll"
+#line 109 "lysalexer.ll"
 { col_nr = 1; ++line_nr;	/* newline */ }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 110 ".\\lysalexer.ll"
+#line 110 "lysalexer.ll"
 { col_nr += YYLeng();			/* comment until end-of-line */ }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 112 ".\\lysalexer.ll"
+#line 112 "lysalexer.ll"
 {BEGIN(COMMENT); col_nr += YYLeng();	/* comment start */ }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 113 ".\\lysalexer.ll"
+#line 113 "lysalexer.ll"
 {BEGIN(INIT); col_nr += YYLeng();			/* comment end */ }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 114 ".\\lysalexer.ll"
+#line 114 "lysalexer.ll"
 {col_nr += YYLeng();									/* comment contents */}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 116 ".\\lysalexer.ll"
+#line 116 "lysalexer.ll"
 {
 	BEGIN(HINT); 
 	update_pos(); 
@@ -851,7 +861,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 122 ".\\lysalexer.ll"
+#line 122 "lysalexer.ll"
 {
 	if(!hint_paren_depth)
 	{
@@ -869,7 +879,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 136 ".\\lysalexer.ll"
+#line 136 "lysalexer.ll"
 {
 	update_pos();
 	hint_collect << YYText();
@@ -879,7 +889,7 @@ YY_RULE_SETUP
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 141 ".\\lysalexer.ll"
+#line 141 "lysalexer.ll"
 {
 	update_pos();
 	hint_collect << YYText();
@@ -887,230 +897,230 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 146 ".\\lysalexer.ll"
+#line 146 "lysalexer.ll"
 { update_pos(); return T_DECRYPT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 147 ".\\lysalexer.ll"
+#line 147 "lysalexer.ll"
 { update_pos(); return T_AS; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 148 ".\\lysalexer.ll"
+#line 148 "lysalexer.ll"
 { update_pos(); return T_IN; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 149 ".\\lysalexer.ll"
+#line 149 "lysalexer.ll"
 { update_pos(); return T_LET; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 150 ".\\lysalexer.ll"
+#line 150 "lysalexer.ll"
 { update_pos(); return T_SUBSET; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 151 ".\\lysalexer.ll"
+#line 151 "lysalexer.ll"
 { update_pos(); return T_UNION; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 152 ".\\lysalexer.ll"
+#line 152 "lysalexer.ll"
 { update_pos(); return T_DY; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 153 ".\\lysalexer.ll"
+#line 153 "lysalexer.ll"
 { process_iset(lysa::ZERO);				 return T_ISET_DEF; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 154 ".\\lysalexer.ll"
+#line 154 "lysalexer.ll"
 { process_iset(lysa::NATURAL1);  return T_ISET_DEF; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 155 ".\\lysalexer.ll"
+#line 155 "lysalexer.ll"
 { process_iset(lysa::NATURAL2);  return T_ISET_DEF; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 156 ".\\lysalexer.ll"
+#line 156 "lysalexer.ll"
 { process_iset(lysa::NATURAL3);  return T_ISET_DEF; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 157 ".\\lysalexer.ll"
+#line 157 "lysalexer.ll"
 { process_iset(lysa::NATURAL01); return T_ISET_DEF; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 158 ".\\lysalexer.ll"
+#line 158 "lysalexer.ll"
 { process_iset(lysa::NATURAL02); return T_ISET_DEF; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 159 ".\\lysalexer.ll"
+#line 159 "lysalexer.ll"
 { process_iset(lysa::NATURAL03); return T_ISET_DEF; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 160 ".\\lysalexer.ll"
+#line 160 "lysalexer.ll"
 { update_pos(); return T_NEW; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 161 ".\\lysalexer.ll"
+#line 161 "lysalexer.ll"
 { update_pos(); return T_AT; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 162 ".\\lysalexer.ll"
+#line 162 "lysalexer.ll"
 { update_pos(); return T_DEST; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 163 ".\\lysalexer.ll"
+#line 163 "lysalexer.ll"
 { update_pos(); return T_ORIG; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 164 ".\\lysalexer.ll"
+#line 164 "lysalexer.ll"
 { update_pos(); return T_CPDY; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 166 ".\\lysalexer.ll"
+#line 166 "lysalexer.ll"
 { process_string(); return T_PLUS_OR_MINUS; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 167 ".\\lysalexer.ll"
+#line 167 "lysalexer.ll"
 { process_string(); return T_TYPENAME; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 168 ".\\lysalexer.ll"
+#line 168 "lysalexer.ll"
 { update_pos(); return T_LBRACE_SUBSCRIPT; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 169 ".\\lysalexer.ll"
+#line 169 "lysalexer.ll"
 { update_pos(); return T_UNDERSCORE; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 170 ".\\lysalexer.ll"
+#line 170 "lysalexer.ll"
 { update_pos(); return T_LPAREN; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 171 ".\\lysalexer.ll"
+#line 171 "lysalexer.ll"
 { update_pos(); return T_RPAREN; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 172 ".\\lysalexer.ll"
+#line 172 "lysalexer.ll"
 { update_pos(); return T_LBOX; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 173 ".\\lysalexer.ll"
+#line 173 "lysalexer.ll"
 { update_pos(); return T_RBOX; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 174 ".\\lysalexer.ll"
+#line 174 "lysalexer.ll"
 { update_pos(); return T_LT; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 175 ".\\lysalexer.ll"
+#line 175 "lysalexer.ll"
 { update_pos(); return T_GT; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 176 ".\\lysalexer.ll"
+#line 176 "lysalexer.ll"
 { update_pos(); return T_EQUALS; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 177 ".\\lysalexer.ll"
+#line 177 "lysalexer.ll"
 { update_pos(); return T_SEMICOLON; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 178 ".\\lysalexer.ll"
+#line 178 "lysalexer.ll"
 { update_pos(); return T_COLON; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 179 ".\\lysalexer.ll"
+#line 179 "lysalexer.ll"
 { update_pos(); return T_DOT; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 180 ".\\lysalexer.ll"
+#line 180 "lysalexer.ll"
 { update_pos(); return T_COMMA; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 181 ".\\lysalexer.ll"
+#line 181 "lysalexer.ll"
 { update_pos(); return T_PIPE; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 182 ".\\lysalexer.ll"
+#line 182 "lysalexer.ll"
 { update_pos(); return T_LBRACE; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 183 ".\\lysalexer.ll"
+#line 183 "lysalexer.ll"
 { update_pos(); return T_RBRACE; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 184 ".\\lysalexer.ll"
+#line 184 "lysalexer.ll"
 { update_pos(); return T_LBRACE_PIPE; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 185 ".\\lysalexer.ll"
+#line 185 "lysalexer.ll"
 { update_pos(); return T_RBRACE_PIPE; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 186 ".\\lysalexer.ll"
+#line 186 "lysalexer.ll"
 { update_pos(); return T_BANG; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 187 ".\\lysalexer.ll"
+#line 187 "lysalexer.ll"
 { update_pos(); return T_PLUS_MINUS; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 189 ".\\lysalexer.ll"
+#line 189 "lysalexer.ll"
 { process_string(); return T_IDENT; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 190 ".\\lysalexer.ll"
+#line 190 "lysalexer.ll"
 { process_string(); return T_NUM; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 191 ".\\lysalexer.ll"
+#line 191 "lysalexer.ll"
 { process_string(); return T_ALNUM; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 193 ".\\lysalexer.ll"
+#line 193 "lysalexer.ll"
 ECHO;
 	YY_BREAK
-#line 1114 "lysalexer.cpp"
+#line 1124 "lysalexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(INIT):
 case YY_STATE_EOF(COMMENT):
@@ -1246,6 +1256,8 @@ case YY_STATE_EOF(HINT):
 		} /* end of scanning one token */
 } /* end of yylex */
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 {
 	yyin = arg_yyin;
@@ -1266,21 +1278,26 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 	yy_start_stack_ptr = yy_start_stack_depth = 0;
 	yy_start_stack = NULL;
 
-    (yy_buffer_stack) = 0;
-    (yy_buffer_stack_top) = 0;
-    (yy_buffer_stack_max) = 0;
+	yy_buffer_stack = 0;
+	yy_buffer_stack_top = 0;
+	yy_buffer_stack_max = 0;
 
 	yy_state_buf = 0;
 
 }
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 yyFlexLexer::~yyFlexLexer()
 {
 	delete [] yy_state_buf;
 	lysayyfree(yy_start_stack  );
 	yy_delete_buffer( YY_CURRENT_BUFFER );
+	lysayyfree(yy_buffer_stack  );
 }
 
+/* The contents of this function are C++ specific, so the () macro is not used.
+ */
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
 	if ( new_in )
@@ -1426,7 +1443,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), num_to_read );
+			(yy_n_chars), (size_t) num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -1449,6 +1466,14 @@ int yyFlexLexer::yy_get_next_buffer()
 
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
+
+	if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) lysayyrealloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
 	(yy_n_chars) += number_to_move;
 	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
@@ -1855,7 +1880,9 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 		(yy_buffer_stack) = (struct yy_buffer_state**)lysayyalloc
 								(num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
-		
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
+								  
 		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
 				
 		(yy_buffer_stack_max) = num_to_alloc;
@@ -1873,6 +1900,8 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 								((yy_buffer_stack),
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
+		if ( ! (yy_buffer_stack) )
+			YY_FATAL_ERROR( "out of dynamic memory in yyensure_buffer_stack()" );
 
 		/* zero only the new slots.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
@@ -1896,8 +1925,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 			(yy_start_stack) = (int *) lysayyrealloc((void *) (yy_start_stack),new_size  );
 
 		if ( ! (yy_start_stack) )
-			YY_FATAL_ERROR(
-			"out of memory expanding start-condition stack" );
+			YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
 		}
 
 	(yy_start_stack)[(yy_start_stack_ptr)++] = YY_START;
@@ -1995,7 +2023,7 @@ void lysayyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 193 ".\\lysalexer.ll"
+#line 193 "lysalexer.ll"
 
 
 //Implementation of the global functions, needed for interfacing with bison.
@@ -2109,3 +2137,4 @@ semval lysaLexer::parse_stream(std::istream &stream)
 //which I have not managed to find a windows port for, so i use 2.5.34.
 #undef yywrap
 int lysayyFlexLexer::yywrap(void) { return 1; };
+

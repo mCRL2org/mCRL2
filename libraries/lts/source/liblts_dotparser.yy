@@ -36,6 +36,9 @@ int dotyylex(void);
   ATermList atermlist;
 }
 
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="dotyy"
 

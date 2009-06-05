@@ -198,7 +198,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 202 "chiparser.hpp"
+#line 202 "chiparser.h"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

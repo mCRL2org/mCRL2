@@ -70,6 +70,9 @@ bool is_number(std::string s);
   ATermList list;
 };
 
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="chiyy"
 

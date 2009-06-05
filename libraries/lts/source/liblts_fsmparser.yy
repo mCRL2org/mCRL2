@@ -33,6 +33,9 @@ char* intToCString(int i);
   int number;
 }
 
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="fsmyy"
 

@@ -29,7 +29,7 @@ bool _getch() { return true; }
 #include "mcrl2/utilities/input_output_tool.h"
 
 #include "lysa.h"
-#include "lysaparser.hpp"
+#include "lysaparser.h"
 #include "lysalexer.h"
 #include "lysaconverter.h"
 #include "strategy.h"

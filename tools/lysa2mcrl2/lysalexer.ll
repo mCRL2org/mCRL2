@@ -18,7 +18,7 @@
  */
 typedef boost::shared_ptr<lysa::Expression> semval;
 #define YYSTYPE semval
-#include "lysaparser.hpp"
+#include "lysaparser.h"
 
 
 //fix for newer versions of flex (>= 2.5.31)

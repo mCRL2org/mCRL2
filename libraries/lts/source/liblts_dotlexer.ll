@@ -13,7 +13,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_dotlexer.h"
-#include "mcrl2/liblts_dotparser.hpp"
+#include "mcrl2/lts/detail/liblts_dotparser.h"
 
 using namespace mcrl2::core;
 

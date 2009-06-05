@@ -10,7 +10,7 @@
 #include <cstring>
 #include <cstdio>
 #include "mcrl2/core/detail/mcrl2lexer.h"
-#include "mcrl2/core/detail/mcrl2parser.hpp"
+#include "mcrl2/core/detail/mcrl2parser.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 

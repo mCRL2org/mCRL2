@@ -39,59 +39,43 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     DIGRAPH = 258,
-     GRAPH = 259,
-     STRICT = 260,
-     SUBGRAPH = 261,
-     NODE = 262,
-     EDGE = 263,
-     IS = 264,
-     COMMA = 265,
-     COLON = 266,
-     SEMICOLON = 267,
-     LBRACE = 268,
-     RBRACE = 269,
-     LBRACK = 270,
-     RBRACK = 271,
-     ARROW = 272,
-     ID = 273
+     EOLN = 258,
+     SECSEP = 259,
+     LPAR = 260,
+     RPAR = 261,
+     ARROW = 262,
+     NUMBER = 263,
+     ID = 264,
+     QUOTED = 265
    };
 #endif
 /* Tokens.  */
-#define DIGRAPH 258
-#define GRAPH 259
-#define STRICT 260
-#define SUBGRAPH 261
-#define NODE 262
-#define EDGE 263
-#define IS 264
-#define COMMA 265
-#define COLON 266
-#define SEMICOLON 267
-#define LBRACE 268
-#define RBRACE 269
-#define LBRACK 270
-#define RBRACK 271
-#define ARROW 272
-#define ID 273
+#define EOLN 258
+#define SECSEP 259
+#define LPAR 260
+#define RPAR 261
+#define ARROW 262
+#define NUMBER 263
+#define ID 264
+#define QUOTED 265
 
 
 
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
-#line 34 "liblts_dotparser.yy"
+#line 31 "liblts_fsmparser.yy"
 {
   ATermAppl aterm;
-  ATermList atermlist;
+  int number;
 }
 /* Line 1489 of yacc.c.  */
-#line 90 "../include/mcrl2/liblts_dotparser.hpp"
+#line 74 "../include/mcrl2/lts/detail/liblts_fsmparser.h"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
 #endif
 
-extern YYSTYPE dotyylval;
+extern YYSTYPE fsmyylval;
 

@@ -207,7 +207,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 211 "../include/mcrl2/core/detail/mcrl2parser.hpp"
+#line 211 "../include/mcrl2/core/detail/mcrl2parser.h"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

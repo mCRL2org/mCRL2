@@ -24,31 +24,36 @@ ifeq (${MAKECMDGOALS},)
   include build/Makefile
 endif
 
-parsers: mcrl2parser chiparser liblts_fsmparser liblts_dotparser
+parsers: liblts_fsmparser liblts_dotparser mcrl2parser chiparser lysaparser
 	cp /usr/include/FlexLexer.h build/workarounds
 
 liblts_fsmparser:
 	cd libraries/lts/source; \
 	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
-	bison -p fsm --defines=../include/mcrl2/liblts_fsmparser.hpp -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
-	sed -i 's+#include "liblts_fsmparser.hpp"+#include "mcrl2/liblts_fsmparser.hpp"+' liblts_fsmparser.cpp
+	bison -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
+	sed -i 's+#include "liblts_fsmparser.h"+#include "mcrl2/lts/detail/liblts_fsmparser.h"+' liblts_fsmparser.cpp
 
 liblts_dotparser:
 	cd libraries/lts/source; \
 	flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll; \
-	bison -p dot --defines=../include/mcrl2/liblts_dotparser.hpp -o liblts_dotparser.cpp liblts_dotparser.yy; \
-	sed -i 's+#include "liblts_dotparser.hpp"+#include "mcrl2/liblts_dotparser.hpp"+' liblts_dotparser.cpp
+	bison -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy; \
+	sed -i 's+#include "liblts_dotparser.h"+#include "mcrl2/lts/detail/liblts_dotparser.h"+' liblts_dotparser.cpp
 
 mcrl2parser:
 	cd libraries/core/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
-	bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.hpp -o mcrl2parser.cpp mcrl2parser.yy; \
-	sed -i 's+#include "mcrl2parser.hpp"+#include "mcrl2/core/detail/mcrl2parser.hpp"+' mcrl2parser.cpp
+	bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy; \
+	sed -i 's+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+' mcrl2parser.cpp
 
 chiparser:
 	cd tools/chi2mcrl2; \
 	flex -Pchi -ochilexer.cpp chilexer.ll; \
-	bison -p chi -d -o chiparser.cpp chiparser.yy;
+	bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy;
+
+lysaparser:
+	cd tools/lysa2mcrl2; \
+	flex -Pchi -olysalexer.cpp lysalexer.ll; \
+	bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy;
 
 tags:
 	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .

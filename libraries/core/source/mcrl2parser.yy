@@ -85,6 +85,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 //generate a GLR parser
 %glr-parser
 
+//more verbose and specific error messages
+%error-verbose
+
 //set name prefix
 %name-prefix="mcrl2yy"
 
