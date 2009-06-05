@@ -9,6 +9,7 @@
 /// \file mcrl2/lps/rewrite.h
 /// \brief add your file description here.
 
+#include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/detail/lps_rewriter.h"
 
 #ifndef MCRL2_LPS_REWRITE_H
@@ -30,7 +31,7 @@ namespace lps {
   template <typename Object, typename DataRewriter, typename Substitution>
   void rewrite(Object& o, const DataRewriter& R, const Substitution& sigma)
   {
-    lps::detail::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
+    data::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
     rewrite(o, Rsigma);
   }
 

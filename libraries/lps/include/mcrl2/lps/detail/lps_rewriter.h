@@ -21,24 +21,6 @@ namespace lps {
 
 namespace detail {
 
-  /// \brief Function object for converting a data rewriter into a rewriter that
-  /// applies a substitution.
-  template <typename DataRewriter, typename Substitution>
-  struct rewriter_adapter
-  {
-    const DataRewriter& R_;
-    const Substitution& sigma_;
-    
-    rewriter_adapter(const DataRewriter& R, const Substitution& sigma)
-      : R_(R), sigma_(sigma)
-    {}
-    
-    data::data_expression operator()(const data::data_expression& t) const
-    {
-      return R_(t, sigma_);
-    }
-  };
-  
   /// \brief Function object for applying a data rewriter to LPS data types.
   template <typename DataRewriter>
   struct lps_rewriter

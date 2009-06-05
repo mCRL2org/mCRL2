@@ -170,7 +170,7 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
   data::rewriter R(src.data());
   data::mutable_substitution<data::variable, data::data_expression> sigma;
   data::detail::parse_substitutions(sigma_text, src.data(), sigma);
-  lps::detail::rewriter_adapter<data::rewriter, data::mutable_substitution<data::variable, data::data_expression> > Rsigma(R, sigma);
+  data::rewriter_adapter<data::rewriter, data::mutable_substitution<data::variable, data::data_expression> > Rsigma(R, sigma);
   lps::detail::make_lps_rewriter(Rsigma).rewrite(src);                   
 
   if (src != dest)
