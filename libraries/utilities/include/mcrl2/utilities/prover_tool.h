@@ -93,7 +93,11 @@ namespace tools {
       void parse_options(const command_line_parser& parser)
       {
         Tool::parse_options(parser);
-        m_solver_type = parser.option_argument_as< smt_solver_type >("smt-solver");
+
+        if (0 < parser.options.count("smt-solver"))
+        {
+          m_solver_type = parser.option_argument_as< smt_solver_type >("smt-solver");
+        }
       }
 
     public:

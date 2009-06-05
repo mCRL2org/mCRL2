@@ -20,7 +20,6 @@
 #include <stdexcept>
 #include <cerrno>
 #include <cstring>
-#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
