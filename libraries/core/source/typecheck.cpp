@@ -4120,8 +4120,8 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
   ATermList NewCandidateList=ATmakeList0();
   for(ATermList l=CandidateList;!ATisEmpty(l);l=ATgetNext(l)){
     ATermAppl Candidate=ATAgetFirst(l);
-    if(!gsIsSortArrow(CandidateType)) continue;
-    NewCandidateList=ATinsert(NewCandidateList,(ATerm)ATLgetArgument(ATAgetFirst(l),0));
+    if(!gsIsSortArrow(Candidate)) continue;
+    NewCandidateList=ATinsert(NewCandidateList,(ATerm)ATLgetArgument(Candidate,0));
   }
   CandidateList=ATreverse(NewCandidateList);
 
