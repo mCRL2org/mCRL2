@@ -140,6 +140,28 @@ void test_struct()
   specification spec = mcrl22lps(text);
 }
 
+void test_block()
+{
+  specification spec = mcrl22lps(
+    "act s,s',d,d': Nat;\n"
+   "\n"
+    "proc P(n: Nat) = s(n).s(n+1).d(n+1).d(n).P(n);\n"
+   "\n"
+    "proc M1(n: Nat) = s(n). s(n+1)|s(n+2). d(n+1)|d(n+2).d(n).M1(n); \n"
+   "\n"
+    "proc S(n: Nat) = s(n).d(n).S(n);\n"
+   "\n"
+    "init \n"
+    "  block({s,d},\n"
+    "    comm( { s | s -> s'\n"
+    "          , d | d -> d'\n"
+    "          }\n"
+    "          , P(0) || M1(1) || S(2) || P(3) || S(4) || (s(0).d(0))\n"
+    "        )\n"
+    "  );"
+  );
+}
+
 void test_large_specification()
 {
   const std::string MODEL =
@@ -471,6 +493,8 @@ int test_main(int argc, char** argv )
   test_lambda();
   core::garbage_collect();
   test_no_free_variables();
+  core::garbage_collect();
+  test_block();
   core::garbage_collect();
 
   return 0;
