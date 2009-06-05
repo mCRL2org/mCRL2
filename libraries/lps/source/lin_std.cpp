@@ -123,16 +123,12 @@ class objectdatatype
     bool containstime; 
   
     objectdatatype()
-    { objectname=identifier_string();
+    {
       objectname.protect();
       constructor=false;
-      representedprocess=process_expression();
       representedprocess.protect();
-      process_representing_action=process_identifier();
       process_representing_action.protect();
-      processbody=process_expression();
       processbody.protect();
-      parameters=variable_list();
       parameters.protect();
       processstatus=unknown;
       object=none;
@@ -141,6 +137,24 @@ class objectdatatype
     }
 
     objectdatatype(const objectdatatype &o)
+    { objectname=o.objectname;
+      objectname.protect();
+      constructor=o.constructor;
+      representedprocess=o.representedprocess;
+      representedprocess.protect();
+      process_representing_action=o.process_representing_action;
+      process_representing_action.protect();
+      processbody=o.processbody;
+      processbody.protect();
+      parameters=o.parameters;
+      parameters.protect();
+      processstatus=o.processstatus;
+      object=o.object;
+      canterminate=o.canterminate;
+      containstime=o.containstime;
+    }
+  
+    void operator=(const objectdatatype &o)
     { objectname=o.objectname;
       objectname.protect();
       constructor=o.constructor;
@@ -3815,6 +3829,16 @@ class specification_basic_type:public boost::noncopyable
         }
 
         enumeratedtype(const enumeratedtype &e)
+        { sortId.protect();
+          elementnames.protect();
+          functions.protect();
+          size=e.size;
+          sortId=e.sortId;
+          elementnames=e.elementnames;
+          functions=e.functions;
+        }
+
+        void operator=(const enumeratedtype &e)
         { sortId.protect();
           elementnames.protect();
           functions.protect();
