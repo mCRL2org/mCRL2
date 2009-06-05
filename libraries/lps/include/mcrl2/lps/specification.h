@@ -131,7 +131,9 @@ class specification
         m_action_labels(action_labels),
         m_process(lps),
         m_initial_process(initial_process)
-    {}
+    {
+      repair_free_variables();
+    }
 
     /// \brief Reads the specification from file.
     /// \param filename A string
