@@ -143,10 +143,9 @@ static ATermAppl find_type(ATermAppl a, ATermList args, ATermList types = NULL)
 static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 {
 	ATermList l = ATgetArguments(t);
-	ATermList m;
-	ATermAppl t2,r;
+	ATermAppl r;
 
-	t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
+	ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
 
 	if ( ATisEmpty(l) )
 	{
@@ -158,7 +157,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 			r = gsMakeDataVarId(t2,r);
 		}
 	} else {
-		m = ATmakeList0();
+		ATermList m = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));

@@ -286,8 +286,6 @@ bool StandardSimulator::SetTracePos(unsigned int pos)
 	}
 
 	unsigned int l = ATgetLength(trace)-1;
-	ATermAppl trans;
-	ATerm state;
 
 	if ( pos <= l+ATgetLength(ecart) )
 	{
@@ -304,8 +302,8 @@ bool StandardSimulator::SetTracePos(unsigned int pos)
 			l--;
 		}
 
-		trans = ATAgetFirst(ATLgetFirst(trace));
-		state = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
+		ATermAppl trans = ATAgetFirst(ATLgetFirst(trace));
+		ATerm state = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
 
 		SetCurrentState(state);
 		UpdateTransitions();
