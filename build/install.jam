@@ -356,11 +356,6 @@ rule platform-configuration ( properties * ) {
     if <link>static in $(properties) {
       requirements += <linkflags>-export-dynamic ;
     }
-    else {
-      if ! <target-os>windows in $(properties) && ! <address-model>64 in $(properties) { # MinGW on Windows
-        requirements += <cxxflags>-fvisibility-inlines-hidden ;
-      }
-    }
 
     # versions of gcc without signed overflow (breaks ATerm library)
     if [ MATCH ^(4\.[3456789]).* : [ feature.get-values toolset-gcc:version : $(properties)) ] ] {
