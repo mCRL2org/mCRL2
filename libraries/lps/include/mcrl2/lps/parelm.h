@@ -21,7 +21,7 @@
 #include <boost/integer.hpp>
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/detail/iota.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"

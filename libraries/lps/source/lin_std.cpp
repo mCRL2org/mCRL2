@@ -56,7 +56,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution_adapter.h"

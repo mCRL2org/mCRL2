@@ -14,7 +14,6 @@
 
 #include <cassert>
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 

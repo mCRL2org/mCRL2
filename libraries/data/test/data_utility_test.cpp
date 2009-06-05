@@ -19,6 +19,7 @@
 #include "mcrl2/core/find.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"

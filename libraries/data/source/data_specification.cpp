@@ -31,8 +31,9 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/structured_sort.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 

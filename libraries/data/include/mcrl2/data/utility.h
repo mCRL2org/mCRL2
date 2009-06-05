@@ -21,14 +21,12 @@
 #include <vector>
 
 #include "boost/format.hpp"
-#include "boost/utility/enable_if.hpp"
 #include "boost/iterator/transform_iterator.hpp"
 
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/find.h"
 
 namespace mcrl2 {
@@ -151,48 +149,6 @@ namespace mcrl2 {
     {
       return boost::iterator_range< boost::transform_iterator<
         detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >(container);
-    }
-
-    /// \brief Pretty prints a data specification
-    /// \param[in] specification a data specification
-    inline std::string pp(data_specification const& specification)
-    {
-      return core::pp(detail::data_specification_to_aterm_data_spec(specification));
-    }
-
-    /// \brief Pretty prints the contents of a container
-    /// \param[in] c a container with data or sort expressions
-    template < typename Container >
-    inline std::string pp(Container const& c, typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0)
-    {
-      std::string result;
-
-      if (c.begin() != c.end())
-      {
-        result.append(mcrl2::core::pp(*c.begin()));
-
-        for (typename Container::const_iterator i = ++(c.begin()); i != c.end(); ++i)
-        {
-          result.append(", ").append(mcrl2::core::pp(*i));
-        }
-      }
-
-      return result;
-    }
-
-    /// \brief Pretty prints a data and sort expressions
-    /// \param[in] c A data or sort expression
-    inline std::string pp(atermpp::aterm_appl const& c)
-    {
-      return core::pp(c);
-    }
-
-    /// \brief Pretty prints a data and sort expressions
-    /// \param[in] c A data or sort expression.
-    template < typename Expression >
-    inline std::string pp(atermpp::term_list< Expression > const& c)
-    {
-      return core::pp(c);
     }
 
     /// \brief Returns a copy of t, but with a common postfix added to each variable name,
@@ -334,19 +290,6 @@ namespace mcrl2 {
     {
       core::identifier_string id = fresh_identifier(context, hint);
       return variable(id, s);
-    }
-
-    /// \brief Combines two variables lists
-    /// \param v1 a list of variables
-    /// \param v2 a list of variables
-    /// \return for all x : x in v1 or x in v2  implies x in result
-    template < typename Container >
-    inline variable_list merge(Container const& v1, Container const& v2) {
-      std::set< typename Container::value_type > variables(v1.begin(), v1.end());
-
-      variables.insert(v2.begin(), v2.end());
-
-      return Container(variables.begin(), variables.end());
     }
 
   } // namespace data

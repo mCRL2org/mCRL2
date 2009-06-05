@@ -14,7 +14,6 @@
 #define MCRL2_DATA_DETAIL_CONVERT_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -62,11 +61,7 @@ namespace mcrl2 {
 
         static atermpp::term_list< TargetExpression >
 	convert(atermpp::term_list< SourceExpression > const& r) {
-          if (ATisEmpty(r.end().list())) {
-            return atermpp::term_list< TargetExpression >(r.begin().list());
-          }
-
-          return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+          return atermpp::term_list< TargetExpression >(r);
         }
       };
 

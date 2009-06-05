@@ -599,7 +599,7 @@ class svc_buffer
 
     unsigned int get_bit()
     {
-      if ( pos/8 == buffer_size )
+      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
       {
         input->read((char *) buffer,56);
         if ( input->eof() )
@@ -609,7 +609,7 @@ class svc_buffer
         buffer_size = input->gcount();
         pos = 0;
       }
-      if ( pos/8 == buffer_size )
+      if ( static_cast< std::streamsize >(pos/8) == buffer_size )
       {
         valid = false;
         return 0;

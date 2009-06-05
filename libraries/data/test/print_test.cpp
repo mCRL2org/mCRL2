@@ -19,6 +19,7 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool_;

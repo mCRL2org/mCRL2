@@ -24,9 +24,10 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/assignment_list_substitution.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -279,12 +280,7 @@ class summand: public atermpp::aterm_appl
     /// \return A symbolic representation of the next states
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
-      data::data_expression_vector result;
-
-      substitute(data::assignment_list_substitution(assignments()),
-                        process_parameters, std::inserter(result, result.end()));
-
-      return data::make_data_expression_list(result);
+      return data::replace_variables(process_parameters, data::assignment_list_substitution(assignments()));
     }
 
     /// \brief Checks if the summand is well typed
@@ -779,12 +775,7 @@ class action_summand: public summand_base
     /// \return A symbolic representation of the next states
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
-      data::data_expression_vector result;
-
-      substitute(data::assignment_list_substitution(assignments()),
-                        process_parameters, std::inserter(result, result.end()));
-
-      return data::make_data_expression_list(result);
+      return data::replace_variables(process_parameters, data::assignment_list_substitution(assignments()));
     }
 
     /// \brief Checks if the summand is well typed

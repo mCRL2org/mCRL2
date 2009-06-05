@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/find.h"

@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/utility.h" // for pp
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
 
 namespace mcrl2 {
@@ -121,7 +121,7 @@ namespace lps {
       // check 1)
       if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
       {
-        std::cerr << "deadlock_summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
+        std::cerr << "deadlock_summand::is_well_typed() failed: time " << mcrl2::data::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
       return true;

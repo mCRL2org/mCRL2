@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
 
 namespace mcrl2 {

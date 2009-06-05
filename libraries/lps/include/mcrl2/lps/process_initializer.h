@@ -20,7 +20,7 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state

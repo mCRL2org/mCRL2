@@ -1664,7 +1664,7 @@ namespace bes
     ///  bes_equations;
     
     template < typename Container, typename PbesRewriter >
-    boolean_equation_system(const typename mcrl2::pbes_system::pbes<Container> pbes_spec,
+    boolean_equation_system(const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
         PbesRewriter &pbes_rewriter,
         const transformation_strategy opt_strategy=lazy,
         const bool opt_store_as_tree=false,
@@ -1686,7 +1686,7 @@ namespace bes
     
       // Verbose msg: doing naive algorithm
     
-      data_specification data = pbes_spec.data();
+//      data_specification const& data = pbes_spec.data();
     
       // Variables in which the result is stored
       propositional_variable_instantiation new_initial_state;

@@ -264,8 +264,7 @@ namespace data {
       data_expression_with_variables operator()(const data_expression_with_variables& d) const
       {
         data_expression t = reconstruct(m_rewriter->rewrite(implement(d)));
-        std::set<variable> v = find_all_variables(t);
-        return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
+        return data_expression_with_variables(t, find_all_variables(t));
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -277,8 +276,7 @@ namespace data {
       data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
       {
         data_expression t = this->operator()(replace_free_variables(d, sigma));
-        std::set<variable> v = find_all_variables(t);
-        return data_expression_with_variables(t, variable_list(v.begin(), v.end()));
+        return data_expression_with_variables(t, find_all_variables(t));
       }
   };
 

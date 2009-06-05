@@ -19,6 +19,7 @@
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
@@ -54,15 +55,9 @@ namespace data {
       /// \brief Constructor.
       /// \param expression A data expression
       /// \param variables A sequence of data variables
-      data_expression_with_variables(data_expression expression, variable_vector const& variables)
-        : data_expression(expression), m_variables(variables.begin(), variables.end())
-      {}
-
-      /// \brief Constructor.
-      /// \param expression A data expression
-      /// \param variables A sequence of data variables
-      data_expression_with_variables(data_expression expression, variable_list variables)
-        : data_expression(expression), m_variables(variables)
+      template < typename Container >
+      data_expression_with_variables(data_expression expression, const Container& variables)
+        : data_expression(expression), m_variables(convert< variable_list >(variables))
       {}
 
       /// \brief Return the variables.
@@ -146,7 +141,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-      return term_type(data::sort_bool_::and_(p, q), data::merge(p.variables(), q.variables()));
+      return term_type(data::sort_bool_::and_(p, q), p.variables() + q.variables());
     }
 
     /// \brief Make a disjunction
@@ -156,7 +151,7 @@ namespace core {
     static inline
     term_type or_(term_type p, term_type q)
     {
-      return term_type(data::sort_bool_::or_(p, q), data::merge(p.variables(), q.variables()));
+      return term_type(data::sort_bool_::or_(p, q), p.variables() + q.variables());
     }
 
     /// \brief Test for value true

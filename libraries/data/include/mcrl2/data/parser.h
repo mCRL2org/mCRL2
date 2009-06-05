@@ -27,7 +27,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/regfrmtrans.h"
-#include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 
