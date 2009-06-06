@@ -400,7 +400,7 @@ void test_type_checking()
   state_formula formula = mcf2statefrm("<a([d])>true", context);
 
   BOOST_CHECK(is_may(formula));
-  BOOST_CHECK(static_cast< atermpp::aterm_appl >(formula) != 0);
+  BOOST_CHECK(act(formula));
 }
 
 int test_main(int argc, char* argv[])

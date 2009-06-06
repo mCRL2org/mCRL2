@@ -25,29 +25,62 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool_;
 using namespace mcrl2::data::sort_nat;
 
+bool print_check(data_expression const& left, std::string const& right) {
+  if (pp(left) != right)
+  {
+    std::clog << "pp(" << pp(left) << ") != " << right << std::endl;
+
+    return false;
+  }
+
+  return true;
+}
+
+#define PRINT_CHECK(x,y) BOOST_CHECK(print_check(x,y))
+
 void test_function_symbol_print() {
   function_symbol f("f", sort_bool_::bool_());
 
-  BOOST_CHECK(pp(f) == "f");
+  PRINT_CHECK(f, "f");
 }
 
 void test_application_print() {
   function_symbol f("f", function_sort(bool_(), bool_()));
   function_symbol g("g", function_sort(bool_(), nat(), bool_()));
 
-  BOOST_CHECK(pp(application(f, true_())) == "f(true)");
-  BOOST_CHECK(pp(application(g, false_(), sort_nat::nat(10))) == "g(false, 10)");
+  PRINT_CHECK(application(f, true_()), "f(true)");
+  PRINT_CHECK(application(g, false_(), sort_nat::nat(10)), "g(false, 10)");
+  PRINT_CHECK(application(g, application(f, true_()), sort_nat::nat(10)), "g(f(true), 10)");
 }
 
 void test_abstraction_print() {
-  variable_vector x(make_vector(variable("x", sort_nat::nat())));
-  variable_vector xy(make_vector(x[0], variable("y", sort_nat::nat())));
+  using namespace sort_pos;
+  using namespace sort_nat;
 
-  BOOST_CHECK(pp(lambda(x, equal_to(variable("x", sort_nat::nat()), sort_nat::nat(10)))) == "lambda x: Nat. x == 10");
-  std::cerr << pp(lambda(x, equal_to(variable("x", sort_nat::nat()), sort_nat::nat(10)))) << std::endl;
+  variable_vector x(make_vector(variable("x", sort_nat::nat())));
+  variable_vector y(make_vector(variable("y", sort_pos::pos())));
+  variable_vector xy(make_vector(x[0], y[0]));
+
+  PRINT_CHECK(lambda(x, equal_to(x[0], nat(10))), "lambda x: Nat. x == 10");
+  PRINT_CHECK(lambda(xy, equal_to(xy[0], pos2nat(xy[1]))), "lambda x: Nat, y: Pos. x == y");
+  PRINT_CHECK(exists(x, equal_to(x[0], nat(10))), "exists x: Nat. x == 10");
+  PRINT_CHECK(exists(xy, equal_to(xy[0], pos2nat(xy[1]))), "exists x: Nat, y: Pos. x == y");
+  PRINT_CHECK(forall(x, equal_to(x[0], nat(10))), "forall x: Nat. x == 10");
+  PRINT_CHECK(forall(xy, equal_to(xy[0], pos2nat(xy[1]))), "forall x: Nat, y: Pos. x == y");
+  PRINT_CHECK(forall(x, exists(y, not_equal_to(xy[0], pos2nat(xy[1])))), "forall x: Nat. exists y: Pos. x != y");
 }
 
 void test_set_print() {
+  using namespace sort_nat;
+  using namespace sort_set_;
+  using namespace sort_fset;
+
+  data_expression s1(setfset(nat(), fsetinsert(nat(), nat(1), fset_empty(nat()))));
+  data_expression s2(setfset(nat(), fsetinsert(nat(), nat(2), fset_empty(nat()))));
+  data_expression s12(setfset(nat(), fsetinsert(nat(), nat(1), fsetinsert(nat(), nat(2), fset_empty(nat())))));
+
+//  PRINT_CHECK(s1, "{ 1 }");
+//  PRINT_CHECK(s12, "{ 1, 2 }");
 }
 
 void test_bag_print() {
