@@ -110,11 +110,11 @@ static bool match_and_remove(string &s, const string &match)
 }
 
 static const std::string help_text=
-          "The following commands are available to manipulate mcrl2 data expressions.\n"
-          "Essentially, there are commands to rewrite and type expressions, as well as generating\n"
-          "the solutions for a boolean expression. The expressions can contain assigned or \n"
-          "unassigned variables. Note that there are no bounds on the number of steps to evaluate\n"
-          "or solve an expression, nor is the number of solutions bounded. Hence, the assign, eval\n"
+          "The following commands are available to manipulate mcrl2 data expressions. "
+          "Essentially, there are commands to rewrite and type expressions, as well as generating "
+          "the solutions for a boolean expression. The expressions can contain assigned or "
+          "unassigned variables. Note that there are no bounds on the number of steps to evaluate "
+          "or solve an expression, nor is the number of solutions bounded. Hence, the assign, eval "
           "solve commands can give rise to infinite loops.\n"
           "  h[elp]                         print this help message.\n"
           "  q[uit]                         quit.\n"
@@ -125,7 +125,7 @@ static const std::string help_text=
           "  r[ewriter] STRATEGY            use STRATEGY for rewriting.\n"
           "  s[solve] VARLIST. EXPRESSION   give all valuations of the variables in\n"
           "                                      VARLIST that satisfy EXPRESSION.\n"
-          "VARLIST is of the form x,y,...: S; ... v,w,...: T)\n";
+          "VARLIST is of the form x,y,...: S; ... v,w,...: T.\n";
 
 
 class mcrl2i_tool: public rewriter_tool<input_tool>
@@ -137,9 +137,9 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           TOOLNAME,
           AUTHORS,
           "Interpreter for the mCRL2 data language",
-          "Evaluate mCRL2 data expressions via a text-based interface. \n"
-          "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used.\n" 
-          "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored.\n"
+          "Evaluate mCRL2 data expressions via a text-based interface. "
+          "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used. " 
+          "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored."
           + help_text
         )
     {}
@@ -208,10 +208,15 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           {
-            rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
-            if (new_strategy!=m_rewrite_strategy)
-            { m_rewrite_strategy=new_strategy;
-              rewr=rewriter(spec,m_rewrite_strategy);
+            try 
+            { rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
+              if (new_strategy!=m_rewrite_strategy)
+              { m_rewrite_strategy=new_strategy;
+                rewr=rewriter(spec,m_rewrite_strategy);
+              }
+            } 
+            catch (boost::bad_lexical_cast &e)
+            { throw mcrl2::runtime_error("The string " + s + " does not describe a rewrite strategy.");
             }
           }
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
@@ -230,12 +235,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             atermpp::set <variable> vars;
             string::size_type dotpos=s.find(".");
             if (dotpos==string::npos)
-            { throw mcrl2::runtime_error("Expect a `.' in the input");
+            { throw mcrl2::runtime_error("Expect a `.' in the input.");
             }
             parse_variables(s.substr(0,dotpos)+";",std::inserter(vars,vars.begin()),spec);
             data_expression term = parse_term(s.substr(dotpos+1),spec,context_variables,vars);
             if ( term.sort()!=sort_bool_::bool_())
-            { throw mcrl2::runtime_error("expression is not of sort Bool\n");
+            { throw mcrl2::runtime_error("expression is not of sort Bool.");
             }
             for (classic_enumerator< > i =
                  e.make(data::convert < std::set <variable > >(vars),rewr,term);
@@ -255,12 +260,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           {
             string::size_type assign_pos = s.find("=");
             if (assign_pos==string::npos)
-            { throw mcrl2::runtime_error("Missing symbol = in assignment");
+            { throw mcrl2::runtime_error("Missing symbol = in assignment.");
             }
             string varname=trim_spaces(s.substr(0,assign_pos)).c_str();
 
             if (check_whether_variable_string_is_in_use(varname,context_variables))
-            { throw mcrl2::runtime_error("Variable " + varname + " already in use");
+            { throw mcrl2::runtime_error("Variable " + varname + " already in use.");
             }
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
@@ -271,7 +276,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             context_variables.insert(var);
           }
           else
-          { throw mcrl2::runtime_error("unknown command (try 'h' for help)");
+          { throw mcrl2::runtime_error("unknown command (try 'h' for help).");
           }
         }
         catch (mcrl2::runtime_error &e)  // Catch errors in the input.
