@@ -227,16 +227,16 @@ namespace mcrl2 {
       public:
 
         /// \brief type used to represent variables
-        typedef typename container_type::key_type                variable_type;
+        typedef typename super::variable_type                    variable_type;
 
         /// \brief type used to represent expressions
-        typedef typename container_type::value_type::second_type expression_type;
+        typedef typename super::expression_type                  expression_type;
 
         /// \brief Iterator type for constant element access
-        typedef typename container_type::const_iterator const_iterator;
+        typedef typename container_type::const_iterator          const_iterator;
 
         /// \brief Iterator type for non-constant element access
-        typedef typename container_type::iterator       iterator;
+        typedef typename container_type::iterator                iterator;
 
       protected:
 
