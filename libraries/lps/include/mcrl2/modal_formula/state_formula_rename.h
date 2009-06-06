@@ -16,6 +16,7 @@
 #include "mcrl2/modal_formula/state_formula_builder.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitution.h"
 
 namespace mcrl2 {
 
@@ -134,14 +135,14 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
   std::set<data::variable> src = data::find_all_variables(f);
 
   // create a mapping of replacements
-  std::map<data::variable, data::data_expression> replacements;
+  data::mutable_map_substitution<> replacements;
 
-  for (std::set<data::variable>::iterator i = src.begin(); i != src.end(); ++i)
+  for (std::set<data::variable>::const_iterator i = src.begin(); i != src.end(); ++i)
   {
     replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return data::variable_map_replace(f, replacements);
+  return data::replace_variables(f, replacements);
 }
 
 } // namespace modal_formula
