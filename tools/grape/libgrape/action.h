@@ -11,8 +11,8 @@
 #ifndef LIBGRAPE_ACTION_H
 #define LIBGRAPE_ACTION_H
 
-#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
 #include "dataexpression.h"
+#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
 
 namespace grape
 {

@@ -11,6 +11,7 @@
 #include "action.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
 
 using namespace mcrl2::core;
 using namespace grape::libgrape;

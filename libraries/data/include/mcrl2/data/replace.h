@@ -21,6 +21,7 @@
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/substitution_function.h"
+#include "mcrl2/core/deprecation.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/container_utility.h"
@@ -359,6 +360,12 @@ struct variable_sequence_replace_helper: public core::substitution_function<type
 };
 /// \endcond
 
+template <typename Term, typename VariableContainer, typename ExpressionContainer>
+DEPRECATED(Term variable_sequence_replace(Term t,
+                               const VariableContainer& variables,
+                               const ExpressionContainer& replacements
+                              ));
+
 /// \brief Replaces variables in the term t using the specified sequence of replacements.
 /// \param t A term
 /// \param variables A sequence of variables
@@ -405,6 +412,9 @@ struct variable_map_replace_helper: public core::substitution_function<typename 
   }
 };
 /// \endcond
+
+template <typename Term, typename MapContainer>
+DEPRECATED(Term variable_map_replace(Term t, const MapContainer& replacements));
 
 /// \brief Replaces all variables in the term t using the specified map of replacements.
 /// \param t A term

@@ -129,7 +129,7 @@ namespace mcrl2 {
     template < typename Variable = data::variable,
                typename Expression = data::data_expression,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
-    class mutable_map_substitution;
+    struct mutable_map_substitution;
 
     /** \brief Generic substitution class (model of Substitution)
      *
