@@ -165,7 +165,7 @@ namespace mcrl2 {
         /// \param[in] v the variable for which to give the associated expression
         /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
         expression_type operator()(variable_type const& v) const {
-          return static_cast< Derived const& >(*this)(v);
+          return static_cast< Derived const& >(*this).apply(v);
         }
 
         /** \brief Apply substitution to an expression
@@ -189,7 +189,7 @@ namespace mcrl2 {
          * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
         expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
-          return SubstitutionProcedure< substitution >::apply(static_cast< Derived const& >(*this), e);
+          return SubstitutionProcedure< Derived >::apply(static_cast< Derived const& >(*this), e);
         }
     };
 
@@ -240,12 +240,29 @@ namespace mcrl2 {
 
       protected:
 
+        friend class substitution< map_substitution, variable_type, expression_type, SubstitutionProcedure >;
+
         /// \brief a mapping from variables to expressions
         UniqueSortedPairAssociativeContainer m_map;
 
       protected:
 
         map_substitution() {
+        }
+
+        /// \brief Apply on single single variable expression
+        /// \param[in] v the variable for which to give the associated expression
+        /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+        expression_type apply(variable_type const& v) const {
+          const_iterator i = m_map.find(v);
+
+          if (i == m_map.end()) {
+            expression_type e = v;
+
+            return e;
+          }
+
+          return i->second;
         }
 
       public:
@@ -311,21 +328,6 @@ namespace mcrl2 {
         }
 
         using super::operator();
-
-        /// \brief Apply on single single variable expression
-        /// \param[in] v the variable for which to give the associated expression
-        /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
-        expression_type operator()(variable_type const& v) const {
-          const_iterator i = m_map.find(v);
-
-          if (i == m_map.end()) {
-            expression_type e = v;
-
-            return e;
-          }
-
-          return i->second;
-        }
 
         /** \brief Update substitution for a single variable
          *
