@@ -17,8 +17,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/parse.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -6765,11 +6765,8 @@ ATermAppl UnitePNIRSorts(ATermAppl SortExpr1, ATermAppl SortExpr2)
 }
 
 bool gsIsUserIdentifier(const std::string &name) {
-  std::istringstream *stream = new std::istringstream("identifier "+name);
-  std::vector<std::istream*> streams(1,stream);
-  ATerm result = parse_streams(streams,false);
-  delete stream;
-  return result != NULL;
+  std::istringstream stream(name);
+  return parse_identifier(stream) != NULL;
 }
 
     }
