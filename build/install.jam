@@ -345,7 +345,7 @@ rule platform-configuration ( properties * ) {
 
   if <toolset>gcc in $(properties) { # GCC
     requirements += <cxxflags>-pipe <cxxflags>-fno-operator-names
-                    <cxxflags>-Woverloaded-virtual <cxxflags>-Wstrict-null-sentinel ;
+                    <cxxflags>-Woverloaded-virtual <cxxflags>-Wstrict-null-sentinel <cxxflags>-pipe ;
 
     if <warnings>all in $(properties) {
       requirements += <cxxflags>-Wno-long-long ;

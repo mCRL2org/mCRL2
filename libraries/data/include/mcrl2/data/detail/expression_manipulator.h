@@ -21,7 +21,7 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail {
 
-      template < typename Derived, typename Result >
+      template < typename Derived >
       struct expression_manipulator
       {
         data_expression const& operator()(function_symbol const& e)
@@ -99,20 +99,20 @@ namespace mcrl2 {
         }
 
         template < typename Expression >
-        atermpp::term_list< Result > operator()(atermpp::term_list< Expression > const& container)
+        atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)
         {
-          atermpp::term_list< Result > result;
+          atermpp::vector< Expression > result;
 
           for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
           {
-            atermpp::push_front(result, (*this)(*i));
+            result.push_back((*this)(*i));
           }
 
-          return atermpp::reverse(result);
+          return convert< atermpp::term_list< Expression > >(result);
         }
 
         template < typename Container >
-        result_container< Container, Result > operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+        Container operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
         {
           Container result;
 

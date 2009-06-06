@@ -1288,15 +1288,15 @@ class specification_basic_type:public boost::noncopyable
                      const variable_list vars,
                      const  data_expression_list tl)
     {
-       atermpp::map < variable, data_expression > sigma;             
-       data_expression_list::const_iterator j=terms.begin(); 
-       for(variable_list::const_iterator i=vars.begin();         
-                        i!=vars.end(); ++i, ++j)         
+       atermpp::map < variable, data_expression > sigma;
+       data_expression_list::const_iterator j=terms.begin();
+       for(variable_list::const_iterator i=vars.begin();
+                        i!=vars.end(); ++i, ++j)
        { /* Substitutions are carried out from left to right. The first applicable substitution counts */        
-         if (sigma.count(*i)==0)         
-         { sigma[*i]=*j;         
-         }       
-       }         
+         if (sigma.count(*i)==0)
+         { sigma[*i]=*j;
+         }
+       }
        return data::replace_free_variables(tl,make_map_substitution_adapter(sigma));
     }
     
