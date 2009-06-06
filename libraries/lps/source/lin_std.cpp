@@ -1288,15 +1288,38 @@ class specification_basic_type:public boost::noncopyable
                      const variable_list vars,
                      const  data_expression_list tl)
     {
-      return data::replace_free_variables(tl,make_map_substitution(atermpp::reverse(vars), atermpp::reverse(terms)));
+       atermpp::map < variable, data_expression > sigma;             
+       data_expression_list::const_iterator j=terms.begin(); 
+       for(variable_list::const_iterator i=vars.begin();         
+                        i!=vars.end(); ++i, ++j)         
+       { /* Substitutions are carried out from left to right. The first applicable substitution counts */        
+         if (sigma.count(*i)==0)         
+         { sigma[*i]=*j;         
+         }       
+       }         
+       return data::replace_free_variables(tl,make_map_substitution_adapter(sigma));
     }
     
     data_expression substitute_data(
                      const data_expression_list terms,
                      const variable_list vars,
                      const data_expression t)
-    {
-      return data::replace_free_variables(t,make_map_substitution(atermpp::reverse(vars), atermpp::reverse(terms)));
+    { /* The code below could be replaced by the code below, but this is too inefficient,
+         as the reverse operator is expensive:
+          return data::replace_free_variables(t,make_map_substitution(atermpp::reverse(vars), atermpp::reverse(terms)));
+      */
+      atermpp::map < variable, data_expression > sigma;      
+      data_expression_list::const_iterator j=terms.begin(); 
+      for(variable_list::const_iterator i=vars.begin();         
+                        i!=vars.end(); ++i, ++j)         
+      { /* Substitutions are carried out from left to right. The first applicable substitution counts */        
+        if (sigma.count(*i)==0)         
+        { sigma[*i]=*j;         
+        }       
+      }         
+      const data_expression result=data::replace_free_variables(t,make_map_substitution_adapter(sigma));        
+      return result;
+      
     }
     
     action_list substitute_multiaction(
@@ -6735,7 +6758,7 @@ class specification_basic_type:public boost::noncopyable
       }
     
       if (is_block(t))
-      { return (canterminatebody(allow(t).operand(),stable,visited,allowrecursion));
+      { return (canterminatebody(block(t).operand(),stable,visited,allowrecursion));
       }
     
       if (is_comm(t))
