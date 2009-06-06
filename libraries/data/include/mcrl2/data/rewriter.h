@@ -153,7 +153,7 @@ namespace data {
       /// \brief Performs data reconstruction after rewriting (should become obsolete)
       data_expression reconstruct(atermpp::aterm_appl expression) const
       {
-        return m_conversion_helper->reconstruct(expression);
+        return m_conversion_helper->lazy_reconstruct(expression);
       }
 
     public:

@@ -21,6 +21,8 @@
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/forall.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
@@ -205,8 +207,7 @@ namespace mcrl2 {
             }
 
             return (variables.empty()) ? implement(expression.body()) :
-                application(implement(lambda(boost::make_iterator_range(variables), expression.body())),
-                          boost::make_iterator_range(arguments));
+                application(implement(lambda(variables, expression.body())), arguments);
           }
 
           template < typename ForwardTraversalIterator >
@@ -230,11 +231,29 @@ namespace mcrl2 {
             // convert arguments
             atermpp::term_list< data_expression > arguments(implement(expression.arguments()));
 
-            return application(implement(expression.head()), boost::make_iterator_range(arguments));
+            return application(implement(expression.head()), arguments);
           }
 
-          application reconstruct(application const& expression)
+          data_expression reconstruct(application const& expression)
           {
+            if (expression.head().is_function_symbol())
+            {
+              function_symbol head(expression.head());
+
+              if (head.name() == "exists")
+              {
+                lambda argument(reconstruct(expression.arguments()[0]));
+
+                return exists(argument.variables(), argument.body());
+              }
+              else if (head.name() == "forall")
+              {
+                lambda argument(reconstruct(expression.arguments()[0]));
+
+                return forall(argument.variables(), argument.body());
+              }
+            }
+
             atermpp::vector< data_expression > arguments;
 
             for (application::arguments_const_range r(expression.arguments()); !r.empty(); r.advance_begin(1))
@@ -242,7 +261,7 @@ namespace mcrl2 {
               arguments.push_back(reconstruct(r.front()));
             }
 
-            return application(reconstruct(expression.head()), boost::make_iterator_range(arguments));
+            return application(reconstruct(expression.head()), arguments);
           }
 
           data_expression reconstruct(data_expression const& expression)
@@ -259,6 +278,16 @@ namespace mcrl2 {
             else if (expression.is_application())
             {
               return reconstruct(application(expression));
+            }
+
+            return expression;
+          }
+
+          data_expression lazy_reconstruct(data_expression const& expression)
+          {
+            if (!m_reconstruction_context.empty())
+            {
+              return reconstruct(expression);
             }
 
             return expression;
