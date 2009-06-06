@@ -99,7 +99,7 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2)
 template <typename Rewriter1, typename Rewriter2>
 void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl, std::string substitutions)
 {
-  data::mutable_substitution<data::variable, data::data_expression_with_variables> sigma;
+  data::mutable_map_substitution<data::variable, data::data_expression_with_variables> sigma;
   data::detail::parse_substitutions(substitutions, sigma);
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
@@ -274,7 +274,7 @@ void test_substitutions1()
   data::rewriter  datar(specification);
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
-  data::mutable_substitution<data::variable, data::data_expression_with_variables> sigma;
+  data::mutable_map_substitution<data::variable, data::data_expression_with_variables> sigma;
   sigma[data::parse_variable("m: Pos")] = r(data::parse_data_expression("3"));
   sigma[data::parse_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
@@ -419,7 +419,7 @@ void test_substitutions3()
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
 
-  data::mutable_substitution<data::variable, data::data_expression_with_variables> sigma;
+  data::mutable_map_substitution<data::variable, data::data_expression_with_variables> sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");

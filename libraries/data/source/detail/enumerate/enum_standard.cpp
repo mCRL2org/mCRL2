@@ -8,7 +8,8 @@
 
 #include <cstdlib>
 #include <sstream>
-#include <aterm2.h>
+#include <boost/scoped_array.hpp>
+#include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -16,8 +17,6 @@
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/detail/enum/standard.h"
 #include "mcrl2/data/bool.h"
-
-#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -328,7 +327,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
                         }
                 }
 
-                DECL_A(args,ATerm,arity+extra_arity);
+                boost::scoped_array< ATerm > args(new ATerm[arity+extra_arity]);
                 AFun fun = ATgetAFun((ATermAppl) t);
                 int k = 1;
 
@@ -349,8 +348,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
                         args[k] = build_solution_aux_innerc(ATgetArgument((ATermAppl) t,i),substs);
                 }
 
-                ATerm r = (ATerm) ATmakeApplArray(fun,args);
-                FREE_A(args);
+                ATerm r = (ATerm) ATmakeApplArray(fun,args.get());
                 return r;
         }
 }

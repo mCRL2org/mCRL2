@@ -113,7 +113,7 @@ namespace detail {
       /// an exception is thrown.
       void instantiate_free_variables()
       {
-        data::mutable_substitution<> sigma;
+        data::mutable_map_substitution<> sigma;
         data::representative_generator default_expression_generator(m_spec.data());
         std::set<data::variable> to_be_removed;
         const data::variable_list& v = m_spec.process().free_variables();
@@ -142,7 +142,7 @@ namespace detail {
       /// \brief Removes parameters with a singleton sort
       void remove_singleton_sorts()
       {
-        data::mutable_substitution<> sigma;
+        data::mutable_map_substitution<> sigma;
         std::set<data::variable> to_be_removed;
         const data::variable_list& p = m_spec.process().process_parameters();
         for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)

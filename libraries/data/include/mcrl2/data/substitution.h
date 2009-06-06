@@ -16,8 +16,9 @@
 
 #include "boost/type_traits/remove_cv.hpp"
 #include "boost/type_traits/is_same.hpp"
+#include "boost/type_traits/remove_reference.hpp"
+#include "boost/iterator/filter_iterator.hpp"
 
-#include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/replace.h"
 
 namespace mcrl2 {
@@ -77,7 +78,7 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
-        return replace_variables(e, s);
+        return replace_variables< typename Substitution::expression_type, Substitution const& >(e, s);
       }
     };
 
@@ -111,25 +112,31 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
-        return replace_free_variables(e, s);
+        return replace_free_variables< typename Substitution::expression_type, Substitution const& >(e, s);
       }
     };
 
-    template < typename Variable = data::variable,
+    template < typename Derived,
+               typename Variable = data::variable,
                typename Expression = data::data_expression,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
     class substitution;
 
+    template < typename UniqueSortedPairAssociativeContainer,
+               template < typename Substitution > class SubstitutionProcedure = structural_substitution >
+    class map_substitution;
+
     template < typename Variable = data::variable,
                typename Expression = data::data_expression,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
-    class mutable_substitution;
+    class mutable_map_substitution;
 
     /** \brief Generic substitution class (model of Substitution)
      *
      * Objects of this type represent mutable substitutions that can be applied
      * to expressions in order to generate new expressions. 
      *
+     * \arg Derived represents a derived class (per CRTP)
      * \arg Variable type used to represent variables
      * \arg Expression type used to represent expressions
      * \arg SubstitutionProcedure procedure parametrised with a model of Substitution that is used for applying a substitution
@@ -141,59 +148,24 @@ namespace mcrl2 {
      * cases one would typically a need full-blown capture avoiding
      * substitution procedure.
      **/
-    template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
-    class substitution {
+    template < typename Derived, typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
+    class substitution : public std::unary_function< Expression, Expression > {
 
       public:
 
         /// \brief type used to represent variables
-        typedef Variable                                                            variable_type;
+        typedef Variable                   variable_type;
 
         /// \brief type used to represent expressions
-        typedef Expression                                                          expression_type;
-
-        /// \brief Iterator type for constant element access
-        typedef typename atermpp::map< variable_type, expression_type >::const_iterator const_iterator;
-
-        /// \brief Iterator type for non-constant element access
-        typedef typename atermpp::map< variable_type, expression_type >::iterator       iterator;
-
-      protected:
-
-        /// \brief a mapping from variables to expressions
-        atermpp::map< variable_type, expression_type > m_map;
+        typedef Expression                 expression_type;
 
       public:
-
-        /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
-        const_iterator begin() const {
-          return m_map.begin();
-        }
-
-        const_iterator find() {
-        }
-
-        /// \brief Returns an iterator pointing past the end of the sequence of assignments
-        const_iterator end() const {
-          return m_map.end();
-        }
-
-        /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
-        iterator find(variable_type const& v) const {
-          return m_map.find(v);
-        }
 
         /// \brief Apply on single single variable expression
         /// \param[in] v the variable for which to give the associated expression
         /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
         expression_type operator()(variable_type const& v) const {
-          typename atermpp::map< variable_type, expression_type >::const_iterator i = m_map.find(v);
-
-          if (i == m_map.end()) {
-            return expression_type(v);
-          }
-
-          return i->second;
+          return static_cast< Derived const& >(*this)(v);
         }
 
         /** \brief Apply substitution to an expression
@@ -217,98 +189,74 @@ namespace mcrl2 {
          * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
         expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
-          return SubstitutionProcedure< substitution >::apply(*this, e);
-        }
-
-        /** \brief Comparison operation between substitutions
-         *
-         * \param[in] other object of another substitution object
-         * \return whether the substitution expressed by this object is equivalent to <|other|>
-         **/
-        bool operator==(substitution const& other) const {
-          const_iterator i = m_map.begin();
-          const_iterator j = other.m_map.begin();
-
-          while (i != m_map.end() && j != other.m_map.end()) {
-            expression_type const& ii(i->second);
-            expression_type const& jj(j->second);
-
-            if (ii == i->first) {
-              ++i;
-            }
-            else if (jj == j->first) {
-              ++j;
-            }
-            else if (ii == jj) {
-              ++i;
-              ++j;
-            }
-            else {
-              return false;
-            }
-          }
-          while (i != m_map.end()) {
-            expression_type const& ii(i->second);
-
-            if (ii != i->first) {
-              return false;
-            }
-
-            ++i;
-          }
-          while (j != other.m_map.end()) {
-            expression_type const& jj(j->second);
-
-            if (jj == j->first) {
-              return false;
-            }
-
-            ++j;
-          }
-
-          return true;
+          return SubstitutionProcedure< substitution >::apply(static_cast< Derived const& >(*this), e);
         }
     };
 
-    /** \brief Generic substitution class (model of Substitution)
+    /**
+     * \brief Substitution that uses a Unique Sorted Pair Associative Container for storing assignments
      *
-     * Objects of this type represent mutable substitutions that can be applied
-     * to expressions in order to generate new expressions. 
-     *
-     * \arg Variable type used to represent variables
-     * \arg Expression type used to represent expressions
-     * \arg SubstitutionProcedure procedure parametrised with a model of Substitution that is used for applying a substitution
-     *
-     * Model of MutableSubstitution.
-     *
-     * \note the default substitution procedure is term substitution that does
-     * not take into account binders. In special cases one would typically a
-     * need full-blown capture avoiding substitution procedure.
-     **/
-    template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
-    class mutable_substitution : public substitution< Variable, Expression, SubstitutionProcedure > {
+     * Instantiate types are models of the Map Substitution concept. Provided that
+     * SubstitutionProcedure is a subtitution procedure and
+     * UniqueSortedPairAssociativeContainer is a model of Unique Sorted Pair
+     * Associative Container (STL concept). In the case that the
+     * UniqueSortedPairAssociativeContainer type parameter has a const
+     * qualifier, the instantiated type is also a model of the Mutable Subsitution concept.
+     */
+    template < typename UniqueSortedPairAssociativeContainer, template < typename Substitution > class SubstitutionProcedure >
+    class map_substitution :
+        public substitution< map_substitution< UniqueSortedPairAssociativeContainer, SubstitutionProcedure >,
+	  typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type::key_type,
+          typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type::value_type::second_type, SubstitutionProcedure >
+    {
+        typedef substitution< map_substitution< UniqueSortedPairAssociativeContainer, SubstitutionProcedure >,
+	  typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type::key_type,
+          typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type::value_type::second_type,
+											 SubstitutionProcedure > super;
+
+        typedef typename boost::remove_cv<
+                 typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type >::type container_type;
+
+        struct non_trivial_assignments {
+          bool operator()(typename container_type::value_type const& p) const
+          {
+            return p.first != p.second;
+          }
+        };
 
       public:
 
         /// \brief type used to represent variables
-        typedef Variable    variable_type;
+        typedef typename container_type::key_type                variable_type;
 
         /// \brief type used to represent expressions
-        typedef Expression  expression_type;
+        typedef typename container_type::value_type::second_type expression_type;
 
-        /// \brief constant iterator type for individual assignments
-        typedef typename substitution< Variable, Expression, SubstitutionProcedure >::const_iterator const_iterator;
+        /// \brief Iterator type for constant element access
+        typedef typename container_type::const_iterator const_iterator;
 
-        /// \brief iterator type for individual assignments
-        typedef typename substitution< Variable, Expression, SubstitutionProcedure >::iterator       iterator;
+        /// \brief Iterator type for non-constant element access
+        typedef typename container_type::iterator       iterator;
+
+      protected:
+
+        /// \brief a mapping from variables to expressions
+        UniqueSortedPairAssociativeContainer m_map;
+
+      protected:
+
+        map_substitution() {
+        }
+
+      public:
 
         /// \brief Wrapper class for internal storage and substitution updates using operator()
         class assignment {
 
           private:
 
-            variable_type                                   m_variable;
-            atermpp::map< variable_type, expression_type >& m_map;
+            typename container_type::key_type m_variable;
+            container_type&                   m_map;
 
           public:
 
@@ -316,7 +264,7 @@ namespace mcrl2 {
             ///
             /// \param[in] v a variable.
             /// \param[in] m a mapping of variables to expressions.
-            assignment(variable_type v, atermpp::map< variable_type, expression_type >& m) :
+            assignment(typename container_type::key_type v, container_type& m) :
                 m_variable(v), m_map(m)
             {
             }
@@ -345,7 +293,39 @@ namespace mcrl2 {
             }
         };
 
-      public:
+        template <typename VariableContainer, typename ExpressionContainer >
+        map_substitution(VariableContainer const& vc, ExpressionContainer const& ec) {
+          BOOST_ASSERT(vc.size() == ec.size());
+
+          typename ExpressionContainer::const_iterator j = ec.begin();
+          for (typename VariableContainer::const_iterator i = vc.begin(); i != vc.end(); ++i, ++j)
+          {
+            m_map[*i] = *j;
+          }
+        }
+
+        map_substitution(container_type& other) : m_map(other) {
+        }
+
+        map_substitution(const container_type& other) : m_map(other) {
+        }
+
+        using super::operator();
+
+        /// \brief Apply on single single variable expression
+        /// \param[in] v the variable for which to give the associated expression
+        /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+        expression_type operator()(variable_type const& v) const {
+          const_iterator i = m_map.find(v);
+
+          if (i == m_map.end()) {
+            expression_type e = v;
+
+            return e;
+          }
+
+          return i->second;
+        }
 
         /** \brief Update substitution for a single variable
          *
@@ -370,9 +350,15 @@ namespace mcrl2 {
           return assignment(v, this->m_map);
         }
 
-        using substitution< Variable, Expression, SubstitutionProcedure >::begin;
-        using substitution< Variable, Expression, SubstitutionProcedure >::end;
-        using substitution< Variable, Expression, SubstitutionProcedure >::find;
+        /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
+        const_iterator begin() const {
+          return m_map.begin();
+        }
+
+        /// \brief Returns an iterator pointing past the end of the sequence of assignments
+        const_iterator end() const {
+          return m_map.end();
+        }
 
         /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
         iterator begin() {
@@ -388,11 +374,47 @@ namespace mcrl2 {
         iterator find(variable_type const& v) {
           return this->m_map.find(v);
         }
+
+        /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
+        iterator find(variable_type const& v) const {
+          return m_map.find(v);
+        }
         
         /// \brief Returns true if the sequence of assignments is empty
         bool empty() const {
           return this->m_map.empty();
         }
+
+        /** \brief Comparison operation between substitutions
+         *
+         * \param[in] other object of another substitution object
+         * \return whether the substitution expressed by this object is equivalent to <|other|>
+         **/
+        bool operator==(map_substitution const& other) const {
+          typedef typename boost::filter_iterator< non_trivial_assignments,
+			 typename container_type::const_iterator > assignment_iterator;
+
+          for (assignment_iterator
+            i(m_map.begin(), m_map.end()), j(other.m_map.begin(), other.m_map.end());
+	            i.base() != m_map.end() && j.base() != other.m_map.end(); ++i, ++j) {
+
+            if (i->second != j->second) {
+              return false;
+            }
+          }
+
+          return true;
+        }
+    };
+
+    /** \brief Generic substitution class (model of Mutable Substitution)
+     *
+     * Used to generate models of the Mutable Map Substitution concept.
+     *
+     * \see map_substitution
+     **/
+    template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
+    struct mutable_map_substitution : public map_substitution< atermpp::map< Variable, Expression >, SubstitutionProcedure > {
     };
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].
@@ -409,6 +431,21 @@ namespace mcrl2 {
       }
       result << "]";
       return result.str();
+    }
+
+    /// \brief Utility function for creating a map_substitution_adapter.
+    template <typename VariableContainer, typename ExpressionContainer, typename MapContainer >
+    map_substitution< MapContainer >
+    make_map_substitution(const VariableContainer& vc, const ExpressionContainer ec)
+    {
+      return map_substitution< MapContainer >(vc, ec);
+    }
+  
+    template <typename VariableContainer, typename ExpressionContainer >
+    map_substitution< std::map< typename VariableContainer::value_type, typename ExpressionContainer::value_type > >
+    make_map_substitution(const VariableContainer& vc, const ExpressionContainer ec)
+    {
+      return map_substitution< std::map< typename VariableContainer::value_type, typename ExpressionContainer::value_type > >(vc, ec);
     }
 
   }

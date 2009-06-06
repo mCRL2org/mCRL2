@@ -631,7 +631,7 @@ namespace mcrl2 {
         }
       }
 
-      map_substitution_adapter< atermpp::map< sort_expression, sort_expression > > renaming_substitution(renamings);
+      map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
 
       for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
       {

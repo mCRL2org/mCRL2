@@ -59,7 +59,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
   rewriter evaluator(d);
 
   for (classic_enumerator< > i(d, v, evaluator, c); --t != 0 && i != classic_enumerator< >(); ++i) {
-    std::cout << mcrl2::core::pp((*i)(c)) << std::endl;
+    std::clog << mcrl2::core::pp((*i)(c)) << std::endl;
   }
 }
 
@@ -103,7 +103,7 @@ void enumerate< data_enumerator< > >(data_specification const& d,
   while (!expression_stack.empty() && t-- != 0) {
     data_expression_with_variables expression(expression_stack.pop());
 
-//    std::cout << mcrl2::core::pp(expression) << std::endl;
+//    std::clog << mcrl2::core::pp(expression) << std::endl;
 
     if (!expression.is_constant()) {
       expression_stack.push(e.enumerate(expression));
@@ -153,7 +153,7 @@ void enumerate< detail::Enumerator >(data_specification const& d,
   while(!solutions->errorOccurred() && solutions->next(&substitution) && t-- != 0) {
     rewriter.get_rewriter().setSubstitutionInternalList(substitution);
 
-    std::cout << mcrl2::core::pp(rewriter.get_rewriter().rewrite(static_cast< ATermAppl >(c))) << std::endl;
+    std::clog << mcrl2::core::pp(rewriter.get_rewriter().rewrite(static_cast< ATermAppl >(c))) << std::endl;
 
     rewriter.get_rewriter().clearSubstitutions();
   }
@@ -164,7 +164,7 @@ void enumerate< detail::Enumerator >(data_specification const& d,
 void empty_test() {
   using namespace mcrl2::data::selectors;
 
-  typedef classic_enumerator< mutable_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
+  typedef classic_enumerator< mutable_map_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
 
   // test manual construction of evaluator with rewriter
   data::data_specification specification;
@@ -266,7 +266,7 @@ void mutually_recursive_test(const size_t count) {
 void check_concepts() {
   using namespace mcrl2::data::concepts;
 
-  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_substitution< > >));
+  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
 
   BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
 }

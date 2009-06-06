@@ -16,6 +16,8 @@
 #include <iterator>
 #include <utility>
 #include "boost/assert.hpp"
+#include "boost/type_traits/add_reference.hpp"
+#include "boost/type_traits/remove_reference.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/substitution_function.h"
@@ -82,7 +84,11 @@ namespace mcrl2 {
 
           data_expression operator()(data_expression const& e)
           {
-            if (e.is_abstraction())
+            if (e.is_application())
+            {
+              return (*this)(application(e));
+            }
+            else if (e.is_abstraction())
             {
               return (*this)(abstraction(e));
             }
@@ -93,10 +99,6 @@ namespace mcrl2 {
             else if (e.is_where_clause())
             {
               return (*this)(where_clause(e));
-            }
-            else if (e.is_application())
-            {
-              return (*this)(application(e));
             }
 
             return e;
@@ -278,8 +280,10 @@ namespace mcrl2 {
 template < typename Container, typename ReplaceFunction >
 Container replace_variables(Container const& container, ReplaceFunction replace_function)
 {
-  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
-  return detail::partial_replace(container, detail::replace_variables_helper< ReplaceFunction& >(replace_function));
+  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
+
+  return detail::partial_replace(container, detail::replace_variables_helper<
+		 typename boost::add_reference< ReplaceFunction >::type >(replace_function));
 }
 
 /// \brief Recursively traverses the given expression or expression container,
@@ -294,9 +298,9 @@ Container replace_variables(Container const& container, ReplaceFunction replace_
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function)
 {
-  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
+  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
 
-  detail::replace_free_variables_helper< ReplaceFunction& > replacer(replace_function);
+  detail::replace_free_variables_helper< typename boost::add_reference< ReplaceFunction >::type > replacer(replace_function);
 
   return detail::replace_free_variables(replacer, container);
 }
@@ -314,8 +318,9 @@ Container replace_free_variables(Container const& container, ReplaceFunction rep
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function, std::set< variable > const& bound)
 {
-  BOOST_CONCEPT_ASSERT((concepts::Substitution<ReplaceFunction>));
-  detail::replace_free_variables_helper< ReplaceFunction > replacer(replace_function, bound);
+  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
+
+  detail::replace_free_variables_helper< typename boost::add_reference< ReplaceFunction >::type > replacer(replace_function, bound);
 
   return detail::replace_free_variables(replacer, container);
 }

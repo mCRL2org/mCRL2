@@ -19,59 +19,18 @@ namespace mcrl2 {
 
 namespace data {
 
-  /// \brief An adapter that turns a mapping from variables to expressions into a substitution.
+  /// \brief Utility function for creating a map_substitution_adapter.
   template <typename MapContainer>
-  class map_substitution_adapter
+  map_substitution<MapContainer const&> make_map_substitution_adapter(const MapContainer& m)
   {
-    public:
-      /// \brief type used to represent variables
-      typedef typename MapContainer::key_type variable_type;
-
-      /// \brief type used to represent expressions
-      typedef typename MapContainer::mapped_type expression_type;
-
-    protected:
-      /// \brief The wrapped substitution
-      const MapContainer& m_map;
-
-      /// \brief Iterator type for constant element access
-      typedef typename MapContainer::const_iterator const_iterator;
-
-      /// \brief Iterator type for non-constant element access
-      typedef typename MapContainer::const_iterator iterator;
-
-    public:
-      /// \brief Constructor
-      map_substitution_adapter(const MapContainer& m)
-        : m_map(m)
-      {}
-
-      /// \brief Apply on single single variable expression
-      /// \param[in] v the variable for which to give the associated expression
-      /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
-      expression_type operator()(variable_type const& v) const {
-        const_iterator i = m_map.find(v);
-        expression_type t;
-        t=v; // Do not assume existence of a constructor.
-        return i == m_map.end() ? t : i->second;
-      }
-
-      /** \brief Apply substitution to an expression
-       *
-       * \param[in] e the expression to which to apply substitution
-       * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
-       * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
-       **/
-      expression_type operator()(typename detail::expression_type_or_inaccessible< variable_type, expression_type >::type const& e) const {
-        return variable_map_replace(e, m_map);
-      }
-  };
+    return map_substitution<MapContainer const&>(m);
+  }
 
   /// \brief Utility function for creating a map_substitution_adapter.
   template <typename MapContainer>
-  map_substitution_adapter<MapContainer> make_map_substitution_adapter(const MapContainer& m)
+  map_substitution<MapContainer&> make_mutable_map_substitution_adapter(MapContainer& m)
   {
-    return map_substitution_adapter<MapContainer>(m);
+    return map_substitution<MapContainer&>(m);
   }
 
 } // namespace data

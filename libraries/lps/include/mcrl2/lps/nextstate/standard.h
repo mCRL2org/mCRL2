@@ -207,7 +207,7 @@ namespace mcrl2 {
 
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
-      bool classic_enumerator_impl< mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
                   legacy_rewriter, legacy_selector >::increment() {
 
         ATermList assignment_list;
@@ -233,7 +233,7 @@ namespace mcrl2 {
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
       template < typename ForwardIteratorRange >
-      bool classic_enumerator_impl< mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
                   legacy_rewriter, legacy_selector >::initialise(boost::iterator_range< ForwardIteratorRange > const& v) {
 
         atermpp::term_list< data::variable > variables;
@@ -282,7 +282,7 @@ struct ns_info
 
         // Uses terms in internal format... *Sigh*
         typedef mcrl2::data::classic_enumerator<
-            mcrl2::data::mutable_substitution< atermpp::aterm_appl, atermpp::aterm >,
+            mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
             legacy_rewriter, legacy_selector > enumerator_type;
 
         typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;

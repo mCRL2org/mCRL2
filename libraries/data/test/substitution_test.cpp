@@ -44,10 +44,10 @@ void test_basic()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, data_expression > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_substitution< variable, variable > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, data_expression > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< variable, variable > >));
 
-  mutable_substitution< variable, data_expression > s;
+  mutable_map_substitution< variable, data_expression > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -68,7 +68,7 @@ void test_basic()
   BOOST_CHECK(s(lambda(x,y)) == lambda(x,c));
 
   // Replacing free as well as bound variables
-  mutable_substitution< variable, data_expression, textual_substitution > st;
+  mutable_map_substitution< variable, data_expression, textual_substitution > st;
 
   st[y] = c;
 
@@ -76,7 +76,7 @@ void test_basic()
   BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
 
   // Replacing free variables only
-  mutable_substitution< variable, data_expression, structural_substitution > sb;
+  mutable_map_substitution< variable, data_expression, structural_substitution > sb;
 
   sb[y] = c;
 
@@ -140,13 +140,13 @@ void test_list_substitution()
 
 void test_mutable_substitution_adapter()
 {
-  mutable_substitution<variable, data_expression> f;
+  mutable_map_substitution<variable, data_expression> f;
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
   f[x] = y;
 
-  mutable_substitution_adapter<mutable_substitution<variable, data_expression> > g(f);
+  mutable_substitution_adapter<mutable_map_substitution<variable, data_expression> > g(f);
   BOOST_CHECK(g(x) == y);
 
   assignment a(y, z);
@@ -165,7 +165,7 @@ void test_mutable_substitution()
 {
   using namespace mcrl2::data::detail;
 
-  mutable_substitution<variable, data_expression_with_variables> sigma;
+  mutable_map_substitution<variable, data_expression_with_variables> sigma;
   variable v("v", sort_nat::nat());
   data_expression e = v;
 
@@ -175,7 +175,7 @@ void test_mutable_substitution()
   sigma[v] = e;
 
   // Compile test
-  mutable_substitution<variable, variable> sigmaprime;
+  mutable_map_substitution<variable, variable> sigmaprime;
 
   sigma[v] = v;
 }
@@ -187,7 +187,7 @@ void test_map_substitution_adapter()
   variable vv("vv", sort_nat::nat());
 
   // Compile test
-  map_substitution_adapter< atermpp::map< variable, variable > > sigma(mapping);
+  map_substitution< atermpp::map< variable, variable > const& > sigma(mapping);
 
   mapping[v] = vv;
 

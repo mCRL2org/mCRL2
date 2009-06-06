@@ -36,7 +36,7 @@ struct default_free_variable_solver
   /// \brief Attempts to find a valuation for free variables that makes the condition
   /// !R(c, sigma) or (R(e, sigma) = R(g, sigma)) true.
   template <typename DataRewriter, typename Substitution>
-  data::mutable_substitution<> solve(const data::variable_list& V,
+  data::mutable_map_substitution<> solve(const data::variable_list& V,
                      const data::data_expression& /* c */,
                      const data::data_expression& g,
                      const data::variable& /* d */,
@@ -45,7 +45,7 @@ struct default_free_variable_solver
                      const Substitution& sigma
                     )
     {
-      data::mutable_substitution<> result;
+      data::mutable_map_substitution<> result;
       data::data_expression r = R(g, sigma);
       if (r.is_variable())
       {
@@ -109,7 +109,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       }
 
       // sigma contains substitutions of free variables and process parameters
-      data::mutable_substitution<> sigma;
+      data::mutable_map_substitution<> sigma;
       data::data_expression_vector::iterator e_i = e.begin();
  
       std::set<data::variable> G(d.begin(), d.end());
@@ -145,10 +145,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                       << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
 #endif
-                data::mutable_substitution<> W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
+                data::mutable_map_substitution<> W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
-                  for (data::mutable_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
+                  for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
                   {
                     sigma[w->first] = w->second;
                     undo[d_j].insert(w->first);
@@ -206,7 +206,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
-      for (data::mutable_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
+      for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
       {
         constant_parameters.insert(i->first);
       }

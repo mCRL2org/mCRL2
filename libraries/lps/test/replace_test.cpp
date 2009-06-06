@@ -86,10 +86,10 @@ void test_lps_replacer()
 {
   specification spec1 = parse_linear_process_specification(SPEC1a);
   specification spec2 = parse_linear_process_specification(SPEC1b);
-  data::mutable_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
-  lps::detail::lps_replacer<data::mutable_substitution<> > subst(sigma);
+  lps::detail::lps_replacer<data::mutable_map_substitution<> > subst(sigma);
 
   data::data_expression d;
   subst(d);
