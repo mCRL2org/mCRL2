@@ -478,6 +478,180 @@ void test_no_free_variables()
   BOOST_CHECK(spec.process().free_variables().empty());
 }
 
+const std::string various_case_1=
+      "init delta;";
+
+const std::string various_case_2=
+      "act a;"
+      "proc X=a.X;"
+      "init X;";
+
+const std::string various_case_3=
+      "sort D     = struct d1 | d2;"
+      "             Error = struct e;"
+      "act r2: D # Bool;"
+      "    s3: D # Bool;"
+      "    s3: Error;"
+      "    i;"
+      "proc K = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;"
+      "init K;";
+
+const std::string various_case_4=
+      "act a:Nat;"
+      "proc X=sum n:Nat. (n==0)->a(n).X;"
+      "init X;";
+
+const std::string various_case_5=
+      "act a,b,c;"
+      "proc X=a.X;"
+      "     Y=b.Y;"
+      "init X||Y;";
+
+const std::string various_case_6=
+      "act a1,a2,b,c;"
+      "proc X=a1.a2.X;"
+      "     Y=b.Y;"
+      "init comm({a1|b->c},X||Y);";
+
+const std::string various_case_7=
+      "proc X=tau.X;"
+      "init X;";
+
+const std::string various_case_8=
+      "act a,b;"
+      "proc X= (a|b).X;"
+      "init X;";
+
+const std::string various_case_9=
+      "act a;"
+      "init allow({a},a.a.delta);";
+
+const std::string various_case_10=
+      "act a,b,c;"
+      "init comm({a|b->c},(a|b).delta);";
+
+const std::string various_case_11=
+      "act a,b,c:Nat;"
+      "map n:Nat;"
+      "init comm({a|b->c},(a(3)|b(n)));";
+
+const std::string various_case_12=
+      "act c2:Nat#Nat;"
+      "init allow({c2},c2(3,5));";
+
+const std::string various_case_13=
+      "sort D = struct d1 | d2;"
+      "act r1,s4: D;"
+      "proc S(b:Bool)     = sum d:D. r1(d).S(true);"
+      "init S(false);";
+
+const std::string various_case_14=
+      "act r1: Bool;"
+      "proc S(d:Bool) = sum d:Bool. r1(d).S(true);"
+      "init S(false);";
+
+const std::string various_case_15=
+      "act a;"
+      "init (a+a.a+a.a.a+a.a.a.a).delta;";
+
+const std::string various_case_16=
+      "act s6,r6,c6, i;"
+      "proc T = r6.T;"
+      "     K = i.K;"
+      "     L = s6.L;"
+      "init comm({r6|s6->c6},T || K || L);";
+
+const std::string various_case_17=
+      "act s3,r3,c3,s6;"
+      "proc R = r3.R;"
+      "     K = s3.K;"
+      "     L = s6.L;"
+      "init comm({r3|s3->c3}, K || L || R);";
+
+const std::string various_case_18=
+      "act a,b,c,d,e;"
+      "init comm({c|d->b},(a|b|c|d|e).delta);";
+
+const std::string various_case_19=
+      "act a,b,c,d,e;"
+      "init comm({e|d->b},(a|b|c|d|e).delta);";
+
+const std::string various_case_20=
+      "act a:Nat;"
+      "proc X(n:Nat)="
+      "  sum n:Nat.(n>25) -> a(n).X(n)+"
+      "  sum n:Nat.(n>25) -> a(n).X(n)+"
+      "  (n>25) -> a(n).X(n);"
+      "init X(1);";
+
+const std::string various_case_21=
+      "act a,b:Pos;"
+      "proc X(m:Pos)= sum n:Nat. (n<1) -> a(1)|b(1)@1.X(1)+"
+      "               sum n:Nat. (n<2) -> a(2)|b(2)@2.X(2)+"
+      "               sum n:Nat. (n<3) -> a(3)|b(3)@3.X(3)+"
+      "               sum n:Nat. (n<4) -> a(4)|b(4)@4.X(4)+"
+      "               sum n:Nat. (n<5) -> a(5)|b(5)@5.X(5);"
+      "init X(1);";
+
+const std::string various_case_22=
+      "% This test is expected to fail with a proper error message."
+      "act a;"
+      "proc P = (a || a) . P;"
+      "init P;";
+
+
+void test_various_aux(t_lin_options &options)
+{ /* Here various testcases are checked, which have been used in
+     debugging the translation of the linearizer to the new data
+     library. */
+  specification spec;
+  spec = mcrl22lps(various_case_1);
+  spec = mcrl22lps(various_case_2);
+  spec = mcrl22lps(various_case_3);
+  spec = mcrl22lps(various_case_4);
+  spec = mcrl22lps(various_case_5);
+  spec = mcrl22lps(various_case_6);
+  spec = mcrl22lps(various_case_7);
+  spec = mcrl22lps(various_case_8);
+  spec = mcrl22lps(various_case_9);
+  spec = mcrl22lps(various_case_10);
+  spec = mcrl22lps(various_case_11);
+  spec = mcrl22lps(various_case_12);
+  spec = mcrl22lps(various_case_13);
+  spec = mcrl22lps(various_case_14);
+  spec = mcrl22lps(various_case_15);
+  spec = mcrl22lps(various_case_16);
+  spec = mcrl22lps(various_case_17);
+  spec = mcrl22lps(various_case_18);
+  spec = mcrl22lps(various_case_19);
+  spec = mcrl22lps(various_case_20);
+  spec = mcrl22lps(various_case_21);
+  bool ok=false;
+  try 
+  { spec = mcrl22lps(various_case_22);
+  } 
+  catch (mcrl2::runtime_error &e)
+  { ok=true;
+  }
+  BOOST_CHECK(ok);
+}
+
+void test_various()
+{ t_lin_options options;
+  test_various_aux(options);
+  options.lin_method=lmRegular2;
+  test_various_aux(options);
+  options.lin_method=lmStack;
+  test_various_aux(options);
+  options.binary=true;
+  test_various_aux(options);
+  options.lin_method=lmRegular;
+  test_various_aux(options);
+  options.binary=false;
+  options.no_intermediate_cluster=true;
+  test_various_aux(options);
+}
+
 int test_main(int argc, char** argv )
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -496,6 +670,7 @@ int test_main(int argc, char** argv )
   core::garbage_collect();
   test_block();
   core::garbage_collect();
-
+  test_various();
+  core::garbage_collect();
   return 0;
 }
