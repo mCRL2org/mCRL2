@@ -25,9 +25,7 @@
 */
 
 // Standard C libraries
-#include <cstdlib>
 #include <cassert>
-#include <cstring>
 #include <iostream>
 #include <iterator>
 #include <algorithm>
@@ -71,8 +69,6 @@
 // Boost utilities
 #include "boost/format.hpp"
 #include "boost/utility.hpp"
-
-#include "gc.h" // Required for ad hoc garbage collection.
 
 // For Aterm library extension functions
 using namespace mcrl2;
@@ -153,7 +149,7 @@ class objectdatatype
       canterminate=o.canterminate;
       containstime=o.containstime;
     }
-  
+
     void operator=(const objectdatatype &o)
     { objectname=o.objectname;
       objectname.protect();
@@ -3765,9 +3761,9 @@ class specification_basic_type:public boost::noncopyable
                      const atermpp::vector < process_identifier> &pCRLprocs,
                      const variable_list pars,
                      const stacklisttype &stack,
-                     int canterminate,
-                     int regular,
-                     int singlestate)
+                     bool canterminate,
+                     bool regular,
+                     bool singlestate)
     { summand_list sumlist;
       for(atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin(); 
                   walker!=pCRLprocs.end(); ++walker)
@@ -6814,7 +6810,7 @@ class specification_basic_type:public boost::noncopyable
       }
     
       throw mcrl2::runtime_error("unexpected process format in canterminate " + pp(t) +".");
-      return process_expression();
+      return false;
     }
     
     bool canterminate_rec(
@@ -7148,6 +7144,6 @@ mcrl2::lps::specification linearise_std(
   
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);
-  AT_collect();
+
   return spec1;
 }
