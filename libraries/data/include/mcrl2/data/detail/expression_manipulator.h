@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 #define MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -47,6 +48,11 @@ namespace mcrl2 {
         data_expression const& operator()(where_clause const& e)
         {
           return e;
+        }
+
+        data_expression operator()(data_expression_with_variables const& e)
+        {
+          return (*this)(static_cast< data_expression const& >(e));
         }
 
         data_expression operator()(data_expression const& e)
