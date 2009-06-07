@@ -21,7 +21,7 @@
 typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
 
 //t_phase represents the phases at which the program should be able to stop
-typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
+// typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
 
 //t_lin_options represents the options of the lineariser
 struct t_lin_options {
@@ -36,9 +36,9 @@ struct t_lin_options {
   bool nosumelm;
   bool nodeltaelimination;
   bool add_delta;
-  bool check_only;
-  t_phase end_phase;
-  bool pretty;
+  // bool check_only;
+  // t_phase end_phase;
+  // bool pretty;
   // bool noalpha;
   mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
   std::string infilename;
@@ -56,9 +56,9 @@ struct t_lin_options {
       nosumelm(false),
       nodeltaelimination(false),
       add_delta(false),
-      check_only(false),
-      end_phase(phNone),
-      pretty(false),
+      // check_only(false),
+      // end_phase(phNone),
+      // pretty(false),
       // noalpha(false),
       rewrite_strategy(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty)
   {}
