@@ -290,6 +290,29 @@ namespace mcrl2 {
       return sort_real_::real_(n);
     }
 
+    /// \brief Returns true if and only if s1 == s2, or if s1 is a less specific numeric type than s2
+    ///
+    /// \param[in] s1 a sort expression
+    /// \param[in] s2 a sort expression
+    inline bool is_convertible(sort_expression const& s1, sort_expression const& s2)
+    {
+      if (s1 != s2)
+      {
+        if (s2 == sort_real_::real_()) {
+          return s1 == sort_int_::int_() || s1 == sort_nat::nat() || s1 == sort_pos::pos();
+        }
+        else if (s2 == sort_int_::int_()) {
+          return s1 == sort_nat::nat() || s1 == sort_pos::pos();
+        }
+        else if (s2 == sort_nat::nat()) {
+          return s1 == sort_pos::pos();
+        }
+
+        return false;
+      }
+
+      return true;
+    }
 
     namespace sort_list {
       /// \brief Constructs a list expression from a range of expressions
@@ -306,7 +329,7 @@ namespace mcrl2 {
         std::vector< data_expression > elements(range.begin(), range.end());
 
         for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i) {
-          BOOST_ASSERT(i->sort() == s);
+          BOOST_ASSERT(is_convertible(i->sort(), s));
 
           list_expression = sort_list::cons_(s, *i, list_expression);
         }
@@ -330,7 +353,7 @@ namespace mcrl2 {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
         for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i) {
-          BOOST_ASSERT(i->sort() == s);
+          BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
         }
@@ -353,7 +376,7 @@ namespace mcrl2 {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
         for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i) {
-          BOOST_ASSERT(i->sort() == s);
+          BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, sort_nat::nat(1));
         }
