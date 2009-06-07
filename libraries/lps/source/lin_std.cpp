@@ -334,10 +334,9 @@ class specification_basic_type:public boost::noncopyable
     { return stringTable.count(str)>0;
     }
     
-    void insertsort(const sort_expression sortterm, const bool add_to_spec=false)
-    { if (add_to_spec) 
-      { data.add_sort(sortterm);
-      }
+    void insertsort(const sort_expression sortterm)
+    {
+      data.add_sort(sortterm);
     
       if (sortterm.is_basic_sort())
       {
@@ -369,7 +368,7 @@ class specification_basic_type:public boost::noncopyable
       throw mcrl2::runtime_error("expected a sortterm (2): " + pp(sortterm));
     }
     
-    void insert_equation(const data_equation eqn, bool add_to_spec)
+    void insert_equation(const data_equation eqn)
     {
       if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
       data.add_equation(eqn);
@@ -2939,22 +2938,21 @@ class specification_basic_type:public boost::noncopyable
            sp_push_arguments.push_back(structured_sort_constructor_argument(stack_sort_alias,
                                spec.fresh_name("pop")));
            sorts=reverse(sorts);
-           structured_sort_constructor sc_push(spec.fresh_name("push"),
-                     boost::make_iterator_range(sp_push_arguments));
+           structured_sort_constructor sc_push(spec.fresh_name("push"), sp_push_arguments);
            structured_sort_constructor sc_emptystack(spec.fresh_name("emptystack"),spec.fresh_name("isempty"));
            
            structured_sort_constructor_vector constructors(1,sc_push);
            constructors.push_back(sc_emptystack);
-           stacksort=structured_sort(constructors);
+           stacksort=stack_sort_alias;
            // ATfprintf(stderr,"STACKSORT %t\n",ATermAppl(stacksort));
            // std::cerr << "Stacksort " << pp(stacksort) << "\n";
            //add data declarations for structured sort
-           spec.insertsort(alias(stack_sort_alias,stacksort), true);
-           push=sc_push.constructor_function(stacksort);
-           emptystack=sc_emptystack.constructor_function(stacksort);
-           empty=sc_emptystack.recogniser_function(stacksort);
-           const atermpp:: vector < function_symbol > projection_functions =
-                                         sc_push.projection_functions(stacksort);
+           spec.insertsort(alias(stack_sort_alias,structured_sort(constructors)));
+           push=sc_push.constructor_function(stack_sort_alias);
+           emptystack=sc_emptystack.constructor_function(stack_sort_alias);
+           empty=sc_emptystack.recogniser_function(stack_sort_alias);
+           const atermpp::vector< function_symbol > projection_functions =
+                                         sc_push.projection_functions(stack_sort_alias);
            pop=projection_functions.back();
            getstate=projection_functions.front();
            get=function_symbol_list(projection_functions.begin()+1,projection_functions.end()-1);
@@ -3821,7 +3819,7 @@ class specification_basic_type:public boost::noncopyable
             structured_sort sort_struct(struct_conss);
     
             //add declaration of standard functions
-            spec.insertsort(alias(sort_id, sort_struct), true);
+            spec.insertsort(alias(sort_id, sort_struct));
     
             //store new declarations in return value w
             sortId = sort_struct;
@@ -3912,8 +3910,7 @@ class specification_basic_type:public boost::noncopyable
                 data_equation(
                   push_front(push_front(variable_list(),v),v1), 
                   application(functionname,push_front(xxxterm,data_expression(v))),
-                  data_expression(v1)),
-                  true);
+                  data_expression(v1)));
     
       variable_list auxvars=vars;
     
@@ -3923,8 +3920,7 @@ class specification_basic_type:public boost::noncopyable
       { insert_equation(data_equation(
                vars,
                application(functionname,push_front(args,*w)),
-               auxvars.front()),
-               true);
+               auxvars.front()));
     
         auxvars=pop_front(auxvars);
       } 
