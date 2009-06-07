@@ -11,12 +11,23 @@
 
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
-#include <mcrl2/lps/mcrl22lps.h>
+
+#include <boost/test/included/unit_test_framework.hpp>
+
+#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
+
+struct collect_after_test_case {
+  ~collect_after_test_case()
+  {
+    core::garbage_collect();
+  }
+};
+
+BOOST_GLOBAL_FIXTURE(collect_after_test_case);
 
 // Parameter i should be removed
 const std::string case_1(
@@ -70,7 +81,7 @@ const std::string case_8(
    "init sum t:Nat. a@t;\n"
 );
 
-void test_multiple_linearization_calls()
+BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
 {
   specification spec;
   spec = mcrl22lps(case_1);
@@ -121,7 +132,7 @@ const std::string assignment_case_5
 );
 
 
-void test_process_assignments()
+BOOST_AUTO_TEST_CASE(test_process_assignments)
 { specification spec;
   spec=mcrl22lps(assignment_case_1);
   spec=mcrl22lps(assignment_case_2);
@@ -130,7 +141,7 @@ void test_process_assignments()
   spec=mcrl22lps(assignment_case_5);
 }
 
-void test_struct()
+BOOST_AUTO_TEST_CASE(test_struct)
 {
   std::string text =
   "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
@@ -140,7 +151,7 @@ void test_struct()
   specification spec = mcrl22lps(text);
 }
 
-void test_block()
+BOOST_AUTO_TEST_CASE(test_block)
 {
   specification spec = mcrl22lps(
     "act s,s',d,d': Nat;\n"
@@ -162,7 +173,7 @@ void test_block()
   );
 }
 
-void test_large_specification()
+BOOST_AUTO_TEST_CASE(test_large_specification)
 {
   const std::string MODEL =
   "sort                                                                                                                                                                                   \n"
@@ -447,7 +458,7 @@ void test_large_specification()
   specification model = mcrl22lps(MODEL);
 }
 
-void test_lambda()
+BOOST_AUTO_TEST_CASE(test_lambda)
 {
   lps::specification s(mcrl22lps(
     "map select : (Nat -> Bool) # List(Nat) -> List(Nat);\n"
@@ -467,7 +478,7 @@ const std::string no_free_variables_case_1(
   "init P;\n"
 );
 
-void test_no_free_variables()
+BOOST_AUTO_TEST_CASE(test_no_free_variables)
 {
   t_lin_options options;
   options.nofreevars = true;
@@ -626,17 +637,10 @@ void test_various_aux(t_lin_options &options)
   spec = mcrl22lps(various_case_19);
   spec = mcrl22lps(various_case_20);
   spec = mcrl22lps(various_case_21);
-  bool ok=false;
-  try 
-  { spec = mcrl22lps(various_case_22);
-  } 
-  catch (mcrl2::runtime_error &e)
-  { ok=true;
-  }
-  BOOST_CHECK(ok);
+  BOOST_CHECK_THROW(mcrl22lps(various_case_22), mcrl2::runtime_error);
 }
 
-void test_various()
+BOOST_AUTO_TEST_CASE(test_various)
 { t_lin_options options;
   test_various_aux(options);
   options.lin_method=lmRegular2;
@@ -652,25 +656,10 @@ void test_various()
   test_various_aux(options);
 }
 
-int test_main(int argc, char** argv )
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  test_struct();
-  core::garbage_collect();
-  test_multiple_linearization_calls();
-  core::garbage_collect();
-  test_process_assignments();
-  core::garbage_collect();
-  test_large_specification();
-  core::garbage_collect();
-  test_lambda();
-  core::garbage_collect();
-  test_no_free_variables();
-  core::garbage_collect();
-  test_block();
-  core::garbage_collect();
-  test_various();
-  core::garbage_collect();
   return 0;
 }
+
