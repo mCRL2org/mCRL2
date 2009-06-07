@@ -39,7 +39,7 @@ struct t_lin_options {
   bool check_only;
   t_phase end_phase;
   bool pretty;
-  bool noalpha;
+  // bool noalpha;
   mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
   std::string infilename;
   std::string outfilename;
@@ -59,7 +59,7 @@ struct t_lin_options {
       check_only(false),
       end_phase(phNone),
       pretty(false),
-      noalpha(false),
+      // noalpha(false),
       rewrite_strategy(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty)
   {}
 };

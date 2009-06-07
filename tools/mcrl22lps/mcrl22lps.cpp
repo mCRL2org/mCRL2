@@ -51,6 +51,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 
   private:
     t_lin_options m_linearisation_options;
+    bool noalpha;   // indicates whether alpa reduction is needed.
 
   protected:
 
@@ -116,7 +117,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 
       m_linearisation_options.final_cluster           = 0 < parser.options.count("cluster");
       m_linearisation_options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
-      m_linearisation_options.noalpha                 = 0 < parser.options.count("no-alpha");
+      // m_linearisation_options.noalpha                 = 0 < parser.options.count("no-alpha");
+      noalpha                 = 0 < parser.options.count("no-alpha");
       m_linearisation_options.newstate                = 0 < parser.options.count("newstate");
       m_linearisation_options.binary                  = 0 < parser.options.count("binary");
       m_linearisation_options.statenames              = 0 < parser.options.count("statenames");
@@ -175,7 +177,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       if (m_linearisation_options.check_only && m_linearisation_options.end_phase != phTypeCheck) {
         parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
       }
-      if (m_linearisation_options.noalpha && m_linearisation_options.end_phase == phAlphaRed) {
+      if (noalpha && m_linearisation_options.end_phase == phAlphaRed) {
         parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
       }
 
@@ -224,7 +226,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         return result;
       }
       //perform alphabet reductions
-      if (!m_linearisation_options.noalpha) {
+      if (!noalpha) {
         gsVerboseMsg("performing alphabet reductions...\n");
         result = gsAlpha(result);
         if (result == NULL)
@@ -260,7 +262,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
              "translate an mCRL2 specification to an LPS",
              "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
              "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used.") {
+             "stdin is used."),noalpha(false) {
     }
 
     bool run() {
@@ -341,7 +343,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 
       m_linearisation_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
       m_linearisation_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
-      m_linearisation_options.noalpha                 = c.get_option_argument< bool >(option_no_alpha);
+      noalpha                 = c.get_option_argument< bool >(option_no_alpha);
+      // m_linearisation_options.noalpha                 = c.get_option_argument< bool >(option_no_alpha);
       m_linearisation_options.newstate                = c.get_option_argument< bool >(option_newstate);
       m_linearisation_options.binary                  = c.get_option_argument< bool >(option_binary);
       m_linearisation_options.statenames              = c.get_option_argument< bool >(option_statenames);
