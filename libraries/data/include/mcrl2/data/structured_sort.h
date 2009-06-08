@@ -459,11 +459,11 @@ namespace mcrl2 {
                   }
                 }
 
-                result.push_back(data_equation(boost::make_iterator_range(variables),
+                result.push_back(data_equation(variables,
                   equal_to(operand_left, operand_right), right_equal));
-                result.push_back(data_equation(boost::make_iterator_range(variables),
+                result.push_back(data_equation(variables,
                   less(operand_left, operand_right), right_smaller));
-                result.push_back(data_equation(boost::make_iterator_range(variables),
+                result.push_back(data_equation(variables,
                   less_equal(operand_left, operand_right), right_smaller_equal));
               }
             }
@@ -499,9 +499,9 @@ namespace mcrl2 {
               {
                 if (!j->name().empty()) {
                   application lhs(function_symbol(j->name(), function_sort(s, j->sort())),
-                        application(i.front().constructor_function(s), boost::make_iterator_range(variables)));
+                        application(i.front().constructor_function(s), variables));
 
-                  result.push_back(data_equation(boost::make_iterator_range(variables), lhs, variables[j - arguments.begin()]));
+                  result.push_back(data_equation(variables, lhs, variables[j - arguments.begin()]));
                 }
               }
             }
@@ -545,8 +545,8 @@ namespace mcrl2 {
                     variables.push_back(variable(generator(), k->sort()));
                   }
 
-                  result.push_back(data_equation(boost::make_iterator_range(variables), application(j->recogniser_function(s),
-                    application(i->constructor_function(s), boost::make_iterator_range(variables))), right));
+                  result.push_back(data_equation(variables, application(j->recogniser_function(s),
+                    application(i->constructor_function(s), variables)), right));
                 }
               }
             }

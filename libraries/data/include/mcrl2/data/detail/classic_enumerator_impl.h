@@ -137,14 +137,14 @@ namespace mcrl2 {
           template < typename ForwardTraversalIterator >
           bool initialise(boost::iterator_range< ForwardTraversalIterator > const& v) {
             // Apply translation (effectively type normalisation) to variables
-            atermpp::aterm_list variables;
+            atermpp::vector< variable_type > variables;
 
             for (ForwardTraversalIterator i = v.begin(); i != v.end(); ++i) {
-              variables = atermpp::push_back(variables, m_evaluator.convert_to(*i));
+              variables.push_back(static_cast< variable_type >(m_evaluator.convert_to(*i)));
             }
 
             m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(variables, m_evaluator.convert_to(m_condition), false)));
+                        m_shared_context->m_enumerator.findSolutions(convert< variable_list >(variables), m_evaluator.convert_to(m_condition), false)));
 
             return increment();
           }

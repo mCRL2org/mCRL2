@@ -87,13 +87,14 @@ namespace mcrl2 {
         /// \param[in] lhs The left hand side of the data_equation.
         /// \param[in] rhs The right hand side of the data_equation.
         /// \overload for variable list as iterator range
-        template < typename ForwardTraversalIterator >
-        data_equation(const typename boost::iterator_range< ForwardTraversalIterator >& variables,
+        template < typename Container >
+        data_equation(const Container& variables,
                       const data_expression& condition,
                       const data_expression& lhs,
-                      const data_expression& rhs)
+                      const data_expression& rhs,
+                      typename detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  make_variable_list(variables), condition, lhs, rhs))
+                  convert< variable_list >(variables), condition, lhs, rhs))
         {}
 
         /// \brief Constructor
@@ -103,12 +104,13 @@ namespace mcrl2 {
         /// \param[in] rhs The right hand side of the data_equation.
         /// \post this is the data equation representing the input, with
         ///       condition true
-        template < typename ForwardTraversalIterator >
-        data_equation(const typename boost::iterator_range< ForwardTraversalIterator >& variables,
+        template < typename Container >
+        data_equation(const Container& variables,
                       const data_expression& lhs,
-                      const data_expression& rhs)
+                      const data_expression& rhs,
+                      typename detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  variable_list(variables.begin(), variables.end()), core::detail::gsMakeNil(), lhs, rhs))
+                  convert< variable_list >(variables), core::detail::gsMakeNil(), lhs, rhs))
         {}
 
         /// \brief Constructor
