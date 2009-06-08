@@ -13,6 +13,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/find.h"
 
 #ifndef MCRL2_DATA_TRAVERSE_H
 #define MCRL2_DATA_TRAVERSE_H
