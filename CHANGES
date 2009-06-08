@@ -1,4 +1,15 @@
 ===============================================================================
+Changes between toolset releases January 2009 and July 2009:
+===============================================================================
+
+ General
+   - developed a new data  and process library and adapted most tools and 
+     libraries to use it. Ultimately the classes in core will all be replaced
+     such that core will become obsolete.
+   - introduced new tool classes and adapted all tools to it.
+   - adapted the user interface of mcrl2i. 
+
+===============================================================================
 Changes between toolset releases July 2008 and January 2009:
 ===============================================================================
 
