@@ -134,11 +134,26 @@ inline std::string to_string (const std::string& t)
 class CAsttransform
 {
   public:
-  	bool translator(ATermAppl ast);
+    CAsttransform()
+      : parenthesis_level(0),
+        terminate(true),
+        state(-1),
+        next_state(-1),
+        loop(false),
+        guardedloop(false),
+        guardedStarBeginState(0),
+        stream_number(0),
+        originates_from_stream(0),
+        alternative(false),
+        parallel(false),
+        no_statepar(false)
+      {}
+
+    bool translator(ATermAppl ast);
     bool set_options(t_options options);
     std::string getResult();
   private:
-	std::string manipulateProcess(ATermAppl input);
+    std::string manipulateProcess(ATermAppl input);
     std::string mcrl2_result;
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
@@ -164,8 +179,6 @@ class CAsttransform
     std::vector<RPC> ProcessChannelMap;
 
     std::string processType(ATermAppl input);
-
-    int stream_lvl;      //Variable to indicate the steams lvl
 
     std::vector<RAT> transitionSystem;
 

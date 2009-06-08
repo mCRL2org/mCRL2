@@ -1389,11 +1389,7 @@ std::string CAsttransform::processValue(ATermAppl input)
 
 std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList input)
 {
-  vector<RVT>::iterator it;
-  RPV tmpRPV;
-  RVT tmpRVT;
   vector<RPV> result;
-  string InitValue;
   gsDebugMsg("input of manipulateProcessVariableDeclarations: %T\n", input);
   // INPUT: ProcDecl( ... )
   // Arity is 1 because VarDecl the argument is of the form list*
@@ -1409,6 +1405,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       ATerm element = ATgetFirst(to_process);
       if ( StrcmpIsFun( "DataVarID", (ATermAppl) element) )
       {
+        RPV tmpRPV;
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(element,0)));
         tmpRPV.Type = processType((ATermAppl) ATgetArgument(element,1));
         tmpRPV.InitValue = initialValueVariable(tmpRPV.Type);
@@ -1417,6 +1414,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       if ( StrcmpIsFun( "DataVarExprID", (ATermAppl) element) )
       {
         ATerm sub_element = ATgetArgument(element, 0);
+        RPV tmpRPV;
         tmpRPV.Name = ATgetName(ATgetAFun(ATgetArgument(sub_element,0)));
         tmpRPV.Type = processType((ATermAppl) ATgetArgument(sub_element,1));
         tmpRPV.InitValue = processValue((ATermAppl) ATgetArgument(element,1));
