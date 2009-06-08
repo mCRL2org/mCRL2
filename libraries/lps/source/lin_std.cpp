@@ -2939,7 +2939,7 @@ class specification_basic_type:public boost::noncopyable
            sp_push_arguments.push_back(structured_sort_constructor_argument(stack_sort_alias,
                                spec.fresh_name("pop")));
            sorts=reverse(sorts);
-           structured_sort_constructor sc_push(spec.fresh_name("push"), sp_push_arguments);
+           structured_sort_constructor sc_push(spec.fresh_name("push"), boost::make_iterator_range(sp_push_arguments));
            structured_sort_constructor sc_emptystack(spec.fresh_name("emptystack"),spec.fresh_name("isempty"));
            
            structured_sort_constructor_vector constructors(1,sc_push);
