@@ -189,14 +189,11 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void BDD_Prover::update_answers() {
-      ATermAppl v_original_formula;
-      ATermAppl v_original_bdd;
-
       if (!f_processed) {
         build_bdd();
         eliminate_paths();
-        v_original_formula = f_formula;
-        v_original_bdd = f_bdd;
+        ATermAppl v_original_formula = f_formula;
+        ATermAppl v_original_bdd = f_bdd;
         if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd))) {
           f_induction.initialize(v_original_formula);
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {

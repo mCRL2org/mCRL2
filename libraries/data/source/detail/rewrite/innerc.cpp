@@ -199,11 +199,6 @@ ATerm RewriterCompilingInnermost::toInner(ATermAppl Term, bool add_opids)
 
 ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 {
-	ATermList l;
-        ATermList list;
-	ATerm t;
-	ATermAppl a;
-
 	if ( !ATisList(Term) )
 	{
 		if ( ATisInt(Term) )
@@ -220,8 +215,9 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 	}
 
         //Reconstruct term structure
-	l = (ATermList) Term;
-	t = ATgetFirst(l);
+	ATermList l = (ATermList) Term;
+	ATerm t = ATgetFirst(l);
+	ATermAppl a;
 	if ( ATisInt(t) )
 	{
 		a = int2term[ATgetInt((ATermInt) t)];
@@ -237,7 +233,7 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
                 while(gsIsSortArrow(sort) && !(ATisEmpty(l)))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
-                        list = ATmakeList0();
+                        ATermList list = ATmakeList0();
                         while (!ATisEmpty(sort_dom))
                         {
                                 list = ATinsert(list, (ATerm) fromInner(ATgetFirst(l)));
@@ -417,18 +413,16 @@ static char *whitespace(int len)
 #ifdef _INNERC_STORE_TREES
 int RewriterCompilingInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 {
-	int n,m;
-
 	if ( isS(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
 		fprintf(f,"n%i [label=\"S(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isM(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		if ( ATisInt(ATgetArgument(tree,0)) )
 		{
 			fprintf(f,"n%i [label=\"M(%i)\"]\n",*num_states,ATgetInt((ATermInt) ATgetArgument(tree,0)));
@@ -440,8 +434,8 @@ int RewriterCompilingInnermost::write_tree(FILE *f, ATermAppl tree, int *num_sta
 		return (*num_states)++;
 	} else if ( isF(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		if ( ATisInt(ATgetArgument(tree,0)) )
 		{
 	 		fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(int2term[ATgetInt((ATermInt) ATgetArgument(tree,0))],0))));
@@ -453,20 +447,20 @@ int RewriterCompilingInnermost::write_tree(FILE *f, ATermAppl tree, int *num_sta
 		return (*num_states)++;
 	} else if ( isD(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,0),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,0),num_states);
 		fprintf(f,"n%i [label=\"D\"]\n",*num_states);
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isN(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,0),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,0),num_states);
 		fprintf(f,"n%i [label=\"N\"]\n",*num_states);
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isC(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		gsfprintf(f,"n%i [label=\"C(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
 		fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
 		fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);

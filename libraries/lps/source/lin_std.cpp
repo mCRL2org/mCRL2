@@ -150,7 +150,7 @@ class objectdatatype
       containstime=o.containstime;
     }
 
-    void operator=(const objectdatatype &o)
+    const objectdatatype& operator=(const objectdatatype &o)
     { objectname=o.objectname;
       objectname.protect();
       constructor=o.constructor;
@@ -166,6 +166,7 @@ class objectdatatype
       object=o.object;
       canterminate=o.canterminate;
       containstime=o.containstime;
+      return (*this);
     }
   
     ~objectdatatype()
@@ -5985,7 +5986,7 @@ class specification_basic_type:public boost::noncopyable
     
     variable_list make_unique_variables(
                   const variable_list var_list,
-                  const std::string hint)
+                  const std::string& hint)
     { /* This function generates a list of variables with the same sorts
          as in variable_list, where all names are unique */
     

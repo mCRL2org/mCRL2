@@ -363,8 +363,6 @@ ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
 
 ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 {
-        ATermList l,m;
-
         if ( !usedummies )
         {
                 return a;
@@ -374,8 +372,8 @@ ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 
         if ( ATisList(a) )
         {
-                l = (ATermList) a;
-                m = ATmakeList0();
+                ATermList l = (ATermList) a;
+                ATermList m = ATmakeList0();
                 for (; !ATisEmpty(l); l=ATgetNext(l))
                 {
                         m = ATinsert(m,SetVars(ATgetFirst(l),free_vars));

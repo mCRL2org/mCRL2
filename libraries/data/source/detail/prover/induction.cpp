@@ -27,19 +27,15 @@ namespace mcrl2 {
   // Class Induction - Functions declared private -------------------------------------------------
 
     void Induction::recurse_expression_for_lists(ATermAppl a_expression) {
-      ATermAppl v_argument;
-      ATermAppl v_sort;
-      ATermList v_arguments;
-
       if (gsIsDataVarId(a_expression)) {
-        v_sort = gsGetSort(a_expression);
+        ATermAppl v_sort = gsGetSort(a_expression);
         if (f_sort_info.is_sort_list(v_sort)) {
           ATindexedSetPut(f_list_variables, (ATerm) a_expression, 0);
         }
       } else if (f_expression_info.is_operator(a_expression)) {
-        v_arguments = gsGetDataExprArgs(a_expression);
+        ATermList v_arguments = gsGetDataExprArgs(a_expression);
         while (!ATisEmpty(v_arguments)) {
-          v_argument = ATAgetFirst(v_arguments);
+          ATermAppl v_argument = ATAgetFirst(v_arguments);
           v_arguments = ATgetNext(v_arguments);
           recurse_expression_for_lists(v_argument);
         }
@@ -95,14 +91,11 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Induction::get_fresh_dummy(ATermAppl a_sort) {
-      char* v_dummy_string;
-      ATermAppl v_dummy_name;
       ATermAppl v_result;
-
       do {
-        v_dummy_string = (char*) malloc((NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
+        char* v_dummy_string = (char*) malloc((NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
         sprintf(v_dummy_string, "dummy%d", f_fresh_dummy_number);
-        v_dummy_name = gsString2ATermAppl(v_dummy_string);
+        ATermAppl v_dummy_name = gsString2ATermAppl(v_dummy_string);
         v_result = gsMakeDataVarId(v_dummy_name, a_sort);
         free(v_dummy_string);
         v_dummy_string = 0;
@@ -187,26 +180,18 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Induction::create_hypotheses(ATermAppl a_hypothesis, ATermList a_list_of_variables, ATermList a_list_of_dummies) {
-      ATermAppl v_variable;
-      ATermAppl v_variable_sort;
-      ATermAppl v_dummy;
-      ATermAppl v_clause;
-      ATermAppl v_substitution;
-      ATermList v_substitution_list;
-
       if (ATisEmpty(a_list_of_variables)) {
         return gsMakeDataExprTrue();
       } else {
-        v_clause = a_hypothesis;
+        ATermAppl v_clause = a_hypothesis;
         if (ATgetLength(a_list_of_variables) > 1) {
           while (!ATisEmpty(a_list_of_variables)) {
-            v_variable = ATAgetFirst(a_list_of_variables);
-            v_variable_sort = gsGetSort(v_variable);
+            ATermAppl v_variable = ATAgetFirst(a_list_of_variables);
             a_list_of_variables = ATgetNext(a_list_of_variables);
-            v_dummy = ATAgetFirst(a_list_of_dummies);
+            ATermAppl v_dummy = ATAgetFirst(a_list_of_dummies);
             a_list_of_dummies = ATgetNext(a_list_of_dummies);
-            v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
-            v_substitution_list = ATmakeList1((ATerm) v_substitution);
+            ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
+            ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
             v_clause = gsMakeDataExprAnd(v_clause, gsSubstValues_Appl(v_substitution_list, a_hypothesis, true));
           }
         }
@@ -221,53 +206,35 @@ namespace mcrl2 {
       ATermAppl a_formula, ATermAppl a_hypothesis, int a_variable_number, int a_number_of_variables,
       ATermList a_list_of_variables, ATermList a_list_of_dummies
     ) {
-      ATermList v_list_1, v_list_2;
-      ATermAppl v_formula_1, v_formula_2;
-      ATermAppl v_hypothesis;
-      ATermAppl v_dummy;
-      ATermAppl v_dummy_sort;
-      ATermList v_list_of_dummies;
-      ATermAppl v_variable;
-      ATermAppl v_variable_sort;
-      ATermAppl v_substitution;
-      ATermList v_substitution_list;
-      ATermList v_list_of_variables;
-      ATermAppl v_hypotheses_1, v_hypotheses_2;
-      ATermList v_result;
-
-      v_variable = (ATermAppl) ATindexedSetGetElem(f_list_variables, a_variable_number);
-      v_variable_sort = gsGetSort(v_variable);
-      v_list_of_variables = ATinsert(a_list_of_variables, (ATerm) v_variable);
-      v_dummy_sort = get_sort_of_list_elements(v_variable);
-      v_dummy = get_fresh_dummy(v_dummy_sort);
-      v_list_of_dummies = ATinsert(a_list_of_dummies, (ATerm) v_dummy);
-      v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
-      v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
+      ATermAppl v_variable = (ATermAppl) ATindexedSetGetElem(f_list_variables, a_variable_number);
+      ATermAppl v_variable_sort = gsGetSort(v_variable);
+      ATermList v_list_of_variables = ATinsert(a_list_of_variables, (ATerm) v_variable);
+      ATermAppl v_dummy_sort = get_sort_of_list_elements(v_variable);
+      ATermAppl v_dummy = get_fresh_dummy(v_dummy_sort);
+      ATermList v_list_of_dummies = ATinsert(a_list_of_dummies, (ATerm) v_dummy);
+      ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, gsMakeDataExprCons(v_dummy, v_variable));
+      ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
+      ATermAppl v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
       v_substitution = gsMakeSubst_Appl(v_variable, gsMakeOpIdEmptyList(v_variable_sort));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_formula_2 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
-      v_hypothesis = gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);
+      ATermAppl v_formula_2 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
+      ATermAppl v_hypothesis = gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);
 
       if (a_variable_number < a_number_of_variables - 1) {
-        v_list_1 = create_clauses(v_formula_1, a_hypothesis, a_variable_number + 1, a_number_of_variables, v_list_of_variables, v_list_of_dummies);
-        v_list_2 = create_clauses(v_formula_2, v_hypothesis, a_variable_number + 1, a_number_of_variables, a_list_of_variables, a_list_of_dummies);
-        v_result = ATconcat(v_list_1, v_list_2);
+        ATermList v_list_1 = create_clauses(v_formula_1, a_hypothesis, a_variable_number + 1, a_number_of_variables, v_list_of_variables, v_list_of_dummies);
+        ATermList v_list_2 = create_clauses(v_formula_2, v_hypothesis, a_variable_number + 1, a_number_of_variables, a_list_of_variables, a_list_of_dummies);
+        return ATconcat(v_list_1, v_list_2);
       } else {
-        v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
-        v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
-        v_result = ATmakeList2((ATerm) gsMakeDataExprImp(v_hypotheses_1, v_formula_1), (ATerm) gsMakeDataExprImp(v_hypotheses_2, v_formula_2));
+        ATermAppl v_hypotheses_1 = create_hypotheses(a_hypothesis, v_list_of_variables, v_list_of_dummies);
+        ATermAppl v_hypotheses_2 = create_hypotheses(v_hypothesis, a_list_of_variables, a_list_of_dummies);
+        return ATmakeList2((ATerm) gsMakeDataExprImp(v_hypotheses_1, v_formula_1), (ATerm) gsMakeDataExprImp(v_hypotheses_2, v_formula_2));
       }
-
-      return v_result;
     }
 
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Induction::apply_induction() {
       ATermAppl v_result;
-      ATermList v_list_of_clauses;
-      ATermAppl v_clause;
 
       f_fresh_dummy_number = 0;
       if (f_count == 1) {
@@ -275,11 +242,11 @@ namespace mcrl2 {
         v_result = apply_induction_one();
       } else {
         gsVerboseMsg("Induction on %d variables.\n", f_count);
-        v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, ATmakeList0(), ATmakeList0());
+        ATermList v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, ATmakeList0(), ATmakeList0());
         v_result = ATAgetFirst(v_list_of_clauses);
         v_list_of_clauses = ATgetNext(v_list_of_clauses);
         while (!ATisEmpty(v_list_of_clauses)) {
-          v_clause = ATAgetFirst(v_list_of_clauses);
+          ATermAppl v_clause = ATAgetFirst(v_list_of_clauses);
           v_list_of_clauses = ATgetNext(v_list_of_clauses);
           v_result = gsMakeDataExprAnd(v_result, v_clause);
         }

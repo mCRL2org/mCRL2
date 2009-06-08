@@ -188,38 +188,30 @@ using namespace mcrl2::core::detail;
   {
     assert(is_tau_summand(a_summand_1));
     assert(!is_delta_summand(a_summand_2));
-    ATermAppl v_condition_1, v_condition_2;
-    ATermList v_assignments_1, v_assignments_2;
-    ATermList v_substitutions_1, v_substitutions_2;
-    ATermAppl v_subst_condition_1, v_subst_condition_2;
-    ATermAppl v_lhs, v_rhs;
-    ATermAppl v_equation;
-    ATermAppl v_subst_equation;
-    ATermList v_actions;
-    ATermAppl v_actions_equation;
+    ATermAppl v_rhs;
 
-    v_condition_1 = ATAgetArgument(a_summand_1, 1);
-    v_assignments_1 = ATLgetArgument(a_summand_1, 4);
-    v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
-    v_condition_2 = ATAgetArgument(a_summand_2, 1);
-    v_lhs = gsMakeDataExprAnd(v_condition_1, v_condition_2);
+    ATermAppl v_condition_1 = ATAgetArgument(a_summand_1, 1);
+    ATermList v_assignments_1 = ATLgetArgument(a_summand_1, 4);
+    ATermList v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+    ATermAppl v_condition_2 = ATAgetArgument(a_summand_2, 1);
+    ATermAppl v_lhs = gsMakeDataExprAnd(v_condition_1, v_condition_2);
     v_lhs = gsMakeDataExprAnd(v_lhs, a_invariant);
-    v_assignments_2 = ATLgetArgument(a_summand_2, 4);
-    v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
-    v_subst_condition_1 = gsSubstValues_Appl(v_substitutions_2, v_condition_1, true);
-    v_subst_condition_2 = gsSubstValues_Appl(v_substitutions_1, v_condition_2, true);
-    v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
+    ATermList v_assignments_2 = ATLgetArgument(a_summand_2, 4);
+    ATermList v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+    ATermAppl v_subst_condition_1 = gsSubstValues_Appl(v_substitutions_2, v_condition_1, true);
+    ATermAppl v_subst_condition_2 = gsSubstValues_Appl(v_substitutions_1, v_condition_2, true);
+    ATermAppl v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
-    v_actions = ATLgetArgument(ATAgetArgument(a_summand_2, 2), 0);
+    ATermList v_actions = ATLgetArgument(ATAgetArgument(a_summand_2, 2), 0);
     if (ATisEmpty(v_actions)) {
       // tau-summand
-      v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
+      ATermAppl v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
       v_rhs = gsMakeDataExprOr(v_equation, v_rhs);
     } else {
       // non-tau-summand
-      v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
+      ATermAppl v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
       v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
       v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
@@ -293,20 +285,19 @@ using namespace mcrl2::core::detail;
     bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
       assert(is_tau_summand(a_summand_1));
       ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lps, 2), 1);
-      ATermAppl v_condition, v_new_invariant;
       bool v_is_confluent = true;
 
       if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
         gsMessage(":");
       } else {
         if (!is_delta_summand(a_summand_2)) {
-          v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
+          ATermAppl v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
           f_bdd_prover.set_formula(v_condition);
           if (f_bdd_prover.is_tautology() == answer_yes) {
             gsMessage("+");
           } else {
             if (f_generate_invariants) {
-              v_new_invariant = f_bdd_prover.get_bdd();
+              ATermAppl v_new_invariant = f_bdd_prover.get_bdd();
               gsVerboseMsg("\nChecking invariant: %P\n", v_new_invariant);
               if (f_invariant_checker.check_invariant(v_new_invariant)) {
                 gsVerboseMsg("Invariant holds\n");

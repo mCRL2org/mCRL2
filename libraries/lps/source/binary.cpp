@@ -94,7 +94,6 @@ data_expression make_if_tree(const variable_list& new_parameters,
 {
   //gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
   //gsDebugMsg("Enumerated elements: %s\n", enumerated_elements.to_string().c_str());
-  int n,m;
   data_expression result;
 
   if (new_parameters.empty())
@@ -103,8 +102,8 @@ data_expression make_if_tree(const variable_list& new_parameters,
   }
   else
   {
-    n = enumerated_elements.size();
-    m = powerof2_(new_parameters.size() - 1);
+    int n = enumerated_elements.size();
+    int m = powerof2_(new_parameters.size() - 1);
 
     //m == 2^(new_parameters.size() - 1)
 
@@ -336,7 +335,7 @@ assignment_list replace_enumerated_parameters_in_assignments(const assignment_li
                                                                        table& enumerated_elements_table)
 {
   gsDebugMsg("replace_enumerated_parameters_in_assignments %s\n", list.to_string().c_str());
-  assignment_list result, temp;
+  assignment_list result;
   // First replace right-hand-sides
   for (assignment_list::iterator i = list.begin(); i != list.end(); ++i)
   {

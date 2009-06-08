@@ -141,18 +141,16 @@ static void finalise_common()
 #ifdef _INNER_STORE_TREES
 int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 {
-	int n,m;
-
 	if ( isS(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
 		fprintf(f,"n%i [label=\"S(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isM(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		if ( ATisInt(ATgetArgument(tree,0)) )
 		{
 			fprintf(f,"n%i [label=\"M(%i)\"]\n",*num_states,ATgetInt((ATermInt) ATgetArgument(tree,0)));
@@ -164,8 +162,8 @@ int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 		return (*num_states)++;
 	} else if ( isF(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		if ( ATisInt(ATgetArgument(tree,0)) )
 		{
 	 		fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(int2term[ATgetInt((ATermInt) ATgetArgument(tree,0))],0))));
@@ -177,20 +175,20 @@ int RewriterInnermost::write_tree(FILE *f, ATermAppl tree, int *num_states)
 		return (*num_states)++;
 	} else if ( isD(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,0),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,0),num_states);
 		fprintf(f,"n%i [label=\"D\"]\n",*num_states);
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isN(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,0),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,0),num_states);
 		fprintf(f,"n%i [label=\"N\"]\n",*num_states);
 		fprintf(f,"n%i -> n%i\n",*num_states,n);
 		return (*num_states)++;
 	} else if ( isC(tree) )
 	{
-		n = write_tree(f,ATAgetArgument(tree,1),num_states);
-		m = write_tree(f,ATAgetArgument(tree,2),num_states);
+		int n = write_tree(f,ATAgetArgument(tree,1),num_states);
+		int m = write_tree(f,ATAgetArgument(tree,2),num_states);
 		gsfprintf(f,"n%i [label=\"C(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
 		fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
 		fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
@@ -1061,10 +1059,6 @@ ATerm RewriterInnermost::toInner(ATermAppl Term, bool add_opids)
 ATermAppl RewriterInnermost::fromInner(ATerm Term)
 {
         assert(Term!=NULL);
-	ATermList l;
-        ATermList list;
-	ATerm t;
-	ATermAppl a;
 
 	if ( !ATisList(Term) )
 	{
@@ -1082,8 +1076,9 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
 	}
 
         //Reconstruct term structure
-	l = (ATermList) Term;
-	t = ATgetFirst(l);
+	ATermList l = (ATermList) Term;
+	ATerm t = ATgetFirst(l);
+	ATermAppl a;
 	if ( ATisInt(t) )
 	{
 		a = int2term[ATgetInt((ATermInt) t)];
@@ -1099,7 +1094,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
                 while(gsIsSortArrow(sort) && !ATisEmpty(l))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
-                        list = ATmakeList0();
+                        ATermList list = ATmakeList0();
                         while (!ATisEmpty(sort_dom))
                         {
                                 list = ATinsert(list, (ATerm) fromInner(ATgetFirst(l)));
@@ -1225,10 +1220,8 @@ RewriterInnermost::~RewriterInnermost()
 
 bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 {
-	ATermList l;
-	ATermAppl a,m;
-	ATermInt i,j;
-	int old_num;
+	ATermAppl m;
+	ATermInt j;
 
 	try
 	{
@@ -1238,15 +1231,15 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 		return false;
 	}
 
-	old_num = num_opids;
+	int old_num = num_opids;
 
-	a = ATAgetArgument(Rule,2);
+	ATermAppl a = ATAgetArgument(Rule,2);
 	if ( gsIsOpId(a) )
 	{
 		j = (ATermInt) OpId2Int(a,true);
 		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(Rule,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(Rule,3),true));
 	} else {
-		l = (ATermList) toInner(a,true);
+		ATermList l = (ATermList) toInner(a,true);
 		j = (ATermInt) ATgetFirst(l);
 		m = ATmakeAppl4(ruleAFun,ATgetArgument(Rule,0),toInner(ATAgetArgument(Rule,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(Rule,3),true));
 	}
@@ -1270,10 +1263,10 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 		ATprotectArray((ATerm *) inner_eqns,num_opids);
 		ATprotectArray((ATerm *) inner_trees,num_opids);
 
-		l = ATtableKeys(term2int);
+		ATermList l = ATtableKeys(term2int);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+			ATermInt i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 			if ( ATgetInt(i) >= old_num )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);
@@ -1295,25 +1288,24 @@ bool RewriterInnermost::addRewriteRule(ATermAppl Rule)
 
 bool RewriterInnermost::removeRewriteRule(ATermAppl Rule)
 {
-	ATermList l,n;
-	ATermAppl a,m;
+	ATermAppl m;
 	ATerm t;
 
-	a = ATAgetArgument(Rule,2);
+	ATermAppl a = ATAgetArgument(Rule,2);
 	if ( gsIsOpId(a) )
 	{
 		t = OpId2Int(a,false);
 		m = ATmakeAppl4(ruleAFun,(ATerm) ATmakeList0(),toInner(ATAgetArgument(Rule,1),true),(ATerm) ATmakeList0(),toInner(ATAgetArgument(Rule,3),true));
 	} else {
-		l = (ATermList) toInner(a,false);
+		ATermList l = (ATermList) toInner(a,false);
 		t = ATgetFirst(l);
 		m = ATmakeAppl4(ruleAFun,ATgetArgument(Rule,0),toInner(ATAgetArgument(Rule,1),true),(ATerm) ATgetNext(l),toInner(ATAgetArgument(Rule,3),true));
 	}
 
 	if ( ATisInt(t) )
 	{
-		l = inner_eqns[ATgetInt((ATermInt) t)];
-		n = ATmakeList0();
+		ATermList l = inner_eqns[ATgetInt((ATermInt) t)];
+		ATermList n = ATmakeList0();
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
 			if ( !ATisEqual(m,ATgetFirst(l)) )

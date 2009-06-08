@@ -20,9 +20,6 @@ using namespace mcrl2::core;
     /// \param a_bdd A binary decision diagram.
 
     void BDD2Dot::aux_output_bdd(ATermAppl a_bdd) {
-      ATermAppl v_true_branch, v_false_branch, v_guard;
-      int v_true_number, v_false_number;
-
       if (ATtableGet(f_visited, (ATerm) a_bdd)) {
         return;
       }
@@ -32,13 +29,13 @@ using namespace mcrl2::core;
       } else if (f_bdd_info.is_false(a_bdd)) {
         fprintf(f_dot_file, "  %d [shape=box, label=\"F\"];\n", f_node_number);
       } else if (f_bdd_info.is_if_then_else(a_bdd)) {
-        v_true_branch = f_bdd_info.get_true_branch(a_bdd);
-        v_false_branch = f_bdd_info.get_false_branch(a_bdd);
+        ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
+        ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
         aux_output_bdd(v_false_branch);
-        v_true_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_true_branch));
-        v_false_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_false_branch));
-        v_guard = f_bdd_info.get_guard(a_bdd);
+        int v_true_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_true_branch));
+        int v_false_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_false_branch));
+        ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
         gsfprintf(f_dot_file, "  %d [label=\"%P\"];\n", f_node_number, v_guard);
         fprintf(f_dot_file, "  %d -> %d;\n", f_node_number, v_true_number);
         fprintf(f_dot_file, "  %d -> %d [style=dashed];\n", f_node_number, v_false_number);

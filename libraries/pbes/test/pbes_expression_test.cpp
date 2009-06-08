@@ -143,8 +143,7 @@ void test_accessors()
   {
     using namespace pbes_expr_optimized;
 
-    pbes_expression a, b, c;
-    variable_list w;
+    pbes_expression a;
     identifier_string s;
     data_expression e;
     atermpp::set<pbes_expression> q1;

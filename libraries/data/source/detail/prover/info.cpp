@@ -106,12 +106,10 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
   // Class ATerm_Info - Functions declared protected ----------------------------------------------
 
     bool ATerm_Info::alpha1(ATerm a_term1, ATerm a_term2, int a_number) {
-      ATerm v_term;
-
       if (get_number_of_arguments(a_term1) == a_number) {
         return false;
       } else {
-        v_term = get_argument(a_term1, a_number);
+        ATerm v_term = get_argument(a_term1, a_number);
         return ( v_term == a_term2) || lpo1(v_term, a_term2) || alpha1(a_term1, a_term2, ++a_number);
       }
     }
@@ -145,12 +143,10 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
     // --------------------------------------------------------------------------------------------
 
     bool ATerm_Info::majo1(ATerm a_term1, ATerm a_term2, int a_number) {
-      ATerm v_term;
-
       if (get_number_of_arguments(a_term2) == a_number) {
         return true;
       } else {
-        v_term = get_argument(a_term2, a_number);
+        ATerm v_term = get_argument(a_term2, a_number);
         return lpo1(a_term1, v_term) && majo1(a_term1, a_term2, ++a_number);
       }
     }
@@ -158,13 +154,11 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
     // --------------------------------------------------------------------------------------------
 
     bool ATerm_Info::lex1(ATerm a_term1, ATerm a_term2, int a_number) {
-      ATerm v_term1, v_term2;
-
       if (get_number_of_arguments(a_term1) == a_number) {
         return false;
       } else {
-        v_term1 = get_argument(a_term1, a_number);
-        v_term2 = get_argument(a_term2, a_number);
+        ATerm v_term1 = get_argument(a_term1, a_number);
+        ATerm v_term2 = get_argument(a_term2, a_number);
         if (v_term1 == v_term2) {
           return lex1(a_term1, a_term2, ++a_number);
         } else {

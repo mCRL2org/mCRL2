@@ -148,8 +148,6 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
         s = ATmakeList1(t);
         while ( !ATisEmpty(s) )
         {
-                ATerm a1,a2;
-
                 a = ATgetFirst(s);
                 s = ATgetNext(s);
 
@@ -162,8 +160,8 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
                 {
                         s = ATconcat(s,ATgetNext((ATermList) a));
                 } else if ( IsInner3Eq(ATgetFirst((ATermList) a)) ) {
-                        a1 = ATgetFirst(ATgetNext((ATermList) a));
-                        a2 = ATgetFirst(ATgetNext(ATgetNext((ATermList) a)));
+                        ATerm a1 = ATgetFirst(ATgetNext((ATermList) a));
+                        ATerm a2 = ATgetFirst(ATgetNext(ATgetNext((ATermList) a)));
                         if ( !ATisEqual(a1,a2) )
                         {
                                 if ( ATisAppl(a1) && gsIsDataVarId((ATermAppl) a1) && (ATindexOf(vars, a1,0) >= 0) && !gsOccurs(a1,a2) )

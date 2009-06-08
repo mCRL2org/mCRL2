@@ -177,10 +177,7 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
 
 ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 {
-	int arity;
-        ATermList list;
 	ATermAppl a;
-	ATerm t;
 
 //gsprintf("in: %T\n\n",Term);
 	if ( gsIsDataVarId(Term) )
@@ -189,8 +186,8 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 		return Term;
 	}
 
-        arity = ATgetArity(ATgetAFun(Term));
-	t = ATgetArgument(Term,0);
+        int arity = ATgetArity(ATgetAFun(Term));
+	ATerm t = ATgetArgument(Term,0);
 	if ( ATisInt(t) )
 	{
 		a = int2term[ATgetInt((ATermInt) t)];
@@ -205,7 +202,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
                 while(gsIsSortArrow(sort) && (i < arity))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
-                        list = ATmakeList0();
+                        ATermList list = ATmakeList0();
                         while(!ATisEmpty(sort_dom))
                         {
                                 assert(i < arity);
@@ -910,13 +907,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
 ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 {
-	unsigned int old_opids;
-	ATermAppl a;
-	ATermList l;
-	ATermInt i;
-
-	old_opids = num_opids;
-	a = toInner((ATermAppl) Term,true);
+	unsigned int old_opids = num_opids;
+	ATermAppl a = toInner((ATermAppl) Term,true);
 	if ( old_opids < num_opids )
 	{
 		ATunprotectArray((ATerm *) int2term);
@@ -927,10 +919,10 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 		jitty_strat = (ATermList *) realloc(jitty_strat,num_opids*sizeof(ATermList));
 		for (unsigned int k = old_opids; k < num_opids; k++) jitty_strat[k] = NULL;
 		ATprotectArray((ATerm *) jitty_strat,num_opids);
-		l = ATtableKeys(term2int);
+		ATermList l = ATtableKeys(term2int);
 		for (; !ATisEmpty(l); l=ATgetNext(l))
 		{
-			i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+			ATermInt i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
 			if ( ((unsigned int) ATgetInt(i)) >= old_opids )
 			{
 				int2term[ATgetInt(i)] = ATAgetFirst(l);

@@ -32,20 +32,14 @@ namespace mcrl2 {
   // Class SMT_LIB_Solver - Functions declared private --------------------------------------------
 
     void SMT_LIB_Solver::declare_variables() {
-      ATermList v_variables;
-      ATermAppl v_variable;
-      ATermAppl v_sort;
-      int v_sort_number;
-      char* v_sort_string;
-      char* v_variable_string;
-
       f_variables_extrafuns = "";
-      v_variables = ATindexedSetElements(f_variables);
+      ATermList v_variables = ATindexedSetElements(f_variables);
       if (!ATisEmpty(v_variables)) {
         f_variables_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_variables)) {
-          v_variable = ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
+          char* v_variable_string;
           v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
           if (f_sort_info.is_sort_real(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
@@ -56,9 +50,9 @@ namespace mcrl2 {
           } else if (f_sort_info.is_sort_pos(gsGetSort(v_variable))) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
           } else {
-            v_sort = gsGetSort(v_variable);
-            v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort, 0);
-            v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
+            ATermAppl v_sort = gsGetSort(v_variable);
+            int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort, 0);
+            char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%d", v_sort_number);
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
             free(v_sort_string);
@@ -72,31 +66,22 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::declare_operators() {
-      ATermList v_operators;
-      ATermAppl v_operator;
-      ATermAppl v_sort;
-      ATermAppl v_sort_domain_elt;
-      ATermList v_sort_domain_list;
-      int v_sort_number;
-      char* v_sort_string;
-      int v_operator_number;
-      char* v_operator_string;
-
       f_operators_extrafuns = "";
-      v_operators = ATindexedSetElements(f_operators);
+      ATermList v_operators = ATindexedSetElements(f_operators);
       if (!ATisEmpty(v_operators)) {
         f_operators_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_operators)) {
-          v_operator = ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
-          v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
+          int v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
+          char* v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
           free(v_operator_string);
           v_operator_string = 0;
-          v_sort = gsGetSort(v_operator);
+          ATermAppl v_sort = gsGetSort(v_operator);
           do {
+            ATermList v_sort_domain_list;
             if (f_sort_info.is_sort_arrow_prod(v_sort)) {
               v_sort_domain_list = f_sort_info.get_domain(v_sort);
               v_sort = f_sort_info.get_range(v_sort);
@@ -106,7 +91,7 @@ namespace mcrl2 {
             }
             for(ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
             {
-              v_sort_domain_elt = ATAgetFirst(l);
+              ATermAppl v_sort_domain_elt = ATAgetFirst(l);
               if (f_sort_info.is_sort_arrow_prod(v_sort_domain_elt)) {
                 throw mcrl2::runtime_error("Function " + pp(v_operator) +
                         " cannot be translated to the SMT-LIB format.");
@@ -120,8 +105,8 @@ namespace mcrl2 {
               } else if (f_sort_info.is_sort_real(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Real";
               } else {
-                v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain_elt, 0);
-                v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
+                int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain_elt, 0);
+                char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
                 sprintf(v_sort_string, "sort%d", v_sort_number);
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
                 free(v_sort_string);
@@ -157,23 +142,19 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::declare_sorts() {
-      ATermList v_sorts;
-      ATermAppl v_sort = 0;
-      int v_sort_number;
-      char* v_sort_string;
-
       f_extrasorts = "";
-      v_sorts = ATindexedSetElements(f_sorts);
+      ATermList v_sorts = ATindexedSetElements(f_sorts);
       if (!ATisEmpty(v_sorts)) {
         f_extrasorts = "  :extrasorts (";
+        ATermAppl v_sort = 0;
         while (!ATisEmpty(v_sorts)) {
           if (v_sort != 0) {
             f_extrasorts = f_extrasorts + " ";
           }
           v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
-          v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
-          v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
+          int v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
+          char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
           f_extrasorts = f_extrasorts + v_sort_string;
           free(v_sort_string);
@@ -186,23 +167,17 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::produce_notes_for_sorts() {
-      ATermList v_sorts;
-      ATermAppl v_sort = 0;
-      int v_sort_number;
-      char* v_sort_original_id;
-      char* v_sort_string;
-
       f_sorts_notes = "";
-      v_sorts = ATindexedSetElements(f_sorts);
+      ATermList v_sorts = ATindexedSetElements(f_sorts);
       if (!ATisEmpty(v_sorts)) {
         f_sorts_notes = "  :notes \"";
         while (!ATisEmpty(v_sorts)) {
-          v_sort = ATAgetFirst(v_sorts);
+          ATermAppl v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
-          v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
-          v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
+          int v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
+          char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
-          v_sort_original_id = f_sort_info.get_sort_id(v_sort);
+          char* v_sort_original_id = f_sort_info.get_sort_id(v_sort);
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
           free(v_sort_string);
           v_sort_string = 0;
@@ -214,23 +189,17 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::produce_notes_for_operators() {
-      ATermList v_operators;
-      ATermAppl v_operator;
-      int v_operator_number;
-      char* v_operator_original_id;
-      char* v_operator_string;
-
       f_operators_notes = "";
-      v_operators = ATindexedSetElements(f_operators);
+      ATermList v_operators = ATindexedSetElements(f_operators);
       if (!ATisEmpty(v_operators)) {
         f_operators_notes = "  :notes \"";
         while (!ATisEmpty(v_operators)) {
-          v_operator = ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
-          v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
-          v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
+          int v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
+          char* v_operator_string = (char*) malloc((NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%d", v_operator_number);
-          v_operator_original_id = gsATermAppl2String(ATAgetArgument(v_operator, 0));
+          char* v_operator_original_id = gsATermAppl2String(ATAgetArgument(v_operator, 0));
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
           free(v_operator_string);
           v_operator_string = 0;
@@ -589,11 +558,9 @@ namespace mcrl2 {
 
     void SMT_LIB_Solver::translate_int_constant(ATermAppl a_clause) {
       char* v_value;
-      string v_string;
-
       v_value = gsIntValue(a_clause);
       if (strncmp(v_value, "-", 1) == 0) {
-        v_string = "~";
+        string v_string = "~";
         v_string = v_string + (v_value + 1);
         f_formula = f_formula + "(" + v_string + ")";
       } else {
@@ -740,16 +707,12 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::add_nat_clauses() {
-      ATermList v_variables;
-      ATermAppl v_variable;
-      char* v_variable_string;
-
-      v_variables = ATindexedSetElements(f_nat_variables);
+      ATermList v_variables = ATindexedSetElements(f_nat_variables);
       if (!ATisEmpty(v_variables)) {
         while (!ATisEmpty(v_variables)) {
-          v_variable = ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          char* v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 0)";
         }
       }
@@ -758,16 +721,12 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::add_pos_clauses() {
-      ATermList v_variables;
-      ATermAppl v_variable;
-      char* v_variable_string;
-
-      v_variables = ATindexedSetElements(f_pos_variables);
+      ATermList v_variables = ATindexedSetElements(f_pos_variables);
       if (!ATisEmpty(v_variables)) {
         while (!ATisEmpty(v_variables)) {
-          v_variable = ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
+          char* v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 1)";
         }
       }

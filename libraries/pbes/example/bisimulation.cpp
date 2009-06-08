@@ -29,16 +29,16 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  std::string infile1;            // location of model LPS
-  std::string infile2;            // location of spec LPS
-  std::string outfile;            // location of result
-  int type;                       // the type of bisimulation
-  bool normalize = false;         // normalize the result
-
-  specification M;
-  specification S;
-
   try {
+    std::string infile1;            // location of model LPS
+    std::string infile2;            // location of spec LPS
+    std::string outfile;            // location of result
+    int type;                       // the type of bisimulation
+    bool normalize = false;         // normalize the result
+
+    specification M;
+    specification S;
+
     //--- reach options ---------
     boost::program_options::options_description bisimulation_options(
       "Usage: bisimulation [OPTION]... INFILE1 INFILE2 OUTFILE\n"

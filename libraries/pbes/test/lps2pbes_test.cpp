@@ -140,8 +140,6 @@ void test_lps2pbes()
 void test_lps2pbes2()
 {
   std::string FORMULA;
-  specification spec;
-  state_formula formula;
   pbes<> p;
   bool timed = false;
 
