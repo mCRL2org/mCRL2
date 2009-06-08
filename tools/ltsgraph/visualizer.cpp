@@ -422,7 +422,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double delta = alpha - beta;
 
   double xFactor = 1;
-  double yFactor;
   double cosGamma = cos(gamma);
   double cosDelta = cos(delta);
   double sinGamma = sin(gamma);
@@ -445,7 +444,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   }
   else
   {
-    yFactor = (8 * (yVirtual - yState)) / (3 * (sinGamma + sinDelta));
+    double yFactor = (8 * (yVirtual - yState)) / (3 * (sinGamma + sinDelta));
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 

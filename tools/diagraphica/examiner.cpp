@@ -56,11 +56,8 @@ Examiner::~Examiner()
     attributes.clear();
 
     // composition
-    if ( frame != NULL )
-    {
-        delete frame;
-        frame = NULL;
-    }
+    delete frame;
+    frame = NULL;
 
     // composition
     {
@@ -184,8 +181,7 @@ void Examiner::setFrame(
     ColorRGB col )
 // -----------------------------------
 {
-    if ( frame != NULL )
-        delete frame;
+    delete frame;
     attributes.clear();
     frame = new Cluster( *frme );
 
@@ -198,11 +194,8 @@ void Examiner::setFrame(
 void Examiner::clrFrame()
 // ----------------------
 {
-    if ( frame != NULL )
-    {
-        delete frame;
-        frame = NULL;
-    }
+    delete frame;
+    frame = NULL;
 
     attributes.clear();
 

@@ -81,7 +81,6 @@ namespace squadt {
 
       void new_project::build() {
         wxBoxSizer* s = new wxBoxSizer(wxVERTICAL);
-        wxTreeEvent e;
 
         /* Prepare sizers */
         screen0                   = new wxBoxSizer(wxVERTICAL);

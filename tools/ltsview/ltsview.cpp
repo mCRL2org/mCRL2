@@ -268,10 +268,7 @@ void LTSView::openFile(string fileName)
         "Could not load file " + fileName);
     return;
   }
-  if (lts != NULL)
-  {
-    delete lts;
-  }
+  delete lts;
   lts = newlts;
 
   mainFrame->updateProgressDialog(17,"Ranking states");
