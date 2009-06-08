@@ -327,14 +327,14 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
        the context
  */
 
-static bool gsIsOpIdNumericUpCast(ATermAppl Term);
+static bool gsIsOpIdNumericUpCast(ATermAppl DataExpr);
 //Ret: DataExpr is an operation identifier for a numeric upcast
 
-static bool gsIsOpIdPrefix(ATermAppl Term);
-//Ret: DataExpr is a prefix operation identifier
+static bool gsIsOpIdPrefix(ATermAppl DataExpr, int ArgsLength);
+//Ret: DataExpr is a prefix operation identifier and ArgsLength == 1
 
-static bool gsIsOpIdInfix(ATermAppl Term);
-//Ret: DataExpr is an infix operation identifier
+static bool gsIsOpIdInfix(ATermAppl DataExpr, int ArgsLength);
+//Ret: DataExpr is an infix operation identifier and ArgsLength == 2
 
 static int gsPrecOpIdPrefix();
 //Ret: Precedence of prefix operators
@@ -378,9 +378,9 @@ inline static void PRINT_FUNC(dbg_prints)(const char *Value)
   assert(false);
 #endif
 #if defined(PRINT_C)
-//  if (gsDebug) fprintf(stderr, Value);
+//  if (gsDebug) fprintf(stderr, "%s\n", Value);
 #elif defined(PRINT_CXX)
-//  if (gsDebug) std::cerr << Value;
+//  if (gsDebug) std::cerr << Value << std::endl;
 #endif
 }
 
@@ -1278,14 +1278,14 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(dbg_prints)("printing upcast expression\n");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
           pp_format, ShowSorts, PrecLevel);
-      } else if (gsIsOpIdPrefix(Head) && ArgsLength == 1) {
+      } else if (gsIsOpIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
           pp_format, ShowSorts, gsPrecOpIdPrefix());
-      } else if (gsIsOpIdInfix(Head) && ArgsLength == 2) {
+      } else if (gsIsOpIdInfix(Head, ArgsLength)) {
         //print infix expression
         PRINT_FUNC(dbg_prints)("printing infix expression\n");
         ATermAppl HeadName = ATAgetArgument(Head, 0);
@@ -2059,34 +2059,30 @@ bool gsHasConsistentContextList(const ATermTable DataVarDecls,
   return Result;
 }
 
-bool gsIsOpIdNumericUpCast(ATermAppl Term)
+bool gsIsOpIdNumericUpCast(ATermAppl DataExpr)
 {
-  if (!gsIsOpId(Term)) {
+  if (!gsIsOpId(DataExpr)) {
     return false;
   }
   return
-    (Term == gsMakeOpIdPos2Nat())  ||
-    (Term == gsMakeOpIdPos2Int())  ||
-    (Term == gsMakeOpIdPos2Real()) ||
-    (Term == gsMakeOpIdNat2Int())  ||
-    (Term == gsMakeOpIdNat2Real()) ||
-    (Term == gsMakeOpIdInt2Real())
+    (DataExpr == gsMakeOpIdPos2Nat())  ||
+    (DataExpr == gsMakeOpIdPos2Int())  ||
+    (DataExpr == gsMakeOpIdPos2Real()) ||
+    (DataExpr == gsMakeOpIdNat2Int())  ||
+    (DataExpr == gsMakeOpIdNat2Real()) ||
+    (DataExpr == gsMakeOpIdInt2Real())
     ;
 }
 
-bool gsIsOpIdPrefix(ATermAppl Term)
+bool gsIsOpIdPrefix(ATermAppl DataExpr, int ArgsLength)
 {
-  if (!gsIsOpId(Term)) {
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  ATermAppl TermSort = ATAgetArgument(Term, 1);
-  if (!gsIsSortArrow(TermSort)) {
+  if (ArgsLength != 1) {
     return false;
   }
-  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 1) {
-    return false;
-  }
-  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  ATermAppl OpIdName = ATAgetArgument(DataExpr, 0);
   return
      (OpIdName == gsMakeOpIdNameNot())      ||
      (OpIdName == gsMakeOpIdNameNeg())      ||
@@ -2094,19 +2090,15 @@ bool gsIsOpIdPrefix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameSetCompl());
 }
 
-bool gsIsOpIdInfix(ATermAppl Term)
+bool gsIsOpIdInfix(ATermAppl DataExpr, int ArgsLength)
 {
-  if (!gsIsOpId(Term)) {
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  ATermAppl TermSort = ATAgetArgument(Term, 1);
-  if (!gsIsSortArrow(TermSort)) {
+  if (ArgsLength != 2) {
     return false;
   }
-  if (ATgetLength(ATLgetArgument(TermSort, 0)) != 2) {
-    return false;
-  }
-  ATermAppl OpIdName = ATAgetArgument(Term, 0);
+  ATermAppl OpIdName = ATAgetArgument(DataExpr, 0);
   return
      (OpIdName == gsMakeOpIdNameImp())          ||
      (OpIdName == gsMakeOpIdNameAnd())          ||
@@ -2129,7 +2121,7 @@ bool gsIsOpIdInfix(ATermAppl Term)
      (OpIdName == gsMakeOpIdNameSubt())         ||
      (OpIdName == gsMakeOpIdNameSetUnion())     ||
      (OpIdName == gsMakeOpIdNameSetDiff())      ||
-     (OpIdName == gsMakeOpIdNameBagJoin())     ||
+     (OpIdName == gsMakeOpIdNameBagJoin())      ||
      (OpIdName == gsMakeOpIdNameBagDiff())      ||
      (OpIdName == gsMakeOpIdNameDiv())          ||
      (OpIdName == gsMakeOpIdNameMod())          ||
