@@ -214,8 +214,6 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
       {
         mcrl2::lps::specification s;
         lts_extra ext;
-        lts_dot_options extdot;
-        string fn;
         if ( !lts_opts.outinfo )
         {
           generic_lts->remove_state_values();
@@ -226,7 +224,8 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
           ext = lts_extra(&s);
         } else if ( lts_opts.outformat == lts_dot )
         {
-          fn = lts_filename;
+          string fn = lts_filename;
+          lts_dot_options extdot;
           extdot.name = &fn;
           extdot.print_states = lts_opts.outinfo;
           ext = lts_extra(extdot);

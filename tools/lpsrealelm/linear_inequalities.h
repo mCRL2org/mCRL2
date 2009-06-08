@@ -1421,7 +1421,6 @@ atermpp::set < variable >  gauss_elimination(
 
   // Now find out whether there are variables that occur in an equality, so
   // that we can perform gauss elimination.
-  variable_list eliminated_variables;
   for(Variable_iterator i = variables_begin; i != variables_end; ++i)
   { unsigned int j;
     for(j=0; j<resulting_equalities.size(); ++j)

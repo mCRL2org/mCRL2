@@ -141,6 +141,7 @@ grape_label_dialog::grape_label_dialog()
 
 grape_label_dialog::~grape_label_dialog()
 {
+  delete m_label;
 }
 
 void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )

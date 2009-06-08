@@ -914,7 +914,6 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
       // occur in the condition or in the effect.
-      context_type nextstate_context_for_this_summand;
       for(std::vector < std::vector < linear_inequality > >::const_iterator
                 nextstate_combination = i->nextstate_context_combinations_begin();
                 nextstate_combination != i->nextstate_context_combinations_end();
@@ -998,7 +997,6 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
     
     // Construct the real time condition for summand in terms of xi variables.
 
-    context_type nextstate_context_for_this_summand;
     atermpp::vector < data_expression_list >::const_iterator
                          nextstate_value=i->nextstate_value_combinations_begin();
 
