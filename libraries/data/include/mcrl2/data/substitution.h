@@ -438,14 +438,14 @@ namespace mcrl2 {
     /// \brief Utility function for creating a map_substitution_adapter.
     template <typename VariableContainer, typename ExpressionContainer, typename MapContainer >
     map_substitution< MapContainer >
-    make_map_substitution(const VariableContainer& vc, const ExpressionContainer ec)
+    make_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
     {
       return map_substitution< MapContainer >(vc, ec);
     }
   
     template <typename VariableContainer, typename ExpressionContainer >
     map_substitution< std::map< typename VariableContainer::value_type, typename ExpressionContainer::value_type > >
-    make_map_substitution(const VariableContainer& vc, const ExpressionContainer ec)
+    make_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
     {
       return map_substitution< std::map< typename VariableContainer::value_type, typename ExpressionContainer::value_type > >(vc, ec);
     }
