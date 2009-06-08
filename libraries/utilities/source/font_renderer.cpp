@@ -103,12 +103,12 @@ namespace mcrl2 {
       }
 
       void font_renderer::draw_text(
-        const std::string s,
+        const std::string& s,
         const double x,
         const double y,
         const double scale,
-        const Alignment align_horizontal,
-        const Alignment align_vertical)
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical)
       {
         // Render text at the specified location
         double xSLft;
@@ -192,12 +192,12 @@ namespace mcrl2 {
       }
 
       void font_renderer::draw_bounding_box(
-        const std::string s,
+        const std::string& s,
         const double x,
         const double y,
         const double scale,
-        const Alignment align_horizontal,
-        const Alignment align_vertical,
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical,
         const bool draw_border)
       {
         // Render text's bb at the specified location
@@ -271,7 +271,7 @@ namespace mcrl2 {
       }
 
       void font_renderer::draw_cropped_text(
-        const std::string s,
+        const std::string& s,
         const double x,
         const double y,
         const double xLft,
@@ -279,21 +279,21 @@ namespace mcrl2 {
         const double yTop,
         const double yBot,
         const double scale,
-        const Alignment align_horizontal,
-        const Alignment align_vertical)
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical)
       {
         // Crop text to fit into bounding box.
       }
 
       void font_renderer::draw_wrapped_text(
-        const std::string s,
+        const std::string& s,
         const double xLft,
         const double xRgt,
         const double yTop,
         const double yBot,
         const double scale,
-        const Alignment align_horizontal,
-        const Alignment align_vertical)
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical)
       {
         // Wrapped text to fit into bounding box.
 

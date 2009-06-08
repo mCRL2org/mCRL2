@@ -85,12 +85,12 @@ namespace mcrl2
           /// \post The text is rendered at the specified location, with the
           ///       specified alignments and at the specified scale.
           void draw_text(
-            const std::string s,
+            const std::string& s,
             const double x,
             const double y,
             const double scale,
-            const Alignment align_horizontal,
-            const Alignment align_vertical
+            const Alignment& align_horizontal,
+            const Alignment& align_vertical
           );
 
           /// \brief Renders a bounding box for string s.
@@ -107,12 +107,12 @@ namespace mcrl2
           ///
           /// \post A bounding box for the given string is drawn.
           void draw_bounding_box(
-            const std::string s,
+            const std::string& s,
             const double x,
             const double y,
             const double scale,
-            const Alignment align_horizontal,
-            const Alignment align_vertical,
+            const Alignment& align_horizontal,
+            const Alignment& align_vertical,
             const bool draw_border
           );
 
@@ -136,7 +136,7 @@ namespace mcrl2
           ///       To fit within the bounding box defined by xLft, xRgt, yBot and
           ///       yTop.
           void draw_cropped_text(
-            const std::string s,
+            const std::string& s,
             const double x,
             const double y,
             const double xLft,
@@ -144,8 +144,8 @@ namespace mcrl2
             const double yTop,
             const double yBot,
             const double scale,
-            const Alignment align_horizontal,
-            const Alignment align_vertical
+            const Alignment& align_horizontal,
+            const Alignment& align_vertical
           );
 
           /// \brief Renders the string s wrapped into a bounding box.
@@ -166,14 +166,14 @@ namespace mcrl2
           ///       To fit within the bounding box defined by xLft, xRgt, yBot and
           ///       yTop.
           void draw_wrapped_text(
-            const std::string s,
+            const std::string& s,
             const double xLft,
             const double xRgt,
             const double yTop,
             const double yBot,
             const double scale,
-            const Alignment align_horizontal,
-            const Alignment align_vertical
+            const Alignment& align_horizontal,
+            const Alignment& align_vertical
           );
 
           private:
