@@ -440,6 +440,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 
                                 info.rewr_obj->setSubstitutionInternal(var,term_rf);
                                 ATerm new_expr = info.rewr_obj->rewriteInternal(e.expr);
+
                                 if ( !ATisEqual(new_expr,info.rewr_false) )
                                 {
                                         fs_push(ATgetNext(ATreverse(uvars)),ATinsert(e.vals,(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) var,(ATerm) term_rf)),new_expr);
@@ -575,13 +576,15 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool_::false_());
         ATprotect(&info.rewr_false);
 
+        info.eqs = ATindexedSetCreate(100,50);
+
         if ( (info.rewr_obj->getStrategy() == GS_REWR_INNER) || (info.rewr_obj->getStrategy() == GS_REWR_INNER_P) )
         {
           info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
           info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
-          info.opidAnd = info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd());
+          info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool_::and_());
           ATprotect(&info.opidAnd);
-          info.eqs = ATindexedSetCreate(100,50);
+
           for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
           {
             if (r.front().name() == "==")
@@ -593,15 +596,15 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         } else {
           info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
           info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
-          info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(gsMakeOpIdAnd()),0);
+          info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool_::and_()),0);
           ATprotect(&info.opidAnd);
-          info.eqs = ATindexedSetCreate(100,50);
+
           for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
           {
             if (r.front().name() == "==")
             {
               ATbool b;
-              ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(r.front()),&b);
+              ATindexedSetPut(info.eqs,ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(r.front()),0),&b);
             }
           }
         }

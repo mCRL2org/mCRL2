@@ -11,6 +11,8 @@
 
 #include "mcrl2/lps/specification.h"
 
+#include <deque>
+
 //Enumerator
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
@@ -18,73 +20,14 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/suminst.h"
 
+#include "mcrl2/atermpp/set_operations.h"
+
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 
 namespace mcrl2 {
 
 namespace lps {
-
-/////////////////////////////////////////////////////////////////
-// Helper functions
-/////
-
-///\return the list of all date_variables in vl, that are not in rl
-static
-variable_list filter(const variable_list& vl, const std::set< variable >& rl)
-{
-  variable_list result;
-  for (variable_list::const_iterator i = vl.begin(); i != vl.end(); ++i)
-  {
-    if (rl.find(*i) == rl.end())
-    {
-      result = push_front(result, *i);
-    }
-  }
-
-  return result;
-}
-
-///\pre fl is a list of constructors
-///\return a list of finite sorts in sl
-static
-std::set< sort_expression > get_finite_sorts(const data::data_specification& d, const sort_expression_list& sl)
-{
-  std::set< sort_expression > result;
-  for(sort_expression_list::iterator i = sl.begin(); i != sl.end(); ++i)
-  {
-    if (i->is_alias()) {
-      alias ai(*i);
-
-      if (d.is_certainly_finite(ai.reference()))
-      {
-        result.insert(ai.name());
-        result.insert(ai.reference());
-      }
-    }
-    else if (d.is_certainly_finite(*i))
-    {
-      result.insert(*i);
-    }
-  }
-  return result;
-}
-
-///\return a list of all variables of a sort that occurs in sl
-static
-std::set< variable > get_variables(const variable_list& vl, std::set< sort_expression > const& sl)
-{
-  std::set< variable > result;
-  for (variable_list::iterator i = vl.begin(); i != vl.end(); ++i)
-  {
-    if (sl.find(i->sort()) != sl.end())
-    {
-      result.insert(*i);
-    }
-  }
-  return result;
-}
-
 
 ////////////////////////////////////////////////////////////////
 // Declustering
@@ -100,19 +43,23 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
 
   gsVerboseMsg("initialization...");
 
-  std::set< variable > variables; // The variables we need to consider in instantiating
-  if (o.finite_only)
+  std::deque< variable > variables; // The variables we need to consider in instantiating
+
+  // partition such that variables with finite sort precede those that do not
+  for (atermpp::term_list_iterator< variable > i = summand_.summation_variables().begin();
+                                               i != summand_.summation_variables().end(); ++i)
   {
-    // Only consider finite variables
-    variables = get_variables(summand_.summation_variables(),
-                get_finite_sorts(specification.data(), make_sort_expression_list(specification.data().sorts())));
-  }
-  else
-  {
-    variables = data::convert< std::set< variable > >(summand_.summation_variables());
+    if (specification.data().is_certainly_finite(i->sort()))
+    {
+      variables.push_front(*i);
+    }
+    else if (!o.finite_only)
+    {
+      variables.push_back(*i);
+    }
   }
 
-  if (variables.size() == 0)
+  if (variables.empty())
   {
     // Nothing to be done, return original summand
     gsVerboseMsg("No summation variables in this summand\n");
@@ -122,30 +69,30 @@ void instantiate_summand(const lps::specification& specification, const lps::sum
   {
     // List of variables with the instantiated variables removed (can be done upfront, which is more efficient,
     // because we only need to calculate it once.
-    variable_list new_vars = filter(summand_.summation_variables(), variables);
+    variable_list new_vars;
+
+    if (o.finite_only)
+    {
+      new_vars = term_list_difference(summand_.summation_variables(), convert< variable_list >(variables));
+    }
 
     // Solutions
     gsVerboseMsg("processing...");
 
     try {
-      for (classic_enumerator< > i(enumerator_factory.make(variables, summand_.condition())); i != classic_enumerator<>(); ++i)
+      gsDebugMsg("Enumerating condition: %s\n", data::pp(summand_.condition()).c_str());
+
+      for (classic_enumerator< > i(enumerator_factory.make(boost::make_iterator_range(variables), summand_.condition())); i != classic_enumerator<>(); ++i)
       {
-        assignment_list substitutions;
+        gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
 
-        // Translate internal rewriter solution to lps assignment_list
-        for (classic_enumerator<>::substitution_type::const_iterator s(i->begin()); s != i->end(); ++s)
-        {
-          // Substitution to be performed
-          substitutions = push_front(substitutions, assignment(s->first, s->second));
-        }
-        gsDebugMsg("substitutions: %s\n", substitutions.to_string().c_str());
-
+        // TODO requires LPS level substitution / replace functionality 
         summand s = summand(new_vars,
-                substitute(assignment_list_substitution(substitutions), summand_.condition()),
+                (*i)(summand_.condition()),
                 summand_.is_delta(),
-                substitute(assignment_list_substitution(substitutions), summand_.actions()),
-                substitute(assignment_list_substitution(substitutions), summand_.time()),
-                substitute(assignment_list_substitution(substitutions), summand_.assignments())
+                replace_variables(summand_.actions(), *i),
+                (*i)(summand_.time()),
+                replace_variables(summand_.assignments(), *i)
                 );
 
         result = push_front(result, s);
