@@ -104,8 +104,18 @@ namespace mcrl2 {
 
             return atermpp::aterm_appl(atermpp::aterm_appl(e).function(), new_arguments.begin(), new_arguments.end());
           }
+          else if (e.type() == AT_LIST)
+          {
+            return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+          }
 
           return e;
+        }
+
+        // \deprecated exists only for backwards compatibility
+        atermpp::aterm apply_list(atermpp::aterm e)
+        {
+          return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
         }
 
         template < typename Expression >
