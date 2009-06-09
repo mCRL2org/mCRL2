@@ -811,8 +811,8 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
     cerr << "Process diagram " << diagram_id.ToAscii() << " has no name." << endl;
     return false;
   }
-  // parse process diagram name
-  if (!gsIsUserIdentifier(diagram_name.ToAscii()))
+  // parse process diagram name  
+  if (!gsIsUserIdentifier(std::string(diagram_name.fn_str())))
   {
     // ERROR: process name is not an identifier
     cerr << "Process diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
@@ -1978,7 +1978,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
     return false;
   }
   // parse architecture diagram name
-  if (!gsIsUserIdentifier(diagram_name.ToAscii()))
+  if (!gsIsUserIdentifier(std::string(diagram_name.fn_str())))
   {
     // ERROR: architecture name is not an identifier
     cerr << "Architecture diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
@@ -2295,7 +2295,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
         return false;
       }
       // parse channel communication name
-      if (!gsIsUserIdentifier(channel_communication_visible_name.ToAscii()))
+      if (!gsIsUserIdentifier(std::string(channel_communication_visible_name.fn_str())))
       {
         // ERROR: channel communication name is not an identifier
         cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2445,7 +2445,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
         return false;
       }
       // parse channel name
-      if (!gsIsUserIdentifier(channel_name.ToAscii()))
+      if (!gsIsUserIdentifier(std::string(channel_name.fn_str())))
       {
         // ERROR: channel communication name is not an identifier
         cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2459,7 +2459,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
       if (!channel_rename.IsEmpty())
       {
         // parse channel name
-        if (!gsIsUserIdentifier(channel_rename.ToAscii()))
+        if (!gsIsUserIdentifier(std::string(channel_rename.fn_str())))
         {
           // ERROR: channel rename is not an identifier
           cerr << "Architecture diagram " << diagram_name.ToAscii()

@@ -17,9 +17,11 @@
 
 #include "grape_ids.h"
 #include "labeldialog.h"
+#include "../../mcrl2gen/mcrl2gen_validate.h"
 
 
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
 
 grape_label_dialog::grape_label_dialog( const label &p_label )
 : wxDialog( 0, wxID_ANY, _T( "Edit label" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
@@ -141,14 +143,6 @@ grape_label_dialog::grape_label_dialog()
 
 grape_label_dialog::~grape_label_dialog()
 {
-  delete m_label;
-  delete m_var_decls_input;
-  delete m_condition_input;
-  delete m_multiaction_input;
-  delete m_timestamp_input;
-  delete m_var_updates_input;
-  delete m_preview_text;
-  delete m_statusbar;
 }
 
 void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )
@@ -209,15 +203,55 @@ void grape_label_dialog::update_preview()
 
 bool grape_label_dialog::show_modal( label &p_label )
 {
-  int result = ShowModal();
-  if ( result == wxID_CANCEL )
+  bool is_valid = false;
+  while (!is_valid)
   {
-    return false;
+    int result = ShowModal();
+    if ( result == wxID_CANCEL )
+    {
+      return false;
+    }
+
+    is_valid = true;
+    update_preview();
+    p_label = *m_label;
+    
+    //check label variable declarations
+    if (p_label.get_declarations_text() != m_var_decls_input->GetValue())
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The variable declaration invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label condition
+    if ((!m_condition_input->GetValue().IsEmpty()) && ( parse_data_expr(p_label.get_condition()) == 0 ))
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The condition is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+        
+    //check label multiactions
+    if (p_label.get_actions_text() != m_multiaction_input->GetValue())
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The multiaction is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label timestamp
+    if ((!m_timestamp_input->GetValue().IsEmpty()) && ( parse_sort_expr(p_label.get_timestamp()) == 0 ))
+    {      
+      is_valid = false;      
+      wxMessageBox( _T("The timestamp is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }
+    
+    //check label variable updates
+    if (p_label.get_variable_updates_text() != m_var_updates_input->GetValue())
+    {
+      is_valid = false;      
+      wxMessageBox( _T("The variable update is invalid."), _T("error"), wxOK | wxICON_ERROR );
+    }   
+
   }
-
-  update_preview();
-
-  p_label = *m_label;
 
   return true;
 }

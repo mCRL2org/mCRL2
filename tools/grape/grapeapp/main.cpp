@@ -16,6 +16,7 @@
 
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/input_tool.h"
 
 #include <iostream>
 
@@ -28,17 +29,16 @@
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
 using namespace mcrl2::core;
+using namespace mcrl2::utilities::tools;
 
-class grape_app: public mcrl2::utilities::wx::tool< grape_app >
-{
-  friend class mcrl2::utilities::wx::tool< grape_app >;
+class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
+{  
+  friend class mcrl2::utilities::wx::tool< grape_app, input_tool >;
 
   private:
 
     // the filename is the first parameter
     wxString    filename;
-
-    bool parse_command_line(int& argc, wxChar** argv);
 
     std::vector< std::string > developers() {
       static char const* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
@@ -47,49 +47,31 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app >
       return std::vector< std::string >(&developer_names[0], &developer_names[7]);
     }
 
+    std::vector< std::string > documenters() {
+      return std::vector< std::string >(1, "Hans Poppelaars");
+    }
+
   public:
-
-    grape_app() : mcrl2::utilities::wx::tool< grape_app >("GraPE",
+    grape_app() : mcrl2::utilities::wx::tool< grape_app, input_tool >("GraPE",    
+                  "graphical editing environment for mCRL2 process specifications",
                   "Graphical Process Editor for mCRL2.",
-                  developers(), std::vector< std::string >(1, "Hans Poppelaars")) {
+                  "Graphical editing environment for mCRL2 process specifications. "
+                  "If INFILE is supplied, it is loaded as a GraPE specification.",
+                  developers(),
+                  "",
+                  documenters()) { 
     }
 
-    bool DoInit();
-};
+  bool run()
+  {
+    grape_frame *frame = new grape_frame( filename );
+    SetTopWindow(frame);
 
-bool grape_app::DoInit()
-{
-  grape_frame *frame = new grape_frame( filename );
-  SetTopWindow(frame);
+    wxInitAllImageHandlers();
 
-  wxInitAllImageHandlers();
-
-  return true;
-}
-
-bool grape_app::parse_command_line(int& argc, wxChar** argv) {
-  using namespace mcrl2::utilities;
-
-  interface_description clinterface(std::string(wxString(static_cast< wxChar** > (argv)[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR,
-      "graphical editing environment for mCRL2 process specifications",
-      "[OPTION]... [INFILE]",
-      "Graphical editing environment for mCRL2 process specifications. "
-      "If INFILE is supplied, it is loaded as a GraPE specification.");
-
-  command_line_parser parser(clinterface, argc, static_cast< wxChar** > (argv));
-
-  if (parser.continue_execution()) {
-    if (0 < parser.arguments.size()) {
-      filename = wxString(parser.arguments[0].c_str(), wxConvLocal);
-    }
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
+    return true;
   }
-
-  return parser.continue_execution();
-}
+};
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
