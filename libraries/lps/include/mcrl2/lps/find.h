@@ -40,6 +40,17 @@ namespace mcrl2 {
           }
         }
 
+        void operator()(multi_action const& s)
+        {
+          (*this)(s.time());
+          (*this)(s.actions());
+        }
+
+        void operator()(deadlock const& s)
+        {
+          (*this)(s.time());
+        }
+
         template < typename T >
         void operator()(atermpp::term_list< T > const& l)
         {

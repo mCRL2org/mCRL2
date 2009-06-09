@@ -13,13 +13,17 @@
 #define MCRL2_LPS_DETAIL_LPS_ALGORITHM_H
 
 #include <algorithm>
+#include <iterator>
 #include <set>
 #include <vector>
+#include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/data/find.h"  
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"  
+#include "mcrl2/lps/find.h"  
 #include "mcrl2/lps/rewrite.h"  
 #include "mcrl2/lps/substitute.h"  
 #include "mcrl2/lps/remove_parameters.h"  
@@ -71,6 +75,37 @@ namespace detail {
      
       /// \brief If true, verbose output is written
       bool m_verbose;
+
+      template <typename OutIter>
+      void sumelm_find_variables(const action_summand& s, OutIter result) const
+      {
+        data::find_all_free_variables(s.condition(), result);
+        lps::find_all_free_variables(s.multi_action(), result);
+        data::find_all_free_variables(s.assignments(), result);
+      }
+    
+      template <typename OutIter>
+      void sumelm_find_variables(const deadlock_summand& s, OutIter result) const
+      {
+        data::find_all_free_variables(s.condition(), result);
+        lps::find_all_free_variables(s.deadlock(), result);
+      }
+    
+      template <typename SummandType>
+      void remove_unused_summand_variables(SummandType& summand_)
+      {
+        data::variable_vector new_summation_variables;
+    
+        std::set<data::variable> occurring_vars;
+        sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
+    
+        std::set<data::variable> summation_variables(data::convert<std::set<data::variable> >(summand_.summation_variables()));
+        std::set_intersection(summation_variables.begin(), summation_variables.end(),
+                            occurring_vars.begin(), occurring_vars.end(),
+                            std::inserter(new_summation_variables, new_summation_variables.end()));
+    
+        summand_.summation_variables() = data::convert<data::variable_list>(new_summation_variables);
+      }
 
     public:
       /// \brief Constructor
@@ -165,6 +200,16 @@ namespace detail {
 
         deadlock_summand_vector& w = m_spec.process().deadlock_summands();
         w.erase(std::remove_if(w.begin(), w.end(), is_trivial_summand()), w.end());
+      }
+
+      /// \brief Removes unused summand variables.
+      void remove_unused_summand_variables()
+      {
+        action_summand_vector& v = m_spec.process().action_summands();
+        std::for_each(v.begin(), v.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<action_summand>, this, _1));
+
+        deadlock_summand_vector& w = m_spec.process().deadlock_summands();
+        std::for_each(w.begin(), w.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<deadlock_summand>, this, _1));
       }
   };
 

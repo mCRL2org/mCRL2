@@ -11,6 +11,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite lps
     :
+      [ run lps_algorithm_test.cpp ]
       [ run remove_parameters_test.cpp ]
       [ run specification_property_map_test.cpp ]
       [ run pp_test.cpp ]
