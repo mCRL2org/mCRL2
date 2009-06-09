@@ -49,7 +49,7 @@
 #include "mcrl2/data/enumerator.h"
 
 //Boolean equation systems
-#include "bes_deprecated.h"
+#include "mcrl2/pbes/bes_deprecated.h"
 #include "mcrl2/pbes/pbesrewr.h"
 
 using namespace std;
