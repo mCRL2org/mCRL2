@@ -24,6 +24,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -371,6 +372,7 @@ namespace lps {
     copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data());
     ATermAppl lps_spec = specification_to_aterm(copy_specification);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
+    result           = data::detail::internal_format_conversion(result);
     return action_rename_specification(result);
   }
 
