@@ -110,9 +110,7 @@ void visualchannel_communication::draw( void )
     
     // draw text 
     grape_glcanvas::get_font_renderer()->draw_text(std::string(name_to.fn_str()), x + 0.05f*cos(empty_rotation), y + 0.025f + 0.05f*sin(empty_rotation), 0.0015f, align_horizontal, align_vertical);   
-    if (rotation != 0) {
-      delete [] rotation;
-    }
+    delete [] rotation;
   }
 }
 

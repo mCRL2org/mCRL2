@@ -363,6 +363,7 @@ grape_event_detach_channel_communication::grape_event_detach_channel_communicati
 
 grape_event_detach_channel_communication::~grape_event_detach_channel_communication(  void  )
 {
+  delete m_remove_event;
 }
 
 bool grape_event_detach_channel_communication::Do(  void  )

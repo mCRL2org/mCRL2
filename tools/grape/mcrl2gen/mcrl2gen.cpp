@@ -525,7 +525,7 @@ arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode *p_doc_
             if (!found)
             {
               // get channel communication rename
-              wxString visible_channel_communication_name = get_child_value(channel_communication_child, _T("rename"));
+              wxString visible_channel_communication_name = get_child_value(channel_communication_child, _T("name"));
               renamed vis_ren;
               vis_ren.m_old_name = p_communications[i].m_name;
               vis_ren.m_new.set_name( visible_channel_communication_name );
@@ -857,7 +857,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     return false;
   }
 
-  //cerr << "mCRL2 conversion successful." << endl;
+  cerr << "mCRL2 conversion successful." << endl;
   return true;
 }
 
@@ -1026,7 +1026,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     return false;
   }
 
-  //cerr << "mCRL2 conversion successful." << endl;
+  cerr << "mCRL2 conversion successful." << endl;
   return true;
 }
 
@@ -2143,18 +2143,16 @@ void grape::mcrl2gen::convert_spaces_node(wxXmlNode *p_node)
   wxString name = p_node->GetNodeContent();
   name.Replace(_T(" "), _T("_"));
   
-  //wxXmlNode *val = p_node->GetChildren();
-  //val = new wxXmlNode(p_node, wxXML_TEXT_NODE, _T("value"), name);
-
   wxXmlNode *val = p_node->GetChildren();
-  val->DeleteProperty(_T("value"));
-  val->AddProperty(_T("value"), name);
+  if (val)
+  {
+    val->SetContent(name);
+  }
 }
 
 void grape::mcrl2gen::convert_spaces(wxXmlDocument &p_spec)
 {
   wxXmlNode *root_node = p_spec.GetRoot();
-  wxString object_name;
 
   wxXmlNode *procs = get_child(root_node, _T("processdiagramlist"));
   if(procs != 0)

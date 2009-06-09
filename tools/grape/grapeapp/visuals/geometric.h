@@ -127,7 +127,7 @@ namespace grape
      * @param p_color draw color
      * @param p_selected selection property of the object
      */
-    void set_color(const color p_c, bool p_selected);
+    void set_color(const color &p_c, bool p_selected);
 
     /**
      * Function to see if a nearest the endpoint of a line or (if false is returned) nearest the endpoint of the line.
@@ -274,7 +274,7 @@ namespace grape
      * @param p_end The end coordinate of the to be drawn line.
      * @param A flag indicating whether the object is selected.
      */
-    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color = g_color_black, const bool is_dashed = false );
+    void draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color &p_color = g_color_black, const bool is_dashed = false );
 
     /**
      * Initial designator (arrow) draw function.
@@ -365,7 +365,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_color The intended fill color of the rectangle.
      */
-    void draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color );
+    void draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color );
 
     /**
      * Line rectangle draw function.
@@ -375,7 +375,7 @@ namespace grape
      * @param p_selected A flag indicating whether the object is selected.
      * @param p_color The intended color of the edge of the rectangle.
      */
-    void draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color );
+    void draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color );
 
     /**
      * Cross draw function.

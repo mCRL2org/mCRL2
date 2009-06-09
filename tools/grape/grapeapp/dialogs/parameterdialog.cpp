@@ -87,6 +87,7 @@ grape_parameter_dialog::grape_parameter_dialog()
 
 grape_parameter_dialog::~grape_parameter_dialog()
 {
+  delete m_grid;
 }
 
 bool grape_parameter_dialog::show_modal()

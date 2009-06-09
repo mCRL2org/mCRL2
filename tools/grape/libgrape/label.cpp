@@ -235,7 +235,6 @@ void label::set_declarations_text( wxString p_declarations )
   wxString text = p_declarations; 
   text.Trim(true); text.Trim(false);
   wxString sub_text; 
-  wxString text_out; 
   int index = -1;
   
   // loop until we parsed all declarations

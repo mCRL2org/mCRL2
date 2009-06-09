@@ -17,6 +17,8 @@ preamble::preamble( void )
 {
   m_parameter_declarations_list.Empty();
   m_local_variable_declarations_list.Empty();
+  m_width = 0;
+  m_height = 0;
 }
 
 preamble::preamble( const preamble &p_preamble )

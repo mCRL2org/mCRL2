@@ -49,35 +49,6 @@
                         </label>
                     </nonterminatingtransition>
                     <nonterminatingtransition>
-                        <id>62</id>
-                        <coord>
-                            <x>1.366667</x>
-                            <y>-1.053333</y>
-                        </coord>
-                        <size>
-                            <width>0.250000</width>
-                            <height>0.250000</height>
-                        </size>
-                        <linetype>straight</linetype>
-                        <breakpointlist/>
-                        <from>48</from>
-                        <to>46</to>
-                        <label>
-                            <variabledeclarations/>
-                            <condition/>
-                            <actions>
-                                <action>
-                                    <name>s5</name>
-                                    <param>b</param>
-                                </action>
-                            </actions>
-                            <timestamp/>
-                            <variableupdates>
-                                <variableupdate>b:=!b</variableupdate>
-                            </variableupdates>
-                        </label>
-                    </nonterminatingtransition>
-                    <nonterminatingtransition>
                         <id>60</id>
                         <coord>
                             <x>1.238333</x>
@@ -139,8 +110,8 @@
                     <nonterminatingtransition>
                         <id>58</id>
                         <coord>
-                            <x>0.503333</x>
-                            <y>-0.966667</y>
+                            <x>0.476667</x>
+                            <y>-0.870000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -171,8 +142,8 @@
                     <nonterminatingtransition>
                         <id>57</id>
                         <coord>
-                            <x>0.300000</x>
-                            <y>-0.940000</y>
+                            <x>0.746667</x>
+                            <y>-1.080000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -195,6 +166,35 @@
                             <variableupdates/>
                         </label>
                     </nonterminatingtransition>
+                    <nonterminatingtransition>
+                        <id>62</id>
+                        <coord>
+                            <x>1.366667</x>
+                            <y>-1.053333</y>
+                        </coord>
+                        <size>
+                            <width>0.250000</width>
+                            <height>0.250000</height>
+                        </size>
+                        <linetype>straight</linetype>
+                        <breakpointlist/>
+                        <from>48</from>
+                        <to>46</to>
+                        <label>
+                            <variabledeclarations/>
+                            <condition/>
+                            <actions>
+                                <action>
+                                    <name>s5</name>
+                                    <param>b</param>
+                                </action>
+                            </actions>
+                            <timestamp/>
+                            <variableupdates>
+                                <variableupdate>b:=!b</variableupdate>
+                            </variableupdates>
+                        </label>
+                    </nonterminatingtransition>
                 </nonterminatingtransitionlist>
                 <terminatingtransitionlist/>
                 <statelist>
@@ -209,18 +209,6 @@
                             <height>0.200000</height>
                         </size>
                         <name>receive failed</name>
-                    </state>
-                    <state>
-                        <id>48</id>
-                        <coord>
-                            <x>1.968334</x>
-                            <y>-1.340000</y>
-                        </coord>
-                        <size>
-                            <width>0.613333</width>
-                            <height>0.200000</height>
-                        </size>
-                        <name>value transmitted</name>
                     </state>
                     <state>
                         <id>47</id>
@@ -245,6 +233,18 @@
                             <height>0.200000</height>
                         </size>
                         <name>idle</name>
+                    </state>
+                    <state>
+                        <id>48</id>
+                        <coord>
+                            <x>1.968334</x>
+                            <y>-1.340000</y>
+                        </coord>
+                        <size>
+                            <width>0.613333</width>
+                            <height>0.200000</height>
+                        </size>
+                        <name>value transmitted</name>
                     </state>
                 </statelist>
                 <referencestatelist/>
@@ -364,8 +364,8 @@
                     <nonterminatingtransition>
                         <id>80</id>
                         <coord>
-                            <x>1.683333</x>
-                            <y>-1.045000</y>
+                            <x>1.606667</x>
+                            <y>-1.043333</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -498,8 +498,8 @@
                     <nonterminatingtransition>
                         <id>73</id>
                         <coord>
-                            <x>1.028333</x>
-                            <y>-1.020000</y>
+                            <x>1.110000</x>
+                            <y>-0.900000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -525,8 +525,8 @@
                     <nonterminatingtransition>
                         <id>72</id>
                         <coord>
-                            <x>1.605833</x>
-                            <y>-1.106667</y>
+                            <x>1.536667</x>
+                            <y>-1.056667</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -551,8 +551,8 @@
                     <nonterminatingtransition>
                         <id>71</id>
                         <coord>
-                            <x>1.031667</x>
-                            <y>-1.356667</y>
+                            <x>1.030000</x>
+                            <y>-1.340000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -654,8 +654,8 @@
                     <state>
                         <id>66</id>
                         <coord>
-                            <x>1.590000</x>
-                            <y>-1.370000</y>
+                            <x>1.620000</x>
+                            <y>-1.333333</y>
                         </coord>
                         <size>
                             <width>0.510000</width>
@@ -930,11 +930,11 @@
                     <processreference>
                         <id>5</id>
                         <coord>
-                            <x>1.826667</x>
-                            <y>-0.780000</y>
+                            <x>1.345000</x>
+                            <y>-0.790000</y>
                         </coord>
                         <size>
-                            <width>0.613333</width>
+                            <width>0.590000</width>
                             <height>0.273333</height>
                         </size>
                         <name>K</name>
@@ -949,8 +949,8 @@
                     <processreference>
                         <id>6</id>
                         <coord>
-                            <x>2.698334</x>
-                            <y>-1.341667</y>
+                            <x>2.178334</x>
+                            <y>-1.315000</y>
                         </coord>
                         <size>
                             <width>0.456667</width>
@@ -970,8 +970,8 @@
                     <processreference>
                         <id>7</id>
                         <coord>
-                            <x>1.833333</x>
-                            <y>-1.921667</y>
+                            <x>1.363333</x>
+                            <y>-1.888334</y>
                         </coord>
                         <size>
                             <width>0.600000</width>
@@ -989,8 +989,8 @@
                     <processreference>
                         <id>8</id>
                         <coord>
-                            <x>0.880000</x>
-                            <y>-1.326667</y>
+                            <x>0.510000</x>
+                            <y>-1.323334</y>
                         </coord>
                         <size>
                             <width>0.440000</width>
@@ -1013,15 +1013,15 @@
                     <channel>
                         <id>35</id>
                         <coord>
-                            <x>1.533333</x>
-                            <y>-1.913334</y>
+                            <x>1.063333</x>
+                            <y>-1.880001</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
                         <channeltype>visible</channeltype>
-                        <rename>i</rename>
+                        <rename></rename>
                         <name>i</name>
                         <onreference>7</onreference>
                         <connectionlist/>
@@ -1029,15 +1029,15 @@
                     <channel>
                         <id>34</id>
                         <coord>
-                            <x>1.996667</x>
-                            <y>-0.643333</y>
+                            <x>1.526667</x>
+                            <y>-0.653333</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
                         <channeltype>visible</channeltype>
-                        <rename>i</rename>
+                        <rename></rename>
                         <name>i</name>
                         <onreference>5</onreference>
                         <connectionlist/>
@@ -1045,8 +1045,8 @@
                     <channel>
                         <id>9</id>
                         <coord>
-                            <x>1.520000</x>
-                            <y>-0.886667</y>
+                            <x>1.050001</x>
+                            <y>-0.896667</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1063,8 +1063,8 @@
                     <channel>
                         <id>10</id>
                         <coord>
-                            <x>2.133333</x>
-                            <y>-0.893333</y>
+                            <x>1.640000</x>
+                            <y>-0.903333</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1081,8 +1081,8 @@
                     <channel>
                         <id>12</id>
                         <coord>
-                            <x>2.470000</x>
-                            <y>-1.166667</y>
+                            <x>1.950000</x>
+                            <y>-1.140000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1099,8 +1099,8 @@
                     <channel>
                         <id>13</id>
                         <coord>
-                            <x>2.553334</x>
-                            <y>-1.546667</y>
+                            <x>2.033334</x>
+                            <y>-1.520000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1117,15 +1117,15 @@
                     <channel>
                         <id>14</id>
                         <coord>
-                            <x>2.823334</x>
-                            <y>-1.136667</y>
+                            <x>2.303334</x>
+                            <y>-1.110000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
                         <channeltype>visible</channeltype>
-                        <rename>s4</rename>
+                        <rename></rename>
                         <name>s4</name>
                         <onreference>6</onreference>
                         <connectionlist/>
@@ -1133,8 +1133,8 @@
                     <channel>
                         <id>15</id>
                         <coord>
-                            <x>2.133333</x>
-                            <y>-1.813333</y>
+                            <x>1.663333</x>
+                            <y>-1.780000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1151,8 +1151,8 @@
                     <channel>
                         <id>17</id>
                         <coord>
-                            <x>1.540000</x>
-                            <y>-1.783333</y>
+                            <x>1.070000</x>
+                            <y>-1.750000</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1169,8 +1169,8 @@
                     <channel>
                         <id>18</id>
                         <coord>
-                            <x>1.100000</x>
-                            <y>-1.500000</y>
+                            <x>0.730000</x>
+                            <y>-1.496667</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1187,8 +1187,8 @@
                     <channel>
                         <id>19</id>
                         <coord>
-                            <x>1.083333</x>
-                            <y>-1.126667</y>
+                            <x>0.713333</x>
+                            <y>-1.123334</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
@@ -1205,15 +1205,15 @@
                     <channel>
                         <id>20</id>
                         <coord>
-                            <x>0.660000</x>
-                            <y>-1.340000</y>
+                            <x>0.290000</x>
+                            <y>-1.336667</y>
                         </coord>
                         <size>
                             <width>0.037000</width>
                             <height>0.037000</height>
                         </size>
                         <channeltype>visible</channeltype>
-                        <rename>r1</rename>
+                        <rename></rename>
                         <name>r1</name>
                         <onreference>8</onreference>
                         <connectionlist/>
@@ -1223,8 +1223,8 @@
                     <channelcommunication>
                         <id>21</id>
                         <coord>
-                            <x>1.288333</x>
-                            <y>-1.000000</y>
+                            <x>0.875000</x>
+                            <y>-1.006667</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -1240,8 +1240,8 @@
                     <channelcommunication>
                         <id>22</id>
                         <coord>
-                            <x>2.285000</x>
-                            <y>-1.015000</y>
+                            <x>1.805000</x>
+                            <y>-1.028333</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -1257,8 +1257,8 @@
                     <channelcommunication>
                         <id>23</id>
                         <coord>
-                            <x>2.340000</x>
-                            <y>-1.671667</y>
+                            <x>1.856667</x>
+                            <y>-1.648334</y>
                         </coord>
                         <size>
                             <width>0.250000</width>
@@ -1274,8 +1274,8 @@
                     <channelcommunication>
                         <id>24</id>
                         <coord>
-                            <x>1.320000</x>
-                            <y>-1.641667</y>
+                            <x>0.896667</x>
+                            <y>-1.625000</y>
                         </coord>
                         <size>
                             <width>0.250000</width>

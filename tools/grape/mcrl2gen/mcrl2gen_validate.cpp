@@ -811,6 +811,13 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
     cerr << "Process diagram " << diagram_id.ToAscii() << " has no name." << endl;
     return false;
   }
+  // parse process diagram name
+  if (!gsIsUserIdentifier(diagram_name.ToAscii()))
+  {
+    // ERROR: process name is not an identifier
+    cerr << "Process diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
+    return false;
+  }
 
   // validate preamble
   list_of_decl preamble_params;
@@ -1200,9 +1207,9 @@ bool grape::mcrl2gen::validate_reference_state_list(wxXmlNode *p_doc_root, wxXml
     wxString ref_id = get_child_value(referenced_diagram, _T("id"));
 
     // check parameter initialisation
-    list_of_varupdate ref_inits;
     try
     {
+      list_of_varupdate ref_inits;
       validate_reference_parameters(p_doc_root, ref_state, diagram_name, ref_inits, datatype_spec);
     }
     catch(...)
@@ -1226,15 +1233,15 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
 {
   // initialize variables
   p_parameter_initialisation.Empty();
-  list_of_decl variable_decls;  // must be empty
-  list_of_decl preamble_parameter_decls;
-  list_of_decl_init preamble_variable_decls; // must be empty
 
   if(p_reference->GetName() == _T("processreference") || p_reference->GetName() == _T("referencestate"))
   {
     wxString diagram_name = get_child_value(p_reference, _T("name"));
     wxString referenced_diagram_id = get_child_value(p_reference, _T("propertyof"));
     wxXmlNode *referenced_diagram = get_diagram(p_doc_root, referenced_diagram_id);
+    list_of_decl variable_decls;  // must be empty
+    list_of_decl preamble_parameter_decls;
+    list_of_decl_init preamble_variable_decls; // must be empty
     try
     {
       validate_preamble(referenced_diagram, preamble_parameter_decls, preamble_variable_decls, datatype_spec);
@@ -1265,9 +1272,9 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
     // loop through parameter assignments
     for(wxXmlNode *param_assignment = param_list->GetChildren(); param_assignment != 0; param_assignment = param_assignment->GetNext())
     {
-      varupdate parameter_assignment;
       if ( param_assignment->GetName() == _T( "parameterassignment" ) )
       {
+        varupdate parameter_assignment;
         // get parameter assignment
         wxString parameter_assignment_text = param_assignment->GetNodeContent();
         if ( !parameter_assignment.set_varupdate( parameter_assignment_text ) )
@@ -1499,9 +1506,9 @@ bool grape::mcrl2gen::validate_terminating_transition_list(wxXmlNode *p_process_
     }
 
     // validate transition label
-    label trans_label;
     try
     {
+      label trans_label;
       validate_transition_label(transition, p_preamble_parameters, p_preamble_variables, trans_label, diagram_name, datatype_spec);
     }
     catch(...)
@@ -1533,9 +1540,9 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
     }
 
     // validate transition label
-    label trans_label;
     try
     {
+      label trans_label;
       validate_transition_label(transition, p_preamble_parameters, p_preamble_variables, trans_label, diagram_name, datatype_spec);
     }
     catch(...)
@@ -1549,33 +1556,31 @@ bool grape::mcrl2gen::validate_nonterminating_transition_list(wxXmlNode *p_proce
 
 bool grape::mcrl2gen::validate_transition_label(wxXmlNode *p_process_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, label &p_trans_label, wxString p_diagram_name, ATermAppl &datatype_spec)
 {
-  // initialize variables
-  list_of_decl variable_decl_list;
-  wxString condition;
-  list_of_action actions;
-  wxString timestamp;
-  list_of_varupdate variable_updates;
-
   // load label
   wxXmlNode* transition_label = get_child(p_process_diagram, _T("label"));
   if (transition_label != 0)
   {
     // validate variable declarations
+    list_of_decl variable_decl_list;
     if (!validate_transition_label_variable_declarations(transition_label, p_diagram_name, variable_decl_list, datatype_spec)) return false;
     
     // get variable table
     atermpp::table vars = get_variable_table(p_preamble_parameter_decls, p_preamble_local_var_decls, variable_decl_list, datatype_spec);
 
     // validate condition
+    wxString condition;
     if (!validate_transition_label_condition(transition_label, p_diagram_name, condition, datatype_spec, vars)) return false;
 
     // validate actions
+    list_of_action actions;
     if (!validate_transition_label_actions(transition_label, p_diagram_name, actions, datatype_spec, vars)) return false;
 
     // validate timestamp
+    wxString timestamp;
     if (!validate_transition_label_timestamp(transition_label, p_diagram_name, timestamp, datatype_spec, vars)) return false;
 
     // validate variable updates
+    list_of_varupdate variable_updates;
     if (!validate_transition_label_variable_updates(transition_label, p_diagram_name, variable_updates, datatype_spec, vars)) return false;
 
     // update transition label
@@ -1841,9 +1846,9 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
     // loop through all variable updates
     for (wxXmlNode *trans_label_variable_update = trans_label_variable_updates->GetChildren(); trans_label_variable_update != 0; trans_label_variable_update = trans_label_variable_update->GetNext())
     {
-      varupdate variable_update;
       if (trans_label_variable_update->GetName() == _T("variableupdate"))
       {
+        varupdate variable_update;
         wxString variable_update_text = trans_label_variable_update->GetNodeContent();
         if ( !variable_update.set_varupdate( variable_update_text ) )
         {
@@ -1970,6 +1975,13 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   if(diagram_name.IsEmpty())
   {
     cerr << "Architecture diagram " << diagram_id.ToAscii() << " has no name." << endl;
+    return false;
+  }
+  // parse architecture diagram name
+  if (!gsIsUserIdentifier(diagram_name.ToAscii()))
+  {
+    // ERROR: architecture name is not an identifier
+    cerr << "Architecture diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
     return false;
   }
 
@@ -2196,9 +2208,9 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
     }
 
     // check parameter initialisation
-    list_of_varupdate ref_inits;
     try
     {
+      list_of_varupdate ref_inits;
       validate_reference_parameters(p_doc_root, proc_ref, diagram_name, ref_inits, datatype_spec);
     }
     catch(...)
@@ -2280,6 +2292,15 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
         // ERROR: visible channel communication is not named
         cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a visible channel communication that is unnamed." << endl;
+        return false;
+      }
+      // parse channel communication name
+      if (!gsIsUserIdentifier(channel_communication_visible_name.ToAscii()))
+      {
+        // ERROR: channel communication name is not an identifier
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
+             << " contains a channel communication name " << channel_communication_visible_name.ToAscii()
+             << " which is not a valid identifier." << endl;
         return false;
       }
     }
@@ -2422,6 +2443,30 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
         cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel with no name." << endl;
         return false;
+      }
+      // parse channel name
+      if (!gsIsUserIdentifier(channel_name.ToAscii()))
+      {
+        // ERROR: channel communication name is not an identifier
+        cerr << "Architecture diagram " << diagram_name.ToAscii()
+             << " contains a channel name " << channel_name.ToAscii()
+             << " which is not a valid identifier." << endl;
+        return false;
+      }
+
+      // check rename
+      wxString channel_rename = get_child_value(channel, _T("rename"));
+      if (!channel_rename.IsEmpty())
+      {
+        // parse channel name
+        if (!gsIsUserIdentifier(channel_rename.ToAscii()))
+        {
+          // ERROR: channel rename is not an identifier
+          cerr << "Architecture diagram " << diagram_name.ToAscii()
+               << " contains a channel rename " << channel_rename.ToAscii()
+               << " which is not a valid identifier." << endl;
+          return false;
+        }
       }
 
       // get actions of referenced diagram

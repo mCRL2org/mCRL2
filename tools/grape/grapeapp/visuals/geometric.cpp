@@ -206,7 +206,7 @@ bool grape::grapeapp::is_inside(coordinate p_poly[], int p_count, const coordina
   return inside;
 }
 
-void grape::grapeapp::set_color(const color p_color, bool p_selected)
+void grape::grapeapp::set_color(const color &p_color, bool p_selected)
 {
   if (p_selected)
   {
@@ -532,7 +532,7 @@ coordinate grape::grapeapp::move_to_border_rectangle( const coordinate &p_rect_c
   return result;
 }
 
-void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color p_color, const bool is_dashed )
+void grape::grapeapp::draw_line( const coordinate &p_begin, const coordinate &p_end, bool p_selected, const color &p_color, const bool is_dashed )
 {
   // set color of line
   set_color( p_color, p_selected );
@@ -841,7 +841,7 @@ void grape::grapeapp::draw_channel( const coordinate &p_center, float p_radius, 
   draw_channel( p_center, p_radius, p_selected, p_channel_type );
 }
 
-void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color )
+void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color )
 {
   glPushMatrix();
 
@@ -870,7 +870,7 @@ void grape::grapeapp::draw_filled_rectangle( const coordinate &p_center, float p
   glPopMatrix();
 }
 
-void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color p_color )
+void grape::grapeapp::draw_line_rectangle( const coordinate &p_center, float p_width, float p_height, bool p_selected, const color &p_color )
 {
   glPushMatrix();
 

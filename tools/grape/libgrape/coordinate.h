@@ -22,17 +22,15 @@ namespace grape
     /**
      * \short Represents a coordinate on a 2D plane.
      */
-    class coordinate
+    struct coordinate
     {
-      public:
         float m_x; /**< x-coordinate. */
         float m_y; /**< y-coordinate. */
 
-        /** Assigns the coordinate @p p_c to this instance of the coordinate. */
-        void operator=( const coordinate &p_c );
-
         /** @return True if the given coordinate is the same as the object. */
         bool operator==( const coordinate &p_c );
+        /** Assigns the coordinate @p p_c to this instance of the coordinate. */
+        coordinate & operator=( const coordinate &p_c );
         /** @return Return the coordinate that is the difference between the two coordinates. */
         coordinate operator-(const coordinate &p_c);
         /** @return Return the coordinate that is the sum of the two coordinates. */

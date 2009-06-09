@@ -322,7 +322,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_timestamp = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
 
       wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      if (!tt_label_timestamp_text.IsEmpty())
+      while (!tt_label_timestamp_text.IsEmpty())
       {
         new wxXmlNode( xml_terminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
       }
@@ -340,7 +340,6 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
         /* node <action> */
         wxXmlNode* xml_terminating_trans_label_action = new wxXmlNode( xml_terminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
 
-        wxString tt_label_action_params_text;
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
@@ -365,7 +364,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_condition = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
 
       wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      if (!tt_label_condition_text.IsEmpty())
+      while (!tt_label_condition_text.IsEmpty())
       {
         new wxXmlNode( xml_terminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
       }
@@ -453,7 +452,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_timestamp = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
 
       wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      if (!tt_label_timestamp_text.IsEmpty())
+      while (!tt_label_timestamp_text.IsEmpty())
       {
         new wxXmlNode( xml_nonterminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
       }
@@ -471,7 +470,6 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
         /* node <action> */
         wxXmlNode* xml_nonterminating_trans_label_action = new wxXmlNode( xml_nonterminating_trans_label_actions, wxXML_ELEMENT_NODE, _T( "action" ) );
 
-        wxString tt_label_action_params_text;
         list_of_dataexpression tt_label_action_params = tt_label_action.get_parameters();
         if (tt_label_action_params.GetCount() > 0)
         {
@@ -496,7 +494,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_condition = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
 
       wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      if (!tt_label_condition_text.IsEmpty())
+      while (!tt_label_condition_text.IsEmpty())
       {
         new wxXmlNode( xml_nonterminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
       }

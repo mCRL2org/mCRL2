@@ -77,6 +77,8 @@ grape_channel_communication_dlg::grape_channel_communication_dlg()
 
 grape_channel_communication_dlg::~grape_channel_communication_dlg()
 {
+  delete m_name_input;
+  delete m_combobox;
 }
 
 bool grape_channel_communication_dlg::show_modal( channel_communication &p_channel_communication )

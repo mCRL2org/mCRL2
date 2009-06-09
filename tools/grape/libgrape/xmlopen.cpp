@@ -117,13 +117,13 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
   wxXmlNode* proc_dia_node = p_proc_list_node->GetChildren();
   while ( proc_dia_node )
   {
-    list_of_decl preamble_parameters;
-    list_of_decl_init preamble_variables;
     unsigned int proc_dia_id = 0;
     wxString proc_dia_name = _T( "" );
     wxString node_name = proc_dia_node->GetName();
     if ( node_name == _T( "processdiagram" ) )
     {
+      list_of_decl preamble_parameters;
+      list_of_decl_init preamble_variables;
       wxXmlNode* proc_dia_info_node = proc_dia_node->GetChildren();
       while ( proc_dia_info_node )
       {
@@ -153,9 +153,9 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
               // get the parameterlist
               for(wxXmlNode *preamble_parameter = preamble_node->GetChildren(); preamble_parameter != 0; preamble_parameter = preamble_parameter->GetNext())
               {
-                decl preamble_parameter_decl;
                 if(preamble_parameter->GetName() == _T("param"))
                 {
+                  decl preamble_parameter_decl;
                   wxString preamble_param = preamble_parameter->GetNodeContent();
                   bool valid = preamble_parameter_decl.set_decl( preamble_param );
                   if ( !valid )
@@ -177,9 +177,9 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
               // get the localvariablelist
               for(wxXmlNode *preamble_local_variable = preamble_node->GetChildren(); preamble_local_variable != 0; preamble_local_variable = preamble_local_variable->GetNext())
               {
-                decl_init preamble_local_var_decl;
                 if(preamble_local_variable->GetName() == _T("var"))
                 {
+                  decl_init preamble_local_var_decl;
                   wxString preamble_local_var = preamble_local_variable->GetNodeContent();
                   bool valid = preamble_local_var_decl.set_decl_init( preamble_local_var );
                   if ( !valid )
@@ -477,9 +477,9 @@ bool grape::libgrape::open_reference_states( grape_specification* p_spec, wxXmlN
                   wxXmlNode* parameter_info = ref_state_information->GetChildren();
                   while ( parameter_info )
                   {
-                    varupdate parameter_update;
                     if ( parameter_info->GetName() == _T( "parameterassignment" ) )
                     {
+                      varupdate parameter_update;
                       wxString parameter_update_text = parameter_info->GetNodeContent();
                       bool valid = parameter_update.set_varupdate( parameter_update_text );
                       if ( !valid )
@@ -662,9 +662,9 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                       wxXmlNode* variable_declarations = label_info->GetChildren();
                       while ( variable_declarations )
                       {
-                        decl variable_decl;
                         if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
                         {
+                          decl variable_decl;
                           wxString variable_declaration = variable_declarations->GetNodeContent();
                           bool valid = variable_decl.set_decl( variable_declaration );
                           if ( !valid )
@@ -739,9 +739,9 @@ bool grape::libgrape::open_nonterminating_transitions( grape_specification* p_sp
                       wxXmlNode* variable_updates = label_info->GetChildren();
                       while ( variable_updates )
                       {
-                        varupdate variable_update;
                         if ( variable_updates->GetName() == _T( "variableupdate" ) )
                         {
+                          varupdate variable_update;
                           wxString variable_update_text = variable_updates->GetNodeContent();
                           bool valid = variable_update.set_varupdate( variable_update_text );
                           if ( !valid )
@@ -939,9 +939,9 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                       wxXmlNode* variable_declarations = label_info->GetChildren();
                       while ( variable_declarations )
                       {
-                        decl variable_decl;
                         if ( variable_declarations->GetName() == _T( "variabledeclaration" ) )
                         {
+                          decl variable_decl;
                           wxString variable_declaration = variable_declarations->GetNodeContent();
                           bool valid = variable_decl.set_decl( variable_declaration );
                           if ( !valid )
@@ -1016,9 +1016,9 @@ bool grape::libgrape::open_terminating_transitions( grape_specification* p_spec,
                       wxXmlNode* variable_updates = label_info->GetChildren();
                       while ( variable_updates )
                       {
-                        varupdate variable_update;
                         if ( variable_updates->GetName() == _T( "variableupdate" ) )
                         {
+                          varupdate variable_update;
                           wxString variable_update_text = variable_updates->GetNodeContent();
                           bool valid = variable_update.set_varupdate( variable_update_text );
                           if ( !valid )
@@ -1548,9 +1548,9 @@ bool grape::libgrape::open_process_references( grape_specification* p_spec, wxXm
                   wxXmlNode* parameter_info = proc_ref_information->GetChildren();
                   while ( parameter_info )
                   {
-                    varupdate parameter_update;
                     if ( parameter_info->GetName() == _T( "parameterassignment" ) )
                     {
+                      varupdate parameter_update;
                       wxString parameter_update_text = parameter_info->GetNodeContent();
                       bool valid = parameter_update.set_varupdate( parameter_update_text );
                       if ( !valid )

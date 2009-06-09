@@ -184,6 +184,8 @@ void grape_reference_dialog::init( wxPanel *p_panel )
 
 grape_reference_dialog::~grape_reference_dialog()
 {
+  delete m_combo;
+  delete m_grid;
 }
 
 bool grape_reference_dialog::show_modal()

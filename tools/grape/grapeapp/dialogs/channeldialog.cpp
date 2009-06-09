@@ -99,11 +99,14 @@ grape_channel_dlg::grape_channel_dlg()
 
 grape_channel_dlg::~grape_channel_dlg()
 {
+  delete m_name_input;
+  delete m_rename_input;
+  delete m_combobox;
 }
 
 bool grape_channel_dlg::update_validation()
 {
-  bool is_valid = identifier_valid(m_name_input->GetValue());
+  bool is_valid = !m_name_input->GetValue().IsEmpty() && identifier_valid(m_name_input->GetValue());
   is_valid &= identifier_valid(m_rename_input->GetValue());
   return is_valid;
 }

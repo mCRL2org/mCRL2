@@ -372,10 +372,7 @@ bool grape_event_drag::Do( void )
         {
           compound_state* state = static_cast<libgrape::compound_state*> ( v_obj->get_selectable_object() );
           // set length of dynamic array
-          if (s_orig_ntt != 0)
-          {
-            delete [] s_orig_ntt;
-          }
+          delete [] s_orig_ntt;
           s_orig_ntt = new coordinate[state->count_transition_endstate()];
 
           // fill dynamic array with initial coordinates
@@ -738,7 +735,14 @@ bool grape_event_drag::Do( void )
           coord.m_y = ( chan_1->get_coordinate().m_y + chan_2->get_coordinate().m_y ) / 2;
           grape_event_add_channel_communication* event = new grape_event_add_channel_communication( m_main_frame, coord, chan_1, chan_2 );
           // Only do something if the two channels are not on the same reference; note this check was disabled because attach DOES allow it. It is enabled because we don't use attach.
-          if ( chan_1->get_reference() != chan_2->get_reference() ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( chan_1->get_reference() != chan_2->get_reference() )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         }
         // or ended in a channel communication
         else if ( ( end_object_ptr != 0 ) && ( end_object_ptr->get_type() == CHANNEL_COMMUNICATION ) )
@@ -760,7 +764,14 @@ bool grape_event_drag::Do( void )
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         } // end else if
       }
       // or we began in a channel communication
@@ -786,7 +797,14 @@ bool grape_event_drag::Do( void )
               break; // break from the for loop, the boolean can never become true again anyway.
             } // end if
           } // end for
-          if ( all_different_references ) m_main_frame->get_event_handler()->Submit( event, true );
+          if ( all_different_references )
+          {
+            m_main_frame->get_event_handler()->Submit( event, true );
+          }
+          else
+          {
+            delete event;
+          }
         }
       }
       break;
@@ -813,8 +831,8 @@ bool grape_event_drag::Do( void )
   if ((state == ADD_NONTERMINATING_TRANSITION) || (state == ADD_TERMINATING_TRANSITION) || (state == ADD_STATE) || (state == ADD_REFERENCE_STATE) || (state == ADD_PROCESS_REFERENCE) || (state == ADD_ARCHITECTURE_REFERENCE) || (state == ADD_COMMENT) || (state == ADD_CHANNEL) || (state == ADD_INITIAL_DESIGNATOR) || (state == ADD_NONTERMINATING_TRANSITION))
   {
     //deselect all objects
-    grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
-    m_main_frame->get_event_handler()->Submit(event, false);
+    grape_event_deselect_all *deselect_event = new grape_event_deselect_all(m_main_frame);
+    m_main_frame->get_event_handler()->Submit(deselect_event, false);
   }
   
   return true;

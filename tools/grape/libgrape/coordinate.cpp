@@ -22,10 +22,11 @@ bool coordinate::operator==( const coordinate &p_c )
          (ty < 0.001 && ty > -0.001);
 }
 
-void coordinate::operator=( const coordinate &p_c )
+coordinate & coordinate::operator=( const coordinate &p_c )
 {
   m_x = p_c.m_x;
   m_y = p_c.m_y;
+  return *this;
 }
 
 coordinate coordinate::operator-(const coordinate &p_c)

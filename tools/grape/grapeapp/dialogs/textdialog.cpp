@@ -62,11 +62,11 @@ grape_text_dlg::grape_text_dlg()
 
 grape_text_dlg::~grape_text_dlg()
 {
+  delete m_input;
 }
 
 bool grape_text_dlg::show_modal( wxString &p_text )
 {
-  wxString s;
   int result = ShowModal();
   if ( result == wxID_CANCEL )
   {

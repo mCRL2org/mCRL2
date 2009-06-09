@@ -94,6 +94,8 @@ grape_preamble_dialog::grape_preamble_dialog()
 
 grape_preamble_dialog::~grape_preamble_dialog()
 {
+  delete m_parameter_grid;
+  delete m_localvar_grid;
 }
 
 wxString grape_preamble_dialog::get_parameter_declarations() const

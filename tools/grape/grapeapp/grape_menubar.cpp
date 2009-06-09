@@ -237,6 +237,16 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
 
 grape_menubar::~grape_menubar()
 {
+  for (unsigned int i = GetMenuCount(); !GetMenuCount(); --i)
+  {
+    wxMenu* menu = Remove(i);
+    if (menu == m_menu_file) delete m_menu_file;
+    if (menu == m_menu_edit) delete m_menu_edit;
+    if (menu == m_menu_diagram) delete m_menu_diagram;
+    if (menu == m_menu_tools) delete m_menu_tools;
+    if (menu == m_menu_help) delete m_menu_help;
+    delete menu;
+  }
 }
 
 wxMenu* grape_menubar::get_menu( grape_main_menu p_which )

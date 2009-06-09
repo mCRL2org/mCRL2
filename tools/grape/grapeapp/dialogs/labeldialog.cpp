@@ -142,6 +142,13 @@ grape_label_dialog::grape_label_dialog()
 grape_label_dialog::~grape_label_dialog()
 {
   delete m_label;
+  delete m_var_decls_input;
+  delete m_condition_input;
+  delete m_multiaction_input;
+  delete m_timestamp_input;
+  delete m_var_updates_input;
+  delete m_preview_text;
+  delete m_statusbar;
 }
 
 void grape_label_dialog::event_change_var_decls_text( wxCommandEvent &p_event )

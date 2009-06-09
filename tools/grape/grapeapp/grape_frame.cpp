@@ -155,6 +155,8 @@ grape_frame::~grape_frame( void )
   m_process_diagram_list = 0;
   delete m_architecture_diagram_list;
   m_architecture_diagram_list = 0;
+  delete m_datatext;
+  m_datatext = 0;
   delete m_glcanvas;
   m_glcanvas = 0;
   delete m_logpanel;
@@ -171,6 +173,12 @@ grape_frame::~grape_frame( void )
   m_help_controller = 0;
   delete m_clipboard;
   m_clipboard = 0;
+  delete m_dataspecbutton;
+  m_dataspecbutton = 0;
+  SetStatusBar(0);
+  delete m_statusbar;
+  SetMenuBar(0);
+  delete m_menubar;
 }
 
 grape_menubar * grape_frame::get_menubar( void )
