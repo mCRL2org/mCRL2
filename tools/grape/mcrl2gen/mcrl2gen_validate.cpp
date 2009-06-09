@@ -727,6 +727,18 @@ bool grape::mcrl2gen::validate(wxXmlDocument &p_spec)
   return true;
 }
 
+bool grape::mcrl2gen::validate_datatype_specification(wxXmlDocument &p_spec)
+{
+  wxXmlNode *doc_root = p_spec.GetRoot();
+  ATermAppl datatype_spec;
+  if (!validate_datatype_specification(doc_root, datatype_spec))
+  {
+    return false;
+  }
+  cerr << "Data type specification is valid." << endl;
+  return true;
+}
+
 bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec)
 {
   // initialise variables
@@ -1401,6 +1413,16 @@ bool grape::mcrl2gen::validate_state_list(wxXmlNode *p_process_diagram, wxXmlNod
   {
     wxString state_name = get_child_value(state, _T("name"));
     wxString state_id = get_child_value(state, _T("id"));
+
+    // validate state name as identifier
+    wxString state_full_name = state_name + _T("_") + state_id;
+    if (!gsIsUserIdentifier(std::string(state_full_name.fn_str())))
+    {
+      // ERROR: state name is not a valid identifier
+      cerr << "Process diagram " << diagram_name.ToAscii()
+           << " contains a state " << state_name.ToAscii() << " which name is not a valid identifier." << endl;
+      return false;
+    }
 
     // check state-transition connections
     if (!validate_transition_connection(p_process_diagram, state_id))

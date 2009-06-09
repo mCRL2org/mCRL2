@@ -257,6 +257,16 @@ namespace grape
     /**
      * Datatype specification validation function.
      * Validates the datatype specification.
+     * @param p_spec The GraPE XML specification containing the diagram to validate.
+     * @return True if the datatype specification contained in p_spec is valid, false otherwise.
+     * @pre p_spec is a valid reference to a GraPE XML specification.
+     * @post True is returned if the datatype specification is valid, false otherwise and error messages are produced.
+     */
+    bool validate_datatype_specification(wxXmlDocument &p_spec);
+
+    /**
+     * Datatype specification validation function.
+     * Validates the datatype specification.
      * @param p_doc_root An XML specification.
      * @param datatype_spec The datatype specification.
      * @return True if the datatype specification contained in p_doc_root is valid, false otherwise.

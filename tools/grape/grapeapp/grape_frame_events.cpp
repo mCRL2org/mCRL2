@@ -136,25 +136,35 @@ void grape_frame::event_menu_saveas(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_menu_exportmcrl2(wxCommandEvent& WXUNUSED(p_event))
 {
-  grape_event_export_current_diagram_mcrl2 *event = new grape_event_export_current_diagram_mcrl2(this);
-  m_event_handler->Submit(event, false);
+  if (m_mode == GRAPE_MODE_DATASPEC || m_mode == GRAPE_MODE_SPEC)
+  {
+    grape_event_export_datatype_specification_mcrl2 *event = new grape_event_export_datatype_specification_mcrl2(this);
+    m_event_handler->Submit(event, false);
+  }
+  else
+  {
+    grape_event_export_current_diagram_mcrl2 *event = new grape_event_export_current_diagram_mcrl2(this);
+    m_event_handler->Submit(event, false);
+  }
 }
 
-void grape_frame::event_menu_validate_diagram(wxCommandEvent &WXUNUSED(p_event))
+void grape_frame::event_menu_validate(wxCommandEvent &WXUNUSED(p_event))
 {
-  grape_event_validate_diagram *event = new grape_event_validate_diagram(this);
-  m_event_handler->Submit(event, false);
+  if (m_mode == GRAPE_MODE_ARCH || m_mode == GRAPE_MODE_PROC)
+  {
+    grape_event_validate_diagram *event = new grape_event_validate_diagram(this);
+    m_event_handler->Submit(event, false);
+  }
+  else
+  {
+    grape_event_validate_datatype_specification *event = new grape_event_validate_datatype_specification(this);
+    m_event_handler->Submit(event, false);
+  }
 }
 
 void grape_frame::event_menu_exportimage(wxCommandEvent& WXUNUSED(p_event))
 {
   grape_event_export_current_diagram_image* event = new grape_event_export_current_diagram_image( this );
-  m_event_handler->Submit( event, false );
-}
-
-void grape_frame::event_menu_exporttext(wxCommandEvent& WXUNUSED(p_event))
-{
-  grape_event_export_datatype_specification_text* event = new grape_event_export_datatype_specification_text( this );
   m_event_handler->Submit( event, false );
 }
 

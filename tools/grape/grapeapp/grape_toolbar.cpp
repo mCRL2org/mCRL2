@@ -40,6 +40,7 @@ grape_toolbar::grape_toolbar(wxWindow *p_parent) : wxToolBar(p_parent, wxID_ANY,
   AddSeparator();
   AddTool(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, _T("Add Architecture diagram"), g_icons[ _T("newarch") ], wxNullBitmap, wxITEM_NORMAL, _T("Add Architecture diagram"), _T("Add Architecture diagram"));
   AddTool(GRAPE_MENU_ADD_PROCESS_DIAGRAM, _T("Add Process diagram"), g_icons[ _T("newproc") ], wxNullBitmap, wxITEM_NORMAL, _T("Add Process diagram"), _T("Add Process diagram"));
+  AddTool(GRAPE_MENU_VALIDATE, _T("Validate"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate"), _T("Validate"));
 }
 
 grape_toolbar::~grape_toolbar(void)
@@ -84,7 +85,6 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL, _T("Add Channel"), g_icons[ _T("channel") ], wxNullBitmap, _T("Add Channel"), _T("Add Channel"));
   AddRadioTool(GRAPE_TOOL_ADD_CHANNEL_COMMUNICATION, _T("Add Channel communication"), g_icons[ _T("chancomm") ], wxNullBitmap, _T("Add Channel communication"), _T("Add Channel communication"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
-  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
 }
 
 grape_proc_toolbar::grape_proc_toolbar( void ) : grape_toolbar()
@@ -106,5 +106,4 @@ grape_proc_toolbar::grape_proc_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddRadioTool(GRAPE_TOOL_ADD_INITIAL_DESIGNATOR, _T("Add Initial designator"), g_icons[ _T("initdes") ], wxNullBitmap, _T("Add Initial designator"), _T("Add Initial designator"));
   AddRadioTool(GRAPE_TOOL_ADD_TERMINATING_TRANSITION, _T("Add Terminating transition"), g_icons[ _T("termtransition") ], wxNullBitmap, _T("Add Terminating transition"), _T("Add Terminating transition"));
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
-  AddTool(GRAPE_MENU_VALIDATE_DIAGRAM, _T("Validate current diagram"), g_icons[ _T("validate") ], wxNullBitmap, wxITEM_NORMAL, _T("Validate current diagram"), _T("Validate current diagram"));
 }

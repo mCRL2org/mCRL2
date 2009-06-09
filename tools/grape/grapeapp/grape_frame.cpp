@@ -242,6 +242,7 @@ void grape_frame::set_is_modified( bool p_modified )
   m_modified = p_modified;
   // set title
   set_title();
+  update_bars();
 }
 
 
@@ -311,9 +312,6 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   EVT_MENU(wxID_CLOSE, grape_frame::event_menu_close)
   EVT_MENU(wxID_SAVE, grape_frame::event_menu_save)
   EVT_MENU(wxID_SAVEAS, grape_frame::event_menu_saveas)
-  EVT_MENU(GRAPE_MENU_EXPORTMCRL2, grape_frame::event_menu_exportmcrl2)
-  EVT_MENU(GRAPE_MENU_EXPORTIMAGE, grape_frame::event_menu_exportimage)
-  EVT_MENU(GRAPE_MENU_EXPORTTEXT, grape_frame::event_menu_exporttext)
   EVT_MENU(wxID_PRINT, grape_frame::event_menu_print)
   EVT_MENU(wxID_EXIT, grape_frame::event_menu_quit)
 
@@ -329,12 +327,15 @@ BEGIN_EVENT_TABLE(grape_frame, wxFrame)
   //EVT_MENU(GRAPE_MENU_DESELECT_ALL, grape_frame::event_menu_deselect_all)
   EVT_MENU(GRAPE_MENU_DATATYPESPEC, grape_frame::event_datatype_spec)
 
-  // diagram menu
+  // specification menu
   EVT_MENU(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, grape_frame::event_menu_add_architecture_diagram)
   EVT_MENU(GRAPE_MENU_ADD_PROCESS_DIAGRAM, grape_frame::event_menu_add_process_diagram)
+  EVT_MENU(GRAPE_MENU_VALIDATE, grape_frame::event_menu_validate)
+  EVT_MENU(GRAPE_MENU_EXPORTMCRL2, grape_frame::event_menu_exportmcrl2)
+  EVT_MENU(GRAPE_MENU_EXPORTIMAGE, grape_frame::event_menu_exportimage)
+//  EVT_MENU(GRAPE_MENU_EXPORTTEXT, grape_frame::event_menu_exporttext)
   EVT_MENU(GRAPE_MENU_RENAME_DIAGRAM, grape_frame::event_menu_rename_diagram)
   EVT_MENU(GRAPE_MENU_REMOVE_DIAGRAM, grape_frame::event_menu_remove_diagram)
-  EVT_MENU(GRAPE_MENU_VALIDATE_DIAGRAM, grape_frame::event_menu_validate_diagram)
 
   // help menu
   EVT_MENU(wxID_HELP, grape_frame::event_menu_help)
@@ -536,6 +537,9 @@ void grape_frame::update_bars( void )
 
 void grape_frame::update_toolbar( void )
 {
+  // update SAVE for the toolbar
+  GetToolBar()->EnableTool( wxID_SAVE, m_modified );
+
   // update UNDO and REDO right for the toolbar
   GetToolBar()->EnableTool( wxID_UNDO, m_menubar->IsEnabled( wxID_UNDO ) );
   GetToolBar()->SetToolShortHelp( wxID_UNDO, m_menubar->FindItem( wxID_UNDO )->GetLabelFromText( m_menubar->FindItem( wxID_UNDO )->GetLabel() ) );
@@ -545,24 +549,62 @@ void grape_frame::update_toolbar( void )
   // update DELETE and PROPERTIES right for the toolbar
   GetToolBar()->EnableTool( wxID_DELETE, m_menubar->IsEnabled( wxID_DELETE ) );
   GetToolBar()->EnableTool( GRAPE_MENU_PROPERTIES, m_menubar->IsEnabled( GRAPE_MENU_PROPERTIES ) );
+
+  // update VALIDATE for the toolbar
+  GetToolBar()->EnableTool( GRAPE_MENU_VALIDATE, m_menubar->IsEnabled( GRAPE_MENU_VALIDATE ) );
 }
 
 void grape_frame::update_menubar( void )
 {
+  // update SAVE for the menubar
+  m_menubar->Enable( wxID_SAVE, m_modified );
   diagram *dia_ptr = m_glcanvas->get_diagram();
   if ( dia_ptr && !(m_mode & GRAPE_MODE_DATASPEC) )
   {
     bool object_selected = dia_ptr->count_selected_objects() > 0;
+    wxString dia_name = dia_ptr->get_name();
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate " + dia_name + "\tF5") );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate diagram " + dia_name) );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export " + dia_name + " to &mCRL2...\tCtrl-E") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export diagram " + dia_name + " to mCRL2") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export " + dia_name + " to &image...\tCtrl-I") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export " + dia_name + " to image") );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, true );
     m_menubar->Enable( wxID_DELETE, object_selected );
     //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, object_selected );
     // m_menubar->Enable( GRAPE_MENU_SELECT_ALL, m_glcanvas->count_visual_object() > 1 ); // 1 because the visibility frame or the preamble are also visual objects, wich can not be selected
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, dia_ptr->count_selected_objects() == 1 );
   }
-  else
+  else if (m_mode & GRAPE_MODE_DATASPEC)
   {
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate data type specification\tF5") );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate data type specification") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export data type specification to &mCRL2...\tCtrl-E") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export data type specification to mCRL2") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export to &image...\tCtrl-I") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export to image") );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, true );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, false );
     m_menubar->Enable( wxID_DELETE, false );
     //m_menubar->Enable( GRAPE_MENU_DESELECT_ALL, false );
     //m_menubar->Enable( GRAPE_MENU_SELECT_ALL, false );
+    m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
+  }
+  else if (m_mode & GRAPE_MODE_SPEC)
+  {
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate\tF5") );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export to &mCRL2...\tCtrl-E") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export diagram to mCRL2") );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export to &image...\tCtrl-I") );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export to image") );
+    m_menubar->Enable( GRAPE_MENU_VALIDATE, false );
+    m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, false );
+    m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, false );
+    m_menubar->Enable( wxID_DELETE, false );
     m_menubar->Enable( GRAPE_MENU_PROPERTIES, false );
   }
 }

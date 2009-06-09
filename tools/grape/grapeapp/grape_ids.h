@@ -26,8 +26,7 @@ namespace grape
       // menubar events
       GRAPE_MENU_EXPORTMCRL2,
       GRAPE_MENU_EXPORTIMAGE,
-      GRAPE_MENU_EXPORTTEXT,
-      GRAPE_MENU_VALIDATE_DIAGRAM,
+      GRAPE_MENU_VALIDATE,
 
       // dialog boxes appear when these are invoked
       GRAPE_MENU_ADD_PROCESS_DIAGRAM,
@@ -64,8 +63,6 @@ namespace grape
       GRAPE_MENU_DELETE,
 
       GRAPE_MENU_IMPORT_FROM_MCRL2,
-//      GRAPE_MENU_EXPORT_TO_MCRL2,
-//      GRAPE_MENU_EXPORT_TO_PICTURE,
       GRAPE_MENU_SET_PARAMETERS,
       GRAPE_MENU_SIMULATE,
 

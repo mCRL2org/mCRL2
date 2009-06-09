@@ -1030,6 +1030,28 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
   return true;
 }
 
+bool grape::mcrl2gen::export_datatype_specification_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, bool p_verbose, bool p_save)
+{
+  wxXmlNode *doc_root = p_spec.GetRoot();
+  wxString dat_spec = datatype_specification_mcrl2(doc_root);
+  if(p_save)
+  {
+    wxFile file_out;
+    file_out.Open(p_filename, wxFile::write);
+    if(!file_out.IsOpened())
+    {
+      // ERROR: could not open file to write to
+      cerr << "mCRL2 conversion error: could not open file "
+           << p_filename.ToAscii() << "." << endl;
+      return false;
+    }
+    file_out.Write(dat_spec);
+    file_out.Close();
+  }
+  cerr << "mCRL2 conversion succesful." << endl;
+  return true;
+}
+
 wxString grape::mcrl2gen::datatype_specification_mcrl2(wxXmlNode *p_doc_root)
 {
   wxXmlNode *spec_list = get_child(p_doc_root, _T("datatypespecificationlist"));

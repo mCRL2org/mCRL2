@@ -18,12 +18,17 @@
 #include "grape_frame.h"
 #include "grape_glcanvas.h"
 #include "grape_listbox.h"
+#include "grape_logpanel.h"
 
 #include "event_diagram.h"
 #include "event_file.h"
+#include "mcrl2gen/mcrl2gen.h"
 
 using namespace grape::libgrape;
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
+
+using namespace std;
 
 grape_event_new::grape_event_new( grape_frame *p_main_frame ) : grape_event_base( p_main_frame, false, _T( "new specification" ) )
 {
@@ -334,40 +339,103 @@ bool grape_event_import::Undo( void )
 }
 
 
-
-grape_event_export_datatype_specification_text::grape_event_export_datatype_specification_text( grape_frame *p_main_frame )
-: grape_event_base( p_main_frame, false, _T( "export datatype specification to text" ) )
+grape_event_validate_datatype_specification::grape_event_validate_datatype_specification( grape_frame *p_main_frame )
+: grape_event_base( p_main_frame, false, _T( "validate datatype specification" ) )
 {
 }
 
-grape_event_export_datatype_specification_text::~grape_event_export_datatype_specification_text( void )
+grape_event_validate_datatype_specification::~grape_event_validate_datatype_specification( void )
 {
 }
 
-bool grape_event_export_datatype_specification_text::Do( void )
+bool grape_event_validate_datatype_specification::Do( void )
 {
-  // display save dialog
-  wxFileDialog save_dialog( m_main_frame, _T( "Export to text..." ),  m_main_frame->get_filename().GetPath(), _T( "" ), _T( "All files ( *.* )|*.*" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
-  int result = save_dialog.ShowModal();
-  if ( result == wxID_OK )
+  m_main_frame->save_datatype_specification();
+  // clear logpanel and catch cout
+  m_main_frame->get_logpanel()->Clear();
+  
+  // convert specification to XML
+  wxString empty_filename = wxEmptyString;
+  grape_specification *export_spec = m_main_frame->get_grape_specification();
+  wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
+  convert_spaces(export_doc);
+  if (!validate_datatype_specification(export_doc))
   {
-    // get filename
-    wxFileName filename( save_dialog.GetPath() );
-    wxFile new_file( filename.GetFullPath(), wxFile::write );
-    if ( new_file.IsOpened() )
-    {
-      m_main_frame->save_datatype_specification();
-      grape_specification* spec = m_main_frame->get_grape_specification();
-      datatype_specification* data_spec = spec->get_datatype_specification();
-      bool succes = new_file.Write( data_spec->get_declarations() );
-      new_file.Close();
-      return succes;
-    }
+    cerr << "mcrl2 conversion failed: datatype specification is not valid." << endl;
+    display_message(m_main_frame, false);
+    return false;
   }
-  return false;
+  return true;
 }
 
-bool grape_event_export_datatype_specification_text::Undo( void )
+bool grape_event_validate_datatype_specification::Undo( void )
+{
+  return true;
+}
+
+
+grape_event_export_datatype_specification_mcrl2::grape_event_export_datatype_specification_mcrl2( grape_frame *p_main_frame )
+: grape_event_base( p_main_frame, false, _T( "export datatype specification to mcrl2" ) )
+{
+}
+
+grape_event_export_datatype_specification_mcrl2::~grape_event_export_datatype_specification_mcrl2( void )
+{
+}
+
+bool grape_event_export_datatype_specification_mcrl2::Do( void )
+{
+  m_main_frame->save_datatype_specification();
+  // clear logpanel and catch cout
+  m_main_frame->get_logpanel()->Clear();
+  
+  // convert specification to XML
+  wxString empty_filename = wxEmptyString;
+  grape_specification *export_spec = m_main_frame->get_grape_specification();
+  wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
+  convert_spaces(export_doc);
+
+
+  // display save dialog
+  wxFileDialog save_dialog( m_main_frame, _T( "Export data type specification to mcrl2..." ),  m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T( "_data type specification" ), _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  if (save_dialog.ShowModal() == wxID_CANCEL ) return false;
+  
+  // get filename
+  wxFileName filename( save_dialog.GetPath() );
+  if ( filename.GetExt().Lower() != _T("mcrl2") )
+  {
+    wxString fullname = filename.GetFullName();
+    filename.SetName( fullname );
+    filename.SetExt( _T("mcrl2") );
+    if ( filename.FileExists() )
+    {
+      wxString s = _T("The file ");
+      s += filename.GetFullPath();
+      s += _T(" already exists, do you wish to overwrite this file?" );
+      int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
+      if ( result == wxNO ) return false;
+    }    
+  }
+      
+  wxString export_name = filename.GetFullPath(); 
+  // export architecture diagram
+  if (!validate_datatype_specification(export_doc))
+  {
+    cerr << "mcrl2 conversion failed: datatype specification is not valid." << endl;
+    display_message(m_main_frame, false);
+    return false;
+  }
+  if(!export_datatype_specification_to_mcrl2(export_doc, export_name))
+  { 
+    display_message(m_main_frame, false);
+    return false;
+  }
+  display_message(m_main_frame, true);
+  
+  return true;
+}
+
+bool grape_event_export_datatype_specification_mcrl2::Undo( void )
 {
   return true;
 }

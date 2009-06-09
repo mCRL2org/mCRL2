@@ -199,6 +199,19 @@ namespace grape
     bool export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, wxString &p_diagram_id, grape::libgrape::list_of_decl_init &p_parameters_init, bool p_verbose = false, bool p_save = true);
 
     /**
+     * Data type specification to mcrl2 export function.
+     * Exports an XML GraPE specification, containing a data type specification, to an mCRL2 file.
+     * @pre The XML GraPE specification contains a data type specification.
+     * @post The XML specification is validated and saved to an mCRL2 file or error messages are produced.
+     * @param p_spec The specification to export.
+     * @param p_filename The filename of the generated mCRL2 file.
+     * @param p_verbose Flag to set for verbose output.
+     * @param p_save Flag to set if the output has to be saved to the specified file.
+     * @return True if the specification is exported successfully, false otherwise.
+     */
+    bool export_datatype_specification_to_mcrl2(wxXmlDocument &p_spec, wxString &p_filename, bool p_verbose = false, bool p_save = true);
+
+    /**
      * XML datatype specification to mCRL2 datatype specification convertor function.
      * Constructs an mCRL2 datatype specification out of an XML datatype specification.
      * @param p_doc_root The root of a valid XML specification.

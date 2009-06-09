@@ -43,6 +43,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
 // architecture reference
 {
   m_main_frame = p_main_frame;
+  m_grid = 0;
   wxPanel *panel = new wxPanel( this );
 
   wxGridSizer *grid = new wxFlexGridSizer( 2, 3, 0 );
@@ -184,8 +185,8 @@ void grape_reference_dialog::init( wxPanel *p_panel )
 
 grape_reference_dialog::~grape_reference_dialog()
 {
-  delete m_combo;
   delete m_grid;
+  delete m_combo;
 }
 
 bool grape_reference_dialog::show_modal()

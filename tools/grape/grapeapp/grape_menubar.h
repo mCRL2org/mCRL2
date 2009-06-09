@@ -24,11 +24,11 @@ namespace grape
     class grape_menubar : public wxMenuBar
     {
       private:
-        wxMenu  *m_menu_file;       /**< The File menu shown on the menubar. */
-        wxMenu  *m_menu_edit;       /**< The Edit menu shown on the menubar. */
-        wxMenu  *m_menu_diagram;    /**< The Diagram menu shown on the menubar. */
-        wxMenu  *m_menu_tools;      /**< The Tools menu shown on the menubar. */
-        wxMenu  *m_menu_help;       /**< The Help menu shown on the menubar. */
+        wxMenu  *m_menu_file;           /**< The File menu shown on the menubar. */
+        wxMenu  *m_menu_edit;           /**< The Edit menu shown on the menubar. */
+        wxMenu  *m_menu_specification;  /**< The Specification menu shown on the menubar. */
+        wxMenu  *m_menu_tools;          /**< The Tools menu shown on the menubar. */
+        wxMenu  *m_menu_help;           /**< The Help menu shown on the menubar. */
 
       public:
         /**
@@ -64,7 +64,7 @@ namespace grape
           GRAPE_MENU_FILE = 0,
           GRAPE_MENU_EDIT,
           GRAPE_MENU_TOOLS,
-          GRAPE_MENU_DIAGRAM,
+          GRAPE_MENU_SPECIFICATION,
           GRAPE_MENU_HELP
         };
 

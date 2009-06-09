@@ -259,9 +259,9 @@ namespace grape
     };
 
     /**
-     * \short Represents the export to text event for the datatype specification.
+     * \short Represents the validate event for the datatype specification.
      */
-    class grape_event_export_datatype_specification_text : public grape_event_base
+    class grape_event_validate_datatype_specification : public grape_event_base
     {
       private:
       public:
@@ -271,13 +271,47 @@ namespace grape
          * Initializes the event.
          * @param p_main_frame Pointer to the main frame.
          */
-        grape_event_export_datatype_specification_text( grape_frame *p_main_frame );
+        grape_event_validate_datatype_specification( grape_frame *p_main_frame );
 
         /**
          * Default destructor.
          * Frees allocated memory.
          */
-        ~grape_event_export_datatype_specification_text( void );
+        ~grape_event_validate_datatype_specification( void );
+
+        /**
+         * Overloaded Do function.
+         * Performs the event.
+         */
+        bool Do( void );
+
+        /**
+         * Overloaded Undo function.
+         * Reverts the event.
+         */
+        bool Undo( void );
+    };
+
+    /**
+     * \short Represents the export to mcrl2 event for the datatype specification.
+     */
+    class grape_event_export_datatype_specification_mcrl2 : public grape_event_base
+    {
+      private:
+      public:
+
+        /**
+         * Initialization constructor.
+         * Initializes the event.
+         * @param p_main_frame Pointer to the main frame.
+         */
+        grape_event_export_datatype_specification_mcrl2( grape_frame *p_main_frame );
+
+        /**
+         * Default destructor.
+         * Frees allocated memory.
+         */
+        ~grape_event_export_datatype_specification_mcrl2( void );
 
         /**
          * Overloaded Do function.
