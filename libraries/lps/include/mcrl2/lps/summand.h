@@ -671,6 +671,15 @@ summand deadlock_summand_to_aterm(const deadlock_summand& s)
   return atermpp::aterm_appl(result);
 }
 
+/// \brief Conversion to action summand.
+/// \deprecated
+inline
+deadlock_summand summand_to_deadlock_summand(const summand& s)
+{
+  assert(s.is_delta());
+  return deadlock_summand(s.summation_variables(), s.condition(), s.deadlock());
+}
+
 /// \brief LPS summand containing a multi-action.
 class action_summand: public summand_base
 {
@@ -827,6 +836,15 @@ summand action_summand_to_aterm(const action_summand& s)
          s.assignments()
         );
   return atermpp::aterm_appl(result);
+}
+
+/// \brief Conversion to action summand.
+/// \deprecated
+inline
+action_summand summand_to_action_summand(const summand& s)
+{
+  assert(!s.is_delta());
+  return action_summand(s.summation_variables(), s.condition(), s.multi_action(), s.assignments());
 }
 
 } // namespace lps
