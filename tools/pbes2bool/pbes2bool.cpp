@@ -84,7 +84,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
     typedef squadt_tool< pbes_rewriter_tool<rewriter_tool<input_output_tool> > > super;
 
     std::string default_rewriter() const
-    { return "quantifier-finite";
+    { return "quantifier-all";
     }
 
   public:
