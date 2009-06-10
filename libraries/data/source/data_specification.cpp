@@ -59,6 +59,7 @@ namespace mcrl2 {
       }
 
       /// \brief Set of sorts that depend on the sorts that are added
+      /// TODO rewrite using find functionality
       class dependent_sort_helper
       {
         public:

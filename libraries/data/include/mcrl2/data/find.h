@@ -18,19 +18,9 @@
 #include <functional>
 #include "boost/bind.hpp"
 #include "boost/utility/enable_if.hpp"
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/remove_const.hpp"
-#include "boost/type_traits/remove_reference.hpp"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/assignment.h"
-#include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/application.h"
-#include "mcrl2/data/where_clause.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/detail/expression_traverser.h"
 
 namespace mcrl2 {
 
@@ -117,52 +107,73 @@ namespace detail {
     }
   }
 
-  /// TODO migrate to generated visitor structure
   template <typename MatchPredicate, typename OutputIterator>
-  class free_variable_find_all_helper {
+  class variable_find_all_helper : public detail::expression_traverser< variable_find_all_helper< MatchPredicate, OutputIterator > > {
 
     protected:
 
-      std::set< variable > m_bound;
       MatchPredicate&      m_match;
       OutputIterator       m_iterator;
 
-    public:
-
-      void operator()(data_expression const& e)
+      void operator()(where_clause const& w)
       {
-        if (e.is_abstraction())
+        for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
         {
-          (*this)(abstraction(e));
+          (*this)(r.front().rhs());
         }
-        else if (e.is_variable())
+
+        (*this)(w.body());
+      }
+  };
+
+  /// TODO migrate to generated visitor structure
+  template <typename MatchPredicate, typename OutputIterator>
+  class free_variable_find_all_helper : public detail::expression_traverser< free_variable_find_all_helper< MatchPredicate, OutputIterator > > {
+
+      typedef detail::expression_traverser< free_variable_find_all_helper< MatchPredicate, OutputIterator > > super;
+
+    protected:
+
+      std::multiset< variable > m_bound;
+      MatchPredicate&           m_match;
+      OutputIterator            m_iterator;
+
+      template < typename Container >
+      inline
+      void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+      {
+        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
         {
-          (*this)(variable(e));
-        }
-        else if (e.is_where_clause())
-        {
-          (*this)(where_clause(e));
-        }
-        else if (e.is_application())
-        {
-          (*this)(application(e));
+          m_bound.insert(*i);
         }
       }
 
+      template < typename Container >
+      inline
+      void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+      {
+        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
+        {
+          m_bound.erase(m_bound.find(*i));
+        }
+      }
+
+    public:
+
+      using super::operator();
+
       void operator()(where_clause const& w)
       {
-        std::set< variable > bound_variables(m_bound.begin(), m_bound.end());
+        increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
 
         for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
         {
-          bound_variables.insert(r.front().lhs());
+          (*this)(r.front().rhs());
         }
-
-        m_bound.swap(bound_variables);
 
         (*this)(w.body());
 
-        m_bound.swap(bound_variables);
+        decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
       }
 
       void operator()(application const& a)
@@ -191,23 +202,21 @@ namespace detail {
 
       void operator()(abstraction const& a)
       {
-        std::set< variable > bound_variables(boost::copy_range< std::set< variable > >(a.variables()));
-
-        bound_variables.insert(m_bound.begin(), m_bound.end());
-
-        m_bound.swap(bound_variables);
+        increase_bind_count(a.variables());
 
         (*this)(a.body());
 
-        m_bound.swap(bound_variables);
+        decrease_bind_count(a.variables());
       }
 
     public:
 
+      template < typename Container >
       free_variable_find_all_helper(MatchPredicate& match,
                                 OutputIterator const& destBegin,
-                                std::set< data::variable > const& bound_by_context) :
-                          m_bound(bound_by_context), m_match(match), m_iterator(destBegin)
+                                Container const& bound_by_context,
+                                typename detail::enable_if_container< Container, variable >::type* = 0) :
+                          m_bound(bound_by_context.begin(), bound_by_context.end()), m_match(match), m_iterator(destBegin)
       {
       }
 
@@ -231,13 +240,11 @@ namespace detail {
   template <typename MatchPredicate, typename OutputIterator>
   void find_all_free_variables_if(data_expression const& t, MatchPredicate match, OutputIterator const& destBegin)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
-
-    context(t);
+    free_variable_find_all_helper< MatchPredicate, OutputIterator >(match, destBegin)(t);
   }
 
   template <typename T, typename MatchPredicate, typename OutputIterator>
-  void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
+  void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename is_container< T, data_expression >::type >::type* = 0)
   {
     free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
 

@@ -144,7 +144,7 @@ void test_assignment_list()
     assignment(d1, d2),
     assignment(e1, d1)
   );
-  assignment_list m2 = replace_data_expressions(m1, assignment(d2, d1));
+  assignment_list m2 = data::replace_variables(m1, assignment(d2, d1));
   assignment_list m3 = atermpp::make_list(
     assignment(d1, d1),
     assignment(e1, d1)

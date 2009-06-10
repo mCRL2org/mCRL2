@@ -162,11 +162,11 @@ lps::specification untime(const lps::specification& spec) {
     // Declarations within scope of for-loop
     data::variable_vector untime_summation_variables; //Updated set of summation variables
     data::data_expression untime_condition; //Updated condition
-    data::assignment_vector untime_assignments; //Updated assignments (or next state)
     lps::summand untime_summand; //Updated summand
 
     // Only untime summands that are not delta summands; all delta summands are removed, and replaced by one true->delta summand
     if (!(i->is_delta())){
+      data::assignment_vector untime_assignments = data::convert< data::assignment_vector >(i->assignments()); //Updated assignments (or next state)
 
       if (i->has_time())
       {
@@ -179,12 +179,10 @@ lps::specification untime(const lps::specification& spec) {
                                    data::greater(data_expression(i->time()), data::sort_real_::real_(0))));
 
 	// Extend original assignments to include t.i(d,e.i)
-	untime_assignments = data::make_assignment_vector(i->assignments());
         untime_assignments.push_back(assignment(last_action_time,i->time()));
       }
       else
       {
-
 	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
 	// c -> a . X == sum t:Real . c -> a@t . X
 	mcrl2::data::variable time_var = fresh_variable(lps::specification_to_aterm(spec), data::sort_real_::real_(), "time_var");
@@ -198,7 +196,6 @@ lps::specification untime(const lps::specification& spec) {
 
 
 	// Extend original assignments to include t.i(d,e.i)
-	untime_assignments = data::make_assignment_vector(i->assignments());
         untime_assignments.push_back(assignment(last_action_time, time_var));
       } // i->has_time()
 

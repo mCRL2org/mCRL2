@@ -45,7 +45,7 @@ void test_replace()
   variable c("c", sort_bool_::bool_());
   variable d("d", sort_bool_::bool_());
   assignment a(c, d);
-  summand t = replace_data_expressions(s, a);
+  summand t = data::replace_variables(s, a); // must become lps::replace
   std::cout << "<s>" << pp(s) << std::endl;
   std::cout << "<t>" << pp(t) << std::endl;
 }

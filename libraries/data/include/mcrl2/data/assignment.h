@@ -12,20 +12,25 @@
 #ifndef MCRL2_DATA_ASSIGNMENT_H
 #define MCRL2_DATA_ASSIGNMENT_H
 
+#include "boost/iterator/transform_iterator.hpp"
+
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
   namespace data {
+
+    // forward declaration for application operation of assignment
+    template <typename Container, typename ReplaceFunction >
+    Container replace_free_variables(Container const& container, ReplaceFunction replace_function);
 
     /// \brief data assignment.
     ///
@@ -55,14 +60,12 @@ namespace mcrl2 {
         {}
 
         /// \brief Returns the name of the assignment.
-        inline
         variable lhs() const
         {
           return variable(atermpp::arg1(*this));
         }
 
         /// \brief Returns the right hand side of the assignment
-        inline
         data_expression rhs() const
         {
           return atermpp::arg2(*this);
@@ -72,8 +75,7 @@ namespace mcrl2 {
         /// \return True if the assignement is well typed.
         bool is_well_typed() const
         {
-          bool result = lhs().sort() == rhs().sort();
-          if (!result)
+          if (lhs().sort() != rhs().sort())
           {
             std::clog << "data_assignment::is_well_typed() failed: the left and right hand sides "
                << mcrl2::core::pp(lhs()) << " and " << mcrl2::core::pp(rhs()) << " have different sorts." << std::endl;
@@ -82,13 +84,18 @@ namespace mcrl2 {
           return true;
         }
 
+        data_expression operator()(const variable& x) const
+        {
+          return x == lhs() ? rhs() : data_expression(x);
+        }
+
         /// \brief Applies the substitution to a term
         /// \param x A term
         /// \return The value <tt>x[lhs() := rhs()]</tt>.
-        template <typename Term>
-        data_expression operator()(const Term& x) const
+        template < typename Expression >
+        data_expression operator()(const Expression& x) const
         {
-          return atermpp::replace(x, lhs(), rhs());
+          return data::replace_free_variables< Expression, assignment const& >(x, *this);
         }
 
     }; // class assignment
@@ -98,8 +105,44 @@ namespace mcrl2 {
     /// \brief vector of assignments
     typedef atermpp::vector<assignment>    assignment_vector;
 
+    /// \brief Selects the right-hand side of an assignment
+    struct left_hand_side : public std::unary_function< variable, const assignment >
+    {
+      variable operator()(assignment const& a) const {
+        return a.lhs();
+      }
+    };
 
-    ///////////////////////////////////////////////////////////////////////////////
+    /// \brief Selects the right-hand side of an assignment
+    struct right_hand_side : public std::unary_function< data_expression, const assignment >
+    {
+      data_expression operator()(assignment const& a) const {
+        return a.rhs();
+      }
+    };
+
+    /// \brief Returns the corresponding sequence of left-hand sides for a given sequence assignment (lazy)
+    /// \param[in] assignments the sequence of unmutable assignments
+    /// \return a sequence r such that assignments.i.lhs() = r.i.lhs() for all i
+    template < typename Container >
+    inline 
+    boost::iterator_range< boost::transform_iterator< left_hand_side, typename Container::const_iterator > >
+    make_assignment_left_hand_side_range(Container const& assignments, typename detail::enable_if_container< Container, assignment >::type* = 0)
+    {
+      return boost::iterator_range< boost::transform_iterator< left_hand_side, typename Container::const_iterator > >(assignments);
+    }
+
+    /// \brief Returns the corresponding sequence of left-hand sides for a given sequence assignment (lazy)
+    /// \param[in] assignments the sequence of unmutable assignments
+    /// \return a sequence r such that assignments.i.lhs() = r.i.lhs() for all i
+    template < typename Container >
+    inline 
+    boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >
+    make_assignment_right_hand_side_range(Container const& assignments, typename detail::enable_if_container< Container, assignment >::type* = 0)
+    {
+      return boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >(assignments);
+    }
+
     /// \brief Constructs an assignment_list by pairwise combining a variable and expression
     /// \param lhs A sequence of data variables
     /// \param rhs A sequence of data expressions
@@ -117,7 +160,6 @@ namespace mcrl2 {
       return result;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
     /// \brief Constructs an assignment_list by pairwise combining a variable and expression
     /// \param lhs A sequence of data variables
     /// \param rhs A sequence of data expressions
@@ -127,68 +169,22 @@ namespace mcrl2 {
       return convert< assignment_list >(make_assignment_vector(lhs, rhs));
     }
 
-/// \cond INTERNAL_DOCS
-namespace detail {
-
-  /// \brief Function object that applies a substitution to the right hand side of an assignment
-  template <typename UnaryFunction>
-  struct assignment_substitute_rhs
-  {
-    const UnaryFunction& f;
-
-    assignment_substitute_rhs(const UnaryFunction& f_)
-      : f(f_)
-    {}
-
-    assignment operator()(const assignment& a) const
-    {
-      return assignment(a.lhs(), f(a.rhs()));
-    }
-  };
-
-} // namespace detail
-/// \endcond
-
-    /// \brief Applies a substitution function to data expressions appearing in the right hand
-    /// sides of assignments.
-    /// \param l                         A sequence of assignments
-    /// \param f A function that models the concept UnaryFunction with dependent
-    /// types argument_type and result_type equal to data_expression.
-    /// \return The substitution result.
-    template <typename UnaryFunction>
-    assignment_list replace_data_expressions(const assignment_list& l, UnaryFunction f)
-    {
-      return atermpp::apply(l, detail::assignment_substitute_rhs<UnaryFunction>(f));
+    /// \brief Converts an iterator range to data_expression_list
+    /// \param r A range of assignments.
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename Container >
+    inline assignment_list make_assignment_list(Container const& container, typename detail::enable_if_container< Container, assignment >::type* = 0) {
+      return convert< assignment_list >(container);
     }
 
     /// \brief Converts an iterator range to data_expression_list
     /// \param r A range of assignments.
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
-    template < typename ForwardTraversalIterator >
-    inline assignment_list make_assignment_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< assignment_list >(r);
-    }
-
-    /// \brief Converts a vector to a variable_list 
-    /// \param r A range of assignments.
-    template < typename Expression >
-    inline assignment_list make_assignment_list(atermpp::vector< Expression >const& r) {
-      return convert< assignment_list >(r);
-    }
-
-    /// \brief Converts an iterator range to variable_list
-    /// \param r A range of assignments.
-    template < typename ForwardTraversalIterator >
-    inline assignment_vector make_assignment_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< assignment_vector >(r);
-    }
-
-    /// \brief Converts an iterator range to variable_list
-    /// \param r A range of assignments.
-    template < typename Expression >
-    inline assignment_vector make_assignment_vector(atermpp::term_list< Expression > const& r) {
-      return convert< assignment_vector >(boost::make_iterator_range(r));
+    template < typename Container >
+    inline assignment_list make_assignment_vector(Container const& container, typename detail::enable_if_container< Container, assignment >::type* = 0) {
+      return convert< assignment_vector >(container);
     }
 
   } // namespace data

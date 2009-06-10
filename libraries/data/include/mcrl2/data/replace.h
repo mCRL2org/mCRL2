@@ -56,7 +56,7 @@ namespace mcrl2 {
               declarations.push_back((*this)(r.front()));
             }
 
-            return where_clause((*this)(w.body()), boost::make_iterator_range(declarations));
+            return where_clause((*this)(w.body()), declarations);
           }
 
           application operator()(application const& a)
@@ -103,7 +103,27 @@ namespace mcrl2 {
       {
         protected:
 
-          std::set< variable > m_bound;
+          std::multiset< variable > m_bound;
+
+          template < typename Container >
+          inline
+          void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          {
+            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
+            {
+              m_bound.insert(*i);
+            }
+          }
+
+          template < typename Container >
+          inline
+          void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          {
+            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
+            {
+              m_bound.erase(m_bound.find(*i));
+            }
+          }
 
         public:
 
@@ -111,24 +131,20 @@ namespace mcrl2 {
 
           where_clause operator()(where_clause const& w)
           {
-            std::set< variable > bound_variables(m_bound.begin(), m_bound.end());
+            increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
 
             atermpp::vector< assignment > declarations;
 
             for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
             {
-              bound_variables.insert(r.front().lhs());
-
               declarations.push_back((*this)(r.front()));
             }
 
-            m_bound.swap(bound_variables);
+            data_expression new_where_clause(where_clause((*this)(w.body()), declarations));
 
-            data_expression new_body((*this)(w.body()));
+            decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
 
-            m_bound.swap(bound_variables);
-
-            return where_clause(new_body, boost::make_iterator_range(declarations));
+            return new_where_clause;
           }
 
           bool check_replacement_assumption(variable const& v)
@@ -152,17 +168,13 @@ namespace mcrl2 {
 
           abstraction operator()(abstraction const& a)
           {
-            std::set< variable > bound_variables(boost::copy_range< std::set< variable > >(a.variables()));
+            increase_bind_count(a.variables());
 
-            bound_variables.insert(m_bound.begin(), m_bound.end());
+            abstraction new_abstraction(a.binding_operator(), a.variables(), (*this)(a.body()));
 
-            m_bound.swap(bound_variables);
+            decrease_bind_count(a.variables());
 
-            data_expression new_body((*this)(a.body()));
-
-            m_bound.swap(bound_variables);
-
-            return abstraction(a.binding_operator(), a.variables(), new_body);
+            return new_abstraction;
           }
 
         protected:

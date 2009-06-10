@@ -458,7 +458,7 @@ summand replace_data_expressions(const summand& s,
 
   if (substitute_condition)
   {
-    condition = substitute(f, condition);
+    condition = data::replace_free_variables(f, condition);
   }
   if (substitute_actions && !s.is_delta())
   {
@@ -466,11 +466,11 @@ summand replace_data_expressions(const summand& s,
   }
   if (substitute_time && s.has_time())
   {
-    time = substitute(f, time);
+    time = data::replace_free_variables(time, f);
   }
   if (substitute_next_state)
   {
-    assignments = replace_data_expressions(assignments, f);
+    assignments = data::replace_free_variables(assignments, f);
   }
   return summand(s.summation_variables(), condition, s.is_delta(), actions, time, assignments);
 }

@@ -146,12 +146,12 @@ namespace mcrl2 {
     std::set< data::variable > find_all_free_variables(Container const& container)
     {
       std::set< data::variable > result;
-    
+
       find_all_free_variables(container, data::detail::make_inserter(result));
-    
+
       return result;
     }
-    
+
   } // namespace  lps
 } // namespace mcrl2
 
