@@ -77,7 +77,7 @@ static unsigned long long num_found_same;
 static unsigned long long current_state;
 static unsigned long long initial_state;
 
-static atermpp::vector<ATerm> backpointers;
+static atermpp::vector<atermpp::aterm> backpointers;
 static unsigned long *bithashtable = NULL;
 
 static bool trace_support = false;
@@ -138,7 +138,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   if ( lgopts->trace || lgopts->save_error_trace )
   {
     trace_support = true;
-    backpointers.push_back(NULL);
+    backpointers.push_back(atermpp::aterm());
   } else {
     trace_support = false;
   }
@@ -262,7 +262,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
   {
     tr = ATinsert(tr,(ATerm) ATmakeList2((ATerm) extra_transition,extra_state));
   }
-  while ( (ns = backpointers[ATindexedSetGetIndex(states,s)]) != NULL )
+  while ( (ns = backpointers[ATindexedSetGetIndex(states,s)]) != atermpp::aterm() )
   {
     ATermAppl trans;
     ATerm t;

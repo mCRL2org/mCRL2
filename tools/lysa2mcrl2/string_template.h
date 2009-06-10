@@ -23,14 +23,13 @@
 
 
 using namespace std;
-using boost::shared_ptr;
 
 class StringTemplate;
 
 class StringTemplateFile
 {
 protected:
-	map<string, string> format_strings;
+	std::map<std::string, std::string> format_strings;
 public:
 	StringTemplateFile(string filecontent);
 	StringTemplate get(string id);
@@ -41,9 +40,9 @@ public:
 class StringTemplate
 {
 protected:
-	string subject;
-	string current_key;
-  map<string, shared_ptr<ostringstream> > streams;
+	std::string subject;
+	std::string current_key;
+  std::map<std::string, boost::shared_ptr<std::ostringstream> > streams;
 public:
 	StringTemplate(string format_string) : subject(format_string) {};
   StringTemplate(StringTemplateFile& stf, string id) : subject(stf.fmt_string(id)) {};
@@ -56,8 +55,6 @@ public:
   void finalise();
 	string get() { finalise(); return subject; }
 };
-
-
 
 
 #endif

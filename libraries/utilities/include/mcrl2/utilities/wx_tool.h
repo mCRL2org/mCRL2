@@ -116,7 +116,7 @@ namespace mcrl2 {
               arguments.push_back(boost::shared_array< char >(new char[argument.size() + 1]));
 
               std::copy(argument.begin(), argument.end(), arguments.back().get());
-              
+
               // Make sure that the string is zero terminated
               arguments.back()[argument.size()] = '\0';
 
@@ -196,7 +196,7 @@ namespace mcrl2 {
           int OnRun() {
             if (m_execute) {
               if (wxWindow* window = GetTopWindow()) {
- 	        wx_handler* handler = new wx_handler(*this);
+                wx_handler* handler = new wx_handler(*this);
 
                 // register fallback event handler
                 wxEvtHandler* original(window->PopEventHandler());
@@ -253,7 +253,7 @@ namespace mcrl2 {
                       std::string const& known_issues = "",
                       std::vector< std::string > const& documenters = std::vector< std::string >()) :
                           ToolBase(boost::to_lower_copy(tool_name),
-				   boost::join(developers, ","),
+                                   boost::join(developers, ","),
                                    what_is, description, known_issues),
                           m_execute(false), m_tool_name(tool_name),
                           m_description(description_gui), m_developers(developers),

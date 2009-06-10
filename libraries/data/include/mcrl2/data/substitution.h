@@ -381,7 +381,7 @@ namespace mcrl2 {
         iterator find(variable_type const& v) const {
           return m_map.find(v);
         }
-        
+
         /// \brief Returns true if the sequence of assignments is empty
         bool empty() const {
           return this->m_map.empty();
@@ -442,7 +442,7 @@ namespace mcrl2 {
     {
       return map_substitution< MapContainer >(vc, ec);
     }
-  
+
     template <typename VariableContainer, typename ExpressionContainer >
     map_substitution< std::map< typename VariableContainer::value_type, typename ExpressionContainer::value_type > >
     make_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)

@@ -104,18 +104,6 @@ void StaticGraph::make_random(verti V, unsigned out_deg, EdgeDirection edge_dir)
     assign(edges, edge_dir);
 }
 
-template<class It, class Cmp> bool is_sorted(It i, It j, Cmp &cmp)
-{
-    if (i == j) return true;
-    for (;;)
-    {
-        It k = i;
-        if (++k == j) return true;
-        if (cmp(*k, *i)) return false; // *(i+1) > *i
-        i = k;
-    }
-}
-
 void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
 {
     // Find number of vertices
@@ -136,7 +124,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!std::is_sorted(edges.begin(), edges.end(), std::ptr_fun(&edge_cmp_forward)))
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }

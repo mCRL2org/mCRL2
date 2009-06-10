@@ -677,8 +677,8 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
     SVCstateIndex newState = SVCnewState(outFile,
     (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
     SVCsetInitialState(outFile, newState);
-    SVCsetType(outFile, "mCRL2");
-    SVCsetCreator(outFile, "ltsmin");
+    SVCsetType(outFile, const_cast< char* >("mCRL2"));
+    SVCsetCreator(outFile, const_cast< char* >("ltsmin"));
     n_tau_transitions = WriteTransitions();
     if (omit_tauloops == DELETE_TAULOOPS) {
          sprintf(buf,
@@ -749,8 +749,8 @@ int WriteDataAddParam(SVCfile *in, SVCstateIndex initState, int is_branching)
   SVClabelIndex lab;
   SVCparameterIndex param;
 
-  SVCsetType(outFile, "mCRL2+info");
-  SVCsetCreator(outFile, "ltsmin2");
+  SVCsetType(outFile, const_cast< char* >("mCRL2+info"));
+  SVCsetCreator(outFile, const_cast< char* >("ltsmin2"));
 
   SVCstateIndex init = SVCgetInitialState(in);
   ReturnEquivalenceClasses(initState,is_branching?ATtrue:ATfalse);

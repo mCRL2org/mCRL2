@@ -64,7 +64,7 @@ ostringstream& StringTemplate::operator[] (string key)
 {
   if(!streams.count(key))
   {
-    shared_ptr<ostringstream> os(new ostringstream());
+    boost::shared_ptr<ostringstream> os(new ostringstream());
     streams.insert(make_pair(key, os));
   }
   return *(streams[key]);
@@ -74,7 +74,7 @@ void StringTemplate::finalise()
 {
   //pair<string, shared_ptr<ostringstream> > v;
   //BOOST_FOREACH(v, streams)
-  for(map<string, shared_ptr<ostringstream> >::iterator i = streams.begin(); i != streams.end(); i++)
+  for(map<string, boost::shared_ptr<ostringstream> >::iterator i = streams.begin(); i != streams.end(); i++)
   {
     string key(i->first);
     string value(i->second->str());
