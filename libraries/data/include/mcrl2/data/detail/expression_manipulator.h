@@ -83,7 +83,7 @@ namespace mcrl2 {
 
         assignment operator()(assignment const& a)
         {
-          return assignment((*this)(a.lhs()), (*this)(a.rhs()));
+          return assignment(a.lhs(), (*this)(a.rhs()));
         }
 
         // \deprecated exists only for backwards compatibility
