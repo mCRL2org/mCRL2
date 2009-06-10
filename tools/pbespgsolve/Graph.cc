@@ -8,6 +8,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "Graph.h"
+#include "boost/bind.hpp"
 #include <assert.h>
 #include <stdlib.h>
 #include <algorithm>
@@ -124,7 +125,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!std::is_sorted(edges.begin(), edges.end(), std::ptr_fun(&edge_cmp_forward)))
+        if (std::adjacent_find(edges.begin(), edges.end(), boost::bind(std::logical_not< bool >(), boost::bind(&edge_cmp_forward, _1, _2))) != edges.end())
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }
