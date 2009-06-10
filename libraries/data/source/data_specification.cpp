@@ -16,6 +16,7 @@
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/map_substitution_adapter.h"
@@ -609,7 +610,12 @@ namespace mcrl2 {
 
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
-            renamings[name] = reference;
+            for (atermpp::map< sort_expression, sort_expression >::iterator i = renamings.begin(); i != renamings.end(); ++i)
+            {
+              i->second = atermpp::replace(i->second, name, reference);
+            }
+
+            renamings[name] = atermpp::replace(reference, make_map_substitution_adapter(renamings));
           }
           else
           {
@@ -627,7 +633,7 @@ namespace mcrl2 {
 
           partial_renamings.erase(i->first);
 
-          add_alias(alias(i->first, atermpp::bottom_up_replace(i->second, make_map_substitution_adapter(partial_renamings))));
+          add_alias(alias(i->first, atermpp::replace(i->second, make_map_substitution_adapter(partial_renamings))));
         }
       }
 
@@ -635,20 +641,20 @@ namespace mcrl2 {
 
       for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
       {
-        add_alias(alias(i->second, atermpp::bottom_up_replace(i->first, renaming_substitution)));
+        add_alias(alias(i->second, atermpp::replace(i->first, renaming_substitution)));
       }
 
       for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
         if (!i->is_alias())
         {
-          add_sort(atermpp::bottom_up_replace(*i, renaming_substitution));
+          add_sort(atermpp::replace(*i, renaming_substitution));
         }
       }
 
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {
-        function_symbol new_function(atermpp::bottom_up_replace(*i, renaming_substitution));
+        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
 
         if (!search_constructor(new_function))
         {
@@ -657,7 +663,7 @@ namespace mcrl2 {
       }
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
       {
-        function_symbol new_function(atermpp::bottom_up_replace(*i, renaming_substitution));
+        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
 
         if (!search_mapping(new_function))
         {
@@ -666,7 +672,7 @@ namespace mcrl2 {
       }
       for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
       {
-        data_equation new_equation(atermpp::bottom_up_replace(*i, renaming_substitution));
+        data_equation new_equation(atermpp::replace(*i, renaming_substitution));
 
         if (!search_equation(new_equation))
         {
@@ -724,6 +730,13 @@ namespace mcrl2 {
 
           if (renamings.find(reference) == renamings.end())
           {
+            atermpp::map< sort_expression, sort_expression > copy_renamings(renamings);
+
+            for (atermpp::map< sort_expression, sort_expression >::iterator i = copy_renamings.begin(); i != copy_renamings.end(); ++i)
+            {
+              renamings[atermpp::replace(i->first, reference, r.front().name())] = i->second;
+            }
+
             renamings[reference] = r.front().name();
           }
           else
@@ -740,36 +753,43 @@ namespace mcrl2 {
 
             if (renamings.find(normalised) == renamings.end())
             {
-              renamings[normalised] = generator.generate_name(normalised);
+              basic_sort name(generator.generate_name(normalised));
+
+              renamings[normalised] = name;
+              sorts.insert(alias(name, normalised));
             }
           }
-          else if (!r.front().is_alias())
-          { // incidentally, store in set of sorts
-            sorts.insert(r.front());
+         else if (!r.front().is_alias())
+         { // incidentally, store in set of sorts
+           sorts.insert(r.front());
+         }
+        }
+
+        // recursively apply renamings until no longer possible, or when unfolding recursive sorts
+        for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
+        {
+          atermpp::map< sort_expression, sort_expression >::const_iterator j = renamings.find(r.front().reference());
+
+          if (renamings.find(r.front().reference()) != renamings.end())
+          {
+            std::map< sort_expression, sort_expression > partial_renamings(renamings);
+
+            partial_renamings.erase(j->first);
+
+            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
           }
-        }
-
-        // Step two: Normalise names for container sorts
-        for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
-        {
-          std::map< sort_expression, sort_expression > partial_renamings(renamings);
-
-          partial_renamings.erase(i->first);
-
-          sorts.insert(alias(i->second, atermpp::bottom_up_replace(i->first, make_map_substitution_adapter(partial_renamings))));
-        }
-        for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
-        {
-          sorts.insert(alias(i->second, atermpp::bottom_up_replace(i->first, make_map_substitution_adapter(renamings))));
+          else {
+            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(renamings))));
+          }
         }
 
         using namespace core::detail;
 
         return gsMakeDataSpec(
            gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
-           gsMakeConsSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
-           gsMakeMapSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
-           gsMakeDataEqnSpec(atermpp::bottom_up_replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
+           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
+           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
+           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
       }
     } // namespace detail
     /// \endcond
