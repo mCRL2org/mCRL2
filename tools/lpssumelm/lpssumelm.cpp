@@ -47,11 +47,11 @@ class sumelm_tool: public squadt_tool< input_output_tool >
 
       lps_specification.load(m_input_filename);
 
-      // Untime lps_specification and save the output to a binary file
-      lps::specification new_spec = sumelm(lps_specification);
+      // apply sum elimination to lps_specification and save the output to a binary file
+      lps::sumelm_algorithm(lps_specification, core::gsVerbose||core::gsDebug).run();
 
       gsDebugMsg("Sum elimination completed, saving to %s\n", m_output_filename.c_str());
-      new_spec.save(m_output_filename);
+      lps_specification.save(m_output_filename);
 
       return true;
     }

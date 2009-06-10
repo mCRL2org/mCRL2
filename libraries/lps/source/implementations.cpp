@@ -1,7 +1,6 @@
 #include "boost.hpp" // precompiled headers
 
 #include "lin_std.cpp"
-#include "sumelm.cpp"
 #include "binary.cpp"
 #include "data_elimination.cpp"
 #include "invariant_checker.cpp"

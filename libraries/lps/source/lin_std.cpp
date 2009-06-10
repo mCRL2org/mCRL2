@@ -5804,7 +5804,9 @@ class specification_basic_type:public boost::noncopyable
                      summand_(sumvars,newcondition,false,multiaction,
                                        smmnd.has_time(),smmnd.time(),nextstate);
             if (!options.nosumelm)
-            { new_summand=sumelm(new_summand);
+            { action_summand act_summand(summand_to_action_summand(new_summand));
+              sumelm(act_summand);
+              new_summand = action_summand_to_aterm(act_summand);
             } 
     
             if (newcondition!=sort_bool_::false_()) 

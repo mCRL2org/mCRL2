@@ -161,7 +161,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         lps::rewrite(lps_new_spec, datar);
       }
       if(m_sumelm)
-      { lps_new_spec = sumelm(lps_new_spec);
+      { sumelm_algorithm(lps_new_spec, core::gsVerbose||core::gsDebug).run();
         if(m_rewrite)
         {
           lps::rewrite(lps_new_spec, datar);

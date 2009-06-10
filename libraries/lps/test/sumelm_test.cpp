@@ -39,7 +39,8 @@ void test_case_1()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -61,7 +62,8 @@ void test_case_2()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -85,7 +87,8 @@ void test_case_3()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -107,7 +110,8 @@ void test_case_4()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -131,7 +135,8 @@ void test_case_5()
   // FIXME, this test case requires the parser to allow parsing of free
   // variables.
   specification s0 = mcrl22lps(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -159,6 +164,7 @@ void test_case_5()
       }
     }
   }
+  std::clog << lps::pp(s1) << std::endl;
 }
 
 /*
@@ -175,7 +181,8 @@ void test_case_6()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -221,7 +228,8 @@ void test_case_7()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -251,7 +259,8 @@ void test_case_8()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -278,7 +287,8 @@ void test_case_9()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -302,7 +312,8 @@ void test_case_10()
   );
 
   specification s0 = parse_linear_process_specification(text);
-  specification s1 = sumelm(s0);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
