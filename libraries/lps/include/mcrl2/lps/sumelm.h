@@ -170,6 +170,7 @@ namespace mcrl2 {
     /// \brief Apply the sum elimination lemma to summand s.
     /// \param s an action summand
     /// \return s to which the sum elimination lemma has been applied.
+    inline
     void sumelm(action_summand& s)
     {
       specification spec;
@@ -180,6 +181,7 @@ namespace mcrl2 {
     /// \brief Apply the sum elimination lemma to summand s.
     /// \param s a deadlock summand
     /// \return s to which the sum elimination lemma has been applied.
+    inline
     void sumelm(deadlock_summand& s)
     {
       specification spec;
