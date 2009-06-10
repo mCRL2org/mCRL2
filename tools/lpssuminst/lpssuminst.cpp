@@ -27,7 +27,8 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
     typedef squadt_tool< rewriter_tool<input_output_tool> > super;
 
-    lps::t_suminst_options m_suminst_opts; ///< Options of the algorithm
+    bool m_tau_summands_only;
+    bool m_finite_sorts_only;
 
     void add_options(interface_description& desc)
     {
@@ -39,8 +40,8 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      m_suminst_opts.tau_only    = 0 < parser.options.count("tau");
-      m_suminst_opts.finite_only = 0 < parser.options.count("finite");
+      m_tau_summands_only    = 0 < parser.options.count("tau");
+      m_finite_sorts_only = 0 < parser.options.count("finite");
     }
 
   public:
@@ -65,10 +66,8 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
        lps_specification.load(m_input_filename);
 
        mcrl2::data::rewriter r = create_rewriter(lps_specification.data());
-
-       lps::specification result = instantiate_sums(lps_specification, r, m_suminst_opts);
-
-       result.save(m_output_filename);
+       lps::suminst_algorithm<data::rewriter>(lps_specification, r, m_finite_sorts_only, m_tau_summands_only).run();
+       lps_specification.save(m_output_filename);
 
        return true;
     }
@@ -161,20 +160,20 @@ class suminst_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(configuration);
 
-      m_suminst_opts.tau_only = configuration.option_exists(option_tau_only);
-      m_suminst_opts.finite_only = configuration.option_exists(option_finite_only);
+      m_tau_summands_only = configuration.option_exists(option_tau_only);
+      m_finite_sorts_only = configuration.option_exists(option_finite_only);
 
       /* Create display */
       tipi::tool_display d;
 
       send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text("Declustering in progress"), layout::left)));
+                    append(d.create< label >().set_text("Instantiation of summation variables in progress"), layout::left)));
 
       //Perform instantiation
       bool result = run() == 0;
 
       send_display_layout(d.manager(d.create< vertical_box >().
-                    append(d.create< label >().set_text(std::string("Declustering ") + ((result) ? "succeeded" : "failed")), layout::left)));
+                    append(d.create< label >().set_text(std::string("Instantiation of summation variables ") + ((result) ? "succeeded" : "failed")), layout::left)));
 
       return result;
     }

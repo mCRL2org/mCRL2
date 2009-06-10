@@ -9,4 +9,4 @@
 #include "confluence_checker.cpp"
 #include "disjointness_checker.cpp"
 #include "invariant_eliminator.cpp"
-#include "suminst.cpp"
+
