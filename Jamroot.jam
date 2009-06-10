@@ -165,7 +165,7 @@ if [ path.exists ./tools ] {
 
       # General examples
       install-data examples
-              : [ path.glob-tree $(TOP)/examples : *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
+              : [ path.glob-tree $(TOP)/examples : *.gra *.dgc *.dgd *.txt *.mcrl2 *.pnml *.mcf *.fsm *.trc project.xml : .svn ]
               : <install-source-root>./examples
                 <data-sub-location>examples
               ;

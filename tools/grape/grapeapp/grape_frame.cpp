@@ -563,12 +563,12 @@ void grape_frame::update_menubar( void )
   {
     bool object_selected = dia_ptr->count_selected_objects() > 0;
     wxString dia_name = dia_ptr->get_name();
-    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, _T("&Validate " + dia_name + "\tF5") );
-    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate diagram " + dia_name) );
-    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, _T("Export " + dia_name + " to &mCRL2...\tCtrl-E") );
-    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, _T("Export diagram " + dia_name + " to mCRL2") );
-    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, _T("Export " + dia_name + " to &image...\tCtrl-I") );
-    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, _T("Export " + dia_name + " to image") );
+    m_menubar->SetLabel( GRAPE_MENU_VALIDATE, wxString(_T("&Validate ")).Append(dia_name).Append(wxString(_T("\tF5"))) );
+    m_menubar->SetHelpString( GRAPE_MENU_VALIDATE, _T("Validate diagram ") + dia_name );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTMCRL2, wxString(_T("Export ")).Append(dia_name).Append(_T(" to &mCRL2...\tCtrl-E")) );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTMCRL2, wxString(_T("Export diagram ")).Append(dia_name).Append(_T(" to mCRL2")) );
+    m_menubar->SetLabel( GRAPE_MENU_EXPORTIMAGE, wxString(_T("Export ")).Append(dia_name).Append(_T(" to &image...\tCtrl-I")) );
+    m_menubar->SetHelpString( GRAPE_MENU_EXPORTIMAGE, wxString(_T("Export ")).Append(dia_name).Append(_T(" to image")) );
     m_menubar->Enable( GRAPE_MENU_VALIDATE, true );
     m_menubar->Enable( GRAPE_MENU_EXPORTMCRL2, true );
     m_menubar->Enable( GRAPE_MENU_EXPORTIMAGE, true );
