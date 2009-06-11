@@ -230,104 +230,51 @@ namespace mcrl2 {
             return m_result.end();
           }
       };
-
-      // Temporary measure (used to guard normlisation of recursive structured sorts
-      class normaliser
-      {
-        private:
-
-          data_specification const& m_specification;
-
-          std::set< basic_sort >    m_known;
-
-        public:
-
-          structured_sort normalise(structured_sort const& e)
-          {
-            for (data_specification::aliases_const_range r(m_specification.aliases(e)); !r.empty(); r.advance_begin(1))
-            {
-              m_known.insert(r.front().name());
-            }
-
-            atermpp::vector< structured_sort_constructor > new_constructors;
-
-            for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
-            {
-              atermpp::vector< structured_sort_constructor_argument > new_arguments;
-
-              for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
-              {
-                new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
-              }
-
-              new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
-            }
-
-            return structured_sort(new_constructors);
-          }
-
-          sort_expression normalise(sort_expression const& e)
-          {
-            if (e.is_basic_sort())
-            {
-              if (m_known.find(e) == m_known.end())
-              {
-                return m_specification.find_referenced_sort(e);
-              }
-            }
-            else if (e.is_function_sort())
-            {
-              atermpp::vector< sort_expression > new_domain;
-          
-              for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
-              {
-                new_domain.push_back(normalise(r.front()));
-              }
-          
-              return function_sort(new_domain, normalise(function_sort(e).codomain()));
-            }
-            else if (e.is_container_sort())
-            {
-              return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
-            }
-            else if (e.is_structured_sort())
-            {
-              normalise(structured_sort(e));
-            }
-
-            return e;
-          }
-
-          normaliser(data_specification const& specification) : m_specification(specification)
-          {}
-      };
     } // namespace detail
     /// \endcond
 
+    // Assumes that the right-hand sides of aliases are normal form
     sort_expression data_specification::normalise(sort_expression const& e) const
     {
       if (e.is_basic_sort())
       {
         return find_referenced_sort(e);
       }
-      else if (e.is_function_sort())
-      {
-        atermpp::vector< sort_expression > new_domain;
-
-        for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
+      else if (m_aliases_by_sort.find(e) == m_aliases_by_sort.end())
+      { // only normalise when no name has been introduced for the sort (needed for recursive structured sorts)
+        if (e.is_function_sort())
         {
-          new_domain.push_back(normalise(r.front()));
+          atermpp::vector< sort_expression > new_domain;
+       
+          for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
+          {
+            new_domain.push_back(normalise(r.front()));
+          }
+       
+          return function_sort(new_domain, normalise(function_sort(e).codomain()));
         }
-
-        return function_sort(new_domain, normalise(function_sort(e).codomain()));
-      }
-      else if (e.is_container_sort())
-      {
-        return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
-      }
-      else if (e.is_structured_sort())
-      {
-        return detail::normaliser(*this).normalise(structured_sort(e));
+        else if (e.is_container_sort())
+        {
+          return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
+        }
+        else if (e.is_structured_sort())
+        {
+          atermpp::vector< structured_sort_constructor > new_constructors;
+       
+          for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
+          {
+            atermpp::vector< structured_sort_constructor_argument > new_arguments;
+       
+            for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
+            {
+              new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
+            }
+       
+            new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
+          }
+       
+          return structured_sort(new_constructors);
+        }
       }
 
       return e;
@@ -663,18 +610,25 @@ namespace mcrl2 {
           basic_sort      name(alias(*i).name());
           sort_expression reference(alias(*i).reference());
 
+          for (atermpp::map< sort_expression, sort_expression >::iterator j = renamings.begin(); j != renamings.end(); ++j)
+          {
+            j->second = atermpp::replace(j->second, name, reference);
+          }
+
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
-            for (atermpp::map< sort_expression, sort_expression >::iterator i = renamings.begin(); i != renamings.end(); ++i)
-            {
-              i->second = atermpp::replace(i->second, name, reference);
+            if (!reference.is_basic_sort() || renamings.find(reference) == renamings.end())
+            { // no other name for the sort
+              renamings[name] = atermpp::replace(reference, make_map_substitution_adapter(renamings));
             }
-
-            renamings[name] = atermpp::replace(reference, make_map_substitution_adapter(renamings));
+            else
+            {
+              other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, make_map_substitution_adapter(renamings))));
+            }
           }
           else
           {
-            other_names.insert(std::pair< sort_expression, sort_expression >(reference, name));
+            renamings.insert(std::pair< sort_expression, sort_expression >(name, reference));
           }
         }
       }
@@ -684,11 +638,7 @@ namespace mcrl2 {
       {
         if (std::string(basic_sort(i->first).name()).find("@legacy_") != 0)
         {
-          std::map< sort_expression, sort_expression > partial_renamings(renamings);
-
-          partial_renamings.erase(i->first);
-
-          add_alias(alias(i->first, atermpp::replace(i->second, make_map_substitution_adapter(partial_renamings))));
+          add_alias(alias(i->first, i->second));
         }
       }
 
@@ -804,21 +754,16 @@ namespace mcrl2 {
         {
           if (r.front().is_container_sort() || r.front().is_structured_sort())
           {
-            sort_expression normalised(s.normalise(r.front()));
-
-            if (renamings.find(normalised) == renamings.end())
+            if (renamings.find(r.front()) == renamings.end())
             {
-              basic_sort name(generator.generate_name(normalised));
+              basic_sort name(generator.generate_name(r.front()));
 
-              renamings[normalised] = name;
-              sorts.insert(alias(name, normalised));
+              renamings[r.front()] = name;
             }
           }
-         else if (!r.front().is_alias())
-         { // incidentally, store in set of sorts
-           sorts.insert(r.front());
-         }
         }
+
+        map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
 
         // recursively apply renamings until no longer possible, or when unfolding recursive sorts
         for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
@@ -834,7 +779,19 @@ namespace mcrl2 {
             sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
           }
           else {
-            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(renamings))));
+            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), renaming_substitution)));
+          }
+        }
+
+        for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
+        {
+          if (r.front().is_container_sort() || r.front().is_structured_sort())
+          {
+            sorts.insert(alias(renamings[r.front()], atermpp::replace(r.front(), renaming_substitution)));
+          }
+          else if (!r.front().is_alias())
+          { // incidentally, store in set of sorts
+            sorts.insert(atermpp::replace(r.front(), renaming_substitution));
           }
         }
 
@@ -842,9 +799,9 @@ namespace mcrl2 {
 
         return gsMakeDataSpec(
            gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
-           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), make_map_substitution_adapter(renamings))),
-           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), make_map_substitution_adapter(renamings))),
-           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), make_map_substitution_adapter(renamings))));
+           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), renaming_substitution)),
+           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), renaming_substitution)),
+           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), renaming_substitution)));
       }
     } // namespace detail
     /// \endcond
