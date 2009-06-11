@@ -372,7 +372,7 @@ namespace lps {
     copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data());
     ATermAppl lps_spec = specification_to_aterm(copy_specification);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
-    result           = data::detail::internal_format_conversion(result);
+    result           = data::detail::internal_format_conversion(spec.data(), result);
     return action_rename_specification(result);
   }
 
