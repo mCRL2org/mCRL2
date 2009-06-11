@@ -52,26 +52,20 @@ namespace mcrl2 {
 
         void operator()(abstraction const& e)
         {
-          (*this)(a.variables());
-          (*this)(a.body());
-        }
-
-        void operator()(abstraction const& a)
-        {
-          (*this)(a.variables());
-          (*this)(a.body());
+          (*this)(e.variables());
+          (*this)(e.body());
         }
 
         void operator()(application const& e)
         {
-          (*this)(a.head());
-          (*this)(a.arguments());
+          (*this)(e.head());
+          (*this)(e.arguments());
         }
 
         void operator()(where_clause const& e)
         {
-          (*this)(a.declarations());
-          (*this)(a.body());
+          (*this)(e.declarations());
+          (*this)(e.body());
         }
 
         void operator()(data_expression const& e)

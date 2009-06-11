@@ -226,12 +226,7 @@ namespace mcrl2 {
 
           data_expression implement(application const& expression)
           {
-            using namespace mcrl2::core::detail;
-
-            // convert arguments
-            atermpp::term_list< data_expression > arguments(implement(expression.arguments()));
-
-            return application(implement(expression.head()), arguments);
+            return application(implement(expression.head()), implement(expression.arguments()));
           }
 
           data_expression reconstruct(application const& expression)

@@ -230,6 +230,77 @@ namespace mcrl2 {
             return m_result.end();
           }
       };
+
+      // Temporary measure (used to guard normlisation of recursive structured sorts
+      class normaliser
+      {
+        private:
+
+          data_specification const& m_specification;
+
+          std::set< basic_sort >    m_known;
+
+        public:
+
+          structured_sort normalise(structured_sort const& e)
+          {
+            for (data_specification::aliases_const_range r(m_specification.aliases(e)); !r.empty(); r.advance_begin(1))
+            {
+              m_known.insert(r.front().name());
+            }
+
+            atermpp::vector< structured_sort_constructor > new_constructors;
+
+            for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
+            {
+              atermpp::vector< structured_sort_constructor_argument > new_arguments;
+
+              for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
+              {
+                new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
+              }
+
+              new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
+            }
+
+            return structured_sort(new_constructors);
+          }
+
+          sort_expression normalise(sort_expression const& e)
+          {
+            if (e.is_basic_sort())
+            {
+              if (m_known.find(e) == m_known.end())
+              {
+                return m_specification.find_referenced_sort(e);
+              }
+            }
+            else if (e.is_function_sort())
+            {
+              atermpp::vector< sort_expression > new_domain;
+          
+              for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
+              {
+                new_domain.push_back(normalise(r.front()));
+              }
+          
+              return function_sort(new_domain, normalise(function_sort(e).codomain()));
+            }
+            else if (e.is_container_sort())
+            {
+              return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
+            }
+            else if (e.is_structured_sort())
+            {
+              normalise(structured_sort(e));
+            }
+
+            return e;
+          }
+
+          normaliser(data_specification const& specification) : m_specification(specification)
+          {}
+      };
     } // namespace detail
     /// \endcond
 
@@ -256,24 +327,7 @@ namespace mcrl2 {
       }
       else if (e.is_structured_sort())
       {
-        if (m_aliases_by_sort.find(e) == m_aliases_by_sort.end())
-        { // only normalise when no name has been introduced for the sort (needed for recursive structured sorts)
-          atermpp::vector< structured_sort_constructor > new_constructors;
-
-          for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
-          {
-            atermpp::vector< structured_sort_constructor_argument > new_arguments;
-
-            for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
-            {
-              new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
-            }
-
-            new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
-          }
-
-          return structured_sort(new_constructors);
-        }
+        return detail::normaliser(*this).normalise(structured_sort(e));
       }
 
       return e;
