@@ -95,6 +95,21 @@ namespace mcrl2 {
           }
           else if (e.type() == AT_APPL)
           {
+            return apply(atermpp::aterm_appl(e));
+          }
+          else if (e.type() == AT_LIST)
+          {
+            return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+          }
+
+          return e;
+        }
+
+        // \deprecated exists only for backwards compatibility
+        atermpp::aterm_appl apply(atermpp::aterm_appl e)
+        {
+          if (!e.empty())
+          {
             atermpp::vector< atermpp::aterm_appl > new_arguments;
 
             for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
@@ -102,11 +117,7 @@ namespace mcrl2 {
               new_arguments.push_back((*this)(*i));
             }
 
-            return atermpp::aterm_appl(atermpp::aterm_appl(e).function(), new_arguments.begin(), new_arguments.end());
-          }
-          else if (e.type() == AT_LIST)
-          {
-            return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+            return atermpp::aterm_appl(e.function(), new_arguments.begin(), new_arguments.end());
           }
 
           return e;

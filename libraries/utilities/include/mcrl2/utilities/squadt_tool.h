@@ -83,7 +83,8 @@ namespace mcrl2 {
 #endif
 
         /// \brief relays messages from the mCRL2 messaging system
-        friend void relay_message< squadt_tool >(const ::mcrl2::core::messageType, const char* data);
+        template < class T >
+        friend void relay_message(const ::mcrl2::core::messageType, const char* data);
 
         private:
 
@@ -192,7 +193,7 @@ namespace mcrl2 {
       /// \cond INTERNAL_DOCS
       /** \brief Used to relay messages generated using core::print */
       template < class Tool >
-      inline void relay_message(const ::mcrl2::core::messageType t, const char* data) {
+      void relay_message(const ::mcrl2::core::messageType t, const char* data) {
         tipi::report::type report_type;
 
         switch (t) {
