@@ -34,7 +34,7 @@ static ATerm get_repr(ATerm state);
 
 
 exploration_strategy str_to_expl_strat(const char *s)
-{
+{ 
   if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
   {
     return es_breadth;
@@ -46,6 +46,14 @@ exploration_strategy str_to_expl_strat(const char *s)
   if ( !strcmp(s,"r") || !strcmp(s,"random") )
   {
     return es_random;
+  }
+  if ( !strcmp(s,"p") || !strcmp(s,"priority") )
+  {
+    return es_value_prioritized;
+  }
+  if ( !strcmp(s,"q") || !strcmp(s,"rpriority") )
+  {
+    return es_value_random_prioritized;
   }
   return es_none;
 }
@@ -60,6 +68,10 @@ const char *expl_strat_to_str(exploration_strategy es)
       return "depth";
     case es_random:
       return "random";
+    case es_value_prioritized:
+      return "priority";
+    case es_value_random_prioritized:
+      return "rpriority";
     default:
       return "unknown";
   }
@@ -192,6 +204,24 @@ bool finalise_lts_generation()
     {
       gsVerboseMsg(
         "done with random walk of %llu transition%s (visited %llu unique state%s).\n",
+        trans,
+        (trans==1)?"":"s",
+        num_states,
+        (num_states==1)?"":"s"
+      );
+    } else if ( lgopts->expl_strat == es_value_prioritized )
+    {
+      gsVerboseMsg(
+        "done with value prioritized walk of %llu transition%s (visited %llu unique state%s).\n",
+        trans,
+        (trans==1)?"":"s",
+        num_states,
+        (num_states==1)?"":"s"
+      );
+    } else if ( lgopts->expl_strat == es_value_random_prioritized )
+    {
+      gsVerboseMsg(
+        "done with random value prioritized walk of %llu transition%s (visited %llu unique state%s).\n",
         trans,
         (trans==1)?"":"s",
         num_states,
@@ -878,8 +908,7 @@ bool generate_lts()
         {
           NewState = get_repr(NewState);
           if ( !priority ) // don't store confluent self loops
-          {
-            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+          { tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
             tmp_states = ATinsert(tmp_states,NewState);
           }
         }
@@ -903,6 +932,332 @@ bool generate_lts()
             {
               new_state = ATgetFirst(tmp_states);
             }
+            tmp_trans = ATgetNext(tmp_trans);
+            tmp_states = ATgetNext(tmp_states);
+          }
+          state = new_state;
+        } else {
+          check_deadlocktrace(state);
+          break;
+        }
+
+        current_state++;
+        if ( (current_state%200) == 0 ) {
+          lgopts->display_status(level,current_state,num_states,num_found_same,trans);
+        }
+        if ( gsVerbose && ((current_state%1000) == 0) )
+        {
+          gsVerboseMsg(
+            "monitor: currently explored %llu transition%s and encountered %llu unique state%s.\n",
+            trans,
+            (trans==1)?"":"s",
+            num_states,
+            (num_states==1)?"":"s"
+          );
+        }
+      }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
+      delete nsgen;
+    } else if ( lgopts->expl_strat == es_value_prioritized )
+    { 
+      mcrl2::data::rewriter& rewriter=nstate->getRewriter();
+      NextStateGenerator *nsgen = NULL;
+      srand((unsigned)time(NULL)+getpid());
+      while ( current_state < num_states )
+      // while ( current_state < lgopts->max_states )
+      {
+        ATermList tmp_trans = ATmakeList0();
+        ATermList tmp_states = ATmakeList0();
+        ATermAppl Transition;
+        ATerm NewState;
+        state = ATindexedSetGetElem(states,current_state);
+        nsgen = nstate->getNextStates(state,nsgen);
+        bool priority;
+        while ( nsgen->next(&Transition,&NewState,&priority) )
+        {
+          NewState = get_repr(NewState);
+          if ( !priority ) // don't store confluent self loops
+          {
+            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+            tmp_states = ATinsert(tmp_states,NewState);
+          }
+        }
+
+        // Filter the transitions by only taking the actions that either have no
+        // positive number as first parameter, or that has the lowest positive number.
+        // This can be non-deterministic, as there can be more actions with this low number
+        // as first parameter.
+        //
+        // First find the lowest index.
+
+        ATermAppl lowest_first_action_parameter=NULL;
+
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
+        { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+          if (ATgetLength(multi_action_list)==1)
+          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+            if (ATgetLength(action_arguments)>0) 
+            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+              if (gsIsSortExprNat(first_sort))
+              { 
+                if (lowest_first_action_parameter==NULL)
+                { lowest_first_action_parameter=first_argument;
+                }
+                else 
+                { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprGT(lowest_first_action_parameter,first_argument)));
+                  if (gsIsDataExprTrue(result))
+                  { lowest_first_action_parameter=first_argument;
+                  }
+                  else if (!gsIsDataExprFalse(result))
+                  { assert(0);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Now carry out the actual filtering; 
+        ATermList new_tmp_trans = ATmakeList0();
+        ATermList new_tmp_states = ATmakeList0();
+        ATermList tmp_state_walker = tmp_states;
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
+        { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
+          ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+          tmp_state_walker=ATgetNext(tmp_state_walker);
+          ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+          if (ATgetLength(multi_action_list)==1)
+          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+            if (ATgetLength(action_arguments)>0) 
+            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+              if (gsIsSortExprNat(first_sort))
+              { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprEq(lowest_first_action_parameter,first_argument)));
+                if (gsIsDataExprTrue(result))
+                { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                }
+                else 
+                { assert(gsIsDataExprFalse(result));
+                  // The transition is omitted!
+                }
+              }
+              else 
+              {
+                new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+              }
+            }
+            else 
+            { 
+              new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+              new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+            }
+          }
+          else 
+          { 
+            new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+            new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+          }
+        }
+        tmp_trans=ATreverse(new_tmp_trans);
+        tmp_states=ATreverse(new_tmp_states);
+
+        if ( nsgen->errorOccurred() )
+        {
+          lg_error = true;
+          save_error_trace(state);
+          break;
+        }
+
+        int len = ATgetLength(tmp_trans);
+        if ( len > 0 )
+        {
+          // ATerm new_state = NULL;
+          for (int i=0; i<len; i++)
+          {
+            if (num_states-current_state <= lgopts->todo_max)
+            { add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+            }
+            else if (rand()%2==0)  // with 50 % probability
+            { current_state++;    // ignore the current state
+              add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+            }  
+            else 
+            { // Ignore the new state.
+            }
+
+            tmp_trans = ATgetNext(tmp_trans);
+            tmp_states = ATgetNext(tmp_states);
+          }
+        } else {
+          check_deadlocktrace(state);
+          break;
+        }
+
+        current_state++;
+        if ( (current_state%200) == 0 ) {
+          lgopts->display_status(level,current_state,num_states,num_found_same,trans);
+        }
+        if ( gsVerbose && ((current_state%1000) == 0) )
+        {
+          gsVerboseMsg(
+            "monitor: currently explored %llu transition%s and encountered %llu unique state%s [MAX %d].\n",
+            trans,
+            (trans==1)?"":"s",
+            num_states,
+            (num_states==1)?"":"s",
+            lgopts->todo_max
+          );
+        }
+      }
+      lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
+      delete nsgen;
+    } else if ( lgopts->expl_strat == es_value_random_prioritized )
+    { 
+      srand((unsigned)time(NULL)+getpid());
+      mcrl2::data::rewriter& rewriter=nstate->getRewriter();
+      NextStateGenerator *nsgen = NULL;
+      while ( current_state < lgopts->max_states )
+      {
+        ATermList tmp_trans = ATmakeList0();
+        ATermList tmp_states = ATmakeList0();
+        ATermAppl Transition;
+        ATerm NewState;
+
+        // state = ATindexedSetGetElem(states,current_state);
+        nsgen = nstate->getNextStates(state,nsgen);
+        bool priority;
+        while ( nsgen->next(&Transition,&NewState,&priority) )
+        {
+          NewState = get_repr(NewState);
+          if ( !priority ) // don't store confluent self loops
+          {
+            tmp_trans = ATinsert(tmp_trans,(ATerm) Transition);
+            tmp_states = ATinsert(tmp_states,NewState);
+          }
+        }
+
+        // Filter the transitions by only taking the actions that either have no
+        // positive number as first parameter, or that has the lowest positive number.
+        // This can be non-deterministic, as there can be more actions with this low number
+        // as first parameter.
+        //
+        // First find the lowest index.
+
+        ATermAppl lowest_first_action_parameter=NULL;
+
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
+        { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+          if (ATgetLength(multi_action_list)==1)
+          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+            if (ATgetLength(action_arguments)>0) 
+            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+              if (gsIsSortExprNat(first_sort))
+              { 
+                if (lowest_first_action_parameter==NULL)
+                { lowest_first_action_parameter=first_argument;
+                }
+                else 
+                { 
+                  ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprGT(lowest_first_action_parameter,first_argument)));
+                  if (gsIsDataExprTrue(result))
+                  { lowest_first_action_parameter=first_argument;
+                  }
+                  else if (!gsIsDataExprFalse(result))
+                  { assert(0);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Now carry out the actual filtering; 
+        ATermList new_tmp_trans = ATmakeList0();
+        ATermList new_tmp_states = ATmakeList0();
+        ATermList tmp_state_walker = tmp_states;
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+                   tmp_trans_walker=ATgetNext(tmp_trans_walker))
+        { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
+          ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
+          tmp_state_walker=ATgetNext(tmp_state_walker);
+          ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
+          if (ATgetLength(multi_action_list)==1)
+          { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
+            ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
+            ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
+            if (ATgetLength(action_arguments)>0) 
+            { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
+              ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
+              if (gsIsSortExprNat(first_sort))
+              { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprEq(lowest_first_action_parameter,first_argument)));
+                if (gsIsDataExprTrue(result))
+                { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                  new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+                }
+                else 
+                { 
+                  assert(gsIsDataExprFalse(result));
+                }
+              }
+              else
+              { 
+                new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+                new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+              }
+            }
+            else 
+            { 
+              new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+              new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+            }
+          }
+          else 
+          { 
+            new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
+            new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
+          }
+        }
+        
+        // Randomly select one element from the list for experiments.
+        if (ATgetLength(new_tmp_trans)>0)
+        { int r = rand()%ATgetLength(new_tmp_trans);
+          tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
+          tmp_states=ATgetSlice(new_tmp_states,r,r+1);
+        }
+        else 
+        { tmp_trans=ATempty;
+          tmp_states=ATempty;
+        }
+
+        if ( nsgen->errorOccurred() )
+        {
+          lg_error = true;
+          save_error_trace(state);
+          break;
+        }
+
+        int len = ATgetLength(tmp_trans);
+        if ( len > 0 )
+        {
+          ATerm new_state = NULL;
+          for (int i=0; i<len; i++)
+          {
+            add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
+            new_state = ATgetFirst(tmp_states);
+
             tmp_trans = ATgetNext(tmp_trans);
             tmp_states = ATgetNext(tmp_states);
           }

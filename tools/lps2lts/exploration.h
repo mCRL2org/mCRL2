@@ -29,7 +29,12 @@
 #define DEFAULT_BITHASHSIZE 209715200ULL // ~25 MB
 #define DEFAULT_INIT_TSIZE 10000UL
 
-enum exploration_strategy { es_none, es_breadth, es_depth, es_random };
+enum exploration_strategy { es_none, 
+                            es_breadth, 
+                            es_depth, 
+                            es_random, 
+                            es_value_prioritized, 
+                            es_value_random_prioritized };
 
 struct lts_generation_options {
   lts_generation_options();
