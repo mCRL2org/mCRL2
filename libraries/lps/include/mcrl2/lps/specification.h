@@ -351,7 +351,8 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
 
   if (compatible)
   {
-    data::detail::data_specification_to_aterm_data_spec(spec.data(), aterm_specification);
+    aterm_specification = ATsetArgument(aterm_specification,
+      atermpp::aterm(data::detail::data_specification_to_aterm_data_spec(spec.data(), aterm_specification)), 0);
   }
 
   return aterm_specification;
