@@ -163,6 +163,8 @@ class lps2lts_tool : public lps2lts_base
           "explore the state space using strategy NAME:\n"
           "  'b', 'breadth'   breadth-first search (default)\n"
           "  'd', 'depth'     depth-first search\n"
+          "  'p', 'prioritized'  prioritize single actions on its first argument being of sort Nat where only those actions with the lowest value for this parameter are selected. E.g. if there are actions a(3) and b(4), a(3) remains and b(4) is skipped. Actions without a first parameter of sort Nat and multactions with more than one action are always chosen (option is experimental).\n"
+          "  'q', 'rprioritized'  prioritize actions on its first argument being of sort Nat (see option --prioritized), and randomly select one of these to obtain a prioritized random simulation (option is experimental).\n"
           "  'r', 'random'    random simulation", 's').
         add_option("out", make_mandatory_argument("FORMAT"),
           "save the output in the specified FORMAT", 'o').
