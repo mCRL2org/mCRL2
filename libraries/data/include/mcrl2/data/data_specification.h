@@ -40,7 +40,11 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
+      struct dummy {
+        static atermpp::aterm_appl dummy_context;
+      };
+
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, atermpp::aterm_appl& = dummy::dummy_context);
 
       class dependent_sort_helper;
     }
@@ -139,7 +143,7 @@ namespace mcrl2 {
 
         friend data_specification& remove_all_system_defined(data_specification&);
         friend data_specification  remove_all_system_defined(data_specification const&);
-        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
+        friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&, atermpp::aterm_appl&);
 
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
         void make_complete();

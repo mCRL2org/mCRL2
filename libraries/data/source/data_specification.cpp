@@ -688,7 +688,9 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s)
+      atermpp::aterm_appl dummy::dummy_context;
+
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, atermpp::aterm_appl& context)
       {
         // Generates names for a specification assuming that no sorts with name prefix @legacy_ exist
         struct name_generator {
@@ -796,6 +798,11 @@ namespace mcrl2 {
         }
 
         using namespace core::detail;
+
+        if (context != dummy::dummy_context)
+        {
+          context = atermpp::replace(context, renaming_substitution);
+        }
 
         return gsMakeDataSpec(
            gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
