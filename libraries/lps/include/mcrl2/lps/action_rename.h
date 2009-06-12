@@ -364,7 +364,9 @@ namespace lps {
   /// \param spec A linear process specification
   /// \return An action rename specification
   inline
-  action_rename_specification parse_action_rename_specification(std::istream& in, lps::specification const& spec)
+  action_rename_specification parse_action_rename_specification(
+                                 std::istream& in, 
+                                 lps::specification const& spec)
   {
     //std::istringstream in(text);
     ATermAppl result = detail::parse_action_rename_specification(in);
@@ -377,14 +379,16 @@ namespace lps {
   }
 
 
-/// \brief  Rename the actions in a linear specification using a given action rename spec
+/// \brief  Rename the actions in a linear specification using a given action_rename_spec
+/// \details The actions in a linear specification are renamed according to a given
+///         action rename specification. 
 ///         Note that the rules are applied in the order they appear in the specification.
 ///         This yield quite elaborate conditions in the resulting lps, as a latter rule
 ///         can only be applied if an earlier rule is not applicable. Note also that
 ///         there is always a default summand, where the action is not renamed. Using
 ///         sum elimination and rewriting a substantial reduction of the conditions that
 ///         are generated can be obtained, often allowing many summands to be removed.
-/// \param  action_rename_spec The action rename specification to be used.
+/// \param  action_rename_spec The action_rename_specification to be used.
 /// \param  lps_old_spec The input linear specification.
 /// \return The lps_old_spec where all actions have been renamed according
 ///         to action_rename_spec.
@@ -399,8 +403,8 @@ lps::specification action_rename(
 
   action_rename_rule_list rename_rules = action_rename_spec.rules();
   summand_list lps_old_summands = lps_old_spec.process().summands();
-  summand_list lps_summands = summand_list(); //for changes in lps_old_summands
-  action_list lps_new_actions = action_list();;
+  summand_list lps_summands; //for changes in lps_old_summands
+  action_list lps_new_actions;
 
   data::postfix_identifier_generator generator("");
   generator.add_to_context(specification_to_aterm(lps_old_spec));
@@ -409,7 +413,9 @@ lps::specification action_rename(
   bool to_delta=false;
 
   //go through the rename rules of the rename file
-  gsVerboseMsg("rename rules found: %i\n", rename_rules.size());
+  if (gsVerbose) 
+  { std::cerr << "rename rules found: " << rename_rules.size() << "\n";
+  }
   for(action_rename_rule_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
     summand_list lps_new_summands;
@@ -490,7 +496,9 @@ lps::specification action_rename(
 
     lps_summands = summand_list();
     //go through the summands of the old lps
-    gsVerboseMsg("summands found: %i\n", lps_old_summands.size());
+    if (gsVerbose)
+    { std::cerr << "Summands found: " << lps_old_summands.size() << "\n";
+    }
     for(summand_list::iterator losi = lps_old_summands.begin();
                                     losi != lps_old_summands.end(); ++losi)
     {
@@ -510,15 +518,19 @@ lps::specification action_rename(
       atermpp::vector < std::pair <bool, action_list > >
                            lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),action_list()));
 
-      gsVerboseMsg("actions in summand found: %i\n", lps_old_actions.size());
+      if (gsVerbose)
+      { std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
+      }
       for(action_list::iterator loai = lps_old_actions.begin();
                 loai != lps_old_actions.end(); loai++)
       {
         action lps_old_action = *loai;
-
+        std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
         if (equal_signatures(lps_old_action, rule_old_action))
         {
-          gsVerboseMsg("renaming action %P\n",(ATermAppl)rule_old_action);
+          if (gsVerbose)
+          { std::cerr << "Renaming action " << core::pp(rule_old_action) << "\n";
+          }
 
           //rename all previously used variables
           data_expression renamed_rule_condition=rule_condition;
@@ -663,7 +675,9 @@ lps::specification action_rename(
           { *i = std::make_pair((*i).first,push_front((*i).second, lps_old_action));
           }
         }
-        gsVerboseMsg("action done\n");
+        if (gsVerbose)
+        { std::cerr << "Action done\n";
+        }
 
       } //end of action list iterator
 
@@ -688,17 +702,32 @@ lps::specification action_rename(
     lps_old_summands = lps_new_summands;
   } //end of rename rule iterator
 
-  gsVerboseMsg("simplifying the result...\n");
+  if (gsVerbose)
+  { std::cerr << "Simplifying the result...\n";
+  }
 
   linear_process new_process = lps_old_spec.process();
   new_process.set_summands(lps_old_summands); // These are the renamed sumands.
+
+  // add action_rename_spec.action_labels to action_rename_spec.action_labels without adding duplates.
+  action_label_list all=action_rename_spec.action_labels();
+  for(action_label_list::const_iterator i=lps_old_spec.action_labels().begin();
+           i!=lps_old_spec.action_labels().end(); ++i)
+  { if (find(action_rename_spec.action_labels().begin(),
+             action_rename_spec.action_labels().end(),*i)==action_rename_spec.action_labels().end())
+    { // Not found;
+      all=push_front(all,*i);
+    }
+  }
   specification lps_new_spec = specification(
                                           lps_old_spec.data(),
-                                          lps_old_spec.action_labels(),
+                                          all,
                                           new_process,
                                           lps_old_spec.initial_process());
 
-  gsVerboseMsg("new lps complete\n");
+  if (gsVerbose)
+  { std::cerr << "New lps complete\n";
+  }
   return lps_new_spec;
 } //end of rename(...)
 

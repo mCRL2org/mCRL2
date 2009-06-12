@@ -126,7 +126,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
       if (core::gsVerbose)
       {
-        std::cerr << "lpsactionrename parameters:" << std::endl;
+        std::cerr << "Parameters of lpsactionrename:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  rename file:        " << m_action_rename_filename << std::endl;
@@ -142,7 +142,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       std::ifstream rename_stream(m_action_rename_filename.c_str());
       if (!rename_stream.is_open())
       {
-        mcrl2::runtime_error("cannot open rename file " + m_action_rename_filename);
+        mcrl2::runtime_error("Cannot open rename file " + m_action_rename_filename);
       }
 
       // Parse the rename spec in rename_stream.
@@ -153,7 +153,9 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       rename_stream.close();
 
       //rename all assigned actions
-      core::gsVerboseMsg("renaming actions...\n");
+      if (core::gsVerbose)
+      { std::cerr << "Renaming actions...\n";
+      }
       specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
       data::rewriter datar;
       if (m_rewrite)
