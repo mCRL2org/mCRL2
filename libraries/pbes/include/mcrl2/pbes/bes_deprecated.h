@@ -1651,7 +1651,7 @@ namespace bes
       else if (pbes_expr::is_false(p))
       { return false_();
       }
-    
+
       throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " + pp(p) + "\n");
       return false_();
     }

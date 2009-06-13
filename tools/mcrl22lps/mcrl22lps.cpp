@@ -176,7 +176,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     { //linearise infilename with options
       
       process_specification spec;
-      if (m_linearisation_options.infilename == "") 
+      if (m_linearisation_options.infilename.empty()) 
       { //parse specification from stdin
         if (gsVerbose)
         { std::cerr << "Parsing input from stdin...\n";
@@ -202,12 +202,12 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       }
       //report on well-formedness (if needed)
       if (opt_check_only) {
-        if (m_linearisation_options.infilename == "") {
-          fprintf(stderr, "stdin");
+        if (m_linearisation_options.infilename.empty()) {
+          std::cerr << "stdin";
         } else {
-          fprintf(stderr, "The file '%s'", m_linearisation_options.infilename.c_str());
+          std::cerr << "The file '" << m_linearisation_options.infilename << "'";
         }
-        fprintf(stderr, " contains a well-formed mCRL2 specification.\n");
+        std::cerr << " contains a well-formed mCRL2 specification." << std::endl;
         return true;
       }
       //store the result

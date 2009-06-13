@@ -688,15 +688,13 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-      atermpp::aterm_appl dummy::dummy_context;
-
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, atermpp::aterm_appl& context)
+      atermpp::map< sort_expression, sort_expression > make_compatible_renaming_map(const data_specification& s)
       {
         // Generates names for a specification assuming that no sorts with name prefix @legacy_ exist
-        struct name_generator {
-
+        struct legacy_name_generator {
+       
           std::set< basic_sort > m_generated;
-
+       
           static std::string sort_name(const sort_expression& target)
           {
             if (target.is_container_sort())
@@ -708,27 +706,21 @@ namespace mcrl2 {
               return "structured_sort";
             }
           }
-
+       
           // \brief find `THE' identifier for a structured sort or container sort
           basic_sort generate_name(const sort_expression& target)
           {
              basic_sort generated(static_cast< std::string >(
                         fresh_identifier(boost::make_iterator_range(m_generated),
                                         std::string("@legacy_").append(sort_name(target)))));
-
+       
              m_generated.insert(generated);
-
+       
              return generated;
           }
         } generator;
 
-        atermpp::set< sort_expression > sorts;
-
-        // Maps container sort expressions to a unique name
-        atermpp::map< sort_expression, sort_expression >      renamings;
-
-        // Maps container sort expressions to names
-        atermpp::multimap< sort_expression, sort_expression > other_names;
+        atermpp::map< sort_expression, sort_expression > renamings;
 
         // Step one: fix a name for all container sorts (legacy requirement)
         for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
@@ -737,18 +729,12 @@ namespace mcrl2 {
 
           if (renamings.find(reference) == renamings.end())
           {
-            atermpp::map< sort_expression, sort_expression > copy_renamings(renamings);
-
-            for (atermpp::map< sort_expression, sort_expression >::iterator i = copy_renamings.begin(); i != copy_renamings.end(); ++i)
+            for (atermpp::map< sort_expression, sort_expression >::iterator i = renamings.begin(); i != renamings.end(); ++i)
             {
               renamings[atermpp::replace(i->first, reference, r.front().name())] = i->second;
             }
 
             renamings[reference] = r.front().name();
-          }
-          else
-          {
-            other_names.insert(std::pair< sort_expression, sort_expression >(reference, r.front().name()));
           }
         }
 
@@ -760,55 +746,115 @@ namespace mcrl2 {
             {
               basic_sort name(generator.generate_name(r.front()));
 
+              for (atermpp::map< sort_expression, sort_expression >::iterator i = renamings.begin(); i != renamings.end(); ++i)
+              {
+                renamings[atermpp::replace(i->first, r.front(), name)] = i->second;
+              }
+
               renamings[r.front()] = name;
             }
           }
         }
 
-        map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
+        return renamings;
+      }
 
-        // recursively apply renamings until no longer possible, or when unfolding recursive sorts
-        for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
+      /// Compatible conversion to ATerm is needlessly complicated only to appease the type checker
+      /// As a side effect data checked against the compatible specification
+      /// may refer to names that do not exist at the level data_specification objects.
+      /// This function reverts the naming to make data terms usable in combination with data_specification objects.
+      /// \note temporary measure until a type checker at data level becomes available
+      template < typename Term >
+      Term apply_compatibility_renamings(const data_specification& s, Term const& term)
+      {
+        // Maps container sort expressions to a unique name
+        atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
+
+        return atermpp::replace(term, make_map_substitution_adapter(renamings));
+      }
+
+      template
+      variable_list apply_compatibility_renamings(const data_specification& s, variable_list const& term);
+      template
+      atermpp::aterm_appl apply_compatibility_renamings(const data_specification& s, atermpp::aterm_appl const& term);
+
+      template < typename Term >
+      Term undo_compatibility_renamings(const data_specification& s, Term const& term)
+      {
+        // Maps container sort expressions to a unique name
+        atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
+        atermpp::map< sort_expression, sort_expression > inverse_renamings;
+
+        for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
         {
-          atermpp::map< sort_expression, sort_expression >::const_iterator j = renamings.find(r.front().reference());
-
-          if (renamings.find(r.front().reference()) != renamings.end())
-          {
-            std::map< sort_expression, sort_expression > partial_renamings(renamings);
-
-            partial_renamings.erase(j->first);
-
-            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
-          }
-          else {
-            sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), renaming_substitution)));
-          }
+          inverse_renamings[i->second] = i->first;
         }
 
-        for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
-        {
-          if (r.front().is_container_sort() || r.front().is_structured_sort())
-          {
-            sorts.insert(alias(renamings[r.front()], atermpp::replace(r.front(), renaming_substitution)));
-          }
-          else if (!r.front().is_alias())
-          { // incidentally, store in set of sorts
-            sorts.insert(atermpp::replace(r.front(), renaming_substitution));
-          }
-        }
+        return atermpp::replace(term, make_map_substitution_adapter(inverse_renamings));
+      }
 
+      template
+      variable_list undo_compatibility_renamings(const data_specification& s, variable_list const& term);
+      template
+      atermpp::aterm_appl undo_compatibility_renamings(const data_specification& s, atermpp::aterm_appl const& term);
+
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, bool compatible)
+      {
         using namespace core::detail;
 
-        if (context != dummy::dummy_context)
+        if (compatible)
         {
-          context = atermpp::replace(context, renaming_substitution);
-        }
+          atermpp::set< sort_expression > sorts;
 
-        return gsMakeDataSpec(
-           gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
-           gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), renaming_substitution)),
-           gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), renaming_substitution)),
-           gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), renaming_substitution)));
+          // Maps container sort expressions to a unique name
+          atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
+
+          map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
+
+          // recursively apply renamings until no longer possible, or when unfolding recursive sorts
+          for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
+          {
+            atermpp::map< sort_expression, sort_expression >::const_iterator j = renamings.find(r.front().reference());
+
+            if (renamings.find(r.front().reference()) != renamings.end())
+            {
+              std::map< sort_expression, sort_expression > partial_renamings(renamings);
+
+              partial_renamings.erase(j->first);
+
+              sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
+            }
+            else {
+              sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), renaming_substitution)));
+            }
+          }
+
+          for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
+          {
+            if (r.front().is_container_sort() || r.front().is_structured_sort())
+            {
+              sorts.insert(alias(renamings[r.front()], atermpp::replace(r.front(), renaming_substitution)));
+            }
+            else if (!r.front().is_alias())
+            { // incidentally, store in set of sorts
+              sorts.insert(atermpp::replace(r.front(), renaming_substitution));
+            }
+          }
+
+          return gsMakeDataSpec(
+             gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
+             gsMakeConsSpec(atermpp::replace(convert< atermpp::aterm_list >(s.constructors()), renaming_substitution)),
+             gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(s.mappings()), renaming_substitution)),
+             gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.equations()), renaming_substitution)));
+        }
+        else
+        {
+          return gsMakeDataSpec(
+             gsMakeSortSpec(convert< atermpp::aterm_list >(s.sorts())),
+             gsMakeConsSpec(convert< atermpp::aterm_list >(s.constructors())),
+             gsMakeMapSpec(convert< atermpp::aterm_list >(s.mappings())),
+             gsMakeDataEqnSpec(convert< atermpp::aterm_list >(s.equations())));
+        }
       }
     } // namespace detail
     /// \endcond

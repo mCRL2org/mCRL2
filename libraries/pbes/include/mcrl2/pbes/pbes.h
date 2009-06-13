@@ -458,7 +458,7 @@ class pbes
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data),
              core::detail::gsMakePBEqnSpec(free_variables, equations),
-               detail::pbes_initializer(data::variable_list(m_free_variables.begin(), m_free_variables.end()), m_initial_state));
+               detail::pbes_initializer(free_variables, m_initial_state));
     }
 
     /// \brief Returns the set of binding variables of the pbes.

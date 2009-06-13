@@ -26,11 +26,12 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2;
 
 class lpspp_tool: public input_output_tool
 {
@@ -86,15 +87,16 @@ class lpspp_tool: public input_output_tool
     {
       std::string str_in  = (input_filename().empty())?"stdin":("'" + input_filename() + "'");
       std::string str_out = (output_filename().empty())?"stdout":("'" + output_filename() + "'");
-      ATermAppl spec = (ATermAppl) mcrl2::core::detail::load_aterm(input_filename());
-      if (!mcrl2::core::detail::gsIsLinProcSpec(spec)) {
-        throw mcrl2::runtime_error(str_in + " does not contain an LPS");
+    
+      lps::specification specification;
+      specification.load(input_filename());
+
+      if (format != ppDebug)
+      {
+        specification.data() = mcrl2::data::remove_all_system_defined(specification.data());
       }
-    
-      mcrl2::data::data_specification data_spec(ATAgetArgument(spec, 0));
-    
-      spec = ATsetArgument(spec, atermpp::aterm((mcrl2::data::detail::data_specification_to_aterm_data_spec(
-        (format != ppDebug) ? mcrl2::data::remove_all_system_defined(data_spec) : data_spec))), 0);
+
+      ATermAppl spec = lps::specification_to_aterm(specification);
     
       //open output file for writing or set to stdout
       FILE *output_stream    = NULL;

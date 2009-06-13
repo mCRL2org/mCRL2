@@ -69,7 +69,7 @@ namespace data {
   inline
   data_specification parse_data_specification(
                                  std::istream& text)
-  { ATermAppl spec = core::parse_data_spec(text);
+  { atermpp::aterm_appl spec = core::parse_data_spec(text);
     if (spec == 0)
       throw mcrl2::runtime_error("Error while parsing data specification");
     spec = core::type_check_data_spec(spec);
@@ -127,10 +127,13 @@ namespace data {
       throw mcrl2::runtime_error("Error while parsing data variable declarations.");
 
     // Type check the variabl list.
-    ATermAppl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+    atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                         mcrl2::data::remove_all_system_defined(data_spec));
 
     data_vars = core::type_check_data_vars(data_vars, d);
+
+    // Undo sort renamings for compatibility with type checker
+    data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     if (data_vars == 0)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
     data_vars = atermpp::reverse(data_vars);
@@ -263,7 +266,7 @@ namespace data {
                                         const Variable_iterator end,
                                         const data_specification& data_spec = detail::default_specification())
   {
-    ATermAppl data_expr = core::parse_data_expr(text);
+    atermpp::aterm_appl data_expr = core::parse_data_expr(text);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error parsing data expression");
     //create ATerm table from begin and end
@@ -276,6 +279,8 @@ namespace data {
     data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(
                         mcrl2::data::remove_all_system_defined(data_spec)), variables);
+    // Undo sort renamings for compatibility with type checker
+    data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
     detail::internal_format_conversion_helper converter(data_spec);
@@ -347,12 +352,14 @@ namespace data {
   sort_expression parse_sort_expression(std::istream &text,
                                         const data_specification& data_spec = detail::default_specification())
   {
-    ATermAppl sort_expr = core::parse_sort_expr(text);
+    atermpp::aterm_appl sort_expr = core::parse_sort_expr(text);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error parsing sort expression");
-    ATermAppl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+    atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                                 mcrl2::data::remove_all_system_defined(data_spec));
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
+    // Undo sort renamings for compatibility with type checker
+    sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");
     return sort_expression(sort_expr);

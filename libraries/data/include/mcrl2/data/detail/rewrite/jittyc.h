@@ -44,6 +44,7 @@ class RewriterCompilingJitty: public Rewriter
 		ATerm getSubstitutionInternal(ATermAppl Var);
 		void clearSubstitution(ATermAppl Var);
 		void clearSubstitutions();
+		using Rewriter::clearSubstitutions;
 		
                 bool addRewriteRule(ATermAppl Rule);
                 bool removeRewriteRule(ATermAppl Rule);

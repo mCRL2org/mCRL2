@@ -127,7 +127,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
         return NULL;
       }
-      ATermAppl result = parse_state_frm(formstream);
+      atermpp::aterm_appl result = parse_state_frm(formstream);
       formstream.close();
       if (result == NULL) {
         gsErrorMsg("parsing failed\n");
@@ -142,7 +142,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       // make copy because type checking needs a specification without system defined sorts
       lps_spec_copy.data() = mcrl2::data::remove_all_system_defined(lps_spec_copy.data());
-      ATermAppl reconstructed_spec = specification_to_aterm(lps_spec_copy);
+      atermpp::aterm_appl reconstructed_spec = specification_to_aterm(lps_spec_copy);
 
       //type check formula
       gsVerboseMsg("type checking...\n");
@@ -166,6 +166,8 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         return result;
       }
 
+      // Undo sort renamings for compatibility with type checker
+      result = data::detail::undo_compatibility_renamings(lps_spec.data(), result);
       // Translating to internal format
       result = data::detail::internal_format_conversion(lps_spec.data(), result);
       // Add any system defined sorts needed by this 

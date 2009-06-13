@@ -83,13 +83,14 @@ namespace detail {
   {
     std::stringstream formula_stream;
     formula_stream << formula_text;
-    ATermAppl f = parse_state_formula(formula_stream);
+    atermpp::aterm_appl f = parse_state_formula(formula_stream);
     lps::specification copy_spec = spec;
     copy_spec.data() = remove_all_system_defined(spec.data());
-    ATermAppl reconstructed_spec = specification_to_aterm(copy_spec);
+    atermpp::aterm_appl reconstructed_spec = specification_to_aterm(copy_spec);
     f = type_check_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
-    spec = lps::specification(reconstructed_spec); // Force the data specification to be recomputed
+    f = data::detail::undo_compatibility_renamings(spec.data(), f);
+    spec.data().make_complete(data::find_all_sort_expressions(f)); // Make complete with respect to f
     f = data::detail::internal_format_conversion(spec.data(), f);
     return f;
   }

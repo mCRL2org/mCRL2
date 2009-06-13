@@ -99,7 +99,7 @@ class specification
     operator ATermAppl() const
     {
       return core::detail::gsMakeLinProcSpec(
-          data::detail::data_specification_to_aterm_data_spec(m_data),
+          data::detail::data_specification_to_aterm_data_spec(m_data, false),
           core::detail::gsMakeActSpec(m_action_labels),
           linear_process_to_aterm(m_process),
           m_initial_process
@@ -334,7 +334,7 @@ void complete_data_specification(lps::specification& spec)
 {
   std::set<data::sort_expression> s;
   traverse_sort_expressions(spec, std::inserter(s, s.end()));
-  spec.data().make_complete(boost::make_iterator_range(s));
+  spec.data().make_complete(s);
 }
 
 /// \brief Conversion to ATermAppl.
@@ -342,20 +342,31 @@ void complete_data_specification(lps::specification& spec)
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
 {
-  atermpp::aterm_appl aterm_specification(core::detail::gsMakeLinProcSpec(
-      data::detail::data_specification_to_aterm_data_spec(spec.data()),
+  if (compatible)
+  {
+    atermpp::aterm_appl specification_term(core::detail::gsMakeLinProcSpec(
+      data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
       core::detail::gsMakeActSpec(spec.action_labels()),
       linear_process_to_aterm(spec.process()),
       spec.initial_process()
-  ));
+    ));
 
-  if (compatible)
-  {
-    aterm_specification = ATsetArgument(aterm_specification,
-      atermpp::aterm(data::detail::data_specification_to_aterm_data_spec(spec.data(), aterm_specification)), 0);
+    specification_term = data::detail::apply_compatibility_renamings(spec.data(), specification_term);
+
+    return core::detail::gsMakeLinProcSpec(
+        data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
+        atermpp::aterm_appl(specification_term(1)),
+        atermpp::aterm_appl(specification_term(2)),
+        atermpp::aterm_appl(specification_term(3))
+    );
   }
 
-  return aterm_specification;
+  return core::detail::gsMakeLinProcSpec(
+      data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
+      core::detail::gsMakeActSpec(spec.action_labels()),
+      linear_process_to_aterm(spec.process()),
+      spec.initial_process()
+  );
 }
 
 /// \brief Pretty print function
