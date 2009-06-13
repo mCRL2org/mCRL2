@@ -26,13 +26,17 @@ namespace process {
   /// \param spec A string
   /// \return The parse result
   inline
-  process_specification parse_process_specification(const std::string& spec)
+  process_specification parse_process_specification(
+                                  const std::string& spec, 
+                                  const bool alpha_reduce=false)
   {
     std::stringstream spec_stream;
     spec_stream << spec;
     ATermAppl result = core::detail::parse_specification(spec_stream);
     result           = core::detail::type_check_specification(result);
-    result           = core::detail::alpha_reduce(result);
+    if (alpha_reduce)
+    { result           = core::detail::alpha_reduce(result);
+    }
     result           = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);
   }

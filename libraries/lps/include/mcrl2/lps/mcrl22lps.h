@@ -41,8 +41,8 @@ namespace lps {
   /// \return The linearized specification.
   inline
   specification mcrl22lps(const std::string& text, t_lin_options options = t_lin_options())
-  {
-    process::process_specification spec = process::parse_process_specification(text);
+  { // parse and apply alphabet axioms.
+    process::process_specification spec = process::parse_process_specification(text,true);
     return linearise(spec, options);
   }
 

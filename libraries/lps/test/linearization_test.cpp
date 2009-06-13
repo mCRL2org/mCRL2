@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_block)
     "        )\n"
     "  );"
   );
-}
+} 
 
 BOOST_AUTO_TEST_CASE(test_large_specification)
 {

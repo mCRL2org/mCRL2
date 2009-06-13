@@ -72,11 +72,9 @@ namespace data {
   { ATermAppl spec = core::parse_data_spec(text);
     if (spec == 0)
       throw mcrl2::runtime_error("Error while parsing data specification");
-    // std::cerr << "SPEC " << spec << "\n";
     spec = core::type_check_data_spec(spec);
     if (spec == 0)
       throw mcrl2::runtime_error("Error while type checking data specification");
-    // std::cerr << "SPEC11111 " << spec << "\n";
     return detail::internal_format_conversion(data_specification(spec));
   }
 

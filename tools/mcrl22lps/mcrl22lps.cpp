@@ -7,46 +7,38 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl22lps.cpp
-/// \brief Add your file description here.
+/// \brief This tool linearises mcrl2 specifications into linear
+///         form.
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "mcrl22lps"
+#define TOOLNAME "mcrl22lps"
 #define AUTHOR "Jan Friso Groote"
 
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
 #include <fstream>
-#include "aterm2.h"
+#include <iostream>
+#include <sstream>
+#include <string>
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/lin_types.h"
 #include "mcrl2/lps/lin_std.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/alpha.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
-#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/parse.h"
 
-#include "gc.h" // Required for ad hoc garbage collection.
+// #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
+// useful to find garbage collection problems.
 
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::process;
 
+using mcrl2::core::gsVerbose;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
-
-//t_phase represents the phases at which the program should be able to stop
-typedef enum { phNone, phParse, phTypeCheck, phAlphaRed, phDataImpl } t_phase;
 
 class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 {
@@ -55,8 +47,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
   private:
     t_lin_options m_linearisation_options;
     bool noalpha;   // indicates whether alpa reduction is needed.
-    bool check_only;
-    t_phase end_phase;
+    bool opt_check_only;
     bool pretty;
 
 
@@ -108,12 +99,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
           "in the resulting linear process; speeds up linearisation ", 'D');
       desc.add_option("check-only",
           "check syntax and static semantics; do not linearise", 'e');
-      desc.add_option("end-phase", make_mandatory_argument("PHASE"),
-          "stop linearisation and output the mCRL2 specification after phase PHASE: "
-          "'pa' (parsing), "
-          "'tc' (type checking), "
-          "'ar' (alphabet reduction)"
-          , 'p');
       desc.add_option("pretty",
           "return a pretty printed version of the output", 'P');
     }
@@ -139,9 +124,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.rewrite_strategy        = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
       m_linearisation_options.lin_method = lmRegular;
 
-      if (0 < parser.options.count("check-only")) {
-        check_only = true;
-        end_phase  = phTypeCheck;
+      if (0 < parser.options.count("check-only")) 
+      { opt_check_only = true;
       }
 
       if (0 < parser.options.count("lin-method")) {
@@ -160,99 +144,14 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         }
       }
 
-      if (parser.options.count("end-phase")) {
-        if (1 < parser.options.count("end-phase")) {
-          parser.error("multiple use of option -p/--end-phase; only one occurrence is allowed");
-        }
-        std::string phase(parser.option_argument("end-phase"));
-        if (phase == "pa") {
-          end_phase = phParse;
-        } else if (phase == "tc") {
-          end_phase = phTypeCheck;
-        } else if (phase == "ar") {
-          end_phase = phAlphaRed;
-        } else if (phase == "di") {
-          end_phase = phDataImpl;
-        } else {
-          parser.error("option -p/--end-phase has illegal argument '" + phase + "'");
-        }
-      }
-
       //check for dangerous and illegal option combinations
       if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack) {
         parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
-      }
-      if (check_only && end_phase != phTypeCheck) {
-        parser.error("options -e/--check-only and -p/--end-phase may not be used in conjunction");
-      }
-      if (noalpha && end_phase == phAlphaRed) {
-        parser.error("options -r/--no-alpha and -par/--end-phase=ar may not be used in conjunction");
       }
 
       m_linearisation_options.infilename       = input_filename();
       m_linearisation_options.outfilename      = output_filename();
       m_linearisation_options.rewrite_strategy = rewrite_strategy();
-    }
-
-    ATermAppl parse_input()
-    {
-      ATermAppl result = NULL;
-      //parse specification
-      if (m_linearisation_options.infilename == "") {
-        //parse specification from stdin
-        gsVerboseMsg("parsing input from stdin...\n");
-        result = parse_proc_spec(std::cin);
-      } else {
-        //parse specification from infilename
-        std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) {
-          gsErrorMsg("cannot open input file '%s'\n", m_linearisation_options.infilename.c_str());
-          return NULL;
-        }
-        gsVerboseMsg("parsing input file '%s'...\n", m_linearisation_options.infilename.c_str());
-        result = parse_proc_spec(instream);
-        instream.close();
-      }
-      if (result == NULL)
-      {
-        gsErrorMsg("parsing failed\n");
-        return NULL;
-      }
-
-      if (end_phase == phParse) {
-        return result;
-      }
-      //type check the result
-      gsVerboseMsg("type checking...\n");
-      result = type_check_proc_spec(result);
-      if (result == NULL)
-      {
-        gsErrorMsg("type checking failed\n");
-        return NULL;
-      }
-      if (end_phase == phTypeCheck) {
-        return result;
-      }
-      //perform alphabet reductions
-      if (!noalpha) {
-        gsVerboseMsg("performing alphabet reductions...\n");
-        result = gsAlpha(result);
-        if (result == NULL)
-        {
-          gsErrorMsg("alphabet reductions failed\n");
-          return NULL;
-        }
-        if (end_phase == phAlphaRed) {
-          return result;
-        }
-      }
-      if (end_phase == phDataImpl) {
-        return result;
-      }
-      //linearise the result
-      gsVerboseMsg("linearising processes using the %s method\n", lin_method_to_string(m_linearisation_options.lin_method));
-
-      return result;
     }
 
     char const* lin_method_to_string(t_lin_method lin_method)
@@ -265,55 +164,79 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
   public:
 
     mcrl22lps_tool() : super(
-             "mcrl22lps",
-             "Jan Friso Groote",
+             TOOLNAME,
+             AUTHOR,
              "translate an mCRL2 specification to an LPS",
              "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
              "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used."),noalpha(false),check_only(false),end_phase(phNone),pretty(false)
+             "stdin is used."),noalpha(false),opt_check_only(false),pretty(false)
     {}
 
-    bool run() {
-      //linearise infilename with options
-      ATermAppl result = parse_input();
-      if (result == NULL) {
-        return false;
+    bool run() 
+    { //linearise infilename with options
+      
+      process_specification spec;
+      if (m_linearisation_options.infilename == "") 
+      { //parse specification from stdin
+        if (gsVerbose)
+        { std::cerr << "Parsing input from stdin...\n";
+        }
+        std::stringbuf buf;
+        std::cin.get(buf,'\0');
+        const std::string input_string=buf.str();
+        spec = parse_process_specification(input_string,!noalpha);
+      } 
+      else 
+      { //parse specification from infilename
+        std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+        if (!instream.is_open()) 
+        { throw mcrl2::runtime_error("Cannot open input file: " + m_linearisation_options.infilename);
+        }
+        if (gsVerbose) 
+        { std::cerr << "parsing input file '"  + m_linearisation_options.infilename + "'\n";
+        }
+        std::stringbuf buf;
+        instream.get(buf,'\0');
+        const std::string input_string=buf.str();
+        spec = parse_process_specification(input_string,!noalpha);
       }
       //report on well-formedness (if needed)
-      if (check_only) {
+      if (opt_check_only) {
         if (m_linearisation_options.infilename == "") {
-          fprintf(stdout, "stdin");
+          fprintf(stderr, "stdin");
         } else {
-          fprintf(stdout, "The file '%s'", m_linearisation_options.infilename.c_str());
+          fprintf(stderr, "The file '%s'", m_linearisation_options.infilename.c_str());
         }
-        fprintf(stdout, " contains a well-formed mCRL2 specification.\n");
+        fprintf(stderr, " contains a well-formed mCRL2 specification.\n");
         return true;
       }
       //store the result
-      if ((end_phase == phNone) && (!pretty)) {
-        mcrl2::lps::specification spec(
-                     linearise_std(mcrl2::process::process_specification(mcrl2::data::detail::internal_format_conversion(result)), 
-                                       m_linearisation_options));
-        if (m_linearisation_options.outfilename.empty())
-        { gsVerboseMsg("saving result to stdout...\n");
-        } else
-        { gsVerboseMsg("saving result to '%s'...\n", m_linearisation_options.outfilename.c_str());
-        }
-        spec.save(m_linearisation_options.outfilename);
-      } else
-      { if (m_linearisation_options.outfilename.empty()) {
-          PrintPart_CXX(std::cout, (ATerm) result, (pretty)?ppDefault:ppInternal);
-          std::cout << std::endl;
-        } else {
-          std::ofstream outstream(m_linearisation_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
-          if (!outstream.is_open()) {
-            throw mcrl2::runtime_error("could not open output file '" + m_linearisation_options.outfilename + "' for writing");
+      if (!pretty) 
+      { mcrl2::lps::specification linear_spec(linearise_std(spec,m_linearisation_options));
+        if (gsVerbose)
+        { if (m_linearisation_options.outfilename.empty())
+          { std::cerr << "saving result to stdout...\n";
+          } 
+          else
+          { std::cerr << "saving result to '" << m_linearisation_options.outfilename << "'\n";
           }
-          PrintPart_CXX(outstream, (ATerm) result, pretty?ppDefault:ppInternal);
+        }
+        linear_spec.save(m_linearisation_options.outfilename);
+      } 
+      else
+      { if (m_linearisation_options.outfilename.empty()) 
+        { std::cout << pp(spec) << std::endl;
+          //PrintPart_CXX(std::cout, (ATermAppl) spec, (pretty)?ppDefault:ppInternal);
+        } 
+        else 
+        { std::ofstream outstream(m_linearisation_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
+          if (!outstream.is_open()) 
+          { throw mcrl2::runtime_error("could not open output file '" + m_linearisation_options.outfilename + "' for writing");
+          }
+          outstream << pp(spec); // PrintPart_CXX(outstream, (ATermAppl) spec, pretty?ppDefault:ppInternal);
           outstream.close();
         }
       }
-      AT_collect();
       return true;
     }
 
@@ -328,9 +251,9 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 # define option_statenames               "statenames"
 # define option_no_rewrite               "no_rewrite"
 # define option_no_freevars              "no_freevars"
+# define option_check_only               "check_only"
 # define option_no_sumelm                "no_sumelm"
 # define option_no_deltaelm              "no_dataelm"
-# define option_end_phase                "end_phase"
 # define option_add_delta                "add_delta"
 
   private:
@@ -340,31 +263,26 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     {
       bool result = true;
 
-      if (c.option_exists(option_linearisation_method)) {
-        m_linearisation_options.lin_method = c.get_option_argument< t_lin_method >(option_linearisation_method, 0);
+      if (c.option_exists(option_linearisation_method)) 
+      { m_linearisation_options.lin_method = c.get_option_argument< t_lin_method >(option_linearisation_method, 0);
       }
-      else {
-        send_error("Configuration does not contain a linearisation method\n");
-
+      else 
+      { send_error("Configuration does not contain a linearisation method\n");
         result = false;
       }
 
       m_linearisation_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
       m_linearisation_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
       noalpha                 = c.get_option_argument< bool >(option_no_alpha);
-      // m_linearisation_options.noalpha                 = c.get_option_argument< bool >(option_no_alpha);
       m_linearisation_options.newstate                = c.get_option_argument< bool >(option_newstate);
       m_linearisation_options.binary                  = c.get_option_argument< bool >(option_binary);
       m_linearisation_options.statenames              = c.get_option_argument< bool >(option_statenames);
       m_linearisation_options.norewrite               = c.get_option_argument< bool >(option_no_rewrite);
       m_linearisation_options.nofreevars              = c.get_option_argument< bool >(option_no_freevars);
+      opt_check_only                                  = c.get_option_argument< bool >(option_check_only);
       m_linearisation_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
       m_linearisation_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
       m_linearisation_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
-
-      end_phase = c.get_option_argument< t_phase >(option_end_phase, 0);
-
-      check_only = (end_phase != phNone);
 
       m_linearisation_options.infilename       = input_filename();
       m_linearisation_options.outfilename      = output_filename();
@@ -381,15 +299,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         add(lmRegular, "regular").
         add(lmRegular2, "regular2").
         add(lmStack, "expansion");
-
-      tipi::datatype::enumeration< t_phase > phase_enumeration;
-
-      phase_enumeration.
-        add(phNone, "all").
-        add(phParse, "parsing").
-        add(phTypeCheck, "type-checking").
-        add(phAlphaRed, "alphabet_reduction").
-        add(phDataImpl, "data_implementation");
 
       return true;
     }
@@ -443,6 +352,9 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       if (!c.option_exists(option_no_freevars)) {
         c.add_option(option_no_freevars).set_argument_value< 0 >(false);
       }
+      if (!c.option_exists(option_check_only)) {
+        c.add_option(option_check_only).set_argument_value< 0 >(false);
+      }
       if (!c.option_exists(option_no_sumelm)) {
         c.add_option(option_no_sumelm).set_argument_value< 0 >(false);
       }
@@ -458,9 +370,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 
       // Helper for linearisation method selection
       mcrl2::utilities::squadt::radio_button_helper < t_lin_method > method_selector(d);
-
-      // Helper for end phase selection
-      mcrl2::utilities::squadt::radio_button_helper < t_phase >      phase_selector(d);
 
       layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
 
@@ -481,6 +390,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
       checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
       checkbox& freevars            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_freevars));
+      checkbox& check_only          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_check_only));
 
       // two columns to select the linearisation options of the tool
       m.append(d.create< label >().set_text(" ")).
@@ -497,17 +407,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
                 append(alpha.set_label("Apply alphabet axioms")).
                 append(sumelm.set_label("Apply sum elimination")).
                 append(deltaelm.set_label("Apply delta elimination")).
-                append(freevars.set_label("Generate free variables"))));
-
-      // Determine which phases the linearizer will go through. Default is all.
-      m.append(d.create< label >().set_text(" ")).
-        append(d.create< label >().set_text("Stop after: ")).
-        append(d.create< vertical_box >().
-            append(phase_selector.associate(phParse, "Parsing")).
-            append(phase_selector.associate(phTypeCheck, "Type checking")).
-            append(phase_selector.associate(phDataImpl, "Data implementation")).
-            append(phase_selector.associate(phAlphaRed, "Alphabet reduction")).
-            append(phase_selector.associate(phNone, "Linearisation", true)));
+                append(freevars.set_label("Generate free variables")).
+                append(check_only.set_label("Check input only and do not linearise"))));
 
       add_rewrite_option(d, m);
 
@@ -517,10 +418,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m.append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);
 
-      // Set default values for options if the configuration specifies them
-      if (c.option_exists(option_end_phase)) {
-        phase_selector.set_selection(c.get_option_argument< t_phase >(option_end_phase, 0));
-      }
       if (c.option_exists(option_linearisation_method)) {
         method_selector.set_selection(c.get_option_argument< t_lin_method >(option_linearisation_method, 0));
       }
@@ -538,12 +435,9 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       c.add_option(option_linearisation_method).
               set_argument_value< 0 >(method_selector.get_selection());
 
-      c.add_option(option_end_phase).
-              set_argument_value< 0 >(phase_selector.get_selection());
-
-      if (phase_selector.get_selection() != phNone) { // file will not be produced
+      if (opt_check_only) { // file will not be produced
         c.remove_output("main-output");
-      }
+      } 
 
       c.get_option(option_final_cluster).set_argument_value< 0 >(clusterfinal.get_status());
       c.get_option(option_no_intermediate_cluster).set_argument_value< 0 >(!clusterintermediate.get_status());
@@ -553,6 +447,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       c.get_option(option_statenames).set_argument_value< 0 >(statenames.get_status());
       c.get_option(option_no_rewrite).set_argument_value< 0 >(!rewrite.get_status());
       c.get_option(option_no_freevars).set_argument_value< 0 >(!freevars.get_status());
+      c.get_option(option_check_only).set_argument_value< 0 >(!check_only.get_status());
       c.get_option(option_no_sumelm).set_argument_value< 0 >(!sumelm.get_status());
       c.get_option(option_no_deltaelm).set_argument_value< 0 >(!deltaelm.get_status());
       c.get_option(option_add_delta).set_argument_value< 0 >(add_delta.get_status());
@@ -567,7 +462,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     bool check_configuration(tipi::configuration const& c) const
     {
       return c.input_exists("main-input") &&
-             (c.get_option_argument< t_phase >(option_end_phase, 0) == phNone || c.input_exists("main-output")) &&
+             c.input_exists("main-output") &&
              c.input_exists(option_linearisation_method);
     }
 
@@ -579,8 +474,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       using namespace tipi::layout;
       using namespace tipi::datatype;
       using namespace tipi::layout::elements;
-
-      bool result = true;
 
       synchronise_with_configuration(c);
 
@@ -598,30 +491,24 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       send_display_layout(d);
 
       // Perform linearisation
-      ATermAppl input_result = parse_input();
 
-      if (input_result == 0) {
-        message.set_text("Linearisation failed");
+      std::istringstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+      const std::string input_string(instream.str());
+      process_specification input_result = parse_process_specification(input_string,!noalpha);
 
-        result = false;
+      if (opt_check_only) 
+      { message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
       }
-      else if (check_only) {
-        message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
-      }
-      else {
-        mcrl2::lps::specification specification(linearise_std(
-                   mcrl2::process::process_specification(input_result), m_linearisation_options));
+      else 
+      { mcrl2::lps::specification specification(linearise_std(input_result, m_linearisation_options));
         //store the result
         specification.save(m_linearisation_options.outfilename);
-
-        if (result) {
-          message.set_text("Linearisation finished");
-        }
+        message.set_text("Linearisation finished");
       }
 
       send_display_layout(d);
 
-      return (result);
+      return true;
     }
 #endif
 };
