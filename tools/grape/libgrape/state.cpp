@@ -66,4 +66,4 @@ state::~state( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_state );
+WX_DEFINE_OBJARRAY( arr_state )

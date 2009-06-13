@@ -38,7 +38,7 @@ namespace grape
       ADD_ARCHITECTURE_REFERENCE,
       ADD_CHANNEL,
       ADD_CHANNEL_COMMUNICATION,
-      ADD_COMMENT,
+      ADD_COMMENT
     };
 
     /**
@@ -75,7 +75,7 @@ namespace grape
         bool            m_dragging;              /**< Whether the touched object was dragged. */
         bool            m_mousedown;             /**< Shall contain @c true when the left mouse button is pressed. */
 
-        DECLARE_EVENT_TABLE();        /**< The event table of this canvas. */
+        DECLARE_EVENT_TABLE()        /**< The event table of this canvas. */
 
 
         /**

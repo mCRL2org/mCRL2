@@ -37,7 +37,7 @@ namespace grape
         wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
         wxTextCtrl     *m_multiaction_input;/**< Input shown in the dialog, used for a multi action.*/
         wxTextCtrl     *m_var_updates_input;/**< Input shown in the dialog, used for variable updates*/
-        
+
         wxStatusBar    *m_statusbar;          /**< Statusbar shown in the dialog*/
 
         wxStaticText   *m_preview_text;     /**< Preview text.*/
@@ -46,7 +46,7 @@ namespace grape
         /** Default constructor. */
         grape_label_dialog();
 
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
         * Constructor.

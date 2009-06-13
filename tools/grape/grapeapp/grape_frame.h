@@ -72,7 +72,7 @@ namespace grape
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
         diagram             *m_current_diagram;       /**< The current diagram showed on the glcanvas. */
 
-        DECLARE_EVENT_TABLE();                        /**< The event table of this frame. */
+        DECLARE_EVENT_TABLE()                        /**< The event table of this frame. */
 
       protected:
         /**

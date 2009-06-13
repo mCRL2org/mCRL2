@@ -8,10 +8,11 @@
 //
 /// \file ltsmin.h
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
 #include "aterm1.h"
 #include <assert.h>
 #include "svc/svcerrno.h"
@@ -77,7 +78,7 @@ extern ATermList  *lab; /* [[key, sources], ... ] */
 extern INTERVAL *Pi;
 /* end extern declarations and data structures */
 
-extern int errno, label_tau;
+extern int label_tau;
 extern SVCfile inFile[], outFile[];
 extern SVCbool readIndex[];
 extern int traceLevel, optimal, classes;

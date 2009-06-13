@@ -25,10 +25,10 @@ using namespace std;
 
 // Dynamic array implementations
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(arr_channel_id);
-WX_DEFINE_OBJARRAY(arr_action_reference);
-WX_DEFINE_OBJARRAY(arr_channel_comm);
-WX_DEFINE_OBJARRAY(arr_renamed);
+WX_DEFINE_OBJARRAY(arr_channel_id)
+WX_DEFINE_OBJARRAY(arr_action_reference)
+WX_DEFINE_OBJARRAY(arr_channel_comm)
+WX_DEFINE_OBJARRAY(arr_renamed)
 
 void grape::mcrl2gen::init_mcrl2libs(int p_argc, char** p_argv)
 {

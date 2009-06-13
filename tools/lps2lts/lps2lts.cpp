@@ -175,6 +175,7 @@ class lps2lts_tool : public lps2lts_base
 
     void parse_options(const command_line_parser &parser)
     {
+      lps2lts_base::parse_options(parser);
       options.removeunused    = parser.options.count("unused-data") == 0;
       options.detect_deadlock = parser.options.count("deadlock");
       options.outinfo         = parser.options.count("no-info") == 0;

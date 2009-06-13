@@ -68,5 +68,5 @@ linetype communication::get_linetype( void ) const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_communication );
+WX_DEFINE_OBJARRAY( arr_communication )
 

@@ -475,4 +475,4 @@ object* architecture_diagram::find_object( architecture_diagram* p_arch_dia, uns
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_architecture_diagram );
+WX_DEFINE_OBJARRAY( arr_architecture_diagram )

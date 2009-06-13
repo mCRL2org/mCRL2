@@ -282,12 +282,12 @@ semval lysaLexer::parse_stream(std::istream &stream)
 	{
 		yyerror(s);
 	}
-	if (res != 0) 
-	{ 
+	if (res != 0)
+	{
 		// return empty shared_ptr.
 		semval result;
 		return result;
-	} 
+	}
 	else
 	{
 		//return a new shared_ptr to the parse tree.
@@ -301,4 +301,4 @@ semval lysaLexer::parse_stream(std::istream &stream)
 //maybe it is because build\workarounds\FlexLexer.h is for flex 2.5.35 
 //which I have not managed to find a windows port for, so i use 2.5.34.
 #undef yywrap
-int lysayyFlexLexer::yywrap(void) { return 1; };
+int lysayyFlexLexer::yywrap(void) { return 1; }
