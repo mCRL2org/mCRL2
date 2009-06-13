@@ -226,11 +226,6 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
       p.load(m_input_filename);
-
-      if (!p.is_well_typed())
-      { throw mcrl2::runtime_error("The pbes is not well typed\n");
-      }
-
       p.normalize();
       if (opt_data_elm)
       { p = remove_unused_data(p);
