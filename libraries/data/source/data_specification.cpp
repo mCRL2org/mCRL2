@@ -828,7 +828,10 @@ namespace mcrl2 {
 
           for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
           {
-            sorts.insert(alias(i->second, i->first));
+            if (std::string(basic_sort(i->second).name()).find("@legacy_") == 0)
+            {
+              sorts.insert(alias(i->second, i->first));
+            }
           }
 
           for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
