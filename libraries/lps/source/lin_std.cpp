@@ -5372,7 +5372,6 @@ class specification_basic_type:public boost::noncopyable
          consisting of actions and data occur in C, such that
          a communication can take place. If not action_label() is delivered,
          otherwise the resulting action is the result. */
-      // std::cerr << "Can communicate in " << pp(m) << "\n"; 
       // first copy the left-hand sides of communications for use
       for(int i=0; i<comm_table.size(); i++)
       {
@@ -5439,7 +5438,6 @@ class specification_basic_type:public boost::noncopyable
          that are not in m should be in n (i.e. there must be a
          subbag o of n such that m+o can communicate. */
     
-      // std::cerr << "Might communicate " << pp(m) << "  " << pp(n) << "\n";
       // first copy the left-hand sides of communications for use
       for(int i=0; i<comm_table.size(); i++)
       { comm_table.match_failed[i]=false;
@@ -5487,16 +5485,12 @@ class specification_basic_type:public boost::noncopyable
           }
         }
         if (!comm_ok) 
-        { // std::cerr << "Might communicate is false\n";
-          return false;
+        { return false;
         }
       }
-      // std::cerr << "HIERO " << pp(m) << "   " << pp(n) << "\n";
  
       if (n_is_null)
       { // there is a matching lhs
-        // std::cerr << "Might communicate is true1\n";
-
         return true;
       } 
       else 
@@ -5540,14 +5534,11 @@ class specification_basic_type:public boost::noncopyable
           }
     
           if (!rest_is_null[i]) // lhs was found in rest[i]
-          { // std::cerr << "Might communicate is true2\n";
-            return true;
+          { return true;
           }
         }
     
         // no lhs completely matches
-        // std::cerr << "Might communicate is false2\n";
-
         return false;
       }
     }
@@ -5600,12 +5591,10 @@ class specification_basic_type:public boost::noncopyable
     bool xi(const action_list alpha, const action_list beta, comm_entry &comm_table)
     { if (beta.empty())
       { if (can_communicate(alpha,comm_table)!=action_label())
-        { // std::cerr << "can commmunitcate true1\n";
-          return true;
+        { return true;
         }
         else 
-        { // std::cerr << "can commmunitcate false1\n";
-          return false;
+        { return false;
         }
       } 
       else 
@@ -5614,8 +5603,7 @@ class specification_basic_type:public boost::noncopyable
         const action_list beta_next = pop_front(beta);
     
         if (can_communicate(l,comm_table)!=action_label())
-        { // std::cerr << "can commmunitcate true2\n";
-          return true;
+        { return true;
         } else if ( might_communicate(l,comm_table,beta_next,false) )
         {
           return xi(l,beta_next,comm_table) || xi(alpha,beta_next,comm_table);
@@ -5626,8 +5614,7 @@ class specification_basic_type:public boost::noncopyable
     }
     
     data_expression psi(const action_list alpha_in, comm_entry &comm_table)
-    { // std::cerr << "PSI IN " << pp(alpha_in) << "\n";
-      action_list alpha=reverse(alpha_in);
+    { action_list alpha=reverse(alpha_in);
       data_expression cond = sort_bool_::false_();
       while ( !alpha.empty() )
       {
@@ -5640,7 +5627,6 @@ class specification_basic_type:public boost::noncopyable
           { // sort and remove duplicates??
             cond = lazy::or_(cond,pairwiseMatch(a.arguments(),beta.front().arguments()));
           }
-            // std::cerr << "Cond " << pp(cond) << "  alpha " << pp(alpha) << "  " << pp(beta) << "\n";
           beta = pop_front(beta);
         }
     
@@ -5658,17 +5644,10 @@ class specification_basic_type:public boost::noncopyable
     { /* This is the function gamma(m,C,r) provided
          by Muck van Weerdenburg in Calculation of
          Communication with open terms [1]. */
-      // std::cerr << "Multiaction " << pp(multiaction) << "\n"; 
       if (multiaction.empty())
       { tuple_list t;
         t.conditions.push_back((r_is_null)?sort_bool_::true_():psi(r,comm_table));
         t.actions.push_back(action_list());
-      // std::cerr << "Return actcondlist1 ";
-          atermpp::vector < data_expression >:: const_iterator j=t.conditions.begin();
-          for(atermpp::vector < action_list >:: const_iterator i=t.actions.begin();
-                      i!=t.actions.end(); ++i, ++j)
-          { // std::cerr << "LIST1 " << pp(*i) << "    " << pp(*j) << "\n";
-          } 
         return t;
       }
     
@@ -5680,19 +5659,9 @@ class specification_basic_type:public boost::noncopyable
                              action_list(),
                              remainingmultiaction,
                              r,r_is_null,comm_table);
-      // std::cerr << "Return actcondlist3 \n";
-          for(atermpp::vector < action_list >:: const_iterator i=S.actions.begin();
-                      i!=S.actions.end(); ++i)
-          { // ATfprintf(stderr,"LIST3 %t\n",(ATermList)*i );
-          } 
       const tuple_list T=makeMultiActionConditionList_aux(
                       remainingmultiaction,comm_table,
                       (r_is_null)?push_front(action_list(),firstaction):push_front(r,firstaction),false);
-      // std::cerr << "Return actcondlist2 \n";
-          for(atermpp::vector < action_list >:: const_iterator i=T.actions.begin();
-                      i!=T.actions.end(); ++i)
-          { // ATfprintf(stderr,"LIST2 %t\n",(ATermList)*i );
-          } 
       return addActionCondition(firstaction,sort_bool_::true_(),T,S);
     }
     
@@ -5734,7 +5703,6 @@ class specification_basic_type:public boost::noncopyable
       for(summand_list::const_iterator sourcesumlist=summands.begin();
                     sourcesumlist!=summands.end(); ++sourcesumlist)
       { const summand smmnd=*sourcesumlist;
-        // std::cerr << "SUMMNAD " << pp(smmnd) << "\n";
         const variable_list sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.actions();
         if (smmnd.is_delta())
@@ -5785,11 +5753,6 @@ class specification_basic_type:public boost::noncopyable
                          makeMultiActionConditionList(
                                   multiaction,
                                   communications1);
-          atermpp::vector <data_expression > :: const_iterator j=multiactionconditionlist.conditions.begin();
-          for(atermpp::vector < action_list >:: const_iterator i=multiactionconditionlist.actions.begin();
-                      i!=multiactionconditionlist.actions.end(); ++i, ++j)
-          { // std::cerr << "LIST " << pp(*i) << "     " << pp(*j) << "\n"; 
-          } 
     
           assert(multiactionconditionlist.actions.size()==
                  multiactionconditionlist.conditions.size());
