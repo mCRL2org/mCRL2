@@ -1284,7 +1284,7 @@ class specification_basic_type:public boost::noncopyable
                      const variable_list vars,
                      const  data_expression_list tl)
     {
-       atermpp::map < variable, data_expression > sigma;
+       std::map < variable, data_expression > sigma;
        data_expression_list::const_iterator j=terms.begin();
        for(variable_list::const_iterator i=vars.begin();
                         i!=vars.end(); ++i, ++j)
@@ -1304,7 +1304,7 @@ class specification_basic_type:public boost::noncopyable
          as the reverse operator is expensive:
           return data::replace_free_variables(t,make_map_substitution(atermpp::reverse(vars), atermpp::reverse(terms)));
       */
-      atermpp::map < variable, data_expression > sigma;      
+      std::map < variable, data_expression > sigma;      
       data_expression_list::const_iterator j=terms.begin(); 
       for(variable_list::const_iterator i=vars.begin();         
                         i!=vars.end(); ++i, ++j)         
