@@ -81,7 +81,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbag_empty
       inline
-      function_symbol fbag_empty(const sort_expression& s)
+      function_symbol const& fbag_empty(const sort_expression& s)
       {
         static function_symbol fbag_empty = data::detail::initialise_static_expression(fbag_empty, function_symbol("@fbag_empty", fbag(s)));
         return fbag_empty;
@@ -104,7 +104,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbag_cons
       inline
-      function_symbol fbag_cons(const sort_expression& s)
+      function_symbol const& fbag_cons(const sort_expression& s)
       {
         static function_symbol fbag_cons = data::detail::initialise_static_expression(fbag_cons, function_symbol("@fbag_cons", function_sort(s, sort_pos::pos(), fbag(s), fbag(s))));
         return fbag_cons;
@@ -165,7 +165,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbaginsert
       inline
-      function_symbol fbaginsert(const sort_expression& s)
+      function_symbol const& fbaginsert(const sort_expression& s)
       {
         static function_symbol fbaginsert = data::detail::initialise_static_expression(fbaginsert, function_symbol("@fbag_insert", function_sort(s, sort_pos::pos(), fbag(s), fbag(s))));
         return fbaginsert;
@@ -214,7 +214,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagcinsert
       inline
-      function_symbol fbagcinsert(const sort_expression& s)
+      function_symbol const& fbagcinsert(const sort_expression& s)
       {
         static function_symbol fbagcinsert = data::detail::initialise_static_expression(fbagcinsert, function_symbol("@fbag_cinsert", function_sort(s, sort_nat::nat(), fbag(s), fbag(s))));
         return fbagcinsert;
@@ -263,7 +263,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagcount
       inline
-      function_symbol fbagcount(const sort_expression& s)
+      function_symbol const& fbagcount(const sort_expression& s)
       {
         static function_symbol fbagcount = data::detail::initialise_static_expression(fbagcount, function_symbol("@fbag_count", function_sort(s, fbag(s), sort_nat::nat())));
         return fbagcount;
@@ -311,7 +311,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagin
       inline
-      function_symbol fbagin(const sort_expression& s)
+      function_symbol const& fbagin(const sort_expression& s)
       {
         static function_symbol fbagin = data::detail::initialise_static_expression(fbagin, function_symbol("@fbag_in", function_sort(s, fbag(s), sort_bool_::bool_())));
         return fbagin;
@@ -359,7 +359,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbaglte
       inline
-      function_symbol fbaglte(const sort_expression& s)
+      function_symbol const& fbaglte(const sort_expression& s)
       {
         static function_symbol fbaglte = data::detail::initialise_static_expression(fbaglte, function_symbol("@fbag_lte", function_sort(function_sort(s, sort_nat::nat()), fbag(s), fbag(s), sort_bool_::bool_())));
         return fbaglte;
@@ -408,7 +408,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagjoin
       inline
-      function_symbol fbagjoin(const sort_expression& s)
+      function_symbol const& fbagjoin(const sort_expression& s)
       {
         static function_symbol fbagjoin = data::detail::initialise_static_expression(fbagjoin, function_symbol("@fbag_join", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagjoin;
@@ -458,7 +458,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagintersect
       inline
-      function_symbol fbagintersect(const sort_expression& s)
+      function_symbol const& fbagintersect(const sort_expression& s)
       {
         static function_symbol fbagintersect = data::detail::initialise_static_expression(fbagintersect, function_symbol("@fbag_inter", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagintersect;
@@ -508,7 +508,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbagdifference
       inline
-      function_symbol fbagdifference(const sort_expression& s)
+      function_symbol const& fbagdifference(const sort_expression& s)
       {
         static function_symbol fbagdifference = data::detail::initialise_static_expression(fbagdifference, function_symbol("@fbag_diff", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagdifference;
@@ -558,7 +558,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fbag2fset
       inline
-      function_symbol fbag2fset(const sort_expression& s)
+      function_symbol const& fbag2fset(const sort_expression& s)
       {
         static function_symbol fbag2fset = data::detail::initialise_static_expression(fbag2fset, function_symbol("@fbag2fset", function_sort(function_sort(s, sort_nat::nat()), fbag(s), sort_fset::fset(s))));
         return fbag2fset;
@@ -606,7 +606,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fset2fbag
       inline
-      function_symbol fset2fbag(const sort_expression& s)
+      function_symbol const& fset2fbag(const sort_expression& s)
       {
         static function_symbol fset2fbag = data::detail::initialise_static_expression(fset2fbag, function_symbol("@fset2fbag", function_sort(sort_fset::fset(s), fbag(s))));
         return fset2fbag;

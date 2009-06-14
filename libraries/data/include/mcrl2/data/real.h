@@ -38,7 +38,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Real
       /// \return Sort expression Real
       inline
-      basic_sort real_()
+      basic_sort const& real_()
       {
         static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort("Real"));
         return real_;
@@ -69,7 +69,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@cReal
       /// \return Function symbol creal
       inline
-      function_symbol creal()
+      function_symbol const& creal()
       {
         static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_())));
         return creal;
@@ -115,7 +115,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Pos2Real
       /// \return Function symbol pos2real
       inline
-      function_symbol pos2real()
+      function_symbol const& pos2real()
       {
         static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol("Pos2Real", function_sort(sort_pos::pos(), real_())));
         return pos2real;
@@ -160,7 +160,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Nat2Real
       /// \return Function symbol nat2real
       inline
-      function_symbol nat2real()
+      function_symbol const& nat2real()
       {
         static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol("Nat2Real", function_sort(sort_nat::nat(), real_())));
         return nat2real;
@@ -205,7 +205,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Int2Real
       /// \return Function symbol int2real
       inline
-      function_symbol int2real()
+      function_symbol const& int2real()
       {
         static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol("Int2Real", function_sort(sort_int_::int_(), real_())));
         return int2real;
@@ -250,7 +250,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Real2Pos
       /// \return Function symbol real2pos
       inline
-      function_symbol real2pos()
+      function_symbol const& real2pos()
       {
         static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol("Real2Pos", function_sort(real_(), sort_pos::pos())));
         return real2pos;
@@ -295,7 +295,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Real2Nat
       /// \return Function symbol real2nat
       inline
-      function_symbol real2nat()
+      function_symbol const& real2nat()
       {
         static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol("Real2Nat", function_sort(real_(), sort_nat::nat())));
         return real2nat;
@@ -340,7 +340,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Real2Int
       /// \return Function symbol real2int
       inline
-      function_symbol real2int()
+      function_symbol const& real2int()
       {
         static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol("Real2Int", function_sort(real_(), sort_int_::int_())));
         return real2int;
@@ -1159,7 +1159,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol floor
       /// \return Function symbol floor
       inline
-      function_symbol floor()
+      function_symbol const& floor()
       {
         static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol("floor", function_sort(real_(), sort_int_::int_())));
         return floor;
@@ -1204,7 +1204,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol ceil
       /// \return Function symbol ceil
       inline
-      function_symbol ceil()
+      function_symbol const& ceil()
       {
         static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol("ceil", function_sort(real_(), sort_int_::int_())));
         return ceil;
@@ -1249,7 +1249,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol round
       /// \return Function symbol round
       inline
-      function_symbol round()
+      function_symbol const& round()
       {
         static function_symbol round = data::detail::initialise_static_expression(round, function_symbol("round", function_sort(real_(), sort_int_::int_())));
         return round;
@@ -1294,7 +1294,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@redfrac
       /// \return Function symbol redfrac
       inline
-      function_symbol redfrac()
+      function_symbol const& redfrac()
       {
         static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_())));
         return redfrac;
@@ -1340,7 +1340,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@redfracwhr
       /// \return Function symbol redfracwhr
       inline
-      function_symbol redfracwhr()
+      function_symbol const& redfracwhr()
       {
         static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_())));
         return redfracwhr;
@@ -1387,7 +1387,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@redfrachlp
       /// \return Function symbol redfrachlp
       inline
-      function_symbol redfrachlp()
+      function_symbol const& redfrachlp()
       {
         static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_())));
         return redfrachlp;

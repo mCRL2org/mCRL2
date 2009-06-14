@@ -213,7 +213,7 @@ namespace mcrl2 {
       /// \brief Constructs expression of type Nat from a string
       /// \param n A string
       inline data_expression nat(std::string const& n) {
-        return (n == "0") ? sort_nat::c0() : static_cast< data_expression >(sort_nat::cnat(sort_pos::pos(n)));
+        return (n == "0") ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(n)));
       }
     }
 

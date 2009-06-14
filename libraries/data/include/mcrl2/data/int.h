@@ -37,7 +37,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Int
       /// \return Sort expression Int
       inline
-      basic_sort int_()
+      basic_sort const& int_()
       {
         static basic_sort int_ = data::detail::initialise_static_expression(int_, basic_sort("Int"));
         return int_;
@@ -59,7 +59,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@cInt
       /// \return Function symbol cint
       inline
-      function_symbol cint()
+      function_symbol const& cint()
       {
         static function_symbol cint = data::detail::initialise_static_expression(cint, function_symbol("@cInt", function_sort(sort_nat::nat(), int_())));
         return cint;
@@ -104,7 +104,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@cNeg
       /// \return Function symbol cneg
       inline
-      function_symbol cneg()
+      function_symbol const& cneg()
       {
         static function_symbol cneg = data::detail::initialise_static_expression(cneg, function_symbol("@cNeg", function_sort(sort_pos::pos(), int_())));
         return cneg;
@@ -160,7 +160,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Nat2Int
       /// \return Function symbol nat2int
       inline
-      function_symbol nat2int()
+      function_symbol const& nat2int()
       {
         static function_symbol nat2int = data::detail::initialise_static_expression(nat2int, function_symbol("Nat2Int", function_sort(sort_nat::nat(), int_())));
         return nat2int;
@@ -205,7 +205,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Int2Nat
       /// \return Function symbol int2nat
       inline
-      function_symbol int2nat()
+      function_symbol const& int2nat()
       {
         static function_symbol int2nat = data::detail::initialise_static_expression(int2nat, function_symbol("Int2Nat", function_sort(int_(), sort_nat::nat())));
         return int2nat;
@@ -250,7 +250,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Pos2Int
       /// \return Function symbol pos2int
       inline
-      function_symbol pos2int()
+      function_symbol const& pos2int()
       {
         static function_symbol pos2int = data::detail::initialise_static_expression(pos2int, function_symbol("Pos2Int", function_sort(sort_pos::pos(), int_())));
         return pos2int;
@@ -295,7 +295,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Int2Pos
       /// \return Function symbol int2pos
       inline
-      function_symbol int2pos()
+      function_symbol const& int2pos()
       {
         static function_symbol int2pos = data::detail::initialise_static_expression(int2pos, function_symbol("Int2Pos", function_sort(int_(), sort_pos::pos())));
         return int2pos;

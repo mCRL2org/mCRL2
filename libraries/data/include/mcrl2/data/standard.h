@@ -22,9 +22,9 @@ namespace mcrl2 {
 
     // predeclare
     namespace sort_bool_ {
-      basic_sort bool_();
-      function_symbol false_();
-      function_symbol true_();
+      basic_sort const& bool_();
+      function_symbol const& false_();
+      function_symbol const& true_();
       application not_(const data_expression&);
       bool is_bool_(const sort_expression&);
     }

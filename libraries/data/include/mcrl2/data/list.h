@@ -63,7 +63,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol nil
       inline
-      function_symbol nil(const sort_expression& s)
+      function_symbol const& nil(const sort_expression& s)
       {
         static function_symbol nil = data::detail::initialise_static_expression(nil, function_symbol("[]", list(s)));
         return nil;
@@ -86,7 +86,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol cons_
       inline
-      function_symbol cons_(const sort_expression& s)
+      function_symbol const& cons_(const sort_expression& s)
       {
         static function_symbol cons_ = data::detail::initialise_static_expression(cons_, function_symbol("|>", function_sort(s, list(s), list(s))));
         return cons_;
@@ -146,7 +146,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol in
       inline
-      function_symbol in(const sort_expression& s)
+      function_symbol const& in(const sort_expression& s)
       {
         static function_symbol in = data::detail::initialise_static_expression(in, function_symbol("in", function_sort(s, list(s), sort_bool_::bool_())));
         return in;
@@ -194,7 +194,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol count
       inline
-      function_symbol count(const sort_expression& s)
+      function_symbol const& count(const sort_expression& s)
       {
         static function_symbol count = data::detail::initialise_static_expression(count, function_symbol("#", function_sort(list(s), sort_nat::nat())));
         return count;
@@ -241,7 +241,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol snoc
       inline
-      function_symbol snoc(const sort_expression& s)
+      function_symbol const& snoc(const sort_expression& s)
       {
         static function_symbol snoc = data::detail::initialise_static_expression(snoc, function_symbol("<|", function_sort(list(s), s, list(s))));
         return snoc;
@@ -289,7 +289,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol concat
       inline
-      function_symbol concat(const sort_expression& s)
+      function_symbol const& concat(const sort_expression& s)
       {
         static function_symbol concat = data::detail::initialise_static_expression(concat, function_symbol("++", function_sort(list(s), list(s), list(s))));
         return concat;
@@ -337,7 +337,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol element_at
       inline
-      function_symbol element_at(const sort_expression& s)
+      function_symbol const& element_at(const sort_expression& s)
       {
         static function_symbol element_at = data::detail::initialise_static_expression(element_at, function_symbol(".", function_sort(list(s), sort_nat::nat(), s)));
         return element_at;
@@ -385,7 +385,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol head
       inline
-      function_symbol head(const sort_expression& s)
+      function_symbol const& head(const sort_expression& s)
       {
         static function_symbol head = data::detail::initialise_static_expression(head, function_symbol("head", function_sort(list(s), s)));
         return head;
@@ -432,7 +432,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol tail
       inline
-      function_symbol tail(const sort_expression& s)
+      function_symbol const& tail(const sort_expression& s)
       {
         static function_symbol tail = data::detail::initialise_static_expression(tail, function_symbol("tail", function_sort(list(s), list(s))));
         return tail;
@@ -479,7 +479,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol rhead
       inline
-      function_symbol rhead(const sort_expression& s)
+      function_symbol const& rhead(const sort_expression& s)
       {
         static function_symbol rhead = data::detail::initialise_static_expression(rhead, function_symbol("rhead", function_sort(list(s), s)));
         return rhead;
@@ -526,7 +526,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol rtail
       inline
-      function_symbol rtail(const sort_expression& s)
+      function_symbol const& rtail(const sort_expression& s)
       {
         static function_symbol rtail = data::detail::initialise_static_expression(rtail, function_symbol("rtail", function_sort(list(s), list(s))));
         return rtail;

@@ -78,7 +78,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fset_empty
       inline
-      function_symbol fset_empty(const sort_expression& s)
+      function_symbol const& fset_empty(const sort_expression& s)
       {
         static function_symbol fset_empty = data::detail::initialise_static_expression(fset_empty, function_symbol("@fset_empty", fset(s)));
         return fset_empty;
@@ -101,7 +101,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fset_cons
       inline
-      function_symbol fset_cons(const sort_expression& s)
+      function_symbol const& fset_cons(const sort_expression& s)
       {
         static function_symbol fset_cons = data::detail::initialise_static_expression(fset_cons, function_symbol("@fset_cons", function_sort(s, fset(s), fset(s))));
         return fset_cons;
@@ -161,7 +161,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetinsert
       inline
-      function_symbol fsetinsert(const sort_expression& s)
+      function_symbol const& fsetinsert(const sort_expression& s)
       {
         static function_symbol fsetinsert = data::detail::initialise_static_expression(fsetinsert, function_symbol("@fset_insert", function_sort(s, fset(s), fset(s))));
         return fsetinsert;
@@ -209,7 +209,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetcinsert
       inline
-      function_symbol fsetcinsert(const sort_expression& s)
+      function_symbol const& fsetcinsert(const sort_expression& s)
       {
         static function_symbol fsetcinsert = data::detail::initialise_static_expression(fsetcinsert, function_symbol("@fset_cinsert", function_sort(s, sort_bool_::bool_(), fset(s), fset(s))));
         return fsetcinsert;
@@ -258,7 +258,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetin
       inline
-      function_symbol fsetin(const sort_expression& s)
+      function_symbol const& fsetin(const sort_expression& s)
       {
         static function_symbol fsetin = data::detail::initialise_static_expression(fsetin, function_symbol("@fset_in", function_sort(s, fset(s), sort_bool_::bool_())));
         return fsetin;
@@ -306,7 +306,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetlte
       inline
-      function_symbol fsetlte(const sort_expression& s)
+      function_symbol const& fsetlte(const sort_expression& s)
       {
         static function_symbol fsetlte = data::detail::initialise_static_expression(fsetlte, function_symbol("@fset_lte", function_sort(function_sort(s, sort_bool_::bool_()), fset(s), fset(s), sort_bool_::bool_())));
         return fsetlte;
@@ -355,7 +355,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetunion
       inline
-      function_symbol fsetunion(const sort_expression& s)
+      function_symbol const& fsetunion(const sort_expression& s)
       {
         static function_symbol fsetunion = data::detail::initialise_static_expression(fsetunion, function_symbol("@fset_union", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s))));
         return fsetunion;
@@ -405,7 +405,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol fsetintersection
       inline
-      function_symbol fsetintersection(const sort_expression& s)
+      function_symbol const& fsetintersection(const sort_expression& s)
       {
         static function_symbol fsetintersection = data::detail::initialise_static_expression(fsetintersection, function_symbol("@fset_inter", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s))));
         return fsetintersection;

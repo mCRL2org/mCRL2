@@ -36,7 +36,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Nat
       /// \return Sort expression Nat
       inline
-      basic_sort nat()
+      basic_sort const& nat()
       {
         static basic_sort nat = data::detail::initialise_static_expression(nat, basic_sort("Nat"));
         return nat;
@@ -58,7 +58,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression \@NatPair
       /// \return Sort expression \@NatPair
       inline
-      basic_sort natpair()
+      basic_sort const& natpair()
       {
         static basic_sort natpair = data::detail::initialise_static_expression(natpair, basic_sort("@NatPair"));
         return natpair;
@@ -80,7 +80,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@c0
       /// \return Function symbol c0
       inline
-      function_symbol c0()
+      function_symbol const& c0()
       {
         static function_symbol c0 = data::detail::initialise_static_expression(c0, function_symbol("@c0", nat()));
         return c0;
@@ -102,7 +102,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@cNat
       /// \return Function symbol cnat
       inline
-      function_symbol cnat()
+      function_symbol const& cnat()
       {
         static function_symbol cnat = data::detail::initialise_static_expression(cnat, function_symbol("@cNat", function_sort(sort_pos::pos(), nat())));
         return cnat;
@@ -147,7 +147,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@cPair
       /// \return Function symbol cpair
       inline
-      function_symbol cpair()
+      function_symbol const& cpair()
       {
         static function_symbol cpair = data::detail::initialise_static_expression(cpair, function_symbol("@cPair", function_sort(nat(), nat(), natpair())));
         return cpair;
@@ -205,7 +205,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Pos2Nat
       /// \return Function symbol pos2nat
       inline
-      function_symbol pos2nat()
+      function_symbol const& pos2nat()
       {
         static function_symbol pos2nat = data::detail::initialise_static_expression(pos2nat, function_symbol("Pos2Nat", function_sort(sort_pos::pos(), nat())));
         return pos2nat;
@@ -250,7 +250,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol Nat2Pos
       /// \return Function symbol nat2pos
       inline
-      function_symbol nat2pos()
+      function_symbol const& nat2pos()
       {
         static function_symbol nat2pos = data::detail::initialise_static_expression(nat2pos, function_symbol("Nat2Pos", function_sort(nat(), sort_pos::pos())));
         return nat2pos;
@@ -535,7 +535,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol pred
       /// \return Function symbol pred
       inline
-      function_symbol pred()
+      function_symbol const& pred()
       {
         static function_symbol pred = data::detail::initialise_static_expression(pred, function_symbol("pred", function_sort(sort_pos::pos(), nat())));
         return pred;
@@ -580,7 +580,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@dub
       /// \return Function symbol dub
       inline
-      function_symbol dub()
+      function_symbol const& dub()
       {
         static function_symbol dub = data::detail::initialise_static_expression(dub, function_symbol("@dub", function_sort(sort_bool_::bool_(), nat(), nat())));
         return dub;
@@ -746,7 +746,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@gtesubtb
       /// \return Function symbol gtesubtb
       inline
-      function_symbol gtesubtb()
+      function_symbol const& gtesubtb()
       {
         static function_symbol gtesubtb = data::detail::initialise_static_expression(gtesubtb, function_symbol("@gtesubtb", function_sort(sort_bool_::bool_(), sort_pos::pos(), sort_pos::pos(), nat())));
         return gtesubtb;
@@ -1017,7 +1017,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@even
       /// \return Function symbol even
       inline
-      function_symbol even()
+      function_symbol const& even()
       {
         static function_symbol even = data::detail::initialise_static_expression(even, function_symbol("@even", function_sort(nat(), sort_bool_::bool_())));
         return even;
@@ -1062,7 +1062,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@monus
       /// \return Function symbol monus
       inline
-      function_symbol monus()
+      function_symbol const& monus()
       {
         static function_symbol monus = data::detail::initialise_static_expression(monus, function_symbol("@monus", function_sort(nat(), nat(), nat())));
         return monus;
@@ -1108,7 +1108,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@swap_zero
       /// \return Function symbol swap_zero
       inline
-      function_symbol swap_zero()
+      function_symbol const& swap_zero()
       {
         static function_symbol swap_zero = data::detail::initialise_static_expression(swap_zero, function_symbol("@swap_zero", function_sort(nat(), nat(), nat())));
         return swap_zero;
@@ -1154,7 +1154,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@swap_zero_add
       /// \return Function symbol swap_zero_add
       inline
-      function_symbol swap_zero_add()
+      function_symbol const& swap_zero_add()
       {
         static function_symbol swap_zero_add = data::detail::initialise_static_expression(swap_zero_add, function_symbol("@swap_zero_add", function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_add;
@@ -1202,7 +1202,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@swap_zero_min
       /// \return Function symbol swap_zero_min
       inline
-      function_symbol swap_zero_min()
+      function_symbol const& swap_zero_min()
       {
         static function_symbol swap_zero_min = data::detail::initialise_static_expression(swap_zero_min, function_symbol("@swap_zero_min", function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_min;
@@ -1250,7 +1250,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@swap_zero_monus
       /// \return Function symbol swap_zero_monus
       inline
-      function_symbol swap_zero_monus()
+      function_symbol const& swap_zero_monus()
       {
         static function_symbol swap_zero_monus = data::detail::initialise_static_expression(swap_zero_monus, function_symbol("@swap_zero_monus", function_sort(nat(), nat(), nat(), nat(), nat())));
         return swap_zero_monus;
@@ -1298,7 +1298,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@swap_zero_lte
       /// \return Function symbol swap_zero_lte
       inline
-      function_symbol swap_zero_lte()
+      function_symbol const& swap_zero_lte()
       {
         static function_symbol swap_zero_lte = data::detail::initialise_static_expression(swap_zero_lte, function_symbol("@swap_zero_lte", function_sort(nat(), nat(), nat(), sort_bool_::bool_())));
         return swap_zero_lte;
@@ -1345,7 +1345,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@first
       /// \return Function symbol first
       inline
-      function_symbol first()
+      function_symbol const& first()
       {
         static function_symbol first = data::detail::initialise_static_expression(first, function_symbol("@first", function_sort(natpair(), nat())));
         return first;
@@ -1390,7 +1390,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@last
       /// \return Function symbol last
       inline
-      function_symbol last()
+      function_symbol const& last()
       {
         static function_symbol last = data::detail::initialise_static_expression(last, function_symbol("@last", function_sort(natpair(), nat())));
         return last;
@@ -1435,7 +1435,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@divmod
       /// \return Function symbol divmod
       inline
-      function_symbol divmod()
+      function_symbol const& divmod()
       {
         static function_symbol divmod = data::detail::initialise_static_expression(divmod, function_symbol("@divmod", function_sort(sort_pos::pos(), sort_pos::pos(), natpair())));
         return divmod;
@@ -1481,7 +1481,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@gdivmod
       /// \return Function symbol gdivmod
       inline
-      function_symbol gdivmod()
+      function_symbol const& gdivmod()
       {
         static function_symbol gdivmod = data::detail::initialise_static_expression(gdivmod, function_symbol("@gdivmod", function_sort(natpair(), sort_bool_::bool_(), sort_pos::pos(), natpair())));
         return gdivmod;
@@ -1528,7 +1528,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol \@ggdivmod
       /// \return Function symbol ggdivmod
       inline
-      function_symbol ggdivmod()
+      function_symbol const& ggdivmod()
       {
         static function_symbol ggdivmod = data::detail::initialise_static_expression(ggdivmod, function_symbol("@ggdivmod", function_sort(nat(), nat(), sort_pos::pos(), natpair())));
         return ggdivmod;

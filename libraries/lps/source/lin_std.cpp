@@ -5646,7 +5646,7 @@ class specification_basic_type:public boost::noncopyable
          Communication with open terms [1]. */
       if (multiaction.empty())
       { tuple_list t;
-        t.conditions.push_back((r_is_null)?sort_bool_::true_():psi(r,comm_table));
+        t.conditions.push_back((r_is_null)?sort_bool_::true_():static_cast< data_expression const& >(psi(r,comm_table)));
         t.actions.push_back(action_list());
         return t;
       }
@@ -6038,8 +6038,8 @@ class specification_basic_type:public boost::noncopyable
       variable_list ultimate_delay_sumvars1;
       data_expression ultimatedelaycondition=
                  (options.add_delta?sort_bool_::true_():
-                       getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
-                                                      timevar,ultimate_delay_sumvars1));
+                       static_cast< data_expression const& >(getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
+                                                      timevar,ultimate_delay_sumvars1)));
     
       for (summand_list::const_iterator walker1=sumlist1.begin(); 
                           walker1!=sumlist1.end(); ++walker1)
@@ -6091,8 +6091,8 @@ class specification_basic_type:public boost::noncopyable
     
       variable_list ultimate_delay_sumvars2;
       ultimatedelaycondition=(options.add_delta?sort_bool_::true_():
-                   getUltimateDelayCondition(sumlist1,par1,
-                                         timevar,ultimate_delay_sumvars2));
+                   static_cast< data_expression const& >(getUltimateDelayCondition(sumlist1,par1,
+                                         timevar,ultimate_delay_sumvars2)));
     
       for (summand_list::const_iterator walker2=sumlist2.begin(); 
                   walker2!=sumlist2.end(); ++walker2)

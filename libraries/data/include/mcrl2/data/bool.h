@@ -34,7 +34,7 @@ namespace mcrl2 {
       /// \brief Constructor for sort expression Bool
       /// \return Sort expression Bool
       inline
-      basic_sort bool_()
+      basic_sort const& bool_()
       {
         static basic_sort bool_ = data::detail::initialise_static_expression(bool_, basic_sort("Bool"));
         return bool_;
@@ -56,7 +56,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol true
       /// \return Function symbol true_
       inline
-      function_symbol true_()
+      function_symbol const& true_()
       {
         static function_symbol true_ = data::detail::initialise_static_expression(true_, function_symbol("true", bool_()));
         return true_;
@@ -78,7 +78,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol false
       /// \return Function symbol false_
       inline
-      function_symbol false_()
+      function_symbol const& false_()
       {
         static function_symbol false_ = data::detail::initialise_static_expression(false_, function_symbol("false", bool_()));
         return false_;
@@ -111,7 +111,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol !
       /// \return Function symbol not_
       inline
-      function_symbol not_()
+      function_symbol const& not_()
       {
         static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol("!", function_sort(bool_(), bool_())));
         return not_;
@@ -156,7 +156,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol &&
       /// \return Function symbol and_
       inline
-      function_symbol and_()
+      function_symbol const& and_()
       {
         static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol("&&", function_sort(bool_(), bool_(), bool_())));
         return and_;
@@ -202,7 +202,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol ||
       /// \return Function symbol or_
       inline
-      function_symbol or_()
+      function_symbol const& or_()
       {
         static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol("||", function_sort(bool_(), bool_(), bool_())));
         return or_;
@@ -248,7 +248,7 @@ namespace mcrl2 {
       /// \brief Constructor for function symbol =>
       /// \return Function symbol implies
       inline
-      function_symbol implies()
+      function_symbol const& implies()
       {
         static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol("=>", function_sort(bool_(), bool_(), bool_())));
         return implies;
