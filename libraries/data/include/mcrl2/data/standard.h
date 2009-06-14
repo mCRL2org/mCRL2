@@ -29,6 +29,21 @@ namespace mcrl2 {
       bool is_bool_(const sort_expression&);
     }
 
+    namespace detail {
+      /// Function for initialisation of static variables, takes care of protection
+      /// \param[in,out] target a reference to the static variable
+      /// \param[in] original the expression that is used to initialise the variable
+      /// \ return a reference to original
+      template < typename Expression >
+      Expression const& initialise_static_expression(Expression& target, Expression const& original)
+      {
+        target = original;
+        target.protect();
+     
+        return original;
+      }
+    }
+
     /// \brief Constructor for function symbol ==
     /// \param[in] s A sort expression
     /// \return function symbol equal_to

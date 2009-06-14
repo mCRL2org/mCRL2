@@ -56,7 +56,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).container_name() == "fbag";
+          return static_cast< container_sort >(e).container_name() == "fbag";
         }
         return false;
       }
@@ -83,7 +83,7 @@ namespace mcrl2 {
       inline
       function_symbol fbag_empty(const sort_expression& s)
       {
-        function_symbol fbag_empty("@fbag_empty", fbag(s));
+        static function_symbol fbag_empty = data::detail::initialise_static_expression(fbag_empty, function_symbol("@fbag_empty", fbag(s)));
         return fbag_empty;
       }
 
@@ -95,7 +95,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_empty";
+          return static_cast< function_symbol >(e).name() == "@fbag_empty";
         }
         return false;
       }
@@ -106,7 +106,7 @@ namespace mcrl2 {
       inline
       function_symbol fbag_cons(const sort_expression& s)
       {
-        function_symbol fbag_cons("@fbag_cons", function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        static function_symbol fbag_cons = data::detail::initialise_static_expression(fbag_cons, function_symbol("@fbag_cons", function_sort(s, sort_pos::pos(), fbag(s), fbag(s))));
         return fbag_cons;
       }
 
@@ -118,7 +118,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_cons";
+          return static_cast< function_symbol >(e).name() == "@fbag_cons";
         }
         return false;
       }
@@ -144,7 +144,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbag_cons_function_symbol(static_cast<const application&>(e).head());
+          return is_fbag_cons_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -167,7 +167,7 @@ namespace mcrl2 {
       inline
       function_symbol fbaginsert(const sort_expression& s)
       {
-        function_symbol fbaginsert("@fbag_insert", function_sort(s, sort_pos::pos(), fbag(s), fbag(s)));
+        static function_symbol fbaginsert = data::detail::initialise_static_expression(fbaginsert, function_symbol("@fbag_insert", function_sort(s, sort_pos::pos(), fbag(s), fbag(s))));
         return fbaginsert;
       }
 
@@ -179,7 +179,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_insert";
+          return static_cast< function_symbol >(e).name() == "@fbag_insert";
         }
         return false;
       }
@@ -205,7 +205,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbaginsert_function_symbol(static_cast<const application&>(e).head());
+          return is_fbaginsert_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -216,7 +216,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagcinsert(const sort_expression& s)
       {
-        function_symbol fbagcinsert("@fbag_cinsert", function_sort(s, sort_nat::nat(), fbag(s), fbag(s)));
+        static function_symbol fbagcinsert = data::detail::initialise_static_expression(fbagcinsert, function_symbol("@fbag_cinsert", function_sort(s, sort_nat::nat(), fbag(s), fbag(s))));
         return fbagcinsert;
       }
 
@@ -228,7 +228,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_cinsert";
+          return static_cast< function_symbol >(e).name() == "@fbag_cinsert";
         }
         return false;
       }
@@ -254,7 +254,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagcinsert_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagcinsert_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -265,7 +265,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagcount(const sort_expression& s)
       {
-        function_symbol fbagcount("@fbag_count", function_sort(s, fbag(s), sort_nat::nat()));
+        static function_symbol fbagcount = data::detail::initialise_static_expression(fbagcount, function_symbol("@fbag_count", function_sort(s, fbag(s), sort_nat::nat())));
         return fbagcount;
       }
 
@@ -277,7 +277,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_count";
+          return static_cast< function_symbol >(e).name() == "@fbag_count";
         }
         return false;
       }
@@ -302,7 +302,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagcount_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagcount_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -313,7 +313,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagin(const sort_expression& s)
       {
-        function_symbol fbagin("@fbag_in", function_sort(s, fbag(s), sort_bool_::bool_()));
+        static function_symbol fbagin = data::detail::initialise_static_expression(fbagin, function_symbol("@fbag_in", function_sort(s, fbag(s), sort_bool_::bool_())));
         return fbagin;
       }
 
@@ -325,7 +325,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_in";
+          return static_cast< function_symbol >(e).name() == "@fbag_in";
         }
         return false;
       }
@@ -350,7 +350,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagin_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagin_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -361,7 +361,7 @@ namespace mcrl2 {
       inline
       function_symbol fbaglte(const sort_expression& s)
       {
-        function_symbol fbaglte("@fbag_lte", function_sort(function_sort(s, sort_nat::nat()), fbag(s), fbag(s), sort_bool_::bool_()));
+        static function_symbol fbaglte = data::detail::initialise_static_expression(fbaglte, function_symbol("@fbag_lte", function_sort(function_sort(s, sort_nat::nat()), fbag(s), fbag(s), sort_bool_::bool_())));
         return fbaglte;
       }
 
@@ -373,7 +373,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_lte";
+          return static_cast< function_symbol >(e).name() == "@fbag_lte";
         }
         return false;
       }
@@ -399,7 +399,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbaglte_function_symbol(static_cast<const application&>(e).head());
+          return is_fbaglte_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -410,7 +410,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagjoin(const sort_expression& s)
       {
-        function_symbol fbagjoin("@fbag_join", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        static function_symbol fbagjoin = data::detail::initialise_static_expression(fbagjoin, function_symbol("@fbag_join", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagjoin;
       }
 
@@ -422,7 +422,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_join";
+          return static_cast< function_symbol >(e).name() == "@fbag_join";
         }
         return false;
       }
@@ -449,7 +449,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagjoin_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagjoin_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -460,7 +460,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagintersect(const sort_expression& s)
       {
-        function_symbol fbagintersect("@fbag_inter", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        static function_symbol fbagintersect = data::detail::initialise_static_expression(fbagintersect, function_symbol("@fbag_inter", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagintersect;
       }
 
@@ -472,7 +472,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_inter";
+          return static_cast< function_symbol >(e).name() == "@fbag_inter";
         }
         return false;
       }
@@ -499,7 +499,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagintersect_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagintersect_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -510,7 +510,7 @@ namespace mcrl2 {
       inline
       function_symbol fbagdifference(const sort_expression& s)
       {
-        function_symbol fbagdifference("@fbag_diff", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s)));
+        static function_symbol fbagdifference = data::detail::initialise_static_expression(fbagdifference, function_symbol("@fbag_diff", function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_nat::nat()), fbag(s), fbag(s), fbag(s))));
         return fbagdifference;
       }
 
@@ -522,7 +522,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag_diff";
+          return static_cast< function_symbol >(e).name() == "@fbag_diff";
         }
         return false;
       }
@@ -549,7 +549,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbagdifference_function_symbol(static_cast<const application&>(e).head());
+          return is_fbagdifference_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -560,7 +560,7 @@ namespace mcrl2 {
       inline
       function_symbol fbag2fset(const sort_expression& s)
       {
-        function_symbol fbag2fset("@fbag2fset", function_sort(function_sort(s, sort_nat::nat()), fbag(s), sort_fset::fset(s)));
+        static function_symbol fbag2fset = data::detail::initialise_static_expression(fbag2fset, function_symbol("@fbag2fset", function_sort(function_sort(s, sort_nat::nat()), fbag(s), sort_fset::fset(s))));
         return fbag2fset;
       }
 
@@ -572,7 +572,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fbag2fset";
+          return static_cast< function_symbol >(e).name() == "@fbag2fset";
         }
         return false;
       }
@@ -597,7 +597,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fbag2fset_function_symbol(static_cast<const application&>(e).head());
+          return is_fbag2fset_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -608,7 +608,7 @@ namespace mcrl2 {
       inline
       function_symbol fset2fbag(const sort_expression& s)
       {
-        function_symbol fset2fbag("@fset2fbag", function_sort(sort_fset::fset(s), fbag(s)));
+        static function_symbol fset2fbag = data::detail::initialise_static_expression(fset2fbag, function_symbol("@fset2fbag", function_sort(sort_fset::fset(s), fbag(s))));
         return fset2fbag;
       }
 
@@ -620,7 +620,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset2fbag";
+          return static_cast< function_symbol >(e).name() == "@fset2fbag";
         }
         return false;
       }
@@ -644,7 +644,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fset2fbag_function_symbol(static_cast<const application&>(e).head());
+          return is_fset2fbag_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -678,7 +678,7 @@ namespace mcrl2 {
       {
         if (is_fbag_cons_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -694,15 +694,15 @@ namespace mcrl2 {
       {
         if (is_fbagcount_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbagin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbag2fset_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -718,27 +718,27 @@ namespace mcrl2 {
       {
         if (is_fbaginsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbagcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbaglte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbagjoin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbagintersect_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbagdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -754,27 +754,27 @@ namespace mcrl2 {
       {
         if (is_fbaginsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbagcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbaglte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbagjoin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbagintersect_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fbagdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -790,27 +790,27 @@ namespace mcrl2 {
       {
         if (is_fbaginsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fbagcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fbaglte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fbagjoin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fbagintersect_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fbagdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -826,15 +826,15 @@ namespace mcrl2 {
       {
         if (is_fbagjoin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[3];
+          return static_cast< application >(e).arguments()[3];
         }
         if (is_fbagintersect_application(e))
         {
-          return static_cast<const application&>(e).arguments()[3];
+          return static_cast< application >(e).arguments()[3];
         }
         if (is_fbagdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[3];
+          return static_cast< application >(e).arguments()[3];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -850,7 +850,7 @@ namespace mcrl2 {
       {
         if (is_fbag_cons_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -866,7 +866,7 @@ namespace mcrl2 {
       {
         if (is_fset2fbag_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -882,7 +882,7 @@ namespace mcrl2 {
       {
         if (is_fbag_cons_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -898,15 +898,15 @@ namespace mcrl2 {
       {
         if (is_fbagcount_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbagin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fbag2fset_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);

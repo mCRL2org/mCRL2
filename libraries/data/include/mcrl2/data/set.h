@@ -55,7 +55,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).container_name() == "set_";
+          return static_cast< container_sort >(e).container_name() == "set_";
         }
         return false;
       }
@@ -76,7 +76,7 @@ namespace mcrl2 {
       inline
       function_symbol setconstructor(const sort_expression& s)
       {
-        function_symbol setconstructor("@set", function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s)));
+        static function_symbol setconstructor = data::detail::initialise_static_expression(setconstructor, function_symbol("@set", function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s))));
         return setconstructor;
       }
 
@@ -88,7 +88,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@set";
+          return static_cast< function_symbol >(e).name() == "@set";
         }
         return false;
       }
@@ -113,7 +113,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setconstructor_function_symbol(static_cast<const application&>(e).head());
+          return is_setconstructor_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -124,7 +124,7 @@ namespace mcrl2 {
       inline
       function_symbol emptyset(const sort_expression& s)
       {
-        function_symbol emptyset("{}", set_(s));
+        static function_symbol emptyset = data::detail::initialise_static_expression(emptyset, function_symbol("{}", set_(s)));
         return emptyset;
       }
 
@@ -136,7 +136,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "{}";
+          return static_cast< function_symbol >(e).name() == "{}";
         }
         return false;
       }
@@ -147,7 +147,7 @@ namespace mcrl2 {
       inline
       function_symbol setfset(const sort_expression& s)
       {
-        function_symbol setfset("@setfset", function_sort(sort_fset::fset(s), set_(s)));
+        static function_symbol setfset = data::detail::initialise_static_expression(setfset, function_symbol("@setfset", function_sort(sort_fset::fset(s), set_(s))));
         return setfset;
       }
 
@@ -159,7 +159,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@setfset";
+          return static_cast< function_symbol >(e).name() == "@setfset";
         }
         return false;
       }
@@ -183,7 +183,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setfset_function_symbol(static_cast<const application&>(e).head());
+          return is_setfset_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -194,7 +194,7 @@ namespace mcrl2 {
       inline
       function_symbol setcomprehension(const sort_expression& s)
       {
-        function_symbol setcomprehension("@setcomp", function_sort(function_sort(s, sort_bool_::bool_()), set_(s)));
+        static function_symbol setcomprehension = data::detail::initialise_static_expression(setcomprehension, function_symbol("@setcomp", function_sort(function_sort(s, sort_bool_::bool_()), set_(s))));
         return setcomprehension;
       }
 
@@ -206,7 +206,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@setcomp";
+          return static_cast< function_symbol >(e).name() == "@setcomp";
         }
         return false;
       }
@@ -230,7 +230,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setcomprehension_function_symbol(static_cast<const application&>(e).head());
+          return is_setcomprehension_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -241,7 +241,7 @@ namespace mcrl2 {
       inline
       function_symbol setin(const sort_expression& s)
       {
-        function_symbol setin("in", function_sort(s, set_(s), sort_bool_::bool_()));
+        static function_symbol setin = data::detail::initialise_static_expression(setin, function_symbol("in", function_sort(s, set_(s), sort_bool_::bool_())));
         return setin;
       }
 
@@ -253,7 +253,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "in";
+          return static_cast< function_symbol >(e).name() == "in";
         }
         return false;
       }
@@ -278,7 +278,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setin_function_symbol(static_cast<const application&>(e).head());
+          return is_setin_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -289,7 +289,7 @@ namespace mcrl2 {
       inline
       function_symbol setcomplement(const sort_expression& s)
       {
-        function_symbol setcomplement("!", function_sort(set_(s), set_(s)));
+        static function_symbol setcomplement = data::detail::initialise_static_expression(setcomplement, function_symbol("!", function_sort(set_(s), set_(s))));
         return setcomplement;
       }
 
@@ -301,7 +301,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "!";
+          return static_cast< function_symbol >(e).name() == "!";
         }
         return false;
       }
@@ -325,7 +325,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setcomplement_function_symbol(static_cast<const application&>(e).head());
+          return is_setcomplement_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -336,7 +336,7 @@ namespace mcrl2 {
       inline
       function_symbol setunion_(const sort_expression& s)
       {
-        function_symbol setunion_("+", function_sort(set_(s), set_(s), set_(s)));
+        static function_symbol setunion_ = data::detail::initialise_static_expression(setunion_, function_symbol("+", function_sort(set_(s), set_(s), set_(s))));
         return setunion_;
       }
 
@@ -348,7 +348,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "+";
+          return static_cast< function_symbol >(e).name() == "+";
         }
         return false;
       }
@@ -373,7 +373,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setunion__function_symbol(static_cast<const application&>(e).head());
+          return is_setunion__function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -384,7 +384,7 @@ namespace mcrl2 {
       inline
       function_symbol setintersection(const sort_expression& s)
       {
-        function_symbol setintersection("*", function_sort(set_(s), set_(s), set_(s)));
+        static function_symbol setintersection = data::detail::initialise_static_expression(setintersection, function_symbol("*", function_sort(set_(s), set_(s), set_(s))));
         return setintersection;
       }
 
@@ -396,7 +396,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "*";
+          return static_cast< function_symbol >(e).name() == "*";
         }
         return false;
       }
@@ -421,7 +421,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setintersection_function_symbol(static_cast<const application&>(e).head());
+          return is_setintersection_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -432,7 +432,7 @@ namespace mcrl2 {
       inline
       function_symbol setdifference(const sort_expression& s)
       {
-        function_symbol setdifference("-", function_sort(set_(s), set_(s), set_(s)));
+        static function_symbol setdifference = data::detail::initialise_static_expression(setdifference, function_symbol("-", function_sort(set_(s), set_(s), set_(s))));
         return setdifference;
       }
 
@@ -444,7 +444,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == "-";
         }
         return false;
       }
@@ -469,7 +469,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_setdifference_function_symbol(static_cast<const application&>(e).head());
+          return is_setdifference_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -480,7 +480,7 @@ namespace mcrl2 {
       inline
       function_symbol false_function(const sort_expression& s)
       {
-        function_symbol false_function("@false_", function_sort(s, sort_bool_::bool_()));
+        static function_symbol false_function = data::detail::initialise_static_expression(false_function, function_symbol("@false_", function_sort(s, sort_bool_::bool_())));
         return false_function;
       }
 
@@ -492,7 +492,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@false_";
+          return static_cast< function_symbol >(e).name() == "@false_";
         }
         return false;
       }
@@ -516,7 +516,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_false_function_function_symbol(static_cast<const application&>(e).head());
+          return is_false_function_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -527,7 +527,7 @@ namespace mcrl2 {
       inline
       function_symbol true_function(const sort_expression& s)
       {
-        function_symbol true_function("@true_", function_sort(s, sort_bool_::bool_()));
+        static function_symbol true_function = data::detail::initialise_static_expression(true_function, function_symbol("@true_", function_sort(s, sort_bool_::bool_())));
         return true_function;
       }
 
@@ -539,7 +539,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@true_";
+          return static_cast< function_symbol >(e).name() == "@true_";
         }
         return false;
       }
@@ -563,7 +563,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_true_function_function_symbol(static_cast<const application&>(e).head());
+          return is_true_function_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -574,7 +574,7 @@ namespace mcrl2 {
       inline
       function_symbol not_function(const sort_expression& s)
       {
-        function_symbol not_function("@not_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        static function_symbol not_function = data::detail::initialise_static_expression(not_function, function_symbol("@not_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
         return not_function;
       }
 
@@ -586,7 +586,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@not_";
+          return static_cast< function_symbol >(e).name() == "@not_";
         }
         return false;
       }
@@ -610,7 +610,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_not_function_function_symbol(static_cast<const application&>(e).head());
+          return is_not_function_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -621,7 +621,7 @@ namespace mcrl2 {
       inline
       function_symbol and_function(const sort_expression& s)
       {
-        function_symbol and_function("@and_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        static function_symbol and_function = data::detail::initialise_static_expression(and_function, function_symbol("@and_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
         return and_function;
       }
 
@@ -633,7 +633,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@and_";
+          return static_cast< function_symbol >(e).name() == "@and_";
         }
         return false;
       }
@@ -658,7 +658,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_and_function_function_symbol(static_cast<const application&>(e).head());
+          return is_and_function_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -669,7 +669,7 @@ namespace mcrl2 {
       inline
       function_symbol or_function(const sort_expression& s)
       {
-        function_symbol or_function("@or_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        static function_symbol or_function = data::detail::initialise_static_expression(or_function, function_symbol("@or_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
         return or_function;
       }
 
@@ -681,7 +681,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@or_";
+          return static_cast< function_symbol >(e).name() == "@or_";
         }
         return false;
       }
@@ -706,7 +706,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_or_function_function_symbol(static_cast<const application&>(e).head());
+          return is_or_function_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -744,31 +744,31 @@ namespace mcrl2 {
       {
         if (is_setconstructor_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_setin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_setunion__application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_setintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_setdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_and_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_or_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -784,27 +784,27 @@ namespace mcrl2 {
       {
         if (is_setfset_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setcomprehension_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setcomplement_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_false_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_true_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_not_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -820,31 +820,31 @@ namespace mcrl2 {
       {
         if (is_setconstructor_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setunion__application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_setdifference_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_and_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_or_function_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);

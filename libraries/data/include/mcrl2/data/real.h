@@ -40,8 +40,7 @@ namespace mcrl2 {
       inline
       basic_sort real_()
       {
-        static basic_sort real_("Real");
-        real_.protect();
+        static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort("Real"));
         return real_;
       }
 
@@ -53,7 +52,7 @@ namespace mcrl2 {
       {
         if (e.is_basic_sort())
         {
-          return static_cast<const basic_sort&>(e) == real_();
+          return static_cast< basic_sort >(e) == real_();
         }
         return false;
       }
@@ -72,7 +71,7 @@ namespace mcrl2 {
       inline
       function_symbol creal()
       {
-        function_symbol creal("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_()));
+        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_())));
         return creal;
       }
 
@@ -84,7 +83,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@cReal";
+          return static_cast< function_symbol >(e).name() == "@cReal";
         }
         return false;
       }
@@ -108,7 +107,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_creal_function_symbol(static_cast<const application&>(e).head());
+          return is_creal_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -118,7 +117,7 @@ namespace mcrl2 {
       inline
       function_symbol pos2real()
       {
-        function_symbol pos2real("Pos2Real", function_sort(sort_pos::pos(), real_()));
+        static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol("Pos2Real", function_sort(sort_pos::pos(), real_())));
         return pos2real;
       }
 
@@ -130,7 +129,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Pos2Real";
+          return static_cast< function_symbol >(e).name() == "Pos2Real";
         }
         return false;
       }
@@ -153,7 +152,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_pos2real_function_symbol(static_cast<const application&>(e).head());
+          return is_pos2real_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -163,7 +162,7 @@ namespace mcrl2 {
       inline
       function_symbol nat2real()
       {
-        function_symbol nat2real("Nat2Real", function_sort(sort_nat::nat(), real_()));
+        static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol("Nat2Real", function_sort(sort_nat::nat(), real_())));
         return nat2real;
       }
 
@@ -175,7 +174,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Nat2Real";
+          return static_cast< function_symbol >(e).name() == "Nat2Real";
         }
         return false;
       }
@@ -198,7 +197,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_nat2real_function_symbol(static_cast<const application&>(e).head());
+          return is_nat2real_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -208,7 +207,7 @@ namespace mcrl2 {
       inline
       function_symbol int2real()
       {
-        function_symbol int2real("Int2Real", function_sort(sort_int_::int_(), real_()));
+        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol("Int2Real", function_sort(sort_int_::int_(), real_())));
         return int2real;
       }
 
@@ -220,7 +219,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Int2Real";
+          return static_cast< function_symbol >(e).name() == "Int2Real";
         }
         return false;
       }
@@ -243,7 +242,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_int2real_function_symbol(static_cast<const application&>(e).head());
+          return is_int2real_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -253,7 +252,7 @@ namespace mcrl2 {
       inline
       function_symbol real2pos()
       {
-        function_symbol real2pos("Real2Pos", function_sort(real_(), sort_pos::pos()));
+        static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol("Real2Pos", function_sort(real_(), sort_pos::pos())));
         return real2pos;
       }
 
@@ -265,7 +264,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Real2Pos";
+          return static_cast< function_symbol >(e).name() == "Real2Pos";
         }
         return false;
       }
@@ -288,7 +287,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_real2pos_function_symbol(static_cast<const application&>(e).head());
+          return is_real2pos_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -298,7 +297,7 @@ namespace mcrl2 {
       inline
       function_symbol real2nat()
       {
-        function_symbol real2nat("Real2Nat", function_sort(real_(), sort_nat::nat()));
+        static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol("Real2Nat", function_sort(real_(), sort_nat::nat())));
         return real2nat;
       }
 
@@ -310,7 +309,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Real2Nat";
+          return static_cast< function_symbol >(e).name() == "Real2Nat";
         }
         return false;
       }
@@ -333,7 +332,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_real2nat_function_symbol(static_cast<const application&>(e).head());
+          return is_real2nat_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -343,7 +342,7 @@ namespace mcrl2 {
       inline
       function_symbol real2int()
       {
-        function_symbol real2int("Real2Int", function_sort(real_(), sort_int_::int_()));
+        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol("Real2Int", function_sort(real_(), sort_int_::int_())));
         return real2int;
       }
 
@@ -355,7 +354,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "Real2Int";
+          return static_cast< function_symbol >(e).name() == "Real2Int";
         }
         return false;
       }
@@ -378,7 +377,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_real2int_function_symbol(static_cast<const application&>(e).head());
+          return is_real2int_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -424,7 +423,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "min";
+          return static_cast< function_symbol >(e).name() == "min";
         }
         return false;
       }
@@ -448,7 +447,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_minimum_function_symbol(static_cast<const application&>(e).head());
+          return is_minimum_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -518,7 +517,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "max";
+          return static_cast< function_symbol >(e).name() == "max";
         }
         return false;
       }
@@ -542,7 +541,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_maximum_function_symbol(static_cast<const application&>(e).head());
+          return is_maximum_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -587,7 +586,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "abs";
+          return static_cast< function_symbol >(e).name() == "abs";
         }
         return false;
       }
@@ -610,7 +609,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_abs_function_symbol(static_cast<const application&>(e).head());
+          return is_abs_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -655,7 +654,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == "-";
         }
         return false;
       }
@@ -678,7 +677,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_negate_function_symbol(static_cast<const application&>(e).head());
+          return is_negate_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -723,7 +722,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "succ";
+          return static_cast< function_symbol >(e).name() == "succ";
         }
         return false;
       }
@@ -746,7 +745,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_succ_function_symbol(static_cast<const application&>(e).head());
+          return is_succ_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -791,7 +790,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "pred";
+          return static_cast< function_symbol >(e).name() == "pred";
         }
         return false;
       }
@@ -814,7 +813,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_pred_function_symbol(static_cast<const application&>(e).head());
+          return is_pred_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -868,7 +867,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "+";
+          return static_cast< function_symbol >(e).name() == "+";
         }
         return false;
       }
@@ -892,7 +891,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_plus_function_symbol(static_cast<const application&>(e).head());
+          return is_plus_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -938,7 +937,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == "-";
         }
         return false;
       }
@@ -962,7 +961,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_minus_function_symbol(static_cast<const application&>(e).head());
+          return is_minus_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1008,7 +1007,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "*";
+          return static_cast< function_symbol >(e).name() == "*";
         }
         return false;
       }
@@ -1032,7 +1031,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_times_function_symbol(static_cast<const application&>(e).head());
+          return is_times_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1078,7 +1077,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "exp";
+          return static_cast< function_symbol >(e).name() == "exp";
         }
         return false;
       }
@@ -1102,7 +1101,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_exp_function_symbol(static_cast<const application&>(e).head());
+          return is_exp_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1128,7 +1127,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "/";
+          return static_cast< function_symbol >(e).name() == "/";
         }
         return false;
       }
@@ -1152,7 +1151,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_divides_function_symbol(static_cast<const application&>(e).head());
+          return is_divides_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1162,7 +1161,7 @@ namespace mcrl2 {
       inline
       function_symbol floor()
       {
-        function_symbol floor("floor", function_sort(real_(), sort_int_::int_()));
+        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol("floor", function_sort(real_(), sort_int_::int_())));
         return floor;
       }
 
@@ -1174,7 +1173,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "floor";
+          return static_cast< function_symbol >(e).name() == "floor";
         }
         return false;
       }
@@ -1197,7 +1196,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_floor_function_symbol(static_cast<const application&>(e).head());
+          return is_floor_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1207,7 +1206,7 @@ namespace mcrl2 {
       inline
       function_symbol ceil()
       {
-        function_symbol ceil("ceil", function_sort(real_(), sort_int_::int_()));
+        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol("ceil", function_sort(real_(), sort_int_::int_())));
         return ceil;
       }
 
@@ -1219,7 +1218,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "ceil";
+          return static_cast< function_symbol >(e).name() == "ceil";
         }
         return false;
       }
@@ -1242,7 +1241,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_ceil_function_symbol(static_cast<const application&>(e).head());
+          return is_ceil_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1252,7 +1251,7 @@ namespace mcrl2 {
       inline
       function_symbol round()
       {
-        function_symbol round("round", function_sort(real_(), sort_int_::int_()));
+        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol("round", function_sort(real_(), sort_int_::int_())));
         return round;
       }
 
@@ -1264,7 +1263,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "round";
+          return static_cast< function_symbol >(e).name() == "round";
         }
         return false;
       }
@@ -1287,7 +1286,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_round_function_symbol(static_cast<const application&>(e).head());
+          return is_round_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1297,7 +1296,7 @@ namespace mcrl2 {
       inline
       function_symbol redfrac()
       {
-        function_symbol redfrac("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_()));
+        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_())));
         return redfrac;
       }
 
@@ -1309,7 +1308,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@redfrac";
+          return static_cast< function_symbol >(e).name() == "@redfrac";
         }
         return false;
       }
@@ -1333,7 +1332,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_redfrac_function_symbol(static_cast<const application&>(e).head());
+          return is_redfrac_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1343,7 +1342,7 @@ namespace mcrl2 {
       inline
       function_symbol redfracwhr()
       {
-        function_symbol redfracwhr("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_()));
+        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_())));
         return redfracwhr;
       }
 
@@ -1355,7 +1354,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@redfracwhr";
+          return static_cast< function_symbol >(e).name() == "@redfracwhr";
         }
         return false;
       }
@@ -1380,7 +1379,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_redfracwhr_function_symbol(static_cast<const application&>(e).head());
+          return is_redfracwhr_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1390,7 +1389,7 @@ namespace mcrl2 {
       inline
       function_symbol redfrachlp()
       {
-        function_symbol redfrachlp("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_()));
+        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_())));
         return redfrachlp;
       }
 
@@ -1402,7 +1401,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@redfrachlp";
+          return static_cast< function_symbol >(e).name() == "@redfrachlp";
         }
         return false;
       }
@@ -1426,7 +1425,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_redfrachlp_function_symbol(static_cast<const application&>(e).head());
+          return is_redfrachlp_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -1476,35 +1475,35 @@ namespace mcrl2 {
       {
         if (is_minimum_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_maximum_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_plus_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_minus_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_times_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_exp_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_divides_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_redfrachlp_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1520,7 +1519,7 @@ namespace mcrl2 {
       {
         if (is_redfracwhr_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1536,7 +1535,7 @@ namespace mcrl2 {
       {
         if (is_redfracwhr_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1552,7 +1551,7 @@ namespace mcrl2 {
       {
         if (is_redfracwhr_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1568,7 +1567,7 @@ namespace mcrl2 {
       {
         if (is_creal_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1584,7 +1583,7 @@ namespace mcrl2 {
       {
         if (is_creal_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1600,55 +1599,55 @@ namespace mcrl2 {
       {
         if (is_pos2real_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_nat2real_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_int2real_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_real2pos_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_real2nat_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_real2int_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_abs_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_negate_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_succ_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_pred_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_floor_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_ceil_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_round_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -1664,35 +1663,35 @@ namespace mcrl2 {
       {
         if (is_minimum_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_maximum_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_plus_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_minus_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_times_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_exp_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_divides_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_redfrachlp_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);

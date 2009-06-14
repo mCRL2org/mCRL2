@@ -53,7 +53,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast<const container_sort&>(e).container_name() == "fset";
+          return static_cast< container_sort >(e).container_name() == "fset";
         }
         return false;
       }
@@ -80,7 +80,7 @@ namespace mcrl2 {
       inline
       function_symbol fset_empty(const sort_expression& s)
       {
-        function_symbol fset_empty("@fset_empty", fset(s));
+        static function_symbol fset_empty = data::detail::initialise_static_expression(fset_empty, function_symbol("@fset_empty", fset(s)));
         return fset_empty;
       }
 
@@ -92,7 +92,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_empty";
+          return static_cast< function_symbol >(e).name() == "@fset_empty";
         }
         return false;
       }
@@ -103,7 +103,7 @@ namespace mcrl2 {
       inline
       function_symbol fset_cons(const sort_expression& s)
       {
-        function_symbol fset_cons("@fset_cons", function_sort(s, fset(s), fset(s)));
+        static function_symbol fset_cons = data::detail::initialise_static_expression(fset_cons, function_symbol("@fset_cons", function_sort(s, fset(s), fset(s))));
         return fset_cons;
       }
 
@@ -115,7 +115,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_cons";
+          return static_cast< function_symbol >(e).name() == "@fset_cons";
         }
         return false;
       }
@@ -140,7 +140,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fset_cons_function_symbol(static_cast<const application&>(e).head());
+          return is_fset_cons_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -163,7 +163,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetinsert(const sort_expression& s)
       {
-        function_symbol fsetinsert("@fset_insert", function_sort(s, fset(s), fset(s)));
+        static function_symbol fsetinsert = data::detail::initialise_static_expression(fsetinsert, function_symbol("@fset_insert", function_sort(s, fset(s), fset(s))));
         return fsetinsert;
       }
 
@@ -175,7 +175,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_insert";
+          return static_cast< function_symbol >(e).name() == "@fset_insert";
         }
         return false;
       }
@@ -200,7 +200,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetinsert_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetinsert_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -211,7 +211,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetcinsert(const sort_expression& s)
       {
-        function_symbol fsetcinsert("@fset_cinsert", function_sort(s, sort_bool_::bool_(), fset(s), fset(s)));
+        static function_symbol fsetcinsert = data::detail::initialise_static_expression(fsetcinsert, function_symbol("@fset_cinsert", function_sort(s, sort_bool_::bool_(), fset(s), fset(s))));
         return fsetcinsert;
       }
 
@@ -223,7 +223,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_cinsert";
+          return static_cast< function_symbol >(e).name() == "@fset_cinsert";
         }
         return false;
       }
@@ -249,7 +249,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetcinsert_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetcinsert_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -260,7 +260,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetin(const sort_expression& s)
       {
-        function_symbol fsetin("@fset_in", function_sort(s, fset(s), sort_bool_::bool_()));
+        static function_symbol fsetin = data::detail::initialise_static_expression(fsetin, function_symbol("@fset_in", function_sort(s, fset(s), sort_bool_::bool_())));
         return fsetin;
       }
 
@@ -272,7 +272,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_in";
+          return static_cast< function_symbol >(e).name() == "@fset_in";
         }
         return false;
       }
@@ -297,7 +297,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetin_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetin_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -308,7 +308,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetlte(const sort_expression& s)
       {
-        function_symbol fsetlte("@fset_lte", function_sort(function_sort(s, sort_bool_::bool_()), fset(s), fset(s), sort_bool_::bool_()));
+        static function_symbol fsetlte = data::detail::initialise_static_expression(fsetlte, function_symbol("@fset_lte", function_sort(function_sort(s, sort_bool_::bool_()), fset(s), fset(s), sort_bool_::bool_())));
         return fsetlte;
       }
 
@@ -320,7 +320,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_lte";
+          return static_cast< function_symbol >(e).name() == "@fset_lte";
         }
         return false;
       }
@@ -346,7 +346,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetlte_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetlte_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -357,7 +357,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetunion(const sort_expression& s)
       {
-        function_symbol fsetunion("@fset_union", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
+        static function_symbol fsetunion = data::detail::initialise_static_expression(fsetunion, function_symbol("@fset_union", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s))));
         return fsetunion;
       }
 
@@ -369,7 +369,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_union";
+          return static_cast< function_symbol >(e).name() == "@fset_union";
         }
         return false;
       }
@@ -396,7 +396,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetunion_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetunion_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -407,7 +407,7 @@ namespace mcrl2 {
       inline
       function_symbol fsetintersection(const sort_expression& s)
       {
-        function_symbol fsetintersection("@fset_inter", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
+        static function_symbol fsetintersection = data::detail::initialise_static_expression(fsetintersection, function_symbol("@fset_inter", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s))));
         return fsetintersection;
       }
 
@@ -419,7 +419,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast<const function_symbol&>(e).name() == "@fset_inter";
+          return static_cast< function_symbol >(e).name() == "@fset_inter";
         }
         return false;
       }
@@ -446,7 +446,7 @@ namespace mcrl2 {
       {
         if (e.is_application())
         {
-          return is_fsetintersection_function_symbol(static_cast<const application&>(e).head());
+          return is_fsetintersection_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -476,7 +476,7 @@ namespace mcrl2 {
       {
         if (is_fset_cons_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -492,11 +492,11 @@ namespace mcrl2 {
       {
         if (is_fsetinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fsetin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -512,19 +512,19 @@ namespace mcrl2 {
       {
         if (is_fsetcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fsetlte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fsetunion_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fsetintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -540,19 +540,19 @@ namespace mcrl2 {
       {
         if (is_fsetcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fsetlte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fsetunion_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         if (is_fsetintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -568,19 +568,19 @@ namespace mcrl2 {
       {
         if (is_fsetcinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fsetlte_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fsetunion_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         if (is_fsetintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[2];
+          return static_cast< application >(e).arguments()[2];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -596,11 +596,11 @@ namespace mcrl2 {
       {
         if (is_fsetunion_application(e))
         {
-          return static_cast<const application&>(e).arguments()[3];
+          return static_cast< application >(e).arguments()[3];
         }
         if (is_fsetintersection_application(e))
         {
-          return static_cast<const application&>(e).arguments()[3];
+          return static_cast< application >(e).arguments()[3];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -616,7 +616,7 @@ namespace mcrl2 {
       {
         if (is_fset_cons_application(e))
         {
-          return static_cast<const application&>(e).arguments()[1];
+          return static_cast< application >(e).arguments()[1];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);
@@ -632,11 +632,11 @@ namespace mcrl2 {
       {
         if (is_fsetinsert_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         if (is_fsetin_application(e))
         {
-          return static_cast<const application&>(e).arguments()[0];
+          return static_cast< application >(e).arguments()[0];
         }
         // This should never be reached, otherwise something is very wrong.
         assert(false);

@@ -257,7 +257,7 @@ class function_declaration_list():
       for (id, label, idx) in unique_case_arguments:
         case_code += "        if (is_%s_application(e))\n" % (label.to_string())
         case_code += "        {\n"
-        case_code += "          return static_cast<const application&>(e).arguments()[%s];\n" % (idx)
+        case_code += "          return static_cast< application >(e).arguments()[%s];\n" % (idx)
         case_code += "        }\n"
       case_code += "        // This should never be reached, otherwise something is very wrong.\n"
       case_code += "        assert(false);\n"
@@ -294,8 +294,7 @@ class function_declaration_list():
         code += "      inline\n"
         code += "      function_symbol %s(%s)\n" % (name, sortparams)
         code += "      {\n"
-#        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
-        code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        static function_symbol %s = data::detail::initialise_static_expression(%s, function_symbol(\"%s\", %s));\n" % (name, name, fullname, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
         return code
@@ -316,7 +315,6 @@ class function_declaration_list():
         code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
         code += "      {\n"
         code += "        %s\n" % (targetsort)
-#        code += "        //static function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
@@ -332,7 +330,7 @@ class function_declaration_list():
         code += "      {\n"
         code += "        if (e.is_function_symbol())\n"
         code += "        {\n"
-        code += "          return static_cast<const function_symbol&>(e).name() == \"%s\";\n" % (fullname)
+        code += "          return static_cast< function_symbol >(e).name() == \"%s\";\n" % (fullname)
         code += "        }\n"
         code += "        return false;\n"
         code += "      }\n"
@@ -368,7 +366,7 @@ class function_declaration_list():
         code += "      {\n"
         code += "        if (e.is_application())\n"
         code += "        {\n"
-        code += "          return is_%s_function_symbol(static_cast<const application&>(e).head());\n" % (name)
+        code += "          return is_%s_function_symbol(static_cast< application >(e).head());\n" % (name)
         code += "        }\n"
         code += "        return false;\n"
         code += "      }\n"
@@ -1370,8 +1368,7 @@ class sort_declaration():
     code += "      inline\n"
     code += "      basic_sort %s()\n" % (label.to_string())
     code += "      {\n"
-    code += "        static basic_sort %s(\"%s\");\n" % (label.to_string(), id.to_string())
-    code += "        %s.protect();\n" % (label.to_string())
+    code += "        static basic_sort %s = data::detail::initialise_static_expression(%s, basic_sort(\"%s\"));\n" % (label.to_string(), label.to_string(), id.to_string())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
@@ -1383,7 +1380,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (e.is_basic_sort())\n"
     code += "        {\n"
-    code += "          return static_cast<const basic_sort&>(e) == %s();\n" % (label.to_string())
+    code += "          return static_cast< basic_sort >(e) == %s();\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"
@@ -1397,7 +1394,6 @@ class sort_declaration():
     code += "      inline\n"
     code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
     code += "      {\n"
-#    code += "        //static container_sort %s(\"%s\", %s);\n" % (label.to_string(), id.to_string(), parameter.to_string().lower())
     code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
@@ -1411,7 +1407,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (e.is_container_sort())\n"
     code += "        {\n"
-    code += "          return static_cast<const container_sort&>(e).container_name() == \"%s\";\n" % (label.to_string())
+    code += "          return static_cast< container_sort >(e).container_name() == \"%s\";\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"
