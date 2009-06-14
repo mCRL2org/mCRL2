@@ -617,7 +617,7 @@ namespace mcrl2 {
 
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
-            if (!reference.is_basic_sort() || renamings.find(reference) == renamings.end())
+            if (renamings.find(reference) == renamings.end())
             { // no other name for the sort
               renamings[name] = atermpp::replace(reference, make_map_substitution_adapter(renamings));
             }
@@ -815,7 +815,7 @@ namespace mcrl2 {
           for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
           {
             atermpp::map< sort_expression, sort_expression >::const_iterator j = renamings.find(r.front().reference());
-
+ 
             if (renamings.find(r.front().reference()) != renamings.end())
             {
               std::map< sort_expression, sort_expression > partial_renamings(renamings);
@@ -824,20 +824,18 @@ namespace mcrl2 {
 
               sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
             }
-            else {
-              sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), renaming_substitution)));
-            }
+          }
+
+          for (atermpp::map< sort_expression, sort_expression >::const_iterator i = renamings.begin(); i != renamings.end(); ++i)
+          {
+            sorts.insert(alias(i->second, i->first));
           }
 
           for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
           {
-            if (r.front().is_container_sort() || r.front().is_structured_sort())
+            if (!r.front().is_alias() && !r.front().is_container_sort() && !r.front().is_structured_sort())
             {
-              sorts.insert(alias(renamings[r.front()], atermpp::replace(r.front(), renaming_substitution)));
-            }
-            else if (!r.front().is_alias())
-            { // incidentally, store in set of sorts
-              sorts.insert(atermpp::replace(r.front(), renaming_substitution));
+              sorts.insert(r.front());
             }
           }
 

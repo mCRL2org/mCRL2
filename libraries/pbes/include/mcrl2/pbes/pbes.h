@@ -456,7 +456,7 @@ class pbes
       // convert the equation system to ATerm format
       atermpp::term_list< data::variable > free_variables(m_free_variables.begin(), m_free_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
-      return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data, false),
+      return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data),
              core::detail::gsMakePBEqnSpec(free_variables, equations),
                detail::pbes_initializer(free_variables, m_initial_state));
     }

@@ -171,7 +171,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       // Translating to internal format
       result = data::detail::internal_format_conversion(lps_spec.data(), result);
       // Add any system defined sorts needed by this 
-      lps_spec.data().make_complete(boost::make_iterator_range(data::find_all_sort_expressions(result)));
+      lps_spec.data().make_complete(data::find_all_sort_expressions(result));
 
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
