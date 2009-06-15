@@ -134,18 +134,24 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxFileSystem::AddHandler(new wxArchiveFSHandler);
   m_help_controller = new wxHtmlHelpController(wxHF_DEFAULT_STYLE, this);
   wxString filename = wxEmptyString;
-  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
+ 
+ //GRAPE_HELP_DIR
+  if ( fs.FindFileInPath( &filename, _T( "/home/jars/Documents/Grape/trunk/tools/grape/manual" ), _T("grapehelp.zip") ) )
   {
     // file found
     m_help_controller->AddBook( wxFileName( filename ) );
   }
+  else
+  {
+    wxMessageBox( _T("Help file \"grapehelp.zip\" could not be found in \"" GRAPE_HELP_DIR "\"") + filename, _T("Warning"), wxOK | wxICON_EXCLAMATION);
+  }
 
-  // show frame;
+  // show frame
   Show();
-
+    
   if ( show_messagebox )
   {
-    wxMessageBox( _T("The file \"") + p_filename + _T("\" could not be opened."), _T("Warning"), wxOK | wxICON_EXCLAMATION, this );
+    wxMessageBox( _T("The file \"") + p_filename + _T("\" could not be opened."), _T("Warning"), wxOK | wxICON_EXCLAMATION );
   }
 }
 
