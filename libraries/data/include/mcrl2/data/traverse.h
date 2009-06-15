@@ -36,7 +36,7 @@ OutIter traverse_sort_expressions(const sort_expression& s, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const variable& v, OutIter dest)
 {
-  *dest++ = v.sort();
+  find_all_sort_expressions(v, dest);
   return dest;
 }
 
@@ -45,7 +45,7 @@ OutIter traverse_sort_expressions(const variable& v, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const data_expression& d, OutIter dest)
 {
-  *dest++ = d.sort();     
+  find_all_sort_expressions(d, dest);
   return dest;
 }
 
@@ -54,8 +54,8 @@ OutIter traverse_sort_expressions(const data_expression& d, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const assignment& a, OutIter dest)
 {
-  *dest++ = a.lhs().sort();
-  *dest++ = a.rhs().sort(); // TODO: can this be removed?
+  find_all_sort_expressions(a.lhs(), dest);
+  find_all_sort_expressions(a.rhs(), dest); // TODO: can this be removed?
   return dest;
 }
 
