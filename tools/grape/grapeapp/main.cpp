@@ -37,9 +37,6 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
 
   private:
 
-    // the filename is the first parameter
-    wxString    filename;
-
     std::vector< std::string > developers() {
       static char const* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
            "Diana Koenraadt", "Bas Luksenburg", "Jonathan Nelisse", "Hans Poppelaars", "Bram Schoenmakers"};
@@ -64,7 +61,8 @@ class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
 
   bool run()
   {
-    grape_frame *frame = new grape_frame( filename );
+    // create a new frame using the input file
+    grape_frame *frame = new grape_frame( wxString(input_filename().c_str(), wxConvUTF8) );
     SetTopWindow(frame);
 
     wxInitAllImageHandlers();
