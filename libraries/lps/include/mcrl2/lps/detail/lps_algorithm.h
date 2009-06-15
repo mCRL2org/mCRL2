@@ -26,7 +26,7 @@
 #include "mcrl2/lps/find.h"  
 #include "mcrl2/lps/rewrite.h"  
 #include "mcrl2/lps/substitute.h"  
-#include "mcrl2/lps/remove_parameters.h"  
+#include "mcrl2/lps/remove.h"  
 
 namespace mcrl2 {
 
@@ -34,38 +34,6 @@ namespace lps {
 
 namespace detail {
 
-  /// \brief Function object that checks if a summand has a false condition
-  struct is_trivial_summand
-  {
-    bool operator()(const summand_base& s) const
-    {
-      return s.condition() == data::sort_bool_::false_();
-    }
-  };
-  
-  /// \brief Function object that checks if a sort is a singleton sort.
-  /// Note that it is an approximation, meaning that in some cases it
-  /// may return false whereas in reality the answer is true.
-  struct is_singleton_sort
-  {
-    const data::data_specification& m_data_spec;
-
-    is_singleton_sort(const data::data_specification& data_spec)
-      : m_data_spec(data_spec)
-    {}
-
-    bool operator()(const data::sort_expression& s) const
-    {
-      data::data_specification::constructors_const_range c = m_data_spec.constructors(s);
-      if (boost::distance(c) != 1)
-      {
-        return false;
-      }
-      data::function_symbol f = *c.begin();
-      return !f.sort().is_function_sort();
-    }
-  };
-  
   /// \brief Algorithm class for algorithms on linear process specifications.
   class lps_algorithm
   {
@@ -177,29 +145,13 @@ namespace detail {
       /// \brief Removes parameters with a singleton sort
       void remove_singleton_sorts()
       {
-        data::mutable_map_substitution<> sigma;
-        std::set<data::variable> to_be_removed;
-        const data::variable_list& p = m_spec.process().process_parameters();
-        for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
-        {
-          if (is_singleton_sort(m_spec.data())(i->sort()))
-          {
-            sigma[*i] = *m_spec.data().constructors(i->sort()).begin();
-            to_be_removed.insert(*i);
-          }
-        }
-        lps::substitute(m_spec, sigma);
-        lps::remove_parameters(m_spec, to_be_removed);
+        lps::remove_singleton_sorts(m_spec);
       }
       
       /// \brief Removes summands with condition equal to false
       void remove_trivial_summands()
       {
-        action_summand_vector& v = m_spec.process().action_summands();
-        v.erase(std::remove_if(v.begin(), v.end(), is_trivial_summand()), v.end());
-
-        deadlock_summand_vector& w = m_spec.process().deadlock_summands();
-        w.erase(std::remove_if(w.begin(), w.end(), is_trivial_summand()), w.end());
+        lps::remove_trivial_summands(m_spec);
       }
 
       /// \brief Removes unused summand variables.

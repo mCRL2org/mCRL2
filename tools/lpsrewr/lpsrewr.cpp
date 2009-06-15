@@ -9,6 +9,7 @@
 
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/remove.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -79,6 +80,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
         run_bench_mark(spec, R);
       }
       lps::rewrite(spec, R);     
+      lps::remove_trivial_summands(spec);
       spec.save(output_filename());
       return true;
     }

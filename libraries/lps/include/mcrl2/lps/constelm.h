@@ -23,7 +23,7 @@
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/remove_parameters.h"
+#include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
