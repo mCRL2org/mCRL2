@@ -1,10 +1,11 @@
 % Workers (block-specification)
 %
-% This is an artificial constructed specification of workers, where each worker
-% has a specific task. Every worker has a unique ID, which other workers can
-% address. If a worker needs to address another worker, it selects the worker
-% with the lowest ID value, that is not occupied. When a worker has finished 
-% the job it sends a notification, that is has finished the task.
+% This is an artificial constructed specification with workers. Each worker
+% executes a particular task and has a unique ID. Some tasks required 
+% that other workers are put to work.
+% If a worker needs to address another worker, it selects a worker
+% with the lowest ID value, which is not occupied. When a worker has completed 
+% a task, it sends a notification to the worker that has delegated a task.
 % There are three kind of workers:
 % * A hard worker: Immediately executes an addressed task. (S)
 % * A messenger:   Takes a task and delivers it to another worker. A messenger 
@@ -12,9 +13,9 @@
 %                  completed. (P)
 % * A lazy worker: Takes a task and delivers it simultaneously to two other 
 %                  workers. A lazy worker cannot accept a new task, when it has
-%                  delegated a task. The lazy worker only accepts the 
-%                  notification of delegated work. (M1)
-% Only hard workers require resources. This specification has unlimited 
+%                  delegated a task. A lazy worker only accepts the 
+%                  notification of delegated tasks when both task are completed. (M1)
+% Only hard workers require resources. This specification specifies unlimited 
 % resources for hard workers.
 %
 % Created by Frank Stappers, 

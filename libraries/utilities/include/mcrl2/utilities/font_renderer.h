@@ -15,7 +15,13 @@
 
 #include <string>
 #include <wx/wx.h>
+
 #include <wx/glcanvas.h>
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
 
 namespace mcrl2
 {
