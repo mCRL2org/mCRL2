@@ -29,6 +29,8 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -295,6 +297,11 @@ void assignment_test()
   assignment xy(x, y);
   BOOST_CHECK(xy.lhs() == x);
   BOOST_CHECK(xy.rhs() == y);
+}
+
+void system_defined_check()
+{
+  BOOST_CHECK(sort_list::nil(sort_pos::pos()) != sort_list::nil(sort_nat::nat()));
 }
 
 int test_main(int argc, char** argv)
