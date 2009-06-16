@@ -292,9 +292,14 @@ class function_declaration_list():
             code += "      /// \\param %s A sort expression\n" % (escape(s[len("const sort_expression& "):]))
         code += "      /// \\return Function symbol %s\n" % (escape(name))
         code += "      inline\n"
-        code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
-        code += "      {\n"
-        code += "        static function_symbol %s = data::detail::initialise_static_expression(%s, function_symbol(\"%s\", %s));\n" % (name, name, fullname, sort)
+        if sortparams_list <> ['']:
+          code += "      function_symbol %s(%s)\n" % (name, sortparams)
+          code += "      {\n"
+          code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        else:
+          code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
+          code += "      {\n"
+          code += "        static function_symbol %s = data::detail::initialise_static_expression(%s, function_symbol(\"%s\", %s));\n" % (name, name, fullname, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
         return code

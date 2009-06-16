@@ -74,9 +74,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setconstructor
       inline
-      function_symbol const& setconstructor(const sort_expression& s)
+      function_symbol setconstructor(const sort_expression& s)
       {
-        static function_symbol setconstructor = data::detail::initialise_static_expression(setconstructor, function_symbol("@set", function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s))));
+        function_symbol setconstructor("@set", function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s)));
         return setconstructor;
       }
 
@@ -122,9 +122,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol emptyset
       inline
-      function_symbol const& emptyset(const sort_expression& s)
+      function_symbol emptyset(const sort_expression& s)
       {
-        static function_symbol emptyset = data::detail::initialise_static_expression(emptyset, function_symbol("{}", set_(s)));
+        function_symbol emptyset("{}", set_(s));
         return emptyset;
       }
 
@@ -145,9 +145,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setfset
       inline
-      function_symbol const& setfset(const sort_expression& s)
+      function_symbol setfset(const sort_expression& s)
       {
-        static function_symbol setfset = data::detail::initialise_static_expression(setfset, function_symbol("@setfset", function_sort(sort_fset::fset(s), set_(s))));
+        function_symbol setfset("@setfset", function_sort(sort_fset::fset(s), set_(s)));
         return setfset;
       }
 
@@ -192,9 +192,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setcomprehension
       inline
-      function_symbol const& setcomprehension(const sort_expression& s)
+      function_symbol setcomprehension(const sort_expression& s)
       {
-        static function_symbol setcomprehension = data::detail::initialise_static_expression(setcomprehension, function_symbol("@setcomp", function_sort(function_sort(s, sort_bool_::bool_()), set_(s))));
+        function_symbol setcomprehension("@setcomp", function_sort(function_sort(s, sort_bool_::bool_()), set_(s)));
         return setcomprehension;
       }
 
@@ -239,9 +239,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setin
       inline
-      function_symbol const& setin(const sort_expression& s)
+      function_symbol setin(const sort_expression& s)
       {
-        static function_symbol setin = data::detail::initialise_static_expression(setin, function_symbol("in", function_sort(s, set_(s), sort_bool_::bool_())));
+        function_symbol setin("in", function_sort(s, set_(s), sort_bool_::bool_()));
         return setin;
       }
 
@@ -287,9 +287,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setcomplement
       inline
-      function_symbol const& setcomplement(const sort_expression& s)
+      function_symbol setcomplement(const sort_expression& s)
       {
-        static function_symbol setcomplement = data::detail::initialise_static_expression(setcomplement, function_symbol("!", function_sort(set_(s), set_(s))));
+        function_symbol setcomplement("!", function_sort(set_(s), set_(s)));
         return setcomplement;
       }
 
@@ -334,9 +334,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setunion_
       inline
-      function_symbol const& setunion_(const sort_expression& s)
+      function_symbol setunion_(const sort_expression& s)
       {
-        static function_symbol setunion_ = data::detail::initialise_static_expression(setunion_, function_symbol("+", function_sort(set_(s), set_(s), set_(s))));
+        function_symbol setunion_("+", function_sort(set_(s), set_(s), set_(s)));
         return setunion_;
       }
 
@@ -382,9 +382,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setintersection
       inline
-      function_symbol const& setintersection(const sort_expression& s)
+      function_symbol setintersection(const sort_expression& s)
       {
-        static function_symbol setintersection = data::detail::initialise_static_expression(setintersection, function_symbol("*", function_sort(set_(s), set_(s), set_(s))));
+        function_symbol setintersection("*", function_sort(set_(s), set_(s), set_(s)));
         return setintersection;
       }
 
@@ -430,9 +430,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol setdifference
       inline
-      function_symbol const& setdifference(const sort_expression& s)
+      function_symbol setdifference(const sort_expression& s)
       {
-        static function_symbol setdifference = data::detail::initialise_static_expression(setdifference, function_symbol("-", function_sort(set_(s), set_(s), set_(s))));
+        function_symbol setdifference("-", function_sort(set_(s), set_(s), set_(s)));
         return setdifference;
       }
 
@@ -478,9 +478,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol false_function
       inline
-      function_symbol const& false_function(const sort_expression& s)
+      function_symbol false_function(const sort_expression& s)
       {
-        static function_symbol false_function = data::detail::initialise_static_expression(false_function, function_symbol("@false_", function_sort(s, sort_bool_::bool_())));
+        function_symbol false_function("@false_", function_sort(s, sort_bool_::bool_()));
         return false_function;
       }
 
@@ -525,9 +525,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol true_function
       inline
-      function_symbol const& true_function(const sort_expression& s)
+      function_symbol true_function(const sort_expression& s)
       {
-        static function_symbol true_function = data::detail::initialise_static_expression(true_function, function_symbol("@true_", function_sort(s, sort_bool_::bool_())));
+        function_symbol true_function("@true_", function_sort(s, sort_bool_::bool_()));
         return true_function;
       }
 
@@ -572,9 +572,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol not_function
       inline
-      function_symbol const& not_function(const sort_expression& s)
+      function_symbol not_function(const sort_expression& s)
       {
-        static function_symbol not_function = data::detail::initialise_static_expression(not_function, function_symbol("@not_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
+        function_symbol not_function("@not_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return not_function;
       }
 
@@ -619,9 +619,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol and_function
       inline
-      function_symbol const& and_function(const sort_expression& s)
+      function_symbol and_function(const sort_expression& s)
       {
-        static function_symbol and_function = data::detail::initialise_static_expression(and_function, function_symbol("@and_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
+        function_symbol and_function("@and_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return and_function;
       }
 
@@ -667,9 +667,9 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return Function symbol or_function
       inline
-      function_symbol const& or_function(const sort_expression& s)
+      function_symbol or_function(const sort_expression& s)
       {
-        static function_symbol or_function = data::detail::initialise_static_expression(or_function, function_symbol("@or_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()))));
+        function_symbol or_function("@or_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return or_function;
       }
 
