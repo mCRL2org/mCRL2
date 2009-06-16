@@ -18,9 +18,12 @@
 
 #include <wx/glcanvas.h>
 #ifdef __APPLE__
-  #include <OpenGL/glu.h>
+# include <GLUT/glut.h>
 #else
-  #include <GL/glu.h>
+# ifdef WIN32
+#  include <windows.h>
+# endif
+# include <GL/glu.h>
 #endif
 
 namespace mcrl2
