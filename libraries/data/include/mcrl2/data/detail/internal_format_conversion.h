@@ -90,7 +90,7 @@ namespace mcrl2 {
           /// Translates contained numeric expressions to their internal representations
           where_clause operator()(where_clause const& expression)
           {
-            return where_clause((*this)(expression.body()), boost::make_iterator_range((*this)(expression.declarations())));
+            return where_clause((*this)(expression.body()), (*this)(expression.declarations()));
           }
 
           /// Translates contained numeric expressions to their internal representations
@@ -120,7 +120,7 @@ namespace mcrl2 {
 
           application operator()(application const& expression)
           {
-            std::vector< data_expression > arguments((*this)(expression.arguments()));
+            atermpp::vector< data_expression > arguments((*this)(expression.arguments()));
 
             if (expression.head().is_function_symbol()) {
               function_symbol head(expression.head());
@@ -129,32 +129,30 @@ namespace mcrl2 {
               { // convert to snoc list
                 sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
 
-                return sort_list::list(element_sort, boost::make_iterator_range(arguments));
+                return sort_list::list(element_sort, arguments);
               }
               else if (head.name() == "@SetEnum")
               { // convert to finite set
                 sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
 
-                return sort_set_::setfset(element_sort,
-                    sort_fset::fset(element_sort, boost::make_iterator_range(arguments)));
+                return sort_set_::setfset(element_sort, sort_fset::fset(element_sort, arguments));
               }
               else if (head.name() == "@BagEnum")
               { // convert to finite bag
                 sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
 
-                return sort_bag::bagfbag(element_sort,
-                    sort_fbag::fbag(element_sort, boost::make_iterator_range(arguments)));
+                return sort_bag::bagfbag(element_sort, sort_fbag::fbag(element_sort, arguments));
               }
             }
 
-            return application((*this)(expression.head()), boost::make_iterator_range(arguments));
+            return application((*this)(expression.head()), arguments);
           }
 
           /// Translates the numeric expressions to their internal representations
           data_equation operator()(data_equation const& equation)
           {
             return data_equation(
-              boost::make_iterator_range((*this)(equation.variables())),
+              (*this)(equation.variables()),
               (*this)(equation.condition()),
               (*this)(equation.lhs()),
               (*this)(equation.rhs()));

@@ -31,6 +31,7 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
+#include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -321,9 +322,10 @@ namespace mcrl2 {
       /// with value_type convertible to data_expression.
       /// \param[in] s the sort of list elements
       /// \param[in] range an iterator range of elements of sort s
-      template < typename ForwardTraversalIterator >
+      template < typename Sequence >
       inline
-      application list(const sort_expression& s, boost::iterator_range< ForwardTraversalIterator > const& range)
+      application list(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression                list_expression(nil(s));
         std::vector< data_expression > elements(range.begin(), range.end());
@@ -346,13 +348,14 @@ namespace mcrl2 {
       /// \param[in] s the sort of list elements
       /// \param[in] begin iterator that marks the start of a range of elements of sort s
       /// \param[in] end the past-end iterator for a range of elements of sort s
-      template < typename ForwardTraversalIterator >
+      template < typename Sequence >
       inline
-      application fset(const sort_expression& s, boost::iterator_range< ForwardTraversalIterator > const& range)
+      application fset(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fset_expression(sort_fset::fset_empty(s));
 
-        for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i) {
+        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i) {
           BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fset_expression = sort_fset::fsetinsert(s, *i, fset_expression);
@@ -369,13 +372,14 @@ namespace mcrl2 {
       /// \param[in] s the sort of list elements
       /// \param[in] begin iterator that marks the start of a range of elements of sort s
       /// \param[in] end the past-end iterator for a range of elements of sort s
-      template < typename ForwardTraversalIterator >
+      template < typename Sequence >
       inline
-      application fbag(const sort_expression& s, boost::iterator_range< ForwardTraversalIterator > const& range)
+      application fbag(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
-        for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i) {
+        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i) {
           BOOST_ASSERT(is_convertible(i->sort(), s));
 
           fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, sort_nat::nat(1));
