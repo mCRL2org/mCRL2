@@ -88,7 +88,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
 mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str )
 {
   //Generate a fresh Basic Sort
-  mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+  mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( sort_names );
   mcrl2::core::identifier_string nstr = generator( str );
   gsDebugMsg("\t");
@@ -101,7 +101,7 @@ mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str
 mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapping_name(std::string str)
 {
   //Generate a fresh name for a constructor of mapping
-  mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+  mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( mapping_and_constructor_names );
   mcrl2::core::identifier_string nstr = generator( str );
   gsDebugMsg("Generated a fresh mapping: %s\n", string(nstr).c_str() ); 
@@ -212,7 +212,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   variable_vector vars;        /* Equation variables  */
   data_equation_vector del;    /* Generated equations */
   std::set<mcrl2::core::identifier_string> var_names; /* var_names */
-  mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+  mcrl2::data::postfix_identifier_generator generator("");
   variable v;
 
   std::string fstr = "y";
@@ -349,7 +349,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 
 mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str)
 {
-  mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+  mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( process_parameter_names );
   mcrl2::core::identifier_string idstr = generator( str.append( "_pp" ) );
   process_parameter_names.insert( idstr );
@@ -698,7 +698,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
 
   if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())
   {
-    mcrl2::data::postfix_identifier_generator generator = mcrl2::data::postfix_identifier_generator ("");
+    mcrl2::data::postfix_identifier_generator generator("");
     generator.add_identifiers( sort_names );
     mcrl2::core::identifier_string nstr = generator( "S" );
     unfold_parameter_name = nstr; 

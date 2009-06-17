@@ -174,7 +174,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
 
-  MCRL2_ATERM_INIT(0, lpCmdLine)
+  MCRL2_ATERMPP_INIT(0, lpCmdLine)
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
