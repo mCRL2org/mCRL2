@@ -207,6 +207,7 @@ bool p_lts::read_from_aut(istream &is)
   #define READ_FROM_AUT_BUF_SIZE 8196
   char buf[READ_FROM_AUT_BUF_SIZE];
   char *s1,*s2,*s3;
+  unsigned int line_no = 1;
 
   is.getline(buf,READ_FROM_AUT_BUF_SIZE);
   if ( read_aut_header(buf,&s1,&s2,&s3) )
@@ -215,7 +216,7 @@ bool p_lts::read_from_aut(istream &is)
     ntrans = strtoul(s2,NULL,10);
     nstate = strtoul(s3,NULL,10);
   } else {
-    gsErrorMsg("cannot parse AUT input! (invalid header)\n");
+    gsErrorMsg("cannot parse AUT input (invalid header)\n");
     return false;
   }
 
@@ -232,6 +233,7 @@ bool p_lts::read_from_aut(istream &is)
     const char *s;
 
     is.getline(buf,READ_FROM_AUT_BUF_SIZE);
+    line_no++;
     if ( is.gcount() == 0 )
     {
       break;
@@ -243,18 +245,18 @@ bool p_lts::read_from_aut(istream &is)
       to = strtoul(s3,NULL,10);
       if ( from >= nstates )
       {
-        gsErrorMsg("invalid AUT transition; state index (%u) higher than maximum (%u) given by header\n",from,nstates);
+        gsErrorMsg("cannot parse AUT input (invalid transition at line %d; state index (%u) higher than maximum (%u) given by header)\n",line_no,from,nstates);
         ATtableDestroy(labs);
         return false;
       }
       if ( to >= nstates )
       {
-        gsErrorMsg("invalid AUT transition; state index (%u) higher than maximum (%u) given by header\n",to,nstates);
+        gsErrorMsg("cannot parse AUT input (invalid transition at line %d; state index (%u) higher than maximum (%u) given by header)\n",line_no,to,nstates);
         ATtableDestroy(labs);
         return false;
       }
     } else {
-      gsErrorMsg("cannot parse AUT input! (invalid transition)\n");
+      gsErrorMsg("cannot parse AUT input (invalid transition at line %d)\n",line_no);
       ATtableDestroy(labs);
       return false;
     }
