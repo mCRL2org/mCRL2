@@ -129,27 +129,6 @@ namespace mcrl2 {
        * \brief Convenience class for connecting wxWidgets applications to the environment (platform dependent wrapper around wxEntry)
        **/
       class entry_wrapper {
-#ifdef __WINDOWS__
-        private:
-
-          HINSTANCE        hInstance;
-          HINSTANCE        hPrevInstance;
-          wxCmdLineArgType lpCmdLine;
-          int              nCmdShow;
-
-        public:
-
-          entry_wrapper(HINSTANCE hc, HINSTANCE hp, wxCmdLineArgType lp, int ns) {
-            hInstance     = hc;
-            hPrevInstance = hp;
-            lpCmdLine     = lp;
-            nCmdShow      = ns;
-          }
-
-          bool perform_entry() {
-            return (wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow) == 0);
-          }
-#else
         private:
 
           int&    argc;
@@ -163,7 +142,6 @@ namespace mcrl2 {
           bool perform_entry() {
             return (wxEntry(argc, argv) == 0);
           }
-#endif
       };
 
       /**
@@ -204,18 +182,6 @@ namespace mcrl2 {
 
         public:
 
-#if defined(__WINDOWS__)
-          /// \brief Windows specific SQuADT connection activation a tool object
-          inline static bool free_activation(T& instance, HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
-# ifdef __WXWINDOWS__
-            wxCmdLineArgType dummy_lpCmdLine = const_cast< char* >("squadt-tool");
-
-            instance.m_starter.reset(new entry_wrapper(hInstance, hPrevInstance, dummy_lpCmdLine, nCmdShow));
-# endif
-
-            return instance.try_interaction(lpCmdLine);
-          }
-#else
           /// \brief Unix specific SQuADT connection activation using a tool object
           inline static bool free_activation(T& instance, int& ac, char** av) {
 # if defined(__WXWINDOWS__)
@@ -224,38 +190,20 @@ namespace mcrl2 {
 
             return instance.try_interaction(ac, av);
           }
-#endif
 
-#if defined(__WINDOWS__)
-          /// \brief Windows specific SQuADT connection activation (creates connector object)
-          inline static bool free_activation(HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
-            T communicator;
-
-            return free_activation(communicator, hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-          }
-#else
           /// \brief Unix specific SQuADT connection activation (creates connector object)
           inline static bool free_activation(int& ac, char** av) {
             T communicator;
 
             return free_activation(communicator, ac, av);
           }
-#endif
       };
 
-#if defined(__WINDOWS__)
-      /// \brief Windows specific SQuADT connection activation (creates connector object)
-      template < typename T >
-      inline bool free_activation(T& instance, HINSTANCE hInstance, HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow) {
-        return interactor< T >::free_activation(instance, hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-      }
-#else
       /// \brief Unix specific SQuADT connection activation (creates connector object)
       template < typename T >
       inline bool free_activation(T& instance, int& ac, char** av) {
         return interactor< T >::free_activation(instance, ac, av);
       }
-#endif
     }
   }
 }
