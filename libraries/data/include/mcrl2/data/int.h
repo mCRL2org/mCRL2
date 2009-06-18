@@ -26,6 +26,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
