@@ -278,7 +278,7 @@ class function_declaration_list():
           case_code += "        {\n"
           case_code += "          return static_cast< application >(e).arguments()[%s];\n" % (i)
           case_code += "        }\n"
-        case_code += "        throw mcrl2::runtime_error(\"Unexpected expression \" + pp(e) + \" occurred\");\n"
+        case_code += "        throw mcrl2::runtime_error(\"Unexpected expression occurred\");\n"
       case_code += "      }\n"
       code += "%s\n" % (case_code)
     return code

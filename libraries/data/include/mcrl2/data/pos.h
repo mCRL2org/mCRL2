@@ -24,7 +24,6 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
@@ -643,7 +642,7 @@ namespace mcrl2 {
         {
           return static_cast< application >(e).arguments()[2];
         }
-        throw mcrl2::runtime_error("Unexpected expression " + pp(e) + " occurred");
+        throw mcrl2::runtime_error("Unexpected expression occurred");
       }
 
       ///\brief Function for projecting out argument
@@ -699,7 +698,7 @@ namespace mcrl2 {
         {
           return static_cast< application >(e).arguments()[1];
         }
-        throw mcrl2::runtime_error("Unexpected expression " + pp(e) + " occurred");
+        throw mcrl2::runtime_error("Unexpected expression occurred");
       }
 
       ///\brief Function for projecting out argument
@@ -731,7 +730,7 @@ namespace mcrl2 {
         {
           return static_cast< application >(e).arguments()[1];
         }
-        throw mcrl2::runtime_error("Unexpected expression " + pp(e) + " occurred");
+        throw mcrl2::runtime_error("Unexpected expression occurred");
       }
 
       /// \brief Give all system defined equations for pos
