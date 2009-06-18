@@ -97,7 +97,7 @@ namespace mcrl2 {
           /// Eliminates set/bag comprehension and list enumeration
           data_expression operator()(abstraction const& expression)
           {
-            using namespace sort_set_;
+            using namespace sort_set;
             using namespace sort_bag;
 
             variable_list bound_variables = convert< variable_list >((*this)(expression.variables()));
@@ -135,7 +135,7 @@ namespace mcrl2 {
               { // convert to finite set
                 sort_expression element_sort((*this)(function_sort(head.sort()).domain()[0]));
 
-                return sort_set_::setfset(element_sort, sort_fset::fset(element_sort, arguments));
+                return sort_set::setfset(element_sort, sort_fset::fset(element_sort, arguments));
               }
               else if (head.name() == "@BagEnum")
               { // convert to finite bag

@@ -278,11 +278,11 @@ struct pbes_expression_builder
     // TODO: this is a hack, to deal with the data_true <-> pbes_true issue
     if (tr::is_true(result))
     {
-      result = data::sort_bool_::true_();
+      result = data::sort_bool::true_();
     }
     if (tr::is_false(result))
     {
-      result = data::sort_bool_::false_();
+      result = data::sort_bool::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
@@ -509,11 +509,11 @@ struct pbes_expression_builder<Term, void>
     // TODO: this is a temporary hack, to deal with the data_true <-> pbes_true problems in the rewriter
     if (tr::is_true(result))
     {
-      result = data::sort_bool_::true_();
+      result = data::sort_bool::true_();
     }
     if (tr::is_false(result))
     {
-      result = data::sort_bool_::false_();
+      result = data::sort_bool::false_();
     }
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG

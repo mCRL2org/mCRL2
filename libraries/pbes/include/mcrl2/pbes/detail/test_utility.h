@@ -45,7 +45,7 @@ namespace detail {
   /// \return A data variable of type Bool with a given name
   data::variable bool_(std::string name)
   {
-    return data::variable(core::identifier_string(name), data::sort_bool_::bool_());
+    return data::variable(core::identifier_string(name), data::sort_bool::bool_());
   }
 
   /// \brief Returns a propositional variable declaration with the given name and parameters

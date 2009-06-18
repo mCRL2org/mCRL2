@@ -4,6 +4,7 @@
 
 import string
 import copy
+import re
 
 # Remove trailing _ from a string
 def remove_underscore(s):
@@ -1939,6 +1940,11 @@ class specification():
     code += "} // namespace mcrl2\n\n"
     code += "#endif // MCRL2_DATA_%s_H\n" % (self.namespace.upper())
     code = string.replace(code, "__", "_")
+    p = re.compile('sort_([A-Za-z0-9]*)_([ ]|:)')
+    code = p.sub(r'sort_\1\2', code)
+    p = re.compile('is_([A-Za-z0-9]*)_\(')
+    code = p.sub(r'is_\1(',code)
+    
     return code
 
 class include_list():

@@ -30,10 +30,10 @@ void test_assignments()
   variable y("y", sort_pos::pos());
   assignment xy(x,y);
   assignment_list l(make_list(xy));
-  
+
   multi_action a(action(action_label(core::identifier_string("a"), sort_expression_list()), data_expression_list()));
-    
-  summand s(variable_list(), data_expression(sort_bool_::true_()), a, l);
+
+  summand s(variable_list(), data_expression(sort_bool::true_()), a, l);
 
   multi_action s_a = s.multi_action();
   assignment_list s_l = s.assignments();

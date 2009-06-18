@@ -60,7 +60,7 @@ state_formula normalize(state_formula f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::sort_bool_::not_(f);
+      return data::sort_bool::not_(f);
     } else if (is_true(f)) {
       return false_();
     } else if (is_false(f)) {

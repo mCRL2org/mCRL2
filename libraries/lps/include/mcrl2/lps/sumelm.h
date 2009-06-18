@@ -63,7 +63,7 @@ namespace mcrl2 {
           // In all cases not explicitly handled we return the original working_condition
           data_expression result = working_condition;
 
-          if (sort_bool_::is_and_application(working_condition))
+          if (sort_bool::is_and_application(working_condition))
           {
             //Recursively apply sum elimination on lhs and rhs
             //Note that recursive application provides for progress because lhs and rhs split the working condition.
@@ -96,20 +96,20 @@ namespace mcrl2 {
                 {
                   // apply all previously added substitutions to the rhs.
                   sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
-                  result = sort_bool_::true_();
+                  result = sort_bool::true_();
                 } else if (application(working_condition).right().is_variable() &&
                            data::search_variable(summand_.summation_variables(), variable(application(working_condition).right()))) {
                   // check whether the converse is possible
                   if (substitutions.count(application(working_condition).right()) == 0) {
                     sumelm_add_replacement(substitutions, application(working_condition).right(), substitutions[application(working_condition).left()]);
-                    result = sort_bool_::true_();
+                    result = sort_bool::true_();
                   }
                 } else if (substitutions.count(substitutions[application(working_condition).left()]) == 0 &&
                              substitutions[application(working_condition).left()].is_variable() &&
                              data::search_variable(summand_.summation_variables(), variable(substitutions[application(working_condition).left()]))) {
                   sumelm_add_replacement(substitutions, substitutions[application(working_condition).left()], application(working_condition).right());
                   sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
-                  result = sort_bool_::true_();
+                  result = sort_bool::true_();
                 }
               }
             }

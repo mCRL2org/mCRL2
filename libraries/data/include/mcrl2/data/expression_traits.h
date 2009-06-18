@@ -215,12 +215,12 @@ namespace data {
 
     static bool is_true(data_expression const& e)
     {
-      return sort_bool_::is_true_function_symbol(e);
+      return sort_bool::is_true_function_symbol(e);
     }
 
     static bool is_false(data_expression const& e)
     {
-      return sort_bool_::is_false_function_symbol(e);
+      return sort_bool::is_false_function_symbol(e);
     }
 
     static bool is_application(data_expression const& e)
@@ -266,22 +266,22 @@ namespace data {
 
     static data_expression false_()
     {
-      return sort_bool_::false_();
+      return sort_bool::false_();
     }
 
     static data_expression true_()
     {
-      return sort_bool_::true_();
+      return sort_bool::true_();
     }
 
     static data_expression and_(data_expression const& e1, data_expression const& e2)
     {
-      return sort_bool_::and_(e1, e1);
+      return sort_bool::and_(e1, e1);
     }
 
     static data_expression or_(data_expression const& e1, data_expression const& e2)
     {
-      return sort_bool_::or_(e1, e1);
+      return sort_bool::or_(e1, e1);
     }
   };
 }

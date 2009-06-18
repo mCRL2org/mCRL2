@@ -94,7 +94,7 @@ namespace detail {
     struct non_linear_process
     {
       process_expression expr;
-      
+
       non_linear_process(const process_expression& p)
         : expr(p)
       {}
@@ -108,7 +108,7 @@ namespace detail {
       m_deadlock_changed = false;
       m_multi_action = lps::multi_action();
       m_multi_action_changed = false;
-      m_condition = data::sort_bool_::true_();
+      m_condition = data::sort_bool::true_();
       m_next_state = data::assignment_list();
     }
 
@@ -127,7 +127,7 @@ namespace detail {
       }
 // std::cout << "adding summand" << m_multi_action_changed << m_deadlock_changed << "\n" << core::pp(m_summand) << std::endl;
     }
-  
+
     /// \brief These names can be used as return types of the visit functions, to make
     /// the code more readible.
     enum return_type

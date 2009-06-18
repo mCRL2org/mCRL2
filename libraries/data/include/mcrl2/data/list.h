@@ -184,7 +184,7 @@ namespace mcrl2 {
       inline
       function_symbol in(const sort_expression& s)
       {
-        function_symbol in(in_name(), function_sort(s, list(s), sort_bool_::bool_()));
+        function_symbol in(in_name(), function_sort(s, list(s), sort_bool::bool_()));
         return in;
       }
 
@@ -837,11 +837,11 @@ namespace mcrl2 {
         variable vp("p",sort_pos::pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vd, vs), equal_to(nil(s), cons_(s, vd, vs)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vd, vs), equal_to(cons_(s, vd, vs), nil(s)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool_::and_(equal_to(vd, ve), equal_to(vs, vt))));
-        result.push_back(data_equation(make_vector(vd), in(s, vd, nil(s)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool_::or_(equal_to(vd, ve), in(s, vd, vs))));
+        result.push_back(data_equation(make_vector(vd, vs), equal_to(nil(s), cons_(s, vd, vs)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vd, vs), equal_to(cons_(s, vd, vs), nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vd, ve, vs, vt), equal_to(cons_(s, vd, vs), cons_(s, ve, vt)), sort_bool::and_(equal_to(vd, ve), equal_to(vs, vt))));
+        result.push_back(data_equation(make_vector(vd), in(s, vd, nil(s)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vd, ve, vs), in(s, vd, cons_(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), in(s, vd, vs))));
         result.push_back(data_equation(variable_list(), count(s, nil(s)), sort_nat::c0()));
         result.push_back(data_equation(make_vector(vd, vs), count(s, cons_(s, vd, vs)), sort_nat::cnat(sort_nat::succ(count(s, vs)))));
         result.push_back(data_equation(make_vector(vd), snoc(s, nil(s), vd), cons_(s, vd, nil(s))));
@@ -870,9 +870,9 @@ namespace mcrl2 {
          {
            sort_nat::add_nat_to_specification(specification);
          }
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {

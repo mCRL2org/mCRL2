@@ -143,28 +143,28 @@ std::pair<data_expression, data_expression> split_variables_and_constants(const 
 {
   // gsDebugMsg("Splitting constants and variables in %P\n", (ATermAppl)e);
   std::pair<data_expression, data_expression> result;
-  if(sort_real_::is_plus_application(e))
+  if(sort_real::is_plus_application(e))
   {
     std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
     std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real_::plus(left.first, right.first), sort_real_::plus(left.second, right.second));
+    result = std::make_pair(sort_real::plus(left.first, right.first), sort_real::plus(left.second, right.second));
   }
-  else if (sort_real_::is_minus_application(e))
+  else if (sort_real::is_minus_application(e))
   {
     std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
     std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real_::plus(left.first, sort_real_::negate(right.first)), sort_real_::plus(left.second, sort_real_::negate(right.second)));
+    result = std::make_pair(sort_real::plus(left.first, sort_real::negate(right.first)), sort_real::plus(left.second, sort_real::negate(right.second)));
   }
-  else if (sort_real_::is_negate_application(e))
+  else if (sort_real::is_negate_application(e))
   {
     data_expression argument = *static_cast<const data_application&>(e).arguments().begin();
-    if(sort_real_::is_plus_application(argument))
+    if(sort_real::is_plus_application(argument))
     {
-      result = split_variables_and_constants(sort_real_::plus(sort_real_::is_negate_application(application(argument).left), sort_real_::is_negate_application(application(argument).right())));
+      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), sort_real::is_negate_application(application(argument).right())));
     }
-    else if(sort_real_::is_minus_application(argument))
+    else if(sort_real::is_minus_application(argument))
     {
-      result = split_variables_and_constants(sort_real_::plus(sort_real_::is_negate_application(application(argument).left), application(argument).right()));
+      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), application(argument).right()));
     }
     else if(is_number(argument))
     {
@@ -201,7 +201,7 @@ variable_list get_real_variables(const variable_list& l)
   variable_list r;
   for(variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->sort() == sort_real_::real_())
+    if(i->sort() == sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -218,7 +218,7 @@ variable_list get_nonreal_variables(const variable_list& l)
   variable_list r;
   for(variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->sort() != sort_real_::real_())
+    if(i->sort() != sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -235,7 +235,7 @@ data_expression_list get_real_expressions(const data_expression_list& l)
   data_expression_list r;
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->sort() == sort_real_::real_())
+    if(i->sort() == sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -252,7 +252,7 @@ data_expression_list get_nonreal_expressions(const data_expression_list& l)
   data_expression_list r;
   for(data_expression_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->sort() != sort_real_::real_())
+    if(i->sort() != sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -269,7 +269,7 @@ assignment_list get_real_assignments(const assignment_list& l)
   assignment_list r;
   for(assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->lhs().sort() == sort_real_::real_())
+    if(i->lhs().sort() == sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -301,7 +301,7 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
   assignment_list r;
   for(assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    if(i->lhs().sort() != sort_real_::real_())
+    if(i->lhs().sort() != sort_real::real_())
     {
       r = push_front(r, *i);
     }
@@ -351,7 +351,7 @@ static void split_condition(
   real_conditions.clear();
   non_real_conditions.clear();
 
-  if ((!negate && sort_bool_::is_and_application(e))  || (negate && sort_bool_::is_or_application(e)))
+  if ((!negate && sort_bool::is_and_application(e))  || (negate && sort_bool::is_or_application(e)))
   {
     atermpp::vector < data_expression_list >
                  real_conditions_aux1, non_real_conditions_aux1;
@@ -370,7 +370,7 @@ static void split_condition(
       }
     }
   }
-  else if ((!negate && sort_bool_::is_or_application(e))  || (negate && sort_bool_::is_and_application(e)))
+  else if ((!negate && sort_bool::is_or_application(e))  || (negate && sort_bool::is_and_application(e)))
   {
     split_condition(application(e).left(),real_conditions,non_real_conditions,negate);
     atermpp::vector < data_expression_list >
@@ -384,17 +384,17 @@ static void split_condition(
     }
   }
   else if (is_if_application(e))
-  { split_condition(sort_bool_::or_(sort_bool_::and_(condition_part(e),then_part(e)),
-                        sort_bool_::and_(sort_bool_::not_(condition_part(e)),else_part(e))),
+  { split_condition(sort_bool::or_(sort_bool::and_(condition_part(e),then_part(e)),
+                        sort_bool::and_(sort_bool::not_(condition_part(e)),else_part(e))),
                         real_conditions,non_real_conditions,negate);
   }
-  else if (sort_bool_::is_not_application(e))
+  else if (sort_bool::is_not_application(e))
   { split_condition(application(e).arguments()[0],real_conditions,non_real_conditions,!negate);
   }
-  else if(is_inequality(e) && (application(e).left().sort() == sort_real_::real_() || application(e).right().sort() == sort_real_::real_()))
+  else if(is_inequality(e) && (application(e).left().sort() == sort_real::real_() || application(e).right().sort() == sort_real::real_()))
   { std::set < variable > vars=find_all_variables(e);
     for(std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
-    { if (i->sort()!=sort_real_::real_())
+    { if (i->sort()!=sort_real::real_())
       { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +
                                          pp(*i) + " not of sort Real.");
       }
@@ -412,13 +412,13 @@ static void split_condition(
   { // e is assumed to be a non_real expression.
     std::set < variable > vars=find_all_variables(e);
     for(std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
-    { if (i->sort()==sort_real_::real_())
+    { if (i->sort()==sort_real::real_())
       { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +                                          pp(*i) + " of sort Real.");
       }
     }
     if (negate)
     { non_real_conditions.push_back(push_front(data_expression_list(),
-                                               data_expression(sort_bool_::not_(e))));
+                                               data_expression(sort_bool::not_(e))));
       real_conditions.push_back(data_expression_list());
     }
     else
@@ -462,7 +462,7 @@ static void normalize_specification(
     {
       summand t(*i);
       const data_expression c=r(lazy::join_and(j_n->begin(), j_n->end()));
-      if (!sort_bool_::is_false_function_symbol(c))
+      if (!sort_bool::is_false_function_symbol(c))
       { t=set_condition(t,c);
 
         vector < linear_inequality > inequalities;
@@ -531,7 +531,7 @@ static void normalize_specification(
           atermpp::map<data_expression, data_expression> replacements;
           for(assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
           {
-            if(j->lhs().sort() == sort_real_::real_())
+            if(j->lhs().sort() == sort_real::real_())
             {
               replacements[j->lhs()] = j->rhs();
             }
@@ -564,12 +564,12 @@ void determine_real_inequalities(
               const rewriter &r)
 {
   // std::cerr << "Real inequalities in" << pp(e) << "\n";
-  if (sort_bool_::is_and_application(e))
+  if (sort_bool::is_and_application(e))
   {
     determine_real_inequalities(application(e).left(), inequalities,r);
     determine_real_inequalities(application(e).right(), inequalities,r);
   }
-  else if (is_inequality(e) && (application(e).right().sort() == sort_real_::real_()))
+  else if (is_inequality(e) && (application(e).right().sort() == sort_real::real_()))
   {
     inequalities.push_back(linear_inequality(e,r));
   }
@@ -683,22 +683,22 @@ data_expression remove_variable(const variable& variable, const data_expression&
 
   data_expression left = application(inequality).left;
   data_expression new_left = real_zero();
-  while(sort_real_::is_plus_application(left))
+  while(sort_real::is_plus_application(left))
   {
     // gsDebugMsg("left = %P is a plus expression\n", (ATermAppl)left);
     if(is_multiplies(application(left).right()))
     {
       data_expression factor = application(application(left()).right).left();
-      new_left = gsMakeDataExprDivide(sort_real_::plus(new_left, application(left).left()), factor);
+      new_left = gsMakeDataExprDivide(sort_real::plus(new_left, application(left).left()), factor);
       return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, gsMakeDataExprDivide(application(inequality).right(), factor)));
     }
-    else if (application(left).right() == variable || application(left).right() == sort_real_::is_negate_application(static_cast<const data_expression&>(variable)))
+    else if (application(left).right() == variable || application(left).right() == sort_real::is_negate_application(static_cast<const data_expression&>(variable)))
     {
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(sort_real_::plus(new_left, application(left).left()), application(inequality).right()));
+      return data_application(static_cast<const data_application&>(inequality).head(), make_list(sort_real::plus(new_left, application(left).left()), application(inequality).right()));
     }
     else
     {
-      new_left = sort_real_::plus(new_left, application(left).right());
+      new_left = sort_real::plus(new_left, application(left).right());
       left = application(left).left();
     }
   }
@@ -708,13 +708,13 @@ data_expression remove_variable(const variable& variable, const data_expression&
   if(is_negate_application(left))
   {
     data_expression argument = *static_cast<const data_application&>(left).arguments().begin();
-    if(sort_real_::is_plus_application(argument))
+    if(sort_real::is_plus_application(argument))
     {
-      data_expression p = sort_real_::plus(sort_real_::is_negate_application(application(argument).left), sort_real_::is_negate_application(application(argument).right()));
+      data_expression p = sort_real::plus(sort_real::is_negate_application(application(argument).left), sort_real::is_negate_application(application(argument).right()));
       return remove_variable(variable, data_application(static_cast<const data_application&>(inequality).head(), make_list(p, application(inequality).right())));
     }
   }
-  if (left == variable || left == sort_real_::is_negate_application(static_cast<const data_expression&>(variable)))
+  if (left == variable || left == sort_real::is_negate_application(static_cast<const data_expression&>(variable)))
   {
     return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, application(inequality).right()));
   }
@@ -852,17 +852,17 @@ assignment_list determine_process_initialization(
     data_expression left = realelm_data_expression_map_replace(i->get_lowerbound(), replacements);
     data_expression right = realelm_data_expression_map_replace(i->get_upperbound(), replacements);
     assignment ass;
-    if(r(less(left, right)) == sort_bool_::true_())
+    if(r(less(left, right)) == sort_bool::true_())
     {
       ass = assignment(i->get_variable(), c.smaller());
     }
-    else if(r(equal_to(left, right)) == sort_bool_::true_())
+    else if(r(equal_to(left, right)) == sort_bool::true_())
     {
       ass = assignment(i->get_variable(), c.equal());
     }
     else
     {
-      assert(r(greater(left, right)) == sort_bool_::true_());
+      assert(r(greater(left, right)) == sort_bool::true_());
       ass = assignment(i->get_variable(), c.larger());
     }
     init = push_front(init, ass);
@@ -1042,7 +1042,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
               }
               else
               { assert(j->comparison()==linear_inequality::less_eq);
-                new_condition=lazy::and_(new_condition,sort_bool_::not_(c.is_larger(k->get_variable())));
+                new_condition=lazy::and_(new_condition,sort_bool::not_(c.is_larger(k->get_variable())));
               }
             }
             else
@@ -1052,7 +1052,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
               }
               else
               { assert(j->comparison()==linear_inequality::less_eq);
-                new_condition=lazy::and_(new_condition,sort_bool_::not_(c.is_smaller(k->get_variable())));
+                new_condition=lazy::and_(new_condition,sort_bool::not_(c.is_smaller(k->get_variable())));
               }
             }
           }

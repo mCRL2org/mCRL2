@@ -33,7 +33,7 @@ namespace mcrl2 {
   namespace data {
 
     /// \brief Namespace for system defined sort real_
-    namespace sort_real_ {
+    namespace sort_real {
 
       inline
       core::identifier_string const& real_name()
@@ -55,7 +55,7 @@ namespace mcrl2 {
       /// \param e A sort expression
       /// \return true iff e == real_()
       inline
-      bool is_real_(const sort_expression& e)
+      bool is_real(const sort_expression& e)
       {
         if (e.is_basic_sort())
         {
@@ -87,7 +87,7 @@ namespace mcrl2 {
       inline
       function_symbol const& creal()
       {
-        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol(creal_name(), function_sort(sort_int_::int_(), sort_pos::pos(), real_())));
+        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol(creal_name(), function_sort(sort_int::int_(), sort_pos::pos(), real_())));
         return creal;
       }
 
@@ -253,7 +253,7 @@ namespace mcrl2 {
       inline
       function_symbol const& int2real()
       {
-        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), function_sort(sort_int_::int_(), real_())));
+        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), function_sort(sort_int::int_(), real_())));
         return int2real;
       }
 
@@ -418,7 +418,7 @@ namespace mcrl2 {
       inline
       function_symbol const& real2int()
       {
-        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), function_sort(real_(), sort_int_::int_())));
+        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), function_sort(real_(), sort_int::int_())));
         return real2int;
       }
 
@@ -480,9 +480,9 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int::int_() && s1 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
@@ -559,25 +559,25 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_pos::pos() && s1 == sort_int_::int_())
+        else if (s0 == sort_pos::pos() && s1 == sort_int::int_())
         {
           target_sort = sort_pos::pos();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_pos::pos())
+        else if (s0 == sort_int::int_() && s1 == sort_pos::pos())
         {
           target_sort = sort_pos::pos();
         }
-        else if (s0 == sort_nat::nat() && s1 == sort_int_::int_())
+        else if (s0 == sort_nat::nat() && s1 == sort_int::int_())
         {
           target_sort = sort_nat::nat();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_nat::nat())
+        else if (s0 == sort_int::int_() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int::int_() && s1 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
@@ -661,7 +661,7 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_())
+        else if (s0 == sort_int::int_())
         {
           target_sort = sort_nat::nat();
         }
@@ -740,15 +740,15 @@ namespace mcrl2 {
         }
         else if (s0 == sort_pos::pos())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_nat::nat())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
-        else if (s0 == sort_int_::int_())
+        else if (s0 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else
         {
@@ -815,9 +815,9 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_())
+        else if (s0 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_nat::nat())
         {
@@ -894,11 +894,11 @@ namespace mcrl2 {
         }
         else if (s0 == sort_nat::nat())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
-        else if (s0 == sort_int_::int_())
+        else if (s0 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_pos::pos())
         {
@@ -970,9 +970,9 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int::int_() && s1 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
@@ -1059,15 +1059,15 @@ namespace mcrl2 {
         }
         else if (s0 == sort_pos::pos() && s1 == sort_pos::pos())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int::int_() && s1 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else
         {
@@ -1136,9 +1136,9 @@ namespace mcrl2 {
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_int_::int_())
+        else if (s0 == sort_int::int_() && s1 == sort_int::int_())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_nat::nat() && s1 == sort_nat::nat())
         {
@@ -1211,13 +1211,13 @@ namespace mcrl2 {
       function_symbol exp(const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort;
-        if (s0 == real_() && s1 == sort_int_::int_())
+        if (s0 == real_() && s1 == sort_int::int_())
         {
           target_sort = real_();
         }
-        else if (s0 == sort_int_::int_() && s1 == sort_nat::nat())
+        else if (s0 == sort_int::int_() && s1 == sort_nat::nat())
         {
-          target_sort = sort_int_::int_();
+          target_sort = sort_int::int_();
         }
         else if (s0 == sort_pos::pos() && s1 == sort_nat::nat())
         {
@@ -1346,7 +1346,7 @@ namespace mcrl2 {
       inline
       function_symbol const& floor()
       {
-        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol(floor_name(), function_sort(real_(), sort_int_::int_())));
+        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol(floor_name(), function_sort(real_(), sort_int::int_())));
         return floor;
       }
 
@@ -1401,7 +1401,7 @@ namespace mcrl2 {
       inline
       function_symbol const& ceil()
       {
-        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), function_sort(real_(), sort_int_::int_())));
+        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), function_sort(real_(), sort_int::int_())));
         return ceil;
       }
 
@@ -1456,7 +1456,7 @@ namespace mcrl2 {
       inline
       function_symbol const& round()
       {
-        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol(round_name(), function_sort(real_(), sort_int_::int_())));
+        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol(round_name(), function_sort(real_(), sort_int::int_())));
         return round;
       }
 
@@ -1511,7 +1511,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfrac()
       {
-        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol(redfrac_name(), function_sort(sort_int_::int_(), sort_int_::int_(), real_())));
+        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol(redfrac_name(), function_sort(sort_int::int_(), sort_int::int_(), real_())));
         return redfrac;
       }
 
@@ -1567,7 +1567,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfracwhr()
       {
-        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol(redfracwhr_name(), function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_())));
+        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol(redfracwhr_name(), function_sort(sort_pos::pos(), sort_int::int_(), sort_nat::nat(), real_())));
         return redfracwhr;
       }
 
@@ -1624,7 +1624,7 @@ namespace mcrl2 {
       inline
       function_symbol const& redfrachlp()
       {
-        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol(redfrachlp_name(), function_sort(real_(), sort_int_::int_(), real_())));
+        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol(redfrachlp_name(), function_sort(real_(), sort_int::int_(), real_())));
         return redfrachlp;
       }
 
@@ -1688,10 +1688,10 @@ namespace mcrl2 {
         result.push_back(plus(real_(), real_()));
         result.push_back(minus(real_(), real_()));
         result.push_back(times(real_(), real_()));
-        result.push_back(exp(real_(), sort_int_::int_()));
+        result.push_back(exp(real_(), sort_int::int_()));
         result.push_back(divides(sort_pos::pos(), sort_pos::pos()));
         result.push_back(divides(sort_nat::nat(), sort_nat::nat()));
-        result.push_back(divides(sort_int_::int_(), sort_int_::int_()));
+        result.push_back(divides(sort_int::int_(), sort_int::int_()));
         result.push_back(divides(real_(), real_()));
         result.push_back(floor());
         result.push_back(ceil());
@@ -1806,46 +1806,46 @@ namespace mcrl2 {
         variable vn("n",sort_nat::nat());
         variable vp("p",sort_pos::pos());
         variable vq("q",sort_pos::pos());
-        variable vx("x",sort_int_::int_());
-        variable vy("y",sort_int_::int_());
+        variable vx("x",sort_int::int_());
+        variable vy("y",sort_int::int_());
         variable vr("r",real_());
         variable vs("s",real_());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vr), less(vr, vr), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int_::cint(vn), sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int_::cint(sort_nat::cnat(vp)), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));
+        result.push_back(data_equation(make_vector(vp), pos2real(vp), creal(sort_int::cint(sort_nat::cnat(vp)), sort_pos::c1())));
         result.push_back(data_equation(make_vector(vx), real2int(creal(vx, sort_pos::c1())), vx));
-        result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int_::int2nat(vx)));
-        result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int_::int2pos(vx)));
+        result.push_back(data_equation(make_vector(vx), real2nat(creal(vx, sort_pos::c1())), sort_int::int2nat(vx)));
+        result.push_back(data_equation(make_vector(vx), real2pos(creal(vx, sort_pos::c1())), sort_int::int2pos(vx)));
         result.push_back(data_equation(make_vector(vr, vs), minimum(vr, vs), if_(less(vr, vs), vr, vs)));
         result.push_back(data_equation(make_vector(vr, vs), maximum(vr, vs), if_(less(vr, vs), vs, vr)));
-        result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int_::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
+        result.push_back(data_equation(make_vector(vr), abs(vr), if_(less(vr, creal(sort_int::cint(sort_nat::c0()), sort_pos::c1())), negate(vr), vr)));
         result.push_back(data_equation(make_vector(vp, vx), negate(creal(vx, vp)), creal(negate(vx), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int_::cint(sort_nat::cnat(vp))), vp)));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp)))), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int_::cint(sort_nat::cnat(times(vp, vq))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int_::cint(sort_nat::cnat(vq))), times(vy, sort_int_::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int_::cint(vm), sort_int_::cint(vn))));
-        result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int_::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
-        result.push_back(data_equation(make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int_::cint(vn)), redfrac(exp(vx, vn), sort_int_::cint(sort_nat::cnat(exp(vp, vn))))));
-        result.push_back(data_equation(make_vector(vp, vq, vx), not_equal_to(vx, sort_int_::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int_::cneg(vq)), redfrac(sort_int_::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
-        result.push_back(data_equation(make_vector(vp, vx), floor(creal(vx, vp)), sort_int_::div(vx, vp)));
+        result.push_back(data_equation(make_vector(vp, vx), succ(creal(vx, vp)), creal(plus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(make_vector(vp, vx), pred(creal(vx, vp)), creal(minus(vx, sort_int::cint(sort_nat::cnat(vp))), vp)));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), plus(creal(vx, vp), creal(vy, vq)), redfrac(plus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), minus(creal(vx, vp), creal(vy, vq)), redfrac(minus(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp)))), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), times(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, vy), sort_int::cint(sort_nat::cnat(times(vp, vq))))));
+        result.push_back(data_equation(make_vector(vp, vq, vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(creal(vx, vp), creal(vy, vq)), redfrac(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
+        result.push_back(data_equation(make_vector(vp, vq), divides(vp, vq), redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vm, vn), not_equal_to(vm, sort_nat::c0()), divides(vm, vn), redfrac(sort_int::cint(vm), sort_int::cint(vn))));
+        result.push_back(data_equation(make_vector(vx, vy), not_equal_to(vy, sort_int::cint(sort_nat::c0())), divides(vx, vy), redfrac(vx, vy)));
+        result.push_back(data_equation(make_vector(vn, vp, vx), exp(creal(vx, vp), sort_int::cint(vn)), redfrac(exp(vx, vn), sort_int::cint(sort_nat::cnat(exp(vp, vn))))));
+        result.push_back(data_equation(make_vector(vp, vq, vx), not_equal_to(vx, sort_int::cint(sort_nat::c0())), exp(creal(vx, vp), sort_int::cneg(vq)), redfrac(sort_int::cint(sort_nat::cnat(exp(vp, sort_nat::cnat(vq)))), exp(vx, sort_nat::cnat(vq)))));
+        result.push_back(data_equation(make_vector(vp, vx), floor(creal(vx, vp)), sort_int::div(vx, vp)));
         result.push_back(data_equation(make_vector(vr), ceil(vr), negate(floor(negate(vr)))));
-        result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int_::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool_::false_(), sort_pos::c1()))))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int_::cneg(vp)), redfrac(negate(vx), sort_int_::cint(sort_nat::cnat(vp)))));
-        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int_::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int_::div(vx, vp), sort_int_::mod(vx, vp))));
+        result.push_back(data_equation(make_vector(vr), round(vr), floor(plus(vr, creal(sort_int::cint(sort_nat::cnat(sort_pos::c1())), sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
+        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cneg(vp)), redfrac(negate(vx), sort_int::cint(sort_nat::cnat(vp)))));
+        result.push_back(data_equation(make_vector(vp, vx), redfrac(vx, sort_int::cint(sort_nat::cnat(vp))), redfracwhr(vp, sort_int::div(vx, vp), sort_int::mod(vx, vp))));
         result.push_back(data_equation(make_vector(vp, vx), redfracwhr(vp, vx, sort_nat::c0()), creal(vx, sort_pos::c1())));
-        result.push_back(data_equation(make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int_::cint(sort_nat::cnat(vp)), sort_int_::cint(sort_nat::cnat(vq))), vx)));
-        result.push_back(data_equation(make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int_::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int_::int2pos(vx))));
+        result.push_back(data_equation(make_vector(vp, vq, vx), redfracwhr(vp, vx, sort_nat::cnat(vq)), redfrachlp(redfrac(sort_int::cint(sort_nat::cnat(vp)), sort_int::cint(sort_nat::cnat(vq))), vx)));
+        result.push_back(data_equation(make_vector(vp, vx, vy), redfrachlp(creal(vx, vp), vy), creal(plus(sort_int::cint(sort_nat::cnat(vp)), times(vy, vx)), sort_int::int2pos(vx))));
         return result;
       }
 
@@ -1854,13 +1854,13 @@ namespace mcrl2 {
       inline
       void add_real_to_specification(data_specification& specification)
       {
-         if (specification.constructors(sort_int_::int_()).empty())
+         if (specification.constructors(sort_int::int_()).empty())
          {
-           sort_int_::add_int_to_specification(specification);
+           sort_int::add_int_to_specification(specification);
          }
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {

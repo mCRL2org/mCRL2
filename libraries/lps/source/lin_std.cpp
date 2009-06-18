@@ -291,7 +291,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     process_expression delta_at_zero(void)
-    { return at(delta(), data::sort_real_::real_(0));
+    { return at(delta(), data::sort_real::real_(0));
     }
 
     bool isDeltaAtZero(const process_expression t)
@@ -301,7 +301,7 @@ class specification_basic_type:public boost::noncopyable
       if (!is_delta(at(t).operand()))
       { return false;
       }
-      return RewriteTerm(at(t).time_stamp())==data::sort_real_::real_(0);
+      return RewriteTerm(at(t).time_stamp())==data::sort_real::real_(0);
     }
 
 
@@ -563,7 +563,7 @@ class specification_basic_type:public boost::noncopyable
       if (is_if_then(t))
       { const data_expression new_cond=RewriteTerm(if_then(t).condition());
         const process_expression new_then_case=pCRLrewrite(if_then(t).then_case());
-        if (new_cond==sort_bool_::true_())
+        if (new_cond==sort_bool::true_())
         { return new_then_case;
         }
         return if_then(new_cond,new_then_case);
@@ -1471,10 +1471,10 @@ class specification_basic_type:public boost::noncopyable
       if (is_if_then(p))
       { // std::cerr << "SUBST PCRL " << pp(terms) << " --> " << pp(vars) << " IN " << pp(p) << "\n";
         data_expression condition=substitute_data(terms,vars,if_then(p).condition());
-        if (condition==sort_bool_::false_())
+        if (condition==sort_bool::false_())
         { return delta_at_zero();
         }
-        if (condition==sort_bool_::true_())
+        if (condition==sort_bool::true_())
         { return substitute_pCRLproc(terms,vars,if_then(p).then_case());
         }
         return if_then(condition,substitute_pCRLproc(terms,vars,if_then(p).then_case()));
@@ -1482,10 +1482,10 @@ class specification_basic_type:public boost::noncopyable
       if (is_if_then_else(p))
       {
         data_expression condition=substitute_data(terms,vars,if_then_else(p).condition());
-        if (condition==sort_bool_::false_())
+        if (condition==sort_bool::false_())
         { return substitute_pCRLproc(terms,vars,if_then_else(p).else_case());
         }
-        if (condition==sort_bool_::true_())
+        if (condition==sort_bool::true_())
         { return substitute_pCRLproc(terms,vars,if_then_else(p).then_case());
         }
         return if_then_else(
@@ -2509,7 +2509,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       if (is_if_then(body))
-      { data_expression timecondition=sort_bool_::true_();
+      { data_expression timecondition=sort_bool::true_();
         process_expression body1=distributeTime(
                            if_then(body).then_case(),
                            time,
@@ -2558,7 +2558,7 @@ class specification_basic_type:public boost::noncopyable
        GNF where one action is always followed by a
        variable. */
     { if (is_at(body))
-      { data_expression timecondition=sort_bool_::true_();
+      { data_expression timecondition=sort_bool::true_();
         process_expression body1=procstorealGNFbody(
                              at(body).operand(),
                              first,
@@ -3022,7 +3022,7 @@ class specification_basic_type:public boost::noncopyable
           if ((spec.options.binary) && (spec.options.newstate))
           { int i=spec.upperpowerof2(no_of_states);
             for( ; i>0 ; i--)
-            { variable name(spec.fresh_name("bst"),sort_bool_::bool_());
+            { variable name(spec.fresh_name("bst"),sort_bool::bool_());
               spec.insertvariable(name,true);
               booleanStateVariables=push_front(booleanStateVariables,name);
             }
@@ -3038,11 +3038,11 @@ class specification_basic_type:public boost::noncopyable
                 }
                 else
                 { /* Generate a stackvariable that is never used */
-                  stackvar=variable(spec.fresh_name("Never_used"), sort_bool_::bool_());
+                  stackvar=variable(spec.fresh_name("Never_used"), sort_bool::bool_());
                 }
               }
               else
-              { stackvar=variable(spec.fresh_name(s3),sort_bool_::bool_());
+              { stackvar=variable(spec.fresh_name(s3),sort_bool::bool_());
               }
             }
             else
@@ -3131,11 +3131,11 @@ class specification_basic_type:public boost::noncopyable
         int k=upperpowerof2(stack.no_of_states);
         for( ; k>0 ; k--)
         { if ((i % 2)==0)
-          { t=push_front(t,data_expression(sort_bool_::false_()));
+          { t=push_front(t,data_expression(sort_bool::false_()));
             i=i/2;
           }
           else
-          { t=push_front(t,data_expression(sort_bool_::true_()));
+          { t=push_front(t,data_expression(sort_bool::true_()));
             i=(i-1)/2;
           }
         }
@@ -3180,7 +3180,7 @@ class specification_basic_type:public boost::noncopyable
       const variable_list vars=stack.booleanStateVariables;
 
       i=i-1; /* start counting from 0, instead from 1 */
-      data_expression t3(sort_bool_::true_());
+      data_expression t3(sort_bool::true_());
       for(variable_list::const_iterator v=vars.begin(); v!=vars.end(); ++v)
       { if ((i % 2)==0)
         { t3=lazy::and_(lazy::not_(*v),t3);
@@ -3553,7 +3553,7 @@ class specification_basic_type:public boost::noncopyable
          Note also that a terminated term is indicated by taking procargs
          equal to NULL. */
 
-      if (condition!=sort_bool_::false_())
+      if (condition!=sort_bool::false_())
       { return push_front(sumlist,
                summand_(sumvars,condition,is_delta_summand,
                multiAction,has_time,actTime,
@@ -3599,7 +3599,7 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression condition1;
       if ((regular)&&(singlestate))
-      { condition1=sort_bool_::true_();
+      { condition1=sort_bool::true_();
       }
       else
       { condition1=correctstatecond(procId,pCRLprocs,stack,regular);
@@ -3818,9 +3818,9 @@ class specification_basic_type:public boost::noncopyable
           elementnames.protect();
           functions.protect();
           if (n==2)
-          { sortId = sort_bool_::bool_();
+          { sortId = sort_bool::bool_();
             elementnames = push_front(push_front(data_expression_list(),
-                                data_expression(sort_bool_::true_())),data_expression(sort_bool_::false_()));
+                                data_expression(sort_bool::true_())),data_expression(sort_bool::false_()));
           }
           else
           { //create new sort identifier
@@ -3968,7 +3968,7 @@ class specification_basic_type:public boost::noncopyable
       /* The function does not exist;
          Create a new function of enumeratedtype e, on sort */
 
-      if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool_::bool_())
+      if (enumeratedtypes[enumeratedtype_index].sortId==sort_bool::bool_())
       { /* take the if function on sort 'sort' */
         const function_symbol_list f=enumeratedtypes[enumeratedtype_index].functions;
         enumeratedtypes[enumeratedtype_index].functions=push_front(f,if_(sort));
@@ -4021,10 +4021,10 @@ class specification_basic_type:public boost::noncopyable
           { spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
           }
 
-          spec.create_case_function_on_enumeratedtype(sort_bool_::bool_(),enumeratedtype_index);
+          spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
 
           if (spec.timeIsBeingUsed)
-          { spec.create_case_function_on_enumeratedtype(sort_real_::real_(),enumeratedtype_index);
+          { spec.create_case_function_on_enumeratedtype(sort_real::real_(),enumeratedtype_index);
           }
         }
 
@@ -4125,7 +4125,7 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression transform_matching_list(const variable_list matchinglist)
     { if (matchinglist.empty())
-         return sort_bool_::true_();
+         return sort_bool::true_();
 
       const variable var=matchinglist.front();
       data_expression unique=representative_generator_internal(var.sort());
@@ -4214,7 +4214,7 @@ class specification_basic_type:public boost::noncopyable
                           const variable_list tail)
     { variable_list result;
       assert(n>1);
-      condition=sort_bool_::true_();
+      condition=sort_bool::true_();
 
       n=n-1;
       for(result=tail ; (n>0) ; n=n/2)
@@ -4395,28 +4395,28 @@ class specification_basic_type:public boost::noncopyable
       }
       if (options.binary)
       { resultcondition=construct_binary_case_tree(n,
-                    resultsum,auxresult,sort_bool_::bool_(),e);
+                    resultsum,auxresult,sort_bool::bool_(),e);
         resultcondition=lazy::and_(binarysumcondition,resultcondition);
         resultcondition=lazy::and_(
                        construct_binary_case_tree(n,
-                           resultsum,conditionlist,sort_bool_::bool_(),e),
+                           resultsum,conditionlist,sort_bool::bool_(),e),
                        resultcondition);
       }
       else
       { if (equaluptillnow)
         { resultcondition=lazy::and_(
                       application(
-                              find_case_function(e.enumeratedtype_index,sort_bool_::bool_()),
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                               push_front(conditionlist,data_expression(e.var))),
                       equalterm);
         }
         else
         { resultcondition=application(
-                         find_case_function(e.enumeratedtype_index,sort_bool_::bool_()),
+                         find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                          push_front(auxresult,data_expression(e.var)));
           resultcondition=lazy::and_(
                       application(
-                              find_case_function(e.enumeratedtype_index,sort_bool_::bool_()),
+                              find_case_function(e.enumeratedtype_index,sort_bool::bool_()),
                               push_front(conditionlist,data_expression(e.var))),
                       resultcondition);
         }
@@ -4531,7 +4531,7 @@ class specification_basic_type:public boost::noncopyable
       { variable dummy_time_variable;
         if (!all_summands_have_time)
         { // Generate a fresh dummy variable, and add it to the summand variables
-          dummy_time_variable=get_fresh_variable("dt",sort_real_::real_());
+          dummy_time_variable=get_fresh_variable("dt",sort_real::real_());
           resultsum=push_front(resultsum,dummy_time_variable);
         }
         auxrename_list_pars=rename_list_pars.begin();
@@ -4567,7 +4567,7 @@ class specification_basic_type:public boost::noncopyable
         }
         if (options.binary==1)
         { resulttime=construct_binary_case_tree(n,
-                      resultsum,auxresult,sort_real_::real_(),e);
+                      resultsum,auxresult,sort_real::real_(),e);
         }
         else
         {
@@ -4576,7 +4576,7 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           { resulttime=application(
-                           find_case_function(e.enumeratedtype_index,sort_real_::real_()),
+                           find_case_function(e.enumeratedtype_index,sort_real::real_()),
                            push_front(auxresult,data_expression(e.var)));
           }
         }
@@ -4797,7 +4797,7 @@ class specification_basic_type:public boost::noncopyable
            is time consuming in the linearisation, the use
            of this flag, can speed up linearisation considerably */
         sums=push_front(sums,
-                        summand_(variable_list(),sort_bool_::true_(),true,action_list(),
+                        summand_(variable_list(),sort_bool::true_(),true,action_list(),
                                  false,data_expression(),assignment_list()));
       }
 
@@ -4848,19 +4848,19 @@ class specification_basic_type:public boost::noncopyable
 
     bool implies_condition(const data_expression c1, const data_expression c2)
     {
-      if (c2==sort_bool_::true_())
+      if (c2==sort_bool::true_())
       { return true;
       }
 
-      if (c1==sort_bool_::false_())
+      if (c1==sort_bool::false_())
       { return true;
       }
 
-      if (c1==sort_bool_::true_())
+      if (c1==sort_bool::true_())
       { return false;
       }
 
-      if (c2==sort_bool_::false_())
+      if (c2==sort_bool::false_())
       { return false;
       }
 
@@ -4873,23 +4873,23 @@ class specification_basic_type:public boost::noncopyable
          || occur, and then the &&. This result was measured on the alternating
          bit protocol, with --regular. */
 
-      if (sort_bool_::is_and_application(c2))
+      if (sort_bool::is_and_application(c2))
       {
         return implies_condition(c1,application(c2).left()) &&
                implies_condition(c1,application(c2).right());
       }
 
-      if (sort_bool_::is_or_application(c1))
+      if (sort_bool::is_or_application(c1))
       { return implies_condition(application(c1).left(),c2) &&
                implies_condition(application(c1).right(),c2);
       }
 
-      if (sort_bool_::is_and_application(c1))
+      if (sort_bool::is_and_application(c1))
       { return implies_condition(application(c1).left(),c2) ||
                implies_condition(application(c1).right(),c2);
       }
 
-      if (sort_bool_::is_or_application(c2))
+      if (sort_bool::is_or_application(c2))
       { return implies_condition(c1,application(c2).left()) ||
                implies_condition(c1,application(c2).right());
       }
@@ -5081,7 +5081,7 @@ class specification_basic_type:public boost::noncopyable
           }
           else
           { // summand has no time.
-            if (condition==sort_bool_::true_())
+            if (condition==sort_bool::true_())
             { resultsimpledeltasumlist=push_front(
                           resultsimpledeltasumlist,
                             summand(
@@ -5126,7 +5126,7 @@ class specification_basic_type:public boost::noncopyable
         else
         { // Add a true -> delta
           resultsumlist=push_front(resultsumlist,
-                 summand(variable_list(),sort_bool_::true_(),true,action_list(),assignment_list()));
+                 summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
         }
       }
       if ((core::gsVerbose) && (sourcesumlist_length>2 || is_allow))
@@ -5309,25 +5309,25 @@ class specification_basic_type:public boost::noncopyable
     {
       if (l1.empty())
       { if (l2.empty())
-        { return sort_bool_::true_();
+        { return sort_bool::true_();
         }
-        return sort_bool_::false_();
+        return sort_bool::false_();
       }
 
       if (l2.empty())
-      { return sort_bool_::false_();
+      { return sort_bool::false_();
       }
 
       const data_expression t1=l1.front();
       const data_expression t2=l2.front();
 
       if (t1.sort()!=t2.sort())
-      { return sort_bool_::false_();
+      { return sort_bool::false_();
       }
 
       data_expression result=pairwiseMatch(pop_front(l1),pop_front(l2));
 
-      if (result==sort_bool_::false_())
+      if (result==sort_bool::false_())
       { return result;
       }
 
@@ -5589,7 +5589,7 @@ class specification_basic_type:public boost::noncopyable
         { const tuple_list T=makeMultiActionConditionList_aux(w,comm_table,r,r_is_null);
           return addActionCondition(
                        (c==action_label()?action():action(c,d)),  //Check. Nil kan niet geleverd worden.
-                       sort_bool_::true_(),
+                       sort_bool::true_(),
                        T,
                        tuple_list());
         }
@@ -5634,7 +5634,7 @@ class specification_basic_type:public boost::noncopyable
 
     data_expression psi(const action_list alpha_in, comm_entry &comm_table)
     { action_list alpha=reverse(alpha_in);
-      data_expression cond = sort_bool_::false_();
+      data_expression cond = sort_bool::false_();
       while ( !alpha.empty() )
       {
         const action a = alpha.front();
@@ -5665,7 +5665,7 @@ class specification_basic_type:public boost::noncopyable
          Communication with open terms [1]. */
       if (multiaction.empty())
       { tuple_list t;
-        t.conditions.push_back((r_is_null)?sort_bool_::true_():static_cast< data_expression const& >(psi(r,comm_table)));
+        t.conditions.push_back((r_is_null)?sort_bool::true_():static_cast< data_expression const& >(psi(r,comm_table)));
         t.actions.push_back(action_list());
         return t;
       }
@@ -5681,7 +5681,7 @@ class specification_basic_type:public boost::noncopyable
       const tuple_list T=makeMultiActionConditionList_aux(
                       remainingmultiaction,comm_table,
                       (r_is_null)?push_front(action_list(),firstaction):push_front(r,firstaction),false);
-      return addActionCondition(firstaction,sort_bool_::true_(),T,S);
+      return addActionCondition(firstaction,sort_bool::true_(),T,S);
     }
 
     tuple_list makeMultiActionConditionList(
@@ -5791,7 +5791,7 @@ class specification_basic_type:public boost::noncopyable
               new_summand = action_summand_to_aterm(act_summand);
             }
 
-            if (newcondition!=sort_bool_::false_())
+            if (newcondition!=sort_bool::false_())
             { resultsumlist=push_front(resultsumlist,new_summand);
             }
           }
@@ -5830,7 +5830,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      if (sort_real_::is_plus_application(actiontime))
+      if (sort_real::is_plus_application(actiontime))
       { return (check_real_variable_occurrence(sumvars,application(actiontime).left(),condition) ||
                 check_real_variable_occurrence(sumvars,application(actiontime).right(),condition));
       }
@@ -5928,9 +5928,9 @@ class specification_basic_type:public boost::noncopyable
         const summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
 
-        if ((!walker->has_time()) && (condition==sort_bool_::true_()))
+        if ((!walker->has_time()) && (condition==sort_bool::true_()))
         {
-          return sort_bool_::true_();
+          return sort_bool::true_();
         }
 
       }
@@ -5939,7 +5939,7 @@ class specification_basic_type:public boost::noncopyable
          be generated. So, we must now traverse all conditions
          to generate a non trivial ultimate delay condition */
 
-      data_expression  result=sort_bool_::false_();
+      data_expression  result=sort_bool::false_();
       for (summand_list::const_iterator walker=sumlist.begin();
                       walker!=sumlist.end(); ++walker)
       { const summand smmnd=*walker;
@@ -6053,10 +6053,10 @@ class specification_basic_type:public boost::noncopyable
 
       /* first we enumerate the summands of t1 */
 
-      variable timevar=get_fresh_variable("timevar",sort_real_::real_());
+      variable timevar=get_fresh_variable("timevar",sort_real::real_());
       variable_list ultimate_delay_sumvars1;
       data_expression ultimatedelaycondition=
-                 (options.add_delta?sort_bool_::true_():
+                 (options.add_delta?sort_bool::true_():
                        static_cast< data_expression const& >(getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
                                                       timevar,ultimate_delay_sumvars1)));
 
@@ -6073,7 +6073,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction1!=push_front(action_list(),terminationAction))
         {
           if (!summand1.has_time())
-          { if (ultimatedelaycondition!=sort_bool_::true_())
+          { if (ultimatedelaycondition!=sort_bool::true_())
             { actiontime1=timevar;
               sumvars1=push_front(sumvars1,timevar);
               condition1=lazy::and_(ultimatedelaycondition,condition1);
@@ -6091,7 +6091,7 @@ class specification_basic_type:public boost::noncopyable
           }
 
           condition1=RewriteTerm(condition1);
-          if (condition1!=sort_bool_::false_())
+          if (condition1!=sort_bool::false_())
           { resultsumlist=
               push_front(
                 resultsumlist,
@@ -6109,7 +6109,7 @@ class specification_basic_type:public boost::noncopyable
       /* second we enumerate the summands of sumlist2 */
 
       variable_list ultimate_delay_sumvars2;
-      ultimatedelaycondition=(options.add_delta?sort_bool_::true_():
+      ultimatedelaycondition=(options.add_delta?sort_bool::true_():
                    static_cast< data_expression const& >(getUltimateDelayCondition(sumlist1,par1,
                                          timevar,ultimate_delay_sumvars2)));
 
@@ -6126,7 +6126,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction2!=push_front(action_list(),terminationAction))
         {
           if (!summand2.has_time())
-          { if (ultimatedelaycondition!=sort_bool_::true_())
+          { if (ultimatedelaycondition!=sort_bool::true_())
             { actiontime2=data_expression(timevar);
               sumvars2=push_front(sumvars2,timevar);
               condition2=lazy::and_(ultimatedelaycondition,condition2);
@@ -6144,7 +6144,7 @@ class specification_basic_type:public boost::noncopyable
           }
 
           condition2=RewriteTerm(condition2);
-          if (condition2!=sort_bool_::false_())
+          if (condition2!=sort_bool::false_())
           {
             resultsumlist=
               push_front(
@@ -6230,7 +6230,7 @@ class specification_basic_type:public boost::noncopyable
             const assignment_list nextstate3=nextstate1+nextstate2;
 
             condition3=RewriteTerm(condition3);
-            if ((condition3!=sort_bool_::false_()) && (!is_delta3))
+            if ((condition3!=sort_bool::false_()) && (!is_delta3))
             { resultsumlist=
                 push_front(
                   resultsumlist,

@@ -43,8 +43,8 @@ void test_case_1()
   int bool_param_count = 0;
   for (variable_list::iterator i = parameters1.begin(); i != parameters1.end(); ++i)
   {
-    BOOST_CHECK(i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }
@@ -79,8 +79,8 @@ void test_case_2()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }
@@ -115,8 +115,8 @@ void test_case_3()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }
@@ -150,8 +150,8 @@ void test_case_4()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_pos::pos() || i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_pos::pos() || i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }
@@ -186,8 +186,8 @@ void test_case_5()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }
@@ -225,8 +225,8 @@ void test_case_6()
        i != s1.process().process_parameters().end();
        ++i)
   {
-    BOOST_CHECK(i->sort() == sort_bool_::bool_());
-    if (i->sort() == sort_bool_::bool_())
+    BOOST_CHECK(i->sort() == sort_bool::bool_());
+    if (i->sort() == sort_bool::bool_())
     {
       ++bool_param_count;
     }

@@ -190,7 +190,7 @@ void empty_test() {
 
   variables.insert(variable("y", sort_nat::nat()));
 
-  for (enumerator_type i(specification, variables, evaluator, sort_bool_::false_()); i != enumerator_type(); ++i) {
+  for (enumerator_type i(specification, variables, evaluator, sort_bool::false_()); i != enumerator_type(); ++i) {
     BOOST_CHECK(false);
   }
 }

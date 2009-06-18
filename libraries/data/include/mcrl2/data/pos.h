@@ -107,7 +107,7 @@ namespace mcrl2 {
       inline
       function_symbol const& cdub()
       {
-        static function_symbol cdub = data::detail::initialise_static_expression(cdub, function_symbol(cdub_name(), function_sort(sort_bool_::bool_(), pos(), pos())));
+        static function_symbol cdub = data::detail::initialise_static_expression(cdub, function_symbol(cdub_name(), function_sort(sort_bool::bool_(), pos(), pos())));
         return cdub;
       }
 
@@ -452,7 +452,7 @@ namespace mcrl2 {
       inline
       function_symbol const& add_with_carry()
       {
-        static function_symbol add_with_carry = data::detail::initialise_static_expression(add_with_carry, function_symbol(add_with_carry_name(), function_sort(sort_bool_::bool_(), pos(), pos(), pos())));
+        static function_symbol add_with_carry = data::detail::initialise_static_expression(add_with_carry, function_symbol(add_with_carry_name(), function_sort(sort_bool::bool_(), pos(), pos(), pos())));
         return add_with_carry;
       }
 
@@ -565,7 +565,7 @@ namespace mcrl2 {
       inline
       function_symbol const& multir()
       {
-        static function_symbol multir = data::detail::initialise_static_expression(multir, function_symbol(multir_name(), function_sort(sort_bool_::bool_(), pos(), pos(), pos(), pos())));
+        static function_symbol multir = data::detail::initialise_static_expression(multir, function_symbol(multir_name(), function_sort(sort_bool::bool_(), pos(), pos(), pos(), pos())));
         return multir;
       }
 
@@ -738,52 +738,52 @@ namespace mcrl2 {
       inline
       data_equation_vector pos_generate_equations_code()
       {
-        variable vb("b",sort_bool_::bool_());
-        variable vc("c",sort_bool_::bool_());
+        variable vb("b",sort_bool::bool_());
+        variable vc("c",sort_bool::bool_());
         variable vp("p",pos());
         variable vq("q",pos());
         variable vr("r",pos());
 
         data_equation_vector result;
-        result.push_back(data_equation(make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vb, vp), equal_to(cdub(vb, vp), c1()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vb, vp), equal_to(c1(), cdub(vb, vp)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vb, vp), equal_to(cdub(vb, vp), c1()), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vp, vq), equal_to(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(make_vector(vb, vp, vq), equal_to(cdub(vb, vp), cdub(vb, vq)), equal_to(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool_::and_(equal_to(vb, vc), equal_to(vp, vq))));
-        result.push_back(data_equation(make_vector(vp), less(vp, c1()), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
+        result.push_back(data_equation(make_vector(vp), less(vp, c1()), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool::true_()));
         result.push_back(data_equation(make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vp, vq), less(cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), less_equal(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vc, vp, vq), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
-        result.push_back(data_equation(make_vector(vp), less_equal(c1(), vp), sort_bool_::true_()));
-        result.push_back(data_equation(make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vp, vq), less(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vc, vp, vq), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
+        result.push_back(data_equation(make_vector(vp), less_equal(c1(), vp), sort_bool::true_()));
+        result.push_back(data_equation(make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool::false_()));
         result.push_back(data_equation(make_vector(vb, vp, vq), less_equal(cdub(vb, vp), cdub(vb, vq)), less_equal(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq), less_equal(cdub(sort_bool_::false_(), vp), cdub(vb, vq)), less_equal(vp, vq)));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vc, vp, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool_::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vp, vq), less_equal(cdub(sort_bool::false_(), vp), cdub(vb, vq)), less_equal(vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), less_equal(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vc, vp, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
         result.push_back(data_equation(make_vector(vp, vq), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(make_vector(vp, vq), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
         result.push_back(data_equation(make_vector(vp), abs(vp), vp));
-        result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool_::false_(), c1())));
-        result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool_::false_(), vp)), cdub(sort_bool_::true_(), vp)));
-        result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool_::true_(), vp)), cdub(sort_bool_::false_(), succ(vp))));
-        result.push_back(data_equation(make_vector(vp, vq), plus(vp, vq), add_with_carry(sort_bool_::false_(), vp, vq)));
-        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::false_(), c1(), vp), succ(vp)));
-        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::true_(), c1(), vp), succ(succ(vp))));
-        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::false_(), vp, c1()), succ(vp)));
-        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool_::true_(), vp, c1()), succ(succ(vp))));
+        result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool::false_(), c1())));
+        result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool::false_(), vp)), cdub(sort_bool::true_(), vp)));
+        result.push_back(data_equation(make_vector(vp), succ(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), succ(vp))));
+        result.push_back(data_equation(make_vector(vp, vq), plus(vp, vq), add_with_carry(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool::false_(), c1(), vp), succ(vp)));
+        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool::true_(), c1(), vp), succ(succ(vp))));
+        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool::false_(), vp, c1()), succ(vp)));
+        result.push_back(data_equation(make_vector(vp), add_with_carry(sort_bool::true_(), vp, c1()), succ(succ(vp))));
         result.push_back(data_equation(make_vector(vb, vc, vp, vq), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
-        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool_::false_(), vp), cdub(sort_bool_::true_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool_::true_(), vp), cdub(sort_bool_::false_(), vq)), cdub(sort_bool_::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), times(vp, vq), multir(sort_bool_::false_(), c1(), vp, vq)));
-        result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), times(vp, vq), multir(sort_bool_::false_(), c1(), vq, vp)));
-        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool_::false_(), vp, c1(), vq), vq));
-        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool_::true_(), vp, c1(), vq), add_with_carry(sort_bool_::false_(), vp, vq)));
-        result.push_back(data_equation(make_vector(vb, vp, vq, vr), multir(vb, vp, cdub(sort_bool_::false_(), vq), vr), multir(vb, vp, vq, cdub(sort_bool_::false_(), vr))));
-        result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool_::false_(), vp, cdub(sort_bool_::true_(), vq), vr), multir(sort_bool_::true_(), vr, vq, cdub(sort_bool_::false_(), vr))));
-        result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool_::true_(), vp, cdub(sort_bool_::true_(), vq), vr), multir(sort_bool_::true_(), add_with_carry(sort_bool_::false_(), vp, vr), vq, cdub(sort_bool_::false_(), vr))));
+        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vq), less_equal(vp, vq), times(vp, vq), multir(sort_bool::false_(), c1(), vp, vq)));
+        result.push_back(data_equation(make_vector(vp, vq), less(vq, vp), times(vp, vq), multir(sort_bool::false_(), c1(), vq, vp)));
+        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool::false_(), vp, c1(), vq), vq));
+        result.push_back(data_equation(make_vector(vp, vq), multir(sort_bool::true_(), vp, c1(), vq), add_with_carry(sort_bool::false_(), vp, vq)));
+        result.push_back(data_equation(make_vector(vb, vp, vq, vr), multir(vb, vp, cdub(sort_bool::false_(), vq), vr), multir(vb, vp, vq, cdub(sort_bool::false_(), vr))));
+        result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool::false_(), vp, cdub(sort_bool::true_(), vq), vr), multir(sort_bool::true_(), vr, vq, cdub(sort_bool::false_(), vr))));
+        result.push_back(data_equation(make_vector(vp, vq, vr), multir(sort_bool::true_(), vp, cdub(sort_bool::true_(), vq), vr), multir(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, vr), vq, cdub(sort_bool::false_(), vr))));
         return result;
       }
 
@@ -792,9 +792,9 @@ namespace mcrl2 {
       inline
       void add_pos_to_specification(data_specification& specification)
       {
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          specification.add_system_defined_sort(pos());
          specification.add_system_defined_constructors(pos_generate_constructors_code());

@@ -72,7 +72,7 @@ atermpp::vector<pbes_equation> operator+(const atermpp::vector<pbes_equation>& p
 /// \cond INTERNAL_DOCS
 namespace detail {
 
-	/// \brief Negates a propositional variable
+  /// \brief Negates a propositional variable
   struct propositional_variable_negator
   {
     const propositional_variable& v_;
@@ -419,7 +419,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             data::data_expression ck(i->condition());
             data::data_expression tk(i->time());
             data::variable_list yk = i->summation_variables();
-            pbes_expression p = pbes_expr::exists(yk, and_(data::sort_bool_::not_(ck), d::greater(t, tk)));
+            pbes_expression p = pbes_expr::exists(yk, and_(data::sort_bool::not_(ck), d::greater(t, tk)));
             v.push_back(p);
           }
           result = and_(join_or(v.begin(), v.end()), d::greater(t, T));
@@ -441,7 +441,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       {
         f = s::arg(f);
         if (s::is_data(f)) {
-          result = pbes_expression(data::sort_bool_::not_(f));
+          result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
           result = false_();
         } else if (s::is_false(f)) {
@@ -631,7 +631,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       modal_formula::state_formula f = preprocess_formula(formula, spec);
 
       // make sure the lps is timed
-      data::variable T = fresh_variable(make_list(f, lps::linear_process_to_aterm(lps)), data::sort_real_::real_(), "T");
+      data::variable T = fresh_variable(make_list(f, lps::linear_process_to_aterm(lps)), data::sort_real::real_(), "T");
       atermpp::aterm_list context = make_list(T, spec.initial_process(), lps::linear_process_to_aterm(lps), f);
       lps = lps::detail::make_timed_lps(lps, context);
 
@@ -646,11 +646,11 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       core::identifier_string Xf = name(f);
       data::data_expression_list fi = detail::mu_expressions(f);
       data::data_expression_list pi = spec.initial_process().state();
-      propositional_variable_instantiation init(Xe, data::sort_real_::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
+      propositional_variable_instantiation init(Xe, data::sort_real::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
 
       // add sort real to data_spec (if needed)
       data::data_specification data_spec(spec.data());
-      data_spec.add_sort(data::sort_real_::real_());
+      data_spec.add_sort(data::sort_real::real_());
 
       pbes<> result(data_spec, e, free_variables(spec), init);
       result.normalize();
@@ -746,7 +746,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
 
       pbes_expression result;
 
-	  if (!s::is_not(f))
+    if (!s::is_not(f))
       {
         if (s::is_data(f)) {
           result = pbes_expression(f);
@@ -847,7 +847,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       {
         f = s::arg(f);
         if (s::is_data(f)) {
-          result = pbes_expression(data::sort_bool_::not_(f));
+          result = pbes_expression(data::sort_bool::not_(f));
         } else if (s::is_true(f)) {
           result = false_();
         } else if (s::is_false(f)) {

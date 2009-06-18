@@ -63,7 +63,7 @@ pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-/// print a term (pretty print + ascii representation) 
+/// print a term (pretty print + ascii representation)
 template <typename Term>
 std::string ppp(Term t)
 {
@@ -254,14 +254,14 @@ void test_enumerate_quantifiers_rewriter_finite()
   var_decl =
     "datavar          \n"
     "  m: Nat;        \n"
-    "  q: List(Nat);  \n"       
+    "  q: List(Nat);  \n"
     "                 \n"
     "predvar          \n"
     "  X: Nat, List(Nat), Nat;\n"
     ;
   expr1 = "forall k: Nat. val(!(k < m)) || X(m, q, q . (k mod 4))";
-  expr2 = "forall k: Nat. val(!(k < m)) || X(m, q, q . (k mod 4))";  
-  sigma = "";                                                           
+  expr2 = "forall k: Nat. val(!(k < m)) || X(m, q, q . (k mod 4))";
+  sigma = "";
   test_expressions(R, expr1, S, expr2, var_decl, sigma);
 }
 
@@ -295,7 +295,7 @@ template <typename PbesRewriter>
 void test_map_substitution_adapter(PbesRewriter r)
 {
   atermpp::map<data::variable, data::data_expression_with_variables> sigma;
-  pbes_system::pbes_expression x = data::sort_bool_::true_();
+  pbes_system::pbes_expression x = data::sort_bool::true_();
   pbes_system::pbes_expression y = r(x, data::make_map_substitution_adapter(sigma));
 }
 
@@ -323,8 +323,8 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Pos;       \n"
     ;
-	expr1 = "X(m+n)";
-	expr2 = "X(7)";
+  expr1 = "X(m+n)";
+  expr2 = "X(7)";
   sigma = "m: Pos := 3; n: Pos := 4";
   test_expressions(R, expr1, expr2, var_decl, sigma);
 
@@ -336,8 +336,8 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Bool, Nat; \n"
     ;
-	expr1 = "forall c: Bool. X(c, n)";
-	expr2 = "X(true, 0) && X(false, 0)";
+  expr1 = "forall c: Bool. X(c, n)";
+  expr2 = "X(true, 0) && X(false, 0)";
   sigma = "b: Bool := true; n: Nat := 0";
   test_expressions(R, expr1, expr2, var_decl, sigma);
 
@@ -347,8 +347,8 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Nat;       \n"
     ;
-	expr1 = "exists b: Bool, c: Bool. val(b && c)";
-	expr2 = "val(true)";
+  expr1 = "exists b: Bool, c: Bool. val(b && c)";
+  expr2 = "val(true)";
   sigma = "";
   test_expressions(R, expr1, expr2, var_decl, sigma);
 
@@ -358,8 +358,8 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Nat;       \n"
     ;
-	expr1 = "exists b: Bool.exists c:Bool. val(b && c)";
-	expr2 = "val(true)";
+  expr1 = "exists b: Bool.exists c:Bool. val(b && c)";
+  expr2 = "val(true)";
   sigma = "";
   test_expressions(R, expr1, expr2, var_decl, sigma);
 
@@ -370,11 +370,11 @@ void test_substitutions2()
     "predvar         \n"
     "  X: Nat;       \n"
     ;
-	expr1 = "!!val(!!b)";
-	expr2 = "val(true)";
+  expr1 = "!!val(!!b)";
+  expr2 = "val(true)";
   sigma = "b:Bool := true";
   test_expressions(R, expr1, expr2, var_decl, sigma);
- 
+
   test_map_substitution_adapter(R);
 }
 
@@ -455,7 +455,7 @@ void test_substitutions3()
 void test_pfnf_rewriter()
 {
   using namespace pbes_system;
-                                 
+
   pfnf_rewriter<pbes_expression> R;
   pbes_expression x = expr("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)");
   pbes_expression y = R(x);

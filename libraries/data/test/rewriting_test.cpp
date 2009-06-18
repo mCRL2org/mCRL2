@@ -60,7 +60,7 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
 }
 
 void bool_rewrite_test() {
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   data_specification specification;
 
@@ -170,13 +170,13 @@ void nat_rewrite_test() {
   // Added a few additional checks (Wieger)
   data::rewriter datar(specification);
   data::data_expression x = data::parse_data_expression("n >= 0", "n:Nat;");
-  BOOST_CHECK(datar(x) == sort_bool_::true_());
+  BOOST_CHECK(datar(x) == sort_bool::true_());
   variable n("n", nat());
-  data_rewrite_test(R, greater_equal(n, p0), sort_bool_::true_());
+  data_rewrite_test(R, greater_equal(n, p0), sort_bool::true_());
 }
 
 void int_rewrite_test() {
-  using namespace mcrl2::data::sort_int_;
+  using namespace mcrl2::data::sort_int;
 
   data_specification specification;
 
@@ -234,7 +234,7 @@ void int_rewrite_test() {
 }
 
 void real_rewrite_test() {
-  using namespace mcrl2::data::sort_real_;
+  using namespace mcrl2::data::sort_real;
 
   data_specification specification;
 
@@ -294,7 +294,7 @@ void real_rewrite_test() {
 }
 
 void list_rewrite_test() {
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
   using namespace mcrl2::data::sort_list;
 
   data_specification specification;
@@ -320,10 +320,10 @@ void list_rewrite_test() {
 }
 
 void set_rewrite_test() {
-  using namespace mcrl2::data::sort_set_;
+  using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_nat;
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   data_specification specification = parse_data_specification(
     "sort A = Set(Nat);"
@@ -333,7 +333,7 @@ void set_rewrite_test() {
 
   data::rewriter R(specification);
 
-  sort_expression set_nat(sort_set_::set_(nat()));
+  sort_expression set_nat(sort_set::set_(nat()));
 
   data_expression empty(R(emptyset(nat())));
 
@@ -368,7 +368,7 @@ void bag_rewrite_test() {
   using namespace mcrl2::data::sort_fbag;
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_pos;
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   data_specification specification = parse_data_specification(
     "sort A = Bag(Nat);"
@@ -411,7 +411,7 @@ void bag_rewrite_test() {
 }
 
 void structured_sort_rewrite_test() {
-  using namespace sort_bool_;
+  using namespace sort_bool;
   using namespace sort_nat;
 
   data_specification specification;

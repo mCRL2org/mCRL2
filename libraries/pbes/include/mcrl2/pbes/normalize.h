@@ -74,7 +74,7 @@ pbes_expression normalize(pbes_expression f)
   {
     f = arg(f); // remove the not
     if (is_data(f)) {
-      return data::sort_bool_::not_(f);
+      return data::sort_bool::not_(f);
     } else if (is_pbes_true(f)) {
       return false_();
     } else if (is_pbes_false(f)) {

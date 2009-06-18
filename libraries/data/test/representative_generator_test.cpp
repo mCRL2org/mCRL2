@@ -33,7 +33,7 @@ void test_representative_generator()
   data_specification specification;
 
   specification.import_system_defined_sort(sort_nat::nat());
-  specification.import_system_defined_sort(sort_list::list(sort_bool_::bool_()));
+  specification.import_system_defined_sort(sort_list::list(sort_bool::bool_()));
 
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
   arguments.push_back(structured_sort_constructor_argument(basic_sort("E"), "s"));
@@ -52,14 +52,14 @@ void test_representative_generator()
   BOOST_CHECK(default_expression_generator(structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
 
   // Should be true or false, since constants are preferred to other constructors or mappings
-  BOOST_CHECK(default_expression_generator(sort_bool_::bool_()) == sort_bool_::true_() ||
-              default_expression_generator(sort_bool_::bool_()) == sort_bool_::false_());
+  BOOST_CHECK(default_expression_generator(sort_bool::bool_()) == sort_bool::true_() ||
+              default_expression_generator(sort_bool::bool_()) == sort_bool::false_());
 
   // Should be c0, since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(sort_nat::nat()) == sort_nat::c0());
 
   // Should be nil, since constants are preferred to other constructors or mappings
-  BOOST_CHECK(default_expression_generator(sort_list::list(sort_bool_::bool_())) == sort_list::nil(sort_bool_::bool_()));
+  BOOST_CHECK(default_expression_generator(sort_list::list(sort_bool::bool_())) == sort_list::nil(sort_bool::bool_()));
 
   // Should be e(0), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==

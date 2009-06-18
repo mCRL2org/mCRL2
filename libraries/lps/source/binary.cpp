@@ -157,7 +157,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
   {
     variable par = *i;
 
-    if (!sort_bool_::is_bool_(par) && specification.data().is_certainly_finite(par.sort()))
+    if (!sort_bool::is_bool(par) && specification.data().is_certainly_finite(par.sort()))
     {
       //Get all constructors for par
       variable_list new_pars; // List to store new parameters
@@ -182,7 +182,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
       //Create new parameters and add them to the parameter list.
       for (int i = 0; i<n; ++i)
       {
-        new_pars = push_front(new_pars, generator(sort_bool_::bool_()));
+        new_pars = push_front(new_pars, generator(sort_bool::bool_()));
       }
       // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
 
@@ -268,7 +268,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
   // Iterate over the parameters, i.e. the bools in which we encode
   for (int i = new_parameters.size(); i > 0; --i)
   {
-    data_expression r = sort_bool_::false_(); // We make a big || expression, so start with unit false
+    data_expression r = sort_bool::false_(); // We make a big || expression, so start with unit false
     data_expression_list elts = enumerated_elements; // Copy the enumerated elements, as these are needed for each iteration.
 
     // Make sure all elements get encoded.

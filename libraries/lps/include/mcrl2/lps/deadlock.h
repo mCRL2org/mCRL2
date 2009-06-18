@@ -27,7 +27,7 @@ namespace lps {
   {
     friend class deadlock_summand;
     friend struct atermpp::aterm_traits<deadlock>;
-    
+
     protected:
       /// \brief The time of the deadlock. If <tt>m_time == data::data_expression()</tt>
       /// the multi action has no time.
@@ -38,7 +38,7 @@ namespace lps {
       {
         m_time.protect();
       }
-      
+
       /// \brief Unprotect the term.
       /// Releases protection of the term which has previously been protected through a
       /// call to protect.
@@ -46,7 +46,7 @@ namespace lps {
       {
         m_time.unprotect();
       }
-      
+
       /// \brief Mark the term for not being garbage collected.
       void mark()
       {
@@ -119,7 +119,7 @@ namespace lps {
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // check 1)
-      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
+      if (has_time() && !data::sort_real::is_real(m_time.sort()))
       {
         std::cerr << "deadlock_summand::is_well_typed() failed: time " << mcrl2::data::pp(m_time) << " doesn't have type real." << std::endl;
         return false;

@@ -297,13 +297,13 @@ void test_equal_multi_actions()
   action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
   action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
 
-  test_multi_actions( a1,  a1, d::sort_bool_::true_());
+  test_multi_actions( a1,  a1, d::sort_bool::true_());
   test_multi_actions( a1,  a2, d::equal_to(d1, d2));
-  test_multi_actions(a11, a11, d::sort_bool_::true_());
-  test_multi_actions(a12, a21, d::sort_bool_::true_());
+  test_multi_actions(a11, a11, d::sort_bool::true_());
+  test_multi_actions(a12, a21, d::sort_bool::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));
-  test_multi_actions(a1, a12,  d::sort_bool_::false_());
-  test_multi_actions(a1, b1,   d::sort_bool_::false_());
+  test_multi_actions(a1, a12,  d::sort_bool::false_());
+  test_multi_actions(a1, b1,   d::sort_bool::false_());
   test_multi_actions(a12, a34);
   test_multi_actions(a12b1, a34b2);
 }

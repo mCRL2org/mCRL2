@@ -19,7 +19,7 @@
 
 using namespace mcrl2;
 using namespace mcrl2::data;
-using namespace mcrl2::data::sort_bool_;
+using namespace mcrl2::data::sort_bool;
 
 void bool_sort_test()
 {

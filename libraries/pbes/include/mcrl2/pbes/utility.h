@@ -550,11 +550,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     { assert(0);  // Treating the internal format separately is obsolete.
       /* atermpp::term_list< data::data_expression > expressions(r.rewriteInternalList(
         atermpp::term_list< data::data_expression >(current_parameters.begin(), current_parameters.end())));
-        parameters=data::data_expression_list(expressions.begin(), expressions.end()); 
+        parameters=data::data_expression_list(expressions.begin(), expressions.end());
       */
     }
     else
-    { 
+    {
       for( data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
@@ -590,10 +590,10 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       data::data_expression d(r(p,sigma));
       // std::cerr << "REWRITE DATA EXPR: " << pp(p) << " ==> " << pp(d) << "\n";
       // ATfprintf(stderr,"FORMAT: %t\n",(ATermAppl)(d));
-      if (d == data::sort_bool_::true_())
+      if (d == data::sort_bool::true_())
       { result = pbes_expr::true_();
       }
-      else if (d == data::sort_bool_::false_())
+      else if (d == data::sort_bool::false_())
       { result = pbes_expr::false_();
       }
       else

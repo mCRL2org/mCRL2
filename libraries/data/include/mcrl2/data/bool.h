@@ -29,7 +29,7 @@ namespace mcrl2 {
   namespace data {
 
     /// \brief Namespace for system defined sort bool_
-    namespace sort_bool_ {
+    namespace sort_bool {
 
       inline
       core::identifier_string const& bool_name()
@@ -51,7 +51,7 @@ namespace mcrl2 {
       /// \param e A sort expression
       /// \return true iff e == bool_()
       inline
-      bool is_bool_(const sort_expression& e)
+      bool is_bool(const sort_expression& e)
       {
         if (e.is_basic_sort())
         {

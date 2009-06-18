@@ -34,7 +34,7 @@ lps::specification remove_deltas(const lps::specification& spec) {
   }
 
   lps::summand delta_summand = summand(variable_list(),
-                                       sort_bool_::true_(),
+                                       sort_bool::true_(),
                                        true,
                                        action_list(),
                                        assignment_list()
@@ -58,12 +58,12 @@ lps::specification remove_deltas(const lps::specification& spec) {
 
 static
 mcrl2::data::data_expression calculate_time_invariant(
-                   const lps::specification& spec, 
-                   const mcrl2::data::variable &last_action_time) 
+                   const lps::specification& spec,
+                   const mcrl2::data::variable &last_action_time)
 {
   const data::variable_list parameters=spec.process().process_parameters();
   const data::data_expression_list initial_values =spec.initial_process().state();
-  const data::data_expression real_zero= sort_real_::real_(0);
+  const data::data_expression real_zero= sort_real::real_(0);
 
   // The vector below contains exactly one boolean for each parameter. As long as the value
   // for the elements in the vector is true, it is a candidate time variable.
@@ -101,7 +101,7 @@ mcrl2::data::data_expression calculate_time_invariant(
     }
   }
 
-  mcrl2::data::data_expression time_invariant(sort_bool_::true_());
+  mcrl2::data::data_expression time_invariant(sort_bool::true_());
   j=time_variable_candidates.begin();
   for( data::variable_list::const_iterator k=parameters.begin();
               k!=parameters.end() ; ++j, ++k)
@@ -145,8 +145,8 @@ lps::specification untime(const lps::specification& spec) {
 
   // Create extra parameter last_action_time and add it to the list of process parameters,
   // last_action_time is used later on in the code
-  last_action_time = fresh_variable(lps::specification_to_aterm(spec), mcrl2::data::sort_real_::real_(), "last_action_time");
-  data::data_expression time_invariant=calculate_time_invariant(spec,last_action_time); 
+  last_action_time = fresh_variable(lps::specification_to_aterm(spec), mcrl2::data::sort_real::real_(), "last_action_time");
+  data::data_expression time_invariant=calculate_time_invariant(spec,last_action_time);
   untime_process_parameters = data::make_variable_vector(lps.process_parameters());
   untime_process_parameters.push_back(last_action_time);
 
@@ -170,32 +170,32 @@ lps::specification untime(const lps::specification& spec) {
 
       if (i->has_time())
       {
-	// The summand is already timed, therefor there is no need to add an extra summation variable for time
-	untime_summation_variables = data::make_variable_vector(i->summation_variables());
+  // The summand is already timed, therefor there is no need to add an extra summation variable for time
+  untime_summation_variables = data::make_variable_vector(i->summation_variables());
 
-	// Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
-	untime_condition = lazy::and_(i->condition(),
+  // Extend the original condition with an additional argument t.i(d,e.i)>last_action_time
+  untime_condition = lazy::and_(i->condition(),
                            lazy::and_(data::greater(i->time(),data_expression(last_action_time)),
-                                   data::greater(data_expression(i->time()), data::sort_real_::real_(0))));
+                                   data::greater(data_expression(i->time()), data::sort_real::real_(0))));
 
-	// Extend original assignments to include t.i(d,e.i)
+  // Extend original assignments to include t.i(d,e.i)
         untime_assignments.push_back(assignment(last_action_time,i->time()));
       }
       else
       {
-	// Add a new summation variable (this is allowed because according to an axiom the following equality holds):
-	// c -> a . X == sum t:Real . c -> a@t . X
-	mcrl2::data::variable time_var = fresh_variable(lps::specification_to_aterm(spec), data::sort_real_::real_(), "time_var");
-	untime_summation_variables = data::make_variable_vector(i->summation_variables());
+  // Add a new summation variable (this is allowed because according to an axiom the following equality holds):
+  // c -> a . X == sum t:Real . c -> a@t . X
+  mcrl2::data::variable time_var = fresh_variable(lps::specification_to_aterm(spec), data::sort_real::real_(), "time_var");
+  untime_summation_variables = data::make_variable_vector(i->summation_variables());
         untime_summation_variables.push_back(time_var);
 
-	// Extend the original condition with an additional argument
-	untime_condition = lazy::and_(i->condition(),
+  // Extend the original condition with an additional argument
+  untime_condition = lazy::and_(i->condition(),
                            lazy::and_(data::greater(time_var, data_expression(last_action_time)),
-                                   data::greater(data_expression(time_var), data::sort_real_::real_(0))));
+                                   data::greater(data_expression(time_var), data::sort_real::real_(0))));
 
 
-	// Extend original assignments to include t.i(d,e.i)
+  // Extend original assignments to include t.i(d,e.i)
         untime_assignments.push_back(assignment(last_action_time, time_var));
       } // i->has_time()
 
@@ -204,11 +204,11 @@ lps::specification untime(const lps::specification& spec) {
 
       // Create a new summand with the changed parameters
       untime_summand = lps::summand(data::make_variable_list(untime_summation_variables),
-					  untime_condition,
-					  i->is_delta(),
-					  i->actions(),
-					  data::make_assignment_list(untime_assignments)
-					  );
+            untime_condition,
+            i->is_delta(),
+            i->actions(),
+            data::make_assignment_list(untime_assignments)
+            );
 
       // Add the new summand to the list
       untime_summand_list = push_front(untime_summand_list, untime_summand);
@@ -220,7 +220,7 @@ lps::specification untime(const lps::specification& spec) {
   // Add delta summand
   lps::summand untime_summand;
   untime_summand = lps::summand(variable_list(),
-                                data_expression(sort_bool_::true_()),
+                                data_expression(sort_bool::true_()),
                                 true,
                                 action_list(),
                                 assignment_list()
@@ -238,15 +238,15 @@ lps::specification untime(const lps::specification& spec) {
 
   // Create new initial_variables and initial_state in order to correctly initialize.
   data::assignment_list untime_initial_assignments = spec.initial_process().assignments();
-  untime_initial_assignments = push_back(untime_initial_assignments,assignment(last_action_time, sort_real_::real_(0)));
+  untime_initial_assignments = push_back(untime_initial_assignments,assignment(last_action_time, sort_real::real_(0)));
 
   // Create new specification, this equals original specification, except for the new LPS.
   untime_specification = lps::specification(spec.data(),
-			                    spec.action_labels(),
-					    untime_lps, //new LPS
-					    process_initializer(spec.initial_process().free_variables(),
+                          spec.action_labels(),
+              untime_lps, //new LPS
+              process_initializer(spec.initial_process().free_variables(),
                                             untime_initial_assignments)
-					   );
+             );
 
   return untime_specification;
 }

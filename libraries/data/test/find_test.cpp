@@ -38,7 +38,7 @@ variable pos(std::string name)
 inline
 variable bool_(std::string name)
 {
-  return variable(identifier_string(name), sort_bool_::bool_());
+  return variable(identifier_string(name), sort_bool::bool_());
 }
 
 int test_main(int argc, char* argv[])
@@ -60,13 +60,13 @@ int test_main(int argc, char* argv[])
   variable p3 = pos("p3");
   variable p4 = pos("p4");
 
-  sort_expression_vector domain = make_vector< sort_expression >(sort_pos::pos(), sort_bool_::bool_());
+  sort_expression_vector domain = make_vector< sort_expression >(sort_pos::pos(), sort_bool::bool_());
   sort_expression sexpr = function_sort(domain, sort_nat::nat());
 std::cout << "<sexpr>" << sexpr << std::endl;
   variable q1(identifier_string("q1"), sexpr);
 
-  data_expression x = sort_bool_::and_(equal_to(n1, n2), not_equal_to(n2, n3));
-  data_expression y = sort_bool_::or_(equal_to(p1, p2), sort_bool_::and_(x, b2));
+  data_expression x = sort_bool::and_(equal_to(n1, n2), not_equal_to(n2, n3));
+  data_expression y = sort_bool::or_(equal_to(p1, p2), sort_bool::and_(x, b2));
 
   BOOST_CHECK( search_variable(x, n1));
   BOOST_CHECK( search_variable(x, n2));
@@ -82,22 +82,22 @@ std::cout << "<sexpr>" << sexpr << std::endl;
 
   BOOST_CHECK( search_basic_sort(y, sort_nat::nat()  ));
   BOOST_CHECK( search_basic_sort(y, sort_pos::pos()  ));
-  BOOST_CHECK( search_basic_sort(y, sort_bool_::bool_()));
-  BOOST_CHECK(!search_basic_sort(y, sort_real_::real_() ));
+  BOOST_CHECK( search_basic_sort(y, sort_bool::bool_()));
+  BOOST_CHECK(!search_basic_sort(y, sort_real::real_() ));
 
   core::garbage_collect();
 
   std::set<basic_sort> s = find_all_basic_sorts(y);
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_nat::nat()) != s.end());
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_pos::pos()) != s.end());
-  BOOST_CHECK(std::find(s.begin(), s.end(), sort_bool_::bool_()) != s.end());
+  BOOST_CHECK(std::find(s.begin(), s.end(), sort_bool::bool_()) != s.end());
 
   core::garbage_collect();
 
   std::set<sort_expression> e = find_all_sort_expressions(q1);
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_pos::pos())   != e.end());
-  BOOST_CHECK(std::find(e.begin(), e.end(), sort_bool_::bool_()) != e.end());
+  BOOST_CHECK(std::find(e.begin(), e.end(), sort_bool::bool_()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), sexpr)              != e.end());
 
   core::garbage_collect();

@@ -138,7 +138,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           AUTHORS,
           "Interpreter for the mCRL2 data language",
           "Evaluate mCRL2 data expressions via a text-based interface. "
-          "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used. " 
+          "If INFILE is present and if it contains an LPS or PBES, the data types of this specification may be used. "
           "If no input file is given, only the standard numeric datatypes are available. Stdin is ignored."
           + help_text
         )
@@ -172,7 +172,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       // Import all standard data types should be available even if they are
       // not port of the loaded lps or pbes.
-      spec.import_system_defined_sort(sort_real_::real_());
+      spec.import_system_defined_sort(sort_real::real_());
 
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
@@ -208,13 +208,13 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"r ") || match_and_remove(s,"rewriter "))
           {
-            try 
+            try
             { rewriter::strategy new_strategy = boost::lexical_cast< rewriter::strategy >(s);
               if (new_strategy!=m_rewrite_strategy)
               { m_rewrite_strategy=new_strategy;
                 rewr=rewriter(spec,m_rewrite_strategy);
               }
-            } 
+            }
             catch (boost::bad_lexical_cast &e)
             { throw mcrl2::runtime_error("The string " + s + " does not describe a rewrite strategy.");
             }
@@ -239,7 +239,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
             parse_variables(s.substr(0,dotpos)+";",std::inserter(vars,vars.begin()),spec);
             data_expression term = parse_term(s.substr(dotpos+1),spec,context_variables,vars);
-            if ( term.sort()!=sort_bool_::bool_())
+            if ( term.sort()!=sort_bool::bool_())
             { throw mcrl2::runtime_error("expression is not of sort Bool.");
             }
             for (classic_enumerator< > i =

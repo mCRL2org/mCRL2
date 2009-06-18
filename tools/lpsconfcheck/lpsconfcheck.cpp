@@ -184,7 +184,7 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     m_time_limit(0),
     m_path_eliminator(false),
     m_apply_induction(false),
-    m_invariant(mcrl2::data::sort_bool_::true_())
+    m_invariant(mcrl2::data::sort_bool::true_())
   {}
 
   bool run()

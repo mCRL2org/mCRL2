@@ -231,7 +231,7 @@ namespace mcrl2 {
         template < typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
           make(AlternativeEvaluator const& evaluator,std::set< variable_type > const& variables,
-                         expression_type const& condition = sort_bool_::true_(),
+                         expression_type const& condition = sort_bool::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
           return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
@@ -248,7 +248,7 @@ namespace mcrl2 {
         template < typename ForwardTraversalIterator, typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
           make(AlternativeEvaluator const& evaluator, boost::iterator_range< ForwardTraversalIterator > const& variables,
-                         expression_type const& condition = sort_bool_::true_(),
+                         expression_type const& condition = sort_bool::true_(),
                          substitution_type const& substitution = substitution_type()) const {
 
           return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >

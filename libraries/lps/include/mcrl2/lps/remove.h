@@ -10,7 +10,7 @@
 /// \brief add your file description here.
 
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
-#include "mcrl2/lps/substitute.h"  
+#include "mcrl2/lps/substitute.h"
 
 #ifndef MCRL2_LPS_REMOVE_H
 #define MCRL2_LPS_REMOVE_H
@@ -26,7 +26,7 @@ namespace detail {
   {
     bool operator()(const summand_base& s) const
     {
-      return s.condition() == data::sort_bool_::false_();
+      return s.condition() == data::sort_bool::false_();
     }
   };
 

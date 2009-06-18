@@ -203,7 +203,7 @@ class info_tool {
               nr_sorts++;
             }
             else
-              cout << " -> " << core::pp(sort_bool_::bool_());
+              cout << " -> " << core::pp(sort_bool::bool_());
             }
           cout << endl;
           nr_predvar++;

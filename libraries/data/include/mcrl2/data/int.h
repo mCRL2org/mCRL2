@@ -32,7 +32,7 @@ namespace mcrl2 {
   namespace data {
 
     /// \brief Namespace for system defined sort int_
-    namespace sort_int_ {
+    namespace sort_int {
 
       inline
       core::identifier_string const& int_name()
@@ -54,7 +54,7 @@ namespace mcrl2 {
       /// \param e A sort expression
       /// \return true iff e == int_()
       inline
-      bool is_int_(const sort_expression& e)
+      bool is_int(const sort_expression& e)
       {
         if (e.is_basic_sort())
         {
@@ -871,11 +871,11 @@ namespace mcrl2 {
       function_symbol dub(const sort_expression& s0, const sort_expression& s1)
       {
         sort_expression target_sort;
-        if (s0 == sort_bool_::bool_() && s1 == int_())
+        if (s0 == sort_bool::bool_() && s1 == int_())
         {
           target_sort = int_();
         }
-        else if (s0 == sort_bool_::bool_() && s1 == sort_nat::nat())
+        else if (s0 == sort_bool::bool_() && s1 == sort_nat::nat())
         {
           target_sort = sort_nat::nat();
         }
@@ -1374,7 +1374,7 @@ namespace mcrl2 {
         result.push_back(succ(int_()));
         result.push_back(pred(sort_nat::nat()));
         result.push_back(pred(int_()));
-        result.push_back(dub(sort_bool_::bool_(), int_()));
+        result.push_back(dub(sort_bool::bool_(), int_()));
         result.push_back(plus(int_(), int_()));
         result.push_back(minus(sort_pos::pos(), sort_pos::pos()));
         result.push_back(minus(sort_nat::nat(), sort_nat::nat()));
@@ -1482,7 +1482,7 @@ namespace mcrl2 {
       inline
       data_equation_vector int_generate_equations_code()
       {
-        variable vb("b",sort_bool_::bool_());
+        variable vb("b",sort_bool::bool_());
         variable vn("n",sort_nat::nat());
         variable vm("m",sort_nat::nat());
         variable vp("p",sort_pos::pos());
@@ -1492,16 +1492,16 @@ namespace mcrl2 {
 
         data_equation_vector result;
         result.push_back(data_equation(make_vector(vm, vn), equal_to(cint(vm), cint(vn)), equal_to(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), equal_to(cint(vn), cneg(vp)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), equal_to(cneg(vp), cint(vn)), sort_bool_::false_()));
+        result.push_back(data_equation(make_vector(vn, vp), equal_to(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vn, vp), equal_to(cneg(vp), cint(vn)), sort_bool::false_()));
         result.push_back(data_equation(make_vector(vp, vq), equal_to(cneg(vp), cneg(vq)), equal_to(vp, vq)));
         result.push_back(data_equation(make_vector(vm, vn), less(cint(vm), cint(vn)), less(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), less(cint(vn), cneg(vp)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), less(cneg(vp), cint(vn)), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vn, vp), less(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vn, vp), less(cneg(vp), cint(vn)), sort_bool::true_()));
         result.push_back(data_equation(make_vector(vp, vq), less(cneg(vp), cneg(vq)), less(vq, vp)));
         result.push_back(data_equation(make_vector(vm, vn), less_equal(cint(vm), cint(vn)), less_equal(vm, vn)));
-        result.push_back(data_equation(make_vector(vn, vp), less_equal(cint(vn), cneg(vp)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(vn, vp), less_equal(cneg(vp), cint(vn)), sort_bool_::true_()));
+        result.push_back(data_equation(make_vector(vn, vp), less_equal(cint(vn), cneg(vp)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(vn, vp), less_equal(cneg(vp), cint(vn)), sort_bool::true_()));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(cneg(vp), cneg(vq)), less_equal(vq, vp)));
         result.push_back(data_equation(variable_list(), nat2int(), cint()));
         result.push_back(data_equation(make_vector(vn), int2nat(cint(vn)), vn));
@@ -1531,14 +1531,14 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vn), pred(cint(vn)), pred(vn)));
         result.push_back(data_equation(make_vector(vp), pred(cneg(vp)), cneg(succ(vp))));
         result.push_back(data_equation(make_vector(vb, vn), dub(vb, cint(vn)), cint(dub(vb, vn))));
-        result.push_back(data_equation(make_vector(vp), dub(sort_bool_::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool_::false_(), vp))));
-        result.push_back(data_equation(make_vector(vp), dub(sort_bool_::true_(), cneg(vp)), negate(dub(sort_bool_::true_(), pred(vp)))));
+        result.push_back(data_equation(make_vector(vp), dub(sort_bool::false_(), cneg(vp)), cneg(sort_pos::cdub(sort_bool::false_(), vp))));
+        result.push_back(data_equation(make_vector(vp), dub(sort_bool::true_(), cneg(vp)), negate(dub(sort_bool::true_(), pred(vp)))));
         result.push_back(data_equation(make_vector(vm, vn), plus(cint(vm), cint(vn)), cint(plus(vm, vn))));
         result.push_back(data_equation(make_vector(vn, vp), plus(cint(vn), cneg(vp)), minus(vn, sort_nat::cnat(vp))));
         result.push_back(data_equation(make_vector(vn, vp), plus(cneg(vp), cint(vn)), minus(vn, sort_nat::cnat(vp))));
-        result.push_back(data_equation(make_vector(vp, vq), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool_::false_(), vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gtesubtb(sort_bool_::false_(), vp, vq))));
-        result.push_back(data_equation(make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gtesubtb(sort_bool_::false_(), vq, vp))));
+        result.push_back(data_equation(make_vector(vp, vq), plus(cneg(vp), cneg(vq)), cneg(sort_pos::add_with_carry(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vq), less_equal(vq, vp), minus(vp, vq), cint(sort_nat::gtesubtb(sort_bool::false_(), vp, vq))));
+        result.push_back(data_equation(make_vector(vp, vq), less(vp, vq), minus(vp, vq), negate(sort_nat::gtesubtb(sort_bool::false_(), vq, vp))));
         result.push_back(data_equation(make_vector(vm, vn), less_equal(vn, vm), minus(vm, vn), cint(sort_nat::gtesubt(vm, vn))));
         result.push_back(data_equation(make_vector(vm, vn), less(vm, vn), minus(vm, vn), negate(sort_nat::gtesubt(vn, vm))));
         result.push_back(data_equation(make_vector(vx, vy), minus(vx, vy), plus(vx, negate(vy))));
@@ -1552,7 +1552,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vp, vq), mod(cneg(vp), vq), int2nat(minus(vq, succ(mod(pred(vp), vq))))));
         result.push_back(data_equation(make_vector(vm, vn), exp(cint(vm), vn), cint(exp(vm, vn))));
         result.push_back(data_equation(make_vector(vn, vp), sort_nat::even(vn), exp(cneg(vp), vn), cint(sort_nat::cnat(exp(vp, vn)))));
-        result.push_back(data_equation(make_vector(vn, vp), sort_bool_::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
+        result.push_back(data_equation(make_vector(vn, vp), sort_bool::not_(sort_nat::even(vn)), exp(cneg(vp), vn), cneg(exp(vp, vn))));
         return result;
       }
 
@@ -1565,9 +1565,9 @@ namespace mcrl2 {
          {
            sort_nat::add_nat_to_specification(specification);
          }
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {

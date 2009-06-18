@@ -170,7 +170,7 @@ namespace mcrl2 {
           data_expression implement(abstraction const& expression)
           {
             using namespace mcrl2::core::detail;
-            using namespace mcrl2::data::sort_set_;
+            using namespace mcrl2::data::sort_set;
             using namespace mcrl2::data::sort_bag;
 
             data_expression abstract_body(implement(lambda(implement(expression.variables()), implement(expression.body()))));
@@ -185,11 +185,11 @@ namespace mcrl2 {
             }
             else if (expression.is_exists())
             {
-              return application(function_symbol("exists", function_sort(abstract_body.sort(), sort_bool_::bool_())), abstract_body);
+              return application(function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
             }
             else if (expression.is_forall())
             {
-              return application(function_symbol("forall", function_sort(abstract_body.sort(), sort_bool_::bool_())), abstract_body);
+              return application(function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
             }
 
             return abstract_body;

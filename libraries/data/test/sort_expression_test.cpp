@@ -158,7 +158,7 @@ void structured_sort_test()
   BOOST_CHECK(s_e_.struct_constructors() == s.struct_constructors());
 
   structured_sort_constructor_argument_vector nv(make_vector(structured_sort_constructor_argument(sort_nat::nat())));
-  structured_sort_constructor_argument_vector bv(make_vector(structured_sort_constructor_argument(sort_bool_::bool_())));
+  structured_sort_constructor_argument_vector bv(make_vector(structured_sort_constructor_argument(sort_bool::bool_())));
   structured_sort_constructor b("B", boost::make_iterator_range(nv));
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
   structured_sort bc(make_vector(b,c));
@@ -170,7 +170,7 @@ void structured_sort_test()
   BOOST_CHECK(!bc_constructors[0].arguments().empty());
   BOOST_CHECK(!bc_constructors[1].arguments().empty());
   BOOST_CHECK(sort_nat::is_nat(bc_constructors[0].arguments()[0].sort()));
-  BOOST_CHECK(sort_bool_::is_bool_(bc_constructors[1].arguments()[0].sort()));
+  BOOST_CHECK(sort_bool::is_bool(bc_constructors[1].arguments()[0].sort()));
 }
 
 void container_sort_test()

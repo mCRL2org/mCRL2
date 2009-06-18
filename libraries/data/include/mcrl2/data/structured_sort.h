@@ -275,7 +275,7 @@ namespace mcrl2 {
         /// corresponds to is treated internally.
         function_symbol recogniser_function(const sort_expression& s) const
         {
-          return function_symbol(recogniser(), function_sort(s, sort_bool_::bool_()));
+          return function_symbol(recogniser(), function_sort(s, sort_bool::bool_()));
         }
 
     }; // class structured_sort_constructor
@@ -373,9 +373,9 @@ namespace mcrl2 {
           {
             for (structured_sort_constructor_vector::const_iterator j = cl.begin(); j != cl.end(); ++j)
             {
-              data_expression right_equal         = (i == j) ? sort_bool_::true_() : sort_bool_::false_();
-              data_expression right_smaller       = (i < j)  ? sort_bool_::true_() : sort_bool_::false_();
-              data_expression right_smaller_equal = (i <= j) ? sort_bool_::true_() : sort_bool_::false_();
+              data_expression right_equal         = (i == j) ? sort_bool::true_() : sort_bool::false_();
+              data_expression right_smaller       = (i < j)  ? sort_bool::true_() : sort_bool::false_();
+              data_expression right_smaller_equal = (i <= j) ? sort_bool::true_() : sort_bool::false_();
 
               if (i->argument_sorts().empty() && j->argument_sorts().empty())
               {
@@ -441,21 +441,21 @@ namespace mcrl2 {
                     // Constructors have one or more arguments:
                     // - rhs for c(x0,...,xn) == c(y0,..,yn):
                     //     x0 == y0 && ... && xn == yn
-                    right_equal         = sort_bool_::and_(equal_to(*k, *l), right_equal);
+                    right_equal         = sort_bool::and_(equal_to(*k, *l), right_equal);
                     // - rhs for c(x0,...,xn) < c(y0,..,yn):
                     //     x0 < y0                                                     , when n = 0
                     //     x0 < y0 || (x0 == y0 && x1 < y1)                            , when n = 1
                     //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 < y2))) , when n = 2
                     //     etcetera
-                    right_smaller       = sort_bool_::or_(less(*k, *l),
-                        sort_bool_::and_(equal_to(*k, *l), right_smaller));
+                    right_smaller       = sort_bool::or_(less(*k, *l),
+                        sort_bool::and_(equal_to(*k, *l), right_smaller));
                     // - rhs for c(x0,...,xn) <= c(y0,..,yn):
                     //     x0 <= y0                                                    , when n = 0
                     //     x0 < y0 || (x0 == y0 && x1 <= y1)                           , when n = 1
                     //     x0 < y0 || (x0 == y0 && (x1 < y1 || (x1 == y1 && x2 <= y2))), when n = 2
                     //     etcetera
-                    right_smaller_equal = sort_bool_::or_(less(*k, *l),
-                        sort_bool_::and_(equal_to(*k, *l), right_smaller_equal));
+                    right_smaller_equal = sort_bool::or_(less(*k, *l),
+                        sort_bool::and_(equal_to(*k, *l), right_smaller_equal));
                   }
                 }
 
@@ -522,7 +522,7 @@ namespace mcrl2 {
             {
               if(!j->recogniser().empty())
               {
-                data_expression right = (*i == *j) ? sort_bool_::true_() : sort_bool_::false_();
+                data_expression right = (*i == *j) ? sort_bool::true_() : sort_bool::false_();
 
                 if (i->argument_sorts().empty())
                 {

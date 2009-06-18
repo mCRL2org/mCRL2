@@ -48,7 +48,7 @@ struct make_timed_lps_summand
   {
     if (!summand_.has_time())
     {
-      data::variable v(m_generator("T"), data::sort_real_::real_());
+      data::variable v(m_generator("T"), data::sort_real::real_());
       summand_ = set_time(summand_, data::data_expression(v));
       data::variable_list V(summand_.summation_variables());
       V = push_front(V, v);

@@ -357,7 +357,7 @@ namespace mcrl2 {
       inline
       function_symbol bagin(const sort_expression& s)
       {
-        function_symbol bagin(bagin_name(), function_sort(s, bag(s), sort_bool_::bool_()));
+        function_symbol bagin(bagin_name(), function_sort(s, bag(s), sort_bool::bool_()));
         return bagin;
       }
 
@@ -589,7 +589,7 @@ namespace mcrl2 {
       inline
       function_symbol bag2set(const sort_expression& s)
       {
-        function_symbol bag2set(bag2set_name(), function_sort(bag(s), sort_set_::set_(s)));
+        function_symbol bag2set(bag2set_name(), function_sort(bag(s), sort_set::set_(s)));
         return bag2set;
       }
 
@@ -646,7 +646,7 @@ namespace mcrl2 {
       inline
       function_symbol set2bag(const sort_expression& s)
       {
-        function_symbol set2bag(set2bag_name(), function_sort(sort_set_::set_(s), bag(s)));
+        function_symbol set2bag(set2bag_name(), function_sort(sort_set::set_(s), bag(s)));
         return set2bag;
       }
 
@@ -991,7 +991,7 @@ namespace mcrl2 {
       inline
       function_symbol nat2bool_function(const sort_expression& s)
       {
-        function_symbol nat2bool_function(nat2bool_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_bool_::bool_())));
+        function_symbol nat2bool_function(nat2bool_function_name(), function_sort(function_sort(s, sort_nat::nat()), function_sort(s, sort_bool::bool_())));
         return nat2bool_function;
       }
 
@@ -1048,7 +1048,7 @@ namespace mcrl2 {
       inline
       function_symbol bool2nat_function(const sort_expression& s)
       {
-        function_symbol bool2nat_function(bool2nat_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_nat::nat())));
+        function_symbol bool2nat_function(bool2nat_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_nat::nat())));
         return bool2nat_function;
       }
 
@@ -1164,7 +1164,7 @@ namespace mcrl2 {
         variable ve("e",s);
         variable vf("f",function_sort(s, sort_nat::nat()));
         variable vg("g",function_sort(s, sort_nat::nat()));
-        variable vh("h",function_sort(s, sort_bool_::bool_()));
+        variable vh("h",function_sort(s, sort_bool::bool_()));
         variable vs("s",sort_fset::fset(s));
         variable vx("x",bag(s));
         variable vy("y",bag(s));
@@ -1178,18 +1178,18 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(ve, vx), bagin(s, ve, vx), greater(bagcount(s, ve, vx), sort_nat::c0())));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), equal_to(vf, vg), equal_to(bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), equal_to(vb, vc)));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), not_equal_to(vf, vg), equal_to(bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), forall(make_vector(vd), equal_to(bagcount(s, vd, bagconstructor(s, vf, vb)), bagcount(s, vd, bagconstructor(s, vg, vc))))));
-        result.push_back(data_equation(make_vector(vx, vy), less(vx, vy), sort_bool_::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
+        result.push_back(data_equation(make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), equal_to(vf, vg), less_equal(bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), sort_fbag::fbaglte(s, vf, vb, vc)));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), not_equal_to(vf, vg), less_equal(bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), forall(make_vector(vd), less_equal(bagcount(s, vd, bagconstructor(s, vf, vb)), bagcount(s, vd, bagconstructor(s, vg, vc))))));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), bagjoin(s, bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), bagconstructor(s, add_function(s, vf, vg), sort_fbag::fbagjoin(s, vf, vg, vb, vc))));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), bagintersect(s, bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), bagconstructor(s, min_function(s, vf, vg), sort_fbag::fbagintersect(s, vf, vg, vb, vc))));
         result.push_back(data_equation(make_vector(vb, vc, vf, vg), bagdifference(s, bagconstructor(s, vf, vb), bagconstructor(s, vg, vc)), bagconstructor(s, monus_function(s, vf, vg), sort_fbag::fbagdifference(s, vf, vg, vb, vc))));
-        result.push_back(data_equation(make_vector(vb, vf), bag2set(s, bagconstructor(s, vf, vb)), sort_set_::setconstructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
-        result.push_back(data_equation(make_vector(vh, vs), set2bag(s, sort_set_::setconstructor(s, vh, vs)), bagconstructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
+        result.push_back(data_equation(make_vector(vb, vf), bag2set(s, bagconstructor(s, vf, vb)), sort_set::setconstructor(s, nat2bool_function(s, vf), sort_fbag::fbag2fset(s, vf, vb))));
+        result.push_back(data_equation(make_vector(vh, vs), set2bag(s, sort_set::setconstructor(s, vh, vs)), bagconstructor(s, bool2nat_function(s, vh), sort_fbag::fset2fbag(s, vs))));
         result.push_back(data_equation(make_vector(ve), zero_function(s, ve), sort_nat::c0()));
         result.push_back(data_equation(make_vector(ve), one_function(s, ve), sort_nat::cnat(sort_pos::c1())));
-        result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool_::false_()));
-        result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool_::false_()));
+        result.push_back(data_equation(variable_list(), equal_to(zero_function(s), one_function(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list(), equal_to(one_function(s), zero_function(s)), sort_bool::false_()));
         result.push_back(data_equation(make_vector(ve, vf, vg), add_function(s, vf, vg)(ve), sort_nat::plus(vf(ve), vg(ve))));
         result.push_back(data_equation(make_vector(vf), add_function(s, vf, zero_function(s)), vf));
         result.push_back(data_equation(make_vector(vf), add_function(s, zero_function(s), vf), vf));
@@ -1202,11 +1202,11 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vf), monus_function(s, vf, zero_function(s)), vf));
         result.push_back(data_equation(make_vector(vf), monus_function(s, zero_function(s), vf), zero_function(s)));
         result.push_back(data_equation(make_vector(ve, vf), nat2bool_function(s, vf)(ve), greater(vf(ve), sort_nat::c0())));
-        result.push_back(data_equation(variable_list(), nat2bool_function(s, zero_function(s)), sort_set_::false_function(s)));
-        result.push_back(data_equation(variable_list(), nat2bool_function(s, one_function(s)), sort_set_::true_function(s)));
+        result.push_back(data_equation(variable_list(), nat2bool_function(s, zero_function(s)), sort_set::false_function(s)));
+        result.push_back(data_equation(variable_list(), nat2bool_function(s, one_function(s)), sort_set::true_function(s)));
         result.push_back(data_equation(make_vector(ve, vh), bool2nat_function(s, vh)(ve), if_(vh(ve), sort_nat::cnat(sort_pos::c1()), sort_nat::c0())));
-        result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set_::false_function(s)), zero_function(s)));
-        result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set_::true_function(s)), one_function(s)));
+        result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::false_function(s)), zero_function(s)));
+        result.push_back(data_equation(variable_list(), bool2nat_function(s, sort_set::true_function(s)), one_function(s)));
         return result;
       }
 
@@ -1220,9 +1220,9 @@ namespace mcrl2 {
          {
            sort_fbag::add_fbag_to_specification(specification, element);
          }
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_nat::nat()).empty())
          {
@@ -1236,9 +1236,9 @@ namespace mcrl2 {
          {
            sort_fset::add_fset_to_specification(specification, element);
          }
-         if (specification.constructors(sort_set_::set_(element)).empty())
+         if (specification.constructors(sort_set::set_(element)).empty())
          {
-           sort_set_::add_set_to_specification(specification, element);
+           sort_set::add_set_to_specification(specification, element);
          }
          specification.add_system_defined_sort(bag(element));
          specification.add_system_defined_constructors(bag_generate_constructors_code(element));

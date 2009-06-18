@@ -68,13 +68,13 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  x = data::variable("x", data::sort_bool_::bool_());
-  y = data::variable("y", data::sort_bool_::bool_());
-  z = data::variable("z", data::sort_bool_::bool_());
+  x = data::variable("x", data::sort_bool::bool_());
+  y = data::variable("y", data::sort_bool::bool_());
+  z = data::variable("z", data::sort_bool::bool_());
 
   f  = not_(x);
   f1 = normalize(f);
-  f2 = data::sort_bool_::not_(x);
+  f2 = data::sort_bool::not_(x);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -82,7 +82,7 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = normalize(f);
-  f2 = or_(or_(data::sort_bool_::not_(x), data::sort_bool_::not_(y)), z);
+  f2 = or_(or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;

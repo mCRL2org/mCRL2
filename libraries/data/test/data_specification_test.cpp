@@ -344,12 +344,12 @@ void test_is_certainly_finite()
   BOOST_CHECK(spec.is_certainly_finite(s));
   BOOST_CHECK(!spec.is_certainly_finite(s0));
 
-  spec.import_system_defined_sort(sort_real_::real_());
-  BOOST_CHECK(spec.is_certainly_finite(sort_bool_::bool_()));
+  spec.import_system_defined_sort(sort_real::real_());
+  BOOST_CHECK(spec.is_certainly_finite(sort_bool::bool_()));
   BOOST_CHECK(!spec.is_certainly_finite(sort_pos::pos()));
   BOOST_CHECK(!spec.is_certainly_finite(sort_nat::nat()));
-  BOOST_CHECK(!spec.is_certainly_finite(sort_int_::int_()));
-  BOOST_CHECK(!spec.is_certainly_finite(sort_real_::real_()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_int::int_()));
+  BOOST_CHECK(!spec.is_certainly_finite(sort_real::real_()));
 
   basic_sort s1("S1");
   basic_sort s2("S2");
@@ -365,7 +365,7 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(list(s)));
   BOOST_CHECK(!spec.is_certainly_finite(list(s0)));
 
-  using namespace sort_set_;
+  using namespace sort_set;
 
   BOOST_CHECK(!spec.is_certainly_finite(set_(s)));
   BOOST_CHECK(!spec.is_certainly_finite(set_(s0)));
@@ -425,13 +425,13 @@ void test_system_defined()
 
   data_specification specification;
 
-  BOOST_CHECK(!specification.constructors(sort_bool_::bool_()).empty());
+  BOOST_CHECK(!specification.constructors(sort_bool::bool_()).empty());
 
   specification = parse_data_specification(
     "sort S;"
     "map f: Set(S);");
 
-  BOOST_CHECK(search(specification.sorts(), sort_set_::set_(basic_sort("S"))));
+  BOOST_CHECK(search(specification.sorts(), sort_set::set_(basic_sort("S"))));
   BOOST_CHECK(search(specification.sorts(), sort_fset::fset(basic_sort("S"))));
 
   specification = parse_data_specification(
@@ -439,7 +439,7 @@ void test_system_defined()
     "sort E = D;"
     "sort F = E;");
 
-  BOOST_CHECK(sort_set_::set_generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
+  BOOST_CHECK(sort_set::set_generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
@@ -475,11 +475,11 @@ void test_system_defined()
   BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
 
   // Check for presence of function sort
-  BOOST_CHECK(!specification.mappings(function_sort(basic_sort("D"), sort_bool_::bool_())).empty());
+  BOOST_CHECK(!specification.mappings(function_sort(basic_sort("D"), sort_bool::bool_())).empty());
 
-  specification.add_mapping(function_symbol("f", function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())));
+  specification.add_mapping(function_symbol("f", function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())));
 
-  BOOST_CHECK(!specification.mappings(function_sort(sort_bool_::bool_(), sort_bool_::bool_(), sort_nat::nat())).empty());
+  BOOST_CHECK(!specification.mappings(function_sort(sort_bool::bool_(), sort_bool::bool_(), sort_nat::nat())).empty());
 
   // Manually structured sort
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
@@ -542,7 +542,7 @@ void test_normalisation()
 {
   using namespace mcrl2::data;
   using namespace mcrl2::data::sort_list;
-  using namespace mcrl2::data::sort_set_;
+  using namespace mcrl2::data::sort_set;
   using namespace mcrl2::data::sort_bag;
 
   data_specification specification;
@@ -577,7 +577,7 @@ void test_copy()
     "sort S;"
     "map f: Set(S);");
 
-  BOOST_CHECK(specification.search_constructor(sort_bool_::true_()));
+  BOOST_CHECK(specification.search_constructor(sort_bool::true_()));
 
   data_specification other;
   other = specification;

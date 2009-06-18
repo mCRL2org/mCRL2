@@ -386,7 +386,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                         if (l == NULL)
                         {
                           l = ATempty;
-			}
+      }
                         if ( ATisEmpty(l) )
                         {
                                 gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);
@@ -571,9 +571,9 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         max_vars = MAX_VARS_INIT;
         info.max_vars = &max_vars;
 
-        info.rewr_true = info.rewr_obj->toRewriteFormat(sort_bool_::true_());
+        info.rewr_true = info.rewr_obj->toRewriteFormat(sort_bool::true_());
         ATprotect(&info.rewr_true);
-        info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool_::false_());
+        info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool::false_());
         ATprotect(&info.rewr_false);
 
         info.eqs = ATindexedSetCreate(100,50);
@@ -582,7 +582,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         {
           info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
           info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_inner3;
-          info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool_::and_());
+          info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool::and_());
           ATprotect(&info.opidAnd);
 
           for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
@@ -596,7 +596,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
         } else {
           info.FindEquality = &EnumeratorSolutionsStandard::FindInnerCEquality;
           info.build_solution_aux = &EnumeratorSolutionsStandard::build_solution_aux_innerc;
-          info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool_::and_()),0);
+          info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool::and_()),0);
           ATprotect(&info.opidAnd);
 
           for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
@@ -693,13 +693,13 @@ Rewriter* EnumeratorStandard::getRewriter()
 
 Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter, EnumerateStrategy strategy)
 {
-	switch ( strategy )
-	{
-		case ENUM_STANDARD:
-			return new EnumeratorStandard(data_spec, r,clean_up_rewriter);
-		default:
-			return NULL;
-	}
+  switch ( strategy )
+  {
+    case ENUM_STANDARD:
+      return new EnumeratorStandard(data_spec, r,clean_up_rewriter);
+    default:
+      return NULL;
+  }
 }
     } // namespace detail
   } // namespace data

@@ -34,7 +34,7 @@ namespace mcrl2 {
   namespace data {
 
     /// \brief Namespace for system defined sort set_
-    namespace sort_set_ {
+    namespace sort_set {
 
       inline
       core::identifier_string const& set_name()
@@ -58,7 +58,7 @@ namespace mcrl2 {
       /// \return true iff e is a container sort of which the name matches
       ///      set_
       inline
-      bool is_set_(const sort_expression& e)
+      bool is_set(const sort_expression& e)
       {
         if (e.is_container_sort())
         {
@@ -92,7 +92,7 @@ namespace mcrl2 {
       inline
       function_symbol setconstructor(const sort_expression& s)
       {
-        function_symbol setconstructor(setconstructor_name(), function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s)));
+        function_symbol setconstructor(setconstructor_name(), function_sort(function_sort(s, sort_bool::bool_()), sort_fset::fset(s), set_(s)));
         return setconstructor;
       }
 
@@ -240,7 +240,7 @@ namespace mcrl2 {
       inline
       function_symbol setcomprehension(const sort_expression& s)
       {
-        function_symbol setcomprehension(setcomprehension_name(), function_sort(function_sort(s, sort_bool_::bool_()), set_(s)));
+        function_symbol setcomprehension(setcomprehension_name(), function_sort(function_sort(s, sort_bool::bool_()), set_(s)));
         return setcomprehension;
       }
 
@@ -297,7 +297,7 @@ namespace mcrl2 {
       inline
       function_symbol setin(const sort_expression& s)
       {
-        function_symbol setin(setin_name(), function_sort(s, set_(s), sort_bool_::bool_()));
+        function_symbol setin(setin_name(), function_sort(s, set_(s), sort_bool::bool_()));
         return setin;
       }
 
@@ -586,7 +586,7 @@ namespace mcrl2 {
       inline
       function_symbol false_function(const sort_expression& s)
       {
-        function_symbol false_function(false_function_name(), function_sort(s, sort_bool_::bool_()));
+        function_symbol false_function(false_function_name(), function_sort(s, sort_bool::bool_()));
         return false_function;
       }
 
@@ -643,7 +643,7 @@ namespace mcrl2 {
       inline
       function_symbol true_function(const sort_expression& s)
       {
-        function_symbol true_function(true_function_name(), function_sort(s, sort_bool_::bool_()));
+        function_symbol true_function(true_function_name(), function_sort(s, sort_bool::bool_()));
         return true_function;
       }
 
@@ -700,7 +700,7 @@ namespace mcrl2 {
       inline
       function_symbol not_function(const sort_expression& s)
       {
-        function_symbol not_function(not_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol not_function(not_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
         return not_function;
       }
 
@@ -757,7 +757,7 @@ namespace mcrl2 {
       inline
       function_symbol and_function(const sort_expression& s)
       {
-        function_symbol and_function(and_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol and_function(and_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
         return and_function;
       }
 
@@ -815,7 +815,7 @@ namespace mcrl2 {
       inline
       function_symbol or_function(const sort_expression& s)
       {
-        function_symbol or_function(or_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol or_function(or_function_name(), function_sort(function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_()), function_sort(s, sort_bool::bool_())));
         return or_function;
       }
 
@@ -927,8 +927,8 @@ namespace mcrl2 {
         variable vd("d",s);
         variable vs("s",sort_fset::fset(s));
         variable vt("t",sort_fset::fset(s));
-        variable vf("f",function_sort(s, sort_bool_::bool_()));
-        variable vg("g",function_sort(s, sort_bool_::bool_()));
+        variable vf("f",function_sort(s, sort_bool::bool_()));
+        variable vg("g",function_sort(s, sort_bool::bool_()));
         variable vx("x",set_(s));
         variable vy("y",set_(s));
         variable vc("c",s);
@@ -940,27 +940,27 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(ve, vf, vs), setin(s, ve, setconstructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::fsetin(s, ve, vs))));
         result.push_back(data_equation(make_vector(vf, vg, vs, vt), equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), equal_to(vs, vt)));
         result.push_back(data_equation(make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(make_vector(vc), equal_to(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
-        result.push_back(data_equation(make_vector(vx, vy), less(vx, vy), sort_bool_::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
+        result.push_back(data_equation(make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(make_vector(vf, vg, vs, vt), equal_to(vf, vg), less_equal(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), sort_fset::fsetlte(s, vf, vs, vt)));
-        result.push_back(data_equation(make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), less_equal(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(make_vector(vc), sort_bool_::implies(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
+        result.push_back(data_equation(make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), less_equal(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(make_vector(vc), sort_bool::implies(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
         result.push_back(data_equation(make_vector(vf, vs), setcomplement(s, setconstructor(s, vf, vs)), setconstructor(s, not_function(s, vf), vs)));
         result.push_back(data_equation(make_vector(vf, vg, vs, vt), setunion_(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, or_function(s, vf, vg), sort_fset::fsetunion(s, vf, vg, vs, vt))));
         result.push_back(data_equation(make_vector(vf, vg, vs, vt), setintersection(s, setconstructor(s, vf, vs), setconstructor(s, vg, vt)), setconstructor(s, and_function(s, vf, vg), sort_fset::fsetintersection(s, vf, vg, vs, vt))));
         result.push_back(data_equation(make_vector(vx, vy), setdifference(s, vx, vy), setintersection(s, vx, setcomplement(s, vy))));
-        result.push_back(data_equation(make_vector(ve), false_function(s, ve), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(ve), true_function(s, ve), sort_bool_::true_()));
-        result.push_back(data_equation(variable_list(), equal_to(false_function(s), true_function(s)), sort_bool_::false_()));
-        result.push_back(data_equation(variable_list(), equal_to(true_function(s), false_function(s)), sort_bool_::false_()));
-        result.push_back(data_equation(make_vector(ve, vf), not_function(s, vf)(ve), sort_bool_::not_(vf(ve))));
+        result.push_back(data_equation(make_vector(ve), false_function(s, ve), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(ve), true_function(s, ve), sort_bool::true_()));
+        result.push_back(data_equation(variable_list(), equal_to(false_function(s), true_function(s)), sort_bool::false_()));
+        result.push_back(data_equation(variable_list(), equal_to(true_function(s), false_function(s)), sort_bool::false_()));
+        result.push_back(data_equation(make_vector(ve, vf), not_function(s, vf)(ve), sort_bool::not_(vf(ve))));
         result.push_back(data_equation(variable_list(), not_function(s, false_function(s)), true_function(s)));
         result.push_back(data_equation(variable_list(), not_function(s, true_function(s)), false_function(s)));
-        result.push_back(data_equation(make_vector(ve, vf, vg), and_function(s, vf, vg)(ve), sort_bool_::and_(vf(ve), vg(ve))));
+        result.push_back(data_equation(make_vector(ve, vf, vg), and_function(s, vf, vg)(ve), sort_bool::and_(vf(ve), vg(ve))));
         result.push_back(data_equation(make_vector(vf), and_function(s, vf, vf), vf));
         result.push_back(data_equation(make_vector(vf), and_function(s, vf, false_function(s)), false_function(s)));
         result.push_back(data_equation(make_vector(vf), and_function(s, false_function(s), vf), false_function(s)));
         result.push_back(data_equation(make_vector(vf), and_function(s, vf, true_function(s)), vf));
         result.push_back(data_equation(make_vector(vf), and_function(s, true_function(s), vf), vf));
-        result.push_back(data_equation(make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool_::or_(vf(ve), vg(ve))));
+        result.push_back(data_equation(make_vector(ve, vf, vg), or_function(s, vf, vg)(ve), sort_bool::or_(vf(ve), vg(ve))));
         result.push_back(data_equation(make_vector(vf), or_function(s, vf, vf), vf));
         result.push_back(data_equation(make_vector(vf), or_function(s, vf, false_function(s)), vf));
         result.push_back(data_equation(make_vector(vf), or_function(s, false_function(s), vf), vf));
@@ -975,9 +975,9 @@ namespace mcrl2 {
       inline
       void add_set_to_specification(data_specification& specification, sort_expression const& element)
       {
-         if (specification.constructors(sort_bool_::bool_()).empty())
+         if (specification.constructors(sort_bool::bool_()).empty())
          {
-           sort_bool_::add_bool_to_specification(specification);
+           sort_bool::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_fset::fset(element)).empty())
          {

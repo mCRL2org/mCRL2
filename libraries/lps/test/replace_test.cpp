@@ -25,7 +25,7 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
-const std::string SPEC = 
+const std::string SPEC =
   "act  a;                  \n"
   "                         \n"
   "proc P(b: Bool) =        \n"
@@ -36,14 +36,14 @@ const std::string SPEC =
   "                         \n"
   "init P(true);            \n"
   ;
-  
+
 void test_replace()
 {
   specification spec = parse_linear_process_specification(SPEC);
   summand s = spec.process().summands().front();
-  variable b("b", sort_bool_::bool_());
-  variable c("c", sort_bool_::bool_());
-  variable d("d", sort_bool_::bool_());
+  variable b("b", sort_bool::bool_());
+  variable c("c", sort_bool::bool_());
+  variable d("d", sort_bool::bool_());
   assignment a(c, d);
   summand t = data::replace_variables(s, a); // must become lps::replace
   std::cout << "<s>" << pp(s) << std::endl;

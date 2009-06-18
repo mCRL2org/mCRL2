@@ -304,14 +304,14 @@ class summand: public atermpp::aterm_appl
       }
 
       // check 2)
-      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
+      if (has_time() && !data::sort_real::is_real(m_time.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: time " << core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
       }
 
       // check 3)
-      if (!data::sort_bool_::is_bool_(m_condition.sort()))
+      if (!data::sort_bool::is_bool(m_condition.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
@@ -439,7 +439,7 @@ summand set_assignments(summand s, data::assignment_list assignments)
 /// \param f A function that models the concept UnaryFunction with dependent
 /// types argument_type and result_type equal to data_expression.
 /// \param substitute_condition      If true, the substitution is applied to the condition
-/// \param substitute_actions        If true, the substitution is applied to the arguments of actions 
+/// \param substitute_actions        If true, the substitution is applied to the arguments of actions
 /// \param substitute_time           If true, the substitution is applied to the time
 /// \param substitute_next_state     If true, the substitution is applied to the next state expressions
 /// \return The substitution result.
@@ -570,7 +570,7 @@ class summand_base
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       // check 1)
-      if (!data::sort_bool_::is_bool_(m_condition.sort()))
+      if (!data::sort_bool::is_bool(m_condition.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
         return false;
@@ -594,7 +594,7 @@ class deadlock_summand: public summand_base
   protected:
     /// \brief The super class
     typedef summand_base super;
-    
+
     /// \brief The deadlock of the summand
     lps::deadlock m_deadlock;
 
@@ -688,7 +688,7 @@ class action_summand: public summand_base
   protected:
     /// \brief The super class
     typedef summand_base super;
-    
+
     /// \brief The summation variables of the summand
     lps::multi_action m_multi_action;
 

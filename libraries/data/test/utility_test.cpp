@@ -41,11 +41,11 @@ void representation_check(Rewriter& R, data_expression const& input, data_expres
 }
 
 void number_test() {
-  using namespace sort_bool_;
+  using namespace sort_bool;
   using namespace sort_pos;
   using namespace sort_nat;
-  using namespace sort_int_;
-  using namespace sort_real_;
+  using namespace sort_int;
+  using namespace sort_real;
 
   data_specification specification = parse_data_specification("sort A = Real;");
 
@@ -53,8 +53,8 @@ void number_test() {
 
   representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1());
   representation_check(R, number(sort_nat::nat(), "1"), R(pos2nat(sort_pos::c1())));
-  representation_check(R, number(sort_int_::int_(), "-1"), R(cneg(sort_pos::c1())));
-  representation_check(R, number(sort_real_::real_(), "1"), R(pos2real(sort_pos::c1())));
+  representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())));
+  representation_check(R, number(sort_real::real_(), "1"), R(pos2real(sort_pos::c1())));
 
   representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))));
   representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))));
@@ -70,7 +70,7 @@ void number_test() {
 
 void list_construction_test() {
   using namespace mcrl2::data::sort_list;
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   data_expression_vector expressions;
 
@@ -91,8 +91,8 @@ void list_construction_test() {
 void convert_test() {
 
   std::vector< data_expression > l;
- 
-  l.push_back(sort_bool_::true_());
+
+  l.push_back(sort_bool::true_());
 
   atermpp::aterm_list al = convert< atermpp::aterm_list >(l);
 

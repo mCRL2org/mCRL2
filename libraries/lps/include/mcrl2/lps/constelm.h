@@ -71,7 +71,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
     /// \brief Maps process parameters to their index.
     std::map<data::variable, unsigned int> m_index_of;
-    
+
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
@@ -93,7 +93,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     {
       m_instantiate_free_variables = instantiate_free_variables;
       data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
-        
+
       // optimization: rewrite e
       lps::rewrite(e, R);
 
@@ -111,7 +111,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       // sigma contains substitutions of free variables and process parameters
       data::mutable_map_substitution<> sigma;
       data::data_expression_vector::iterator e_i = e.begin();
- 
+
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;
       for (data::variable_list::iterator i = d.begin(); i != d.end(); ++i, ++e_i)
@@ -129,7 +129,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         {
           const action_summand& s = *i;
           const data::data_expression& c_i = s.condition();
-          if (R(c_i, sigma) != data::sort_bool_::false_())
+          if (R(c_i, sigma) != data::sort_bool::false_())
           {
             for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
             {

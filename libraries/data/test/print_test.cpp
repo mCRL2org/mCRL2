@@ -22,7 +22,7 @@
 #include "mcrl2/data/print.h"
 
 using namespace mcrl2::data;
-using namespace mcrl2::data::sort_bool_;
+using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
 
 bool print_check(data_expression const& left, std::string const& right) {
@@ -39,7 +39,7 @@ bool print_check(data_expression const& left, std::string const& right) {
 #define PRINT_CHECK(x,y) BOOST_CHECK(print_check(x,y))
 
 void test_function_symbol_print() {
-  function_symbol f("f", sort_bool_::bool_());
+  function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
@@ -72,7 +72,7 @@ void test_abstraction_print() {
 
 void test_set_print() {
   using namespace sort_nat;
-  using namespace sort_set_;
+  using namespace sort_set;
   using namespace sort_fset;
 
   data_expression s1(setfset(nat(), fsetinsert(nat(), nat(1), fset_empty(nat()))));

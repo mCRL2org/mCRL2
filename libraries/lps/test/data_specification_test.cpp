@@ -34,7 +34,7 @@ int test_main(int argc, char** argv)
 
   specification spec = mcrl22lps(SPECIFICATION);
   data_specification data = spec.data();
-  BOOST_CHECK(data.is_certainly_finite(sort_bool_::bool_()));
+  BOOST_CHECK(data.is_certainly_finite(sort_bool::bool_()));
   core::garbage_collect();
   BOOST_CHECK(!data.is_certainly_finite(sort_nat::nat()));
   core::garbage_collect();

@@ -45,7 +45,7 @@ namespace lps {
         m_time.protect();
         m_actions.protect();
       }
-      
+
       /// \brief Unprotect the term.
       /// Releases protection of the term which has previously been protected through a
       /// call to protect.
@@ -54,7 +54,7 @@ namespace lps {
         m_time.unprotect();
         m_actions.unprotect();
       }
-      
+
       /// \brief Mark the term for not being garbage collected.
       void mark()
       {
@@ -170,7 +170,7 @@ namespace lps {
     bool is_well_typed() const
     {
       // check 1)
-      if (has_time() && !data::sort_real_::is_real_(m_time.sort()))
+      if (has_time() && !data::sort_real::is_real(m_time.sort()))
       {
         std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
         return false;
@@ -378,7 +378,7 @@ std::cerr << "different action signatures detected!" << std::endl;
 std::cerr << "a = " << action_list(va.begin(), va.end()) << std::endl;
 std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 #endif
-        return data::sort_bool_::false_();
+        return data::sort_bool::false_();
       }
 
       // compute the intervals of a with equal names
@@ -416,7 +416,7 @@ std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 
       if (!detail::equal_action_signatures(va, vb))
       {
-        return data::sort_bool_::true_();
+        return data::sort_bool::true_();
       }
 
       // compute the intervals of a with equal names

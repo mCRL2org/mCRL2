@@ -92,7 +92,7 @@ struct assignment_list_replacer
 
 void test_replace()
 {
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   std::cerr << "replace" << std::endl;
 
@@ -114,7 +114,7 @@ void test_replace()
 
 void test_assignment_list()
 {
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   std::cerr << "assingment_list replace" << std::endl;
 
@@ -156,7 +156,7 @@ void test_assignment_list()
 
 void test_variable_replace()
 {
-  using namespace mcrl2::data::sort_bool_;
+  using namespace mcrl2::data::sort_bool;
 
   std::cerr << "variable replace" << std::endl;
 
@@ -201,10 +201,10 @@ void test_data_expression_replace()
 {
   std::cerr << "expression replace" << std::endl;
   // y:Real
-  variable y("y",sort_real_::real_());
+  variable y("y",sort_real::real_());
   data_expression e(y);
   // 4:Real
-  data_expression x(sort_real_::real_(4));
+  data_expression x(sort_real::real_(4));
   // [y]
   data_expression_vector el;
   el.push_back(e);
@@ -226,8 +226,8 @@ void test_data_expression_replace()
   std::cerr << mcrl2::data::pp(xl_) << std::endl;
   BOOST_CHECK(xl_ == convert< data_expression_list >(xl));
 
-  data_expression u = sort_real_::plus(sort_real_::real_(4), sort_real_::real_(1));
-  data_expression v = sort_real_::plus(y, sort_real_::real_(1));
+  data_expression u = sort_real::plus(sort_real::real_(4), sort_real::real_(1));
+  data_expression v = sort_real::plus(y, sort_real::real_(1));
   std::cerr << "u = " << mcrl2::core::pp(u) << std::endl;
   std::cerr << "v = " << mcrl2::core::pp(v) << std::endl;
   data_expression v_ = data_expression_map_replace(v, replacements);
@@ -239,12 +239,12 @@ void test_replace_with_binders()
 {
   std::cerr << "replace with binders" << std::endl;
   mutable_map_substitution< variable, data_expression > sigma;
-  data_expression                                   input1(variable("c", sort_bool_::bool_()));
+  data_expression                                   input1(variable("c", sort_bool::bool_()));
   data_expression                                   input2(parse_data_expression("exists b: Bool, c: Bool. if(b, c, b)"));
 
-  sigma[variable("c", sort_bool_::bool_())] = sort_bool_::false_();
+  sigma[variable("c", sort_bool::bool_())] = sort_bool::false_();
 
-  BOOST_CHECK(replace_free_variables(input1, sigma) == sort_bool_::false_());
+  BOOST_CHECK(replace_free_variables(input1, sigma) == sort_bool::false_());
 
   // variable c is bound and should not be replaced
   BOOST_CHECK(replace_free_variables(input2, sigma) == input2);

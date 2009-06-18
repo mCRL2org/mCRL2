@@ -365,7 +365,7 @@ namespace lps {
   /// \return An action rename specification
   inline
   action_rename_specification parse_action_rename_specification(
-                                 std::istream& in, 
+                                 std::istream& in,
                                  lps::specification const& spec)
   {
     //std::istringstream in(text);
@@ -381,7 +381,7 @@ namespace lps {
 
 /// \brief  Rename the actions in a linear specification using a given action_rename_spec
 /// \details The actions in a linear specification are renamed according to a given
-///         action rename specification. 
+///         action rename specification.
 ///         Note that the rules are applied in the order they appear in the specification.
 ///         This yield quite elaborate conditions in the resulting lps, as a latter rule
 ///         can only be applied if an earlier rule is not applicable. Note also that
@@ -413,7 +413,7 @@ lps::specification action_rename(
   bool to_delta=false;
 
   //go through the rename rules of the rename file
-  if (gsVerbose) 
+  if (gsVerbose)
   { std::cerr << "rename rules found: " << rename_rules.size() << "\n";
   }
   for(action_rename_rule_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
@@ -539,13 +539,13 @@ lps::specification action_rename(
           detail::rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
           if (is_nil(renamed_rule_condition))
-          { renamed_rule_condition=sort_bool_::true_();
+          { renamed_rule_condition=sort_bool::true_();
           }
 
           //go through the arguments of the action
           data_expression_list::iterator
                     lps_old_argument_i = lps_old_action.arguments().begin();
-          data_expression new_equalities_condition=sort_bool_::true_();
+          data_expression new_equalities_condition=sort_bool::true_();
           for(data_expression_list::iterator
                        rule_old_argument_i = renamed_rule_old_action.arguments().begin();
                        rule_old_argument_i != renamed_rule_old_action.arguments().end();
@@ -582,7 +582,7 @@ lps::specification action_rename(
             }
           }
 
-          if (renamed_rule_condition==sort_bool_::true_())
+          if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)
             { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
@@ -600,7 +600,7 @@ lps::specification action_rename(
               }
             }
           }
-          else if (renamed_rule_condition==sort_bool_::false_())
+          else if (renamed_rule_condition==sort_bool::false_())
           {
             for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
                         i!=lps_new_actions.end() ; i++ )
@@ -655,7 +655,7 @@ lps::specification action_rename(
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition_temp.begin() ;
                          i!=lps_new_condition_temp.end() ; i++ )
-            { *i=lazy::and_(*i,sort_bool_::not_(renamed_rule_condition));
+            { *i=lazy::and_(*i,sort_bool::not_(renamed_rule_condition));
             }
 
             lps_new_condition.insert(lps_new_condition.end(),

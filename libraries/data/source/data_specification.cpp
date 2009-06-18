@@ -286,17 +286,17 @@ namespace mcrl2 {
       assert(sort.is_system_defined());
 
       // add sorts, constructors, mappings and equations
-      if (sort == sort_bool_::bool_())
+      if (sort == sort_bool::bool_())
       {
-        sort_bool_::add_bool_to_specification(*this);
+        sort_bool::add_bool_to_specification(*this);
       }
-      else if (sort == sort_real_::real_())
+      else if (sort == sort_real::real_())
       {
-        sort_real_::add_real_to_specification(*this);
+        sort_real::add_real_to_specification(*this);
       }
-      else if (sort == sort_int_::int_())
+      else if (sort == sort_int::int_())
       {
-        sort_int_::add_int_to_specification(*this);
+        sort_int::add_int_to_specification(*this);
       }
       else if (sort == sort_nat::nat())
       {
@@ -314,9 +314,9 @@ namespace mcrl2 {
         {
           sort_list::add_list_to_specification(*this, element_sort);
         }
-        else if (sort_set_::is_set_(sort))
+        else if (sort_set::is_set(sort))
         {
-          sort_set_::add_set_to_specification(*this, element_sort);
+          sort_set::add_set_to_specification(*this, element_sort);
         }
         else if (sort_bag::is_bag(sort))
         {
@@ -374,7 +374,7 @@ namespace mcrl2 {
       detail::dependent_sort_helper dependent_sorts(*this);
 
       // make sure that sort bool is part of the specification
-      dependent_sorts.add(sort_bool_::bool_(), true);
+      dependent_sorts.add(sort_bool::bool_(), true);
 
       // sorts
       for (sorts_const_range r(sorts()); !r.empty(); r.advance_begin(1))

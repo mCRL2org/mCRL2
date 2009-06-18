@@ -19,7 +19,7 @@ class NextStateStandard;
 
 /// \cond INTERNAL_DOCS
 // inherits from rewriter only for data implementation/reconstruction
-// 
+//
 // To minimize changes to the existing implementation, data
 // implementation/reconstruction is performed manually.
 struct legacy_rewriter : public mcrl2::data::rewriter
@@ -128,7 +128,7 @@ struct legacy_selector
 {
   static atermpp::aterm& term()
   {
-    static atermpp::aterm term = mcrl2::data::sort_bool_::false_();
+    static atermpp::aterm term = mcrl2::data::sort_bool::false_();
 
     return term;
   }
@@ -264,12 +264,12 @@ namespace mcrl2 {
 
       static atermpp::aterm false_()
       {
-        return get_rewriter().translate(mcrl2::data::sort_bool_::false_());
+        return get_rewriter().translate(mcrl2::data::sort_bool::false_());
       }
 
       static atermpp::aterm true_()
       {
-        return get_rewriter().translate(mcrl2::data::sort_bool_::true_());
+        return get_rewriter().translate(mcrl2::data::sort_bool::true_());
       }
     };
   }
@@ -278,7 +278,7 @@ namespace mcrl2 {
 
 struct ns_info
 {
-	NextStateStandard *parent;
+  NextStateStandard *parent;
 
         // Uses terms in internal format... *Sigh*
         typedef mcrl2::data::classic_enumerator<
@@ -291,16 +291,16 @@ struct ns_info
         boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
         legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
-	int num_summands;
-	ATermAppl *summands;
-	int num_prioritised;
-	ATermList procvars;
-	int stateformat;
-	ATermAppl nil;
-	AFun pairAFun;
-	int statelen;
-	AFun stateAFun;
-	unsigned int *current_id;
+  int num_summands;
+  ATermAppl *summands;
+  int num_prioritised;
+  ATermList procvars;
+  int stateformat;
+  ATermAppl nil;
+  AFun pairAFun;
+  int statelen;
+  AFun stateAFun;
+  unsigned int *current_id;
 
         enumerator_type get_sols(ATermList v, ATerm c) {
           return m_enumerator_factory->make(v, c);
@@ -321,101 +321,101 @@ struct ns_info
           m_rewriter(m_enumerator_factory->get_evaluator()) {
 
           // Configure selector to compare with term that represents false
-          legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool_::false_());
+          legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::false_());
         }
 };
 /// \endcond
 
 class NextStateGeneratorStandard : public NextStateGenerator
 {
-	public:
-		NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false);
-		~NextStateGeneratorStandard();
+  public:
+    NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand = false);
+    ~NextStateGeneratorStandard();
 
-		bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
+    bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
-		bool errorOccurred();
+    bool errorOccurred();
 
-		void reset(ATerm State, size_t SummandIndex = 0);
+    void reset(ATerm State, size_t SummandIndex = 0);
 
-		ATerm get_state() const;
+    ATerm get_state() const;
 
-	private:
-		ns_info info;
-		unsigned int id;
+  private:
+    ns_info info;
+    unsigned int id;
 
-		bool error;
+    bool error;
                 bool single_summand;
 
-		int sum_idx;
+    int sum_idx;
 
-		ATerm cur_state;
-		ATerm cur_act;
-		ATermList cur_nextstate;
+    ATerm cur_state;
+    ATerm cur_act;
+    ATermList cur_nextstate;
 
-		ATerm *stateargs;
+    ATerm *stateargs;
 
                 ns_info::enumerator_type valuations;
 
-		void set_substitutions();
+    void set_substitutions();
 
-		void SetTreeStateVars(ATerm tree, ATermList *vars);
-		ATermAppl rewrActionArgs(ATermAppl act);
-		ATerm makeNewState(ATerm old, ATermList assigns);
-		ATermList ListFromFormat(ATermList l);
+    void SetTreeStateVars(ATerm tree, ATermList *vars);
+    ATermAppl rewrActionArgs(ATermAppl act);
+    ATerm makeNewState(ATerm old, ATermList assigns);
+    ATermList ListFromFormat(ATermList l);
 };
 
 class NextStateStandard : public NextState
 {
-	friend class NextStateGeneratorStandard;
-	public:
+  friend class NextStateGeneratorStandard;
+  public:
                 typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory_type;
-		NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type& e);
-		~NextStateStandard();
+    NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type& e);
+    ~NextStateStandard();
 
-		void prioritise(const char *action);
+    void prioritise(const char *action);
 
-		ATerm getInitialState();
-		NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
-		NextStateGenerator *getNextStates(ATerm state, int group, NextStateGenerator *old = NULL);
+    ATerm getInitialState();
+    NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
+    NextStateGenerator *getNextStates(ATerm state, int group, NextStateGenerator *old = NULL);
 
                 void gatherGroupInformation();
 
-		int getGroupCount() const;
-		int getStateLength();
-		ATermAppl getStateArgument(ATerm state, int index);
-		ATermAppl makeStateVector(ATerm state);
-		ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
+    int getGroupCount() const;
+    int getStateLength();
+    ATermAppl getStateArgument(ATerm state, int index);
+    ATermAppl makeStateVector(ATerm state);
+    ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
                 mcrl2::data::rewriter& getRewriter() { // Deprecated. Do not use.
                   return const_cast< legacy_rewriter& >(info.m_rewriter);
                 }
 
-	private:
-		ns_info info;
-		unsigned int next_id;
-		unsigned int current_id;
+  private:
+    ns_info info;
+    unsigned int next_id;
+    unsigned int current_id;
 
-		bool stateAFun_made;
+    bool stateAFun_made;
 
-		bool usedummies;
+    bool usedummies;
 
-		AFun smndAFun;
-		bool *tree_init;
-		ATerm *stateargs;
+    AFun smndAFun;
+    bool *tree_init;
+    ATerm *stateargs;
 
-		ATermAppl current_spec;
-		ATermList pars;
-		ATerm initial_state;
+    ATermAppl current_spec;
+    ATermList pars;
+    ATerm initial_state;
 
-		ATerm buildTree(ATerm *args);
-		ATerm getTreeElement(ATerm tree, int index);
+    ATerm buildTree(ATerm *args);
+    ATerm getTreeElement(ATerm tree, int index);
 
-		ATermAppl FindDummy(ATermAppl sort, ATermList no_dummy = ATempty);
-		ATerm SetVars(ATerm a, ATermList free_vars);
-		ATermList ListToFormat(ATermList l,ATermList free_vars);
-		ATermList ListFromFormat(ATermList l);
-		ATermAppl ActionToRewriteFormat(ATermAppl act, ATermList free_vars);
-		ATermList AssignsToRewriteFormat(ATermList assigns, ATermList free_vars);
+    ATermAppl FindDummy(ATermAppl sort, ATermList no_dummy = ATempty);
+    ATerm SetVars(ATerm a, ATermList free_vars);
+    ATermList ListToFormat(ATermList l,ATermList free_vars);
+    ATermList ListFromFormat(ATermList l);
+    ATermAppl ActionToRewriteFormat(ATermAppl act, ATermList free_vars);
+    ATermList AssignsToRewriteFormat(ATermList assigns, ATermList free_vars);
 };
 
 #endif

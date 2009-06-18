@@ -107,7 +107,7 @@ void test_find_variable()
 {
   variable d("d", basic_sort("D"));
   variable e("e", basic_sort("E"));
-  data_expression d_e = sort_bool_::and_(d, e);
+  data_expression d_e = sort_bool::and_(d, e);
   variable v = find_variable(d_e);
   BOOST_CHECK(v == d);
 }

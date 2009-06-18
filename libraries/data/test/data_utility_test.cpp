@@ -30,7 +30,7 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
-using namespace mcrl2::data::sort_bool_;
+using namespace mcrl2::data::sort_bool;
 
 void test_fresh_variable_generator()
 {

@@ -89,7 +89,7 @@ namespace mcrl2 {
     class classic_enumerator;
 
     /** \brief Specialised template class for generating data enumerator components
-     * 
+     *
      * A data enumerator represents a sequence of valuations (specified as a
      * substitution) for a given set of variables that satisfy a given
      * condition. The classic enumerator when constructed represents a
@@ -118,9 +118,9 @@ namespace mcrl2 {
      * void enumerate(data_specification const& d,
      *          std::set< variable > variables const& v,
      *                  data_expression const& c) {
-     * 
+     *
      *   using namespace mcrl2::data;
-     * 
+     *
      *   for (classic_enumerator< > i(d, variables, c); i != classic_enumerator< >(); ++i) {
      *     std::cerr << mcrl2::core::pp((*i)(c)) << std::endl;
      *   }
@@ -145,9 +145,9 @@ namespace mcrl2 {
      * void enumerate(data_specification const& d,
      *          std::set< variable > variables const& v,
      *                  data_expression const& c) {
-     * 
+     *
      *   enumerator_type i(d, variables, c);
-     *  
+     *
      *   for (enumerator_type j = i; i != enumerator_type(); ++i, ++j) {
      *     assert(*i == *j);
      *   }
@@ -273,7 +273,7 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             std::set< variable_type > const& variables,
             Evaluator const& evaluator,
-            expression_type const& condition = sort_bool_::true_()) {
+            expression_type const& condition = sort_bool::true_()) {
 
             implementation_type::create(m_impl, specification, boost::make_iterator_range(variables), condition, evaluator);
         }
@@ -307,7 +307,7 @@ namespace mcrl2 {
         classic_enumerator(data_specification const& specification,
             variable_type const& variable,
             Evaluator const& evaluator,
-            expression_type const& condition = sort_bool_::true_()) {
+            expression_type const& condition = sort_bool::true_()) {
 
           implementation_type::create(m_impl, specification,
             boost::make_iterator_range(make_set(variable)), condition, evaluator);

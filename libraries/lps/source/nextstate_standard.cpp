@@ -860,7 +860,7 @@ void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 
         if ( info.num_summands == 0 )
         {
-          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool_::false_()));
+          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
         } else {
           cur_act = ATgetArgument(info.summands[SummandIndex],2);
           cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);

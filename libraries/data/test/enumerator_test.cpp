@@ -64,12 +64,12 @@ void test_enumerator()
   data_specification data = parse_data_specification(DATA_SPEC1);
   rewriter datar(data);
   enumerator e(datar, data);
-  sort_expression s1 = sort_bool_::bool_();
+  sort_expression s1 = sort_bool::bool_();
   atermpp::vector<data_expression> v = e.enumerate_finite_sort(s1);
 
-  variable d1(core::identifier_string("d1"), sort_bool_::bool_());
-  variable d2(core::identifier_string("d2"), sort_bool_::bool_());
-  variable d3(core::identifier_string("d3"), sort_bool_::bool_());
+  variable d1(core::identifier_string("d1"), sort_bool::bool_());
+  variable d2(core::identifier_string("d2"), sort_bool::bool_());
+  variable d3(core::identifier_string("d3"), sort_bool::bool_());
   std::vector<variable> vars;
   vars.push_back(d1);
   vars.push_back(d2);
@@ -195,12 +195,12 @@ void test5()
     for (atermpp::vector<data_expression_with_variables>::iterator i = z.begin(); i != z.end(); ++i)
     {
       data_expression b = datar(greater(*i, three));
-      if (b == sort_bool_::false_())
+      if (b == sort_bool::false_())
       {
         std::clog << "found solution " << pp(*i) << std::endl;
         result.push_back(*i);
       }
-      else if (b == sort_bool_::true_())
+      else if (b == sort_bool::true_())
       {
         std::clog << "found non-solution " << pp(*i) << std::endl;
       }

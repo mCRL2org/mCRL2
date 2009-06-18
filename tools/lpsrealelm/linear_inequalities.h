@@ -86,27 +86,27 @@ class linear_inequality
 
       public:
         lhs_t &add(const data_expression v, const rewriter&r)
-        { return meta_operation_constant<sort_real_::plus>(v,r);
+        { return meta_operation_constant<sort_real::plus>(v,r);
         }
 
         lhs_t &subtract(const data_expression v, const rewriter&r)
-        { return meta_operation_constant<sort_real_::minus>(v,r);
+        { return meta_operation_constant<sort_real::minus>(v,r);
         }
 
         lhs_t &multiply(const data_expression v, const rewriter&r)
-        { return meta_operation_constant<sort_real_::times>(v,r);
+        { return meta_operation_constant<sort_real::times>(v,r);
         }
 
         lhs_t &divide(const data_expression v, const rewriter&r)
-        { return meta_operation_constant<sort_real_::divides>(v,r);
+        { return meta_operation_constant<sort_real::divides>(v,r);
         }
 
         lhs_t &add(const lhs_t &e, const rewriter&r)
-        { return meta_operation_lhs<sort_real_::plus>(e,r);
+        { return meta_operation_lhs<sort_real::plus>(e,r);
         }
 
         lhs_t &subtract(const lhs_t &e, const rewriter&r)
-        { return meta_operation_lhs<sort_real_::minus>(e,r);
+        { return meta_operation_lhs<sort_real::minus>(e,r);
         }
 
         template <typename SubstitutionFunction>
@@ -115,7 +115,7 @@ class linear_inequality
           for(const_iterator i=begin(); i!=end(); ++i)
           { assert(beta.count(i->first)>0);
             const data_expression d=i->first;
-            result=sort_real_::plus(result,sort_real_::times(d,i->second));
+            result=sort_real::plus(result,sort_real::times(d,i->second));
           }
           return r(result,make_map_substitution_adapter(beta));
         }
@@ -161,47 +161,47 @@ class linear_inequality
                       const data_expression factor=real_one())
     {
       // Debugging only
-      if (sort_real_::is_minus_application(e))
+      if (sort_real::is_minus_application(e))
       { parse_and_store_expression(application(e).left(),r,negate,factor);
         parse_and_store_expression(application(e).right(),r,!negate,factor);
       }
-      else if (sort_real_::is_negate_application(e))
+      else if (sort_real::is_negate_application(e))
       { parse_and_store_expression(application(e).left(),r,!negate,factor);
       }
-      else if (sort_real_::is_plus_application(e))
+      else if (sort_real::is_plus_application(e))
       { parse_and_store_expression(application(e).left(),r,negate,factor);
         parse_and_store_expression(application(e).right(),r,negate,factor);
       }
-      else if (sort_real_::is_times_application(e))
+      else if (sort_real::is_times_application(e))
       { data_expression lhs=r(application(e).left()), rhs=r(application(e).right());
         if (is_closed_real_number(lhs))
-        { parse_and_store_expression(rhs,r,negate,sort_real_::times(lhs,factor));
+        { parse_and_store_expression(rhs,r,negate,sort_real::times(lhs,factor));
         }
         else if (is_closed_real_number(rhs))
-        { parse_and_store_expression(lhs,r,negate,sort_real_::times(rhs,factor));
+        { parse_and_store_expression(lhs,r,negate,sort_real::times(rhs,factor));
         }
         else throw mcrl2::runtime_error("Expect constant multiplies expression: " + pp(e) + "\n");
       }
       else if (e.is_variable())
-      { if (e.sort() == sort_real_::real_())
+      { if (e.sort() == sort_real::real_())
         {
           if(m_lhs.find(e) == m_lhs.end())
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real_::negate(factor),r)
+            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::negate(factor),r)
                                                :rewrite_with_memory(factor,r)));
           }
           else
           {
-            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real_::minus(m_lhs[e],factor),r)
-                                               :rewrite_with_memory(sort_real_::plus(m_lhs[e],factor),r)));
+            set_factor_for_a_variable(e,(negate?rewrite_with_memory(sort_real::minus(m_lhs[e],factor),r)
+                                               :rewrite_with_memory(sort_real::plus(m_lhs[e],factor),r)));
           }
         }
         else
            throw mcrl2::runtime_error("Encountered a variable in a real expression which is not of sort real: " + pp(e) + "\n");
       }
       else if (is_closed_real_number(rewrite_with_memory(e,r)))
-      { set_rhs(negate?rewrite_with_memory(sort_real_::plus(rhs(),e),r)
-                      :rewrite_with_memory(sort_real_::minus(rhs(),e),r));
+      { set_rhs(negate?rewrite_with_memory(sort_real::plus(rhs(),e),r)
+                      :rewrite_with_memory(sort_real::minus(rhs(),e),r));
       }
       else throw mcrl2::runtime_error("Expect linear expression over reals: " + pp(e) + "\n");
     }
@@ -376,9 +376,9 @@ class linear_inequality
               i!=e.lhs_end(); ++i)
       {
         set_factor_for_a_variable(i->first,
-             rewrite_with_memory(sort_real_::minus(get_factor_for_a_variable(i->first),i->second),r));
+             rewrite_with_memory(sort_real::minus(get_factor_for_a_variable(i->first),i->second),r));
       }
-      set_rhs(rewrite_with_memory(sort_real_::minus(rhs(),e.rhs()),r));
+      set_rhs(rewrite_with_memory(sort_real::minus(rhs(),e.rhs()),r));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -388,15 +388,15 @@ class linear_inequality
                   const data_expression f1,
                   const data_expression f2,
                   const rewriter &r)
-    { data_expression f=rewrite_with_memory(sort_real_::divides(f1,f2),r);
+    { data_expression f=rewrite_with_memory(sort_real::divides(f1,f2),r);
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
       { set_factor_for_a_variable(
                   i->first,
                   rewrite_with_memory(
-                     sort_real_::minus(get_factor_for_a_variable(i->first),sort_real_::times(f,i->second)),r));
+                     sort_real::minus(get_factor_for_a_variable(i->first),sort_real::times(f,i->second)),r));
       }
-      set_rhs(rewrite_with_memory(sort_real_::minus(rhs(),sort_real_::times(f,e.rhs())),r));
+      set_rhs(rewrite_with_memory(sort_real::minus(rhs(),sort_real::times(f,e.rhs())),r));
     }
 
     /// \brief Return this inequality as a typical pair of terms of the form <x1+c2 x2+...+cn xn, d> where c2,...,cn, d are real constants.
@@ -415,17 +415,17 @@ class linear_inequality
 
       for(lhs_t::const_iterator i=lhs_begin(); i!=lhs_end(); ++i)
       { variable v=i->first;
-        data_expression e=sort_real_::times(rewrite_with_memory(sort_real_::divides(i->second,factor),r),
+        data_expression e=sort_real::times(rewrite_with_memory(sort_real::divides(i->second,factor),r),
                                            data_expression(v));
         if (i==lhs_begin())
         { lhs_expression=e;
         }
         else
-        { lhs_expression=sort_real_::plus(lhs_expression,e);
+        { lhs_expression=sort_real::plus(lhs_expression,e);
         }
       }
 
-      rhs_expression=rewrite_with_memory(sort_real_::divides(rhs(),factor),r);
+      rhs_expression=rewrite_with_memory(sort_real::divides(rhs(),factor),r);
     }
 
     void divide(const data_expression e, const rewriter &r)
@@ -435,9 +435,9 @@ class linear_inequality
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
       { // m_lhs.find(i->first) == i
-        m_lhs[i->first]=rewrite_with_memory(sort_real_::divides(m_lhs[i->first],e),r);
+        m_lhs[i->first]=rewrite_with_memory(sort_real::divides(m_lhs[i->first],e),r);
       }
-      set_rhs(rewrite_with_memory(sort_real_::divides(rhs(),e),r));
+      set_rhs(rewrite_with_memory(sort_real::divides(rhs(),e),r));
     }
 
     void invert(const rewriter &r)
@@ -445,9 +445,9 @@ class linear_inequality
       for(lhs_t::const_iterator i=m_lhs.begin();
               i!=m_lhs.end(); ++i)
       {
-        m_lhs[i->first]=rewrite_with_memory(sort_real_::negate(m_lhs[i->first]),r);
+        m_lhs[i->first]=rewrite_with_memory(sort_real::negate(m_lhs[i->first]),r);
       }
-      set_rhs(rewrite_with_memory(sort_real_::negate(rhs()),r));
+      set_rhs(rewrite_with_memory(sort_real::negate(rhs()),r));
       if (comparison()==less)
       { set_comparison(less_eq);
       }
@@ -506,21 +506,21 @@ std::string string(const linear_inequality &l)
 // the data type library.
 
 static data_expression init_real_zero(data_expression &real_zero)
-{ real_zero=sort_real_::real_("0");
+{ real_zero=sort_real::real_("0");
   real_zero.protect();
   // ATprotect(reinterpret_cast<ATerm*>(&real_zero));
   return real_zero;
 }
 
 static data_expression init_real_one(data_expression &real_one)
-{ real_one=sort_real_::real_("1");
+{ real_one=sort_real::real_("1");
   real_one.protect();
   // ATprotect(reinterpret_cast<ATerm*>(&real_one));
   return real_one;
 }
 
 static data_expression init_real_minus_one(data_expression &real_minus_one)
-{ real_minus_one=sort_real_::real_("-1");
+{ real_minus_one=sort_real::real_("-1");
   real_minus_one.protect();
   // ATprotect(reinterpret_cast<ATerm*>(&real_minus_one));
   return real_minus_one;
@@ -550,20 +550,20 @@ inline data_expression multiply(const data_expression e1,const data_expression e
 } */
 
 inline data_expression min(const data_expression e1,const data_expression e2,const rewriter &r)
-{ if (r(less_equal(e1,e2))==sort_bool_::true_())
+{ if (r(less_equal(e1,e2))==sort_bool::true_())
   { return e1;
   }
-  if (r(less_equal(e2,e1))==sort_bool_::true_())
+  if (r(less_equal(e2,e1))==sort_bool::true_())
   { return e2;
   }
   throw mcrl2::runtime_error("Fail to determine the minimum of: " + pp(e1) + " and " + pp(e2) + "\n" );
 }
 
 inline data_expression max(const data_expression e1,const data_expression e2,const rewriter &r)
-{ if (r(less_equal(e2,e1))==sort_bool_::true_())
+{ if (r(less_equal(e2,e1))==sort_bool::true_())
   { return e1;
   }
-  if (r(less_equal(e1,e2))==sort_bool_::true_())
+  if (r(less_equal(e1,e2))==sort_bool::true_())
   { return e2;
   }
   throw mcrl2::runtime_error("Fail to determine the maximum of: " + pp(e1) + " and " + pp(e2) + "\n" );
@@ -572,7 +572,7 @@ inline data_expression max(const data_expression e1,const data_expression e2,con
 
 inline bool is_closed_real_number(const data_expression e)
 { // TODO: Check that the number is closed.
-  if (e.sort()!=sort_real_::real_())
+  if (e.sort()!=sort_real::real_())
   { return false;
   }
 
@@ -586,10 +586,10 @@ inline bool is_closed_real_number(const data_expression e)
 inline bool is_negative(const data_expression e,const rewriter &r)
 {
   data_expression result=r(less(e,real_zero()));
-  if (result==sort_bool_::true_())
+  if (result==sort_bool::true_())
   { return true;
   }
-  if (result==sort_bool_::false_())
+  if (result==sort_bool::false_())
   { return false;
   }
   throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is smaller than 0");
@@ -598,10 +598,10 @@ inline bool is_negative(const data_expression e,const rewriter &r)
 inline bool is_positive(const data_expression e,const rewriter &r)
 {
   data_expression result=r(greater(e,real_zero()));
-  if (result==sort_bool_::true_())
+  if (result==sort_bool::true_())
   { return true;
   }
-  if (result==sort_bool_::false_())
+  if (result==sort_bool::false_())
   { return false;
   }
   throw mcrl2::runtime_error("Cannot determine that " + pp(e) + " is larger than or equal to 0");
@@ -1028,20 +1028,20 @@ static void pivot_and_update(
                const rewriter &r)
 { std::cerr << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
   const data_expression aij=working_equalities[xi][xj];
-  const data_expression theta=rewrite_with_memory(sort_real_::divides(sort_real_::minus(v,beta[xi]),aij),r);
-  const data_expression theta_delta_correction=rewrite_with_memory(sort_real_::divides(sort_real_::minus(v,beta_delta_correction[xi]),aij),r);
+  const data_expression theta=rewrite_with_memory(sort_real::divides(sort_real::minus(v,beta[xi]),aij),r);
+  const data_expression theta_delta_correction=rewrite_with_memory(sort_real::divides(sort_real::minus(v,beta_delta_correction[xi]),aij),r);
   beta[xi]=v;
   beta_delta_correction[xi]=v_delta_correction;
-  beta[xj]=rewrite_with_memory(sort_real_::plus(beta[xj],theta),r);
-  beta_delta_correction[xj]=rewrite_with_memory(sort_real_::plus(beta_delta_correction[xj],theta_delta_correction),r);
+  beta[xj]=rewrite_with_memory(sort_real::plus(beta[xj],theta),r);
+  beta_delta_correction[xj]=rewrite_with_memory(sort_real::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
   for(atermpp::set < variable >::const_iterator k=basic_variables.begin();
           k!=basic_variables.end(); ++k)
   { if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
     { const data_expression akj=working_equalities[*k][xj];
       std::cerr << "AAA " << pp(akj) << "   " << pp(theta) << "\n";
-      beta[*k]=rewrite_with_memory(sort_real_::plus(beta[*k],sort_real_::times(akj ,theta)),r);
-      beta_delta_correction[*k]=rewrite_with_memory(sort_real_::plus(beta_delta_correction[*k],sort_real_::times(akj ,theta_delta_correction)),r);
+      beta[*k]=rewrite_with_memory(sort_real::plus(beta[*k],sort_real::times(akj ,theta)),r);
+      beta_delta_correction[*k]=rewrite_with_memory(sort_real::plus(beta_delta_correction[*k],sort_real::times(akj ,theta_delta_correction)),r);
     }
   }
   // Apply pivoting on variables xi and xj;
@@ -1051,7 +1051,7 @@ static void pivot_and_update(
   linear_inequality::lhs_t expression_for_xj=working_equalities[xi];
   expression_for_xj.erase(xj);
   expression_for_xj[xi]=real_minus_one();
-  expression_for_xj.multiply(sort_real_::divides(real_minus_one(),aij),r);
+  expression_for_xj.multiply(sort_real::divides(real_minus_one(),aij),r);
 
   working_equalities.erase(xi);
   for(std::map < variable, linear_inequality::lhs_t >::iterator j=working_equalities.begin();
@@ -1168,11 +1168,11 @@ inline bool is_inconsistent(
       if (i->lhs_size()==1)  // the left hand side consists of a single variable.
       { variable v=i->lhs_begin()->first;
         data_expression factor=i->lhs_begin()->second;   assert(factor!=real_zero());
-        data_expression bound=rewrite_with_memory(sort_real_::divides(i->rhs(),factor),r);
+        data_expression bound=rewrite_with_memory(sort_real::divides(i->rhs(),factor),r);
         if (is_positive(factor,r))
         { // The inequality has the shape factor*v<=c or factor*v<c with factor positive
           if ((upperbounds.count(v)==0) ||
-               (rewrite_with_memory(less(bound,upperbounds[v]),r)==sort_bool_::true_()))
+               (rewrite_with_memory(less(bound,upperbounds[v]),r)==sort_bool::true_()))
           { upperbounds[v]=bound;
             upperbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
@@ -1189,7 +1189,7 @@ inline bool is_inconsistent(
         else
         { // The inequality has the shape factor*v<=c or factor*v<c with factor negative
           if ((lowerbounds.count(v)==0) ||
-               (rewrite_with_memory(less(lowerbounds[v],bound),r)==sort_bool_::true_()))
+               (rewrite_with_memory(less(lowerbounds[v],bound),r)==sort_bool::true_()))
           { lowerbounds[v]=bound;
             lowerbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_one():real_zero());
@@ -1206,7 +1206,7 @@ inline bool is_inconsistent(
       else
       { // The inequality has more than one variable at the left hand side.
         // We transform it into an equation with a new slack variable.
-        variable new_basic_variable=fresh_variable(sort_real_::real_());
+        variable new_basic_variable=fresh_variable(sort_real::real_());
         basic_variables.insert(new_basic_variable);
         upperbounds[new_basic_variable]=i->rhs();
         upperbounds_delta_correction[new_basic_variable]=
@@ -1222,9 +1222,9 @@ inline bool is_inconsistent(
         i!=non_basic_variables.end(); ++i)
   { if (lowerbounds.count(*i)>0)
     { if ((upperbounds.count(*i)>0) &&
-          ((rewrite_with_memory(less(upperbounds[*i],lowerbounds[*i]),r)==sort_bool_::true_()) ||
+          ((rewrite_with_memory(less(upperbounds[*i],lowerbounds[*i]),r)==sort_bool::true_()) ||
            ((upperbounds[*i]==lowerbounds[*i]) &&
-            (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
+            (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
       { if (core::gsDebug)
         { std::cerr << "Inconsistent, preprocessing " << pp(*i) << "\n";
         }
@@ -1271,9 +1271,9 @@ inline bool is_inconsistent(
       data_expression value_delta_correction=working_equalities[*i].
                         evaluate(beta_delta_correction,r);
       if ((upperbounds.count(*i)>0) &&
-          ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool_::true_()) ||
+          ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool::true_()) ||
            ((upperbounds[*i]==value) &&
-            (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool_::true_()))))
+            (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
         found=true;
@@ -1281,9 +1281,9 @@ inline bool is_inconsistent(
         lowerbound_violation=false;
       }
       else if ((lowerbounds.count(*i)>0) &&
-               ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool_::true_()) ||
+               ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool::true_()) ||
                 ((lowerbounds[*i]==value) &&
-                 (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
+                 (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
         found=true;
@@ -1309,12 +1309,12 @@ inline bool is_inconsistent(
         // std::cerr << pp(xj) << "  --  " << pp(xj_it->second) << "\n";
         if ((is_positive(xj_it->second,r) &&
                 ((upperbounds.count(xj)==0) ||
-                    ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_())||
-                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
+                    ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool::true_())||
+                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool::true_()))))) ||
             (is_negative(xj_it->second,r) &&
                  ((lowerbounds.count(xj)==0) ||
-                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_())||
-                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
+                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool::true_())||
+                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool::true_()))))))
         { found=true;
           pivot_and_update(xi,xj,lowerbounds[xi],lowerbounds_delta_correction[xi],
                            beta, beta_delta_correction,
@@ -1342,12 +1342,12 @@ inline bool is_inconsistent(
         //                 is_positive(xj_it->second,r) << "\n";
         if ((is_negative(xj_it->second,r) &&
                 ((upperbounds.count(xj)==0) ||
-                   ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_()) ||
-                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
+                   ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool::true_()) ||
+                     ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool::true_()))))) ||
             (is_positive(xj_it->second,r) &&
                  ((lowerbounds.count(xj)==0) ||
-                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_()) ||
-                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
+                    ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool::true_()) ||
+                     ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool::true_()))))))
         { found=true;
           pivot_and_update(xi,xj,upperbounds[xi],upperbounds_delta_correction[xi],
                            beta,beta_delta_correction,

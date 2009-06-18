@@ -285,10 +285,10 @@ void test_quantifier_rename_builder()
 void test_complement_method_builder()
 {
   using namespace pbes_system::pbes_expr;
-  namespace d = data::sort_bool_;
+  namespace d = data::sort_bool;
 
-  variable X("x", data::sort_bool_::bool_());
-  variable Y("y", data::sort_bool_::bool_());
+  variable X("x", data::sort_bool::bool_());
+  variable Y("y", data::sort_bool::bool_());
 
   pbes_expression p = or_(and_(X,Y), and_(Y,X));
   pbes_expression q = and_(or_(d::not_(X), d::not_(Y)), or_(d::not_(Y),d::not_(X)));
@@ -376,6 +376,6 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
   test_traverse_sort_expressions();
   core::garbage_collect();
- 
+
   return 0;
 }

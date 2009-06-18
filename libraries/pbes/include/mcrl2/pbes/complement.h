@@ -54,7 +54,7 @@ struct complement_builder: public pbes_expression_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    return data::sort_bool_::not_(d);
+    return data::sort_bool::not_(d);
   }
 
   /// \brief Visit true node

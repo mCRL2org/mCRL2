@@ -144,11 +144,11 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
-    namespace sort_bool_{
+    namespace sort_bool{
       /// \brief Constructs expression of type Bool from an integral type
       /// \param b A Boolean
       inline data_expression bool_(bool b) {
-        return (b) ? sort_bool_::true_() : sort_bool_::false_();
+        return (b) ? sort_bool::true_() : sort_bool::false_();
       }
     }
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
         data_expression result(sort_pos::c1());
 
         for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i) {
-          result = sort_pos::cdub(sort_bool_::bool_(*i), result);
+          result = sort_pos::cdub(sort_bool::bool_(*i), result);
         }
 
         return result;
@@ -194,7 +194,7 @@ namespace mcrl2 {
         data_expression result(sort_pos::c1());
 
         for (std::vector< bool >::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i) {
-          result = sort_pos::cdub(sort_bool_::bool_(*i), result);
+          result = sort_pos::cdub(sort_bool::bool_(*i), result);
         }
 
         return result;
@@ -218,7 +218,7 @@ namespace mcrl2 {
       }
     }
 
-    namespace sort_int_ {
+    namespace sort_int {
 
       /// \brief Constructs expression of type pos from an integral type
       template < typename T >
@@ -226,20 +226,20 @@ namespace mcrl2 {
       int_(T t) {
         std::string number(detail::as_decimal_string< typename boost::make_unsigned< T >::type >((0 <= t) ? t : -t));
 
-        return (t < 0) ? sort_int_::cneg(sort_pos::pos(-t)) :
-            static_cast< data_expression const& >(sort_int_::cint(sort_nat::nat(t)));
+        return (t < 0) ? sort_int::cneg(sort_pos::pos(-t)) :
+            static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(t)));
       }
 
       /// \brief Constructs expression of type Int from a string
       /// \param n A string
       /// \pre n is of the form ([-]?[0...9][0...9]+)([0...9]+)
       inline data_expression int_(std::string const& n) {
-        return (n[0] == '-') ? sort_int_::cneg(sort_pos::pos(n.substr(1))) :
-            static_cast< data_expression const& >(sort_int_::cint(sort_nat::nat(n)));
+        return (n[0] == '-') ? sort_int::cneg(sort_pos::pos(n.substr(1))) :
+            static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(n)));
       }
     }
 
-    namespace sort_real_ {
+    namespace sort_real {
       /// \brief Constructs expression of type pos from an integral type
       //template < typename T >
       //inline typename boost::enable_if< typename boost::is_floating_point< T >::type, data_expression >::type
@@ -252,7 +252,7 @@ namespace mcrl2 {
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       real_(T t) {
-        return sort_real_::creal(sort_int_::int_(t), sort_pos::c1());
+        return sort_real::creal(sort_int::int_(t), sort_pos::c1());
       }
 
       /// \brief Constructs expression of type pos from an integral type
@@ -261,14 +261,14 @@ namespace mcrl2 {
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type
       real_(T numerator, T denominator) {
-        return sort_real_::creal(sort_int_::int_(numerator), sort_pos::pos(denominator));
+        return sort_real::creal(sort_int::int_(numerator), sort_pos::pos(denominator));
       }
 
       /// \brief Constructs expression of type Real from a string
       /// \param n A string
       /// \pre n is of the form (-[1...9][0...9]+)([0...9]+)
       inline data_expression real_(std::string const& n) {
-        return sort_real_::creal(sort_int_::int_(n), sort_pos::c1());
+        return sort_real::creal(sort_int::int_(n), sort_pos::c1());
       }
     }
 
@@ -284,11 +284,11 @@ namespace mcrl2 {
       else if (s == sort_nat::nat()) {
         return sort_nat::nat(n);
       }
-      else if (s == sort_int_::int_()) {
-        return sort_int_::int_(n);
+      else if (s == sort_int::int_()) {
+        return sort_int::int_(n);
       }
 
-      return sort_real_::real_(n);
+      return sort_real::real_(n);
     }
 
     /// \brief Returns true if and only if s1 == s2, or if s1 is a less specific numeric type than s2
@@ -299,10 +299,10 @@ namespace mcrl2 {
     {
       if (s1 != s2)
       {
-        if (s2 == sort_real_::real_()) {
-          return s1 == sort_int_::int_() || s1 == sort_nat::nat() || s1 == sort_pos::pos();
+        if (s2 == sort_real::real_()) {
+          return s1 == sort_int::int_() || s1 == sort_nat::nat() || s1 == sort_pos::pos();
         }
-        else if (s2 == sort_int_::int_()) {
+        else if (s2 == sort_int::int_()) {
           return s1 == sort_nat::nat() || s1 == sort_pos::pos();
         }
         else if (s2 == sort_nat::nat()) {
@@ -408,14 +408,14 @@ namespace mcrl2 {
       /// \return The value <tt>!p</tt>
       inline data_expression not_(data_expression const& p)
       {
-        if (p == sort_bool_::true_()) {
-          return sort_bool_::false_();
+        if (p == sort_bool::true_()) {
+          return sort_bool::false_();
         }
-        else if (p == sort_bool_::false_()) {
-          return sort_bool_::true_();
+        else if (p == sort_bool::false_()) {
+          return sort_bool::true_();
         }
 
-        return sort_bool_::not_(p);
+        return sort_bool::not_(p);
       }
 
       /// \brief Returns an expression equivalent to p and q
@@ -424,17 +424,17 @@ namespace mcrl2 {
       /// \return The value <tt>p && q</tt>
       inline data_expression or_(data_expression const& p, data_expression const& q)
       {
-        if ((p == sort_bool_::true_()) || (q == sort_bool_::true_())) {
-          return sort_bool_::true_();
+        if ((p == sort_bool::true_()) || (q == sort_bool::true_())) {
+          return sort_bool::true_();
         }
-        else if ((p == q) || (p == sort_bool_::false_())) {
+        else if ((p == q) || (p == sort_bool::false_())) {
           return q;
         }
-        else if (q == sort_bool_::false_()) {
+        else if (q == sort_bool::false_()) {
           return p;
         }
 
-        return sort_bool_::or_(p, q);
+        return sort_bool::or_(p, q);
       }
 
       /// \brief Returns an expression equivalent to p or q
@@ -443,17 +443,17 @@ namespace mcrl2 {
       /// \return The value p || q
       inline data_expression and_(data_expression const& p, data_expression const& q)
       {
-        if ((p == sort_bool_::false_()) || (q == sort_bool_::false_())) {
-          return sort_bool_::false_();
+        if ((p == sort_bool::false_()) || (q == sort_bool::false_())) {
+          return sort_bool::false_();
         }
-        else if ((p == q) || (p == sort_bool_::true_())) {
+        else if ((p == q) || (p == sort_bool::true_())) {
           return q;
         }
-        else if (q == sort_bool_::true_()) {
+        else if (q == sort_bool::true_()) {
           return p;
         }
 
-        return sort_bool_::and_(p, q);
+        return sort_bool::and_(p, q);
       }
 
       /// \brief Returns an expression equivalent to p implies q
@@ -462,17 +462,17 @@ namespace mcrl2 {
       /// \return The value p || q
       inline data_expression implies(data_expression const& p, data_expression const& q)
       {
-        if ((p == sort_bool_::false_()) || (q == sort_bool_::true_()) || (p == q)) {
-          return sort_bool_::true_();
+        if ((p == sort_bool::false_()) || (q == sort_bool::true_()) || (p == q)) {
+          return sort_bool::true_();
         }
-        else if (p == sort_bool_::true_()) {
+        else if (p == sort_bool::true_()) {
           return q;
         }
-        else if (q == sort_bool_::false_()) {
-          return sort_bool_::not_(p);
+        else if (q == sort_bool::false_()) {
+          return sort_bool::not_(p);
         }
 
-        return sort_bool_::implies(p, q);
+        return sort_bool::implies(p, q);
       }
 
       /// \brief Returns an expression equivalent to p == q
@@ -482,7 +482,7 @@ namespace mcrl2 {
       inline data_expression equal_to(data_expression const& p, data_expression const& q)
       {
         if (p == q) {
-          return sort_bool_::true_();
+          return sort_bool::true_();
         }
 
         return data::equal_to(p, q);
@@ -495,7 +495,7 @@ namespace mcrl2 {
       inline data_expression not_equal_to(data_expression const& p, data_expression const& q)
       {
         if (p == q) {
-          return sort_bool_::false_();
+          return sort_bool::false_();
         }
 
         return data::not_equal_to(p, q);
@@ -508,7 +508,7 @@ namespace mcrl2 {
       template < typename ForwardTraversalIterator >
       data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
-        return core::detail::join(first, last, lazy::or_, static_cast< sort_expression const& >(sort_bool_::false_()));
+        return core::detail::join(first, last, lazy::or_, static_cast< sort_expression const& >(sort_bool::false_()));
       }
 
       /// \brief Returns and applied to the sequence of data expressions [first, last)
@@ -518,7 +518,7 @@ namespace mcrl2 {
       template < typename ForwardTraversalIterator >
       data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
-        return core::detail::join(first, last, lazy::and_, static_cast< sort_expression const& >(sort_bool_::true_()));
+        return core::detail::join(first, last, lazy::and_, static_cast< sort_expression const& >(sort_bool::true_()));
       }
     }
 

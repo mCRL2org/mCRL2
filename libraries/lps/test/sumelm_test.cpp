@@ -318,7 +318,7 @@ void test_case_10()
   int sumvar_count = 0;
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    BOOST_CHECK(i->condition() != sort_bool_::true_());
+    BOOST_CHECK(i->condition() != sort_bool::true_());
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
