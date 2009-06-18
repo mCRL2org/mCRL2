@@ -72,8 +72,13 @@ bool DiaGraph::perform_task(tipi::configuration& c) {
 #endif
 
 DiaGraph::DiaGraph() : super("DiaGraph",
-      "interactive visual analysis of an LTS",
-      "[OPTION]... [INFILE]\n",
+      "interactive visual analysis of an LTS", // what-is
+      "You are free to use images produced with DiaGraphica.\n" // gui-specific description
+      "In this case, image credits would be much appreciated.\n" 
+      "\n" 
+      "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n" 
+      "uses the TinyXML parser (tinyxml.sourceforge.net). \n" 
+      "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
       "Multivariate state visualisation and simulation analysis for labelled "
       "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
       "DiaGraphica is started without opening an LTS.",
@@ -132,54 +137,6 @@ int main(int argc, char **argv)
 }
 #endif
 // -- * -------------------------------------------------------------
-
-
-// -- command line --------------------------------------------------
-
-// parse command line
-/*bool DiaGraph::parse_command_line(int argc, wxChar** argv) {
-
-  using namespace ::mcrl2::utilities;
-
-  interface_description clinterface(std::string(wxString(argv[0], wxConvLocal).fn_str()),
-      NAME, AUTHOR,
-      "interactive visual analysis of an LTS",
-      "[OPTION]... [INFILE]\n",
-      "Multivariate state visualisation and simulation analysis for labelled "
-      "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
-      "DiaGraphica is started without opening an LTS.");
-
-  command_line_parser parser(clinterface, argc, argv);
-
-  // needed as guard for clearColleagues() in OnExit()
-  graph = 0;
-
-  if (parser.continue_execution()) {
-    if (0 < parser.arguments.size()) {
-      lts_file_argument = parser.arguments[0];
-    }
-    if (1 < parser.arguments.size()) {
-      parser.error("too many file arguments");
-    }
-  }
-
-  return parser.continue_execution();
-}
-*/
-// -- * -------------------------------------------------------------
-
-// -------------------------
-//DiaGraph::DiaGraph() : mcrl2::utilities::wx::tool< DiaGraph >("DiaGraphica",
-//    "You are free to use images produced with DiaGraphica.\n"
-//    "In this case, image credits would be much appreciated.\n"
-//    "\n"
-//    "DiaGraphica was built with wxWidgets (www.wxwidgets.org) and \n"
-//    "uses the TinyXML parser (tinyxml.sourceforge.net). \n"
-//    "Color schemes were chosen with ColorBrewer (www.colorbrewer.org).",
-//                std::vector< std::string >(1, "Johannes Pretorius")),
-//  graph(0) {
-// -------------------------
-//}
 
 // -- functions inherited from wxApp --------------------------------
 

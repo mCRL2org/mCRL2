@@ -83,9 +83,16 @@ std::vector< std::string > developers()
 
 
 LTSView::LTSView() : super("LTSView",
-    "3D interactive visualization of a labelled transition system",
-    "[OPTION]... [INFILE]\n",
-    "Start the LTSView application. If INFILE is supplied then the "
+    "3D interactive visualization of a labelled transition system", // what-is
+    "Tool for interactive visualization of state transition systems.\n" // gui-specific description
+    "\n"
+    "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
+    "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
+    "\"Visualization of State Transition Graphs\". "
+    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+    "\n"
+    "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
+    "Start the LTSView application. If INFILE is supplied then the " // command-line description
     "LTS in INFILE is loaded into the application.\n"
     "\n"
     "The input format is determined by the contents of INFILE. If that fails, "
@@ -125,21 +132,6 @@ int main(int argc, char **argv)
   return wxEntry(argc, argv);
 }
 #endif
-
-// LTSView::LTSView() :
-//   mcrl2::utilities::wx::tool< LTSView >(
-//     "LTSView",
-//     "Tool for interactive visualization of state transition systems.\n"
-//     "\n"
-//     "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
-//     "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
-//     "\"Visualization of State Transition Graphs\". "
-//     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-//     "\n"
-//     "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
-//     developers()),
-//   lts(0)
-// { }
 
 bool LTSView::run()
 {
