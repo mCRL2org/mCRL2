@@ -59,8 +59,8 @@ class linear_inequality
 {
   public:
     enum comparison_t { equal, less, less_eq };
-    
-    class lhs_t:public atermpp::map < variable, data_expression > 
+
+    class lhs_t:public atermpp::map < variable, data_expression >
     { private:
         template < application Operation(const data_expression &, const data_expression &) >
         lhs_t &meta_operation_constant(const data_expression v, const rewriter &r)
@@ -119,7 +119,7 @@ class linear_inequality
           }
           return r(result,make_map_substitution_adapter(beta));
         }
-        
+
         std::string string() const
         { std::string s;
           if (begin()==end())
@@ -223,7 +223,7 @@ class linear_inequality
     ~linear_inequality()
     { m_rhs.unprotect();
     }
-    
+
     linear_inequality &operator=(const linear_inequality &l)
     { m_rhs=l.m_rhs;
       m_lhs=l.m_lhs;
@@ -241,11 +241,11 @@ class linear_inequality
     linear_inequality(const data_expression e,
                       const rewriter &r)
                      :m_lhs(),m_comparison(less)
-    { 
+    {
       m_rhs.protect();
       m_rhs=real_zero();
 
-      
+
       bool negate(false);
       if (is_equal_to_application(e))
       { m_comparison=equal;
@@ -298,7 +298,7 @@ class linear_inequality
     { return m_lhs.string();
     }
 
-    lhs_t &lhs() 
+    lhs_t &lhs()
     { return m_lhs;
     }
 
@@ -317,7 +317,7 @@ class linear_inequality
       m_lhs.swap(l.m_lhs);
       const comparison_t c(m_comparison);
       m_comparison=l.m_comparison;
-      l.m_comparison=c; 
+      l.m_comparison=c;
     }
 
     void set_rhs(const data_expression e)
@@ -371,10 +371,10 @@ class linear_inequality
     ///
     void subtract(const linear_inequality &e,
                   const rewriter &r)
-    { 
+    {
       for(lhs_t::const_iterator i=e.lhs_begin();
               i!=e.lhs_end(); ++i)
-      { 
+      {
         set_factor_for_a_variable(i->first,
              rewrite_with_memory(sort_real_::minus(get_factor_for_a_variable(i->first),i->second),r));
       }
@@ -429,7 +429,7 @@ class linear_inequality
     }
 
     void divide(const data_expression e, const rewriter &r)
-    { 
+    {
       assert(is_closed_real_number(e));
       assert(!is_zero(e));
       for(lhs_t::const_iterator i=m_lhs.begin();
@@ -584,7 +584,7 @@ inline bool is_closed_real_number(const data_expression e)
 }
 
 inline bool is_negative(const data_expression e,const rewriter &r)
-{ 
+{
   data_expression result=r(less(e,real_zero()));
   if (result==sort_bool_::true_())
   { return true;
@@ -596,7 +596,7 @@ inline bool is_negative(const data_expression e,const rewriter &r)
 }
 
 inline bool is_positive(const data_expression e,const rewriter &r)
-{ 
+{
   data_expression result=r(greater(e,real_zero()));
   if (result==sort_bool_::true_())
   { return true;
@@ -662,7 +662,7 @@ static void count_occurrences(
                  std::map < variable, unsigned int> &nr_positive_occurrences,
                  std::map < variable, unsigned int> &nr_negative_occurrences,
                  const rewriter &r)
-{ 
+{
   for(std::vector < linear_inequality >::const_iterator i=inequalities.begin();
            i!=inequalities.end(); ++i)
   { for(linear_inequality::lhs_t::const_iterator j=i->lhs_begin(); j!=i->lhs_end(); ++j)
@@ -764,8 +764,8 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
     }
 
     // std::cerr << "Best variable " << pp(best_variable) << "\n";
-    
-    if (!found) 
+
+    if (!found)
     { // There are no variables anymore that can be removed from inequalities
       break;
     }
@@ -860,7 +860,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
 ///      in the context of inequalities.
 inline bool is_a_redundant_inequality(
               const std::vector < linear_inequality > &inequalities,
-              const std::vector < linear_inequality > :: iterator i, 
+              const std::vector < linear_inequality > :: iterator i,
               const rewriter &r)
 {
 #ifndef NDEBUG
@@ -1047,7 +1047,7 @@ static void pivot_and_update(
   // Apply pivoting on variables xi and xj;
   basic_variables.erase(xi);
   basic_variables.insert(xj);
-  
+
   linear_inequality::lhs_t expression_for_xj=working_equalities[xi];
   expression_for_xj.erase(xj);
   expression_for_xj[xi]=real_minus_one();
@@ -1067,7 +1067,7 @@ static void pivot_and_update(
   if (core::gsDebug)
   { for(atermpp::map < variable,data_expression > ::const_iterator i=beta.begin();
                i!=beta.end(); ++i)
-    { // std::cerr << "beta[" << pp(i->first) << "]= " << pp(i->second) << "+ delta* " << 
+    { // std::cerr << "beta[" << pp(i->first) << "]= " << pp(i->second) << "+ delta* " <<
       //                  pp(beta_delta_correction[i->first]) << "\n";
     }
     for(std::map < variable, linear_inequality::lhs_t >::const_iterator i=working_equalities.begin();
@@ -1084,7 +1084,7 @@ static void pivot_and_update(
 ///          inequalities. If the empty set of equalities is the result,
 ///          the input was consistent. Otherwise the resulting set contains
 ///          an inconsistent inequality.
-///          The implementation uses a feasible point detection algorithm as described by 
+///          The implementation uses a feasible point detection algorithm as described by
 ///          Bruno Dutertre and Leonardo de Moura. Integrating Simplex with DPLL(T).
 ///          CSL Technical Report SRI-CSL-06-01, 2006.
 /// \param inequalities A list of inequalities
@@ -1101,7 +1101,7 @@ inline bool is_inconsistent(
   // those that will be generated as slack variables will have values indicated
   // by beta, which must lie between the lowerbounds and the upperbounds.
 
-  // First remove all equalities by Gauss elimination and make a fresh variable 
+  // First remove all equalities by Gauss elimination and make a fresh variable
   // generator.
 
   if (core::gsDebug)
@@ -1115,12 +1115,12 @@ inline bool is_inconsistent(
   atermpp::map < variable,data_expression > lowerbounds_delta_correction;
   atermpp::map < variable,data_expression > upperbounds_delta_correction;
   atermpp::map < variable,data_expression > beta_delta_correction;
-  atermpp::set < variable > non_basic_variables; 
-  atermpp::set < variable > basic_variables; 
+  atermpp::set < variable > non_basic_variables;
+  atermpp::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
   fresh_variable_generator fresh_variable("slack_var");
-  
+
   for(std::vector < linear_inequality >::const_iterator i=inequalities_in.begin();
                 i!=inequalities_in.end(); ++i)
   { if (i->is_false(r))
@@ -1145,12 +1145,12 @@ inline bool is_inconsistent(
                                 non_basic_variables.begin(),
                                 non_basic_variables.end(),
                                 r);
-  
+
   assert(equalities.size()==0); // There are no resulting equalities left.
-  
+
   // Now bring the linear equalities in the basic form described
   // in the article by Bruno Dutertre and Leonardo de Moura.
-  
+
   // First set lower and upperbounds, and introduce slack variables
   // if required.
   for(std::vector < linear_inequality >::iterator i=inequalities.begin();
@@ -1164,7 +1164,7 @@ inline bool is_inconsistent(
     if (!i->is_true(r))  // This inequality is redundant and can be skipped.
     { assert(i->comparison()!=linear_inequality::equal);
       assert(i->lhs_size()>0); // this signals a redundant or an inconsistent inequality.
-      
+
       if (i->lhs_size()==1)  // the left hand side consists of a single variable.
       { variable v=i->lhs_begin()->first;
         data_expression factor=i->lhs_begin()->second;   assert(factor!=real_zero());
@@ -1176,9 +1176,9 @@ inline bool is_inconsistent(
           { upperbounds[v]=bound;
             upperbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
- 
-          } 
-          else 
+
+          }
+          else
           { if (bound==upperbounds[v])
             { upperbounds_delta_correction[v]=
                   min(upperbounds_delta_correction[v],
@@ -1186,15 +1186,15 @@ inline bool is_inconsistent(
             }
           }
         }
-        else 
+        else
         { // The inequality has the shape factor*v<=c or factor*v<c with factor negative
           if ((lowerbounds.count(v)==0) ||
                (rewrite_with_memory(less(lowerbounds[v],bound),r)==sort_bool_::true_()))
           { lowerbounds[v]=bound;
             lowerbounds_delta_correction[v]=
                 ((i->comparison()==linear_inequality::less)?real_one():real_zero());
-          } 
-          else 
+          }
+          else
           { if (bound==lowerbounds[v])
             { lowerbounds_delta_correction[v]=
                   max(lowerbounds_delta_correction[v],
@@ -1208,7 +1208,7 @@ inline bool is_inconsistent(
         // We transform it into an equation with a new slack variable.
         variable new_basic_variable=fresh_variable(sort_real_::real_());
         basic_variables.insert(new_basic_variable);
-        upperbounds[new_basic_variable]=i->rhs();  
+        upperbounds[new_basic_variable]=i->rhs();
         upperbounds_delta_correction[new_basic_variable]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
         working_equalities[new_basic_variable]=i->lhs();
@@ -1216,14 +1216,14 @@ inline bool is_inconsistent(
     }
   }
   // Now set the values for beta:
-  // The beta values for the non basic variables must satisfy the lower and 
+  // The beta values for the non basic variables must satisfy the lower and
   // upperbounds.
   for(atermpp::set < variable >::const_iterator i=non_basic_variables.begin();
         i!=non_basic_variables.end(); ++i)
   { if (lowerbounds.count(*i)>0)
-    { if ((upperbounds.count(*i)>0) && 
+    { if ((upperbounds.count(*i)>0) &&
           ((rewrite_with_memory(less(upperbounds[*i],lowerbounds[*i]),r)==sort_bool_::true_()) ||
-           ((upperbounds[*i]==lowerbounds[*i]) && 
+           ((upperbounds[*i]==lowerbounds[*i]) &&
             (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
       { if (core::gsDebug)
         { std::cerr << "Inconsistent, preprocessing " << pp(*i) << "\n";
@@ -1241,7 +1241,7 @@ inline bool is_inconsistent(
     { beta[*i]=real_zero();
       beta_delta_correction[*i]=real_zero();
     }
-    // std::cerr << "beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" << 
+    // std::cerr << "beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" <<
     //                       pp(beta_delta_correction[*i]) <<"\n";
   }
 
@@ -1251,10 +1251,10 @@ inline bool is_inconsistent(
   { beta[*i]=working_equalities[*i].evaluate(beta,r);
     beta_delta_correction[*i]=working_equalities[*i].
                    evaluate(beta_delta_correction,r);
-    // std::cerr << "beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" << 
+    // std::cerr << "beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" <<
     //                       pp(beta_delta_correction[*i]) <<"\n";
   }
-  
+
   // Now the basic data structure has been set up.
   // We must find the first basic variable that does not satisfy its
   // upper and bounds. This is essentially the check algorithm in the
@@ -1263,7 +1263,7 @@ inline bool is_inconsistent(
   for ( ; true ; )
   { // select the smallest basic variable that does not satisfy the bounds.
     bool found=false;
-    bool lowerbound_violation;
+    bool lowerbound_violation = false;
     variable xi;
     for(atermpp::set < variable > :: const_iterator i=basic_variables.begin() ;
            i!=basic_variables.end() ; ++i)
@@ -1272,7 +1272,7 @@ inline bool is_inconsistent(
                         evaluate(beta_delta_correction,r);
       if ((upperbounds.count(*i)>0) &&
           ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool_::true_()) ||
-           ((upperbounds[*i]==value) && 
+           ((upperbounds[*i]==value) &&
             (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool_::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
@@ -1280,9 +1280,9 @@ inline bool is_inconsistent(
         xi=*i;
         lowerbound_violation=false;
       }
-      else if ((lowerbounds.count(*i)>0) && 
+      else if ((lowerbounds.count(*i)>0) &&
                ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool_::true_()) ||
-                ((lowerbounds[*i]==value) && 
+                ((lowerbounds[*i]==value) &&
                  (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool_::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
@@ -1298,7 +1298,7 @@ inline bool is_inconsistent(
       }
       return false;
     }
- 
+
     // std::cerr << "The smallest basic variable that does not satisfy the bounds is " << pp(xi) << "\n";
     if (lowerbound_violation)
     { // select the smallest non-basic variable with which pivoting can take place.
@@ -1307,12 +1307,12 @@ inline bool is_inconsistent(
       for(linear_inequality::lhs_t::const_iterator xj_it=lhs.begin(); xj_it!=lhs.end(); ++xj_it)
       { const variable xj=xj_it->first;
         // std::cerr << pp(xj) << "  --  " << pp(xj_it->second) << "\n";
-        if ((is_positive(xj_it->second,r) && 
-                ((upperbounds.count(xj)==0) || 
+        if ((is_positive(xj_it->second,r) &&
+                ((upperbounds.count(xj)==0) ||
                     ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_())||
                      ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
-            (is_negative(xj_it->second,r) && 
-                 ((lowerbounds.count(xj)==0) || 
+            (is_negative(xj_it->second,r) &&
+                 ((lowerbounds.count(xj)==0) ||
                     ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_())||
                      ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
         { found=true;
@@ -1335,17 +1335,17 @@ inline bool is_inconsistent(
     { // std::cerr << "Upperbound violationdt \n";
       // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
-      for(linear_inequality::lhs_t::const_iterator xj_it=working_equalities[xi].begin(); 
+      for(linear_inequality::lhs_t::const_iterator xj_it=working_equalities[xi].begin();
                 xj_it!=working_equalities[xi].end(); ++xj_it)
       { const variable xj=xj_it->first;
         // std::cerr << pp(xj) << "  --  " << pp(xj_it->second) <<  " POS " <<
         //                 is_positive(xj_it->second,r) << "\n";
-        if ((is_negative(xj_it->second,r) && 
-                ((upperbounds.count(xj)==0) || 
+        if ((is_negative(xj_it->second,r) &&
+                ((upperbounds.count(xj)==0) ||
                    ((rewrite_with_memory(less(beta[xj],upperbounds[xj]),r)==sort_bool_::true_()) ||
                      ((beta[xj]==upperbounds[xj])&& (rewrite_with_memory(less(beta_delta_correction[xj],upperbounds_delta_correction[xj]),r)==sort_bool_::true_()))))) ||
-            (is_positive(xj_it->second,r) && 
-                 ((lowerbounds.count(xj)==0) || 
+            (is_positive(xj_it->second,r) &&
+                 ((lowerbounds.count(xj)==0) ||
                     ((rewrite_with_memory(greater(beta[xj],lowerbounds[xj]),r)==sort_bool_::true_()) ||
                      ((beta[xj]==lowerbounds[xj]) && (rewrite_with_memory(greater(beta_delta_correction[xj],lowerbounds_delta_correction[xj]),r)==sort_bool_::true_()))))))
         { found=true;
@@ -1525,10 +1525,10 @@ atermpp::set < variable >  gauss_elimination(
   return remaining_variables;
 }
 
-// The introduction of the function rewrite_with_memory using a 
-// hash table here is a temporary trick, to boost 
+// The introduction of the function rewrite_with_memory using a
+// hash table here is a temporary trick, to boost
 // performance, which is slow due to translations necessary from and to
-// rewrite format. 
+// rewrite format.
 
 inline data_expression rewrite_with_memory(
                       const data_expression t,const rewriter &r)
@@ -1536,7 +1536,7 @@ inline data_expression rewrite_with_memory(
   static atermpp::map < data_expression, data_expression > rewrite_hash_table;
   atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
   if (i==rewrite_hash_table.end())
-  { 
+  {
     data_expression t1=r(t);
     // std::cerr << "Term " << pp(t) << "Result " << pp(t1) << "\n";
     rewrite_hash_table[t]=t1;
