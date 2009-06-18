@@ -254,13 +254,30 @@ class function_declaration_list():
       case_code += "      inline\n"
       case_code += "      data_expression %s(const data_expression& e)\n" % (p)
       case_code += "      {\n"
+      assertions = []
       for (id, label, idx) in unique_case_arguments:
-        case_code += "        if (is_%s_application(e))\n" % (label.to_string())
-        case_code += "        {\n"
-        case_code += "          return static_cast< application >(e).arguments()[%s];\n" % (idx)
-        case_code += "        }\n"
-      case_code += "        // This should never be reached, otherwise something is very wrong.\n"
-      case_code += "        assert(false);\n"
+        assertions.append("is_%s_application(e)" % (label.to_string()))
+      case_code += "        assert(%s);\n" % (string.join(assertions, " || "))
+
+      # First group by index
+      index_table = {}
+      for (id, label, idx) in unique_case_arguments:
+        try:
+          index_table[idx].append((id, label))
+        except:
+          index_table[idx] = [(id, label)]
+      if len(index_table) == 1:
+        case_code += "        return static_cast< application >(e).arguments()[%s];\n" % (index_table.keys()[0])
+      else:
+        for i in index_table:
+          clauses = []
+          for c in index_table[i]:
+            clauses.append("is_%s_application(e)" % (c[1].to_string()))
+          case_code += "        if (%s)\n" % (string.join(clauses, " || "))
+          case_code += "        {\n"
+          case_code += "          return static_cast< application >(e).arguments()[%s];\n" % (i)
+          case_code += "        }\n"
+        case_code += "        throw mcrl2::runtime_error(\"Unexpected expression \" + pp(e) + \" occurred\");\n"
       case_code += "      }\n"
       code += "%s\n" % (case_code)
     return code
@@ -283,8 +300,21 @@ class function_declaration_list():
       def to_string(self):
         return "%s : { %s }" % (self.id.to_string(), self.sort_expression_list.to_string())
 
+      def function_name(self, fullname, name):
+        code  = ""
+        code += "      /// \\brief Generate identifier %s\n" % (escape(fullname))
+        code += "      /// \\return Identifier %s\n" % (escape(fullname))
+        code += "      inline\n"
+        code += "      core::identifier_string const& %s_name()\n" % (name)
+        code += "      {\n"
+        code += "        static core::identifier_string %s_name = data::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (name, name, fullname)
+        code += "        return %s_name;\n" % (name)
+        code += "      }\n\n"
+        return code
+
       def function_constructor(self, fullname, name, sortparams, sort):
         code  = ""
+        code += self.function_name(fullname, name)
         code += "      /// \\brief Constructor for function symbol %s\n" % (escape(fullname))
         sortparams_list = string.split(sortparams, ", ")
         if sortparams_list <> ['']:
@@ -295,17 +325,18 @@ class function_declaration_list():
         if sortparams_list <> ['']:
           code += "      function_symbol %s(%s)\n" % (name, sortparams)
           code += "      {\n"
-          code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+          code += "        function_symbol %s(%s_name(), %s);\n" % (name, name, sort)
         else:
           code += "      function_symbol const& %s(%s)\n" % (name, sortparams)
           code += "      {\n"
-          code += "        static function_symbol %s = data::detail::initialise_static_expression(%s, function_symbol(\"%s\", %s));\n" % (name, name, fullname, sort)
+          code += "        static function_symbol %s = data::detail::initialise_static_expression(%s, function_symbol(%s_name(), %s));\n" % (name, name, name, sort)
         code += "        return %s;\n" % (name)
-        code += "      }\n"
+        code += "      }\n\n"
         return code
 
       def polymorphic_function_constructor(self, fullname, name, sortparams, comma, domainparams, targetsort, sort):
         code  = ""
+        code += self.function_name(fullname, name)
         code += "      ///\\brief Constructor for function symbol %s\n" % (escape(fullname))
         sortparams_list = string.split(sortparams, ", ")
         if sortparams_list <> ['']:
@@ -320,7 +351,7 @@ class function_declaration_list():
         code += "      function_symbol %s(%s%s%s)\n" % (name, sortparams, comma, domainparams)
         code += "      {\n"
         code += "        %s\n" % (targetsort)
-        code += "        function_symbol %s(\"%s\", %s);\n" % (name, fullname, sort)
+        code += "        function_symbol %s(%s_name(), %s);\n" % (name, name, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
         return code 
@@ -335,7 +366,7 @@ class function_declaration_list():
         code += "      {\n"
         code += "        if (e.is_function_symbol())\n"
         code += "        {\n"
-        code += "          return static_cast< function_symbol >(e).name() == \"%s\";\n" % (fullname)
+        code += "          return static_cast< function_symbol >(e).name() == %s_name();\n" % (name)
         code += "        }\n"
         code += "        return false;\n"
         code += "      }\n"
@@ -1366,14 +1397,25 @@ class sort_declaration():
       result = "        data_equation_vector %s_equations = detail::%s_struct(%s).constructor_equations(%s);\n" % (self.label.to_string(), self.label.to_string(), param, sort)
       return result + "        result.insert(result.end(), %s_equations.begin(), %s_equations.end());\n" % (self.label.to_string(), self.label.to_string())
 
+  def sort_name(self, id, label):
+    code = ""
+    code += "      inline\n"
+    code += "      core::identifier_string const& %s_name()\n" % (label.to_string())
+    code += "      {\n"
+    code += "        static core::identifier_string %s_name = data::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label.to_string(), label.to_string(), id.to_string())
+    code += "        return %s_name;\n" % (label.to_string())
+    code += "      }\n\n"
+    return code
+
   def sort_expression_constructors(self, id, label):
     code = ""
+    code += self.sort_name(id, label)
     code += "      /// \\brief Constructor for sort expression %s\n" % (escape(id.to_string()))
     code += "      /// \\return Sort expression %s\n" % (escape(id.to_string()))
     code += "      inline\n"
     code += "      basic_sort const& %s()\n" % (label.to_string())
     code += "      {\n"
-    code += "        static basic_sort %s = data::detail::initialise_static_expression(%s, basic_sort(\"%s\"));\n" % (label.to_string(), label.to_string(), id.to_string())
+    code += "        static basic_sort %s = data::detail::initialise_static_expression(%s, basic_sort(%s_name()));\n" % (label.to_string(), label.to_string(), label.to_string())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
@@ -1393,13 +1435,14 @@ class sort_declaration():
 
   def sort_expression_constructors_container_sort(self, id, label, parameter):
     code = ""
+    code += self.sort_name(id, label)
     code += "      /// \\brief Constructor for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
     code += "      /// \\param %s A sort expression\n" % (escape(parameter.to_string().lower()))
     code += "      /// \\return Sort expression %s(%s)\n" % (escape(label.to_string()), escape(parameter.to_string().lower()))
     code += "      inline\n"
     code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
     code += "      {\n"
-    code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
+    code += "        container_sort %s(%s_name(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
@@ -1412,7 +1455,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (e.is_container_sort())\n"
     code += "        {\n"
-    code += "          return static_cast< container_sort >(e).container_name() == \"%s\";\n" % (label.to_string())
+    code += "          return static_cast< container_sort >(e).container_name() == %s_name();\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"

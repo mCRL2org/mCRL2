@@ -36,13 +36,20 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort set_
     namespace sort_set_ {
 
+      inline
+      core::identifier_string const& set__name()
+      {
+        static core::identifier_string set__name = data::detail::initialise_static_expression(set__name, core::identifier_string("Set"));
+        return set__name;
+      }
+
       /// \brief Constructor for sort expression Set(S)
       /// \param s A sort expression
       /// \return Sort expression set_(s)
       inline
       container_sort set_(const sort_expression& s)
       {
-        container_sort set_("set_", s);
+        container_sort set_(set__name(), s);
         return set_;
       }
 
@@ -55,7 +62,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == "set_";
+          return static_cast< container_sort >(e).container_name() == set__name();
         }
         return false;
       }
@@ -70,15 +77,25 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Generate identifier \@set
+      /// \return Identifier \@set
+      inline
+      core::identifier_string const& setconstructor_name()
+      {
+        static core::identifier_string setconstructor_name = data::detail::initialise_static_expression(setconstructor_name, core::identifier_string("@set"));
+        return setconstructor_name;
+      }
+
       /// \brief Constructor for function symbol \@set
       /// \param s A sort expression
       /// \return Function symbol setconstructor
       inline
       function_symbol setconstructor(const sort_expression& s)
       {
-        function_symbol setconstructor("@set", function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s)));
+        function_symbol setconstructor(setconstructor_name(), function_sort(function_sort(s, sort_bool_::bool_()), sort_fset::fset(s), set_(s)));
         return setconstructor;
       }
+
 
       /// \brief Recogniser for function \@set
       /// \param e A data expression
@@ -88,7 +105,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@set";
+          return static_cast< function_symbol >(e).name() == setconstructor_name();
         }
         return false;
       }
@@ -118,15 +135,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier {}
+      /// \return Identifier {}
+      inline
+      core::identifier_string const& emptyset_name()
+      {
+        static core::identifier_string emptyset_name = data::detail::initialise_static_expression(emptyset_name, core::identifier_string("{}"));
+        return emptyset_name;
+      }
+
       /// \brief Constructor for function symbol {}
       /// \param s A sort expression
       /// \return Function symbol emptyset
       inline
       function_symbol emptyset(const sort_expression& s)
       {
-        function_symbol emptyset("{}", set_(s));
+        function_symbol emptyset(emptyset_name(), set_(s));
         return emptyset;
       }
+
 
       /// \brief Recogniser for function {}
       /// \param e A data expression
@@ -136,9 +163,18 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "{}";
+          return static_cast< function_symbol >(e).name() == emptyset_name();
         }
         return false;
+      }
+
+      /// \brief Generate identifier \@setfset
+      /// \return Identifier \@setfset
+      inline
+      core::identifier_string const& setfset_name()
+      {
+        static core::identifier_string setfset_name = data::detail::initialise_static_expression(setfset_name, core::identifier_string("@setfset"));
+        return setfset_name;
       }
 
       /// \brief Constructor for function symbol \@setfset
@@ -147,9 +183,10 @@ namespace mcrl2 {
       inline
       function_symbol setfset(const sort_expression& s)
       {
-        function_symbol setfset("@setfset", function_sort(sort_fset::fset(s), set_(s)));
+        function_symbol setfset(setfset_name(), function_sort(sort_fset::fset(s), set_(s)));
         return setfset;
       }
+
 
       /// \brief Recogniser for function \@setfset
       /// \param e A data expression
@@ -159,7 +196,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@setfset";
+          return static_cast< function_symbol >(e).name() == setfset_name();
         }
         return false;
       }
@@ -188,15 +225,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@setcomp
+      /// \return Identifier \@setcomp
+      inline
+      core::identifier_string const& setcomprehension_name()
+      {
+        static core::identifier_string setcomprehension_name = data::detail::initialise_static_expression(setcomprehension_name, core::identifier_string("@setcomp"));
+        return setcomprehension_name;
+      }
+
       /// \brief Constructor for function symbol \@setcomp
       /// \param s A sort expression
       /// \return Function symbol setcomprehension
       inline
       function_symbol setcomprehension(const sort_expression& s)
       {
-        function_symbol setcomprehension("@setcomp", function_sort(function_sort(s, sort_bool_::bool_()), set_(s)));
+        function_symbol setcomprehension(setcomprehension_name(), function_sort(function_sort(s, sort_bool_::bool_()), set_(s)));
         return setcomprehension;
       }
+
 
       /// \brief Recogniser for function \@setcomp
       /// \param e A data expression
@@ -206,7 +253,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@setcomp";
+          return static_cast< function_symbol >(e).name() == setcomprehension_name();
         }
         return false;
       }
@@ -235,15 +282,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier in
+      /// \return Identifier in
+      inline
+      core::identifier_string const& setin_name()
+      {
+        static core::identifier_string setin_name = data::detail::initialise_static_expression(setin_name, core::identifier_string("in"));
+        return setin_name;
+      }
+
       /// \brief Constructor for function symbol in
       /// \param s A sort expression
       /// \return Function symbol setin
       inline
       function_symbol setin(const sort_expression& s)
       {
-        function_symbol setin("in", function_sort(s, set_(s), sort_bool_::bool_()));
+        function_symbol setin(setin_name(), function_sort(s, set_(s), sort_bool_::bool_()));
         return setin;
       }
+
 
       /// \brief Recogniser for function in
       /// \param e A data expression
@@ -253,7 +310,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "in";
+          return static_cast< function_symbol >(e).name() == setin_name();
         }
         return false;
       }
@@ -283,15 +340,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier !
+      /// \return Identifier !
+      inline
+      core::identifier_string const& setcomplement_name()
+      {
+        static core::identifier_string setcomplement_name = data::detail::initialise_static_expression(setcomplement_name, core::identifier_string("!"));
+        return setcomplement_name;
+      }
+
       /// \brief Constructor for function symbol !
       /// \param s A sort expression
       /// \return Function symbol setcomplement
       inline
       function_symbol setcomplement(const sort_expression& s)
       {
-        function_symbol setcomplement("!", function_sort(set_(s), set_(s)));
+        function_symbol setcomplement(setcomplement_name(), function_sort(set_(s), set_(s)));
         return setcomplement;
       }
+
 
       /// \brief Recogniser for function !
       /// \param e A data expression
@@ -301,7 +368,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "!";
+          return static_cast< function_symbol >(e).name() == setcomplement_name();
         }
         return false;
       }
@@ -330,15 +397,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier +
+      /// \return Identifier +
+      inline
+      core::identifier_string const& setunion__name()
+      {
+        static core::identifier_string setunion__name = data::detail::initialise_static_expression(setunion__name, core::identifier_string("+"));
+        return setunion__name;
+      }
+
       /// \brief Constructor for function symbol +
       /// \param s A sort expression
       /// \return Function symbol setunion_
       inline
       function_symbol setunion_(const sort_expression& s)
       {
-        function_symbol setunion_("+", function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setunion_(setunion__name(), function_sort(set_(s), set_(s), set_(s)));
         return setunion_;
       }
+
 
       /// \brief Recogniser for function +
       /// \param e A data expression
@@ -348,7 +425,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "+";
+          return static_cast< function_symbol >(e).name() == setunion__name();
         }
         return false;
       }
@@ -378,15 +455,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier *
+      /// \return Identifier *
+      inline
+      core::identifier_string const& setintersection_name()
+      {
+        static core::identifier_string setintersection_name = data::detail::initialise_static_expression(setintersection_name, core::identifier_string("*"));
+        return setintersection_name;
+      }
+
       /// \brief Constructor for function symbol *
       /// \param s A sort expression
       /// \return Function symbol setintersection
       inline
       function_symbol setintersection(const sort_expression& s)
       {
-        function_symbol setintersection("*", function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setintersection(setintersection_name(), function_sort(set_(s), set_(s), set_(s)));
         return setintersection;
       }
+
 
       /// \brief Recogniser for function *
       /// \param e A data expression
@@ -396,7 +483,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "*";
+          return static_cast< function_symbol >(e).name() == setintersection_name();
         }
         return false;
       }
@@ -426,15 +513,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier -
+      /// \return Identifier -
+      inline
+      core::identifier_string const& setdifference_name()
+      {
+        static core::identifier_string setdifference_name = data::detail::initialise_static_expression(setdifference_name, core::identifier_string("-"));
+        return setdifference_name;
+      }
+
       /// \brief Constructor for function symbol -
       /// \param s A sort expression
       /// \return Function symbol setdifference
       inline
       function_symbol setdifference(const sort_expression& s)
       {
-        function_symbol setdifference("-", function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setdifference(setdifference_name(), function_sort(set_(s), set_(s), set_(s)));
         return setdifference;
       }
+
 
       /// \brief Recogniser for function -
       /// \param e A data expression
@@ -444,7 +541,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == setdifference_name();
         }
         return false;
       }
@@ -474,15 +571,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@false_
+      /// \return Identifier \@false_
+      inline
+      core::identifier_string const& false_function_name()
+      {
+        static core::identifier_string false_function_name = data::detail::initialise_static_expression(false_function_name, core::identifier_string("@false_"));
+        return false_function_name;
+      }
+
       /// \brief Constructor for function symbol \@false_
       /// \param s A sort expression
       /// \return Function symbol false_function
       inline
       function_symbol false_function(const sort_expression& s)
       {
-        function_symbol false_function("@false_", function_sort(s, sort_bool_::bool_()));
+        function_symbol false_function(false_function_name(), function_sort(s, sort_bool_::bool_()));
         return false_function;
       }
+
 
       /// \brief Recogniser for function \@false_
       /// \param e A data expression
@@ -492,7 +599,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@false_";
+          return static_cast< function_symbol >(e).name() == false_function_name();
         }
         return false;
       }
@@ -521,15 +628,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@true_
+      /// \return Identifier \@true_
+      inline
+      core::identifier_string const& true_function_name()
+      {
+        static core::identifier_string true_function_name = data::detail::initialise_static_expression(true_function_name, core::identifier_string("@true_"));
+        return true_function_name;
+      }
+
       /// \brief Constructor for function symbol \@true_
       /// \param s A sort expression
       /// \return Function symbol true_function
       inline
       function_symbol true_function(const sort_expression& s)
       {
-        function_symbol true_function("@true_", function_sort(s, sort_bool_::bool_()));
+        function_symbol true_function(true_function_name(), function_sort(s, sort_bool_::bool_()));
         return true_function;
       }
+
 
       /// \brief Recogniser for function \@true_
       /// \param e A data expression
@@ -539,7 +656,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@true_";
+          return static_cast< function_symbol >(e).name() == true_function_name();
         }
         return false;
       }
@@ -568,15 +685,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@not_
+      /// \return Identifier \@not_
+      inline
+      core::identifier_string const& not_function_name()
+      {
+        static core::identifier_string not_function_name = data::detail::initialise_static_expression(not_function_name, core::identifier_string("@not_"));
+        return not_function_name;
+      }
+
       /// \brief Constructor for function symbol \@not_
       /// \param s A sort expression
       /// \return Function symbol not_function
       inline
       function_symbol not_function(const sort_expression& s)
       {
-        function_symbol not_function("@not_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol not_function(not_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return not_function;
       }
+
 
       /// \brief Recogniser for function \@not_
       /// \param e A data expression
@@ -586,7 +713,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@not_";
+          return static_cast< function_symbol >(e).name() == not_function_name();
         }
         return false;
       }
@@ -615,15 +742,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@and_
+      /// \return Identifier \@and_
+      inline
+      core::identifier_string const& and_function_name()
+      {
+        static core::identifier_string and_function_name = data::detail::initialise_static_expression(and_function_name, core::identifier_string("@and_"));
+        return and_function_name;
+      }
+
       /// \brief Constructor for function symbol \@and_
       /// \param s A sort expression
       /// \return Function symbol and_function
       inline
       function_symbol and_function(const sort_expression& s)
       {
-        function_symbol and_function("@and_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol and_function(and_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return and_function;
       }
+
 
       /// \brief Recogniser for function \@and_
       /// \param e A data expression
@@ -633,7 +770,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@and_";
+          return static_cast< function_symbol >(e).name() == and_function_name();
         }
         return false;
       }
@@ -663,15 +800,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@or_
+      /// \return Identifier \@or_
+      inline
+      core::identifier_string const& or_function_name()
+      {
+        static core::identifier_string or_function_name = data::detail::initialise_static_expression(or_function_name, core::identifier_string("@or_"));
+        return or_function_name;
+      }
+
       /// \brief Constructor for function symbol \@or_
       /// \param s A sort expression
       /// \return Function symbol or_function
       inline
       function_symbol or_function(const sort_expression& s)
       {
-        function_symbol or_function("@or_", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
+        function_symbol or_function(or_function_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_())));
         return or_function;
       }
+
 
       /// \brief Recogniser for function \@or_
       /// \param e A data expression
@@ -681,7 +828,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@or_";
+          return static_cast< function_symbol >(e).name() == or_function_name();
         }
         return false;
       }
@@ -742,36 +889,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        if (is_setconstructor_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_setin_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_setunion__application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_setintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_setdifference_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_and_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_or_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion__application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -782,32 +901,8 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        if (is_setfset_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setcomprehension_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setcomplement_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_false_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_true_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_not_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_setfset_application(e) || is_setcomprehension_application(e) || is_setcomplement_application(e) || is_false_function_application(e) || is_true_function_application(e) || is_not_function_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -818,36 +913,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        if (is_setconstructor_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setin_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setunion__application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_setdifference_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_and_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_or_function_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion__application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       /// \brief Give all system defined equations for set_

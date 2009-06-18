@@ -35,12 +35,19 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort real_
     namespace sort_real_ {
 
+      inline
+      core::identifier_string const& real__name()
+      {
+        static core::identifier_string real__name = data::detail::initialise_static_expression(real__name, core::identifier_string("Real"));
+        return real__name;
+      }
+
       /// \brief Constructor for sort expression Real
       /// \return Sort expression Real
       inline
       basic_sort const& real_()
       {
-        static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort("Real"));
+        static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort(real__name()));
         return real_;
       }
 
@@ -66,14 +73,24 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Generate identifier \@cReal
+      /// \return Identifier \@cReal
+      inline
+      core::identifier_string const& creal_name()
+      {
+        static core::identifier_string creal_name = data::detail::initialise_static_expression(creal_name, core::identifier_string("@cReal"));
+        return creal_name;
+      }
+
       /// \brief Constructor for function symbol \@cReal
       /// \return Function symbol creal
       inline
       function_symbol const& creal()
       {
-        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol("@cReal", function_sort(sort_int_::int_(), sort_pos::pos(), real_())));
+        static function_symbol creal = data::detail::initialise_static_expression(creal, function_symbol(creal_name(), function_sort(sort_int_::int_(), sort_pos::pos(), real_())));
         return creal;
       }
+
 
       /// \brief Recogniser for function \@cReal
       /// \param e A data expression
@@ -83,7 +100,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@cReal";
+          return static_cast< function_symbol >(e).name() == creal_name();
         }
         return false;
       }
@@ -112,14 +129,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Pos2Real
+      /// \return Identifier Pos2Real
+      inline
+      core::identifier_string const& pos2real_name()
+      {
+        static core::identifier_string pos2real_name = data::detail::initialise_static_expression(pos2real_name, core::identifier_string("Pos2Real"));
+        return pos2real_name;
+      }
+
       /// \brief Constructor for function symbol Pos2Real
       /// \return Function symbol pos2real
       inline
       function_symbol const& pos2real()
       {
-        static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol("Pos2Real", function_sort(sort_pos::pos(), real_())));
+        static function_symbol pos2real = data::detail::initialise_static_expression(pos2real, function_symbol(pos2real_name(), function_sort(sort_pos::pos(), real_())));
         return pos2real;
       }
+
 
       /// \brief Recogniser for function Pos2Real
       /// \param e A data expression
@@ -129,7 +156,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Pos2Real";
+          return static_cast< function_symbol >(e).name() == pos2real_name();
         }
         return false;
       }
@@ -157,14 +184,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Nat2Real
+      /// \return Identifier Nat2Real
+      inline
+      core::identifier_string const& nat2real_name()
+      {
+        static core::identifier_string nat2real_name = data::detail::initialise_static_expression(nat2real_name, core::identifier_string("Nat2Real"));
+        return nat2real_name;
+      }
+
       /// \brief Constructor for function symbol Nat2Real
       /// \return Function symbol nat2real
       inline
       function_symbol const& nat2real()
       {
-        static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol("Nat2Real", function_sort(sort_nat::nat(), real_())));
+        static function_symbol nat2real = data::detail::initialise_static_expression(nat2real, function_symbol(nat2real_name(), function_sort(sort_nat::nat(), real_())));
         return nat2real;
       }
+
 
       /// \brief Recogniser for function Nat2Real
       /// \param e A data expression
@@ -174,7 +211,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Nat2Real";
+          return static_cast< function_symbol >(e).name() == nat2real_name();
         }
         return false;
       }
@@ -202,14 +239,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Int2Real
+      /// \return Identifier Int2Real
+      inline
+      core::identifier_string const& int2real_name()
+      {
+        static core::identifier_string int2real_name = data::detail::initialise_static_expression(int2real_name, core::identifier_string("Int2Real"));
+        return int2real_name;
+      }
+
       /// \brief Constructor for function symbol Int2Real
       /// \return Function symbol int2real
       inline
       function_symbol const& int2real()
       {
-        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol("Int2Real", function_sort(sort_int_::int_(), real_())));
+        static function_symbol int2real = data::detail::initialise_static_expression(int2real, function_symbol(int2real_name(), function_sort(sort_int_::int_(), real_())));
         return int2real;
       }
+
 
       /// \brief Recogniser for function Int2Real
       /// \param e A data expression
@@ -219,7 +266,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Int2Real";
+          return static_cast< function_symbol >(e).name() == int2real_name();
         }
         return false;
       }
@@ -247,14 +294,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Real2Pos
+      /// \return Identifier Real2Pos
+      inline
+      core::identifier_string const& real2pos_name()
+      {
+        static core::identifier_string real2pos_name = data::detail::initialise_static_expression(real2pos_name, core::identifier_string("Real2Pos"));
+        return real2pos_name;
+      }
+
       /// \brief Constructor for function symbol Real2Pos
       /// \return Function symbol real2pos
       inline
       function_symbol const& real2pos()
       {
-        static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol("Real2Pos", function_sort(real_(), sort_pos::pos())));
+        static function_symbol real2pos = data::detail::initialise_static_expression(real2pos, function_symbol(real2pos_name(), function_sort(real_(), sort_pos::pos())));
         return real2pos;
       }
+
 
       /// \brief Recogniser for function Real2Pos
       /// \param e A data expression
@@ -264,7 +321,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Real2Pos";
+          return static_cast< function_symbol >(e).name() == real2pos_name();
         }
         return false;
       }
@@ -292,14 +349,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Real2Nat
+      /// \return Identifier Real2Nat
+      inline
+      core::identifier_string const& real2nat_name()
+      {
+        static core::identifier_string real2nat_name = data::detail::initialise_static_expression(real2nat_name, core::identifier_string("Real2Nat"));
+        return real2nat_name;
+      }
+
       /// \brief Constructor for function symbol Real2Nat
       /// \return Function symbol real2nat
       inline
       function_symbol const& real2nat()
       {
-        static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol("Real2Nat", function_sort(real_(), sort_nat::nat())));
+        static function_symbol real2nat = data::detail::initialise_static_expression(real2nat, function_symbol(real2nat_name(), function_sort(real_(), sort_nat::nat())));
         return real2nat;
       }
+
 
       /// \brief Recogniser for function Real2Nat
       /// \param e A data expression
@@ -309,7 +376,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Real2Nat";
+          return static_cast< function_symbol >(e).name() == real2nat_name();
         }
         return false;
       }
@@ -337,14 +404,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier Real2Int
+      /// \return Identifier Real2Int
+      inline
+      core::identifier_string const& real2int_name()
+      {
+        static core::identifier_string real2int_name = data::detail::initialise_static_expression(real2int_name, core::identifier_string("Real2Int"));
+        return real2int_name;
+      }
+
       /// \brief Constructor for function symbol Real2Int
       /// \return Function symbol real2int
       inline
       function_symbol const& real2int()
       {
-        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol("Real2Int", function_sort(real_(), sort_int_::int_())));
+        static function_symbol real2int = data::detail::initialise_static_expression(real2int, function_symbol(real2int_name(), function_sort(real_(), sort_int_::int_())));
         return real2int;
       }
+
 
       /// \brief Recogniser for function Real2Int
       /// \param e A data expression
@@ -354,7 +431,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "Real2Int";
+          return static_cast< function_symbol >(e).name() == real2int_name();
         }
         return false;
       }
@@ -380,6 +457,15 @@ namespace mcrl2 {
           return is_real2int_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier min
+      /// \return Identifier min
+      inline
+      core::identifier_string const& minimum_name()
+      {
+        static core::identifier_string minimum_name = data::detail::initialise_static_expression(minimum_name, core::identifier_string("min"));
+        return minimum_name;
       }
 
       ///\brief Constructor for function symbol min
@@ -411,7 +497,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol minimum("min", function_sort(s0, s1, target_sort));
+        function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
         return minimum;
       }
 
@@ -423,7 +509,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "min";
+          return static_cast< function_symbol >(e).name() == minimum_name();
         }
         return false;
       }
@@ -450,6 +536,15 @@ namespace mcrl2 {
           return is_minimum_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier max
+      /// \return Identifier max
+      inline
+      core::identifier_string const& maximum_name()
+      {
+        static core::identifier_string maximum_name = data::detail::initialise_static_expression(maximum_name, core::identifier_string("max"));
+        return maximum_name;
       }
 
       ///\brief Constructor for function symbol max
@@ -505,7 +600,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol maximum("max", function_sort(s0, s1, target_sort));
+        function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
         return maximum;
       }
 
@@ -517,7 +612,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "max";
+          return static_cast< function_symbol >(e).name() == maximum_name();
         }
         return false;
       }
@@ -544,6 +639,15 @@ namespace mcrl2 {
           return is_maximum_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier abs
+      /// \return Identifier abs
+      inline
+      core::identifier_string const& abs_name()
+      {
+        static core::identifier_string abs_name = data::detail::initialise_static_expression(abs_name, core::identifier_string("abs"));
+        return abs_name;
       }
 
       ///\brief Constructor for function symbol abs
@@ -574,7 +678,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol abs("abs", function_sort(s0, target_sort));
+        function_symbol abs(abs_name(), function_sort(s0, target_sort));
         return abs;
       }
 
@@ -586,7 +690,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "abs";
+          return static_cast< function_symbol >(e).name() == abs_name();
         }
         return false;
       }
@@ -612,6 +716,15 @@ namespace mcrl2 {
           return is_abs_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier -
+      /// \return Identifier -
+      inline
+      core::identifier_string const& negate_name()
+      {
+        static core::identifier_string negate_name = data::detail::initialise_static_expression(negate_name, core::identifier_string("-"));
+        return negate_name;
       }
 
       ///\brief Constructor for function symbol -
@@ -642,7 +755,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol negate("-", function_sort(s0, target_sort));
+        function_symbol negate(negate_name(), function_sort(s0, target_sort));
         return negate;
       }
 
@@ -654,7 +767,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == negate_name();
         }
         return false;
       }
@@ -680,6 +793,15 @@ namespace mcrl2 {
           return is_negate_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier succ
+      /// \return Identifier succ
+      inline
+      core::identifier_string const& succ_name()
+      {
+        static core::identifier_string succ_name = data::detail::initialise_static_expression(succ_name, core::identifier_string("succ"));
+        return succ_name;
       }
 
       ///\brief Constructor for function symbol succ
@@ -710,7 +832,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol succ("succ", function_sort(s0, target_sort));
+        function_symbol succ(succ_name(), function_sort(s0, target_sort));
         return succ;
       }
 
@@ -722,7 +844,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "succ";
+          return static_cast< function_symbol >(e).name() == succ_name();
         }
         return false;
       }
@@ -748,6 +870,15 @@ namespace mcrl2 {
           return is_succ_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier pred
+      /// \return Identifier pred
+      inline
+      core::identifier_string const& pred_name()
+      {
+        static core::identifier_string pred_name = data::detail::initialise_static_expression(pred_name, core::identifier_string("pred"));
+        return pred_name;
       }
 
       ///\brief Constructor for function symbol pred
@@ -778,7 +909,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol pred("pred", function_sort(s0, target_sort));
+        function_symbol pred(pred_name(), function_sort(s0, target_sort));
         return pred;
       }
 
@@ -790,7 +921,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "pred";
+          return static_cast< function_symbol >(e).name() == pred_name();
         }
         return false;
       }
@@ -816,6 +947,15 @@ namespace mcrl2 {
           return is_pred_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier +
+      /// \return Identifier +
+      inline
+      core::identifier_string const& plus_name()
+      {
+        static core::identifier_string plus_name = data::detail::initialise_static_expression(plus_name, core::identifier_string("+"));
+        return plus_name;
       }
 
       ///\brief Constructor for function symbol +
@@ -855,7 +995,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol plus("+", function_sort(s0, s1, target_sort));
+        function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
         return plus;
       }
 
@@ -867,7 +1007,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "+";
+          return static_cast< function_symbol >(e).name() == plus_name();
         }
         return false;
       }
@@ -894,6 +1034,15 @@ namespace mcrl2 {
           return is_plus_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier -
+      /// \return Identifier -
+      inline
+      core::identifier_string const& minus_name()
+      {
+        static core::identifier_string minus_name = data::detail::initialise_static_expression(minus_name, core::identifier_string("-"));
+        return minus_name;
       }
 
       ///\brief Constructor for function symbol -
@@ -925,7 +1074,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol minus("-", function_sort(s0, s1, target_sort));
+        function_symbol minus(minus_name(), function_sort(s0, s1, target_sort));
         return minus;
       }
 
@@ -937,7 +1086,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "-";
+          return static_cast< function_symbol >(e).name() == minus_name();
         }
         return false;
       }
@@ -964,6 +1113,15 @@ namespace mcrl2 {
           return is_minus_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier *
+      /// \return Identifier *
+      inline
+      core::identifier_string const& times_name()
+      {
+        static core::identifier_string times_name = data::detail::initialise_static_expression(times_name, core::identifier_string("*"));
+        return times_name;
       }
 
       ///\brief Constructor for function symbol *
@@ -995,7 +1153,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol times("*", function_sort(s0, s1, target_sort));
+        function_symbol times(times_name(), function_sort(s0, s1, target_sort));
         return times;
       }
 
@@ -1007,7 +1165,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "*";
+          return static_cast< function_symbol >(e).name() == times_name();
         }
         return false;
       }
@@ -1034,6 +1192,15 @@ namespace mcrl2 {
           return is_times_function_symbol(static_cast< application >(e).head());
         }
         return false;
+      }
+
+      /// \brief Generate identifier exp
+      /// \return Identifier exp
+      inline
+      core::identifier_string const& exp_name()
+      {
+        static core::identifier_string exp_name = data::detail::initialise_static_expression(exp_name, core::identifier_string("exp"));
+        return exp_name;
       }
 
       ///\brief Constructor for function symbol exp
@@ -1065,7 +1232,7 @@ namespace mcrl2 {
           assert(false);
         }
 
-        function_symbol exp("exp", function_sort(s0, s1, target_sort));
+        function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));
         return exp;
       }
 
@@ -1077,7 +1244,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "exp";
+          return static_cast< function_symbol >(e).name() == exp_name();
         }
         return false;
       }
@@ -1106,6 +1273,15 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier /
+      /// \return Identifier /
+      inline
+      core::identifier_string const& divides_name()
+      {
+        static core::identifier_string divides_name = data::detail::initialise_static_expression(divides_name, core::identifier_string("/"));
+        return divides_name;
+      }
+
       ///\brief Constructor for function symbol /
       /// \param s0 A sort expression
       /// \param s1 A sort expression
@@ -1115,7 +1291,7 @@ namespace mcrl2 {
       {
         sort_expression target_sort(real_());
 
-        function_symbol divides("/", function_sort(s0, s1, target_sort));
+        function_symbol divides(divides_name(), function_sort(s0, s1, target_sort));
         return divides;
       }
 
@@ -1127,7 +1303,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "/";
+          return static_cast< function_symbol >(e).name() == divides_name();
         }
         return false;
       }
@@ -1156,14 +1332,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier floor
+      /// \return Identifier floor
+      inline
+      core::identifier_string const& floor_name()
+      {
+        static core::identifier_string floor_name = data::detail::initialise_static_expression(floor_name, core::identifier_string("floor"));
+        return floor_name;
+      }
+
       /// \brief Constructor for function symbol floor
       /// \return Function symbol floor
       inline
       function_symbol const& floor()
       {
-        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol("floor", function_sort(real_(), sort_int_::int_())));
+        static function_symbol floor = data::detail::initialise_static_expression(floor, function_symbol(floor_name(), function_sort(real_(), sort_int_::int_())));
         return floor;
       }
+
 
       /// \brief Recogniser for function floor
       /// \param e A data expression
@@ -1173,7 +1359,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "floor";
+          return static_cast< function_symbol >(e).name() == floor_name();
         }
         return false;
       }
@@ -1201,14 +1387,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier ceil
+      /// \return Identifier ceil
+      inline
+      core::identifier_string const& ceil_name()
+      {
+        static core::identifier_string ceil_name = data::detail::initialise_static_expression(ceil_name, core::identifier_string("ceil"));
+        return ceil_name;
+      }
+
       /// \brief Constructor for function symbol ceil
       /// \return Function symbol ceil
       inline
       function_symbol const& ceil()
       {
-        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol("ceil", function_sort(real_(), sort_int_::int_())));
+        static function_symbol ceil = data::detail::initialise_static_expression(ceil, function_symbol(ceil_name(), function_sort(real_(), sort_int_::int_())));
         return ceil;
       }
+
 
       /// \brief Recogniser for function ceil
       /// \param e A data expression
@@ -1218,7 +1414,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "ceil";
+          return static_cast< function_symbol >(e).name() == ceil_name();
         }
         return false;
       }
@@ -1246,14 +1442,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier round
+      /// \return Identifier round
+      inline
+      core::identifier_string const& round_name()
+      {
+        static core::identifier_string round_name = data::detail::initialise_static_expression(round_name, core::identifier_string("round"));
+        return round_name;
+      }
+
       /// \brief Constructor for function symbol round
       /// \return Function symbol round
       inline
       function_symbol const& round()
       {
-        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol("round", function_sort(real_(), sort_int_::int_())));
+        static function_symbol round = data::detail::initialise_static_expression(round, function_symbol(round_name(), function_sort(real_(), sort_int_::int_())));
         return round;
       }
+
 
       /// \brief Recogniser for function round
       /// \param e A data expression
@@ -1263,7 +1469,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "round";
+          return static_cast< function_symbol >(e).name() == round_name();
         }
         return false;
       }
@@ -1291,14 +1497,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@redfrac
+      /// \return Identifier \@redfrac
+      inline
+      core::identifier_string const& redfrac_name()
+      {
+        static core::identifier_string redfrac_name = data::detail::initialise_static_expression(redfrac_name, core::identifier_string("@redfrac"));
+        return redfrac_name;
+      }
+
       /// \brief Constructor for function symbol \@redfrac
       /// \return Function symbol redfrac
       inline
       function_symbol const& redfrac()
       {
-        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol("@redfrac", function_sort(sort_int_::int_(), sort_int_::int_(), real_())));
+        static function_symbol redfrac = data::detail::initialise_static_expression(redfrac, function_symbol(redfrac_name(), function_sort(sort_int_::int_(), sort_int_::int_(), real_())));
         return redfrac;
       }
+
 
       /// \brief Recogniser for function \@redfrac
       /// \param e A data expression
@@ -1308,7 +1524,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@redfrac";
+          return static_cast< function_symbol >(e).name() == redfrac_name();
         }
         return false;
       }
@@ -1337,14 +1553,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@redfracwhr
+      /// \return Identifier \@redfracwhr
+      inline
+      core::identifier_string const& redfracwhr_name()
+      {
+        static core::identifier_string redfracwhr_name = data::detail::initialise_static_expression(redfracwhr_name, core::identifier_string("@redfracwhr"));
+        return redfracwhr_name;
+      }
+
       /// \brief Constructor for function symbol \@redfracwhr
       /// \return Function symbol redfracwhr
       inline
       function_symbol const& redfracwhr()
       {
-        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol("@redfracwhr", function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_())));
+        static function_symbol redfracwhr = data::detail::initialise_static_expression(redfracwhr, function_symbol(redfracwhr_name(), function_sort(sort_pos::pos(), sort_int_::int_(), sort_nat::nat(), real_())));
         return redfracwhr;
       }
+
 
       /// \brief Recogniser for function \@redfracwhr
       /// \param e A data expression
@@ -1354,7 +1580,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@redfracwhr";
+          return static_cast< function_symbol >(e).name() == redfracwhr_name();
         }
         return false;
       }
@@ -1384,14 +1610,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@redfrachlp
+      /// \return Identifier \@redfrachlp
+      inline
+      core::identifier_string const& redfrachlp_name()
+      {
+        static core::identifier_string redfrachlp_name = data::detail::initialise_static_expression(redfrachlp_name, core::identifier_string("@redfrachlp"));
+        return redfrachlp_name;
+      }
+
       /// \brief Constructor for function symbol \@redfrachlp
       /// \return Function symbol redfrachlp
       inline
       function_symbol const& redfrachlp()
       {
-        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol("@redfrachlp", function_sort(real_(), sort_int_::int_(), real_())));
+        static function_symbol redfrachlp = data::detail::initialise_static_expression(redfrachlp, function_symbol(redfrachlp_name(), function_sort(real_(), sort_int_::int_(), real_())));
         return redfrachlp;
       }
+
 
       /// \brief Recogniser for function \@redfrachlp
       /// \param e A data expression
@@ -1401,7 +1637,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@redfrachlp";
+          return static_cast< function_symbol >(e).name() == redfrachlp_name();
         }
         return false;
       }
@@ -1473,40 +1709,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        if (is_minimum_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_maximum_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_plus_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_minus_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_times_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_exp_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_divides_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_redfrachlp_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1517,12 +1721,8 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        if (is_redfracwhr_application(e))
-        {
-          return static_cast< application >(e).arguments()[2];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_redfracwhr_application(e));
+        return static_cast< application >(e).arguments()[2];
       }
 
       ///\brief Function for projecting out argument
@@ -1533,12 +1733,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        if (is_redfracwhr_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_redfracwhr_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1549,12 +1745,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        if (is_redfracwhr_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_redfracwhr_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1565,12 +1757,8 @@ namespace mcrl2 {
       inline
       data_expression denominator(const data_expression& e)
       {
-        if (is_creal_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_creal_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -1581,12 +1769,8 @@ namespace mcrl2 {
       inline
       data_expression numerator(const data_expression& e)
       {
-        if (is_creal_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_creal_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1597,60 +1781,8 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        if (is_pos2real_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_nat2real_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_int2real_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_real2pos_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_real2nat_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_real2int_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_abs_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_negate_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_succ_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_pred_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_floor_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_ceil_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_round_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e) || is_floor_application(e) || is_ceil_application(e) || is_round_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -1661,40 +1793,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        if (is_minimum_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_maximum_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_plus_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_minus_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_times_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_exp_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_divides_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_redfrachlp_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       /// \brief Give all system defined equations for real_

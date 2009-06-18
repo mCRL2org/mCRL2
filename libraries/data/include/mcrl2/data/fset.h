@@ -34,13 +34,20 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort fset
     namespace sort_fset {
 
+      inline
+      core::identifier_string const& fset_name()
+      {
+        static core::identifier_string fset_name = data::detail::initialise_static_expression(fset_name, core::identifier_string("FSet"));
+        return fset_name;
+      }
+
       /// \brief Constructor for sort expression FSet(S)
       /// \param s A sort expression
       /// \return Sort expression fset(s)
       inline
       container_sort fset(const sort_expression& s)
       {
-        container_sort fset("fset", s);
+        container_sort fset(fset_name(), s);
         return fset;
       }
 
@@ -53,7 +60,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == "fset";
+          return static_cast< container_sort >(e).container_name() == fset_name();
         }
         return false;
       }
@@ -74,15 +81,25 @@ namespace mcrl2 {
 
       } // namespace detail
 
+      /// \brief Generate identifier \@fset_empty
+      /// \return Identifier \@fset_empty
+      inline
+      core::identifier_string const& fset_empty_name()
+      {
+        static core::identifier_string fset_empty_name = data::detail::initialise_static_expression(fset_empty_name, core::identifier_string("@fset_empty"));
+        return fset_empty_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_empty
       /// \param s A sort expression
       /// \return Function symbol fset_empty
       inline
       function_symbol fset_empty(const sort_expression& s)
       {
-        function_symbol fset_empty("@fset_empty", fset(s));
+        function_symbol fset_empty(fset_empty_name(), fset(s));
         return fset_empty;
       }
+
 
       /// \brief Recogniser for function \@fset_empty
       /// \param e A data expression
@@ -92,9 +109,18 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_empty";
+          return static_cast< function_symbol >(e).name() == fset_empty_name();
         }
         return false;
+      }
+
+      /// \brief Generate identifier \@fset_cons
+      /// \return Identifier \@fset_cons
+      inline
+      core::identifier_string const& fset_cons_name()
+      {
+        static core::identifier_string fset_cons_name = data::detail::initialise_static_expression(fset_cons_name, core::identifier_string("@fset_cons"));
+        return fset_cons_name;
       }
 
       /// \brief Constructor for function symbol \@fset_cons
@@ -103,9 +129,10 @@ namespace mcrl2 {
       inline
       function_symbol fset_cons(const sort_expression& s)
       {
-        function_symbol fset_cons("@fset_cons", function_sort(s, fset(s), fset(s)));
+        function_symbol fset_cons(fset_cons_name(), function_sort(s, fset(s), fset(s)));
         return fset_cons;
       }
+
 
       /// \brief Recogniser for function \@fset_cons
       /// \param e A data expression
@@ -115,7 +142,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_cons";
+          return static_cast< function_symbol >(e).name() == fset_cons_name();
         }
         return false;
       }
@@ -157,15 +184,25 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Generate identifier \@fset_insert
+      /// \return Identifier \@fset_insert
+      inline
+      core::identifier_string const& fsetinsert_name()
+      {
+        static core::identifier_string fsetinsert_name = data::detail::initialise_static_expression(fsetinsert_name, core::identifier_string("@fset_insert"));
+        return fsetinsert_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_insert
       /// \param s A sort expression
       /// \return Function symbol fsetinsert
       inline
       function_symbol fsetinsert(const sort_expression& s)
       {
-        function_symbol fsetinsert("@fset_insert", function_sort(s, fset(s), fset(s)));
+        function_symbol fsetinsert(fsetinsert_name(), function_sort(s, fset(s), fset(s)));
         return fsetinsert;
       }
+
 
       /// \brief Recogniser for function \@fset_insert
       /// \param e A data expression
@@ -175,7 +212,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_insert";
+          return static_cast< function_symbol >(e).name() == fsetinsert_name();
         }
         return false;
       }
@@ -205,15 +242,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@fset_cinsert
+      /// \return Identifier \@fset_cinsert
+      inline
+      core::identifier_string const& fsetcinsert_name()
+      {
+        static core::identifier_string fsetcinsert_name = data::detail::initialise_static_expression(fsetcinsert_name, core::identifier_string("@fset_cinsert"));
+        return fsetcinsert_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_cinsert
       /// \param s A sort expression
       /// \return Function symbol fsetcinsert
       inline
       function_symbol fsetcinsert(const sort_expression& s)
       {
-        function_symbol fsetcinsert("@fset_cinsert", function_sort(s, sort_bool_::bool_(), fset(s), fset(s)));
+        function_symbol fsetcinsert(fsetcinsert_name(), function_sort(s, sort_bool_::bool_(), fset(s), fset(s)));
         return fsetcinsert;
       }
+
 
       /// \brief Recogniser for function \@fset_cinsert
       /// \param e A data expression
@@ -223,7 +270,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_cinsert";
+          return static_cast< function_symbol >(e).name() == fsetcinsert_name();
         }
         return false;
       }
@@ -254,15 +301,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@fset_in
+      /// \return Identifier \@fset_in
+      inline
+      core::identifier_string const& fsetin_name()
+      {
+        static core::identifier_string fsetin_name = data::detail::initialise_static_expression(fsetin_name, core::identifier_string("@fset_in"));
+        return fsetin_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_in
       /// \param s A sort expression
       /// \return Function symbol fsetin
       inline
       function_symbol fsetin(const sort_expression& s)
       {
-        function_symbol fsetin("@fset_in", function_sort(s, fset(s), sort_bool_::bool_()));
+        function_symbol fsetin(fsetin_name(), function_sort(s, fset(s), sort_bool_::bool_()));
         return fsetin;
       }
+
 
       /// \brief Recogniser for function \@fset_in
       /// \param e A data expression
@@ -272,7 +329,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_in";
+          return static_cast< function_symbol >(e).name() == fsetin_name();
         }
         return false;
       }
@@ -302,15 +359,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@fset_lte
+      /// \return Identifier \@fset_lte
+      inline
+      core::identifier_string const& fsetlte_name()
+      {
+        static core::identifier_string fsetlte_name = data::detail::initialise_static_expression(fsetlte_name, core::identifier_string("@fset_lte"));
+        return fsetlte_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_lte
       /// \param s A sort expression
       /// \return Function symbol fsetlte
       inline
       function_symbol fsetlte(const sort_expression& s)
       {
-        function_symbol fsetlte("@fset_lte", function_sort(function_sort(s, sort_bool_::bool_()), fset(s), fset(s), sort_bool_::bool_()));
+        function_symbol fsetlte(fsetlte_name(), function_sort(function_sort(s, sort_bool_::bool_()), fset(s), fset(s), sort_bool_::bool_()));
         return fsetlte;
       }
+
 
       /// \brief Recogniser for function \@fset_lte
       /// \param e A data expression
@@ -320,7 +387,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_lte";
+          return static_cast< function_symbol >(e).name() == fsetlte_name();
         }
         return false;
       }
@@ -351,15 +418,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@fset_union
+      /// \return Identifier \@fset_union
+      inline
+      core::identifier_string const& fsetunion_name()
+      {
+        static core::identifier_string fsetunion_name = data::detail::initialise_static_expression(fsetunion_name, core::identifier_string("@fset_union"));
+        return fsetunion_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_union
       /// \param s A sort expression
       /// \return Function symbol fsetunion
       inline
       function_symbol fsetunion(const sort_expression& s)
       {
-        function_symbol fsetunion("@fset_union", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
+        function_symbol fsetunion(fsetunion_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
         return fsetunion;
       }
+
 
       /// \brief Recogniser for function \@fset_union
       /// \param e A data expression
@@ -369,7 +446,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_union";
+          return static_cast< function_symbol >(e).name() == fsetunion_name();
         }
         return false;
       }
@@ -401,15 +478,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier \@fset_inter
+      /// \return Identifier \@fset_inter
+      inline
+      core::identifier_string const& fsetintersection_name()
+      {
+        static core::identifier_string fsetintersection_name = data::detail::initialise_static_expression(fsetintersection_name, core::identifier_string("@fset_inter"));
+        return fsetintersection_name;
+      }
+
       /// \brief Constructor for function symbol \@fset_inter
       /// \param s A sort expression
       /// \return Function symbol fsetintersection
       inline
       function_symbol fsetintersection(const sort_expression& s)
       {
-        function_symbol fsetintersection("@fset_inter", function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
+        function_symbol fsetintersection(fsetintersection_name(), function_sort(function_sort(s, sort_bool_::bool_()), function_sort(s, sort_bool_::bool_()), fset(s), fset(s), fset(s)));
         return fsetintersection;
       }
+
 
       /// \brief Recogniser for function \@fset_inter
       /// \param e A data expression
@@ -419,7 +506,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "@fset_inter";
+          return static_cast< function_symbol >(e).name() == fsetintersection_name();
         }
         return false;
       }
@@ -474,12 +561,8 @@ namespace mcrl2 {
       inline
       data_expression head(const data_expression& e)
       {
-        if (is_fset_cons_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fset_cons_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -490,16 +573,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        if (is_fsetinsert_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_fsetin_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetinsert_application(e) || is_fsetin_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -510,24 +585,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        if (is_fsetcinsert_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_fsetlte_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_fsetunion_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_fsetintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -538,24 +597,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        if (is_fsetcinsert_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_fsetlte_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_fsetunion_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_fsetintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -566,24 +609,8 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        if (is_fsetcinsert_application(e))
-        {
-          return static_cast< application >(e).arguments()[2];
-        }
-        if (is_fsetlte_application(e))
-        {
-          return static_cast< application >(e).arguments()[2];
-        }
-        if (is_fsetunion_application(e))
-        {
-          return static_cast< application >(e).arguments()[2];
-        }
-        if (is_fsetintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[2];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
+        return static_cast< application >(e).arguments()[2];
       }
 
       ///\brief Function for projecting out argument
@@ -594,16 +621,8 @@ namespace mcrl2 {
       inline
       data_expression arg4(const data_expression& e)
       {
-        if (is_fsetunion_application(e))
-        {
-          return static_cast< application >(e).arguments()[3];
-        }
-        if (is_fsetintersection_application(e))
-        {
-          return static_cast< application >(e).arguments()[3];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetunion_application(e) || is_fsetintersection_application(e));
+        return static_cast< application >(e).arguments()[3];
       }
 
       ///\brief Function for projecting out argument
@@ -614,12 +633,8 @@ namespace mcrl2 {
       inline
       data_expression tail(const data_expression& e)
       {
-        if (is_fset_cons_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fset_cons_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -630,16 +645,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        if (is_fsetinsert_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_fsetin_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_fsetinsert_application(e) || is_fsetin_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       /// \brief Give all system defined equations for fset

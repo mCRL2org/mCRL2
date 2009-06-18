@@ -31,12 +31,19 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort bool_
     namespace sort_bool_ {
 
+      inline
+      core::identifier_string const& bool__name()
+      {
+        static core::identifier_string bool__name = data::detail::initialise_static_expression(bool__name, core::identifier_string("Bool"));
+        return bool__name;
+      }
+
       /// \brief Constructor for sort expression Bool
       /// \return Sort expression Bool
       inline
       basic_sort const& bool_()
       {
-        static basic_sort bool_ = data::detail::initialise_static_expression(bool_, basic_sort("Bool"));
+        static basic_sort bool_ = data::detail::initialise_static_expression(bool_, basic_sort(bool__name()));
         return bool_;
       }
 
@@ -53,14 +60,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier true
+      /// \return Identifier true
+      inline
+      core::identifier_string const& true__name()
+      {
+        static core::identifier_string true__name = data::detail::initialise_static_expression(true__name, core::identifier_string("true"));
+        return true__name;
+      }
+
       /// \brief Constructor for function symbol true
       /// \return Function symbol true_
       inline
       function_symbol const& true_()
       {
-        static function_symbol true_ = data::detail::initialise_static_expression(true_, function_symbol("true", bool_()));
+        static function_symbol true_ = data::detail::initialise_static_expression(true_, function_symbol(true__name(), bool_()));
         return true_;
       }
+
 
       /// \brief Recogniser for function true
       /// \param e A data expression
@@ -70,9 +87,18 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "true";
+          return static_cast< function_symbol >(e).name() == true__name();
         }
         return false;
+      }
+
+      /// \brief Generate identifier false
+      /// \return Identifier false
+      inline
+      core::identifier_string const& false__name()
+      {
+        static core::identifier_string false__name = data::detail::initialise_static_expression(false__name, core::identifier_string("false"));
+        return false__name;
       }
 
       /// \brief Constructor for function symbol false
@@ -80,9 +106,10 @@ namespace mcrl2 {
       inline
       function_symbol const& false_()
       {
-        static function_symbol false_ = data::detail::initialise_static_expression(false_, function_symbol("false", bool_()));
+        static function_symbol false_ = data::detail::initialise_static_expression(false_, function_symbol(false__name(), bool_()));
         return false_;
       }
+
 
       /// \brief Recogniser for function false
       /// \param e A data expression
@@ -92,7 +119,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "false";
+          return static_cast< function_symbol >(e).name() == false__name();
         }
         return false;
       }
@@ -108,14 +135,24 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Generate identifier !
+      /// \return Identifier !
+      inline
+      core::identifier_string const& not__name()
+      {
+        static core::identifier_string not__name = data::detail::initialise_static_expression(not__name, core::identifier_string("!"));
+        return not__name;
+      }
+
       /// \brief Constructor for function symbol !
       /// \return Function symbol not_
       inline
       function_symbol const& not_()
       {
-        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol("!", function_sort(bool_(), bool_())));
+        static function_symbol not_ = data::detail::initialise_static_expression(not_, function_symbol(not__name(), function_sort(bool_(), bool_())));
         return not_;
       }
+
 
       /// \brief Recogniser for function !
       /// \param e A data expression
@@ -125,7 +162,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "!";
+          return static_cast< function_symbol >(e).name() == not__name();
         }
         return false;
       }
@@ -153,14 +190,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier &&
+      /// \return Identifier &&
+      inline
+      core::identifier_string const& and__name()
+      {
+        static core::identifier_string and__name = data::detail::initialise_static_expression(and__name, core::identifier_string("&&"));
+        return and__name;
+      }
+
       /// \brief Constructor for function symbol &&
       /// \return Function symbol and_
       inline
       function_symbol const& and_()
       {
-        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol("&&", function_sort(bool_(), bool_(), bool_())));
+        static function_symbol and_ = data::detail::initialise_static_expression(and_, function_symbol(and__name(), function_sort(bool_(), bool_(), bool_())));
         return and_;
       }
+
 
       /// \brief Recogniser for function &&
       /// \param e A data expression
@@ -170,7 +217,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "&&";
+          return static_cast< function_symbol >(e).name() == and__name();
         }
         return false;
       }
@@ -199,14 +246,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier ||
+      /// \return Identifier ||
+      inline
+      core::identifier_string const& or__name()
+      {
+        static core::identifier_string or__name = data::detail::initialise_static_expression(or__name, core::identifier_string("||"));
+        return or__name;
+      }
+
       /// \brief Constructor for function symbol ||
       /// \return Function symbol or_
       inline
       function_symbol const& or_()
       {
-        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol("||", function_sort(bool_(), bool_(), bool_())));
+        static function_symbol or_ = data::detail::initialise_static_expression(or_, function_symbol(or__name(), function_sort(bool_(), bool_(), bool_())));
         return or_;
       }
+
 
       /// \brief Recogniser for function ||
       /// \param e A data expression
@@ -216,7 +273,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "||";
+          return static_cast< function_symbol >(e).name() == or__name();
         }
         return false;
       }
@@ -245,14 +302,24 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier =>
+      /// \return Identifier =>
+      inline
+      core::identifier_string const& implies_name()
+      {
+        static core::identifier_string implies_name = data::detail::initialise_static_expression(implies_name, core::identifier_string("=>"));
+        return implies_name;
+      }
+
       /// \brief Constructor for function symbol =>
       /// \return Function symbol implies
       inline
       function_symbol const& implies()
       {
-        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol("=>", function_sort(bool_(), bool_(), bool_())));
+        static function_symbol implies = data::detail::initialise_static_expression(implies, function_symbol(implies_name(), function_sort(bool_(), bool_(), bool_())));
         return implies;
       }
+
 
       /// \brief Recogniser for function =>
       /// \param e A data expression
@@ -262,7 +329,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "=>";
+          return static_cast< function_symbol >(e).name() == implies_name();
         }
         return false;
       }
@@ -311,20 +378,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        if (is_and__application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_or__application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_implies_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_and__application(e) || is_or__application(e) || is_implies_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -335,20 +390,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        if (is_and__application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_or__application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        if (is_implies_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_and__application(e) || is_or__application(e) || is_implies_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -359,12 +402,8 @@ namespace mcrl2 {
       inline
       data_expression arg(const data_expression& e)
       {
-        if (is_not__application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_not__application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       /// \brief Give all system defined equations for bool_

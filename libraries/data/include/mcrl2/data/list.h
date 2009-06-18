@@ -35,13 +35,20 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort list
     namespace sort_list {
 
+      inline
+      core::identifier_string const& list_name()
+      {
+        static core::identifier_string list_name = data::detail::initialise_static_expression(list_name, core::identifier_string("List"));
+        return list_name;
+      }
+
       /// \brief Constructor for sort expression List(S)
       /// \param s A sort expression
       /// \return Sort expression list(s)
       inline
       container_sort list(const sort_expression& s)
       {
-        container_sort list("list", s);
+        container_sort list(list_name(), s);
         return list;
       }
 
@@ -54,9 +61,18 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == "list";
+          return static_cast< container_sort >(e).container_name() == list_name();
         }
         return false;
+      }
+
+      /// \brief Generate identifier []
+      /// \return Identifier []
+      inline
+      core::identifier_string const& nil_name()
+      {
+        static core::identifier_string nil_name = data::detail::initialise_static_expression(nil_name, core::identifier_string("[]"));
+        return nil_name;
       }
 
       /// \brief Constructor for function symbol []
@@ -65,9 +81,10 @@ namespace mcrl2 {
       inline
       function_symbol nil(const sort_expression& s)
       {
-        function_symbol nil("[]", list(s));
+        function_symbol nil(nil_name(), list(s));
         return nil;
       }
+
 
       /// \brief Recogniser for function []
       /// \param e A data expression
@@ -77,9 +94,18 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "[]";
+          return static_cast< function_symbol >(e).name() == nil_name();
         }
         return false;
+      }
+
+      /// \brief Generate identifier |>
+      /// \return Identifier |>
+      inline
+      core::identifier_string const& cons__name()
+      {
+        static core::identifier_string cons__name = data::detail::initialise_static_expression(cons__name, core::identifier_string("|>"));
+        return cons__name;
       }
 
       /// \brief Constructor for function symbol |>
@@ -88,9 +114,10 @@ namespace mcrl2 {
       inline
       function_symbol cons_(const sort_expression& s)
       {
-        function_symbol cons_("|>", function_sort(s, list(s), list(s)));
+        function_symbol cons_(cons__name(), function_sort(s, list(s), list(s)));
         return cons_;
       }
+
 
       /// \brief Recogniser for function |>
       /// \param e A data expression
@@ -100,7 +127,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "|>";
+          return static_cast< function_symbol >(e).name() == cons__name();
         }
         return false;
       }
@@ -142,15 +169,25 @@ namespace mcrl2 {
 
         return result;
       }
+      /// \brief Generate identifier in
+      /// \return Identifier in
+      inline
+      core::identifier_string const& in_name()
+      {
+        static core::identifier_string in_name = data::detail::initialise_static_expression(in_name, core::identifier_string("in"));
+        return in_name;
+      }
+
       /// \brief Constructor for function symbol in
       /// \param s A sort expression
       /// \return Function symbol in
       inline
       function_symbol in(const sort_expression& s)
       {
-        function_symbol in("in", function_sort(s, list(s), sort_bool_::bool_()));
+        function_symbol in(in_name(), function_sort(s, list(s), sort_bool_::bool_()));
         return in;
       }
+
 
       /// \brief Recogniser for function in
       /// \param e A data expression
@@ -160,7 +197,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "in";
+          return static_cast< function_symbol >(e).name() == in_name();
         }
         return false;
       }
@@ -190,15 +227,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier #
+      /// \return Identifier #
+      inline
+      core::identifier_string const& count_name()
+      {
+        static core::identifier_string count_name = data::detail::initialise_static_expression(count_name, core::identifier_string("#"));
+        return count_name;
+      }
+
       /// \brief Constructor for function symbol #
       /// \param s A sort expression
       /// \return Function symbol count
       inline
       function_symbol count(const sort_expression& s)
       {
-        function_symbol count("#", function_sort(list(s), sort_nat::nat()));
+        function_symbol count(count_name(), function_sort(list(s), sort_nat::nat()));
         return count;
       }
+
 
       /// \brief Recogniser for function #
       /// \param e A data expression
@@ -208,7 +255,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "#";
+          return static_cast< function_symbol >(e).name() == count_name();
         }
         return false;
       }
@@ -237,15 +284,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier <|
+      /// \return Identifier <|
+      inline
+      core::identifier_string const& snoc_name()
+      {
+        static core::identifier_string snoc_name = data::detail::initialise_static_expression(snoc_name, core::identifier_string("<|"));
+        return snoc_name;
+      }
+
       /// \brief Constructor for function symbol <|
       /// \param s A sort expression
       /// \return Function symbol snoc
       inline
       function_symbol snoc(const sort_expression& s)
       {
-        function_symbol snoc("<|", function_sort(list(s), s, list(s)));
+        function_symbol snoc(snoc_name(), function_sort(list(s), s, list(s)));
         return snoc;
       }
+
 
       /// \brief Recogniser for function <|
       /// \param e A data expression
@@ -255,7 +312,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "<|";
+          return static_cast< function_symbol >(e).name() == snoc_name();
         }
         return false;
       }
@@ -285,15 +342,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier ++
+      /// \return Identifier ++
+      inline
+      core::identifier_string const& concat_name()
+      {
+        static core::identifier_string concat_name = data::detail::initialise_static_expression(concat_name, core::identifier_string("++"));
+        return concat_name;
+      }
+
       /// \brief Constructor for function symbol ++
       /// \param s A sort expression
       /// \return Function symbol concat
       inline
       function_symbol concat(const sort_expression& s)
       {
-        function_symbol concat("++", function_sort(list(s), list(s), list(s)));
+        function_symbol concat(concat_name(), function_sort(list(s), list(s), list(s)));
         return concat;
       }
+
 
       /// \brief Recogniser for function ++
       /// \param e A data expression
@@ -303,7 +370,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "++";
+          return static_cast< function_symbol >(e).name() == concat_name();
         }
         return false;
       }
@@ -333,15 +400,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier .
+      /// \return Identifier .
+      inline
+      core::identifier_string const& element_at_name()
+      {
+        static core::identifier_string element_at_name = data::detail::initialise_static_expression(element_at_name, core::identifier_string("."));
+        return element_at_name;
+      }
+
       /// \brief Constructor for function symbol .
       /// \param s A sort expression
       /// \return Function symbol element_at
       inline
       function_symbol element_at(const sort_expression& s)
       {
-        function_symbol element_at(".", function_sort(list(s), sort_nat::nat(), s));
+        function_symbol element_at(element_at_name(), function_sort(list(s), sort_nat::nat(), s));
         return element_at;
       }
+
 
       /// \brief Recogniser for function .
       /// \param e A data expression
@@ -351,7 +428,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == ".";
+          return static_cast< function_symbol >(e).name() == element_at_name();
         }
         return false;
       }
@@ -381,15 +458,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier head
+      /// \return Identifier head
+      inline
+      core::identifier_string const& head_name()
+      {
+        static core::identifier_string head_name = data::detail::initialise_static_expression(head_name, core::identifier_string("head"));
+        return head_name;
+      }
+
       /// \brief Constructor for function symbol head
       /// \param s A sort expression
       /// \return Function symbol head
       inline
       function_symbol head(const sort_expression& s)
       {
-        function_symbol head("head", function_sort(list(s), s));
+        function_symbol head(head_name(), function_sort(list(s), s));
         return head;
       }
+
 
       /// \brief Recogniser for function head
       /// \param e A data expression
@@ -399,7 +486,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "head";
+          return static_cast< function_symbol >(e).name() == head_name();
         }
         return false;
       }
@@ -428,15 +515,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier tail
+      /// \return Identifier tail
+      inline
+      core::identifier_string const& tail_name()
+      {
+        static core::identifier_string tail_name = data::detail::initialise_static_expression(tail_name, core::identifier_string("tail"));
+        return tail_name;
+      }
+
       /// \brief Constructor for function symbol tail
       /// \param s A sort expression
       /// \return Function symbol tail
       inline
       function_symbol tail(const sort_expression& s)
       {
-        function_symbol tail("tail", function_sort(list(s), list(s)));
+        function_symbol tail(tail_name(), function_sort(list(s), list(s)));
         return tail;
       }
+
 
       /// \brief Recogniser for function tail
       /// \param e A data expression
@@ -446,7 +543,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "tail";
+          return static_cast< function_symbol >(e).name() == tail_name();
         }
         return false;
       }
@@ -475,15 +572,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier rhead
+      /// \return Identifier rhead
+      inline
+      core::identifier_string const& rhead_name()
+      {
+        static core::identifier_string rhead_name = data::detail::initialise_static_expression(rhead_name, core::identifier_string("rhead"));
+        return rhead_name;
+      }
+
       /// \brief Constructor for function symbol rhead
       /// \param s A sort expression
       /// \return Function symbol rhead
       inline
       function_symbol rhead(const sort_expression& s)
       {
-        function_symbol rhead("rhead", function_sort(list(s), s));
+        function_symbol rhead(rhead_name(), function_sort(list(s), s));
         return rhead;
       }
+
 
       /// \brief Recogniser for function rhead
       /// \param e A data expression
@@ -493,7 +600,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "rhead";
+          return static_cast< function_symbol >(e).name() == rhead_name();
         }
         return false;
       }
@@ -522,15 +629,25 @@ namespace mcrl2 {
         return false;
       }
 
+      /// \brief Generate identifier rtail
+      /// \return Identifier rtail
+      inline
+      core::identifier_string const& rtail_name()
+      {
+        static core::identifier_string rtail_name = data::detail::initialise_static_expression(rtail_name, core::identifier_string("rtail"));
+        return rtail_name;
+      }
+
       /// \brief Constructor for function symbol rtail
       /// \param s A sort expression
       /// \return Function symbol rtail
       inline
       function_symbol rtail(const sort_expression& s)
       {
-        function_symbol rtail("rtail", function_sort(list(s), list(s)));
+        function_symbol rtail(rtail_name(), function_sort(list(s), list(s)));
         return rtail;
       }
+
 
       /// \brief Recogniser for function rtail
       /// \param e A data expression
@@ -540,7 +657,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == "rtail";
+          return static_cast< function_symbol >(e).name() == rtail_name();
         }
         return false;
       }
@@ -595,12 +712,8 @@ namespace mcrl2 {
       inline
       data_expression head(const data_expression& e)
       {
-        if (is_cons__application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_cons__application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -611,12 +724,8 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        if (is_concat_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_concat_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -627,12 +736,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        if (is_in_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_in_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -643,12 +748,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        if (is_in_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_in_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -659,32 +760,8 @@ namespace mcrl2 {
       inline
       data_expression list(const data_expression& e)
       {
-        if (is_count_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_element_at_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_head_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_tail_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_rhead_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        if (is_rtail_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_count_application(e) || is_element_at_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -695,12 +772,8 @@ namespace mcrl2 {
       inline
       data_expression tail(const data_expression& e)
       {
-        if (is_cons__application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_cons__application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -711,12 +784,8 @@ namespace mcrl2 {
       inline
       data_expression rhead(const data_expression& e)
       {
-        if (is_snoc_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_snoc_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -727,12 +796,8 @@ namespace mcrl2 {
       inline
       data_expression position(const data_expression& e)
       {
-        if (is_element_at_application(e))
-        {
-          return static_cast< application >(e).arguments()[1];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_element_at_application(e));
+        return static_cast< application >(e).arguments()[1];
       }
 
       ///\brief Function for projecting out argument
@@ -743,12 +808,8 @@ namespace mcrl2 {
       inline
       data_expression rtail(const data_expression& e)
       {
-        if (is_snoc_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_snoc_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       ///\brief Function for projecting out argument
@@ -759,12 +820,8 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        if (is_concat_application(e))
-        {
-          return static_cast< application >(e).arguments()[0];
-        }
-        // This should never be reached, otherwise something is very wrong.
-        assert(false);
+        assert(is_concat_application(e));
+        return static_cast< application >(e).arguments()[0];
       }
 
       /// \brief Give all system defined equations for list
