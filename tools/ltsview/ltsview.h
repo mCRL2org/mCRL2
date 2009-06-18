@@ -1,4 +1,4 @@
-// Author(s): Bas Ploeger and Carst Tankink
+
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -14,7 +14,12 @@
 #include <wx/wx.h>
 #include <string>
 #include "mediator.h"
+
+#include <wx/app.h>
+
 #include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 
 class MainFrame;
 class GLCanvas;
@@ -24,9 +29,12 @@ class MarkManager;
 class Settings;
 
 class LTSView :
-  public mcrl2::utilities::wx::tool< LTSView >,
+  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >,
   public Mediator
 {
+    typedef mcrl2::utilities::wx::tool< LTSView,
+       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+
   private:
     LTS *lts;
     unsigned int colourCounter;
@@ -40,9 +48,16 @@ class LTSView :
     void applyMarkStyle();
 
   public:
+    #ifdef ENABLE_SQUADT_CONNECTIVITY
+      void set_capabilities(tipi::tool::capabilities&) const;
+      void user_interactive_configuration(tipi::configuration&);
+      bool check_configuration(tipi::configuration const&) const;
+      bool perform_task(tipi::configuration&);
+    #endif
+
     LTSView();
     virtual int OnExit();
-    virtual bool DoInit();
+    virtual bool run();
     bool parse_command_line(int argc, wxChar** argv);
     void activateMarkRule(int index,bool activate);
     void addMarkRule();

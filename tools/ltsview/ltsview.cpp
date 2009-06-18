@@ -39,77 +39,50 @@ using namespace Utils;
 std::string lts_file_argument;
 std::string parse_error;
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY // SQuADT protocol interface
-#undef check /* macro that conflicts with Boost code included below
-              * (seems OS X 10.4 specific) */
-#include <mcrl2/utilities/mcrl2_squadt_interface.h>
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+// Configures tool capabilities.
+void LTSView::set_capabilities(tipi::tool::capabilities& c) const {
+  std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
-  using namespace mcrl2::utilities::squadt;
-  using namespace mcrl2::lts;
-  const char* lts_file_for_input = "lts_in";
+  for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
+    c.add_input_configuration("main-input", tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)), tipi::tool::category::visualisation);
+  }
+}
 
-  class squadt_interactor:
-    public mcrl2::utilities::squadt::mcrl2_wx_tool_interface
-  {
-    public:
-      // Configures tool capabilities.
-      void set_capabilities(tipi::tool::capabilities& c) const
-      {
-        std::set< mcrl2::lts::lts_type > const& input_formats(
-            mcrl2::lts::lts::supported_lts_formats());
+// Queries the user via SQuADt if needed to obtain configuration information
+void LTSView::user_interactive_configuration(tipi::configuration&) { }
 
-        for (std::set< mcrl2::lts::lts_type >::const_iterator 
-            i = input_formats.begin(); i != input_formats.end(); ++i)
-        {
-          c.add_input_configuration(lts_file_for_input, 
-              tipi::mime_type(mcrl2::lts::lts::mime_type_for_type(*i)),
-              tipi::tool::category::visualisation);
-        }
-      }
+// Check an existing configuration object to see if it is usable
+bool LTSView::check_configuration(tipi::configuration const& c) const {
+  if (c.input_exists("main-input")) {
+    /* The input object is present, verify whether the specified format is supported */
+    if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
+      send_error("Invalid configuration: unsupported type `" +
+          c.get_input("main-input").type().sub_type() + "' for main input");
+    }
+    else {
+      return true;
+    }
+  }
 
-      // Queries the user via SQuADt if needed to obtain configuration
-      // information
-      void user_interactive_configuration(tipi::configuration&)
-      { }
+  return false;
+}
 
-      bool check_configuration(tipi::configuration const& c) const
-      {
-        if (c.input_exists(lts_file_for_input))
-        {
-          /* The input object is present, verify whether the specified
-           * format is supported */
-          if (lts::parse_format(
-                c.get_input(lts_file_for_input).type().sub_type().c_str())
-              == lts_none)
-          {
-            send_error(
-                "Invalid configuration: unsupported type `" +
-                c.get_input(lts_file_for_input).type().sub_type() +
-                "' for main input");
-          }
-          else
-          {
-            return true;
-          }
-        }
-        return false;
-      }
+bool LTSView::perform_task(tipi::configuration& c) {
+  m_input_filename = c.get_input("main-input").location();
 
-      bool perform_task(tipi::configuration& c)
-      {
-        lts_file_argument = c.get_input(lts_file_for_input).location();
-        return mcrl2_wx_tool_interface::perform_task(c);
-      }
-  };
-#endif // ENABLE_SQUADT_CONNECTIVITY
+  return super::perform_task(c);
+}
+#endif
 
-bool LTSView::parse_command_line(int argc, wxChar** argv)
+std::vector< std::string > developers()
 {
-  using namespace mcrl2::utilities;
-  interface_description clinterface(
-    std::string(wxString(argv[0], wxConvLocal).fn_str()),
-    NAME,
-    AUTHOR,
+  static char const* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
+  return std::vector< std::string >(&developer_names[0], &developer_names[2]);
+}
+
+
+LTSView::LTSView() : super("LTSView",
     "3D interactive visualization of a labelled transition system",
     "[OPTION]... [INFILE]\n",
     "Start the LTSView application. If INFILE is supplied then the "
@@ -125,54 +98,50 @@ bool LTSView::parse_command_line(int argc, wxChar** argv)
     "  GraphViz format (*.dot);\n"
     "  Finite State Machine format (*.fsm);\n"
     "  mCRL SVC format (*.svc);\n"
-    "  mCRL2 format (*.lts).");
-
-  command_line_parser parser(clinterface, argc, argv);
-
-  // Used to guard destruction in OnExit()
-  lts = 0;
-
-  if (parser.continue_execution()) {
-    if (parser.arguments.size() > 1)
-    {
-      parser.error("too many file arguments");
-    }
-    else if (parser.arguments.size() == 1)
-    {
-      lts_file_argument = parser.arguments[0];
-    }
-  }
-
-  return parser.continue_execution();
-}
+    "  mCRL2 format (*.lts).",
+    developers())
+{ }
 
 IMPLEMENT_APP_NO_MAIN(LTSView)
-
+IMPLEMENT_WX_THEME_SUPPORT
 BEGIN_EVENT_TABLE(LTSView, wxApp)
 END_EVENT_TABLE()
 
-std::vector< std::string > developers()
-{
-  static char const* developer_names[] = {"Bas Ploeger", "Carst Tankink"};
-  return std::vector< std::string >(&developer_names[0], &developer_names[2]);
+#ifdef __WINDOWS__
+extern "C" int WINAPI WinMain(HINSTANCE hInstance,
+                                  HINSTANCE hPrevInstance,
+                                  wxCmdLineArgType lpCmdLine,
+                                  int nCmdShow) {
+
+  MCRL2_ATERMPP_INIT(0, lpCmdLine)
+
+  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
+#else
+int main(int argc, char **argv)
+{
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-LTSView::LTSView() :
-  mcrl2::utilities::wx::tool< LTSView >(
-    "LTSView",
-    "Tool for interactive visualization of state transition systems.\n"
-    "\n"
-    "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
-    "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
-    "\"Visualization of State Transition Graphs\". "
-    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-    "\n"
-    "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
-    developers()),
-  lts(0)
-{ }
+  return wxEntry(argc, argv);
+}
+#endif
 
-bool LTSView::DoInit()
+// LTSView::LTSView() :
+//   mcrl2::utilities::wx::tool< LTSView >(
+//     "LTSView",
+//     "Tool for interactive visualization of state transition systems.\n"
+//     "\n"
+//     "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
+//     "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
+//     "\"Visualization of State Transition Graphs\". "
+//     "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+//     "\n"
+//     "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
+//     developers()),
+//   lts(0)
+// { }
+
+bool LTSView::run()
 {
   rankStyle = ITERATIVE;
   fsmStyle = false;
@@ -200,39 +169,6 @@ bool LTSView::DoInit()
   }
   return true;
 }
-
-
-#ifdef __WINDOWS__
-
-extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-    HINSTANCE hPrevInstance, wxCmdLineArgType lpCmdLine, int nCmdShow)
-{
-  MCRL2_ATERM_INIT(0, lpCmdLine)
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (interactor< squadt_interactor >::free_activation(hInstance,
-        hPrevInstance, lpCmdLine, nCmdShow))
-  {
-    return EXIT_SUCCESS;
-  }
-#endif
-  return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-}
-
-#else // not __WINDOWS__
-
-int main(int argc, char **argv)
-{
-  MCRL2_ATERM_INIT(argc, argv)
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-  if (interactor< squadt_interactor >::free_activation(argc, argv))
-  {
-    return EXIT_SUCCESS;
-  }
-#endif
-  return wxEntry(argc, argv);
-}
-
-#endif // __WINDOWS__
 
 int LTSView::OnExit()
 {
