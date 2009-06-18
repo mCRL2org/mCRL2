@@ -45,15 +45,21 @@
 #include "simulator.h"
 #include "timeseries.h"
 
-class DiaGraph : public mcrl2::utilities::wx::tool< DiaGraph >, public Mediator
+#include "mcrl2/utilities/wx_tool.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
+
+class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
+   mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >, public Mediator
 {
-  friend class mcrl2::utilities::wx::tool< DiaGraph >;
+    typedef mcrl2::utilities::wx::tool< DiaGraph,
+       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
 
 public:
         DiaGraph();
 
 	// -- functions inherited from wxApp ----------------------------
-	bool DoInit();
+        bool run();
 	int OnExit();
 
 	// -- load & save data ------------------------------------------
