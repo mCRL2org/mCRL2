@@ -21,7 +21,7 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool_;
 
-void bool__sort_test()
+void bool_sort_test()
 {
   basic_sort b(bool_());
   BOOST_CHECK(b == bool_());
@@ -32,7 +32,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  bool__sort_test();
+  bool_sort_test();
   core::garbage_collect();
 
   return EXIT_SUCCESS;

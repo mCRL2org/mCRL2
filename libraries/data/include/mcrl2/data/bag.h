@@ -1222,7 +1222,7 @@ namespace mcrl2 {
          }
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_nat::nat()).empty())
          {
@@ -1238,7 +1238,7 @@ namespace mcrl2 {
          }
          if (specification.constructors(sort_set_::set_(element)).empty())
          {
-           sort_set_::add_set__to_specification(specification, element);
+           sort_set_::add_set_to_specification(specification, element);
          }
          specification.add_system_defined_sort(bag(element));
          specification.add_system_defined_constructors(bag_generate_constructors_code(element));

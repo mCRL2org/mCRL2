@@ -439,7 +439,7 @@ void test_system_defined()
     "sort E = D;"
     "sort F = E;");
 
-  BOOST_CHECK(sort_set_::set__generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
+  BOOST_CHECK(sort_set_::set_generate_constructors_code(sort_nat::nat()) == specification.constructors(basic_sort("D")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));

@@ -151,31 +151,31 @@ namespace pbes_expr {
   /// \param t A PBES expression
   /// \return True if it is the value \p true
   inline bool is_true(pbes_expression t)
-  { return is_pbes_true(t) || data::sort_bool_::is_true__function_symbol(t); }
+  { return is_pbes_true(t) || data::sort_bool_::is_true_function_symbol(t); }
 
   /// \brief Test for the value false
   /// \param t A PBES expression
   /// \return True if it is the value \p false
   inline bool is_false(pbes_expression t)
-  { return is_pbes_false(t) || data::sort_bool_::is_false__function_symbol(t); }
+  { return is_pbes_false(t) || data::sort_bool_::is_false_function_symbol(t); }
 
   /// \brief Test for a negation
   /// \param t A PBES expression
   /// \return True if it is a negation
   inline bool is_not(pbes_expression t)
-  { return is_pbes_not(t) || data::sort_bool_::is_not__application(t); }
+  { return is_pbes_not(t) || data::sort_bool_::is_not_application(t); }
 
   /// \brief Test for a conjunction
   /// \param t A PBES expression
   /// \return True if it is a conjunction
   inline bool is_and(pbes_expression t)
-  { return is_pbes_and(t) || data::sort_bool_::is_and__application(t); }
+  { return is_pbes_and(t) || data::sort_bool_::is_and_application(t); }
 
   /// \brief Test for a disjunction
   /// \param t A PBES expression
   /// \return True if it is a disjunction
   inline bool is_or(pbes_expression t)
-  { return is_pbes_or(t) || data::sort_bool_::is_or__application(t); }
+  { return is_pbes_or(t) || data::sort_bool_::is_or_application(t); }
 
   /// \brief Test for an implication
   /// \param t A PBES expression
@@ -233,7 +233,7 @@ namespace accessors {
     {
       return atermpp::arg1(t);
     }
-    assert(data::sort_bool_::is_not__application(t) ||
+    assert(data::sort_bool_::is_not_application(t) ||
            pbes_expr::is_forall(t)    ||
            pbes_expr::is_exists(t)
           );

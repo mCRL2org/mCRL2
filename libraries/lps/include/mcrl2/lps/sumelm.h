@@ -63,7 +63,7 @@ namespace mcrl2 {
           // In all cases not explicitly handled we return the original working_condition
           data_expression result = working_condition;
 
-          if (sort_bool_::is_and__application(working_condition))
+          if (sort_bool_::is_and_application(working_condition))
           {
             //Recursively apply sum elimination on lhs and rhs
             //Note that recursive application provides for progress because lhs and rhs split the working condition.

@@ -245,12 +245,12 @@ namespace mcrl2 {
         if (e.is_function_sort())
         {
           atermpp::vector< sort_expression > new_domain;
-       
+
           for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
           {
             new_domain.push_back(normalise(r.front()));
           }
-       
+
           return function_sort(new_domain, normalise(function_sort(e).codomain()));
         }
         else if (e.is_container_sort())
@@ -260,19 +260,19 @@ namespace mcrl2 {
         else if (e.is_structured_sort())
         {
           atermpp::vector< structured_sort_constructor > new_constructors;
-       
+
           for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors()); !r.empty(); r.advance_begin(1))
           {
             atermpp::vector< structured_sort_constructor_argument > new_arguments;
-       
+
             for (structured_sort_constructor::arguments_const_range ra(r.front().arguments()); !ra.empty(); ra.advance_begin(1))
             {
               new_arguments.push_back(structured_sort_constructor_argument(normalise(ra.front().sort()), ra.front().name()));
             }
-       
+
             new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
           }
-       
+
           return structured_sort(new_constructors);
         }
       }
@@ -288,15 +288,15 @@ namespace mcrl2 {
       // add sorts, constructors, mappings and equations
       if (sort == sort_bool_::bool_())
       {
-        sort_bool_::add_bool__to_specification(*this);
+        sort_bool_::add_bool_to_specification(*this);
       }
       else if (sort == sort_real_::real_())
       {
-        sort_real_::add_real__to_specification(*this);
+        sort_real_::add_real_to_specification(*this);
       }
       else if (sort == sort_int_::int_())
       {
-        sort_int_::add_int__to_specification(*this);
+        sort_int_::add_int_to_specification(*this);
       }
       else if (sort == sort_nat::nat())
       {
@@ -316,7 +316,7 @@ namespace mcrl2 {
         }
         else if (sort_set_::is_set_(sort))
         {
-          sort_set_::add_set__to_specification(*this, element_sort);
+          sort_set_::add_set_to_specification(*this, element_sort);
         }
         else if (sort_bag::is_bag(sort))
         {
@@ -692,9 +692,9 @@ namespace mcrl2 {
       {
         // Generates names for a specification assuming that no sorts with name prefix @legacy_ exist
         struct legacy_name_generator {
-       
+
           std::set< basic_sort > m_generated;
-       
+
           static std::string sort_name(const sort_expression& target)
           {
             if (target.is_container_sort())
@@ -706,16 +706,16 @@ namespace mcrl2 {
               return "structured_sort";
             }
           }
-       
+
           // \brief find `THE' identifier for a structured sort or container sort
           basic_sort generate_name(const sort_expression& target)
           {
              basic_sort generated(static_cast< std::string >(
                         fresh_identifier(boost::make_iterator_range(m_generated),
                                         std::string("@legacy_").append(sort_name(target)))));
-       
+
              m_generated.insert(generated);
-       
+
              return generated;
           }
         } generator;
@@ -815,7 +815,7 @@ namespace mcrl2 {
           for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
           {
             atermpp::map< sort_expression, sort_expression >::const_iterator j = renamings.find(r.front().reference());
- 
+
             if (renamings.find(r.front().reference()) != renamings.end())
             {
               std::map< sort_expression, sort_expression > partial_renamings(renamings);

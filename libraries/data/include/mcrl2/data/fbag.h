@@ -984,7 +984,7 @@ namespace mcrl2 {
       {
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {

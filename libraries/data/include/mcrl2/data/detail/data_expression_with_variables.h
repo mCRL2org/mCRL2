@@ -158,31 +158,31 @@ namespace core {
     /// \param t A term
     /// \return True if the term has the value true
     static inline
-    bool is_true(term_type t) { return data::sort_bool_::is_true__function_symbol(t); }
+    bool is_true(term_type t) { return data::sort_bool_::is_true_function_symbol(t); }
 
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false
     static inline
-    bool is_false(term_type t) { return data::sort_bool_::is_false__function_symbol(t); }
+    bool is_false(term_type t) { return data::sort_bool_::is_false_function_symbol(t); }
 
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type not
     static inline
-    bool is_not(term_type t) { return data::sort_bool_::is_not__application(t); }
+    bool is_not(term_type t) { return data::sort_bool_::is_not_application(t); }
 
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and
     static inline
-    bool is_and(term_type t) { return data::sort_bool_::is_and__application(t); }
+    bool is_and(term_type t) { return data::sort_bool_::is_and_application(t); }
 
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or
     static inline
-    bool is_or(term_type t) { return data::sort_bool_::is_or__application(t); }
+    bool is_or(term_type t) { return data::sort_bool_::is_or_application(t); }
 
     /// \brief Test for implication
     /// \param t A term

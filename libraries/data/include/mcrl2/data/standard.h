@@ -39,7 +39,7 @@ namespace mcrl2 {
       {
         target = original;
         target.protect();
-     
+
         return original;
       }
     }
@@ -125,7 +125,7 @@ namespace mcrl2 {
     /// \brief Recogniser for function if
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching if_
-    inline bool is_if__function_symbol(const data_expression& e)
+    inline bool is_if_function_symbol(const data_expression& e)
     {
       return e.is_function_symbol() && function_symbol(e).name() == "if";
     }
@@ -147,9 +147,9 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol if_ to a
     ///     number of arguments
-    inline bool is_if__application(const data_expression& e)
+    inline bool is_if_application(const data_expression& e)
     {
-      return e.is_application() && is_if__function_symbol(application(e).head());
+      return e.is_application() && is_if_function_symbol(application(e).head());
     }
 
     /// \brief Constructor for function symbol <
@@ -334,4 +334,4 @@ namespace mcrl2 {
   } // namespace data
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_STANDARD__H
+#endif // MCRL2_DATA_STANDARD_H

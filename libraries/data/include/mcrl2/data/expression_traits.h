@@ -215,12 +215,12 @@ namespace data {
 
     static bool is_true(data_expression const& e)
     {
-      return sort_bool_::is_true__function_symbol(e);
+      return sort_bool_::is_true_function_symbol(e);
     }
 
     static bool is_false(data_expression const& e)
     {
-      return sort_bool_::is_false__function_symbol(e);
+      return sort_bool_::is_false_function_symbol(e);
     }
 
     static bool is_application(data_expression const& e)

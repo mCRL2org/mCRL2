@@ -12,8 +12,8 @@
 /// This file was generated from the data sort specification
 /// mcrl2/data/build/int.spec.
 
-#ifndef MCRL2_DATA_INT__H
-#define MCRL2_DATA_INT__H
+#ifndef MCRL2_DATA_INT_H
+#define MCRL2_DATA_INT_H
 
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -35,10 +35,10 @@ namespace mcrl2 {
     namespace sort_int_ {
 
       inline
-      core::identifier_string const& int__name()
+      core::identifier_string const& int_name()
       {
-        static core::identifier_string int__name = data::detail::initialise_static_expression(int__name, core::identifier_string("Int"));
-        return int__name;
+        static core::identifier_string int_name = data::detail::initialise_static_expression(int_name, core::identifier_string("Int"));
+        return int_name;
       }
 
       /// \brief Constructor for sort expression Int
@@ -46,7 +46,7 @@ namespace mcrl2 {
       inline
       basic_sort const& int_()
       {
-        static basic_sort int_ = data::detail::initialise_static_expression(int_, basic_sort(int__name()));
+        static basic_sort int_ = data::detail::initialise_static_expression(int_, basic_sort(int_name()));
         return int_;
       }
 
@@ -176,7 +176,7 @@ namespace mcrl2 {
       /// \brief Give all system defined constructors for int_
       /// \return All system defined constructors for int_
       inline
-      function_symbol_vector int__generate_constructors_code()
+      function_symbol_vector int_generate_constructors_code()
       {
         function_symbol_vector result;
         result.push_back(cint());
@@ -1354,7 +1354,7 @@ namespace mcrl2 {
       /// \brief Give all system defined mappings for int_
       /// \return All system defined mappings for int_
       inline
-      function_symbol_vector int__generate_functions_code()
+      function_symbol_vector int_generate_functions_code()
       {
         function_symbol_vector result;
         result.push_back(nat2int());
@@ -1480,7 +1480,7 @@ namespace mcrl2 {
       /// \brief Give all system defined equations for int_
       /// \return All system defined equations for sort int_
       inline
-      data_equation_vector int__generate_equations_code()
+      data_equation_vector int_generate_equations_code()
       {
         variable vb("b",sort_bool_::bool_());
         variable vn("n",sort_nat::nat());
@@ -1559,7 +1559,7 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for int_
       /// \param specification a specification
       inline
-      void add_int__to_specification(data_specification& specification)
+      void add_int_to_specification(data_specification& specification)
       {
          if (specification.constructors(sort_nat::nat()).empty())
          {
@@ -1567,16 +1567,16 @@ namespace mcrl2 {
          }
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {
            sort_pos::add_pos_to_specification(specification);
          }
          specification.add_system_defined_sort(int_());
-         specification.add_system_defined_constructors(int__generate_constructors_code());
-         specification.add_system_defined_mappings(int__generate_functions_code());
-         specification.add_system_defined_equations(int__generate_equations_code());
+         specification.add_system_defined_constructors(int_generate_constructors_code());
+         specification.add_system_defined_mappings(int_generate_functions_code());
+         specification.add_system_defined_equations(int_generate_equations_code());
       }
     } // namespace sort_int_
 
@@ -1584,4 +1584,4 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_INT__H
+#endif // MCRL2_DATA_INT_H

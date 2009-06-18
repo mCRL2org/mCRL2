@@ -12,8 +12,8 @@
 /// This file was generated from the data sort specification
 /// mcrl2/data/build/set.spec.
 
-#ifndef MCRL2_DATA_SET__H
-#define MCRL2_DATA_SET__H
+#ifndef MCRL2_DATA_SET_H
+#define MCRL2_DATA_SET_H
 
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -37,10 +37,10 @@ namespace mcrl2 {
     namespace sort_set_ {
 
       inline
-      core::identifier_string const& set__name()
+      core::identifier_string const& set_name()
       {
-        static core::identifier_string set__name = data::detail::initialise_static_expression(set__name, core::identifier_string("Set"));
-        return set__name;
+        static core::identifier_string set_name = data::detail::initialise_static_expression(set_name, core::identifier_string("Set"));
+        return set_name;
       }
 
       /// \brief Constructor for sort expression Set(S)
@@ -49,7 +49,7 @@ namespace mcrl2 {
       inline
       container_sort set_(const sort_expression& s)
       {
-        container_sort set_(set__name(), s);
+        container_sort set_(set_name(), s);
         return set_;
       }
 
@@ -62,7 +62,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == set__name();
+          return static_cast< container_sort >(e).container_name() == set_name();
         }
         return false;
       }
@@ -71,7 +71,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return All system defined constructors for set_
       inline
-      function_symbol_vector set__generate_constructors_code(const sort_expression& s)
+      function_symbol_vector set_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
 
@@ -400,10 +400,10 @@ namespace mcrl2 {
       /// \brief Generate identifier +
       /// \return Identifier +
       inline
-      core::identifier_string const& setunion__name()
+      core::identifier_string const& setunion_name()
       {
-        static core::identifier_string setunion__name = data::detail::initialise_static_expression(setunion__name, core::identifier_string("+"));
-        return setunion__name;
+        static core::identifier_string setunion_name = data::detail::initialise_static_expression(setunion_name, core::identifier_string("+"));
+        return setunion_name;
       }
 
       /// \brief Constructor for function symbol +
@@ -412,7 +412,7 @@ namespace mcrl2 {
       inline
       function_symbol setunion_(const sort_expression& s)
       {
-        function_symbol setunion_(setunion__name(), function_sort(set_(s), set_(s), set_(s)));
+        function_symbol setunion_(setunion_name(), function_sort(set_(s), set_(s), set_(s)));
         return setunion_;
       }
 
@@ -421,11 +421,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching +
       inline
-      bool is_setunion__function_symbol(const data_expression& e)
+      bool is_setunion_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == setunion__name();
+          return static_cast< function_symbol >(e).name() == setunion_name();
         }
         return false;
       }
@@ -446,11 +446,11 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol setunion_ to a
       ///     number of arguments
       inline
-      bool is_setunion__application(const data_expression& e)
+      bool is_setunion_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_setunion__function_symbol(static_cast< application >(e).head());
+          return is_setunion_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -862,7 +862,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return All system defined mappings for set_
       inline
-      function_symbol_vector set__generate_functions_code(const sort_expression& s)
+      function_symbol_vector set_generate_functions_code(const sort_expression& s)
       {
         function_symbol_vector result;
         result.push_back(setconstructor(s));
@@ -889,7 +889,7 @@ namespace mcrl2 {
       inline
       data_expression right(const data_expression& e)
       {
-        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion__application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
+        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion_application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
         return static_cast< application >(e).arguments()[1];
       }
 
@@ -913,7 +913,7 @@ namespace mcrl2 {
       inline
       data_expression left(const data_expression& e)
       {
-        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion__application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
+        assert(is_setconstructor_application(e) || is_setin_application(e) || is_setunion_application(e) || is_setintersection_application(e) || is_setdifference_application(e) || is_and_function_application(e) || is_or_function_application(e));
         return static_cast< application >(e).arguments()[0];
       }
 
@@ -921,7 +921,7 @@ namespace mcrl2 {
       /// \param s A sort expression
       /// \return All system defined equations for sort set_
       inline
-      data_equation_vector set__generate_equations_code(const sort_expression& s)
+      data_equation_vector set_generate_equations_code(const sort_expression& s)
       {
         variable ve("e",s);
         variable vd("d",s);
@@ -973,20 +973,20 @@ namespace mcrl2 {
       /// \param specification a specification
       /// \param element the sort of elements stored by the container
       inline
-      void add_set__to_specification(data_specification& specification, sort_expression const& element)
+      void add_set_to_specification(data_specification& specification, sort_expression const& element)
       {
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_fset::fset(element)).empty())
          {
            sort_fset::add_fset_to_specification(specification, element);
          }
          specification.add_system_defined_sort(set_(element));
-         specification.add_system_defined_constructors(set__generate_constructors_code(element));
-         specification.add_system_defined_mappings(set__generate_functions_code(element));
-         specification.add_system_defined_equations(set__generate_equations_code(element));
+         specification.add_system_defined_constructors(set_generate_constructors_code(element));
+         specification.add_system_defined_mappings(set_generate_functions_code(element));
+         specification.add_system_defined_equations(set_generate_equations_code(element));
       }
     } // namespace sort_set_
 
@@ -994,4 +994,4 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_SET__H
+#endif // MCRL2_DATA_SET_H

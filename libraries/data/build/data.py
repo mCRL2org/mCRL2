@@ -1938,6 +1938,7 @@ class specification():
     code += "  } // namespace data\n\n"
     code += "} // namespace mcrl2\n\n"
     code += "#endif // MCRL2_DATA_%s_H\n" % (self.namespace.upper())
+    code = string.replace(code, "__", "_")
     return code
 
 class include_list():

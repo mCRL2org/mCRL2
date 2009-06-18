@@ -102,10 +102,10 @@ namespace mcrl2 {
       /// \brief Generate identifier |>
       /// \return Identifier |>
       inline
-      core::identifier_string const& cons__name()
+      core::identifier_string const& cons_name()
       {
-        static core::identifier_string cons__name = data::detail::initialise_static_expression(cons__name, core::identifier_string("|>"));
-        return cons__name;
+        static core::identifier_string cons_name = data::detail::initialise_static_expression(cons_name, core::identifier_string("|>"));
+        return cons_name;
       }
 
       /// \brief Constructor for function symbol |>
@@ -114,7 +114,7 @@ namespace mcrl2 {
       inline
       function_symbol cons_(const sort_expression& s)
       {
-        function_symbol cons_(cons__name(), function_sort(s, list(s), list(s)));
+        function_symbol cons_(cons_name(), function_sort(s, list(s), list(s)));
         return cons_;
       }
 
@@ -123,11 +123,11 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching |>
       inline
-      bool is_cons__function_symbol(const data_expression& e)
+      bool is_cons_function_symbol(const data_expression& e)
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == cons__name();
+          return static_cast< function_symbol >(e).name() == cons_name();
         }
         return false;
       }
@@ -148,11 +148,11 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol cons_ to a
       ///     number of arguments
       inline
-      bool is_cons__application(const data_expression& e)
+      bool is_cons_application(const data_expression& e)
       {
         if (e.is_application())
         {
-          return is_cons__function_symbol(static_cast< application >(e).head());
+          return is_cons_function_symbol(static_cast< application >(e).head());
         }
         return false;
       }
@@ -712,7 +712,7 @@ namespace mcrl2 {
       inline
       data_expression head(const data_expression& e)
       {
-        assert(is_cons__application(e));
+        assert(is_cons_application(e));
         return static_cast< application >(e).arguments()[0];
       }
 
@@ -772,7 +772,7 @@ namespace mcrl2 {
       inline
       data_expression tail(const data_expression& e)
       {
-        assert(is_cons__application(e));
+        assert(is_cons_application(e));
         return static_cast< application >(e).arguments()[1];
       }
 
@@ -872,7 +872,7 @@ namespace mcrl2 {
          }
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {

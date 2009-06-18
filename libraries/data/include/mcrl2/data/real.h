@@ -12,8 +12,8 @@
 /// This file was generated from the data sort specification
 /// mcrl2/data/build/real.spec.
 
-#ifndef MCRL2_DATA_REAL__H
-#define MCRL2_DATA_REAL__H
+#ifndef MCRL2_DATA_REAL_H
+#define MCRL2_DATA_REAL_H
 
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -36,10 +36,10 @@ namespace mcrl2 {
     namespace sort_real_ {
 
       inline
-      core::identifier_string const& real__name()
+      core::identifier_string const& real_name()
       {
-        static core::identifier_string real__name = data::detail::initialise_static_expression(real__name, core::identifier_string("Real"));
-        return real__name;
+        static core::identifier_string real_name = data::detail::initialise_static_expression(real_name, core::identifier_string("Real"));
+        return real_name;
       }
 
       /// \brief Constructor for sort expression Real
@@ -47,7 +47,7 @@ namespace mcrl2 {
       inline
       basic_sort const& real_()
       {
-        static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort(real__name()));
+        static basic_sort real_ = data::detail::initialise_static_expression(real_, basic_sort(real_name()));
         return real_;
       }
 
@@ -67,7 +67,7 @@ namespace mcrl2 {
       /// \brief Give all system defined constructors for real_
       /// \return All system defined constructors for real_
       inline
-      function_symbol_vector real__generate_constructors_code()
+      function_symbol_vector real_generate_constructors_code()
       {
         function_symbol_vector result;
 
@@ -1669,7 +1669,7 @@ namespace mcrl2 {
       /// \brief Give all system defined mappings for real_
       /// \return All system defined mappings for real_
       inline
-      function_symbol_vector real__generate_functions_code()
+      function_symbol_vector real_generate_functions_code()
       {
         function_symbol_vector result;
         result.push_back(creal());
@@ -1800,7 +1800,7 @@ namespace mcrl2 {
       /// \brief Give all system defined equations for real_
       /// \return All system defined equations for sort real_
       inline
-      data_equation_vector real__generate_equations_code()
+      data_equation_vector real_generate_equations_code()
       {
         variable vm("m",sort_nat::nat());
         variable vn("n",sort_nat::nat());
@@ -1852,15 +1852,15 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for real_
       /// \param specification a specification
       inline
-      void add_real__to_specification(data_specification& specification)
+      void add_real_to_specification(data_specification& specification)
       {
          if (specification.constructors(sort_int_::int_()).empty())
          {
-           sort_int_::add_int__to_specification(specification);
+           sort_int_::add_int_to_specification(specification);
          }
          if (specification.constructors(sort_bool_::bool_()).empty())
          {
-           sort_bool_::add_bool__to_specification(specification);
+           sort_bool_::add_bool_to_specification(specification);
          }
          if (specification.constructors(sort_pos::pos()).empty())
          {
@@ -1871,9 +1871,9 @@ namespace mcrl2 {
            sort_nat::add_nat_to_specification(specification);
          }
          specification.add_system_defined_sort(real_());
-         specification.add_system_defined_constructors(real__generate_constructors_code());
-         specification.add_system_defined_mappings(real__generate_functions_code());
-         specification.add_system_defined_equations(real__generate_equations_code());
+         specification.add_system_defined_constructors(real_generate_constructors_code());
+         specification.add_system_defined_mappings(real_generate_functions_code());
+         specification.add_system_defined_equations(real_generate_equations_code());
       }
     } // namespace sort_real_
 
@@ -1881,4 +1881,4 @@ namespace mcrl2 {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_REAL__H
+#endif // MCRL2_DATA_REAL_H
