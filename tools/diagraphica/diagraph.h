@@ -57,6 +57,12 @@ class DiaGraph :  public mcrl2::utilities::wx::tool< DiaGraph,
 
 public:
         DiaGraph();
+        #ifdef ENABLE_SQUADT_CONNECTIVITY
+            void set_capabilities(tipi::tool::capabilities&) const;
+            void user_interactive_configuration(tipi::configuration&);
+            bool check_configuration(tipi::configuration const&) const;
+            bool perform_task(tipi::configuration&);
+        #endif
 
 	// -- functions inherited from wxApp ----------------------------
         bool run();
