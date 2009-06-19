@@ -36,20 +36,13 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort list
     namespace sort_list {
 
-      inline
-      core::identifier_string const& list_name()
-      {
-        static core::identifier_string list_name = data::detail::initialise_static_expression(list_name, core::identifier_string("list"));
-        return list_name;
-      }
-
       /// \brief Constructor for sort expression List(S)
       /// \param s A sort expression
       /// \return Sort expression list(s)
       inline
       container_sort list(const sort_expression& s)
       {
-        container_sort list(list_name(), s);
+        container_sort list("list", s);
         return list;
       }
 
@@ -62,7 +55,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == list_name();
+          return static_cast< container_sort >(e).container_name() == "list";
         }
         return false;
       }

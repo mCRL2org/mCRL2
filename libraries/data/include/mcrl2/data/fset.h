@@ -35,20 +35,13 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort fset
     namespace sort_fset {
 
-      inline
-      core::identifier_string const& fset_name()
-      {
-        static core::identifier_string fset_name = data::detail::initialise_static_expression(fset_name, core::identifier_string("fset"));
-        return fset_name;
-      }
-
       /// \brief Constructor for sort expression FSet(S)
       /// \param s A sort expression
       /// \return Sort expression fset(s)
       inline
       container_sort fset(const sort_expression& s)
       {
-        container_sort fset(fset_name(), s);
+        container_sort fset("fset", s);
         return fset;
       }
 
@@ -61,7 +54,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == fset_name();
+          return static_cast< container_sort >(e).container_name() == "fset";
         }
         return false;
       }

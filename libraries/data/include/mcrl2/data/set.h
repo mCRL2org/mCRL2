@@ -37,20 +37,13 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort set_
     namespace sort_set {
 
-      inline
-      core::identifier_string const& set_name()
-      {
-        static core::identifier_string set_name = data::detail::initialise_static_expression(set_name, core::identifier_string("set_"));
-        return set_name;
-      }
-
       /// \brief Constructor for sort expression Set(S)
       /// \param s A sort expression
       /// \return Sort expression set_(s)
       inline
       container_sort set_(const sort_expression& s)
       {
-        container_sort set_(set_name(), s);
+        container_sort set_("set_", s);
         return set_;
       }
 
@@ -63,7 +56,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == set_name();
+          return static_cast< container_sort >(e).container_name() == "set_";
         }
         return false;
       }

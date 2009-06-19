@@ -38,20 +38,13 @@ namespace mcrl2 {
     /// \brief Namespace for system defined sort fbag
     namespace sort_fbag {
 
-      inline
-      core::identifier_string const& fbag_name()
-      {
-        static core::identifier_string fbag_name = data::detail::initialise_static_expression(fbag_name, core::identifier_string("fbag"));
-        return fbag_name;
-      }
-
       /// \brief Constructor for sort expression FBag(S)
       /// \param s A sort expression
       /// \return Sort expression fbag(s)
       inline
       container_sort fbag(const sort_expression& s)
       {
-        container_sort fbag(fbag_name(), s);
+        container_sort fbag("fbag", s);
         return fbag;
       }
 
@@ -64,7 +57,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == fbag_name();
+          return static_cast< container_sort >(e).container_name() == "fbag";
         }
         return false;
       }

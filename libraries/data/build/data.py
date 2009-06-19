@@ -1446,14 +1446,15 @@ class sort_declaration():
 
   def sort_expression_constructors_container_sort(self, id, label, parameter):
     code = ""
-    code += self.container_name(id, label)
+#    code += self.container_name(id, label)
     code += "      /// \\brief Constructor for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
     code += "      /// \\param %s A sort expression\n" % (escape(parameter.to_string().lower()))
     code += "      /// \\return Sort expression %s(%s)\n" % (escape(label.to_string()), escape(parameter.to_string().lower()))
     code += "      inline\n"
     code += "      container_sort %s(const sort_expression& %s)\n" % (label.to_string(), parameter.to_string().lower())
     code += "      {\n"
-    code += "        container_sort %s(%s_name(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
+#    code += "        container_sort %s(%s_name(), %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
+    code += "        container_sort %s(\"%s\", %s);\n" % (label.to_string(), label.to_string(), parameter.to_string().lower())
     code += "        return %s;\n" % (label.to_string())
     code += "      }\n\n"
 
@@ -1466,7 +1467,7 @@ class sort_declaration():
     code += "      {\n"
     code += "        if (e.is_container_sort())\n"
     code += "        {\n"
-    code += "          return static_cast< container_sort >(e).container_name() == %s_name();\n" % (label.to_string())
+    code += "          return static_cast< container_sort >(e).container_name() == \"%s\";\n" % (label.to_string())
     code += "        }\n"
     code += "        return false;\n"
     code += "      }\n"
