@@ -15,6 +15,7 @@
 #ifndef MCRL2_DATA_FBAG_H
 #define MCRL2_DATA_FBAG_H
 
+#include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/function_symbol.h"

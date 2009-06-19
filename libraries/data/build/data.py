@@ -1871,6 +1871,7 @@ class specification():
     code += "\n"
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.namespace.upper())
+    code += "#include \"mcrl2/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
     code += "#include \"mcrl2/data/function_sort.h\"\n"
     code += "#include \"mcrl2/data/function_symbol.h\"\n"
