@@ -38,7 +38,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& list_name()
       {
-        static core::identifier_string list_name = data::detail::initialise_static_expression(list_name, core::identifier_string("List"));
+        static core::identifier_string list_name = data::detail::initialise_static_expression(list_name, core::identifier_string("list"));
         return list_name;
       }
 

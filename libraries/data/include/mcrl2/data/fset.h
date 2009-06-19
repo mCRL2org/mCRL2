@@ -37,7 +37,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fset_name()
       {
-        static core::identifier_string fset_name = data::detail::initialise_static_expression(fset_name, core::identifier_string("FSet"));
+        static core::identifier_string fset_name = data::detail::initialise_static_expression(fset_name, core::identifier_string("fset"));
         return fset_name;
       }
 

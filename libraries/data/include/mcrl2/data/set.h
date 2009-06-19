@@ -39,7 +39,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set_name()
       {
-        static core::identifier_string set_name = data::detail::initialise_static_expression(set_name, core::identifier_string("Set"));
+        static core::identifier_string set_name = data::detail::initialise_static_expression(set_name, core::identifier_string("set_"));
         return set_name;
       }
 

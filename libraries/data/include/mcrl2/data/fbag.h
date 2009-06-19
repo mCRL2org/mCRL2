@@ -40,7 +40,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbag_name()
       {
-        static core::identifier_string fbag_name = data::detail::initialise_static_expression(fbag_name, core::identifier_string("FBag"));
+        static core::identifier_string fbag_name = data::detail::initialise_static_expression(fbag_name, core::identifier_string("fbag"));
         return fbag_name;
       }
 

@@ -1408,6 +1408,16 @@ class sort_declaration():
     code += "      }\n\n"
     return code
 
+  def container_name(self, id, label):
+    code = ""
+    code += "      inline\n"
+    code += "      core::identifier_string const& %s_name()\n" % (label.to_string())
+    code += "      {\n"
+    code += "        static core::identifier_string %s_name = data::detail::initialise_static_expression(%s_name, core::identifier_string(\"%s\"));\n" % (label.to_string(), label.to_string(), label.to_string())
+    code += "        return %s_name;\n" % (label.to_string())
+    code += "      }\n\n"
+    return code
+
   def sort_expression_constructors(self, id, label):
     code = ""
     code += self.sort_name(id, label)
@@ -1436,7 +1446,7 @@ class sort_declaration():
 
   def sort_expression_constructors_container_sort(self, id, label, parameter):
     code = ""
-    code += self.sort_name(id, label)
+    code += self.container_name(id, label)
     code += "      /// \\brief Constructor for sort expression %s(%s)\n" % (escape(id.to_string()), escape(parameter.to_string()))
     code += "      /// \\param %s A sort expression\n" % (escape(parameter.to_string().lower()))
     code += "      /// \\return Sort expression %s(%s)\n" % (escape(label.to_string()), escape(parameter.to_string().lower()))
