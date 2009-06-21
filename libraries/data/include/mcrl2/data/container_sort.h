@@ -28,6 +28,34 @@ namespace mcrl2 {
     /// Container sorts are sorts with a name and an element sort.
     class container_sort: public sort_expression
     {
+      public:
+
+        enum type {
+          list = 0,
+          set_ = 1,
+          fset = 2,
+          bag  = 3,
+          fbag = 4
+        };
+
+      private:
+
+        inline
+        static atermpp::vector< atermpp::aterm_appl > const& initialise_types()
+        {
+          using namespace core::detail;
+
+          static atermpp::vector< atermpp::aterm_appl > types(5);
+
+          types[container_sort::list] = gsMakeSortList();
+          types[container_sort::set_] = gsMakeSortSet();
+          types[container_sort::fset] = gsMakeSortFSet();
+          types[container_sort::bag]  = gsMakeSortBag();
+          types[container_sort::fbag] = gsMakeSortFBag();
+
+          return types;
+        }
+
       protected:
 
         /// \brief Converts a string to an internally used type.
@@ -36,74 +64,43 @@ namespace mcrl2 {
         ///            "Set" or "Bag".
         /// \return The internally used type corresponding to s.
         inline
-        atermpp::aterm_appl string_to_sort_cons_type(const std::string& s) const
+        container_sort::type container_type(const atermpp::aterm_appl& s) const
         {
-          atermpp::aterm_appl result;
+          static atermpp::vector< atermpp::aterm_appl > const& types = initialise_types();
 
-          if (s == "list")
+          if (s == types[container_sort::list])
           {
-            result = core::detail::gsMakeSortList();
+            return container_sort::list;
           }
-          else if (s == "set_")
+          else if (s == types[container_sort::set_])
           {
-            result = core::detail::gsMakeSortSet();
+            return container_sort::set_;
           }
-          else if (s == "fset")
+          else if (s == types[container_sort::fset])
           {
-            result = core::detail::gsMakeSortFSet();
+            return container_sort::fset;
           }
-          else if (s == "bag")
+          else if (s == types[container_sort::bag])
           {
-            result = core::detail::gsMakeSortBag();
+            return container_sort::bag;
           }
-          else if (s == "fbag")
+          else if (s == types[container_sort::fbag])
           {
-            result = core::detail::gsMakeSortFBag();
-          }
-          else
-          {
-            std::cerr << "Incorrect sort_cons_type: " << s << std::endl;
-            assert(false);
+            return container_sort::fbag;
           }
 
-          return result;
+          assert(false);
+
+          return container_sort::list;
         }
 
-        /// \brief Converts an internally used type to a string.
-        ///
-        /// \param[in] s The internally used type to be converted.
-        /// \return The string corresponding to s.
+        /// \brief Transforms a container type operation to the term representation
         inline
-        std::string sort_cons_type_to_string(const atermpp::aterm_appl& s) const
+        atermpp::aterm_appl const& container_type_as_term(const container_sort::type& s) const
         {
-          std::string result;
+          static atermpp::vector< atermpp::aterm_appl > const& types = initialise_types();
 
-          if (core::detail::gsIsSortList(s))
-          {
-            result = "list";
-          }
-          else if (core::detail::gsIsSortSet(s))
-          {
-            result = "set_";
-          }
-          else if (core::detail::gsIsSortFSet(s))
-          {
-            result = "fset";
-          }
-          else if (core::detail::gsIsSortBag(s))
-          {
-            result = "bag";
-          }
-          else if (core::detail::gsIsSortFBag(s))
-          {
-            result = "fbag";
-          }
-          else
-          {
-            assert(false);
-          }
-
-          return result;
+          return types[s];
         }
 
       public:
@@ -129,9 +126,9 @@ namespace mcrl2 {
         /// \param[in] container_name Name of the container, should be one of
         ///            "List", "Set" or "Bag".
         /// \param[in] element_sort The sort of elements in the container.
-        container_sort(const std::string& container_name,
+        container_sort(const container_sort::type& container_name,
                        const sort_expression& element_sort)
-          : sort_expression(core::detail::gsMakeSortCons(string_to_sort_cons_type(container_name), element_sort))
+          : sort_expression(core::detail::gsMakeSortCons(container_type_as_term(container_name), element_sort))
         {}
 
         /// \overload
@@ -145,9 +142,9 @@ namespace mcrl2 {
         /// \brief Returns the container name.
         ///
         inline
-        std::string container_name() const
+        container_sort::type container_type() const
         {
-          return sort_cons_type_to_string(atermpp::arg1(*this));
+          return container_type(atermpp::arg1(*this));
         }
 
         /// \brief Returns the element sort.
@@ -163,7 +160,7 @@ namespace mcrl2 {
         inline
         bool is_list_sort() const
         {
-          return (container_name() == "List");
+          return (container_type() == container_sort::list);
         }
 
         /// \brief Returns true iff container name is Set.
@@ -171,7 +168,7 @@ namespace mcrl2 {
         inline
         bool is_set_sort() const
         {
-          return (container_name() == "Set");
+          return (container_type() == container_sort::set_);
         }
 
         /// \brief Returns true iff container name is Bag.
@@ -179,7 +176,7 @@ namespace mcrl2 {
         inline
         bool is_bag_sort() const
         {
-          return (container_name() == "Bag");
+          return (container_type() == container_sort::bag);
         }
 
     }; // class container_sort

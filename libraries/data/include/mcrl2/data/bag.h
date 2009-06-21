@@ -45,7 +45,7 @@ namespace mcrl2 {
       inline
       container_sort bag(const sort_expression& s)
       {
-        container_sort bag("bag", s);
+        container_sort bag(container_sort::bag, s);
         return bag;
       }
 
@@ -58,7 +58,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_name() == "bag";
+          return static_cast< container_sort >(e).container_type() == container_sort::bag;
         }
         return false;
       }

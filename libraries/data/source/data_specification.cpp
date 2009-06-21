@@ -255,7 +255,7 @@ namespace mcrl2 {
         }
         else if (e.is_container_sort())
         {
-          return container_sort(container_sort(e).container_name(), normalise(container_sort(e).element_sort()));
+          return container_sort(container_sort(e).container_type(), normalise(container_sort(e).element_sort()));
         }
         else if (e.is_structured_sort())
         {
@@ -699,7 +699,21 @@ namespace mcrl2 {
           {
             if (target.is_container_sort())
             {
-              return container_sort(target).container_name();
+              switch (container_sort(target).container_type())
+              {
+                case container_sort::list:
+                  return "list";
+                case container_sort::set_:
+                  return "set";
+                case container_sort::fset:
+                  return "fset";
+                case container_sort::bag:
+                  return "bag";
+                case container_sort::fbag:
+                  return "fbag";
+                default:
+                  return "unknown";
+              }
             }
             else
             {

@@ -367,7 +367,7 @@ void test_is_certainly_finite()
 
   using namespace sort_set;
 
-  BOOST_CHECK(!spec.is_certainly_finite(set_(s)));
+  BOOST_CHECK(spec.is_certainly_finite(set_(s)));
   BOOST_CHECK(!spec.is_certainly_finite(set_(s0)));
 
   using namespace sort_bag;

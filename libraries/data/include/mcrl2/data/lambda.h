@@ -39,7 +39,7 @@ namespace mcrl2 {
           : abstraction(d)
         {
           assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == "lambda");
+          assert(static_cast<abstraction>(d).binding_operator() == abstraction::lambda);
         }
 
         /// Constructor.
@@ -49,7 +49,7 @@ namespace mcrl2 {
         /// \pre variables is not empty.
         lambda(const variable& variable,
                const data_expression& body)
-          : abstraction("lambda", convert< variable_list >(make_list(variable)), body)
+          : abstraction(abstraction::lambda, convert< variable_list >(make_list(variable)), body)
         {
         }
 
@@ -62,7 +62,7 @@ namespace mcrl2 {
         lambda(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction("lambda", variables, body)
+          : abstraction(abstraction::lambda, variables, body)
         {
           assert(!variables.empty());
         }

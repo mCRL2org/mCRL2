@@ -177,10 +177,10 @@ void container_sort_test()
 {
   basic_sort s0("S0");
   basic_sort s1("S1");
-  container_sort ls0("list", s0);
-  container_sort ls1("list", s1);
+  container_sort ls0(container_sort::list, s0);
+  container_sort ls1(container_sort::list, s1);
 
-  BOOST_CHECK(ls0.container_name() == "list");
+  BOOST_CHECK(ls0.container_type() == container_sort::list);
   BOOST_CHECK(ls0.element_sort() == s0);
   BOOST_CHECK(ls1.element_sort() == s1);
   BOOST_CHECK(ls0.element_sort() != ls1.element_sort());

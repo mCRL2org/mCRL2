@@ -34,65 +34,59 @@ namespace mcrl2 {
         /// \brief Iterator range over bound variables
         typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
 
-      protected:
+        enum type {
+          lambda = 0,
+          forall = 1,
+          exists = 2
+        };
 
-        /// \brief Transforms a string to an internally used binding operator.
-        ///
-        /// \param[in] s String denoting a binding operator.
-        /// \pre binding_operator is one of "lambda", "forall", "exists",
-        ///      "setcomprehension" or "bagcomprehension".
-        /// \return The internally used binding operator which is equivalent to o.
-        inline atermpp::aterm_appl string_to_binding_operator(const std::string& s) const
+      private:
+
+        inline
+        static atermpp::vector< atermpp::aterm_appl > const& initialise_operators()
         {
-          atermpp::aterm_appl result;
+          using namespace core::detail;
 
-          if (s == "lambda")
-          {
-            result = core::detail::gsMakeLambda();
-          }
-          else if (s == "forall")
-          {
-            result = core::detail::gsMakeForall();
-          }
-          else if (s == "exists")
-          {
-            result = core::detail::gsMakeExists();
-          }
-          else
-          {
-            assert(false);
-          }
+          static atermpp::vector< atermpp::aterm_appl > operators(3);
 
-          return result;
+          operators[abstraction::lambda] = gsMakeLambda();
+          operators[abstraction::forall] = gsMakeForall();
+          operators[abstraction::exists] = gsMakeExists();
+
+          return operators;
         }
 
-        /// \brief Transforms an internally used binding operator to a string.
-        ///
-        /// \param[in] o The internally used binding operator.
-        /// \return The string equivalent to o.
-        inline
-        std::string binding_operator_to_string(const atermpp::aterm_appl& o) const
+      protected:
+
+        /// \brief Returns the binding operator for a term representing a binding operator
+        inline static abstraction::type binding_operator(const atermpp::aterm_appl& s)
         {
-          std::string result;
+          static atermpp::vector< atermpp::aterm_appl > const& operators = initialise_operators();
 
-          if (core::detail::gsIsLambda(o))
+          if (s == operators[abstraction::lambda])
           {
-            result = "lambda";
+            return abstraction::lambda;
           }
-          else if (core::detail::gsIsForall(o))
+          else if (s == operators[abstraction::forall])
           {
-            result = "forall";
+            return abstraction::forall;
           }
-          else if (core::detail::gsIsExists(o))
+          else if (s == operators[abstraction::exists])
           {
-            result = "exists";
-          }
-          else
-          {
-            assert(false);
+            return abstraction::exists;
           }
 
-          return result;
+          assert(false);
+
+          return abstraction::lambda;
+        }
+
+        /// \brief Transforms a binding operation to the term representation
+        inline static atermpp::aterm_appl const& binding_operator_as_term(const abstraction::type s)
+        {
+          static atermpp::vector< atermpp::aterm_appl > const& operators = initialise_operators();
+
+          return operators[s];
         }
 
       public:
@@ -121,11 +115,11 @@ namespace mcrl2 {
         ///      "setcomprehension" or "bagcomprehension".
         /// \pre variables is not empty.
         template < typename Container >
-        abstraction(const std::string& binding_operator,
+        abstraction(const abstraction::type& binding_operator,
                     const Container& variables,
                     const data_expression& body,
                     typename detail::enable_if_container< Container, variable >::type* = 0)
-          : data_expression(core::detail::gsMakeBinder(string_to_binding_operator(binding_operator), convert< variable_list >(variables), body))
+          : data_expression(core::detail::gsMakeBinder(binding_operator_as_term(binding_operator), convert< variable_list >(variables), body))
         {
           assert(!variables.empty());
         }
@@ -142,9 +136,9 @@ namespace mcrl2 {
 
         /// \brief Returns the binding operator of the abstraction
         inline
-        std::string binding_operator() const
+        abstraction::type binding_operator() const
         {
-          return binding_operator_to_string(atermpp::arg1(*this));
+          return binding_operator(atermpp::arg1(*this));
         }
 
         /// \brief Returns the variables of the abstraction
@@ -165,21 +159,21 @@ namespace mcrl2 {
         inline
         bool is_lambda() const
         {
-          return binding_operator() == "lambda";
+          return binding_operator() == abstraction::lambda;
         }
 
         /// \brief Returns true iff the binding operator is "forall"
         inline
         bool is_forall() const
         {
-          return binding_operator() == "forall";
+          return binding_operator() == abstraction::forall;
         }
 
         /// \brief Returns true iff the binding operator is "exists"
         inline
         bool is_exists() const
         {
-          return binding_operator() == "exists";
+          return binding_operator() == abstraction::exists;
         }
 
     }; // class abstraction
