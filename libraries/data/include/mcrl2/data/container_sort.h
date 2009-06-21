@@ -18,6 +18,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/detail/construction_utility.h"
 
 namespace mcrl2 {
 
@@ -28,80 +29,46 @@ namespace mcrl2 {
     /// Container sorts are sorts with a name and an element sort.
     class container_sort: public sort_expression
     {
-      public:
-
-        enum type {
-          list = 0,
-          set_ = 1,
-          fset = 2,
-          bag  = 3,
-          fbag = 4
-        };
-
-      private:
-
-        inline
-        static atermpp::vector< atermpp::aterm_appl > const& initialise_types()
-        {
-          using namespace core::detail;
-
-          static atermpp::vector< atermpp::aterm_appl > types(5);
-
-          types[container_sort::list] = gsMakeSortList();
-          types[container_sort::set_] = gsMakeSortSet();
-          types[container_sort::fset] = gsMakeSortFSet();
-          types[container_sort::bag]  = gsMakeSortBag();
-          types[container_sort::fbag] = gsMakeSortFBag();
-
-          return types;
-        }
-
       protected:
 
-        /// \brief Converts a string to an internally used type.
-        ///
-        /// \param[in] s The string to be converted. May only be any of "List",
-        ///            "Set" or "Bag".
-        /// \return The internally used type corresponding to s.
-        inline
-        container_sort::type container_type(const atermpp::aterm_appl& s) const
-        {
-          static atermpp::vector< atermpp::aterm_appl > const& types = initialise_types();
+        // base class for abstraction types
+        struct variant : public atermpp::aterm_appl {
+          variant(atermpp::aterm_appl const& e) : atermpp::aterm_appl(e)
+          {}
+        };
 
-          if (s == types[container_sort::list])
-          {
-            return container_sort::list;
-          }
-          else if (s == types[container_sort::set_])
-          {
-            return container_sort::set_;
-          }
-          else if (s == types[container_sort::fset])
-          {
-            return container_sort::fset;
-          }
-          else if (s == types[container_sort::bag])
-          {
-            return container_sort::bag;
-          }
-          else if (s == types[container_sort::fbag])
-          {
-            return container_sort::fbag;
-          }
+      public:
 
-          assert(false);
-
-          return container_sort::list;
-        }
-
-        /// \brief Transforms a container type operation to the term representation
-        inline
-        atermpp::aterm_appl const& container_type_as_term(const container_sort::type& s) const
-        {
-          static atermpp::vector< atermpp::aterm_appl > const& types = initialise_types();
-
-          return types[s];
-        }
+        // Type for list variant
+        struct list : public detail::singleton_expression< container_sort::list, container_sort::variant > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeSortList();
+          }
+        };
+        // Type for set_ variant
+        struct set_ : public detail::singleton_expression< container_sort::set_, container_sort::variant > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeSortSet();
+          }
+        };
+        // Type for set_ variant
+        struct fset : public detail::singleton_expression< container_sort::fset, container_sort::variant > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeSortFSet();
+          }
+        };
+        // Type for set_ variant
+        struct bag : public detail::singleton_expression< container_sort::bag, container_sort::variant > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeSortBag();
+          }
+        };
+        // Type for set_ variant
+        struct fbag : public detail::singleton_expression< container_sort::fbag, container_sort::variant > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeSortFBag();
+          }
+        };
 
       public:
 
@@ -126,9 +93,9 @@ namespace mcrl2 {
         /// \param[in] container_name Name of the container, should be one of
         ///            "List", "Set" or "Bag".
         /// \param[in] element_sort The sort of elements in the container.
-        container_sort(const container_sort::type& container_name,
+        container_sort(const container_sort::variant& container_name,
                        const sort_expression& element_sort)
-          : sort_expression(core::detail::gsMakeSortCons(container_type_as_term(container_name), element_sort))
+          : sort_expression(core::detail::gsMakeSortCons(container_name, element_sort))
         {}
 
         /// \overload
@@ -142,9 +109,9 @@ namespace mcrl2 {
         /// \brief Returns the container name.
         ///
         inline
-        container_sort::type container_type() const
+        container_sort::variant container_type() const
         {
-          return container_type(atermpp::arg1(*this));
+          return atermpp::arg1(*this);
         }
 
         /// \brief Returns the element sort.
@@ -160,7 +127,7 @@ namespace mcrl2 {
         inline
         bool is_list_sort() const
         {
-          return (container_type() == container_sort::list);
+          return container_type() == container_sort::list::instance();
         }
 
         /// \brief Returns true iff container name is Set.
@@ -168,7 +135,7 @@ namespace mcrl2 {
         inline
         bool is_set_sort() const
         {
-          return (container_type() == container_sort::set_);
+          return container_type() == container_sort::set_::instance();
         }
 
         /// \brief Returns true iff container name is Bag.
@@ -176,7 +143,7 @@ namespace mcrl2 {
         inline
         bool is_bag_sort() const
         {
-          return (container_type() == container_sort::bag);
+          return container_type() == container_sort::bag::instance();
         }
 
     }; // class container_sort

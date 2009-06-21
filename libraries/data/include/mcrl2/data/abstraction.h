@@ -14,11 +14,10 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/detail/construction_utility.h"
 #include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -29,65 +28,37 @@ namespace mcrl2 {
     ///
     class abstraction: public data_expression
     {
+      protected:
+
+        // base class for abstraction types
+        struct binder_type : public atermpp::aterm_appl {
+          binder_type(atermpp::aterm_appl const& e) : atermpp::aterm_appl(e)
+          {}
+        };
+
       public:
 
         /// \brief Iterator range over bound variables
         typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
 
-        enum type {
-          lambda = 0,
-          forall = 1,
-          exists = 2
+        // Type for lambda abstracions
+        struct lambda : public detail::singleton_expression< abstraction::lambda, abstraction::binder_type > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeLambda();
+          }
         };
-
-      private:
-
-        inline
-        static atermpp::vector< atermpp::aterm_appl > const& initialise_operators()
-        {
-          using namespace core::detail;
-
-          static atermpp::vector< atermpp::aterm_appl > operators(3);
-
-          operators[abstraction::lambda] = gsMakeLambda();
-          operators[abstraction::forall] = gsMakeForall();
-          operators[abstraction::exists] = gsMakeExists();
-
-          return operators;
-        }
-
-      protected:
-
-        /// \brief Returns the binding operator for a term representing a binding operator
-        inline static abstraction::type binding_operator(const atermpp::aterm_appl& s)
-        {
-          static atermpp::vector< atermpp::aterm_appl > const& operators = initialise_operators();
-
-          if (s == operators[abstraction::lambda])
-          {
-            return abstraction::lambda;
+        // Type for universal quantifications
+        struct forall : public detail::singleton_expression< abstraction::forall, abstraction::binder_type > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeForall();
           }
-          else if (s == operators[abstraction::forall])
-          {
-            return abstraction::forall;
+        };
+        // Type for existential quantifications
+        struct exists : public detail::singleton_expression< abstraction::exists, abstraction::binder_type > {
+          static atermpp::aterm_appl initialise() {
+            return core::detail::gsMakeExists();
           }
-          else if (s == operators[abstraction::exists])
-          {
-            return abstraction::exists;
-          }
-
-          assert(false);
-
-          return abstraction::lambda;
-        }
-
-        /// \brief Transforms a binding operation to the term representation
-        inline static atermpp::aterm_appl const& binding_operator_as_term(const abstraction::type s)
-        {
-          static atermpp::vector< atermpp::aterm_appl > const& operators = initialise_operators();
-
-          return operators[s];
-        }
+        };
 
       public:
 
@@ -115,11 +86,11 @@ namespace mcrl2 {
         ///      "setcomprehension" or "bagcomprehension".
         /// \pre variables is not empty.
         template < typename Container >
-        abstraction(const abstraction::type& binding_operator,
+        abstraction(const abstraction::binder_type& binding_operator,
                     const Container& variables,
                     const data_expression& body,
                     typename detail::enable_if_container< Container, variable >::type* = 0)
-          : data_expression(core::detail::gsMakeBinder(binding_operator_as_term(binding_operator), convert< variable_list >(variables), body))
+          : data_expression(core::detail::gsMakeBinder(binding_operator, convert< variable_list >(variables), body))
         {
           assert(!variables.empty());
         }
@@ -136,9 +107,9 @@ namespace mcrl2 {
 
         /// \brief Returns the binding operator of the abstraction
         inline
-        abstraction::type binding_operator() const
+        abstraction::binder_type binding_operator() const
         {
-          return binding_operator(atermpp::arg1(*this));
+          return atermpp::arg1(*this);
         }
 
         /// \brief Returns the variables of the abstraction
@@ -159,30 +130,27 @@ namespace mcrl2 {
         inline
         bool is_lambda() const
         {
-          return binding_operator() == abstraction::lambda;
+          return binding_operator() == abstraction::lambda::instance();
         }
 
         /// \brief Returns true iff the binding operator is "forall"
         inline
         bool is_forall() const
         {
-          return binding_operator() == abstraction::forall;
+          return binding_operator() == abstraction::forall::instance();
         }
 
         /// \brief Returns true iff the binding operator is "exists"
         inline
         bool is_exists() const
         {
-          return binding_operator() == abstraction::exists;
+          return binding_operator() == abstraction::exists::instance();
         }
 
     }; // class abstraction
 
     /// \brief list of abstractions
     typedef atermpp::term_list<abstraction> abstraction_list;
-
-    /// \brief vector of abstractions
-    typedef atermpp::vector<abstraction>    abstraction_vector;
 
   } // namespace data
 

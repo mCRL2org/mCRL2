@@ -14,9 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 
@@ -51,7 +48,7 @@ namespace mcrl2 {
         exists(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::exists, variables, body)
+          : abstraction(abstraction::exists::instance(), variables, body)
         {
           assert(!variables.empty());
         }

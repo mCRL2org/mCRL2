@@ -170,9 +170,9 @@ void nat_rewrite_test() {
   // Added a few additional checks (Wieger)
   data::rewriter datar(specification);
   data::data_expression x = data::parse_data_expression("n >= 0", "n:Nat;");
+
   BOOST_CHECK(datar(x) == sort_bool::true_());
-  variable n("n", nat());
-  data_rewrite_test(R, greater_equal(n, p0), sort_bool::true_());
+  data_rewrite_test(R, greater_equal(variable("n", nat()), p0), sort_bool::true_());
 }
 
 void int_rewrite_test() {

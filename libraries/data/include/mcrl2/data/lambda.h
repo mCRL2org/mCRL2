@@ -14,9 +14,6 @@
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/application.h"
@@ -49,7 +46,7 @@ namespace mcrl2 {
         /// \pre variables is not empty.
         lambda(const variable& variable,
                const data_expression& body)
-          : abstraction(abstraction::lambda, convert< variable_list >(make_list(variable)), body)
+          : abstraction(abstraction::lambda::instance(), convert< variable_list >(make_list(variable)), body)
         {
         }
 
@@ -62,7 +59,7 @@ namespace mcrl2 {
         lambda(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::lambda, variables, body)
+          : abstraction(abstraction::lambda::instance(), variables, body)
         {
           assert(!variables.empty());
         }

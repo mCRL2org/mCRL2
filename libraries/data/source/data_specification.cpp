@@ -699,21 +699,7 @@ namespace mcrl2 {
           {
             if (target.is_container_sort())
             {
-              switch (container_sort(target).container_type())
-              {
-                case container_sort::list:
-                  return "list";
-                case container_sort::set_:
-                  return "set";
-                case container_sort::fset:
-                  return "fset";
-                case container_sort::bag:
-                  return "bag";
-                case container_sort::fbag:
-                  return "fbag";
-                default:
-                  return "unknown";
-              }
+              return container_sort(target).container_type().function().name();
             }
             else
             {

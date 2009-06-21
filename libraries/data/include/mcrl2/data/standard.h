@@ -15,6 +15,8 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/detail/construction_utility.h"
+
 
 namespace mcrl2 {
 
@@ -30,18 +32,66 @@ namespace mcrl2 {
     }
 
     namespace detail {
-      /// Function for initialisation of static variables, takes care of protection
-      /// \param[in,out] target a reference to the static variable
-      /// \param[in] original the expression that is used to initialise the variable
-      /// \ return a reference to original
-      template < typename Expression >
-      Expression const& initialise_static_expression(Expression& target, Expression const& original)
-      {
-        target = original;
-        target.protect();
 
-        return original;
-      }
+      /// \ Component to facilitate code generation
+      template < typename Derived >
+      struct symbol : public detail::singleton_identifier< Derived > {
+        static bool is_application(data_expression const& e)
+        {
+          return e.is_application() ? is_application(application(e)) : false;
+        }
+
+        static bool is_application(application const& e)
+        {
+          return is_function_symbol(e.head());
+        }
+
+        static bool is_function_symbol(data_expression const& e)
+        {
+          return (e.is_function_symbol()) ? is_function_symbol(function_symbol(e)) : false;
+        }
+
+        static bool is_function_symbol(function_symbol const& e)
+        {
+          return e.name() == detail::singleton_identifier< Derived >::instance();
+        }
+      };
+
+      struct equal_symbol : public symbol< equal_symbol > {
+        static char const* initialise() {
+          return "==";
+        }
+      };
+      struct not_equal_symbol : public symbol< not_equal_symbol > {
+        static char const* initialise() {
+          return "!=";
+        }
+      };
+      struct if_symbol : public symbol< if_symbol > {
+        static char const* initialise() {
+          return "if";
+        }
+      };
+      struct less_symbol : public symbol< less_symbol > {
+        static char const* initialise() {
+          return "<";
+        }
+      };
+      struct less_equal_symbol : public symbol< less_equal_symbol > {
+        static char const* initialise() {
+          return "<=";
+        }
+      };
+      struct greater_symbol : public symbol< greater_symbol > {
+        static char const* initialise() {
+          return ">";
+        }
+      };
+      struct greater_equal_symbol : public symbol< greater_equal_symbol > {
+        static char const* initialise() {
+          return ">=";
+        }
+      };
     }
 
     /// \brief Constructor for function symbol ==
@@ -49,15 +99,16 @@ namespace mcrl2 {
     /// \return function symbol equal_to
     inline function_symbol equal_to(const sort_expression& s)
     {
-      return function_symbol("==", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function ==
     /// \param e[in] A data expression
     /// \return true iff e is the function symbol matching ==
-    inline bool is_equal_to_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_equal_to_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == "==";
+      return detail::equal_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol ==
@@ -74,9 +125,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol equal_to to a
     ///     number of arguments
-    inline bool is_equal_to_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_equal_to_application(const DataExpression& e)
     {
-      return (e.is_application()) && is_equal_to_function_symbol(application(e).head());
+      return detail::equal_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol !=
@@ -84,15 +136,16 @@ namespace mcrl2 {
     /// \return function symbol not_equal_to
     inline function_symbol not_equal_to(const sort_expression& s)
     {
-      return function_symbol("!=", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::not_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function !=
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching !=
-    inline bool is_not_equal_to_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_not_equal_to_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == "!=";
+      return detail::not_equal_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol !=
@@ -109,9 +162,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol not_equal_to to a
     ///     number of arguments
-    inline bool is_not_equal_to_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_not_equal_to_application(const DataExpression& e)
     {
-      return (e.is_application()) && is_not_equal_to_function_symbol(application(e).head());
+      return detail::not_equal_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol if
@@ -119,15 +173,16 @@ namespace mcrl2 {
     /// \return function symbol if_
     inline function_symbol if_(const sort_expression& s)
     {
-      return function_symbol("if", function_sort(sort_bool::bool_(), s, s, s));
+      return function_symbol(detail::if_symbol::instance(), function_sort(sort_bool::bool_(), s, s, s));
     }
 
     /// \brief Recogniser for function if
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching if_
-    inline bool is_if_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_if_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == "if";
+      return detail::if_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol if
@@ -147,9 +202,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol if_ to a
     ///     number of arguments
-    inline bool is_if_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_if_application(const DataExpression& e)
     {
-      return e.is_application() && is_if_function_symbol(application(e).head());
+      return detail::if_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol <
@@ -157,15 +213,16 @@ namespace mcrl2 {
     /// \return function symbol less
     inline function_symbol less(const sort_expression& s)
     {
-      return function_symbol("<", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching <
-    inline bool is_less_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_less_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == "<";
+      return detail::less_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol <
@@ -182,9 +239,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol less to a
     ///     number of arguments
-    inline bool is_less_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_less_application(const DataExpression& e)
     {
-      return e.is_application() && is_less_function_symbol(application(e).head());
+      return detail::less_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol <=
@@ -192,15 +250,16 @@ namespace mcrl2 {
     /// \return function symbol less_equal
     inline function_symbol less_equal(const sort_expression& s)
     {
-      return function_symbol("<=", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <=
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching <=
-    inline bool is_less_equal_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_less_equal_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == "<=";
+      return detail::less_equal_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol <=
@@ -217,9 +276,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol less_equal to a
     ///     number of arguments
-    inline bool is_less_equal_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_less_equal_application(const DataExpression& e)
     {
-      return e.is_application() && is_less_equal_function_symbol(application(e).head());
+      return detail::less_equal_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol >
@@ -227,15 +287,16 @@ namespace mcrl2 {
     /// \return function symbol greater
     inline function_symbol greater(const sort_expression& s)
     {
-      return function_symbol(">", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching >
-    inline bool is_greater_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_greater_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == ">";
+      return detail::greater_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol >
@@ -252,9 +313,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol greater to a
     ///     number of arguments
-    inline bool is_greater_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_greater_application(const DataExpression& e)
     {
-      return e.is_application() && is_greater_function_symbol(application(e).head());
+      return detail::greater_symbol::is_application(e);
     }
 
     /// \brief Constructor for function symbol >=
@@ -262,15 +324,16 @@ namespace mcrl2 {
     /// \return function symbol greater_equal
     inline function_symbol greater_equal(const sort_expression& s)
     {
-      return function_symbol(">=", function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >=
     /// \param[in] e A data expression
     /// \return true iff e is the function symbol matching >=
-    inline bool is_greater_equal_function_symbol(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_greater_equal_function_symbol(const DataExpression& e)
     {
-      return e.is_function_symbol() && function_symbol(e).name() == ">=";
+      return detail::greater_equal_symbol::is_function_symbol(e);
     }
 
     /// \brief Application of function symbol >=
@@ -287,9 +350,10 @@ namespace mcrl2 {
     /// \param[in] e A data expression
     /// \return true iff e is an application of function symbol greater_equal to a
     ///     number of arguments
-    inline bool is_greater_equal_application(const data_expression& e)
+    template < typename DataExpression >
+    inline bool is_greater_equal_application(const DataExpression& e)
     {
-      return e.is_application() && is_greater_equal_function_symbol(application(e).head());
+      return detail::greater_equal_symbol::is_application(e);
     }
 
     /// \brief Give all standard system defined functions for sort s
