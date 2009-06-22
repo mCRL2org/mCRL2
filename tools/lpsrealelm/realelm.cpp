@@ -175,7 +175,7 @@ std::pair<data_expression, data_expression> split_variables_and_constants(const 
       result = std::make_pair(e, real_zero());
     }
   }
-  else if (gsIsDataExprCReal(e) && !is_number(*static_cast<const data_application&>(e).arguments().begin()))
+  else if (mcrl2::data::sort_real::is_creal(e) && !is_number(*static_cast<const data_application&>(e).arguments().begin()))
   {
     result = std::make_pair(e, real_zero());
   }
@@ -689,8 +689,8 @@ data_expression remove_variable(const variable& variable, const data_expression&
     if(is_multiplies(application(left).right()))
     {
       data_expression factor = application(application(left()).right).left();
-      new_left = gsMakeDataExprDivide(sort_real::plus(new_left, application(left).left()), factor);
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, gsMakeDataExprDivide(application(inequality).right(), factor)));
+      new_left = sort_real::divides(sort_real::plus(new_left, application(left).left()), factor);
+      return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, sort_real::divides(application(inequality).right(), factor)));
     }
     else if (application(left).right() == variable || application(left).right() == sort_real::is_negate_application(static_cast<const data_expression&>(variable)))
     {

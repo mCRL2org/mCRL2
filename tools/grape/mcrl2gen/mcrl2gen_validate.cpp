@@ -15,6 +15,8 @@
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/real.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
@@ -220,7 +222,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channels(wxXmlNode *p_d
   {
     // get channel_type
     wxString channel_type = get_child_value(channel_node, _T("channeltype"));
-    if (channel_type == _T("visible")) 
+    if (channel_type == _T("visible"))
     {
       wxString channel_id = get_child_value(channel_node, _T("id"));              // get channel id
       wxString channel_name = get_child_value(channel_node, _T("name"));          // get channel name
@@ -325,7 +327,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
         throw CONVERSION_ERROR;
         return visibles;
       }
-      
+
       list_of_action actions_found, new_actions_found;
       // loop through connections
       for (wxXmlNode *connection = channel_list->GetChildren(); connection != 0; connection = connection->GetNext())
@@ -376,7 +378,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
                   // add correct visibles
                   if (actions[i].get_name() == channel_name)
                   {
-               	    bool act_found = false;
+                    bool act_found = false;
                     for (unsigned int j = 0; j < actions_found.GetCount(); ++j)
                     {
                       if ( actions[i].get_parameters().GetCount() == actions_found[j].get_parameters().GetCount() )
@@ -400,7 +402,7 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
                     {
                       new_actions_found.Add( actions[i] );
                     }
-                  } 
+                  }
                 } // end for (actions)
               }
               proc_ref = proc_ref->GetNext();
@@ -570,7 +572,7 @@ void grape::mcrl2gen::compact_list_action(list_of_action &p_actions, list_of_act
           {
             found = acts_params[k].get_type() == actions_params[k].get_type();
             ++k;
-	        }
+          }
           if (found)
           {
             break;
@@ -594,7 +596,7 @@ bool grape::mcrl2gen::is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString 
   wxXmlNode *proc_ref_list = 0;
   wxXmlNode *init_des_list = 0;
   // only ask for child if the diagram exists
-  if (diag != 0) 
+  if (diag != 0)
   {
     objects = get_child(diag, _T("objectlist"));
     // only ask for lists if the object exists
@@ -811,10 +813,10 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlDocument &p_spec, wxString &
 bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode *p_process_diagram, ATermAppl &datatype_spec)
 {
   // initialise variables
-  bool  designator_list_is_valid = true, 
-        ref_state_list_is_valid  = true, 
+  bool  designator_list_is_valid = true,
+        ref_state_list_is_valid  = true,
         state_list_is_valid      = true,
-        term_trans_list_is_valid = true, 
+        term_trans_list_is_valid = true,
         trans_list_is_valid      = true;
   wxString diagram_id = get_child_value(p_process_diagram, _T("id"));     // get diagram id
   wxString diagram_name = get_child_value(p_process_diagram, _T("name")); // get diagram name
@@ -823,7 +825,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
     cerr << "Process diagram " << diagram_id.ToAscii() << " has no name." << endl;
     return false;
   }
-  // parse process diagram name  
+  // parse process diagram name
   if (!gsIsUserIdentifier(std::string(diagram_name.fn_str())))
   {
     // ERROR: process name is not an identifier
@@ -1071,10 +1073,10 @@ bool grape::mcrl2gen::validate_preamble_parameters(wxXmlNode *p_preamble, wxStri
         }
 
         // type check parameter type (sortexpression)
-        ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );          
+        ATermAppl a_type_checked_param_sort = type_check_sort_expr( a_parsed_param_sort, datatype_spec );
         if ( a_type_checked_param_sort == 0 )
         {
-          
+
           // ERROR: parameter declaration is not valid
           cerr << "Process diagram " << diagram_name.ToAscii() << " contains an invalid parameter " << param_text.ToAscii()
                << " declaration in its preamble. The parameter type '" << param_decl.get_type().ToAscii() << "' could not be type checked." << endl;
@@ -1495,7 +1497,7 @@ bool grape::mcrl2gen::validate_state_connection(wxXmlNode *p_process_diagram, wx
       return true;
     }
   }
-  
+
   // get reference state list
   wxXmlNode *ref_states = get_child(objects, _T("referencestatelist"));
   // loop through reference states
@@ -1585,7 +1587,7 @@ bool grape::mcrl2gen::validate_transition_label(wxXmlNode *p_process_diagram, li
     // validate variable declarations
     list_of_decl variable_decl_list;
     if (!validate_transition_label_variable_declarations(transition_label, p_diagram_name, variable_decl_list, datatype_spec)) return false;
-    
+
     // get variable table
     atermpp::table vars = get_variable_table(p_preamble_parameter_decls, p_preamble_local_var_decls, variable_decl_list, datatype_spec);
 
@@ -1723,7 +1725,7 @@ bool grape::mcrl2gen::validate_transition_label_condition(wxXmlNode *p_transitio
         throw CONVERSION_ERROR;
         return false;
       }
-      if ( !gsIsSortExprBool(gsGetSort(a_type_checked_condition_expr)) )
+      if ( !mcrl2::data::sort_bool::is_bool(mcrl2::data::sort_expression(gsGetSort(a_type_checked_condition_expr))) )
       {
         // ERROR: condition is of wrong type
         cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of condition "
@@ -1798,7 +1800,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
 
           dataexpression param;
           param.set_expression( action_param );
-	        param.set_type( action_param_type );
+          param.set_type( action_param_type );
           action_params.Add( param );
         }
         else
@@ -1845,7 +1847,7 @@ bool grape::mcrl2gen::validate_transition_label_timestamp(wxXmlNode *p_transitio
         throw CONVERSION_ERROR;
         return false;
       }
-      if ( !gsIsSortExprReal(gsGetSort(a_type_checked_timestamp_expr)) )
+      if ( !mcrl2::data::sort_real::is_real(mcrl2::data::sort_expression(gsGetSort(a_type_checked_timestamp_expr))) )
       {
         // ERROR: condition is of wrong type
         cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of timestamp "
@@ -1990,7 +1992,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   // initialize variables
   bool channel_communication_list_is_valid  = true,
        channel_list_is_valid                = true,
-       architecture_reference_list_is_valid = true, 
+       architecture_reference_list_is_valid = true,
        process_reference_list_is_valid      = true;
   wxString diagram_id = get_child_value(p_architecture_diagram, _T("id"));      // get diagram id
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));  // get diagram name
@@ -2067,7 +2069,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
   // initialize variables
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));  // get diagram name
   wxArrayString arch_refs;
-  wxArrayString arch_diags;  
+  wxArrayString arch_diags;
 
   // loop through all architecture references
   bool is_valid = true;
@@ -2140,7 +2142,7 @@ bool grape::mcrl2gen::validate_architecture_reference_list(wxXmlNode *p_doc_root
       arch_diags.Add(ref_propertyof);
     }
   }
-  
+
   if (!is_valid)
   {
       cerr << "Architecture diagram " << diagram_name.ToAscii()

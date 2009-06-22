@@ -542,11 +542,11 @@ inline data_expression real_minus_one()
 }
 
 /* inline data_expression divide(const data_expression e1,const data_expression e2)
-{ return gsMakeDataExprDivide(e1,e2);
+{ return mcrl2::data::sort_real::divides(e1,e2);
 }
 
 inline data_expression multiply(const data_expression e1,const data_expression e2)
-{ return gsMakeDataExprMult(e1,e2);
+{ return mcrl2::data::sort_real::times(e1,e2);
 } */
 
 inline data_expression min(const data_expression e1,const data_expression e2,const rewriter &r)

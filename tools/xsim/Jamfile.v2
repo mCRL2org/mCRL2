@@ -1,5 +1,6 @@
 project toolset/xsim
        : requirements
+          <use>/libraries//data
           <use>/libraries//lps
           <use>/libraries//trace
        ;
@@ -29,6 +30,7 @@ tool xsim
          xsimmain.cpp
          xsimtrace.cpp
          /libraries//trace
+         /libraries//data
          /libraries//lps
        : <squadt-connectivity>implemented
          <wx>gl

@@ -20,6 +20,7 @@
 #include "simbasegui.h"
 #include "garageframe.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/basic_sort.h"
 #include <sstream>
 
 using namespace mcrl2::core;
@@ -35,9 +36,9 @@ END_EVENT_TABLE()
 inline std::string intToString( int i )
 // -------------------------------
 {
-	std::ostringstream oss;
-	oss << i;
-	return oss.str();
+  std::ostringstream oss;
+  oss << i;
+  return oss.str();
 }
 
 // --------------------------------------------
@@ -259,7 +260,7 @@ ATermAppl GarageFrame::MakeOpId( std::string name,
                                  ATermAppl SortExpr )
 // --------------------------------------------------
 {
-  return gsMakeOpId(gsString2ATermAppl(name.c_str()), SortExpr);
+  return mcrl2::data::function_symbol(name, mcrl2::data::sort_expression(SortExpr));
 }
 
 
@@ -281,7 +282,7 @@ ATermAppl GarageFrame::MakeDataVarId( std::string name,
 ATermAppl GarageFrame::MakeSortId( std::string name )
 // --------------------------------------------------
 {
-  return gsMakeSortId(gsString2ATermAppl(name.c_str()));
+  return static_cast<ATermAppl>(mcrl2::data::basic_sort(name));
 }
 
 

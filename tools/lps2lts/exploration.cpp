@@ -16,6 +16,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/nat.h"
 #include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace.h"
@@ -34,7 +35,7 @@ static ATerm get_repr(ATerm state);
 
 
 exploration_strategy str_to_expl_strat(const char *s)
-{ 
+{
   if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
   {
     return es_breadth;
@@ -959,7 +960,7 @@ bool generate_lts()
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_value_prioritized )
-    { 
+    {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator *nsgen = NULL;
       srand((unsigned)time(NULL)+getpid());
@@ -992,27 +993,27 @@ bool generate_lts()
 
         ATermAppl lowest_first_action_parameter=NULL;
 
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
                    tmp_trans_walker=ATgetNext(tmp_trans_walker))
         { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
           if (ATgetLength(multi_action_list)==1)
           { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
             ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
             ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0) 
+            if (ATgetLength(action_arguments)>0)
             { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
               ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (gsIsSortExprNat(first_sort))
-              { 
+              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+              {
                 if (lowest_first_action_parameter==NULL)
                 { lowest_first_action_parameter=first_argument;
                 }
-                else 
-                { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprGT(lowest_first_action_parameter,first_argument)));
-                  if (gsIsDataExprTrue(result))
+                else
+                { ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   { lowest_first_action_parameter=first_argument;
                   }
-                  else if (!gsIsDataExprFalse(result))
+                  else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
                   { assert(0);
                   }
                 }
@@ -1021,11 +1022,11 @@ bool generate_lts()
           }
         }
 
-        // Now carry out the actual filtering; 
+        // Now carry out the actual filtering;
         ATermList new_tmp_trans = ATmakeList0();
         ATermList new_tmp_states = ATmakeList0();
         ATermList tmp_state_walker = tmp_states;
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
                    tmp_trans_walker=ATgetNext(tmp_trans_walker))
         { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
           ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
@@ -1035,34 +1036,34 @@ bool generate_lts()
           { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
             ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
             ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0) 
+            if (ATgetLength(action_arguments)>0)
             { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
               ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (gsIsSortExprNat(first_sort))
-              { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprEq(lowest_first_action_parameter,first_argument)));
-                if (gsIsDataExprTrue(result))
+              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+              { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                 { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
                   new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
                 }
-                else 
-                { assert(gsIsDataExprFalse(result));
+                else
+                { assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
                   // The transition is omitted!
                 }
               }
-              else 
+              else
               {
                 new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
                 new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
               }
             }
-            else 
-            { 
+            else
+            {
               new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
               new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
             }
           }
-          else 
-          { 
+          else
+          {
             new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
             new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
           }
@@ -1089,8 +1090,8 @@ bool generate_lts()
             else if (rand()%2==0)  // with 50 % probability
             { current_state++;    // ignore the current state
               add_transition(state,(ATermAppl) ATgetFirst(tmp_trans),ATgetFirst(tmp_states));
-            }  
-            else 
+            }
+            else
             { // Ignore the new state.
             }
 
@@ -1121,7 +1122,7 @@ bool generate_lts()
       lgopts->display_status(level-1,num_states,num_states,num_found_same,trans);
       delete nsgen;
     } else if ( lgopts->expl_strat == es_value_random_prioritized )
-    { 
+    {
       srand((unsigned)time(NULL)+getpid());
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator *nsgen = NULL;
@@ -1154,28 +1155,28 @@ bool generate_lts()
 
         ATermAppl lowest_first_action_parameter=NULL;
 
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
                    tmp_trans_walker=ATgetNext(tmp_trans_walker))
         { ATermList multi_action_list=(ATermList)ATgetArgument(ATgetFirst(tmp_trans_walker),0);
           if (ATgetLength(multi_action_list)==1)
           { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
             ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
             ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0) 
+            if (ATgetLength(action_arguments)>0)
             { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
               ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (gsIsSortExprNat(first_sort))
-              { 
+              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+              {
                 if (lowest_first_action_parameter==NULL)
                 { lowest_first_action_parameter=first_argument;
                 }
-                else 
-                { 
-                  ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprGT(lowest_first_action_parameter,first_argument)));
-                  if (gsIsDataExprTrue(result))
+                else
+                {
+                  ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                  if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                   { lowest_first_action_parameter=first_argument;
                   }
-                  else if (!gsIsDataExprFalse(result))
+                  else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
                   { assert(0);
                   }
                 }
@@ -1184,11 +1185,11 @@ bool generate_lts()
           }
         }
 
-        // Now carry out the actual filtering; 
+        // Now carry out the actual filtering;
         ATermList new_tmp_trans = ATmakeList0();
         ATermList new_tmp_states = ATmakeList0();
         ATermList tmp_state_walker = tmp_states;
-        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker); 
+        for(ATermList tmp_trans_walker=tmp_trans; !ATisEmpty(tmp_trans_walker);
                    tmp_trans_walker=ATgetNext(tmp_trans_walker))
         { ATermAppl multi_action=(ATermAppl)ATgetFirst(tmp_trans_walker);
           ATermAppl state=(ATermAppl)ATgetFirst(tmp_state_walker);
@@ -1198,46 +1199,46 @@ bool generate_lts()
           { ATermAppl first_action=(ATermAppl)ATgetFirst(multi_action_list);
             ATermList action_arguments=(ATermList)ATgetArgument(first_action,1);
             ATermList action_sorts=(ATermList)ATgetArgument(ATgetArgument(first_action,0),1);
-            if (ATgetLength(action_arguments)>0) 
+            if (ATgetLength(action_arguments)>0)
             { ATermAppl first_argument=(ATermAppl)ATgetFirst(action_arguments);
               ATermAppl first_sort=(ATermAppl)ATgetFirst(action_sorts);
-              if (gsIsSortExprNat(first_sort))
-              { ATermAppl result=rewriter(mcrl2::data::data_expression(gsMakeDataExprEq(lowest_first_action_parameter,first_argument)));
-                if (gsIsDataExprTrue(result))
+              if (mcrl2::data::sort_nat::is_nat(mcrl2::data::sort_expression(first_sort)))
+              { ATermAppl result=rewriter(mcrl2::data::equal_to(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
+                if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
                 { new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
                   new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
                 }
-                else 
-                { 
-                  assert(gsIsDataExprFalse(result));
+                else
+                {
+                  assert(mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)));
                 }
               }
               else
-              { 
+              {
                 new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
                 new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
               }
             }
-            else 
-            { 
+            else
+            {
               new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
               new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
             }
           }
-          else 
-          { 
+          else
+          {
             new_tmp_trans=ATinsert(new_tmp_trans,(ATerm)multi_action);
             new_tmp_states=ATinsert(new_tmp_states,(ATerm)state);
           }
         }
-        
+
         // Randomly select one element from the list for experiments.
         if (ATgetLength(new_tmp_trans)>0)
         { int r = rand()%ATgetLength(new_tmp_trans);
           tmp_trans=ATgetSlice(new_tmp_trans,r,r+1);
           tmp_states=ATgetSlice(new_tmp_states,r,r+1);
         }
-        else 
+        else
         { tmp_trans=ATempty;
           tmp_states=ATempty;
         }
@@ -1397,7 +1398,7 @@ bool generate_lts()
               }
             }
           }
-	  current_state = nextcurrent;
+    current_state = nextcurrent;
           prevcurrent = current_state;
           prevtrans = trans;
         }
