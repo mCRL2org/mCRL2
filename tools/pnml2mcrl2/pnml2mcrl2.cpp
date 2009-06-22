@@ -1298,12 +1298,12 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl SumVar0 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("y", 0, ATtrue)), static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()));
       ATermAppl SumVar1 = gsMakeDataVarId(ATmakeAppl0(ATmakeAFun("z", 0, ATtrue)), static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()));
       ATermList SumVars;
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar0, gsIsDataVarId(SumVar0));
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, gsIsDataVarId(SumVar1));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar0, mcrl2::data::data_expression(SumVar0).is_variable());
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", SumVar1, mcrl2::data::data_expression(SumVar1).is_variable());
 
       // create P_pi parameter
       ProcVar = gsMakeDataVarId(pn2gsPlaceParameter(CurrentPlace),static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()));
-      gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, gsIsDataVarId(ProcVar));
+      gsDebugMsg("Parameter %T is %d a DataVarId\n", ProcVar, mcrl2::data::data_expression(ProcVar).is_variable());
 
       // create first sum-sub-process
       SumVars = ATmakeList1((ATerm)SumVar0);

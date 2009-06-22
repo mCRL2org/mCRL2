@@ -54,7 +54,7 @@ static void PrintState(stringstream &ss, ATerm state, NextState *ns)
                 }
 
                 ATermAppl a = ns->getStateArgument(state,i);
-                if ( gsIsDataVarId(a) )
+                if ( mcrl2::data::data_expression(a).is_variable() )
                 {
                         ss << "_";
                 } else {

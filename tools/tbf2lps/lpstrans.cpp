@@ -33,6 +33,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/assignment.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -143,32 +144,29 @@ static ATermAppl find_type(ATermAppl a, ATermList args, ATermList types = NULL)
 
 static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 {
-  ATermList l = ATgetArguments(t);
-  ATermAppl r;
+  using namespace mcrl2::data;
 
+  ATermList l = ATgetArguments(t);
   ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
 
   if ( ATisEmpty(l) )
   {
-    r = find_type(t,ATmakeList0(),args);
+    ATermAppl r = find_type(t,ATmakeList0(),args);
     if ( r == NULL )
     {
-      r = mcrl2::data::function_symbol(t2,mcrl2::data::sort_expression(find_type(t,ATmakeList0())));
+      return function_symbol(t2,sort_expression(find_type(t,ATmakeList0())));
     } else {
-      r = gsMakeDataVarId(t2,r);
+      return variable(t2,sort_expression(r));
     }
   } else {
     ATermList m = ATmakeList0();
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       m = ATappend(m,(ATerm) dataterm2ATermAppl(ATAgetFirst(l),args));
-    }
-    r = mcrl2::data::function_symbol(t2,mcrl2::data::sort_expression(find_type(t,m)));
+    }\
 
-                r = gsMakeDataAppl(r,m);
+    return application(function_symbol(t2,sort_expression(find_type(t,m))), convert<data_expression_list>(atermpp::aterm_list(m)));
   }
-
-  return r;
 }
 
 static ATermList get_lps_acts(ATermAppl lps, ATermList *ids)
@@ -294,7 +292,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids, bool funcs_are_c
     }
     if ( !ATisEmpty(sorts) )
     {
-      sort = gsMakeSortArrow(sorts, sort);
+      sort = mcrl2::data::function_sort(mcrl2::data::convert<mcrl2::data::sort_expression_list>(sorts), mcrl2::data::sort_expression(sort));
     }
 
     ATerm f = (ATerm) static_cast<ATermAppl>(mcrl2::data::function_symbol(ATAgetArgument(ATAgetFirst(funcs),0),mcrl2::data::sort_expression(sort)));
@@ -342,7 +340,7 @@ static ATermList convert_datas(ATermAppl spec, ATermList *ids)
     args = ATmakeList0();
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
-      args = ATappend(args,(ATerm) gsMakeDataVarId(ATAgetArgument(ATAgetFirst(l),0),static_cast<ATermAppl>(mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1)))));
+      args = ATappend(args,(ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1)))));
       add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
     }
     lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args);
@@ -364,7 +362,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
   {
     ATermAppl v = ATAgetFirst(vars);
     pars = ATinsert(pars,
-      (ATerm) gsMakeDataVarId(ATAgetArgument(v,0),static_cast<ATermAppl>(mcrl2::data::basic_sort(ATAgetArgument(v,1))))
+      (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(v,0),mcrl2::data::basic_sort(ATAgetArgument(v,1))))
     );
     add_id(ids,ATAgetArgument(v,0));
   }
@@ -379,7 +377,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       m = ATinsert(m,
-        (ATerm) gsMakeDataVarId(ATAgetArgument(ATAgetFirst(l),0),static_cast<ATermAppl>(mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1))))
+        (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1))))
       );
       add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
     }
@@ -389,7 +387,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
     for (; !ATisEmpty(l); l=ATgetNext(l))
     {
       o = ATinsert(o,
-        (ATerm) gsMakeDataVarId(ATAgetArgument(ATAgetFirst(l),0),static_cast<ATermAppl>(mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1))))
+        (ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(ATAgetArgument(ATAgetFirst(l),1))))
       );
     }
     ATermAppl c = dataterm2ATermAppl(ATAgetArgument(s,4),o);
@@ -431,7 +429,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
       ATermAppl val = dataterm2ATermAppl(ATAgetFirst(l),o);
       if ( !ATisEqual(par,val) )
       {
-        n = ATinsert(n,(ATerm) gsMakeDataVarIdInit(par,val));
+        n = ATinsert(n,(ATerm) static_cast<ATermAppl>(mcrl2::data::assignment(mcrl2::data::variable(par),mcrl2::data::data_expression(val))));
       }
     }
     n = ATreverse(n);
@@ -454,9 +452,9 @@ static ATermList convert_init(ATermAppl spec, ATermList * /*ids*/)
   {
     ATermAppl v = ATAgetFirst(vars);
     l = ATinsert(l,
-      (ATerm) gsMakeDataVarIdInit(
-        gsMakeDataVarId(ATAgetArgument(v,0),static_cast<ATermAppl>(mcrl2::data::basic_sort(ATAgetArgument(v,1)))),
-        dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0())
+      (ATerm) static_cast<ATermAppl>(mcrl2::data::assignment(
+        mcrl2::data::variable(ATAgetArgument(v,0),mcrl2::data::basic_sort(ATAgetArgument(v,1))),
+        mcrl2::data::data_expression(dataterm2ATermAppl(ATAgetFirst(vals),ATmakeList0())))
       )
     );
   }

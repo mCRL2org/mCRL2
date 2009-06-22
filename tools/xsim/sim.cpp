@@ -56,7 +56,7 @@ class sim_tool : public rewriter_tool< input_tool > {
         }
 
         ATermAppl a = ns->getStateArgument(state,i);
-        if ( gsIsDataVarId(a) )
+        if ( mcrl2::data::data_expression(a).is_variable() )
         {
           gsMessage("_");
         } else {
