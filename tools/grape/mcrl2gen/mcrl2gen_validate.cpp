@@ -1343,7 +1343,7 @@ bool grape::mcrl2gen::validate_reference_parameters(wxXmlNode *p_doc_root, wxXml
           return false;
         }
         // type check parameter assignment value (dataexpression)
-        ATermAppl a_type_checked_parameter_assignment_expr = type_check_data_expr( a_parsed_parameter_assignment_expr, gsGetSort(a_type_checked_parameter_assignment_lhs_expression), datatype_spec, vars );
+        ATermAppl a_type_checked_parameter_assignment_expr = type_check_data_expr( a_parsed_parameter_assignment_expr, mcrl2::data::data_expression(a_type_checked_parameter_assignment_lhs_expression).sort(), datatype_spec, vars );
         if ( a_type_checked_parameter_assignment_expr == 0 )
         {
           // ERROR: parameter assignment is not valid
@@ -1725,7 +1725,7 @@ bool grape::mcrl2gen::validate_transition_label_condition(wxXmlNode *p_transitio
         throw CONVERSION_ERROR;
         return false;
       }
-      if ( !mcrl2::data::sort_bool::is_bool(mcrl2::data::sort_expression(gsGetSort(a_type_checked_condition_expr))) )
+      if ( !mcrl2::data::sort_bool::is_bool(mcrl2::data::data_expression(a_type_checked_condition_expr).sort()) )
       {
         // ERROR: condition is of wrong type
         cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of condition "
@@ -1794,7 +1794,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode *p_transition_
           }
 
           // get action parameter type
-          ATermAppl sort_expr = gsGetSort(a_type_checked_action_param_expr);
+          ATermAppl sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
           string sort_expr_string = PrintPart_CXX(ATerm(sort_expr));
           wxString action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
 
@@ -1847,7 +1847,7 @@ bool grape::mcrl2gen::validate_transition_label_timestamp(wxXmlNode *p_transitio
         throw CONVERSION_ERROR;
         return false;
       }
-      if ( !mcrl2::data::sort_real::is_real(mcrl2::data::sort_expression(gsGetSort(a_type_checked_timestamp_expr))) )
+      if ( !mcrl2::data::sort_real::is_real(mcrl2::data::data_expression(a_type_checked_timestamp_expr).sort()) )
       {
         // ERROR: condition is of wrong type
         cerr << "Process diagram " << p_diagram_name.ToAscii() << " contains an invalid label. The sort of timestamp "
@@ -1931,7 +1931,7 @@ bool grape::mcrl2gen::validate_transition_label_variable_updates(wxXmlNode *p_tr
         }
         // type check varupdate right hand side (dataexpression)
         // type checking against type of lhs
-        ATermAppl a_type_checked_varupdate_rhs_expr = type_check_data_expr( a_parsed_varupdate_rhs_expr, gsGetSort(a_type_checked_variable_update_lhs_expression), datatype_spec, vars);
+        ATermAppl a_type_checked_varupdate_rhs_expr = type_check_data_expr( a_parsed_varupdate_rhs_expr, mcrl2::data::data_expression(a_type_checked_variable_update_lhs_expression).sort(), datatype_spec, vars);
         if ( a_type_checked_varupdate_rhs_expr == 0 )
         {
           // ERROR: variable declaration is not valid

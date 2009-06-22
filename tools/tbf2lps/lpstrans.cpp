@@ -105,7 +105,7 @@ static ATbool is_domain(ATermList args, ATermAppl sort)
     } else {
       for (; !ATisEmpty(dom); dom=ATgetNext(dom),args=ATgetNext(args))
       {
-        if ( !ATisEqual(gsGetSort(ATAgetFirst(args)),ATgetFirst(dom)) )
+        if ( !ATisEqual(static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort()),ATgetFirst(dom)) )
         {
           return ATfalse;
         }
@@ -412,7 +412,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
       al = ATinsert(al,
         (ATerm) dataterm2ATermAppl(ATAgetFirst(l),o)
       );
-      as = ATinsert(as,(ATerm) gsGetSort(ATAgetFirst(al)));
+      as = ATinsert(as,(ATerm) static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(al)).sort()));
     }
     ATermAppl a = gsMakeAction(gsMakeActId(ATAgetArgument(s,1),as),al);
     if ( ATisEmpty(as) && !strcmp("tau",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(a,0),0)))) )
@@ -528,7 +528,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
 
   if ( convert_funcs )
   {
-    ATermAppl bool_func_sort = gsGetSort(mcrl2::data::sort_bool::and_());
+    ATermAppl bool_func_sort = mcrl2::data::sort_bool::and_().sort();
 
     substs = ATinsert(substs,
       (ATerm) gsMakeSubst(
