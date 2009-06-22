@@ -13,6 +13,7 @@
 #include <sstream>
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/identifier_string.h"
 #include "label.h"
 #include "action.h"
 #include "dataexpression.h"
@@ -45,7 +46,7 @@ wxString label::get_text( void ) const
   wxString result = _T("");
   if ( !get_declarations_text().IsEmpty() )
   {
-    result += get_declarations_text() + _T( "." );  
+    result += get_declarations_text() + _T( "." );
   }
   if ( !get_condition().IsEmpty() )
   {
@@ -69,8 +70,8 @@ list_of_action &label::get_actions( void )
 }
 
 void label::set_actions_text( const wxString &p_actions )
-{ 
-  m_actions.Clear(); 
+{
+  m_actions.Clear();
 
   istringstream r(string(p_actions.mb_str()).c_str());
   ATermAppl a_parsed_multi_action = mcrl2::core::parse_mult_act(r);
@@ -80,14 +81,14 @@ void label::set_actions_text( const wxString &p_actions )
     {
       action action;
       ATermAppl a = ATAgetFirst(l);
-      string a_name = gsATermAppl2String(ATAgetArgument(a,0));
+      string a_name = identifier_string(ATAgetArgument(a,0));
       action.set_name(wxString(a_name.c_str(), wxConvLocal));
       action.set_parameters_text(ATLgetArgument(a,1));
       m_actions.Add(action);
     }
   }
 }
-        
+
 wxString label::get_actions_text( void ) const
 {
   wxString result = wxEmptyString;
@@ -182,13 +183,13 @@ void label::set_variable_updates( const list_of_varupdate &p_variable_updates )
 
 void label::set_variable_updates_text(wxString p_variable_updates )
 {
-  wxString text = p_variable_updates; 
+  wxString text = p_variable_updates;
   text.Trim(true); text.Trim(false);
   wxString lhs, rhs, rlhs, delimiter;
   int index = -1, index2 = -1;
   int loop = 0;
   // loop until we parsed all variable updates
-  m_variable_updates.Clear(); 
+  m_variable_updates.Clear();
   while (!text.IsEmpty())
   {
     index = text.Find(_T(":="));
@@ -232,32 +233,32 @@ void label::set_variable_updates_text(wxString p_variable_updates )
 
 void label::set_declarations_text( wxString p_declarations )
 {
-  wxString text = p_declarations; 
+  wxString text = p_declarations;
   text.Trim(true); text.Trim(false);
-  wxString sub_text; 
+  wxString sub_text;
   int index = -1;
-  
+
   // loop until we parsed all declarations
-  m_declarations.Clear(); 
+  m_declarations.Clear();
   while (!text.IsEmpty())
   {
     index = text.First(_T(","));
     if (index == -1) index = text.Len();
-    
+
     decl decl;
-       
-    sub_text = text.SubString(0, index-1);  
+
+    sub_text = text.SubString(0, index-1);
 
     // parse all declarations
     decl.set_decl(sub_text);
-      
+
     // add varupdate into the declarations list
     m_declarations.Add(decl);
-          
+
     text = text.SubString(index+1, text.Len());
-  } 
+  }
 }
-        
+
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
 WX_DEFINE_OBJARRAY( list_of_label );

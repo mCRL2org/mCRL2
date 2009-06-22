@@ -67,7 +67,7 @@ ATermAppl *parse_action_list(const char *s, int *len)
   int i=0;
   while ( p != NULL )
   {
-    r[i] = mcrl2::core::detail::gsString2ATermAppl(p);
+    r[i] = mcrl2::core::identifier_string(p);
     i++;
     p = strtok(NULL,",");
   }
