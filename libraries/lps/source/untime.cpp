@@ -244,7 +244,7 @@ lps::specification untime(const lps::specification& spec) {
   untime_specification = lps::specification(spec.data(),
                           spec.action_labels(),
               untime_lps, //new LPS
-              process_initializer(spec.initial_process().free_variables(),
+              process_initializer(spec.initial_process().global_variables(),
                                             untime_initial_assignments)
              );
 

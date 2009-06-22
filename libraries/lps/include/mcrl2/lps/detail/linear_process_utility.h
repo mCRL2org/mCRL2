@@ -41,12 +41,12 @@ namespace detail {
   /// \param p A linear process
   /// \return The free variable names of a linear process
   inline
-  std::set<core::identifier_string> free_variable_names(const linear_process& p)
+  std::set<core::identifier_string> global_variable_names(const linear_process& p)
   {
     std::set<core::identifier_string> result;
-    data::variable_list free_variables(p.free_variables());
-    result.insert(boost::make_transform_iterator(free_variables.begin(), data::detail::variable_name()),
-                  boost::make_transform_iterator(free_variables.end()  , data::detail::variable_name()));
+    data::variable_list global_variables(p.global_variables());
+    result.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
+                  boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name()));
     return result;
   }
 

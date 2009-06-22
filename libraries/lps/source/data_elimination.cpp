@@ -53,14 +53,14 @@ specification remove_unused_data(specification& spec, bool keep_basis)
 
 	add_used(spec.initial_process().state(),elim);
 
-	variable_list::iterator vb = spec.initial_process().free_variables().begin();
-	variable_list::iterator ve = spec.initial_process().free_variables().end();
+	variable_list::iterator vb = spec.initial_process().global_variables().begin();
+	variable_list::iterator ve = spec.initial_process().global_variables().end();
 	for (; vb != ve; vb++)
 	{
 		elim.keep_sort(vb->sort());
 	}
-	vb = l.free_variables().begin();
-	ve = l.free_variables().end();
+	vb = l.global_variables().begin();
+	ve = l.global_variables().end();
 	for (; vb != ve; vb++)
 	{
 		elim.keep_sort(vb->sort());

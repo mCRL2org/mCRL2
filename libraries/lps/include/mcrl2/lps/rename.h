@@ -41,7 +41,7 @@ std::pair<std::vector<data::variable>, std::vector<data::variable> >
 rename_process_parameters_helper(const linear_process& p, IdentifierGenerator& generator)
 {
   std::set<core::identifier_string> forbidden_names = data::detail::set_union(
-    detail::free_variable_names(p),
+    detail::global_variable_names(p),
     detail::summand_variable_names(p)
   );
 
@@ -126,7 +126,7 @@ specification rename_process_parameters(const specification& spec, const std::se
 /// \param generator A generator for fresh identifiers
 /// \return The rename result
 template <typename IdentifierGenerator>
-linear_process rename_free_variables(const linear_process& p, IdentifierGenerator& generator)
+linear_process rename_global_variables(const linear_process& p, IdentifierGenerator& generator)
 {
   std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     detail::process_parameter_names(p),
@@ -136,8 +136,8 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
   std::vector<data::variable> src;  // contains the variables that need to be renamed
   std::vector<data::variable> dest; // contains the corresponding replacements
   generator.add_identifiers(forbidden_names);
-  data::variable_list free_variables(p.free_variables());
-  for (data::variable_list::const_iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+  data::variable_list global_variables(p.global_variables());
+  for (data::variable_list::const_iterator i = global_variables.begin(); i != global_variables.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())
@@ -157,11 +157,11 @@ linear_process rename_free_variables(const linear_process& p, IdentifierGenerato
 /// \param postfix A string
 /// \return The rename result
 inline
-linear_process rename_free_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
+linear_process rename_global_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
   data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
-  return rename_free_variables(p, generator);
+  return rename_global_variables(p, generator);
 }
 
 /// \brief Renames the summation variables in the process p using the given identifier generator.
@@ -175,7 +175,7 @@ linear_process rename_summation_variables(const linear_process& p, IdentifierGen
 
   std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     lps::detail::process_parameter_names(p),
-    lps::detail::free_variable_names(p)
+    lps::detail::global_variable_names(p)
   );
   generator.add_identifiers(forbidden_names);
 

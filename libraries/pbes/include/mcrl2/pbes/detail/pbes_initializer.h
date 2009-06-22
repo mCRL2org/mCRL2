@@ -33,7 +33,7 @@ class pbes_initializer: public atermpp::aterm_appl
 {
   protected:
     /// \brief The free variables of the PBES initializer
-    data::variable_list   m_free_variables;
+    data::variable_list   m_global_variables;
 
     /// \brief The value of the PBES initializer
     propositional_variable_instantiation m_variable;
@@ -45,11 +45,11 @@ class pbes_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    pbes_initializer(data::variable_list free_variables,
+    pbes_initializer(data::variable_list global_variables,
                         propositional_variable_instantiation variable
                        )
-     : atermpp::aterm_appl(core::detail::gsMakePBInit(free_variables, variable)),
-       m_free_variables(free_variables),
+     : atermpp::aterm_appl(core::detail::gsMakePBInit(global_variables, variable)),
+       m_global_variables(global_variables),
        m_variable(variable)
     {
     }
@@ -61,15 +61,15 @@ class pbes_initializer: public atermpp::aterm_appl
     {
       assert(core::detail::check_term_PBInit(m_term));
       atermpp::aterm_appl::iterator i   = t.begin();
-      m_free_variables = *i++;
+      m_global_variables = *i++;
       m_variable = propositional_variable_instantiation(*i);
     }
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    data::variable_list free_variables() const
+    data::variable_list global_variables() const
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the sequence of variables.

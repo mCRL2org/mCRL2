@@ -119,7 +119,7 @@ namespace detail {
         data::mutable_map_substitution<> sigma;
         data::representative_generator default_expression_generator(m_spec.data());
         std::set<data::variable> to_be_removed;
-        const data::variable_list& v = m_spec.process().free_variables();
+        const data::variable_list& v = m_spec.process().global_variables();
         for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
         {
           data::data_expression d = default_expression_generator(i->sort());
@@ -132,8 +132,8 @@ namespace detail {
         }
         lps::substitute(m_spec, sigma);
         lps::remove_parameters(m_spec, to_be_removed);
-        assert(m_spec.process().free_variables().empty());
-        assert(m_spec.initial_process().free_variables().empty());
+        assert(m_spec.process().global_variables().empty());
+        assert(m_spec.initial_process().global_variables().empty());
       }
 
       /// \brief Removes formal parameters from the specification

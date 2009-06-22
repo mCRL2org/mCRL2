@@ -7098,7 +7098,7 @@ mcrl2::lps::specification linearise_std(
                  const t_lin_options lin_options)
 { specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
-                                action_label_list(type_checked_spec.init().free_variables()),
+                                action_label_list(type_checked_spec.init().global_variables()),
                                 type_checked_spec.data(),
                                 lin_options);
   process_identifier init=spec.storeinit(type_checked_spec.init().expression());

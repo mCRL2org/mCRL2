@@ -78,7 +78,7 @@ class specification
       std::set<data::variable> v = compute_free_variables(initial_process());
       free_variables.insert(v.begin(), v.end());
       data::variable_list freevars = data::convert<data::variable_list>(free_variables);
-      m_process.free_variables() = freevars;
+      m_process.global_variables() = freevars;
       m_initial_process = process_initializer(freevars, m_initial_process.assignments());
     }
     
@@ -261,9 +261,9 @@ class specification
       }
 
       // check 3)
-      if (!(mcrl2::data::detail::check_variable_sorts(process().free_variables(), declared_sorts)))
+      if (!(mcrl2::data::detail::check_variable_sorts(process().global_variables(), declared_sorts)))
       {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << data::pp(process().free_variables()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
+        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << data::pp(process().global_variables()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
         return false;
       }
 
@@ -312,14 +312,14 @@ class specification
 inline
 specification repair_free_variables(const specification& spec)
 {
-  data::variable_list fv1 = spec.process().free_variables();
-  data::variable_list fv2 = spec.initial_process().free_variables();
+  data::variable_list fv1 = spec.process().global_variables();
+  data::variable_list fv2 = spec.initial_process().global_variables();
   std::set<data::variable> freevars(fv1.begin(), fv1.end());
   freevars.insert(fv2.begin(), fv2.end());
   data::variable_list new_free_vars(freevars.begin(), freevars.end());
 
   linear_process new_process = spec.process();
-  new_process.free_variables() = new_free_vars;
+  new_process.global_variables() = new_free_vars;
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());
 
   specification result(spec.data(), spec.action_labels(), new_process, new_init);

@@ -97,7 +97,7 @@ namespace detail {
     template <typename Container>
     void traverse(const pbes<Container>& p)
     {
-      traverse_container(p.free_variables());
+      traverse_container(p.global_variables());
       traverse_container(p.equations());
       traverse(p.initial_state());
     }

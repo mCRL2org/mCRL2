@@ -94,7 +94,7 @@ namespace detail {
 
     void traverse(const process_initialization& init)
     {
-      traverse_container(init.free_variables());
+      traverse_container(init.global_variables());
       traverse(init.expression());
     }
     
@@ -105,7 +105,7 @@ namespace detail {
     
     void traverse(const process_equation& eq)
     {
-      traverse_container(eq.free_variables());
+      traverse_container(eq.global_variables());
       traverse_container(eq.formal_parameters());
       traverse(eq.identifier());
       traverse(eq.expression());

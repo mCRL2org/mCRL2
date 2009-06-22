@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file free_variables.h
+/// \file mcrl2/modal_formula/global_variables.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_MODAL_FREE_VARIABLES_H
-#define MCRL2_MODAL_FREE_VARIABLES_H
+#ifndef MCRL2_MODAL_GLOBAL_VARIABLES_H
+#define MCRL2_MODAL_GLOBAL_VARIABLES_H
 
 #include <set>
 #include <vector>
@@ -25,7 +25,7 @@ namespace modal_formula {
 namespace state_frm {
 
 /// \brief Visitor class for finding free variables in a state formula
-struct free_variable_visitor: public state_formula_visitor
+struct global_variable_visitor: public state_formula_visitor
 {
   /// \brief A sequence of bound variables
   data::variable_list bound_variables;
@@ -37,12 +37,12 @@ struct free_variable_visitor: public state_formula_visitor
   std::set<data::variable> result;
 
   /// \brief Constructor
-  free_variable_visitor()
+  global_variable_visitor()
   {}
 
   /// \brief Constructor
   /// \param bound_variables_ A sequence of data variables
-  free_variable_visitor(data::variable_list bound_variables_)
+  global_variable_visitor(data::variable_list bound_variables_)
     : bound_variables(bound_variables_)
   {}
 
@@ -151,7 +151,7 @@ struct free_variable_visitor: public state_formula_visitor
 inline
 std::set<data::variable> compute_free_state_formula_variables(const state_formula& f)
 {
-  state_frm::free_variable_visitor visitor;
+  state_frm::global_variable_visitor visitor;
   visitor.visit(f);
   return visitor.result;
 }
@@ -160,4 +160,4 @@ std::set<data::variable> compute_free_state_formula_variables(const state_formul
 
 } // namespace mcrl2
 
-#endif // MCRL2_MODAL_FREE_VARIABLES_H
+#endif // MCRL2_MODAL_GLOBAL_VARIABLES_H

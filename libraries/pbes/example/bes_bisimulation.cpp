@@ -447,7 +447,7 @@ void pbes_to_bes(pbes_system::pbes<PBESContainer> const& p, boolean_equation_sys
 {
   using namespace mcrl2::pbes_system;
 
-  if(!p.free_variables().empty())
+  if(!p.global_variables().empty())
   {
     throw mcrl2::runtime_error("PBES contains free variables, cannot convert to BES");
   }

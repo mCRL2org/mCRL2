@@ -205,7 +205,7 @@ void test_pbes()
   boost::filesystem::remove(boost::filesystem::path(filename));
 }
 
-void test_free_variables()
+void test_global_variables()
 {
   std::string TEXT =
     "var k, n:Nat;                            \n"
@@ -221,7 +221,7 @@ void test_free_variables()
   pbes<> p;
   std::stringstream s(TEXT);
   s >> p;
-  atermpp::set<variable> freevars = p.free_variables();
+  atermpp::set<variable> freevars = p.global_variables();
   std::cout << freevars.size() << std::endl;
   BOOST_CHECK(freevars.size() == 3);
   for (atermpp::set< variable >::iterator i = freevars.begin(); i != freevars.end(); ++i)
@@ -321,7 +321,7 @@ void test_trivial()
   BOOST_CHECK(p.is_well_typed());
 }
 
-void test_instantiate_free_variables()
+void test_instantiate_global_variables()
 {
   std::string spec_text =
     "act a,b:Nat;             \n"
@@ -336,7 +336,7 @@ void test_instantiate_free_variables()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
-  bool result = p.instantiate_free_variables();
+  bool result = p.instantiate_global_variables();
   std::cout << "<result>" << result << std::endl;
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
 }
@@ -364,7 +364,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
   // test_xyz_generator();
   core::garbage_collect();
-  test_free_variables();
+  test_global_variables();
   core::garbage_collect();
   test_quantifier_rename_builder();
   core::garbage_collect();
@@ -372,7 +372,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
   test_pbes_expression();
   core::garbage_collect();
-  test_instantiate_free_variables();
+  test_instantiate_global_variables();
   core::garbage_collect();
   test_traverse_sort_expressions();
   core::garbage_collect();

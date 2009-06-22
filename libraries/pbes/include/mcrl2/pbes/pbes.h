@@ -41,7 +41,7 @@
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/global_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
@@ -79,11 +79,11 @@ void traverse_sort_expressions(const Object& o, OutIter dest);
 /// \param last End of a range of pbes equations
 /// \return The free variables in the sequence [first, last) of pbes equations.
 template <typename Iterator>
-std::set<data::variable> compute_free_variables(Iterator first, Iterator last)
+std::set<data::variable> compute_global_variables(Iterator first, Iterator last)
 {
   using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-  detail::free_variable_visitor<pbes_expression> visitor;
+  detail::global_variable_visitor<pbes_expression> visitor;
 
   for (Iterator i = first; i != last; ++i)
   {
@@ -127,8 +127,8 @@ class pbes
     /// \brief The sequence of pbes equations
     Container m_equations;
 
-    /// \brief The set of free (don't care) variables
-    atermpp::set<data::variable> m_free_variables;
+    /// \brief The set of global variables
+    atermpp::set<data::variable> m_global_variables;
 
     /// \brief The initial state
     propositional_variable_instantiation m_initial_state;
@@ -153,13 +153,13 @@ class pbes
       data::variable_list freevars(atermpp::term_list_iterator< data::variable >(
                            reinterpret_cast< ATermList >(static_cast< ATerm >(eqn_spec(0)))),
                         atermpp::term_list_iterator< data::variable >());
-      data::variable_list init_freevars = init.free_variables();
+      data::variable_list init_freevars = init.global_variables();
       pbes_equation_list eqn = eqn_spec(1);
 
       // combine the free variables of the equations and the initial state
-      m_free_variables.clear();
-      m_free_variables.insert(freevars.begin(), freevars.end());
-      m_free_variables.insert(init_freevars.begin(), init_freevars.end());
+      m_global_variables.clear();
+      m_global_variables.insert(freevars.begin(), freevars.end());
+      m_global_variables.insert(init_freevars.begin(), init_freevars.end());
 
       m_equations = Container(eqn.begin(), eqn.end());
     }
@@ -241,7 +241,7 @@ class pbes
     /// \return The unbound variables that occur in the pbes.
     std::set<data::variable> compute_unbound_variables() const
     {
-      std::set<data::variable> result = compute_free_variables(equations().begin(), equations().end());
+      std::set<data::variable> result = compute_global_variables(equations().begin(), equations().end());
       std::set<data::variable> vars = initial_state().unbound_variables();
       result.insert(vars.begin(), vars.end());
       return result;
@@ -275,23 +275,23 @@ class pbes
         m_equations(equations),
         m_initial_state(initial_state)
     {
-      m_free_variables = compute_unbound_variables();
+      m_global_variables = compute_unbound_variables();
       assert(core::detail::check_rule_PBES(term()));
     }
 
     /// \brief Constructor.
     /// \param data A data specification
     /// \param equations A sequence of pbes equations
-    /// \param free_variables A sequence of free variables
+    /// \param global_variables A sequence of free variables
     /// \param initial_state A propositional variable instantiation
     pbes(data::data_specification const& data,
          const Container& equations,
-         const atermpp::set<data::variable>& free_variables,
+         const atermpp::set<data::variable>& global_variables,
          propositional_variable_instantiation initial_state)
       :
         m_data(data),
         m_equations(equations),
-        m_free_variables(free_variables),
+        m_global_variables(global_variables),
         m_initial_state(initial_state)
     {
       assert(core::detail::check_rule_PBES(term()));
@@ -327,16 +327,16 @@ class pbes
 
     /// \brief Returns the declared free variables of the pbes.
     /// \return The declared free variables of the pbes.
-    const atermpp::set<data::variable>& free_variables() const
+    const atermpp::set<data::variable>& global_variables() const
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the declared free variables of the pbes.
     /// \return The declared free variables of the pbes.
-    atermpp::set<data::variable>& free_variables()
+    atermpp::set<data::variable>& global_variables()
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the initial state.
@@ -396,16 +396,16 @@ class pbes
     /// So, upon return the sequence of free variables of the pbes contains exactly those
     /// variables for which no default value could be found.
     /// \return true if all free variables were eliminated.
-    bool instantiate_free_variables()
+    bool instantiate_global_variables()
     {
-      std::set<data::variable> free_variables = compute_unbound_variables();
+      std::set<data::variable> global_variables = compute_unbound_variables();
       atermpp::vector<data::variable> src;    // the variables that will be replaced
       atermpp::vector<data::data_expression> dest; // the corresponding replacements
       atermpp::set<data::variable> fail;   // the variables that could not be replaced
 
       data::representative_generator default_expression_generator(m_data);
 
-      for (typename std::set<data::variable>::iterator i = free_variables.begin(); i != free_variables.end(); ++i)
+      for (typename std::set<data::variable>::iterator i = global_variables.begin(); i != global_variables.end(); ++i)
       {
         data::data_expression d = default_expression_generator(i->sort());
         if (d == data::data_expression())
@@ -423,8 +423,8 @@ class pbes
         *i = pbes_equation(i->symbol(), i->variable(), data::variable_sequence_replace(i->formula(), src, dest));
       }
       m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::variable_sequence_replace(m_initial_state.parameters(), src, dest));
-      m_free_variables.swap(fail);
-      return m_free_variables.empty();
+      m_global_variables.swap(fail);
+      return m_global_variables.empty();
     }
 
     /// \brief Writes the pbes to file.
@@ -454,11 +454,11 @@ class pbes
     operator ATermAppl() const
     {
       // convert the equation system to ATerm format
-      atermpp::term_list< data::variable > free_variables(m_free_variables.begin(), m_free_variables.end());
+      atermpp::term_list< data::variable > global_variables(m_global_variables.begin(), m_global_variables.end());
       pbes_equation_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data),
-             core::detail::gsMakePBEqnSpec(free_variables, equations),
-               detail::pbes_initializer(free_variables, m_initial_state));
+             core::detail::gsMakePBEqnSpec(global_variables, equations),
+               detail::pbes_initializer(global_variables, m_initial_state));
     }
 
     /// \brief Returns the set of binding variables of the pbes.
@@ -582,9 +582,9 @@ class pbes
     /// <li>the sorts occurring in the binding variable parameters are declared in the data specification </li>
     /// <li>the sorts occurring in the quantifier variables of the equations are declared in the data specification </li>
     /// <li>the binding variables of the equations have unique names (well formedness)</li>
-    /// <li>the free variables occurring in the equations are declared in free_variables()</li>
-    /// <li>the free variables occurring in the equations with the same name are identical</li>
-    /// <li>the declared free variables and the quantifier variables occurring in the equations have different names</li>
+    /// <li>the global variables occurring in the equations are declared in global_variables()</li>
+    /// <li>the global variables occurring in the equations with the same name are identical</li>
+    /// <li>the declared global variables and the quantifier variables occurring in the equations have different names</li>
     /// <li>the predicate variable instantiations occurring in the equations match with their declarations</li>
     /// <li>the predicate variable instantiation occurring in the initial state matches with the declaration</li>
     /// <li>the data specification is well typed</li>
@@ -595,22 +595,22 @@ class pbes
       using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
-      const atermpp::set<data::variable>& declared_free_variables = free_variables();
-      std::set<data::variable> occurring_free_variables = compute_unbound_variables();
+      const atermpp::set<data::variable>& declared_global_variables = global_variables();
+      std::set<data::variable> occurring_global_variables = compute_unbound_variables();
       std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
       // check 1)
       if (!data::detail::check_sorts(
-              boost::make_transform_iterator(declared_free_variables.begin(), data::detail::sort_of_variable()),
-              boost::make_transform_iterator(declared_free_variables.end()  , data::detail::sort_of_variable()),
+              boost::make_transform_iterator(declared_global_variables.begin(), data::detail::sort_of_variable()),
+              boost::make_transform_iterator(declared_global_variables.end()  , data::detail::sort_of_variable()),
               declared_sorts
              )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables "
-                  << data::pp(declared_free_variables)
+                  << data::pp(declared_global_variables)
                   << " are not declared in the data specification "
                   << data::pp(data().sorts())
                   << std::endl;
@@ -665,24 +665,24 @@ class pbes
       }
 
       // check 5)
-      if (!std::includes(declared_free_variables.begin(),
-                         declared_free_variables.end(),
-                         occurring_free_variables.begin(),
-                         occurring_free_variables.end()
+      if (!std::includes(declared_global_variables.begin(),
+                         declared_global_variables.end(),
+                         occurring_global_variables.begin(),
+                         occurring_global_variables.end()
                         )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: not all of the free variables are declared\n"
-                  << "free variables: " << data::pp(occurring_free_variables) << "\n"
-                  << "declared free variables: " << data::pp(declared_free_variables)
+                  << "free variables: " << data::pp(occurring_global_variables) << "\n"
+                  << "declared free variables: " << data::pp(declared_global_variables)
                   << std::endl;
         return false;
       }
 
       // check 6)
       if (data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(occurring_free_variables.begin(), data::detail::variable_name()),
-               boost::make_transform_iterator(occurring_free_variables.end()  , data::detail::variable_name())
+               boost::make_transform_iterator(occurring_global_variables.begin(), data::detail::variable_name()),
+               boost::make_transform_iterator(occurring_global_variables.end()  , data::detail::variable_name())
               )
          )
       {
@@ -691,7 +691,7 @@ class pbes
       }
 
       // check 7)
-      if (!data::detail::set_intersection(declared_free_variables, quantifier_variables).empty())
+      if (!data::detail::set_intersection(declared_global_variables, quantifier_variables).empty())
       {
         std::cerr << "pbes::is_well_typed() failed: the declared free variables and the quantifier variables have collisions" << std::endl;
         return false;
@@ -728,9 +728,9 @@ class pbes
 /// \param p A pbes
 /// \return The free variables that occur in the pbes.
 template <typename Container>
-std::set<data::variable> compute_free_variables(const pbes<Container>& p)
+std::set<data::variable> compute_global_variables(const pbes<Container>& p)
 {
-  std::set<data::variable> result = compute_free_variables(p.equations().begin(), p.equations().end());
+  std::set<data::variable> result = compute_global_variables(p.equations().begin(), p.equations().end());
   std::set<data::variable> vars = p.initial_state().unbound_variables();
   result.insert(vars.begin(), vars.end());
   return result;

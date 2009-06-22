@@ -31,9 +31,9 @@ namespace mcrl2 {
 
 namespace lps {
 
-struct default_free_variable_solver
+struct default_global_variable_solver
 {
-  /// \brief Attempts to find a valuation for free variables that makes the condition
+  /// \brief Attempts to find a valuation for global variables that makes the condition
   /// !R(c, sigma) or (R(e, sigma) = R(g, sigma)) true.
   template <typename DataRewriter, typename Substitution>
   data::mutable_map_substitution<> solve(const data::variable_list& V,
@@ -67,7 +67,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
   protected:
     /// \brief If true, then the algorithm is allowed to instantiate free variables
     /// as a side effect.
-    bool m_instantiate_free_variables;
+    bool m_instantiate_global_variables;
 
     /// \brief Maps process parameters to their index.
     std::map<data::variable, unsigned int> m_index_of;
@@ -87,18 +87,18 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \param p A linear process
     /// \param e An initial value for the linear process p
     /// \param R A data rewriter
-    /// \param instantiate_free_variables If true, the algorithm is allowed to instantiate free variables
+    /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
-    void run(bool instantiate_free_variables = false)
+    void run(bool instantiate_global_variables = false)
     {
-      m_instantiate_free_variables = instantiate_free_variables;
+      m_instantiate_global_variables = instantiate_global_variables;
       data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
 
       // optimization: rewrite e
       lps::rewrite(e, R);
 
       linear_process& p = m_spec.process();
-      data::variable_list V = p.free_variables();
+      data::variable_list V = p.global_variables();
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of
@@ -145,7 +145,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                       << "      value after:  " << pp(R(g_ij, sigma)) << "\n"
                       << "      replacements: " << data::to_string(sigma) << std::endl;
 #endif
-                data::mutable_map_substitution<> W = default_free_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
+                data::mutable_map_substitution<> W = default_global_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
                   for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
@@ -218,12 +218,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 /// \param spec A linear process specification
 /// \param R A data rewriter
 /// \param verbose If true, verbose output is generated
-/// \param instantiate_free_variables If true, free variables may be instantiated as a side effect of the algorithm
+/// \param instantiate_global_variables If true, free variables may be instantiated as a side effect of the algorithm
 template <typename DataRewriter>
-void constelm(specification& spec, const DataRewriter& R, bool verbose = false, bool instantiate_free_variables = false)
+void constelm(specification& spec, const DataRewriter& R, bool verbose = false, bool instantiate_global_variables = false)
 {
   constelm_algorithm<DataRewriter> algorithm(spec, R, verbose);
-  algorithm.run(instantiate_free_variables);
+  algorithm.run(instantiate_global_variables);
 }
 
 } // namespace lps

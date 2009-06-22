@@ -27,7 +27,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/global_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
@@ -56,7 +56,7 @@ class pbes_parelm_algorithm
     std::set<data::variable> unbound_variables(pbes_expression t, data::variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
-      detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
+      detail::global_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
       visitor.visit(t);
       return visitor.result;
     }
@@ -166,7 +166,7 @@ class pbes_parelm_algorithm
     template <typename Container>
     void run(pbes<Container>& p) const
     {
-      data::variable_list fvars(p.free_variables().begin(), p.free_variables().end());
+      data::variable_list fvars(p.global_variables().begin(), p.global_variables().end());
       std::vector<data::variable> predicate_variables;
 
       // compute a mapping from propositional variable names to offsets

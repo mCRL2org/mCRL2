@@ -134,7 +134,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       cout << endl;
       cout << "Number of summands                : " << lps.summands().size() << endl;
       cout << "Number of tau-summands            : " << get_number_of_tau_summands(lps) << endl;
-      cout << "Number of free variables          : " << lps_specification.initial_process().free_variables().size() + lps.free_variables().size() << endl;
+      cout << "Number of free variables          : " << lps_specification.initial_process().global_variables().size() + lps.global_variables().size() << endl;
       cout << "Number of process parameters      : " << lps.process_parameters().size() << endl;
       cout << "Number of declared actions        : " << lps_specification.action_labels().size() << endl;
       cout << "Number of used actions            : " << action_labels.size() << endl;
@@ -212,7 +212,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
                 append(d.create< label >().set_text(c.get_input(m_input_filename).location())).
                 append(d.create< label >().set_text(to_string(lps.summands().size()))).
                 append(d.create< label >().set_text(to_string(get_number_of_tau_summands(lps)))).
-                append(d.create< label >().set_text(to_string((lps_specification.initial_process().free_variables().size() + lps.free_variables().size())))).
+                append(d.create< label >().set_text(to_string((lps_specification.initial_process().global_variables().size() + lps.global_variables().size())))).
                 append(d.create< label >().set_text(to_string(lps.process_parameters().size()))).
                 append(d.create< label >().set_text(to_string(lps_specification.action_labels().size()))).
                 append(d.create< label >().set_text(to_string(get_used_actions(lps).size()))).

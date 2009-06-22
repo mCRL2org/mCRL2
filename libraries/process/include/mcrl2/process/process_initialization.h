@@ -49,7 +49,7 @@ namespace process {
 
       /// \brief Returns the free variables of the process initialization
       /// \return The free variables of the process initialization
-      data::variable_list free_variables() const
+      data::variable_list global_variables() const
       {
         using namespace atermpp;
         return data::variable_list(

@@ -45,7 +45,7 @@ namespace detail {
 inline
 std::set<data::variable> compute_free_pbes_expression_variables(const pbes_expression& e)
 {
-  free_variable_visitor<pbes_expression> visitor;
+  global_variable_visitor<pbes_expression> visitor;
   visitor.visit(e);
   return visitor.result;
 }

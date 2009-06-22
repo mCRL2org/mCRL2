@@ -25,7 +25,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/pbes/propositional_variable.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/global_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
 #include "mcrl2/pbes/detail/pbes_sort_expression_visitor.h"
 
@@ -949,7 +949,7 @@ namespace core {
     static inline
     variable_sequence_type free_variables(term_type t)
     {
-      pbes_system::detail::free_variable_visitor<term_type> visitor;
+      pbes_system::detail::global_variable_visitor<term_type> visitor;
       visitor.visit(t);
       return variable_sequence_type(visitor.result.begin(), visitor.result.end());
     }

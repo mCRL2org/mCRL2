@@ -35,7 +35,7 @@ class process_initializer: public atermpp::aterm_appl
 {
   protected:
     /// \brief The free variables of the initializer
-    data::variable_list   m_free_variables;
+    data::variable_list   m_global_variables;
 
     /// \brief The assignments of the initializer
     data::assignment_list m_assignments;
@@ -47,13 +47,13 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    process_initializer(data::variable_list free_variables,
+    process_initializer(data::variable_list global_variables,
                         data::assignment_list assignments
                        )
      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(
-         free_variables,
+         global_variables,
          assignments)),
-       m_free_variables(free_variables),
+       m_global_variables(global_variables),
        m_assignments(assignments)
     {
     }
@@ -65,15 +65,15 @@ class process_initializer: public atermpp::aterm_appl
     {
       assert(core::detail::check_term_LinearProcessInit(m_term));
       atermpp::aterm_appl::iterator i   = t.begin();
-      m_free_variables = *i++;
+      m_global_variables = *i++;
       m_assignments = *i;
     }
 
     /// \brief Returns the sequence of free variables.
-    /// \return The sequence of free variables.
-    data::variable_list free_variables() const
+    /// \return The sequence of global variables.
+    data::variable_list global_variables() const
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the sequence of assignments.

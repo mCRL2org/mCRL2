@@ -173,7 +173,7 @@ template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  if (!pbes_spec.instantiate_free_variables())
+  if (!pbes_spec.instantiate_global_variables())
   {
     throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
   }
@@ -278,7 +278,7 @@ template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  if (!pbes_spec.instantiate_free_variables())
+  if (!pbes_spec.instantiate_global_variables())
   {
     throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
   }

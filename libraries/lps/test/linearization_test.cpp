@@ -485,8 +485,8 @@ BOOST_AUTO_TEST_CASE(test_no_free_variables)
 
   specification spec;
   spec = mcrl22lps(no_free_variables_case_1, options);
-  BOOST_CHECK(spec.initial_process().free_variables().empty());
-  BOOST_CHECK(spec.process().free_variables().empty());
+  BOOST_CHECK(spec.initial_process().global_variables().empty());
+  BOOST_CHECK(spec.process().global_variables().empty());
 }
 
 const std::string various_case_1=

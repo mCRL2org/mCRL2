@@ -45,7 +45,7 @@ class linear_process
 {
   protected:
     /// \brief The free variables of the process
-    data::variable_list m_free_variables;
+    data::variable_list m_global_variables;
 
     /// \brief The process parameters of the process
     data::variable_list m_process_parameters;
@@ -68,7 +68,7 @@ class linear_process
         const action_summand_vector& action_summands
        )
      :
-       m_free_variables    (free_variables    ),
+       m_global_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_deadlock_summands (deadlock_summands ),
        m_action_summands   (action_summands   )
@@ -101,7 +101,7 @@ class linear_process
 
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_free_variables = *i++;
+      m_global_variables = *i++;
       m_process_parameters = *i++;
       set_summands(*i);
     }
@@ -161,16 +161,16 @@ class linear_process
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    const data::variable_list& free_variables() const
+    const data::variable_list& global_variables() const
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the sequence of free variables.
     /// \return The sequence of free variables.
-    data::variable_list& free_variables()
+    data::variable_list& global_variables()
     {
-      return m_free_variables;
+      return m_global_variables;
     }
 
     /// \brief Returns the sequence of process parameters.
@@ -212,14 +212,14 @@ class linear_process
     template <typename Substitution>
     linear_process substitute(Substitution f)
     {
-      data::variable_list d = substitute(f, m_free_variables);
+      data::variable_list d = substitute(f, m_global_variables);
       data::variable_list p = substitute(f, m_process_parameters);
       summand_list       s = m_summands          .substitute(f);
       return linear_process(d, p, s);
     }
 */
     /// \brief Returns the set of free variables that appear in the process.
-    /// This set is a subset of <tt>free_variables()</tt>.
+    /// This set is a subset of <tt>global_variables()</tt>.
     /// \return The set of free variables that appear in the process.
     std::set<data::variable> find_free_variables()
     {
@@ -245,7 +245,7 @@ class linear_process
     /// \brief Checks if the linear process is well typed
     /// \return True if
     /// <ul>
-    /// <li>the free variables occurring in the process are declared in free_variables()</li>
+    /// <li>the free variables occurring in the process are declared in global_variables()</li>
     /// <li>the process parameters have unique names</li>
     /// <li>the free variables have unique names</li>
     /// <li>process parameters and summation variables have different names</li>
@@ -255,7 +255,7 @@ class linear_process
     bool is_well_typed() const
     {
       // check 1)
-      std::set<data::variable> declared_free_variables  = mcrl2::data::detail::make_set(free_variables());
+      std::set<data::variable> declared_free_variables  = mcrl2::data::detail::make_set(global_variables());
       std::set<data::variable> occurring_free_variables = compute_free_variables(*this);
       summand_list s = summands();
       if (!(std::includes(declared_free_variables.begin(),
@@ -279,7 +279,7 @@ class linear_process
       }
 
       // check 3)
-      if (!mcrl2::data::detail::unique_names(m_free_variables))
+      if (!mcrl2::data::detail::unique_names(m_global_variables))
       {
         std::cerr << "linear_process::is_well_typed() failed: free variables " << data::pp(m_process_parameters) << " don't have unique names." << std::endl;
         return false;
@@ -327,7 +327,7 @@ inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
   return core::detail::gsMakeLinearProcess(
-    p.free_variables(),
+    p.global_variables(),
     p.process_parameters(),
     p.summands()
   );

@@ -426,8 +426,8 @@ namespace detail {
       // Do the conversion
       convert(m_equation);
 
-      lps::linear_process proc(m_equation.free_variables(), m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
-      lps::process_initializer proc_init(m_equation.free_variables(), data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
+      lps::linear_process proc(m_equation.global_variables(), m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
+      lps::process_initializer proc_init(m_equation.global_variables(), data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
       return lps::specification(p.data(), p.action_labels(), proc, proc_init);
     }
   };

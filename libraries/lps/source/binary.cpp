@@ -430,7 +430,7 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
 
   // Compute new initial assignments
   assignment_list initial_assignments = replace_enumerated_parameters_in_assignments(specification.initial_process().assignments(), new_parameters_table, enumerated_elements_table);
-  process_initializer initial_process(specification.initial_process().free_variables(), initial_assignments);
+  process_initializer initial_process(specification.initial_process().global_variables(), initial_assignments);
 
   // Compute new specification
   result = lps::specification(specification.data(),

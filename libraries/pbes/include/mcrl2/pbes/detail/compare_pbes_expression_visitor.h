@@ -19,9 +19,9 @@ namespace pbes_system {
 namespace detail {
 
   template <typename Term>
-  struct compare_pbes_expression_visitor: public free_variable_visitor<Term>
+  struct compare_pbes_expression_visitor: public global_variable_visitor<Term>
   {
-    typedef free_variable_visitor<Term> super;
+    typedef global_variable_visitor<Term> super;
     typedef typename super::term_type term_type;
     typedef typename pbes_expression_visitor<term_type>::variable_sequence_type variable_sequence_type;
     typedef typename pbes_expression_visitor<term_type>::propositional_variable_type propositional_variable_type;

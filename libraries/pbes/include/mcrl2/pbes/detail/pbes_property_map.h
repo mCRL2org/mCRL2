@@ -122,8 +122,8 @@ namespace detail {
       pbes_property_map(const pbes<Container>& p)
       {
         std::pair<unsigned int, unsigned int>  equation_counts              = compute_equation_counts(p);
-        atermpp::set<data::variable>           declared_free_variables      = p.free_variables();
-        std::set<data::variable>               used_free_variables          = compute_free_variables(p);
+        atermpp::set<data::variable>           declared_free_variables      = p.global_variables();
+        std::set<data::variable>               used_free_variables          = compute_global_variables(p);
         std::set<propositional_variable>       binding_variables            = p.binding_variables();
         std::set<propositional_variable>       occurring_variables          = p.occurring_variables();
 

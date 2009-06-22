@@ -175,8 +175,8 @@ namespace detail {
       std::set<data::variable> compute_declared_free_variables(const specification& spec) const
       {
         std::set<data::variable> result;
-        result.insert(spec.process().free_variables().begin(), spec.process().free_variables().end());
-        result.insert(spec.initial_process().free_variables().begin(), spec.initial_process().free_variables().end());
+        result.insert(spec.process().global_variables().begin(), spec.process().global_variables().end());
+        result.insert(spec.initial_process().global_variables().begin(), spec.initial_process().global_variables().end());
         return result;
       }
 

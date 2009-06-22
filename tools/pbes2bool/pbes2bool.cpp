@@ -231,12 +231,12 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       { p = remove_unused_data(p);
       }
 
-      if (!p.instantiate_free_variables())
+      if (!p.instantiate_global_variables())
       { std::stringstream message;
         message << "Fail to instantiate all free variables in the pbes.\n";
         message << "Remaining free variables are: ";
-        for(atermpp::set <mcrl2::data::variable>::iterator i=p.free_variables().begin() ;
-                   i!=p.free_variables().end() ; i++ )
+        for(atermpp::set <mcrl2::data::variable>::iterator i=p.global_variables().begin() ;
+                   i!=p.global_variables().end() ; i++ )
         { message << mcrl2::core::pp(*i) << " ";
         }
         message << "\n";

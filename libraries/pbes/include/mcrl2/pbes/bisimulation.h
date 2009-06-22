@@ -31,7 +31,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
+#include "mcrl2/pbes/detail/global_variable_visitor.h"
 
 namespace mcrl2 {
 
@@ -134,18 +134,18 @@ class bisimulation_algorithm
     /// \param msg A string
     void check_expression(pbes_expression expr, const linear_process& p, const linear_process& q, std::string msg) const
     {
-      detail::free_variable_visitor<pbes_expression> visitor;
+      detail::global_variable_visitor<pbes_expression> visitor;
       visitor.bound_variables = p.process_parameters() + q.process_parameters();
       visitor.visit(expr);
       std::set<variable> w = visitor.result;
 
-      std::set<variable> free_variables;
-      free_variables.insert(p.free_variables().begin(), p.free_variables().end());
-      free_variables.insert(q.free_variables().begin(), q.free_variables().end());
+      std::set<variable> global_variables;
+      global_variables.insert(p.global_variables().begin(), p.global_variables().end());
+      global_variables.insert(q.global_variables().begin(), q.global_variables().end());
 
       for (std::set<variable>::iterator i = w.begin(); i != w.end(); ++i)
       {
-        if (free_variables.find(*i) == free_variables.end())
+        if (global_variables.find(*i) == global_variables.end())
         {
           std::cerr << "error: " << msg << mcrl2::core::pp(*i) << " is free! " << mcrl2::core::pp(expr) << std::endl;
         }
@@ -261,9 +261,9 @@ public:
       used_names.insert(boost::make_transform_iterator(process_parameters.begin(), data::detail::variable_name()),
                         boost::make_transform_iterator(process_parameters.end()  , data::detail::variable_name())
                        );
-      variable_list const& free_variables(p.free_variables());
-      used_names.insert(boost::make_transform_iterator(free_variables.begin(), data::detail::variable_name()),
-                        boost::make_transform_iterator(free_variables.end()  , data::detail::variable_name())
+      variable_list const& global_variables(p.global_variables());
+      used_names.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
+                        boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name())
                        );
       for (summand_list::iterator i = p.summands().begin(); i != p.summands().end(); ++i)
       {
@@ -274,7 +274,7 @@ public:
       }
       linear_process result = q;
       result = rename_process_parameters (result, used_names, "_S");
-      result = rename_free_variables     (result, used_names, "_S");
+      result = rename_global_variables     (result, used_names, "_S");
       result = rename_summation_variables(result, used_names, "_S");
       return result;
     }

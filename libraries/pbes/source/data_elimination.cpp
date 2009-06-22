@@ -67,8 +67,8 @@ pbes<> remove_unused_data(pbes<> spec, bool keep_basis)
 
 	add_used(spec.initial_state(),elim);
 
-	atermpp::set<variable>::iterator vb = spec.free_variables().begin();
-	atermpp::set<variable>::iterator ve = spec.free_variables().end();
+	atermpp::set<variable>::iterator vb = spec.global_variables().begin();
+	atermpp::set<variable>::iterator ve = spec.global_variables().end();
 	for (; vb != ve; vb++)
 	{
 		elim.keep_sort(vb->sort());
