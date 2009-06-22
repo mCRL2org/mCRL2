@@ -228,10 +228,25 @@ namespace detail {
 
       using super::to_string;
       using super::data;
+      using super::operator[];
 
       std::string compare(const specification_property_map& other) const
       {
         return super::compare(other);
+      }
+      
+      /// \brief Returns a textual overview of some properties of an LPS
+      std::string info() const
+      {
+        std::ostringstream out;
+        out << "Number of summands                  : " << (*this)["summand_count"               ] << "\n";
+        out << "Number of tau-summands              : " << (*this)["tau_summand_count"           ] << "\n";
+        out << "Number of declared global variables : " << (*this)["declared_free_variable_count"] << "\n";
+        out << "Number of process parameters        : " << (*this)["process_parameter_count"     ] << "\n";
+        out << "Number of declared action labels    : " << (*this)["declared_action_label_count" ] << "\n";
+        out << "Number of used actions              : " << (*this)["used_action_label_count"     ] << "\n";
+        out << "Number of used multi-actions        : " << (*this)["used_multi_action_count"     ] << "\n";
+        return out.str();
       }
   };
 

@@ -293,6 +293,18 @@ namespace detail {
         return m_data;
       }
 
+      /// \brief Returns the value corresponding to key.
+      /// Throws an exception if the key is not found.
+      std::string operator[](const std::string& key) const
+      {
+        std::map<std::string, std::string>::const_iterator i = m_data.find(key);
+        if (i == m_data.end())
+        {
+          throw mcrl2::runtime_error("property_map: could not find key " + key);
+        }
+        return i->second;
+      }
+
       /// \brief Compares this property map with another property map.
       /// The function compare_property must be defined properly for all
       /// available properties.
