@@ -127,7 +127,7 @@ namespace mcrl2 {
         inline
         bool is_list_sort() const
         {
-          return container_type() == container_sort::list::instance();
+          return container_type() == container_sort::list();
         }
 
         /// \brief Returns true iff container name is Set.
@@ -135,7 +135,7 @@ namespace mcrl2 {
         inline
         bool is_set_sort() const
         {
-          return container_type() == container_sort::set_::instance();
+          return container_type() == container_sort::set_();
         }
 
         /// \brief Returns true iff container name is Bag.
@@ -143,7 +143,7 @@ namespace mcrl2 {
         inline
         bool is_bag_sort() const
         {
-          return container_type() == container_sort::bag::instance();
+          return container_type() == container_sort::bag();
         }
 
     }; // class container_sort

@@ -130,21 +130,21 @@ namespace mcrl2 {
         inline
         bool is_lambda() const
         {
-          return binding_operator() == abstraction::lambda::instance();
+          return binding_operator() == abstraction::lambda();
         }
 
         /// \brief Returns true iff the binding operator is "forall"
         inline
         bool is_forall() const
         {
-          return binding_operator() == abstraction::forall::instance();
+          return binding_operator() == abstraction::forall();
         }
 
         /// \brief Returns true iff the binding operator is "exists"
         inline
         bool is_exists() const
         {
-          return binding_operator() == abstraction::exists::instance();
+          return binding_operator() == abstraction::exists();
         }
 
     }; // class abstraction

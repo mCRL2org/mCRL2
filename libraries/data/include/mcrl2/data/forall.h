@@ -36,7 +36,7 @@ namespace mcrl2 {
           : abstraction(d)
         {
           assert(d.is_abstraction());
-          assert(static_cast<abstraction>(d).binding_operator() == abstraction::forall::instance());
+          assert(static_cast<abstraction>(d).binding_operator() == abstraction::forall());
         }
 
         /// Constructor.
@@ -48,7 +48,7 @@ namespace mcrl2 {
         forall(const Container& variables,
                const data_expression& body,
                typename detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(abstraction::forall::instance(), variables, body)
+          : abstraction(abstraction::forall(), variables, body)
         {
           assert(!variables.empty());
         }

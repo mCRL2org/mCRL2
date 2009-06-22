@@ -42,7 +42,7 @@ namespace mcrl2 {
       inline
       container_sort list(const sort_expression& s)
       {
-        container_sort list(container_sort::list::instance(), s);
+        container_sort list(container_sort::list(), s);
         return list;
       }
 
@@ -55,7 +55,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_type() == container_sort::list::instance();
+          return static_cast< container_sort >(e).container_type() == container_sort::list();
         }
         return false;
       }

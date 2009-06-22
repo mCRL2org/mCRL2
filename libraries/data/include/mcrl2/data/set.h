@@ -43,7 +43,7 @@ namespace mcrl2 {
       inline
       container_sort set_(const sort_expression& s)
       {
-        container_sort set_(container_sort::set_::instance(), s);
+        container_sort set_(container_sort::set_(), s);
         return set_;
       }
 
@@ -56,7 +56,7 @@ namespace mcrl2 {
       {
         if (e.is_container_sort())
         {
-          return static_cast< container_sort >(e).container_type() == container_sort::set_::instance();
+          return static_cast< container_sort >(e).container_type() == container_sort::set_();
         }
         return false;
       }

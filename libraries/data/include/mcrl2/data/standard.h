@@ -53,7 +53,7 @@ namespace mcrl2 {
 
         static bool is_function_symbol(function_symbol const& e)
         {
-          return e.name() == detail::singleton_identifier< Derived >::instance();
+          return e.name() == detail::singleton_identifier< Derived >();
         }
       };
 
@@ -99,7 +99,7 @@ namespace mcrl2 {
     /// \return function symbol equal_to
     inline function_symbol equal_to(const sort_expression& s)
     {
-      return function_symbol(detail::equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::equal_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function ==
@@ -136,7 +136,7 @@ namespace mcrl2 {
     /// \return function symbol not_equal_to
     inline function_symbol not_equal_to(const sort_expression& s)
     {
-      return function_symbol(detail::not_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::not_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function !=
@@ -173,7 +173,7 @@ namespace mcrl2 {
     /// \return function symbol if_
     inline function_symbol if_(const sort_expression& s)
     {
-      return function_symbol(detail::if_symbol::instance(), function_sort(sort_bool::bool_(), s, s, s));
+      return function_symbol(detail::if_symbol(), function_sort(sort_bool::bool_(), s, s, s));
     }
 
     /// \brief Recogniser for function if
@@ -213,7 +213,7 @@ namespace mcrl2 {
     /// \return function symbol less
     inline function_symbol less(const sort_expression& s)
     {
-      return function_symbol(detail::less_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <
@@ -250,7 +250,7 @@ namespace mcrl2 {
     /// \return function symbol less_equal
     inline function_symbol less_equal(const sort_expression& s)
     {
-      return function_symbol(detail::less_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::less_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function <=
@@ -287,7 +287,7 @@ namespace mcrl2 {
     /// \return function symbol greater
     inline function_symbol greater(const sort_expression& s)
     {
-      return function_symbol(detail::greater_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >
@@ -324,7 +324,7 @@ namespace mcrl2 {
     /// \return function symbol greater_equal
     inline function_symbol greater_equal(const sort_expression& s)
     {
-      return function_symbol(detail::greater_equal_symbol::instance(), function_sort(s, s, sort_bool::bool_()));
+      return function_symbol(detail::greater_equal_symbol(), function_sort(s, s, sort_bool::bool_()));
     }
 
     /// \brief Recogniser for function >=
