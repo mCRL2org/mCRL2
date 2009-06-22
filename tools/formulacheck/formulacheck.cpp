@@ -126,23 +126,23 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
       if (!infilename.empty()) {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-        ATermAppl raw_specification = (ATermAppl) core::detail::load_aterm(infilename);
-        if(core::detail::gsIsLinProcSpec(raw_specification))
-        {
-          return lps::specification(raw_specification).data();
+        try {
+          lps::specification s;
+          s.load(infilename);
+          return s.data();
         }
-        else if(core::detail::gsIsPBES(raw_specification))
-        {
-          return pbes_system::pbes<>(raw_specification).data();
+        catch(mcrl2::runtime_error& e)
+        {}
+
+        try {
+          mcrl2::pbes_system::pbes<> p;
+          p.load(infilename);
+          return p.data();
         }
-        else if(core::detail::gsIsDataSpec(raw_specification))
-        {
-          return data_specification(raw_specification);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS, PBES or data specification");
-        }
+        catch(mcrl2::runtime_error& e)
+        {}
+
+        throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS, PBES or data specification");
       }
       return data_specification();
     }
