@@ -136,7 +136,7 @@ grape_frame::grape_frame( const wxString &p_filename )
   wxString filename = wxEmptyString;
  
  //GRAPE_HELP_DIR
-  if ( fs.FindFileInPath( &filename, _T( "/home/jars/Documents/Grape/trunk/tools/grape/manual" ), _T("grapehelp.zip") ) )
+  if ( fs.FindFileInPath( &filename, _T( GRAPE_HELP_DIR ), _T("grapehelp.zip") ) )
   {
     // file found
     m_help_controller->AddBook( wxFileName( filename ) );
