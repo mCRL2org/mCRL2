@@ -128,7 +128,7 @@ void test3()
   );
   rewriter_with_variables r(data_spec);
   data_expression x = parse_data_expression("b == b", "b: Bool;\n");
-  std::set<variable> v = find_all_variables(x);
+  std::set<variable> v = find_variables(x);
   BOOST_CHECK(v.size() == 1);
 
   data_expression_with_variables y(x, variable_list(v.begin(), v.end()));

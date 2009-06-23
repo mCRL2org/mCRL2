@@ -45,8 +45,8 @@ void test_case_1()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_variables(i->condition()).empty());
-    BOOST_CHECK(find_all_variables(i->actions()).empty());
+    BOOST_CHECK(find_variables(i->condition()).empty());
+    BOOST_CHECK(find_variables(i->actions()).empty());
   }
 }
 
@@ -93,7 +93,7 @@ void test_case_3()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_variables(i->condition()).empty());
+    BOOST_CHECK(find_variables(i->condition()).empty());
   }
 }
 
@@ -116,7 +116,7 @@ void test_case_4()
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
-    BOOST_CHECK(find_all_variables(i->condition()).empty());
+    BOOST_CHECK(find_variables(i->condition()).empty());
   }
 }
 
@@ -138,14 +138,14 @@ void test_case_5()
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  std::set<variable> parameters = mcrl2::data::find_all_variables(s1.process().process_parameters());
+  std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
     // Check that the only data variables in the condition and time
     // are process parameters
-    std::set<variable> condition_vars = find_all_variables(i->condition());
+    std::set<variable> condition_vars = find_variables(i->condition());
     for (std::set<variable>::iterator j = condition_vars.begin()
         ; j != condition_vars.end()
         ; ++j)
@@ -155,7 +155,7 @@ void test_case_5()
 
     if (i->has_time())
     {
-      std::set<variable> time_vars = find_all_variables(i->time());
+      std::set<variable> time_vars = find_variables(i->time());
       for (std::set<variable>::iterator j = time_vars.begin()
           ; j != time_vars.end()
           ; ++j)
@@ -268,7 +268,7 @@ void test_case_8()
     if (!i->summation_variables().empty())
     {
       ++sumvar_count;
-      BOOST_CHECK(find_all_variables(i->condition()).empty());
+      BOOST_CHECK(find_variables(i->condition()).empty());
     }
   }
   BOOST_CHECK(sumvar_count == 1);

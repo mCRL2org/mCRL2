@@ -29,258 +29,317 @@ namespace data {
 /// \cond INTERNAL_DOCS
 namespace detail {
 
-  // The last argument of the functions below is used with boost::enable_if to
-  // activate the correct overload. This way the compiler generates the
-  // necessary code, which would otherwise need to be duplicated *at least*
-  // four times for frequently used containers (currently std::set,
-  // atermpp::set, std::vector, atermpp::vector). Adding overloads for a new
-  // container type only requires instantiation of is_container_impl for the
-  // appropriate type.
-
-  template <typename T, typename MatchPredicate>
-  atermpp::aterm_appl find_if(T t, MatchPredicate match, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
-  {
-    return atermpp::find_if(t, match);
-  }
-
-  template <typename T, typename MatchPredicate>
-  atermpp::aterm_appl find_if(T const& t, MatchPredicate match, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
-  {
-    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-      atermpp::aterm_appl result = atermpp::find_if(*i, match);
-
-      if (result != atermpp::aterm_appl()) {
-        return result;
-      }
-    }
-
-    return atermpp::aterm_appl();
-  }
-
-  template <typename T, typename MatchPredicate, typename StopPredicate>
-  atermpp::aterm_appl partial_find_if(T t, MatchPredicate match, StopPredicate stop, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
-  {
-    return atermpp::partial_find_if(t, match, stop);
-  }
-
-  template <typename T, typename MatchPredicate, typename StopPredicate>
-  atermpp::aterm_appl partial_find_if(T const& t, MatchPredicate match, StopPredicate stop, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
-  {
-    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-      atermpp::aterm_appl result = atermpp::partial_find_if(*i, match, stop);
-
-      if (result != atermpp::aterm_appl()) {
-        return result;
-      }
-    }
-
-    return atermpp::aterm_appl();
-  }
-
-  template <typename T, typename MatchPredicate, typename OutputIterator>
-  void find_all_if(T t, MatchPredicate match, OutputIterator destBegin, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
-  {
-    atermpp::find_all_if(t, match, destBegin);
-  }
-
-  // container specialisation
-  template <typename T, typename MatchPredicate, typename OutputIterator>
-  void find_all_if(T const& t, MatchPredicate match, OutputIterator destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
-  {
-    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-      atermpp::find_all_if(*i, match, destBegin);
-    }
-  }
-
-  template <typename T, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-  void partial_find_all_if(T t, MatchPredicate match, StopPredicate stop, OutputIterator const& destBegin, typename boost::disable_if< typename is_container< T >::type >::type* = 0)
-  {
-    atermpp::partial_find_all_if(t, match, stop, destBegin);
-  }
-
-  // container specialisation
-  template <typename T, typename MatchPredicate, typename StopPredicate, typename OutputIterator>
-  void partial_find_all_if(T const& t, MatchPredicate match, StopPredicate stop, OutputIterator const& destBegin, typename boost::enable_if< typename is_container< T >::type >::type* = 0)
-  {
-    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i) {
-      atermpp::partial_find_all_if(*i, match, stop, destBegin);
-    }
-  }
-
-  template <typename MatchPredicate, typename OutputIterator>
-  class variable_find_all_helper : public detail::expression_traverser< variable_find_all_helper< MatchPredicate, OutputIterator > > {
+  template < typename Expression, typename OutputIterator >
+  class collect_action {
 
     protected:
 
-      MatchPredicate&      m_match;
-      OutputIterator       m_iterator;
+      OutputIterator m_sink;
 
-      void operator()(where_clause const& w)
+    public:
+
+      void operator()(Expression const& e)
       {
-        for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
-        {
-          (*this)(r.front().rhs());
-        }
-
-        (*this)(w.body());
+        *m_sink++ = e;
       }
+
+      collect_action(OutputIterator const& sink) : m_sink(sink)
+      { }
   };
 
-  /// TODO migrate to generated visitor structure
-  template <typename MatchPredicate, typename OutputIterator>
-  class free_variable_find_all_helper : public detail::expression_traverser< free_variable_find_all_helper< MatchPredicate, OutputIterator > > {
+  template < typename Expression, typename Action, template < class > class Traverser = detail::expression_traverser >
+  class find_helper : public Traverser< find_helper< Expression, Action, Traverser > > {
 
-      typedef detail::expression_traverser< free_variable_find_all_helper< MatchPredicate, OutputIterator > > super;
+     typedef Traverser< find_helper< Expression, Action, Traverser > > super;
 
     protected:
 
-      std::multiset< variable > m_bound;
-      MatchPredicate&           m_match;
-      OutputIterator            m_iterator;
-
-      template < typename Container >
-      inline
-      void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
-      {
-        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-        {
-          m_bound.insert(*i);
-        }
-      }
-
-      template < typename Container >
-      inline
-      void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
-      {
-        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-        {
-          m_bound.erase(m_bound.find(*i));
-        }
-      }
+      Action m_action;
 
     public:
 
       using super::operator();
+      using super::enter;
+      using super::leave;
 
-      void operator()(where_clause const& w)
+      void enter(Expression const& e)
       {
-        increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
-
-        for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
-        {
-          (*this)(r.front().rhs());
-        }
-
-        (*this)(w.body());
-
-        decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
+        m_action(e);
       }
 
-      void operator()(application const& a)
-      {
-        (*this)(a.head());
+      find_helper()
+      { }
 
-        for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
-        {
-          (*this)(r.front());
-        }
-      }
+      find_helper(Action action) : m_action(action)
+      { }
+  };
 
-      void operator()(assignment const& a)
-      {
-        (*this)(a.lhs());
-        (*this)(a.rhs());
-      }
+  template < typename Expression, typename OutputIterator >
+  find_helper< Expression, collect_action< Expression, OutputIterator > >
+  make_find_helper(OutputIterator sink)
+  {
+    return find_helper< Expression, collect_action< Expression, OutputIterator > >(collect_action< Expression, OutputIterator >(sink));
+  }
 
-      void operator()(variable const& v)
-      {
-        if (m_bound.find(v) == m_bound.end() && m_match(v))
-        {
-          *m_iterator = v;
-        }
-      }
+  template < typename Expression, typename OutputIterator >
+  find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_expression_traverser >
+  make_sort_find_helper(OutputIterator sink)
+  {
+    return find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_expression_traverser >(
+							collect_action< Expression, OutputIterator >(sink));
+  }
 
-      void operator()(abstraction const& a)
-      {
-        increase_bind_count(a.variables());
+  template < typename OutputIterator >
+  find_helper< variable, collect_action< variable, OutputIterator > >
+  make_variable_find_helper(OutputIterator sink)
+  {
+    return find_helper< variable, collect_action< variable, OutputIterator > >(
+							collect_action< variable, OutputIterator >(sink));
+  }
 
-        (*this)(a.body());
-
-        decrease_bind_count(a.variables());
-      }
+  class search_traversal_condition {
+    private:
+      bool m_result;
 
     public:
 
-      template < typename Container >
-      free_variable_find_all_helper(MatchPredicate& match,
-                                OutputIterator const& destBegin,
-                                Container const& bound_by_context,
-                                typename detail::enable_if_container< Container, variable >::type* = 0) :
-                          m_bound(bound_by_context.begin(), bound_by_context.end()), m_match(match), m_iterator(destBegin)
-      {
+      search_traversal_condition() : m_result(true)
+      { }
+
+      bool operator()() {
+        return m_result;
       }
 
-      free_variable_find_all_helper(MatchPredicate& match, OutputIterator const& destBegin) :
-                                           m_match(match), m_iterator(destBegin)
+      template < typename Expression >
+      bool operator()(Expression const&)
       {
+        return m_result;
+      }
+
+      void operator=(bool result)
+      {
+        m_result = result;
       }
   };
 
-  template <typename T, typename MatchPredicate, typename OutputIterator>
-  void find_all_free_variables_if(atermpp::term_list< T > const& t, MatchPredicate match, OutputIterator const& destBegin)
-  {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
+  /**
+   * \brief Component for searching expressions
+   *
+   * Types:
+   *  \arg Expression the type of sub expressions that is considered
+   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
+   *
+   * When m_predicate(e) becomes false traversal of sub-expressions will be
+   * cut-short. The search_traversal_condition represents a condition
+   * that is true initially and becomes false when the search predicate has
+   * become false. It is used to cut-short expression traversal to return a
+   * result.
+   **/
+  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_expression_traverser >
+  class search_helper : public SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > {
 
-    for (typename atermpp::term_list< T >::const_iterator i = t.begin(); i != t.end(); ++i)
-    {
-      context(*i);
-    }
+      typedef SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > super;
+
+    protected:
+
+      AdaptablePredicate m_predicate;
+
+    public:
+
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+      void enter(Expression const& e)
+      {
+        super::m_traverse_condition = super::m_traverse_condition() && !m_predicate(e);
+      }
+
+      template < typename Container >
+      bool apply(Container const& container) {
+        (*this)(container);
+
+        return !super::m_traverse_condition();
+      }
+
+      search_helper()
+      { }
+
+      search_helper(AdaptablePredicate search_predicate) : m_predicate(search_predicate)
+      { }
+  };
+
+  template < typename Expression, typename AdaptablePredicate >
+  search_helper< Expression, AdaptablePredicate >
+  make_search_helper(AdaptablePredicate search_predicate)
+  {
+    return search_helper< Expression, AdaptablePredicate >(search_predicate);
   }
 
-  template <typename MatchPredicate, typename OutputIterator>
-  void find_all_free_variables_if(data_expression const& t, MatchPredicate match, OutputIterator const& destBegin)
+  template < typename Expression, typename AdaptablePredicate >
+  search_helper< Expression, AdaptablePredicate, detail::selective_sort_expression_traverser >
+  make_sort_search_helper(AdaptablePredicate search_predicate)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator >(match, destBegin)(t);
+    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_expression_traverser >(search_predicate);
   }
 
-  template <typename T, typename MatchPredicate, typename OutputIterator>
-  void find_all_free_variables_if(T const& t, MatchPredicate match, OutputIterator const& destBegin, typename boost::enable_if< typename is_container< T, data_expression >::type >::type* = 0)
+  template < typename AdaptablePredicate >
+  search_helper< variable, AdaptablePredicate, detail::selective_expression_traverser >
+  make_variable_search_helper(AdaptablePredicate search_predicate)
   {
-    free_variable_find_all_helper< MatchPredicate, OutputIterator > context(match, destBegin);
+    return search_helper< variable, AdaptablePredicate, detail::selective_expression_traverser >(search_predicate);
+  }
 
-    for (typename T::const_iterator i = t.begin(); i != t.end(); ++i)
-    {
-      context(*i);
-    }
+  template < typename Action >
+  class free_variable_find_helper : public detail::binding_aware_expression_traverser< free_variable_find_helper< Action > > {
+
+     typedef detail::binding_aware_expression_traverser< free_variable_find_helper< Action > > super;
+
+    protected:
+
+      Action m_action;
+
+    public:
+
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+      void enter(variable const& v)
+      {
+        if (!super::is_bound(v))
+        {
+          m_action(v);
+        }
+      }
+
+      free_variable_find_helper()
+      { }
+
+      free_variable_find_helper(Action action) : m_action(action)
+      { }
+
+      template < typename Container >
+      free_variable_find_helper(Container const& bound, Action action) : super(bound), m_action(action)
+      { }
+  };
+
+  template < typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator > >
+  make_free_variable_find_helper(OutputIterator sink)
+  {
+    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
+							collect_action< variable, OutputIterator >(sink));
+  }
+
+  template < typename Container, typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator > >
+  make_free_variable_find_helper(Container const& bound, OutputIterator sink)
+  {
+    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
+							collect_action< variable, OutputIterator >(bound, sink));
+  }
+
+  /**
+   * \brief Component for searching expressions
+   *
+   * Types:
+   *  \arg Expression the type of sub expressions that is considered
+   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
+   *
+   * When m_predicate(e) becomes true expression traversal will terminate.
+   **/
+  template < typename AdaptablePredicate >
+  class free_variable_search_helper : public detail::selective_binding_aware_expression_traverser<
+			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > {
+
+      typedef detail::selective_binding_aware_expression_traverser<
+			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > super;
+
+    protected:
+
+      AdaptablePredicate m_search_predicate;
+
+    public:
+
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+      void enter(variable const& v)
+      {
+        if (!super::is_bound(v))
+        {
+          super::m_traverse_condition = !m_search_predicate(v);
+        }
+      }
+
+      template < typename Container >
+      bool apply(Container const& container) {
+        (*this)(container);
+
+        return !super::m_traverse_condition();
+      }
+
+      free_variable_search_helper()
+      { }
+
+      free_variable_search_helper(AdaptablePredicate search_predicate) : m_search_predicate(search_predicate)
+      { }
+
+      template < typename Container >
+      free_variable_search_helper(Container const& bound,
+			 AdaptablePredicate search_predicate) : super(bound), m_search_predicate(search_predicate)
+      { }
+  };
+
+  template < typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate >
+  make_free_variable_search_helper(AdaptablePredicate search_predicate)
+  {
+    return free_variable_search_helper< AdaptablePredicate >(search_predicate);
+  }
+
+  template < typename Container, typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate >
+  make_free_variable_search_helper(Container const& bound, AdaptablePredicate search_predicate)
+  {
+    return free_variable_search_helper< AdaptablePredicate >(bound, search_predicate);
   }
 }
 /// \endcond
 
-/// \brief Returns all data variables that occur in the term t
-/// This is implementation is more efficient, but there are problems with it...
-/// \param t an expression
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \param[in,out] o an output iterator to which all data variables occurring in t
+///             are added.
 /// \return All data variables that occur in the term t
-template <typename Container>
-std::set<variable> find_all_variables2(Container t)
+template < typename Container, typename OutputIterator >
+void find_variables(Container const& container, OutputIterator const& o)
 {
-  std::set<variable> result;
-  detail::partial_find_all_if(t,
-                               boost::bind(&detail::is_variable, _1),
-                               boost::bind(std::logical_or<bool>(), boost::bind(&detail::is_variable, _1), boost::bind(&detail::is_function_symbol, _1)),
-                               detail::make_inserter(result)
-                              );
-  return result;
+  detail::make_variable_find_helper(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
 /// \return All data variables that occur in the term t
-template <typename Container >
-std::set<variable> find_all_variables(Container const& container)
+template < typename Container >
+std::set< variable > find_variables(Container const& container)
 {
-  std::set<variable> result;
-  detail::find_all_if(container, boost::bind(&detail::is_variable, _1), detail::make_inserter(result));
+  std::set< variable > result;
+  find_variables(container, std::inserter(result, result.end()));
   return result;
+}
+
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] container an expression or container with expressions
+/// \param[in] v an expression or container with expressions
+/// \param d A variable
+/// \return True if the term has a given variable as subterm.
+template < typename Container >
+bool search_variable(Container const& container, const variable& v)
+{
+  return detail::make_variable_search_helper(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -288,131 +347,151 @@ std::set<variable> find_all_variables(Container const& container)
 /// \param[in,out] o an output iterator to which all data variables occurring in t
 ///             are added.
 /// \return All data variables that occur in the term t
-template <typename Container, typename OutputIterator >
-void find_all_free_variables(Container const& container, OutputIterator const& o)
+template < typename Container, typename OutputIterator >
+void find_free_variables(Container const& container, OutputIterator const& o)
 {
-  detail::find_all_free_variables_if(container, boost::bind(&detail::is_variable, _1), o);
+  detail::make_free_variable_find_helper(o)(container);
+}
+
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \param[in,out] o an output iterator to which all data variables occurring in t
+///             are added.
+/// \param[in] bound a set of variables that should be considered as bound
+/// \return All data variables that occur in the term t
+/// TODO prevent copy of Sequence
+template < typename Container, typename OutputIterator, typename Sequence >
+void find_free_variables(Container const& container, OutputIterator const& o, Sequence const& bound)
+{
+  detail::make_free_variable_find_helper(bound, o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
 /// \return All data variables that occur in the term t
-template <typename Container >
-std::set<variable> find_all_free_variables(Container const& container)
+template < typename Container >
+std::set< variable > find_free_variables(Container const& container)
 {
-  std::set<variable> result;
-
-  find_all_free_variables(container, detail::make_inserter(result));
-
+  std::set< variable > result;
+  find_free_variables(container, std::inserter(result, result.end()));
   return result;
 }
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param[in] t a container with expressions
-/// \param[in] t an expression or container with expressions
-/// \param d A data variable
-/// \return True if the term has a given variable as subterm.
-template <typename Container >
-bool search_variable(Container t, const variable& d)
+/// \brief Returns all data variables that occur in a range of expressions
+/// \param[in] container a container with expressions
+/// \param[in] bound a set of variables that should be considered as bound
+/// \return All data variables that occur in the term t
+/// TODO prevent copy of Sequence
+template < typename Container, typename Sequence >
+std::set< variable > find_free_variables(Container const& container, Sequence const& bound,
+                                        typename detail::enable_if_container< Sequence, variable >::type* = 0)
 {
-  return detail::partial_find_if(t, detail::compare_term<variable>(d), &detail::is_variable) != atermpp::aterm();
+  std::set< variable > result;
+  find_free_variables(container, std::inserter(result, result.end()), bound);
+  return result;
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
 /// \param d A data variable
 /// \return True if the term has a given variable as subterm.
-template <typename Container >
+template < typename Container >
 bool search_free_variable(Container container, const variable& d)
-{ // TODO make more efficient implementation
-  std::set<variable> result;
-
-  find_all_free_variables(container, detail::make_inserter(result));
-  
-  return result.find(d) != result.end();
+{
+  return detail::make_variable_search_helper(detail::compare_variable(d)).apply(container);
 }
+
 
 /// \brief Returns true if the term has a given sort expression as subterm.
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[in] s A sort expression
 /// \return True if the term has a given sort expression as subterm.
-template <typename Container>
-bool search_sort_expression(Container const& t, const sort_expression& s)
+template < typename Container >
+bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
+  return detail::make_sort_search_helper< sort_expression >(detail::compare_sort(s))(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_all_sort_expressions(Container const& t, OutputIterator o)
+template < typename Container, typename OutputIterator >
+void find_sort_expressions(Container const& container, OutputIterator o)
 {
-  detail::find_all_if(t, is_sort_expression, o);
+  detail::make_sort_find_helper< sort_expression >(o)(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \return All sort expressions that occur in the term t
-template <typename Container>
-std::set<sort_expression> find_all_sort_expressions(Container const& t)
+template < typename Container >
+std::set<sort_expression> find_sort_expressions(Container const& container)
 {
   std::set<sort_expression> result;
-  detail::find_all_if(t, is_sort_expression, detail::make_inserter(result));
+  find_sort_expressions(container, std::inserter(result, result.end()));
   return result;
 }
 
 /// \brief Returns true if the term has a given sort identifier as subterm.
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[in] s A sort identifier
 /// \return True if the term has a given sort identifier as subterm.
-template <typename Container>
-bool search_basic_sort(Container const& t, const basic_sort& s)
+template < typename Container >
+bool search_basic_sort(Container const& container, const basic_sort& s)
 {
-  return search_sort_expression(t, s);
+  return detail::make_sort_search_helper< basic_sort >(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[out] o an output iterator
 /// \return All sort identifiers that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_all_basic_sorts(Container const& t, OutputIterator o)
+template < typename Container, typename OutputIterator >
+void find_basic_sorts(Container const& container, OutputIterator o)
 {
-  find_all_sort_expressions(t, detail::make_filter_inserter< sort_expression >(boost::bind(&detail::is_basic_sort, _1), o));
+  return detail::make_sort_find_helper< basic_sort >(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[in] o an output iterator
 /// \return All sort expressions that occur in the term t
 template < typename Container >
-std::set<basic_sort> find_all_basic_sorts(Container const& t)
+std::set<basic_sort> find_basic_sorts(Container const& container)
 {
   std::set<basic_sort> result;
-  find_all_basic_sorts(t, detail::make_inserter(result));
+  find_basic_sorts(container, std::inserter(result, result.end()));
   return result;
 }
 
 /// \brief Returns true if the term has a given data expression as subterm.
-/// \param[in] t an expression
+/// \param[in] container an expression or container of expressions
 /// \param[in] s A data expression
 /// \return True if the term has a given data expression as subterm.
 template <typename Container >
-bool search_data_expression(Container const& t, const data_expression& s)
+bool search_data_expression(Container const& container, const data_expression& s)
 {
-  return detail::find_if(t, boost::bind(std::equal_to<atermpp::aterm_appl>(), s, _1)) != atermpp::aterm();
+  return detail::make_search_helper< data_expression >(detail::compare_term< data_expression >(s)).apply(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t
-/// \param t an expression
+/// \param[in] container an expression or container of expressions
 /// \return All data expressions that occur in the term t
-template <typename Container >
-std::set<data_expression> find_all_data_expressions(Container const& t)
+template < typename Container, typename OutputIterator >
+void find_data_expressions(Container const& container, OutputIterator o)
+{
+  detail::make_find_helper< data_expression >(o)(container);
+}
+
+/// \brief Returns all data expressions that occur in the term t
+/// \param[in] container an expression or container of expressions
+/// \return All data expressions that occur in the term t
+template < typename Container >
+std::set< data_expression > find_data_expressions(Container const& container)
 {
   std::set<data_expression> result;
-  detail::find_all_if(t, is_data_expression, detail::make_inserter(result));
+  find_data_expressions(container, std::inserter(result, result.end()));
   return result;
 }
 

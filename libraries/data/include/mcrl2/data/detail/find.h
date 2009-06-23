@@ -27,7 +27,7 @@ template <typename Term>
 std::set<core::identifier_string> find_variable_names(Term t)
 {
   // find all data variables in t
-  std::set<variable> variables(find_all_variables(t));
+  std::set<variable> variables(find_variables(t));
 
   std::set<core::identifier_string> result;
   for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
@@ -44,7 +44,7 @@ template <typename Term>
 std::set<std::string> find_variable_name_strings(Term t)
 {
   // find all data variables in t
-  std::set<variable> variables(find_all_variables(t));
+  std::set<variable> variables(find_variables(t));
 
   std::set<std::string> result;
   for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)

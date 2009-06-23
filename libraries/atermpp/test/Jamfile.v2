@@ -5,7 +5,7 @@ project libraries/aterm/test
        <use>/site-config//boost
        <use>/libraries//atermpp
        <toolset>msvc:<asynch-exceptions>on
-       <source>/libraries//aterm
+       <library>/libraries//aterm
    ;
 
 test-suite aterm

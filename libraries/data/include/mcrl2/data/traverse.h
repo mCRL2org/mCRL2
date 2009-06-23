@@ -36,7 +36,7 @@ OutIter traverse_sort_expressions(const sort_expression& s, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const variable& v, OutIter dest)
 {
-  find_all_sort_expressions(v, dest);
+  find_sort_expressions(v, dest);
   return dest;
 }
 
@@ -45,7 +45,7 @@ OutIter traverse_sort_expressions(const variable& v, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const data_expression& d, OutIter dest)
 {
-  find_all_sort_expressions(d, dest);
+  find_sort_expressions(d, dest);
   return dest;
 }
 
@@ -54,8 +54,8 @@ OutIter traverse_sort_expressions(const data_expression& d, OutIter dest)
 template <typename OutIter>
 OutIter traverse_sort_expressions(const assignment& a, OutIter dest)
 {
-  find_all_sort_expressions(a.lhs(), dest);
-  find_all_sort_expressions(a.rhs(), dest); // TODO: can this be removed?
+  find_sort_expressions(a.lhs(), dest);
+  find_sort_expressions(a.rhs(), dest); // TODO: can this be removed?
   return dest;
 }
 
@@ -74,7 +74,7 @@ template <typename OutIter>
 OutIter traverse_variables(const data_expression& d, OutIter dest)
 {
   // TODO: make this implementation more efficient
-  std::set<data::variable> v = data::find_all_variables(d);
+  std::set<data::variable> v = data::find_variables(d);
   for (std::set<data::variable>::iterator i = v.begin(); i != v.end(); ++i)
   {
     *dest++ = *i;

@@ -394,7 +394,7 @@ namespace mcrl2 {
       // equations
       for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(r.front())), true);
+        dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(r.front())), true);
       }
 
       make_complete(dependent_sorts);
@@ -403,7 +403,7 @@ namespace mcrl2 {
     template < typename Term >
     void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
     {
-      find_all_sort_expressions(term, std::inserter(sorts, sorts.end()));
+      find_sort_expressions(term, std::inserter(sorts, sorts.end()));
     }
 
     template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
@@ -427,7 +427,7 @@ namespace mcrl2 {
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)), true);
+      dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(e)), true);
 
       make_complete(dependent_sorts);
     }
@@ -436,7 +436,7 @@ namespace mcrl2 {
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(boost::make_iterator_range(find_all_sort_expressions(e)), true);
+      dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(e)), true);
 
       make_complete(dependent_sorts);
     }

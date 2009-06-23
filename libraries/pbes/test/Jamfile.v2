@@ -2,10 +2,10 @@ project libraries/pbes/test
    : requirements
        <use>/site-config//boost
        <toolset>msvc:<asynch-exceptions>on
-       <source>/libraries//lps
-       <source>/libraries//pbes
-       <source>/site-config//boost_filesystem
-       <source>/site-config//boost_system
+       <library>/libraries//lps
+       <library>/libraries//pbes
+       <library>/site-config//boost_filesystem
+       <library>/site-config//boost_system
        #<define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
 

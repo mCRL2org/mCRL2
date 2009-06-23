@@ -90,7 +90,7 @@ namespace detail {
     f = type_check_state_formula(f, reconstructed_spec);
     f = translate_regular_formula(f);
     f = data::detail::undo_compatibility_renamings(spec.data(), f);
-    spec.data().make_complete(data::find_all_sort_expressions(f)); // Make complete with respect to f
+    spec.data().make_complete(data::find_sort_expressions(f)); // Make complete with respect to f
     f = data::detail::internal_format_conversion(spec.data(), f);
     return f;
   }

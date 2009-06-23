@@ -171,7 +171,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
       std::set<data::variable> result;
       for (data::data_expression_list::const_iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
       {
-        std::set<data::variable> vars = data::find_all_variables(*i);
+        std::set<data::variable> vars = data::find_variables(*i);
         result.insert(vars.begin(), vars.end());
       }
       return result;

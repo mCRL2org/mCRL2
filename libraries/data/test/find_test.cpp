@@ -75,7 +75,7 @@ std::cout << "<sexpr>" << sexpr << std::endl;
 
   core::garbage_collect();
 
-  std::set<variable> v = find_all_variables(x);
+  std::set<variable> v = find_variables(x);
   BOOST_CHECK(std::find(v.begin(), v.end(), n1) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n2) != v.end());
   BOOST_CHECK(std::find(v.begin(), v.end(), n3) != v.end());
@@ -87,14 +87,14 @@ std::cout << "<sexpr>" << sexpr << std::endl;
 
   core::garbage_collect();
 
-  std::set<basic_sort> s = find_all_basic_sorts(y);
+  std::set<basic_sort> s = find_basic_sorts(y);
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_nat::nat()) != s.end());
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_pos::pos()) != s.end());
   BOOST_CHECK(std::find(s.begin(), s.end(), sort_bool::bool_()) != s.end());
 
   core::garbage_collect();
 
-  std::set<sort_expression> e = find_all_sort_expressions(q1);
+  std::set<sort_expression> e = find_sort_expressions(q1);
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_pos::pos())   != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_bool::bool_()) != e.end());
@@ -102,7 +102,7 @@ std::cout << "<sexpr>" << sexpr << std::endl;
 
   core::garbage_collect();
 
-  std::set<data_expression> d = find_all_data_expressions(make_vector(q1, p1, n1));
+  std::set<data_expression> d = find_data_expressions(make_vector(q1, p1, n1));
   BOOST_CHECK(std::find(d.begin(), d.end(), q1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), p1) != d.end());
   BOOST_CHECK(std::find(d.begin(), d.end(), n1) != d.end());

@@ -160,7 +160,7 @@ namespace core {
     static inline
     variable_sequence_type free_variables(term_type t)
     {
-      std::set<variable_type> v = data::find_all_free_variables(data::data_expression(t));
+      std::set<variable_type> v = data::find_free_variables(data::data_expression(t));
       return variable_sequence_type(v.begin(), v.end());
     }
 

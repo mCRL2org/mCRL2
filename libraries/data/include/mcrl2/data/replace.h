@@ -101,6 +101,7 @@ namespace mcrl2 {
       class replace_free_variables_helper : public
               replace_variables_helper< replace_free_variables_helper< Derived > >
       {
+
         protected:
 
           std::multiset< variable > m_bound;
@@ -149,7 +150,7 @@ namespace mcrl2 {
 
           bool check_replacement_assumption(variable const& v)
           {
-            std::set< variable > free_variables(find_all_free_variables(static_cast< Derived& >(*this)(v)));
+            std::set< variable > free_variables(find_free_variables(static_cast< Derived& >(*this)(v)));
             std::set< variable > result;
 
             std::set_intersection(free_variables.begin(), free_variables.end(),
@@ -198,6 +199,8 @@ namespace mcrl2 {
       class replace_function_object_helper :
                public ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >
       {
+          BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
+
         protected:
 
           ReplaceFunction  m_replace_function;
@@ -240,8 +243,6 @@ Container replace_variables(Container const& container, ReplaceFunction replace_
 {
   using namespace detail;
 
-  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
-
   return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type,
 						 replace_variables_helper >(replace_function)(container);
 }
@@ -251,16 +252,14 @@ Container replace_variables(Container const& container, ReplaceFunction replace_
 /// its context.
 /// \param[in] container a container with expressions (expression, or container of expressions)
 /// \param[in] replace_function the function used for replacing variables
-/// \pre for all v in find_all_free_variables(container) for all x in
-/// find_all_free_variables(replace_function(v)) v does not occur in a
+/// \pre for all v in find_free_variables(container) for all x in
+/// find_free_variables(replace_function(v)) v does not occur in a
 /// context C[v] = container in which x is bound
 /// \return The expression that results after replacement
 template <typename Container, typename ReplaceFunction >
 Container replace_free_variables(Container const& container, ReplaceFunction replace_function)
 {
   using namespace detail;
-
-  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
 
   return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type,
 					 replace_free_variables_helper >(replace_function)(container);
@@ -272,16 +271,14 @@ Container replace_free_variables(Container const& container, ReplaceFunction rep
 /// \param[in] container a container with expressions (expression, or container of expressions)
 /// \param[in] replace_function the function used for replacing variables
 /// \param[in] bound a set of variables that should be considered as bound
-/// \pre for all v in find_all_free_variables(container) for all x in
-/// find_all_free_variables(replace_function(v)) v does not occur in a
+/// \pre for all v in find_free_variables(container) for all x in
+/// find_free_variables(replace_function(v)) v does not occur in a
 /// context C[v] = container in which x is bound
 /// \return The expression that results after replacement
-template <typename Container, typename ReplaceFunction >
-Container replace_free_variables(Container const& container, ReplaceFunction replace_function, std::set< variable > const& bound)
+template <typename Container, typename ReplaceFunction, typename VariableRange >
+Container replace_free_variables(Container const& container, ReplaceFunction replace_function, VariableRange const& bound)
 {
   using namespace detail;
-
-  BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
 
   return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type&,
 				 replace_free_variables_helper >(replace_function, bound)(container);

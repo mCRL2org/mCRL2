@@ -39,7 +39,7 @@ struct pbes_sort_expression_visitor: public pbes_expression_visitor<Term>
   /// \return The result of visiting the node
   bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
-    data::find_all_sort_expressions(d, std::inserter(result, result.end()));
+    data::find_sort_expressions(d, std::inserter(result, result.end()));
     return true;
   }
 };

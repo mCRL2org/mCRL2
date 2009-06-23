@@ -136,7 +136,7 @@ namespace mcrl2 {
               { // function with non-empty domain
                 data_expression body(implement(expression.body()));
                 atermpp::term_list< variable > free_variables(implement(
-                                                 boost::make_iterator_range(find_all_free_variables(expression))));
+                                                 boost::make_iterator_range(find_free_variables(expression))));
 
                 function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 

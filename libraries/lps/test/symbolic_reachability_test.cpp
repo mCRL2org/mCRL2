@@ -102,7 +102,7 @@ class group_information {
 void group_information::gather(mcrl2::lps::specification const& l) {
   using namespace mcrl2;
 
-  using data::find_all_variables;
+  using data::find_variables;
   using data::variable;
 
   struct local {
@@ -114,7 +114,7 @@ void group_information::gather(mcrl2::lps::specification const& l) {
   lps::linear_process specification(l.process());
 
   // the set with process parameters
-  std::set< variable > parameters = find_all_variables(specification.process_parameters());
+  std::set< variable > parameters = find_variables(specification.process_parameters());
 
   // the list of summands
   std::vector< lps::summand > summands = data::convert<std::vector<lps::summand> >(specification.summands());
@@ -124,19 +124,19 @@ void group_information::gather(mcrl2::lps::specification const& l) {
   for (std::vector< lps::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i) {
     std::set< variable > used_variables;
 
-    local::add_used_variables(used_variables, find_all_variables(i->condition()));
-    local::add_used_variables(used_variables, find_all_variables(i->actions()));
+    local::add_used_variables(used_variables, find_variables(i->condition()));
+    local::add_used_variables(used_variables, find_variables(i->actions()));
 
     if (i->has_time()) {
-      local::add_used_variables(used_variables, find_all_variables(i->time()));
+      local::add_used_variables(used_variables, find_variables(i->time()));
     }
 
     data::assignment_list assignments(i->assignments());
 
     for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j) {
       if(j->lhs() != j->rhs()) {
-        local::add_used_variables(used_variables, find_all_variables(j->lhs()));
-        local::add_used_variables(used_variables, find_all_variables(j->rhs()));
+        local::add_used_variables(used_variables, find_variables(j->lhs()));
+        local::add_used_variables(used_variables, find_variables(j->rhs()));
       }
     }
 

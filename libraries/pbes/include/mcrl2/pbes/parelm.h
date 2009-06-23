@@ -217,7 +217,7 @@ class pbes_parelm_algorithm
           int Yindex = 0;
           for (data::data_expression_list::iterator y = Yparams.begin(); y != Yparams.end(); ++y)
           {
-            std::set<data::variable> vars = data::find_all_variables(*y);
+            std::set<data::variable> vars = data::find_variables(*y);
             for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
             {
               int Xindex = variable_index(Xparams, *k);

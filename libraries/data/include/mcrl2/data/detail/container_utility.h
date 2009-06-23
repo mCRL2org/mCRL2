@@ -269,59 +269,6 @@ namespace mcrl2 {
       struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
 
-      // Used for converting terms to expressions before inserting into a sequence
-      template < typename Expression, typename OutputIterator >
-      class conversion_insert_iterator {
-
-        public:
-
-          typedef std::output_iterator_tag iterator_category;
-          typedef Expression               value_type;
-          typedef void                     difference_type;
-          typedef void                     pointer;
-          typedef void                     reference;
-
-          struct proxy {
-            OutputIterator m_sink;
-
-            void operator=(Expression const& p) {
-              *m_sink = p;
-            }
-
-            void operator=(atermpp::aterm_appl p) {
-              *m_sink = static_cast< Expression >(p);
-            }
-
-            void operator=(atermpp::aterm p) {
-              *m_sink = static_cast< Expression >(p);
-            }
-
-            proxy(OutputIterator const& sink) : m_sink(sink) {
-            }
-          };
-
-        private:
-
-          proxy m_proxy;
-
-        public:
-
-          proxy& operator*() {
-            return m_proxy;
-          }
-
-          conversion_insert_iterator& operator++() {
-            return *this;
-          }
-
-          conversion_insert_iterator& operator++(int) {
-            return *this;
-          }
-
-          conversion_insert_iterator(OutputIterator const& sink) : m_proxy(sink) {
-          }
-      };
-
       template < typename Expression, typename Predicate, typename OutputIterator >
       class filter_insert_iterator {
 
@@ -368,13 +315,6 @@ namespace mcrl2 {
           filter_insert_iterator(Predicate const& m_filter, OutputIterator const& sink) : m_proxy(m_filter, sink) {
           }
       };
-
-      // factory method
-      template < typename Container >
-      inline conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >
-      make_inserter(Container& c, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
-        return conversion_insert_iterator< typename Container::value_type, std::insert_iterator< Container > >(std::inserter(c, c.end()));
-      }
 
       // factory method
       // \param[in] predicate is a filter predicate

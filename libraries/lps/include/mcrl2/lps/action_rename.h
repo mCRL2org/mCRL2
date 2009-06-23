@@ -335,7 +335,7 @@ namespace lps {
       for(data_expression_list::iterator rleft_argument_i = rleft.arguments().begin();
                                               rleft_argument_i != rleft.arguments().end();
                                             ++rleft_argument_i){
-        found_vars = find_all_variables(*rleft_argument_i);
+        found_vars = find_variables(*rleft_argument_i);
         new_vars.insert(found_vars.begin(), found_vars.end());
       }
 
@@ -453,15 +453,15 @@ lps::specification action_rename(
                        rule_old_argument_i != rule_old_action.arguments().end();
                        rule_old_argument_i++)
     { if ((!rule_old_argument_i->is_variable()) &&
-          (!(find_all_variables(*rule_old_argument_i).empty())))
+          (!(find_variables(*rule_old_argument_i).empty())))
       { throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
                           " are not variables or closed expressions");
       }
     }
 
     // Check whether the variables in rhs are included in the lefthandside.
-    std::set < variable > variables_in_old_rule = find_all_variables(rule_old_action);
-    std::set < variable > variables_in_new_rule = find_all_variables(rule_new_action);
+    std::set < variable > variables_in_old_rule = find_variables(rule_old_action);
+    std::set < variable > variables_in_new_rule = find_variables(rule_new_action);
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
@@ -470,7 +470,7 @@ lps::specification action_rename(
     }
 
     // Check whether the variables in condition are included in the lefthandside.
-    std::set < variable > variables_in_condition = find_all_variables(rule_condition);
+    std::set < variable > variables_in_condition = find_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
     { throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +
@@ -556,7 +556,7 @@ lps::specification action_rename(
                                data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
-            { assert((find_all_variables(*rule_old_argument_i).empty())); // the argument must be closed,
+            { assert((find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
                                                                                // which is checked above.
               renamed_rule_condition=
                         lazy::and_(renamed_rule_condition,
@@ -572,7 +572,7 @@ lps::specification action_rename(
           }
 
           /* insert the new sum variables in all the newly generated summands */
-          std::set<variable> new_vars = find_all_variables(renamed_rule_old_action);
+          std::set<variable> new_vars = find_variables(renamed_rule_old_action);
           for(std::set<variable>::iterator sdvi = new_vars.begin();
                          sdvi != new_vars.end(); sdvi++)
           {

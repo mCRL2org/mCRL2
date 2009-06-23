@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_DETAIL_LPS_VARIABLE_TRAVERSER_H
 #define MCRL2_LPS_DETAIL_LPS_VARIABLE_TRAVERSER_H
 
+#include "mcrl2/data/traverse.h"
+
 namespace mcrl2 {
 
 namespace lps {

@@ -115,7 +115,7 @@ struct global_variable_visitor: public state_formula_visitor
   /// \return The result of visiting the node
   bool visit_var(const state_formula& /* e */, const core::identifier_string& /* n */, const data::data_expression_list& l)
   {
-    std::set<data::variable> variables = find_all_variables(l);
+    std::set<data::variable> variables = find_variables(l);
     for (std::set<data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
@@ -131,7 +131,7 @@ struct global_variable_visitor: public state_formula_visitor
   /// \return The result of visiting the node
   bool visit_data_expression(const state_formula& /* e */, const data::data_expression& d)
   {
-    std::set<data::variable> variables = find_all_variables(d);
+    std::set<data::variable> variables = find_variables(d);
     for (std::set<data::variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))

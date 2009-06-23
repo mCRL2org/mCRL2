@@ -20,6 +20,7 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/detail/expression_traverser.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
@@ -87,6 +88,53 @@ void test_bag_print() {
 }
 
 void test_structured_sort_print() {
+}
+
+template < typename Derived >
+class printer : public mcrl2::data::detail::sort_expression_traverser< Derived >
+{
+  protected:
+    unsigned int                m_inside_quantifier;
+    std::set< sort_expression > m_result;
+
+  public:
+
+    printer() : m_inside_quantifier(0) {
+    }
+
+    void enter(sort_expression const& s)
+    {
+      if (0 < m_inside_quantifier)
+      {
+        m_result.insert(s);
+      }
+    }
+
+    void enter(forall const& e) {
+      ++m_inside_quantifier;
+    }
+
+    void leave(forall const& e) {
+      --m_inside_quantifier;
+    }
+};
+
+class forall_printer : public printer< forall_printer >
+{};
+class exists_printer : public printer< exists_printer >
+{
+  public:
+
+    void enter(exists const& e) {
+      ++m_inside_quantifier;
+    }
+
+    void leave(exists const& e) {
+      --m_inside_quantifier;
+    }
+};
+
+void test_traversal() {
 }
 
 int test_main(int argc, char** argv) {

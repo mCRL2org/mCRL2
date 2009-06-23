@@ -112,7 +112,7 @@ std::set<data::variable> compute_free_variables(const process_initializer& init)
   std::set<data::variable> result;
   for (data::assignment_list::const_iterator i = init.assignments().begin(); i != init.assignments().end(); ++i)
   {
-    data::find_all_free_variables(i->rhs(), std::inserter(result, result.end()));
+    data::find_free_variables(i->rhs(), std::inserter(result, result.end()));
   }
   return result;
 }

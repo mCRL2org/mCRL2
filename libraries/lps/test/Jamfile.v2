@@ -2,8 +2,8 @@ project libraries/lps/test
    : requirements
        <use>/site-config//boost
        <toolset>msvc:<asynch-exceptions>on
-       <source>/libraries//lps
-       <source>/libraries//process
+       <library>/libraries//lps
+       <library>/libraries//process
        <define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
 

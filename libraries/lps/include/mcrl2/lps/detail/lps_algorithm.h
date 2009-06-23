@@ -47,16 +47,16 @@ namespace detail {
       template <typename OutIter>
       void sumelm_find_variables(const action_summand& s, OutIter result) const
       {
-        data::find_all_free_variables(s.condition(), result);
-        lps::find_all_free_variables(s.multi_action(), result);
-        data::find_all_free_variables(s.assignments(), result);
+        data::find_free_variables(s.condition(), result);
+        lps::find_free_variables(s.multi_action(), result);
+        data::find_free_variables(s.assignments(), result);
       }
     
       template <typename OutIter>
       void sumelm_find_variables(const deadlock_summand& s, OutIter result) const
       {
-        data::find_all_free_variables(s.condition(), result);
-        lps::find_all_free_variables(s.deadlock(), result);
+        data::find_free_variables(s.condition(), result);
+        lps::find_free_variables(s.deadlock(), result);
       }
     
       template <typename SummandType>

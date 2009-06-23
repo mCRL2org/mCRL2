@@ -132,7 +132,7 @@ template <typename IdentifierGenerator>
 state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data::variable> src = data::find_all_variables(f);
+  std::set<data::variable> src = data::find_variables(f);
 
   // create a mapping of replacements
   data::mutable_map_substitution<> replacements;
