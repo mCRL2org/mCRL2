@@ -523,7 +523,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   new_lps.set_summands(mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
   gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str() );
-  assert( new_lps.is_well_typed());
+  assert( is_well_typed(new_lps));
 
   return new_lps;
 }
@@ -747,7 +747,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, new_lps, new_init );
 
-  assert(  new_spec.is_well_typed() );
+  assert(  is_well_typed(new_spec) );
 
   return new_spec; 
 }

@@ -16,7 +16,6 @@
 #include <cassert>
 #include <algorithm>
 #include <iterator>
-#include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
@@ -282,61 +281,6 @@ class summand: public atermpp::aterm_appl
     {
       return data::replace_variables(process_parameters, data::assignment_list_substitution(assignments()));
     }
-
-    /// \brief Checks if the summand is well typed
-    /// \return Returns true if
-    /// <ul>
-    /// <li>the data assignments are well typed</li>
-    /// <li>the (optional) time has sort Real</li>
-    /// <li>the condition has sort Bool</li>
-    /// <li>the summation variables have unique names</li>
-    //  <li>the left hand sides of the data assignments are unique</li>
-    /// </ul>
-    bool is_well_typed() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      // check 1)
-      for (data::assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
-      {
-        if (!i->is_well_typed())
-          return false;
-      }
-
-      // check 2)
-      if (has_time() && !data::sort_real::is_real(m_time.sort()))
-      {
-        std::cerr << "summand::is_well_typed() failed: time " << core::pp(m_time) << " doesn't have type real." << std::endl;
-        return false;
-      }
-
-      // check 3)
-      if (!data::sort_bool::is_bool(m_condition.sort()))
-      {
-        std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
-        return false;
-      }
-
-      // check 4)
-      if (!data::detail::unique_names(m_summation_variables))
-      {
-        std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
-        return false;
-      }
-
-      // check 5)
-      if (data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
-              )
-         )
-      {
-        std::cerr << "summand::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
-        return false;
-      }
-
-      return true;
-    }
 };
 
 /// \brief Sets the summation variables of s and returns the result
@@ -558,32 +502,6 @@ class summand_base
     {
       return m_condition;
     }
-
-    /// \brief Checks if the summand is well typed
-    /// \return Returns true if
-    /// <ul>
-    /// <li>the condition has sort Bool</li>
-    /// <li>the summation variables have unique names</li>
-    /// </ul>
-    bool is_well_typed() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      // check 1)
-      if (!data::sort_bool::is_bool(m_condition.sort()))
-      {
-        std::cerr << "summand::is_well_typed() failed: condition " << core::pp(m_condition) << " doesn't have type bool." << std::endl;
-        return false;
-      }
-
-      // check 2)
-      if (!data::detail::unique_names(m_summation_variables))
-      {
-        std::cerr << "summand::is_well_typed() failed: summation variables " << pp(m_summation_variables) << " don't have unique names." << std::endl;
-        return false;
-      }
-      return true;
-    }
 };
 
 /// \brief LPS summand containing a deadlock.
@@ -785,38 +703,6 @@ class action_summand: public summand_base
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
       return data::replace_variables(process_parameters, data::assignment_list_substitution(assignments()));
-    }
-
-    /// \brief Checks if the summand is well typed
-    /// \return Returns true if
-    /// <ul>
-    /// <li>the data assignments are well typed</li>
-    /// <li>the left hand sides of the data assignments are unique</li>
-    /// <li>the multi action is well typed
-    /// </ul>
-    bool is_well_typed() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      // check 1)
-      for (data::assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
-      {
-        if (!i->is_well_typed())
-          return false;
-      }
-
-      // check 2)
-      if (data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
-              )
-         )
-      {
-        std::cerr << "summand::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
-        return false;
-      }
-      // check 3)
-      return super::is_well_typed() && m_multi_action.is_well_typed();
     }
 };
 

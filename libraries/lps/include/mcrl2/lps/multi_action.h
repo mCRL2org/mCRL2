@@ -16,7 +16,6 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
 
@@ -161,22 +160,6 @@ namespace lps {
       {
         return !(*this == other);
       }
-
-    /// \brief Checks if the summand is well typed
-    /// \return Returns true if
-    /// <ul>
-    /// <li>the (optional) time has sort Real</li>
-    /// </ul>
-    bool is_well_typed() const
-    {
-      // check 1)
-      if (has_time() && !data::sort_real::is_real(m_time.sort()))
-      {
-        std::cerr << "summand::is_well_typed() failed: time " << mcrl2::core::pp(m_time) << " doesn't have type real." << std::endl;
-        return false;
-      }
-      return true;
-    }
   };
 
 /*

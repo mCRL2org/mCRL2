@@ -430,7 +430,7 @@ void test_abp()
   bool verbose = false;
   bool instantiate_free_variables = false;
   constelm(spec, R, verbose, instantiate_free_variables);
-  BOOST_CHECK(spec.is_well_typed());
+  BOOST_CHECK(is_well_typed(spec));
   core::garbage_collect();
 }
 

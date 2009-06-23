@@ -37,6 +37,9 @@ namespace lps {
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
 
+template <typename Object>
+bool is_well_typed(const Object& o);
+
 class specification;   
 atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
 void complete_data_specification(lps::specification&);
@@ -149,7 +152,7 @@ class specification
       construct_from_aterm(atermpp::aterm_appl(t));
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());
+      assert(is_well_typed(*this));
       //if (!is_well_typed())
       //{
       //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
@@ -169,7 +172,7 @@ class specification
     {
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
-      assert(is_well_typed());
+      assert(is_well_typed(*this));
       specification tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
       core::detail::save_aterm(specification_to_aterm(tmp, false), filename, binary);
@@ -224,86 +227,6 @@ class specification
     {
       return m_initial_process;
     }
-
-    /// \brief Indicates whether the specification is well typed.
-    /// \return True if
-    /// <ul>
-    /// <li>the sorts occurring in the summation variables are declared in the data specification</li>
-    /// <li>the sorts occurring in the process parameters are declared in the data specification </li>
-    /// <li>the sorts occurring in the free variables are declared in the data specification     </li>
-    /// <li>the sorts occurring in the action labels are declared in the data specification      </li>
-    /// <li>the action labels occurring in the process are contained in action_labels()          </li>
-    /// <li>the process is well typed                                                            </li>
-    /// <li>the data specification is well typed                                                 </li>
-    /// <li>the initial process is well typed                                                    </li>
-    /// </ul>
-    bool is_well_typed() const
-    {
-      std::set<data::sort_expression> declared_sorts = mcrl2::data::detail::make_set(data().sorts());
-      std::set<action_label> declared_labels = mcrl2::data::detail::make_set(action_labels());
-      summand_list summands = process().summands();
-
-      // check 1)
-      for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
-      {
-        if (!(mcrl2::data::detail::check_variable_sorts(i->summation_variables(), declared_sorts)))
-        {
-          std::cerr << "specification::is_well_typed() failed: some of the sorts of the summation variables " << data::pp(i->summation_variables()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
-          return false;
-        }
-      }
-
-      // check 2)
-      if (!(mcrl2::data::detail::check_variable_sorts(process().process_parameters(), declared_sorts)))
-      {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the process parameters " << data::pp(process().process_parameters()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
-        return false;
-      }
-
-      // check 3)
-      if (!(mcrl2::data::detail::check_variable_sorts(process().global_variables(), declared_sorts)))
-      {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts of the free variables " << data::pp(process().global_variables()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
-        return false;
-      }
-
-      // check 4)
-      if (!(detail::check_action_label_sorts(action_labels(), declared_sorts)))
-      {
-        std::cerr << "specification::is_well_typed() failed: some of the sorts occurring in the action labels " << mcrl2::core::pp(action_labels()) << " are not declared in the data specification " << data::pp(data().sorts()) << std::endl;
-        return false;
-      }
-
-      // check 5)
-      for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
-      {
-        if (!(detail::check_action_labels(i->actions(), declared_labels)))
-        {
-          std::cerr << "specification::is_well_typed() failed: some of the labels occurring in the actions " << mcrl2::core::pp(i->actions()) << " are not declared in the action specification " << mcrl2::core::pp(action_labels()) << std::endl;
-          return false;
-        }
-      }
-
-      // check 6)
-      if (!process().is_well_typed())
-      {
-        return false;
-      }
-
-      // check 7)
-      if (!data().is_well_typed())
-      {
-        return false;
-      }
-
-      // check 8)
-      if (!initial_process().is_well_typed())
-      {
-        return false;
-      }
-
-      return true;
-    }
 };
 
 /// \brief Replaces the free variables of the process and the initial state by the union of them.
@@ -323,7 +246,7 @@ specification repair_free_variables(const specification& spec)
   process_initializer new_init(new_free_vars, spec.initial_process().assignments());
 
   specification result(spec.data(), spec.action_labels(), new_process, new_init);
-  assert(result.is_well_typed());
+  assert(is_well_typed(result));
   return result;
 }
 
@@ -397,6 +320,8 @@ bool operator!=(const specification& spec1, const specification& spec2)
 #include "mcrl2/lps/traverse.h"
 #endif
 
+#ifndef MCRL2_LPS_WELL_TYPED_H
+#include "mcrl2/lps/well_typed.h"
+#endif
+
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       
-
-

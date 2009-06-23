@@ -71,19 +71,6 @@ namespace mcrl2 {
           return atermpp::arg2(*this);
         }
 
-        /// \brief Returns true if the sorts of the left and right hand side are equal.
-        /// \return True if the assignement is well typed.
-        bool is_well_typed() const
-        {
-          if (lhs().sort() != rhs().sort())
-          {
-            std::clog << "data_assignment::is_well_typed() failed: the left and right hand sides "
-               << mcrl2::core::pp(lhs()) << " and " << mcrl2::core::pp(rhs()) << " have different sorts." << std::endl;
-            return false;
-          }
-          return true;
-        }
-
         data_expression operator()(const variable& x) const
         {
           return x == lhs() ? rhs() : data_expression(x);

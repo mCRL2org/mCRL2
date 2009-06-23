@@ -85,7 +85,7 @@ void test_trivial()
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 }
 
 void test_lps2pbes()
@@ -106,7 +106,7 @@ void test_lps2pbes()
   spec    = mcrl22lps(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   SPECIFICATION =
   "act a : Nat;                           \n"
@@ -117,7 +117,7 @@ void test_lps2pbes()
   spec    = mcrl22lps(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   SPECIFICATION =
   "act a;         \n"
@@ -134,7 +134,7 @@ void test_lps2pbes()
   spec    = mcrl22lps(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 }
 
 void test_lps2pbes2()
@@ -145,23 +145,23 @@ void test_lps2pbes2()
 
   FORMULA = "mu X. !!X";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   FORMULA = "nu X. ([true]X && <true>true)";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)] mu Y. (<true>Y || <s4(d)>true))";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   FORMULA = "forall d:D. nu X. (([!r1(d)]X && [s4(d)]false))";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 }
 
 void test_directory(int argc, char** argv)
@@ -204,7 +204,7 @@ void test_directory(int argc, char** argv)
         {
           try {
             pbes<> result = lps2pbes(SPEC1, formula, false);
-            BOOST_CHECK(result.is_well_typed());
+            BOOST_CHECK(is_well_typed(result));
             pbes<> expected_result;
             expected_result.load(untimed_result_file);
             bool cmp = (result == expected_result);

@@ -26,6 +26,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/traverse.h"
+#include "mcrl2/lps/well_typed.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2 {
@@ -122,7 +123,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
-      assert(m_spec.is_well_typed());
+      assert(is_well_typed(m_spec));
     }
 
     /// \brief Second version of parelm that builds a dependency graph
@@ -208,7 +209,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
-      assert(m_spec.is_well_typed());
+      assert(is_well_typed(m_spec));
     }
     
   public:

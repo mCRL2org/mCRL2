@@ -101,27 +101,6 @@ class process_initializer: public atermpp::aterm_appl
     {
       return process_initializer(f(atermpp::aterm(*this)));
     }
-
-    /// \brief Checks if the process initializer is well typed
-    /// \return Returns true if
-    /// <ul>
-    /// <li>the left hand sides of the data assignments are unique</li>
-    /// </ul>
-    bool is_well_typed() const
-    {
-      // check 1)
-      if (mcrl2::data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(m_assignments.begin(), data::detail::assignment_lhs()),
-               boost::make_transform_iterator(m_assignments.end()  , data::detail::assignment_lhs())
-              )
-         )
-      {
-        std::cerr << "process_initializer::is_well_typed() failed: data assignments " << pp(m_assignments) << " don't have unique left hand sides." << std::endl;
-        return false;
-      }
-
-      return true;
-    }
 };
 
 /// \brief Returns the free variables that occur in the process initializer

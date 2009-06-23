@@ -318,7 +318,7 @@ void test_trivial()
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(is_well_typed(p));
 }
 
 void test_instantiate_global_variables()

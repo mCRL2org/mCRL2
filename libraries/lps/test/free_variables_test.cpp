@@ -41,7 +41,7 @@ void test_free_variables()
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
-  BOOST_CHECK(specification.is_well_typed());
+  BOOST_CHECK(is_well_typed(specification));
 }
 
 int test_main(int argc, char* argv[])
