@@ -49,333 +49,337 @@ namespace mcrl2 {
        * expressions can also be used transparently.
        **/
       template < typename Derived >
-      struct expression_traverser
+      class expression_traverser
       {
-        template < typename DataExpression >
-        void enter(DataExpression const&)
-        {}
-        template < typename DataExpression >
-        void leave(DataExpression const&)
-        {}
+        protected:
 
-        template < typename Abstraction >
-        void visit(Abstraction const& a)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(a));
-          static_cast< Derived& >(*this).enter(static_cast< abstraction const& >(a));
-          static_cast< Derived& >(*this).enter(a);
-
-          static_cast< Derived& >(*this)(a.variables());
-          static_cast< Derived& >(*this)(a.body());
-
-          static_cast< Derived& >(*this).leave(a);
-          static_cast< Derived& >(*this).leave(static_cast< abstraction const& >(a));
-          static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(a));
-        }
-
-        void operator()(function_symbol const& e)
-        { 
-          static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
-        }
-
-        void operator()(variable const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
-        }
-
-        void operator()(lambda const& e)
-        {
-          visit(e);
-        }
-
-        void operator()(forall const& e)
-        {
-          visit(e);
-        }
-
-        void operator()(exists const& e)
-        {
-          visit(e);
-        }
-
-        void operator()(abstraction const& e)
-        {
-          if (e.is_lambda())
+          template < typename Abstraction >
+          void visit(Abstraction const& a)
           {
-            static_cast< Derived& >(*this)(lambda(e));
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(a));
+            static_cast< Derived& >(*this).enter(static_cast< abstraction const& >(a));
+            static_cast< Derived& >(*this).enter(a);
+
+            static_cast< Derived& >(*this)(a.variables());
+            static_cast< Derived& >(*this)(a.body());
+
+            static_cast< Derived& >(*this).leave(a);
+            static_cast< Derived& >(*this).leave(static_cast< abstraction const& >(a));
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(a));
           }
-          else if (e.is_exists())
+
+        public:
+          template < typename DataExpression >
+          void enter(DataExpression const&)
+          {}
+          template < typename DataExpression >
+          void leave(DataExpression const&)
+          {}
+
+          void operator()(function_symbol const& e)
+          { 
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
+          void operator()(variable const& e)
           {
-            static_cast< Derived& >(*this)(exists(e));
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
-          else if (e.is_forall())
+
+          void operator()(lambda const& e)
           {
-            static_cast< Derived& >(*this)(forall(e));
+            visit(e);
           }
-        }
 
-        void operator()(application const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.head());
-          static_cast< Derived& >(*this)(e.arguments());
-
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
-        }
-
-        void operator()(where_clause const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.declarations());
-          static_cast< Derived& >(*this)(e.body());
-
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
-        }
-
-        // Default, no traversal of sort expressions
-        void operator()(data_expression const& e)
-        {
-          if (e.is_application())
+          void operator()(forall const& e)
           {
-            static_cast< Derived& >(*this)(application(e));
+            visit(e);
           }
-          else if (e.is_where_clause())
+
+          void operator()(exists const& e)
           {
-            static_cast< Derived& >(*this)(where_clause(e));
+            visit(e);
           }
-          else if (e.is_abstraction())
+
+          void operator()(abstraction const& e)
           {
-            static_cast< Derived& >(*this)(abstraction(e));
-          }
-          else if (e.is_variable())
-          {
-            static_cast< Derived& >(*this)(variable(e));
-          }
-          else if (e.is_function_symbol())
-          {
-            static_cast< Derived& >(*this)(function_symbol(e));
-          }
-        }
-
-        void operator()(assignment const& a)
-        {
-          static_cast< Derived& >(*this).enter(a);
-
-          static_cast< Derived& >(*this)(a.lhs());
-          static_cast< Derived& >(*this)(a.rhs());
-
-          static_cast< Derived& >(*this).leave(a);
-        }
-
-        void operator()(data_equation const& e)
-        {
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.variables());
-          static_cast< Derived& >(*this)(e.condition());
-          static_cast< Derived& >(*this)(e.lhs());
-          static_cast< Derived& >(*this)(e.rhs());
-
-          static_cast< Derived& >(*this).leave(e);
-        }
-
-        void operator()(data_specification const& e)
-        {
-          static_cast< Derived& >(*this)(e.sorts());
-          static_cast< Derived& >(*this)(e.constructors());
-          static_cast< Derived& >(*this)(e.mappings());
-          static_cast< Derived& >(*this)(e.aliases());
-          static_cast< Derived& >(*this)(e.equations());
-        }
-
-        // \deprecated exists only for backwards compatibility
-        template < typename Expression >
-        void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
-        {
-          if (is_data_expression(e))
-          {
-            static_cast< Derived& >(*this)(data_expression(e));
-          }
-          else {
-            (*this)(static_cast< atermpp::aterm const& >(e));
-          }
-        }
-
-        // \deprecated exists only for backwards compatibility
-        void operator()(atermpp::aterm const& e)
-        {
-          if (e.type() == AT_APPL)
-          {
-            for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+            if (e.is_lambda())
             {
-              static_cast< Derived& >(*this)(*i);
+              static_cast< Derived& >(*this)(lambda(e));
+            }
+            else if (e.is_exists())
+            {
+              static_cast< Derived& >(*this)(exists(e));
+            }
+            else if (e.is_forall())
+            {
+              static_cast< Derived& >(*this)(forall(e));
             }
           }
-          else if (e.type() == AT_LIST)
-          {
-            static_cast< Derived& >(*this)(atermpp::aterm_list(e));
-          }
-        }
 
-        template < typename Container >
-        void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
-        {
-          std::for_each(container.begin(), container.end(), static_cast< Derived& >(*this));
-        }
+          void operator()(application const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.head());
+            static_cast< Derived& >(*this)(e.arguments());
+
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
+          void operator()(where_clause const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.declarations());
+            static_cast< Derived& >(*this)(e.body());
+
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
+          // Default, no traversal of sort expressions
+          void operator()(data_expression const& e)
+          {
+            if (e.is_application())
+            {
+              static_cast< Derived& >(*this)(application(e));
+            }
+            else if (e.is_where_clause())
+            {
+              static_cast< Derived& >(*this)(where_clause(e));
+            }
+            else if (e.is_abstraction())
+            {
+              static_cast< Derived& >(*this)(abstraction(e));
+            }
+            else if (e.is_variable())
+            {
+              static_cast< Derived& >(*this)(variable(e));
+            }
+            else if (e.is_function_symbol())
+            {
+              static_cast< Derived& >(*this)(function_symbol(e));
+            }
+          }
+
+          void operator()(assignment const& a)
+          {
+            static_cast< Derived& >(*this).enter(a);
+
+            static_cast< Derived& >(*this)(a.lhs());
+            static_cast< Derived& >(*this)(a.rhs());
+
+            static_cast< Derived& >(*this).leave(a);
+          }
+
+          void operator()(data_equation const& e)
+          {
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.variables());
+            static_cast< Derived& >(*this)(e.condition());
+            static_cast< Derived& >(*this)(e.lhs());
+            static_cast< Derived& >(*this)(e.rhs());
+
+            static_cast< Derived& >(*this).leave(e);
+          }
+
+          void operator()(data_specification const& e)
+          {
+            static_cast< Derived& >(*this)(e.sorts());
+            static_cast< Derived& >(*this)(e.constructors());
+            static_cast< Derived& >(*this)(e.mappings());
+            static_cast< Derived& >(*this)(e.aliases());
+            static_cast< Derived& >(*this)(e.equations());
+          }
+
+          // \deprecated exists only for backwards compatibility
+          template < typename Expression >
+          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          {
+            if (is_data_expression(e))
+            {
+              static_cast< Derived& >(*this)(data_expression(e));
+            }
+            else {
+              (*this)(static_cast< atermpp::aterm const& >(e));
+            }
+          }
+
+          // \deprecated exists only for backwards compatibility
+          void operator()(atermpp::aterm const& e)
+          {
+            if (e.type() == AT_APPL)
+            {
+              for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+              {
+                static_cast< Derived& >(*this)(*i);
+              }
+            }
+            else if (e.type() == AT_LIST)
+            {
+              static_cast< Derived& >(*this)(atermpp::aterm_list(e));
+            }
+          }
+
+          template < typename Container >
+          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          {
+            std::for_each(container.begin(), container.end(), static_cast< Derived& >(*this));
+          }
       };
 
       template < typename Derived >
-      struct sort_expression_traverser : protected expression_traverser< Derived >
+      class sort_expression_traverser : protected expression_traverser< Derived >
       {
-        typedef expression_traverser< Derived > super;
+        public:
+          typedef expression_traverser< Derived > super;
 
-        template < typename Expression >
-        void enter(Expression const&)
-        {}
-        template < typename Expression >
-        void leave(Expression const&)
-        {}
+          template < typename Expression >
+          void enter(Expression const&)
+          {}
+          template < typename Expression >
+          void leave(Expression const&)
+          {}
 
-        void operator()(basic_sort const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
-        }
-
-        void operator()(function_sort const& e)
-        { 
-          static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.domain());
-          static_cast< Derived& >(*this)(e.codomain());
-
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
-        }
-
-        void operator()(container_sort const& e)
-        { 
-          static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.element_sort());
-
-          static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).leave(e);
-        }
-
-        void operator()(structured_sort const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          for (structured_sort::constructors_const_range r(e.struct_constructors()); !r.empty(); r.advance_begin(1))
+          void operator()(basic_sort const& e)
           {
-            for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
+            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
+          }
+
+          void operator()(function_sort const& e)
+          { 
+            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.domain());
+            static_cast< Derived& >(*this)(e.codomain());
+
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
+          }
+
+          void operator()(container_sort const& e)
+          { 
+            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.element_sort());
+
+            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).leave(e);
+          }
+
+          void operator()(structured_sort const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            for (structured_sort::constructors_const_range r(e.struct_constructors()); !r.empty(); r.advance_begin(1))
             {
-              static_cast< Derived& >(*this)(j.front().sort());
+              for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
+              {
+                static_cast< Derived& >(*this)(j.front().sort());
+              }
+            }
+
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
+          }
+
+          void operator()(sort_expression const& e)
+          {
+            if (e.is_basic_sort())
+            {
+              static_cast< Derived& >(*this)(basic_sort(e));
+            }
+            else if (e.is_container_sort())
+            {
+              static_cast< Derived& >(*this)(container_sort(e));
+            }
+            else if (e.is_structured_sort())
+            {
+              static_cast< Derived& >(*this)(structured_sort(e));
+            }
+            else if (e.is_function_sort())
+            {
+              static_cast< Derived& >(*this)(function_sort(e));
+            }
+            else if (e.is_alias())
+            {
+              static_cast< Derived& >(*this)(alias(e));
             }
           }
 
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
-        }
-
-        void operator()(sort_expression const& e)
-        {
-          if (e.is_basic_sort())
+          void operator()(alias const& e)
           {
-            static_cast< Derived& >(*this)(basic_sort(e));
+            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+
+            static_cast< Derived& >(*this)(e.name());
+            static_cast< Derived& >(*this)(e.reference());
+
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
           }
-          else if (e.is_container_sort())
+
+          void operator()(assignment const& a)
           {
-            static_cast< Derived& >(*this)(container_sort(e));
+            static_cast< super& >(*this)(a);
           }
-          else if (e.is_structured_sort())
+
+          void operator()(data_equation const& e)
           {
-            static_cast< Derived& >(*this)(structured_sort(e));
-          }
-          else if (e.is_function_sort())
-          {
-            static_cast< Derived& >(*this)(function_sort(e));
-          }
-          else if (e.is_alias())
-          {
-            static_cast< Derived& >(*this)(alias(e));
-          }
-        }
-
-        void operator()(alias const& e)
-        {
-          static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
-          static_cast< Derived& >(*this).enter(e);
-
-          static_cast< Derived& >(*this)(e.name());
-          static_cast< Derived& >(*this)(e.reference());
-
-          static_cast< Derived& >(*this).leave(e);
-          static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
-        }
-
-        void operator()(assignment const& a)
-        {
-          static_cast< super& >(*this)(a);
-        }
-
-        void operator()(data_equation const& e)
-        {
-          static_cast< super& >(*this)(e);
-        }
-
-        void operator()(data_specification const& e)
-        {
-          static_cast< Derived& >(*this)(e.sorts());
-          static_cast< Derived& >(*this)(e.aliases());
-          static_cast< super& >(*this)(e);
-        }
-
-        // \deprecated
-        void operator()(atermpp::aterm_appl const& e)
-        {
-          static_cast< super& >(*this)(e);
-        }
-       
-        // \deprecated
-        void operator()(atermpp::aterm const& e)
-        {
-          static_cast< super& >(*this)(e);
-        }
-       
-        template < typename Expression >
-        void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
-        {
-          if (!is_nil(e)) { // REMOVE ME (condition)
-            static_cast< Derived& >(*this)(e.sort());
-
             static_cast< super& >(*this)(e);
           }
-        }
 
-        template < typename Container >
-        void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
-        {
-          std::for_each(container.begin(), container.end(), static_cast< Derived& >(*this));
-        }
+          void operator()(data_specification const& e)
+          {
+            static_cast< Derived& >(*this)(e.sorts());
+            static_cast< Derived& >(*this)(e.aliases());
+            static_cast< super& >(*this)(e);
+          }
+
+          // \deprecated
+          void operator()(atermpp::aterm_appl const& e)
+          {
+            static_cast< super& >(*this)(e);
+          }
+         
+          // \deprecated
+          void operator()(atermpp::aterm const& e)
+          {
+            static_cast< super& >(*this)(e);
+          }
+         
+          template < typename Expression >
+          void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          {
+            if (!is_nil(e)) { // REMOVE ME (condition)
+              static_cast< Derived& >(*this)(e.sort());
+
+              static_cast< super& >(*this)(e);
+            }
+          }
+
+          template < typename Container >
+          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          {
+            std::for_each(container.begin(), container.end(), static_cast< Derived& >(*this));
+          }
       };
 
       template < typename Derived >
@@ -478,9 +482,11 @@ namespace mcrl2 {
        *
        * \see expression_traverser
        **/
-      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = expression_traverser >
+      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = detail::expression_traverser >
       class selective_expression_traverser : public Traverser< Derived >
       {
+          typedef Traverser< Derived > super;
+
         protected:
 
           AdaptablePredicate m_traverse_condition;
@@ -488,6 +494,16 @@ namespace mcrl2 {
           template < typename Expression >
           void forward_call(Expression const& e, typename boost::disable_if< typename boost::is_base_of< data_expression, Expression >::type >::type* = 0,
                                                  typename boost::disable_if< typename boost::is_base_of< sort_expression, Expression >::type >::type* = 0)
+          {
+            static_cast< super& >(*this)(e);
+          }
+
+          void forward_call(data_expression const& e)
+          {
+            static_cast< super& >(*this)(e);
+          }
+
+          void forward_call(sort_expression const& e)
           {
             static_cast< super& >(*this)(e);
           }
@@ -509,9 +525,12 @@ namespace mcrl2 {
             }
           }
 
-        public:
+          AdaptablePredicate& traverse_condition()
+          {
+            return m_traverse_condition;
+          }
 
-          typedef Traverser< Derived > super;
+        public:
 
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
@@ -540,11 +559,15 @@ namespace mcrl2 {
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_data_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, expression_traverser >
+      class selective_data_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser > super;
+        typedef selective_expression_traverser< Derived, AdaptablePredicate > super;
 
         public:
+
+          using super::operator();
+          using super::enter;
+          using super::leave;
 
           selective_data_expression_traverser()
           { }
@@ -554,11 +577,15 @@ namespace mcrl2 {
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_sort_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser >
+      class selective_sort_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, detail::sort_expression_traverser >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser > super;
+        typedef selective_expression_traverser< Derived, AdaptablePredicate, detail::sort_expression_traverser > super;
 
         public:
+
+          using super::operator();
+          using super::enter;
+          using super::leave;
 
           selective_sort_expression_traverser()
           { }
@@ -568,11 +595,15 @@ namespace mcrl2 {
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_binding_aware_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, binding_aware_expression_traverser >
+      class selective_binding_aware_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, detail::binding_aware_expression_traverser >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate, binding_aware_expression_traverser > super;
+        typedef selective_expression_traverser< Derived, AdaptablePredicate, detail::binding_aware_expression_traverser > super;
 
         public:
+
+          using super::operator();
+          using super::enter;
+          using super::leave;
 
           selective_binding_aware_expression_traverser()
           { }
