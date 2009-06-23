@@ -103,20 +103,6 @@ class process_initializer: public atermpp::aterm_appl
     }
 };
 
-/// \brief Returns the free variables that occur in the process initializer
-/// \param init A process initializer 
-/// \return The free variables that occur in the process initializer
-inline
-std::set<data::variable> compute_free_variables(const process_initializer& init)
-{
-  std::set<data::variable> result;
-  for (data::assignment_list::const_iterator i = init.assignments().begin(); i != init.assignments().end(); ++i)
-  {
-    data::find_free_variables(i->rhs(), std::inserter(result, result.end()));
-  }
-  return result;
-}
-
 } // namespace lps
 
 } // namespace mcrl2

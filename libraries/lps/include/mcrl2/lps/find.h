@@ -14,6 +14,10 @@
 
 #include <algorithm>
 #include <functional>
+#include "mcrl2/lps/action.h"
+#include "mcrl2/lps/summand.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/lps/detail/lps_free_variable_finder.h"
 
 namespace mcrl2 {
 
@@ -50,6 +54,17 @@ namespace mcrl2 {
 
       find_free_variables(container, std::inserter(result, result.end()));
 
+      return result;
+    }
+
+    /// \brief Returns all free (unbound) data variables that appear in the
+    /// LPS object o.
+    template <typename Object>
+    std::set<data::variable> lps_find_all_free_variables(const Object& o)
+    {
+      std::set<data::variable> result;
+      lps::detail::lps_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(std::inserter(result, result.end()));
+      finder(o);
       return result;
     }
 

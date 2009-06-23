@@ -182,7 +182,7 @@ namespace detail {
 
       std::set<data::variable> compute_used_free_variables(const specification& spec) const
       {
-        return compute_free_variables(spec.process());
+        return lps_find_all_free_variables(spec.process());
       }
 
     public:

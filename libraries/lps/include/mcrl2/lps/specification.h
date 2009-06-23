@@ -20,11 +20,13 @@
 #include <stdexcept>
 #include <cerrno>
 #include <cstring>
+#include <set>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/detail/action_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -39,6 +41,9 @@ void traverse_sort_expressions(const Object& o, OutIter dest);
 
 template <typename Object>
 bool is_well_typed(const Object& o);
+
+template <typename Object>
+std::set<data::variable> lps_find_all_free_variables(const Object& o);
 
 class specification;   
 atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
@@ -77,8 +82,8 @@ class specification
     /// variable declarations of the process and the initial_process.
     void repair_free_variables()
     {
-      std::set<data::variable> free_variables = compute_free_variables(process());
-      std::set<data::variable> v = compute_free_variables(initial_process());
+      std::set<data::variable> free_variables = lps_find_all_free_variables(process());
+      std::set<data::variable> v = lps_find_all_free_variables(initial_process());
       free_variables.insert(v.begin(), v.end());
       data::variable_list freevars = data::convert<data::variable_list>(free_variables);
       m_process.global_variables() = freevars;
@@ -322,6 +327,10 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_WELL_TYPED_H
 #include "mcrl2/lps/well_typed.h"
+#endif
+
+#ifndef MCRL2_LPS_FIND_H
+#include "mcrl2/lps/find.h"
 #endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       

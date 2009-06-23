@@ -25,7 +25,6 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
@@ -34,9 +33,6 @@ namespace mcrl2 {
 namespace lps {
 
 class linear_process; // prototype declaration
-
-inline
-std::set<data::variable> compute_free_variables(const linear_process& process); // prototype declaration
 
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
@@ -201,46 +197,6 @@ class linear_process
       }
       return false;
     }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-/*    
-    template <typename Substitution>
-    linear_process substitute(Substitution f)
-    {
-      data::variable_list d = substitute(f, m_global_variables);
-      data::variable_list p = substitute(f, m_process_parameters);
-      summand_list       s = m_summands          .substitute(f);
-      return linear_process(d, p, s);
-    }
-*/
-    /// \brief Returns the set of free variables that appear in the process.
-    /// This set is a subset of <tt>global_variables()</tt>.
-    /// \return The set of free variables that appear in the process.
-    std::set<data::variable> find_free_variables()
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      // TODO: the efficiency of this implementation is not optimal
-      std::set<data::variable> result;
-      std::set<data::variable> parameters = mcrl2::data::convert< std::set< data::variable > >(process_parameters());
-      summand_list s = summands();
-      for (summand_list::iterator i = s.begin(); i != s.end(); ++i)
-      {
-        data::assignment_list assignments(i->assignments());
-        std::set<data::variable> summation_variables = mcrl2::data::detail::make_set(i->summation_variables());
-        std::set<data::variable> used_variables;
-        lps::find_free_variables(*i, std::inserter(used_variables, used_variables.end()));
-        std::set<data::variable> bound_variables = mcrl2::data::detail::set_union(parameters, summation_variables);
-        std::set<data::variable> free_variables = mcrl2::data::detail::set_difference(used_variables, bound_variables);
-        result.swap(free_variables);
-      }
-      return result;
-    }
   };
 
 /// \brief Conversion to ATermAppl.
@@ -260,29 +216,6 @@ inline
 std::string pp(const linear_process& p)
 {
   return core::pp(linear_process_to_aterm(p));
-}
-
-/// \brief Returns the free variables that occur in the linear process
-/// \param process A linear process
-/// \return The free variables that occur in the linear process
-inline
-std::set<data::variable> compute_free_variables(const linear_process& process)
-{
-  std::set<data::variable> result;
-  std::set<data::variable> process_parameters = mcrl2::data::detail::make_set(process.process_parameters());
-  summand_list summands(process.summands());
-  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
-  {
-    std::set<data::variable> temporary;
-    lps::find_free_variables(*i, std::inserter(temporary, temporary.end()), process_parameters);
-
-    data::variable_vector summation_variables(data::make_variable_vector(i->summation_variables()));
-    std::sort(summation_variables.begin(), summation_variables.end());
-
-    std::set_difference(temporary.begin(), temporary.end(), summation_variables.begin(), summation_variables.end(),
-                                                std::inserter(result, result.end()));
-  }
-  return result;
 }
 
 /// \brief Returns the action labels that occur in the process

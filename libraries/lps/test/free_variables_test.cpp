@@ -11,6 +11,7 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -25,7 +26,7 @@ void test_free_variables()
     "init X;\n"
   ));
 
-  std::set<data::variable> free_variables(specification.process().find_free_variables());
+  std::set<data::variable> free_variables = lps_find_all_free_variables(specification.process());
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
@@ -36,7 +37,7 @@ void test_free_variables()
     "init X(true);\n"
   );
 
-  free_variables = specification.process().find_free_variables();
+  free_variables = lps_find_all_free_variables(specification.process());
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());

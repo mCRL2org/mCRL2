@@ -208,7 +208,7 @@ namespace detail {
     {
       // check 1)
       std::set<data::variable> declared_free_variables  = mcrl2::data::detail::make_set(p.global_variables());
-      std::set<data::variable> occurring_free_variables = compute_free_variables(p);
+      std::set<data::variable> occurring_free_variables = lps_find_all_free_variables(p);
       if (!(std::includes(declared_free_variables.begin(),
                           declared_free_variables.end(),
                           occurring_free_variables.begin(),
