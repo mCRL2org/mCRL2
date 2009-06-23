@@ -392,7 +392,7 @@ static void split_condition(
   { split_condition(application(e).arguments()[0],real_conditions,non_real_conditions,!negate);
   }
   else if(is_inequality(e) && (application(e).left().sort() == sort_real::real_() || application(e).right().sort() == sort_real::real_()))
-  { std::set < variable > vars=find_all_variables(e);
+  { std::set < variable > vars=find_variables(e);
     for(std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
     { if (i->sort()!=sort_real::real_())
       { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +
@@ -410,7 +410,7 @@ static void split_condition(
   }
   else
   { // e is assumed to be a non_real expression.
-    std::set < variable > vars=find_all_variables(e);
+    std::set < variable > vars=find_variables(e);
     for(std::set < variable >::const_iterator i=vars.begin(); i!=vars.end(); ++i)
     { if (i->sort()==sort_real::real_())
       { throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +                                          pp(*i) + " of sort Real.");
@@ -477,7 +477,7 @@ static void normalize_specification(
         // this sum operator and the condition.
 
         // std::cerr << "REALPARS " << pp(i->next_state(real_parameters)) << "\n";
-        const std::set < variable> s1=find_all_variables(i->next_state(real_parameters));
+        const std::set < variable> s1=find_variables(i->next_state(real_parameters));
         // for(std::set < variable>::const_iterator k=s1.begin(); k!=s1.end(); ++k)
         // { std::cerr << "VAR " << pp(*k) << "\n";
 //

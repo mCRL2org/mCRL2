@@ -96,7 +96,7 @@ class lpspp_tool: public input_output_tool
         specification.data() = mcrl2::data::remove_all_system_defined(specification.data());
       }
 
-      ATermAppl spec = lps::specification_to_aterm(specification);
+      ATermAppl spec = lps::specification_to_aterm(specification, format != ppInternal);
     
       //open output file for writing or set to stdout
       FILE *output_stream    = NULL;

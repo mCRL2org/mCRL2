@@ -249,8 +249,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     data_expression lhs = application(  case_function , mcrl2::data::data_expression_list(args.begin() , args.end()) );
 
     gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
-    set< variable > svars = find_all_variables( lhs );
-    set< variable > tmp_var = find_all_variables( vars[e] );
+    set< variable > svars = find_variables( lhs );
+    set< variable > tmp_var = find_variables( vars[e] );
     svars.insert( tmp_var.begin(), tmp_var.end() );
     del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, vars[e] ) );
     ++e;
@@ -265,7 +265,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     boost::iterator_range<data_expression_vector::const_iterator> arg (args); /* Omslachtig */
     data_expression lhs = application(  case_function , arg );
     gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
-    set< variable > svars = find_all_variables( lhs );
+    set< variable > svars = find_variables( lhs );
     svars.insert(vars[e] );
     del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, vars[e] ) );
   }
@@ -284,8 +284,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     {
       data_expression lhs = application( determine_function, *i );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
-      set< variable > svars = find_all_variables( lhs );
-      set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
+      set< variable > svars = find_variables( lhs );
+      set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       svars.insert( tmp_var.begin(), tmp_var.end() );
       del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, set_of_new_sorts[e] ) );
     }
@@ -311,8 +311,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       }
       data_expression lhs = application( determine_function , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
-      set< variable > svars = find_all_variables( lhs );
-      set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
+      set< variable > svars = find_variables( lhs );
+      set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       svars.insert( tmp_var.begin(), tmp_var.end() );
       del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, set_of_new_sorts[e] ) );
 
@@ -322,8 +322,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       while (!pi.empty() && f < std::distance(dal.begin(), dal.end()) ){
           data_expression lhs = application( pi.front(), mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
           gsDebugMsg("\tAdded \"pi\" equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
-          set< variable > vars = find_all_variables( lhs );
-          set< variable > tmp_var = find_all_variables( dal[f] );
+          set< variable > vars = find_variables( lhs );
+          set< variable > tmp_var = find_variables( dal[f] );
           vars.insert( tmp_var.begin(), tmp_var.end() );
           del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, dal[f] ) );
           ++f;
@@ -335,8 +335,8 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     {
       data_expression lhs = application( determine_function , *i );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
-      set< variable > vars = find_all_variables( lhs );
-      set< variable > tmp_var = find_all_variables( set_of_new_sorts[e] );
+      set< variable > vars = find_variables( lhs );
+      set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       vars.insert( tmp_var.begin(), tmp_var.end() );
       del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, set_of_new_sorts[e] ) );
 
