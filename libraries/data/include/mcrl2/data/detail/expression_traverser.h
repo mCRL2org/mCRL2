@@ -540,6 +540,20 @@ namespace mcrl2 {
       };
 
       template < typename Derived, typename AdaptablePredicate >
+      class selective_data_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, expression_traverser >
+      {
+        typedef selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser > super;
+
+        public:
+
+          selective_data_expression_traverser()
+          { }
+
+          selective_data_expression_traverser(AdaptablePredicate predicate) : super(predicate)
+          { }
+      };
+
+      template < typename Derived, typename AdaptablePredicate >
       class selective_sort_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser >
       {
         typedef selective_expression_traverser< Derived, AdaptablePredicate, sort_expression_traverser > super;

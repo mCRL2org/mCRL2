@@ -135,7 +135,7 @@ namespace detail {
    * become false. It is used to cut-short expression traversal to return a
    * result.
    **/
-  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_expression_traverser >
+  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_data_expression_traverser >
   class search_helper : public SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > {
 
       typedef SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > super;
@@ -184,10 +184,10 @@ namespace detail {
   }
 
   template < typename AdaptablePredicate >
-  search_helper< variable, AdaptablePredicate, detail::selective_expression_traverser >
+  search_helper< variable, AdaptablePredicate, detail::selective_data_expression_traverser >
   make_variable_search_helper(AdaptablePredicate search_predicate)
   {
-    return search_helper< variable, AdaptablePredicate, detail::selective_expression_traverser >(search_predicate);
+    return search_helper< variable, AdaptablePredicate >(search_predicate);
   }
 
   template < typename Action >
