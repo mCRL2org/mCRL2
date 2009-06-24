@@ -714,10 +714,8 @@ class specification_basic_type:public boost::noncopyable
          pointers to objects that are not garbage collected, this
          is a safe way to do this. */
       if (actioncompare(act.label(),firstAction.label()))
-      { // std::cerr<< "Action compare true: " << pp(act.label()) << "  " << pp(firstAction.label()) << "\n";
-        return push_front(multiAction,act);
+      { return push_front(multiAction,act);
       }
-      // std::cerr<< "Action compare false: " << pp(act.label()) << "  " << pp(firstAction.label()) << "\n";
       return push_front(linInsertActionInMultiActionList(
                                act,
                                pop_front(multiAction)),
@@ -725,12 +723,10 @@ class specification_basic_type:public boost::noncopyable
     }
 
     action_list linMergeMultiActionList(const action_list ma1, const action_list ma2)
-    { // std::cerr<< "Sort actions in: " << pp(ma1) << "  " << pp(ma2) << "\n";
-      action_list result=ma2;
+    { action_list result=ma2;
       for(action_list::const_iterator i=ma1.begin() ; i!=ma1.end() ; ++i)
       { result=linInsertActionInMultiActionList(*i,result);
       }
-      // std::cerr << "Sort actions " << pp(result) << "\n";
       return result;
     }
 
@@ -1469,8 +1465,7 @@ class specification_basic_type:public boost::noncopyable
                     substitute_pCRLproc(terms,vars,process::sync(p).right()));
       }
       if (is_if_then(p))
-      { // std::cerr << "SUBST PCRL " << pp(terms) << " --> " << pp(vars) << " IN " << pp(p) << "\n";
-        data_expression condition=substitute_data(terms,vars,if_then(p).condition());
+      { data_expression condition=substitute_data(terms,vars,if_then(p).condition());
         if (condition==sort_bool::false_())
         { return delta_at_zero();
         }
@@ -1503,8 +1498,6 @@ class specification_basic_type:public boost::noncopyable
 
         const process_expression result=sum(sumargs,
                    substitute_pCRLproc(terms1,vars1,sum(p).operand()));
-        // std::cerr << "SUM CONVERT1 " << pp(p) << "\n";
-        // std::cerr << "SUM CONVERT1  RESULT " << pp(result) << "\n";
         return result;
       }
 
@@ -1604,8 +1597,7 @@ class specification_basic_type:public boost::noncopyable
                         processstatustype ps,
                         const bool canterminate,
                         const bool containstime)
-    { // std::cerr << "NEWPROCESS " << pp(parameters) << " := " << pp(body) << "\n";
-      unsigned long numberOfNewProcesses=0, warningNumber=1000;
+    { unsigned long numberOfNewProcesses=0, warningNumber=1000;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       { std::cerr << "generated " << numberOfNewProcesses << " new internal processes.";
@@ -1645,7 +1637,6 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body))
       { variable_list sumvars=sum(body).bound_variables();
-        // std::cerr << "SUM CONVERT2 " << pp(body) << "\n";
         process_expression body1=sum(body).operand();
         variable_list renamevars;
         data_expression_list renameterms;
@@ -1838,7 +1829,6 @@ class specification_basic_type:public boost::noncopyable
           variable_list renamevars;
           variable_list sumvars=sum(body).bound_variables();
           process_expression body1=sum(body).operand();
-          // std::cerr << "SUM CONVERT3 " << pp(body) << "\n";
 
           data_expression_list renameterms;
           alphaconvert(sumvars,renamevars,renameterms,freevars,data_expression_list());
@@ -2119,7 +2109,6 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(body1))
       { /* we must take care that no variables in body2 are
             inadvertently bound */
-        // std::cerr << "SUM CONVERT4 " << pp(body1) << "\n";
         variable_list sumvars=sum(body1).bound_variables();
         variable_list vars;
         data_expression_list terms;
@@ -2183,7 +2172,6 @@ class specification_basic_type:public boost::noncopyable
       if (is_sum(body1))
       { /* we must take care that no variables in condition are
             inadvertently bound */
-        // std::cerr << "SUM CONVERT5 " << pp(body1) << "\n";
         variable_list sumvars=sum(body1).bound_variables();
         variable_list vars;
         data_expression_list terms;
@@ -2497,7 +2485,6 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(body))
       { variable_list sumvars=sum(body).bound_variables();
-        // std::cerr << "SUM CONVERT6 " << pp(body) << "\n";
         process_expression body1=sum(body).operand();
         variable_list renamevars;
         data_expression_list renameterms;
@@ -2945,8 +2932,6 @@ class specification_basic_type:public boost::noncopyable
            structured_sort_constructor_vector constructors(1,sc_push);
            constructors.push_back(sc_emptystack);
            stacksort=stack_sort_alias;
-           // ATfprintf(stderr,"STACKSORT %t\n",ATermAppl(stacksort));
-           // std::cerr << "Stacksort " << pp(stacksort) << "\n";
            //add data declarations for structured sort
            spec.insertsort(alias(stack_sort_alias,structured_sort(constructors)));
            push=sc_push.constructor_function(stack_sort_alias);
@@ -2957,9 +2942,6 @@ class specification_basic_type:public boost::noncopyable
            pop=projection_functions.back();
            getstate=projection_functions.front();
            get=function_symbol_list(projection_functions.begin()+1,projection_functions.end()-1);
-           // std::cerr << "POP: " << pp(pop) << "  " << pp(pop.sort()) << "\n";
-           // std::cerr << "getstate: " << pp(getstate) << pp(getstate.sort()) << "\n";
-           // std::cerr << "get: " << pp(get) << "\n";
          }
 
          ~stackoperations()
@@ -3575,7 +3557,6 @@ class specification_basic_type:public boost::noncopyable
                    const bool regular,
                    const bool singlestate)
     { data_expression atTime;
-      // std::cerr << "ADD SUMMAND IN " << pp(summandterm) << "\n";
       action_list multiAction;
       data_expression_list procargs;
       bool is_delta_summand=false;
@@ -4780,7 +4761,6 @@ class specification_basic_type:public boost::noncopyable
       summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
                (canterminate&&objectdata[n].canterminate),regular,
                    singlecontrolstate);
-      // std::cerr << "SUMMANDLIST in collect pCRL: " << pp(sums) << "\n";
 
       if (!options.no_intermediate_cluster)
       { sums=cluster_actions(sums,parameters);
@@ -4907,7 +4887,6 @@ class specification_basic_type:public boost::noncopyable
       assert(s.is_delta());
       summand_list result;
 
-      // std::cerr << "ADD SUMMAND " << pp(s) << "\n";
       const variable_list sumvars=s.summation_variables();
       const data_expression cond=s.condition();
       const data_expression actiontime=s.time();
@@ -4916,7 +4895,6 @@ class specification_basic_type:public boost::noncopyable
       for(summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       { const summand smmnd=*i;
         const data_expression cond1=i->condition();
-        // std::cerr << "Subsume summand " << pp(smmnd) << "\n";
         tail=pop_front(tail);
         if ((!options.add_delta) &&
             ((actiontime==i->time()) || (!i->has_time())) &&
@@ -4925,7 +4903,6 @@ class specification_basic_type:public boost::noncopyable
              this delta summand to the front, such that it
              is encountered early later on, removing a next
              delta summand */
-      // std::cerr << "NEW SUMMAND SUBSUMED\n";
           return push_front(reverse(result)+tail,smmnd);
         }
         if ((i->is_delta()) &&
@@ -4933,11 +4910,9 @@ class specification_basic_type:public boost::noncopyable
                 (((actiontime==smmnd.time())|| (!s.has_time())) &&
                  (implies_condition(cond1,cond)))))
         { /* do not add summand to result, as it is superseded by s */
-          // std::cerr << "SUMMAND SUBSUMED \n";
         }
         else
         {
-          // std::cerr << "SUMMAND PRESERVED \n";
           result=push_front(result,smmnd);
         }
       }
@@ -4945,7 +4920,6 @@ class specification_basic_type:public boost::noncopyable
       result=push_front(reverse(result),
                      summand_(sumvars,cond,s.is_delta(),s.actions(),s.has_time(),
                                           actiontime,s.assignments()));
-      // std::cerr << "NEW SUMMAND ADDED\n";
       return result;
     }
 
@@ -4972,20 +4946,16 @@ class specification_basic_type:public boost::noncopyable
       for (action_list::const_iterator walker=multiaction.begin();
                   walker!=multiaction.end(); ++walker,++i)
       { if (i==names.end())
-        { // std::cerr << "false1\n";
-          return false;
+        { return false;
         }
 
         if (*i!=walker->label().name())
-        { // std::cerr << "false2\n";
-          return false;
+        { return false;
         }
       }
       if (i==names.end())
-      { // std::cerr << "true1\n";
-        return true;
+      { return true;
       }
-      // std::cerr << "false3\n";
       return false;
     }
 
@@ -5057,19 +5027,16 @@ class specification_basic_type:public boost::noncopyable
         const data_expression actiontime=smmnd.time();
         const data_expression condition=smmnd.condition();
 
-        // std::cerr << "SUMMAND calcul " << pp(multiaction) << "\n";
 
         if (!i->is_delta() &&
             ((is_allow && allow_(allowlist,multiaction)) ||
              (!is_allow && !encap(allowlist,multiaction))))
-        { // std::cerr << "ALLOWED calcul " << pp(allowlist) << "\n";
-          resultactionsumlist=push_front(
+        { resultactionsumlist=push_front(
                         resultactionsumlist,
                         smmnd);
         }
         else
-        { // std::cerr << "FORBIDDEN calcul " << pp(allowlist) << "\n";
-          if (smmnd.has_time())
+        { if (smmnd.has_time())
           { resultdeltasumlist=push_front(
                         resultdeltasumlist,
                           summand( sumvars,
@@ -5999,8 +5966,7 @@ class specification_basic_type:public boost::noncopyable
       init=substitute_assignmentlist(unique_pars,pars,init,pars,1,0);  // Only substitute the variables
                                                                        // the variables at the lhs.
       for(summand_list::const_iterator s=summands.begin(); s!=summands.end(); ++s)
-      { // std::cerr << "Make unique " << pp(*s) << "\n";
-        const summand smmnd= *s;
+      { const summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
         variable_list unique_sumvars=make_unique_variables(sumvars,hint);
         assert(unique_sumvars.size()==sumvars.size());
@@ -6024,7 +5990,6 @@ class specification_basic_type:public boost::noncopyable
         result_summands=push_front(result_summands,
               summand_(unique_sumvars,condition,s->is_delta(),multiaction,
                         s->has_time(),actiontime,nextstate));
-        // std::cerr << "Make unique out " << pp(result_summands.front()) << "\n";
       }
       pars=unique_pars;
       return result_summands;
@@ -6069,14 +6034,16 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime1=summand1.time();
         data_expression condition1=summand1.condition();
         assignment_list nextstate1=summand1.assignments();
+        bool has_time=summand1.has_time();
 
         if (multiaction1!=push_front(action_list(),terminationAction))
         {
-          if (!summand1.has_time())
+          if (!has_time)
           { if (ultimatedelaycondition!=sort_bool::true_())
             { actiontime1=timevar;
               sumvars1=push_front(sumvars1,timevar);
               condition1=lazy::and_(ultimatedelaycondition,condition1);
+              has_time=true;
             }
           }
           else
@@ -6100,7 +6067,7 @@ class specification_basic_type:public boost::noncopyable
                    condition1,
                    summand1.is_delta(),
                    multiaction1, //substitute_multiaction(rename1_list,sums1renaming,multiaction1),
-                   summand1.has_time(),
+                   has_time,
                    actiontime1,
                    nextstate1));
           }
@@ -6122,14 +6089,16 @@ class specification_basic_type:public boost::noncopyable
         data_expression actiontime2=summand2.time();
         data_expression condition2=summand2.condition();
         assignment_list nextstate2=summand2.assignments();
+        bool has_time=summand2.has_time();
 
         if (multiaction2!=push_front(action_list(),terminationAction))
         {
-          if (!summand2.has_time())
+          if (!has_time)
           { if (ultimatedelaycondition!=sort_bool::true_())
             { actiontime2=data_expression(timevar);
               sumvars2=push_front(sumvars2,timevar);
               condition2=lazy::and_(ultimatedelaycondition,condition2);
+              has_time=true;
             }
           }
           else
@@ -6154,7 +6123,7 @@ class specification_basic_type:public boost::noncopyable
                    condition2,
                    summand2.is_delta(),
                    multiaction2,
-                   summand2.has_time(),
+                   has_time,
                    actiontime2,
                    nextstate2));
           }
@@ -6297,24 +6266,20 @@ class specification_basic_type:public boost::noncopyable
                        assignment_list &init)
     { if (is_process_instance(t))
       { summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
-        // std::cerr << "END " << pp(init) << " XX " << pp(pars) << " XX " << pp(t3) << "\n";
         long n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
 
-        // std::cerr << "END3 " << pp(init) << " XX " << pp(pars) << " XX " << pp(t3) << "\n";
         if ((objectdata[n].processstatus==GNF)||
             (objectdata[n].processstatus==pCRL)||
             (objectdata[n].processstatus==GNFalpha)||
             (objectdata[n].processstatus==multiAction))
         {
           t3=make_parameters_and_sum_variables_unique(t3,pars,init,std::string(objectdata[n].objectname));
-        // std::cerr << "END1 " << pp(init) << " XX " << pp(pars) << " XX " << pp(t3) << "\n";
         }
         else
         { if (rename_variables)
           { t3=make_parameters_and_sum_variables_unique(t3,pars,init);
-        // std::cerr << "END2 " << pp(init) << " XX " << pp(pars) << " XX " << pp(t3) << "\n";
           }
         }
         return t3;
@@ -7003,6 +6968,7 @@ class specification_basic_type:public boost::noncopyable
          parameters are needed to check occurrences of vars
          in the assignment list */
 
+      // std::cerr << "INSIEVE1: " << pp(vars) << "\n";    
       atermpp::set < variable > vars_set(vars.begin(),vars.end());
       atermpp::set < variable > vars_result_set;
 
@@ -7025,6 +6991,7 @@ class specification_basic_type:public boost::noncopyable
       { result=push_front(result,*i);
       }
 
+      // std::cerr << "OUTSIEVE1: " << pp(result) << "\n";    
       return result;
     }
 
@@ -7033,7 +7000,8 @@ class specification_basic_type:public boost::noncopyable
                             const variable_list vars,
                             const assignment_list assignments,
                             const variable_list parameters)
-    { const atermpp::set < variable > vars_set(vars.begin(),vars.end());
+    { // std::cerr << "INSIEVE: " << pp(vars) << "\n";
+      const atermpp::set < variable > vars_set(vars.begin(),vars.end());
       atermpp::set < variable > vars_result_set;
 
 
@@ -7045,6 +7013,7 @@ class specification_basic_type:public boost::noncopyable
       { result=push_front(result,*i);
       }
 
+      // std::cerr << "OUTSIEVE: " << pp(result) << "\n";
       return result;
     }
 
@@ -7080,7 +7049,6 @@ class specification_basic_type:public boost::noncopyable
 
       summand_list t3=generateLPEmCRL(init1,objectdata[objectIndex(init1)].canterminate,
                                  options.lin_method!=lmStack,parameters,initial_state);
-      // std::cerr << "SUMMANDLISRESULT " << t3.size() << "   " << pp(t3) << "\n";
       t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
       if (options.final_cluster)
          t3=cluster_actions(t3,parameters);
