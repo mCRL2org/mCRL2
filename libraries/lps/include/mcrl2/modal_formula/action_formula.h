@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/lps/action.h"
-#include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
 

@@ -33,7 +33,6 @@
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/deadlock.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
 

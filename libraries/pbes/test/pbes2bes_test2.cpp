@@ -23,6 +23,8 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/pbes/lps2pbes.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
