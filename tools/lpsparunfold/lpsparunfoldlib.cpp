@@ -53,6 +53,11 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
       gsDebugMsg("\tFound Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
       processed = true;
     }
+
+    if (i->is_container_sort()){
+      gsDebugMsg("\tFound Container Sort: %s\n", pp(container_sort( *i )).c_str() );
+      processed = true;
+    }
     
     if (!processed){
       cerr << "Failed to preprocess sort: "<< *i << endl;
@@ -423,6 +428,10 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
            processed = true;
          }
 
+         if (j -> sort().is_container_sort())
+         {
+           processed = true;
+         }
          if (!processed) {
            cerr << pp(*j) << " is not processed" << endl;
            cerr << *j << endl;
@@ -514,6 +523,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   new_lps.set_summands(mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
   gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str() );
+  
   assert( is_well_typed(new_lps));
 
   return new_lps;
