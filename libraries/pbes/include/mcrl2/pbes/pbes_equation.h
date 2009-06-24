@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBES_EQUATION_H
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -104,7 +103,7 @@ class pbes_equation: public atermpp::aterm_appl
     /// \return True if the predicate formula on the right hand side contains no predicate variables.
     bool is_solved() const
     {
-      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), modal_formula::state_frm::is_var);
+      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), is_propositional_variable_instantiation);
       return t == atermpp::aterm(); // true if nothing was found
     }
 
