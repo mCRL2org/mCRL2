@@ -9,14 +9,14 @@
 /// \file mcrl2/data/traverse.h
 /// \brief add your file description here.
 
+#ifndef MCRL2_DATA_TRAVERSE_H
+#define MCRL2_DATA_TRAVERSE_H
+
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/find.h"
-
-#ifndef MCRL2_DATA_TRAVERSE_H
-#define MCRL2_DATA_TRAVERSE_H
 
 namespace mcrl2 {
 
