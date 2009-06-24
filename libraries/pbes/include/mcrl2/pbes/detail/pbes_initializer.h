@@ -18,7 +18,6 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 #include "mcrl2/pbes/propositional_variable.h"
 
 namespace mcrl2 {
