@@ -100,7 +100,7 @@ void test_parelm()
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_parelm_algorithm algorithm;
   algorithm.run(p);
-  BOOST_CHECK(is_well_typed(p));
+  BOOST_CHECK(p.is_well_typed());
 }
 
 int test_main(int argc, char** argv)

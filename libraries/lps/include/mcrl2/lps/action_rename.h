@@ -460,8 +460,8 @@ lps::specification action_rename(
     }
 
     // Check whether the variables in rhs are included in the lefthandside.
-    std::set < variable > variables_in_old_rule = find_variables(rule_old_action);
-    std::set < variable > variables_in_new_rule = find_variables(rule_new_action);
+    std::set < variable > variables_in_old_rule = lps::find_free_variables(rule_old_action);
+    std::set < variable > variables_in_new_rule = lps::find_free_variables(rule_new_action);
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
@@ -470,7 +470,7 @@ lps::specification action_rename(
     }
 
     // Check whether the variables in condition are included in the lefthandside.
-    std::set < variable > variables_in_condition = find_variables(rule_condition);
+    std::set < variable > variables_in_condition = data::find_free_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
     { throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +

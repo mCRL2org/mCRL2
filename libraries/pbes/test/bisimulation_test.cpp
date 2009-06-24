@@ -55,10 +55,10 @@ void test_bisimulation()
   pbes<> wb  = weak_bisimulation(abp_spec, abp_spec);
   pbes<> sbe = branching_simulation_equivalence(abp_spec, abp_spec);
 
-  BOOST_CHECK(is_well_typed(bb ));
-  BOOST_CHECK(is_well_typed(sb ));
-  BOOST_CHECK(is_well_typed(wb ));
-  BOOST_CHECK(is_well_typed(sbe));
+  BOOST_CHECK(bb.is_well_typed());
+  BOOST_CHECK(sb.is_well_typed());
+  BOOST_CHECK(wb.is_well_typed());
+  BOOST_CHECK(sbe.is_well_typed());
 
 //  BOOST_CHECK(pbes2bool(bb ));
 //  BOOST_CHECK(pbes2bool(sb ));
