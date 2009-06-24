@@ -973,6 +973,28 @@ bool gsIsForall(ATermAppl Term)
   return ATgetAFun(Term) == gsAFunForall();
 }
 
+// GlobVarSpec
+inline
+AFun initAFunGlobVarSpec(AFun& f)
+{
+  f = ATmakeAFun("GlobVarSpec", 1, ATfalse);
+  ATprotectAFun(f);
+  return f;
+}
+
+inline
+AFun gsAFunGlobVarSpec()
+{
+  static AFun AFunGlobVarSpec = initAFunGlobVarSpec(AFunGlobVarSpec);
+  return AFunGlobVarSpec;
+}
+
+inline
+bool gsIsGlobVarSpec(ATermAppl Term)
+{
+  return ATgetAFun(Term) == gsAFunGlobVarSpec();
+}
+
 // Hide
 inline
 AFun initAFunHide(AFun& f)
@@ -1153,7 +1175,7 @@ bool gsIsLambda(ATermAppl Term)
 inline
 AFun initAFunLinProcSpec(AFun& f)
 {
-  f = ATmakeAFun("LinProcSpec", 4, ATfalse);
+  f = ATmakeAFun("LinProcSpec", 5, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1175,7 +1197,7 @@ bool gsIsLinProcSpec(ATermAppl Term)
 inline
 AFun initAFunLinearProcess(AFun& f)
 {
-  f = ATmakeAFun("LinearProcess", 3, ATfalse);
+  f = ATmakeAFun("LinearProcess", 2, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1197,7 +1219,7 @@ bool gsIsLinearProcess(ATermAppl Term)
 inline
 AFun initAFunLinearProcessInit(AFun& f)
 {
-  f = ATmakeAFun("LinearProcessInit", 2, ATfalse);
+  f = ATmakeAFun("LinearProcessInit", 1, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1417,7 +1439,7 @@ bool gsIsOpId(ATermAppl Term)
 inline
 AFun initAFunPBES(AFun& f)
 {
-  f = ATmakeAFun("PBES", 3, ATfalse);
+  f = ATmakeAFun("PBES", 4, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1637,7 +1659,7 @@ bool gsIsPBEqn(ATermAppl Term)
 inline
 AFun initAFunPBEqnSpec(AFun& f)
 {
-  f = ATmakeAFun("PBEqnSpec", 2, ATfalse);
+  f = ATmakeAFun("PBEqnSpec", 1, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1659,7 +1681,7 @@ bool gsIsPBEqnSpec(ATermAppl Term)
 inline
 AFun initAFunPBInit(AFun& f)
 {
-  f = ATmakeAFun("PBInit", 2, ATfalse);
+  f = ATmakeAFun("PBInit", 1, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1703,7 +1725,7 @@ bool gsIsParamId(ATermAppl Term)
 inline
 AFun initAFunProcEqn(AFun& f)
 {
-  f = ATmakeAFun("ProcEqn", 4, ATfalse);
+  f = ATmakeAFun("ProcEqn", 3, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1747,7 +1769,7 @@ bool gsIsProcEqnSpec(ATermAppl Term)
 inline
 AFun initAFunProcSpec(AFun& f)
 {
-  f = ATmakeAFun("ProcSpec", 4, ATfalse);
+  f = ATmakeAFun("ProcSpec", 5, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -1835,7 +1857,7 @@ bool gsIsProcessAssignment(ATermAppl Term)
 inline
 AFun initAFunProcessInit(AFun& f)
 {
-  f = ATmakeAFun("ProcessInit", 2, ATfalse);
+  f = ATmakeAFun("ProcessInit", 1, ATfalse);
   ATprotectAFun(f);
   return f;
 }
@@ -3168,6 +3190,12 @@ ATermAppl gsMakeForall()
 }
 
 inline
+ATermAppl gsMakeGlobVarSpec(ATermList DataVarId_0)
+{
+  return ATmakeAppl1(gsAFunGlobVarSpec(), (ATerm) DataVarId_0);
+}
+
+inline
 ATermAppl gsMakeHide(ATermList String_0, ATermAppl ProcExpr_1)
 {
   return ATmakeAppl2(gsAFunHide(), (ATerm) String_0, (ATerm) ProcExpr_1);
@@ -3216,21 +3244,21 @@ ATermAppl gsMakeLambda()
 }
 
 inline
-ATermAppl gsMakeLinProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl LinearProcess_2, ATermAppl LinearProcessInit_3)
+ATermAppl gsMakeLinProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl LinearProcess_3, ATermAppl LinearProcessInit_4)
 {
-  return ATmakeAppl4(gsAFunLinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) LinearProcess_2, (ATerm) LinearProcessInit_3);
+  return ATmakeAppl5(gsAFunLinProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) LinearProcess_3, (ATerm) LinearProcessInit_4);
 }
 
 inline
-ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList DataVarId_1, ATermList LinearProcessSummand_2)
+ATermAppl gsMakeLinearProcess(ATermList DataVarId_0, ATermList LinearProcessSummand_1)
 {
-  return ATmakeAppl3(gsAFunLinearProcess(), (ATerm) DataVarId_0, (ATerm) DataVarId_1, (ATerm) LinearProcessSummand_2);
+  return ATmakeAppl2(gsAFunLinearProcess(), (ATerm) DataVarId_0, (ATerm) LinearProcessSummand_1);
 }
 
 inline
-ATermAppl gsMakeLinearProcessInit(ATermList DataVarId_0, ATermList DataVarIdInit_1)
+ATermAppl gsMakeLinearProcessInit(ATermList DataVarIdInit_0)
 {
-  return ATmakeAppl2(gsAFunLinearProcessInit(), (ATerm) DataVarId_0, (ATerm) DataVarIdInit_1);
+  return ATmakeAppl1(gsAFunLinearProcessInit(), (ATerm) DataVarIdInit_0);
 }
 
 inline
@@ -3288,9 +3316,9 @@ ATermAppl gsMakeOpId(ATermAppl String_0, ATermAppl SortExpr_1)
 }
 
 inline
-ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermAppl PBEqnSpec_1, ATermAppl PBInit_2)
+ATermAppl gsMakePBES(ATermAppl DataSpec_0, ATermAppl GlobVarSpec_1, ATermAppl PBEqnSpec_2, ATermAppl PBInit_3)
 {
-  return ATmakeAppl3(gsAFunPBES(), (ATerm) DataSpec_0, (ATerm) PBEqnSpec_1, (ATerm) PBInit_2);
+  return ATmakeAppl4(gsAFunPBES(), (ATerm) DataSpec_0, (ATerm) GlobVarSpec_1, (ATerm) PBEqnSpec_2, (ATerm) PBInit_3);
 }
 
 inline
@@ -3348,15 +3376,15 @@ ATermAppl gsMakePBEqn(ATermAppl FixPoint_0, ATermAppl PropVarDecl_1, ATermAppl P
 }
 
 inline
-ATermAppl gsMakePBEqnSpec(ATermList DataVarId_0, ATermList PBEqn_1)
+ATermAppl gsMakePBEqnSpec(ATermList PBEqn_0)
 {
-  return ATmakeAppl2(gsAFunPBEqnSpec(), (ATerm) DataVarId_0, (ATerm) PBEqn_1);
+  return ATmakeAppl1(gsAFunPBEqnSpec(), (ATerm) PBEqn_0);
 }
 
 inline
-ATermAppl gsMakePBInit(ATermList DataVarId_0, ATermAppl PropVarInst_1)
+ATermAppl gsMakePBInit(ATermAppl PropVarInst_0)
 {
-  return ATmakeAppl2(gsAFunPBInit(), (ATerm) DataVarId_0, (ATerm) PropVarInst_1);
+  return ATmakeAppl1(gsAFunPBInit(), (ATerm) PropVarInst_0);
 }
 
 inline
@@ -3366,9 +3394,9 @@ ATermAppl gsMakeParamId(ATermAppl String_0, ATermList DataExpr_1)
 }
 
 inline
-ATermAppl gsMakeProcEqn(ATermList DataVarId_0, ATermAppl ProcVarId_1, ATermList DataVarId_2, ATermAppl ProcExpr_3)
+ATermAppl gsMakeProcEqn(ATermAppl ProcVarId_0, ATermList DataVarId_1, ATermAppl ProcExpr_2)
 {
-  return ATmakeAppl4(gsAFunProcEqn(), (ATerm) DataVarId_0, (ATerm) ProcVarId_1, (ATerm) DataVarId_2, (ATerm) ProcExpr_3);
+  return ATmakeAppl3(gsAFunProcEqn(), (ATerm) ProcVarId_0, (ATerm) DataVarId_1, (ATerm) ProcExpr_2);
 }
 
 inline
@@ -3378,9 +3406,9 @@ ATermAppl gsMakeProcEqnSpec(ATermList ProcEqn_0)
 }
 
 inline
-ATermAppl gsMakeProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl ProcEqnSpec_2, ATermAppl ProcInit_3)
+ATermAppl gsMakeProcSpec(ATermAppl DataSpec_0, ATermAppl ActSpec_1, ATermAppl GlobVarSpec_2, ATermAppl ProcEqnSpec_3, ATermAppl ProcInit_4)
 {
-  return ATmakeAppl4(gsAFunProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) ProcEqnSpec_2, (ATerm) ProcInit_3);
+  return ATmakeAppl5(gsAFunProcSpec(), (ATerm) DataSpec_0, (ATerm) ActSpec_1, (ATerm) GlobVarSpec_2, (ATerm) ProcEqnSpec_3, (ATerm) ProcInit_4);
 }
 
 inline
@@ -3406,9 +3434,9 @@ ATermAppl gsMakeProcessAssignment(ATermAppl ProcVarId_0, ATermList DataVarIdInit
 }
 
 inline
-ATermAppl gsMakeProcessInit(ATermList DataVarId_0, ATermAppl ProcExpr_1)
+ATermAppl gsMakeProcessInit(ATermAppl ProcExpr_0)
 {
-  return ATmakeAppl2(gsAFunProcessInit(), (ATerm) DataVarId_0, (ATerm) ProcExpr_1);
+  return ATmakeAppl1(gsAFunProcessInit(), (ATerm) ProcExpr_0);
 }
 
 inline

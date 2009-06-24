@@ -62,7 +62,6 @@
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
-#include "mcrl2/process/process_initialization.h"
 #include "mcrl2/process/process_equation.h"
 #include <mcrl2/process/process_specification.h>
 
@@ -7066,19 +7065,24 @@ mcrl2::lps::specification linearise_std(
                  const t_lin_options lin_options)
 { specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
-                                action_label_list(type_checked_spec.init().global_variables()),
+                                action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 type_checked_spec.data(),
                                 lin_options);
-  process_identifier init=spec.storeinit(type_checked_spec.init().expression());
+  process_identifier init=spec.storeinit(type_checked_spec.init());
 
   //linearise spec
   variable_list parameters;
   assignment_list initial_state;
   const summand_list result = spec.transform(init,parameters,initial_state);
 
-  linear_process lps(spec.SieveProcDataVarsSummands(
-                           spec.procdatavars,result,parameters),
-                           parameters,
+  // compute global variables
+  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.procdatavars,result,parameters);
+  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.procdatavars,initial_state,parameters);
+  atermpp::set<data::variable> global_variables;
+  global_variables.insert(globals1.begin(), globals1.end());
+  global_variables.insert(globals2.begin(), globals2.end());
+
+  linear_process lps(      parameters,  
                            deadlock_summand_vector(),
                            action_summand_vector());
   lps.set_summands(result);
@@ -7086,10 +7090,9 @@ mcrl2::lps::specification linearise_std(
   lps::specification spec1(
               spec.data,
               spec.acts,
+              global_variables,
               lps,
-              process_initializer(spec.SieveProcDataVarsAssignments(
-                                            spec.procdatavars,initial_state,parameters),
-                                  initial_state));
+              process_initializer(initial_state));
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);

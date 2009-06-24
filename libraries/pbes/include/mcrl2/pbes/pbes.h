@@ -39,7 +39,6 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
-#include "mcrl2/pbes/detail/pbes_initializer.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/global_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
@@ -113,8 +112,8 @@ std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator l
 }
 
 /// \brief parameterized boolean equation system
-// <PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
-// <PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
+// <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
+// <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
 template <typename Container = atermpp::vector<pbes_equation> >
 class pbes
 {
@@ -146,22 +145,16 @@ class pbes
     {
       atermpp::aterm_appl::iterator i = t.begin();
       m_data          = atermpp::aterm_appl(*i++);
+
+      data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
+      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+
       atermpp::aterm_appl eqn_spec = *i++;
-      detail::pbes_initializer init = detail::pbes_initializer(*i);
-
-      m_initial_state = init.variable();
-      data::variable_list freevars(atermpp::term_list_iterator< data::variable >(
-                           reinterpret_cast< ATermList >(static_cast< ATerm >(eqn_spec(0)))),
-                        atermpp::term_list_iterator< data::variable >());
-      data::variable_list init_freevars = init.global_variables();
-      pbes_equation_list eqn = eqn_spec(1);
-
-      // combine the free variables of the equations and the initial state
-      m_global_variables.clear();
-      m_global_variables.insert(freevars.begin(), freevars.end());
-      m_global_variables.insert(init_freevars.begin(), init_freevars.end());
-
+      pbes_equation_list eqn = eqn_spec(0);
       m_equations = Container(eqn.begin(), eqn.end());
+
+      atermpp::aterm_appl init = atermpp::aterm_appl(*i);
+      m_initial_state = atermpp::aterm_appl(init(0));
     }
 
     /// \brief Returns the predicate variables appearing in the left hand side of an equation.
@@ -341,7 +334,7 @@ class pbes
 
     /// \brief Returns the initial state.
     /// \return The initial state.
-    propositional_variable_instantiation initial_state() const
+    const propositional_variable_instantiation& initial_state() const
     {
       return m_initial_state;
     }
@@ -454,11 +447,10 @@ class pbes
     operator ATermAppl() const
     {
       // convert the equation system to ATerm format
-      atermpp::term_list< data::variable > global_variables(m_global_variables.begin(), m_global_variables.end());
-      pbes_equation_list equations(m_equations.begin(), m_equations.end());
       return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data),
-             core::detail::gsMakePBEqnSpec(global_variables, equations),
-               detail::pbes_initializer(global_variables, m_initial_state));
+        core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(m_global_variables)),
+        core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(m_equations)),
+        m_initial_state);
     }
 
     /// \brief Returns the set of binding variables of the pbes.

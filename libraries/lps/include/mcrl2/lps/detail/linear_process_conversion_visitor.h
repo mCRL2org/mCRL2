@@ -411,11 +411,11 @@ namespace detail {
       m_equation = p.equations().front();
 
       // Check 2) The initial process must be a process instance
-      if (!is_process_instance(p.init().expression()))
+      if (!is_process_instance(p.init()))
       {
         throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process has an unexpected value");
       }
-      process_instance init = p.init().expression();
+      process_instance init = p.init();
 
       // Check 3) The process equation and and the initial process instance must match
       if (!match_initial_process(m_equation, init))
@@ -426,9 +426,9 @@ namespace detail {
       // Do the conversion
       convert(m_equation);
 
-      lps::linear_process proc(m_equation.global_variables(), m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
-      lps::process_initializer proc_init(m_equation.global_variables(), data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
-      return lps::specification(p.data(), p.action_labels(), proc, proc_init);
+      lps::linear_process proc(m_equation.formal_parameters(), m_deadlock_summands, m_action_summands);
+      lps::process_initializer proc_init(data::make_assignment_list(m_equation.formal_parameters(), init.actual_parameters()));
+      return lps::specification(p.data(), p.action_labels(), p.global_variables(), proc, proc_init);
     }
   };
 

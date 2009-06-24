@@ -518,7 +518,6 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   }
 
   mcrl2::lps::linear_process new_lps;
-  new_lps.global_variables() = m_lps.global_variables();
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
   new_lps.set_summands(mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
 
@@ -586,7 +585,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
     new_ass_right.erase( new_ass_right.begin() );
   }
 
-  mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer (m_init_process.global_variables(), mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()) );
+  mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer (mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()) );
   gsDebugMsg("%s\n", pp( new_init ).c_str() );
  
   return new_init;

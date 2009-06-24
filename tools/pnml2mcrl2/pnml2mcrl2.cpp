@@ -1108,7 +1108,7 @@ static ATermList pn2gsGenerateActionsTrans(){
       gsDebugMsg("No in and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeParamId(MonitorAction, ATmakeList0());
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
 
     } else if (ATtableGet(context.trans_in, TransID) && !(ATtableGet(context.trans_out, TransID))) {
@@ -1116,11 +1116,11 @@ static ATermList pn2gsGenerateActionsTrans(){
       gsDebugMsg("In and no out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeParamId(CurrentTransIn, ATmakeList0()), gsMakeParamId(MonitorAction, ATmakeList0()));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
       Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTransIn);
 
     } else if (!(ATtableGet(context.trans_in, TransID)) && ATtableGet(context.trans_out, TransID)) {
@@ -1128,11 +1128,11 @@ static ATermList pn2gsGenerateActionsTrans(){
       gsDebugMsg("Out and no in for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeParamId(CurrentTransOut, ATmakeList0()), gsMakeParamId(MonitorAction, ATmakeList0()));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_out
       Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTransOut);
 
     } else if (ATtableGet(context.trans_in, TransID) && ATtableGet(context.trans_out, TransID)) {
@@ -1140,15 +1140,15 @@ static ATermList pn2gsGenerateActionsTrans(){
       gsDebugMsg("In and out for trans: %T\n", (ATerm)CurrentTrans);
       // create T_ti
       Process = gsMakeSync(gsMakeSync(gsMakeParamId(CurrentTransIn, ATmakeList0()), gsMakeParamId(CurrentTransOut, ATmakeList0())), gsMakeParamId(MonitorAction, ATmakeList0()));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTrans);
       // create T_ti_in
       Process = pn2gsSyncIn((ATermList)ATtableGet(context.trans_in, TransID));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTransIn, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTransIn);
       // create T_ti_out
       Process = pn2gsSyncOut((ATermList)ATtableGet(context.trans_out, TransID));
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTransOut, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentTransOut);
     }
     return EquationList;
@@ -1328,7 +1328,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
       // create P_pi
       Process = gsMakeChoice(gsMakeChoice(SubProcess0, SubProcess1), SubProcess2);
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlace, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()))), ATmakeList1((ATerm)ProcVar), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentPlace, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()))), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlace);
     }
 
@@ -1339,7 +1339,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl CondThen = gsMakeSync(gsMakeParamId(CurrentPlaceIn, ATmakeList0()), gsMakeParamId(CurrentPlaceAdd, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax,Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceIn, ATmakeList0());
       ATermAppl Process = gsMakeIfThenElse(CondIf, CondThen, CondElse);
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()))), ATmakeList1((ATerm)ProcVar), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentPlaceAdd, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()))), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceAdd);
     }
 
@@ -1351,7 +1351,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       } else {
   Process = pn2gsChoiceIn((ATermList)ATtableGet(context.place_in, PlaceID));
       }
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceIn, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentPlaceIn, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceIn);
     }
 
@@ -1362,7 +1362,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       ATermAppl CondThen = gsMakeSync(gsMakeParamId(CurrentPlaceOut, ATmakeList0()), gsMakeParamId(CurrentPlaceRem, ATmakeList1((ATerm)pn2gsMakeDataApplProd2(OpMax, Number1, pn2gsMakeDataApplProd2(OpSubt,ProcVar, Number1)))));
       ATermAppl CondElse = gsMakeParamId(CurrentPlaceOut, ATmakeList0());
       ATermAppl Process = gsMakeIfThenElse(CondIf, CondThen, CondElse);
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()))), ATmakeList1((ATerm)ProcVar), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentPlaceRem, ATmakeList1((ATerm)static_cast<ATermAppl>(mcrl2::data::sort_pos::pos()))), ATmakeList1((ATerm)ProcVar), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceRem);
     }
 
@@ -1374,7 +1374,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
       } else {
   Process = pn2gsChoiceOut((ATermList)ATtableGet(context.place_out, PlaceID));
       }
-      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentPlaceOut, ATmakeList0()), ATmakeList0(), Process));
+      EquationList = ATinsert(EquationList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentPlaceOut, ATmakeList0()), ATmakeList0(), Process));
       gsDebugMsg("Process: %T created.\n", CurrentPlaceOut);
     }
 
@@ -1618,7 +1618,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // Also, the transition-processes should be extended with: " . T_ti "
     if (ATisEmpty(context.transitions) == ATtrue) {
       // there are no transitions
-      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeDelta()));
+      ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeDelta()));
     } else {
       // there are transitions
 
@@ -1626,10 +1626,10 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
       // ***** Changed by Yarick 29.05.2006 to add error action ****
       if(!error){
-  ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+  ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(context.transitions), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
       }
       else {
-  ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(ATinsert(context.transitions,(ATerm)gsString2ATermAppl("error"))), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
+  ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(gsString2ATermAppl("Trans"), ATmakeList0()), ATmakeList0(), gsMakeSeq(pn2gsChoiceIn(ATinsert(context.transitions,(ATerm)gsString2ATermAppl("error"))), gsMakeParamId(gsString2ATermAppl("Trans"), ATmakeList0()))));
       }
       // ***** end changed by Yarick.
     }
@@ -1705,7 +1705,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATermList Place_procs=ATtableKeys(context.place_process_name);
     ProcessList =
       ATinsert(ProcessList,
-         (ATerm)gsMakeProcEqn(ATmakeList0(),
+         (ATerm)gsMakeProcEqn(
             gsMakeProcVarId(gsString2ATermAppl("PetriNet"),
                 pn2gsPlacesParameterTypes(Place_procs)),
             pn2gsPlacesParameters(Place_procs),
@@ -1720,7 +1720,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // "..." is the initial marking of all places
 
     Process = gsMakeParamId(gsString2ATermAppl("PetriNet"), pn2gsInitialMarkings(Place_procs));
-    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
+    ProcessList = ATinsert(ProcessList, (ATerm)gsMakeProcEqn(gsMakeProcVarId(NetID, ATmakeList0()), ATmakeList0(), Process));
     gsDebugMsg("Process %T added (the whole list: %T).\n", NetID, ProcessList);
 
     //Now reverse the whole thing
@@ -2230,8 +2230,9 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     ATermAppl Result=gsMakeProcSpec(Prelude,
           gsMakeActSpec(Actions),
+          gsMakeGlobVarSpec(ATmakeList0()),
           gsMakeProcEqnSpec(ProcEqns),
-          gsMakeProcessInit(ATmakeList0(),gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
+          gsMakeProcessInit(gsMakeParamId(ATAgetArgument(Spec, 3), ATmakeList0()))
           );
 
     // ***** Changed by Yarick 29.05.2006 to add error action ****
@@ -2698,7 +2699,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 
     // extra equation
     EquationList = ATinsert(EquationList,
-          (ATerm)gsMakeProcEqn(ATmakeList0(),
+          (ATerm)gsMakeProcEqn(
              gsMakeProcVarId(LeftName, LeftType),
              (Type)?pn2gsMakeDataVarIds(VarNames,Type):ATmakeList0(),
              pn2gsMakeMultiAction(mult,(Type)?pn2gsMakeListOfLists(pn2gsMakeIds(VarNames)):ATmakeList0())));
@@ -2777,14 +2778,14 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 // 	//generate the additional process
 // 	if(i>0 || j>0)
 // 	  EquationList = ATinsert(EquationList,
-// 				    (ATerm)gsMakeProcEqn(ATmakeList0(),
+// 				    (ATerm)gsMakeProcEqn(
 // 							 gsMakeProcVarId(LeftName, ATmakeList0()),
 // 							 ATmakeList0(),
 // 							 pn2gsGenerateP_pi_a(InActionLists,OutActionLists,NULL)));
 // 	//in case there are resets
 // 	if(l>0)
 // 	  EquationList = ATinsert(EquationList,
-// 				  (ATerm)gsMakeProcEqn(ATmakeList0(),
+// 				  (ATerm)gsMakeProcEqn(
 // 						       gsMakeProcVarId(LeftNameResets, ATmakeList0()),
 // 						       ATmakeList0(),
 // 						       pn2gsGenerateP_pi_a(InActionLists,OutActionLists,ResetActionLists)));
@@ -2833,13 +2834,13 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
 // 	if(i>0) InActionLists=pn2gsGetActionLists(i,ActsIn);
 // 	//generate the additional process
 // 	EquationList = ATinsert(EquationList,
-// 				(ATerm)gsMakeProcEqn(ATmakeList0(),
+// 				(ATerm)gsMakeProcEqn(
 // 						     gsMakeProcVarId(LeftName, ATmakeList0()),
 // 						     ATmakeList0(),
 // 						     pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,NULL)));
 // 	if(l>0)
 // 	  EquationList = ATinsert(EquationList,
-// 				  (ATerm)gsMakeProcEqn(ATmakeList0(),
+// 				  (ATerm)gsMakeProcEqn(
 // 						       gsMakeProcVarId(LeftNameResets, ATmakeList0()),
 // 						       ATmakeList0(),
 // 						       pn2gsGenerateP_pi_a(InActionLists,InhibitorActionLists,ResetActionLists)));
@@ -2885,7 +2886,7 @@ static ATermList pn2gsGeneratePlaceAlternative(ATerm PlaceID){
   //make process P_pi and add it
   ATermAppl VarX=gsMakeDataVarId(ATAgetArgument(IdX,0),(Type)?static_cast<ATermAppl>(mcrl2::data::sort_bag::bag(mcrl2::data::sort_expression(Type))):static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()));
   EquationList = ATinsert(EquationList,
-        (ATerm)gsMakeProcEqn(ATmakeList0(),
+        (ATerm)gsMakeProcEqn(
                  gsMakeProcVarId(CurrentPlace,
                      ATmakeList1((ATerm)((Type)?static_cast<ATermAppl>(mcrl2::data::sort_bag::bag(mcrl2::data::sort_expression(Type))):static_cast<ATermAppl>(mcrl2::data::sort_nat::nat())))),
                  ATmakeList1((ATerm)VarX),
@@ -3090,7 +3091,7 @@ static ATermAppl pn2gsMakeMultiAction(ATermList ActionList, ATermList ParamList)
 
     //gsVerboseMsg("Body: %T\n\n",Body);
 
-    return ATmakeList1((ATerm)gsMakeProcEqn(ATmakeList0(), gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Body));
+    return ATmakeList1((ATerm)gsMakeProcEqn(gsMakeProcVarId(CurrentTrans, ATmakeList0()), ATmakeList0(), Body));
   }
 
 static ATermList pn2gsMakeSendActions(ATermList ReadActions){

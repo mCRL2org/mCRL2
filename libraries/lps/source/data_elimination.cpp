@@ -53,17 +53,9 @@ specification remove_unused_data(specification& spec, bool keep_basis)
 
 	add_used(spec.initial_process().state(),elim);
 
-	variable_list::iterator vb = spec.initial_process().global_variables().begin();
-	variable_list::iterator ve = spec.initial_process().global_variables().end();
-	for (; vb != ve; vb++)
+	for (atermpp::set<data::variable>::const_iterator i = spec.global_variables().begin(); i != spec.global_variables().end(); ++i)
 	{
-		elim.keep_sort(vb->sort());
-	}
-	vb = l.global_variables().begin();
-	ve = l.global_variables().end();
-	for (; vb != ve; vb++)
-	{
-		elim.keep_sort(vb->sort());
+		elim.keep_sort(i->sort());
 	}
 
   summand_list summands = l.summands();

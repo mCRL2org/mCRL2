@@ -109,7 +109,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %token <appl> SLASH STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK
 %token <appl> EXCLAM AT HASH BAR
 %token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
-%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWPROC KWPBES KWINIT
+%token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWGLOB KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
 %token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
@@ -150,8 +150,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> id_assignment proc_quant ren_expr comm_expr comm_expr_lhs
 %type <appl> mult_act_name
 //process specifications
-%type <appl> proc_spec proc_spec_elt act_spec proc_eqn_spec proc_eqn_decl
-%type <appl> proc_init
+%type <appl> proc_spec proc_spec_elt act_spec glob_var_spec proc_eqn_spec
+%type <appl> proc_eqn_decl proc_init
 //state formulas
 %type <appl> state_frm state_frm_quant state_frm_imp state_frm_imp_rhs
 %type <appl> state_frm_and state_frm_and_rhs state_frm_prefix
@@ -170,7 +170,8 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> pb_expr pb_expr_quant pb_expr_imp pb_expr_imp_rhs pb_expr_and
 %type <appl> pb_expr_and_rhs pb_expr_not pb_expr_quant_not pb_expr_primary
 //PBES's
-%type <appl> pbes_spec pbes_spec_elt pb_eqn_spec pb_eqn_decl fixpoint pb_init
+%type <appl> pbes_spec pbes_spec_elt pb_eqn_spec pb_eqn_decl
+%type <appl> fixpoint pb_init
 
 //sort expressions
 %type <list> domain_no_arrow domain_no_arrow_elts_hs struct_constructors_bs
@@ -1845,6 +1846,11 @@ proc_spec_elt:
       safe_assign($$, $1);
       gsDebugMsg("parsed process specification element\n  %T\n", $$);
     }
+  | glob_var_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+    }
   | proc_eqn_spec
     {
       safe_assign($$, $1);
@@ -1903,6 +1909,15 @@ acts_decl:
     }
   ;
 
+//global variable specification
+glob_var_spec:
+  KWGLOB data_vars_decls_scs
+    {
+      safe_assign($$, gsMakeGlobVarSpec($2));
+      gsDebugMsg("parsed global variables\n  %T\n", $$);
+    }
+  ;
+
 //process equation specification
 proc_eqn_spec:
   KWPROC proc_eqn_decls_scs
@@ -1931,7 +1946,7 @@ proc_eqn_decl:
   ID EQUALS proc_expr
     {
       safe_assign($$, gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
+        gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
       gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
@@ -1942,7 +1957,7 @@ proc_eqn_decl:
         SortExprs = ATinsert(SortExprs, ATgetArgument(ATAelementAt($3, i), 1));
       }
       safe_assign($$, gsMakeProcEqn(
-        ATmakeList0(), gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
+        gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
       gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
     }
   ;
@@ -1951,7 +1966,7 @@ proc_eqn_decl:
 proc_init:
   KWINIT proc_expr SEMICOLON
     {
-      safe_assign($$, gsMakeProcessInit(ATmakeList0(), $2));
+      safe_assign($$, gsMakeProcessInit($2));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
@@ -2828,6 +2843,11 @@ pbes_spec_elt:
       safe_assign($$, $1);
      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
     }
+  | glob_var_spec
+    {
+      safe_assign($$, $1);
+      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+    }
   | pb_eqn_spec
     {
       safe_assign($$, $1);
@@ -2844,12 +2864,7 @@ pbes_spec_elt:
 pb_eqn_spec:
   KWPBES pb_eqn_decls_scs
     {
-      safe_assign($$, gsMakePBEqnSpec(ATmakeList0(), ATreverse($2)));
-      gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
-    }
-  | KWVAR data_vars_decls_scs KWPBES pb_eqn_decls_scs
-    {
-      safe_assign($$, gsMakePBEqnSpec($2, ATreverse($4)));
+      safe_assign($$, gsMakePBEqnSpec(ATreverse($2)));
       gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
     }
   ;
@@ -2902,14 +2917,8 @@ fixpoint:
 pb_init:
   KWINIT param_id SEMICOLON
     {
-      safe_assign($$, gsMakePBInit(ATmakeList0(),
-        gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
-      gsDebugMsg("parsed initialisation\n  %T\n", $$);
-    }
-  | KWVAR data_vars_decls_scs KWINIT param_id SEMICOLON
-    {
-      safe_assign($$, gsMakePBInit($2,
-        gsMakePropVarInst(ATAgetArgument($4, 0), ATLgetArgument($4, 1))));
+      safe_assign($$,
+        gsMakePBInit(gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
       gsDebugMsg("parsed initialisation\n  %T\n", $$);
     }
   ;
@@ -2965,6 +2974,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   ATermList ConsDecls = ATmakeList0();
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
+  ATermList GlobVars = ATmakeList0();
   ATermList ActDecls = ATmakeList0();
   ATermList ProcEqnDecls = ATmakeList0();
   ATermAppl ProcInit = NULL;
@@ -2981,7 +2991,9 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       }
     } else {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsSortSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt)) {
+        GlobVars = ATconcat(GlobVars, SpecEltArg0);
+      } else if (gsIsSortSpec(SpecElt)) {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
       } else if (gsIsConsSpec(SpecElt)) {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
@@ -3009,6 +3021,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       gsMakeDataEqnSpec(DataEqnDecls)
     ),
     gsMakeActSpec(ActDecls),
+    gsMakeGlobVarSpec(GlobVars),
     gsMakeProcEqnSpec(ProcEqnDecls),
     ProcInit
   );
@@ -3027,6 +3040,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   ATermList ConsDecls = ATmakeList0();
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
+  ATermList GlobVars = ATmakeList0();
   ATermAppl PBEqnSpec = NULL;
   ATermAppl PBInit = NULL;
   int n = ATgetLength(SpecElts);
@@ -3050,7 +3064,9 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       }
     } else {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsSortSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt)) {
+        GlobVars = ATconcat(GlobVars, SpecEltArg0);
+      } else if (gsIsSortSpec(SpecElt)) {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
       } else if (gsIsConsSpec(SpecElt)) {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
@@ -3078,6 +3094,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       gsMakeMapSpec(MapDecls),
       gsMakeDataEqnSpec(DataEqnDecls)
     ),
+    gsMakeGlobVarSpec(GlobVars),
     PBEqnSpec,
     PBInit
   );

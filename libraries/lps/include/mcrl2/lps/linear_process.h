@@ -37,12 +37,10 @@ class linear_process; // prototype declaration
 ///////////////////////////////////////////////////////////////////////////////
 // linear_process
 /// \brief linear process.
+// <LinearProcess> ::= LinearProcess(<DataVarId>*, <LinearProcessSummand>*)
 class linear_process
 {
   protected:
-    /// \brief The free variables of the process
-    data::variable_list m_global_variables;
-
     /// \brief The process parameters of the process
     data::variable_list m_process_parameters;
 
@@ -58,13 +56,11 @@ class linear_process
     {}
 
     /// \brief Constructor.
-    linear_process(data::variable_list free_variables,
-        data::variable_list process_parameters,
+    linear_process(data::variable_list process_parameters,
         const deadlock_summand_vector& deadlock_summands,
         const action_summand_vector& action_summands
        )
      :
-       m_global_variables    (free_variables    ),
        m_process_parameters(process_parameters),
        m_deadlock_summands (deadlock_summands ),
        m_action_summands   (action_summands   )
@@ -97,7 +93,6 @@ class linear_process
 
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
-      m_global_variables = *i++;
       m_process_parameters = *i++;
       set_summands(*i);
     }
@@ -155,20 +150,6 @@ class linear_process
       return m_deadlock_summands;
     }
 
-    /// \brief Returns the sequence of free variables.
-    /// \return The sequence of free variables.
-    const data::variable_list& global_variables() const
-    {
-      return m_global_variables;
-    }
-
-    /// \brief Returns the sequence of free variables.
-    /// \return The sequence of free variables.
-    data::variable_list& global_variables()
-    {
-      return m_global_variables;
-    }
-
     /// \brief Returns the sequence of process parameters.
     /// \return The sequence of process parameters.
     const data::variable_list& process_parameters() const
@@ -205,7 +186,6 @@ inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
   return core::detail::gsMakeLinearProcess(
-    p.global_variables(),
     p.process_parameters(),
     p.summands()
   );

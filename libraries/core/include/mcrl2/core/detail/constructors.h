@@ -45,7 +45,7 @@ ATermList constructList()
 
 //--- begin generated code
 ATermAppl constructBooleanOr();
-ATermAppl constructProcEqn();
+ATermAppl constructStateOr();
 ATermAppl constructHide();
 ATermAppl constructSortArrow();
 ATermAppl constructProcessAssignment();
@@ -154,7 +154,7 @@ ATermAppl constructPBESTrue();
 ATermAppl constructMultActName();
 ATermAppl constructIfThenElse();
 ATermAppl constructNil();
-ATermAppl constructStateOr();
+ATermAppl constructProcEqn();
 ATermAppl constructStructProj();
 ATermAppl constructPBEqn();
 ATermAppl constructWhr();
@@ -173,6 +173,7 @@ ATermAppl constructSortBag();
 ATermAppl constructPBInit();
 ATermAppl constructActTrue();
 ATermAppl constructRegTransOrNil();
+ATermAppl constructGlobVarSpec();
 ATermAppl constructActSpec();
 ATermAppl constructId();
 ATermAppl constructSortExpr();
@@ -211,19 +212,19 @@ ATermAppl constructBooleanOr()
   return t;
 }
 
-// ProcEqn
+// StateOr
 inline
-ATermAppl initConstructProcEqn(ATermAppl& t)
+ATermAppl initConstructStateOr(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunProcEqn(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
+  t = ATmakeAppl2(gsAFunStateOr(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructProcEqn()
+ATermAppl constructStateOr()
 {
-  static ATermAppl t = initConstructProcEqn(t);
+  static ATermAppl t = initConstructStateOr(t);
   return t;
 }
 
@@ -775,7 +776,7 @@ ATermAppl constructProcVarId()
 inline
 ATermAppl initConstructProcessInit(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunProcessInit(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
+  t = ATmakeAppl1(gsAFunProcessInit(), reinterpret_cast<ATerm>(constructProcExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -855,7 +856,7 @@ ATermAppl constructBooleanAnd()
 inline
 ATermAppl initConstructLinProcSpec(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunLinProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructLinearProcess()), reinterpret_cast<ATerm>(constructLinearProcessInit()));
+  t = ATmakeAppl5(gsAFunLinProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructLinearProcess()), reinterpret_cast<ATerm>(constructLinearProcessInit()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -903,7 +904,7 @@ ATermAppl constructChoice()
 inline
 ATermAppl initConstructLinearProcessInit(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunLinearProcessInit(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl1(gsAFunLinearProcessInit(), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1063,7 +1064,7 @@ ATermAppl constructMu()
 inline
 ATermAppl initConstructPBEqnSpec(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunPBEqnSpec(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl1(gsAFunPBEqnSpec(), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1191,7 +1192,7 @@ ATermAppl constructActExists()
 inline
 ATermAppl initConstructProcSpec(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
+  t = ATmakeAppl5(gsAFunProcSpec(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructActSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructProcEqnSpec()), reinterpret_cast<ATerm>(constructProcInit()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1735,7 +1736,7 @@ ATermAppl constructActionRenameSpec()
 inline
 ATermAppl initConstructPBES(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunPBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructPBEqnSpec()), reinterpret_cast<ATerm>(constructPBInit()));
+  t = ATmakeAppl4(gsAFunPBES(), reinterpret_cast<ATerm>(constructDataSpec()), reinterpret_cast<ATerm>(constructGlobVarSpec()), reinterpret_cast<ATerm>(constructPBEqnSpec()), reinterpret_cast<ATerm>(constructPBInit()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1783,7 +1784,7 @@ ATermAppl constructActionRenameRule()
 inline
 ATermAppl initConstructLinearProcess(ATermAppl& t)
 {
-  t = ATmakeAppl3(gsAFunLinearProcess(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
+  t = ATmakeAppl2(gsAFunLinearProcess(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructList()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1955,19 +1956,19 @@ ATermAppl constructNil()
   return t;
 }
 
-// StateOr
+// ProcEqn
 inline
-ATermAppl initConstructStateOr(ATermAppl& t)
+ATermAppl initConstructProcEqn(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunStateOr(), reinterpret_cast<ATerm>(constructStateFrm()), reinterpret_cast<ATerm>(constructStateFrm()));
+  t = ATmakeAppl3(gsAFunProcEqn(), reinterpret_cast<ATerm>(constructProcVarId()), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructProcExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
 
 inline
-ATermAppl constructStateOr()
+ATermAppl constructProcEqn()
 {
-  static ATermAppl t = initConstructStateOr(t);
+  static ATermAppl t = initConstructProcEqn(t);
   return t;
 }
 
@@ -2215,7 +2216,7 @@ ATermAppl constructSortBag()
 inline
 ATermAppl initConstructPBInit(ATermAppl& t)
 {
-  t = ATmakeAppl2(gsAFunPBInit(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructPropVarInst()));
+  t = ATmakeAppl1(gsAFunPBInit(), reinterpret_cast<ATerm>(constructPropVarInst()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -2256,6 +2257,22 @@ inline
 ATermAppl constructRegTransOrNil()
 {
   static ATermAppl t = initConstructRegTransOrNil(t);
+  return t;
+}
+
+// GlobVarSpec
+inline
+ATermAppl initConstructGlobVarSpec(ATermAppl& t)
+{
+  t = ATmakeAppl1(gsAFunGlobVarSpec(), reinterpret_cast<ATerm>(constructList()));
+  ATprotect(reinterpret_cast<ATerm*>(&t));
+  return t;
+}
+
+inline
+ATermAppl constructGlobVarSpec()
+{
+  static ATermAppl t = initConstructGlobVarSpec(t);
   return t;
 }
 

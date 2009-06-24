@@ -722,6 +722,7 @@ lps::specification action_rename(
   specification lps_new_spec = specification(
                                           lps_old_spec.data(),
                                           all,
+                                          lps_old_spec.global_variables(),
                                           new_process,
                                           lps_old_spec.initial_process());
 

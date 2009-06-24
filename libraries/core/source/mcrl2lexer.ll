@@ -135,6 +135,7 @@ map        { process_string(); return KWMAP; }
 var        { process_string(); return KWVAR; }
 eqn        { process_string(); return KWEQN; }
 act        { process_string(); return KWACT; }
+glob       { process_string(); return KWGLOB; }
 proc       { process_string(); return KWPROC; }
 pbes       { process_string(); return KWPBES; }
 init       { process_string(); return KWINIT; }

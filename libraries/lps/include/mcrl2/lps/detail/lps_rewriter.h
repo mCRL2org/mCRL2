@@ -132,7 +132,7 @@ namespace detail {
     /// \param s A process_initializer
     void rewrite(process_initializer& i) const
     {
-      i = process_initializer(i.global_variables(), rewrite_list_copy(i.assignments()));
+      i = process_initializer(rewrite_list_copy(i.assignments()));
     }
   
     /// \brief Applies the rewriter to a linear_process

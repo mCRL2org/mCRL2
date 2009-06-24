@@ -102,10 +102,10 @@ static void PRINT_FUNC(PrintPart_BagEnum)(PRINT_OUTTYPE OutStream,
 
 
 static void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream,
-  const ATermList DataEqns, t_pp_format, bool ShowSorts, int PrecLevel);
+  const ATermList Eqns, t_pp_format pp_format, bool ShowSorts, int PrecLevel);
 /*Pre: OutStream points to a stream to which can be written
-       DataEqns is an ATermList containing data equations from the internal
-       format
+       Eqns is an ATermList containing data or rename equations in the
+       internal format
        pp_format != ppInternal
        ShowSorts indicates if sorts should be shown for each equation
        PrecLevel indicates the precedence level of the context of the equations
@@ -566,7 +566,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsProcSpec(Part) || gsIsLinProcSpec(Part)) {
     //print process specification or linear process specification
     PRINT_FUNC(dbg_prints)("printing specification\n");
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
         pp_format, ShowSorts, PrecLevel);
     }
@@ -632,23 +632,31 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, "  =  ");
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3),
       pp_format, ShowSorts, 0);
-  } else if (gsIsProcEqnSpec(Part)) {
-    //print process specification
-    PRINT_FUNC(dbg_prints)("printing process specification\n");
-    PRINT_FUNC(PrintEqns)(OutStream, ATLgetArgument(Part, 0),
-      pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsLinearProcess(Part)) {
-    //print Linear process
-    PRINT_FUNC(dbg_prints)("printing LPS\n");
-    //print global variables
+  } else if (gsIsGlobVarSpec(Part)) {
+    //print global variable specification
+    PRINT_FUNC(dbg_prints)("printing global variable specification\n");
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "var  ");
+      PRINT_FUNC(fprints)(OutStream, "glob ");
       PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
+      PRINT_FUNC(fprints)(OutStream, "\n");
     }
+  } else if (gsIsProcEqnSpec(Part)) {
+    //print process equation specification
+    PRINT_FUNC(dbg_prints)("printing process equation specification\n");
+    ATermList ProcEqns = ATLgetArgument(Part, 0);
+    if (ATgetLength(ProcEqns) > 0) {
+      PRINT_FUNC(fprints)(OutStream, "proc ");
+      PRINT_FUNC(PrintPart_List)(OutStream, ProcEqns,
+        pp_format, ShowSorts, PrecLevel, ";\n", "     ");
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+  } else if (gsIsLinearProcess(Part)) {
+    //print linear process
+    PRINT_FUNC(dbg_prints)("printing linear process\n");
     //print process name and variable declarations
-    ATermList VarDecls = ATLgetArgument(Part, 1);
+    ATermList VarDecls = ATLgetArgument(Part, 0);
     int VarDeclsLength = ATgetLength(VarDecls);
     PRINT_FUNC(fprints)(OutStream, "proc P");
     if (VarDeclsLength > 0) {
@@ -658,7 +666,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     }
     PRINT_FUNC(fprints)(OutStream, " =");
     //print summations
-    ATermList Summands = ATLgetArgument(Part, 2);
+    ATermList Summands = ATLgetArgument(Part, 1);
     int SummandsLength = ATgetLength(Summands);
     if (SummandsLength == 0) {
       PRINT_FUNC(fprints)(OutStream, " delta@0;\n");
@@ -678,18 +686,18 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     }
     PRINT_FUNC(fprints)(OutStream, "\n");
   } else if (gsIsProcEqn(Part)) {
-    //print process equation (without free variables)
+    //print process equation
     PRINT_FUNC(dbg_prints)("printing process equation\n");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
-    ATermList DataVarIds = ATLgetArgument(Part, 2);
+    ATermList DataVarIds = ATLgetArgument(Part, 1);
     if (ATgetLength(DataVarIds) > 0) {
       PRINT_FUNC(fprints)(OutStream, "(");
       PRINT_FUNC(PrintDecls)(OutStream, DataVarIds, pp_format, NULL, ", ");
       PRINT_FUNC(fprints)(OutStream, ")");
     }
     PRINT_FUNC(fprints)(OutStream, " = ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 3),
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2),
       pp_format, ShowSorts, 0);
   } else if (gsIsLinearProcessSummand(Part)) {
     PRINT_FUNC(PrintLinearProcessSummand)(OutStream, Part, NULL, pp_format, ShowSorts);
@@ -697,28 +705,15 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsProcessInit(Part)) {
     //print initialisation
     PRINT_FUNC(dbg_prints)("printing initialisation\n");
-    ATermList Vars = ATLgetArgument(Part, 0);
-    if (ATgetLength(Vars) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
-        pp_format, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
-    }
     PRINT_FUNC(fprints)(OutStream, "init ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, ";\n");
   } else if (gsIsLinearProcessInit(Part)) {
     //print linear process initialisation
     PRINT_FUNC(dbg_prints)("printing LPS initialisation\n");
-    ATermList Vars = ATLgetArgument(Part, 0);
-    if (ATgetLength(Vars) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
-        pp_format, ";\n", "     ");
-    }
     PRINT_FUNC(fprints)(OutStream, "init P");
-    ATermList Args = ATLgetArgument(Part, 1);
+    ATermList Args = ATLgetArgument(Part, 0);
     if (ATgetLength(Args) > 0) {
       PRINT_FUNC(fprints)(OutStream, "(");
       if (pp_format == ppDefault) {
@@ -748,20 +743,14 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsPBES(Part)) {
     //print PBES specification
     PRINT_FUNC(dbg_prints)("printing PBES specification\n");
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 4; i++) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
         pp_format, ShowSorts, PrecLevel);
     }
   } else if (gsIsPBEqnSpec(Part)) {
     //print parameterised boolean equation specification
     PRINT_FUNC(dbg_prints)("printing parameterised boolean equation specification\n");
-    ATermList Vars = ATLgetArgument(Part, 0);
-    if (ATgetLength(Vars) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
-        pp_format, ";\n", "     ");
-    }
-    ATermList PBEqns = ATLgetArgument(Part, 1);
+    ATermList PBEqns = ATLgetArgument(Part, 0);
     if (ATgetLength(PBEqns) > 0) {
       PRINT_FUNC(fprints)(OutStream, "pbes ");
       PRINT_FUNC(PrintPart_List)(OutStream, PBEqns,
@@ -771,14 +760,8 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsPBInit(Part)) {
     //print parameterised boolean initialisation
     PRINT_FUNC(dbg_prints)("printing parameterised boolean initialisation\n");
-    ATermList Vars = ATLgetArgument(Part, 0);
-    if (ATgetLength(Vars) > 0) {
-      PRINT_FUNC(fprints)(OutStream, "var  ");
-      PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
-        pp_format, ";\n", "     ");
-    }
     PRINT_FUNC(fprints)(OutStream, "init ");
-    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 1),
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 0),
       pp_format, ShowSorts, PrecLevel);
     PRINT_FUNC(fprints)(OutStream, ";\n");
   } else if (gsIsPBEqn(Part)) {
@@ -916,8 +899,6 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       }
       if (gsIsDataEqn(Eqn)) {
         PRINT_FUNC(fprints)(OutStream, "eqn  ");
-      } else if (gsIsProcEqn(Eqn)) {
-        PRINT_FUNC(fprints)(OutStream, "proc ");
       } else if (gsIsActionRenameRule(Eqn)) {
         PRINT_FUNC(fprints)(OutStream, "rename\n     ");
       } else {
@@ -973,8 +954,6 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
           }
           if (gsIsDataEqn(Eqn)) {
             PRINT_FUNC(fprints)(OutStream, "eqn  ");
-          } else if (gsIsProcEqn(Eqn)) {
-            PRINT_FUNC(fprints)(OutStream, "proc ");
           } else if (gsIsActionRenameRule(Eqn)) {
             PRINT_FUNC(fprints)(OutStream, "rename\n     ");
           } else {

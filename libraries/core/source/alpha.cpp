@@ -2012,18 +2012,18 @@ ATermAppl gsAlpha(ATermAppl Spec){
   tmpIndexedSet = ATindexedSetCreate(63,50);
 
   //fill in tables
-  for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,2),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+  for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
     ATermAppl p=ATAgetFirst(pr);
-    ATermAppl pn=ATAgetArgument(p,1);
-    ATtablePut(procs,(ATerm)pn,(ATerm)ATAgetArgument(p,3));
-    ATtablePut(form_pars,(ATerm)pn,(ATerm)ATLgetArgument(p,2));
+    ATermAppl pn=ATAgetArgument(p,0);
+    ATtablePut(procs,(ATerm)pn,(ATerm)ATAgetArgument(p,2));
+    ATtablePut(form_pars,(ATerm)pn,(ATerm)ATLgetArgument(p,1));
   }
 
-  ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(ATAgetArgument(Spec,3),1));
+  ATtablePut(procs,(ATerm)INIT_KEY(),(ATerm)ATAgetArgument(ATAgetArgument(Spec,4),0));
 
-  //Calculate the dependensies of the processes.
+  //Calculate the dependencies of the processes.
   //we start from init and iterate on the processes init depends upon init until the system stabilises.
-  deps=ATtableCreate(10000,80); //process dependensies : P(Pname,type) -> List(P(Pname,type))
+  deps=ATtableCreate(10000,80); //process dependencies : P(Pname,type) -> List(P(Pname,type))
   bool stable=false;
   while(!stable){
     //apply to each and compare with the old values.
@@ -2294,8 +2294,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
   }
   ATtableDestroy(subs_npCRL);
 
-  //rebuild dependensies
-  ATtableReset(deps); //process dependensies : P(Pname,type) -> List(P(Pname,type))
+  //rebuild dependencies
+  ATtableReset(deps); //process dependencies : P(Pname,type) -> List(P(Pname,type))
   stable=false;
   while(!stable){
     //apply to each and compare with the old values.
@@ -2372,8 +2372,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATtablePut(alphas,(ATerm)pn,(ATerm)ATLtableGet(alphas,(ATerm)new_p));
   }
 
-  //recalculate the new dependensies again
-  ATtableReset(deps); //process dependensies : P(Pname,type) -> List(P(Pname,type))
+  //recalculate the new dependencies again
+  ATtableReset(deps); //process dependencies : P(Pname,type) -> List(P(Pname,type))
   stable=false;
   while(!stable){
     //apply to each and compare with the old values.
@@ -2401,12 +2401,12 @@ ATermAppl gsAlpha(ATermAppl Spec){
   //== write out the process equations
   //first the original ones (except deleted)
   ATermList new_pr=ATmakeList0();
-  for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,2),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
+  for(ATermList pr=ATLgetArgument(ATAgetArgument(Spec,3),0); !ATisEmpty(pr); pr=ATgetNext(pr)){
     ATermAppl p=ATAgetFirst(pr);
-    ATermAppl pn=ATAgetArgument(p,1);
+    ATermAppl pn=ATAgetArgument(p,0);
     ATermAppl res=ATAtableGet(procs,(ATerm)pn);
     if(res){
-      new_pr=ATinsert(new_pr,(ATerm)ATsetArgument(p,(ATerm)res,3));
+      new_pr=ATinsert(new_pr,(ATerm)ATsetArgument(p,(ATerm)res,2));
       ATtableRemove(procs,(ATerm)pn);
     }
   }
@@ -2427,15 +2427,15 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	ATermList fpars1=ATLtableGet(form_pars,(ATerm)old_pn);
 	if(fpars1) fpars = fpars1;
       }
-      new_pr=ATinsert(new_pr,(ATerm)gsMakeProcEqn(ATmakeList0(),pn,fpars,ATAtableGet(procs,(ATerm)pn)));
+      new_pr=ATinsert(new_pr,(ATerm)gsMakeProcEqn(pn,fpars,ATAtableGet(procs,(ATerm)pn)));
     }
   }
   new_pr=ATreverse(new_pr);
 
   gsDebugMsg("init: l:%T\n\n", ATLtableGet(alphas,(ATerm)ATAtableGet(procs,(ATerm)INIT_KEY())));
 
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),2);
-  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATLgetArgument(ATAgetArgument(Spec,3),0),ATAtableGet(procs,(ATerm)INIT_KEY())),3);
+  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),3);
+  Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);
 
   ATindexedSetDestroy(tmpIndexedSet);
   ATtableDestroy(alphas);

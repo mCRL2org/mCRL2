@@ -128,6 +128,8 @@ specification rename_process_parameters(const specification& spec, const std::se
 template <typename IdentifierGenerator>
 linear_process rename_global_variables(const linear_process& p, IdentifierGenerator& generator)
 {
+  return p;
+/*
   std::set<core::identifier_string> forbidden_names = data::detail::set_union(
     detail::process_parameter_names(p),
     detail::summand_variable_names(p)
@@ -148,6 +150,7 @@ linear_process rename_global_variables(const linear_process& p, IdentifierGenera
     }
   }
   return atermpp::partial_replace(linear_process_to_aterm(p), lps::detail::make_variable_replacer(src, dest));
+*/
 }
 
 /// \brief Renames the free variables in the process p, such that none of them

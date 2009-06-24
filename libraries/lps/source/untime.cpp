@@ -243,9 +243,9 @@ lps::specification untime(const lps::specification& spec) {
   // Create new specification, this equals original specification, except for the new LPS.
   untime_specification = lps::specification(spec.data(),
                           spec.action_labels(),
+                          spec.global_variables(),
               untime_lps, //new LPS
-              process_initializer(spec.initial_process().global_variables(),
-                                            untime_initial_assignments)
+              process_initializer(untime_initial_assignments)
              );
 
   return untime_specification;

@@ -195,16 +195,20 @@
 //----------------------
 
 //process specification
-<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <ProcInit>)
+<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
+                     <ProcEqnSpec>, <ProcInit>)
 
 //action specification
 <ActSpec>      ::= ActSpec(<ActId>*)
+
+//global variables
+<GlobVarSpec>  ::= GlobVarSpec(<DataVarId>*)
 
 //process equations or linear processes
 <ProcEqnSpec>  ::= ProcEqnSpec(<ProcEqn>*)
 
 //process equation
-<ProcEqn>      ::= ProcEqn(<DataVarId>*, <ProcVarId>, <DataVarId>*, <ProcExpr>)
+<ProcEqn>      ::= ProcEqn(<ProcVarId>, <DataVarId>*, <ProcExpr>)
 
 //multiaction or delta
 <MultActOrDelta>
@@ -212,19 +216,18 @@
                  | Delta
 
 //process initialisation
-<ProcInit>     ::= ProcessInit(<DataVarId>*, <ProcExpr>)
+<ProcInit>     ::= ProcessInit(<ProcExpr>)
 
 
 //Linear process specifications
 //-----------------------------
 
 //process specification
-<LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <LinearProcess>,
-                      <LinearProcessInit>)
+<LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
+                      <LinearProcess>, <LinearProcessInit>)
 
 //process equations or linear processes
-<LinearProcess> ::= LinearProcess(<DataVarId>*, <DataVarId>*,
-                      <LinearProcessSummand>*)
+<LinearProcess> ::= LinearProcess(<DataVarId>*, <LinearProcessSummand>*)
 
 //Linear process summand
 <LinearProcessSummand>
@@ -233,7 +236,7 @@
 
 //process initialisation
 <LinearProcessInit>
-                ::= LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
+                ::= LinearProcessInit(<DataVarIdInit>*)
 
 
 //Mu-calculus formulas
@@ -309,13 +312,13 @@
 //------
 
 //PBES specification
-<PBES>         ::= PBES(<DataSpec>, <PBEqnSpec>, <PBInit>)
+<PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
 
 //parameterized boolean equation specification
-<PBEqnSpec>    ::= PBEqnSpec(<DataVarId>*, <PBEqn>*)
+<PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
 
 //parameterized boolean initialization
-<PBInit>       ::= PBInit(<DataVarId>*, <PropVarInst>)
+<PBInit>       ::= PBInit(<PropVarInst>)
 
 //parameterized boolean equation
 <PBEqn>        ::= PBEqn(<FixPoint>, <PropVarDecl>, <PBExpr>)

@@ -117,7 +117,6 @@ namespace detail {
     /// \param s A process_initializer
     void traverse(const process_initializer& i)
     {
-      traverse_container(i.global_variables());
       traverse_container(i.assignments());
     }
 
@@ -126,7 +125,6 @@ namespace detail {
     void traverse(const linear_process& p)
     {
       traverse_container(p.process_parameters());
-      traverse_container(p.global_variables());
       traverse_container(p.action_summands());
       traverse_container(p.deadlock_summands());
     }
@@ -136,6 +134,7 @@ namespace detail {
     void traverse(const specification& spec)
     {
       traverse(spec.process());
+      traverse_container(spec.global_variables());
       traverse(spec.initial_process());
       traverse_container(spec.action_labels());
     }

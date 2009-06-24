@@ -196,19 +196,6 @@ class pbes_translate_algorithm
       return f;
     }
 
-    /// \brief Returns the set of all global variables of the given specification
-    /// \return The set of all global variables of the given specification
-    /// \param spec A linear process specification
-    atermpp::set<data::variable> global_variables(const lps::specification& spec) const
-    {
-      atermpp::set<data::variable> result;
-      data::variable_list global_variables(spec.process().global_variables());
-      result.insert(global_variables.begin(), global_variables.end());
-      data::variable_list initial_global_variables(spec.initial_process().global_variables());
-      result.insert(initial_global_variables.begin(), initial_global_variables.end());
-      return result;
-    }
-
   public:
     /// \brief Constructor.
     pbes_translate_algorithm()
@@ -652,7 +639,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       data::data_specification data_spec(spec.data());
       data_spec.add_sort(data::sort_real::real_());
 
-      pbes<> result(data_spec, e, global_variables(spec), init);
+      pbes<> result(data_spec, e, spec.global_variables(), init);
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
@@ -1047,7 +1034,7 @@ std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end()
       data::data_expression_list pi = spec.initial_process().state();
       propositional_variable_instantiation init(Xe, fi + pi + Par(Xf, data::variable_list(), f));
 
-      pbes<> result = pbes<>(spec.data(), e, global_variables(spec), init);
+      pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());

@@ -28,6 +28,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/action.h"
+#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 
@@ -62,7 +63,8 @@ void complete_data_specification(lps::specification&);
 //
 // init P(true, 0);
 //
-//<Spec>         ::= LinProcSpec(<DataSpec>, <ActSpec>, <ProcEqnSpec>, <Init>)
+//<LinProcSpec>   ::= LinProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>,
+//                      <LinearProcess>, <LinearProcessInit>)
 class specification
 {
   protected:
@@ -72,46 +74,26 @@ class specification
     /// \brief The action specification of the specification
     action_label_list m_action_labels;
 
+    /// \brief The set of global variables
+    atermpp::set<data::variable> m_global_variables;
+
     /// \brief The linear process of the specification
     linear_process m_process;
 
     /// \brief The initial state of the specification
     process_initializer m_initial_process;
 
-    /// \brief Computes the used free variables, and puts them in the free
-    /// variable declarations of the process and the initial_process.
-    void repair_free_variables()
-    {
-      std::set<data::variable> free_variables = find_free_variables(process());
-      std::set<data::variable> v = find_free_variables(initial_process());
-      free_variables.insert(v.begin(), v.end());
-      data::variable_list freevars = data::convert<data::variable_list>(free_variables);
-      m_process.global_variables() = freevars;
-      m_initial_process = process_initializer(freevars, m_initial_process.assignments());
-    }
-    
     /// \brief Initializes the specification with an ATerm.
     /// \param t A term
     void construct_from_aterm(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      m_data            = atermpp::aterm_appl(*i++);
-      m_action_labels   = atermpp::aterm_appl(*i++)(0);
-      m_process         = atermpp::aterm_appl(*i++);
-      m_initial_process = atermpp::aterm_appl(*i);
-      repair_free_variables();
-    }
-
-    /// \brief Conversion to ATermAppl.
-    /// \return The specification converted to ATerm format.
-    operator ATermAppl() const
-    {
-      return core::detail::gsMakeLinProcSpec(
-          data::detail::data_specification_to_aterm_data_spec(m_data, false),
-          core::detail::gsMakeActSpec(m_action_labels),
-          linear_process_to_aterm(m_process),
-          m_initial_process
-      );
+      m_data             = atermpp::aterm_appl(*i++);
+      m_action_labels    = atermpp::aterm_appl(*i++)(0);
+      data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
+      m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
+      m_process          = atermpp::aterm_appl(*i++);
+      m_initial_process  = atermpp::aterm_appl(*i);
     }
 
   public:
@@ -132,15 +114,18 @@ class specification
     /// \param action_labels A sequence of action labels
     /// \param lps A linear process
     /// \param initial_process A process initializer
-    specification(data::data_specification const& data, action_label_list action_labels, linear_process lps, process_initializer initial_process)
+    specification(const data::data_specification& data,
+                  const action_label_list& action_labels,
+                  const atermpp::set<data::variable>& global_variables,
+                  const linear_process& lps,
+                  const process_initializer& initial_process)
       :
         m_data(data),
         m_action_labels(action_labels),
+        m_global_variables(global_variables),
         m_process(lps),
         m_initial_process(initial_process)
-    {
-      repair_free_variables();
-    }
+    {}
 
     /// \brief Reads the specification from file.
     /// \param filename A string
@@ -219,6 +204,21 @@ class specification
     action_label_list& action_labels()
     { return m_action_labels; }
 
+    
+    /// \brief Returns the declared free variables of the LPS.
+    /// \return The declared free variables of the LPS.
+    const atermpp::set<data::variable>& global_variables() const
+    {
+      return m_global_variables;
+    }
+
+    /// \brief Returns the declared free variables of the LPS.
+    /// \return The declared free variables of the LPS.
+    atermpp::set<data::variable>& global_variables()
+    {
+      return m_global_variables;
+    }
+    
     /// \brief Returns the initial process.
     /// \return The initial process.
     const process_initializer& initial_process() const
@@ -233,27 +233,6 @@ class specification
       return m_initial_process;
     }
 };
-
-/// \brief Replaces the free variables of the process and the initial state by the union of them.
-/// \param spec A linear process specification
-/// \return The modified specification
-inline
-specification repair_free_variables(const specification& spec)
-{
-  data::variable_list fv1 = spec.process().global_variables();
-  data::variable_list fv2 = spec.initial_process().global_variables();
-  std::set<data::variable> freevars(fv1.begin(), fv1.end());
-  freevars.insert(fv2.begin(), fv2.end());
-  data::variable_list new_free_vars(freevars.begin(), freevars.end());
-
-  linear_process new_process = spec.process();
-  new_process.global_variables() = new_free_vars;
-  process_initializer new_init(new_free_vars, spec.initial_process().assignments());
-
-  specification result(spec.data(), spec.action_labels(), new_process, new_init);
-  assert(is_well_typed(result));
-  return result;
-}
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
@@ -275,6 +254,7 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
     atermpp::aterm_appl specification_term(core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
       core::detail::gsMakeActSpec(spec.action_labels()),
+      core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
       linear_process_to_aterm(spec.process()),
       spec.initial_process()
     ));
@@ -285,13 +265,15 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
         data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
         atermpp::aterm_appl(specification_term(1)),
         atermpp::aterm_appl(specification_term(2)),
-        atermpp::aterm_appl(specification_term(3))
+        atermpp::aterm_appl(specification_term(3)),
+        atermpp::aterm_appl(specification_term(4))
     );
   }
 
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
       core::detail::gsMakeActSpec(spec.action_labels()),
+      core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
       linear_process_to_aterm(spec.process()),
       spec.initial_process()
   );

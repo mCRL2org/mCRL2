@@ -98,7 +98,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       lps::rewrite(e, R);
 
       linear_process& p = m_spec.process();
-      data::variable_list V = p.global_variables();
+      data::variable_list V = data::convert<data::variable_list>(m_spec.global_variables());
       const data::variable_list& d = p.process_parameters();
 
       // initialize m_index_of

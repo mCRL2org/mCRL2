@@ -439,7 +439,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList *ids)
     );
   }
 
-  return gsMakeLinearProcess(ATmakeList0(),pars,ATreverse(smds));
+  return gsMakeLinearProcess(pars,ATreverse(smds));
 }
 
 static ATermList convert_init(ATermAppl spec, ATermList * /*ids*/)
@@ -496,7 +496,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
         data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
   gsVerboseMsg("converting initial LPE state...\n");
-  init = gsMakeLinearProcessInit(ATmakeList0(),convert_init(spec,&ids));
+  init = gsMakeLinearProcessInit(convert_init(spec,&ids));
 
   gsVerboseMsg("converting LPE...\n");
   lps = convert_lps(spec,&ids);
@@ -504,7 +504,7 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   gsVerboseMsg("constructing action declarations...\n");
   act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
-  ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, lps, init);
+  ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(ATmakeList0()), lps, init);
 
   ATermList substs = ATmakeList0();
 

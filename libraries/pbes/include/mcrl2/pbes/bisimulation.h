@@ -126,32 +126,6 @@ class bisimulation_algorithm
       }
     }
 
-  private:
-    /// \brief Check function used for debugging.
-    /// \param expr A PBES expression
-    /// \param p A linear process
-    /// \param q A linear process
-    /// \param msg A string
-    void check_expression(pbes_expression expr, const linear_process& p, const linear_process& q, std::string msg) const
-    {
-      detail::global_variable_visitor<pbes_expression> visitor;
-      visitor.bound_variables = p.process_parameters() + q.process_parameters();
-      visitor.visit(expr);
-      std::set<variable> w = visitor.result;
-
-      std::set<variable> global_variables;
-      global_variables.insert(p.global_variables().begin(), p.global_variables().end());
-      global_variables.insert(q.global_variables().begin(), q.global_variables().end());
-
-      for (std::set<variable>::iterator i = w.begin(); i != w.end(); ++i)
-      {
-        if (global_variables.find(*i) == global_variables.end())
-        {
-          std::cerr << "error: " << msg << mcrl2::core::pp(*i) << " is free! " << mcrl2::core::pp(expr) << std::endl;
-        }
-      }
-    }
-
 public:
     /// \brief Creates a name for the propositional variable Xpq
     /// \param p A linear process

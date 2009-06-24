@@ -22,7 +22,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/detail/specification_utility.h"   // compute_initial_state
 
 namespace mcrl2 {
@@ -34,9 +33,6 @@ namespace lps {
 class process_initializer: public atermpp::aterm_appl
 {
   protected:
-    /// \brief The free variables of the initializer
-    data::variable_list   m_global_variables;
-
     /// \brief The assignments of the initializer
     data::assignment_list m_assignments;
 
@@ -47,13 +43,8 @@ class process_initializer: public atermpp::aterm_appl
     {}
 
     /// \brief Constructor.
-    process_initializer(data::variable_list global_variables,
-                        data::assignment_list assignments
-                       )
-     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(
-         global_variables,
-         assignments)),
-       m_global_variables(global_variables),
+    process_initializer(data::assignment_list assignments)
+     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
        m_assignments(assignments)
     {
     }
@@ -64,19 +55,10 @@ class process_initializer: public atermpp::aterm_appl
       : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_term_LinearProcessInit(m_term));
-      atermpp::aterm_appl::iterator i   = t.begin();
-      m_global_variables = *i++;
+      atermpp::aterm_appl::iterator i = t.begin();
       m_assignments = *i;
     }
 
-    /// \brief Returns the sequence of free variables.
-    /// \return The sequence of global variables.
-    data::variable_list global_variables() const
-    {
-      return m_global_variables;
-    }
-
-    /// \brief Returns the sequence of assignments.
     /// \return The sequence of assignments.
     data::assignment_list assignments() const
     {
@@ -88,18 +70,6 @@ class process_initializer: public atermpp::aterm_appl
     data::data_expression_list state() const
     {
       return detail::compute_initial_state(m_assignments);
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    process_initializer substitute(Substitution f)
-    {
-      return process_initializer(f(atermpp::aterm(*this)));
     }
 };
 

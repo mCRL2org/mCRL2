@@ -172,14 +172,6 @@ namespace detail {
         return result;
       }
 
-      std::set<data::variable> compute_declared_free_variables(const specification& spec) const
-      {
-        std::set<data::variable> result;
-        result.insert(spec.process().global_variables().begin(), spec.process().global_variables().end());
-        result.insert(spec.initial_process().global_variables().begin(), spec.initial_process().global_variables().end());
-        return result;
-      }
-
       std::set<data::variable> compute_used_free_variables(const specification& spec) const
       {
         return find_free_variables(spec.process());
@@ -199,7 +191,7 @@ namespace detail {
         unsigned int                           summand_count           = spec.process().summand_count();
         unsigned int                           tau_summand_count       = compute_tau_summand_count(spec);
         unsigned int                           delta_summand_count     = spec.process().deadlock_summands().size();
-        std::set<data::variable>               declared_free_variables = compute_declared_free_variables(spec);
+        std::set<data::variable>               declared_free_variables = spec.global_variables();
         std::set<data::variable>               used_free_variables     = compute_used_free_variables(spec);
         std::set<data::variable>               process_parameters      = data::convert<std::set<data::variable> >(spec.process().process_parameters());
         std::set<action_label>                 declared_action_labels  = data::convert<std::set<action_label> >(spec.action_labels());

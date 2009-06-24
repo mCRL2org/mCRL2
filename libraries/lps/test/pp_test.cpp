@@ -68,7 +68,7 @@ void test_lps_printer()
   print(spec.process());
   print.print_container(spec.process().action_summands());
   print.print_list(spec.process().process_parameters());
-  print.print_list(spec.process().global_variables());
+  //print.print_list(spec.process().global_variables());
 }
 
 int test_main(int argc, char** argv)

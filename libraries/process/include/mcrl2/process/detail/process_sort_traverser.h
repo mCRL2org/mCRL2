@@ -92,12 +92,6 @@ namespace detail {
       traverse_container(a.arguments());
     }
 
-    void traverse(const process_initialization& init)
-    {
-      traverse_container(init.global_variables());
-      traverse(init.expression());
-    }
-    
     void traverse(const process_identifier& pi)
     {
       traverse_container(pi.sorts());
@@ -105,7 +99,6 @@ namespace detail {
     
     void traverse(const process_equation& eq)
     {
-      traverse_container(eq.global_variables());
       traverse_container(eq.formal_parameters());
       traverse(eq.identifier());
       traverse(eq.expression());
@@ -114,6 +107,7 @@ namespace detail {
     void traverse(const process_specification& spec)
     {
       traverse_container(spec.action_labels());
+      traverse_container(spec.global_variables());
       traverse_container(spec.equations());
       traverse(spec.init());
     }

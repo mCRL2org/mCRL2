@@ -133,7 +133,7 @@ namespace detail {
     /// \param s A process_initializer
     void substitute(process_initializer& i) const
     {
-      i = process_initializer(i.global_variables(), substitute_list_copy(i.assignments()));
+      i = process_initializer(substitute_list_copy(i.assignments()));
     }
   
     /// \brief Applies the substitution to a linear_process

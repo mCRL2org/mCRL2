@@ -199,42 +199,17 @@ namespace detail {
     /// \param p A linear_process
     /// \return True if
     /// <ul>
-    /// <li>the free variables occurring in the process are declared in global_variables()</li>
     /// <li>the process parameters have unique names</li>
-    /// <li>the free variables have unique names</li>
     /// <li>process parameters and summation variables have different names</li>
     /// <li>the left hand sides of the assignments of summands are contained in the process parameters</li>
     /// <li>the summands are well typed</li>
     /// </ul>
     bool is_well_typed(const linear_process& p) const
     {
-      // check 1)
-      std::set<data::variable> declared_free_variables  = mcrl2::data::detail::make_set(p.global_variables());
-      std::set<data::variable> occurring_free_variables = lps::find_free_variables(p);
-      if (!(std::includes(declared_free_variables.begin(),
-                          declared_free_variables.end(),
-                          occurring_free_variables.begin(),
-                          occurring_free_variables.end()
-                         )
-          ))
-      {
-        std::cerr << "is_well_typed(linear_process) failed: some of the free variables were not declared\n";
-        std::cerr << "declared free variables: " << data::pp(declared_free_variables) << std::endl;
-        std::cerr << "occurring free variables: " << data::pp(occurring_free_variables) << std::endl;
-        return false;
-      }
-
       // check 2)
       if (!mcrl2::data::detail::unique_names(p.process_parameters()))
       {
         std::cerr << "is_well_typed(linear_process) failed: process parameters " << data::pp(p.process_parameters()) << " don't have unique names." << std::endl;
-        return false;
-      }
-
-      // check 3)
-      if (!mcrl2::data::detail::unique_names(p.global_variables()))
-      {
-        std::cerr << "is_well_typed(linear_process) failed: free variables " << data::pp(p.process_parameters()) << " don't have unique names." << std::endl;
         return false;
       }
 
@@ -281,6 +256,9 @@ namespace detail {
     /// <li>the process is well typed                                                            </li>
     /// <li>the data specification is well typed                                                 </li>
     /// <li>the initial process is well typed                                                    </li>
+    /// <li>the free variables occurring in the linear process are declared in the global variable specification</li>
+    /// <li>the free variables occurring in the initial process are declared in the global variable specification</li>
+    /// <li>the global variables have unique names</li>
     /// </ul>
     bool is_well_typed(const specification& spec) const
     {
@@ -306,9 +284,9 @@ namespace detail {
       }
 
       // check 3)
-      if (!(mcrl2::data::detail::check_variable_sorts(spec.process().global_variables(), declared_sorts)))
+      if (!(mcrl2::data::detail::check_variable_sorts(spec.global_variables(), declared_sorts)))
       {
-        std::cerr << "is_well_typed(specification) failed: some of the sorts of the free variables " << data::pp(spec.process().global_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
+        std::cerr << "is_well_typed(specification) failed: some of the sorts of the free variables " << data::pp(spec.global_variables()) << " are not declared in the data specification " << data::pp(spec.data().sorts()) << std::endl;
         return false;
       }
 
@@ -332,6 +310,31 @@ namespace detail {
       if (!spec.data().is_well_typed())           { return false; }
       if (!is_well_typed(spec.initial_process())) { return false; }
 
+      std::set<data::variable> declared_free_variables  = spec.global_variables();
+      std::set<data::variable> occ1 = lps::find_free_variables(spec.process());
+      std::set<data::variable> occ2 = lps::find_free_variables(spec.initial_process());
+      std::set<data::variable> occurring_free_variables = occ1;
+      occurring_free_variables.insert(occ2.begin(), occ2.end());
+      if (!(std::includes(declared_free_variables.begin(),
+                          declared_free_variables.end(),
+                          occurring_free_variables.begin(),
+                          occurring_free_variables.end()
+                         )
+          ))
+      {
+        std::cerr << "is_well_typed(specification) failed: some of the free variables were not declared\n";
+        std::cerr << "declared global variables: " << data::pp(declared_free_variables) << std::endl;
+        std::cerr << "occurring free variables: " << data::pp(occurring_free_variables) << std::endl;
+        return false;
+      }
+
+      // check 3)
+      if (!mcrl2::data::detail::unique_names(data::convert<data::variable_list>(spec.global_variables())))
+      {
+        std::cerr << "is_well_typed(specification) failed: global variables " << data::pp(data::convert<data::variable_list>(spec.global_variables())) << " don't have unique names." << std::endl;
+        return false;
+      }
+      
       return true;
     }
 

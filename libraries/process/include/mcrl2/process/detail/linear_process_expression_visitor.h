@@ -51,7 +51,7 @@ namespace detail {
         return false;
       }
       data::assignment_list a1 = a.assignments();
-      data::variable_list v = eqn.global_variables();
+      data::variable_list v = eqn.formal_parameters();
       if (a1.size() != v.size())
       {
         return false;

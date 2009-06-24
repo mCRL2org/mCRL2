@@ -35,6 +35,16 @@ namespace detail {
       : to_be_removed(to_be_removed_)
     {}
 
+    /// \brief Removes parameters from a set container.
+    template <typename SetContainer1>
+    void remove_set_container(SetContainer1& c) const
+    {
+      for (typename SetContainer::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      {
+        c.erase(*i);
+      }
+    }
+
     /// \brief Removes parameters from a list of variables.
     data::variable_list remove_list_copy(const data::variable_list& l) const
     {
@@ -87,7 +97,7 @@ namespace detail {
     /// \param s A process_initializer
     void remove(process_initializer& i) const
     {
-      i = process_initializer(remove_list_copy(i.global_variables()), remove_list_copy(i.assignments()));
+      i = process_initializer(remove_list_copy(i.assignments()));
     }
   
     /// \brief Removes parameters from a linear_process
@@ -96,7 +106,6 @@ namespace detail {
     {
       remove_list(p.process_parameters());
       remove_container(p.action_summands());
-      remove_list(p.global_variables());
     }
   
     /// \brief Removes parameters from a linear process specification
@@ -105,6 +114,7 @@ namespace detail {
     {
       remove(spec.process());
       remove(spec.initial_process());
+      remove_set_container(spec.global_variables());
     }
     
     template <typename Term>
