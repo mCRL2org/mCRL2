@@ -700,8 +700,14 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())
   {
     mcrl2::data::postfix_identifier_generator generator("");
+    mcrl2::core::identifier_string nstr;
+    if( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).empty() )
+    {
+      nstr = generator( "S" );
+    } else{
+      nstr = generator( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).begin()->name().name() );
+    }
     generator.add_identifiers( sort_names );
-    mcrl2::core::identifier_string nstr = generator( "S" );
     unfold_parameter_name = nstr; 
   }
 
