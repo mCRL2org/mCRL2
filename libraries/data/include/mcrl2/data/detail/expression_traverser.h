@@ -413,7 +413,7 @@ namespace mcrl2 {
           void visit(Abstraction const& a) {
             increase_bind_count(a.variables());
 
-            static_cast< super& >(*this).visit(a);
+            super::visit(a);
   
             decrease_bind_count(a.variables());
           }

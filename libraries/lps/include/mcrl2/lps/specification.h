@@ -43,7 +43,7 @@ template <typename Object>
 bool is_well_typed(const Object& o);
 
 template <typename Object>
-std::set<data::variable> lps_find_all_free_variables(const Object& o);
+std::set<data::variable> find_free_variables(const Object& o);
 
 class specification;   
 atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
@@ -82,8 +82,8 @@ class specification
     /// variable declarations of the process and the initial_process.
     void repair_free_variables()
     {
-      std::set<data::variable> free_variables = lps_find_all_free_variables(process());
-      std::set<data::variable> v = lps_find_all_free_variables(initial_process());
+      std::set<data::variable> free_variables = find_free_variables(process());
+      std::set<data::variable> v = find_free_variables(initial_process());
       free_variables.insert(v.begin(), v.end());
       data::variable_list freevars = data::convert<data::variable_list>(free_variables);
       m_process.global_variables() = freevars;

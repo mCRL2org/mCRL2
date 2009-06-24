@@ -26,21 +26,11 @@ namespace mcrl2 {
     /// \brief Returns all data variables that occur in a range of expressions
     /// \param[in] container a container with expressions
     /// \return All data variables that occur in the term t
-    /// TODO replace uses by data::find_free_variables
     template <typename Container, typename OutputIterator >
     void find_free_variables(Container const& container, OutputIterator const& o)
     {
-//      detail::make_lps_variable_traverser(o)(container);
-    }
-
-    /// \brief Returns all data variables that occur in a range of expressions
-    /// \param[in] container a container with expressions
-    /// \return All data variables that occur in the term t
-    /// TODO replace uses by data::find_free_variables
-    template <typename Container, typename OutputIterator, typename Sequence >
-    void find_free_variables(Container const& container, OutputIterator const& o, Sequence bound)
-    {
-//      detail::make_lps_variable_traverser(o)(container);
+      lps::detail::lps_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(o);
+      finder(container);
     }
 
     /// \brief Returns all data variables that occur in a range of expressions
@@ -52,19 +42,8 @@ namespace mcrl2 {
     {
       std::set< data::variable > result;
 
-      find_free_variables(container, std::inserter(result, result.end()));
+      lps::find_free_variables(container, std::inserter(result, result.end()));
 
-      return result;
-    }
-
-    /// \brief Returns all free (unbound) data variables that appear in the
-    /// LPS object o.
-    template <typename Object>
-    std::set<data::variable> lps_find_all_free_variables(const Object& o)
-    {
-      std::set<data::variable> result;
-      lps::detail::lps_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(std::inserter(result, result.end()));
-      finder(o);
       return result;
     }
 

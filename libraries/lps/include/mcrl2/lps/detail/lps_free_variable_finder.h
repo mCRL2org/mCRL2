@@ -31,7 +31,7 @@ namespace detail {
 
     bool is_free(const data::variable& v) const
     {
-      return bound_variables.find(v) != bound_variables.end();
+      return bound_variables.find(v) == bound_variables.end();
     }
 
     template <typename Container>
@@ -45,7 +45,7 @@ namespace detail {
     {
       for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
       {
-        bound_variables.erase(*i);
+        bound_variables.erase(bound_variables.find(*i));
       }
     }
 

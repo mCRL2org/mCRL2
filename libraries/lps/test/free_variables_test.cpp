@@ -26,7 +26,7 @@ void test_free_variables()
     "init X;\n"
   ));
 
-  std::set<data::variable> free_variables = lps_find_all_free_variables(specification.process());
+  std::set<data::variable> free_variables = find_free_variables(specification.process());
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
@@ -37,7 +37,7 @@ void test_free_variables()
     "init X(true);\n"
   );
 
-  free_variables = lps_find_all_free_variables(specification.process());
+  free_variables = find_free_variables(specification.process());
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
