@@ -457,8 +457,9 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   {
 
     mcrl2::data::assignment_list ass = j-> assignments();
-    //Create new left-hand assignment_list 
+    //Create new left-hand assignment_list & right-hand assignment_list 
     mcrl2::data::data_expression_vector new_ass_left;
+    mcrl2::data::data_expression_vector new_ass_right;
     for(mcrl2::data::assignment_list::iterator k = ass.begin()
                                                  ; k != ass.end()
                                                  ; ++k)
@@ -471,29 +472,19 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
         {
          new_ass_left.push_back( *l );
         }
-      } else {
-        new_ass_left.push_back( k-> lhs() );
-      }
-    }
-    //Create new right-hand assignment_list 
-    //Unfold parameters
-    mcrl2::data::data_expression_vector new_ass_right;
-    for(mcrl2::data::assignment_list::iterator k = ass.begin()
-                                                 ; k != ass.end()
-                                                 ; ++k)
-    {
-      if (std::distance( ass.begin(), k ) == parameter_at_index)
-      {
 
         mcrl2::data::data_expression_vector ins = unfold_constructor(k -> rhs(), determine_function, pi );
         //Replace unfold parameters in affected assignments
         new_ass_right.insert(new_ass_right.end(), ins.begin(), ins.end());
+
       } else {
+        new_ass_left.push_back( k-> lhs() );
         new_ass_right.push_back( k-> rhs() );
       }
     }
 
     //cout << new_ass_left.size()<< " " << new_ass_right.size() << endl;
+    //cout << mcrl2::data::pp(*j) << endl;
     //cout << mcrl2::data::pp(new_ass_left)  << endl;
     //cout << mcrl2::data::pp(new_ass_right)  << endl;
    
