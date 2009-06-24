@@ -26,7 +26,6 @@
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
 
 namespace mcrl2 {
 
