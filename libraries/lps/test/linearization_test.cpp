@@ -612,8 +612,7 @@ const std::string various_case_22=
 
 const std::string various_case_23=
       "act a,b;"
-      "init a@1.b@2.delta||tau.tau;"
-
+      "init a@1.b@2.delta||tau.tau;";
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
