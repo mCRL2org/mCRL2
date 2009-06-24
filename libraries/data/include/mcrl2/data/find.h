@@ -58,7 +58,6 @@ namespace detail {
 
     public:
 
-      using super::operator();
       using super::enter;
       using super::leave;
 
