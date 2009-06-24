@@ -13,8 +13,6 @@
 #define MCRL2_PBES_UTILITY_H
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"
