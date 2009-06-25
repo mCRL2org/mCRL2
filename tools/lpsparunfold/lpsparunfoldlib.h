@@ -68,6 +68,9 @@ class lpsparunfold
     /// \brief The linear process used for manipulation 
     mcrl2::lps::linear_process m_lps;
 
+    /// \brief The global variables of the specification
+    atermpp::set< mcrl2::data::variable > m_glob_vars;
+
     /// \brief The initialization of a linear process used for manipulation 
     mcrl2::lps::process_initializer m_init_process;
 

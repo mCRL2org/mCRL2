@@ -31,6 +31,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
   m_data_specification = spec.data() ;
   m_lps = spec.process();
   m_init_process = spec.initial_process();
+  m_glob_vars = spec.global_variables();
   m_action_label_list = spec.action_labels();
 
   for (data_specification::sorts_const_range::const_iterator i =  m_data_specification.sorts().begin();
@@ -751,7 +752,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
   boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
   m_data_specification.add_equations( dev_range );
 
-  mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, new_lps, new_init );
+  mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init );
 
   assert(  is_well_typed(new_spec) );
 
