@@ -1429,8 +1429,8 @@ static ATbool gstcReadInPBESAndInit(ATermAppl GlobVarSpec, ATermAppl PBEqnSpec, 
 
 static ATermList gstcWriteProcs(ATermList oldprocs){
   ATermList Result=ATmakeList0();
-  for(ATermList ProcVars=oldprocs;!ATisEmpty(ProcVars);ProcVars=ATgetNext(ProcVars)){
-    ATermAppl ProcVar=ATAgetArgument(ATAgetFirst(ProcVars),1);
+  for(ATermList l=oldprocs;!ATisEmpty(l);l=ATgetNext(l)){
+    ATermAppl ProcVar=ATAgetArgument(ATAgetFirst(l),0);
     if(ProcVar==INIT_KEY()) continue;
     Result=ATinsert(Result,(ATerm)gsMakeProcEqn(ProcVar,
 						ATLtableGet(body.proc_pars,(ATerm)ProcVar),
