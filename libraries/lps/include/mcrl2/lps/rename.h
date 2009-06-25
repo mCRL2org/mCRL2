@@ -25,6 +25,8 @@
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/detail/linear_process_utility.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/lps/detail/lps_replacer.h"
+#include "mcrl2/data/substitution.h"
 
 namespace mcrl2 {
 
@@ -121,46 +123,52 @@ specification rename_process_parameters(const specification& spec, const std::se
   return rename_process_parameters(spec, generator);
 }
 
-/// \brief Renames the free variables in the process p using the given identifier generator.
+/// \brief Renames the global variables in the specification p using the given identifier generator.
 /// \param p A linear process
 /// \param generator A generator for fresh identifiers
 /// \return The rename result
 template <typename IdentifierGenerator>
-linear_process rename_global_variables(const linear_process& p, IdentifierGenerator& generator)
+specification rename_global_variables(const specification &p, IdentifierGenerator& generator)
 {
-  return p;
-/*
   std::set<core::identifier_string> forbidden_names = data::detail::set_union(
-    detail::process_parameter_names(p),
-    detail::summand_variable_names(p)
+    detail::process_parameter_names(p.process()),
+    detail::summand_variable_names(p.process())
   );
 
-  std::vector<data::variable> src;  // contains the variables that need to be renamed
-  std::vector<data::variable> dest; // contains the corresponding replacements
+  data::mutable_map_substitution<> sigma;
   generator.add_identifiers(forbidden_names);
-  data::variable_list global_variables(p.global_variables());
-  for (data::variable_list::const_iterator i = global_variables.begin(); i != global_variables.end(); ++i)
+  const atermpp::set < data::variable > &global_variables(p.global_variables());
+  atermpp::set<data::variable> new_global_variables;
+  for (atermpp::set < data::variable > ::const_iterator i = global_variables.begin(); i != global_variables.end(); ++i)
   {
     core::identifier_string new_name = generator(i->name());
     if (new_name != i->name())
-    {
-      // save the old and new value in the src and dest arrays
-      src.push_back(*i);
-      dest.push_back(data::variable(new_name, i->sort()));
+    { const data::variable v(new_name, i->sort());
+      new_global_variables.insert(v);
+      sigma[*i]=v;
     }
   }
-  return atermpp::partial_replace(linear_process_to_aterm(p), lps::detail::make_variable_replacer(src, dest));
-*/
+  mcrl2::lps::linear_process new_linear_process(p.process());
+  lps::detail::make_lps_replacer(sigma).substitute(new_linear_process);
+  mcrl2::lps::process_initializer new_initial_process(p.initial_process());
+  lps::detail::make_lps_replacer(sigma).substitute(new_initial_process);
+
+  return specification(p.data(),
+                       p.action_labels(),
+                       new_global_variables,
+                       new_linear_process,
+                       new_initial_process);
+                       
 }
 
-/// \brief Renames the free variables in the process p, such that none of them
+/// \brief Renames the global variables in the specification p, such that none of them
 /// appears in forbidden_names. Postfix is used as a hint for the new name.
 /// \param p A linear process
 /// \param forbidden_names A set of names
 /// \param postfix A string
 /// \return The rename result
 inline
-linear_process rename_global_variables(const linear_process& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
+specification rename_global_variables(const specification& p, const std::set<core::identifier_string>& forbidden_names, const std::string& postfix)
 {
   data::postfix_identifier_generator generator(postfix);
   generator.add_identifiers(forbidden_names);
