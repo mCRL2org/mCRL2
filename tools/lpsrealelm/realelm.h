@@ -378,7 +378,7 @@ class summand_information
                       vec_lin_eq,
                       r);
             }
-            else
+            else 
             { vec_lin_eq.swap(*i);
             }
             unsigned int old_size=vec_lin_eq.size();
