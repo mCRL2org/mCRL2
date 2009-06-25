@@ -77,7 +77,7 @@ namespace mcrl2 {
           {}
 
           void operator()(function_symbol const& e)
-          { 
+          {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
             static_cast< Derived& >(*this).leave(e);
@@ -240,7 +240,7 @@ namespace mcrl2 {
       };
 
       template < typename Derived >
-      class sort_expression_traverser : protected expression_traverser< Derived >
+      class sort_expression_traverser : public expression_traverser< Derived >
       {
         public:
           typedef expression_traverser< Derived > super;
@@ -358,13 +358,13 @@ namespace mcrl2 {
           {
             static_cast< super& >(*this)(e);
           }
-         
+
           // \deprecated
           void operator()(atermpp::aterm const& e)
           {
             static_cast< super& >(*this)(e);
           }
-         
+
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
@@ -390,7 +390,7 @@ namespace mcrl2 {
         protected:
 
           std::multiset< variable > m_bound;
- 
+
           template < typename Container >
           void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
           {
@@ -414,7 +414,7 @@ namespace mcrl2 {
             increase_bind_count(a.variables());
 
             super::visit(a);
-  
+
             decrease_bind_count(a.variables());
           }
 
@@ -425,14 +425,14 @@ namespace mcrl2 {
           void operator()(where_clause const& w)
           {
             increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
-  
+
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(w));
             static_cast< Derived& >(*this).enter(w);
             static_cast< Derived& >(*this)(make_assignment_left_hand_side_range(w.declarations()));
             static_cast< Derived& >(*this)(w.body());
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(w));
             static_cast< Derived& >(*this).leave(w);
-  
+
             decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
           }
 
