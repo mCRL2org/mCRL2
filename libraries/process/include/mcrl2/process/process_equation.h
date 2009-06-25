@@ -59,7 +59,7 @@ namespace process {
       process_identifier identifier() const
       {
         using namespace atermpp;
-        return arg2(*this);
+        return arg1(*this);
       }
 
       /// \brief Returns the formal parameters of the equation
@@ -68,7 +68,7 @@ namespace process {
       {
         using namespace atermpp;
         return data::variable_list(
-          atermpp::term_list_iterator<data::variable>(list_arg3(*this)),
+          atermpp::term_list_iterator<data::variable>(list_arg2(*this)),
           atermpp::term_list_iterator<data::variable>());
       }
 
@@ -77,7 +77,7 @@ namespace process {
       process_expression expression() const
       {
         using namespace atermpp;
-        return arg4(*this);
+        return arg3(*this);
       }
   };
 

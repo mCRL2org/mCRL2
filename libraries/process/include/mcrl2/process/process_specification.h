@@ -63,7 +63,8 @@ namespace process {
         data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
         m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
         process_equation_list l = atermpp::aterm_appl(*i++)(0);
-        m_initial_process = atermpp::aterm_appl(*i);
+        atermpp::aterm_appl init = atermpp::aterm_appl(*i);
+        m_initial_process = atermpp::aterm_appl(init(0));
         m_equations       = atermpp::vector<process_equation>(l.begin(), l.end());
         complete_data_specification(*this);
       }
