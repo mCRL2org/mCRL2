@@ -101,6 +101,7 @@ static ATermAppl OpLTE;                //=gsMakeId(gsMakeOpIdNameLTE());
 static ATermAppl OpEq;                 //=gsMakeId(gsMakeOpIdNameEq());
 static ATermAppl OpInt2Nat;            //=gsMakeId(gsMakeOpIdNameInt2Nat());
 static ATermAppl EmptyBag;             //=gsMakeId(gsMakeOpIdNameEmptyBag());
+static ATermAppl OpBagEnum;            //=gsMakeId(gsMakeOpIdNameBagEnum());
 static ATermAppl nMaxTokens;           //=gsMakeId(gsString2ATermAppl("nMaxTokens"));
 static ATermAppl ErrorAction;          //=gsMakeParamId(ATmakeAppl0(ATmakeAFunId("_error")), ATmakeList0());
 
@@ -2283,6 +2284,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATprotectAppl(&OpEq);
     ATprotectAppl(&OpInt2Nat);
     ATprotectAppl(&EmptyBag);
+    ATprotectAppl(&OpBagEnum);
     ATprotectAppl(&nMaxTokens);
     ATprotectAppl(&ErrorAction);
 
@@ -2317,6 +2319,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     OpEq=gsMakeId(mcrl2::data::equal_to(mcrl2::data::sort_pos::pos()).name());
     OpInt2Nat=gsMakeId(mcrl2::data::sort_int::int2nat().name());
     EmptyBag=gsMakeId(mcrl2::data::sort_bag::emptybag(mcrl2::data::sort_pos::pos()).name());
+    OpBagEnum=gsMakeId(gsMakeOpIdNameBagEnum());
     nMaxTokens=gsMakeId(gsString2ATermAppl("nMaxTokens"));
     ErrorAction=gsMakeParamId(ATmakeAppl0(ATmakeAFunId("_error")), ATmakeList0());
 
@@ -2368,6 +2371,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     ATunprotectAppl(&OpEq);
     ATunprotectAppl(&OpInt2Nat);
     ATunprotectAppl(&EmptyBag);
+    ATunprotectAppl(&OpBagEnum);
     ATunprotectAppl(&nMaxTokens);
     ATunprotectAppl(&ErrorAction);
     ATtableDestroy(context.place_name);
@@ -3117,9 +3121,13 @@ static ATermAppl pn2gsMakeBagVars(ATermList l){
   if(ATisEmpty(l))
     return EmptyBag;
 
-  return mcrl2::data::sort_bag::bagfbag(mcrl2::data::data_expression(ATAgetFirst(l)).sort(),
-                                        mcrl2::data::sort_fbag::fbag(mcrl2::data::data_expression(ATAgetFirst(l)).sort(),
-                                                                     mcrl2::data::convert<mcrl2::data::data_expression_list>(atermpp::aterm_list(l))));
+  ATermList l1 = ATmakeList0();
+  for(l=ATreverse(l);!ATisEmpty(l);l=ATgetNext(l)){
+    l1=ATinsert(l1,(ATerm)Number1);
+    l1=ATinsert(l1,(ATerm)ATAgetFirst(l));
+  }
+
+  return gsMakeDataAppl(OpBagEnum, l1);
 }
 
 static ATermList pn2gsMakeListOfLists(ATermList l){
