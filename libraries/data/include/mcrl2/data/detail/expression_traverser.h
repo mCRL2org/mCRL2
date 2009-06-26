@@ -69,6 +69,7 @@ namespace mcrl2 {
           }
 
         public:
+
           template < typename DataExpression >
           void enter(DataExpression const&)
           {}
@@ -261,7 +262,7 @@ namespace mcrl2 {
           }
 
           void operator()(function_sort const& e)
-          { 
+          {
             static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
 
@@ -273,7 +274,7 @@ namespace mcrl2 {
           }
 
           void operator()(container_sort const& e)
-          { 
+          {
             static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
 

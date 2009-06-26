@@ -235,8 +235,8 @@ namespace detail {
   free_variable_find_helper< collect_action< variable, OutputIterator > >
   make_free_variable_find_helper(Container const& bound, OutputIterator sink)
   {
-    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
-							collect_action< variable, OutputIterator >(bound, sink));
+    return free_variable_find_helper< collect_action< variable, OutputIterator > >(bound,
+							collect_action< variable, OutputIterator >(sink));
   }
 
   /**
@@ -347,7 +347,8 @@ bool search_variable(Container const& container, const variable& v)
 ///             are added.
 /// \return All data variables that occur in the term t
 template < typename Container, typename OutputIterator >
-void find_free_variables(Container const& container, OutputIterator const& o)
+void find_free_variables(Container const& container, OutputIterator const& o,
+		           typename detail::disable_if_container< OutputIterator >::type* = 0)
 {
   detail::make_free_variable_find_helper(o)(container);
 }

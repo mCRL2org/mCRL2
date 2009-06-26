@@ -78,7 +78,7 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
-        return replace_variables< typename Substitution::expression_type, Substitution const& >(e, s);
+        return replace_variables(e, s);
       }
     };
 
@@ -112,7 +112,7 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
-        return replace_free_variables< typename Substitution::expression_type, Substitution const& >(e, s);
+        return replace_free_variables(e, s);
       }
     };
 

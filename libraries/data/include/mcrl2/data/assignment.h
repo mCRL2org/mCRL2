@@ -29,8 +29,8 @@ namespace mcrl2 {
   namespace data {
 
     // forward declaration for application operation of assignment
-    template <typename Container, typename ReplaceFunction >
-    Container replace_free_variables(Container const& container, ReplaceFunction replace_function);
+    template <typename Container, typename Substitution >
+    Container replace_free_variables(Container const& container, Substitution replace_function);
 
     /// \brief data assignment.
     ///
@@ -93,7 +93,7 @@ namespace mcrl2 {
     typedef atermpp::vector<assignment>    assignment_vector;
 
     /// \brief Selects the right-hand side of an assignment
-    struct left_hand_side : public std::unary_function< variable, const assignment >
+    struct left_hand_side : public std::unary_function< const assignment, variable >
     {
       variable operator()(assignment const& a) const {
         return a.lhs();
@@ -101,7 +101,7 @@ namespace mcrl2 {
     };
 
     /// \brief Selects the right-hand side of an assignment
-    struct right_hand_side : public std::unary_function< data_expression, const assignment >
+    struct right_hand_side : public std::unary_function< const assignment, data_expression >
     {
       data_expression operator()(assignment const& a) const {
         return a.rhs();
@@ -123,37 +123,44 @@ namespace mcrl2 {
     /// \param[in] assignments the sequence of unmutable assignments
     /// \return a sequence r such that assignments.i.lhs() = r.i.lhs() for all i
     template < typename Container >
-    inline 
     boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >
     make_assignment_right_hand_side_range(Container const& assignments, typename detail::enable_if_container< Container, assignment >::type* = 0)
     {
       return boost::iterator_range< boost::transform_iterator< right_hand_side, typename Container::const_iterator > >(assignments);
     }
 
-    /// \brief Constructs an assignment_list by pairwise combining a variable and expression
-    /// \param lhs A sequence of data variables
-    /// \param rhs A sequence of data expressions
-    /// \return The corresponding assignment list.
-    inline assignment_vector make_assignment_vector(variable_list const& lhs, data_expression_list const& rhs)
+    /// \brief Constructs a range of assignments from sequences of variables and expressions by pair-wise combination
+    template < typename VariableSequence, typename ExpressionSequence >
+    boost::iterator_range< detail::combine_iterator< detail::construct< assignment >&, typename VariableSequence::const_iterator, typename ExpressionSequence::const_iterator > >
+    make_assignment_range(VariableSequence const& variables, ExpressionSequence const& expressions,
+                                                  typename detail::enable_if_container< VariableSequence, variable >::type* = 0,
+                                                  typename detail::enable_if_container< ExpressionSequence, data_expression >::type* = 0)
     {
-      assert(lhs.size() == rhs.size());
-      assignment_vector result;
-      variable_list::const_iterator i = lhs.begin();
-      data_expression_list::const_iterator j = rhs.begin();
-      for ( ; i != lhs.end(); ++i, ++j)
-      {
-        result.push_back(assignment(*i, *j));
-      }
-      return result;
+      assert(boost::distance(variables) == boost::distance(expressions));
+
+      return boost::make_iterator_range(
+        detail::make_combine_iterator(detail::construct< assignment >(), variables.begin(), expressions.begin()),
+        detail::make_combine_iterator(detail::construct< assignment >(), variables.end(), expressions.end()));
     }
 
     /// \brief Constructs an assignment_list by pairwise combining a variable and expression
     /// \param lhs A sequence of data variables
     /// \param rhs A sequence of data expressions
     /// \return The corresponding assignment list.
-    inline assignment_list make_assignment_list(variable_list const& lhs, data_expression_list const& rhs)
+    template < typename VariableSequence, typename ExpressionSequence >
+    assignment_vector make_assignment_vector(VariableSequence const& variables, ExpressionSequence const& expressions)
     {
-      return convert< assignment_list >(make_assignment_vector(lhs, rhs));
+      return convert< assignment_vector >(make_assignment_vector(variables, expressions));
+    }
+
+    /// \brief Converts an iterator range to data_expression_list
+    /// \param r A range of assignments.
+    /// \note This function uses implementation details of the iterator type
+    /// and hence is sometimes efficient than copying all elements of the list.
+    template < typename VariableSequence, typename ExpressionSequence >
+    assignment_list make_assignment_list(VariableSequence const& variables, ExpressionSequence const& expressions)
+    {
+      return convert< assignment_list >(make_assignment_range(variables, expressions));
     }
 
     /// \brief Converts an iterator range to data_expression_list

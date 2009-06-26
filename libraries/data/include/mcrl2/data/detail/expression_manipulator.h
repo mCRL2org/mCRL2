@@ -12,7 +12,16 @@
 #ifndef MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 #define MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 
-#include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "boost/range/iterator_range.hpp"
+
+#include "mcrl2/data/assignment.h"
+#include "mcrl2/data/lambda.h"
+#include "mcrl2/data/forall.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/container_sort.h"
+#include "mcrl2/data/where_clause.h"
+#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -23,137 +32,223 @@ namespace mcrl2 {
     namespace detail {
 
       template < typename Derived >
-      struct expression_manipulator
+      class expression_manipulator
       {
-        data_expression const& operator()(function_symbol const& e)
-        {
-          return e;
-        }
+        public:
 
-        data_expression const& operator()(variable const& e)
-        {
-          return e;
-        }
-
-        data_expression const& operator()(abstraction const& e)
-        {
-          return e;
-        }
-
-        data_expression const& operator()(application const& e)
-        {
-          return e;
-        }
-
-        data_expression const& operator()(where_clause const& e)
-        {
-          return e;
-        }
-
-        data_expression operator()(data_expression_with_variables const& e)
-        {
-          return (*this)(static_cast< data_expression const& >(e));
-        }
-
-        data_expression operator()(data_expression const& e)
-        {
-          if (e.is_application())
+          data_expression const& operator()(function_symbol const& e)
           {
-            return static_cast< Derived& >(*this)(application(e));
-          }
-          else if (e.is_where_clause())
-          {
-            return static_cast< Derived& >(*this)(where_clause(e));
-          }
-          else if (e.is_abstraction())
-          {
-            return static_cast< Derived& >(*this)(abstraction(e));
-          }
-          else if (e.is_variable())
-          {
-            return static_cast< Derived& >(*this)(variable(e));
-          }
-          else if (e.is_function_symbol())
-          {
-            return static_cast< Derived& >(*this)(function_symbol(e));
+            return e;
           }
 
-          return e;
-        }
-
-        assignment operator()(assignment const& a)
-        {
-          return assignment(a.lhs(), (*this)(a.rhs()));
-        }
-
-        // \deprecated exists only for backwards compatibility
-        template < typename Expression >
-        Expression operator()(Expression const& e)
-        {
-          if (is_data_expression(e)) {
-            return (*this)(data_expression(e));
-          }
-          else if (e.type() == AT_APPL)
+          data_expression const& operator()(variable const& e)
           {
-            return apply(atermpp::aterm_appl(e));
-          }
-          else if (e.type() == AT_LIST)
-          {
-            return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+            return e;
           }
 
-          return e;
-        }
-
-        // \deprecated exists only for backwards compatibility
-        atermpp::aterm_appl apply(atermpp::aterm_appl e)
-        {
-          if (!e.empty())
+          data_expression operator()(where_clause const& w)
           {
-            atermpp::vector< atermpp::aterm_appl > new_arguments;
+            return where_clause(static_cast< Derived& >(*this)(w.body()),
+                                static_cast< Derived& >(*this)(w.declarations()));
+          }
 
-            for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+          data_expression operator()(application const& a)
+          {
+            return application(static_cast< Derived& >(*this)(a.head()),
+                               static_cast< Derived& >(*this)(a.arguments()));
+          }
+
+          data_expression operator()(abstraction const& a)
+          {
+            return abstraction(a.binding_operator(),
+              static_cast< Derived& >(*this)(a.variables()),
+              static_cast< Derived& >(*this)(a.body()));
+          }
+
+          data_expression operator()(data_expression const& e)
+          {
+            if (e.is_application())
             {
-              new_arguments.push_back((*this)(*i));
+              return static_cast< Derived& >(*this)(application(e));
+            }
+            else if (e.is_variable())
+            {
+              return static_cast< Derived& >(*this)(variable(e));
+            }
+            else if (e.is_function_symbol())
+            {
+              return static_cast< Derived& >(*this)(function_symbol(e));
+            }
+            else if (e.is_abstraction())
+            {
+              return static_cast< Derived& >(*this)(abstraction(e));
+            }
+            else if (e.is_where_clause())
+            {
+              return static_cast< Derived& >(*this)(where_clause(e));
             }
 
-            return atermpp::aterm_appl(e.function(), new_arguments.begin(), new_arguments.end());
+            return e;
           }
 
-          return e;
-        }
-
-        // \deprecated exists only for backwards compatibility
-        atermpp::aterm apply_list(atermpp::aterm e)
-        {
-          return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
-        }
-
-        template < typename Expression >
-        atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)
-        {
-          atermpp::vector< Expression > result;
-
-          for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
+          assignment operator()(assignment const& a)
           {
-            result.push_back((*this)(*i));
+            return assignment(static_cast< Derived& >(*this)(a.lhs()),
+                              static_cast< Derived& >(*this)(a.rhs()));
           }
 
-          return convert< atermpp::term_list< Expression > >(result);
-        }
-
-        template < typename Container >
-        Container operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
-        {
-          Container result;
-
-          for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+          data_equation operator()(data_equation const& a)
           {
-            result.insert(result.end(), (*this)(*i));
+            return data_equation(
+               static_cast< Derived& >(*this)(a.variables()),
+               static_cast< Derived& >(*this)(a.condition()),
+               static_cast< Derived& >(*this)(a.lhs()),
+               static_cast< Derived& >(*this)(a.rhs()));
           }
 
-          return result;
-        }
+          // \deprecated exists only for backwards compatibility
+          template < typename Expression >
+          Expression operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
+          {
+            if (is_data_expression(e)) {
+              return static_cast< Derived& >(*this)(data_expression(e));
+            }
+            else if (e.type() == AT_APPL)
+            {
+              return apply(atermpp::aterm_appl(e));
+            }
+            else if (e.type() == AT_LIST)
+            {
+              return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+            }
+
+            return e;
+          }
+
+          // \deprecated exists only for backwards compatibility
+          atermpp::aterm_appl apply(atermpp::aterm_appl const& e)
+          {
+            if (!e.empty())
+            {
+              atermpp::vector< atermpp::aterm_appl > new_arguments;
+
+              for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+              {
+                new_arguments.push_back((*this)(*i));
+              }
+
+              return atermpp::aterm_appl(e.function(), new_arguments.begin(), new_arguments.end());
+            }
+
+            return e;
+          }
+
+          // \deprecated exists only for backwards compatibility
+          atermpp::aterm apply_list(atermpp::aterm const& e)
+          {
+            return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
+          }
+
+          template < typename Expression >
+          atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)
+          {
+            atermpp::vector< Expression > result;
+
+            for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
+            {
+              result.push_back((*this)(*i));
+            }
+
+            return convert< atermpp::term_list< Expression > >(result);
+          }
+
+	  // This implementation suffers from the problem that a transformation
+	  // may replace expressions by more general expression types. It is
+	  // not known a-priory what the resulting expression type should be.
+	  // Using type-erasure, the result type can be eliminated from the
+	  // return type, but since the current use of this component is not
+	  // that advanced it was chosen not to enhance the implement.
+          template < typename Container >
+          boost::iterator_range< transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type > >
+          operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          {
+            return boost::make_iterator_range(
+              transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.begin(), static_cast< Derived& >(*this)),
+              transform_iterator< Derived&, typename Container::const_iterator, typename Container::value_type >(container.end(), static_cast< Derived& >(*this)));
+          }
+      };
+
+      template < typename Derived >
+      class binding_aware_expression_manipulator : public expression_manipulator< Derived > {
+
+          typedef expression_manipulator< Derived > super;
+
+        protected:
+
+          std::multiset< variable > m_bound;
+
+          template < typename Container >
+          void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          {
+            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
+            {
+              m_bound.insert(*i);
+            }
+          }
+
+          template < typename Container >
+          void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
+          {
+            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
+            {
+              m_bound.erase(m_bound.find(*i));
+            }
+          }
+
+        public:
+
+          using super::operator();
+
+          data_expression operator()(abstraction const& a)
+          {
+            increase_bind_count(a.variables());
+
+            abstraction result(a.binding_operator(), a.variables(), static_cast< Derived& >(*this)(a.body()));
+
+            decrease_bind_count(a.variables());
+
+            return result;
+          }
+
+          data_expression operator()(where_clause const& w)
+          {
+            increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
+
+            where_clause result(static_cast< Derived& >(*this)(w.body()), make_assignment_range(
+                                 make_assignment_left_hand_side_range(w.declarations()),
+                                 static_cast< Derived& >(*this)(make_assignment_right_hand_side_range(w.declarations()))));
+
+            decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
+
+            return result;
+          }
+
+          bool is_bound(variable const& v) const
+          {
+            return m_bound.find(v) != m_bound.end();
+          }
+
+          binding_aware_expression_manipulator()
+          { }
+
+          template < typename Container >
+          binding_aware_expression_manipulator(Container const& bound_by_context,
+                                    typename detail::enable_if_container< Container, variable >::type* = 0) :
+                              m_bound(bound_by_context.begin(), bound_by_context.end())
+          { }
+
+          virtual ~binding_aware_expression_manipulator()
+          { }
       };
     } // namespace detail
     /// \endcond

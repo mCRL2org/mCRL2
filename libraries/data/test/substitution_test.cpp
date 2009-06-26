@@ -72,8 +72,12 @@ void test_basic()
 
   st[y] = c;
 
-  BOOST_CHECK(st(lambda(y,y)) != lambda(y,y));
-  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
+  // The following should result in assertion failure:
+//  BOOST_CHECK(st(lambda(y,y)) != lambda(y,y));
+//  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
+  st[y] = x;
+  BOOST_CHECK(st(lambda(y,y)) == lambda(x,x));
+  BOOST_CHECK(st(application(lambda(y,y),x) + y) == application(lambda(x,x), x) + x);
 
   // Replacing free variables only
   mutable_map_substitution< variable, data_expression, structural_substitution > sb;

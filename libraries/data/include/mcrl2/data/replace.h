@@ -15,14 +15,15 @@
 #include <algorithm>
 #include <iterator>
 #include <utility>
+
 #include "boost/assert.hpp"
 #include "boost/type_traits/add_reference.hpp"
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/utility/enable_if.hpp"
+
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/core/deprecation.h"
-#include "mcrl2/data/data.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/expression_manipulator.h"
 #include "mcrl2/data/detail/concepts.h"
@@ -40,194 +41,87 @@ namespace mcrl2 {
       // type of a derived class (as per CRTP).
       //
       // The means of specifying and execution of replacement is deferred to the derived class.
-      template < typename Derived >
-      class replace_variables_helper : public expression_manipulator< Derived >
+      template < typename Substitution >
+      class variable_replace_helper : public expression_manipulator< variable_replace_helper< Substitution > >
       {
-        public:
-
-          using expression_manipulator< Derived >::operator();
-
-          where_clause operator()(where_clause const& w)
-          {
-            atermpp::vector< assignment > declarations;
-
-            for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
-            {
-              declarations.push_back((*this)(r.front()));
-            }
-
-            return where_clause((*this)(w.body()), declarations);
-          }
-
-          application operator()(application const& a)
-          {
-            atermpp::vector< data_expression > arguments;
-
-            for (application::arguments_const_range r(a.arguments()); !r.empty(); r.advance_begin(1))
-            {
-              arguments.push_back((*this)(r.front()));
-            }
-
-            return application((*this)(a.head()), arguments);
-          }
-
-          abstraction operator()(abstraction const& a)
-          {
-            return abstraction(a.binding_operator(), a.variables(), (*this)(a.body()));
-          }
+        BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_const<
+                                        typename boost::remove_reference< Substitution >::type >::type>));
 
         protected:
 
-          replace_variables_helper()
+          Substitution m_substitution;
+
+        public:
+
+          using expression_manipulator< variable_replace_helper< Substitution > >::operator();
+
+          assignment operator()(assignment const& a)
+          {
+            return assignment(a.lhs(), (*this)(a.rhs()));
+          }
+
+          data_expression operator()(variable const& v)
+          {
+            return m_substitution(v);
+          }
+
+          variable_replace_helper()
           {}
+
+          variable_replace_helper(typename boost::add_reference< Substitution >::type s) : m_substitution(s)
+          { }
       };
 
-      // Component for doing top-down replacement of variables by expressions.
-      //
-      // Binding is disregarded.  The Derived type parameter represents the
-      // type of a derived class (as per CRTP).
-      //
-      // With a ReplaceFunction with a strict function interface it is not
-      // hard to establish whether replacement introduces a variable that
-      // becomes bound in the context.  The implementation therefore assumes
-      // that that either the replacement function only replaces variables by
-      // closed terms or by open terms that do not contain variables that will
-      // be bound. An assertion is put into place to check that this assumption
-      // holds.
-      //
-      // An advantage of the chose approach is that names of bound variables do
-      // not change as a matter of side-effect.
-      template < typename Derived >
-      class replace_free_variables_helper : public
-              replace_variables_helper< replace_free_variables_helper< Derived > >
+      // Component for doing top-down replacement of free variables by expressions.
+      template < typename Substitution >
+      class free_variable_replace_helper : public binding_aware_expression_manipulator< free_variable_replace_helper< Substitution > >
       {
+        BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_const<
+                                        typename boost::remove_reference< Substitution >::type >::type>));
+
+        typedef binding_aware_expression_manipulator< free_variable_replace_helper< Substitution > > super;
 
         protected:
 
-          std::multiset< variable > m_bound;
+          Substitution m_substitution;
 
-          template < typename Container >
-          inline
-          void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
-          {
-            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-            {
-              m_bound.insert(*i);
-            }
-          }
-
-          template < typename Container >
-          inline
-          void decrease_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
-          {
-            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-            {
-              m_bound.erase(m_bound.find(*i));
-            }
-          }
-
-        public:
-
-          using replace_variables_helper< replace_free_variables_helper< Derived > >::operator();
-
-          where_clause operator()(where_clause const& w)
-          {
-            increase_bind_count(make_assignment_left_hand_side_range(w.declarations()));
-
-            atermpp::vector< assignment > declarations;
-
-            for (where_clause::declarations_const_range r(w.declarations()); !r.empty(); r.advance_begin(1))
-            {
-              declarations.push_back((*this)(r.front()));
-            }
-
-            data_expression new_where_clause(where_clause((*this)(w.body()), declarations));
-
-            decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
-
-            return new_where_clause;
-          }
-
+          // Check that variables in replaced expressions do not become bound
           bool check_replacement_assumption(variable const& v)
           {
-            std::set< variable > free_variables(find_free_variables(static_cast< Derived& >(*this)(v)));
+            std::set< variable > free_variables(find_free_variables(m_substitution(v), super::m_bound));
             std::set< variable > result;
 
             std::set_intersection(free_variables.begin(), free_variables.end(),
-                                  m_bound.begin(), m_bound.end(), std::inserter(result, result.end()));
+                                  super::m_bound.begin(), super::m_bound.end(), std::inserter(result, result.end()));
 
             return result.empty();
           }
 
+        public:
+
+          using super::operator();
+
+          assignment operator()(assignment const& a)
+          {
+            return assignment(a.lhs(), (*this)(a.rhs()));
+          }
+
           data_expression operator()(variable const& v)
           {
-            BOOST_ASSERT((m_bound.find(v) != m_bound.end()) || check_replacement_assumption(v));
+            BOOST_ASSERT((super::m_bound.find(v) != super::m_bound.end()) || check_replacement_assumption(v));
 
-            return (m_bound.find(v) != m_bound.end()) ?
-              static_cast< data_expression >(v) : static_cast< Derived& >(*this)(v);
+            return (super::is_bound(v)) ? static_cast< data_expression >(v) : m_substitution(v);
           }
 
-          abstraction operator()(abstraction const& a)
-          {
-            increase_bind_count(a.variables());
-
-            abstraction new_abstraction(a.binding_operator(), a.variables(), (*this)(a.body()));
-
-            decrease_bind_count(a.variables());
-
-            return new_abstraction;
-          }
-
-        protected:
-
-          replace_free_variables_helper()
+          free_variable_replace_helper()
           {}
 
-          template < typename Container >
-          replace_free_variables_helper(
-                  Container const& bound_by_context,
-                  typename enable_if_container< Container, variable >::type* = 0) :
-                              m_bound(convert< std::set< variable > >(bound_by_context))
-          { }
+          free_variable_replace_helper(typename boost::add_reference< Substitution >::type s) : m_substitution(s)
+          {}
 
-          virtual ~replace_free_variables_helper()
-          { }
-      };
-
-      // Default specialisation that wraps a function object
-      template < typename ReplaceFunction, template < class > class ReplaceHelper >
-      class replace_function_object_helper :
-               public ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >
-      {
-          BOOST_CONCEPT_ASSERT((concepts::Substitution< typename boost::remove_reference< ReplaceFunction >::type>));
-
-        protected:
-
-          ReplaceFunction  m_replace_function;
-
-        public:
-
-          using ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >::operator();
-
-          data_expression operator()(variable const& v)
-          {
-            return m_replace_function(v);
-          }
-
-        public:
-
-          replace_function_object_helper(ReplaceFunction replace_function) :
-                    m_replace_function(replace_function)
-          { }
-
-          // only available if ReplaceHelper has support
-          template < typename Container >
-          replace_function_object_helper(ReplaceFunction replace_function,
-                                        Container const& bound_by_context,
-                                        typename enable_if_container< Container, variable >::type* = 0) :
-                    ReplaceHelper< replace_function_object_helper< ReplaceFunction, ReplaceHelper > >(bound_by_context),
-                    m_replace_function(replace_function)
-          { }
+          template < typename Sequence >
+          free_variable_replace_helper(Sequence const& bound, typename boost::add_reference< Substitution >::type s) : super(bound), m_substitution(s)
+          {}
       };
     } // namespace detail
     /// \endcond
@@ -235,53 +129,45 @@ namespace mcrl2 {
 /// \brief Recursively traverses the given term, and applies the replace function to
 /// each data variable that is encountered during the traversal.
 /// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] replace_function A replace function
+/// \param[in] substitution A replace function
 /// \note Binders are ignored with replacements
 /// \return The replacement result
-template < typename Container, typename ReplaceFunction >
-Container replace_variables(Container const& container, ReplaceFunction replace_function)
+template < typename Container, typename Substitution >
+Container replace_variables(Container const& container, Substitution substitution)
 {
-  using namespace detail;
-
-  return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type,
-						 replace_variables_helper >(replace_function)(container);
+  return detail::variable_replace_helper< typename boost::add_reference< Substitution >::type >(substitution)(container);
 }
 
 /// \brief Recursively traverses the given expression or expression container,
 /// and applies the replace function to each data variable that is not bound it
 /// its context.
 /// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] replace_function the function used for replacing variables
+/// \param[in] substitution the function used for replacing variables
 /// \pre for all v in find_free_variables(container) for all x in
-/// find_free_variables(replace_function(v)) v does not occur in a
+/// find_free_variables(substitution(v)) v does not occur in a
 /// context C[v] = container in which x is bound
 /// \return The expression that results after replacement
-template <typename Container, typename ReplaceFunction >
-Container replace_free_variables(Container const& container, ReplaceFunction replace_function)
+template <typename Container, typename Substitution >
+Container replace_free_variables(Container const& container, Substitution substitution)
 {
-  using namespace detail;
-
-  return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type,
-					 replace_free_variables_helper >(replace_function)(container);
+  return detail::free_variable_replace_helper< typename boost::add_reference< Substitution >::type >(substitution)(container);
 }
 
 /// \brief Recursively traverses the given expression or expression container,
 /// and applies the replace function to each data variable that is not bound it
 /// its context.
 /// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] replace_function the function used for replacing variables
+/// \param[in] substitution the function used for replacing variables
 /// \param[in] bound a set of variables that should be considered as bound
 /// \pre for all v in find_free_variables(container) for all x in
-/// find_free_variables(replace_function(v)) v does not occur in a
+/// find_free_variables(substitution(v)) v does not occur in a
 /// context C[v] = container in which x is bound
 /// \return The expression that results after replacement
-template <typename Container, typename ReplaceFunction, typename VariableRange >
-Container replace_free_variables(Container const& container, ReplaceFunction replace_function, VariableRange const& bound)
+/// TODO prevent bound from being copied
+template <typename Container, typename Substitution , typename VariableSequence >
+Container replace_free_variables(Container const& container, Substitution substitution, VariableSequence const& bound)
 {
-  using namespace detail;
-
-  return replace_function_object_helper< typename boost::add_reference< ReplaceFunction >::type&,
-				 replace_free_variables_helper >(replace_function, bound)(container);
+  return detail::free_variable_replace_helper< typename boost::add_reference< Substitution >::type >(bound, substitution)(container);
 }
 
 /// \cond INTERNAL_DOCS
@@ -340,7 +226,8 @@ Container variable_sequence_replace(Container container,
 {
   using namespace detail;
 
-  return replace_variables(container, variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
+  return replace_variables< Container, variable_sequence_replace_helper< VariableContainer, ExpressionContainer > const& >(container,
+			 variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
 }
 
 /// \cond INTERNAL_DOCS

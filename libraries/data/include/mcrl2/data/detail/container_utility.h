@@ -20,7 +20,12 @@
 #include "boost/static_assert.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_convertible.hpp"
+#include "boost/call_traits.hpp"
+#include "boost/type_traits/remove_reference.hpp"
+#include "boost/type_traits/add_reference.hpp"
 #include "boost/range/iterator_range.hpp"
+#include "boost/iterator/iterator_adaptor.hpp"
+#include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
@@ -269,6 +274,76 @@ namespace mcrl2 {
       struct is_set : public is_set_impl< typename boost::remove_reference< typename boost::remove_const< T >::type >::type >
       { };
 
+      // \note the dereference operation returns (re-)evaluates the function
+      template < typename AdaptableUnaryFunction, typename Iterator, typename Value >
+      class transform_iterator : public boost::iterator_adaptor<
+                 data::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
+                                                        Iterator, Value, boost::use_default, Value > {
+
+        friend class boost::iterator_core_access;
+
+        private:
+
+          AdaptableUnaryFunction m_transformer;
+
+          Value dereference() const
+          {
+            return m_transformer(*(this->base_reference()));
+          }
+
+        public:
+
+          transform_iterator(Iterator const& iterator) : transform_iterator::iterator_adaptor_(iterator)
+          {}
+
+          transform_iterator(Iterator const& iterator, typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer) :
+                                                         transform_iterator::iterator_adaptor_(iterator), m_transformer(transformer)
+          {}
+      };
+
+      template < typename AdaptableUnaryFunction, typename ForwardTraversalIterator1, typename ForwardTraversalIterator2 >
+      class combine_iterator : public boost::iterator_facade<
+                 data::detail::combine_iterator< AdaptableUnaryFunction, ForwardTraversalIterator1, ForwardTraversalIterator2 >,
+                         typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type, boost::forward_traversal_tag,
+                         typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type > {
+
+        friend class boost::iterator_core_access;
+
+        private:
+
+          AdaptableUnaryFunction     m_transformer;
+          ForwardTraversalIterator1  m_iterator_1;
+          ForwardTraversalIterator2  m_iterator_2;
+
+          typename boost::remove_reference< AdaptableUnaryFunction >::type::result_type dereference() const
+          {
+            return m_transformer(*m_iterator_1, *m_iterator_2);
+          }
+
+          void increment()
+          {
+            ++m_iterator_1;
+            ++m_iterator_2;
+          }
+
+          bool equal(combine_iterator const& other) const
+          {
+            return m_iterator_1 == other.m_iterator_1 && m_iterator_2 == other.m_iterator_2;
+          }
+
+        public:
+
+          combine_iterator(typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer,
+					 ForwardTraversalIterator1 i1, ForwardTraversalIterator2 i2) : m_transformer(transformer), m_iterator_1(i1), m_iterator_2(i2)
+          { }
+      };
+
+      template < typename AdaptableUnaryFunction, typename ForwardTraversalIterator1, typename ForwardTraversalIterator2 >
+      combine_iterator< typename boost::add_reference< AdaptableUnaryFunction >::type, ForwardTraversalIterator1, ForwardTraversalIterator2 >
+      make_combine_iterator(AdaptableUnaryFunction f, ForwardTraversalIterator1 const& i1, ForwardTraversalIterator2 const& i2) {
+        return combine_iterator< typename boost::add_reference< AdaptableUnaryFunction >::type, ForwardTraversalIterator1, ForwardTraversalIterator2 >(f, i1, i2);
+      }
+
       template < typename Expression, typename Predicate, typename OutputIterator >
       class filter_insert_iterator {
 
@@ -360,38 +435,24 @@ namespace mcrl2 {
           }
       };
 
-      template < typename Container, typename ReplaceFunction, typename OutputIterator >
-      void apply(Container const& container, ReplaceFunction function, OutputIterator o, typename detail::enable_if_container< Container >::type* = 0)
-      {
-        for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      /// The Boost.pheonix library has a nice implementation that can also be used...
+      /// For our limited purposes this is enough though
+      template < typename Result >
+      struct construct {
+        typedef Result result_type;
+
+        template < typename A >
+        Result operator()(typename boost::call_traits< A >::param_type a) const
         {
-          *o = function(*i);
+          return Result(a);
         }
-      }
-
-      template < typename Expression, typename ReplaceFunction >
-      typename ReplaceFunction::result_type apply_copy(Expression const& expression, ReplaceFunction function, typename detail::disable_if_container< Expression >::type* = 0)
-      {
-        return function(expression);
-      }
-
-      template < typename Container, typename ReplaceFunction >
-      Container apply_copy(Container const& container, ReplaceFunction function, typename detail::enable_if_container< Container >::type* = 0)
-      {
-        Container result;
-
-        typename std::insert_iterator< Container > o(result, result.end());
-
-        apply(container, o);
-
-        return result;
-      }
-
-      template < typename MutableContainer, typename UnaryFunction >
-      void apply(MutableContainer& container, UnaryFunction function)
-      {
-        std::for_each(container.begin(), container.end(), function);
-      }
+ 
+        template < typename A, typename A1 >
+        Result operator()(A a, A1 a1) const
+        {
+          return Result(a, a1);
+        }
+      };
     } // namespace detail
 
     /**
@@ -455,7 +516,6 @@ namespace mcrl2 {
 
       return atermpp::push_front(l, static_cast< Expression >(m));
     }
-
 
     /// \brief Constructs a vector with element type T of one argument.
     ///
