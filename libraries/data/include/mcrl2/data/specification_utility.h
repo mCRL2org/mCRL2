@@ -73,7 +73,7 @@ namespace mcrl2 {
 
             // check alpha equivalence
             if (!o1variables.empty()) {
-              std::map< variable, variable > replacement_map;
+              data::mutable_map_substitution< variable, variable > renamings;
 
               // Assumes that the equation variables are declared in the same order
               while (!o1variables.empty() && !o2variables.empty()) {
@@ -82,14 +82,14 @@ namespace mcrl2 {
                     return false;
                   }
 
-                  replacement_map[o2variables.front()] = o1variables.front();
+                  renamings[o2variables.front()] = o1variables.front();
                 }
 
                 o1variables.advance_begin(1);
                 o2variables.advance_begin(1);
               }
 
-              if (normalised_o1 == data::variable_map_replace(normalised_o2, replacement_map)) {
+              if (normalised_o1 == renamings(normalised_o2)) {
                 return true;
               }
             }

@@ -580,6 +580,32 @@ namespace mcrl2 {
       return true;
     }
 
+    /// \cond INTERNAL_DOCS
+    namespace detail {
+      struct sort_map_substitution_adapter {
+
+        atermpp::map< sort_expression, sort_expression > const& m_map;
+
+        atermpp::aterm_appl operator()(atermpp::aterm_appl a) {
+          if (is_sort_expression(a))
+          {
+            atermpp::map< sort_expression, sort_expression >::const_iterator i = m_map.find(sort_expression(a));
+     
+            if (i != m_map.end())
+            {
+              return i->second;
+            }
+          }
+     
+          return a;
+        }
+
+        sort_map_substitution_adapter(atermpp::map< sort_expression, sort_expression > const& map) : m_map(map)
+        { }
+      };
+    }
+    /// \endcond
+
     /// There are two types of representations of ATerms:
     ///  - the bare specification that does not contain constructor, mappings
     ///    and equations for system defined sorts
@@ -619,11 +645,11 @@ namespace mcrl2 {
           {
             if (renamings.find(reference) == renamings.end())
             { // no other name for the sort
-              renamings[name] = atermpp::replace(reference, make_map_substitution_adapter(renamings));
+              renamings[name] = atermpp::replace(reference, detail::sort_map_substitution_adapter(renamings));
             }
             else
             {
-              other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, make_map_substitution_adapter(renamings))));
+              other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, detail::sort_map_substitution_adapter(renamings))));
             }
           }
           else
@@ -642,7 +668,7 @@ namespace mcrl2 {
         }
       }
 
-      map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
+      detail::sort_map_substitution_adapter renaming_substitution(renamings);
 
       for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
       {
@@ -770,7 +796,7 @@ namespace mcrl2 {
         // Maps container sort expressions to a unique name
         atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
 
-        return atermpp::replace(term, make_map_substitution_adapter(renamings));
+        return atermpp::replace(term, sort_map_substitution_adapter(renamings));
       }
 
       template
@@ -790,7 +816,7 @@ namespace mcrl2 {
           inverse_renamings[i->second] = i->first;
         }
 
-        return atermpp::replace(term, make_map_substitution_adapter(inverse_renamings));
+        return atermpp::replace(term, sort_map_substitution_adapter(inverse_renamings));
       }
 
       template
@@ -809,7 +835,7 @@ namespace mcrl2 {
           // Maps container sort expressions to a unique name
           atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
 
-          map_substitution< atermpp::map< sort_expression, sort_expression > const& > renaming_substitution(renamings);
+          sort_map_substitution_adapter renaming_substitution(renamings);
 
           // recursively apply renamings until no longer possible, or when unfolding recursive sorts
           for (data_specification::aliases_const_range r(s.aliases()); !r.empty(); r.advance_begin(1))
@@ -818,11 +844,11 @@ namespace mcrl2 {
 
             if (renamings.find(r.front().reference()) != renamings.end())
             {
-              std::map< sort_expression, sort_expression > partial_renamings(renamings);
+              atermpp::map< sort_expression, sort_expression > partial_renamings(renamings);
 
               partial_renamings.erase(j->first);
 
-              sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), make_map_substitution_adapter(partial_renamings))));
+              sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), sort_map_substitution_adapter(partial_renamings))));
             }
           }
 

@@ -197,44 +197,6 @@ void test_variable_replace()
   BOOST_CHECK(t1 == t2);
 }
 
-void test_data_expression_replace()
-{
-  std::cerr << "expression replace" << std::endl;
-  // y:Real
-  variable y("y",sort_real::real_());
-  data_expression e(y);
-  // 4:Real
-  data_expression x(sort_real::real_(4));
-  // [y]
-  data_expression_vector el;
-  el.push_back(e);
-  // [4]
-  data_expression_vector xl;
-  xl.push_back(x);
-
-  // y := 4
-  std::map<data_expression, data_expression> replacements;
-  replacements[e] = x;
-
-  std::cerr << e << std::endl;
-  data_expression e_ = data_expression_map_replace(e, replacements);
-  std::cerr << e_ << std::endl;
-  BOOST_CHECK(e_ == x);
-
-  std::cerr << mcrl2::data::pp(xl) << std::endl;
-  data_expression_list xl_ = data_expression_map_replace(convert< aterm_list >(el), replacements);
-  std::cerr << mcrl2::data::pp(xl_) << std::endl;
-  BOOST_CHECK(xl_ == convert< data_expression_list >(xl));
-
-  data_expression u = sort_real::plus(sort_real::real_(4), sort_real::real_(1));
-  data_expression v = sort_real::plus(y, sort_real::real_(1));
-  std::cerr << "u = " << mcrl2::core::pp(u) << std::endl;
-  std::cerr << "v = " << mcrl2::core::pp(v) << std::endl;
-  data_expression v_ = data_expression_map_replace(v, replacements);
-  std::cerr << "v_ = " << mcrl2::core::pp(v_) << std::endl;
-  BOOST_CHECK(v_ != u);
-}
-
 void test_replace_with_binders()
 {
   std::cerr << "replace with binders" << std::endl;
@@ -261,9 +223,6 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_variable_replace();
-  core::garbage_collect();
-
-  test_data_expression_replace();
   core::garbage_collect();
 
   test_replace_with_binders();

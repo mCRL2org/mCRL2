@@ -28,29 +28,30 @@ namespace mcrl2 {
     class data_expression;
     class variable;
 
-    /// \cond INTERNAL_DOCS
+    /// /cond INTERNAL_DOCS
     namespace detail {
-      class inaccessible {
+      template < class Derived >
+      struct substitution_procedure {
 
-        inaccessible() { }
-      };
+         template < typename Substitution, typename Expression >
+         static Expression apply(Substitution const& s, Expression const& e)
+         {
+           return Derived::generic_apply(s, e);
+         }
 
-      template < bool Condition, typename Result >
-      struct choose_expression_type_or_inaccessible {
-        typedef inaccessible type;
-      };
+         template < typename Substitution >
+         static data_expression apply(Substitution const& s, typename Substitution::variable_type const& e,
+                   typename boost::disable_if< typename boost::is_same< typename Substitution::variable_type, variable >::type >::type* = 0)
+         {
+           return s(e);
+         }
 
-      template < typename Result >
-      struct choose_expression_type_or_inaccessible< false, Result > {
-        typedef Result type;
-      };
-
-      template < typename Variable, typename Expression >
-      struct expression_type_or_inaccessible {
-
-        typedef typename choose_expression_type_or_inaccessible< boost::is_same<
-            typename boost::remove_cv< Variable >::type,
-            typename boost::remove_cv< Expression >::type >::value, Expression >::type type;
+         template < typename Substitution >
+         static data_expression apply(Substitution const& s, data_expression const& e,
+                   typename boost::enable_if< typename boost::is_same< typename Substitution::variable_type, variable >::type >::type* = 0)
+         {
+           return (e.is_variable()) ? s(variable(e)) : Derived::generic_apply(s, e);
+         }
       };
     }
     /// \endcond
@@ -72,12 +73,13 @@ namespace mcrl2 {
      *  - [x := true, y := false] applied to lambda x:Bool. x && y results in lambda true:Bool. true && false
      **/
     template < typename Substitution >
-    struct textual_substitution {
+    struct textual_substitution : public detail::substitution_procedure< textual_substitution< Substitution > > {
       /// Function Arguments:
       ///  \param[in] s a substitution object that is only used for variable lookup
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
-      static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
+      template < typename Expression >
+      static data_expression generic_apply(Substitution const& s, Expression const& e) {
         return replace_variables(e, s);
       }
     };
@@ -106,12 +108,13 @@ namespace mcrl2 {
      *  - [y := x] applied to lambda x:Bool. x && y results in lambda x:Bool. x && x (invalid input: assertion)
      **/
     template < typename Substitution >
-    struct structural_substitution {
+    struct structural_substitution : public detail::substitution_procedure< structural_substitution< Substitution > > {
       /// Function Arguments:
       ///  \param[in] s a substitution object that is only used for variable lookup
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
-      static data_expression apply(Substitution const& s, typename Substitution::expression_type const& e) {
+      template < typename Expression >
+      static data_expression generic_apply(Substitution const& s, Expression const& e) {
         return replace_free_variables(e, s);
       }
     };
@@ -188,7 +191,8 @@ namespace mcrl2 {
          * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
          * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
-        expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
+        template < typename OtherExpression >
+        expression_type operator()(OtherExpression const& e) const {
           return SubstitutionProcedure< Derived >::apply(static_cast< Derived const& >(*this), e);
         }
     };

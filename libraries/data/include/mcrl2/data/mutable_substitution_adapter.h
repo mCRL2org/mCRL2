@@ -75,7 +75,8 @@ namespace data {
        * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
        * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
        **/
-      expression_type operator()(typename detail::expression_type_or_inaccessible< variable_type, expression_type >::type const& e) const {
+      template < typename Expression >
+      expression_type operator()(Expression const& e) const {
         return g_(f_(e));
       }
 
@@ -167,7 +168,8 @@ namespace data {
        * \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
        * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
        **/
-      expression_type operator()(typename detail::expression_type_or_inaccessible< Variable, Expression >::type const& e) const {
+      template < typename OtherExpression >
+      expression_type operator()(OtherExpression const& e) const {
         return g_(e);
       }
 
@@ -202,14 +204,14 @@ namespace data {
       }
   };
 
-    /// \brief Returns a string representation of the map, for example [a := 3, b := true].
-    /// \param[in] sigma a constant reference to an object of a mutable_substitution_adapter instance
-    /// \return A string representation of the map.
-    template <typename Substitution>
-    std::string to_string(const mutable_substitution_adapter<Substitution>& sigma)
-    {
-      return to_string(sigma.substitution());
-    }
+  /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+  /// \param[in] sigma a constant reference to an object of a mutable_substitution_adapter instance
+  /// \return A string representation of the map.
+  template <typename Substitution>
+  std::string to_string(const mutable_substitution_adapter<Substitution>& sigma)
+  {
+    return to_string(sigma.substitution());
+  }
 
 } // namespace data
 

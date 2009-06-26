@@ -34,6 +34,14 @@ namespace mcrl2 {
       template < typename Derived >
       class expression_manipulator
       {
+          template < typename Abstraction >
+          data_expression visit(Abstraction const& a)
+          {
+            return abstraction(a.binding_operator(),
+              static_cast< Derived& >(*this)(a.variables()),
+              static_cast< Derived& >(*this)(a.body()));
+          }
+
         public:
 
           data_expression const& operator()(function_symbol const& e)
@@ -58,11 +66,24 @@ namespace mcrl2 {
                                static_cast< Derived& >(*this)(a.arguments()));
           }
 
+          data_expression operator()(lambda const& a)
+          {
+            return visit(a);
+          }
+
+          data_expression operator()(exists const& a)
+          {
+            return visit(a);
+          }
+
+          data_expression operator()(forall const& a)
+          {
+            return visit(a);
+          }
+
           data_expression operator()(abstraction const& a)
           {
-            return abstraction(a.binding_operator(),
-              static_cast< Derived& >(*this)(a.variables()),
-              static_cast< Derived& >(*this)(a.body()));
+            return visit(a);
           }
 
           data_expression operator()(data_expression const& e)
@@ -190,10 +211,7 @@ namespace mcrl2 {
           template < typename Container >
           void increase_bind_count(const Container& variables, typename detail::enable_if_container< Container, variable >::type* = 0)
           {
-            for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-            {
-              m_bound.insert(*i);
-            }
+            m_bound.insert(variables.begin(), variables.end());
           }
 
           template < typename Container >
@@ -205,11 +223,8 @@ namespace mcrl2 {
             }
           }
 
-        public:
-
-          using super::operator();
-
-          data_expression operator()(abstraction const& a)
+          template < typename Abstraction >
+          data_expression visit(Abstraction const& a)
           {
             increase_bind_count(a.variables());
 
@@ -218,6 +233,30 @@ namespace mcrl2 {
             decrease_bind_count(a.variables());
 
             return result;
+          }
+
+        public:
+
+          using super::operator();
+
+          data_expression operator()(lambda const& a)
+          {
+            return visit(a);
+          }
+
+          data_expression operator()(exists const& a)
+          {
+            return visit(a);
+          }
+
+          data_expression operator()(forall const& a)
+          {
+            return visit(a);
+          }
+
+          data_expression operator()(abstraction const& a)
+          {
+            return visit(a);
           }
 
           data_expression operator()(where_clause const& w)

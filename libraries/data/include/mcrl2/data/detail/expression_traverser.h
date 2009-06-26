@@ -208,19 +208,17 @@ namespace mcrl2 {
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
-            if (is_data_expression(e))
-            {
-              static_cast< Derived& >(*this)(data_expression(e));
-            }
-            else {
-              (*this)(static_cast< atermpp::aterm const& >(e));
-            }
+            (*this)(static_cast< atermpp::aterm const& >(e));
           }
 
           // \deprecated exists only for backwards compatibility
           void operator()(atermpp::aterm const& e)
           {
-            if (e.type() == AT_APPL)
+            if (is_data_expression(e))
+            {
+              static_cast< Derived& >(*this)(data_expression(e));
+            }
+            else if (e.type() == AT_APPL)
             {
               for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
               {

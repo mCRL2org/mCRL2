@@ -22,6 +22,7 @@
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/remove_parameters.h"
@@ -161,7 +162,7 @@ namespace pbes_system {
           for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
             unsigned int p = index_of(*k, m_parameters[Y]);
-            w[m_data_rewriter(variable_map_replace(e[p], vX))].insert(*k);
+            w[m_data_rewriter(e[p], data::make_map_substitution_adapter(vX))].insert(*k);
           }
           if (w.size() > 1)
           {
@@ -207,7 +208,7 @@ namespace pbes_system {
           std::map<variable_type, data_term_type> replacements = compute_substitution(X);
           if (!X.empty())
           {
-            *i = pbes_equation(i->symbol(), i->variable(), data::variable_map_replace(i->formula(), replacements));
+            *i = pbes_equation(i->symbol(), i->variable(), data::make_map_substitution_adapter(replacements)(i->formula()));
           }
         }
 
