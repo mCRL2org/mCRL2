@@ -249,6 +249,11 @@ class pbes
     pbes(atermpp::aterm_appl t)
     {
       init_term(t);
+if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
+{
+  std::cerr << "Offending PBES:\n" << pbes_to_aterm(*this) << std::endl;
+  std::cerr << "Original PBES:\n" << t << std::endl;
+}
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
@@ -704,7 +709,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = tr
 {
   ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
   ATermAppl equations = core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(p.equations()));
-  ATermAppl initial_state = p.initial_state();
+  ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());
   atermpp::aterm_appl result;
 
   if (compatible)
