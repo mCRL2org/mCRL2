@@ -159,7 +159,7 @@ class lysa2mcrl2_tool: public input_output_tool
       desc.add_option("zero-action",
         "Generates a 'zero' action before deadlocking when Typed LySa's empty process (0) "
         "is encountered. This is a valid action in the supplied preambles. This option may "
-        "help you differentiate between a deadlock and a correct protocol run termination. "
+        "help you differentiate between a deadlock and a correct protocol run termination. ",
         'z');
 
       desc.add_option("lysa",
