@@ -54,6 +54,9 @@ using mcrl2::core::pp;
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
+template <typename Container>
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true);
+
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
 
@@ -132,19 +135,12 @@ class pbes
     /// \brief The initial state
     propositional_variable_instantiation m_initial_state;
 
-    /// \brief Conversion to ATerm
-    /// \return The pbes converted to ATerm
-    ATerm term() const
-    {
-      return reinterpret_cast<ATerm>(ATermAppl(*this));
-    }
-
     /// \brief Initialize the pbes from an ATerm
     /// \param t A term
     void init_term(atermpp::aterm_appl t)
     {
       atermpp::aterm_appl::iterator i = t.begin();
-      m_data          = atermpp::aterm_appl(*i++);
+      m_data = atermpp::aterm_appl(*i++);
 
       data::variable_list global_variables = atermpp::aterm_appl(*i++)(0);
       m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
@@ -253,7 +249,7 @@ class pbes
     pbes(atermpp::aterm_appl t)
     {
       init_term(t);
-      assert(core::detail::check_rule_PBES(term()));
+      assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
     /// \brief Constructor.
@@ -269,7 +265,7 @@ class pbes
         m_initial_state(initial_state)
     {
       m_global_variables = compute_unbound_variables();
-      assert(core::detail::check_rule_PBES(term()));
+      assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
     /// \brief Constructor.
@@ -287,7 +283,7 @@ class pbes
         m_global_variables(global_variables),
         m_initial_state(initial_state)
     {
-      assert(core::detail::check_rule_PBES(term()));
+      assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
     /// \brief Returns the data specification.
@@ -431,26 +427,11 @@ class pbes
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
       assert(is_well_typed());
-      //if (!is_well_typed())
-      //{
-      //  throw mcrl2::runtime_error("PBES is not well typed (pbes::save())");
-      //}
 
       pbes<Container> tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = ATermAppl(tmp);
+      atermpp::aterm_appl t = pbes_to_aterm(tmp);
       core::detail::save_aterm(t, filename, binary);
-    }
-
-    /// \brief Conversion to ATermAppl.
-    /// \return The PBES converted to ATerm format.
-    operator ATermAppl() const
-    {
-      // convert the equation system to ATerm format
-      return core::detail::gsMakePBES(data::detail::data_specification_to_aterm_data_spec(m_data),
-        core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(m_global_variables)),
-        core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(m_equations)),
-        m_initial_state);
     }
 
     /// \brief Returns the set of binding variables of the pbes.
@@ -716,6 +697,48 @@ class pbes
     }
 };
 
+/// \brief Conversion to ATermAppl.
+/// \return The PBES converted to ATerm format.
+template <typename Container>
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true)
+{
+  ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
+  ATermAppl equations = core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(p.equations()));
+  ATermAppl initial_state = p.initial_state();
+  atermpp::aterm_appl result;
+
+  if (compatible)
+  {
+    atermpp::aterm_appl pbes_term(core::detail::gsMakePBES(
+      data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
+      global_variables,
+      equations,
+      initial_state
+      )
+    );
+
+    pbes_term = data::detail::apply_compatibility_renamings(p.data(), pbes_term);
+
+    result = core::detail::gsMakePBES(
+        data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
+        atermpp::aterm_appl(pbes_term(1)),
+        atermpp::aterm_appl(pbes_term(2)),
+        atermpp::aterm_appl(pbes_term(3))
+    );
+    return result;
+  }
+  else
+  {
+    result = core::detail::gsMakePBES(
+      data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
+      global_variables,
+      equations,
+      initial_state
+    );
+  }
+  return result;
+}
+
 /// \brief Computes the free variables that occur in the pbes.
 /// \param p A pbes
 /// \return The free variables that occur in the pbes.
@@ -738,6 +761,16 @@ void complete_data_specification(pbes<Container>& p)
   p.data().make_complete(boost::make_iterator_range(s));
 }
 
+/// \brief Equality operator on PBESs
+/// \return True if the PBESs have exactly the same internal representation. Note
+/// that this is in general not a very useful test.
+// TODO: improve the comparison
+template <typename Container1, typename Container2>
+bool operator==(const pbes<Container1>& p1, const pbes<Container2>& p2)
+{
+  return pbes_to_aterm(p1) == pbes_to_aterm(p2);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2
@@ -751,8 +784,8 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
   static void protect(mcrl2::pbes_system::pbes<Container> t)   { t.protect(); }
   static void unprotect(mcrl2::pbes_system::pbes<Container> t) { t.unprotect(); }
   static void mark(mcrl2::pbes_system::pbes<Container> t)      { t.mark(); }
-  static ATerm term(mcrl2::pbes_system::pbes<Container> t)     { return t.term(); }
-  static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { return &t.term(); }
+  static ATerm term(mcrl2::pbes_system::pbes<Container> t)     { atermpp::aterm x = pbes_to_aterm(t); return x; }
+  static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
 };
 }
 /// \endcond
