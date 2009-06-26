@@ -32,8 +32,6 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/detail/data_common.h"
-//#include "mcrl2/data/data_specification.h"
-//#include "mcrl2/data/detail/data_specification_compatibility.h"
 
 namespace mcrl2 {
   namespace core {
@@ -272,6 +270,15 @@ static void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
          summand is printed without assignments
 */
 
+static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm Term, unsigned int Nesting = 0);
+//Pre:  Term is an ATerm containing applications and lists only
+//      Nesting indicates the nesting depth of Term in its context
+//Post: A string representation of the ATerm is written to OutStream,
+//      such that each element part of the ATerm is indented by Nesting + its nesting depth
+
+static void PRINT_FUNC(AFun)(PRINT_OUTTYPE OutStream, const AFun Fun);
+//Post: The string representation Fun is written to OutStream
+
 static ATermList GetAssignmentsRHS(ATermList Assignments);
 /*Pre: Assignments is a list of assignments of data expressions to data
        variables
@@ -352,6 +359,7 @@ static int gsPrecOpIdInfixRight(ATermAppl OpIdName);
 //Pre: OpIdInfix is the name of an infix operation identifier
 //Ret: Precedence of the right argument of the operation
 
+
 //implementation
 //--------------
 
@@ -384,6 +392,59 @@ inline static void PRINT_FUNC(dbg_prints)(const char *Value)
 #endif
 }
 
+static void PRINT_FUNC(AFun)(PRINT_OUTTYPE OutStream, const AFun fun)
+{
+  if (ATisQuoted(fun)) {
+    PRINT_FUNC(fprints)(OutStream, "\"");
+  }
+  PRINT_FUNC(fprints)(OutStream, ATgetName(fun));
+  if (ATisQuoted(fun)) {
+    PRINT_FUNC(fprints)(OutStream, "\"");
+  }
+}
+
+static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm term, unsigned int nesting)
+{
+  std::string prefix(2*nesting, ' ');
+  if (ATgetType(term) == AT_APPL) {
+    PRINT_FUNC(fprints)(OutStream, prefix.c_str());
+    ATermAppl appl = (ATermAppl) term;
+    AFun fun = ATgetAFun(appl);
+    PRINT_FUNC(AFun)(OutStream, fun);
+    unsigned int arity = ATgetArity(fun);
+    if (arity > 0) {
+      PRINT_FUNC(fprints)(OutStream, "(\n");
+      for (unsigned int i = 0; i < arity; i++) {
+        PRINT_FUNC(IndentedATerm)(OutStream, ATgetArgument(appl, i), nesting+1);
+        if (i+1 < arity) {
+          PRINT_FUNC(fprints)(OutStream, ",\n");
+        }
+      }
+      PRINT_FUNC(fprints)(OutStream, "\n");
+      PRINT_FUNC(fprints)(OutStream, prefix.c_str());
+      PRINT_FUNC(fprints)(OutStream, ")");
+    }
+  } else if (ATgetType(term) == AT_LIST) {
+    PRINT_FUNC(fprints)(OutStream, prefix.c_str());
+    if (ATisEmpty((ATermList) term)) {
+      PRINT_FUNC(fprints)(OutStream, "[]");
+    } else {
+      PRINT_FUNC(fprints)(OutStream, "[\n");
+      for (ATermList l = (ATermList) term; !ATisEmpty(l); l = ATgetNext(l)) {
+        PRINT_FUNC(IndentedATerm)(OutStream, ATgetFirst(l), nesting+1);
+        if (!ATisEmpty(ATgetNext(l))) {
+          PRINT_FUNC(fprints)(OutStream, ",\n");
+        }
+      }
+      PRINT_FUNC(fprints)(OutStream, "\n");
+      PRINT_FUNC(fprints)(OutStream, prefix.c_str());
+      PRINT_FUNC(fprints)(OutStream, "]");
+    }
+  } else {
+    PRINT_FUNC(fprints)(OutStream, "ERROR: term is not an ATermAppl or ATermList");
+  }
+}
+
 void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
   t_pp_format pp_format)
 {
@@ -394,6 +455,8 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
 #elif defined(PRINT_CXX)
     OutStream << ATwriteToString(Part) << std::endl;
 #endif
+  } else if (pp_format == ppInternalDebug) {
+    PRINT_FUNC(IndentedATerm)(OutStream, Part);
   } else {
     ATerm ReconstructedPart = Part;
     // Tries to remove system defined sorts in case of non-debug prints

@@ -25,7 +25,7 @@ namespace mcrl2 {
   namespace core {
 
 /// \brief t_pp_format represents the available pretty print formats
-typedef enum { ppDefault, ppDebug, ppInternal } t_pp_format;
+typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
 
 /// \brief Print string representation of pretty print format
 /// \param pp_format a pretty print format
@@ -43,6 +43,8 @@ std::string pp_format_to_string(const t_pp_format pp_format)
       return "debug";
     case ppInternal:
       return "internal";
+    case ppInternalDebug:
+      return "internal_debug";
     default:
       throw mcrl2::runtime_error("Unknown pretty print format");
   }
