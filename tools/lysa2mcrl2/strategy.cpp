@@ -32,7 +32,7 @@ class Strategy_symbolic : public Strategy
 "\n"
 "# init\n"
 "init           = init allow({s, r, FAIL, zero}, comm({send|recvA->s, sendA|recv->r},%newline%  %proc%%newline%));\n"
-"attacker_index = eqn attackerIndex = %index%\n"; } 
+"attacker_index = eqn attackerIndex = %index%;\n"; } 
   std::string getPreamble()          { return 
 "\n"
 "\n"
