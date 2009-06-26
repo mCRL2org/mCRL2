@@ -176,7 +176,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
       pbes<> p = pbes_translate(state_formula(result), lps_spec, timed);
-      result = ATermAppl(p);
+      result = pbes_to_aterm(p);
       if (result == NULL) {
         return NULL;
       }

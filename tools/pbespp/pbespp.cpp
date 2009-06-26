@@ -98,7 +98,7 @@ class pbespp_tool: public input_output_tool
         pbes_specification.data() = mcrl2::data::remove_all_system_defined(pbes_specification.data());
       }
 
-      ATermAppl spec = static_cast< ATermAppl >(pbes_specification);
+      ATermAppl spec = pbes_to_aterm(pbes_specification);
 
       //open output file for writing or set to stdout
       FILE *output_stream    = NULL;
