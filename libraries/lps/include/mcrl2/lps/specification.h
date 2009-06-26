@@ -43,9 +43,6 @@ void traverse_sort_expressions(const Object& o, OutIter dest);
 template <typename Object>
 bool is_well_typed(const Object& o);
 
-template <typename Object>
-std::set<data::variable> find_free_variables(const Object& o);
-
 class specification;   
 atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
 void complete_data_specification(lps::specification&);

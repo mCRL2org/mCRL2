@@ -287,80 +287,6 @@ ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
         return NULL;
 }
 
-ATermAppl NextStateStandard::FindDummy(ATermAppl sort, ATermList no_dummy)
-{
-        ATermList l;
-
-        no_dummy = ATinsert(no_dummy,(ATerm) sort);
-
-        if ( gsIsSortArrow(sort) )
-        {
-                // Take dataspec from current_spec, then take the consspec from the dataspec
-                // and take the list of opids (l) from this consspec
-                l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),1),0);
-
-                for (; !ATisEmpty(l); l=ATgetNext(l))
-                {
-                        ATermAppl conssort = ATAgetArgument(ATAgetFirst(l),1);
-                        if ( ATisEqual(conssort,sort) )
-                        {
-                                return ATAgetFirst(l);
-                        }
-                }
-
-                // Take dataspec from current_spec, then take the mapspec from the dataspec
-                // and take the list of opids (l) from this mapspec
-                l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),2),0);
-                for (; !ATisEmpty(l); l=ATgetNext(l))
-                {
-                        ATermAppl mapsort = ATAgetArgument(ATAgetFirst(l),1);
-                        if ( ATisEqual(mapsort,sort) )
-                        {
-                                return ATAgetFirst(l);
-                        }
-                }
-        } else {
-                for (unsigned int i=1; i<3; ++i)
-                { // first check all constructors, then the mappings
-                l = ATLgetArgument(ATAgetArgument(ATAgetArgument(current_spec,0),i),0);
-                for (; !ATisEmpty(l); l=ATgetNext(l))
-                {
-                        ATermAppl funcsort = ATAgetArgument(ATAgetFirst(l),1);
-                        if ( ATisEqual(gsGetSortExprResult(funcsort),sort) )
-                        {
-                                ATermList domains = gsGetSortExprDomains(funcsort);
-                                ATermAppl t = ATAgetFirst(l);
-
-                                bool found = true;
-                                for (; !ATisEmpty(domains); domains=ATgetNext(domains))
-                                {
-                                        ATermList domain = ATLgetFirst(domains);
-                                        ATermList dummies = ATmakeList0();
-                                        for (; !ATisEmpty(domain); domain=ATgetNext(domain))
-                                        {
-                                                if ( ATindexOf(no_dummy,ATgetFirst(domain),0) >= 0 )
-                                                {
-                                                        found = false;
-                                                        break;
-                                                }
-                                                dummies = ATinsert(dummies, (ATerm) FindDummy(ATAgetFirst(domain),no_dummy));
-                                        }
-                                        dummies = ATreverse(dummies);
-                                        t = gsMakeDataAppl(t,dummies);
-                                }
-
-                                if ( found )
-                                {
-                                        return t;
-                                }
-                        }
-                }
-                }
-        }
-
-        throw mcrl2::runtime_error("could not find dummy of type " + pp(sort));
-}
-
 ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 {
         if ( !usedummies )
@@ -485,9 +411,6 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
         tree_init = NULL;
 
-        current_spec = specification_to_aterm(spec, false);
-        ATprotectAppl(&current_spec);
-
         info.stateformat = state_format;
         info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
         ATprotectAFun(info.pairAFun);
@@ -495,9 +418,9 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         info.nil = gsMakeNil();
         ATprotectAppl(&info.nil);
 
-        free_vars = ATLgetArgument(ATAgetArgument(current_spec,2),0);
+        free_vars = data::convert< variable_list >(spec.global_variables());
 
-        pars = ATLgetArgument(ATAgetArgument(current_spec,2),1);
+        pars = spec.process().process_parameters();
         ATprotectList(&pars);
 
         info.statelen = ATgetLength(pars);
@@ -510,7 +433,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
                 stateAFun_made = false;
         }
 
-        info.procvars = ATLgetArgument(ATAgetArgument(current_spec,2),1);
+        info.procvars = spec.process().process_parameters();
         ATprotectList(&info.procvars);
 
         stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
@@ -522,7 +445,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
         smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
         ATprotectAFun(smndAFun);
-        ATermList sums = ATLgetArgument(ATAgetArgument(current_spec,2),2);
+        ATermList sums = spec.process().summands();
         l = ATmakeList0();
         for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
         {
@@ -551,8 +474,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         }
 
         l = pars;
-        free_vars = ATLgetArgument(ATAgetArgument(current_spec,3),0);
-        m = ATLgetArgument(ATAgetArgument(current_spec,3),1);
+        m = spec.initial_process().assignments();
 
         for (int i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
         {
@@ -597,7 +519,6 @@ NextStateStandard::~NextStateStandard()
 
         ATunprotectArray(stateargs);
 
-        ATunprotectAppl(&current_spec);
         ATunprotectAppl(&info.nil);
 
         ATunprotectAFun(info.pairAFun);

@@ -39,7 +39,7 @@ namespace detail {
     template <typename SetContainer1>
     void remove_set_container(SetContainer1& c) const
     {
-      for (typename SetContainer::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      for (typename SetContainer::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
       {
         c.erase(*i);
       }

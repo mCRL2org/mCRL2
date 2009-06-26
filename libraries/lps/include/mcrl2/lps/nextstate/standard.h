@@ -280,16 +280,16 @@ struct ns_info
 {
   NextStateStandard *parent;
 
-        // Uses terms in internal format... *Sigh*
-        typedef mcrl2::data::classic_enumerator<
-            mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
-            legacy_rewriter, legacy_selector > enumerator_type;
+  // Uses terms in internal format... *Sigh*
+  typedef mcrl2::data::classic_enumerator<
+      mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
+      legacy_rewriter, legacy_selector > enumerator_type;
 
-        typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
+  typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
-        mcrl2::data::data_specification const&                            m_specification;
-        boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
-        legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
+  mcrl2::data::data_specification const&                            m_specification;
+  boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
+  legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
   int num_summands;
   ATermAppl *summands;
@@ -302,27 +302,27 @@ struct ns_info
   AFun stateAFun;
   unsigned int *current_id;
 
-        enumerator_type get_sols(ATermList v, ATerm c) {
-          return m_enumerator_factory->make(v, c);
-        }
+  enumerator_type get_sols(ATermList v, ATerm c) {
+    return m_enumerator_factory->make(v, c);
+  }
 
-        ATermAppl export_term(ATerm term) {
-          return m_rewriter.translate(term);
-        }
+  ATermAppl export_term(ATerm term) {
+    return m_rewriter.translate(term);
+  }
 
-        ATerm import_term(ATermAppl term) {
-          return m_rewriter.translate(term);
-        }
+  ATerm import_term(ATermAppl term) {
+    return m_rewriter.translate(term);
+  }
 
-        ns_info(mcrl2::data::data_specification const& specification,
-                mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
-          m_specification(specification),
-          m_enumerator_factory(new enumerator_factory_type(factory)),
-          m_rewriter(m_enumerator_factory->get_evaluator()) {
+  ns_info(mcrl2::data::data_specification const& specification,
+          mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
+    m_specification(specification),
+    m_enumerator_factory(new enumerator_factory_type(factory)),
+    m_rewriter(m_enumerator_factory->get_evaluator()) {
 
-          // Configure selector to compare with term that represents false
-          legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::false_());
-        }
+    // Configure selector to compare with term that represents false
+    legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::false_());
+  }
 };
 /// \endcond
 
@@ -345,7 +345,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
     unsigned int id;
 
     bool error;
-                bool single_summand;
+    bool single_summand;
 
     int sum_idx;
 
@@ -403,14 +403,12 @@ class NextStateStandard : public NextState
     bool *tree_init;
     ATerm *stateargs;
 
-    ATermAppl current_spec;
     ATermList pars;
     ATerm initial_state;
 
     ATerm buildTree(ATerm *args);
     ATerm getTreeElement(ATerm tree, int index);
 
-    ATermAppl FindDummy(ATermAppl sort, ATermList no_dummy = ATempty);
     ATerm SetVars(ATerm a, ATermList free_vars);
     ATermList ListToFormat(ATermList l,ATermList free_vars);
     ATermList ListFromFormat(ATermList l);
