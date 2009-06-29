@@ -526,7 +526,7 @@ lps::specification action_rename(
                 loai != lps_old_actions.end(); loai++)
       {
         action lps_old_action = *loai;
-        std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
+        //std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
         if (equal_signatures(lps_old_action, rule_old_action))
         {
           if (gsVerbose)
