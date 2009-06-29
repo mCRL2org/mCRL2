@@ -205,7 +205,7 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         {
           gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
-        add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,3),1),(ATermAppl) ATgetArgument(lts_opts.spec,1));
+        add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,3),0),(ATermAppl) ATgetArgument(lts_opts.spec,1));
       }
       break;
     case lts_none:
