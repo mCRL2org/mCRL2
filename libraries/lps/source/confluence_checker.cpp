@@ -284,7 +284,7 @@ using namespace mcrl2::core::detail;
 
     bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
       assert(is_tau_summand(a_summand_1));
-      ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lps, 2), 1);
+      ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lps, 3), 0);
       bool v_is_confluent = true;
 
       if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
@@ -335,7 +335,7 @@ using namespace mcrl2::core::detail;
 
     ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
       assert(is_tau_summand(a_summand));
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 2), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 3), 1);
       ATermAppl v_summand, v_marked_summand;
       int v_summand_number = 1;
       bool v_is_confluent = true;
@@ -432,8 +432,8 @@ using namespace mcrl2::core::detail;
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number) {
-      ATermAppl v_process_equation = ATAgetArgument(f_lps, 2);
-      ATermList v_summands = ATLgetArgument(v_process_equation, 2);
+      ATermAppl v_process_equation = ATAgetArgument(f_lps, 3);
+      ATermList v_summands = ATLgetArgument(v_process_equation, 1);
       ATermAppl v_summand;
       ATermList v_marked_summands = ATmakeList0();
       ATermAppl v_marked_summand;
@@ -465,8 +465,8 @@ using namespace mcrl2::core::detail;
         v_summand_number++;
       }
       v_marked_summands = ATreverse(v_marked_summands);
-      v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 2);
-      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equation, 2);
+      v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 1);
+      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equation, 3);
 
       if (v_is_marked && !has_ctau_action(mcrl2::lps::specification(f_lps))) {
         v_lps = add_ctau_action(v_lps);

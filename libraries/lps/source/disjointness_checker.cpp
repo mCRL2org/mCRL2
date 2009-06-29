@@ -137,8 +137,8 @@ using namespace mcrl2::core::detail;
   // Class Disjointness_Checker - Functions declared public ---------------------------------------
 
     Disjointness_Checker::Disjointness_Checker(ATermAppl a_process_equation) {
-      ATermList v_parameters = ATLgetArgument(a_process_equation, 1);
-      ATermList v_summands = ATLgetArgument(a_process_equation, 2);
+      ATermList v_parameters = ATLgetArgument(a_process_equation, 0);
+      ATermList v_summands = ATLgetArgument(a_process_equation, 1);
       ATermAppl v_summand;
       int v_summand_number = 1;
 
