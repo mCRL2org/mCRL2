@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jan Friso Groote, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -18,7 +18,6 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rename.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
