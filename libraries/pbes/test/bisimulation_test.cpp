@@ -47,29 +47,34 @@ const std::string ABP_SPECIFICATION =
 "    )                                                                      \n"
 "  );                                                                       \n";
 
-void test_bisimulation()
+std::string SMALLSPEC =
+  "act a,b;                 \n"
+  "                         \n"
+  "proc X = a.tau.tau.b.X;  \n"
+  "                         \n"
+  "init X;                  \n"
+  ;
+
+void test_bisimulation(const std::string& lps_spec)
 {
-  specification abp_spec = mcrl22lps(ABP_SPECIFICATION);
-  pbes<> bb  = branching_bisimulation(abp_spec, abp_spec);
-  pbes<> sb  = strong_bisimulation(abp_spec, abp_spec);
-  pbes<> wb  = weak_bisimulation(abp_spec, abp_spec);
-  pbes<> sbe = branching_simulation_equivalence(abp_spec, abp_spec);
+  specification spec = mcrl22lps(lps_spec);
+  pbes<> bb  = branching_bisimulation(spec, spec);
+  pbes<> sb  = strong_bisimulation(spec, spec);
+  pbes<> wb  = weak_bisimulation(spec, spec);
+  pbes<> sbe = branching_simulation_equivalence(spec, spec);
 
   BOOST_CHECK(bb.is_well_typed());
   BOOST_CHECK(sb.is_well_typed());
   BOOST_CHECK(wb.is_well_typed());
   BOOST_CHECK(sbe.is_well_typed());
-
-//  BOOST_CHECK(pbes2bool(bb ));
-//  BOOST_CHECK(pbes2bool(sb ));
-//  BOOST_CHECK(pbes2bool(wb ));
-//  BOOST_CHECK(pbes2bool(sbe));
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-  test_bisimulation();
+  test_bisimulation(ABP_SPECIFICATION);
+  core::garbage_collect();
+  test_bisimulation(SMALLSPEC);
   core::garbage_collect();
 
   return 0;
