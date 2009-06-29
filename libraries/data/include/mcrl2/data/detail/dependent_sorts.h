@@ -39,11 +39,11 @@ namespace mcrl2 {
 
       /// \brief Computes the set of sorts that depend on the sorts that are added
       template < typename Action >
-      class dependent_sort_helper : public detail::selective_sort_expression_traverser< dependent_sort_helper< Action >, unique_traversal_condition< sort_expression > >
+      class dependent_sort_helper : public detail::selective_sort_traverser< dependent_sort_helper< Action >, unique_traversal_condition< sort_expression > >
       {
-        friend class detail::sort_expression_traverser< dependent_sort_helper >;
+        friend class detail::sort_traverser< dependent_sort_helper >;
 
-        typedef detail::selective_sort_expression_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > > super;
+        typedef detail::selective_sort_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > > super;
 
         public:
 

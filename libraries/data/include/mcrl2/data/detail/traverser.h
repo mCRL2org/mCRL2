@@ -49,7 +49,7 @@ namespace mcrl2 {
        * expressions can also be used transparently.
        **/
       template < typename Derived >
-      class expression_traverser
+      class traverser
       {
         protected:
 
@@ -239,10 +239,10 @@ namespace mcrl2 {
       };
 
       template < typename Derived >
-      class sort_expression_traverser : public expression_traverser< Derived >
+      class sort_traverser : public traverser< Derived >
       {
         public:
-          typedef expression_traverser< Derived > super;
+          typedef traverser< Derived > super;
 
           template < typename Expression >
           void enter(Expression const&)
@@ -382,9 +382,9 @@ namespace mcrl2 {
       };
 
       template < typename Derived >
-      class binding_aware_expression_traverser : public expression_traverser< Derived > {
+      class binding_aware_traverser : public traverser< Derived > {
 
-        typedef expression_traverser< Derived > super;
+        typedef traverser< Derived > super;
 
         protected:
 
@@ -455,16 +455,16 @@ namespace mcrl2 {
             return m_bound.find(v) != m_bound.end();
           }
 
-          binding_aware_expression_traverser()
+          binding_aware_traverser()
           { }
 
           template < typename Container >
-          binding_aware_expression_traverser(Container const& bound_by_context,
+          binding_aware_traverser(Container const& bound_by_context,
                                     typename detail::enable_if_container< Container, variable >::type* = 0) :
                               m_bound(bound_by_context.begin(), bound_by_context.end())
           { }
 
-          virtual ~binding_aware_expression_traverser()
+          virtual ~binding_aware_traverser()
           { }
       };
 
@@ -479,10 +479,10 @@ namespace mcrl2 {
        * Before a subterm is explored the predicate is applied to see whether
        * traversal should continue.
        *
-       * \see expression_traverser
+       * \see traverser
        **/
-      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = detail::expression_traverser >
-      class selective_expression_traverser : public Traverser< Derived >
+      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = detail::traverser >
+      class selective_traverser : public Traverser< Derived >
       {
           typedef Traverser< Derived > super;
 
@@ -547,20 +547,20 @@ namespace mcrl2 {
           }
 
           // Default constructor (only works if SelectionPredicate is Default Constructible)
-          selective_expression_traverser()
+          selective_traverser()
           { }
 
-          selective_expression_traverser(AdaptablePredicate predicate) : m_traverse_condition(predicate)
+          selective_traverser(AdaptablePredicate predicate) : m_traverse_condition(predicate)
           { }
 
-          virtual ~selective_expression_traverser()
+          virtual ~selective_traverser()
           { }
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_data_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate >
+      class selective_data_traverser : public selective_traverser< Derived, AdaptablePredicate >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate > super;
+        typedef selective_traverser< Derived, AdaptablePredicate > super;
 
         public:
 
@@ -568,17 +568,17 @@ namespace mcrl2 {
           using super::enter;
           using super::leave;
 
-          selective_data_expression_traverser()
+          selective_data_traverser()
           { }
 
-          selective_data_expression_traverser(AdaptablePredicate predicate) : super(predicate)
+          selective_data_traverser(AdaptablePredicate predicate) : super(predicate)
           { }
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_sort_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, detail::sort_expression_traverser >
+      class selective_sort_traverser : public selective_traverser< Derived, AdaptablePredicate, detail::sort_traverser >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate, detail::sort_expression_traverser > super;
+        typedef selective_traverser< Derived, AdaptablePredicate, detail::sort_traverser > super;
 
         public:
 
@@ -586,17 +586,17 @@ namespace mcrl2 {
           using super::enter;
           using super::leave;
 
-          selective_sort_expression_traverser()
+          selective_sort_traverser()
           { }
 
-          selective_sort_expression_traverser(AdaptablePredicate predicate) : super(predicate)
+          selective_sort_traverser(AdaptablePredicate predicate) : super(predicate)
           { }
       };
 
       template < typename Derived, typename AdaptablePredicate >
-      class selective_binding_aware_expression_traverser : public selective_expression_traverser< Derived, AdaptablePredicate, detail::binding_aware_expression_traverser >
+      class selective_binding_aware_traverser : public selective_traverser< Derived, AdaptablePredicate, detail::binding_aware_traverser >
       {
-        typedef selective_expression_traverser< Derived, AdaptablePredicate, detail::binding_aware_expression_traverser > super;
+        typedef selective_traverser< Derived, AdaptablePredicate, detail::binding_aware_traverser > super;
 
         public:
 
@@ -604,10 +604,10 @@ namespace mcrl2 {
           using super::enter;
           using super::leave;
 
-          selective_binding_aware_expression_traverser()
+          selective_binding_aware_traverser()
           { }
 
-          selective_binding_aware_expression_traverser(AdaptablePredicate predicate) : super(predicate)
+          selective_binding_aware_traverser(AdaptablePredicate predicate) : super(predicate)
           { }
       };
 

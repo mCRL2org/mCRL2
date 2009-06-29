@@ -20,7 +20,7 @@
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/detail/expression_traverser.h"
+#include "mcrl2/data/detail/traverser.h"
 
 namespace mcrl2 {
 
@@ -47,7 +47,7 @@ namespace detail {
       { }
   };
 
-  template < typename Expression, typename Action, template < class > class Traverser = detail::expression_traverser >
+  template < typename Expression, typename Action, template < class > class Traverser = detail::traverser >
   class find_helper : public Traverser< find_helper< Expression, Action, Traverser > > {
 
      typedef Traverser< find_helper< Expression, Action, Traverser > > super;
@@ -81,10 +81,10 @@ namespace detail {
   }
 
   template < typename Expression, typename OutputIterator >
-  find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_expression_traverser >
+  find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_traverser >
   make_sort_find_helper(OutputIterator sink)
   {
-    return find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_expression_traverser >(
+    return find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_traverser >(
 							collect_action< Expression, OutputIterator >(sink));
   }
 
@@ -134,7 +134,7 @@ namespace detail {
    * become false. It is used to cut-short expression traversal to return a
    * result.
    **/
-  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_data_expression_traverser >
+  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_data_traverser >
   class search_helper : public SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > {
 
       typedef SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > super;
@@ -176,23 +176,23 @@ namespace detail {
   }
 
   template < typename Expression, typename AdaptablePredicate >
-  search_helper< Expression, AdaptablePredicate, detail::selective_sort_expression_traverser >
+  search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >
   make_sort_search_helper(AdaptablePredicate search_predicate)
   {
-    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_expression_traverser >(search_predicate);
+    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >(search_predicate);
   }
 
   template < typename AdaptablePredicate >
-  search_helper< variable, AdaptablePredicate, detail::selective_data_expression_traverser >
+  search_helper< variable, AdaptablePredicate, detail::selective_data_traverser >
   make_variable_search_helper(AdaptablePredicate search_predicate)
   {
     return search_helper< variable, AdaptablePredicate >(search_predicate);
   }
 
   template < typename Action >
-  class free_variable_find_helper : public detail::binding_aware_expression_traverser< free_variable_find_helper< Action > > {
+  class free_variable_find_helper : public detail::binding_aware_traverser< free_variable_find_helper< Action > > {
 
-     typedef detail::binding_aware_expression_traverser< free_variable_find_helper< Action > > super;
+     typedef detail::binding_aware_traverser< free_variable_find_helper< Action > > super;
 
     protected:
 
@@ -254,10 +254,10 @@ namespace detail {
    * When m_predicate(e) becomes true expression traversal will terminate.
    **/
   template < typename AdaptablePredicate >
-  class free_variable_search_helper : public detail::selective_binding_aware_expression_traverser<
+  class free_variable_search_helper : public detail::selective_binding_aware_traverser<
 			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > {
 
-      typedef detail::selective_binding_aware_expression_traverser<
+      typedef detail::selective_binding_aware_traverser<
 			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > super;
 
     protected:

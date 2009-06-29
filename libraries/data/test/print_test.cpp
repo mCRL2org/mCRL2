@@ -20,7 +20,7 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/expression_traverser.h"
+#include "mcrl2/data/detail/traverser.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
@@ -91,7 +91,7 @@ void test_structured_sort_print() {
 }
 
 template < typename Derived >
-class printer : public mcrl2::data::detail::sort_expression_traverser< Derived >
+class printer : public mcrl2::data::detail::sort_traverser< Derived >
 {
   protected:
     unsigned int                m_inside_quantifier;
