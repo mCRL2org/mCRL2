@@ -230,51 +230,6 @@ Container variable_sequence_replace(Container container,
 			 variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
 }
 
-/// \cond INTERNAL_DOCS
-template <typename MapContainer>
-struct variable_map_replace_helper: public core::substitution_function<typename MapContainer::key_type, typename MapContainer::mapped_type>
-{
-  const MapContainer& replacements_;
-
-  /// \brief Constructor.
-  /// \param replacements A mapping of data variable replacements
-  variable_map_replace_helper(const MapContainer& replacements)
-    : replacements_(replacements)
-  {}
-
-  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
-  /// otherwise t.
-  /// \param t A data variable
-  /// \return The function result
-  data_expression operator()(const variable& t) const
-  {
-    typename MapContainer::const_iterator i = replacements_.find(t);
-    if (i == replacements_.end())
-    {
-      return atermpp::aterm_appl(t);
-    }
-    else
-    {
-      return i->second;
-    }
-  }
-};
-/// \endcond
-
-template <typename Term, typename MapContainer>
-DEPRECATED(Term variable_map_replace(Term t, const MapContainer& replacements));
-
-/// \brief Replaces all variables in the term t using the specified map of replacements.
-/// \param t A term
-/// \param replacements A map of replacements
-/// \return The replacement result. Each variable \p v in t that occurs as key in the map
-/// \p replacements is replaced by \p replacements[\p v].
-template <typename Term, typename MapContainer>
-Term variable_map_replace(Term t, const MapContainer& replacements)
-{
-  return replace_variables(t, variable_map_replace_helper<MapContainer>(replacements));
-}
-
 } // namespace data
 
 } // namespace mcrl2
