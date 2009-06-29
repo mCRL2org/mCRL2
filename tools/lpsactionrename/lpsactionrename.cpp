@@ -20,7 +20,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rename.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/action_rename.h"
