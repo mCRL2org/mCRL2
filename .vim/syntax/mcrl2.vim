@@ -2,13 +2,13 @@
 " Language:   mCRL2
 " Extension:  mcrl2
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       23-12-2008
+" Date:       29-06-2009
 
 syntax clear
 
 syntax case match
 
-syntax keyword gsSpecKW     sort cons map var eqn act proc init struct
+syntax keyword gsSpecKW     sort cons map var eqn act glob proc init struct
 syntax keyword gsProcCKW    delta tau
 syntax keyword gsProcKW     sum block allow hide rename comm
 syntax keyword gsSortCKW    Bool Pos Nat Int Real
