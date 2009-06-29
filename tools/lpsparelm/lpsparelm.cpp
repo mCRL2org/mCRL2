@@ -37,7 +37,7 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
     bool run() {
       lps::specification spec;
       spec.load(m_input_filename);
-      lps::parelm(spec);
+      lps::parelm(spec, true, mcrl2::core::gsVerbose);
       spec.save(m_output_filename);
       return true;
     }

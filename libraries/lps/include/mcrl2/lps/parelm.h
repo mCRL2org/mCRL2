@@ -61,12 +61,11 @@ class parelm_algorithm: public lps::detail::lps_algorithm
     {
       if (m_verbose)
       {
-        std::clog << "parelm removed " << to_be_removed.size() << " process parameters: ";
+        std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
         for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
         {
-          std::clog << pp(*i) << ":" << pp(i->sort());
+          std::clog << pp(*i) << ":" << pp(i->sort()) << std::endl;
         }
-        std::clog << std::endl;
       }
     }
     
