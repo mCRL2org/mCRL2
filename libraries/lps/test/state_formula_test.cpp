@@ -20,7 +20,6 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/mcrl22lps.h"
-#include "mcrl2/lps/rename.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;

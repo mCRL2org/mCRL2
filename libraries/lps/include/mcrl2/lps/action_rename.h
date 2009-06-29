@@ -23,7 +23,9 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
+#include "mcrl2/lps/detail/algorithm.h"
 
 // //Action rename rules
 // <ActionRenameRules>
