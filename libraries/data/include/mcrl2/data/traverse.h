@@ -73,12 +73,7 @@ OutIter traverse_variables(const variable& v, OutIter dest)
 template <typename OutIter>
 OutIter traverse_variables(const data_expression& d, OutIter dest)
 {
-  // TODO: make this implementation more efficient
-  std::set<data::variable> v = data::find_variables(d);
-  for (std::set<data::variable>::iterator i = v.begin(); i != v.end(); ++i)
-  {
-    *dest++ = *i;
-  }
+  data::find_variables(d, dest);
   return dest;
 }
 

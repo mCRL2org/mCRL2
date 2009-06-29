@@ -115,7 +115,7 @@ struct global_variable_visitor: public pbes_expression_visitor<Term>
   {
     if (search_propositional_variables)
     {
-      std::set<data::variable> variables = data::find_variables(v.parameters());
+      std::set<data::variable> variables = data::find_free_variables(v.parameters());
       for (std::set<data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
       {
         if (!is_bound(*i))
@@ -133,7 +133,7 @@ struct global_variable_visitor: public pbes_expression_visitor<Term>
   /// \return The result of visiting the node
   bool visit_data_expression(const term_type& e, const data_term_type& d)
   {
-    std::set<data::variable> variables = data::find_variables(d);
+    std::set<data::variable> variables = data::find_free_variables(d);
     for (std::set<data::variable>::iterator i = variables.begin(); i != variables.end(); ++i)
     {
       if (!is_bound(*i))
