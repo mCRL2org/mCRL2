@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <map>
+#include <set>
 
 #include "boost/bind.hpp"
 
@@ -58,10 +60,31 @@ namespace mcrl2 {
         return s.is_system_defined(c);
       }
 
+      template < typename Expression >
+      class unique_traversal_condition {
+
+        private:
+
+          std::set< Expression > m_known;
+
+        public:
+
+          bool operator()(Expression const& e)
+          {
+            return m_known.insert(e).second;
+          }
+
+          unique_traversal_condition()
+          { }
+      };
+
       /// \brief Set of sorts that depend on the sorts that are added
-      /// TODO rewrite using find functionality
-      class dependent_sort_helper
+      class dependent_sort_helper : public detail::selective_sort_expression_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > >
       {
+        friend class detail::sort_expression_traverser< dependent_sort_helper >;
+
+        typedef detail::selective_sort_expression_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > > super;
+
         public:
 
           typedef std::set< sort_expression >::const_iterator iterator;
@@ -71,101 +94,69 @@ namespace mcrl2 {
 
           data_specification const&   m_specification;
 
-          std::set< sort_expression > m_visited_sorts;
-
           std::set< sort_expression > m_result;
 
-        private:
+        protected:
 
-          void add_generic_and_check(const sort_expression& s)
+          using super::enter;
+
+          void visit_constructors(basic_sort const& s)
           {
-            if (m_visited_sorts.find(s) == m_visited_sorts.end())
+            for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
             {
-              m_visited_sorts.insert(s);
-              m_result.insert(s);
-
-              add_generic(s);
-            }
-          }
-
-          void add_generic(const basic_sort& s)
-          {
-            sort_expression actual_sort = m_specification.find_referenced_sort(s);
-
-            if (actual_sort != s && !actual_sort.is_basic_sort()) {
-              add_generic_and_check(actual_sort);
-            }
-            else {
-              for (data_specification::constructors_const_range r(m_specification.constructors(actual_sort)); !r.empty(); r.advance_begin(1))
+              if (r.front().sort().is_function_sort())
               {
-                if (r.front().sort().is_function_sort())
+                for (function_sort::domain_const_range i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  function_sort f_sort(r.front().sort());
-
-                  for (function_sort::domain_const_range i(f_sort.domain()); !i.empty(); i.advance_begin(1))
+                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
                   {
-                    add_generic_and_check(i.front());
+                    (*this)(i.front());
                   }
                 }
               }
             }
           }
 
-          void add_generic(const container_sort& s)
+          void enter(const container_sort& s)
           {
-            add_generic_and_check(container_sort(s).element_sort());
+            m_result.insert(s);
           }
 
-          void add_generic(const function_sort& s)
+          void enter(const structured_sort& s)
           {
-            for (function_sort::domain_const_range i(s.domain()); !i.empty(); i.advance_begin(1))
-            {
-              add_generic_and_check(i.front());
-            }
-
-            add_generic_and_check(s.codomain());
+            m_result.insert(s);
           }
 
-          void add_generic(const structured_sort& s)
+          void enter(const basic_sort& s)
           {
-            for (structured_sort::constructors_const_range r(s.struct_constructors()); !r.empty(); r.advance_begin(1))
-            {
-              for (structured_sort_constructor::arguments_const_range j(r.front().arguments()); !j.empty(); j.advance_begin(1))
-              {
-                add_generic_and_check(j.front().sort());
-              }
-            }
-          }
+            sort_expression actual_sort = m_specification.find_referenced_sort(s);
 
-          void add_generic(const sort_expression& s)
-          {
-            if (s.is_basic_sort())
+            if (actual_sort == s)
             {
-              add_generic(basic_sort(s));
-            }
-            else if (s.is_container_sort())
-            {
-              add_generic(container_sort(s));
-            }
-            else if (s.is_function_sort())
-            {
-              add_generic(function_sort(s));
-            }
-            else if (s.is_structured_sort())
-            {
-              add_generic(structured_sort(s));
-            }
-            else if (s.is_alias())
-            {
-              add_generic_and_check(alias(s).reference());
+              visit_constructors(s);
+
+              m_result.insert(s);
             }
             else
             {
-              assert(false);
+              (*this)(actual_sort);
             }
           }
 
         public:
+
+          using super::operator();
+
+          // Alternative traversal for function_sort
+          void operator()(const function_sort& s)
+          {
+            (*this)(s.domain());
+          }
+
+          operator std::set< sort_expression > const&()
+          {
+            return m_result;
+          }
 
           /// \brief Constructor
           ///
@@ -174,6 +165,16 @@ namespace mcrl2 {
                                                 m_specification(specification)
           {}
 
+          template < typename Sequence >
+          void add(const Sequence& s, bool assume_self_dependence = false,
+                       typename detail::enable_if_container< Sequence >::type* = 0)
+          {
+            for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
+            {
+              add(*i, assume_self_dependence);
+            }
+          }
+
           /// \brief Adds the sorts on which a sort expression depends
           ///
           /// \param[in] s A sort expression.
@@ -181,35 +182,18 @@ namespace mcrl2 {
           /// \return All sorts on which s depends.
           void add(const sort_expression& s, bool assume_self_dependence = false)
           {
-            if (assume_self_dependence)
-            {
+            if (assume_self_dependence) {
               m_result.insert(s);
             }
-            if (m_visited_sorts.find(s) == m_visited_sorts.end())
-            {
-              add_generic(s);
-            }
-          }
 
-          /// \brief Adds the sorts on which a sort expression depends
-          ///
-          /// \param[in] s A sort expression.
-          /// \param[in] assume_self_dependence add the sort as well as all dependent sorts
-          /// \return All sorts on which s depends.
-          template < typename ForwardTraversalIterator >
-          void add(boost::iterator_range< ForwardTraversalIterator > const& range, bool assume_self_dependence = false)
-          {
-            for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
+            if (is_basic_sort(s) && m_specification.find_referenced_sort(s))
             {
-              add(*i, assume_self_dependence);
+              visit_constructors(s);
             }
-          }
-
-          /// \brief Reset internal structures to default after construction
-          void clear()
-          {
-            m_visited_sorts.clear();
-            m_result.clear();
+            else
+            {
+              (*this)(s);
+            }
           }
 
           /// \brief Iterator for the sequence of dependent sorts
@@ -394,7 +378,7 @@ namespace mcrl2 {
       // equations
       for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(r.front())), true);
+        dependent_sorts.add(find_sort_expressions(r.front()), true);
       }
 
       make_complete(dependent_sorts);
@@ -427,7 +411,7 @@ namespace mcrl2 {
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(e)), true);
+      dependent_sorts.add(find_sort_expressions(e), true);
 
       make_complete(dependent_sorts);
     }
@@ -436,7 +420,7 @@ namespace mcrl2 {
     {
       detail::dependent_sort_helper dependent_sorts(*this);
 
-      dependent_sorts.add(boost::make_iterator_range(find_sort_expressions(e)), true);
+      dependent_sorts.add(find_sort_expressions(e), true);
 
       make_complete(dependent_sorts);
     }
@@ -466,6 +450,147 @@ namespace mcrl2 {
       detail::remove_if(m_equations, boost::bind(detail::is_system_defined< data_equation >, *this, _1));
     }
 
+    std::set< sort_expression > find_dependent_sorts(data_specification const& specification, sort_expression const& s) {
+      detail::dependent_sort_helper helper(specification);
+
+      helper.add(s);
+
+      return std::set< sort_expression >(helper);
+    }
+
+    class finiteness_helper {
+
+      protected:
+
+        typedef std::set< sort_expression >             dependent_sort_set;
+
+        data_specification const&                       m_specification;
+
+        std::map< sort_expression, dependent_sort_set > m_dependent_sorts;
+
+        std::multiset< sort_expression >                m_visiting;
+
+        dependent_sort_set const& dependent_sorts(sort_expression const& s)
+        {
+          std::map< sort_expression, dependent_sort_set >::iterator i = m_dependent_sorts.find(s);
+
+          if (i == m_dependent_sorts.end())
+          {
+            i = m_dependent_sorts.insert(i, std::make_pair(s, static_cast< dependent_sort_set const& >(
+						data::find_dependent_sorts(m_specification, s))));
+          }
+
+          return i->second;
+        }
+
+        bool search(dependent_sort_set const& source, sort_expression const& s)
+        {
+          return source.find(s) != source.end();
+        }
+
+      public:
+
+        finiteness_helper(data_specification const& specification) : m_specification(specification)
+        { }
+
+        bool is_finite(const sort_expression& s)
+        {
+          if (s.is_basic_sort())
+          {
+            return is_finite(basic_sort(s));
+          }
+          else if (s.is_container_sort())
+          {
+            return is_finite(container_sort(s));
+          }
+          else if (s.is_function_sort())
+          {
+            return is_finite(function_sort(s));
+          }
+          else if (s.is_structured_sort())
+          {
+            return is_finite(structured_sort(s));
+          }
+          else if (s.is_alias())
+          {
+            return is_finite(alias(s));
+          }
+
+          return false;
+        }
+
+        bool is_finite(const basic_sort& s)
+        {
+          sort_expression actual_sort = m_specification.find_referenced_sort(s);
+
+          if (actual_sort != s)
+          {
+            return is_finite(actual_sort);
+          }
+          else {
+            m_visiting.insert(s);
+
+            for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
+            {
+              if (r.front().sort().is_function_sort())
+              {
+                for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(r.front().sort())); !c.empty(); c.advance_begin(1))
+                {
+                  if ((c.front() == s) || (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front())))
+                  {
+                    return false;
+                  }
+                }
+              }
+            }
+
+            m_visiting.erase(m_visiting.find(s));
+          }
+
+          return !search(dependent_sorts(s), s) && !m_specification.constructors(actual_sort).empty();
+        }
+
+        bool is_finite(const function_sort& s)
+        {
+          for (function_sort::domain_const_range i(s.domain()); !i.empty(); i.advance_begin(1))
+          {
+            if (m_visiting.find(i.front()) == m_visiting.end() && !is_finite(i.front()))
+            {
+              return false;
+            }
+          }
+
+          return (s.codomain() != s) ? is_finite(s.codomain()) : false;
+        }
+
+        bool is_finite(const container_sort& s)
+        {
+          return (s.is_set_sort()) ? is_finite(s.element_sort()) : false;
+        }
+
+        bool is_finite(const alias& s)
+        {
+          return is_finite(s.reference());
+        }
+
+        bool is_finite(const structured_sort& s)
+        {
+          m_visiting.insert(s);
+
+          for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(s)); !c.empty(); c.advance_begin(1))
+          {
+            if (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front()))
+            {
+              return false;
+            }
+          }
+
+          m_visiting.erase(m_visiting.find(s));
+
+          return true;
+        }
+    };
+
     /// \brief Checks whether a sort is certainly finite.
     ///
     /// \param[in] s A sort expression
@@ -473,90 +598,7 @@ namespace mcrl2 {
     ///      false otherwise.
     bool data_specification::is_certainly_finite(const sort_expression& s) const
     {
-      // Check for recursive occurrence.
-      detail::dependent_sort_helper dependent_sorts(*this);
-
-      dependent_sorts.add(s);
-
-      if (dependent_sorts.find(s) != dependent_sorts.end())
-      {
-        return false;
-      }
-
-      if (s.is_basic_sort())
-      {
-        sort_expression actual_sort = find_referenced_sort(s);
-
-        if (actual_sort != s && !actual_sort.is_basic_sort())
-        {
-          return is_certainly_finite(actual_sort);
-        }
-
-        for (data_specification::constructors_const_range r(constructors(actual_sort)); !r.empty(); r.advance_begin(1))
-        {
-          dependent_sorts.clear();
-          dependent_sorts.add(r.front().sort().target_sort());
-          for (detail::dependent_sort_helper::const_iterator j = dependent_sorts.begin(); j != dependent_sorts.end(); ++j)
-          {
-            if (!is_certainly_finite(*j))
-            {
-              return false;
-            }
-          }
-        }
-
-        return !constructors(actual_sort).empty();
-      }
-      else if (s.is_container_sort())
-      {
-        container_sort cs(s);
-        if(cs.is_set_sort())
-        {
-          return is_certainly_finite(cs.element_sort());
-        }
-        return false;
-      }
-      else if (s.is_function_sort())
-      {
-        function_sort fs(s);
-        for (function_sort::domain_const_range i(fs.domain()); !i.empty(); i.advance_begin(1))
-        {
-          if (!is_certainly_finite(i.front()))
-          {
-            return false;
-          }
-        }
-
-        if (fs.codomain() == s)
-        {
-          return false;
-        }
-
-        return is_certainly_finite(fs.codomain());
-      }
-      else if (s.is_structured_sort())
-      {
-        dependent_sorts.clear();
-        dependent_sorts.add(s);
-        for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
-        {
-          if (!is_certainly_finite(*i))
-          {
-            return false;
-          }
-        }
-        return true;
-      }
-      else if (s.is_alias())
-      {
-        return is_certainly_finite(alias(s).reference());
-      }
-      else
-      {
-        assert(false);
-      }
-
-      return false;
+      return finiteness_helper(*this).is_finite(s);
     }
 
     bool data_specification::is_well_typed() const
