@@ -36,9 +36,6 @@
 using namespace std;
 using namespace Utils;
 
-std::string lts_file_argument;
-std::string parse_error;
-
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
 void LTSView::set_capabilities(tipi::tool::capabilities& c) const {
@@ -152,9 +149,9 @@ bool LTSView::run()
 
   wxInitAllImageHandlers();
 
-  if (!lts_file_argument.empty())
+  if (!input_filename().empty())
   {
-    wxFileName fileName(wxString(lts_file_argument.c_str(), wxConvLocal));
+    wxFileName fileName(wxString(input_filename().c_str(), wxConvLocal));
     fileName.Normalize();
     mainFrame->setFileInfo(fileName);
     openFile(static_cast< string >(fileName.GetFullPath().fn_str()));
