@@ -45,8 +45,6 @@ namespace mcrl2 {
       template < typename Term >
       Term undo_compatibility_renamings(const data_specification&, Term const&);
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = true);
-
-      class dependent_sort_helper;
     }
     /// \endcond
 
@@ -148,15 +146,9 @@ namespace mcrl2 {
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
         void make_complete();
 
-        ///\brief Adds system defined sorts when necessary to make the specification complete
-        void make_complete(detail::dependent_sort_helper const&);
-
         /// \brief Helper function for make_complete() methods
         template < typename Term >
         void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
-
-        /// \brief Helper function for make_complete() methods
-        void make_complete_helper(std::set< sort_expression > const&);
 
         ///\brief Removes system defined sorts including constructors, mappings and equations
         void purge_system_defined();
@@ -655,8 +647,14 @@ namespace mcrl2 {
           gather_sorts(*i, sorts);
         }
 
-        make_complete_helper(sorts);
+        make_complete(sorts);
       }
+
+      ///\brief Adds system defined sorts when necessary to make the specification complete
+      /// \param[in] s a set of sort expressions that is added to a specification that is system-defined complete 
+      /// \pre specification is complete, but not necessarily with respect to sorts in e
+      /// \post specification has all constructors/mappings/equations for sorts in e
+      void make_complete(std::set< sort_expression > const& s);
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] e a data expression that is added to a specification that is system-defined complete 

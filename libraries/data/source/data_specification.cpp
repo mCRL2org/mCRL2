@@ -13,14 +13,12 @@
 #include <functional>
 #include <iostream>
 #include <map>
-#include <set>
 
 #include "boost/bind.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_specification.h"
@@ -37,6 +35,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/detail/dependent_sorts.h"
 
 namespace mcrl2 {
 
@@ -59,161 +58,6 @@ namespace mcrl2 {
       {
         return s.is_system_defined(c);
       }
-
-      template < typename Expression >
-      class unique_traversal_condition {
-
-        private:
-
-          std::set< Expression > m_known;
-
-        public:
-
-          bool operator()(Expression const& e)
-          {
-            return m_known.insert(e).second;
-          }
-
-          unique_traversal_condition()
-          { }
-      };
-
-      /// \brief Set of sorts that depend on the sorts that are added
-      class dependent_sort_helper : public detail::selective_sort_expression_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > >
-      {
-        friend class detail::sort_expression_traverser< dependent_sort_helper >;
-
-        typedef detail::selective_sort_expression_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > > super;
-
-        public:
-
-          typedef std::set< sort_expression >::const_iterator iterator;
-          typedef std::set< sort_expression >::const_iterator const_iterator;
-
-        private:
-
-          data_specification const&   m_specification;
-
-          std::set< sort_expression > m_result;
-
-        protected:
-
-          using super::enter;
-
-          void visit_constructors(basic_sort const& s)
-          {
-            for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
-            {
-              if (r.front().sort().is_function_sort())
-              {
-                for (function_sort::domain_const_range i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
-                {
-                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
-                  {
-                    (*this)(i.front());
-                  }
-                }
-              }
-            }
-          }
-
-          void enter(const container_sort& s)
-          {
-            m_result.insert(s);
-          }
-
-          void enter(const structured_sort& s)
-          {
-            m_result.insert(s);
-          }
-
-          void enter(const basic_sort& s)
-          {
-            sort_expression actual_sort = m_specification.find_referenced_sort(s);
-
-            if (actual_sort == s)
-            {
-              visit_constructors(s);
-
-              m_result.insert(s);
-            }
-            else
-            {
-              (*this)(actual_sort);
-            }
-          }
-
-        public:
-
-          using super::operator();
-
-          // Alternative traversal for function_sort
-          void operator()(const function_sort& s)
-          {
-            (*this)(s.domain());
-          }
-
-          operator std::set< sort_expression > const&()
-          {
-            return m_result;
-          }
-
-          /// \brief Constructor
-          ///
-          /// \param[in] specification a data specification
-          dependent_sort_helper(data_specification const& specification) :
-                                                m_specification(specification)
-          {}
-
-          template < typename Sequence >
-          void add(const Sequence& s, bool assume_self_dependence = false,
-                       typename detail::enable_if_container< Sequence >::type* = 0)
-          {
-            for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
-            {
-              add(*i, assume_self_dependence);
-            }
-          }
-
-          /// \brief Adds the sorts on which a sort expression depends
-          ///
-          /// \param[in] s A sort expression.
-          /// \param[in] assume_self_dependence add the sort as well as all dependent sorts
-          /// \return All sorts on which s depends.
-          void add(const sort_expression& s, bool assume_self_dependence = false)
-          {
-            if (assume_self_dependence) {
-              m_result.insert(s);
-            }
-
-            if (is_basic_sort(s) && m_specification.find_referenced_sort(s))
-            {
-              visit_constructors(s);
-            }
-            else
-            {
-              (*this)(s);
-            }
-          }
-
-          /// \brief Iterator for the sequence of dependent sorts
-          const_iterator find(sort_expression const& s) const
-          {
-            return m_result.find(s);
-          }
-
-          /// \brief Iterator for the sequence of dependent sorts
-          const_iterator begin() const
-          {
-            return m_result.begin();
-          }
-
-          /// \brief Iterator for past-the-end of sequence of dependent sorts
-          const_iterator end() const
-          {
-            return m_result.end();
-          }
-      };
     } // namespace detail
     /// \endcond
 
@@ -324,12 +168,59 @@ namespace mcrl2 {
       add_standard_mappings_and_equations(sort);
     }
 
+    template < typename Container, typename Sequence >
+    void insert(Container& container, Sequence sequence)
+    {
+      container.insert(sequence.begin(), sequence.end());
+    }
+
+    ///\brief Adds standard sorts when necessary
+    ///
+    /// Assumes that if constructors of a sort are part of the specification,
+    /// then the sort was already imported.
+    void data_specification::make_complete()
+    {
+      std::set< sort_expression > dependent_sorts;
+
+      // make sure that sort bool is part of the specification
+      dependent_sorts.insert(sort_bool::bool_());
+
+      // sorts
+      dependent_sorts.insert(m_sorts.begin(), m_sorts.end());
+      // constructors
+      insert(dependent_sorts, make_sort_range(constructors()));
+      // mappings
+      insert(dependent_sorts, make_sort_range(mappings()));
+      // equations
+      for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
+      { // make function sort in case of constants to add the corresponding sort as needed
+        insert(dependent_sorts, find_sort_expressions(r.front()));
+      }
+
+      make_complete(dependent_sorts);
+    }
+
+    template < typename Term >
+    void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
+    {
+      find_sort_expressions(term, std::inserter(sorts, sorts.end()));
+    }
+
+    template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
+
     // Assumes that a system defined sort s is not (full) part of the specification if:
     //  - the set of sorts does not contain s
     //  - the specification has no constructors for s
-    void data_specification::make_complete(detail::dependent_sort_helper const& dependent_sorts)
+    void data_specification::make_complete(std::set< sort_expression > const& sorts)
     {
-      for (detail::dependent_sort_helper::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
+      std::set< sort_expression > dependent_sorts(sorts);
+
+      find_dependent_sorts(*this, sorts, std::inserter(dependent_sorts, dependent_sorts.end()));
+
+      for (std::set< sort_expression >::const_iterator i = dependent_sorts.begin(); i != dependent_sorts.end(); ++i)
       {
         sort_expression normalised(normalise(*i));
 
@@ -349,90 +240,23 @@ namespace mcrl2 {
       }
     }
 
-    ///\brief Adds standard sorts when necessary
-    ///
-    /// Assumes that if constructors of a sort are part of the specification,
-    /// then the sort was already imported.
-    void data_specification::make_complete()
-    {
-      detail::dependent_sort_helper dependent_sorts(*this);
-
-      // make sure that sort bool is part of the specification
-      dependent_sorts.add(sort_bool::bool_(), true);
-
-      // sorts
-      for (sorts_const_range r(sorts()); !r.empty(); r.advance_begin(1))
-      {
-        dependent_sorts.add(r.front(), true);
-      }
-      // constructors
-      for (constructors_const_range r(constructors()); !r.empty(); r.advance_begin(1))
-      { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(r.front().sort(), true);
-      }
-      // mappings
-      for (mappings_const_range r(mappings()); !r.empty(); r.advance_begin(1))
-      { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(r.front().sort(), true);
-      }
-      // equations
-      for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
-      { // make function sort in case of constants to add the corresponding sort as needed
-        dependent_sorts.add(find_sort_expressions(r.front()), true);
-      }
-
-      make_complete(dependent_sorts);
-    }
-
-    template < typename Term >
-    void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
-    {
-      find_sort_expressions(term, std::inserter(sorts, sorts.end()));
-    }
-
-    template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
-
-    void data_specification::make_complete_helper(std::set< sort_expression > const& sorts)
-    {
-      detail::dependent_sort_helper dependent_sorts(*this);
-
-      for (std::set< sort_expression >::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
-      {
-        dependent_sorts.add(*i, true);
-      }
-
-      make_complete(dependent_sorts);
-    }
-
     void data_specification::make_complete(data_expression const& e)
     {
-      detail::dependent_sort_helper dependent_sorts(*this);
-
-      dependent_sorts.add(find_sort_expressions(e), true);
-
-      make_complete(dependent_sorts);
+      make_complete(find_sort_expressions(e));
     }
 
     void data_specification::make_complete(data_equation const& e)
     {
-      detail::dependent_sort_helper dependent_sorts(*this);
-
-      dependent_sorts.add(find_sort_expressions(e), true);
-
-      make_complete(dependent_sorts);
+      make_complete(find_sort_expressions(e));
     }
 
     void data_specification::make_complete(sort_expression const& s)
     {
-      detail::dependent_sort_helper dependent_sorts(*this);
+      std::set< sort_expression > sorts;
 
-      // for compatibilty with specifications imported from ATerm
-      dependent_sorts.add(s, true);
+      sorts.insert(s);
 
-      make_complete(dependent_sorts);
+      make_complete(sorts);
     }
 
     void data_specification::purge_system_defined()
@@ -448,14 +272,6 @@ namespace mcrl2 {
                 boost::bind(&atermpp::multimap< sort_expression, function_symbol >::value_type::second, _1)));
 
       detail::remove_if(m_equations, boost::bind(detail::is_system_defined< data_equation >, *this, _1));
-    }
-
-    std::set< sort_expression > find_dependent_sorts(data_specification const& specification, sort_expression const& s) {
-      detail::dependent_sort_helper helper(specification);
-
-      helper.add(s);
-
-      return std::set< sort_expression >(helper);
     }
 
     class finiteness_helper {
