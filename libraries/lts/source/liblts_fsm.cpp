@@ -264,9 +264,11 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
         s = s.substr(1,s.size()-2);
         os << s << " ";
       } else { // type == lts_mcrl2
-        PrintPart_CXX(os,ATgetFirst(params),ppDefault);
+        ATermAppl param = ATAgetFirst(params);
+        assert(gsIsDataVarId(param));
+        PrintPart_CXX(os,ATgetArgument(param, 0),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
-        PrintPart_CXX(os,ATgetArgument(ATAgetFirst(params),1),ppDefault);
+        PrintPart_CXX(os,ATgetArgument(param, 1),ppDefault);
         os << " ";
       }
 
@@ -397,7 +399,7 @@ static ATermList get_lps_params(ATerm lps)
   {
     if ( ATisAppl(lps) && gsIsLinProcSpec((ATermAppl) lps) )
     {
-      params = ATLgetArgument(ATAgetArgument((ATermAppl) lps,3),1);
+      params = ATLgetArgument(ATAgetArgument((ATermAppl) lps,3),0);
     } else if ( ATisAppl(lps) && !strcmp(ATgetName(ATgetAFun((ATermAppl) lps)),"spec2gen") )
     {
       ATermList pars = ATLgetArgument(ATAgetArgument((ATermAppl) lps,1),1);
@@ -415,9 +417,9 @@ static ATermList get_lps_params(ATerm lps)
   return params;
 }
 
-static ATermList get_lps_params(lps::linear_process &lps)
+static ATermList get_lps_params(lps::specification &lps)
 {
-  data::variable_list process_parameters(lps.process_parameters());
+  data::variable_list process_parameters(lps.process().process_parameters());
   return atermpp::term_list< data::variable >(process_parameters.begin(), process_parameters.end());
 }
 
@@ -625,7 +627,7 @@ static bool check_type(lts_type type, ATerm lps)
   }
 }
 
-static bool check_type(lts_type type, lps::linear_process &/*lps*/)
+static bool check_type(lts_type type, lps::specification &/*spec*/)
 {
   return (type == lts_mcrl2);
 }
@@ -679,13 +681,12 @@ bool p_lts::write_to_fsm(std::string const& filename, ATerm lps)
 bool p_lts::write_to_fsm(std::string const& filename, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lps::linear_process lps = spec.process();
-  if ( !check_type(tmp,lps) )
+  if ( !check_type(tmp, spec) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
     return write_to_fsm(filename,tmp,NULL);
   } else {
-    return write_to_fsm(filename,tmp,get_lps_params(lps));
+    return write_to_fsm(filename,tmp,get_lps_params(spec));
   }
 }
 
@@ -704,13 +705,12 @@ bool p_lts::write_to_fsm(std::ostream &os, ATerm lps)
 bool p_lts::write_to_fsm(std::ostream &os, lps::specification &spec)
 {
   lts_type tmp = fsm_get_lts_type();
-  lps::linear_process lps = spec.process();
-  if ( !check_type(tmp,lps) )
+  if ( !check_type(tmp, spec) )
   {
     gsWarningMsg("supplied LPS cannot be used with LTS; ignoring it\n");
     return write_to_fsm(os,tmp,NULL);
   } else {
-    return write_to_fsm(os,tmp,get_lps_params(lps));
+    return write_to_fsm(os,tmp,get_lps_params(spec));
   }
 }
 
