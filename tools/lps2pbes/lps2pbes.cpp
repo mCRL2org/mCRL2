@@ -176,7 +176,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       //generate PBES from state formula and LPS
       gsVerboseMsg("generating PBES from state formula and LPS...\n");
       pbes<> p = pbes_translate(state_formula(result), lps_spec, timed);
-      result = pbes_to_aterm(p);
+      result = pbes_to_aterm(p, false);
       if (result == NULL) {
         return NULL;
       }
@@ -221,7 +221,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
         gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
       }
       if ((end_phase == PH_NONE) && (!pretty)) {
-        mcrl2::pbes_system::pbes<> pbes_spec(result);
+        mcrl2::pbes_system::pbes<> pbes_spec(create_pbes_new());
         pbes_spec.save(output_filename());
       } else {
         if (output_filename().empty()) {

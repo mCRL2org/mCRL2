@@ -435,7 +435,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
 
       pbes<Container> tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
-      atermpp::aterm_appl t = pbes_to_aterm(tmp);
+      atermpp::aterm_appl t = pbes_to_aterm(tmp, false);
       core::detail::save_aterm(t, filename, binary);
     }
 

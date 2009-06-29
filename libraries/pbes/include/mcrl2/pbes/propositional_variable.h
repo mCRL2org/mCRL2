@@ -168,13 +168,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     /// \return The unbound variables appearing in the parameters.
     std::set<data::variable> unbound_variables() const
     {
-      std::set<data::variable> result;
-      for (data::data_expression_list::const_iterator i = m_parameters.begin(); i != m_parameters.end(); ++i)
-      {
-        std::set<data::variable> vars = data::find_free_variables(*i);
-        result.insert(vars.begin(), vars.end());
-      }
-      return result;
+      return data::find_free_variables(m_parameters);
     }
 };
 
