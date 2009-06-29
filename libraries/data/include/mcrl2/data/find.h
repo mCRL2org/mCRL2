@@ -212,6 +212,11 @@ namespace detail {
         }
       }
 
+      void operator()(assignment const& a)
+      {
+        (*this)(a.rhs());
+      }
+
       free_variable_find_helper()
       { }
 
@@ -271,6 +276,11 @@ namespace detail {
         {
           super::m_traverse_condition = !m_search_predicate(v);
         }
+      }
+
+      void operator()(assignment const& a)
+      {
+        (*this)(a.rhs());
       }
 
       template < typename Container >
