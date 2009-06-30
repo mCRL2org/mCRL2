@@ -17,30 +17,16 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/core/regfrmtrans.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/modal_formula/mucalculus.h"
-#include "mcrl2/modal_formula/detail/algorithms.h"
-#include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
 using namespace mcrl2;
-using namespace mcrl2::lps;
-using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
-using namespace mcrl2::modal_formula;
-using namespace mcrl2::data::detail;
 using namespace mcrl2::utilities::tools;
 
 class lps2pbes_tool : public squadt_tool<input_output_tool>
@@ -99,10 +85,10 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
-      specification spec;
+      lps::specification spec;
       spec.load(input_filename());
-      state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
-      pbes<> result = lps2pbes(spec, formula, timed);
+      modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
       result.save(output_filename());
       return true;
     }
