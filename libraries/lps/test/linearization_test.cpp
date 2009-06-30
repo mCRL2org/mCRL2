@@ -481,7 +481,7 @@ const std::string no_free_variables_case_1(
 BOOST_AUTO_TEST_CASE(test_no_free_variables)
 {
   t_lin_options options;
-  options.nofreevars = true;
+  options.noglobalvars = true;
 
   specification spec;
   spec = mcrl22lps(no_free_variables_case_1, options);
