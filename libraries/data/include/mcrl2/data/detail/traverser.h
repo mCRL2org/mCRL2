@@ -204,6 +204,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this)(e.equations());
           }
 
+#ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
@@ -214,15 +215,17 @@ namespace mcrl2 {
           // \deprecated exists only for backwards compatibility
           void operator()(atermpp::aterm const& e)
           {
-            if (is_data_expression(e))
+            if (e.type() == AT_APPL)
             {
-              static_cast< Derived& >(*this)(data_expression(e));
-            }
-            else if (e.type() == AT_APPL)
-            {
-              for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+              if (is_data_expression(e))
               {
-                static_cast< Derived& >(*this)(*i);
+                static_cast< Derived& >(*this)(data_expression(e));
+              }
+              else {
+                for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
+                {
+                  static_cast< Derived& >(*this)(*i);
+                }
               }
             }
             else if (e.type() == AT_LIST)
@@ -230,6 +233,7 @@ namespace mcrl2 {
               static_cast< Derived& >(*this)(atermpp::aterm_list(e));
             }
           }
+#endif // NO_TERM_TRAVERSAL
 
           template < typename Container >
           void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
@@ -352,6 +356,7 @@ namespace mcrl2 {
             static_cast< super& >(*this)(e);
           }
 
+#ifndef NO_TERM_TRAVERSAL
           // \deprecated
           void operator()(atermpp::aterm_appl const& e)
           {
@@ -373,6 +378,7 @@ namespace mcrl2 {
               static_cast< super& >(*this)(e);
             }
           }
+#endif // NO_TERM_TRAVERSAL
 
           template < typename Container >
           void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)

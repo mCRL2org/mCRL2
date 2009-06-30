@@ -29,10 +29,10 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/map_substitution_adapter.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -393,8 +393,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
     bool instantiate_global_variables()
     {
       std::set<data::variable> global_variables = compute_unbound_variables();
-      atermpp::vector<data::variable> src;    // the variables that will be replaced
-      atermpp::vector<data::data_expression> dest; // the corresponding replacements
+      data::mutable_map_substitution< > replacements;    // the variables that will be replaced
       atermpp::set<data::variable> fail;   // the variables that could not be replaced
 
       data::representative_generator default_expression_generator(m_data);
@@ -408,15 +407,14 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
         }
         else
         {
-          src.push_back(*i);
-          dest.push_back(d);
+          replacements[*i] = d;
         }
       }
       for (typename Container::iterator i = equations().begin(); i != equations().end(); ++i)
       {
-        *i = pbes_equation(i->symbol(), i->variable(), data::variable_sequence_replace(i->formula(), src, dest));
+        *i = pbes_equation(i->symbol(), i->variable(), replacements(i->formula()));
       }
-      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::variable_sequence_replace(m_initial_state.parameters(), src, dest));
+      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::replace_free_variables(m_initial_state.parameters(), replacements));
       m_global_variables.swap(fail);
       return m_global_variables.empty();
     }

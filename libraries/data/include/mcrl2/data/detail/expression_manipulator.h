@@ -127,16 +127,19 @@ namespace mcrl2 {
                static_cast< Derived& >(*this)(a.rhs()));
           }
 
+#ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility
           template < typename Expression >
           Expression operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
-            if (is_data_expression(e)) {
-              return static_cast< Derived& >(*this)(data_expression(e));
-            }
-            else if (e.type() == AT_APPL)
+            if (e.type() == AT_APPL)
             {
-              return apply(atermpp::aterm_appl(e));
+              if (is_data_expression(e)) {
+                return static_cast< Derived& >(*this)(data_expression(e));
+              }
+              else {
+                return apply(atermpp::aterm_appl(e));
+              }
             }
             else if (e.type() == AT_LIST)
             {
@@ -169,6 +172,7 @@ namespace mcrl2 {
           {
             return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
           }
+#endif // NO_TERM_TRAVERSAL
 
           template < typename Expression >
           atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)

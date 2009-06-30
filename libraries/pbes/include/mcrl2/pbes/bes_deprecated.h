@@ -24,7 +24,6 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_traits.h"
-// #include "mcrl2/core/term_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
@@ -97,21 +96,21 @@ namespace bes
     ATprotectAFun(f);
     return f;
   }
-  
+
   inline AFun PAIR()
   { static AFun PAIR = initAFunPair(PAIR);
     return PAIR;
   }
-  
+
   static ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
   {
     return ATmakeAppl2(PAIR(),(ATerm)t1,(ATerm)t2);
   }
-  
+
   static bool is_pair(ATerm t)
   { return ATgetAFun(t)==PAIR();
   }
-  
+
   static unsigned int largest_power_of_2_smaller_than(int i)
   { unsigned int j=1;
     i=i>>1;
@@ -121,11 +120,11 @@ namespace bes
     };
     return j;
   }
-  
+
   static void assign_variables_in_tree(
                         ATerm t,
                         mcrl2::data::variable_list::iterator &var_iter,
-                        atermpp::map<mcrl2::data::variable, 
+                        atermpp::map<mcrl2::data::variable,
                                         mcrl2::data::data_expression_with_variables> &sigma)
   { if (is_pair(t))
     { assign_variables_in_tree(ATgetArgument(t,0),var_iter,sigma);
@@ -137,8 +136,7 @@ namespace bes
       var_iter++;
     }
   }
-  
-  
+
   // static ATermAppl store_as_tree(pbes_expression p)
   static ATermAppl store_as_tree(mcrl2::pbes_system::propositional_variable_instantiation p)
   /* We assume p is a propositional_variable_instantiation of the form B(x1,...,xn). If p has less than 3
@@ -148,14 +146,14 @@ namespace bes
    */
   {
     mcrl2::data::data_expression_list args=p.parameters();
-  
+
     if ( args.size() ==0 )
     return p.name();
-  
+
     unsigned int n=largest_power_of_2_smaller_than(args.size());
-  
+
     atermpp::vector<ATermAppl> tree_store(n);
-  
+
     /* put the arguments in the intermediate tree_store. The last elements are stored as
      * pairs, such that the args.size() elements are stored in n positions. */
     unsigned int i=0;
@@ -172,7 +170,7 @@ namespace bes
         i++;
       }
     }
-  
+
     while (n>1)
     { n=n>>1; // n=n/2;
       for (unsigned int i=0; i<n; i++)
@@ -183,8 +181,6 @@ namespace bes
     return apply_pair_symbol(p.name(),(ATermAppl)tree_store[0]);
   }
 
-
-  
   class counter_example
   {
     private:
@@ -238,8 +234,6 @@ namespace bes
       }
 
   };
-
-  
 
   // wrap global variables in a class, to enable multiple inclusion of this header file
   // note, T is only a dummy
@@ -302,7 +296,7 @@ namespace bes
         m_term = t;
         return *this;
       }
-      
+
       atermpp::aterm aterm() const
       { return m_term;
       }
@@ -511,7 +505,7 @@ namespace bes
     }
     if (b1==b2)
     { return b1;
-    } 
+    }
     return and_(b1,b2);
   }
 
@@ -562,36 +556,36 @@ namespace bes
     return if_(b1,b2,b3);
   }
 
-  inline bes_expression variable(const variable_type &n) 
+  inline bes_expression variable(const variable_type &n)
   { return bes_expression((atermpp::aterm)atermpp::aterm_int(n));
   }
 
-  inline bool is_false(const bes_expression &b) 
+  inline bool is_false(const bes_expression &b)
   {
     return b==false_();
   }
 
-  inline bool is_true(const bes_expression &b) 
+  inline bool is_true(const bes_expression &b)
   { return b==true_();
   }
 
-  inline bool is_dummy(const bes_expression &b) 
+  inline bool is_dummy(const bes_expression &b)
   { return b==dummy();
   }
 
-  inline bool is_and(const bes_expression &b) 
+  inline bool is_and(const bes_expression &b)
   { return ATgetAFun((_ATerm*)b)==AFunBESAnd();
   }
 
-  inline bool is_or(const bes_expression &b) 
+  inline bool is_or(const bes_expression &b)
   { return ATgetAFun((_ATerm*)b)==AFunBESOr();
   }
 
-  inline bool is_if(const bes_expression &b) 
+  inline bool is_if(const bes_expression &b)
   { return ATgetAFun((_ATerm*)b)==AFunBESIf();
   }
 
-  inline bes_expression lhs(const bes_expression &b) 
+  inline bes_expression lhs(const bes_expression &b)
   { assert(is_and(b) || is_or(b));
     return bes_expression(atermpp::aterm_appl((const atermpp::aterm&)b)(0));
   }
@@ -1020,7 +1014,7 @@ namespace bes
       atermpp::indexed_set variable_index;  //Used for constructing counter examples
 
     protected:
-      inline void check_vector_sizes(const variable_type v) 
+      inline void check_vector_sizes(const variable_type v)
       { if (v>nr_of_variables())
         { control_info.resize(v+1,0);
           right_hand_sides.resize(v+1,dummy());
@@ -1162,7 +1156,7 @@ namespace bes
                       bes_expression b,
                       const bool use_indexed_set,
                       atermpp::indexed_set &indexed_set)
-      { 
+      {
         assert(v>0);
         assert(variable_occurrences_are_stored);
 
@@ -1389,7 +1383,7 @@ namespace bes
         refresh_relevances();
       }
 
-      bool is_relevant(const variable_type v) 
+      bool is_relevant(const variable_type v)
       {
         assert(0<v);
         check_vector_sizes(v);
@@ -1535,7 +1529,6 @@ namespace bes
 
     //function add_propositional_variable_instantiations_to_indexed_set
     //and translate to pbes expression to a bes_expression in BDD format.
-    
     bes_expression add_propositional_variable_instantiations_to_indexed_set_and_translate(
                        const mcrl2::pbes_system::pbes_expression p,
                        atermpp::indexed_set &variable_index,
@@ -1551,7 +1544,7 @@ namespace bes
       {
         std::pair<unsigned long,bool> pr=variable_index.put((opt_store_as_tree)?
                                mcrl2::pbes_system::pbes_expression(store_as_tree(p)):p);
-    
+
         if (pr.second) /* p is added to the indexed set, so it is a new variable */
         { nr_of_generated_variables++;
           if (to_bdd)
@@ -1624,7 +1617,7 @@ namespace bes
         if (is_true(b1))
         { return b1;
         }
-    
+
         bes_expression b2=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                                 accessors::right(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
                                 construct_counter_example,current_variable,opt_store_as_tree);
@@ -1637,7 +1630,7 @@ namespace bes
         if (is_false(b2))
         { return b1;
         }
-    
+
         if (to_bdd)
         { return BDDif(b1,true_(),b2);
         }
@@ -1658,11 +1651,10 @@ namespace bes
 
     /// \brief Calculate a BES from a given PBES
     /// \detail
-    
+
     /// Global variables
     ///  atermpp::indexed_set variable_index(10000, 50);
     ///  bes_equations;
-    
     template < typename Container, typename PbesRewriter >
     boolean_equation_system(const typename mcrl2::pbes_system::pbes<Container>& pbes_spec,
         PbesRewriter &pbes_rewriter,
@@ -1683,30 +1675,28 @@ namespace bes
       using namespace mcrl2::pbes_system;
       assert(pbes_spec.is_well_typed());
       assert(pbes_spec.is_closed());
-    
+
       // Verbose msg: doing naive algorithm
-    
+
 //      data_specification const& data = pbes_spec.data();
-    
+
       // Variables in which the result is stored
       propositional_variable_instantiation new_initial_state;
-    
+
       // atermpp::indexed_set variable_index(10000, 50);
       // In order to generate a counterexample, this must also be known outside
       // this procedure.
-    
       variable_index.put(true_());
       variable_index.put(false_()); /* Put first two dummy terms that
                                            gets index 0 and 1 in the indexed set, to
                                            take care that the first variable gets an index 2, to
                                            make space for a first equation of the shape X1=X2. */
-    
+
       /* The following list contains that variables that need to be explored.
          This list is only relevant if opt_strategy>=on_the_fly,
          as in the other case the variables to be investigated are those
          with indices between nre_of_processed_variables and nr_of_generated
          variables. */
-    
       std::deque < variable_type> todo;
       if (opt_strategy>=on_the_fly)
       { todo.push_front(2);
@@ -1717,34 +1707,34 @@ namespace bes
                          pbes_rewriter,
                          opt_precompile_pbes);  */
       variable_index.put((opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
-    
+
       if (opt_strategy>=on_the_fly)
       { store_variable_occurrences();
         count_variable_relevance_on();
       }
-    
+
       if (opt_construct_counter_example)
       { construct_counter_example_on();
       }
-    
+
       // Needed hashtables
       Container eqsys = pbes_spec.equations();
       atermpp::table pbes_equations(2*eqsys.size(), 50);   // (propvarname, pbes_equation)
-    
+
       // Vector with the order of the variable names used for sorting the result
-    
+
       atermpp::table variable_rank(2*eqsys.size(),50);
-    
+
       // Fill the pbes_equations table
       if (mcrl2::core::gsVerbose)
       { std::cerr << "Retrieving pbes_equations from equation system...\n";
       }
-    
+
       assert(eqsys.size()>0); // There should be at least one equation
       fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
-    
+
       unsigned long rank=1;
-    
+
       for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
       {
         pbes_equations.put(
@@ -1763,11 +1753,11 @@ namespace bes
         }
         variable_rank.put(eqi->variable().name(),atermpp::aterm_int(rank));
       }
-    
+
       unsigned long relevance_counter=0;
       unsigned long relevance_counter_limit=100;
       #define RELEVANCE_DIVIDE_FACTOR 100
-    
+
       if (mcrl2::core::gsVerbose)
       { std::cerr << "Computing a BES from the PBES....\n";
       }
@@ -1777,11 +1767,11 @@ namespace bes
                     eqsys.begin()->symbol(),
                     1,
                     variable(2));
-    
+
       // Variables used in whole function
       unsigned long nr_of_processed_variables = 1;
       unsigned long nr_of_generated_variables = 2;
-    
+
       // As long as there are states to be explored
       while ((opt_strategy>=on_the_fly)
                  ?todo.size()>0
@@ -1795,15 +1785,15 @@ namespace bes
         else
         { variable_to_be_processed=nr_of_processed_variables+1;
         }
-    
+
         if (is_relevant(variable_to_be_processed))
                // If v is not relevant, it does not need to be investigated.
         {
-    
+
           pbes_equation current_pbeq;
           atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression_with_variables > sigma;
           // mcrl2::data::atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression > sigma;
-    
+
           // Add the required substitutions
           if (opt_store_as_tree)
           {  // The current varable instantiation is stored as a tree, and this tree must be unfolded.
@@ -1811,7 +1801,7 @@ namespace bes
              if (!is_pair(t))
              { // Then t is the name of the current_variable_instantiation, and it has
                // no arguments.
-    
+
                current_pbeq = pbes_equation(pbes_equations.get(t));
                assert(current_pbeq.variable().parameters().size()==0);
              }
@@ -1819,25 +1809,25 @@ namespace bes
              { // t is a pair, with a name as its left hand side.
                current_pbeq = pbes_equation(pbes_equations.get(ATgetArgument(t,0)));
                // the right hand side of t are the parameters, in a tree structure.
-    
+
                t=ATgetArgument(t,1);
                variable_list::iterator iter=current_pbeq.variable().parameters().begin();
                assign_variables_in_tree(t,iter,sigma);
              }
-    
+
           }
           else // The current variable instantiation is a propositional_variable_instantiation
           {
             propositional_variable_instantiation current_variable_instantiation =
                 propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
-    
+
             current_pbeq = pbes_equation(pbes_equations.get(current_variable_instantiation.name()));
             assert(current_pbeq!=pbes_equation());  // If this fails, a pbes variable is used in
                                                     // a right hand side, and not in the left hand side
                                                     // of an equation.
-    
+
             data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-    
+
             // Rewriter *data_rewriter=pbes_rewriter.get_rewriter();
             for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                    vlist!=current_pbeq.variable().parameters().end() ; vlist++)
@@ -1849,11 +1839,11 @@ namespace bes
             }
             assert(elist==current_variable_instantiation.parameters().end());
           }
-    
-          pbes_expression new_pbes_expression = 
+
+          pbes_expression new_pbes_expression =
                 pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma));
           // pbes_expression new_pbes_expression = pbes_rewriter(current_pbeq.formula());
-          
+
 
           bes_expression new_bes_expression=
                add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -1866,20 +1856,20 @@ namespace bes
                             // bes_equations,
                             variable_to_be_processed,
                             opt_store_as_tree);
-    
+
           /* No need to clear up sigma, as it was locally declared. */
           /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter();
           for(variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                    vlist!=current_pbeq.variable().parameters().end() ; vlist++)
           { data_rewriter->clearSubstitution(*vlist);
           }  */
-    
-    
+
+
           if (opt_strategy>=on_the_fly_with_fixed_points)
           { // find a variable in the new_bes_expression from which `variable' to be
             // processed is reachable. If so, new_bes_expression can be set to
             // true or false.
-    
+
             if (current_pbeq.symbol()==fixpoint_symbol::mu())
             {
               if (find_mu_loop(
@@ -1907,7 +1897,7 @@ namespace bes
               }
             }
           }
-    
+
           if ((opt_strategy>=on_the_fly))
           {
             add_equation(
@@ -1916,7 +1906,7 @@ namespace bes
                     atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
                     new_bes_expression,
                     todo);
-    
+
             /* So now and then (after doing as many operations on the size of bes_equations,
                the relevances of variables must be reset, to avoid investigating irrelevant
                variables. There is an invariant in the system that all variables reachable
@@ -1936,7 +1926,7 @@ namespace bes
                     atermpp::aterm_int(variable_rank.get(current_pbeq.variable().name())).value(),
                     new_bes_expression);
           }
-    
+
           if (opt_strategy>=on_the_fly)
           {
             if (is_true(new_bes_expression)||is_false(new_bes_expression))
@@ -1944,16 +1934,16 @@ namespace bes
               // new_bes_expression is true or false and opt_strategy is on the fly or higher.
               // This means we must optimize the y substituting true/false for this variable
               // everywhere. For this we use the occurrence set.
-    
+
               std::set <variable_type> to_set_to_true_or_false;
               to_set_to_true_or_false.insert(variable_to_be_processed);
               for( ; !to_set_to_true_or_false.empty() ; )
               {
                 variable_type w=(*to_set_to_true_or_false.begin());
-    
+
                 // Take the lowest element for substitution, to generate
                 // short counterexample.
-    
+
                 // gsVerboseMsg("------------------ %d\n",(unsigned long)w);
                 to_set_to_true_or_false.erase(w);
                 for( std::set <variable_type>::iterator
@@ -1961,7 +1951,7 @@ namespace bes
                           v!=variable_occurrence_set_end(w);
                           v++)
                 {
-    
+
                   bes_expression b=get_rhs(*v);
                   if (opt_construct_counter_example)
                   { b=substitute_true_false(b,w,get_rhs(w),
@@ -1970,7 +1960,7 @@ namespace bes
                   else
                   { b=substitute_true_false(b,w,get_rhs(w));
                   }
-    
+
                   if (is_true(b)||is_false(b))
                   { to_set_to_true_or_false.insert(*v);
                   }
@@ -1986,9 +1976,9 @@ namespace bes
         if (nr_of_processed_variables % 1000 == 0)
         {
           if (mcrl2::core::gsVerbose)
-          { 
+          {
             std::cerr << "Processed " << nr_of_processed_variables <<
-                          " and generated " << nr_of_generated_variables << 
+                          " and generated " << nr_of_generated_variables <<
                                " boolean variables\n";
           }
         }
@@ -2033,7 +2023,7 @@ namespace bes
       else
       {
         propositional_variable_instantiation X(variable_index.get(current_var));
-    
+
         data_expression_list tl=X.parameters();
         std::string s=X.name();
         f << s;
@@ -2045,14 +2035,14 @@ namespace bes
         }
         f << ")";
       }
-    
+
       if (already_printed[current_var])
       { f << "*\n";
       }
       else
       { f << "\n";
         already_printed[current_var]=true;
-    
+
         for(std::deque < bes::counter_example>::iterator walker=counter_example_begin(current_var);
             walker!=counter_example_end(current_var) ; walker++)
         {
@@ -2063,7 +2053,7 @@ namespace bes
         }
       }
     }
-    
+
   public:
     void print_counter_example( const bool opt_store_as_tree,
                                 const std::string filename)
@@ -2086,7 +2076,6 @@ namespace bes
         catch (std::exception& e)
         { std::cerr << "Fail to write counterexample to " << filename <<
                    "(" << e.what() << ")\n";
-    
         }
       }
     }
@@ -2098,7 +2087,7 @@ namespace bes
 } // namespace bes.
 
   namespace atermpp
-  {  
+  {
     template<>
     struct aterm_traits<bes::bes_expression>
     {
@@ -2109,7 +2098,7 @@ namespace bes
                                                                     // when it is inside a protected container
       static ATerm term(bes::bes_expression t)     { return t.term(); }  // return the ATerm corresponding to t
       static ATerm* ptr(bes::bes_expression& t)    { return &t.term(); } // return the address of the ATerm corresponding to t
-    };  
+    };
   } // namespace atermpp
 
 
@@ -2195,7 +2184,7 @@ static bes_expression translate_equation_for_vasy(const unsigned long i,
   else if (is_if(b))
   { //BESIF(x,y,z) is equivalent to (y & (x|z)) provided the expression is monotonic.
     return translate_equation_for_vasy(i,
-                    and_optimized(then_branch(b), 
+                    and_optimized(then_branch(b),
                          or_optimized(condition(b),else_branch(b))),s,bes_equations);
     /* const bes_expression y=then_branch(b);
     const bes_expression z=else_branch(b);
@@ -2389,7 +2378,7 @@ void save_bes_in_cwi_format(const std::string &outfilename,boolean_equation_syst
 
 //function save_rhs_in_cwi
 //---------------------------
-static void save_rhs_in_cwi_form(std::ostream &outputfile, 
+static void save_rhs_in_cwi_form(std::ostream &outputfile,
                                  bes_expression b,
                                  boolean_equation_system &bes_equations)
 {
@@ -2460,7 +2449,7 @@ static void save_bes_in_pbes_format(
   atermpp::vector < pbes_equation > eqns;
   for(unsigned long r=1 ; r<=bes_equations.max_rank ; r++)
   { for(unsigned long i=1; i<=bes_equations.nr_of_variables() ; i++)
-    { 
+    {
       if (bes_equations.is_relevant(i) && (bes_equations.get_rank(i)==r) )
       {  pbes_expression pbe=generate_rhs_as_formula(bes_equations.get_rhs(i));
          std::stringstream variable_name;
@@ -2797,7 +2786,7 @@ bool solve_bes(bes::boolean_equation_system &bes_equations,
 { using namespace mcrl2::core;
   using namespace std;
   using namespace mcrl2::pbes_system;
-  
+
   if (mcrl2::core::gsVerbose)
   { std::cerr << "Solving a BES with " << bes_equations.nr_of_variables() <<
                                   " equations.\n";
