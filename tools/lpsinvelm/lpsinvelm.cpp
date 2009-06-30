@@ -90,6 +90,12 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
 
     typedef prover_tool< rewriter_tool<input_output_tool> > super;
 
+  protected:
+    std::string synopsis() const
+    {
+      return "[OPTION]... --invfile=INVFILE [INFILE [OUTFILE]]\n";
+    }
+
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
