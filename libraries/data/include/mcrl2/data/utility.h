@@ -250,7 +250,7 @@ namespace mcrl2 {
     /// \param id_creator A function that generates identifiers
     /// \return An identifier that doesn't appear in the term context
     template <typename Term, class IdentifierCreator>
-    core::identifier_string fresh_identifier(Term context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
+    core::identifier_string fresh_identifier(Term const& context, const std::string& hint, IdentifierCreator id_creator = IdentifierCreator())
     {
       return fresh_identifier(core::find_identifiers(context), hint, id_creator);
     }
@@ -286,7 +286,7 @@ namespace mcrl2 {
     /// \param hint A string
     /// \return A variable that doesn't appear in context
     template <typename Term>
-    variable fresh_variable(Term context, sort_expression s, std::string hint)
+    variable fresh_variable(Term const& context, sort_expression s, std::string hint)
     {
       core::identifier_string id = fresh_identifier(context, hint);
       return variable(id, s);

@@ -207,11 +207,14 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
+      ATermAppl result = 0;
       //process state formula
-      ATermAppl result = create_pbes();
+      if ((end_phase != PH_NONE) || (pretty)) {
+        result = create_pbes();
 
-      if (result == 0) {
-        return false;
+        if (result == 0) {
+          return false;
+        }
       }
 
       //store the result

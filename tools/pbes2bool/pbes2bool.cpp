@@ -26,10 +26,7 @@
 #define AUTHOR "Jan Friso Groote"
 
 //C++
-#include <ostream>
-#include <exception>
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <utility>
 
@@ -42,11 +39,9 @@
 #include "mcrl2/utilities/squadt_tool.h"
 
 //LPS-Framework
-#include "mcrl2/pbes/utility.h"
-#include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/sort_expression.h"
-#include "mcrl2/pbes/data_elimination.h"
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/pbes/utility.h"
+#include "mcrl2/pbes/data_elimination.h"
 
 //Boolean equation systems
 #include "mcrl2/pbes/bes_deprecated.h"
