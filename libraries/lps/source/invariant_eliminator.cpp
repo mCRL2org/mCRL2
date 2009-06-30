@@ -61,7 +61,7 @@ using namespace mcrl2::core::detail;
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Invariant_Eliminator::simplify(ATermAppl a_invariant, int a_summand_number) {
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 2), 2);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 3), 1);
       ATermAppl v_summand;
       ATermList v_simplified_summands = ATmakeList0();
       int v_summand_number = 1;
@@ -81,8 +81,8 @@ using namespace mcrl2::core::detail;
         v_summand_number++;
       }
       v_simplified_summands = ATreverse(v_simplified_summands);
-      ATermAppl v_process_equations = ATAgetArgument(f_lps, 2);
-      v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 2);
-      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equations, 2);
+      ATermAppl v_process_equations = ATAgetArgument(f_lps, 3);
+      v_process_equations = ATsetArgument(v_process_equations, (ATerm) v_simplified_summands, 1);
+      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equations, 3);
       return v_lps;
     }

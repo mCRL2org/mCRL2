@@ -60,7 +60,7 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     bool Invariant_Checker::check_init(ATermAppl a_invariant) {
-      ATermList v_assignments = ATLgetArgument(f_init, 1);
+      ATermList v_assignments = ATLgetArgument(f_init, 0);
       ATermAppl v_assignment;
       ATermAppl v_variable;
       ATermAppl v_expression;
