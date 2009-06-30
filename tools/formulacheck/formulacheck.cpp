@@ -153,7 +153,6 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
         "formulacheck",
         "Luc Engelen",
         "check a boolean formula",
-        "[OPTION]... [INFILE]\n",
         "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
         "INFILE holds. If INFILE is not present, stdin is used."),
       f_counter_example(false),

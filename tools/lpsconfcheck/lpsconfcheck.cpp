@@ -170,7 +170,6 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
         "lpsconfcheck",
         "Luc Engelen",
         "mark confluent tau-summands of an LPS",
-        "[OPTION]... [INFILE [OUTFILE]]\n",
         "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
         "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
         "stdin is used. If OUTFILE is not present, stdout is used."),
