@@ -32,7 +32,7 @@ struct t_lin_options {
   bool binary;
   bool statenames;
   bool norewrite;
-  bool nofreevars;
+  bool noglobalvars;
   bool nosumelm;
   bool nodeltaelimination;
   bool add_delta;
@@ -52,7 +52,7 @@ struct t_lin_options {
       binary(false),
       statenames(false),
       norewrite(false),
-      nofreevars(false),
+      noglobalvars(false),
       nosumelm(false),
       nodeltaelimination(false),
       add_delta(false),

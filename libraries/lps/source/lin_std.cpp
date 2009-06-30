@@ -3275,7 +3275,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression representative_generator_internal(const sort_expression s)
-    { if (!options.nofreevars)
+    { if (!options.noglobalvars)
       { const variable newVariable(fresh_name("dc"),s);
         insertvariable(newVariable,true);
         global_variables=push_front(global_variables,newVariable);

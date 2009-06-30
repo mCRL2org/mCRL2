@@ -85,9 +85,10 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       desc.add_option("no-rewrite",
           "do not rewrite data terms while linearising; useful when the rewrite "
           "system does not terminate", 'o');
-      desc.add_option("no-freevars",
+      desc.add_option("no-globvars",
           "instantiate don't care values with arbitrary constants, "
-          "instead of modelling them by free variables", 'f');
+          "instead of modelling them by global variables. This has no effect"
+          "on global variable that are declared in the specification.", 'f');
       desc.add_option("no-sumelm",
           "avoid applying sum elimination in parallel composition", 'm');
       desc.add_option("no-deltaelm",
@@ -115,7 +116,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.binary                  = 0 < parser.options.count("binary");
       m_linearisation_options.statenames              = 0 < parser.options.count("statenames");
       m_linearisation_options.norewrite               = 0 < parser.options.count("no-rewrite");
-      m_linearisation_options.nofreevars              = 0 < parser.options.count("no-freevars");
+      m_linearisation_options.noglobalvars              = 0 < parser.options.count("no-globvars");
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
@@ -250,7 +251,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 # define option_binary                   "binary"
 # define option_statenames               "statenames"
 # define option_no_rewrite               "no_rewrite"
-# define option_no_freevars              "no_freevars"
+# define option_no_globalvars              "no_globalvars"
 # define option_check_only               "check_only"
 # define option_no_sumelm                "no_sumelm"
 # define option_no_deltaelm              "no_dataelm"
@@ -278,7 +279,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.binary                  = c.get_option_argument< bool >(option_binary);
       m_linearisation_options.statenames              = c.get_option_argument< bool >(option_statenames);
       m_linearisation_options.norewrite               = c.get_option_argument< bool >(option_no_rewrite);
-      m_linearisation_options.nofreevars              = c.get_option_argument< bool >(option_no_freevars);
+      m_linearisation_options.noglobalvars              = c.get_option_argument< bool >(option_no_globalvars);
       opt_check_only                                  = c.get_option_argument< bool >(option_check_only);
       m_linearisation_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
       m_linearisation_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
@@ -349,8 +350,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       if (!c.option_exists(option_no_rewrite)) {
         c.add_option(option_no_rewrite).set_argument_value< 0 >(false);
       }
-      if (!c.option_exists(option_no_freevars)) {
-        c.add_option(option_no_freevars).set_argument_value< 0 >(false);
+      if (!c.option_exists(option_no_globalvars)) {
+        c.add_option(option_no_globalvars).set_argument_value< 0 >(false);
       }
       if (!c.option_exists(option_check_only)) {
         c.add_option(option_check_only).set_argument_value< 0 >(false);
@@ -389,7 +390,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       checkbox& alpha               = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_alpha));
       checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
       checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
-      checkbox& freevars            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_freevars));
+      checkbox& globalvars            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_globalvars));
       checkbox& check_only          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_check_only));
 
       // two columns to select the linearisation options of the tool
@@ -407,7 +408,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
                 append(alpha.set_label("Apply alphabet axioms")).
                 append(sumelm.set_label("Apply sum elimination")).
                 append(deltaelm.set_label("Apply delta elimination")).
-                append(freevars.set_label("Generate free variables")).
+                append(globalvars.set_label("Generate global variables")).
                 append(check_only.set_label("Check input only and do not linearise"))));
 
       add_rewrite_option(d, m);
@@ -446,7 +447,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       c.get_option(option_binary).set_argument_value< 0 >(binary.get_status());
       c.get_option(option_statenames).set_argument_value< 0 >(statenames.get_status());
       c.get_option(option_no_rewrite).set_argument_value< 0 >(!rewrite.get_status());
-      c.get_option(option_no_freevars).set_argument_value< 0 >(!freevars.get_status());
+      c.get_option(option_no_globalvars).set_argument_value< 0 >(!globalvars.get_status());
       c.get_option(option_check_only).set_argument_value< 0 >(!check_only.get_status());
       c.get_option(option_no_sumelm).set_argument_value< 0 >(!sumelm.get_status());
       c.get_option(option_no_deltaelm).set_argument_value< 0 >(!deltaelm.get_status());
