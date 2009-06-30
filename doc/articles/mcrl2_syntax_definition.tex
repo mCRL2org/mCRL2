@@ -333,6 +333,7 @@
 \newcommand{\kwend}{{\bf end}}
 \newcommand{\kwdiv}{{\bf div}}
 \newcommand{\kwmod}{{\bf mod}}
+\newcommand{\kwglob}{{\bf glob}}
 \newcommand{\kwproc}{{\bf proc}}
 \newcommand{\kwinit}{{\bf init}}
 \newcommand{\kwpbes}{{\bf pbes}}
@@ -374,6 +375,7 @@ map
 var
 eqn
 act
+glob
 proc
 pbes
 init
@@ -536,12 +538,13 @@ Process specifications $\f{proc\_spec}$:
 \f{proc\_spec}      & \mb{::=} & \mb{(}\f{proc\_spec\_elt}\mb{)^{*}}\\
 \f{proc\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
                     & \mb{|}   & \kwact\ \mb{(}\f{ad};\mb{)^{+}}\\
+                    & \mb{|}   & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
                     & \mb{|}   & \kwproc\ \mb{(}\f{pd};\mb{)^{+}}\\
                     & \mb{|}   & \kwinit\ p;\\
 \f{pd}              & \mb{::=} & P = p\ \mb{|}\ P(\f{mvd},\mb{\ldots},\f{mvd}) = p\\
 \f{ad}              & \mb{::=} & a\ \mb{|}\ a: s \times \mb{\cdots} \times s
 \end{tightarray}\]
-Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of each of the keywords $\kwproc$ and $\kwinit$.
+Here $\f{proc\_spec\_elt}$ represents a process specification element, $\f{pd}$ a process definition, and $\f{ad}$ an action declaration. Furthermore, we impose the restriction that $\f{proc\_spec}$ should contain precisely one occurrence of the keyword $\kwinit$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Mu-calculus formulae}
@@ -662,6 +665,7 @@ PBES specifications $\f{pbes\_spec}$:
 \[\begin{tightarray}{lrl}
 \f{pbes\_spec}      & \mb{::=} & \mb{(}\f{pbes\_spec\_elt}\mb{)^{*}}\\
 \f{pbes\_spec\_elt} & \mb{::=} & \f{data\_spec}\\
+                    & \mb{|} & \kwglob\ \mb{(}\f{mvd};\mb{)^{+}}\\
                     & \mb{|} & \kwpbes\ \mb{(}\f{pb\_eqn};\mb{)^{+}}\\
                     & \mb{|} & \kwinit\ \f{pvo};
 \end{tightarray}\]
