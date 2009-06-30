@@ -40,10 +40,7 @@ class lpspp_tool: public input_output_tool
       : input_output_tool(NAME, AUTHOR,
           "pretty print an LPS",
           "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
-          "is not present, stdout is used. If INFILE is not present, stdin is used.",
-          "The LPS printed in the default format might not be a well-formed mCRL2 specification, "
-          "because the proc and init sections could be preceded by declarations of free variables "
-          "denoted by var."
+          "is not present, stdout is used. If INFILE is not present, stdin is used."
         ),
         format(ppDefault)
     {}
