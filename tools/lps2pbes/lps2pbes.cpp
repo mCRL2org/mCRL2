@@ -48,12 +48,8 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
   typedef squadt_tool<input_output_tool> super;
 
   protected:
-    //t_phase represents the phases at which the program should be able to stop
-    typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL, PH_REG_FRM_TRANS } t_phase;
-
     bool pretty;
     bool timed;
-    t_phase end_phase;
     std::string formfilename;
 
     std::string synopsis() const
@@ -68,12 +64,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
           "use the state formula from FILE", 'f');
       desc.add_option("timed",
           "use the timed version of the algorithm, even for untimed LPS's", 't');
-      desc.add_option("end-phase", make_mandatory_argument("PHASE"),
-          "stop conversion and output the state formula after phase PHASE: "
-          "'pa' (parsing), "
-          "'tc' (type checking), "
-          "'rft' (regular formula translation)"
-        , 'p');
       desc.add_option("pretty",
           "return a pretty printed version of the output", 'P');
     }
@@ -84,19 +74,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       pretty    = 0 < parser.options.count("pretty");
       timed     = 0 < parser.options.count("timed");
-      end_phase = PH_NONE;
-
-      if (parser.options.count("end-phase"))
-      {
-        std::string phase = parser.option_argument("end-phase");
-        if      (phase == "pa")  { end_phase = PH_PARSE; }
-        else if (phase == "tc")  { end_phase = PH_TYPE_CHECK; }
-        else if (phase == "di")  { end_phase = PH_DATA_IMPL; }
-        else if (phase == "rft") { end_phase = PH_REG_FRM_TRANS; }
-        else {
-          parser.error("option -p has illegal argument '" + phase + "'");
-        }
-      }
 
       //check for presence of -f
       if (parser.options.count("formula")) {
@@ -105,91 +82,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       else {
         parser.error("option -f is not specified");
       }
-    }
-
-    //Pre:  formfilename contains a state formula
-    //      input_filename() contains an LPS ("" indicates stdin)
-    //      end_phase indicates at which phase conversion stops
-    //Ret:  if end_phase == PH_NONE, the PBES generated from the state formula and
-    //      the LPS
-    //      if end_phase != PH_NONE, the state formula after phase end_phase
-    //      NULL, if something went wrong
-    ATermAppl create_pbes()
-    {
-      //open input_filename()
-      specification lps_spec;
-      lps_spec.load(input_filename());
-
-      //parse formula from formfilename
-      gsVerboseMsg("parsing formula from '%s'...\n", formfilename.c_str());
-      std::ifstream formstream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
-      if (!formstream.is_open()) {
-        gsErrorMsg("cannot open formula file '%s'\n", formfilename.c_str());
-        return NULL;
-      }
-      atermpp::aterm_appl result = parse_state_frm(formstream);
-      formstream.close();
-      if (result == NULL) {
-        gsErrorMsg("parsing failed\n");
-        return NULL;
-      }
-      if (end_phase == PH_PARSE) {
-        return result;
-      }
-
-      // prepare specification for type-checking
-      specification lps_spec_copy(lps_spec);
-
-      // make copy because type checking needs a specification without system defined sorts
-      lps_spec_copy.data() = mcrl2::data::remove_all_system_defined(lps_spec_copy.data());
-      atermpp::aterm_appl reconstructed_spec = specification_to_aterm(lps_spec_copy);
-
-      //type check formula
-      gsVerboseMsg("type checking...\n");
-      result = type_check_state_frm(result, reconstructed_spec);
-      if (result == NULL) {
-        gsErrorMsg("type checking failed\n");
-        return NULL;
-      }
-      if (end_phase == PH_TYPE_CHECK) {
-        return result;
-      }
-
-      //translate regular formulas in terms of state and action formulas
-      gsVerboseMsg("translating regular formulas in terms of state and action formulas...\n");
-      result = translate_reg_frms(result);
-      if (result == NULL) {
-        gsErrorMsg("regular formula translation failed\n");
-        return NULL;
-      }
-      if (end_phase == PH_REG_FRM_TRANS) {
-        return result;
-      }
-
-      // Undo sort renamings for compatibility with type checker
-      result = data::detail::undo_compatibility_renamings(lps_spec.data(), result);
-      // Translating to internal format
-      result = data::detail::internal_format_conversion(lps_spec.data(), result);
-      // Add any system defined sorts needed by this 
-      lps_spec.data().make_complete(data::find_sort_expressions(result));
-
-      //generate PBES from state formula and LPS
-      gsVerboseMsg("generating PBES from state formula and LPS...\n");
-      pbes<> p = pbes_translate(state_formula(result), lps_spec, timed);
-      result = pbes_to_aterm(p, false);
-      if (result == NULL) {
-        return NULL;
-      }
-
-      return result;
-    }
-
-    pbes<> create_pbes_new()
-    {
-      specification spec;
-      spec.load(input_filename());
-      state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
-      return lps2pbes(spec, formula, timed);
     }
 
   public:
@@ -207,38 +99,11 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
-      ATermAppl result = 0;
-      //process state formula
-      if ((end_phase != PH_NONE) || (pretty)) {
-        result = create_pbes();
-
-        if (result == 0) {
-          return false;
-        }
-      }
-
-      //store the result
-      if (output_filename().empty()) {
-        gsVerboseMsg("saving result to standard output...\n");
-      } else {
-        gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
-      }
-      if ((end_phase == PH_NONE) && (!pretty)) {
-        mcrl2::pbes_system::pbes<> pbes_spec(create_pbes_new());
-        pbes_spec.save(output_filename());
-      } else {
-        if (output_filename().empty()) {
-          PrintPart_CXX(std::cout, (ATerm) result, (pretty)?ppDefault:ppInternal);
-          std::cout << std::endl;
-        } else {
-          std::ofstream outstream(output_filename().c_str(), std::ofstream::out|std::ofstream::binary);
-          if (!outstream.is_open()) {
-            throw mcrl2::runtime_error("could not open output file '" + output_filename() + "' for writing");
-          }
-          PrintPart_CXX(outstream, (ATerm) result, pretty?ppDefault:ppInternal);
-          outstream.close();
-        }
-      }
+      specification spec;
+      spec.load(input_filename());
+      state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      pbes<> result = lps2pbes(spec, formula, timed);
+      result.save(output_filename());
       return true;
     }
 
@@ -255,14 +120,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       output_format_enumeration.
         add(readable, "readable").
         add(normal, "normal");
-
-      tipi::datatype::enumeration< t_phase > end_phase_enumeration;
-
-      end_phase_enumeration.
-        add(PH_NONE, "none").
-        add(PH_PARSE, "parse").
-        add(PH_TYPE_CHECK, "type_check").
-        add(PH_REG_FRM_TRANS, "formula_translation");
 
       return true;
     }
@@ -292,15 +149,9 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       if (!c.option_exists("selected_output_format")) {
         c.add_option("selected_output_format").set_argument_value< 0 >(normal);
       }
-      if (!c.option_exists("stop_after_phase")) {
-        c.add_option("stop_after_phase").set_argument_value< 0 >(PH_NONE);
-      }
 
       /* Create display */
       tipi::tool_display d;
-
-      // Helper for end phase selection
-      mcrl2::utilities::squadt::radio_button_helper < t_phase > phase_selector(d);
 
       // Helper for output format selection
       mcrl2::utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
@@ -322,18 +173,12 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
             append(d.create< label >().set_text("Formula file name : ")).
             append(formula_field)).
         append(timed_conversion.set_label("timed conversion")).
-        append(d.create< vertical_box >().
-            append(phase_selector.associate(PH_NONE, "none", true)).
-            append(phase_selector.associate(PH_PARSE, "parsing")).
-            append(phase_selector.associate(PH_TYPE_CHECK, "type checking")).
-            append(phase_selector.associate(PH_REG_FRM_TRANS, "formula translation"))).
         append(d.create< label >().set_text(" ")).
         append(okay_button, layout::right);
 
       // Set default values if the configuration specifies them
       format_selector.set_selection(
           c.get_option_argument< pbes_output_format >("selected_output_format", 0));
-      phase_selector.set_selection(c.get_option_argument< t_phase >("stop_after_phase"));
 
       if (c.input_exists("formula_in")) {
         formula_field.set_text(c.get_input("formula_in").location());
@@ -368,7 +213,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       c.get_option("use_timed_algorithm").set_argument_value< 0, tipi::datatype::boolean >(timed_conversion.get_status());
       c.get_option("selected_output_format").set_argument_value< 0 >(format_selector.get_selection());
-      c.get_option("stop_after_phase").set_argument_value< 0 >(phase_selector.get_selection());
 
       send_clear_display();
 
@@ -381,7 +225,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       return c.input_exists("main-input") &&
              c.input_exists("formula_in") &&
              c.output_exists("main-output") &&
-             c.option_exists("stop_after_phase") &&
              c.option_exists("use_timed_algorithm");
     }
 
@@ -393,7 +236,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
       pretty           = c.get_option_argument< pbes_output_format >("selected_output_format") != normal;
       timed            = c.get_option_argument< bool >("use_timed_algorithm");
-      end_phase        = c.get_option_argument< t_phase >("stop_after_phase");
       formfilename     = c.get_input("formula_in").location();
       return run();
     }
