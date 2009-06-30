@@ -58,6 +58,21 @@ namespace mcrl2 {
           /// \brief after rewriting
           atermpp::map< data_expression, data_expression >         m_reconstruction_context;
 
+        protected:
+
+          template < typename Sequence >
+          void initialise(Sequence const& s)
+          {
+            // Add rewrite rules (needed only for lambda expressions)
+            for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
+            {
+              if (!m_rewriter->addRewriteRule(implement(*i)))
+              {
+                throw mcrl2::runtime_error("Could not add rewrite rule!");
+              }
+            }
+          }
+
         public:
 
           // For normalising sort expressions
@@ -321,14 +336,25 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            // Add rewrite rules (needed only for lambda expressions)
-            for (data_specification::equations_const_range r = specification.equations(); !r.empty(); r.advance_begin(1))
-            {
-              if (!m_rewriter->addRewriteRule(implement(r.front())))
-              {
-                throw mcrl2::runtime_error("Could not add rewrite rule!");
-              }
-            }
+            initialise(specification.equations());
+          }
+
+          template < typename EquationSelector >
+          rewrite_conversion_helper(data_specification const& specification,
+                                    detail::Rewriter& rewriter, EquationSelector& selector) :
+                   m_data_specification(&specification),
+                   m_rewriter(&rewriter)
+          {
+            initialise(selector(specification.equations()));
+          }
+
+          template < typename EquationSelector >
+          rewrite_conversion_helper(data_specification const& specification,
+                                    detail::Rewriter& rewriter, EquationSelector const& selector) :
+                   m_data_specification(&specification),
+                   m_rewriter(&rewriter)
+          {
+            initialise(selector(specification.equations()));
           }
       };
     } // namespace detail

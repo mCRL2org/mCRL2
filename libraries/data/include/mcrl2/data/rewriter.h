@@ -15,15 +15,16 @@
 #include <functional>
 #include <algorithm>
 #include <sstream>
+
 #include "boost/shared_ptr.hpp"
-#include "mcrl2/core/substitution_function.h"
+#include "boost/type_traits/add_reference.hpp"
+
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
 
@@ -74,7 +75,7 @@ namespace data {
     protected:
 
       /// \brief Constructor.
-      /// \param r A rewriter
+      /// \param[in] r A rewriter
       basic_rewriter(boost::shared_ptr<detail::Rewriter> const& r) :
           m_rewriter(r)
       {}
@@ -92,7 +93,7 @@ namespace data {
     public:
 
       /// \brief Adds an equation to the rewrite rules.
-      /// \param eq The equation that is added.
+      /// \param[in] eq The equation that is added.
       /// \return Returns true if the operation succeeded.
       bool add_rule(const data_equation& eq)
       {
@@ -100,7 +101,7 @@ namespace data {
       }
 
       /// \brief Removes an equation from the rewrite rules.
-      /// \param eq The equation that is removed.
+      /// \param[in] eq The equation that is removed.
       void remove_rule(const data_equation& eq)
       {
         m_rewriter->removeRewriteRule(eq);
@@ -146,7 +147,7 @@ namespace data {
       }
 
       /// \brief Performs data reconstruction after rewriting (should become obsolete)
-      data_expression reconstruct(atermpp::aterm_appl expression) const
+      data_expression reconstruct(atermpp::aterm_appl const& expression) const
       {
         return m_conversion_helper->lazy_reconstruct(expression);
       }
@@ -154,7 +155,7 @@ namespace data {
     public:
 
       /// \brief Constructor.
-      /// \param r A rewriter
+      /// \param[in] r A rewriter
       basic_rewriter(basic_rewriter const& other) :
           basic_rewriter< atermpp::aterm >(other),
           m_conversion_helper(other.m_conversion_helper)
@@ -162,16 +163,27 @@ namespace data {
       }
 
       /// \brief Constructor.
-      /// \param d A data specification
-      /// \param s A rewriter strategy.
+      /// \param[in] d A data specification
+      /// \param[in] s A rewriter strategy.
       basic_rewriter(data_specification const& d, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
           m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
       {
       }
 
+      /// \brief Constructor.
+      /// \param[in] d A data specification
+      /// \param[in] s A rewriter strategy.
+      /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+      template < typename EquationSelector >
+      basic_rewriter(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+          basic_rewriter< atermpp::aterm >(s),
+          m_conversion_helper(new detail::rewrite_conversion_helper::rewrite_conversion_helper(d, *m_rewriter, selector))
+      {
+      }
+
       /// \brief Adds an equation to the rewrite rules.
-      /// \param equation The equation that is added.
+      /// \param[in] equation The equation that is added.
       /// \return Returns true if the operation succeeded.
       bool add_rule(const data_equation& equation)
       {
@@ -188,20 +200,29 @@ namespace data {
   {
     public:
       /// \brief Constructor.
-      /// \param d A data specification
-      /// \param s A rewriter strategy.
+      /// \param[in] r a rewriter.
+      rewriter(rewriter const& r) :
+         basic_rewriter<data_expression>(r)
+      { }
+
+      /// \brief Constructor.
+      /// \param[in] d A data specification
+      /// \param[in] s A rewriter strategy.
       rewriter(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
          basic_rewriter<data_expression>(d, s)
       { }
 
       /// \brief Constructor.
-      /// \param r a rewriter.
-      rewriter(rewriter const& r) :
-         basic_rewriter<data_expression>(r)
+      /// \param[in] d A data specification
+      /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+      /// \param[in] s A rewriter strategy.
+      template < typename EquationSelector >
+      rewriter(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+         basic_rewriter<data_expression>(d, selector, s)
       { }
 
       /// \brief Default specification used if no specification is specified at construction
-      /// \param d A data specification
+      /// \param[in] d A data specification
       static data_specification& default_specification()
       {
         static data_specification specification;
@@ -210,7 +231,7 @@ namespace data {
       }
 
       /// \brief Rewrites a data expression.
-      /// \param d A data expression
+      /// \param[in] d A data expression
       /// \return The normal form of d.
       data_expression operator()(const data_expression& d) const
       {
@@ -219,8 +240,8 @@ namespace data {
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
       /// to data variables.
-      /// \param d A data expression
-      /// \param sigma A substitution function
+      /// \param[in] d A data expression
+      /// \param[in] sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
       data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
@@ -240,21 +261,31 @@ namespace data {
 
     public:
 
-      /// \brief Constructor.
-      /// \param d A data specification
-      /// \param s A rewriter strategy.
-      rewriter_with_variables(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
-          basic_rewriter<data_expression>(d, s)
-      { }
-
       /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
-      /// \param r A data rewriter
+      /// \param[in] r A data rewriter
       rewriter_with_variables(basic_rewriter< data_expression > const& r) :
           basic_rewriter<data_expression>(r)
       {}
 
+      /// \brief Constructor.
+      /// \param[in] d A data specification
+      /// \param[in] s A rewriter strategy.
+      rewriter_with_variables(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
+          basic_rewriter<data_expression>(d, s)
+      { }
+
+      /// \brief Constructor.
+      /// \param[in] d A data specification
+      /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
+      /// \param[in] s A rewriter strategy.
+      template < typename EquationSelector >
+      rewriter_with_variables(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+         basic_rewriter<data_expression>(d, selector, s)
+      { }
+
+
       /// \brief Rewrites a data expression.
-      /// \param d The term to be rewritten.
+      /// \param[in] d The term to be rewritten.
       /// \return The normal form of d.
       data_expression_with_variables operator()(const data_expression_with_variables& d) const
       {
@@ -264,13 +295,13 @@ namespace data {
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
       /// to data variables.
-      /// \param d A term.
-      /// \param sigma A substitution function
+      /// \param[in] d A term.
+      /// \param[in] sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
       data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
       {
-        data_expression t = this->operator()(replace_free_variables(d, sigma));
+        data_expression t = this->operator()(replace_free_variables(static_cast< data_expression const& >(d), sigma));
         return data_expression_with_variables(t, find_free_variables(t));
       }
   };
