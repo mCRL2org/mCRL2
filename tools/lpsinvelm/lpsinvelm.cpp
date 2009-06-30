@@ -167,9 +167,8 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> > {
         "lpsinvelm",
         "Luc Engelen",
         "check invariants and use these to simplify or eliminate summands of an LPS",
-        "[OPTION]... --invariant=INVFILE [INFILE [OUTFILE]]\n",
-        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) in "
-        "INVFILE is an invariant of the linear process specification (LPS) in INFILE. "
+        "Checks whether the boolean formula (an mCRL2 data expression of sort Bool) provided "
+        "as invariant is an invariant of the linear process specification (LPS) in INFILE. "
         "If this is the case, the tool eliminates all summands of the LPS whose condition "
         "violates the invariant, and writes the result to OUTFILE. "
         "If INFILE is present, stdin is used. If OUTFILE is not present, stdout is used.\n"
