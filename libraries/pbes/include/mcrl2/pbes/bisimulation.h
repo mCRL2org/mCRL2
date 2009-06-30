@@ -237,8 +237,8 @@ public:
       pvars.insert(p.process().process_parameters().begin(), p.process().process_parameters().end());
 
       std::set<data::variable> qvars;
-      pvars.insert(q.global_variables().begin(), q.global_variables().end());
-      pvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
+      qvars.insert(q.global_variables().begin(), q.global_variables().end());
+      qvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
       
       // compute name clashes between pvars and qvars
       std::set<core::identifier_string> pnames;
@@ -423,7 +423,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
 
       data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma);
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -523,7 +523,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
       using namespace pbes_expr_optimized;
       data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma);
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -618,6 +618,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       using namespace pbes_expr_optimized;
       std::vector<pbes_expression> v;
+      variable_list e = i->summation_variables();
+      const variable_list& d = p.process_parameters();
       const variable_list& d1 = q.process_parameters();
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {
@@ -628,7 +630,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         data_expression      cj = j->condition();
         variable_list        e1 = j->summation_variables();
         data_expression_list gj = j->next_state(q.process_parameters());
-        pbes_expression      expr = pbes_expr::exists(e1, and_(cj, var(Y1(p, q, i), d1 + gj + e1)));
+        pbes_expression      expr = pbes_expr::exists(e1, and_(cj, var(Y1(p, q, i), d + gj + e)));
         v.push_back(expr);
       }
       return or_(join_or(v.begin(), v.end()), step(p, q, i));
@@ -691,7 +693,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       using namespace pbes_expr_optimized;
       data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma);
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -699,7 +701,6 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
       variable_list const& d  = m.process_parameters();
       variable_list const& d1 = s.process_parameters();
       atermpp::vector<pbes_equation> equations;
-
 
       // E1
       equations.push_back(pbes_equation(nu(), propositional_variable(X(m, s), d + d1), and_(match(m, s), match(s, m))));
@@ -753,7 +754,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
       using namespace pbes_expr_optimized;
       data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma);
+      lps::substitute(spec1, sigma, true);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);

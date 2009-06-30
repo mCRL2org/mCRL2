@@ -427,11 +427,11 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
     /// much more compact than the ascii representation.
     /// \param filename A string
     /// \param binary If true the file is saved in binary format
-    void save(const std::string& filename, bool binary = true) const
+    void save(const std::string& filename, bool binary = true, bool no_well_typedness_check = false) const
     {
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
-      assert(is_well_typed());
+      assert(no_well_typedness_check || is_well_typed());
 
       pbes<Container> tmp(*this);
       tmp.data() = data::remove_all_system_defined(tmp.data());
@@ -705,7 +705,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.
 template <typename Container>
-atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true)
+atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
 {
   ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
   ATermAppl equations = core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(p.equations()));

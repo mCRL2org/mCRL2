@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/lps_replacer.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -48,6 +49,7 @@ void test_replace()
   summand t = data::replace_variables(s, a); // must become lps::replace
   std::cout << "<s>" << pp(s) << std::endl;
   std::cout << "<t>" << pp(t) << std::endl;
+  core::garbage_collect();
 }
 
 std::string SPEC1a =
@@ -101,6 +103,18 @@ void test_lps_replacer()
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << pp(spec2.process()) << std::endl;
   BOOST_CHECK(pp(spec1.process()) == pp(spec2.process()));
+  core::garbage_collect();
+}
+
+void test_lps_substitute()
+{
+  data::variable v("v", sort_pos::pos());
+  data::variable w("w", sort_pos::pos());
+  data::mutable_map_substitution<> sigma;
+  sigma[v] = w;
+
+  lps::substitute(v, sigma);
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -109,7 +123,7 @@ int test_main(int argc, char* argv[])
 
   test_replace();
   test_lps_replacer();
-  core::garbage_collect();
+  test_lps_substitute();
 
   return 0;
 }

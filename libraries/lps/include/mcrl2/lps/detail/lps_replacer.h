@@ -27,9 +27,15 @@ namespace detail {
   struct lps_replacer
   {
     const Substitution& sigma;
+    
+    /// If true, the process parameters, global variables and the left hand
+    /// sides of assignments are replaced as well. For this it is needed
+    /// that the result of the substitution is a variable.
+    bool replace_parameters;
   
-    lps_replacer(const Substitution& sigma_)
-      : sigma(sigma_)
+    lps_replacer(const Substitution& sigma_, bool replace_parameters_ = false)
+      : sigma(sigma_),
+        replace_parameters(replace_parameters_)
     {}
 
     /// \brief Applies the substitution to the elements of a term list
@@ -63,6 +69,20 @@ namespace detail {
       }
     }   
 
+    /// \brief Applies the substitution to a data variable
+    /// \param d A data variable
+    data::variable substitute_copy(const data::variable& d) const
+    {
+      return sigma(d);
+    } 
+
+    /// \brief Applies the substitution to a data variable
+    /// \param d A data variable
+    void substitute(data::variable& d) const
+    {                                         
+      d = substitute_copy(d);
+    } 
+  
     /// \brief Applies the substitution to a data expression
     /// \param d A data expression
     data::data_expression substitute_copy(const data::data_expression& d) const    
@@ -81,7 +101,15 @@ namespace detail {
     /// \param a An assignment
     void substitute(data::assignment& a) const
     {
-      a = data::assignment(a.lhs(), substitute_copy(a.rhs()));
+      if (replace_parameters)
+      {
+        data::variable v = substitute_copy(a.lhs());
+        a = data::assignment(v, substitute_copy(a.rhs()));
+      }
+      else
+      {
+        a = data::assignment(a.lhs(), substitute_copy(a.rhs()));
+      }
     } 
   
     /// \brief Applies the substitution to an action
@@ -140,6 +168,10 @@ namespace detail {
     /// \param s A linear_process
     void substitute(linear_process& p) const
     {
+      if (replace_parameters)
+      {
+        substitute_list(p.process_parameters());
+      }
       substitute_container(p.action_summands());
       substitute_container(p.deadlock_summands());
     }
@@ -148,6 +180,15 @@ namespace detail {
     /// \param spec A linear process specification
     void substitute(specification& spec) const
     {
+      if (replace_parameters)
+      {
+        atermpp::set<data::variable> glob;
+        for (atermpp::set<data::variable>::iterator i = spec.global_variables().begin(); i != spec.global_variables().end(); ++i)
+        {
+          glob.insert(substitute_copy(*i));
+        }
+        spec.global_variables() = glob;
+      }
       substitute(spec.process());
       substitute(spec.initial_process());
     }

@@ -20,9 +20,9 @@ namespace lps {
 
   /// \brief Applies a substitution to an LPS data type.
   template <typename Object, typename Substitution>
-  void substitute(Object& o, const Substitution& sigma)
+  void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false)
   {
-    lps::detail::lps_replacer<Substitution> r(sigma);
+    lps::detail::lps_replacer<Substitution> r(sigma, replace_parameters);
     r(o);
   }
 
