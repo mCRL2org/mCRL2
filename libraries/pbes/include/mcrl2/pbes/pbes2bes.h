@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/sort_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
@@ -229,9 +229,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     states_done.put(new_propvarinst);
 
     // Replace all occurrences in the right hand side and rewrite the expression
-    pbes_expression new_pbes_expression;
-    new_pbes_expression = data::variable_sequence_replace(current_pbes_expression, current_variable.parameters(), current_state.parameters());
-    new_pbes_expression = rewrite(new_pbes_expression);
+    pbes_expression new_pbes_expression = rewrite(current_pbes_expression, data::make_map_substitution(current_variable.parameters(), current_state.parameters()));
 
     propositional_variable_instantiation_list oldpropvarinst_list;
     propositional_variable_instantiation_list newpropvarinst_list;
@@ -376,11 +374,8 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     {
       propositional_variable propvar_current = propositional_variable(create_propvar_name(propvar_name, inst_i->finite_exp), inst_i->infinite_var);
 
-      pbes_expression current_expression; // Current expression
-
       // Substitute all instantiated variables and rewrite the rhs as far as possible.
-      current_expression = data::variable_sequence_replace(formula, inst_i->finite_var, inst_i->finite_exp);
-      current_expression = rewrite(current_expression);
+      pbes_expression current_expression = rewrite(formula, data::make_map_substitution(inst_i->finite_var, inst_i->finite_exp));
 
       propositional_variable_instantiation_list oldpropvarinst_list;
       propositional_variable_instantiation_list newpropvarinst_list;

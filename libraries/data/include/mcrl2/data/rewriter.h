@@ -244,7 +244,7 @@ namespace data {
       /// \param[in] sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
-      data_expression operator()(const data_expression& d, SubstitutionFunction sigma) const
+      data_expression operator()(const data_expression& d, SubstitutionFunction const& sigma) const
       {
         return reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma))));
       }
@@ -299,7 +299,7 @@ namespace data {
       /// \param[in] sigma A substitution function
       /// \return The normal form of the term.
       template <typename SubstitutionFunction>
-      data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction sigma) const
+      data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction const& sigma) const
       {
         data_expression t = this->operator()(replace_free_variables(static_cast< data_expression const& >(d), sigma));
         return data_expression_with_variables(t, find_free_variables(t));

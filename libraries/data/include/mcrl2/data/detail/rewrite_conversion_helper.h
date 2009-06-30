@@ -110,26 +110,30 @@ namespace mcrl2 {
               std::string m_current;
 
               local_generator() : m_current("lambda@")
-              {
-              }
+              {}
 
               function_symbol operator()(mcrl2::data::sort_expression const& sort)
               {
                 bool carry = true;
 
-                for (std::string::iterator i = m_current.begin() + 7; carry && (i != m_current.end()); ++i) {
-                  if (*i == '9') {
+                for (std::string::iterator i = m_current.begin() + 7; i != m_current.end() && carry; ++i) {
+                  if (*i < '9') {
+                    ++(*i);
+
+                    carry = false;
+                  }
+                  else if (*i < 'a') {
                     *i = 'a';
 
                     carry = false;
                   }
-                  else if (*i == 'z') {
-                    *i = '0';
-                  }
-                  else {
+                  else if (*i < 'z') {
                     ++(*i);
 
                     carry = false;
+                  }
+                  else {
+                    *i = '0';
                   }
                 }
 
@@ -139,7 +143,9 @@ namespace mcrl2 {
 
                 return mcrl2::data::function_symbol(m_current, sort);
               }
-            } symbol_generator;
+            };
+
+            static local_generator symbol_generator;
 
             atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
 
@@ -188,41 +194,36 @@ namespace mcrl2 {
             using namespace mcrl2::data::sort_set;
             using namespace mcrl2::data::sort_bag;
 
-            data_expression abstract_body(implement(lambda(implement(expression.variables()), implement(expression.body()))));
+            if (!expression.is_lambda())
+            {
+              data_expression abstract_body(implement(lambda(expression.variables(), expression.body())));
 
-            if (is_setcomprehension_application(expression))
-            {
-              return setcomprehension(set_(expression.variables()[0].sort()), abstract_body);
+              if (is_setcomprehension_application(expression))
+              {
+                return setcomprehension(set_(expression.variables()[0].sort()), abstract_body);
+              }
+              else if (is_bagcomprehension_application(expression))
+              {
+                return bagcomprehension(bag(expression.variables()[0].sort()), abstract_body);
+              }
+              else if (expression.is_exists())
+              {
+                return application(function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
+              }
+              else if (expression.is_forall())
+              {
+                return application(function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
+              }
             }
-            else if (is_bagcomprehension_application(expression))
-            {
-              return bagcomprehension(bag(expression.variables()[0].sort()), abstract_body);
-            }
-            else if (expression.is_exists())
-            {
-              return application(function_symbol("exists", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
-            }
-            else if (expression.is_forall())
-            {
-              return application(function_symbol("forall", function_sort(abstract_body.sort(), sort_bool::bool_())), abstract_body);
-            }
-
-            return abstract_body;
+             
+            return implement(lambda(expression));
           }
 
-          data_expression implement(where_clause const& expression)
+          data_expression implement(where_clause const& w)
           { // return corresponding lambda expression
-            atermpp::vector< variable >        variables;
-            atermpp::vector< data_expression > arguments;
-
-            for (where_clause::declarations_const_range r(expression.declarations()); !r.empty(); r.advance_begin(1))
-            {
-              variables.push_back(r.front().lhs());
-              arguments.push_back(implement(r.front().rhs()));
-            }
-
-            return (variables.empty()) ? implement(expression.body()) :
-                application(implement(lambda(variables, expression.body())), arguments);
+            return (make_assignment_left_hand_side_range(w.declarations()).empty()) ? implement(w.body()) :
+                application(implement(lambda(make_assignment_left_hand_side_range(w.declarations()), w.body())),
+                  implement(make_assignment_right_hand_side_range(w.declarations())));
           }
 
           template < typename ForwardTraversalIterator >
@@ -305,8 +306,6 @@ namespace mcrl2 {
 
           data_expression implement(data_expression const& expression)
           {
-            using namespace mcrl2::core::detail;
-
             if (expression.is_application())
             {
               return implement(application(expression));
