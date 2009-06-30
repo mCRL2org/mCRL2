@@ -181,7 +181,7 @@ class objectdatatype
 class specification_basic_type:public boost::noncopyable
 { public:
     action_label_list acts;     /* storage place for actions */
-    variable_list procdatavars; /* storage place for free variables occurring
+    variable_list global_variables; /* storage place for free variables occurring
                                    in processes ranging over data */
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
@@ -223,15 +223,20 @@ class specification_basic_type:public boost::noncopyable
                              const atermpp::vector< process_equation > &ps,
                              const variable_list idvs,
                              const data_specification& ds,
+                             const atermpp::set < data::variable > &glob_vars,
                              const t_lin_options &opt):
-                     acts(),procdatavars(),data(ds),options(opt),
+                     acts(),global_variables(),data(ds),options(opt),
                      timeIsBeingUsed(false)
     { objectIndexTable=ATindexedSetCreate(1024,75);
       stack_operations_list=NULL;
       acts.protect();
       acts=as;
       storeact(acts);
-      procdatavars.protect();
+      global_variables.protect();
+      for(atermpp::set <data::variable>::const_reverse_iterator i=glob_vars.rbegin();
+                     i!=glob_vars.rend(); ++i)
+      { global_variables=push_front(global_variables,*i);
+      }
       procs=ps;
       storeprocs(procs);
       initdatavars.protect();
@@ -264,7 +269,7 @@ class specification_basic_type:public boost::noncopyable
         stack_operations_list=temp;
       }
       acts.unprotect();
-      procdatavars.unprotect();
+      global_variables.unprotect();
       initdatavars.unprotect();
       terminationAction.unprotect();
       terminatedProcId.unprotect();
@@ -3067,8 +3072,8 @@ class specification_basic_type:public boost::noncopyable
                            const stacklisttype &stack)
     { /* first search whether the variable is a free process variable */
 
-      for(variable_list::const_iterator walker=procdatavars.begin() ;
-                   walker!=procdatavars.end() ; ++walker)
+      for(variable_list::const_iterator walker=global_variables.begin() ;
+                   walker!=global_variables.end() ; ++walker)
       { if (*walker==var)
         { return var;
         }
@@ -3273,7 +3278,7 @@ class specification_basic_type:public boost::noncopyable
     { if (!options.nofreevars)
       { const variable newVariable(fresh_name("dc"),s);
         insertvariable(newVariable,true);
-        procdatavars=push_front(procdatavars,newVariable);
+        global_variables=push_front(global_variables,newVariable);
         return newVariable;
       }
       return representative_generator(data)(s);
@@ -5858,8 +5863,8 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for(variable_list::const_iterator p=procdatavars.begin();
-                p!=procdatavars.end() ; ++p)
+      for(variable_list::const_iterator p=global_variables.begin();
+                p!=global_variables.end() ; ++p)
       { if (occursinterm(*p,result))
         { variables=push_front(variables,*p);
         }
@@ -7067,6 +7072,7 @@ mcrl2::lps::specification linearise_std(
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 type_checked_spec.data(),
+                                type_checked_spec.global_variables(),
                                 lin_options);
   process_identifier init=spec.storeinit(type_checked_spec.init());
 
@@ -7076,8 +7082,8 @@ mcrl2::lps::specification linearise_std(
   const summand_list result = spec.transform(init,parameters,initial_state);
 
   // compute global variables
-  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.procdatavars,result,parameters);
-  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.procdatavars,initial_state,parameters);
+  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
+  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
   atermpp::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());

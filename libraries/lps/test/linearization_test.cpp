@@ -613,6 +613,13 @@ const std::string various_case_23=
       "act a,b;"
       "init a@1.b@2.delta||tau.tau;";
 
+const std::string various_case_24=
+      "act  a: Pos;"
+      "glob x: Pos;"
+      "proc P = a(x).P;"
+      "init P;";
+
+
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
@@ -640,6 +647,7 @@ void test_various_aux(t_lin_options &options)
   spec = mcrl22lps(various_case_20);
   spec = mcrl22lps(various_case_21);
   spec = mcrl22lps(various_case_23);
+  spec = mcrl22lps(various_case_24);
   BOOST_CHECK_THROW(mcrl22lps(various_case_22), mcrl2::runtime_error);
 }
 
