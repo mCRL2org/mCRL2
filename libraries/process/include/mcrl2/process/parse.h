@@ -32,10 +32,10 @@ namespace process {
   {
     std::stringstream spec_stream;
     spec_stream << spec;
-    ATermAppl result = core::detail::parse_specification(spec_stream);
-    result           = core::detail::type_check_specification(result);
+    ATermAppl result = core::detail::parse_process_specification(spec_stream);
+    result           = core::detail::type_check_process_specification(result);
     if (alpha_reduce)
-    { result           = core::detail::alpha_reduce(result);
+    { result           = core::detail::alpha_reduce_process_specification(result);
     }
     result           = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);

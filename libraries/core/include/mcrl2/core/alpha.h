@@ -19,8 +19,7 @@ namespace mcrl2 {
 
 /** \brief     Apply alphabet reduction to an mCRL2 process specification.
  *  \param[in] Spec An ATerm representation of an mCRL2 process
- *             specification in the internal format after data
- *             implementation.
+ *             specification in the internal format after type checking.
  *  \return    Spec after applying alphabet reductions.
 **/
 ATermAppl gsAlpha(ATermAppl Spec);
