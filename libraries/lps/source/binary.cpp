@@ -9,6 +9,8 @@
 /// \file binary.cpp
 /// \brief
 
+#include <cmath>
+
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/lps/specification.h"
 
@@ -25,38 +27,6 @@ using namespace mcrl2::data;
 namespace mcrl2 {
 
 namespace lps {
-
-//////////////////////////////////////////////////////
-/// General helper functions
-//////////////////////////////////////////////////////
-
-///\pre n>0
-///\return ceil(log_2(n))
-static
-unsigned int log2(unsigned int n)
-{
-  int result = 0;
-  if (n == 0)
-  {
-    core::gsErrorMsg("Domain cannot be empty\n");
-  }
-
-  --n;
-  //n is the maximal value to be represented
-  for ( ; n>0; n = n/2)
-  {
-    ++result;
-  }
-  return result;
-}
-
-///\return 2^n
-static
-unsigned int powerof2_(unsigned int n)
-{
-  assert(n < (8 * sizeof(unsigned int)));
-  return 1 << n;
-}
 
 ///\pre 0 <= n <= list.size() = m, list is [0..m), list == original list
 ///\post list contains elements [n..m)
@@ -100,7 +70,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
   else
   {
     int n = enumerated_elements.size();
-    int m = powerof2_(new_parameters.size() - 1);
+    int m = round(pow(2, new_parameters.size() - 1));
 
     //m == 2^(new_parameters.size() - 1)
 
@@ -168,7 +138,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
       enumerated_elements_table.put(par, make_data_expression_list(enumerated_elements)); // Store enumerated elements for easy retrieval later on.
 
       //Calculate the number of booleans needed to encode par
-      int n = log2(enumerated_elements.size());
+      int n = ceil(log(enumerated_elements.size()) / log(2));//log2(enumerated_elements.size());
 
       // n = ceil(log_2(j)), so also 2^n <= j
       core::gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
@@ -271,7 +241,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
     // Make sure all elements get encoded.
     while (!elts.empty())
     {
-      int count(powerof2_(i-1));
+      int count(round(pow(2, i-1)));
 
       // Iterate over the elements that get the boolean value new_parameters.front() == false
       for(int j = 0; j < count; ++j)
