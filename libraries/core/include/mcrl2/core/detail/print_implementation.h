@@ -256,18 +256,13 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
 */
 
 static void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
-  const ATermAppl LinearProcessSummand, const ATermList VarDecls,
-  t_pp_format pp_format, bool ShowSorts);
+  const ATermAppl LinearProcessSummand, t_pp_format pp_format, bool ShowSorts);
 /*Pre: OutStream points to a stream to which can be written
        LinearProcessSummand is a linear process summand
-       VarDecls is a list of variable declarations, or NULL
        pp_format != ppInternal
        ShowSorts indicates if the sorts of DataExpr should be shown
   Post:A textual representation of the expression is written to OutStream, in
-       which:
-       - ShowSorts is taken into account
-       - if pp_format != ppDebug and VarDecls != NULL, the next state of the
-         summand is printed without assignments
+       which ShowSorts is taken into account
 */
 
 static void PRINT_FUNC(IndentedATerm)(PRINT_OUTTYPE OutStream, const ATerm Term, unsigned int Nesting = 0);
@@ -283,26 +278,6 @@ static ATermList GetAssignmentsRHS(ATermList Assignments);
 /*Pre: Assignments is a list of assignments of data expressions to data
        variables
   Ret: The right-hand sides the assignments
-*/
-
-static ATermList SubstituteAssignments_list(ATermList Vars,
-  ATermList Assignments);
-/*Pre: Vars is a list of data variables
-       Assignments is a list of assignments of data expressions to data
-       variables
-  Ret: Vars in which each element v is replaced by the right-hand side of the
-       first assignment in Assignments in which v occurs as a left-hand side,
-       or by v itself, if it doesn't occur at all as a left-hand side.
-*/
-
-static ATermAppl SubstituteAssignments_appl(ATermAppl Var,
-  ATermList Assignments);
-/*Pre: Var is a data variable
-       Assignments is a list of assignments of data expressions to data
-       variables
-  Ret: The right-hand side of the first assignment in Assignments in which Var
-       occurs as a left-hand side. Var, if it doesn't occur at all as a
-       left-hand side.
 */
 
 static ATermList gsGroupDeclsBySort(ATermList Decls);
@@ -742,7 +717,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
           PRINT_FUNC(fprints)(OutStream, "\n     + ");
         }
         PRINT_FUNC(PrintLinearProcessSummand)(OutStream, ATAgetFirst(l),
-          VarDecls, pp_format, ShowSorts);
+          pp_format, ShowSorts);
         l = ATgetNext(l);
       }
       PRINT_FUNC(fprints)(OutStream, ";\n");
@@ -763,8 +738,8 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, 2),
       pp_format, ShowSorts, 0);
   } else if (gsIsLinearProcessSummand(Part)) {
-    PRINT_FUNC(PrintLinearProcessSummand)(OutStream, Part, NULL, pp_format, ShowSorts);
     //print summand
+    PRINT_FUNC(PrintLinearProcessSummand)(OutStream, Part, pp_format, ShowSorts);
   } else if (gsIsProcessInit(Part)) {
     //print initialisation
     PRINT_FUNC(dbg_prints)("printing initialisation\n");
@@ -1930,8 +1905,7 @@ static void PRINT_FUNC(PrintPBExpr)(PRINT_OUTTYPE OutStream,
 }
 
 void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
-  const ATermAppl Summand, const ATermList VarDecls,
-  t_pp_format pp_format, bool ShowSorts)
+  const ATermAppl Summand, t_pp_format pp_format, bool ShowSorts)
 {
   assert(gsIsLinearProcessSummand(Summand));
   PRINT_FUNC(dbg_prints)("printing LPS summand\n");
@@ -1964,20 +1938,10 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(fprints)(OutStream, " .\n         ");
     PRINT_FUNC(fprints)(OutStream, "P");
     ATermList Assignments = ATLgetArgument(Summand, 4);
-    if (VarDecls != NULL && pp_format == ppDefault) {
-      if (ATgetLength(VarDecls) > 0) {
-        PRINT_FUNC(fprints)(OutStream, "(");
-        PRINT_FUNC(PrintPart_List)(OutStream,
-          SubstituteAssignments_list(VarDecls, Assignments),
-          pp_format, ShowSorts, 0, NULL, ", ");
-        PRINT_FUNC(fprints)(OutStream, ")");
-      }
-    } else {
-      PRINT_FUNC(fprints)(OutStream, "(");
-      PRINT_FUNC(PrintPart_List)(OutStream, Assignments,
-        pp_format, ShowSorts, 0, NULL, ", ");
-      PRINT_FUNC(fprints)(OutStream, ")");
-    }
+    PRINT_FUNC(fprints)(OutStream, "(");
+    PRINT_FUNC(PrintPart_List)(OutStream, Assignments,
+      pp_format, ShowSorts, 0, NULL, ", ");
+    PRINT_FUNC(fprints)(OutStream, ")");
   }
 }
 
@@ -1988,31 +1952,6 @@ ATermList GetAssignmentsRHS(ATermList Assignments) {
     Assignments = ATgetNext(Assignments);
   }
   return ATreverse(l);
-}
-
-ATermList SubstituteAssignments_list(ATermList Vars, ATermList Assignments)
-{
-  ATermList l = ATmakeList0();
-  while (!ATisEmpty(Vars)) {
-    l = ATinsert(l, (ATerm) SubstituteAssignments_appl(ATAgetFirst(Vars), Assignments));
-    Vars = ATgetNext(Vars);
-  }
-  return ATreverse(l);
-}
-
-ATermAppl SubstituteAssignments_appl(ATermAppl Var, ATermList Assignments)
-{
-  ATermAppl Result = Var;
-  bool found = false;
-  while (!ATisEmpty(Assignments) && !found) {
-    ATermAppl Assignment = ATAgetFirst(Assignments);
-    if (ATisEqual(Var, ATAgetArgument(Assignment, 0))) {
-      Result = ATAgetArgument(Assignment, 1);
-      found = true;
-    }
-    Assignments = ATgetNext(Assignments);
-  }
-  return Result;
 }
 
 ATermList gsGroupDeclsBySort(ATermList Decls)
