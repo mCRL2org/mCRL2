@@ -110,6 +110,7 @@ namespace mcrl2 {
           // Alternative traversal for function_sort
           void operator()(const function_sort& s)
           {
+            m_action(s);
             (*this)(s.domain());
           }
 
@@ -150,6 +151,12 @@ namespace mcrl2 {
             {
               (*this)(s);
             }
+          }
+
+          template < typename Expression >
+          void add(Expression const& s, typename detail::disable_if_container< Expression >::type* = 0)
+          {
+              (*this)(s);
           }
       };
     } // namespace detail

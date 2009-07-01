@@ -255,6 +255,24 @@ namespace mcrl2 {
           void leave(Expression const&)
           {}
 
+          void operator()(function_symbol const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.sort());
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
+          void operator()(variable const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
+            static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.sort());
+            static_cast< Derived& >(*this).leave(e);
+            static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
           void operator()(basic_sort const& e)
           {
             static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));

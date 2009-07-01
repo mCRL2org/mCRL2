@@ -352,9 +352,12 @@ namespace mcrl2 {
               {
                 for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(r.front().sort())); !c.empty(); c.advance_begin(1))
                 {
-                  if ((c.front() == s) || (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front())))
+                  if (!c.front().is_function_sort())
                   {
-                    return false;
+                    if ((c.front() == s) || (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front())))
+                    {
+                      return false;
+                    }
                   }
                 }
               }
