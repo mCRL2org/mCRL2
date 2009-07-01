@@ -20,10 +20,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/binary.h"
 
-using namespace atermpp;
-using namespace mcrl2::core;
 using namespace mcrl2::data;
-using namespace mcrl2::data::detail;
 
 namespace mcrl2 {
 
@@ -41,14 +38,14 @@ unsigned int log2(unsigned int n)
   int result = 0;
   if (n == 0)
   {
-    gsErrorMsg("Domain cannot be empty\n");
+    core::gsErrorMsg("Domain cannot be empty\n");
   }
 
   --n;
   //n is the maximal value to be represented
   for ( ; n>0; n = n/2)
   {
-    result ++;
+    ++result;
   }
   return result;
 }
@@ -92,8 +89,8 @@ static
 data_expression make_if_tree(const variable_list& new_parameters,
                              const data_expression_list& enumerated_elements)
 {
-  //gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
-  //gsDebugMsg("Enumerated elements: %s\n", enumerated_elements.to_string().c_str());
+  //core::gsDebugMsg("New parameters: %s\n", new_parameters.to_string().c_str());
+  //core::gsDebugMsg("Enumerated elements: %s\n", enumerated_elements.to_string().c_str());
   data_expression result;
 
   if (new_parameters.empty())
@@ -132,7 +129,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
                  );
   }
 
-  //gsDebugMsg("If tree: %s\n", result.to_string().c_str());
+  //core::gsDebugMsg("If tree: %s\n", result.to_string().c_str());
   return result;
 }
 
@@ -144,12 +141,12 @@ data_expression make_if_tree(const variable_list& new_parameters,
 static
 variable_list replace_enumerated_parameters(const lps::specification& specification,
                                                  data::enumerator_factory< classic_enumerator< > > const& classic_enumerator_factory,
-                                                 table& new_parameters_table,
-                                                 table& enumerated_elements_table)
+                                                 atermpp::table& new_parameters_table,
+                                                 atermpp::table& enumerated_elements_table)
 {
   variable_list result;
   variable_list process_parameters = specification.process().process_parameters();
-  gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
+  core::gsDebugMsg("Original process parameters: %s\n", process_parameters.to_string().c_str());
 
   fresh_variable_generator generator(specification_to_aterm(specification));
   // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
@@ -174,7 +171,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
       int n = log2(enumerated_elements.size());
 
       // n = ceil(log_2(j)), so also 2^n <= j
-      gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
+      core::gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
 
       //Set hint for fresh variable names
       generator.set_hint(par.name());
@@ -196,13 +193,13 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
     }
     else
     {
-      gsVerboseMsg("Parameter `%s' has not been replaced by parameters of type Bool\n", par.to_string().c_str());
+      core::gsVerboseMsg("Parameter `%s' has not been replaced by parameters of type Bool\n", par.to_string().c_str());
       result = push_front(result, par);
     }
   }
 
   result = reverse(result);
-  gsDebugMsg("New process parameters: %s\n", result.to_string().c_str());
+  core::gsDebugMsg("New process parameters: %s\n", result.to_string().c_str());
   return result;
 }
 
@@ -215,14 +212,14 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
 ///of boolean variables
 static
 data_expression replace_enumerated_parameters_in_data_expression(data_expression expression,
-                                                                 table& new_parameters_table,
-                                                                 table& enumerated_elements_table)
+                                                                 atermpp::table& new_parameters_table,
+                                                                 atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in data expression\n");
+  core::gsDebugMsg("replace enumerated parameters in data expression\n");
   variable_list orig_parameters = variable_list(new_parameters_table.table_keys());
   for (variable_list::iterator i = orig_parameters.begin(); i != orig_parameters.end(); ++i)
   {
-    gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
+    core::gsDebugMsg("Replacing data expression %s with tree %s\n", expression.to_string().c_str(), make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i)).to_string().c_str());
     expression = data_expression(bottom_up_replace(expression, *i, make_if_tree(new_parameters_table.get(*i), enumerated_elements_table.get(*i))));
   }
   return expression;
@@ -231,14 +228,14 @@ data_expression replace_enumerated_parameters_in_data_expression(data_expression
 ///Replace all occurrences of variables of a finite sort != bool with a vector of boolean variables
 static
 variable_list replace_enumerated_parameters_in_variables(const variable_list& list,
-                                                                   table& new_parameters_table,
-                                                                   table& enumerated_elements_table)
+                                                                   atermpp::table& new_parameters_table,
+                                                                   atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in data variables\n");
+  core::gsDebugMsg("replace enumerated parameters in data variables\n");
   variable_list result;
   for (variable_list::iterator i = list.begin(); i != list.end(); ++i)
   {
-    aterm t = new_parameters_table.get(*i);
+    atermpp::aterm t = new_parameters_table.get(*i);
     if (t != NULL) // *i is not of a finite type, therefore it hasn't been stored in the tables.
     {
       variable_list new_variables = variable_list(t);
@@ -261,7 +258,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
                                                                      variable_list new_parameters,
                                                                      const data_expression_list& enumerated_elements)
 {
-  gsDebugMsg("replace enumerated parameter %s in data assigment %s\n", parameter.to_string().c_str(), argument.to_string().c_str());
+  core::gsDebugMsg("replace enumerated parameter %s in data assigment %s\n", parameter.to_string().c_str(), argument.to_string().c_str());
   assignment_list result;
   data_expression arg = argument.rhs();
 
@@ -310,7 +307,7 @@ assignment_list replace_enumerated_parameter_in_assignments(const assignment_lis
                                                                       const variable_list& new_parameters,
                                                                       const data_expression_list& enumerated_elements)
 {
-  gsDebugMsg("replace enumerated parameter %s in data assignments %s\n", parameter.to_string().c_str(), list.to_string().c_str());
+  core::gsDebugMsg("replace enumerated parameter %s in data assignments %s\n", parameter.to_string().c_str(), list.to_string().c_str());
   assignment_list result;
 
   for (assignment_list::iterator i = list.begin(); i != list.end(); ++i)
@@ -331,10 +328,10 @@ assignment_list replace_enumerated_parameter_in_assignments(const assignment_lis
 ///Replace all assignments of finite sorts != bool with a vector of boolean assignments.
 static
 assignment_list replace_enumerated_parameters_in_assignments(const assignment_list& list,
-                                                                       table& new_parameters_table,
-                                                                       table& enumerated_elements_table)
+                                                                       atermpp::table& new_parameters_table,
+                                                                       atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace_enumerated_parameters_in_assignments %s\n", list.to_string().c_str());
+  core::gsDebugMsg("replace_enumerated_parameters_in_assignments %s\n", list.to_string().c_str());
   assignment_list result;
   // First replace right-hand-sides
   for (assignment_list::iterator i = list.begin(); i != list.end(); ++i)
@@ -356,10 +353,10 @@ assignment_list replace_enumerated_parameters_in_assignments(const assignment_li
 ///Replace all parameters of finite sorts != bool in list with an if tree of booleans.
 static
 action_list replace_enumerated_parameters_in_actions(action_list list,
-                                                     table& new_parameters_table,
-                                                     table& enumerated_elements_table)
+                                                     atermpp::table& new_parameters_table,
+                                                     atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in action labels\n");
+  core::gsDebugMsg("replace enumerated parameters in action labels\n");
   variable_list orig_parms = variable_list(new_parameters_table.table_keys());
   for (variable_list::iterator i = orig_parms.begin(); i != orig_parms.end(); ++i)
   {
@@ -371,13 +368,13 @@ action_list replace_enumerated_parameters_in_actions(action_list list,
 ///Replace all parameters of finite sorts != bool in summand with a vector of booleans
 static
 summand replace_enumerated_parameters_in_summand(const summand& summand_,
-                                                     table& new_parameters_table,
-                                                     table& enumerated_elements_table)
+                                                     atermpp::table& new_parameters_table,
+                                                     atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in summand %s\n", summand_.to_string().c_str());
+  core::gsDebugMsg("replace enumerated parameters in summand %s\n", summand_.to_string().c_str());
   summand result;
 
-  gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand_.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
+  core::gsDebugMsg("\nOriginal condition: %s\n\n New condition: %s\n\n", summand_.condition().to_string().c_str(), replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table).to_string().c_str());
 
   result = summand(summand_.summation_variables(),
                        replace_enumerated_parameters_in_data_expression(summand_.condition(), new_parameters_table, enumerated_elements_table),
@@ -392,10 +389,10 @@ summand replace_enumerated_parameters_in_summand(const summand& summand_,
 ///Replace all parameters of finite sorts != bool in list with a vector of booleans
 static
 summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
-                                                       table& new_parameters_table,
-                                                       table& enumerated_elements_table)
+                                                       atermpp::table& new_parameters_table,
+                                                       atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in summands\n");
+  core::gsDebugMsg("replace enumerated parameters in summands\n");
   summand_list result;
   for (summand_list::iterator i = list.begin(); i != list.end(); ++i)
   {
@@ -409,10 +406,10 @@ summand_list replace_enumerated_parameters_in_summands(const summand_list& list,
 ///Replace all parameters of finite sorts != bool in lps with a vector of booleans
 static
 linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& lps,
-                                         table& new_parameters_table,
-                                         table& enumerated_elements_table)
+                                         atermpp::table& new_parameters_table,
+                                         atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in linear process\n");
+  core::gsDebugMsg("replace enumerated parameters in linear process\n");
   linear_process result = lps;
   result.process_parameters() = replace_enumerated_parameters_in_variables(lps.process_parameters(), new_parameters_table, enumerated_elements_table);
   result.set_summands(replace_enumerated_parameters_in_summands(lps.summands(), new_parameters_table, enumerated_elements_table));
@@ -422,10 +419,10 @@ linear_process replace_enumerated_parameters_in_lps(const lps::linear_process& l
 /// Replace all parameters of finite sorts != bool in specification with a vector of booleans
 static
 specification replace_enumerated_parameters_in_specification(const lps::specification& specification,
-                                                             table& new_parameters_table,
-                                                             table& enumerated_elements_table)
+                                                             atermpp::table& new_parameters_table,
+                                                             atermpp::table& enumerated_elements_table)
 {
-  gsDebugMsg("replace enumerated parameters in specification\n");
+  core::gsDebugMsg("replace enumerated parameters in specification\n");
   lps::specification result;
 
   // Compute new initial assignments
@@ -447,12 +444,12 @@ specification replace_enumerated_parameters_in_specification(const lps::specific
 specification binary(const lps::specification& spec,
                      rewriter& r)
 {
-  gsVerboseMsg("Executing binary...\n");
+  core::gsVerboseMsg("Executing binary...\n");
   specification result = spec;
   // table new_parameters_table = table(128, 50); Table is non copyable since 30/4/2007.
   // table enumerated_elements_table = table(128,50);
-  table new_parameters_table(128, 50);
-  table enumerated_elements_table(128,50);
+  atermpp::table new_parameters_table(128, 50);
+  atermpp::table enumerated_elements_table(128,50);
 
   data::enumerator_factory< classic_enumerator< > > enumerator(spec.data(), r);
 
@@ -461,7 +458,7 @@ specification binary(const lps::specification& spec,
   variable_list new_process_parameters = replace_enumerated_parameters(result, enumerator, new_parameters_table, enumerated_elements_table);
   result = replace_enumerated_parameters_in_specification(result, new_parameters_table, enumerated_elements_table);
   result.process().process_parameters() = new_process_parameters;
-  gsDebugMsg("Finished processing\n");
+  core::gsDebugMsg("Finished processing\n");
 
   return result;
 }
