@@ -1803,7 +1803,7 @@ SetExpression:
     | LBRACE Expression_csp RBRACE
       {
       	  gsDebugMsg("R:%d",__LINE__);
-          ATerm type;
+          ATerm type = NULL;
 		  ATermList to_process = $2;
 		  while(!ATisEmpty(to_process))
           {
@@ -2107,7 +2107,7 @@ ListLiteral:
   | SQLBRACKET Expression_csp SQRBRACKET
       {
       	  gsDebugMsg("Entering ListLiteral\n");
-          ATerm type;
+          ATerm type = NULL;
 		  ATermList to_process = $2;
 		  while(!ATisEmpty(to_process))
           {
