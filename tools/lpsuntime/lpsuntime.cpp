@@ -39,13 +39,13 @@ class untime_tool: public squadt_tool< input_output_tool >
 
     bool run()
     {
-      lps::specification lps_specification;
+      lps::specification spec;
+      spec.load(m_input_filename);
 
-      lps_specification.load(m_input_filename);
+      lps::untime_algorithm untime(spec, core::gsVerbose);
+      untime.run();
 
-      lps::specification result = lps::untime(lps_specification);
-
-      result.save(m_output_filename);
+      spec.save(m_output_filename);
 
       return true;
     }

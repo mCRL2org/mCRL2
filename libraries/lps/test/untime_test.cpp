@@ -34,7 +34,8 @@ void test_case_1()
   );
 
   specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -64,7 +65,8 @@ void test_case_2()
   );
 
   specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -92,7 +94,8 @@ void test_case_3()
   );
 
   specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
@@ -123,7 +126,8 @@ void test_case_4()
   );
 
   specification s0 = mcrl22lps(text);
-  specification s1 = untime(s0);
+  specification s1 = s0;
+  lps::untime_algorithm(s1).run();
   summand_list summands0 = s0.process().summands();
   summand_list summands1 = s1.process().summands();
   BOOST_CHECK(s0.process().process_parameters().size() == s1.process().process_parameters().size() - 1);
