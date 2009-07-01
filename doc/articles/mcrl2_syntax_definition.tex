@@ -505,19 +505,21 @@ and $\f{ad}$ for action declaration.
 Process expressions $p$:
 \[\begin{tightarray}{lrl}
 p   & \mb{::=} & a\ \mb{|}\ \delta\ \mb{|}\ \tau\ \mb{|}\ p \alt p\ \mb{|}\ p \seq p\ \mb{|}\ P\ \mb{|}\
-            p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
-    & \mb{|} & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
-            \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
-            \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
-            \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
-            \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
-    & \mb{|} & a(d, \mb{\ldots}, d)\ \mb{|}\
-            P(d, \mb{\ldots}, d)\ \mb{|}\
-            c \to p \diamond p\ \mb{|}\
-            c \to p\ \mb{|}\
-            \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
-     & \mb{|} & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
-     & \mb{|} & ( p )\\
+                 p \sync p\ \mb{|}\ p \pmerge p\ \mb{|}\ p \lmerge p\\
+    & \mb{|}   & \allow{\set{\f{as},\mb{\ldots},\f{as}}}(p)\ \mb{|}\
+                 \block{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \hide{\set{a,\mb{\ldots},a}}(p)\ \mb{|}\
+                 \ren{\set{\f{ar},\mb{\ldots},\f{ar}}}(p)\ \mb{|}\
+                 \comm{\set{\f{ac},\mb{\ldots},\f{ac}}}(p)\\
+    & \mb{|}   & a(d, \mb{\ldots}, d)\ \mb{|}\
+                 P(d, \mb{\ldots}, d)\ \mb{|}\
+                 P()\ \mb{|}\
+                 P(x = d, \mb{\ldots}, x = d)\\
+    & \mb{|}   & c \to p \diamond p\ \mb{|}\
+                 c \to p\ \mb{|}\
+                 \sum_{\f{mvd},\mb{\ldots},\f{mvd}}p\\
+     & \mb{|}  & p\,\at\,t\ \mb{|}\ t \pinit p\ \mb{|}\ p \pbefore q\\
+     & \mb{|}  & ( p )\\
 as  & \mb{::=} & a |\,\mb{\cdots} | a\\
 ar  & \mb{::=} & a \to a\\
 ac  & \mb{::=} & a\sync\f{as} \to a\ \mb{|}\ a\sync\f{as} \to \tau\ \mb{|}\ a\sync\f{as}\\
