@@ -344,7 +344,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(selector(specification.equations()));
+            initialise(make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
           }
 
           template < typename EquationSelector >
@@ -353,7 +353,7 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(selector(specification.equations()));
+            initialise(make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
           }
       };
     } // namespace detail

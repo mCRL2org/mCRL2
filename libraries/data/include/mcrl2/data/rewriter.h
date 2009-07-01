@@ -176,7 +176,7 @@ namespace data {
       /// \param[in] s A rewriter strategy.
       /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
       template < typename EquationSelector >
-      basic_rewriter(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+      basic_rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
           m_conversion_helper(new detail::rewrite_conversion_helper::rewrite_conversion_helper(d, *m_rewriter, selector))
       {
@@ -217,7 +217,7 @@ namespace data {
       /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
       /// \param[in] s A rewriter strategy.
       template < typename EquationSelector >
-      rewriter(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+      rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
          basic_rewriter<data_expression>(d, selector, s)
       { }
 
@@ -279,7 +279,7 @@ namespace data {
       /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
       /// \param[in] s A rewriter strategy.
       template < typename EquationSelector >
-      rewriter_with_variables(data_specification const& d, typename boost::add_reference< EquationSelector >::type selector, strategy s = jitty) :
+      rewriter_with_variables(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
          basic_rewriter<data_expression>(d, selector, s)
       { }
 

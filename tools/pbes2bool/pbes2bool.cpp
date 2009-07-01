@@ -41,7 +41,7 @@
 //LPS-Framework
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/utility.h"
-#include "mcrl2/pbes/data_elimination.h"
+#include "mcrl2/data/selection.h"
 
 //Boolean equation systems
 #include "mcrl2/pbes/bes_deprecated.h"
@@ -222,9 +222,6 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       mcrl2::pbes_system::pbes<> p;
       p.load(m_input_filename);
       p.normalize();
-      if (opt_data_elm)
-      { p = remove_unused_data(p);
-      }
 
       if (!p.instantiate_global_variables())
       { std::stringstream message;
@@ -239,7 +236,9 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       }
 
       // data rewriter
-      data::rewriter datar=create_rewriter(p.data());
+      data::rewriter datar= (opt_data_elm) ?
+            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), p.equations()), rewrite_strategy()) :
+            data::rewriter(p.data(), rewrite_strategy());
 
       ::bes::boolean_equation_system bes_equations;
       // pbes rewriter

@@ -16,8 +16,8 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/selection.h"
 #include "mcrl2/data/nat.h"
-#include "mcrl2/lps/data_elimination.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace.h"
 #include "exploration.h"
@@ -118,7 +118,6 @@ bool initialise_lts_generation(lts_generation_options *opts)
   if ( lgopts->removeunused )
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
-    lgopts->specification = remove_unused_data(lgopts->specification);
   }
 
   basefilename = strdup(lgopts->filename.c_str());
@@ -156,7 +155,12 @@ bool initialise_lts_generation(lts_generation_options *opts)
     trace_support = false;
   }
 
-  lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
+  
+  lgopts->m_rewriter.reset(
+    (lgopts->removeunused) ?
+      new mcrl2::data::rewriter(lgopts->specification.data(), 
+		mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::linear_process_to_aterm(lgopts->specification.process())), lgopts->strat) :
+      new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
   lgopts->m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(lgopts->specification.data(), *(lgopts->m_rewriter)));
 
   nstate = createNextState(lgopts->specification,*(lgopts->m_enumerator_factory),!lgopts->usedummies,lgopts->stateformat);

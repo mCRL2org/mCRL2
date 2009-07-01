@@ -3,7 +3,7 @@ project pbes
        ;
 
 mcrl2-library pbes
-       : data_elimination.cpp
+       :
        : <library>/libraries//data
          <include>../include
          <include>../../lps/include # for modal_formula

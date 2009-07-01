@@ -40,7 +40,7 @@ namespace mcrl2 {
     namespace detail {
 
       /**
-       * \brief Container adapter to use random access iterators for a term_list object
+       * \brief Container adaptor to use random access iterators for a term_list object
        * \note Necessary for range construction with term_list_random_iterator
        **/
       template < typename Expression >
@@ -409,6 +409,53 @@ namespace mcrl2 {
         return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
       }
 
+      template < typename Iterator, typename AdaptableUnaryPredicate >
+      class filter_iterator : public boost::iterator_adaptor<
+                 data::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator > {
+
+        friend class boost::iterator_core_access;
+
+        protected:
+
+          AdaptableUnaryPredicate    m_predicate;
+          Iterator                   m_end;
+
+          void increment()
+          {
+            if (this->base_reference() != m_end)
+            {
+              while (++this->base_reference() != m_end && !m_predicate(*(this->base_reference())))
+              { }
+            }
+          }
+
+        public:
+
+          filter_iterator(AdaptableUnaryPredicate predicate, boost::iterator_range< Iterator > const& range) :
+                 filter_iterator::iterator_adaptor_(range.begin()), m_predicate(predicate), m_end(range.end())
+          {}
+
+          filter_iterator(AdaptableUnaryPredicate predicate, Iterator begin, Iterator end) :
+                 filter_iterator::iterator_adaptor_(begin), m_predicate(predicate), m_end(end)
+          {}
+
+          filter_iterator(AdaptableUnaryPredicate predicate, Iterator end) :
+                 filter_iterator::iterator_adaptor_(end), m_predicate(predicate), m_end(end)
+          {}
+      };
+
+
+      template < typename AdaptableUnaryPredicate, typename Iterator >
+      boost::iterator_range< filter_iterator< Iterator, AdaptableUnaryPredicate > >
+      make_filter_iterator_range(boost::iterator_range< Iterator > const& r, AdaptableUnaryPredicate predicate)
+      {
+        typedef filter_iterator< Iterator, AdaptableUnaryPredicate > iterator_type;
+
+        return boost::iterator_range< iterator_type >(
+                    iterator_type(predicate, r), iterator_type(predicate, r.end()));
+      }
+
+
       template < typename Expression >
       class random_access_list {
 
@@ -456,7 +503,7 @@ namespace mcrl2 {
     } // namespace detail
 
     /**
-     * \brief Container adapter to use random access iterators for a term_list object
+     * \brief Container adaptor to use random access iterators for a term_list object
      * \note Necessary for range construction with term_list_random_iterator
      **/
     template < typename TargetExpression, typename SourceExpression >
@@ -466,7 +513,7 @@ namespace mcrl2 {
     }
 
     /**
-     * \brief Container adapter to use random access iterators for a term_list object
+     * \brief Container adaptor to use random access iterators for a term_list object
      * \note Necessary for range construction with term_list_random_iterator
      **/
     template < typename Expression >

@@ -2601,10 +2601,11 @@ static void finish_function(FILE *f, int arity, int opid, bool *used)
 void RewriterCompilingJitty::implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args)
 {
 //#ifdef IS_DEBUG
+#ifndef IT_DEBUG_INLINE
 gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",int2term[opid],opid);
 gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
 fflush(f);
-//#endif
+#endif
 	bool used[arity];
 	for (int i=0; i<arity; i++)
 	{
