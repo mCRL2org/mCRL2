@@ -80,7 +80,10 @@ namespace mcrl2 {
         application(const data_expression& head,
                     const data_expression& arg1)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1)))
-        { }
+        {
+          assert(head.sort().is_function_sort());
+          assert(function_sort(head.sort()).domain().size() == 1);
+        }
 
         /// \brief Convenience constructor for application with two arguments
         ///
@@ -92,7 +95,10 @@ namespace mcrl2 {
                     const data_expression& arg1,
                     const data_expression& arg2)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2)))
-        { }
+        {
+          assert(head.sort().is_function_sort());
+          assert(function_sort(head.sort()).domain().size() == 2);
+        }
 
         /// \brief Convenience constructor for application with three arguments
         ///
@@ -106,7 +112,10 @@ namespace mcrl2 {
                     const data_expression& arg2,
                     const data_expression& arg3)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3)))
-        { }
+        {
+          assert(head.sort().is_function_sort());
+          assert(function_sort(head.sort()).domain().size() == 3);
+        }
 
         /// \brief Convenience constructor for application with three arguments
         ///
@@ -122,7 +131,10 @@ namespace mcrl2 {
                     const data_expression& arg3,
                     const data_expression& arg4)
           : data_expression(core::detail::gsMakeDataAppl(head, atermpp::make_list(arg1, arg2, arg3, arg4)))
-        { }
+        {
+          assert(head.sort().is_function_sort());
+          assert(function_sort(head.sort()).domain().size() == 4);
+        }
 
         /// \brief Returns the application of this application to an argument.
         /// \pre this->sort() is a function sort.

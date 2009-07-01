@@ -59,7 +59,9 @@ namespace mcrl2 {
         function_symbol(const std::string& name,
                         const sort_expression& sort)
           : data_expression(core::detail::gsMakeOpId(atermpp::aterm_string(name), sort))
-        {}
+        {
+          assert(name != "");
+        }
 
         /// \brief Constructur.
         ///
@@ -68,7 +70,9 @@ namespace mcrl2 {
         function_symbol(const core::identifier_string& name,
                         const sort_expression& sort)
           : data_expression(core::detail::gsMakeOpId(name, sort))
-        {}
+        {
+          assert(name != core::identifier_string(""));
+        }
 
         /// \brief Returns the application of this function symbol to an argument.
         /// \pre this->sort() is a function sort.

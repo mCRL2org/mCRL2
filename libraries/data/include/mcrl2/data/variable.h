@@ -64,7 +64,9 @@ namespace mcrl2 {
         /// \param[in] sort The sort of the variable.
         variable(const std::string& name, const sort_expression& sort)
           : data_expression(core::detail::gsMakeDataVarId(atermpp::aterm_string(name), sort))
-        {}
+        {
+          assert(name != "");
+        }
 
         /// \brief Constructor.
         ///
@@ -72,7 +74,9 @@ namespace mcrl2 {
         /// \param[in] sort The sort of the variable.
         variable(const core::identifier_string& name, const sort_expression& sort)
           : data_expression(core::detail::gsMakeDataVarId(name, sort))
-        {}
+        {
+          assert(name != core::identifier_string(""));
+        }
 
         /// \brief Returns the name of the variable.
         inline
@@ -116,7 +120,7 @@ namespace mcrl2 {
       return convert< variable_list >(r);
     }
 
-    /// \brief Converts a vector to a variable_list 
+    /// \brief Converts a vector to a variable_list
     /// \param r A range of variables.
     template < typename Expression >
     inline variable_list make_variable_list(atermpp::vector< Expression >const& r) {
