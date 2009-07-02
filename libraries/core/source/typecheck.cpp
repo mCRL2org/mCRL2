@@ -693,12 +693,7 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   ATermAppl data_spec = ATAgetArgument(pbes_spec,0);
   ATermAppl pb_eqn_spec = ATAgetArgument(pbes_spec,2);
   ATermAppl pb_init = ATAgetArgument(pbes_spec,3);
-
   ATermAppl glob_var_spec = ATAgetArgument(pbes_spec,1);
-  ATermList glob_vars = ATLgetArgument(glob_var_spec,0);
-  if(!gstcAddVars2Table(context.glob_vars, glob_vars)){
-    goto finally;
-  }
 
   if(!gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
     goto finally;
@@ -719,6 +714,11 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   gsDebugMsg ("type checking of PBES specification read-in phase of functions finished\n");
 
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
+
+  if(!gstcAddVars2Table(context.glob_vars, ATLgetArgument(glob_var_spec,0))){
+    goto finally;
+  }
+  gsDebugMsg ("type checking of PBES specification read-in phase of global variables finished\n");
 
   if(!gstcReadInPBESAndInit(pb_eqn_spec,pb_init)) {
     goto finally;
