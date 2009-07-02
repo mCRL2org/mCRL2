@@ -45,7 +45,7 @@ namespace mcrl2 {
         }
 
         template < typename Sequence >
-        used_data_equation_selector(data_specification const& specification, Sequence context)
+        used_data_equation_selector(data_specification const& specification, Sequence const& context)
         {
           find_dependent_sorts(specification, context, std::inserter(m_used_sorts, m_used_sorts.end()));
 

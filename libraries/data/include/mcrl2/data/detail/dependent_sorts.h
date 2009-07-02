@@ -154,7 +154,7 @@ namespace mcrl2 {
           }
 
           template < typename Expression >
-          void add(Expression const& s, typename detail::disable_if_container< Expression >::type* = 0)
+          void add(Expression const& s, bool assume_self_dependence = false, typename detail::disable_if_container< Expression >::type* = 0)
           {
             (*this)(s);
           }

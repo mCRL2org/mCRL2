@@ -506,7 +506,7 @@ namespace mcrl2 {
       /// \param last End of a sequence of data expressions
       /// \return Or applied to the sequence of data expressions [first, last)
       template < typename ForwardTraversalIterator >
-      data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
+      inline data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
         return core::detail::join(first, last, lazy::or_, static_cast< sort_expression const& >(sort_bool::false_()));
       }
@@ -516,7 +516,7 @@ namespace mcrl2 {
       /// \param last End of a sequence of data expressions
       /// \return And applied to the sequence of data expressions [first, last)
       template < typename ForwardTraversalIterator >
-      data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
+      inline data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
       {
         return core::detail::join(first, last, lazy::and_, static_cast< sort_expression const& >(sort_bool::true_()));
       }

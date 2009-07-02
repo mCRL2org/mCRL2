@@ -391,8 +391,6 @@ namespace mcrl2 {
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
             if (!is_nil(e)) { // REMOVE ME (condition)
-              static_cast< Derived& >(*this)(e.sort());
-
               static_cast< super& >(*this)(e);
             }
           }
