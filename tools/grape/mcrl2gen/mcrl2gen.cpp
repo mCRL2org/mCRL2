@@ -94,7 +94,7 @@ wxArrayString grape::mcrl2gen::get_process_references(wxXmlNode *p_diagram)
   // initialize variables
   wxArrayString refs;
   wxXmlNode *objects = get_child(p_diagram, _T("objectlist"));
-  wxXmlNode *ref_list;
+  wxXmlNode *ref_list = 0;
 
   // get references
   if (p_diagram->GetName() == _T("processdiagram"))
