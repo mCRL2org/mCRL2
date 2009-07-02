@@ -49,20 +49,17 @@ namespace mcrl2 {
         {
           find_dependent_sorts(specification, context, std::inserter(m_used_sorts, m_used_sorts.end()));
 
-          bool changed = true;
+          std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
 
-          while (changed) {
-            changed = false;
-
-            for (data_specification::equations_const_range r(specification.equations()); !r.empty(); r.advance_begin(1))
+          for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
+          {
+            for (std::set< data_equation >::iterator i = equations.begin(), j = equations.begin(); j++ != equations.end(); i = j)
             {
-              if ((*this)(r.front()))
+              if ((*this)(*i))
               {
-                std::set< sort_expression >::size_type old_size = m_used_sorts.size();
+                find_dependent_sorts(specification, *i, std::inserter(m_used_sorts, m_used_sorts.end()));
 
-                find_dependent_sorts(specification, r.front(), std::inserter(m_used_sorts, m_used_sorts.end()));
-
-                changed = changed || (m_used_sorts.size() != old_size);
+                equations.erase(i);
               }
             }
           }
