@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_PARSE_H
 #define MCRL2_PROCESS_PARSE_H
 
+#include <iostream>
 #include <string>
 #include <sstream>
 #include "mcrl2/data/detail/internal_format_conversion.h"
@@ -22,16 +23,15 @@ namespace mcrl2 {
 
 namespace process {
 
-  /// \brief Parses a process specification from a string
-  /// \param spec A string
+  /// \brief Parses a process specification from an input stream
+  /// \param spec_stream An input stream
+  /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
   /// \return The parse result
   inline
   process_specification parse_process_specification(
-                                  const std::string& spec, 
+                                  std::istream& spec_stream, 
                                   const bool alpha_reduce=false)
   {
-    std::stringstream spec_stream;
-    spec_stream << spec;
     ATermAppl result = core::detail::parse_process_specification(spec_stream);
     result           = core::detail::type_check_process_specification(result);
     if (alpha_reduce)
@@ -39,6 +39,19 @@ namespace process {
     }
     result           = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);
+  }
+
+  /// \brief Parses a process specification from a string
+  /// \param spec_string A string
+  /// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
+  /// \return The parse result
+  inline
+  process_specification parse_process_specification(
+                                  const std::string& spec_string, 
+                                  const bool alpha_reduce=false)
+  {
+    std::istringstream spec_stream(spec_string);
+    return parse_process_specification(spec_stream, alpha_reduce);
   }
 
 } // namespace process

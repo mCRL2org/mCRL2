@@ -17,7 +17,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
@@ -182,10 +181,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         if (gsVerbose)
         { std::cerr << "Parsing input from stdin...\n";
         }
-        std::stringbuf buf;
-        std::cin.get(buf,'\0');
-        const std::string input_string=buf.str();
-        spec = parse_process_specification(input_string,!noalpha);
+        spec = parse_process_specification(std::cin,!noalpha);
       } 
       else 
       { //parse specification from infilename
@@ -196,10 +192,8 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         if (gsVerbose) 
         { std::cerr << "parsing input file '"  + m_linearisation_options.infilename + "'\n";
         }
-        std::stringbuf buf;
-        instream.get(buf,'\0');
-        const std::string input_string=buf.str();
-        spec = parse_process_specification(input_string,!noalpha);
+        spec = parse_process_specification(instream,!noalpha);
+        instream.close();
       }
       //report on well-formedness (if needed)
       if (opt_check_only) {
@@ -493,10 +487,13 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 
       // Perform linearisation
 
-      std::istringstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-      const std::string input_string(instream.str());
-      process_specification input_result = parse_process_specification(input_string,!noalpha);
-
+      std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
+      if (!instream.is_open()) 
+      { throw mcrl2::runtime_error("Cannot open input file: " + m_linearisation_options.infilename);
+      }
+      process_specification input_result = parse_process_specification(instream,!noalpha);
+      instream.close();
+ 
       if (opt_check_only) 
       { message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
       }
