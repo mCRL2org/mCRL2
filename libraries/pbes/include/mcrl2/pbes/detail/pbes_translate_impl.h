@@ -94,10 +94,10 @@ std::set<core::identifier_string> propositional_variable_names(Term t)
 /// \param f A modal formula
 /// \return The variables corresponding to ass(f)
 inline
-data::variable_list mu_variables(modal_formula::state_formula f)
+data::variable_list mu_variables(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = modal_formula::state_frm::ass(f);
+  data::assignment_list l = state_formulas::state_frm::ass(f);
   data::variable_list result;
   for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
@@ -110,10 +110,10 @@ data::variable_list mu_variables(modal_formula::state_formula f)
 /// \param f A modal formula
 /// \return The data expressions corresponding to ass(f)
 inline
-data::data_expression_list mu_expressions(modal_formula::state_formula f)
+data::data_expression_list mu_expressions(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = modal_formula::state_frm::ass(f);
+  data::assignment_list l = state_formulas::state_frm::ass(f);
   data::data_expression_list result;
   for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {

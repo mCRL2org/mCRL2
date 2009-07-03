@@ -26,7 +26,7 @@
 
 namespace mcrl2 {
 
-namespace modal_formula {
+namespace state_formulas {
 
 ///////////////////////////////////////////////////////////////////////////////
 // state_formula
@@ -182,7 +182,7 @@ namespace state_frm
   /// \param p A modal formula
   /// \return must applied to r and p
   inline
-  state_formula must(regular_formula r, state_formula p)
+  state_formula must(regular_formulas::regular_formula r, state_formula p)
   {
     return state_formula(core::detail::gsMakeStateMust(r, p));
   }
@@ -192,7 +192,7 @@ namespace state_frm
   /// \param p A modal formula
   /// \return may applied to r and p
   inline
-  state_formula may(regular_formula r, state_formula p)
+  state_formula may(regular_formulas::regular_formula r, state_formula p)
   {
     return state_formula(core::detail::gsMakeStateMay(r, p));
   }
@@ -236,7 +236,7 @@ namespace state_frm
   /// \param l A sequence of data expressions
   /// \return a variable with the given name and arguments
   inline
-  state_formula var(core::identifier_string name, data::data_expression_list l)
+  state_formula variable(core::identifier_string name, data::data_expression_list l)
   {
     return state_formula(core::detail::gsMakeStateVar(name, atermpp::term_list< data::data_expression >(l.begin(), l.end())));
   }
@@ -356,7 +356,7 @@ namespace state_frm
   /// \brief Returns true if the term t is a variable expression
   /// \param t A term
   /// \return True if the term t is a variable expression
-  inline bool is_var(atermpp::aterm_appl t)
+  inline bool is_variable(atermpp::aterm_appl t)
   { return core::detail::gsIsStateVar(t); }
 
   /// \brief Returns true if the term t is a nu expression
@@ -487,7 +487,7 @@ namespace state_frm
   /// \param t A modal formula
   /// \return The regular formula of a must or may expression
   inline
-  regular_formula act(state_formula t)
+  regular_formulas::regular_formula act(state_formula t)
   {
     assert(core::detail::gsIsStateMust(t) || core::detail::gsIsStateMay(t));
     return atermpp::arg1(t);
@@ -503,7 +503,7 @@ namespace state_frm
     /// \return The function result
     bool operator()(atermpp::aterm_appl t) const
     {
-      return is_delay_timed(t) || is_yaled_timed(t) || act_frm::is_at(t);
+      return is_delay_timed(t) || is_yaled_timed(t) || action_formulas::act_frm::is_at(t);
     }
   };
   /// \endcond
@@ -518,7 +518,7 @@ namespace state_frm
       return atermpp::find_if(*this, state_frm::is_timed_subterm()) != atermpp::aterm();
     }
 
-} // namespace modal_formula
+} // namespace state_formulas
 
 } // namespace mcrl2
 

@@ -22,7 +22,7 @@
 
 namespace mcrl2 {
 
-namespace modal_formula {
+namespace action_formulas {
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_formula
@@ -281,7 +281,7 @@ namespace accessors
 
 } // namespace accessors
 
-} // namespace modal_formula
+} // namespace action_formulas
 
 } // namespace mcrl2
 

@@ -29,7 +29,7 @@ namespace pbes_system {
   /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
   /// \return The result of the algorithm
   inline
-  pbes<> lps2pbes(const lps::specification& spec, const modal_formula::state_formula& formula, bool timed)
+  pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed)
   {
     return pbes_translate(formula, spec, timed);
   }
@@ -44,7 +44,7 @@ namespace pbes_system {
   {
     pbes<> result;
     lps::specification spec = lps::mcrl22lps(spec_text);
-    modal_formula::state_formula f = modal_formula::detail::mcf2statefrm(formula_text, spec);
+    state_formulas::state_formula f = state_formulas::detail::mcf2statefrm(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }
 

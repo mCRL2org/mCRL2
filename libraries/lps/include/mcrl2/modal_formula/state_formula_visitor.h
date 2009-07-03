@@ -17,7 +17,7 @@
 
 namespace mcrl2 {
 
-namespace modal_formula {
+namespace state_formulas {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -110,14 +110,14 @@ struct state_formula_visitor
 
   /// \brief Visit must node
   /// \return The result of visiting the node
-  virtual bool visit_must(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual bool visit_must(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return true;
   }
 
   /// \brief Visit may node
   /// \return The result of visiting the node
-  virtual bool visit_may(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual bool visit_may(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return true;
   }
@@ -312,7 +312,7 @@ struct state_formula_visitor
         visit(qexpr);
       }
     } else if(is_must(e)) {
-      regular_formula r = act(e);
+      regular_formulas::regular_formula r = act(e);
       state_formula s = arg(e);
       bool result = visit_must(e, r, s);
       if (result)
@@ -320,7 +320,7 @@ struct state_formula_visitor
         visit(s);
       }
     } else if(is_may(e)) {
-      regular_formula r = act(e);
+      regular_formulas::regular_formula r = act(e);
       state_formula s = arg(e);
       bool result = visit_may(e, r, s);
       if (result)
@@ -337,7 +337,7 @@ struct state_formula_visitor
     } else if(is_delay_timed(e)) {
       data::data_expression t = time(e);
       visit_delay_timed(e, t);
-    } else if(is_var(e)) {
+    } else if(is_variable(e)) {
       core::identifier_string n = name(e);
       data::data_expression_list l = param(e);
       visit_var(e, n, l);
@@ -365,7 +365,7 @@ struct state_formula_visitor
   }
 };
 
-} // namespace modal_formula
+} // namespace state_formulas
 
 } // namespace mcrl2
 

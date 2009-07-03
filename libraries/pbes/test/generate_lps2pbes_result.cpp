@@ -23,8 +23,8 @@ using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal_formula;
-using namespace mcrl2::modal_formula::detail;
+using namespace mcrl2::state_formulas;
+using namespace mcrl2::state_formulas::detail;
 using namespace mcrl2::pbes_system;
 
 int main(int argc, char** argv)

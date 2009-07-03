@@ -87,7 +87,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
     {
       lps::specification spec;
       spec.load(input_filename());
-      modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(core::read_text(formfilename), spec);
       pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
       result.save(output_filename());
       return true;

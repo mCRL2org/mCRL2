@@ -17,7 +17,7 @@
 
 namespace mcrl2 {
 
-namespace modal_formula {
+namespace state_formulas {
 
 //<StateFrm>     ::= <DataExpr>
 //                 | StateTrue
@@ -111,14 +111,14 @@ struct state_formula_builder
 
   /// \brief Visit must node
   /// \return The result of visiting the node
-  virtual state_formula visit_must(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual state_formula visit_must(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return state_formula();
   }
 
   /// \brief Visit may node
   /// \return The result of visiting the node
-  virtual state_formula visit_may(const state_formula& /* e */, const regular_formula& /* r */, const state_formula& /* f */)
+  virtual state_formula visit_may(const state_formula& /* e */, const regular_formulas::regular_formula& /* r */, const state_formula& /* f */)
   {
     return state_formula();
   }
@@ -221,12 +221,12 @@ struct state_formula_builder
       state_formula result = visit_exists(e, qvars, qexpr);
       return (result == state_formula()) ? state_frm::exists(qvars, visit(qexpr)) : result;
     } else if(is_must(e)) {
-      const regular_formula& r = act(e);
+      const regular_formulas::regular_formula& r = act(e);
       state_formula s = arg(e);
       state_formula result = visit_must(e, r, s);
       return (result == state_formula()) ? must(r, visit(s)) : result;
     } else if(is_may(e)) {
-      const regular_formula& r = act(e);
+      const regular_formulas::regular_formula& r = act(e);
       state_formula s = arg(e);
       state_formula result = visit_may(e, r, s);
       return (result == state_formula()) ? may(r, visit(s)) : result;
@@ -244,7 +244,7 @@ struct state_formula_builder
       const data::data_expression& t = time(e);
       state_formula result = visit_delay_timed(e, t);
       return (result == state_formula()) ? e : result;
-    } else if(is_var(e)) {
+    } else if(is_variable(e)) {
       const core::identifier_string& n = name(e);
       const data::data_expression_list& l = param(e);
       state_formula result = visit_var(e, n, l);
@@ -268,7 +268,7 @@ struct state_formula_builder
   }
 };
 
-} // namespace modal_formula
+} // namespace state_formulas
 
 } // namespace mcrl2
 

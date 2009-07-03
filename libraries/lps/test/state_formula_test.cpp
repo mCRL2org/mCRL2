@@ -29,8 +29,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
-using namespace mcrl2::modal_formula;
-using namespace mcrl2::modal_formula::detail;
+using namespace mcrl2::state_formulas;
+using namespace mcrl2::state_formulas::detail;
 
 const std::string SPECIFICATION =
 "act a:Nat;                              \n"
@@ -352,9 +352,9 @@ void test_normalize()
   using mcrl2::core::pp;
   using namespace state_frm;
 
-  state_formula x = var(identifier_string("X"), data_expression_list());
-  state_formula y = var(identifier_string("Y"), data_expression_list());
-  state_formula z = var(identifier_string("Z"), data_expression_list());
+  state_formula x = state_formulas::state_frm::variable(identifier_string("X"), data_expression_list());
+  state_formula y = state_formulas::state_frm::variable(identifier_string("Y"), data_expression_list());
+  state_formula z = state_formulas::state_frm::variable(identifier_string("Z"), data_expression_list());
   state_formula f;
   state_formula f1;
   state_formula f2;

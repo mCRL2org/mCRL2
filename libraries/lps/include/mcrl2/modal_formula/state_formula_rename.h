@@ -20,7 +20,7 @@
 
 namespace mcrl2 {
 
-namespace modal_formula {
+namespace state_formulas {
 
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
@@ -72,7 +72,7 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
         break;
       }
     }
-    return state_frm::var(new_name, l);
+    return state_frm::variable(new_name, l);
   }
 
   /// \brief Visit mu node
@@ -145,7 +145,7 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
   return data::replace_variables(f, replacements);
 }
 
-} // namespace modal_formula
+} // namespace state_formulas
 
 } // namespace mcrl2
 
