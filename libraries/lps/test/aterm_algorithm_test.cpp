@@ -19,7 +19,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
@@ -132,7 +132,7 @@ int test_main(int argc, char** argv)
   test_find_variable();
   core::garbage_collect();
 
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   linear_process lps = spec.process();
 
   // find all action labels in lps

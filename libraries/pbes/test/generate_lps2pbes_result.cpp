@@ -16,7 +16,6 @@
 #include <string>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/core/text_utility.h"
 
 using namespace atermpp;

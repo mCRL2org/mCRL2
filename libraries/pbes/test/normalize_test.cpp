@@ -12,7 +12,7 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
@@ -106,7 +106,7 @@ void test_normalize1()
 void test_normalize2()
 {
   // test case from Aad Mathijssen, 2/11/2008
-  lps::specification spec       = lps::mcrl22lps("init tau + tau;");
+  lps::specification spec       = lps::linearise("init tau + tau;");
   state_formulas::state_formula formula  = state_formulas::detail::mcf2statefrm("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
@@ -116,7 +116,7 @@ void test_normalize2()
 void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
-  lps::specification spec = lps::mcrl22lps(
+  lps::specification spec = lps::linearise(
     "proc P = tau.P;\n"
     "init P;        \n"
   );

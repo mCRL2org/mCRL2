@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -94,7 +95,7 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_parelm()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  specification spec    = linearise(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);

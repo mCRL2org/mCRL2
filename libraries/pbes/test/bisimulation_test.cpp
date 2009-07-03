@@ -1,5 +1,5 @@
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -57,7 +57,7 @@ std::string SMALLSPEC =
 
 void test_bisimulation(const std::string& lps_spec)
 {
-  specification spec = mcrl22lps(lps_spec);
+  specification spec = linearise(lps_spec);
   pbes<> bb  = branching_bisimulation(spec, spec);
   pbes<> sb  = strong_bisimulation(spec, spec);
   pbes<> wb  = weak_bisimulation(spec, spec);

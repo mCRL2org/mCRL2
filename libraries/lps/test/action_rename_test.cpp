@@ -11,11 +11,10 @@
 
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/action_rename.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
-using lps::mcrl22lps;
 using lps::specification;
 using lps::action_rename_specification;
 // using lps::action_rename;
@@ -35,7 +34,7 @@ void test1()
   "  (n>4)  -> a(n) => b(n); \n"
   "  (n<22) -> a(n) => c(n); \n";
 
-  specification spec = mcrl22lps(SPEC);
+  specification spec = lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);
@@ -60,7 +59,7 @@ void test2()
   "  (f(n)>23) -> a(n) => b(n); \n"
   "  b(n) => c(n); \n";
 
-  specification spec = mcrl22lps(SPEC);
+  specification spec = lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
   action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
   specification new_spec = action_rename(ar_spec,spec);

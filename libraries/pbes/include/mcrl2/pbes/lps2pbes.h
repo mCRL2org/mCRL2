@@ -17,7 +17,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_translate.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 
 namespace mcrl2 {
 
@@ -43,7 +43,7 @@ namespace pbes_system {
   pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
   {
     pbes<> result;
-    lps::specification spec = lps::mcrl22lps(spec_text);
+    lps::specification spec = lps::linearise(spec_text);
     state_formulas::state_formula f = state_formulas::detail::mcf2statefrm(formula_text, spec);
     return lps2pbes(spec, f, timed);
   }

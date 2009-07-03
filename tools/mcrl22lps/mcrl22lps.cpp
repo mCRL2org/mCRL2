@@ -20,8 +20,7 @@
 #include <string>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/lin_types.h"
-#include "mcrl2/lps/lin_std.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -38,6 +37,12 @@ using mcrl2::core::gsVerbose;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
+using mcrl2::lps::t_lin_method;
+using mcrl2::lps::lmStack;
+using mcrl2::lps::lmRegular;
+using mcrl2::lps::lmRegular2;
+using mcrl2::lps::t_lin_options;
+using mcrl2::lps::linearise;
 
 class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
 {
@@ -196,7 +201,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         return true;
       }
       //store the result
-      mcrl2::lps::specification linear_spec(linearise_std(spec,m_linearisation_options));
+      mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
       if (gsVerbose)
       { if (m_linearisation_options.outfilename.empty())
         { std::cerr << "saving result to stdout..." << std::endl;
@@ -472,7 +477,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       { message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
       }
       else 
-      { mcrl2::lps::specification specification(linearise_std(input_result, m_linearisation_options));
+      { mcrl2::lps::specification specification(linearise(input_result, m_linearisation_options));
         //store the result
         specification.save(m_linearisation_options.outfilename);
         message.set_text("Linearisation finished");

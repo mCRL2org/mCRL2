@@ -13,7 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
@@ -109,7 +109,7 @@ void test_remove_parameters()
 
 void test_instantiate_free_variables()
 {
-  specification spec = mcrl22lps(ABP_SPEC);
+  specification spec = linearise(ABP_SPEC);
   lps::detail::lps_algorithm algorithm(spec);
   algorithm.instantiate_free_variables();
   core::garbage_collect();

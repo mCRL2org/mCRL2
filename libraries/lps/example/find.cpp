@@ -20,7 +20,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(ABP_SPECIFICATION);
+  specification spec = linearise(ABP_SPECIFICATION);
   linear_process lps = spec.process();
   std::set<identifier_string> ids = core::find_identifiers(aterm(lps));
   for (std::set<identifier_string>::iterator i = ids.begin(); i != ids.end(); ++i)

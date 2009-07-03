@@ -14,8 +14,8 @@
 #include <set>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include <mcrl2/lps/mcrl22lps.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 
@@ -65,7 +65,7 @@ const std::string ABP_SPEC=
 
 void test_traverse_sort_expressions()
 {
-  specification spec = mcrl22lps(ABP_SPEC);
+  specification spec = linearise(ABP_SPEC);
   std::set<sort_expression> s;
   traverse_sort_expressions(spec, std::inserter(s, s.end()));
   std::cout << core::detail::print_pp_set(s) << std::endl;
@@ -79,7 +79,7 @@ void test_system_defined_sorts()
     "proc X(i,j: Nat)   = (i == 5) -> a. X(i,j);\n\n"
     "init X(0,1);\n");
 
-  specification spec = mcrl22lps(SPEC);
+  specification spec = linearise(SPEC);
   // complete_data_specification(spec);
   // std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
 

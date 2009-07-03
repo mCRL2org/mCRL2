@@ -12,7 +12,6 @@
 #include <iostream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/modal_formula/detail/algorithms.h" // mcf2statefrm
-#include "mcrl2/lps/mcrl22lps.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes2bool.h"
 #include "mcrl2/pbes/lps2pbes.h"

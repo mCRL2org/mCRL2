@@ -33,6 +33,7 @@
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
 using data::make_vector;
@@ -43,7 +44,7 @@ using data::basic_sort;
 using data::multiset_identifier_generator;
 using state_formulas::detail::mcf2statefrm;
 using state_formulas::state_formula;
-using lps::mcrl22lps;
+using lps::linearise;
 using lps::specification;
 using pbes_system::pbes;
 using pbes_system::pbes_expression;
@@ -169,7 +170,7 @@ const std::string MPSU_FORMULA =
 
 void test_pbes()
 {
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   state_formula formula = mcf2statefrm(FORMULA2, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
@@ -234,7 +235,7 @@ void test_global_variables()
 //
 // void test_pbes_expression_builder()
 // {
-//   specification mpsu_spec = mcrl22lps(MPSU_SPECIFICATION);
+//   specification mpsu_spec = linearise(MPSU_SPECIFICATION);
 //   state_formula mpsu_formula = mcf2statefrm(MPSU_FORMULA, mpsu_spec);
 //   bool timed = false;
 //   pbes<> p = lps2pbes(mpsu_spec, mpsu_formula, timed);
@@ -314,7 +315,7 @@ void test_pbes_expression()
 
 void test_trivial()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  specification spec    = linearise(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
@@ -330,7 +331,7 @@ void test_instantiate_global_variables()
     "init d.P(1);             \n"
   ;
   std::string formula_text = "([true*.a(1)]  (mu X.([!a(1)]X && <true> true)))";
-  specification spec = mcrl22lps(spec_text);
+  specification spec = linearise(spec_text);
   state_formula formula = mcf2statefrm(formula_text, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
@@ -345,7 +346,7 @@ void test_traverse_sort_expressions()
 {
   using data::sort_expression;
 
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  specification spec    = linearise(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);

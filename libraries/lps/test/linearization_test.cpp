@@ -14,7 +14,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -84,14 +84,14 @@ const std::string case_8(
 BOOST_AUTO_TEST_CASE(test_multiple_linearization_calls)
 {
   specification spec;
-  spec = mcrl22lps(case_1);
-  spec = mcrl22lps(case_2);
-  spec = mcrl22lps(case_3);
-  spec = mcrl22lps(case_4);
-  spec = mcrl22lps(case_5);
-  spec = mcrl22lps(case_6);
-  spec = mcrl22lps(case_7);
-  spec = mcrl22lps(case_8);
+  spec = linearise(case_1);
+  spec = linearise(case_2);
+  spec = linearise(case_3);
+  spec = linearise(case_4);
+  spec = linearise(case_5);
+  spec = linearise(case_6);
+  spec = linearise(case_7);
+  spec = linearise(case_8);
 }
 
 const std::string assignment_case_1
@@ -134,11 +134,11 @@ const std::string assignment_case_5
 
 BOOST_AUTO_TEST_CASE(test_process_assignments)
 { specification spec;
-  spec=mcrl22lps(assignment_case_1);
-  spec=mcrl22lps(assignment_case_2);
-  spec=mcrl22lps(assignment_case_3);
-  spec=mcrl22lps(assignment_case_4);
-  spec=mcrl22lps(assignment_case_5);
+  spec=linearise(assignment_case_1);
+  spec=linearise(assignment_case_2);
+  spec=linearise(assignment_case_3);
+  spec=linearise(assignment_case_4);
+  spec=linearise(assignment_case_5);
 }
 
 BOOST_AUTO_TEST_CASE(test_struct)
@@ -148,12 +148,12 @@ BOOST_AUTO_TEST_CASE(test_struct)
   "                                                   \n"
   "init true->delta;                                  \n"
   ;
-  specification spec = mcrl22lps(text);
+  specification spec = linearise(text);
 }
 
 BOOST_AUTO_TEST_CASE(test_block)
 {
-  specification spec = mcrl22lps(
+  specification spec = linearise(
     "act s,s',d,d': Nat;\n"
    "\n"
     "proc P(n: Nat) = s(n).s(n+1).d(n+1).d(n).P(n);\n"
@@ -455,12 +455,12 @@ BOOST_AUTO_TEST_CASE(test_large_specification)
   ". [!exists r:Phase . sUR(n,t,r)]Y && <true>true)                         \n"
   ;
 
-  specification model = mcrl22lps(MODEL);
+  specification model = linearise(MODEL);
 }
 
 BOOST_AUTO_TEST_CASE(test_lambda)
 {
-  lps::specification s(mcrl22lps(
+  lps::specification s(linearise(
     "map select : (Nat -> Bool) # List(Nat) -> List(Nat);\n"
     "var f : Nat -> Bool;\n"
     "    x : Nat;\n"
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(test_no_free_variables)
   options.noglobalvars = true;
 
   specification spec;
-  spec = mcrl22lps(no_free_variables_case_1, options);
+  spec = linearise(no_free_variables_case_1, options);
   BOOST_CHECK(spec.global_variables().empty());
 }
 
@@ -625,30 +625,30 @@ void test_various_aux(t_lin_options &options)
      debugging the translation of the linearizer to the new data
      library. */
   specification spec;
-  spec = mcrl22lps(various_case_1);
-  spec = mcrl22lps(various_case_2);
-  spec = mcrl22lps(various_case_3);
-  spec = mcrl22lps(various_case_4);
-  spec = mcrl22lps(various_case_5);
-  spec = mcrl22lps(various_case_6);
-  spec = mcrl22lps(various_case_7);
-  spec = mcrl22lps(various_case_8);
-  spec = mcrl22lps(various_case_9);
-  spec = mcrl22lps(various_case_10);
-  spec = mcrl22lps(various_case_11);
-  spec = mcrl22lps(various_case_12);
-  spec = mcrl22lps(various_case_13);
-  spec = mcrl22lps(various_case_14);
-  spec = mcrl22lps(various_case_15);
-  spec = mcrl22lps(various_case_16);
-  spec = mcrl22lps(various_case_17);
-  spec = mcrl22lps(various_case_18);
-  spec = mcrl22lps(various_case_19);
-  spec = mcrl22lps(various_case_20);
-  spec = mcrl22lps(various_case_21);
-  spec = mcrl22lps(various_case_23);
-  spec = mcrl22lps(various_case_24);
-  BOOST_CHECK_THROW(mcrl22lps(various_case_22), mcrl2::runtime_error);
+  spec = linearise(various_case_1);
+  spec = linearise(various_case_2);
+  spec = linearise(various_case_3);
+  spec = linearise(various_case_4);
+  spec = linearise(various_case_5);
+  spec = linearise(various_case_6);
+  spec = linearise(various_case_7);
+  spec = linearise(various_case_8);
+  spec = linearise(various_case_9);
+  spec = linearise(various_case_10);
+  spec = linearise(various_case_11);
+  spec = linearise(various_case_12);
+  spec = linearise(various_case_13);
+  spec = linearise(various_case_14);
+  spec = linearise(various_case_15);
+  spec = linearise(various_case_16);
+  spec = linearise(various_case_17);
+  spec = linearise(various_case_18);
+  spec = linearise(various_case_19);
+  spec = linearise(various_case_20);
+  spec = linearise(various_case_21);
+  spec = linearise(various_case_23);
+  spec = linearise(various_case_24);
+  BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)

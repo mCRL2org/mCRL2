@@ -14,7 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/specification.h>
 #include <mcrl2/lps/binary.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include <mcrl2/lps/linearise.h>
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
@@ -33,7 +33,7 @@ void test_case_1()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
 
@@ -69,7 +69,7 @@ void test_case_2()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
@@ -105,7 +105,7 @@ void test_case_3()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
@@ -140,7 +140,7 @@ void test_case_4()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
@@ -176,7 +176,7 @@ void test_case_5()
     "init P(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();
@@ -215,7 +215,7 @@ void test_case_6()
     "init P(d1(e1));\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1 = binary(s0, r);
   summand_list summands1 = s1.process().summands();

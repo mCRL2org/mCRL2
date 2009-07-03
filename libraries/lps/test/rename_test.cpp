@@ -15,7 +15,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
@@ -71,7 +71,7 @@ const std::string SPECIFICATION3 =
 
 void test_lps_rename()
 {
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   linear_process p = spec.process();
   std::set<identifier_string> forbidden_names;
   forbidden_names.insert(identifier_string("x"));
@@ -95,7 +95,7 @@ void test_lps_rename()
 
 void test_rename()
 {
-  specification spec = mcrl22lps(SPECIFICATION3);
+  specification spec = linearise(SPECIFICATION3);
   std::set<identifier_string> forbidden_names;
   // specification spec2 = rename_process_parameters(spec, forbidden_names, "_A");
   // std::cout << "<spec>"  << lps::pp(spec) << std::endl;

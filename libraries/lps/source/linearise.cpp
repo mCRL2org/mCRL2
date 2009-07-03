@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lin_std.cpp
+/// \file linearise.cpp
 /// \brief Add your file description here.
 
 /* This file contains the implementation of an mCRL2 lineariser.
@@ -34,8 +34,7 @@
 #include <algorithm>
 
 // linear process libraries.
-#include "mcrl2/lps/lin_std.h"
-// #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
@@ -7063,11 +7062,11 @@ class specification_basic_type:public boost::noncopyable
 
 }; // End of the class specification basictype
 
-/**************** linearise_std **************************************/
+/**************** linearise **************************************/
 
-mcrl2::lps::specification linearise_std(
-                 const process_specification type_checked_spec,
-                 const t_lin_options lin_options)
+mcrl2::lps::specification mcrl2::lps::linearise(
+                 const mcrl2::process::process_specification& type_checked_spec,
+                 mcrl2::lps::t_lin_options lin_options)
 { specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),

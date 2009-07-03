@@ -13,7 +13,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -83,7 +83,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(ABP_SPEC);
+  specification spec = linearise(ABP_SPEC);
   lps::detail::specification_property_map info1(spec);
   std::cerr << info1.to_string() << std::endl;
   lps::detail::specification_property_map info2(LPSINFO);

@@ -15,7 +15,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 
 using namespace std;
 using namespace atermpp;
@@ -66,7 +66,7 @@ std::string SPECIFICATION =
 void test_remove_unused_summand_variables()
 { 
   core::garbage_collect();
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   lps::detail::lps_algorithm algorithm(spec);
   algorithm.remove_unused_summand_variables();
 }

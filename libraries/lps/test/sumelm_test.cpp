@@ -14,7 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 
@@ -134,7 +134,7 @@ void test_case_5()
 
   // FIXME, this test case requires the parser to allow parsing of free
   // variables.
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();

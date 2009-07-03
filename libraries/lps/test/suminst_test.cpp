@@ -13,7 +13,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include <mcrl2/lps/suminst.h>
-#include <mcrl2/lps/mcrl22lps.h>
+#include <mcrl2/lps/linearise.h>
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;
@@ -31,7 +31,7 @@ void test_case_1()
     "init X;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1,r).run();
@@ -57,7 +57,7 @@ void test_case_2()
     "init X(d1);\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
@@ -81,7 +81,7 @@ void test_case_3()
     "init X;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
@@ -108,7 +108,7 @@ void test_case_4()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, true, true).run();
@@ -146,7 +146,7 @@ void test_case_5()
     "init P;\n"
   );
 
-  specification s0 = mcrl22lps(text);
+  specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();

@@ -23,14 +23,13 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
 #include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/lps2pbes.h"
 
 using namespace mcrl2;
 using namespace pbes_system;
 using modal_formula::detail::mcf2statefrm;
 using modal_formula::state_formula;
-using lps::mcrl22lps;
 using lps::specification;
 
 std::string CABP_SPECIFICATION =
@@ -122,7 +121,7 @@ std::string INFINITELY_OFTEN_SEND = "nu X. mu Y. (<r1(d1)>X || <!r1(d1)>Y)";
 void test1()
 {
   // create a pbes p
-  specification spec    = mcrl22lps(CABP_SPECIFICATION);
+  specification spec    = lps::linearise(CABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(INFINITELY_OFTEN_SEND, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);

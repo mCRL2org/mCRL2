@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(ABP_SPECIFICATION);
+  specification spec = linearise(ABP_SPECIFICATION);
   cout << "check_term_LinProcSpec(spec) = " << check_term_LinProcSpec(spec) << endl;
 
   aterm_appl f1 = make_term("OpId(\"!=\",SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortArrow(SortArrow(SortId(\"Bool\"),SortArrow(SortId(\"Pos\"),SortId(\"Pos\"))),SortId(\"Bool\"))))");

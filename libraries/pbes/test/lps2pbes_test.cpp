@@ -18,7 +18,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/test_utility.h"
@@ -81,7 +81,7 @@ const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_trivial()
 {
-  specification spec    = mcrl22lps(ABP_SPECIFICATION);
+  specification spec    = linearise(ABP_SPECIFICATION);
   state_formula formula = mcf2statefrm(TRIVIAL_FORMULA, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
@@ -103,7 +103,7 @@ void test_lps2pbes()
   "init X(3);                              \n"
   ;
   FORMULA = "true => false";
-  spec    = mcrl22lps(SPECIFICATION);
+  spec    = linearise(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
@@ -114,7 +114,7 @@ void test_lps2pbes()
   "init X(3);                             \n"
   ;
   FORMULA = "nu X. (X && forall m:Nat. [a(m)]false)";
-  spec    = mcrl22lps(SPECIFICATION);
+  spec    = linearise(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
@@ -131,7 +131,7 @@ void test_lps2pbes()
   "  ( mu B. exists t3:Pos . [!a]B ) \n"
   ")                                 \n"
   ;
-  spec    = mcrl22lps(SPECIFICATION);
+  spec    = linearise(SPECIFICATION);
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());

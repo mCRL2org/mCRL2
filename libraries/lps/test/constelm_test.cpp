@@ -17,7 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/lps/specification.h"
@@ -425,7 +425,7 @@ void test_abp()
   "    )                                                                      \n"
   "  );                                                                       \n"
   ;
-  specification spec = mcrl22lps(ABP_SPEC);
+  specification spec = linearise(ABP_SPEC);
   data::rewriter R(spec.data());
   bool verbose = false;
   bool instantiate_free_variables = false;

@@ -13,7 +13,7 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -76,7 +76,7 @@ void test_lps2pbes(std::string lps_spec, std::string mcf_formula)
 {
   using namespace pbes_system;
 
-  lps::specification spec = lps::mcrl22lps(lps_spec);
+  lps::specification spec = lps::linearise(lps_spec);
   modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(mcf_formula, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);

@@ -14,7 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
@@ -66,7 +66,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  specification spec = mcrl22lps(SPECIFICATION);
+  specification spec = linearise(SPECIFICATION);
   linear_process lps = spec.process();
   BOOST_CHECK(is_well_typed(lps));
   BOOST_CHECK(!lps.has_time());

@@ -12,7 +12,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/lps_printer.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -63,7 +63,7 @@ void test_lps_printer()
   using namespace mcrl2::lps;
 
   lps::detail::lps_printer<std::ostream> print(std::cout);
-  specification spec = mcrl22lps(ABP_SPEC);
+  specification spec = linearise(ABP_SPEC);
   print(spec);
   print(spec.process());
   print.print_container(spec.process().action_summands());

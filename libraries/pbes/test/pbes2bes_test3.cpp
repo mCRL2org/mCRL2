@@ -13,7 +13,7 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes2bes_algorithm.h"
@@ -132,7 +132,7 @@ void test_balancing_plat()
 {
   using namespace pbes_system;
 
-  lps::specification spec = lps::mcrl22lps(BALANCE_PLAT_SPECIFICATION);
+  lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
   modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(NO_DEADLOCK, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);

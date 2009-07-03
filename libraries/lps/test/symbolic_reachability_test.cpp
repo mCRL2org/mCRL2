@@ -12,7 +12,7 @@
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/set.h"
 
 const std::string case_no_influenced_parameters(
@@ -187,16 +187,16 @@ int test_main(int argc, char** argv) {
   using namespace mcrl2;
   using namespace mcrl2::lps;
 
-  check_info(mcrl22lps(case_no_influenced_parameters));
-  check_info(mcrl22lps(case_influenced_condition));
-  check_info(mcrl22lps(case_influenced_action));
-  check_info(mcrl22lps(case_influenced_time));
-  check_info(mcrl22lps(case_influenced_next));
-  check_info(mcrl22lps(case_two_parameters));
-  check_info(mcrl22lps(case_summands));
-  check_info(mcrl22lps(case_last));
+  check_info(linearise(case_no_influenced_parameters));
+  check_info(linearise(case_influenced_condition));
+  check_info(linearise(case_influenced_action));
+  check_info(linearise(case_influenced_time));
+  check_info(linearise(case_influenced_next));
+  check_info(linearise(case_two_parameters));
+  check_info(linearise(case_summands));
+  check_info(linearise(case_last));
 
-  lps::specification model(mcrl22lps(case_no_influenced_parameters));
+  lps::specification model(linearise(case_no_influenced_parameters));
 
   if (1 < argc) {
     model.load(argv[1]);

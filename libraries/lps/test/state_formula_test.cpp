@@ -19,7 +19,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/lps/mcrl22lps.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace std;
@@ -330,7 +330,7 @@ void test_rename()
 {
   using mcrl2::core::pp;
 
-  specification spec    = mcrl22lps(SPECIFICATION);
+  specification spec    = linearise(SPECIFICATION);
 
   state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
   set_identifier_generator generator;
@@ -375,8 +375,8 @@ void test_normalize()
   std::cout << "f2 = " << pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
-/* this takes too much time with mcrl22lps...
-  specification model = mcrl22lps(MODEL);
+/* this takes too much time with linearise...
+  specification model = linearise(MODEL);
   state_formula req1_1 = mcf2statefrm(REQ1_1, model);
   state_formula req1_2 = mcf2statefrm(REQ1_2, model);
   state_formula q1 = normalize(req1_1);
@@ -390,7 +390,7 @@ void test_type_checking()
 {
   using namespace state_frm;
 
-  specification context = mcrl22lps(
+  specification context = linearise(
     "sort B = struct d;"
     "act a: List(B);"
     "init a([d]);"

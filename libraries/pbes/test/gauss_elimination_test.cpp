@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/lps/linearise.h"
 
 using namespace mcrl2;
 
@@ -162,7 +163,7 @@ const std::string FORMULA  = "[true*]<true*>true";
 void test_abp()
 {
   bool timed = false;
-  lps::specification spec      = lps::mcrl22lps(ABP_SPECIFICATION);
+  lps::specification spec      = lps::linearise(ABP_SPECIFICATION);
   state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(FORMULA, spec);
 
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
