@@ -65,10 +65,6 @@ void test_bisimulation(const std::string& lps_spec)
 
   BOOST_CHECK(bb.is_well_typed());
   BOOST_CHECK(sb.is_well_typed());
-if (!wb.is_well_typed())
-{
-  wb.save("wb.pbes", true, true);
-}
   BOOST_CHECK(wb.is_well_typed());
   BOOST_CHECK(sbe.is_well_typed());
 }
