@@ -20,7 +20,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 
-// Example that didn't compile, submitted by Jan Friso.
 void test_data_expression(const std::string &de_in, bool test_type_checker = true)
 {
   std::istringstream de_in_stream(de_in);
@@ -41,10 +40,71 @@ void test_data_expression(const std::string &de_in, bool test_type_checker = tru
   }
 }
 
+void test_data_specification(const std::string &ds_in, bool test_type_checker = true)
+{
+  std::istringstream ds_in_stream(ds_in);
+  ATermAppl ds_aterm = mcrl2::core::parse_data_spec(ds_in_stream);
+  BOOST_REQUIRE(ds_aterm != NULL);
+
+  std::string ds_out = mcrl2::core::PrintPart_CXX((ATerm) ds_aterm);
+  //std::cerr << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
+  BOOST_CHECK(ds_in == ds_out);
+
+  if (test_type_checker) {
+    ds_aterm = mcrl2::core::type_check_data_spec(ds_aterm);
+    BOOST_REQUIRE(ds_aterm != NULL);
+ 
+    ds_out = mcrl2::core::PrintPart_CXX((ATerm) ds_aterm);
+    //std::cerr << "The following data specifications should be the same:" << std::endl << ds_in  << std::endl << "and" << std::endl << ds_out << std::endl;
+    BOOST_CHECK(ds_in == ds_out);
+  }
+}
+
+void test_process_specification(const std::string &ps_in, bool test_type_checker = true)
+{
+  std::istringstream ps_in_stream(ps_in);
+  ATermAppl ps_aterm = mcrl2::core::parse_proc_spec(ps_in_stream);
+  BOOST_REQUIRE(ps_aterm != NULL);
+
+  std::string ps_out = mcrl2::core::PrintPart_CXX((ATerm) ps_aterm);
+  //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in << std::endl << "and" << std::endl << ps_out << std::endl;
+  BOOST_CHECK(ps_in == ps_out);
+
+  if (test_type_checker) {
+    ps_aterm = mcrl2::core::type_check_proc_spec(ps_aterm);
+    BOOST_REQUIRE(ps_aterm != NULL);
+ 
+    ps_out = mcrl2::core::PrintPart_CXX((ATerm) ps_aterm);
+    //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in  << std::endl << "and" << std::endl << ps_out << std::endl;
+    BOOST_CHECK(ps_in == ps_out);
+  }
+}
+
+void test_pbes_specification(const std::string &pbes_in, bool test_type_checker = true)
+{
+  std::istringstream pbes_in_stream(pbes_in);
+  ATermAppl pbes_aterm = mcrl2::core::parse_pbes_spec(pbes_in_stream);
+  BOOST_REQUIRE(pbes_aterm != NULL);
+
+  std::string pbes_out = mcrl2::core::PrintPart_CXX((ATerm) pbes_aterm);
+  //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in << std::endl << "and" << std::endl << pbes_out << std::endl;
+  BOOST_CHECK(pbes_in == pbes_out);
+
+  if (test_type_checker) {
+    pbes_aterm = mcrl2::core::type_check_pbes_spec(pbes_aterm);
+    BOOST_REQUIRE(pbes_aterm != NULL);
+ 
+    pbes_out = mcrl2::core::PrintPart_CXX((ATerm) pbes_aterm);
+    //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in  << std::endl << "and" << std::endl << pbes_out << std::endl;
+    BOOST_CHECK(pbes_in == pbes_out);
+  }
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
+  //test boolean data expressions
   test_data_expression("true");
   mcrl2::core::garbage_collect();
   test_data_expression("if(true, true, false)");
@@ -52,6 +112,42 @@ int test_main(int argc, char** argv)
   test_data_expression("!true");
   mcrl2::core::garbage_collect();
   test_data_expression("true && false");
+  mcrl2::core::garbage_collect();
+
+  //test data specification involving structured sorts
+  //in which projection functions are reused
+  test_data_specification(
+    "sort S = struct c(p: Bool) | d(p: Bool, q: S);\n"
+  );
+  mcrl2::core::garbage_collect();
+
+  //test process specification involving process reference assignments
+  test_process_specification(
+    "proc P(b: Bool) = tau . P() + tau . P(b = false);\n"
+    "\n"
+    "init P(b = true);\n"
+  );
+  mcrl2::core::garbage_collect();
+
+  //test process specification involving global variables
+  test_process_specification(
+    "glob dc: Bool;\n"
+    "\n"
+    "proc P(b: Bool) = tau . P(dc);\n"
+    "\n"
+    "init P(dc);\n"
+  );
+  mcrl2::core::garbage_collect();
+
+  //test PBES specification involving global variables
+  test_pbes_specification(
+    "glob dc: Bool;\n"
+    "\n"
+    "pbes nu X(b: Bool) =\n"
+    "       val(b) && X(dc);\n"
+    "\n"
+    "init X(dc);\n"
+  );
   mcrl2::core::garbage_collect();
 
   return 0;
