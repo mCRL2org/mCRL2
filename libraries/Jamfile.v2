@@ -65,7 +65,6 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
         alias $(name).inline : : <link>shared : : $(usage-requirements) ;
       }
 
-ECHO $(name) "-" $(usage-requirements) ;
       alias $(name) : : <link>shared : : $(usage-requirements) $(requirements) ;
     }
   }
