@@ -190,7 +190,7 @@ namespace process {
         core::detail::gsMakeActSpec(spec.action_labels()),
         core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
         core::detail::gsMakeProcEqnSpec(process_equation_list(spec.equations().begin(), spec.equations().end())),
-        spec.init()
+        core::detail::gsMakeProcessInit(spec.init())
     );
   }
   
