@@ -602,19 +602,58 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
         pp_format, ShowSorts, PrecLevel);
     }
   } else if (gsIsProcSpec(Part) || gsIsLinProcSpec(Part)) {
-    //print process specification or linear process specification
-    PRINT_FUNC(dbg_prints)("printing specification\n");
-    for (int i = 0; i < 5; i++) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
-        pp_format, ShowSorts, PrecLevel);
+    //print process specification or LPS
+    PRINT_FUNC(dbg_prints)("printing process specification or LPS\n");
+    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    ATermAppl ActSpec = ATAgetArgument(Part, 1);
+    bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
+    ATermAppl GlobVarSpec = ATAgetArgument(Part, 2);
+    bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
+    ATermAppl ProcEqnSpec = ATAgetArgument(Part, 3);
+    bool ProcEqnSpecEmpty = gsIsProcSpec(Part)?ATisEmpty(ATLgetArgument(ProcEqnSpec, 0)):false;
+    ATermAppl ProcInit = ATAgetArgument(Part, 4);
+    PRINT_FUNC(PrintPart_Appl)(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
+    if (!ActSpecEmpty && !DataSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
     }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ActSpec, pp_format, ShowSorts, PrecLevel);
+    if (!GlobVarSpecEmpty && (!DataSpecEmpty || !ActSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, GlobVarSpec, pp_format, ShowSorts, PrecLevel);
+    if (!ProcEqnSpecEmpty && (!DataSpecEmpty || !ActSpecEmpty || !GlobVarSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ProcEqnSpec, pp_format, ShowSorts, PrecLevel);
+    if (!DataSpecEmpty || !ActSpecEmpty || !GlobVarSpecEmpty || !ProcEqnSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ProcInit, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsDataSpec(Part)) {
     //print data specification
     PRINT_FUNC(dbg_prints)("printing data specification\n");
-    for (int i = 0; i < 4; i++) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
-        pp_format, ShowSorts, PrecLevel);
+    ATermAppl SortSpec = ATAgetArgument(Part, 0);
+    bool SortSpecEmpty = ATisEmpty(ATLgetArgument(SortSpec, 0));
+    ATermAppl ConsSpec = ATAgetArgument(Part, 1);
+    bool ConsSpecEmpty = ATisEmpty(ATLgetArgument(ConsSpec, 0));
+    ATermAppl MapSpec = ATAgetArgument(Part, 2);
+    bool MapSpecEmpty = ATisEmpty(ATLgetArgument(MapSpec, 0));
+    ATermAppl DataEqnSpec = ATAgetArgument(Part, 3);
+    bool DataEqnSpecEmpty = ATisEmpty(ATLgetArgument(DataEqnSpec, 0));
+    PRINT_FUNC(PrintPart_Appl)(OutStream, SortSpec, pp_format, ShowSorts, PrecLevel);
+    if (!ConsSpecEmpty && !SortSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
     }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ConsSpec, pp_format, ShowSorts, PrecLevel);
+    if (!MapSpecEmpty && (!SortSpecEmpty || !ConsSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, MapSpec, pp_format, ShowSorts, PrecLevel);
+    if (!DataEqnSpecEmpty && (!SortSpecEmpty || !ConsSpecEmpty || !MapSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, DataEqnSpec, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsSortSpec(Part)) {
     //print sort specification
     PRINT_FUNC(dbg_prints)("printing sort specification\n");
@@ -623,7 +662,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(fprints)(OutStream, "sort ");
       PRINT_FUNC(PrintPart_List)(OutStream, SortDecls,
         pp_format, ShowSorts, PrecLevel, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsConsSpec(Part) || gsIsMapSpec(Part)) {
     //print operation specification
@@ -632,7 +670,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     if (ATgetLength(OpIds) > 0) {
       PRINT_FUNC(fprints)(OutStream, gsIsConsSpec(Part)?"cons ":"map  ");
       PRINT_FUNC(PrintDecls)(OutStream, OpIds, pp_format, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsDataEqnSpec(Part)) {
     //print equation specification
@@ -646,7 +683,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     if (ATgetLength(ActIds) > 0) {
       PRINT_FUNC(fprints)(OutStream, "act  ");
       PRINT_FUNC(PrintDecls)(OutStream, ActIds, pp_format, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsSortRef(Part)) {
     //print sort reference
@@ -678,7 +714,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(fprints)(OutStream, "glob ");
       PRINT_FUNC(PrintDecls)(OutStream, (pp_format == ppDebug)?Vars:gsGroupDeclsBySort(Vars),
         pp_format, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsProcEqnSpec(Part)) {
     //print process equation specification
@@ -688,7 +723,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(fprints)(OutStream, "proc ");
       PRINT_FUNC(PrintPart_List)(OutStream, ProcEqns,
         pp_format, ShowSorts, PrecLevel, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsLinearProcess(Part)) {
     //print linear process
@@ -722,7 +756,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       }
       PRINT_FUNC(fprints)(OutStream, ";\n");
     }
-    PRINT_FUNC(fprints)(OutStream, "\n");
   } else if (gsIsProcEqn(Part)) {
     //print process equation
     PRINT_FUNC(dbg_prints)("printing process equation\n");
@@ -781,10 +814,26 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
   } else if (gsIsPBES(Part)) {
     //print PBES specification
     PRINT_FUNC(dbg_prints)("printing PBES specification\n");
-    for (int i = 0; i < 4; i++) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
-        pp_format, ShowSorts, PrecLevel);
+    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    ATermAppl GlobVarSpec = ATAgetArgument(Part, 1);
+    bool GlobVarSpecEmpty = ATisEmpty(ATLgetArgument(GlobVarSpec, 0));
+    ATermAppl PBEqnSpec = ATAgetArgument(Part, 2);
+    bool PBEqnSpecEmpty = ATisEmpty(ATLgetArgument(PBEqnSpec, 0));
+    ATermAppl PBInit = ATAgetArgument(Part, 3);
+    PRINT_FUNC(PrintPart_Appl)(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
+    if (!GlobVarSpecEmpty && !DataSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
     }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, GlobVarSpec, pp_format, ShowSorts, PrecLevel);
+    if (!PBEqnSpecEmpty && (!DataSpecEmpty || !GlobVarSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, PBEqnSpec, pp_format, ShowSorts, PrecLevel);
+    if (!DataSpecEmpty || !GlobVarSpecEmpty || !PBEqnSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, PBInit, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsPBEqnSpec(Part)) {
     //print parameterised boolean equation specification
     PRINT_FUNC(dbg_prints)("printing parameterised boolean equation specification\n");
@@ -793,7 +842,6 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
       PRINT_FUNC(fprints)(OutStream, "pbes ");
       PRINT_FUNC(PrintPart_List)(OutStream, PBEqns,
         pp_format, ShowSorts, PrecLevel, ";\n", "     ");
-      PRINT_FUNC(fprints)(OutStream, "\n");
     }
   } else if (gsIsPBInit(Part)) {
     //print parameterised boolean initialisation
@@ -836,20 +884,24 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print parameterised boolean expression
     PRINT_FUNC(dbg_prints)("printing parameterised boolean expression\n");
     PRINT_FUNC(PrintPBExpr)(OutStream, Part, pp_format, ShowSorts, PrecLevel);
-  } else if (gsIsDataSpec(Part)) {
-    //print data specification
-    PRINT_FUNC(dbg_prints)("printing data specification\n");
-    for (int i = 0; i < 4; i++) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
-        pp_format, ShowSorts, PrecLevel);
-    }
   } else if (gsIsActionRenameSpec(Part)) {
     //print action rename specification
     PRINT_FUNC(dbg_prints)("printing action rename specification\n");
-    for (int i = 0; i < 3; i++) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, ATAgetArgument(Part, i),
-        pp_format, ShowSorts, PrecLevel);
+    ATermAppl DataSpec = ATAgetArgument(Part, 0);
+    bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
+    ATermAppl ActSpec = ATAgetArgument(Part, 1);
+    bool ActSpecEmpty = ATisEmpty(ATLgetArgument(ActSpec, 0));
+    ATermAppl ActionRenameRules = ATAgetArgument(Part, 2);
+    bool ActionRenameRulesEmpty = ATisEmpty(ATLgetArgument(ActionRenameRules, 0));
+    PRINT_FUNC(PrintPart_Appl)(OutStream, DataSpec, pp_format, ShowSorts, PrecLevel);
+    if (!ActSpecEmpty && !DataSpecEmpty) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
     }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ActSpec, pp_format, ShowSorts, PrecLevel);
+    if (!ActionRenameRulesEmpty && (!DataSpecEmpty || !ActSpecEmpty)) {
+      PRINT_FUNC(fprints)(OutStream, "\n");
+    }
+    PRINT_FUNC(PrintPart_Appl)(OutStream, ActionRenameRules, pp_format, ShowSorts, PrecLevel);
   } else if (gsIsActionRenameRule(Part)) {
     //print action rename rule (without variables)
     PRINT_FUNC(dbg_prints)("printing action rename rule\n");
@@ -944,8 +996,11 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
       }
       PRINT_FUNC(PrintPart_Appl)(OutStream, Eqn,
         pp_format, ShowSorts, PrecLevel);
-      PRINT_FUNC(fprints)(OutStream, ";\n\n");
+      PRINT_FUNC(fprints)(OutStream, ";\n");
       l = ATgetNext(l);
+      if (!ATisEmpty(l)) {
+        PRINT_FUNC(fprints)(OutStream, "\n");
+      }
     }
   } else { //pp_format == ppDefault
     int EqnsLength = ATgetLength(Eqns);
@@ -1007,7 +1062,6 @@ void PRINT_FUNC(PrintEqns)(PRINT_OUTTYPE OutStream, const ATermList Eqns,
         }
       }
       //finalisation after printing all (>0) equations
-      PRINT_FUNC(fprints)(OutStream, "\n");
       ATtableDestroy(VarDeclTable);
     }
   }
