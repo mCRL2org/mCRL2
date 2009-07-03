@@ -47,8 +47,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     t_lin_options m_linearisation_options;
     bool noalpha;   // indicates whether alpa reduction is needed.
     bool opt_check_only;
-    bool pretty;
-
 
   protected:
 
@@ -99,34 +97,26 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
           "in the resulting linear process; speeds up linearisation ", 'D');
       desc.add_option("check-only",
           "check syntax and static semantics; do not linearise", 'e');
-      desc.add_option("pretty",
-          "return a pretty printed version of the output", 'P');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
 
+      opt_check_only                                  = 0 < parser.options.count("check-only");
+      noalpha                                         = 0 < parser.options.count("no-alpha");
       m_linearisation_options.final_cluster           = 0 < parser.options.count("cluster");
       m_linearisation_options.no_intermediate_cluster = 0 < parser.options.count("no-cluster");
-      // m_linearisation_options.noalpha                 = 0 < parser.options.count("no-alpha");
-      noalpha                                         = 0 < parser.options.count("no-alpha");
       m_linearisation_options.newstate                = 0 < parser.options.count("newstate");
       m_linearisation_options.binary                  = 0 < parser.options.count("binary");
       m_linearisation_options.statenames              = 0 < parser.options.count("statenames");
       m_linearisation_options.norewrite               = 0 < parser.options.count("no-rewrite");
-      m_linearisation_options.noglobalvars              = 0 < parser.options.count("no-globvars");
+      m_linearisation_options.noglobalvars            = 0 < parser.options.count("no-globvars");
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
-      pretty                                          = 0 < parser.options.count("pretty");
-      // m_linearisation_options.pretty                  = 0 < parser.options.count("pretty");
       m_linearisation_options.rewrite_strategy        = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
       m_linearisation_options.lin_method = lmRegular;
-
-      if (0 < parser.options.count("check-only")) 
-      { opt_check_only = true;
-      }
 
       if (0 < parser.options.count("lin-method")) {
         if (1 < parser.options.count("lin-method")) {
@@ -169,7 +159,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
              "translate an mCRL2 specification to an LPS",
              "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
              "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used."),noalpha(false),opt_check_only(false),pretty(false)
+             "stdin is used."),noalpha(false),opt_check_only(false)
     {}
 
     bool run() 
@@ -179,7 +169,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       if (m_linearisation_options.infilename.empty()) 
       { //parse specification from stdin
         if (gsVerbose)
-        { std::cerr << "Parsing input from stdin...\n";
+        { std::cerr << "parsing input from stdin..." << std::endl;
         }
         spec = parse_process_specification(std::cin,!noalpha);
       } 
@@ -187,10 +177,10 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       { //parse specification from infilename
         std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open()) 
-        { throw mcrl2::runtime_error("Cannot open input file: " + m_linearisation_options.infilename);
+        { throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
         }
         if (gsVerbose) 
-        { std::cerr << "parsing input file '"  + m_linearisation_options.infilename + "'\n";
+        { std::cerr << "parsing input file '"  + m_linearisation_options.infilename + "'" << std::endl;
         }
         spec = parse_process_specification(instream,!noalpha);
         instream.close();
@@ -200,38 +190,22 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
         if (m_linearisation_options.infilename.empty()) {
           std::cerr << "stdin";
         } else {
-          std::cerr << "The file '" << m_linearisation_options.infilename << "'";
+          std::cerr << "the file '" << m_linearisation_options.infilename << "'";
         }
-        std::cerr << " contains a well-formed mCRL2 specification." << std::endl;
+        std::cerr << " contains a well-formed mCRL2 specification" << std::endl;
         return true;
       }
       //store the result
-      if (!pretty) 
-      { mcrl2::lps::specification linear_spec(linearise_std(spec,m_linearisation_options));
-        if (gsVerbose)
-        { if (m_linearisation_options.outfilename.empty())
-          { std::cerr << "saving result to stdout...\n";
-          } 
-          else
-          { std::cerr << "saving result to '" << m_linearisation_options.outfilename << "'\n";
-          }
-        }
-        linear_spec.save(m_linearisation_options.outfilename);
-      } 
-      else
-      { if (m_linearisation_options.outfilename.empty()) 
-        { std::cout << pp(spec) << std::endl;
-          //PrintPart_CXX(std::cout, (ATermAppl) spec, (pretty)?ppDefault:ppInternal);
+      mcrl2::lps::specification linear_spec(linearise_std(spec,m_linearisation_options));
+      if (gsVerbose)
+      { if (m_linearisation_options.outfilename.empty())
+        { std::cerr << "saving result to stdout..." << std::endl;
         } 
-        else 
-        { std::ofstream outstream(m_linearisation_options.outfilename.c_str(), std::ofstream::out|std::ofstream::binary);
-          if (!outstream.is_open()) 
-          { throw mcrl2::runtime_error("could not open output file '" + m_linearisation_options.outfilename + "' for writing");
-          }
-          outstream << pp(spec); // PrintPart_CXX(outstream, (ATermAppl) spec, pretty?ppDefault:ppInternal);
-          outstream.close();
+        else
+        { std::cerr << "saving result to '" << m_linearisation_options.outfilename << "'" << std::endl;
         }
       }
+      linear_spec.save(m_linearisation_options.outfilename);
       return true;
     }
 
