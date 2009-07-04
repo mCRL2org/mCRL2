@@ -17,6 +17,7 @@
 #include "grape_frame.h"
 #include "architecturereference.h"
 #include "mcrl2/utilities/font_renderer.h"
+#include "visuals/geometric.h"
 #include "visuals/visualobject.h"
 #include "visuals/visualchannel_communication.h"
 #include "visuals/visualcomment.h"
@@ -158,28 +159,81 @@ void grape_glcanvas::draw_visual_objects()
   }
 
   visual_object *v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_lmouse_down_coordinate );
-  if ((m_mousedown) && (v_obj != 0))
-  {
-    if ((v_obj->get_type() == STATE) || (v_obj->get_type() == REFERENCE_STATE))
-    { 
-      // draw terminating transition if we are dragging
-      if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)) draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
+  if (m_mousedown)
+  {   
+    // if we are selecting multiple object
+    if (m_multiple_selection)
+    {     
+      // set color of line black
+      set_color( g_color_black, true );
+
+      //enable dashed line
+      glLineStipple(1, 0x3F07);
+      glEnable(GL_LINE_STIPPLE);
+                
+      // draw selection rectangle
+      glBegin(GL_LINE_LOOP);
+        glVertex3f( m_lmouse_down_coordinate.m_x, m_lmouse_down_coordinate.m_y, 0.0f);
+        glVertex3f( m_lmouse_down_coordinate.m_x, m_mouse_coordinate.m_y, 0.0f);
+        glVertex3f( m_mouse_coordinate.m_x, m_mouse_coordinate.m_y, 0.0f);
+        glVertex3f( m_mouse_coordinate.m_x, m_lmouse_down_coordinate.m_y, 0.0f);
+      glEnd();  
+                 
+      // select objects inside selection
+      for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
+      {
+        visual_object* vis_obj_ptr = m_visual_objects.Item( i );
+        object* obj = vis_obj_ptr->get_selectable_object();
+         
+        bool ver_between_lmouse_and_mouse = (m_lmouse_down_coordinate.m_y >= obj->get_coordinate().m_y - obj->get_height()*0.5) && (m_mouse_coordinate.m_y <= obj->get_coordinate().m_y + obj->get_height()*0.5); 
+        bool ver_between_mouse_and_lmouse = (m_mouse_coordinate.m_y >= obj->get_coordinate().m_y - obj->get_height()*0.5) && (m_lmouse_down_coordinate.m_y <= obj->get_coordinate().m_y + obj->get_height()*0.5);
+                  
+        bool hor_between_lmouse_and_mouse = (m_lmouse_down_coordinate.m_x >= obj->get_coordinate().m_x - obj->get_width()*0.5) && (m_mouse_coordinate.m_x <= obj->get_coordinate().m_x + obj->get_width()*0.5); 
+        bool hor_between_mouse_and_lmouse = (m_mouse_coordinate.m_x >= obj->get_coordinate().m_x - obj->get_width()*0.5) && (m_lmouse_down_coordinate.m_x <= obj->get_coordinate().m_x + obj->get_width()*0.5);
+         
+        bool inside_vertical = ver_between_lmouse_and_mouse || ver_between_mouse_and_lmouse;
+        bool inside_horizontal = hor_between_lmouse_and_mouse || hor_between_mouse_and_lmouse;
+        if (inside_horizontal && inside_vertical)
+        {
+          obj->select();
+        }
+        else
+        {
+          obj->deselect();
+        }        
+      }    
     }
-    if ((v_obj->get_type() == CHANNEL_COMMUNICATION) || (v_obj->get_type() == CHANNEL))
-    { 
-      // draw channel communication if we are dragging
-      if (m_canvas_state == ADD_CHANNEL_COMMUNICATION) draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
-    }
-  
-    if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (get_selectable_visual_object( m_mouse_coordinate ) == 0))
-    {
-      comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
     
-      // find position on border rectangle
-      coordinate coord = move_to_border_rectangle( comm_ptr->get_coordinate(), comm_ptr->get_width(), comm_ptr->get_height(), m_mouse_coordinate );     
+    // if there is an object selected
+    if (v_obj != 0 )
+    { 
+      if ((v_obj->get_type() == STATE) || (v_obj->get_type() == REFERENCE_STATE))
+      { 
+        // draw terminating transition if we are dragging
+        if ((m_canvas_state == ADD_TERMINATING_TRANSITION || m_canvas_state == ADD_NONTERMINATING_TRANSITION)) 
+        {
+          draw_terminating_transition(m_lmouse_down_coordinate, m_mouse_coordinate, true, _T(""));
+        }
+      }
+      if ((v_obj->get_type() == CHANNEL_COMMUNICATION) || (v_obj->get_type() == CHANNEL))
+      { 
+        // draw channel communication if we are dragging
+        if (m_canvas_state == ADD_CHANNEL_COMMUNICATION)
+        {
+          draw_line(m_lmouse_down_coordinate, m_mouse_coordinate, true, g_color_black);
+        }
+      }
+    
+      if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (get_selectable_visual_object( m_mouse_coordinate ) == 0))
+      {
+        comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
       
-      // draw comment line if we are dragging in empty space
-      draw_line(coord, m_mouse_coordinate, true, g_color_black);
+        // find position on border rectangle
+        coordinate coord = move_to_border_rectangle( comm_ptr->get_coordinate(), comm_ptr->get_width(), comm_ptr->get_height(), m_mouse_coordinate );     
+        
+        // draw comment line if we are dragging in empty space
+        draw_line(coord, m_mouse_coordinate, true, g_color_black);
+      }
     }
   }
 }
@@ -498,6 +552,12 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
         m_main_frame->event_drag( m_touched_visual_object_id, m_lmouse_down_coordinate, clicked_coord, m_touched_click_location, true );
         // clear_visual_objects was called while processing the event, renew m_touched_visual_object properly
         m_touched_visual_object = get_visual_object( obj_ptr );
+      } 
+      
+      if (m_multiple_selection)
+      {
+        // always update canvas if we are selecting multiple objects
+        draw();
       }
     }
   }
@@ -506,12 +566,15 @@ void grape_glcanvas::event_mouse_move( wxMouseEvent &p_event )
 void grape_glcanvas::event_lmouse_down( wxMouseEvent &p_event )
 {
   coordinate clicked_coord = get_canvas_coordinate( p_event.GetX(), p_event.GetY() ) ;
-    m_mouse_coordinate = clicked_coord;
+  m_mouse_coordinate = clicked_coord;
 
   if ( !m_mousedown ) // first mousedown event
   {
     m_mousedown = true;
     m_touched_visual_object = get_selectable_visual_object( clicked_coord );
+    
+    m_multiple_selection = !m_touched_visual_object;
+  
     if ( m_touched_visual_object )
     {
       object *obj_ptr = m_touched_visual_object->get_selectable_object();

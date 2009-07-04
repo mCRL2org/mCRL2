@@ -74,7 +74,7 @@ namespace grape
         grape_direction m_touched_click_location; /**< When a border of a visual is clicked, it is stored which border was clicked. This is needed for grape_event_drag to determine to which direction to resize. */
         bool            m_dragging;              /**< Whether the touched object was dragged. */
         bool            m_mousedown;             /**< Shall contain @c true when the left mouse button is pressed. */
-
+        bool            m_multiple_selection;    /**< Shall contain true when we are selecting objects. */
         DECLARE_EVENT_TABLE()        /**< The event table of this canvas. */
 
 
