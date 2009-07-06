@@ -62,7 +62,7 @@ doxy:
 	@doc/doxy/generate_libref_website.sh
 
 tex:
-	@doc/doxy/generate_libdocs.sh
+	@doc/tex/generate_libdocs.py
 
 build/Makefile:
 	$(error Please run configure first)
