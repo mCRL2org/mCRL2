@@ -3,11 +3,9 @@ project libraries/core/test
    : requirements
       <use>/libraries//utilities
       <use>/libraries//atermpp
-      <use>/libraries//core
       <use>/site-config//boost
       <toolset>msvc:<asynch-exceptions>on
       <library>/libraries//core
-      <library>/libraries//data
    ;
 
 include $(TOP)/build/testing/header_test.jam ;
