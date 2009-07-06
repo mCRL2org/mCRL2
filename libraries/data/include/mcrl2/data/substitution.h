@@ -331,8 +331,6 @@ namespace mcrl2 {
         map_substitution(const container_type& other) : m_map(other) {
         }
 
-        using super::operator();
-
         /** \brief Update substitution for a single variable
          *
          * \param[in] v the variable for which to update the value

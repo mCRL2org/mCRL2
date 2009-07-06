@@ -143,9 +143,9 @@ namespace mcrl2 {
           std::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
-          s.condition() = make_map_substitution_adapter(substitutions)(new_condition);
+		  s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
           s.multi_action().actions() = replace_free_variables(s.multi_action().actions(), make_map_substitution_adapter(substitutions));
-          s.multi_action().time() = make_map_substitution_adapter(substitutions)(s.multi_action().time());
+          s.multi_action().time() = replace_free_variables(s.multi_action().time(), make_map_substitution_adapter(substitutions));
           s.assignments() = replace_free_variables(s.assignments(), make_map_substitution_adapter(substitutions));
 
           remove_unused_summand_variables(s);
@@ -160,8 +160,8 @@ namespace mcrl2 {
           std::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
-          s.condition() = make_map_substitution_adapter(substitutions)(new_condition);
-          s.deadlock().time() = make_map_substitution_adapter(substitutions)(s.deadlock().time());
+          s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
+          s.deadlock().time() = replace_free_variables(s.deadlock().time(), make_map_substitution_adapter(substitutions));
 
           remove_unused_summand_variables(s);
         }

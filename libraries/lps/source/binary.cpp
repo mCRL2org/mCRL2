@@ -70,7 +70,7 @@ data_expression make_if_tree(const variable_list& new_parameters,
   else
   {
     int n = enumerated_elements.size();
-    int m = round(pow(2, new_parameters.size() - 1));
+	int m = static_cast<int>(pow(static_cast<double>(2), static_cast<double>(new_parameters.size() - 1)));
 
     //m == 2^(new_parameters.size() - 1)
 
@@ -138,7 +138,7 @@ variable_list replace_enumerated_parameters(const lps::specification& specificat
       enumerated_elements_table.put(par, make_data_expression_list(enumerated_elements)); // Store enumerated elements for easy retrieval later on.
 
       //Calculate the number of booleans needed to encode par
-      int n = ceil(log(enumerated_elements.size()) / log(2));//log2(enumerated_elements.size());
+      int n = static_cast<int>(ceil(log(static_cast<double>(enumerated_elements.size())) / log(static_cast<double>(2))));//log2(enumerated_elements.size());
 
       // n = ceil(log_2(j)), so also 2^n <= j
       core::gsVerboseMsg("Parameter `%s' has been replaced by %d parameters of type bool\n", par.to_string().c_str(), n);
@@ -241,7 +241,7 @@ assignment_list replace_enumerated_parameter_in_assignment(const assignment& arg
     // Make sure all elements get encoded.
     while (!elts.empty())
     {
-      int count(round(pow(2, i-1)));
+      int count(static_cast<int>(pow(static_cast<double>(2), i-1)));
 
       // Iterate over the elements that get the boolean value new_parameters.front() == false
       for(int j = 0; j < count; ++j)
