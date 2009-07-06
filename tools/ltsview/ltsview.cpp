@@ -103,7 +103,7 @@ LTSView::LTSView() : super("LTSView",
     "  Finite State Machine format (*.fsm);\n"
     "  mCRL SVC format (*.svc);\n"
     "  mCRL2 format (*.lts).",
-    developers())
+    developers()), lts(0)
 { }
 
 IMPLEMENT_APP_NO_MAIN(LTSView)
@@ -159,7 +159,7 @@ bool LTSView::run()
   return true;
 }
 
-int LTSView::OnExit()
+LTSView::~LTSView()
 {
   if (lts != 0)
   {
@@ -168,7 +168,6 @@ int LTSView::OnExit()
     delete visualizer;
     delete markManager;
   }
-  return 0;
 }
 
 std::string LTSView::getVersionString()

@@ -56,7 +56,7 @@ class LTSView :
     #endif
 
     LTSView();
-    virtual int OnExit();
+    ~LTSView();
     virtual bool run();
     bool parse_command_line(int argc, wxChar** argv);
     void activateMarkRule(int index,bool activate);
