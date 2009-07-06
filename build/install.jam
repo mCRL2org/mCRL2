@@ -430,8 +430,8 @@ rule load-configuration ( build-root-path configuration-file-name ) {
     ECHO "" ;
   }
 
-  prefix         = [ path.make $(build-root)/stage ] ;
-  install-prefix = [ path.make [ get-option prefix : $(prefix) ] ] ;
+  prefix         = $(build-root)/stage ;
+  install-prefix = [ get-option prefix : $(prefix) ] ;
 
   # Set installation/stage locations
   if [ feature.defaults <install> ] = <install>yes {
