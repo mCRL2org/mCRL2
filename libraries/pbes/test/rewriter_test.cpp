@@ -108,6 +108,7 @@ void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string
     std::cout << "R1(d1, sigma) " << ppp(R1(d1, sigma)) << std::endl;
     std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl << std::endl;
   }
+  core::garbage_collect();
 }
 
 template <typename Rewriter>
@@ -218,25 +219,52 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
+}
 
+void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
+{
+  std::cout << "<enumerate_quantifiers_rewriter>" << std::endl;
+
+  data::data_specification dspec = data::parse_data_specification(data_spec);
+  data::rewriter datar(dspec);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<data::number_postfix_generator> datae(dspec, datar, generator);
+  data::rewriter_with_variables datarv(dspec);
+  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
+  test_expressions(R, expr1, expr2, var_decl, sigma, data_spec);
+}
+
+void test_enumerate_quantifiers_rewriter2()
+{
   std::string var_decl;
-  std::string dspec;
+  std::string data_spec;
   std::string sigma;
   std::string expr1;
   std::string expr2;
 
   //------------------------//
-  dspec = "sort Enum = struct e1 | e2;\n";
+  data_spec = "sort Enum = struct e1 | e2;\n";
   var_decl =
     "datavar         \n"
     "predvar         \n"
     "  X: Enum;      \n"
     ;
-//  expr1 = "exists m1,m2:Enum.(X(m1) || X(m2))";
   expr1 = "exists m:Enum.(X(m))";
   expr2 = "X(e1) || X(e2)";
   sigma = "";
-  test_expressions(R, expr1, expr2, var_decl, sigma, dspec);
+  test_enumerate_quantifiers_rewriter(expr1, expr2, var_decl, sigma, data_spec);
+
+  //------------------------//
+  data_spec = "sort Enum = struct e1 | e2;\n";
+  var_decl =
+    "datavar         \n"
+    "predvar         \n"
+    "  X: Enum;      \n"
+    ;
+  expr1 = "exists m1,m2:Enum.(X(m1) || X(m2))";
+  expr2 = "X(e1) || X(e2)";
+  sigma = "";
+  test_enumerate_quantifiers_rewriter(expr1, expr2, var_decl, sigma, data_spec);
 }
 
 void test_enumerate_quantifiers_rewriter_finite()
@@ -299,6 +327,7 @@ void test_substitutions1()
   pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression("X(m+n)", var_decl);
   pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression("X(7)", var_decl);
   BOOST_CHECK(r(d1, sigma) == r(d2));
+  core::garbage_collect();
 }
 
 template <typename PbesRewriter>
@@ -307,6 +336,7 @@ void test_map_substitution_adapter(PbesRewriter r)
   atermpp::map<data::variable, data::data_expression_with_variables> sigma;
   pbes_system::pbes_expression x = data::sort_bool::true_();
   pbes_system::pbes_expression y = r(x, data::make_map_substitution_adapter(sigma));
+  core::garbage_collect();
 }
 
 void test_substitutions2()
@@ -460,6 +490,7 @@ void test_substitutions3()
 
   pbes_system::pbes_expression phi = pbes_system::parse_pbes_expression("forall k_S2_00: Nat. val(!(k_S2_00 < m_S && !bst_K && !bst1_K)) || X(l_S, m_S, false, true, (l_S + k_S2_00) mod 4, bst2_L, bst3_L, k_L, l'_R, b_R)", var_decl, DATA_SPEC);
   pbes_system::pbes_expression x = r(phi, sigma);
+  core::garbage_collect();
 }
 
 void test_pfnf_rewriter()
@@ -471,6 +502,7 @@ void test_pfnf_rewriter()
   pbes_expression y = R(x);
 
   // TODO: add real test cases for PFNF rewriter
+  core::garbage_collect();
 }
 
 int test_main(int argc, char* argv[])
@@ -478,19 +510,13 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_simplifying_rewriter();
-  core::garbage_collect();
   test_enumerate_quantifiers_rewriter();
-  core::garbage_collect();
+  test_enumerate_quantifiers_rewriter2();
   test_enumerate_quantifiers_rewriter_finite();
-  core::garbage_collect();
   test_substitutions1();
-  core::garbage_collect();
   test_substitutions2();
-  core::garbage_collect();
   test_substitutions3();
-  core::garbage_collect();
   test_pfnf_rewriter();
-  core::garbage_collect();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
   BOOST_CHECK(false);
