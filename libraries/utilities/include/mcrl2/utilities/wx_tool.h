@@ -85,7 +85,7 @@ namespace mcrl2 {
 
           bool Initialize(int& argc, wxChar** argv) {
             try {
-              bool result = execute(argc, argv);
+              bool result = execute(argc, argv) == 0;
 
               m_execute = (m_execute || result) && wxApp::Initialize(argc, argv);
             }

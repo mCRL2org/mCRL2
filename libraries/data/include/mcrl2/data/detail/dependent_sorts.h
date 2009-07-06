@@ -70,7 +70,7 @@ namespace mcrl2 {
                 {
                   if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
                   {
-                    (*this)(i.front());
+                    static_cast< super& >(*this)(i.front());
                   }
                 }
               }
@@ -99,19 +99,23 @@ namespace mcrl2 {
             }
             else
             {
-              (*this)(actual_sort);
+              static_cast< super& >(*this)(actual_sort);
             }
           }
 
         public:
 
-          using super::operator();
-
           // Alternative traversal for function_sort
           void operator()(const function_sort& s)
           {
             m_action(s);
-            (*this)(s.domain());
+            static_cast< super& >(*this)(s.domain());
+          }
+
+          template < typename Expression >
+          void operator()(const Expression& e)
+          {
+            static_cast< super& >(*this)(e);
           }
 
           dependent_sort_helper(data_specification const& specification) :
@@ -149,7 +153,7 @@ namespace mcrl2 {
             }
             else
             {
-              (*this)(s);
+              static_cast< super& >(*this)(s);
             }
           }
 
