@@ -1,4 +1,4 @@
-.PHONY: all bjam install test tags clean distclean parsers mcrl2parser chiparser liblts_fsmparser doxy
+.PHONY: all bjam install test tags clean distclean parsers mcrl2parser chiparser liblts_fsmparser doxy tex
 
 all: bjam config.status
 	$(BOOST_BUILD)
@@ -60,6 +60,9 @@ tags:
 
 doxy:
 	@doc/doxy/generate_libref_website.sh
+
+tex:
+	@doc/doxy/generate_libdocs.sh
 
 build/Makefile:
 	$(error Please run configure first)
