@@ -20,16 +20,13 @@
 #include <string>
 
 //mCRL2 specific
-#include "mcrl2/core/parse.h"
-#include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/txt2pbes.h"
 
-using namespace mcrl2::core;
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace mcrl2::data::detail;
 
 class txt2pbes_tool: public input_output_tool
 {
@@ -46,48 +43,8 @@ class txt2pbes_tool: public input_output_tool
 
     bool run()
     {
-      ATermAppl result = NULL;
-      //parse specification
-      if (input_filename().empty()) {
-        //parse specification from stdin
-        gsVerboseMsg("parsing input from stdin...\n");
-        result = parse_pbes_spec(std::cin);
-      } else {
-        //parse specification from input_filename()
-        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) {
-          throw mcrl2::runtime_error("cannot open input file '" + input_filename() + "'");
-        }
-        gsVerboseMsg("parsing input file '%s'...\n", input_filename().c_str());
-        result = parse_pbes_spec(instream);
-        instream.close();
-      }
-      if (result == NULL) {
-        throw mcrl2::runtime_error("parsing failed");
-      }
-      //type check the result
-      gsVerboseMsg("type checking...\n");
-      result = type_check_pbes_spec(result);
-      if (result == NULL) {
-        throw mcrl2::runtime_error("type checking failed");
-      }
-      //check if PBES is monotonic
-      try {
-        gsVerboseMsg("checking monotonicity...\n");
-        mcrl2::pbes_system::pbes<> p(result);
-        //TODO replace by a more sophisticated check
-        p.normalize();
-      }
-      catch (std::exception&) {
-        throw mcrl2::runtime_error("PBES is not monotonic");
-      }
-      //store the result
-      if (output_filename().empty()) {
-        gsVerboseMsg("saving result to stdout...\n");
-      } else {
-        gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
-      }
-      mcrl2::pbes_system::pbes<> p(result);
+      std::string text = core::read_text(input_filename());
+      pbes_system::pbes<> p = pbes_system::txt2pbes(text);
       p.save(output_filename());
       return true;
     }
