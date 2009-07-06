@@ -57,12 +57,6 @@ const std::string VARIABLE_SPECIFICATION =
   "  Z: Bool, Nat; \n"
   ;
 
-inline
-pbes_expression expr(const std::string& text)
-{
-  return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
-}
-
 /// print a term (pretty print + ascii representation)
 template <typename Term>
 std::string ppp(Term t)
@@ -73,56 +67,53 @@ std::string ppp(Term t)
 }
 
 template <typename Rewriter1, typename Rewriter2>
-void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2)
+void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
 {
-  if (R1(expr(expr1)) != R2(expr(expr2)))
+  pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl, data_spec);
+  pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl, data_spec);
+
+  if (substitutions == "")
   {
-    BOOST_CHECK(R1(expr(expr1)) == R2(expr(expr2)));
-    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    
+    if (R1(d1) != R2(d2))
+    {
+      BOOST_CHECK(R1(d1) == R2(d2));
+      std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    }
+    else
+    {
+      std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
+    }
+    std::cout << "expr1    " << core::pp(d1) << std::endl;
+    std::cout << "expr2    " << core::pp(d2) << std::endl;
+    std::cout << "R(expr1) " << ppp(R1(d1)) << std::endl;
+    std::cout << "R(expr2) " << ppp(R2(d2)) << std::endl << std::endl;
   }
   else
   {
-    std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
+    data::mutable_map_substitution<data::variable, data::data_expression_with_variables> sigma;
+    data::detail::parse_substitutions(substitutions, sigma);
+    if (R1(d1, sigma) != R2(d2))
+    {
+      BOOST_CHECK(R1(d1, sigma) == R2(d2));
+      std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+    }
+    else
+    {
+      std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
+    }
+    std::cout << "d1            " << core::pp(d1) << std::endl;
+    std::cout << "d2            " << core::pp(d2) << std::endl;
+    std::cout << "sigma         " << substitutions << std::endl;
+    std::cout << "R1(d1, sigma) " << ppp(R1(d1, sigma)) << std::endl;
+    std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl << std::endl;
   }
-  std::cout << "expr1    " << core::pp(expr(expr1)) << std::endl;
-  std::cout << "expr2    " << core::pp(expr(expr2)) << std::endl;
-  std::cout << "R(expr1) " << ppp(R1(expr(expr1))) << std::endl;
-  std::cout << "R(expr2) " << ppp(R2(expr(expr2))) << std::endl << std::endl;
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2)
+void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
 {
-  test_expressions(R, expr1, R, expr2);
-}
-
-template <typename Rewriter1, typename Rewriter2>
-void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl, std::string substitutions)
-{
-  data::mutable_map_substitution<data::variable, data::data_expression_with_variables> sigma;
-  data::detail::parse_substitutions(substitutions, sigma);
-  pbes_system::pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl);
-  pbes_system::pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl);
-  if (R1(d1, sigma) != R2(d2))
-  {
-    BOOST_CHECK(R1(d1, sigma) == R2(d2));
-    std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
-  }
-  else
-  {
-    std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
-  }
-  std::cout << "d1            " << core::pp(d1) << std::endl;
-  std::cout << "d2            " << core::pp(d2) << std::endl;
-  std::cout << "sigma         " << substitutions << std::endl;
-  std::cout << "R1(d1, sigma) " << ppp(R1(d1, sigma)) << std::endl;
-  std::cout << "R2(d2)        " << ppp(R2(d2)) << std::endl << std::endl;
-}
-
-template <typename Rewriter>
-void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::string var_decl, std::string substitutions)
-{
-  test_expressions(R, expr1, R, expr2, var_decl, substitutions);
+  test_expressions(R, expr1, R, expr2, var_decl, substitutions, data_spec);
 }
 
 void test_simplifying_rewriter()
@@ -190,7 +181,7 @@ void test_enumerate_quantifiers_rewriter()
   data::data_expression d = data::parse_data_expression("n < 10", "n: Pos;\n");
   data::data_expression_with_variables dv(d);
 
-  pbes_system::pbes_expression y = expr("Y(n)");
+  pbes_system::pbes_expression y = pbes_system::parse_pbes_expression("Y(n)", VARIABLE_SPECIFICATION);
   pbes_system::pbes_expression_with_variables yv(y, data::variable_list());
 
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
@@ -227,6 +218,25 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
+
+  std::string var_decl;
+  std::string dspec;
+  std::string sigma;
+  std::string expr1;
+  std::string expr2;
+
+  //------------------------//
+  dspec = "sort Enum = struct e1 | e2;\n";
+  var_decl =
+    "datavar         \n"
+    "predvar         \n"
+    "  X: Enum;      \n"
+    ;
+//  expr1 = "exists m1,m2:Enum.(X(m1) || X(m2))";
+  expr1 = "exists m:Enum.(X(m))";
+  expr2 = "X(e1) || X(e2)";
+  sigma = "";
+  test_expressions(R, expr1, expr2, var_decl, sigma, dspec);
 }
 
 void test_enumerate_quantifiers_rewriter_finite()
@@ -457,7 +467,7 @@ void test_pfnf_rewriter()
   using namespace pbes_system;
 
   pfnf_rewriter<pbes_expression> R;
-  pbes_expression x = expr("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)");
+  pbes_expression x = parse_pbes_expression("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)", VARIABLE_SPECIFICATION);
   pbes_expression y = R(x);
 
   // TODO: add real test cases for PFNF rewriter
