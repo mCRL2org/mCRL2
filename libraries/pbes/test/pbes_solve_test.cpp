@@ -33,8 +33,10 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
   {
     std::cout << "--- failed test ---\n";
     std::cout << core::pp(pbes_to_aterm(p)) << std::endl;
-    std::cout << "result: "          << std::boolalpha(result) << std::endl;
-    std::cout << "expected result: " << std::boolalpha(expected_result) << std::endl;
+    std::cout << "result: "          << result << std::endl;
+    std::cout << "expected result: " << expected_result << std::endl;
+    // std::cout << "result: "          << std::boolalpha(result) << std::endl;
+    // std::cout << "expected result: " << std::boolalpha(expected_result) << std::endl;
   }
   BOOST_CHECK(result == expected_result);
 }

@@ -38,12 +38,12 @@
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
-//LPS-Framework
+//Data Framework
 #include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/utility.h"
 #include "mcrl2/data/selection.h"
 
 //Boolean equation systems
+#include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/bes_deprecated.h"
 #include "mcrl2/pbes/pbesrewr.h"
 

@@ -13,8 +13,17 @@
 #ifndef MCRL2_PBES_PBES_SOLVER_TEST_H
 #define MCRL2_PBES_PBES_SOLVER_TEST_H
 
+//Rewriters
+// #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/data/rewriter.h"
+// #include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/pbes/rewriter.h"
+// #include "mcrl2/utilities/rewriter_tool.h"
+
 //Data framework
 #include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/selection.h"
+
 
 //Boolean equation systems
 // #include "mcrl2/pbes/utility.h"
@@ -35,18 +44,20 @@ namespace pbes_system {
 ///         pbes2bool uses more advanced features).
 
 template < typename Container > 
-bool pbes2_bool_test(const typename pbes<Container>& pbes_spec)
+bool pbes2_bool_test(pbes< Container > &pbes_spec)
 { // Generate an enumerator, a data rewriter and a pbes rewriter.
-  data::rewriter datar= 
-            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), p.equations()), rewrite_strategy());
+  data::rewriter datar(pbes_spec.data(), 
+                       mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_to_aterm(pbes_spec, false)),
+                       mcrl2::data::rewriter::jitty);
+            // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);
-  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::data_enumerator<> datae(pbes_spec.data(), datar, generator);
   const bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,data::data_enumerator<> >
                           pbesr(datarv, datae, enumerate_infinite_sorts);
-  ::bes::boolean_equation_system bes_equations(p, pbesr);
-  return solve_bes(bes_equations);
+  ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);
+  return solve_bes(bes_equations,false,false);
 } 
 
 } // namespace pbes_system
