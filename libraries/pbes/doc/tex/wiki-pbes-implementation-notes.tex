@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Friday, February 06, 2009 15:09:22}
+%TCIDATA{LastRevised=Tuesday, July 07, 2009 10:09:43}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -730,81 +730,64 @@ bisimulation.\newpage
 \section{PBES rewriters}
 
 In this section we describe two PBES rewriters. We assume that a data
-rewriter $\mathsf{datar}$ is given that rewrites data terms.
+rewriter $r$ is given that rewrites data terms.
 
 \subsection{Simplifying rewriter}
 
-We define a simplifying PBES rewriter $\mathsf{pbesr}$ recursively as follows%
+We define a simplifying PBES rewriter $R$ recursively as follows%
 \begin{equation*}
-\begin{array}{ccl}
-\mathsf{pbesr}(b) & = & \mathsf{datar}(b) \\ 
-\mathsf{pbesr}(\lnot \varphi ) & = & \lnot \mathsf{pbesr}(\varphi ) \\ 
-&  &  \\ 
-\mathsf{pbesr}(\varphi \wedge \psi ) & = & \left\{ 
 \begin{array}{lcl}
-false &  & \text{if }\mathsf{pbesr}(\varphi )=false\vee \mathsf{pbesr}(\psi
-)=false \\ 
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=true \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=true \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
-pbesr}(\psi ) \\ 
-\mathsf{pbesr}(\varphi )\wedge \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
-\end{array}%
-\right. \\ 
-&  &  \\ 
-\mathsf{pbesr}(\varphi \vee \psi ) & = & \left\{ 
-\begin{array}{lcl}
-true &  & \text{if }\mathsf{pbesr}(\varphi )=true\vee \mathsf{pbesr}(\psi
-)=true \\ 
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=false \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=false \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{%
-pbesr}(\psi ) \\ 
-\mathsf{pbesr}(\varphi )\vee \mathsf{pbesr}(\psi ) &  & \text{otherwise}%
-\end{array}%
-\right. \\ 
-&  &  \\ 
-\mathsf{pbesr}(\varphi \rightarrow \psi ) & = & \left\{ 
-\begin{array}{lcl}
-\mathsf{pbesr}(\psi ) &  & \text{if }\mathsf{pbesr}(\varphi )=true \\ 
-true &  & \text{if }\mathsf{pbesr}(\varphi )=false \\ 
-true &  & \text{if }\mathsf{pbesr}(\psi )=true \\ 
-\mathsf{pbesr}(\lnot \varphi ) &  & \text{if }\mathsf{pbesr}(\psi )=false \\ 
-true &  & \text{if }\mathsf{pbesr}(\varphi )=\mathsf{pbesr}(\psi ) \\ 
-\mathsf{pbesr}(\varphi )\rightarrow \mathsf{pbesr}(\psi ) &  & \text{%
-otherwise}%
-\end{array}%
-\right. \\ 
-&  &  \\ 
-\mathsf{pbesr}(\forall _{d:D}.\varphi ) & = & \left\{ 
-\begin{array}{lcl}
-true &  & \text{if }\mathsf{pbesr}(\varphi )=true \\ 
-false &  & \text{if }\mathsf{pbesr}(\varphi )=false\text{ and }D\text{ is
-non-empty} \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
+R(b) & \rightarrow  & r(b) \\ 
+R(\lnot \lnot \varphi ) & \rightarrow  & R(\varphi ) \\ 
+R(\varphi \wedge true) & \rightarrow  & R(\varphi ) \\ 
+R(\varphi \wedge false) & \rightarrow  & false \\ 
+R(\varphi \vee true) & \rightarrow  & true \\ 
+R(\varphi \vee false) & \rightarrow  & R(\varphi ) \\ 
+R(true\rightarrow \varphi ) & \rightarrow  & R(\varphi ) \\ 
+R(false\rightarrow \varphi ) & \rightarrow  & true \\ 
+R(\varphi \rightarrow true) & \rightarrow  & true \\ 
+R(\varphi \rightarrow false) & \rightarrow  & R(\lnot R(\varphi )) \\ 
+R(\forall _{d:D}.\varphi ) & \rightarrow  & true\text{ if }D\text{ is empty}
 \\ 
-\forall _{d:D}.\mathsf{pbesr}(\varphi ) &  & \text{otherwise}%
-\end{array}%
-\right. \\ 
-&  &  \\ 
-\mathsf{pbesr}(\exists _{d:D}.\varphi ) & = & \left\{ 
-\begin{array}{lcl}
-true &  & \text{if }\mathsf{pbesr}(\varphi )=true\text{ and }D\text{ is
-non-empty} \\ 
-false &  & \text{if }\mathsf{pbesr}(\varphi )=false \\ 
-\mathsf{pbesr}(\varphi ) &  & \text{if }d\text{ does not occur in }\varphi
+R(\forall _{d:D}.\varphi ) & \rightarrow  & R(\varphi )\text{ if }D\text{ is
+non-empty and }d\text{ does not occur in }\varphi  \\ 
+R(\forall _{d:D}.true) & \rightarrow  & true\text{ if }D\text{ is non-empty}
 \\ 
-\exists _{d:D}.\mathsf{pbesr}(\varphi ) &  & \text{otherwise}%
-\end{array}%
-\right. \\ 
-&  &  \\ 
-\mathsf{pbesr}(X(e)) & = & X(\mathsf{datar}(e))%
+R(\forall _{d:D}.false) & \rightarrow  & false\text{ if }D\text{ is non-empty%
+} \\ 
+R(\forall _{d:D}.\lnot \varphi ) & \rightarrow  & R(\lnot R(\exists
+_{d:D}.R(\varphi )))\text{ if }D\text{ is non-empty} \\ 
+R(\forall _{d:D}.\varphi \wedge \psi ) & \rightarrow  & R(R(\forall
+_{d:D}.\varphi )\wedge R(\forall _{d:D}.\psi ))\text{ if }D\text{ is
+non-empty} \\ 
+R(\forall _{d:D}.\varphi \vee \psi ) & \rightarrow  & R(R(\forall
+_{d:D}.\varphi )\vee R(\psi ))\text{ if }D\text{ is non-empty and }d\notin
+free(\psi ) \\ 
+R(\exists _{d:D}.\varphi ) & \rightarrow  & false\text{ if }D\text{ is empty}
+\\ 
+R(\exists _{d:D}.true) & \rightarrow  & true\text{ if }D\text{ is non-empty}
+\\ 
+R(\exists _{d:D}.false) & \rightarrow  & false\text{ if }D\text{ is non-empty%
+} \\ 
+R(\exists _{d:D}.\lnot \varphi ) & \rightarrow  & R(\lnot R(\forall
+_{d:D}.\varphi ))\text{ if }D\text{ is non-empty} \\ 
+R(\exists _{d:D}.\varphi \wedge \psi ) & \rightarrow  & R(R(\exists
+_{d:D}.\varphi )\vee R(\exists _{d:D}.\psi ))\text{ if }D\text{ is non-empty}
+\\ 
+R(\exists _{d:D}.\varphi \wedge \psi ) & \rightarrow  & R(R(\exists
+_{d:D}.\varphi )\vee R(\psi ))\text{ if }D\text{ is non-empty and }d\notin
+free(\psi ) \\ 
+R(X(e)) & \rightarrow  & X(r(e)) \\ 
+R(\lnot \varphi ) & \rightarrow  & \lnot R(\varphi ) \\ 
+R(\forall _{d:D}.\varphi ) & \rightarrow  & \forall _{d:D}.R(\varphi ) \\ 
+R(\exists _{d:D}.\varphi ) & \rightarrow  & \exists _{d:D}.R(\varphi )%
 \end{array}%
 \end{equation*}%
 where $b$ is a data term of data sort $\mathbb{B}$, $true$ and $false$ are
-elements of data sort $\mathbb{B}$, $X$ is a predicate variable, $e$consists
-of zero or more data sorts and $d,d_{1},d_{2}$ are data variables of sort $D$%
-.
+elements of data sort $\mathbb{B}$, $X$ is a predicate variable, $e$
+consists of zero or more data sorts and $d,d_{1},d_{2}$ are data variables
+of sort $D$. The last three rules have lower priority than the others,
+meaning that they may be only applied if no other rules can be applied.
 
 \paragraph{\newpage Simplify}
 
@@ -956,7 +939,7 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=\bot  \\ 
+c_{X}:=\bot \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
@@ -992,7 +975,7 @@ e[i] & \text{if }c=\bot \text{ and }e[i]\text{ is constant} \\
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right. 
+\right.
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an
