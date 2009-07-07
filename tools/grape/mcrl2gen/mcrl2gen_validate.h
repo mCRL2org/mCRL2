@@ -573,13 +573,15 @@ namespace grape
     /**
      * Channel communication list validation function.
      * Validates a list of channel communications.
+     * @param p_doc_root The XML GraPE specification containing the list of channels.
      * @param p_architecture_diagram The XML architecture diagram containing the list of channel communications.
      * @param p_channel_communication_list The XML list of channel communications.
+     * @param datatype_spec The datatype specification.
      * @return True if the list of channel communications is valid, false otherwise.
-     * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram containing the list of channel communications and p_channel_communication_list is a valid pointer to an XML list of channel communications.
+     * @pre p_doc_root is a valid pointer to an XML GraPE specification containing the list of channels, p_architecture_diagram is a valid pointer to an XML architecture diagram containing the list of channel communications and p_channel_communication_list is a valid pointer to an XML list of channel communications.
      * @post The validity of the list of channel communications is returned and error messages are produced if necessary.
      */
-    bool validate_channel_communication_list(wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_communication_list);
+    bool validate_channel_communication_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_communication_list, ATermAppl &datatype_spec);
 
     /**
      * Channel list validation function.

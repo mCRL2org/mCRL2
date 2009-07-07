@@ -2051,7 +2051,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
     {
       if(curr_list->GetName() == _T("channelcommunicationlist"))
       {
-        channel_communication_list_is_valid = validate_channel_communication_list(p_architecture_diagram, curr_list);
+        channel_communication_list_is_valid = validate_channel_communication_list(p_doc_root, p_architecture_diagram, curr_list, datatype_spec);
       }
       else if(curr_list->GetName() == _T("channellist"))
       {
@@ -2276,7 +2276,7 @@ bool grape::mcrl2gen::validate_process_reference_list(wxXmlNode *p_doc_root, wxX
   return true;
 }
 
-bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_communication_list)
+bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, wxXmlNode *p_channel_communication_list, ATermAppl &datatype_spec)
 {
   // a channel communication is valid when all its connections are to existing channels
   // initialize variables
@@ -2329,29 +2329,178 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_architect
       }
     }
 
+
+
+
+
+    list_of_action comm_type, new_comm_type;
+    int connection_nr = 0;
     // loop through connections
     for(wxXmlNode *connection = connectionlist->GetChildren(); connection != 0; connection = connection->GetNext())
     {
       wxString connection_channel = connection->GetNodeContent();
       // loop through channels
-      bool found = false;
+      bool channel_found = false;
       for(wxXmlNode *channel = channels->GetChildren(); channel != 0; channel = channel->GetNext())
       {
+        // get channel id
         wxString channel_id = get_child_value(channel, _T("id"));
         if(channel_id == connection_channel)
         {
-          found = true;
+          // get process / architecture reference the channel is on
+          wxString channel_reference = get_child_value(channel, _T("onreference"));
+          // get reference
+          wxXmlNode *reference = 0;
+          bool is_process_reference = false;
+          wxXmlNode *proc_references = get_child(objects, _T("processreferencelist"));
+          wxXmlNode *arch_references = get_child(objects, _T("architecturereferencelist"));
+
+          // loop through process references
+          for(wxXmlNode *proc_reference = proc_references->GetChildren(); proc_reference != 0; proc_reference = proc_reference->GetNext())
+          {
+            wxString proc_id = get_child_value(proc_reference, _T("id"));
+            if(proc_id == channel_reference)
+            {
+              wxString proc_diag = get_child_value(proc_reference, _T("propertyof"));
+              try
+              {
+                reference = get_diagram(p_doc_root, proc_diag);
+              }
+              catch(...)
+              {}
+              is_process_reference = true;
+              break;
+            }
+          }
+          if(reference == 0)
+          {
+            for(wxXmlNode *arch_reference = arch_references->GetChildren(); arch_reference != 0; arch_reference = arch_reference->GetNext())
+            {
+              wxString arch_id = get_child_value(arch_reference, _T("id"));
+              if(arch_id == channel_reference)
+              {
+                wxString arch_diag = get_child_value(arch_reference, _T("propertyof"));
+                try
+                {
+                  reference = get_diagram(p_doc_root, arch_diag);
+                }
+                catch(...)
+                {}
+                is_process_reference = false;
+                break;
+              }
+            }
+          }
+          if(reference == 0)
+          {
+            cerr << "Architecture diagram " << diagram_name.ToAscii()
+                 << " contains a channel that lies on a reference to a non-existing diagram." << endl;
+            return false;
+          }
+          else
+          {
+            // check name
+            wxString channel_name = get_child_value(channel, _T("name"));
+            if(channel_name.IsEmpty())
+            {
+              cerr << "Architecture diagram " << diagram_name.ToAscii()
+                   << " contains a channel with no name." << endl;
+              return false;
+            }
+            // parse channel name
+            if (!gsIsUserIdentifier(std::string(channel_name.fn_str())))
+            {
+              // ERROR: channel communication name is not an identifier
+              cerr << "Architecture diagram " << diagram_name.ToAscii()
+                   << " contains a channel name " << channel_name.ToAscii()
+                   << " which is not a valid identifier." << endl;
+              return false;
+            }
+
+            // get actions of referenced diagram
+            list_of_action ref_actions;
+            wxString ref_id = get_child_value(reference, _T("id"));
+            if(is_process_reference)
+            {
+              // channel lies on a process reference
+              try
+              {
+                ref_actions = get_process_actions(p_doc_root, ref_id, datatype_spec);
+              }
+              catch(...)
+              {
+                return false;
+              }
+            }
+            else
+            {
+              // channel lies on an architecture reference
+              try
+              {
+                ref_actions = get_architecture_visibles(p_doc_root, ref_id, datatype_spec);
+              }
+              catch(...)
+              {
+                return false;
+              }
+            }
+
+            // loop through actions of refenced diagram
+            for(unsigned int i=0; i<ref_actions.GetCount(); ++i)
+            {
+              if(ref_actions[i].get_name() == channel_name)
+              {
+                if (connection_nr == 0)
+                {
+                  new_comm_type.Add(ref_actions[i]);
+                }
+                else
+                {
+                  for (unsigned int j=0; j<comm_type.GetCount(); ++j)
+                  {
+                    if (comm_type[j].get_parameters().GetCount() == ref_actions[i].get_parameters().GetCount())
+                    {
+                      bool type_found = true;
+                      for (unsigned int k=0; type_found && k<comm_type[j].get_parameters().GetCount(); ++k)
+                      {
+                        type_found = comm_type[j].get_parameters()[k].get_type() == ref_actions[i].get_parameters()[k].get_type();
+                      }
+                      if (type_found)
+                      {
+                        new_comm_type.Add(ref_actions[i]);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          channel_found = true;
           break;
         }
       }
-      if(!found)
+      if(!channel_found)
       {
         cerr << "Architecture diagram " << diagram_name.ToAscii()
              << " contains a channel communication that is connected to a non-existing channel." << endl;
         return false;
       }
+      ++connection_nr;
+      comm_type = new_comm_type;
+      new_comm_type.Empty();
+    }
+
+    // check communication type
+    if (comm_type.IsEmpty())
+    {
+      cerr << "Architecture diagram " << diagram_name.ToAscii()
+           << " contains a channel communication which channels have not the same type of action inside its associated reference." << endl;
+      return false;
     }
   }
+
+
+
 
   return true;
 }
