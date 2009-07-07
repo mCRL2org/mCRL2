@@ -15,16 +15,7 @@
 
 #include <string>
 #include <wx/wx.h>
-
 #include <wx/glcanvas.h>
-#ifdef __APPLE__
-# include <GLUT/glut.h>
-#else
-# ifdef WIN32
-#  include <windows.h>
-# endif
-# include <GL/glu.h>
-#endif
 
 namespace mcrl2
 {
