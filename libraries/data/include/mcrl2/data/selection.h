@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/dependent_sorts.h"
 
@@ -26,28 +27,41 @@ namespace mcrl2 {
       
       private:
 
-        std::set< sort_expression > m_used_sorts;
+        std::set< function_symbol > m_used_symbols;
+
+        template < typename Range >
+        void add_symbols(Range const& r)
+        {
+          m_used_symbols.insert(r.begin(), r.end()); 
+        }
 
       public:
 
         bool operator()(data_equation const& e) const
         {
-          if (e.lhs().is_application())
-          {
-            return m_used_sorts.find(application(e.lhs()).head().sort()) != m_used_sorts.end();
-          }
-          else if (e.lhs().is_function_symbol())
-          {
-            return m_used_sorts.find(function_symbol(e.lhs()).sort()) != m_used_sorts.end();
-          }
+          std::set< function_symbol > used_symbols;
 
-          return true;
+          detail::make_find_helper< function_symbol >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
+
+          return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
         }
 
-        template < typename Sequence >
-        used_data_equation_selector(data_specification const& specification, Sequence const& context)
+        // temporary measure: use aterm
+        used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context)
         {
-          find_dependent_sorts(specification, context, std::inserter(m_used_sorts, m_used_sorts.end()));
+          // Trick, traverse all but the data specification
+          for (atermpp::aterm_appl::const_iterator i = ++(++context.begin()); i != context.end(); ++i)
+          {
+            detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
+
+            const std::set< variable > variables = find_free_variables(*i);
+
+            for (std::set< variable >::const_iterator j = variables.begin(); j != variables.end(); ++j)
+            {
+              add_symbols(specification.constructors(j->sort()));
+              add_symbols(specification.mappings(j->sort()));
+            }
+          }
 
           std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
 
@@ -57,7 +71,7 @@ namespace mcrl2 {
             {
               if ((*this)(*i))
               {
-                find_dependent_sorts(specification, *i, std::inserter(m_used_sorts, m_used_sorts.end()));
+                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
 
                 equations.erase(i);
               }

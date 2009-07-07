@@ -33,7 +33,6 @@ using namespace mcrl2::trace;
 
 static ATerm get_repr(ATerm state);
 
-
 exploration_strategy str_to_expl_strat(const char *s)
 {
   if ( !strcmp(s,"b") || !strcmp(s,"breadth") )
@@ -159,7 +158,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   lgopts->m_rewriter.reset(
     (lgopts->removeunused) ?
       new mcrl2::data::rewriter(lgopts->specification.data(), 
-		mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::linear_process_to_aterm(lgopts->specification.process())), lgopts->strat) :
+		mcrl2::data::used_data_equation_selector(lgopts->specification.data(), mcrl2::lps::specification_to_aterm(lgopts->specification, false)), lgopts->strat) :
       new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
   lgopts->m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(lgopts->specification.data(), *(lgopts->m_rewriter)));
 

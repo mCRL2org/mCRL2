@@ -26,7 +26,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/lps/linear_process.h"
-#include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/data/data_specification.h"

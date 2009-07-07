@@ -3297,7 +3297,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
     int arity = getArity(int2term[j]);
 
+#ifdef IS_DEBUG
     gsfprintf(f,  "// %T\n",int2term[j]);
+#endif
 /*    fprintf(f,  "static ATermAppl rewr_%i_nnf(ATermAppl t)\n"
                 "{\n",j);
     if (arity>0)
