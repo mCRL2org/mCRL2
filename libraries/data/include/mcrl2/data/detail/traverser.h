@@ -27,6 +27,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
@@ -146,6 +147,12 @@ namespace mcrl2 {
 
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
+          }
+
+          // Default, no traversal of sort expressions
+          void operator()(data_expression_with_variables const& e)
+          {
+            static_cast< Derived& >(*this)(static_cast< data_expression const& >(e));
           }
 
           // Default, no traversal of sort expressions

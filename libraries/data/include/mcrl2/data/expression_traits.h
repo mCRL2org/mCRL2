@@ -14,14 +14,22 @@
 
 #include <functional>
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/abstraction.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
 namespace mcrl2 {
+
+namespace data {
+  template < typename Container >
+  std::set< variable > find_free_variables(Container const& container);
+
+  template < typename Container >
+  std::set< variable > find_variables(Container const& container);
+}
 
 namespace core {
 
@@ -42,20 +50,20 @@ namespace core {
     /// \return The value true
     static inline
     term_type true_()
-    { return atermpp::aterm_appl(core::detail::gsMakeDataExprTrue()); }
+    { return data::sort_bool::true_(); }
 
     /// \brief The value false
     /// \return The value false
     static inline
     term_type false_()
-    { return atermpp::aterm_appl(core::detail::gsMakeDataExprFalse()); }
+    { return data::sort_bool::false_(); }
 
     /// \brief Operator not
     /// \param p A term
     /// \return Operator not applied to p
     static inline
     term_type not_(term_type p)
-    { return atermpp::aterm_appl(core::detail::gsMakeDataExprNot(p)); }
+    { return data::sort_bool::not_(p); }
 
     /// \brief Operator and
     /// \param p A term
@@ -63,7 +71,7 @@ namespace core {
     /// \return Operator and applied to p and q
     static inline
     term_type and_(term_type p, term_type q)
-    { return atermpp::aterm_appl(core::detail::gsMakeDataExprAnd(p,q)); }
+    { return data::sort_bool::and_(p, q); }
 
     /// \brief Operator or
     /// \param p A term
@@ -71,70 +79,70 @@ namespace core {
     /// \return Operator or applied to p and q
     static inline
     term_type or_(term_type p, term_type q)
-    { return atermpp::aterm_appl(core::detail::gsMakeDataExprOr(p,q)); }
+    { return data::sort_bool::or_(p, q); }
 
     /// \brief Test for value true
     /// \param t A term
     /// \return True if the term has the value true
     static inline
     bool is_true(term_type t)
-    { return core::detail::gsIsDataExprTrue(t); }
+    { return t == data::sort_bool::true_(); }
 
     /// \brief Test for value false
     /// \param t A term
     /// \return True if the term has the value false
     static inline
     bool is_false(term_type t)
-    { return core::detail::gsIsDataExprFalse(t); }
+    { return t == data::sort_bool::false_(); }
 
     /// \brief Test for operator not
     /// \param t A term
     /// \return True if the term is of type not
     static inline
     bool is_not(term_type t)
-    { return core::detail::gsIsDataExprNot(t); }
+    { return data::sort_bool::is_not_application(t); }
 
     /// \brief Test for operator and
     /// \param t A term
     /// \return True if the term is of type and
     static inline
     bool is_and(term_type t)
-    { return core::detail::gsIsDataExprAnd(t); }
+    { return data::sort_bool::is_and_application(t); }
 
     /// \brief Test for operator or
     /// \param t A term
     /// \return True if the term is of type or
     static inline
     bool is_or(term_type t)
-    { return core::detail::gsIsDataExprOr(t); }
+    { return data::sort_bool::is_or_application(t); }
 
     /// \brief Test for implication
     /// \param t A term
     /// \return True if the term is an implication
     static inline
     bool is_imp(term_type t)
-    { return core::detail::gsIsDataExprImp(t);; }
+    { return data::sort_bool::is_implies_application(t); }
 
     /// \brief Test for universal quantification
     /// \param t A term
     /// \return True if the term is an universal quantification
     static inline
     bool is_forall(term_type t)
-    { return core::detail::gsIsDataExprForall(t); }
+    { return t.is_abstraction() && data::abstraction(t).is_forall(); }
 
     /// \brief Test for existential quantification
     /// \param t A term
     /// \return True if the term is an existential quantification
     static inline
     bool is_exists(term_type t)
-    { return core::detail::gsIsDataExprExists(t); }
+    { return t.is_abstraction() && data::abstraction(t).is_exists(); }
 
     /// \brief Test for lambda abstraction
     /// \param t A term
     /// \return True if the term is a lambda expression
     static inline
     bool is_lambda(term_type t)
-    { return core::detail::gsIsDataExprLambda(t); }
+    { return t.is_abstraction() && data::abstraction(t).is_lambda(); }
 
     /// \brief Conversion from variable to term
     /// \param v A variable
@@ -181,12 +189,7 @@ namespace core {
     static inline
     bool is_constant(term_type t)
     {
-      struct local {
-        static bool caster(atermpp::aterm p) {
-          return data::data_expression(p).is_variable();
-        }
-      };
-      return atermpp::find_if(t, std::ptr_fun(&local::caster)) == atermpp::aterm();
+      return find_variables(t).empty();
     }
 
     /// \brief Pretty print function
@@ -195,7 +198,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t);
+      return data::pp(t);
     }
   };
 
@@ -287,5 +290,7 @@ namespace data {
 }
 
 } // namespace mcrl2
+
+#include "mcrl2/data/find.h"
 
 #endif // MCRL2_DATA_TERM_TRAITS_H
