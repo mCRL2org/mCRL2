@@ -880,7 +880,7 @@ assignment_list determine_process_initialization(
 specification realelm(specification s, int max_iterations, const rewriter &r)
 {
   if (s.process().has_time())
-  { throw  mcrl2::runtime_error("Input specification contains actions with time tags. Use lpsuntime first.");
+  { throw  mcrl2::runtime_error("Input specification contains actions with time. Use lpsuntime first.");
   }
   // First prepare the rewriter and normalize the specification.
   comp_struct c;
@@ -893,7 +893,9 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());
   std::vector < summand_information > summand_info;
+  std::cerr << "Normalize specification in\n";
   normalize_specification(s, real_parameters, r, summand_info);
+  std::cerr << "Normalize specification out\n";
 
   context_type context; // Contains introduced variables
 

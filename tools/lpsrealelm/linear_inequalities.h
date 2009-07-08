@@ -65,7 +65,7 @@ class linear_inequality
         template < application Operation(const data_expression &, const data_expression &) >
         lhs_t &meta_operation_constant(const data_expression v, const rewriter &r)
         { for(lhs_t::iterator i=begin();i!=end();++i)
-          { i->second=r(Operation(v,i->second));
+          { i->second=rewrite_with_memory(Operation(v,i->second),r);
           }
           return *this;
         }
@@ -75,10 +75,10 @@ class linear_inequality
         lhs_t &meta_operation_lhs(const lhs_t &e, const rewriter &r)
         { for(lhs_t::const_iterator i=e.begin();i!=e.end();++i)
           { if (count(i->first)==0)
-            { (*this)[i->first]=r(Operation(real_zero(),i->second));
+            { (*this)[i->first]=rewrite_with_memory(Operation(real_zero(),i->second),r);
             }
             else
-            { (*this)[i->first]=r(Operation((*this)[i->first],i->second));
+            { (*this)[i->first]=rewrite_with_memory(Operation((*this)[i->first],i->second),r);
             }
           }
           return *this;
@@ -173,7 +173,7 @@ class linear_inequality
         parse_and_store_expression(application(e).right(),r,negate,factor);
       }
       else if (sort_real::is_times_application(e))
-      { data_expression lhs=r(application(e).left()), rhs=r(application(e).right());
+      { data_expression lhs=rewrite_with_memory(application(e).left(),r), rhs=rewrite_with_memory(application(e).right(),r);
         if (is_closed_real_number(lhs))
         { parse_and_store_expression(rhs,r,negate,sort_real::times(lhs,factor));
         }
@@ -550,20 +550,20 @@ inline data_expression multiply(const data_expression e1,const data_expression e
 } */
 
 inline data_expression min(const data_expression e1,const data_expression e2,const rewriter &r)
-{ if (r(less_equal(e1,e2))==sort_bool::true_())
+{ if (rewrite_with_memory(less_equal(e1,e2),r)==sort_bool::true_())
   { return e1;
   }
-  if (r(less_equal(e2,e1))==sort_bool::true_())
+  if (rewrite_with_memory(less_equal(e2,e1),r)==sort_bool::true_())
   { return e2;
   }
   throw mcrl2::runtime_error("Fail to determine the minimum of: " + pp(e1) + " and " + pp(e2) + "\n" );
 }
 
 inline data_expression max(const data_expression e1,const data_expression e2,const rewriter &r)
-{ if (r(less_equal(e2,e1))==sort_bool::true_())
+{ if (rewrite_with_memory(less_equal(e2,e1),r)==sort_bool::true_())
   { return e1;
   }
-  if (r(less_equal(e1,e2))==sort_bool::true_())
+  if (rewrite_with_memory(less_equal(e1,e2),r)==sort_bool::true_())
   { return e2;
   }
   throw mcrl2::runtime_error("Fail to determine the maximum of: " + pp(e1) + " and " + pp(e2) + "\n" );
@@ -585,7 +585,7 @@ inline bool is_closed_real_number(const data_expression e)
 
 inline bool is_negative(const data_expression e,const rewriter &r)
 {
-  data_expression result=r(less(e,real_zero()));
+  data_expression result=rewrite_with_memory(less(e,real_zero()),r);
   if (result==sort_bool::true_())
   { return true;
   }
@@ -597,7 +597,7 @@ inline bool is_negative(const data_expression e,const rewriter &r)
 
 inline bool is_positive(const data_expression e,const rewriter &r)
 {
-  data_expression result=r(greater(e,real_zero()));
+  data_expression result=rewrite_with_memory(greater(e,real_zero()),r);
   if (result==sort_bool::true_())
   { return true;
   }
@@ -1035,6 +1035,7 @@ static void pivot_and_update(
   beta[xj]=rewrite_with_memory(sort_real::plus(beta[xj],theta),r);
   beta_delta_correction[xj]=rewrite_with_memory(sort_real::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
+  std::cerr << "Pivoting phase 0\n";
   for(atermpp::set < variable >::const_iterator k=basic_variables.begin();
           k!=basic_variables.end(); ++k)
   { if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
@@ -1045,6 +1046,7 @@ static void pivot_and_update(
     }
   }
   // Apply pivoting on variables xi and xj;
+  std::cerr << "Pivoting phase 1\n";
   basic_variables.erase(xi);
   basic_variables.insert(xj);
 
@@ -1052,7 +1054,7 @@ static void pivot_and_update(
   expression_for_xj.erase(xj);
   expression_for_xj[xi]=real_minus_one();
   expression_for_xj.multiply(sort_real::divides(real_minus_one(),aij),r);
-
+  std::cerr << "Pivoting phase 2\n";
   working_equalities.erase(xi);
   for(std::map < variable, linear_inequality::lhs_t >::iterator j=working_equalities.begin();
            j!=working_equalities.end(); ++j)
@@ -1064,6 +1066,7 @@ static void pivot_and_update(
   }
   working_equalities[xj]=expression_for_xj;
 
+  std::cerr << "End pivoting " << pp(xj) << "\n";
   if (core::gsDebug)
   { for(atermpp::map < variable,data_expression > ::const_iterator i=beta.begin();
                i!=beta.end(); ++i)
@@ -1267,9 +1270,12 @@ inline bool is_inconsistent(
     variable xi;
     for(atermpp::set < variable > :: const_iterator i=basic_variables.begin() ;
            i!=basic_variables.end() ; ++i)
-    { data_expression value=working_equalities[*i].evaluate(beta,r);
+    { std::cerr << "Evaluate start\n";
+      data_expression value=working_equalities[*i].evaluate(beta,r);
+      std::cerr << "Evaluate middle " << pp(value) << "\n";
       data_expression value_delta_correction=working_equalities[*i].
                         evaluate(beta_delta_correction,r);
+      std::cerr << "Evaluate end\n";
       if ((upperbounds.count(*i)>0) &&
           ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool::true_()) ||
            ((upperbounds[*i]==value) &&
@@ -1537,9 +1543,10 @@ inline data_expression rewrite_with_memory(
   atermpp::map < data_expression, data_expression > :: iterator i=rewrite_hash_table.find(t);
   if (i==rewrite_hash_table.end())
   {
+    // std::cerr << "Size of hash table: " << rewrite_hash_table.size() << "\n";
     data_expression t1=r(t);
+    // rewrite_hash_table[t]=t1;
     // std::cerr << "Term " << pp(t) << "Result " << pp(t1) << "\n";
-    rewrite_hash_table[t]=t1;
     return t1;
   }
   // std::cerr << "Term " << pp(t) << "FROM HASH " << pp(i->second) << "\n";
