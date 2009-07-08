@@ -16,6 +16,40 @@
 
 #include "boost/utility/enable_if.hpp"
 #include "boost/type_traits/is_base_of.hpp"
+
+namespace mcrl2 {
+
+  namespace data {
+
+    namespace detail {
+
+      template < typename Derived >
+      class traverser;
+
+      template < typename Derived >
+      class sort_traverser;
+
+      template < typename Derived >
+      class binding_aware_traverser;
+
+      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = detail::traverser >
+      class selective_traverser;
+
+      template < typename Derived, typename AdaptablePredicate >
+      class selective_data_traverser;
+
+      template < typename Derived, typename AdaptablePredicate >
+      class selective_sort_traverser;
+
+      template < typename Derived, typename AdaptablePredicate >
+      class selective_binding_aware_traverser;
+
+    } // namespace detail
+
+  } // namespace data
+
+} // namespace mcrl2
+
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/application.h"
@@ -35,6 +69,8 @@
 namespace mcrl2 {
 
   namespace data {
+
+    class data_expression_with_variables;
 
     /// \cond INTERNAL_DOCS
     namespace detail {
@@ -510,7 +546,7 @@ namespace mcrl2 {
        *
        * \see traverser
        **/
-      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser = detail::traverser >
+      template < typename Derived, typename AdaptablePredicate, template < class > class Traverser >
       class selective_traverser : public Traverser< Derived >
       {
           typedef Traverser< Derived > super;

@@ -20,6 +20,7 @@
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/data/detail/traverser.h"
 
 namespace mcrl2 {

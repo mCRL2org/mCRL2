@@ -16,6 +16,7 @@
 #include "mcrl2/data/assignment_list_substitution.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/substitution.h"
+#include "mcrl2/data/utility.h"
 #include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"

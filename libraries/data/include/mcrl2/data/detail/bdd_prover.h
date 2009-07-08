@@ -93,7 +93,7 @@ class BDD_Prover: public Prover {
     bool f_apply_induction;
 
     /// \brief A data specification.
-    ATermAppl const& f_data_spec;
+    ATermAppl f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.

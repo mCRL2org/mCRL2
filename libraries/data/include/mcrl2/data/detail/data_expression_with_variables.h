@@ -12,13 +12,11 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 #define MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 
-#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/utility.h"
 #include "mcrl2/data/print.h"
 
 namespace mcrl2 {
@@ -262,7 +260,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " " + data::pp(t.variables());
+      return term_traits<data::data_expression>::pp(t) + " " + data::pp(t.variables());
     }
   };
 
