@@ -49,7 +49,7 @@ namespace detail {
     /// \brief Function call operator
     /// \param t A data variable
     /// \return The function result
-    data_expression operator()(variable t) const
+    data_expression operator()(variable const& t) const
     {
       typename VariableContainer::const_iterator i = variables_.begin();
       typename ExpressionContainer::const_iterator j = replacements_.begin();

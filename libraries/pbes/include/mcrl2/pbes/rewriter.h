@@ -165,7 +165,7 @@ namespace pbes_system {
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        typedef data::mutable_map_substitution<variable_type, data_term_type> substitution_function;
+        typedef data::mutable_map_substitution< atermpp::map< variable_type, data_term_type > > substitution_function;
         substitution_function sigma;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
         term_type result = r(x, sigma);

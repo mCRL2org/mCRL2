@@ -129,8 +129,7 @@ namespace mcrl2 {
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
     class map_substitution;
 
-    template < typename Variable = data::variable,
-               typename Expression = data::data_expression,
+    template < typename UniqueSortedPairAssociativeContainer = atermpp::map< variable, data_expression >,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
     struct mutable_map_substitution;
 
@@ -417,8 +416,8 @@ namespace mcrl2 {
      *
      * \see map_substitution
      **/
-    template < typename Variable, typename Expression, template < typename Substitution > class SubstitutionProcedure >
-    struct mutable_map_substitution : public map_substitution< atermpp::map< Variable, Expression >, SubstitutionProcedure > {
+    template < typename UniqueSortedPairAssociativeContainer, template < typename Substitution > class SubstitutionProcedure >
+    struct mutable_map_substitution : public map_substitution< UniqueSortedPairAssociativeContainer, SubstitutionProcedure > {
     };
 
     /// \brief Returns a string representation of the map, for example [a := 3, b := true].

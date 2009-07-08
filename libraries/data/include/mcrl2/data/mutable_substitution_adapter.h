@@ -30,7 +30,7 @@ namespace data {
       typedef typename Substitution::expression_type expression_type;
 
       /// \brief Wrapper class for internal storage and substitution updates using operator()
-      typedef typename mutable_map_substitution<variable_type, expression_type>::assignment assignment;
+      typedef typename mutable_map_substitution< atermpp::map< variable_type, expression_type > >::assignment assignment;
 
       /// \brief The type of the wrapped substitution
       typedef Substitution substitution_type;
@@ -40,7 +40,7 @@ namespace data {
       const Substitution& f_;
 
       /// \brief An additional mutable substitution
-      mutable_map_substitution<variable_type, expression_type> g_;
+      mutable_map_substitution< atermpp::map< variable_type, expression_type > > g_;
 
     public:
       /// \brief Constructor
@@ -113,11 +113,11 @@ namespace data {
 
   /// \brief Specialization for mutable_map_substitution.
   template <typename Variable, typename Expression, template < class Substitution > class SubstitutionProcedure >
-  class mutable_substitution_adapter<mutable_map_substitution<Variable, Expression, SubstitutionProcedure > >
+  class mutable_substitution_adapter<mutable_map_substitution< atermpp::map< Variable, Expression >, SubstitutionProcedure > >
   {
     public:
       /// \brief The type of the wrapped substitution
-      typedef mutable_map_substitution<Variable, Expression, SubstitutionProcedure> substitution_type;
+      typedef mutable_map_substitution< atermpp::map< Variable, Expression >, SubstitutionProcedure> substitution_type;
 
       /// \brief type used to represent variables
       typedef typename substitution_type::variable_type variable_type;
@@ -131,13 +131,13 @@ namespace data {
     protected:
 
       /// \brief object on which substitution manipulations are performed
-      mutable_map_substitution<Variable, Expression>& g_;
+      mutable_map_substitution< atermpp::map< Variable, Expression > >& g_;
 
     public:
 
       /// \brief Constructor with mutable substitution object
       /// \param[in,out] g underlying substitution object
-      mutable_substitution_adapter(mutable_map_substitution<Variable, Expression>& g)
+      mutable_substitution_adapter(mutable_map_substitution< atermpp::map< Variable, Expression > >& g)
         : g_(g)
       {}
 

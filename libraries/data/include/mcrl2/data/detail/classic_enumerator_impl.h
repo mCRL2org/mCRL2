@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 
 #include "mcrl2/data/detail/enum/standard.h"
 #include "mcrl2/data/detail/convert.h"
@@ -117,7 +118,7 @@ namespace mcrl2 {
           boost::shared_ptr< shared_context_type >                           m_shared_context;
 
           // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
-          boost::shared_ptr< EnumeratorSolutionsStandard >                   m_generator;
+          EnumeratorSolutionsStandard                                        m_generator;
 
           typename compatibility_evaluator< Evaluator >::actual_type const&  m_evaluator;
 
@@ -127,24 +128,28 @@ namespace mcrl2 {
 
         private:
 
-          // do not use directly, use the create method
-          classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
-                               expression_type const& c, substitution_type const& s, Evaluator const& e) :
-                             m_shared_context(context), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
-          }
-
-          /// \param[in] v iterator range of the enumeration variables
-          template < typename ForwardTraversalIterator >
-          bool initialise(boost::iterator_range< ForwardTraversalIterator > const& v) {
+          template < typename Container >
+          atermpp::term_list< variable_type > convert(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) {
             // Apply translation (effectively type normalisation) to variables
             atermpp::vector< variable_type > variables;
 
-            for (ForwardTraversalIterator i = v.begin(); i != v.end(); ++i) {
+            for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i) {
               variables.push_back(static_cast< variable_type >(m_evaluator.convert_to(*i)));
             }
 
-            m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                        m_shared_context->m_enumerator.findSolutions(convert< variable_list >(variables), m_evaluator.convert_to(m_condition), false)));
+            return data::convert< atermpp::term_list< variable_type > >(variables);
+          }
+
+          // do not use directly, use the create method
+          classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
+                             expression_type const& c, substitution_type const& s, Evaluator const& e) :
+                m_shared_context(context), m_generator(m_shared_context->m_enumerator.getInfo()), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
+          }
+
+          /// \param[in] v iterator range of the enumeration variables
+          template < typename Container >
+          bool initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) {
+            m_shared_context->m_enumerator.findSolutions(convert(v), m_evaluator.convert_to(m_condition), false, &m_generator);
 
             return increment();
           }
@@ -156,6 +161,7 @@ namespace mcrl2 {
                                                  m_shared_context(other.m_shared_context),
                                                  m_generator(other.m_generator),
                                                  m_evaluator(other.m_evaluator),
+                                                 m_condition(other.m_condition),
                                                  m_substitution(other.m_substitution) {
           }
 
@@ -163,8 +169,8 @@ namespace mcrl2 {
 
             ATermList assignment_list;
 
-            while (m_generator->next(&assignment_list)) {
-              if (m_generator->errorOccurred()) {
+            while (m_generator.next(&assignment_list)) {
+              if (m_generator.errorOccurred()) {
                 throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
               }
 
@@ -192,10 +198,11 @@ namespace mcrl2 {
           }
 
           /// \param[in] v iterator range of the enumeration variables
-          template < typename ForwardTraversalIterator >
-          static void create(boost::shared_ptr< classic_enumerator_impl >& target,
+          template < typename Container >
+          static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
-                  boost::iterator_range< ForwardTraversalIterator > const& v, expression_type const& c, substitution_type const& s = substitution_type()) {
+                  Container const& v, expression_type const& c, substitution_type const& s = substitution_type(),
+                    typename detail::enable_if_container< Container, variable >::type* = 0) {
 
             target.reset(new classic_enumerator_impl(context, c, s));
 
@@ -205,11 +212,12 @@ namespace mcrl2 {
           }
 
           /// \param[in] v iterator range of the enumeration variables
-          template < typename ForwardTraversalIterator >
-          static void create(boost::shared_ptr< classic_enumerator_impl >& target,
+          template < typename Container>
+          static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,
-                               boost::iterator_range< ForwardTraversalIterator > const& v, expression_type const& c,
-                               Evaluator const& e, substitution_type const& s = substitution_type()) {
+                               Container const& v, expression_type const& c,
+                               Evaluator const& e, substitution_type const& s = substitution_type(),
+                    typename detail::enable_if_container< Container, variable >::type* = 0) {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
@@ -219,10 +227,11 @@ namespace mcrl2 {
           }
 
           /// \param[in] v iterator range of the enumeration variables
-          template < typename ForwardTraversalIterator >
-          static void create(boost::shared_ptr< classic_enumerator_impl >& target,
-              data_specification const& specification, boost::iterator_range< ForwardTraversalIterator > const& v,
-              expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type()) {
+          template < typename Container>
+          static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
+              data_specification const& specification, Container const& v,
+              expression_type const& c, Evaluator const& e, substitution_type const& s = substitution_type(),
+                    typename detail::enable_if_container< Container, variable >::type* = 0) {
 
             create(target, boost::shared_ptr< shared_context_type >(new shared_context_type(specification, const_cast< Evaluator& >(e))), v, c, e, s);
           }

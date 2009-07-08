@@ -184,7 +184,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
     Enumerator make(ATermList v, ATerm c)
     {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(boost::make_iterator_range(atermpp::aterm_list(v)), atermpp::aterm(c));
+      return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< variable >(v), atermpp::aterm(c));
     }
 
 
@@ -207,13 +207,13 @@ namespace mcrl2 {
 
       // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
       template < >
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
                   legacy_rewriter, legacy_selector >::increment() {
 
         ATermList assignment_list;
 
-        while (m_generator->next(&assignment_list)) {
-          if (m_generator->errorOccurred()) {
+        while (m_generator.next(&assignment_list)) {
+          if (m_generator.errorOccurred()) {
             throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
           }
 
@@ -232,20 +232,11 @@ namespace mcrl2 {
 
       // Specialisation of classic_enumerator_impl to circumvent data implementation trick
       template < >
-      template < typename ForwardIteratorRange >
-      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
-                  legacy_rewriter, legacy_selector >::initialise(boost::iterator_range< ForwardIteratorRange > const& v) {
+      template < typename Container >
+      bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
+                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type*) {
 
-        atermpp::term_list< data::variable > variables;
-
-        // normalise variables
-        for (ForwardIteratorRange i = v.begin(); i != v.end(); ++i)
-        {
-          variables = atermpp::push_front(variables, variable(variable(*i).name(), m_shared_context->m_specification.normalise(variable(*i).sort())));
-        }
-
-        m_generator.reset(static_cast< EnumeratorSolutionsStandard* >(
-                    m_shared_context->m_enumerator.findSolutions(atermpp::reverse(variables), m_condition, false)));
+        m_shared_context->m_enumerator.findSolutions(data::convert< atermpp::term_list< variable_type > >(v), m_condition, false, &m_generator);
 
         return increment();
       }
@@ -282,7 +273,7 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-      mcrl2::data::mutable_map_substitution< atermpp::aterm_appl, atermpp::aterm >,
+      mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
       legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;

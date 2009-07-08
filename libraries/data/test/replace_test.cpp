@@ -200,7 +200,7 @@ void test_variable_replace()
 void test_replace_with_binders()
 {
   std::cerr << "replace with binders" << std::endl;
-  mutable_map_substitution< variable, data_expression > sigma;
+  mutable_map_substitution< > sigma;
   data_expression                                   input1(variable("c", sort_bool::bool_()));
   data_expression                                   input2(parse_data_expression("exists b: Bool, c: Bool. if(b, c, b)"));
 

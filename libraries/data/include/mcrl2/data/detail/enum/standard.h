@@ -55,6 +55,9 @@ class EnumeratorStandard : public Enumerator
 		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old = NULL);
 
 		Rewriter *getRewriter();
+                enumstd_info& getInfo() {
+                  return info;
+                }
 
 	private:
 		bool clean_up_rewr_obj;
@@ -67,6 +70,13 @@ class EnumeratorStandard : public Enumerator
 class EnumeratorSolutionsStandard : public EnumeratorSolutions
 {
 	public:
+		EnumeratorSolutionsStandard(enumstd_info &Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)
+                {
+                  ATprotectList(&enum_vars);
+                  ATprotect(&enum_expr);
+                }
+
+		EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const&other);
 		EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info &Info);
 		~EnumeratorSolutionsStandard();
 
@@ -81,11 +91,11 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
 	private:
 		enumstd_info info;
-		bool check_true;
 
 		ATermList enum_vars;
 		ATerm enum_expr;
 
+		bool check_true;
 		bool error;
 
 		int used_vars;

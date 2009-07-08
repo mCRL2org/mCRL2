@@ -119,21 +119,9 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        enumerator_type make(std::set< variable_type > const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
-
-          return enumerator_type(m_enumeration_context, boost::make_iterator_range(variables), condition, substitution, *m_evaluator);
-        }
-
-        /** \brief Creates enumerator using a default constructed condition evaluator
-         *
-         * \param[in] variables the set of variables for which to find valuations
-         * \param[in] condition the enumeration condition
-         * \param[in] substitution template for substitutions
-         **/
-        template < typename ForwardTraversalIterator >
-        enumerator_type make(boost::iterator_range< ForwardTraversalIterator > const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
+        template < typename Container >
+        enumerator_type make(Container const& variables, expression_type const& condition = expression_traits< expression_type >::true_(),
+                         substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, *m_evaluator);
         }
@@ -145,24 +133,10 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        enumerator_type make(std::set< variable_type > const& variables, Evaluator const& evaluator,
+        template < typename Container >
+        enumerator_type make(Container const& variables, Evaluator const& evaluator,
                          expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
-
-          return enumerator_type(m_enumeration_context, boost::make_iterator_range(variables), condition, substitution, evaluator);
-        }
-
-        /** \brief Creates enumerator using the default type
-         *
-         * \param[in] variables the set of variables for which to find valuations
-         * \param[in] evaluator a condition evaluator object
-         * \param[in] condition the enumeration condition
-         * \param[in] substitution template for substitutions
-         **/
-        template < typename ForwardTraversalIterator >
-        enumerator_type make(boost::iterator_range< ForwardTraversalIterator > const& variables, Evaluator const& evaluator,
-                         expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
+                         substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return enumerator_type(m_enumeration_context, variables, condition, substitution, evaluator);
         }
@@ -174,29 +148,11 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        template < typename AlternativeEvaluator >
+        template < typename Container, typename AlternativeEvaluator >
         classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
-          make(AlternativeEvaluator const& evaluator, std::set< variable_type > const& variables,
-                         expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
-
-          return classic_enumerator<
-                       substitution_type, AlternativeEvaluator, selector_type >
-                                  (m_enumeration_context, boost::make_iterator_range(variables), condition, substitution, evaluator);
-        }
-
-        /** \brief Creates enumerator with an alternative condition evaluator component
-         *
-         * \param[in] variables the set of variables for which to find valuations
-         * \param[in] evaluator a condition evaluator object
-         * \param[in] condition the enumeration condition
-         * \param[in] substitution template for substitutions
-         **/
-        template < typename ForwardTraversalIterator, typename AlternativeEvaluator >
-        classic_enumerator< substitution_type, AlternativeEvaluator, selector_type >
-          make(AlternativeEvaluator const& evaluator, boost::iterator_range< ForwardTraversalIterator > const& variables,
-                         expression_type const& condition = expression_traits< expression_type >::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
+          make(AlternativeEvaluator const& evaluator, Container const& variables,
+             expression_type const& condition = expression_traits< expression_type >::true_(),
+             substitution_type const& substitution = substitution_type(), typename detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return classic_enumerator<
                        substitution_type, AlternativeEvaluator, selector_type >
@@ -228,28 +184,12 @@ namespace mcrl2 {
          * \param[in] condition the enumeration condition
          * \param[in] substitution template for substitutions
          **/
-        template < typename AlternativeEvaluator, typename AlternativeSelector >
+        template < typename Container, typename AlternativeEvaluator, typename AlternativeSelector >
         classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-          make(AlternativeEvaluator const& evaluator,std::set< variable_type > const& variables,
-                         expression_type const& condition = sort_bool::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
-
-          return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-                   (m_enumeration_context, boost::make_iterator_range(variables), condition, substitution, evaluator);
-        }
-
-        /** \brief Creates enumerator with alternative condition evaluator and selector components
-         *
-         * \param[in] variables the set of variables for which to find valuations
-         * \param[in] evaluator a condition evaluator object
-         * \param[in] condition the enumeration condition
-         * \param[in] substitution template for substitutions
-         **/
-        template < typename ForwardTraversalIterator, typename AlternativeEvaluator, typename AlternativeSelector >
-        classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
-          make(AlternativeEvaluator const& evaluator, boost::iterator_range< ForwardTraversalIterator > const& variables,
-                         expression_type const& condition = sort_bool::true_(),
-                         substitution_type const& substitution = substitution_type()) const {
+          make(AlternativeEvaluator const& evaluator, Container const& variables,
+             expression_type const& condition = sort_bool::true_(),
+             substitution_type const& substitution = substitution_type(),
+             typename detail::enable_if_container< Container, variable >::type* = 0) const {
 
           return classic_enumerator< substitution_type, AlternativeEvaluator, AlternativeSelector >
                    (m_enumeration_context, variables, condition, substitution, evaluator);

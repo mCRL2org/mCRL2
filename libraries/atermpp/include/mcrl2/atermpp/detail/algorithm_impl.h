@@ -12,7 +12,7 @@
 #ifndef MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 #define MCRL2_ATERMPP_DETAIL_ALGORITHM_IMPL_H
 
-#include <boost/shared_array.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -67,7 +67,7 @@ namespace detail {
     if (n > 0)
     {
       bool term_changed = false;
-      boost::shared_array< ATerm > t(new ATerm[n]);
+      boost::scoped_array< ATerm > t(new ATerm[n]);
       for (unsigned int i = 0; i < n; ++i)
       {
         t[i] = 0;

@@ -538,6 +538,38 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
         reset(Vars,Expr,true_only);
 }
 
+EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
+	 info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
+         check_true(other.check_true), error(other.error), used_vars(other.used_vars),
+         fs_stack(0), ss_stack(0)
+{
+  fs_stack_pos = other.fs_stack_pos;
+  ss_stack_pos = other.ss_stack_pos;
+
+  fs_stack = (fs_expr *) realloc(fs_stack,other.fs_stack_size*sizeof(fs_expr));
+
+  for(fs_stack_size = 0; fs_stack_size < other.fs_stack_size; ++fs_stack_size)
+  {
+    fs_stack[fs_stack_size].vars = other.fs_stack[fs_stack_size].vars;
+    fs_stack[fs_stack_size].vals = other.fs_stack[fs_stack_size].vals;
+    fs_stack[fs_stack_size].expr = other.fs_stack[fs_stack_size].expr;
+  }
+
+  ATprotectArray((ATerm *) fs_stack,3*fs_stack_size);
+
+  ss_stack = (ATermList *) realloc(ss_stack,other.ss_stack_size*sizeof(ATermList));
+
+  for(ss_stack_size = 0; ss_stack_size < other.ss_stack_size; ++ss_stack_size)
+  {
+    ss_stack[ss_stack_size] = other.ss_stack[ss_stack_size];
+  }
+
+  ATprotectArray((ATerm *) ss_stack,ss_stack_size);
+
+  ATprotectList(&enum_vars);
+  ATprotect(&enum_expr);
+}
+
 EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
 {
         ATunprotectList(&enum_vars);

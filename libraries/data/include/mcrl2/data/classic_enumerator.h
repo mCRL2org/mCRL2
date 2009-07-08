@@ -15,7 +15,7 @@
 #include <set>
 
 #include "boost/assert.hpp"
-#include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/data/data_specification.h"
@@ -188,7 +188,7 @@ namespace mcrl2 {
       private:
 
         // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
-        boost::shared_ptr< implementation_type > m_impl;
+        boost::scoped_ptr< implementation_type >  m_impl;
 
       private:
 
@@ -199,15 +199,10 @@ namespace mcrl2 {
         }
 
         bool equal(classic_enumerator const& other) const {
-          if ((m_impl.get() == 0) ^ (other.m_impl.get() == 0)) {
-            return false;
-          }
-          else if (m_impl.get() != 0) {
-            return ((m_impl.get() == other.m_impl.get()) ? true : m_impl->equal(*other.m_impl)) &&
-               m_impl->dereference() == other.m_impl->dereference();
-          }
+          implementation_type* left  = m_impl.get();
+          implementation_type* right = other.m_impl.get();
 
-          return true;
+          return (left == right) || (left != 0 && right != 0 && (left->dereference() == right->dereference()));
         }
 
         substitution_type const& dereference() const {
@@ -230,13 +225,13 @@ namespace mcrl2 {
              variable_type const& variable, expression_type const& condition,
              substitution_type const& substitution, Evaluator const& evaluator) {
 
-          implementation_type::create(m_impl, context, boost::make_iterator_range(make_set(variable)), condition, evaluator, substitution);
+          implementation_type::create(m_impl, context, make_set(variable), condition, evaluator, substitution);
         }
 
-        template < typename ForwardTraversalIterator >
+        template < typename Container >
         classic_enumerator(boost::shared_ptr< shared_context_type > const& context,
-             boost::iterator_range< ForwardTraversalIterator > const& variables, expression_type const& condition,
-             substitution_type const& substitution, Evaluator const& evaluator) {
+             Container const& variables, expression_type const& condition,
+             substitution_type const& substitution, Evaluator const& evaluator, typename detail::enable_if_container< Container, variable >::type* = 0) {
 
           implementation_type::create(m_impl, context, variables, condition, evaluator, substitution);
         }
@@ -247,6 +242,22 @@ namespace mcrl2 {
         classic_enumerator() {
         }
 
+        /// \brief Copy constructor
+        classic_enumerator(classic_enumerator const& other) {
+          if (other.m_impl) {
+            m_impl.reset(new implementation_type(*other.m_impl));
+          }
+        }
+
+        /// \brief Copy constructor
+        classic_enumerator& operator=(classic_enumerator const& other) {
+          if (other.m_impl) {
+            m_impl.reset(new implementation_type(*other.m_impl));
+          }
+
+          return *this;
+        }
+
         /** \brief Constructs iterator representing a sequence of expressions
          *
          * Convenience function for enumeration over a single variable
@@ -260,7 +271,7 @@ namespace mcrl2 {
             expression_type const& condition,
             substitution_type const& substitution) {
 
-          implementation_type::create(m_impl, specification, boost::make_iterator_range(make_set(variable)), condition, substitution);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, substitution);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -275,7 +286,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition = sort_bool::true_()) {
 
-            implementation_type::create(m_impl, specification, boost::make_iterator_range(variables), condition, evaluator);
+          implementation_type::create(m_impl, specification, variables, condition, evaluator);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -291,9 +302,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
-
-            implementation_type::create(m_impl, specification,
-              boost::make_iterator_range(variables), condition, evaluator, substitution);
+          implementation_type::create(m_impl, specification, variables, condition, evaluator, substitution);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -309,8 +318,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition = sort_bool::true_()) {
 
-          implementation_type::create(m_impl, specification,
-            boost::make_iterator_range(make_set(variable)), condition, evaluator);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator);
         }
 
         /** \brief Constructs iterator representing a sequence of expressions
@@ -327,9 +335,7 @@ namespace mcrl2 {
             Evaluator const& evaluator,
             expression_type const& condition,
             substitution_type const& substitution) {
-
-          implementation_type::create(m_impl, specification,
-            boost::make_iterator_range(make_set(variable)), condition, evaluator, substitution);
+          implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator, substitution);
         }
     };
 
