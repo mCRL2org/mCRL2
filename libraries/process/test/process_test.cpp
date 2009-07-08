@@ -168,7 +168,22 @@ std::string CASE10 =
   "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
   "init P(0);\n"
   ;
-    
+
+// provided by Jeroen Keiren
+std::string CASE11 =
+  "act  a,b: Int;                       \n"
+  "glob dc,dc0: Int;                    \n"
+  "proc P(s3_P: Pos, y_P: Int) =        \n"
+  "       sum y0_P: Int.                \n"
+  "         (s3_P == 1 && y0_P == 4) -> \n"
+  "         a(y0_P) @ y0_P .            \n"
+  "         P(s3_P = 2, y_P = y0_P)     \n"
+  "     + (s3_P == 2) ->                \n"
+  "         b(y_P * 2) @ (y_P + 1) .    \n"
+  "         P(s3_P = 1, y_P = dc0);     \n"
+  "init P(1, dc);                       \n"
+  ;
+ 
 void test_process(std::string text)
 {
   process_specification spec = parse_process_specification(text);
@@ -210,7 +225,7 @@ int test_main(int argc, char* argv[])
   test_linear(CASE8);
   test_linear(CASE9);
   test_linear(CASE10);
-  core::garbage_collect();
+  test_linear(CASE11);
   
   return 0;
 }
