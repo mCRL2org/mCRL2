@@ -58,7 +58,7 @@ namespace pbes_system {
       typedef core::term_traits<pbes_expression> tr;
 
       /// \brief Substitution function type used by the PBES rewriter.
-      typedef data::mutable_map_substitution<data::variable, data::data_expression_with_variables> substitution_function;
+      typedef data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > substitution_function;
 
       /// \brief The PBES that is being solved.
       pbes<>& m_pbes;

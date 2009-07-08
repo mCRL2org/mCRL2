@@ -22,6 +22,7 @@
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
@@ -84,6 +85,11 @@ namespace mcrl2 {
           data_expression operator()(abstraction const& a)
           {
             return visit(a);
+          }
+
+          data_expression operator()(data_expression_with_variables const& a)
+          {
+            return static_cast< Derived& >(*this)(static_cast< data_expression const& >(a));
           }
 
           data_expression operator()(data_expression const& e)
