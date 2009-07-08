@@ -629,7 +629,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
         data_expression      cj = j->condition();
         variable_list        e1 = j->summation_variables();
-        data_expression_list gj = j->next_state(q.process_parameters());
+        data_expression_list gj = j->next_state(d1);
         pbes_expression      expr = pbes_expr::exists(e1, and_(cj, var(Y1(p, q, i), d + gj + e)));
         v.push_back(expr);
       }

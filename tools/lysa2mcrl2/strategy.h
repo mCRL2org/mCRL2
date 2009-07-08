@@ -24,6 +24,8 @@ namespace lysa
     virtual std::string getPreamble()         = 0;
     virtual bool        makeSymbolicAttacker() = 0;
     static Strategy* get(std::string name);
+    virtual ~Strategy()
+    {}
   };
 }
 
