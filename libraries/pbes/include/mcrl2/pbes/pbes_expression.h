@@ -163,25 +163,49 @@ namespace pbes_expr {
   /// \param t A PBES expression
   /// \return True if it is a negation
   inline bool is_not(pbes_expression t)
-  { return is_pbes_not(t) || data::sort_bool::is_not_application(t); }
+  {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
+    return is_pbes_not(t) || data::sort_bool::is_not_application(t);
+#else
+    return is_pbes_not(t);
+#endif
+  }
 
   /// \brief Test for a conjunction
   /// \param t A PBES expression
   /// \return True if it is a conjunction
   inline bool is_and(pbes_expression t)
-  { return is_pbes_and(t) || data::sort_bool::is_and_application(t); }
+  {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
+     return is_pbes_and(t) || data::sort_bool::is_and_application(t);
+#else
+     return is_pbes_and(t);
+#endif
+  }
 
   /// \brief Test for a disjunction
   /// \param t A PBES expression
   /// \return True if it is a disjunction
   inline bool is_or(pbes_expression t)
-  { return is_pbes_or(t) || data::sort_bool::is_or_application(t); }
+  {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
+    return is_pbes_or(t) || data::sort_bool::is_or_application(t);
+#else
+     return is_pbes_or(t);
+#endif
+  }
 
   /// \brief Test for an implication
   /// \param t A PBES expression
   /// \return True if it is an implication
   inline bool is_imp(pbes_expression t)
-  { return is_pbes_imp(t) || data::sort_bool::is_implies_application(t); }
+  {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
+    return is_pbes_imp(t) || data::sort_bool::is_implies_application(t);
+#else
+     return is_pbes_imp(t);
+#endif
+  }
 
   /// \brief Test for an universal quantification
   /// \param t A PBES expression
@@ -229,6 +253,7 @@ namespace accessors {
   inline
   pbes_expression arg(pbes_expression t)
   {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
     if (pbes_expr::is_pbes_not(t))
     {
       return atermpp::arg1(t);
@@ -238,6 +263,16 @@ namespace accessors {
            pbes_expr::is_exists(t)
           );
     return atermpp::arg2(t);
+#else
+    if (pbes_expr::is_pbes_not(t))
+    {
+      return atermpp::arg1(t);
+    }
+    else
+    {
+      return atermpp::arg2(t);
+    }
+#endif
   }
 
   /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -247,7 +282,11 @@ namespace accessors {
   pbes_expression left(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
+    return data::is_data_expression(t) ? atermpp::arg2(t) : atermpp::arg1(t);
+#else
     return atermpp::arg1(t);
+#endif
   }
 
   /// \brief Returns the right hand side of an expression of type and, or or imp.
@@ -256,8 +295,12 @@ namespace accessors {
   inline
   pbes_expression right(pbes_expression t)
   {
+#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
+    return data::is_data_expression(t) ? atermpp::arg3(t) : atermpp::arg2(t);
+#else
     return atermpp::arg2(t);
+#endif
   }
 
   /// \brief Returns the variables of a quantification expression
@@ -793,7 +836,7 @@ namespace core {
     static inline
     bool is_and(term_type t)
     {
-      return core::detail::gsIsPBESAnd(t) || core::detail::gsIsDataExprAnd(t);
+      return pbes_system::pbes_expr::is_and(t);
     }
 
     /// \brief Test for a disjunction
@@ -802,7 +845,7 @@ namespace core {
     static inline
     bool is_or(term_type t)
     {
-      return core::detail::gsIsPBESOr(t) || core::detail::gsIsDataExprOr(t);
+      return pbes_system::pbes_expr::is_or(t);
     }
 
     /// \brief Test for an implication
@@ -811,7 +854,7 @@ namespace core {
     static inline
     bool is_imp(term_type t)
     {
-      return core::detail::gsIsPBESImp(t) || core::detail::gsIsDataExprImp(t);
+      return pbes_system::pbes_expr::is_imp(t);
     }
 
     /// \brief Test for an universal quantification
@@ -820,7 +863,7 @@ namespace core {
     static inline
     bool is_forall(term_type t)
     {
-      return core::detail::gsIsPBESForall(t) || core::detail::gsIsDataExprForall(t);
+      return pbes_system::pbes_expr::is_forall(t);
     }
 
     /// \brief Test for an existential quantification
@@ -829,7 +872,7 @@ namespace core {
     static inline
     bool is_exists(term_type t)
     {
-      return core::detail::gsIsPBESExists(t) || core::detail::gsIsDataExprExists(t);
+      return pbes_system::pbes_expr::is_exists(t);
     }
 
     /// \brief Test for data term
@@ -856,6 +899,8 @@ namespace core {
     static inline
     term_type arg(term_type t)
     {
+      return pbes_system::accessors::arg(t);
+/*
       // Forall and exists are not fully supported by the data library
       assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
       assert(is_not(t) || is_exists(t) || is_forall(t));
@@ -868,6 +913,7 @@ namespace core {
       {
         return atermpp::arg2(t);
       }
+*/
     }
 
     /// \brief Returns the left argument of a term of type and, or or imp
@@ -876,8 +922,11 @@ namespace core {
     static inline
     term_type left(term_type t)
     {
+      return pbes_system::accessors::left(t);
+/*
       assert(is_and(t) || is_or(t) || is_imp(t));
       return atermpp::arg1(t);
+*/
     }
 
     /// \brief Returns the right argument of a term of type and, or or imp
@@ -886,8 +935,11 @@ namespace core {
     static inline
     term_type right(term_type t)
     {
+      return pbes_system::accessors::right(t);
+/*
       assert(is_and(t) || is_or(t) || is_imp(t));
       return atermpp::arg2(t);
+*/
     }
 
     /// \brief Returns the quantifier variables of a quantifier expression
