@@ -289,14 +289,26 @@ namespace detail {
       {
         throw non_linear_process();
       }
-      if (!is_process_instance(right))
+      if (is_process_instance(right))
       {
-        throw std::runtime_error("unexpected error in visit_seq");
+        process_instance q = right;
+        if (q.identifier() != eqn.identifier())
+        {
+          throw non_linear_process();
+        }
       }
-      process_instance q = right;
-      if (q.identifier() != eqn.identifier())
+      else if (is_process_instance_assignment(right))
       {
-        throw non_linear_process();
+        process_instance_assignment q = right;
+        if (q.identifier() != eqn.identifier())
+        {
+          throw non_linear_process();
+        }
+      }
+      else
+      {
+        std::cerr << "seq right hand side: " << core::pp(right) << std::endl;
+        throw std::runtime_error("unexpected error in visit_seq");
       }
       return continue_recursion;
     }
