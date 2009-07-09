@@ -164,7 +164,7 @@ namespace mcrl2 {
 
               for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
               {
-                new_arguments.push_back((*this)(*i));
+                new_arguments.push_back(static_cast< Derived& >(*this)(*i));
               }
 
               return atermpp::aterm_appl(e.function(), new_arguments.begin(), new_arguments.end());
@@ -178,7 +178,6 @@ namespace mcrl2 {
           {
             return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
           }
-#endif // NO_TERM_TRAVERSAL
 
           template < typename Expression >
           atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)
@@ -187,11 +186,12 @@ namespace mcrl2 {
 
             for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
             {
-              result.push_back((*this)(*i));
+              result.push_back(static_cast< Derived& >(*this)(*i));
             }
 
             return convert< atermpp::term_list< Expression > >(result);
           }
+#endif // NO_TERM_TRAVERSAL
 
 	  // This implementation suffers from the problem that a transformation
 	  // may replace expressions by more general expression types. It is

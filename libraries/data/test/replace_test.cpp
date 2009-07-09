@@ -195,6 +195,11 @@ void test_variable_replace()
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t1 == t2);
+
+  t = and_(equal_to(d1, d2), not_equal_to(d2, d3));
+  replace_variables(t, make_map_substitution(variables, replacements));
+
+  BOOST_CHECK(t1 == t2);
 }
 
 void test_replace_with_binders()
