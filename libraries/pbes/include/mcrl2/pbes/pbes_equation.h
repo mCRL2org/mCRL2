@@ -218,15 +218,6 @@ operator!=(const pbes_equation& x, const pbes_equation& y)
   return !(x == y);
 }
 
-/// \brief Traverses the summand, and writes all sort expressions
-/// that are encountered to the output range [dest, ...).
-template <typename OutIter>
-void traverse_sort_expressions(const pbes_equation& e, OutIter dest)
-{
-  traverse_sort_expressions(e.variable(), dest);
-  traverse_sort_expressions(e.formula(), dest);
-}
-
 /// \brief Conversion to ATermAppl.
 /// \return The specification converted to ATerm format.
 inline

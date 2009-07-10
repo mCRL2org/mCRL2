@@ -12,8 +12,10 @@
 #ifndef MCRL2_PBES_DETAIL_PBES_SORT_TRAVERSER_H
 #define MCRL2_PBES_DETAIL_PBES_SORT_TRAVERSER_H
 
+#include <vector>
 #include "mcrl2/data/traverse.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/detail/pbes_sort_expression_visitor.h"
 
 namespace mcrl2 {
 
@@ -23,12 +25,10 @@ namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
   template <typename OutIter>
-  struct pbes_sort_traverser: pbes_expression_visitor<pbes_expression>
+  struct pbes_sort_traverser
   {
     OutIter dest;
-
-    typedef pbes_expression_visitor<pbes_expression> super;
-    
+  
     pbes_sort_traverser(OutIter dest_)
       : dest(dest_)
     {}
@@ -42,7 +42,7 @@ namespace detail {
         traverse(*i);
       }
     }   
-  
+
     /// \brief Traverses a sort expression
     /// \param d A sort expression
     void traverse(const data::sort_expression& d)    
@@ -72,28 +72,41 @@ namespace detail {
     } 
 
     /// \brief Traverses a pbes expression
-    /// \param d A pbes expression
-    void traverse(const pbes_expression& p)    
+    /// \param t A pbes expression
+    void traverse(const pbes_expression& t)
     {
-      super::visit(p);
+      detail::pbes_sort_expression_visitor<pbes_expression> visitor;
+      visitor.visit(t);
+      for (std::set<data::sort_expression>::iterator i = visitor.result.begin(); i != visitor.result.end(); ++i)
+      {
+        traverse(*i);
+      }
     } 
-  
+
+    /// \brief Traverses a propositional variable declaration
+    /// \param t A propositional variable declaration
     void traverse(const propositional_variable& v)
     {
-      traverse_container(v.parameters());
-    }
-    
+      traverse_container(v.parameters());     
+    } 
+
+    /// \brief Traverses a propositional variable instantiation
+    /// \param t A propositional variable instantiation
     void traverse(const propositional_variable_instantiation& v)
     {
       traverse_container(v.parameters());
-    }
-    
-    void traverse(const pbes_equation& eq)
-    {
-      traverse(eq.variable());
-      traverse(eq.formula());
-    }
+    } 
 
+    /// \brief Traverses a pbes equation
+    /// \param d A deadlock
+    void traverse(const pbes_equation& e)
+    {
+      traverse(e.variable());
+      traverse(e.formula());
+    } 
+
+    /// \brief Traverses a PBES
+    /// \param spec A PBES specification
     template <typename Container>
     void traverse(const pbes<Container>& p)
     {
@@ -107,30 +120,7 @@ namespace detail {
     {
       traverse(t);
     }
-
-    //---------------------------------------------------------------//
-    //                visit functions
-    //---------------------------------------------------------------//
-
-    /// \brief Visit data_expression node
-    /// \param e A term
-    /// \param d A data term
-    /// \return The result of visiting the node
-    bool visit_data_expression(const pbes_expression& e, const data::data_expression& d)
-    {
-      traverse(d);
-      return true;
-    }
-
-    /// \brief Visit propositional_variable node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
-    {
-      traverse(v);
-      return continue_recursion;
-    }
-  };                   
+  };
 
   /// \brief Utility function to create an pbes_sort_traverser.
   template <typename OutIter>    
