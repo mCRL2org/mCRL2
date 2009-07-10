@@ -23,6 +23,7 @@ namespace core {
   /// \param arg A term
   /// \return The application of not to the argument.
   template <typename Term>
+  inline
   Term optimized_not(Term arg)
   {
     typedef typename core::term_traits<Term> tr;
@@ -34,6 +35,7 @@ namespace core {
   /// \param q A term
   /// \return The application of and to the arguments.
   template <typename Term>
+  inline
   Term optimized_and(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
@@ -45,6 +47,7 @@ namespace core {
   /// \param q A term
   /// \return The application of or to the arguments.
   template <typename Term>
+  inline
   Term optimized_or(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
@@ -56,6 +59,7 @@ namespace core {
   /// \param q A term
   /// \return The application of implication to the arguments.
   template <typename Term>
+  inline
   Term optimized_imp(Term p, Term q)
   {
     typedef typename core::term_traits<Term> tr;
@@ -67,6 +71,7 @@ namespace core {
   /// \param p A term
   /// \return The application of universal quantification to the arguments.
   template <typename Term, typename VariableSequence>
+  inline
   Term optimized_forall(VariableSequence l, Term p)
   {
     typedef typename core::term_traits<Term> tr;
@@ -78,6 +83,7 @@ namespace core {
   /// \param p A term
   /// \return The application of existential quantification to the arguments.
   template <typename Term, typename VariableSequence>
+  inline
   Term optimized_exists(VariableSequence l, Term p)
   {
     typedef typename core::term_traits<Term> tr;
