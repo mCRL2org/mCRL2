@@ -538,7 +538,7 @@ void XSimMain::OnLoadView( wxCommandEvent& /* event */ )
 
     wxFileDialog dialog( this, wxT("Select a View Plugin..."), wxT(""), wxT(""), filter);
 
-    dialog.SetDirectory(wxString(wxT(PLUGINDIR), wxConvLocal));
+    dialog.SetDirectory(wxString(PLUGINDIR, wxConvLocal));
 
     if ( dialog.ShowModal() == wxID_OK )
     {
