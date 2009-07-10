@@ -3752,8 +3752,7 @@ ATermAppl gsMakeDataExprSet(ATermAppl DataExprFunc, ATermAppl DataExprFSet, ATer
 {
   ATermAppl SortExprFunc = gsGetSort(DataExprFunc);
   assert(gsIsSortArrow(SortExprFunc));
-  ATermAppl SortExprFuncResult = ATAgetArgument(SortExprFunc, 1);
-  assert(ATisEqual(SortExprFuncResult, gsMakeSortExprBool()));
+  assert(ATisEqual(ATAgetArgument(SortExprFunc, 1), gsMakeSortExprBool()));
   ATermList SortExprFuncDom = ATLgetArgument(SortExprFunc, 0);
   assert(ATgetLength(SortExprFuncDom) == 1);
   return gsMakeDataAppl2(
@@ -3770,8 +3769,7 @@ ATermAppl gsMakeDataExprSetComp(ATermAppl DataExprFunc, ATermAppl SortExprSet)
 {
   ATermAppl SortExprFunc = gsGetSort(DataExprFunc);
   assert(gsIsSortArrow(SortExprFunc));
-  ATermAppl SortExprFuncResult = ATAgetArgument(SortExprFunc, 1);
-  assert(ATisEqual(SortExprFuncResult, gsMakeSortExprBool()));
+  assert(ATisEqual(ATAgetArgument(SortExprFunc, 1), gsMakeSortExprBool()));
   ATermList SortExprFuncDom = ATLgetArgument(SortExprFunc, 0);
   assert(ATgetLength(SortExprFuncDom) == 1);
   return gsMakeDataAppl1(
@@ -3832,8 +3830,7 @@ ATermAppl gsMakeDataExprBag(ATermAppl DataExprFunc, ATermAppl DataExprFBag, ATer
 {
   ATermAppl SortExprFunc = gsGetSort(DataExprFunc);
   assert(gsIsSortArrow(SortExprFunc));
-  ATermAppl SortExprFuncResult = ATAgetArgument(SortExprFunc, 1);
-  assert(ATisEqual(SortExprFuncResult, gsMakeSortExprNat()));
+  assert(ATisEqual(ATAgetArgument(SortExprFunc, 1), gsMakeSortExprNat()));
   ATermList SortExprFuncDom = ATLgetArgument(SortExprFunc, 0);
   assert(ATgetLength(SortExprFuncDom) == 1);
   return gsMakeDataAppl2(
@@ -3850,8 +3847,7 @@ ATermAppl gsMakeDataExprBagComp(ATermAppl DataExprFunc, ATermAppl SortExprBag)
 {
   ATermAppl SortExprFunc = gsGetSort(DataExprFunc);
   assert(gsIsSortArrow(SortExprFunc));
-  ATermAppl SortExprFuncResult = ATAgetArgument(SortExprFunc, 1);
-  assert(ATisEqual(SortExprFuncResult, gsMakeSortExprNat()));
+  assert(ATisEqual(ATAgetArgument(SortExprFunc, 1), gsMakeSortExprNat()));
   ATermList SortExprFuncDom = ATLgetArgument(SortExprFunc, 0);
   assert(ATgetLength(SortExprFuncDom) == 1);
   return gsMakeDataAppl1(
