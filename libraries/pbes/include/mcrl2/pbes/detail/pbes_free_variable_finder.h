@@ -123,7 +123,7 @@ namespace detail {
     } 
 
     /// \brief Traverses a pbes equation
-    /// \param d A deadlock
+    /// \param e A pbes equation
     void traverse(const pbes_equation& e)
     {
       add_bound_variables(e.variable().parameters());

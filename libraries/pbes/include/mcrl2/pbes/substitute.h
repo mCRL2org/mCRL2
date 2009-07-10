@@ -6,28 +6,26 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/substitute.h
+/// \file mcrl2/pbes/substitute.h
 /// \brief add your file description here.
 
-#include "mcrl2/lps/detail/lps_substituter.h"
-
-#ifndef MCRL2_LPS_SUBSTITUTE_H
-#define MCRL2_LPS_SUBSTITUTE_H
+#ifndef MCRL2_PBES_SUBSTITUTE_H
+#define MCRL2_PBES_SUBSTITUTE_H
 
 namespace mcrl2 {
 
-namespace lps {
+namespace pbes_system {
 
-  /// \brief Applies a substitution to an LPS data type.
+  /// \brief Applies a substitution to a PBES data type.
   template <typename Object, typename Substitution>
   void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false)
   {
-    lps::detail::lps_substituter<Substitution> r(sigma, replace_parameters);
+    pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
     r(o);
   }
 
-} // namespace lps
+} // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_SUBSTITUTE_H
+#endif // MCRL2_PBES_SUBSTITUTE_H

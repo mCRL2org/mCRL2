@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/lps_replacer.h
+/// \file mcrl2/lps/detail/lps_substituter.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_LPS_REPLACER_H
-#define MCRL2_LPS_DETAIL_LPS_REPLACER_H
+#ifndef MCRL2_LPS_DETAIL_LPS_SUBSTITUTER_H
+#define MCRL2_LPS_DETAIL_LPS_SUBSTITUTER_H
 
 #include <vector>
 #include "mcrl2/data/replace.h"
@@ -24,7 +24,7 @@ namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
   template <typename Substitution>
-  struct lps_replacer
+  struct lps_substituter
   {
     const Substitution& sigma;
     
@@ -33,7 +33,7 @@ namespace detail {
     /// that the result of the substitution is a variable.
     bool replace_parameters;
   
-    lps_replacer(const Substitution& sigma_, bool replace_parameters_ = false)
+    lps_substituter(const Substitution& sigma_, bool replace_parameters_ = false)
       : sigma(sigma_),
         replace_parameters(replace_parameters_)
     {}
@@ -200,11 +200,11 @@ namespace detail {
     }
   };
 
-  /// \brief Utility function to create an lps_replacer.
+  /// \brief Utility function to create an lps_substituter.
   template <typename Substitution>    
-  lps_replacer<Substitution> make_lps_replacer(const Substitution& sigma)        
+  lps_substituter<Substitution> make_lps_substituter(const Substitution& sigma)        
   {
-    return lps_replacer<Substitution>(sigma);
+    return lps_substituter<Substitution>(sigma);
   } 
 
 } // namespace detail
@@ -213,4 +213,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_DETAIL_LPS_REPLACER_H
+#endif // MCRL2_LPS_DETAIL_LPS_SUBSTITUTER_H
