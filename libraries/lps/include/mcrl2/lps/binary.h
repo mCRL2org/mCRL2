@@ -68,7 +68,7 @@ namespace mcrl2 {
           else
           {
             int n = enumerated_elements.size();
-            int m = round(pow(2, new_parameters.size() - 1));
+            int m = pow( static_cast<int>(2), static_cast<int>(new_parameters.size()) - 1);
 
             //m == 2^(new_parameters.size() - 1)
 
