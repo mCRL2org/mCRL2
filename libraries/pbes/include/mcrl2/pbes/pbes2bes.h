@@ -173,10 +173,7 @@ template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  if (!pbes_spec.instantiate_global_variables())
-  {
-    throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
-  }
+  pbes_spec.instantiate_global_variables();
   core::gsVerboseMsg("Using lazy approach...\n");
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
@@ -276,10 +273,7 @@ template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  if (!pbes_spec.instantiate_global_variables())
-  {
-    throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
-  }
+  pbes_spec.instantiate_global_variables();
   core::gsVerboseMsg("Using finite approach...\n");
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();

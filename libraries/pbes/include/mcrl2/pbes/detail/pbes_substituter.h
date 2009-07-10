@@ -15,6 +15,7 @@
 #include <vector>
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/detail/substitute_builder.h"
 
 namespace mcrl2 {
 
@@ -116,7 +117,7 @@ namespace detail {
     /// \param t A pbes expression
     void substitute(pbes_expression& t) const
     {
-      ...
+      t = detail::make_substitute_builder(sigma).visit(t);
     } 
 
     /// \brief Applies the substitution to a propositional variable declaration
@@ -125,7 +126,7 @@ namespace detail {
     {
       if (replace_parameters)
       {
-        traverse_container(v.parameters());
+        v = propositional_variable(v.name(), substitute_list_copy(v.parameters()));
       }
     } 
 
@@ -140,22 +141,19 @@ namespace detail {
     /// \param e A pbes equation
     void substitute(pbes_equation& e) const
     {
-      if (replace_parameters)
-      {
-        substitute_list(e.parameters());
-      }
+      substitute(e.variable());
       substitute(e.formula());
     } 
   
     /// \brief Applies the substitution to a PBES
-    /// \param spec A PBES
+    /// \param p A PBES
     template <typename Container>
     void substitute(pbes<Container>& p) const
     {
       if (replace_parameters)
       {
         atermpp::set<data::variable> glob;
-        for (atermpp::set<data::variable>::iterator i = spec.global_variables().begin(); i != spec.global_variables().end(); ++i)
+        for (atermpp::set<data::variable>::iterator i = p.global_variables().begin(); i != p.global_variables().end(); ++i)
         {
           glob.insert(substitute_copy(*i));
         }

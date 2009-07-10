@@ -222,7 +222,8 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       mcrl2::pbes_system::pbes<> p;
       p.load(m_input_filename);
       p.normalize();
-
+      p.instantiate_global_variables();
+/*
       if (!p.instantiate_global_variables())
       { std::stringstream message;
         message << "Fail to instantiate all free variables in the pbes.\n";
@@ -234,7 +235,7 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
         message << "\n";
         throw mcrl2::runtime_error(message.str());
       }
-
+*/
       // data rewriter
       data::rewriter datar= (opt_data_elm) ?
             data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p, false)), rewrite_strategy()) :

@@ -102,10 +102,7 @@ namespace pbes_system {
       /// \param p A PBES
       void run(pbes<>& p)
       {
-        if (!p.instantiate_global_variables())
-        {
-          throw mcrl2::runtime_error("Instantiatiation of free variables failed!");
-        }
+        p.instantiate_global_variables();
 
         // initialize equation_index and E
         int eqn_index = 0;

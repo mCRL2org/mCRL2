@@ -164,13 +164,6 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {
       return m_parameters;
     }
-
-    /// \brief Returns the unbound variables appearing in the parameters.
-    /// \return The unbound variables appearing in the parameters.
-    std::set<data::variable> unbound_variables() const
-    {
-      return data::find_free_variables(m_parameters);
-    }
 };
 
 /// \brief Read-only singly linked list of propositional variables instantiations

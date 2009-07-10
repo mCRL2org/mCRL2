@@ -337,8 +337,7 @@ void test_instantiate_global_variables()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
-  bool result = p.instantiate_global_variables();
-  std::cout << "<result>" << result << std::endl;
+  p.instantiate_global_variables();
   std::cout << "<after>" << mcrl2::core::pp(p) << std::endl;
 }
 

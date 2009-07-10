@@ -37,10 +37,10 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
-#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
@@ -53,6 +53,15 @@ using mcrl2::core::pp;
 
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
+
+template <typename Object, typename SetContainer>
+void remove_parameters(Object& o, const SetContainer& to_be_removed);
+
+template <typename Object, typename Substitution>
+void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
+                     
+template <typename Container>
+std::set<data::variable> find_free_variables(Container const& container);
 
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible = true);
@@ -75,26 +84,6 @@ void traverse_sort_expressions(const Object& o, OutIter dest);
   };
 
 /// \endcond
-
-/// \brief Computes the free variables that occur in the sequence [first, last) of pbes equations.
-/// \param first Start of a range of pbes equations
-/// \param last End of a range of pbes equations
-/// \return The free variables in the sequence [first, last) of pbes equations.
-template <typename Iterator>
-std::set<data::variable> compute_global_variables(Iterator first, Iterator last)
-{
-  using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-  detail::free_variable_visitor<pbes_expression> visitor;
-
-  for (Iterator i = first; i != last; ++i)
-  {
-    visitor.bound_variables = i->variable().parameters();
-    visitor.visit(i->formula());
-  }
-
-  return visitor.result;
-}
 
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
@@ -230,16 +219,6 @@ class pbes
       return false;
     }
 
-    /// \brief Computes the unbound variables that occur in the pbes.
-    /// \return The unbound variables that occur in the pbes.
-    std::set<data::variable> compute_unbound_variables() const
-    {
-      std::set<data::variable> result = compute_global_variables(equations().begin(), equations().end());
-      std::set<data::variable> vars = initial_state().unbound_variables();
-      result.insert(vars.begin(), vars.end());
-      return result;
-    }
-
   public:
     /// \brief The container type for the equations
     typedef Container container_type;
@@ -273,7 +252,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
         m_equations(equations),
         m_initial_state(initial_state)
     {
-      m_global_variables = compute_unbound_variables();
+      m_global_variables = find_free_variables(*this);
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
@@ -389,38 +368,28 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
       return true;
     }
 
-    /// \brief Attempts to eliminate the free variables of the pbes, by substituting a default
-    /// value for them. Variables for which no default value can be found are untouched.
-    /// So, upon return the sequence of free variables of the pbes contains exactly those
-    /// variables for which no default value could be found.
-    /// \return true if all free variables were eliminated.
-    bool instantiate_global_variables()
+    /// \brief Attempts to eliminate the free variables of the PBES, by substituting
+    /// a constant value for them. If no constant value is found for one of the variables,
+    /// an exception is thrown.
+    void instantiate_global_variables()
     {
-      std::set<data::variable> global_variables = compute_unbound_variables();
-      data::mutable_map_substitution< > replacements;    // the variables that will be replaced
-      atermpp::set<data::variable> fail;   // the variables that could not be replaced
-
-      data::representative_generator default_expression_generator(m_data);
-
-      for (typename std::set<data::variable>::iterator i = global_variables.begin(); i != global_variables.end(); ++i)
+      data::mutable_map_substitution<> sigma;
+      data::representative_generator default_expression_generator(data());
+      std::set<data::variable> to_be_removed;
+      const atermpp::set<data::variable>& v = global_variables();
+      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
       {
         data::data_expression d = default_expression_generator(i->sort());
         if (d == data::data_expression())
         {
-          fail.insert(*i);
+          throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + pp(*i));
         }
-        else
-        {
-          replacements[*i] = d;
-        }
+        sigma[*i] = d;
+        to_be_removed.insert(*i);
       }
-      for (typename Container::iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        *i = pbes_equation(i->symbol(), i->variable(), replacements(i->formula()));
-      }
-      m_initial_state = propositional_variable_instantiation(m_initial_state.name(), data::replace_free_variables(m_initial_state.parameters(), replacements));
-      m_global_variables.swap(fail);
-      return m_global_variables.empty();
+      pbes_system::substitute(*this, sigma, false);
+      pbes_system::remove_parameters(*this, to_be_removed);
+      assert(global_variables().empty());
     }
 
     /// \brief Writes the pbes to file.
@@ -576,7 +545,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
       const atermpp::set<data::variable>& declared_global_variables = global_variables();
-      std::set<data::variable> occurring_global_variables = compute_unbound_variables();
+      std::set<data::variable> occurring_global_variables = find_free_variables(*this);
       std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
@@ -754,18 +723,6 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
   return result;
 }
 
-/// \brief Computes the free variables that occur in the pbes.
-/// \param p A pbes
-/// \return The free variables that occur in the pbes.
-template <typename Container>
-std::set<data::variable> compute_global_variables(const pbes<Container>& p)
-{
-  std::set<data::variable> result = compute_global_variables(p.equations().begin(), p.equations().end());
-  std::set<data::variable> vars = p.initial_state().unbound_variables();
-  result.insert(vars.begin(), vars.end());
-  return result;
-}
-
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 template <typename Container>
@@ -805,8 +762,20 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 }
 /// \endcond
 
+#ifndef MCRL2_PBES_REMOVE_H
+#include "mcrl2/pbes/remove.h"
+#endif
+
+#ifndef MCRL2_PBES_SUBSTITUTE_H
+#include "mcrl2/pbes/substitute.h"
+#endif
+
 #ifndef MCRL2_PBES_TRAVERSE_H
 #include "mcrl2/pbes/traverse.h"
+#endif
+
+#ifndef MCRL2_PBES_FIND_H
+#include "mcrl2/pbes/find.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H

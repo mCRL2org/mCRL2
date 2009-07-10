@@ -23,7 +23,6 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/mucalculus.h"

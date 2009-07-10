@@ -6,23 +6,23 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/substitute.h
+/// \file mcrl2/pbes/remove.h
 /// \brief add your file description here.
 
-#include "mcrl2/pbes/detail/pbes_substituter.h"
+#ifndef MCRL2_PBES_REMOVE_H
+#define MCRL2_PBES_REMOVE_H
 
-#ifndef MCRL2_PBES_SUBSTITUTE_H
-#define MCRL2_PBES_SUBSTITUTE_H
+#include "mcrl2/pbes/detail/pbes_parameter_remover.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// \brief Applies a substitution to a PBES data type.
-  template <typename Object, typename Substitution>
-  void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false)
+  /// \brief Removes parameters from a PBES data type.
+  template <typename Object, typename SetContainer>
+  void remove_parameters(Object& o, const SetContainer& to_be_removed)
   {
-    pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
+    pbes_system::detail::pbes_parameter_remover<SetContainer> r(to_be_removed);
     r(o);
   }
 
@@ -30,4 +30,4 @@ namespace pbes_system {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_SUBSTITUTE_H
+#endif // MCRL2_PBES_REMOVE_H
