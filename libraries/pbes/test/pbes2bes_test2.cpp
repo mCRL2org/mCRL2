@@ -28,8 +28,8 @@
 
 using namespace mcrl2;
 using namespace pbes_system;
-using modal_formula::detail::mcf2statefrm;
-using modal_formula::state_formula;
+using state_formulas::detail::mcf2statefrm;
+using state_formulas::state_formula;
 using lps::specification;
 
 std::string CABP_SPECIFICATION =

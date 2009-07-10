@@ -133,7 +133,7 @@ void test_balancing_plat()
   using namespace pbes_system;
 
   lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
-  modal_formula::state_formula formula = modal_formula::detail::mcf2statefrm(NO_DEADLOCK, spec);
+  state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(NO_DEADLOCK, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes<> q = pbes2bes(p);
