@@ -149,7 +149,7 @@ namespace mcrl2 {
             }
             else if (e.type() == AT_LIST)
             {
-              return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply_list(e))));
+              return atermpp::aterm_appl(reinterpret_cast< ATermAppl >(static_cast< ATerm >(apply(atermpp::aterm_list(e)))));
             }
 
             return e;
@@ -174,22 +174,29 @@ namespace mcrl2 {
           }
 
           // \deprecated exists only for backwards compatibility
-          atermpp::aterm apply_list(atermpp::aterm const& e)
+          atermpp::aterm apply(atermpp::aterm_list const& e)
           {
-            return reinterpret_cast< ATerm >(static_cast< ATermList >((*this)(atermpp::aterm_list(e))));
+            atermpp::vector< atermpp::aterm > result;
+
+            for (atermpp::aterm_list::const_iterator i= e.begin(); i != e.end(); ++i)
+            {
+              result.push_back(static_cast< Derived& >(*this)(*i));
+            }
+
+            return convert< atermpp::aterm_list >(result);
           }
 
           template < typename Expression >
-          atermpp::term_list< Expression > operator()(atermpp::term_list< Expression > const& container)
+          atermpp::term_list< data_expression > operator()(atermpp::term_list< Expression > const& container)
           {
-            atermpp::vector< Expression > result;
+            atermpp::vector< data_expression > result;
 
             for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
             {
               result.push_back(static_cast< Derived& >(*this)(*i));
             }
 
-            return convert< atermpp::term_list< Expression > >(result);
+            return convert< atermpp::term_list< data_expression > >(result);
           }
 #endif // NO_TERM_TRAVERSAL
 

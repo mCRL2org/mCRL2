@@ -69,7 +69,7 @@ namespace mcrl2 {
           {
             if (!(i->is_delta()))
             {
-            const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
+              const data::data_expression_list summand_arguments = i->next_state(m_spec.process().process_parameters());
               std::vector <bool>::iterator j = time_variable_candidates.begin();
               data::variable_list::const_iterator l=m_spec.process().process_parameters().begin();
               for( data::data_expression_list::const_iterator k=summand_arguments.begin() ;

@@ -28,9 +28,9 @@ namespace data {
 /// \brief Sequence of data assignments.
 // A linear search is done in the list of assignments.
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
-class assignment_list_substitution: public substitution< assignment_list_substitution >
+class assignment_list_substitution: public substitution< assignment_list_substitution, variable, data_expression, textual_substitution >
 {
-  friend class substitution< assignment_list_substitution, variable_type, expression_type >;
+  friend class substitution< assignment_list_substitution, variable_type, expression_type, textual_substitution >;
 
   private:
 
