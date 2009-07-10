@@ -225,6 +225,8 @@ static inline atermpp::map<atermpp::aterm,bool> neg_values(atermpp::map<atermpp:
 
 ATermAppl type_check_data_spec(ATermAppl data_spec)
 {
+  gsVerboseMsg("type checking data specification...\n");
+
   ATermAppl Result=NULL;
   gsDebugMsg ("type checking phase started\n");
   gstcDataInit();
@@ -263,6 +265,8 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
 
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
+  gsVerboseMsg("type checking process specification...\n");
+
   ATermAppl Result=NULL;
 
   gsDebugMsg ("type checking phase started\n");
@@ -314,6 +318,7 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 {
+  gsVerboseMsg("type checking sort expression...\n");
   //check correctness of the sort expression in sort_expr
   //using the specification in spec
   assert(gsIsSortExpr(sort_expr));
@@ -357,6 +362,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars)
 {
+  gsVerboseMsg("type checking data expression...\n");
   //check correctness of the data expression in data_expr using
   //the specification in spec
 
@@ -411,6 +417,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
 
 ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
 {
+  gsVerboseMsg("type checking multiaction...\n");
   //check correctness of the multi-action in mult_act using
   //the process specification or LPS in spec
   assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
@@ -463,6 +470,7 @@ ATermAppl type_check_mult_act(ATermAppl mult_act, ATermAppl spec)
 
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 {
+  gsVerboseMsg("type checking process expression...\n");
   //check correctness of the process expression in proc_expr using
   //the process specification or LPS in spec
   assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
@@ -472,6 +480,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 
 ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 {
+  gsVerboseMsg("type checking state formula...\n");
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   //check correctness of the state formula in state_formula using
   //the process specification or LPS in spec as follows:
@@ -537,6 +546,8 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 }
 
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec){
+
+  gsVerboseMsg("type checking action rename specification...\n");
 
   //check precondition
   assert(gsIsActionRenameSpec(ar_spec));
@@ -681,6 +692,8 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   //check correctness of the PBES specification in pbes_spec
   //gsWarningMsg("type checking of PBES specifications is only partially implemented\n");
 
+  gsVerboseMsg("type checking PBES specification...\n");
+
   assert(gsIsPBES(pbes_spec));
 
   ATermAppl Result=NULL;
@@ -752,6 +765,7 @@ finally:
 
 ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
 {
+  gsVerboseMsg("type checking data variables...\n");
   //check correctness of the data variable declaration in sort_expr
   //using the specification in spec
 

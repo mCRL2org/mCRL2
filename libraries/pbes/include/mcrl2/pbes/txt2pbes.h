@@ -15,21 +15,22 @@
 #include <sstream>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/core/messaging.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// \brief Parses a PBES specification.
-  /// \param text A string
+  /// \brief Parses a PBES specification from an input stream
+  /// \param spec_stream A stream from which can be read
   /// \return The parsed PBES
   inline
-  pbes<> txt2pbes(const std::string& text)
+  pbes<> txt2pbes(std::istream& spec_stream)
   {
-    std::stringstream from(text);
     pbes<> result;
-    from >> result;
+    spec_stream >> result;
     try {
+      core::gsVerboseMsg("checking monotonicity...\n");
       result.normalize();
     }
     catch (std::exception& /* e */)
@@ -37,6 +38,16 @@ namespace pbes_system {
       throw mcrl2::runtime_error("PBES is not monotonic");
     }
     return result;
+  }
+
+  /// \brief Parses a PBES specification from a string
+  /// \param text A string
+  /// \return The parsed PBES
+  inline
+  pbes<> txt2pbes(const std::string& text)
+  {
+    std::stringstream from(text);
+    return txt2pbes(from);
   }
 
 } // namespace pbes_system

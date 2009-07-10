@@ -33,7 +33,8 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::process;
 
-using mcrl2::core::gsVerbose;
+using mcrl2::core::gsVerboseMsg;
+using mcrl2::core::gsMessage;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
@@ -149,13 +150,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.rewrite_strategy = rewrite_strategy();
     }
 
-    char const* lin_method_to_string(t_lin_method lin_method)
-    {
-      static const char* method[] = {"stack","regular","regular2"};
-
-      return method[lin_method];
-    }
-
   public:
 
     mcrl22lps_tool() : super(
@@ -173,19 +167,15 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       process_specification spec;
       if (m_linearisation_options.infilename.empty()) 
       { //parse specification from stdin
-        if (gsVerbose)
-        { std::cerr << "parsing input from stdin..." << std::endl;
-        }
+        gsVerboseMsg("reading input from stdin...\n");
         spec = parse_process_specification(std::cin,!noalpha);
       } 
       else 
       { //parse specification from infilename
+        gsVerboseMsg("reading input from file '%s'...\n", m_linearisation_options.infilename.c_str());
         std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) 
-        { throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
-        }
-        if (gsVerbose) 
-        { std::cerr << "parsing input file '"  + m_linearisation_options.infilename + "'" << std::endl;
+        if (!instream.is_open()) {
+          throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
         }
         spec = parse_process_specification(instream,!noalpha);
         instream.close();
@@ -193,22 +183,18 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       //report on well-formedness (if needed)
       if (opt_check_only) {
         if (m_linearisation_options.infilename.empty()) {
-          std::cerr << "stdin";
+          gsMessage("stdin contains a well-formed mCRL2 specification\n");
         } else {
-          std::cerr << "the file '" << m_linearisation_options.infilename << "'";
+          gsMessage("the file '%s' contains a well-formed mCRL2 specification\n", m_linearisation_options.infilename.c_str());
         }
-        std::cerr << " contains a well-formed mCRL2 specification" << std::endl;
         return true;
       }
       //store the result
       mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
-      if (gsVerbose)
-      { if (m_linearisation_options.outfilename.empty())
-        { std::cerr << "saving result to stdout..." << std::endl;
-        } 
-        else
-        { std::cerr << "saving result to '" << m_linearisation_options.outfilename << "'" << std::endl;
-        }
+      if (m_linearisation_options.outfilename.empty()) {
+        gsVerboseMsg("writing LPS to stdout...\n");
+      } else {
+        gsVerboseMsg("writing LPS to file '%s'...\n", m_linearisation_options.outfilename.c_str());
       }
       linear_spec.save(m_linearisation_options.outfilename);
       return true;

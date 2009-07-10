@@ -72,17 +72,15 @@ namespace detail {
     return result;
   }
 
-  /// \brief Converts a modal formula to a state formula
+  /// \brief Parses a state formula from an input stream
   // spec may be updated as the data implementation of the state formula
   // may cause internal names to change.
-  /// \param formula_text A string
+  /// \param formula_stream A stream from which can be read
   /// \param spec A linear process specification
   /// \return The converted modal formula
   inline
-  state_formula mcf2statefrm(const std::string& formula_text, lps::specification& spec)
+  state_formula mcf2statefrm(std::istream& formula_stream, lps::specification& spec)
   {
-    std::stringstream formula_stream;
-    formula_stream << formula_text;
     atermpp::aterm_appl f = parse_state_formula(formula_stream);
     lps::specification copy_spec = spec;
     copy_spec.data() = remove_all_system_defined(spec.data());
@@ -93,6 +91,19 @@ namespace detail {
     spec.data().make_complete(data::find_sort_expressions(f)); // Make complete with respect to f
     f = data::detail::internal_format_conversion(spec.data(), f);
     return f;
+  }
+
+  /// \brief Parses a state formula from text
+  // spec may be updated as the data implementation of the state formula
+  // may cause internal names to change.
+  /// \param formula_text A string
+  /// \param spec A linear process specification
+  /// \return The converted modal formula
+  inline
+  state_formula mcf2statefrm(const std::string& formula_text, lps::specification& spec)
+  {
+    std::stringstream formula_stream(formula_text);
+    return mcf2statefrm(formula_stream, spec);
   }
 
 } // namespace detail

@@ -25,6 +25,15 @@ namespace lps {
 /// \brief The available linearisation methods
 typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
 
+/// \brief String representation of a linearisation method
+/// \param[in] lin_method A linerisation method
+/// \return 
+std::string lin_method_to_string(t_lin_method lin_method)
+{
+  std::string method[] = {"stack","regular","regular2"};
+  return method[lin_method];
+}
+
 /// \brief Options for linearisation
 struct t_lin_options {
   t_lin_method lin_method;

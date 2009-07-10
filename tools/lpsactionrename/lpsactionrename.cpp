@@ -27,12 +27,13 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 
-using namespace mcrl2;
+using mcrl2::core::gsVerboseMsg;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::utilities::tools::squadt_tool;
@@ -66,7 +67,7 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       desc.add_option("renamefile", make_mandatory_argument("NAME"),
               "use the rename rules from NAME", 'f');
       desc.add_option("no-rewrite",
-              "do not rewrite data terms while renaming; use when the rewrite system "
+              "do not rewrite data expressions while renaming; use when the rewrite system "
               "does not terminate", 'o');
       desc.add_option("no-sumelm",
                 "do not apply sum elimination to the final result", 'm');
@@ -121,27 +122,21 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
     bool run()
     {
-      //process action rename specfication
-
-      if (core::gsVerbose)
-      {
-        std::cerr << "Parameters of lpsactionrename:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  rename file:        " << m_action_rename_filename << std::endl;
-        std::cerr << "  rewrite:            " << (m_rewrite?"YES":"NO") << std::endl;
-        std::cerr << "  sumelm:             " << (m_sumelm?"YES":"NO") << std::endl;
+      //load LPS
+      if (input_filename().empty()) {
+        gsVerboseMsg("reading LPS from stdin...\n");
+      } else {
+        gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
       }
-
-      //open infilename
       specification lps_old_spec;
-      lps_old_spec.load(m_input_filename);
+      lps_old_spec.load(input_filename());
 
-      //parse the action rename file
+      //load action rename file
+      gsVerboseMsg("reading input from file '%s'...\n", m_action_rename_filename.c_str());
       std::ifstream rename_stream(m_action_rename_filename.c_str());
       if (!rename_stream.is_open())
       {
-        mcrl2::runtime_error("Cannot open rename file " + m_action_rename_filename);
+        mcrl2::runtime_error("cannot open rename file " + m_action_rename_filename);
       }
 
       // Parse the rename spec in rename_stream.
@@ -152,23 +147,29 @@ class action_rename_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       rename_stream.close();
 
       //rename all assigned actions
-      if (core::gsVerbose)
-      { std::cerr << "Renaming actions...\n";
-      }
+      gsVerboseMsg("renaming actions in LPS...\n");
       specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
       data::rewriter datar;
-      if (m_rewrite)
-      { datar = create_rewriter(lps_new_spec.data());
+      if (m_rewrite) {
+        gsVerboseMsg("rewriting data expressions in LPS...\n");
+        datar = create_rewriter(lps_new_spec.data());
         lps::rewrite(lps_new_spec, datar);
       }
-      if(m_sumelm)
-      { sumelm_algorithm(lps_new_spec, core::gsVerbose||core::gsDebug).run();
-        if(m_rewrite)
-        {
+      if(m_sumelm) {
+        gsVerboseMsg("applying sum elimination...\n");
+        sumelm_algorithm(lps_new_spec, core::gsVerbose||core::gsDebug).run();
+        if(m_rewrite) {
+          gsVerboseMsg("rewriting data expressions in LPS...\n");
           lps::rewrite(lps_new_spec, datar);
         }
       }
-      lps_new_spec.save(m_output_filename);
+      //save the result
+      if (output_filename().empty()) {
+        gsVerboseMsg("writing LPS to stdout...\n");
+      } else {
+        gsVerboseMsg("writing LPS to file '%s'...\n", output_filename().c_str());
+      }
+      lps_new_spec.save(output_filename());
 
       return true;
     }

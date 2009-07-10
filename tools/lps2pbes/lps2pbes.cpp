@@ -29,6 +29,8 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
+using mcrl2::core::gsVerboseMsg;
+
 class lps2pbes_tool : public squadt_tool<input_output_tool>
 {
   typedef squadt_tool<input_output_tool> super;
@@ -85,10 +87,31 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
 
     bool run()
     {
+      //load LPS
+      if (input_filename().empty()) {
+        gsVerboseMsg("reading LPS from stdin...\n");
+      } else {
+        gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
+      }
       lps::specification spec;
       spec.load(input_filename());
-      state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(core::read_text(formfilename), spec);
+      //load formula file
+      gsVerboseMsg("reading input from file '%s'...\n", formfilename.c_str());
+      std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+      if (!instream.is_open()) {
+        throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+      }
+      state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(instream, spec);
+      instream.close();
+      //convert formula and LPS to a PBES
+      gsVerboseMsg("converting state formula and LPS to a PBES...\n");
       pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
+      //save the result
+      if (output_filename().empty()) {
+        gsVerboseMsg("writing PBES to stdout...\n");
+      } else {
+        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+      }
       result.save(output_filename());
       return true;
     }

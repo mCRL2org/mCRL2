@@ -1133,7 +1133,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 	  i++;
 	} while(ATAtableGet(procs,(ATerm)new_pn));
 
-	gsVerboseMsg("Created process %P\n", new_pn);
+	gsVerboseMsg("- created process %P\n", new_pn);
 	ATermAppl p=ATAtableGet(procs,(ATerm)pn);
 	assert(p);
 	p=PushAllow(V,p);
@@ -2001,6 +2001,7 @@ static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true
 }
 
 ATermAppl gsAlpha(ATermAppl Spec){
+  gsVerboseMsg("applying alphabet reductions...\n");
   //create the tables
   afunPair=ATmakeAFun("p",2,ATfalse);
   ATprotectAFun(afunPair);
@@ -2215,12 +2216,12 @@ ATermAppl gsAlpha(ATermAppl Spec){
       nP_checked:
 
       if(good){
-        gsVerboseMsg("proc: %P is a recursive parallel process in n-parallel pCRL format\n", p);
+        gsVerboseMsg("- process %P is a recursive parallel process in n-parallel pCRL format\n", p);
 	ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
 	ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }
       else{
-	gsWarningMsg("proc: %P is a recursive parallel process not in n-parallel pCRL format\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
+	gsWarningMsg("- process %P is a recursive parallel process not in n-parallel pCRL format\n in this case alphabet reductions may not stop, or may not be performed completely\n\n", p);
       }
     }
   }

@@ -20,6 +20,7 @@
 #include <string>
 
 //mCRL2 specific
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -27,6 +28,8 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+
+using mcrl2::core::gsVerboseMsg;
 
 class txt2pbes_tool: public input_output_tool
 {
@@ -43,8 +46,27 @@ class txt2pbes_tool: public input_output_tool
 
     bool run()
     {
-      std::string text = core::read_text(input_filename());
-      pbes_system::pbes<> p = pbes_system::txt2pbes(text);
+      pbes_system::pbes<> p;
+      if (input_filename().empty()) 
+      { //parse specification from stdin
+        gsVerboseMsg("reading input from stdin...\n");
+        p = pbes_system::txt2pbes(std::cin);
+      } 
+      else {
+        //parse specification from input filename
+        gsVerboseMsg("reading input from file '%s'...\n", input_filename().c_str());
+        std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
+        if (!instream.is_open()) {
+          throw mcrl2::runtime_error("cannot open input file: " + input_filename());
+        }
+        p = pbes_system::txt2pbes(instream);
+        instream.close();
+      }
+      if (output_filename().empty()) {
+        gsVerboseMsg("writing PBES to stdout...\n");
+      } else {
+        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+      }
       p.save(output_filename());
       return true;
     }

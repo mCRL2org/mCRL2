@@ -414,8 +414,8 @@ lps::specification action_rename(
   bool to_delta=false;
 
   //go through the rename rules of the rename file
-  if (gsVerbose)
-  { std::cerr << "rename rules found: " << rename_rules.size() << "\n";
+  if (gsDebug)
+  { std::cerr << "Rename rules found: " << rename_rules.size() << "\n";
   }
   for(action_rename_rule_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
@@ -497,7 +497,7 @@ lps::specification action_rename(
 
     lps_summands = summand_list();
     //go through the summands of the old lps
-    if (gsVerbose)
+    if (gsDebug)
     { std::cerr << "Summands found: " << lps_old_summands.size() << "\n";
     }
     for(summand_list::iterator losi = lps_old_summands.begin();
@@ -519,7 +519,7 @@ lps::specification action_rename(
       atermpp::vector < std::pair <bool, action_list > >
                            lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),action_list()));
 
-      if (gsVerbose)
+      if (gsDebug)
       { std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
       }
       for(action_list::iterator loai = lps_old_actions.begin();
@@ -529,7 +529,7 @@ lps::specification action_rename(
         //std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
         if (equal_signatures(lps_old_action, rule_old_action))
         {
-          if (gsVerbose)
+          if (gsDebug)
           { std::cerr << "Renaming action " << core::pp(rule_old_action) << "\n";
           }
 
@@ -676,7 +676,7 @@ lps::specification action_rename(
           { *i = std::make_pair((*i).first,push_front((*i).second, lps_old_action));
           }
         }
-        if (gsVerbose)
+        if (gsDebug)
         { std::cerr << "Action done\n";
         }
 
@@ -703,7 +703,7 @@ lps::specification action_rename(
     lps_old_summands = lps_new_summands;
   } //end of rename rule iterator
 
-  if (gsVerbose)
+  if (gsDebug)
   { std::cerr << "Simplifying the result...\n";
   }
 
@@ -727,7 +727,7 @@ lps::specification action_rename(
                                           new_process,
                                           lps_old_spec.initial_process());
 
-  if (gsVerbose)
+  if (gsDebug)
   { std::cerr << "New lps complete\n";
   }
   return lps_new_spec;

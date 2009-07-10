@@ -7067,7 +7067,9 @@ class specification_basic_type:public boost::noncopyable
 mcrl2::lps::specification mcrl2::lps::linearise(
                  const mcrl2::process::process_specification& type_checked_spec,
                  mcrl2::lps::t_lin_options lin_options)
-{ specification_basic_type spec(type_checked_spec.action_labels(),
+{ 
+  gsVerboseMsg("linearising process specification using the '%s' method...\n", lin_method_to_string(lin_options.lin_method).c_str());
+  specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 type_checked_spec.data(),
