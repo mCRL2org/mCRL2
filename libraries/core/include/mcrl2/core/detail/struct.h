@@ -1805,37 +1805,37 @@ ATermAppl gsMakeDataApplList(ATermAppl DataExpr, ATermList DataExprArgs);
 ATermAppl gsMakeDataExprAndList(ATermList DataExprs);
 
 ///\return data expression of sort Bool that is a representation of b
-ATermAppl gsMakeDataExprBool_bool(bool b);
+ATermAppl gsMakeDataExprBool_bool(const bool b);
 
 ///\pre p is of the form "[1-9][0-9]*"
 ///\return data expression of sort Pos that is a representation of p
-ATermAppl gsMakeDataExprPos(char *p);
+ATermAppl gsMakeDataExprPos(const char *p);
 
 ///\pre p > 0
 ///\return data expression of sort Pos that is a representation of p
-ATermAppl gsMakeDataExprPos_int(int p);
+ATermAppl gsMakeDataExprPos_int(const int p);
 
 ///\pre n is of the form "0 | [1-9][0-9]*"
 ///\return data expression of sort Nat that is a representation of n
-ATermAppl gsMakeDataExprNat(char *n);
+ATermAppl gsMakeDataExprNat(const char *n);
 
 ///\pre n >= 0
 ///\return data expression of sort Nat that is a representation of n
-ATermAppl gsMakeDataExprNat_int(int n);
+ATermAppl gsMakeDataExprNat_int(const int n);
 
 ///\pre z is of the form "0 | -? [1-9][0-9]*"
 ///\return data expression of sort Int that is a representation of z
-ATermAppl gsMakeDataExprInt(char *z);
+ATermAppl gsMakeDataExprInt(const char *z);
 
 ///\return data expression of sort Int that is a representation of z
-ATermAppl gsMakeDataExprInt_int(int z);
+ATermAppl gsMakeDataExprInt_int(const int z);
 
 ///\pre z is of the form "0 | -? [1-9][0-9]*"
 ///\return data expression of sort Real that is a representation of z
-ATermAppl gsMakeDataExprReal(char *z);
+ATermAppl gsMakeDataExprReal(const char *z);
 
 ///\return data expression of sort Real that is a representation of z
-ATermAppl gsMakeDataExprReal_int(int z);
+ATermAppl gsMakeDataExprReal_int(const int z);
 
 ///\pre PosExpr is a data expression of sort Pos
 ///\return PosExpr is built from constructors only

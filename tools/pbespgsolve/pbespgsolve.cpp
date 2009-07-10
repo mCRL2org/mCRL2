@@ -99,12 +99,12 @@ struct MStat {
     int size, resident, share, text, lib, data, dt;
 };
 
-static bool read_mstat(MStat &stat)
-{
-    std::ifstream ifs("/proc/self/statm");
-    return ifs >> stat.size >> stat.resident >> stat.share >> stat.text
-               >> stat.lib >> stat.data >> stat.dt;
-}
+//static bool read_mstat(MStat &stat)
+//{
+//    std::ifstream ifs("/proc/self/statm");
+//    return ifs >> stat.size >> stat.resident >> stat.share >> stat.text
+//               >> stat.lib >> stat.data >> stat.dt;
+//}
 
 //static double get_vmsize()
 //{
@@ -113,26 +113,26 @@ static bool read_mstat(MStat &stat)
 //    return mstat.size*(getpagesize()/MB);
 //}
 
-static void print_usage()
-{
-    printf(
-"Options:\n"
-"  --help/-h              show help\n"
-"  --input/-i <format>    input format: random, raw, PGSolver or PBES\n"
-"  --size <int>           size of randomly generated graph\n"
-"  --outdegree <int>      average out-degree in randomly generated graph\n"
-"  --priorities <int>     number of priorities in randomly generated game\n"
-"  --seed <int>           random seed\n"
-"  --strategy/-l <desc>   Small Progress Measures lifting strategy\n"
-"  --dot/-d <file>        write parity game in GraphViz dot format to <file>\n"
-"  --pgsolver/-p <file>   write parity game in PGSolver format to <file>\n"
-"  --raw/-r <file>        write parity game in raw format to <file>\n"
-"  --winners/-w <file>    write compact winners specification to <file>\n"
-"  --scc                  solve strongly connected components individually\n"
-"  --dual                 solve the dual game\n"
-"  --reorder/-e (bfs|dfs) reorder vertices\n"
-"  --timeout/-t <t>       abort solving after <t> seconds\n");
-}
+//static void print_usage()
+//{
+//    printf(
+//"Options:\n"
+//"  --help/-h              show help\n"
+//"  --input/-i <format>    input format: random, raw, PGSolver or PBES\n"
+//"  --size <int>           size of randomly generated graph\n"
+//"  --outdegree <int>      average out-degree in randomly generated graph\n"
+//"  --priorities <int>     number of priorities in randomly generated game\n"
+//"  --seed <int>           random seed\n"
+//"  --strategy/-l <desc>   Small Progress Measures lifting strategy\n"
+//"  --dot/-d <file>        write parity game in GraphViz dot format to <file>\n"
+//"  --pgsolver/-p <file>   write parity game in PGSolver format to <file>\n"
+//"  --raw/-r <file>        write parity game in raw format to <file>\n"
+//"  --winners/-w <file>    write compact winners specification to <file>\n"
+//"  --scc                  solve strongly connected components individually\n"
+//"  --dual                 solve the dual game\n"
+//"  --reorder/-e (bfs|dfs) reorder vertices\n"
+//"  --timeout/-t <t>       abort solving after <t> seconds\n");
+//}
 
 // static void parse_args(int argc, char *argv[])
 // {

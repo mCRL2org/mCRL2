@@ -4343,7 +4343,7 @@ ATermAppl gsMakeDataExprAndList(ATermList DataExprs)
   return Result;
 }
 
-ATermAppl gsMakeDataExprBool_bool(bool b)
+ATermAppl gsMakeDataExprBool_bool(const bool b)
 {
   if (b) {
     return gsMakeDataExprTrue();
@@ -4352,7 +4352,7 @@ ATermAppl gsMakeDataExprBool_bool(bool b)
   }
 }
 
-ATermAppl gsMakeDataExprPos(char *p)
+ATermAppl gsMakeDataExprPos(const char *p)
 {
   assert(strlen(p) > 0);
   if (!strcmp(p, "1")) {
@@ -4370,7 +4370,7 @@ ATermAppl gsMakeDataExprPos(char *p)
   }
 }
 
-ATermAppl gsMakeDataExprPos_int(int p)
+ATermAppl gsMakeDataExprPos_int(const int p)
 {
   assert(p > 0);
   DECL_A(s,char,NrOfChars(p)+1);
@@ -4380,7 +4380,7 @@ ATermAppl gsMakeDataExprPos_int(int p)
   return a;
 }
 
-ATermAppl gsMakeDataExprNat(char *n)
+ATermAppl gsMakeDataExprNat(const char *n)
 {
   if (!strcmp(n, "0")) {
     return gsMakeDataExprC0();
@@ -4389,7 +4389,7 @@ ATermAppl gsMakeDataExprNat(char *n)
   }
 }
 
-ATermAppl gsMakeDataExprNat_int(int n)
+ATermAppl gsMakeDataExprNat_int(const int n)
 {
   assert(n >= 0);
   DECL_A(s,char,NrOfChars(n)+1);
@@ -4399,7 +4399,7 @@ ATermAppl gsMakeDataExprNat_int(int n)
   return a;
 }
 
-ATermAppl gsMakeDataExprInt(char *z)
+ATermAppl gsMakeDataExprInt(const char *z)
 {
   if (!strncmp(z, "-", 1)) {
     return gsMakeDataExprCNeg(gsMakeDataExprPos(z+1));
@@ -4408,7 +4408,7 @@ ATermAppl gsMakeDataExprInt(char *z)
   }
 }
 
-ATermAppl gsMakeDataExprInt_int(int z)
+ATermAppl gsMakeDataExprInt_int(const int z)
 {
   DECL_A(s,char,NrOfChars(z)+1);
   sprintf(s, "%d", z);
@@ -4417,12 +4417,12 @@ ATermAppl gsMakeDataExprInt_int(int z)
   return a;
 }
 
-ATermAppl gsMakeDataExprReal(char *z)
+ATermAppl gsMakeDataExprReal(const char *z)
 {
   return gsMakeDataExprCReal(gsMakeDataExprInt(z), gsMakeDataExprC1());
 }
 
-ATermAppl gsMakeDataExprReal_int(int z)
+ATermAppl gsMakeDataExprReal_int(const int z)
 {
   DECL_A(s,char,NrOfChars(z)+1);
   sprintf(s, "%d", z);
