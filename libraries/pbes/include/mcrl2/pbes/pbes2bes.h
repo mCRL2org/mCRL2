@@ -201,7 +201,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
   core::gsVerboseMsg("Retrieving PBES equations from equation system...\n");
   for (atermpp::vector<pbes_equation>::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
-    pbes_equations.put(eqi->variable().name(), *eqi);
+    pbes_equations.put(eqi->variable().name(), pbes_equation_to_aterm(*eqi));
     names_order.push_back(eqi->variable().name());
   }
 

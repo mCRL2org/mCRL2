@@ -1739,10 +1739,10 @@ namespace bes
       {
         pbes_equations.put(
                 eqi->variable().name(),
-                pbes_equation(
+                pbes_equation_to_aterm(pbes_equation(
                     eqi->symbol(),
                     eqi->variable(),
-                    eqi->formula()));
+                    eqi->formula())));
         // Rewriting terms here can lead to non termination, in 
         // case the quantifier-all rewriter is used. This kind of rewriting
         // should be done outside this method. 

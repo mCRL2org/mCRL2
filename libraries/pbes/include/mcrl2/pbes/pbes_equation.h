@@ -23,11 +23,15 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \brief pbes equation.
-class pbes_equation: public atermpp::aterm_appl
-{
-  protected:
+class pbes_equation;
+atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 
+/// \brief pbes equation.
+class pbes_equation
+{
+  friend struct atermpp::aterm_traits<pbes_equation>;
+  
+  protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
 
@@ -37,22 +41,46 @@ class pbes_equation: public atermpp::aterm_appl
     /// \brief The expression on the right hand side of the equation
     pbes_expression m_formula;
 
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect()
+    {
+      m_symbol.protect();
+      m_variable.protect();
+      m_formula.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect()
+    {
+      m_symbol.unprotect();
+      m_variable.unprotect();
+      m_formula.unprotect();
+    }
+
+    /// \brief Mark the term for not being garbage collected.
+    void mark()
+    {
+      m_symbol.mark();
+      m_variable.mark();
+      m_formula.mark();
+    }
+
   public:
     /// \brief The expression type of the equation.
     typedef pbes_expression term_type;
 
     /// \brief Constructor.
     pbes_equation()
-      : atermpp::aterm_appl(core::detail::constructPBEqn())
     {}
 
     /// \brief Constructor.
     /// \param t A term
     pbes_equation(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_PBEqn(m_term));
-      iterator i = t.begin();
+      assert(core::detail::check_rule_PBEqn(t));
+      atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
       m_variable = propositional_variable(*i++);
       m_formula  = pbes_expression(*i);
@@ -63,37 +91,51 @@ class pbes_equation: public atermpp::aterm_appl
     /// \param variable A propositional variable declaration
     /// \param expr A PBES expression
     pbes_equation(fixpoint_symbol symbol, propositional_variable variable, pbes_expression expr)
-      : atermpp::aterm_appl(core::detail::gsMakePBEqn(symbol, variable, expr)),
+      : 
         m_symbol(symbol),
         m_variable(variable),
         m_formula(expr)
     {
     }
 
-    /// \brief Assignment operator.
-    pbes_equation& operator=(atermpp::aterm t)
+    /// \brief Returns the fixpoint symbol of the equation.
+    /// \return The fixpoint symbol of the equation.
+    const fixpoint_symbol& symbol() const
     {
-      m_term = t;
-      return *this;
+      return m_symbol;
     }
 
     /// \brief Returns the fixpoint symbol of the equation.
     /// \return The fixpoint symbol of the equation.
-    fixpoint_symbol symbol() const
+    fixpoint_symbol& symbol()
     {
       return m_symbol;
     }
 
     /// \brief Returns the pbes variable of the equation.
     /// \return The pbes variable of the equation.
-    propositional_variable variable() const
+    const propositional_variable& variable() const
+    {
+      return m_variable;
+    }
+
+    /// \brief Returns the pbes variable of the equation.
+    /// \return The pbes variable of the equation.
+    propositional_variable& variable()
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
     /// \return The predicate formula on the right hand side of the equation.
-    pbes_expression formula() const
+    const pbes_expression& formula() const
+    {
+      return m_formula;
+    }
+
+    /// \brief Returns the predicate formula on the right hand side of the equation.
+    /// \return The predicate formula on the right hand side of the equation.
+    pbes_expression& formula()
     {
       return m_formula;
     }
@@ -145,7 +187,7 @@ class pbes_equation: public atermpp::aterm_appl
            )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << mcrl2::core::pp(*this) << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << mcrl2::core::pp(pbes_equation_to_aterm(*this)) << std::endl;
         return false;
       }
 
@@ -162,8 +204,19 @@ class pbes_equation: public atermpp::aterm_appl
     }
 };
 
-/// \brief Read-only singly linked list of data expressions
-typedef atermpp::term_list<pbes_equation> pbes_equation_list;
+inline bool
+operator==(const pbes_equation& x, const pbes_equation& y)
+{
+  return x.symbol() == y.symbol() &&
+         x.variable() == y.variable() &&
+         x.formula() == y.formula();
+}
+
+inline bool
+operator!=(const pbes_equation& x, const pbes_equation& y)
+{
+  return !(x == y);
+}
 
 /// \brief Traverses the summand, and writes all sort expressions
 /// that are encountered to the output range [dest, ...).
@@ -174,6 +227,14 @@ void traverse_sort_expressions(const pbes_equation& e, OutIter dest)
   traverse_sort_expressions(e.formula(), dest);
 }
 
+/// \brief Conversion to ATermAppl.
+/// \return The specification converted to ATerm format.
+inline
+atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
+{
+  return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2
@@ -181,12 +242,15 @@ void traverse_sort_expressions(const pbes_equation& e, OutIter dest)
 /// \cond INTERNAL_DOCS
 namespace atermpp {
 
-using mcrl2::pbes_system::pbes_equation;
-
-template <>
-struct term_list_iterator_traits<pbes_equation>
+template<>
+struct aterm_traits<mcrl2::pbes_system::pbes_equation>
 {
-  typedef ATermAppl value_type;
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::pbes_system::pbes_equation t)   { t.protect(); }
+  static void unprotect(mcrl2::pbes_system::pbes_equation t) { t.unprotect(); }
+  static void mark(mcrl2::pbes_system::pbes_equation t)      { t.mark(); }
+  //static ATerm term(mcrl2::pbes_system::pbes_equation t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::pbes_system::pbes_equation& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

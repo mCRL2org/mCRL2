@@ -592,7 +592,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }
@@ -996,7 +996,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << pp(pbes_equation_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end())) << std::flush;
 #endif
       return result;
     }

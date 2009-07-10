@@ -18,11 +18,11 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 std::string test1 =
-  "pbes                                                                              \n"
-  "                                                                                  \n"
-  "nu X(b:Bool, n:Nat) = (val(b) => X(!b, n)) && (val(!b) => X(!b, n+1));            \n"
-  "                                                                                  \n"
-  "init X(true,0);                                                                   \n"
+  "pbes                         \n"
+  "                             \n"
+  "nu X(b:Bool, n:Nat) = true;  \n"
+  "                             \n"
+  "init X(true,0);              \n"
   ;
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)

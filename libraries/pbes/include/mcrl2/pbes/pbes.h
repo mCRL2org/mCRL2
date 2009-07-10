@@ -146,8 +146,12 @@ class pbes
       m_global_variables = data::convert<atermpp::set<data::variable> >(global_variables);
 
       atermpp::aterm_appl eqn_spec = *i++;
-      pbes_equation_list eqn = eqn_spec(0);
-      m_equations = Container(eqn.begin(), eqn.end());
+      atermpp::aterm_list eqn = eqn_spec(0);
+      m_equations.clear();
+      for (atermpp::aterm_list::iterator j = eqn.begin(); j != eqn.end(); ++j)
+      {
+        m_equations.push_back(pbes_equation(*j));
+      }
 
       atermpp::aterm_appl init = atermpp::aterm_appl(*i);
       m_initial_state = atermpp::aterm_appl(init(0));
@@ -706,7 +710,15 @@ template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
 {
   ATermAppl global_variables = core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(p.global_variables()));
-  ATermAppl equations = core::detail::gsMakePBEqnSpec(data::convert<pbes_equation_list>(p.equations()));
+
+  atermpp::aterm_list eqn_list;
+  const Container& eqn = p.equations();
+  for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
+  {
+    atermpp::aterm a = pbes_equation_to_aterm(*i);
+    eqn_list = atermpp::push_front(eqn_list, a);
+  }
+  ATermAppl equations = core::detail::gsMakePBEqnSpec(eqn_list);
   ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());
   atermpp::aterm_appl result;
 
