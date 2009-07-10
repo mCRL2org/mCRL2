@@ -113,7 +113,7 @@ void test_lps_substitute()
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
 
-  lps::substitute(v, sigma);
+  lps::substitute(v, sigma, false);
   core::garbage_collect();
 }
 

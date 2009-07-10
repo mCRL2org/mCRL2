@@ -91,7 +91,7 @@ namespace detail {
         to_be_removed.insert(*i);
       }
     }
-    lps::substitute(spec, sigma);
+    lps::substitute(spec, sigma, false);
     lps::remove_parameters(spec, to_be_removed);
   }
 

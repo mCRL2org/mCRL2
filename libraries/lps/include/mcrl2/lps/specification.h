@@ -30,11 +30,18 @@
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/representative_generator.h"
 
 namespace mcrl2 {
 
 /// \brief The main namespace for the LPS library.
 namespace lps {
+
+template <typename Object, typename SetContainer>
+void remove_parameters(Object& o, const SetContainer& to_be_removed);
+
+template <typename Object, typename Substitution>
+void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
                      
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
@@ -231,6 +238,30 @@ class specification
     {
       return m_initial_process;
     }
+    
+    /// \brief Attempts to eliminate the free variables of the specification, by substituting
+    /// a constant value for them. If no constant value is found for one of the variables,
+    /// an exception is thrown.
+    void instantiate_global_variables()
+    {
+      data::mutable_map_substitution<> sigma;
+      data::representative_generator default_expression_generator(data());
+      std::set<data::variable> to_be_removed;
+      const atermpp::set<data::variable>& v = global_variables();
+      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+      {
+        data::data_expression d = default_expression_generator(i->sort());
+        if (d == data::data_expression())
+        {
+          throw mcrl2::runtime_error("Error in specification::instantiate_global_variables: could not instantiate " + pp(*i));
+        }
+        sigma[*i] = d;
+        to_be_removed.insert(*i);
+      }
+      lps::substitute(*this, sigma, false);
+      lps::remove_parameters(*this, to_be_removed);
+      assert(global_variables().empty());
+    }
 };
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
@@ -301,6 +332,14 @@ bool operator!=(const specification& spec1, const specification& spec2)
 } // namespace lps                                                                                         
 
 } // namespace mcrl2                                                                                        
+
+#ifndef MCRL2_LPS_REMOVE_H
+#include "mcrl2/lps/remove.h"
+#endif
+
+#ifndef MCRL2_LPS_SUBSTITUTE_H
+#include "mcrl2/lps/substitute.h"
+#endif
 
 #ifndef MCRL2_LPS_TRAVERSE_H
 #include "mcrl2/lps/traverse.h"

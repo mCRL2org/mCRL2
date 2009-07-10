@@ -21,7 +21,6 @@
 #include "mcrl2/data/find.h"  
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"  
 #include "mcrl2/lps/find.h"  
 #include "mcrl2/lps/rewrite.h"  
@@ -116,23 +115,7 @@ namespace detail {
       /// an exception is thrown.
       void instantiate_free_variables()
       {
-        data::mutable_map_substitution<> sigma;
-        data::representative_generator default_expression_generator(m_spec.data());
-        std::set<data::variable> to_be_removed;
-        const atermpp::set<data::variable>& v = m_spec.global_variables();
-        for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          data::data_expression d = default_expression_generator(i->sort());
-          if (d == data::data_expression())
-          {
-            throw mcrl2::runtime_error("Error in specification::instantiate_free_variables: could not instantiate " + pp(*i));
-          }
-          sigma[*i] = d;
-          to_be_removed.insert(*i);
-        }
-        lps::substitute(m_spec, sigma);
-        lps::remove_parameters(m_spec, to_be_removed);
-        assert(m_spec.global_variables().empty());
+        m_spec.instantiate_global_variables();
       }
 
       /// \brief Removes formal parameters from the specification
