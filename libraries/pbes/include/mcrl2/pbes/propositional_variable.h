@@ -20,6 +20,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/parser.h"
 

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file global_variable_visitor.h
+/// \file mcrl2/pbes/detail/free_variable_visitor.h
 /// \brief Add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_GLOBAL_VARIABLE_VISITOR_H
-#define MCRL2_PBES_DETAIL_GLOBAL_VARIABLE_VISITOR_H
+#ifndef MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
+#define MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H
 
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
@@ -23,7 +23,7 @@ namespace pbes_system {
 namespace detail {
 
 template <typename Term>
-struct global_variable_visitor: public pbes_expression_visitor<Term>
+struct free_variable_visitor: public pbes_expression_visitor<Term>
 {
   typedef pbes_expression_visitor<Term> super;
   typedef typename super::term_type term_type;
@@ -35,11 +35,11 @@ struct global_variable_visitor: public pbes_expression_visitor<Term>
   std::set<data::variable> result;
   bool search_propositional_variables;
 
-  global_variable_visitor(bool search_propositional_variables_ = true)
+  free_variable_visitor(bool search_propositional_variables_ = true)
     : search_propositional_variables(search_propositional_variables_)
   {}
 
-  global_variable_visitor(data::variable_list bound_variables_, bool search_propositional_variables_ = true)
+  free_variable_visitor(data::variable_list bound_variables_, bool search_propositional_variables_ = true)
     : bound_variables(bound_variables_), search_propositional_variables(search_propositional_variables_)
   {}
 
@@ -151,4 +151,4 @@ struct global_variable_visitor: public pbes_expression_visitor<Term>
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_GLOBAL_VARIABLE_VISITOR_H
+#endif // MCRL2_PBES_DETAIL_FREE_VARIABLE_VISITOR_H

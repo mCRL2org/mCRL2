@@ -25,7 +25,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
-#include "mcrl2/pbes/detail/global_variable_visitor.h"
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
@@ -54,7 +54,7 @@ class pbes_parelm_algorithm
     std::set<data::variable> unbound_variables(pbes_expression t, data::variable_list bound_variables) const
     {
       bool search_propositional_variables = false;
-      detail::global_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
+      detail::free_variable_visitor<pbes_expression> visitor(bound_variables, search_propositional_variables);
       visitor.visit(t);
       return visitor.result;
     }

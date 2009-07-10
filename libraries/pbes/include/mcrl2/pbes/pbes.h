@@ -40,7 +40,7 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
-#include "mcrl2/pbes/detail/global_variable_visitor.h"
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
@@ -85,7 +85,7 @@ std::set<data::variable> compute_global_variables(Iterator first, Iterator last)
 {
   using namespace std::rel_ops; // for definition of operator!= in terms of operator==
 
-  detail::global_variable_visitor<pbes_expression> visitor;
+  detail::free_variable_visitor<pbes_expression> visitor;
 
   for (Iterator i = first; i != last; ++i)
   {
