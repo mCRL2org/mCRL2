@@ -82,6 +82,23 @@ std::set<typename Container::value_type> make_set(const Container& c)
   return result;
 }
 
+/// \brief Determines if the unordered sequences s1 and s2 have an empty intersection
+/// \param s1 A sequence
+/// \param s2 A sequence
+/// \return True if the intersection of s1 and s2 is empty
+template <typename Sequence>
+bool sequence_empty_intersection(Sequence s1, Sequence s2)
+{
+  for (typename Sequence::const_iterator i = s1.begin(); i != s1.end(); ++i)
+  {
+    if (std::find(s2.begin(), s2.end(), *i) != s2.end())
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
 } // namespace detail
 
 } // namespace data

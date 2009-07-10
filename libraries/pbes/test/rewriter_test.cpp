@@ -11,6 +11,7 @@
 
 //#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
 #include <iostream>
 #include <set>
@@ -28,6 +29,8 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;
@@ -69,20 +72,20 @@ std::string ppp(Term t)
 template <typename Rewriter1, typename Rewriter2>
 void test_expressions(Rewriter1 R1, std::string expr1, Rewriter2 R2, std::string expr2, std::string var_decl = VARIABLE_SPECIFICATION, std::string substitutions = "", std::string data_spec = "")
 {
+  std::cout << "--- test case --- " << expr1 << " -> " << expr2 << " with substitution " << substitutions << std::endl;
   pbes_expression d1 = pbes_system::parse_pbes_expression(expr1, var_decl, data_spec);
   pbes_expression d2 = pbes_system::parse_pbes_expression(expr2, var_decl, data_spec);
 
   if (substitutions == "")
-  {
-    
+  {   
     if (R1(d1) != R2(d2))
     {
       BOOST_CHECK(R1(d1) == R2(d2));
-      std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
+      std::cout << "--- TEST FAILED --- " << std::endl;
     }
     else
     {
-      std::cout << "--- succeeded test --- " << expr1 << " -> " << expr2 << std::endl;
+      std::cout << "--- TEST SUCCEEDED --- " << std::endl;
     }
     std::cout << "expr1    " << core::pp(d1) << std::endl;
     std::cout << "expr2    " << core::pp(d2) << std::endl;
@@ -124,7 +127,7 @@ void test_simplifying_rewriter()
   data::data_specification data_spec = data::data_specification();
   data_spec.import_system_defined_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
-  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
+  pbes_system::simplifying_quantifier_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
 
   test_expressions(R, "val(n >= 0) || Y(n)"                                             , "val(true)");
   test_expressions(R, "false"                                                           , "val(false)");
@@ -155,6 +158,14 @@ void test_simplifying_rewriter()
   test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) => Y(n)"                       , "true");
   test_expressions(R, "forall m:Nat. Y(n)"                                              , "Y(n)");
   test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) || Y(n)"                       , "Y(n)");
+  test_expressions(R, "!!X"                                                             , "X");
+  test_expressions(R, "forall m:Nat. X"                                                 , "X");
+  test_expressions(R, "forall m,n:Nat. Y(n)"                                            , "forall n:Nat. Y(n)");
+  test_expressions(R, "forall m,n:Nat. Y(m)"                                            , "forall m:Nat. Y(m)");
+  test_expressions(R, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
+  test_expressions(R, "forall n: Nat. forall b: Bool. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
+  test_expressions(R, "forall n: Nat. val(b) && Y(n)"                                   , "val(b) && forall n: Nat. Y(n)");
+  test_expressions(R, "forall n: Nat. val(b)"                                           , "val(b)");
 
   // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
   // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
@@ -219,6 +230,7 @@ void test_enumerate_quantifiers_rewriter()
   test_expressions(R, "exists m:Nat.true"                                               , "true");
   test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
   test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
+  test_expressions(R, "forall m:Nat. X"                                                 , "X");
 }
 
 void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
@@ -265,6 +277,24 @@ void test_enumerate_quantifiers_rewriter2()
   expr2 = "X(e1) || X(e2)";
   sigma = "";
   test_enumerate_quantifiers_rewriter(expr1, expr2, var_decl, sigma, data_spec);
+}
+
+void test_pbesrewr()
+{
+  std::string pbes_text =
+    "sort Enum = struct e1 | e2;                           \n"
+    "pbes mu X(n:Enum)=exists m1,m2:Enum.(X(m1) || X(m2)); \n"
+    "init X(e1);                                           \n"
+    ;
+  pbes<> p = txt2pbes(pbes_text);
+  data::rewriter datar(p.data(), data::rewriter::jitty);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::rewriter_with_variables datarv(datar);
+  bool enumerate_infinite_sorts = true;
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+  pbesrewr(p, pbesr);
+  // p.save("pbesrewr.pbes");
 }
 
 void test_enumerate_quantifiers_rewriter_finite()
@@ -509,6 +539,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_pbesrewr();
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
   test_enumerate_quantifiers_rewriter2();

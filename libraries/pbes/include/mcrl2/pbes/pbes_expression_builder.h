@@ -25,6 +25,13 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+namespace detail {
+
+  struct no_substitution
+  {
+  };
+
+}
 
 #ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 // use a static variable to store the indentation depth

@@ -40,21 +40,18 @@ namespace detail {
     return reverse(result);
   }
 
-  /// \brief Returns the difference of two unordered sets, that are stored in ATerm lists.
+  /// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
   /// \param x A sequence of data variables
   /// \param y A sequence of data variables
-  /// \return The difference of two sets.
+  /// \return The intersection of two sets.
   inline
-  variable_list set_difference(variable_list x, variable_list y)
+  variable_list set_intersection(variable_list x, variable_list y)
   {
     if (x == y)
     {
       return x;
     }
 
-    // We assume that in the majority of cases no variables are removed.
-    // Therefore we only do the expensive ATerm list construction if it
-    // is really needed.
     std::set<variable> to_be_removed;
     for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
     {

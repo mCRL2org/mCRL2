@@ -177,9 +177,9 @@ namespace core {
     /// \param w A sequence of data variables
     /// \return The difference of two sets.
     static inline
-    variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
+    variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
     {
-      return data::detail::set_difference(v, w);
+      return data::detail::set_intersection(v, w);
     }
 
     /// \brief Test if a term is constant

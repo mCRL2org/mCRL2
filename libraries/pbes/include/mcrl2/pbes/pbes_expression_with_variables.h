@@ -370,7 +370,7 @@ namespace core {
     static inline
     std::string pp(term_type t)
     {
-      return core::pp(t) + " [" + data::pp(t.variables()) + "]";
+      return core::pp(t) + " variables: " + data::pp(t.variables());
     }
   };
 

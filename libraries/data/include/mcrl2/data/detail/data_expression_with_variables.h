@@ -235,14 +235,14 @@ namespace core {
       return t.variables();
     }
 
-    /// \brief Returns the difference of two unordered sets of variables
+    /// \brief Returns the intersection of two unordered sets of variables
     /// \param v A sequence of data variables
     /// \param w A sequence of data variables
-    /// \return The difference of two sets.
+    /// \return The intersection of two sets.
     static inline
-    variable_sequence_type set_difference(const variable_sequence_type& v, const variable_sequence_type& w)
+    variable_sequence_type set_intersection(const variable_sequence_type& v, const variable_sequence_type& w)
     {
-      return term_traits<data::data_expression>::set_difference(v, w);
+      return term_traits<data::data_expression>::set_intersection(v, w);
     }
 
     /// \brief Test if a term is constant

@@ -6,15 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/simplify_rewrite_builder.h
+/// \file mcrl2/pbes/detail/simplify_quantifier_builder.h
 /// \brief Simplifying rewriter for pbes expressions.
 
-#ifndef MCRL2_PBES_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
-#define MCRL2_PBES_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
+#ifndef MCRL2_PBES_DETAIL_SIMPLIFY_QUANTIFIER_BUILDER_H
+#define MCRL2_PBES_DETAIL_SIMPLIFY_QUANTIFIER_BUILDER_H
 
 #include <set>
 #include <utility>
 #include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
 namespace mcrl2 {
@@ -25,18 +26,49 @@ namespace detail {
 
   // Simplifying PBES rewriter.
   template <typename Term, typename DataRewriter, typename SubstitutionFunction = no_substitution>
-  struct simplify_rewrite_builder: public pbes_expression_builder<Term, SubstitutionFunction>
+  struct simplify_quantifier_builder: public pbes_expression_builder<Term, SubstitutionFunction>
   {
     typedef pbes_expression_builder<Term, SubstitutionFunction>                super;
     typedef SubstitutionFunction                                               argument_type;
     typedef typename super::term_type                                          term_type;
     typedef typename core::term_traits<term_type>::data_term_type              data_term_type;
     typedef typename core::term_traits<term_type>::data_term_sequence_type     data_term_sequence_type;
-    typedef typename core::term_traits<term_type>::variable_sequence_type variable_sequence_type;
+    typedef typename core::term_traits<term_type>::variable_sequence_type      variable_sequence_type;
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
     DataRewriter& m_data_rewriter;
+    
+    /// \brief Store the variables of the lhs and rhs of any application of and/or for later reference
+    variable_sequence_type lvar;
+    variable_sequence_type rvar;
+
+    /// \brief A binary function with the side effect that the dependent variables of the arguments are stored
+    template <typename BinaryFunction>
+    struct store_variables_function
+    {
+      variable_sequence_type& lvar;
+      variable_sequence_type& rvar;
+      const BinaryFunction& op;
+      
+      store_variables_function(variable_sequence_type& l, variable_sequence_type& r, const BinaryFunction& o)
+        : lvar(l), rvar(r), op(o)
+      {}
+      
+      term_type operator()(const term_type& left, const term_type& right) const
+      {
+        lvar = tr::free_variables(left);
+        rvar = tr::free_variables(right);
+        return op(left, right);
+      }
+    };
+
+    /// \brief Utility function for creating a store_variables_function
+    template <typename BinaryFunction>
+    store_variables_function<BinaryFunction> make_store_variables_function(variable_sequence_type& l, variable_sequence_type& r, BinaryFunction& o)
+    {
+      return store_variables_function<BinaryFunction>(l, r, o);
+    }
 
     /// \brief Is called in the case rewriting is done with a substitution function.
     /// \param d A data term
@@ -45,8 +77,6 @@ namespace detail {
     template <typename T>
     data_term_type rewrite(data_term_type d, T& sigma)
     {
-//data_term_type result = m_data_rewriter(d, sigma);
-//std::cerr << m_data_rewriter.type() << "<d>" << core::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
       return m_data_rewriter(d, sigma);
     }
 
@@ -60,7 +90,7 @@ namespace detail {
 
     /// \brief Constructor.
     /// \param rewr A data rewriter
-    simplify_rewrite_builder(DataRewriter& rewr)
+    simplify_quantifier_builder(DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
 
@@ -103,13 +133,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_not(const term_type& x, const term_type& n, SubstitutionFunction& sigma)
     {
-      if (tr::is_true(n))
+      if (tr::is_not(n))
       {
-        return tr::false_();
-      }
-      if (tr::is_false(n))
-      {
-        return tr::true_();
+        return super::visit(tr::arg(n), sigma);
       }
       return term_type(); // continue recursion
     }
@@ -123,27 +149,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_and(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      if (tr::is_true(left))
-      {
-        return super::visit(right, sigma);
-      }
-      if (tr::is_true(right))
-      {
-        return super::visit(left, sigma);
-      }
-      if (tr::is_false(left))
-      {
-        return tr::false_();
-      }
-      if (tr::is_false(right))
-      {
-        return tr::false_();
-      }
-      if (left == right)
-      {
-        return super::visit(left, sigma);
-      }
-      return term_type(); // continue recursion
+      term_type l = super::visit(left, sigma);
+      term_type r = super::visit(right, sigma);
+      return core::detail::optimized_and(l, r, make_store_variables_function(lvar, rvar, tr::and_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
     }
 
     /// \brief Visit or node
@@ -155,27 +163,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_or(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      if (tr::is_true(left))
-      {
-        return tr::true_();
-      }
-      if (tr::is_true(right))
-      {
-        return tr::true_();
-      }
-      if (tr::is_false(left))
-      {
-        return super::visit(right, sigma);
-      }
-      if (tr::is_false(right))
-      {
-        return super::visit(left, sigma);
-      }
-      if (left == right)
-      {
-        return super::visit(left, sigma);
-      }
-      return term_type(); // continue recursion
+      term_type l = super::visit(left, sigma);
+      term_type r = super::visit(right, sigma);
+      return core::detail::optimized_or(l, r, make_store_variables_function(lvar, rvar, tr::or_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
     }
 
     /// \brief Visit imp node
@@ -187,27 +177,9 @@ namespace detail {
     /// \return The result of visiting the node
     term_type visit_imp(const term_type& x, const term_type& left, const term_type& right, SubstitutionFunction& sigma)
     {
-      if (tr::is_true(left))
-      {
-        return super::visit(right, sigma);
-      }
-      if (tr::is_false(left))
-      {
-        return tr::true_();
-      }
-      if (tr::is_true(right))
-      {
-        return tr::true_();
-      }
-      if (left == right)
-      {
-        return tr::true_();
-      }
-      if (tr::is_false(right))
-      {
-        return super::visit(tr::not_(left), sigma);
-      }
-      return term_type(); // continue recursion
+      term_type l = super::visit(left, sigma);
+      term_type r = super::visit(right, sigma);
+      return core::detail::optimized_imp(l, r, make_store_variables_function(lvar, rvar, tr::imp), tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
     }
 
     /// \brief Visit forall node
@@ -220,8 +192,45 @@ namespace detail {
     term_type visit_forall(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
+      term_type result;
       term_type t = visit(phi, sigma);
-      return core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+
+      if (tr::is_not(t))
+      {
+        result = core::optimized_not(core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      }
+      if (tr::is_and(t))
+      {
+        term_type l = tr::left(t);
+        term_type r = tr::right(t);
+        data::variable_list lv = tt::set_intersection(variables, lvar);
+        data::variable_list rv = tt::set_intersection(variables, rvar);
+        result = core::optimized_and(core::optimized_forall(lv, l), core::optimized_forall(rv, r));
+      }
+      else if (tr::is_or(t))
+      {
+        term_type l = tr::left(t);
+        term_type r = tr::right(t);
+        data::variable_list lv = tt::set_intersection(variables, lvar);
+        data::variable_list rv = tt::set_intersection(variables, rvar);
+        if (lv.empty())
+        {
+          result = core::optimized_or(l, core::optimized_forall(rv, r));
+        }
+        else if (rv.empty())
+        {
+          result = core::optimized_or(r, core::optimized_forall(lv, l));
+        }
+        else
+        {
+          result = core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+        }
+      }
+      else
+      {
+        result = core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+      }
+      return result;
     }
 
     /// \brief Visit exists node
@@ -234,8 +243,45 @@ namespace detail {
     term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
     {
       typedef typename core::term_traits<data_term_type> tt;
+      term_type result;
       term_type t = visit(phi, sigma);
-      return core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+
+      if (tr::is_not(t))
+      {
+        result = core::optimized_not(core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      }
+      else if (tr::is_or(t))
+      {
+        term_type l = tr::left(t);
+        term_type r = tr::right(t);
+        data::variable_list lv = tt::set_intersection(variables, lvar);
+        data::variable_list rv = tt::set_intersection(variables, rvar);
+        result = core::optimized_or(core::optimized_exists(lvar, l), core::optimized_exists(rvar, r));
+      }
+      else if (tr::is_and(t))
+      {
+        term_type l = tr::left(t);
+        term_type r = tr::right(t);
+        data::variable_list lv = tt::set_intersection(variables, lvar);
+        data::variable_list rv = tt::set_intersection(variables, rvar);
+        if (lv.empty())
+        {
+          result = core::optimized_and(l, core::optimized_forall(rv, r));
+        }
+        else if (rv.empty())
+        {
+          result = core::optimized_and(r, core::optimized_forall(lv, l));
+        }
+        else
+        {
+          result = core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+        }
+      }
+      else
+      {
+        result = core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+      }
+      return result;
     }
 
     /// \brief Visit propositional_variable node
@@ -281,4 +327,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_SIMPLIFY_REWRITE_BUILDER_H
+#endif // MCRL2_PBES_DETAIL_SIMPLIFY_QUANTIFIER_BUILDER_H
