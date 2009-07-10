@@ -18,9 +18,8 @@
 #include "mcrl2/utilities/squadt_tool.h"
 
 using namespace std;
+using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
-using namespace mcrl2::core;
-using namespace mcrl2::lps;
 
 class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 {
@@ -43,15 +42,12 @@ class binary_tool: public squadt_tool< rewriter_tool<input_output_tool> >
 
     bool run()
     {
-      specification lps_specification;
-      lps_specification.load(m_input_filename);
+      lps::specification spec;
+      spec.load(m_input_filename);
+      data::rewriter r(create_rewriter(spec.data()));
 
-      mcrl2::data::rewriter r(create_rewriter(lps_specification.data()));
-
-      // apply binary on lps_specification and save the output to a binary file
-      specification result = binary(lps_specification, r);
-
-      result.save(m_output_filename);
+      lps::binary_algorithm<data::rewriter>(spec, r).run();
+      spec.save(m_output_filename);
 
       return true;
     }

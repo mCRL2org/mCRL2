@@ -1,7 +1,6 @@
 #include "boost.hpp" // precompiled headers
 
 #include "linearise.cpp"
-#include "binary.cpp"
 #include "invariant_checker.cpp"
 #include "nextstate_standard.cpp"
 #include "confluence_checker.cpp"

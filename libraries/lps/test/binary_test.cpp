@@ -26,6 +26,7 @@ using namespace mcrl2::lps;
 ///parameters of sort Bool. This leaves only parameters of sort Bool and Pos.
 void test_case_1()
 {
+  std::clog << "test case 1" << std::endl;
   const std::string text(
     "sort D = struct d1|d2;\n"
     "act a;\n"
@@ -35,7 +36,8 @@ void test_case_1()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
 
   summand_list summands1 = s1.process().summands();
   variable_list parameters1 = s1.process().process_parameters();
@@ -62,6 +64,7 @@ void test_case_1()
  */
 void test_case_2()
 {
+  std::clog << "test case 2" << std::endl;
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8;\n"
     "act a;\n"
@@ -71,7 +74,8 @@ void test_case_2()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -98,6 +102,7 @@ void test_case_2()
  */
 void test_case_3()
 {
+  std::clog << "test case 3" << std::endl;
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7;\n"
     "act a;\n"
@@ -107,7 +112,8 @@ void test_case_3()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -133,6 +139,7 @@ void test_case_3()
  */
 void test_case_4()
 {
+  std::clog << "test case 4" << std::endl;
   const std::string text(
     "sort D = struct d1|d2;\n"
     "act a,b:D;\n"
@@ -142,7 +149,8 @@ void test_case_4()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -169,6 +177,7 @@ void test_case_4()
  */
 void test_case_5()
 {
+  std::clog << "test case 5" << std::endl;
   const std::string text(
     "sort D = struct d1|d2|d3|d4|d5|d6|d7|d8|d9;\n"
     "act a;\n"
@@ -178,7 +187,8 @@ void test_case_5()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
@@ -207,6 +217,7 @@ void test_case_5()
  */
 void test_case_6()
 {
+  std::clog << "test case 6" << std::endl;
   const std::string text(
     "sort D = struct d1(E) | d2(E);\n"
     "     E = struct e1 | e2;\n"
@@ -217,7 +228,8 @@ void test_case_6()
 
   specification s0 = linearise(text);
   rewriter r(s0.data());
-  specification s1 = binary(s0, r);
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
 
   int bool_param_count = 0;
