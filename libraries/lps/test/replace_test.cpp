@@ -18,7 +18,7 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/substitute.h"
-#include "mcrl2/lps/detail/lps_replacer.h"
+#include "mcrl2/lps/detail/lps_substituter.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -84,14 +84,14 @@ std::string SPEC1b =
   "init P(1, 0);             \n"
   ;
 
-void test_lps_replacer()
+void test_lps_substituter()
 {
   specification spec1 = parse_linear_process_specification(SPEC1a);
   specification spec2 = parse_linear_process_specification(SPEC1b);
   data::mutable_map_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
-  lps::detail::lps_replacer<data::mutable_map_substitution<> > subst(sigma);
+  lps::detail::lps_substituter<data::mutable_map_substitution<> > subst(sigma);
 
   data::data_expression d;
   subst(d);
@@ -122,7 +122,7 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   test_replace();
-  test_lps_replacer();
+  test_lps_substituter();
   test_lps_substitute();
 
   return 0;
