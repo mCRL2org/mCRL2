@@ -36,7 +36,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
   typedef squadt_tool<input_output_tool> super;
 
   protected:
-    bool pretty;
     bool timed;
     std::string formfilename;
 
@@ -52,15 +51,12 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
           "use the state formula from FILE", 'f');
       desc.add_option("timed",
           "use the timed version of the algorithm, even for untimed LPS's", 't');
-      desc.add_option("pretty",
-          "return a pretty printed version of the output", 'P');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
 
-      pretty    = 0 < parser.options.count("pretty");
       timed     = 0 < parser.options.count("timed");
 
       //check for presence of -f
@@ -243,7 +239,6 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
       // Let squadt_tool update configuration for rewriter and add output file configuration
       synchronise_with_configuration(c);
 
-      pretty           = c.get_option_argument< pbes_output_format >("selected_output_format") != normal;
       timed            = c.get_option_argument< bool >("use_timed_algorithm");
       formfilename     = c.get_input("formula_in").location();
       return run();
