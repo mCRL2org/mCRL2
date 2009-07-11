@@ -77,7 +77,7 @@ namespace mcrl2 {
 
              detail::make_find_helper< function_symbol >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
 
-             symbols_for_equation[*i] = used_symbols;
+             symbols_for_equation[*i].swap(used_symbols);
           }
 
           for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
@@ -87,6 +87,7 @@ namespace mcrl2 {
               if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
                 detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
 
                 equations.erase(i);
               }
