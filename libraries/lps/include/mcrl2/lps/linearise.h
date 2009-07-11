@@ -28,6 +28,7 @@ typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
 /// \brief String representation of a linearisation method
 /// \param[in] lin_method A linerisation method
 /// \return 
+inline
 std::string lin_method_to_string(t_lin_method lin_method)
 {
   std::string method[] = {"stack","regular","regular2"};
