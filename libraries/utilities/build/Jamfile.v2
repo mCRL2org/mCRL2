@@ -25,12 +25,20 @@ obj squadt_interface
         <include>../include
       ;
 
+obj toolset_revision
+      : source/toolset_revision.cpp
+      : <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
+      :
+      :
+      ;
+
 obj command_line_interface
       : source/command_line_interface.cpp
       : <use>/site-config//boost
       :
       : <include>../include
         <include>../../pbes/include # Temporary measure until squadt_tool class hierarchy is complete
+        <library>/libraries/utilities//toolset_revision
       ;
 
 mcrl2-library utilities

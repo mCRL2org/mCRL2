@@ -8,7 +8,6 @@ project libraries/pbes/example
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
-       <define>MCRL2_REVISION=\"\\\"0\\\"\"
    ;
 
 exe paritygame   : paritygame.cpp : ;

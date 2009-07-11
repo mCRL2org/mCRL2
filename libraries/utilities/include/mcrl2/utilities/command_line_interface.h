@@ -22,6 +22,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/type_traits/is_pod.hpp"
 #include "boost/shared_ptr.hpp"
+#include "mcrl2/utilities/toolset_revision.h"
 
 namespace mcrl2 {
   namespace utilities {
@@ -1128,7 +1129,7 @@ namespace mcrl2 {
         }
       };
 
-      static bool initialised = initialiser< void >::set_revision(MCRL2_REVISION);
+      static bool initialised = initialiser< void >::set_revision(get_toolset_revision());
     }
 
     template <>

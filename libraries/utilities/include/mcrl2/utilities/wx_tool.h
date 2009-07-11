@@ -24,6 +24,7 @@
 #include "boost/algorithm/string/case_conv.hpp"
 
 #include "mcrl2/utilities/command_line_interface.h"
+#include "mcrl2/utilities/toolset_revision.h"
 #include "mcrl2/utilities/input_tool.h" // temporary measure
 
 namespace mcrl2 {
@@ -144,7 +145,7 @@ namespace mcrl2 {
 
             //our approach (put version in description to improve formatting):
             information.SetDescription(wx_cast("mCRL2 toolset " + mcrl2::utilities::version_tag() +
-                         "\n(revision " MCRL2_REVISION + ")\n\n" + m_description));
+                         "\n(revision " + get_toolset_revision() + ")\n\n" + m_description));
 
             //set copyright
             information.SetCopyright(wx_cast(std::string("Copyright \xA9 ") +

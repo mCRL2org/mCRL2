@@ -6,7 +6,6 @@ project libraries/lps/example
        <source>/libraries/utilities//command_line_interface
        <source>/site-config//boost_program_options
        <source>/site-config//boost_filesystem
-       <define>MCRL2_REVISION=\"\\\"0\\\"\"
    ;
 
 exe lpsrewr         : lpsrewr.cpp : <squadt-connectivity>implemented ;

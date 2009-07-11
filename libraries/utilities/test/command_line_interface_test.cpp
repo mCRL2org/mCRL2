@@ -15,7 +15,6 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 
-#define MCRL2_REVISION "xXxXx"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/input_tool.h"

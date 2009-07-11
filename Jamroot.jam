@@ -188,8 +188,7 @@ rule plugin ( name : sources * : requirements * : defaults * : usage-requirement
 
 # Target for a tool in the mCRL2 toolset
 rule tool ( name : sources * : requirements * : defaults * : usage-requirements * ) {
-  build-requirements = <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
-                                [ process-requirements $(requirements) ] ;
+  build-requirements = [ process-requirements $(requirements) ] ;
 
   if ! <build>no in $(build-requirements) {
     exe $(name) : $(sources)

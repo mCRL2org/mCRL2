@@ -5,7 +5,6 @@ project status
     : requirements <hardcode-dll-paths>true
       <preserve-test-targets>on
       <dependency>/site-config//boost
-      <define>"MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\""
     ;
 
 # Tests from Jamfiles in individual library test subdirectories
