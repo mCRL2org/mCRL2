@@ -430,11 +430,37 @@ namespace mcrl2 {
       result << "[";
       for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
       {
-        result << (i == sigma.begin() ? "" : "; ") << core::pp(i->first) << ":" << core::pp(i->first.sort()) << " := " << core::pp(i->second);
+        result << (i == sigma.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
       }
       result << "]";
       return result.str();
     }
+
+    /** \brief Function object for applying substitutions to an expression
+     *
+     * \arg[in] Expression the type of the resulting rexpression
+     **/
+    template < typename Expression >
+    class apply_to_expression {
+
+      private:
+
+        Expression m_base_expression;
+      
+      public:
+
+        apply_to_expression(Expression const& e) : m_base_expression(e)
+        {}
+
+        apply_to_expression()
+        {}
+
+        template < typename Substitution >
+        Expression operator()(Substitution const& s) const
+        {
+          return s(m_base_expression);
+        }
+    };
 
     /// \brief Utility function for creating a map_substitution_adapter.
     template <typename VariableContainer, typename ExpressionContainer, typename MapContainer >

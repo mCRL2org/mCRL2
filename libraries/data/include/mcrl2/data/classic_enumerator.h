@@ -185,6 +185,9 @@ namespace mcrl2 {
         template < typename T >
         friend class enumerator_factory;
 
+        template < typename M, typename E, typename S >
+        friend class classic_enumerator;
+
       private:
 
         // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
@@ -281,10 +284,11 @@ namespace mcrl2 {
          * \param[in] condition the condition used for filtering generated substitutions
          * \param[in] evaluator component that is used for evaluating conditions
          **/
+        template < typename Container >
         classic_enumerator(data_specification const& specification,
-            std::set< variable_type > const& variables,
-            Evaluator const& evaluator,
-            expression_type const& condition = sort_bool::true_()) {
+            Container const& variables, Evaluator const& evaluator,
+            expression_type const& condition = sort_bool::true_(),
+            typename detail::enable_if_container< Container, variable >::type* = 0) {
 
           implementation_type::create(m_impl, specification, variables, condition, evaluator);
         }
@@ -297,11 +301,13 @@ namespace mcrl2 {
          * \param[in] evaluator component that is used for evaluating conditions
          * \param[in] substitution template for the substitution that is returned
          **/
+        template < typename Container >
         classic_enumerator(data_specification const& specification,
-            std::set< variable_type > const& variables,
+            Container const& variables,
             Evaluator const& evaluator,
             expression_type const& condition,
-            substitution_type const& substitution) {
+            substitution_type const& substitution,
+            typename detail::enable_if_container< Container, variable >::type* = 0) {
           implementation_type::create(m_impl, specification, variables, condition, evaluator, substitution);
         }
 
@@ -314,8 +320,7 @@ namespace mcrl2 {
          * \param[in] evaluator component that is used for evaluating conditions
          **/
         classic_enumerator(data_specification const& specification,
-            variable_type const& variable,
-            Evaluator const& evaluator,
+            variable_type const& variable, Evaluator const& evaluator,
             expression_type const& condition = sort_bool::true_()) {
 
           implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator);
@@ -338,6 +343,104 @@ namespace mcrl2 {
           implementation_type::create(m_impl, specification, make_set(variable), condition, evaluator, substitution);
         }
     };
+
+    /**
+     * \brief Specialisation for enumerating without enumeration condition
+     **/
+    template < typename MutableSubstitution >
+    class classic_enumerator< MutableSubstitution, void, selectors::select_all > :
+                           public classic_enumerator< MutableSubstitution, rewriter, selectors::select_all >
+    {
+      typedef classic_enumerator< MutableSubstitution, rewriter, selectors::select_all > super;
+
+      public:
+
+        /// \brief The type of objects that represent substitutions
+        typedef MutableSubstitution                                            substitution_type;
+        /// \brief The type of objects that represent variables
+        typedef typename MutableSubstitution::variable_type                    variable_type;
+        /// \brief The type of objects that represent expressions
+        typedef typename MutableSubstitution::expression_type                  expression_type;
+
+      private:
+
+        static typename super::evaluator_type& get_shared_evaluator()
+        {
+          static typename super::evaluator_type  evaluator;
+
+          return evaluator;
+        }
+
+        static boost::shared_ptr< typename super::shared_context_type >& get_shared_context()
+        {
+          static boost::shared_ptr< typename super::shared_context_type > context(
+            new typename super::shared_context_type(rewriter::default_specification(), get_shared_evaluator()));
+
+          return context;
+        }
+
+      public:
+
+         classic_enumerator()
+         { }
+
+        /** \brief Constructs iterator representing a sequence of expressions
+         *
+         * \param[in] specification specification containing the definitions of sorts
+         * \param[in] variables the set of variables for which to find valuatations
+         **/
+        classic_enumerator(data_specification const& specification,
+            variable_type const& variable) :
+                   super(get_shared_context(), make_set(variable), sort_bool::true_(), substitution_type(), get_shared_evaluator())
+        { }
+
+        /** \brief Constructs iterator representing a sequence of expressions
+         *
+         * \param[in] specification specification containing the definitions of sorts
+         * \param[in] variables the set of variables for which to find valuatations
+         **/
+        template < typename Container >
+        classic_enumerator(data_specification const& specification,
+            Container const& variables,
+            typename detail::enable_if_container< Container, variable >::type* = 0) :
+                   super(get_shared_context(), variables, sort_bool::true_(), substitution_type(), get_shared_evaluator())
+        { }
+
+    };
+
+    /** \brief Constructs an enumerator without condition evaluation
+    *
+    * The resulting sequence of substitution is as if enumerating with
+    * an arbitrary condition and a selector that selects any valuation of
+    * variables.
+    *
+    * \param[in] specification the data context
+    * \param[in] variables the set of variables for which to find valuatations
+    **/
+    template < typename VariableSequence >
+    classic_enumerator< mutable_map_substitution< >, void, selectors::select_all >
+    make_simple_classic_enumerator(data_specification const& specification, VariableSequence const& variables)
+    {
+      return classic_enumerator< mutable_map_substitution< >, void, selectors::select_all >(specification, variables);
+    }
+
+    /** \brief Constructs iterator range of expressions generated by
+    * applying a sequence of substitutions to a single expression
+    *
+    * \param[in] specification specification containing the definitions of sorts
+    * \param[in] variables the set of variables for which to find valuatations
+    **/
+    template < typename Enumerator >
+    boost::iterator_range< detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >,
+									 Enumerator, typename Enumerator::expression_type > >
+    make_enumeration_sequence(typename Enumerator::expression_type const& base_expression, Enumerator const& enumerator)
+    {
+      typedef detail::transform_iterator< apply_to_expression< typename Enumerator::expression_type >, Enumerator, typename Enumerator::expression_type > iterator_type;
+
+      return boost::make_iterator_range(
+        iterator_type(enumerator, apply_to_expression< typename Enumerator::expression_type >(base_expression)),
+        iterator_type(Enumerator()));
+    }
 
   } // namespace data
 } // namespace mcrl2

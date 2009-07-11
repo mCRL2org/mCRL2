@@ -20,7 +20,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/data/detail/sort_utility.h"
+#include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -291,10 +291,10 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   //Populate sort_enumerations with all enumerations for the finite sorts of the system
   core::gsVerboseMsg("Enumerating finite data sorts...\n");
-  for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
+  for (atermpp::vector<pbes_equation>::const_iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
     data::variable_list parameters = eq_i->variable().parameters();
-    for (data::variable_list::iterator p = parameters.begin(); p != parameters.end(); p++)
+    for (data::variable_list::const_iterator p = parameters.begin(); p != parameters.end(); p++)
     {
       data::sort_expression current_sort = p->sort();
       if (sort_enumerations.get(current_sort) == NULL)
@@ -302,10 +302,10 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
         // if (check_finite(data.constructors(), current_sort))
         if (data.is_certainly_finite(current_sort))
         {
-          // data::data_expression_list enumerations_from_sort = data::detail::enumerate_constructors(data.constructors(), current_sort);
-          data::data_expression_vector v = data::detail::enumerate_constructors(data, current_sort);
-          data::data_expression_list enumerations_from_sort = data::make_data_expression_list(v);
-          sort_enumerations.put(current_sort, enumerations_from_sort);
+          data::variable x("x", current_sort);
+
+          // data::data_expression_list enumerations_from_sort = data::detail::enumerate_constructors (data.constructors(), current_sort);
+          sort_enumerations.put(current_sort, data::convert< data::data_expression_list >(make_enumeration_sequence(x, data::make_simple_classic_enumerator< >(data, x))));
         }
       }
     }
