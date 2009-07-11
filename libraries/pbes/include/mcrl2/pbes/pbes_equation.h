@@ -12,16 +12,50 @@
 #ifndef MCRL2_PBES_PBES_EQUATION_H
 #define MCRL2_PBES_PBES_EQUATION_H
 
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
+#include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+namespace detail {
+
+  struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expression>
+  {
+    struct found_propositional_variable
+    {};
+    
+    /// \brief Visit propositional_variable node
+    /// \param e A term
+    /// \return The result of visiting the node
+    bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+    {
+      throw found_propositional_variable();
+      return true;
+    } 
+  };
+  
+  inline
+  bool has_propositional_variables(const pbes_expression& t)
+  {
+    propositional_variable_visitor visitor;
+    try
+    {
+      visitor.visit(t);
+    }
+    catch (propositional_variable_visitor::found_propositional_variable&)
+    {
+      return true;
+    }
+    return false;
+  }
+
+} // namespace detail
 
 class pbes_equation;
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
@@ -145,8 +179,7 @@ class pbes_equation
     /// \return True if the predicate formula on the right hand side contains no predicate variables.
     bool is_solved() const
     {
-      atermpp::aterm t = atermpp::find_if(ATermAppl(m_formula), is_propositional_variable_instantiation);
-      return t == atermpp::aterm(); // true if nothing was found
+      return !detail::has_propositional_variables(formula());
     }
 
     /// \brief Returns true if the equation is a BES (boolean equation system).

@@ -17,7 +17,6 @@
 #include <utility>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/data/data.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/soundness_checks.h"

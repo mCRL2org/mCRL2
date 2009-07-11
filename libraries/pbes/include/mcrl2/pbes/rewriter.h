@@ -17,7 +17,6 @@
 #include <utility>
 #include <vector>
 #include "mcrl2/core/print.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/mutable_substitution_adapter.h"
