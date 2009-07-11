@@ -47,31 +47,46 @@ namespace mcrl2 {
         }
 
         // temporary measure: use aterm
-        used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context)
+        used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context, bool add_symbols_for_global_variables = true)
         {
           // Trick, traverse all but the data specification
           for (atermpp::aterm_appl::const_iterator i = ++(++context.begin()); i != context.end(); ++i)
           {
             detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
 
-            const std::set< variable > variables = find_free_variables(*i);
-
-            for (std::set< variable >::const_iterator j = variables.begin(); j != variables.end(); ++j)
+            if (add_symbols_for_global_variables)
             {
-              add_symbols(specification.constructors(j->sort()));
-              add_symbols(specification.mappings(j->sort()));
+              const std::set< variable > variables = find_free_variables(*i);
+
+              // Compensate for symbols that could be used as part of an instantiation of free variables
+              for (std::set< variable >::const_iterator j = variables.begin(); j != variables.end(); ++j)
+              {
+                add_symbols(specification.constructors(j->sort()));
+                add_symbols(specification.mappings(j->sort()));
+              }
             }
           }
 
           std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
 
+          std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
+
+          for (std::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+          {
+             std::set< function_symbol > used_symbols;
+
+             detail::make_find_helper< function_symbol >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+
+             symbols_for_equation[*i] = used_symbols;
+          }
+
           for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
           {
             for (std::set< data_equation >::iterator i = equations.begin(), j = equations.begin(); j++ != equations.end(); i = j)
             {
-              if ((*this)(*i))
+              if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
-                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
+                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
 
                 equations.erase(i);
               }

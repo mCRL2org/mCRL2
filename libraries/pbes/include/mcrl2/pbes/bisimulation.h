@@ -185,9 +185,9 @@ public:
     /// \param name A
     /// \param parameters A sequence of data variables
     /// \return The created propositional variable
-    propositional_variable_instantiation var(core::identifier_string name, variable_list  const& parameters) const
+    propositional_variable_instantiation var(core::identifier_string name, variable_list const& parameters) const
     {
-      return propositional_variable_instantiation(name, data_expression_list(parameters.begin(), parameters.end()));
+      return propositional_variable_instantiation(name, data_expression_list(parameters));
     }
 
     /// \brief Creates a propositional variable.
