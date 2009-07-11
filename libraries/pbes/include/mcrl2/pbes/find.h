@@ -15,8 +15,6 @@
 #include <set>
 #include <iterator>
 #include <functional>
-#include <boost/bind.hpp>
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
@@ -47,36 +45,43 @@ std::set<data::variable> find_free_variables(Container const& container)
   return result;
 }
 
-/// \brief Returns true if the term has a given variable as subterm.
-/// \param t A term
-/// \param v A propositional variable instantiation
-/// \return True if the term has a given variable as subterm.
-template <typename Term>
-bool find_propositional_variable(Term t, const propositional_variable_instantiation& v)
-{
-  return atermpp::partial_find_if(t,
-                                  detail::compare_propositional_variable_instantiation(v),
-                                  is_propositional_variable_instantiation
-                                 ) != atermpp::aterm();
-}
+namespace detail {
 
-/// \brief Returns all propositional variable instantiations that occur in the term t
+  template <typename OutputIterator>
+  struct find_propositional_variables_visitor: public pbes_expression_visitor<pbes_expression>
+  {
+    OutputIterator dest;
+    
+    find_propositional_variables_visitor(OutputIterator d)
+      : dest(d)
+    {}
+
+    /// \brief Visit propositional_variable node
+    /// \param e A term
+    /// \return The result of visiting the node
+    bool visit_propositional_variable(const pbes_expression& e, const propositional_variable_instantiation& v)
+    {
+      *dest++ = v;
+      return true;
+    } 
+  };
+
+  template <typename OutputIterator>
+  find_propositional_variables_visitor<OutputIterator> make_find_propositional_variables_visitor(OutputIterator dest)
+  {
+    return find_propositional_variables_visitor<OutputIterator>(dest);
+  }
+
+} // namespace detail
+
+
+/// \brief Returns all propositional variable instantiations that occur in the pbes expression t
 /// \param t A term
-/// \return All propositional variable instantiations that occur in the term t
-template <typename Term>
-std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(Term t)
+/// \return All propositional variable instantiations that occur in the pbes expression t
+std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
 {
   std::set<propositional_variable_instantiation> variables;
-  atermpp::find_all_if(t, is_propositional_variable_instantiation, std::inserter(variables, variables.end()));
-  return variables;
-/*
-  std::set<propositional_variable_instantiation> variables;
-  atermpp::partial_find_all_if(t,
-                               is_propositional_variable_instantiation,
-                               boost::bind(std::logical_or<bool>(), boost::bind(data::is_data_expression, _1), boost::bind(is_propositional_variable_instantiation, _1)),
-                               std::inserter(variables, variables.end())
-                              );
-*/
+  detail::make_find_propositional_variables_visitor(std::inserter(variables, variables.end())).visit(t);
   return variables;
 }
 
