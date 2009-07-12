@@ -82,7 +82,7 @@ DiaGraph::DiaGraph() : super("DiaGraph",
       "Multivariate state visualisation and simulation analysis for labelled "
       "transition systems (LTS's) in the FSM format. If an INFILE is not supplied then "
       "DiaGraphica is started without opening an LTS.",
-    std::vector< std::string >(1, "Hannes Pretorius"))
+    std::vector< std::string >(1, "Hannes Pretorius")), graph(0)
 { }
 
 bool DiaGraph::run()
