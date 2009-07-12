@@ -885,7 +885,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   // First prepare the rewriter and normalize the specification.
   comp_struct c;
   data_specification ds=s.data();
-  ds.add_sort(alias(c.sort(),c));
+  ds.add_sort(alias(c.basic_sort_name(),c));
   s.data() = ds;
   postfix_identifier_generator variable_generator("");
   variable_generator.add_to_context(specification_to_aterm(s));
