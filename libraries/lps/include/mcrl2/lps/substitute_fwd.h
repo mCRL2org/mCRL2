@@ -6,15 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/substitute.h
+/// \file mcrl2/lps/substitute_fwd.h
 /// \brief add your file description here.
 
-#include "mcrl2/lps/detail/lps_substituter.h"
-
-#ifndef MCRL2_LPS_SUBSTITUTE_H
-#define MCRL2_LPS_SUBSTITUTE_H
-
-#include "mcrl2/lps/substitute_fwd.h"
+#ifndef MCRL2_LPS_SUBSTITUTE_FWD_H
+#define MCRL2_LPS_SUBSTITUTE_FWD_H
 
 namespace mcrl2 {
 
@@ -22,14 +18,10 @@ namespace lps {
 
   /// \brief Applies a substitution to an LPS data type.
   template <typename Object, typename Substitution>
-  void substitute(Object& o, const Substitution& sigma, bool replace_parameters)
-  {
-    lps::detail::lps_substituter<Substitution> r(sigma, replace_parameters);
-    r(o);
-  }
+  void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false);
 
 } // namespace lps
 
 } // namespace mcrl2
 
-#endif // MCRL2_LPS_SUBSTITUTE_H
+#endif // MCRL2_LPS_SUBSTITUTE_FWD_H

@@ -28,6 +28,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
+#include "mcrl2/lps/substitute_fwd.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/representative_generator.h"
@@ -40,9 +41,6 @@ namespace lps {
 template <typename Object, typename SetContainer>
 void remove_parameters(Object& o, const SetContainer& to_be_removed);
 
-template <typename Object, typename Substitution>
-void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
-                     
 template <typename Object, typename OutIter>
 void traverse_sort_expressions(const Object& o, OutIter dest);
 
