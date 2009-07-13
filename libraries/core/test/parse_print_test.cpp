@@ -114,6 +114,24 @@ int test_main(int argc, char** argv)
   test_data_expression("true && false");
   mcrl2::core::garbage_collect();
 
+  //test numbers
+  test_data_expression("0");
+  mcrl2::core::garbage_collect();
+  test_data_expression("-1");
+  mcrl2::core::garbage_collect();
+  test_data_expression("0 + 1");
+  mcrl2::core::garbage_collect();
+  test_data_expression("1 * 2 + 3");
+  mcrl2::core::garbage_collect();
+
+  //test enumerations
+  test_data_expression("[true, false]");
+  mcrl2::core::garbage_collect();
+  test_data_expression("{true, false}");
+  mcrl2::core::garbage_collect();
+  test_data_expression("{true: 1, false: 2}");
+  mcrl2::core::garbage_collect();
+
   //test data specification involving structured sorts
   //in which projection functions are reused
   test_data_specification(

@@ -312,26 +312,35 @@ static bool gsHasConsistentContextList(const ATermTable DataVarDecls,
 static bool gsIsOpIdNumericUpCast(ATermAppl DataExpr);
 //Ret: DataExpr is an operation identifier for a numeric upcast
 
-static bool gsIsOpIdPrefix(ATermAppl DataExpr, int ArgsLength);
-//Ret: DataExpr is a prefix operation identifier and ArgsLength == 1
+static bool gsIsIdListEnum(ATermAppl DataExpr);
+//Ret: DataExpr is a list enumeration identifier
 
-static bool gsIsOpIdInfix(ATermAppl DataExpr, int ArgsLength);
-//Ret: DataExpr is an infix operation identifier and ArgsLength == 2
+static bool gsIsIdSetEnum(ATermAppl DataExpr);
+//Ret: DataExpr is a set enumeration identifier
 
-static int gsPrecOpIdPrefix();
+static bool gsIsIdBagEnum(ATermAppl DataExpr);
+//Ret: DataExpr is a bag enumeration identifier
+
+static bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength);
+//Ret: DataExpr is a prefix identifier and ArgsLength == 1
+
+static bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength);
+//Ret: DataExpr is an infix identifier and ArgsLength == 2
+
+static int gsPrecIdPrefix();
 //Ret: Precedence of prefix operators
 //     (higher than all infix operators and arguments thereof)
 
-static int gsPrecOpIdInfix(ATermAppl OpIdName);
-//Pre: OpIdName is the name of an infix operation identifier
+static int gsPrecIdInfix(ATermAppl IdName);
+//Pre: IdName is the name of an infix identifier
 //Ret: Precedence of the operation itself
 
-static int gsPrecOpIdInfixLeft(ATermAppl OpIdName);
-//Pre: OpIdInfix is the name of an infix operation identifier
+static int gsPrecIdInfixLeft(ATermAppl IdName);
+//Pre: IdInfix is the name of an infix identifier
 //Ret: Precedence of the left argument of the operation
 
-static int gsPrecOpIdInfixRight(ATermAppl OpIdName);
-//Pre: OpIdInfix is the name of an infix operation identifier
+static int gsPrecIdInfixRight(ATermAppl IdName);
+//Pre: IdInfix is the name of an infix identifier
 //Ret: Precedence of the right argument of the operation
 
 
@@ -1324,52 +1333,52 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         Args = ATLgetArgument(DataExpr, 1);
       }
       int ArgsLength = ATgetLength(Args);
-      if (gsIsDataExprListEnum(DataExpr)) {
+      if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
+        //print upcast expression
+        PRINT_FUNC(dbg_prints)("printing upcast expression\n");
+        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
+          pp_format, ShowSorts, PrecLevel);
+      } else if (gsIsIdListEnum(Head)) {
         //print list enumeration
         PRINT_FUNC(dbg_prints)("printing list enumeration\n");
         PRINT_FUNC(fprints)(OutStream, "[");
         PRINT_FUNC(PrintPart_List)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "]");
-      } else if (gsIsDataExprSetEnum(DataExpr)) {
-        //print set/bag enumeration
+      } else if (gsIsIdSetEnum(Head)) {
+        //print set enumeration
         PRINT_FUNC(dbg_prints)("printing set enumeration\n");
         PRINT_FUNC(fprints)(OutStream, "{");
         PRINT_FUNC(PrintPart_List)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
-      } else if (gsIsDataExprBagEnum(DataExpr)) {
+      } else if (gsIsIdBagEnum(Head)) {
         //print bag enumeration
         PRINT_FUNC(fprints)(OutStream, "{");
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
-      } else if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1) {
-        //print upcast expression
-        PRINT_FUNC(dbg_prints)("printing upcast expression\n");
-        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, PrecLevel);
-      } else if (gsIsOpIdPrefix(Head, ArgsLength)) {
+      } else if (gsIsIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head,
           pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, gsPrecOpIdPrefix());
-      } else if (gsIsOpIdInfix(Head, ArgsLength)) {
+          pp_format, ShowSorts, gsPrecIdPrefix());
+      } else if (gsIsIdInfix(Head, ArgsLength)) {
         //print infix expression
         PRINT_FUNC(dbg_prints)("printing infix expression\n");
         ATermAppl HeadName = ATAgetArgument(Head, 0);
-        if (PrecLevel > gsPrecOpIdInfix(HeadName))
+        if (PrecLevel > gsPrecIdInfix(HeadName))
           PRINT_FUNC(fprints)(OutStream, "(");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
-          pp_format, ShowSorts, gsPrecOpIdInfixLeft(HeadName));
+          pp_format, ShowSorts, gsPrecIdInfixLeft(HeadName));
         PRINT_FUNC(fprints)(OutStream, " ");
         PRINT_FUNC(PrintPart_Appl)(OutStream, Head, pp_format, ShowSorts, PrecLevel);
         PRINT_FUNC(fprints)(OutStream, " ");
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
-          pp_format, ShowSorts, gsPrecOpIdInfixRight(HeadName));
-        if (PrecLevel > gsPrecOpIdInfix(HeadName))
+          pp_format, ShowSorts, gsPrecIdInfixRight(HeadName));
+        if (PrecLevel > gsPrecIdInfix(HeadName))
           PRINT_FUNC(fprints)(OutStream, ")");
       } else if (gsIsId(DataExpr)) {
         //print untyped data variable or operation identifier
@@ -1397,7 +1406,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         if (Reconstructed == DataExpr) {
           //print data application
           PRINT_FUNC(dbg_prints)("printing data application\n");
-          PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecOpIdPrefix());
+          PRINT_FUNC(PrintDataExpr)(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
           PRINT_FUNC(fprints)(OutStream, "(");
           PRINT_FUNC(PrintPart_List)(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
           PRINT_FUNC(fprints)(OutStream, ")");
@@ -1535,7 +1544,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing if then\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " -> ");
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 5);
@@ -1545,7 +1554,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing if then else\n");
     if (PrecLevel > 4) PRINT_FUNC(fprints)(OutStream, "(");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 0),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " -> ");
     PRINT_FUNC(PrintProcExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
       pp_format, ShowSorts, 5);
@@ -1572,7 +1581,7 @@ static void PRINT_FUNC(PrintProcExpr)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 6);
     PRINT_FUNC(fprints)(OutStream, " @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ProcExpr, 1),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
     if (PrecLevel > 6) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsSync(ProcExpr)) {
     //print sync
@@ -1640,13 +1649,13 @@ static void PRINT_FUNC(PrintStateFrm)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(dbg_prints)("printing timed yaled\n");
     PRINT_FUNC(fprints)(OutStream, "yaled @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(StateFrm, 0),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
   } else if (gsIsStateDelayTimed(StateFrm)) {
     //print timed delay
     PRINT_FUNC(dbg_prints)("printing timed delay\n");
     PRINT_FUNC(fprints)(OutStream, "delay @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(StateFrm, 0),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
   } else if (gsIsStateVar(StateFrm)) {
     //print fixpoint variable
     PRINT_FUNC(dbg_prints)("printing fixpoint variable\n");
@@ -1865,7 +1874,7 @@ static void PRINT_FUNC(PrintActFrm)(PRINT_OUTTYPE OutStream,
       pp_format, ShowSorts, 3);
     PRINT_FUNC(fprints)(OutStream, " @ ");
     PRINT_FUNC(PrintDataExpr)(OutStream, ATAgetArgument(ActFrm, 1),
-      pp_format, ShowSorts, gsPrecOpIdPrefix());
+      pp_format, ShowSorts, gsPrecIdPrefix());
     if (PrecLevel > 3) PRINT_FUNC(fprints)(OutStream, ")");
   } else if (gsIsActNot(ActFrm)) {
     //print negation
@@ -1973,7 +1982,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   //print condition
   ATermAppl Cond = ATAgetArgument(Summand, 1);
   if (!gsIsNil(Cond)) {
-    PRINT_FUNC(PrintDataExpr)(OutStream, Cond, pp_format, ShowSorts, gsPrecOpIdPrefix());
+    PRINT_FUNC(PrintDataExpr)(OutStream, Cond, pp_format, ShowSorts, gsPrecIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " ->\n         ");
   }
   //print multiaction
@@ -1985,7 +1994,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   //print time
   if (IsTimed) {
     PRINT_FUNC(fprints)(OutStream, " @ ");
-    PRINT_FUNC(PrintDataExpr)(OutStream, Time, pp_format, ShowSorts, gsPrecOpIdPrefix());
+    PRINT_FUNC(PrintDataExpr)(OutStream, Time, pp_format, ShowSorts, gsPrecIdPrefix());
   }
   //print process reference
   if (!gsIsDelta(MultAct)) {
@@ -2109,7 +2118,31 @@ bool gsIsOpIdNumericUpCast(ATermAppl DataExpr)
     ;
 }
 
-bool gsIsOpIdPrefix(ATermAppl DataExpr, int ArgsLength)
+bool gsIsIdListEnum(ATermAppl DataExpr)
+{
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
+    return false;
+  }
+  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameListEnum();
+}
+
+bool gsIsIdSetEnum(ATermAppl DataExpr)
+{
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
+    return false;
+  }
+  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameSetEnum();
+}
+
+bool gsIsIdBagEnum(ATermAppl DataExpr)
+{
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
+    return false;
+  }
+  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameBagEnum();
+}
+
+bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
@@ -2117,15 +2150,15 @@ bool gsIsOpIdPrefix(ATermAppl DataExpr, int ArgsLength)
   if (ArgsLength != 1) {
     return false;
   }
-  ATermAppl OpIdName = ATAgetArgument(DataExpr, 0);
+  ATermAppl IdName = ATAgetArgument(DataExpr, 0);
   return
-     (OpIdName == gsMakeOpIdNameNot())      ||
-     (OpIdName == gsMakeOpIdNameNeg())      ||
-     (OpIdName == gsMakeOpIdNameListSize()) ||
-     (OpIdName == gsMakeOpIdNameSetCompl());
+     (IdName == gsMakeOpIdNameNot())      ||
+     (IdName == gsMakeOpIdNameNeg())      ||
+     (IdName == gsMakeOpIdNameListSize()) ||
+     (IdName == gsMakeOpIdNameSetCompl());
 }
 
-bool gsIsOpIdInfix(ATermAppl DataExpr, int ArgsLength)
+bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
@@ -2133,80 +2166,80 @@ bool gsIsOpIdInfix(ATermAppl DataExpr, int ArgsLength)
   if (ArgsLength != 2) {
     return false;
   }
-  ATermAppl OpIdName = ATAgetArgument(DataExpr, 0);
+  ATermAppl IdName = ATAgetArgument(DataExpr, 0);
   return
-     (OpIdName == gsMakeOpIdNameImp())          ||
-     (OpIdName == gsMakeOpIdNameAnd())          ||
-     (OpIdName == gsMakeOpIdNameOr())           ||
-     (OpIdName == gsMakeOpIdNameEq())           ||
-     (OpIdName == gsMakeOpIdNameNeq())          ||
-     (OpIdName == gsMakeOpIdNameLT())           ||
-     (OpIdName == gsMakeOpIdNameLTE())          ||
-     (OpIdName == gsMakeOpIdNameGT())           ||
-     (OpIdName == gsMakeOpIdNameGTE())          ||
-     (OpIdName == gsMakeOpIdNameEltIn())        ||
-     (OpIdName == gsMakeOpIdNameSubSetEq())     ||
-     (OpIdName == gsMakeOpIdNameSubSet())       ||
-     (OpIdName == gsMakeOpIdNameSubBagEq())     ||
-     (OpIdName == gsMakeOpIdNameSubBag())       ||
-     (OpIdName == gsMakeOpIdNameCons())         ||
-     (OpIdName == gsMakeOpIdNameSnoc())         ||
-     (OpIdName == gsMakeOpIdNameConcat())       ||
-     (OpIdName == gsMakeOpIdNameAdd())          ||
-     (OpIdName == gsMakeOpIdNameSubt())         ||
-     (OpIdName == gsMakeOpIdNameSetUnion())     ||
-     (OpIdName == gsMakeOpIdNameSetDiff())      ||
-     (OpIdName == gsMakeOpIdNameBagJoin())      ||
-     (OpIdName == gsMakeOpIdNameBagDiff())      ||
-     (OpIdName == gsMakeOpIdNameDiv())          ||
-     (OpIdName == gsMakeOpIdNameMod())          ||
-     (OpIdName == gsMakeOpIdNameDivide())       ||
-     (OpIdName == gsMakeOpIdNameMult())         ||
-     (OpIdName == gsMakeOpIdNameEltAt())        ||
-     (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-     (OpIdName == gsMakeOpIdNameBagIntersect());
+     (IdName == gsMakeOpIdNameImp())          ||
+     (IdName == gsMakeOpIdNameAnd())          ||
+     (IdName == gsMakeOpIdNameOr())           ||
+     (IdName == gsMakeOpIdNameEq())           ||
+     (IdName == gsMakeOpIdNameNeq())          ||
+     (IdName == gsMakeOpIdNameLT())           ||
+     (IdName == gsMakeOpIdNameLTE())          ||
+     (IdName == gsMakeOpIdNameGT())           ||
+     (IdName == gsMakeOpIdNameGTE())          ||
+     (IdName == gsMakeOpIdNameEltIn())        ||
+     (IdName == gsMakeOpIdNameSubSetEq())     ||
+     (IdName == gsMakeOpIdNameSubSet())       ||
+     (IdName == gsMakeOpIdNameSubBagEq())     ||
+     (IdName == gsMakeOpIdNameSubBag())       ||
+     (IdName == gsMakeOpIdNameCons())         ||
+     (IdName == gsMakeOpIdNameSnoc())         ||
+     (IdName == gsMakeOpIdNameConcat())       ||
+     (IdName == gsMakeOpIdNameAdd())          ||
+     (IdName == gsMakeOpIdNameSubt())         ||
+     (IdName == gsMakeOpIdNameSetUnion())     ||
+     (IdName == gsMakeOpIdNameSetDiff())      ||
+     (IdName == gsMakeOpIdNameBagJoin())      ||
+     (IdName == gsMakeOpIdNameBagDiff())      ||
+     (IdName == gsMakeOpIdNameDiv())          ||
+     (IdName == gsMakeOpIdNameMod())          ||
+     (IdName == gsMakeOpIdNameDivide())       ||
+     (IdName == gsMakeOpIdNameMult())         ||
+     (IdName == gsMakeOpIdNameEltAt())        ||
+     (IdName == gsMakeOpIdNameSetIntersect()) ||
+     (IdName == gsMakeOpIdNameBagIntersect());
 }
 
-int gsPrecOpIdPrefix()
+int gsPrecIdPrefix()
 {
   return 13;
 }
 
-int gsPrecOpIdInfix(ATermAppl OpIdName)
+int gsPrecIdInfix(ATermAppl IdName)
 {
-  if (OpIdName == gsMakeOpIdNameImp()) {
+  if (IdName == gsMakeOpIdNameImp()) {
     return 2;
-  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
     return 3;
-  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
     return 4;
   } else if (
-      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
-      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameEltIn()) ||
-      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
-      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
+      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
+      (IdName == gsMakeOpIdNameEltIn()) ||
+      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
+      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
       ) {
     return 5;
-  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == gsMakeOpIdNameCons())) {
     return 6;
-  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == gsMakeOpIdNameSnoc())) {
     return 7;
-  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == gsMakeOpIdNameConcat())) {
     return 8;
   } else if (
-      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
-      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
+      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
+      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
-      (OpIdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
+      (IdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
-      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
-      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-      (OpIdName == gsMakeOpIdNameBagIntersect())
+      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
+      (IdName == gsMakeOpIdNameSetIntersect()) ||
+      (IdName == gsMakeOpIdNameBagIntersect())
       ){
     return 11;
   } else {
@@ -2215,41 +2248,41 @@ int gsPrecOpIdInfix(ATermAppl OpIdName)
   }
 }
 
-int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
+int gsPrecIdInfixLeft(ATermAppl IdName)
 {
-  if (OpIdName == gsMakeOpIdNameImp()) {
+  if (IdName == gsMakeOpIdNameImp()) {
     return 3;
-  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
     return 4;
-  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
     return 5;
   } else if (
-      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
-      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameEltIn()) ||
-      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
-      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
+      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
+      (IdName == gsMakeOpIdNameEltIn()) ||
+      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
+      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
       ) {
     return 6;
-  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == gsMakeOpIdNameCons())) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == gsMakeOpIdNameSnoc())) {
     return 7;
-  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == gsMakeOpIdNameConcat())) {
     return 8;
   } else if (
-      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
-      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
+      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
+      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
       ) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
-      (OpIdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
+      (IdName == gsMakeOpIdNameDivide())) {
     return 10;
   } else if (
-      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
-      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-      (OpIdName == gsMakeOpIdNameBagIntersect())
+      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
+      (IdName == gsMakeOpIdNameSetIntersect()) ||
+      (IdName == gsMakeOpIdNameBagIntersect())
       ){
     return 11;
   } else {
@@ -2258,41 +2291,41 @@ int gsPrecOpIdInfixLeft(ATermAppl OpIdName)
   }
 }
 
-int gsPrecOpIdInfixRight(ATermAppl OpIdName)
+int gsPrecIdInfixRight(ATermAppl IdName)
 {
-  if (OpIdName == gsMakeOpIdNameImp()) {
+  if (IdName == gsMakeOpIdNameImp()) {
     return 2;
-  } else if ((OpIdName == gsMakeOpIdNameAnd()) || (OpIdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
     return 3;
-  } else if ((OpIdName == gsMakeOpIdNameEq()) || (OpIdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
     return 4;
   } else if (
-      (OpIdName == gsMakeOpIdNameLT()) || (OpIdName == gsMakeOpIdNameLTE()) ||
-      (OpIdName == gsMakeOpIdNameGT()) || (OpIdName == gsMakeOpIdNameGTE()) ||
-      (OpIdName == gsMakeOpIdNameEltIn()) ||
-      (OpIdName == gsMakeOpIdNameSubSetEq()) || (OpIdName == gsMakeOpIdNameSubSet()) ||
-      (OpIdName == gsMakeOpIdNameSubBagEq()) || (OpIdName == gsMakeOpIdNameSubBag())
+      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
+      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
+      (IdName == gsMakeOpIdNameEltIn()) ||
+      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
+      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
       ) {
     return 6;
-  } else if ((OpIdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == gsMakeOpIdNameCons())) {
     return 6;
-  } else if ((OpIdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == gsMakeOpIdNameSnoc())) {
     return 9;
-  } else if ((OpIdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == gsMakeOpIdNameConcat())) {
     return 9;
   } else if (
-      (OpIdName == gsMakeOpIdNameAdd()) || (OpIdName == gsMakeOpIdNameSubt()) ||
-      (OpIdName == gsMakeOpIdNameSetUnion()) || (OpIdName == gsMakeOpIdNameSetDiff()) ||
-      (OpIdName == gsMakeOpIdNameBagJoin()) || (OpIdName == gsMakeOpIdNameBagDiff())
+      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
+      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
+      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
       ) {
     return 10;
-  } else if ((OpIdName == gsMakeOpIdNameDiv()) || (OpIdName == gsMakeOpIdNameMod()) ||
-      (OpIdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
+      (IdName == gsMakeOpIdNameDivide())) {
     return 11;
   } else if (
-      (OpIdName == gsMakeOpIdNameMult()) || (OpIdName == gsMakeOpIdNameEltAt()) ||
-      (OpIdName == gsMakeOpIdNameSetIntersect()) ||
-      (OpIdName == gsMakeOpIdNameBagIntersect())
+      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
+      (IdName == gsMakeOpIdNameSetIntersect()) ||
+      (IdName == gsMakeOpIdNameBagIntersect())
       ){
     return 12;
   } else {
