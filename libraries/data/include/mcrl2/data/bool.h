@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_BOOL_H
 #define MCRL2_DATA_BOOL_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -380,7 +382,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -392,7 +394,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_and_application(e) || is_or_application(e) || is_implies_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -404,7 +406,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_not_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for bool_

@@ -116,7 +116,7 @@ void test_assignment_list()
 {
   using namespace mcrl2::data::sort_bool;
 
-  std::cerr << "assingment_list replace" << std::endl;
+  std::cerr << "assignment_list replace" << std::endl;
 
   variable d1("d1", basic_sort("D"));
   variable d2("d2", basic_sort("D"));

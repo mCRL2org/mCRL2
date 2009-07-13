@@ -36,10 +36,10 @@ namespace mcrl2 {
       public:
 
         /// \brief iterator range over a list of variables
-        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const;
+        typedef atermpp::term_list< variable > variables_const;
 
         /// \brief iterator range over a constant list of variables
-        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
+        typedef atermpp::term_list< variable > variables_const_range;
 
       public:
 
@@ -170,7 +170,7 @@ namespace mcrl2 {
         /// \brief Returns the variables of the data equation.
         variables_const_range variables() const
         {
-          return boost::make_iterator_range(add_random_access< variable >(atermpp::list_arg1(appl())));
+          return atermpp::list_arg1(appl());
         }
 
         /// \brief Returns the condition of the data equation.

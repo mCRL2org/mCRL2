@@ -74,7 +74,7 @@ namespace mcrl2 {
         {
           atermpp::vector< sort_expression > new_domain;
 
-          for (function_sort::domain_const_range r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
+          for (boost::iterator_range< function_sort::domain_const_range::iterator > r(function_sort(e).domain()); !r.empty(); r.advance_begin(1))
           {
             new_domain.push_back(normalise(r.front()));
           }
@@ -371,7 +371,7 @@ namespace mcrl2 {
 
         bool is_finite(const function_sort& s)
         {
-          for (function_sort::domain_const_range i(s.domain()); !i.empty(); i.advance_begin(1))
+          for (boost::iterator_range< function_sort::domain_const_range::iterator > i(s.domain()); !i.empty(); i.advance_begin(1))
           {
             if (m_visiting.find(i.front()) == m_visiting.end() && !is_finite(i.front()))
             {

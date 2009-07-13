@@ -66,7 +66,7 @@ namespace mcrl2 {
             {
               if (r.front().sort().is_function_sort())
               {
-                for (function_sort::domain_const_range i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
+                for (boost::iterator_range< function_sort::domain_const_range::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
                   if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
                   {

@@ -39,121 +39,6 @@ namespace mcrl2 {
     /// \cond INTERNAL_DOCS
     namespace detail {
 
-      /**
-       * \brief Container adaptor to use random access iterators for a term_list object
-       * \note Necessary for range construction with term_list_random_iterator
-       **/
-      template < typename Expression >
-      class random_access_list;
-
-      /// \brief Iterator for term_list.
-      template <typename Expression>
-      class term_list_random_iterator: public boost::iterator_facade<
-              term_list_random_iterator<Expression>, // Derived
-              const Expression,                      // Value
-              boost::random_access_traversal_tag,    // CategoryOrTraversal
-              const Expression                       // Reference
-          >
-      {
-       public:
-
-          /// \brief For efficient conversion of iterator ranges
-          atermpp::term_list< Expression > list() const
-          {
-            return m_start;
-          }
-
-          /// \brief Conversion to term_list_iterator
-          operator atermpp::term_list_iterator< Expression >() {
-            return atermpp::term_list_iterator< Expression >(m_list);
-          }
-
-       private:
-          friend class boost::iterator_core_access;
-
-          ATermList m_start;
-          ATermList m_list;
-
-          template < typename TermList >
-          friend class random_access_list;
-
-          /// \brief Constructor for a sequence with elements of l
-          /// \param l A sequence of terms
-          /// \param p A sequence of terms or the empty list
-          /// The empty list specifies that the object is past-the-end iterator
-          /// \note decrement will not work properly with objects constructed with default l
-          term_list_random_iterator(ATermList l = ATempty, ATermList p = ATempty)
-            : m_start(l), m_list(p)
-          {}
-
-          /// \brief Equality operator
-          /// \param other An iterator
-          /// \return True if the iterators are equal
-          bool equal(term_list_random_iterator const& other) const
-          {
-            return this->m_list == other.m_list;
-          }
-
-          /// \brief Dereference operator
-          /// \return The value that the iterator references
-          const Expression dereference() const
-          {
-            assert(!ATisEmpty(m_list));
-
-            return Expression(typename atermpp::term_list_iterator_traits<Expression>::value_type(ATgetFirst(m_list)));
-          }
-
-          /// \brief Increments the iterator (linear)
-          void decrement()
-          {
-            for (ATermList l = m_start; l != ATempty; l = ATgetNext(l)) {
-              if (ATgetNext(l) == m_list) {
-                m_list = l;
-
-                break;
-              }
-            }
-          }
-
-          /// \brief Increments the iterator
-          void increment()
-          {
-            assert(!ATisEmpty(m_list));
-
-            m_list = ATgetNext(m_list);
-          }
-
-          /// \brief Advance by n
-          void advance(size_t n)
-          {
-            for (; n != 0; --n) {
-              increment();
-            }
-          }
-
-          /// \brief Measure distance to other iterator
-          ptrdiff_t distance_to(term_list_random_iterator const& other) const
-          {
-            ptrdiff_t count = 0;
-
-            for (ATermList l = m_list; !ATisEmpty(l); l = ATgetNext(l), ++count) {
-              if (l == other.m_list) {
-                return count;
-              }
-            }
-
-            count = 0;
-
-            for (ATermList l = other.m_list; !ATisEmpty(l); l = ATgetNext(l), --count) {
-              if (l == m_list) {
-                break;
-              }
-            }
-
-            return count;
-          }
-      };
-
       // Condition for recognising types that represent containers
       template < typename T >
       struct is_container_impl {
@@ -275,7 +160,7 @@ namespace mcrl2 {
       { };
 
       // \note the dereference operation returns (re-)evaluates the function
-      template < typename AdaptableUnaryFunction, typename Iterator, typename Value >
+      template < typename AdaptableUnaryFunction, typename Iterator, typename Value = typename AdaptableUnaryFunction::result_type >
       class transform_iterator : public boost::iterator_adaptor<
                  data::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
                                                         Iterator, Value, boost::use_default, Value > {
@@ -284,7 +169,7 @@ namespace mcrl2 {
 
         private:
 
-          AdaptableUnaryFunction m_transformer;
+          mutable AdaptableUnaryFunction m_transformer;
 
           Value dereference() const
           {
@@ -455,33 +340,6 @@ namespace mcrl2 {
                     iterator_type(predicate, r), iterator_type(predicate, r.end()));
       }
 
-
-      template < typename Expression >
-      class random_access_list {
-
-        atermpp::aterm_list m_list;
-
-        public:
-          typedef Expression                              value_type;
-          typedef term_list_random_iterator< Expression > iterator;
-          typedef term_list_random_iterator< Expression > const_iterator;
-
-          template < typename SourceExpression >
-          random_access_list(atermpp::term_list< SourceExpression > const& list) : m_list(list) {
-          }
-
-          random_access_list(ATermList list) : m_list(atermpp::aterm_list(list)) {
-          }
-
-          term_list_random_iterator< Expression > begin() const {
-            return term_list_random_iterator< Expression >(m_list, m_list);
-          }
-
-          term_list_random_iterator< Expression > end() const {
-            return term_list_random_iterator< Expression >(m_list);
-          }
-      };
-
       /// The Boost.pheonix library has a nice implementation that can also be used...
       /// For our limited purposes this is enough though
       template < typename Result >
@@ -501,26 +359,6 @@ namespace mcrl2 {
         }
       };
     } // namespace detail
-
-    /**
-     * \brief Container adaptor to use random access iterators for a term_list object
-     * \note Necessary for range construction with term_list_random_iterator
-     **/
-    template < typename TargetExpression, typename SourceExpression >
-    detail::random_access_list< TargetExpression > add_random_access(atermpp::term_list< SourceExpression > const& list)
-    {
-      return detail::random_access_list< TargetExpression >(list);
-    }
-
-    /**
-     * \brief Container adaptor to use random access iterators for a term_list object
-     * \note Necessary for range construction with term_list_random_iterator
-     **/
-    template < typename Expression >
-    detail::random_access_list< Expression > add_random_access(ATermList list)
-    {
-      return detail::random_access_list< Expression >(list);
-    }
 
     /// \brief Returns the concatenation of the lists l and m
     /// \param l A sequence of data expressions

@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_FORALL_H
 #define MCRL2_DATA_FORALL_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 
@@ -64,10 +62,6 @@ namespace mcrl2 {
         */
 
     }; // class forall
-
-    /// \brief list of foralls
-    ///
-    typedef atermpp::term_list<forall> forall_list;
 
   } // namespace data
 

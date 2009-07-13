@@ -313,19 +313,19 @@ assignment_list get_nonreal_assignments(const assignment_list& l)
 static data_expression condition_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return application(e).arguments()[0];
+  return *boost::next(application(e).arguments().begin(), 0);
 }
 
 static data_expression then_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return application(e).arguments()[1];
+  return *boost::next(application(e).arguments().begin(), 1);
 }
 
 static data_expression else_part(const data_expression e)
 {
   assert(is_if_application(e));
-  return application(e).arguments()[2];
+  return *boost::next(application(e).arguments().begin(), 2);
 }
 
 
@@ -389,7 +389,7 @@ static void split_condition(
                         real_conditions,non_real_conditions,negate);
   }
   else if (sort_bool::is_not_application(e))
-  { split_condition(application(e).arguments()[0],real_conditions,non_real_conditions,!negate);
+  { split_condition(*application(e).arguments().begin(),real_conditions,non_real_conditions,!negate);
   }
   else if(is_inequality(e) && (application(e).left().sort() == sort_real::real_() || application(e).right().sort() == sort_real::real_()))
   { std::set < variable > vars=find_variables(e);

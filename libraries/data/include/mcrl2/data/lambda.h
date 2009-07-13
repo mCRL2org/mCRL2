@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_LAMBDA_H
 #define MCRL2_DATA_LAMBDA_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/application.h"
@@ -84,10 +82,6 @@ namespace mcrl2 {
         */
 
     }; // class lambda
-
-    /// \brief list of lambdas
-    ///
-    typedef atermpp::term_list<lambda> lambda_list;
 
   } // namespace data
 

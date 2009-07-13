@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_NAT_H
 #define MCRL2_DATA_NAT_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -1929,7 +1931,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_monus_application(e) || is_swap_zero_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1941,7 +1943,7 @@ namespace mcrl2 {
       data_expression proj2(const data_expression& e)
       {
         assert(is_cpair_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1953,7 +1955,7 @@ namespace mcrl2 {
       data_expression proj1(const data_expression& e)
       {
         assert(is_cpair_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1967,11 +1969,11 @@ namespace mcrl2 {
         assert(is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
         if (is_gtesubt_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e))
         {
-          return static_cast< application >(e).arguments()[0];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
         if (is_gtesubtb_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -1987,11 +1989,11 @@ namespace mcrl2 {
         assert(is_gtesubt_application(e) || is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
         if (is_gtesubt_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_ggdivmod_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         if (is_gtesubtb_application(e))
         {
-          return static_cast< application >(e).arguments()[2];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 2);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -2005,7 +2007,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
-        return static_cast< application >(e).arguments()[2];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -2017,7 +2019,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e));
-        return static_cast< application >(e).arguments()[3];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -2029,7 +2031,7 @@ namespace mcrl2 {
       data_expression number(const data_expression& e)
       {
         assert(is_abs_application(e) || is_succ_application(e) || is_pred_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -2043,11 +2045,11 @@ namespace mcrl2 {
         assert(is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_dub_application(e) || is_even_application(e));
         if (is_cnat_application(e) || is_pos2nat_application(e) || is_nat2pos_application(e) || is_even_application(e))
         {
-          return static_cast< application >(e).arguments()[0];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
         if (is_dub_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -2061,7 +2063,7 @@ namespace mcrl2 {
       data_expression pair(const data_expression& e)
       {
         assert(is_first_application(e) || is_last_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -2075,11 +2077,11 @@ namespace mcrl2 {
         assert(is_dub_application(e) || is_gtesubtb_application(e) || is_gdivmod_application(e));
         if (is_dub_application(e) || is_gtesubtb_application(e))
         {
-          return static_cast< application >(e).arguments()[0];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
         if (is_gdivmod_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -2093,7 +2095,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e) || is_monus_application(e) || is_swap_zero_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for nat

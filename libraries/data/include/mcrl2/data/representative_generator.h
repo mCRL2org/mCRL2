@@ -112,7 +112,7 @@ namespace mcrl2 {
 
           data_expression_vector arguments;
 
-          for (function_sort::domain_const_range r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
+          for (boost::iterator_range< function_sort::domain_const_range::iterator > r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
           {
             data_expression representative = find_representative(r.front(), maximum_depth - 1);
 
@@ -153,7 +153,6 @@ namespace mcrl2 {
           }
           else
           {
-
             // s is a constant (not a function sort).
             // check if there is a constant constructor for s
             for (data_specification::constructors_const_range::const_iterator i =

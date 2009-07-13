@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_BAG_H
 #define MCRL2_DATA_BAG_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -1120,7 +1122,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_bagconstructor_application(e) || is_bagcount_application(e) || is_bagin_application(e) || is_bagjoin_application(e) || is_bagintersect_application(e) || is_bagdifference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1132,7 +1134,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_bagfbag_application(e) || is_bagcomprehension_application(e) || is_bag2set_application(e) || is_set2bag_application(e) || is_zero_function_application(e) || is_one_function_application(e) || is_nat2bool_function_application(e) || is_bool2nat_function_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1144,7 +1146,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_bagconstructor_application(e) || is_bagcount_application(e) || is_bagin_application(e) || is_bagjoin_application(e) || is_bagintersect_application(e) || is_bagdifference_application(e) || is_add_function_application(e) || is_min_function_application(e) || is_monus_function_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for bag

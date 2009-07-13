@@ -12,13 +12,12 @@
 #ifndef MCRL2_DATA_ABSTRACTION_H
 #define MCRL2_DATA_ABSTRACTION_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/detail/construction_utility.h"
 #include "mcrl2/data/detail/container_utility.h"
+#include "mcrl2/core/detail/constructors.h"
 
 namespace mcrl2 {
 
@@ -39,7 +38,7 @@ namespace mcrl2 {
       public:
 
         /// \brief Iterator range over bound variables
-        typedef boost::iterator_range< detail::term_list_random_iterator< variable > > variables_const_range;
+        typedef atermpp::term_list< variable > variables_const_range;
 
         // Type for lambda abstracions
         struct lambda : public detail::singleton_expression< abstraction::lambda, abstraction::binder_type > {
@@ -116,7 +115,7 @@ namespace mcrl2 {
         inline
         variables_const_range variables() const
         {
-          return boost::make_iterator_range(add_random_access< variable >(atermpp::list_arg2(*this)));
+          return atermpp::list_arg2(*this);
         }
 
         /// \brief Returns the body of the abstraction
@@ -148,9 +147,6 @@ namespace mcrl2 {
         }
 
     }; // class abstraction
-
-    /// \brief list of abstractions
-    typedef atermpp::term_list<abstraction> abstraction_list;
 
   } // namespace data
 

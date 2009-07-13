@@ -25,7 +25,7 @@
 #include "mcrl2/core/substitution_function.h"
 #include "mcrl2/core/deprecation.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/expression_manipulator.h"
+#include "mcrl2/data/detail/manipulator.h"
 #include "mcrl2/data/detail/concepts.h"
 
 namespace mcrl2 {

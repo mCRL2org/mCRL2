@@ -68,7 +68,7 @@ void function_sort_test()
 
   // Element wise check
   sort_expression_vector::const_iterator i = s01_range.begin();
-  function_sort::domain_iterator j = fs.domain().begin();
+  function_sort::domain_const_range::iterator j = fs.domain().begin();
   while (i != s01_range.end() && j != fs.domain().end())
   {
     BOOST_CHECK(*i == *j);
@@ -169,8 +169,8 @@ void structured_sort_test()
   BOOST_CHECK(bc_constructors[1] == c);
   BOOST_CHECK(!bc_constructors[0].arguments().empty());
   BOOST_CHECK(!bc_constructors[1].arguments().empty());
-  BOOST_CHECK(sort_nat::is_nat(bc_constructors[0].arguments()[0].sort()));
-  BOOST_CHECK(sort_bool::is_bool(bc_constructors[1].arguments()[0].sort()));
+  BOOST_CHECK(sort_nat::is_nat(bc_constructors[0].arguments().begin()->sort()));
+  BOOST_CHECK(sort_bool::is_bool(bc_constructors[1].arguments().begin()->sort()));
 }
 
 void container_sort_test()

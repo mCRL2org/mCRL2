@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_REAL_H
 #define MCRL2_DATA_REAL_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -1711,7 +1713,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1723,7 +1725,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_redfracwhr_application(e));
-        return static_cast< application >(e).arguments()[2];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -1735,7 +1737,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_redfracwhr_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1747,7 +1749,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_redfracwhr_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1759,7 +1761,7 @@ namespace mcrl2 {
       data_expression denominator(const data_expression& e)
       {
         assert(is_creal_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -1771,7 +1773,7 @@ namespace mcrl2 {
       data_expression numerator(const data_expression& e)
       {
         assert(is_creal_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1783,7 +1785,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_pos2real_application(e) || is_nat2real_application(e) || is_int2real_application(e) || is_real2pos_application(e) || is_real2nat_application(e) || is_real2int_application(e) || is_abs_application(e) || is_negate_application(e) || is_succ_application(e) || is_pred_application(e) || is_floor_application(e) || is_ceil_application(e) || is_round_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -1795,7 +1797,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_minimum_application(e) || is_maximum_application(e) || is_plus_application(e) || is_minus_application(e) || is_times_application(e) || is_exp_application(e) || is_divides_application(e) || is_redfrachlp_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for real_

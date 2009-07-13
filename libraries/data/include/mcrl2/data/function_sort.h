@@ -34,11 +34,9 @@ namespace mcrl2 {
     {
       public:
         /// \brief iterator range over list of structured sort constructors
-        typedef detail::term_list_random_iterator< sort_expression > domain_iterator;
-        /// \brief iterator range over list of structured sort constructors
-        typedef boost::iterator_range< domain_iterator >             domain_range;
+        typedef atermpp::term_list< sort_expression >                     domain_range;
         /// \brief iterator range over constant list of structured sort constructors
-        typedef boost::iterator_range< domain_iterator >             domain_const_range;
+        typedef atermpp::term_list< sort_expression >                     domain_const_range;
 
       public:
 
@@ -137,7 +135,7 @@ namespace mcrl2 {
         inline
         domain_const_range domain() const
         {
-          return domain_const_range(add_random_access< sort_expression >(atermpp::list_arg1(*this)));
+          return atermpp::list_arg1(*this);
         }
 
         /// \brief Returns the codomain of the sort.
@@ -152,8 +150,6 @@ namespace mcrl2 {
 
     /// \brief list of function sorts
     typedef atermpp::term_list<function_sort> function_sort_list;
-    /// \brief list of function sorts
-    typedef atermpp::vector<function_sort>    function_sort_vector;
 
   } // namespace data
 

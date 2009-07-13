@@ -1132,15 +1132,6 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void filter_vars_by_termlist(
-                        const application::arguments_const_range r,
-                        const atermpp::set < variable > &vars_set,
-                        atermpp::set < variable > &vars_result_set)
-    { for(application::arguments_const_range r1(r) ; !r1.empty(); r1.advance_begin(1))
-      { filter_vars_by_term(r1.front(),vars_set,vars_result_set);
-      }
-    }
-
-    void filter_vars_by_termlist(
                         const data_expression_list tl,
                         const atermpp::set < variable > &vars_set,
                         atermpp::set < variable > &vars_result_set)
@@ -3880,7 +3871,7 @@ class specification_basic_type:public boost::noncopyable
       {
         function_sort::domain_const_range domain = function_sort(w->sort()).domain();
         assert(domain.size() >= 2);
-        if (domain[1]==sort)
+        if (*(++domain.begin())==sort)
         { return *w;
         }
       };

@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_FBAG_H
 #define MCRL2_DATA_FBAG_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -798,7 +800,7 @@ namespace mcrl2 {
       data_expression head(const data_expression& e)
       {
         assert(is_fbag_cons_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -810,7 +812,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_fbagcount_application(e) || is_fbagin_application(e) || is_fbag2fset_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -822,7 +824,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_fbaginsert_application(e) || is_fbagcinsert_application(e) || is_fbaglte_application(e) || is_fbagjoin_application(e) || is_fbagintersect_application(e) || is_fbagdifference_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -834,7 +836,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_fbaginsert_application(e) || is_fbagcinsert_application(e) || is_fbaglte_application(e) || is_fbagjoin_application(e) || is_fbagintersect_application(e) || is_fbagdifference_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -846,7 +848,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_fbaginsert_application(e) || is_fbagcinsert_application(e) || is_fbaglte_application(e) || is_fbagjoin_application(e) || is_fbagintersect_application(e) || is_fbagdifference_application(e));
-        return static_cast< application >(e).arguments()[2];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -858,7 +860,7 @@ namespace mcrl2 {
       data_expression arg4(const data_expression& e)
       {
         assert(is_fbagjoin_application(e) || is_fbagintersect_application(e) || is_fbagdifference_application(e));
-        return static_cast< application >(e).arguments()[3];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -870,7 +872,7 @@ namespace mcrl2 {
       data_expression tail(const data_expression& e)
       {
         assert(is_fbag_cons_application(e));
-        return static_cast< application >(e).arguments()[2];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -882,7 +884,7 @@ namespace mcrl2 {
       data_expression arg(const data_expression& e)
       {
         assert(is_fset2fbag_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -894,7 +896,7 @@ namespace mcrl2 {
       data_expression headcount(const data_expression& e)
       {
         assert(is_fbag_cons_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -906,7 +908,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_fbagcount_application(e) || is_fbagin_application(e) || is_fbag2fset_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for fbag

@@ -12,10 +12,6 @@
 #ifndef MCRL2_DATA_WHERE_CLAUSE_H
 #define MCRL2_DATA_WHERE_CLAUSE_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
@@ -31,10 +27,10 @@ namespace mcrl2 {
       public:
 
         /// \brief Iterator range over list of declarations
-        typedef boost::iterator_range< atermpp::term_list< assignment >::iterator >       declarations_range;
+        typedef atermpp::term_list< assignment >  declarations_range;
 
         /// \brief Iterator range over constant list of declarations
-        typedef boost::iterator_range< atermpp::term_list< assignment >::const_iterator > declarations_const_range;
+        typedef atermpp::term_list< assignment >  declarations_const_range;
 
       public:
 
@@ -82,7 +78,7 @@ namespace mcrl2 {
         inline
         declarations_const_range declarations() const
         {
-          return boost::make_iterator_range(atermpp::term_list<assignment>(atermpp::list_arg2(*this)));
+          return atermpp::list_arg2(*this);
         }
 
         /// \brief Returns the body of the where_clause
@@ -93,10 +89,6 @@ namespace mcrl2 {
         }
 
     }; // class where_clause
-
-    /// \brief list of where_clauses
-    ///
-    typedef atermpp::vector<where_clause> where_clause_vector;
 
   } // namespace data
 

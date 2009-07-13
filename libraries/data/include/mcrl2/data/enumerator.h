@@ -166,7 +166,7 @@ class data_enumerator
         if (i->sort().is_function_sort()) {
           std::vector<variable> variables;
 
-          for (function_sort::domain_const_range j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+          for (boost::iterator_range< function_sort::domain_const_range::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
           {
             variables.push_back(variable((*m_generator)(), j.front()));
           }

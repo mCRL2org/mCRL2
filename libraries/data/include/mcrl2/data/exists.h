@@ -12,8 +12,6 @@
 #ifndef MCRL2_DATA_EXISTS_H
 #define MCRL2_DATA_EXISTS_H
 
-#include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 
@@ -64,9 +62,6 @@ namespace mcrl2 {
         */
 
     }; // class exists
-
-    /// \brief list of exists
-    typedef atermpp::term_list<exists> exists_list;
 
   } // namespace data
 

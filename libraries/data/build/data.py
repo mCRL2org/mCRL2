@@ -268,7 +268,7 @@ class function_declaration_list():
         except:
           index_table[idx] = [(id, label)]
       if len(index_table) == 1:
-        case_code += "        return static_cast< application >(e).arguments()[%s];\n" % (index_table.keys()[0])
+        case_code += "        return *boost::next(static_cast< application >(e).arguments().begin(), %s);\n" % (index_table.keys()[0])
       else:
         for i in index_table:
           clauses = []
@@ -276,7 +276,7 @@ class function_declaration_list():
             clauses.append("is_%s_application(e)" % (c[1].to_string()))
           case_code += "        if (%s)\n" % (string.join(clauses, " || "))
           case_code += "        {\n"
-          case_code += "          return static_cast< application >(e).arguments()[%s];\n" % (i)
+          case_code += "          return *boost::next(static_cast< application >(e).arguments().begin(), %s);\n" % (i)
           case_code += "        }\n"
         case_code += "        throw mcrl2::runtime_error(\"Unexpected expression occurred\");\n"
       case_code += "      }\n"
@@ -1872,6 +1872,7 @@ class specification():
     code += "\n"
     code += "#ifndef MCRL2_DATA_%s_H\n" % (self.namespace.upper())
     code += "#define MCRL2_DATA_%s_H\n\n" % (self.namespace.upper())
+    code += "#include \"boost/utility.hpp\"\n\n"
     code += "#include \"mcrl2/exception.h\"\n"
     code += "#include \"mcrl2/data/basic_sort.h\"\n"
     code += "#include \"mcrl2/data/function_sort.h\"\n"

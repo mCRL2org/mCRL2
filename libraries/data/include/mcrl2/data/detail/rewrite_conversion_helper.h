@@ -73,6 +73,32 @@ namespace mcrl2 {
             }
           }
 
+          struct implementor {
+            rewrite_conversion_helper& m_owner;
+
+            implementor(rewrite_conversion_helper& owner) : m_owner(owner)
+            {}
+
+            template < typename Expression >
+            data_expression operator()(Expression const& expression)
+            {
+              return m_owner.implement(expression);
+            }
+          };
+
+          struct reconstructor {
+            rewrite_conversion_helper& m_owner;
+
+            reconstructor(rewrite_conversion_helper& owner) : m_owner(owner)
+            {}
+
+            template < typename Expression >
+            data_expression operator()(Expression const& expression)
+            {
+              return m_owner.reconstruct(expression);
+            }
+          };
+
         public:
 
           // For normalising sort expressions
@@ -151,13 +177,12 @@ namespace mcrl2 {
 
             if (i == m_implementation_context.end())
             { // implementation with previously generated function
-              atermpp::term_list< variable > bound_variables = implement(expression.variables());
+              atermpp::term_list< variable > bound_variables = convert< atermpp::term_list< variable > >(implement(expression.variables()));
 
               if (!bound_variables.empty())
               { // function with non-empty domain
                 data_expression body(implement(expression.body()));
-                atermpp::term_list< variable > free_variables(implement(
-                                                 boost::make_iterator_range(find_free_variables(expression))));
+                atermpp::term_list< variable > free_variables = convert< atermpp::term_list< variable > >(implement(find_free_variables(expression, bound_variables)));
 
                 function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 
@@ -200,11 +225,11 @@ namespace mcrl2 {
 
               if (is_setcomprehension_application(expression))
               {
-                return setcomprehension(set_(expression.variables()[0].sort()), abstract_body);
+                return setcomprehension(set_(expression.variables().begin()->sort()), abstract_body);
               }
               else if (is_bagcomprehension_application(expression))
               {
-                return bagcomprehension(bag(expression.variables()[0].sort()), abstract_body);
+                return bagcomprehension(bag(expression.variables().begin()->sort()), abstract_body);
               }
               else if (expression.is_exists())
               {
@@ -226,18 +251,14 @@ namespace mcrl2 {
                   implement(make_assignment_right_hand_side_range(w.declarations())));
           }
 
-          template < typename ForwardTraversalIterator >
-          atermpp::term_list< typename ForwardTraversalIterator::value_type > implement(boost::iterator_range< ForwardTraversalIterator > const& range)
+          template < typename Container >
+          boost::iterator_range< detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > >
+          implement(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
           {
-            atermpp::vector< typename ForwardTraversalIterator::value_type > result;
+            typedef detail::transform_iterator< implementor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
-            for (typename boost::iterator_range< ForwardTraversalIterator >::const_iterator
-                                                          i(range.begin()); i != range.end(); ++i)
-            {
-              result.push_back(implement(*i));
-            }
-
-            return convert< atermpp::term_list< typename ForwardTraversalIterator::value_type > >(result);
+            return boost::make_iterator_range(iterator_type(container.begin(), implementor(*this)),
+                                              iterator_type(container.end(), implementor(*this)));
           }
 
           data_expression implement(application const& expression)
@@ -253,26 +274,29 @@ namespace mcrl2 {
 
               if (head.name() == "exists")
               {
-                lambda argument(reconstruct(expression.arguments()[0]));
+                lambda argument(reconstruct(*expression.arguments().begin()));
 
                 return exists(argument.variables(), argument.body());
               }
               else if (head.name() == "forall")
               {
-                lambda argument(reconstruct(expression.arguments()[0]));
+                lambda argument(reconstruct(*expression.arguments().begin()));
 
                 return forall(argument.variables(), argument.body());
               }
             }
 
-            atermpp::vector< data_expression > arguments;
+            return application(reconstruct(expression.head()), reconstruct(expression.arguments()));
+          }
 
-            for (application::arguments_const_range r(expression.arguments()); !r.empty(); r.advance_begin(1))
-            {
-              arguments.push_back(reconstruct(r.front()));
-            }
+          template < typename Container >
+          boost::iterator_range< detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > >
+          reconstruct(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
+          {
+            typedef detail::transform_iterator< reconstructor, typename Container::const_iterator, typename Container::value_type > iterator_type;
 
-            return application(reconstruct(expression.head()), arguments);
+            return boost::make_iterator_range(iterator_type(container.begin(), reconstructor(*this)),
+                                              iterator_type(container.end(), reconstructor(*this)));
           }
 
           data_expression reconstruct(data_expression const& expression)

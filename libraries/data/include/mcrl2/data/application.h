@@ -13,7 +13,6 @@
 #define MCRL2_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/data_expression.h"
@@ -30,13 +29,13 @@ namespace mcrl2 {
       public:
 
         /// \brief Iterator over arguments
-        typedef detail::term_list_random_iterator< data_expression > argument_iterator;
+        typedef atermpp::term_list< data_expression >::const_iterator  argument_iterator;
 
         /// \brief Iterator range over constant arguments
-        typedef boost::iterator_range< argument_iterator >           arguments_const_range;
+        typedef atermpp::term_list< data_expression >                  arguments_const_range;
 
         /// \brief Iterator range over arguments
-        typedef boost::iterator_range< argument_iterator >           arguments_range;
+        typedef atermpp::term_list< data_expression >                  arguments_range;
 
       public:
 
@@ -164,9 +163,9 @@ namespace mcrl2 {
 
         /// \brief Returns the arguments of the application
         inline
-        boost::iterator_range< argument_iterator > arguments() const
+        arguments_const_range arguments() const
         {
-          return boost::make_iterator_range(add_random_access< data_expression >(atermpp::list_arg2(appl())));
+          return atermpp::list_arg2(appl());
         }
 
         /// \brief Returns the first argument of the application
@@ -176,7 +175,7 @@ namespace mcrl2 {
         data_expression left() const
         {
           assert(arguments().size() == 2);
-          return arguments()[0];
+          return *(arguments().begin());
         }
 
         /// \brief Returns the second argument of the application
@@ -185,16 +184,10 @@ namespace mcrl2 {
         data_expression right() const
         {
           assert(arguments().size() == 2);
-          return arguments()[1];
+          return *(++arguments().begin());
         }
 
     }; // class application
-
-    /// \brief list of applications
-    typedef atermpp::term_list<application> application_list;
-
-    /// \brief vector of applications
-    typedef atermpp::vector<application> application_vector;
 
   } // namespace data
 

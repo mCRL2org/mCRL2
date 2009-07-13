@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_POS_H
 #define MCRL2_DATA_POS_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -637,11 +639,11 @@ namespace mcrl2 {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         if (is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         if (is_add_with_carry_application(e))
         {
-          return static_cast< application >(e).arguments()[2];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 2);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -655,7 +657,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_multir_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -667,7 +669,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_multir_application(e));
-        return static_cast< application >(e).arguments()[2];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
       ///\brief Function for projecting out argument
@@ -679,7 +681,7 @@ namespace mcrl2 {
       data_expression arg3(const data_expression& e)
       {
         assert(is_multir_application(e));
-        return static_cast< application >(e).arguments()[3];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
       }
 
       ///\brief Function for projecting out argument
@@ -693,11 +695,11 @@ namespace mcrl2 {
         assert(is_cdub_application(e) || is_abs_application(e) || is_succ_application(e));
         if (is_abs_application(e) || is_succ_application(e))
         {
-          return static_cast< application >(e).arguments()[0];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
         if (is_cdub_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }
@@ -711,7 +713,7 @@ namespace mcrl2 {
       data_expression bit(const data_expression& e)
       {
         assert(is_cdub_application(e) || is_add_with_carry_application(e) || is_multir_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -725,11 +727,11 @@ namespace mcrl2 {
         assert(is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_add_with_carry_application(e) || is_times_application(e));
         if (is_maximum_application(e) || is_minimum_application(e) || is_plus_application(e) || is_times_application(e))
         {
-          return static_cast< application >(e).arguments()[0];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
         if (is_add_with_carry_application(e))
         {
-          return static_cast< application >(e).arguments()[1];
+          return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
       }

@@ -15,6 +15,8 @@
 #ifndef MCRL2_DATA_LIST_H
 #define MCRL2_DATA_LIST_H
 
+#include "boost/utility.hpp"
+
 #include "mcrl2/exception.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/function_sort.h"
@@ -707,7 +709,7 @@ namespace mcrl2 {
       data_expression head(const data_expression& e)
       {
         assert(is_cons_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -719,7 +721,7 @@ namespace mcrl2 {
       data_expression right(const data_expression& e)
       {
         assert(is_concat_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -731,7 +733,7 @@ namespace mcrl2 {
       data_expression arg1(const data_expression& e)
       {
         assert(is_in_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -743,7 +745,7 @@ namespace mcrl2 {
       data_expression arg2(const data_expression& e)
       {
         assert(is_in_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -755,7 +757,7 @@ namespace mcrl2 {
       data_expression list(const data_expression& e)
       {
         assert(is_count_application(e) || is_element_at_application(e) || is_head_application(e) || is_tail_application(e) || is_rhead_application(e) || is_rtail_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -767,7 +769,7 @@ namespace mcrl2 {
       data_expression tail(const data_expression& e)
       {
         assert(is_cons_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -779,7 +781,7 @@ namespace mcrl2 {
       data_expression rhead(const data_expression& e)
       {
         assert(is_snoc_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -791,7 +793,7 @@ namespace mcrl2 {
       data_expression position(const data_expression& e)
       {
         assert(is_element_at_application(e));
-        return static_cast< application >(e).arguments()[1];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
       ///\brief Function for projecting out argument
@@ -803,7 +805,7 @@ namespace mcrl2 {
       data_expression rtail(const data_expression& e)
       {
         assert(is_snoc_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -815,7 +817,7 @@ namespace mcrl2 {
       data_expression left(const data_expression& e)
       {
         assert(is_concat_application(e));
-        return static_cast< application >(e).arguments()[0];
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       /// \brief Give all system defined equations for list
