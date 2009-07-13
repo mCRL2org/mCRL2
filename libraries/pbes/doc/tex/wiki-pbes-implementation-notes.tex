@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, July 07, 2009 15:32:55}
+%TCIDATA{LastRevised=Monday, July 13, 2009 11:32:07}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -740,46 +740,44 @@ appearing in $\varphi $ as $\mathsf{free}(\varphi )$. We assume that a data
 rewriter $r$ is given that rewrites data terms.%
 \begin{equation*}
 \begin{array}{lcl}
-b & \rightarrow  & r(b) \\ 
-\lnot \lnot \varphi  & \rightarrow  & \varphi  \\ 
-\varphi \wedge true & \rightarrow  & \varphi  \\ 
-true\wedge \varphi  & \rightarrow  & \varphi  \\ 
-\varphi \wedge false & \rightarrow  & false \\ 
-false\wedge \varphi  & \rightarrow  & false \\ 
-\varphi \wedge \varphi  & \rightarrow  & \varphi  \\ 
-\varphi \vee true & \rightarrow  & true \\ 
-true\vee \varphi  & \rightarrow  & true \\ 
-\varphi \vee false & \rightarrow  & \varphi  \\ 
-false\vee \varphi  & \rightarrow  & \varphi  \\ 
-\varphi \vee \varphi  & \rightarrow  & \varphi  \\ 
-\varphi \Rightarrow \psi  & \rightarrow  & \lnot \varphi \vee \psi  \\ 
-\forall _{d:D}.\varphi  & \rightarrow  & \varphi \text{ if }d\notin \mathsf{%
+b & \rightarrow & r(b) \\ 
+\lnot \lnot \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge true & \rightarrow & \varphi \\ 
+true\wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \wedge false & \rightarrow & false \\ 
+false\wedge \varphi & \rightarrow & false \\ 
+\varphi \wedge \varphi & \rightarrow & \varphi \\ 
+\varphi \vee true & \rightarrow & true \\ 
+true\vee \varphi & \rightarrow & true \\ 
+\varphi \vee false & \rightarrow & \varphi \\ 
+false\vee \varphi & \rightarrow & \varphi \\ 
+\varphi \vee \varphi & \rightarrow & \varphi \\ 
+\varphi \Rightarrow \psi & \rightarrow & \lnot \varphi \vee \psi \\ 
+\forall _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
 free}(\varphi ) \\ 
-\forall _{d:D}.\lnot \varphi  & \rightarrow  & \lnot \exists _{d:D}.\varphi 
-\\ 
-\forall _{d:D}.\varphi \wedge \psi  & \rightarrow  & \forall _{d:D}.\varphi
-\wedge \forall _{d:D}.\psi  \\ 
-\forall _{d:D}.\varphi \vee \psi  & \rightarrow  & (\forall _{d:D}.\varphi
+\forall _{d:D}.\lnot \varphi & \rightarrow & \lnot \exists _{d:D}.\varphi \\ 
+\forall _{d:D}.\varphi \wedge \psi & \rightarrow & \forall _{d:D}.\varphi
+\wedge \forall _{d:D}.\psi \\ 
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & (\forall _{d:D}.\varphi
 )\vee \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
-\forall _{d:D}.\varphi \vee \psi  & \rightarrow  & \varphi \vee (\forall
+\forall _{d:D}.\varphi \vee \psi & \rightarrow & \varphi \vee (\forall
 _{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
-\exists _{d:D}.\varphi  & \rightarrow  & \varphi \text{ if }d\notin \mathsf{%
+\exists _{d:D}.\varphi & \rightarrow & \varphi \text{ if }d\notin \mathsf{%
 free}(\varphi ) \\ 
-\exists _{d:D}.\lnot \varphi  & \rightarrow  & \lnot \forall _{d:D}.\varphi 
-\\ 
-\exists _{d:D}.\varphi \vee \psi  & \rightarrow  & \exists _{d:D}.\varphi
-\vee \exists _{d:D}.\psi  \\ 
-\exists _{d:D}.\varphi \wedge \psi  & \rightarrow  & (\exists _{d:D}.\varphi
+\exists _{d:D}.\lnot \varphi & \rightarrow & \lnot \forall _{d:D}.\varphi \\ 
+\exists _{d:D}.\varphi \vee \psi & \rightarrow & \exists _{d:D}.\varphi \vee
+\exists _{d:D}.\psi \\ 
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & (\exists _{d:D}.\varphi
 )\wedge \psi \text{ if }d\notin \mathsf{free}(\psi ) \\ 
-\exists _{d:D}.\varphi \wedge \psi  & \rightarrow  & \varphi \wedge (\exists
+\exists _{d:D}.\varphi \wedge \psi & \rightarrow & \varphi \wedge (\exists
 _{d:D}.\psi )\text{ if }d\notin \mathsf{free}(\varphi ) \\ 
-X(e) & \rightarrow  & X(r(e))%
+X(e) & \rightarrow & X(r(e))%
 \end{array}%
 \end{equation*}%
 where $\varphi $ and $\psi $ are arbitrary pbes expressions, $b$ is a data
 term of data sort $\mathbb{B}$, $true$ and $false$ are elements of data sort 
 $\mathbb{B}$, $X$ is a predicate variable, $e$ consists of zero or more data
-sorts and $d$ is a data variable of sort $D$. 
+sorts and $d$ is a data variable of sort $D$.
 
 \paragraph{\newpage Simplify}
 
@@ -878,22 +876,26 @@ and where $stop_{Q}=\top $ and $\dbigoplus =\dbigvee $ in case $Q=\exists $%
 
 \section{PBES instantiation}
 
-In this section we describe an implementation of the instantiation algorithm 
-$Inst$. Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots 
-\mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $%
-X_{init}(e_{init})$ an initial state. The algorithm \textsc{Pbes2bes} uses
-instantiation to compute a BES. It takes two extra parameters, an injective
-function $\rho $ that renames proposition variables to predicate variables,
-and a rewriter $R$ that eliminates quantifiers from predicate formulae. This
-rewriter is described in the next section.%
+In this section we describe two instantiation algorithms for PBESs.
+
+\subsection{\protect\bigskip Lazy algorithm}
+
+In this section we describe an implementation of the lazy instantiation
+algorithm \textsc{Pbes2besLazy} that uses instantiation to compute a BES. It
+takes two extra parameters, an injective function $\rho $ that renames
+proposition variables to predicate variables, and a rewriter $R$ that
+eliminates quantifiers from predicate formulae. Let $\mathcal{E=(\sigma }%
+_{1}X_{1}(d_{1}:D_{1})=\varphi _{1})\cdots \mathcal{(\sigma }%
+_{n}X_{n}(d_{n}:D_{n})=\varphi _{n})$ be a PBES, and $X_{init}(e_{init})$ an
+initial state.%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{Pbes2bes(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
+\text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
 \text{, }\rho \text{\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
-\\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
+_{i}:=\epsilon  \\ 
 todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset \\ 
+done:=\emptyset  \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
@@ -914,9 +916,50 @@ predicate formulae using%
 \rho (b)=_{def}b & \quad \rho (\varphi \oplus \psi )=_{def}\rho (\varphi
 )\oplus \rho (\psi )%
 \end{array}%
-\end{equation*}
+\end{equation*}%
+\pagebreak 
 
-\newpage
+\subsection{Finite algorithm}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{1}:D_{1},e_{1}:E_{1})=\varphi
+_{1})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{n}:D_{n},e_{n}:E_{n})=\varphi
+_{n})$ be a PBES. We assume that all data sorts $D_{i}$ are finite and all
+data sorts $E_{i}$ are infinite. Let $r$ be a data rewriter, and let $\rho $
+be an injective function that creates a unique predicate variable from a
+predicate variable name and a data value according to $\rho
+(X(d:D,e:E),d_{0})\rightarrow Y(e:E)$, where $D$ is finite and $E$ is
+infinite and $d_{0}\in D$. Note that $D$ and $D_{i}$ may be
+multi-dimensional sorts.%
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{Pbes2besFinite(}}\mathcal{E}\text{, }r\text{, }\rho \text{%
+\textsc{)}} \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do}} \\ 
+\qquad \mathcal{E}_{i}:=\{\mathcal{\sigma }_{i}\rho (X_{i},d)=R(\varphi
+_{k}[d_{k}:=d])\ |\ d\in D_{i}\} \\ 
+\text{\textbf{return }}\mathcal{E}_{1}\cdots \mathcal{E}_{n},%
+\end{array}%
+\end{equation*}%
+with $R$ a rewriter on pbes expressions that is defined as follows:%
+\begin{eqnarray*}
+R(b) &=&b \\
+R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
+R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
+R(X_{i}(d,e)) &=&\left\{ 
+\begin{array}{cc}
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\ 
+\dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
+\text{if }FV(d)\neq \emptyset 
+\end{array}%
+\right.  \\
+R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
+R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
+\end{eqnarray*}%
+where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and 
+$\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
+variables appearing in $d$.
+
+\newpage 
 
 \section{Constant Parameter Detection and Elimination}
 
