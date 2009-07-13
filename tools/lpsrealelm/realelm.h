@@ -450,7 +450,7 @@ class summand_information
         nextstate_context_combinations.swap(new_nextstate_context_combinations);
         // residual_inequalities.swap(new_residual_inequalities);
       }
-      std::cerr << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n";
+      // std::cerr << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n";
     }
 };
 

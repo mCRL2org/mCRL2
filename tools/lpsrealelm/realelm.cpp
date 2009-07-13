@@ -453,7 +453,8 @@ static void normalize_specification(
   for(summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
     atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
-    // std::cerr << "Condition in: " << pp(i->condition()) << "\n";
+    std::cerr << "SUMMANDNORM: " << pp(*i) << "\n";
+    std::cerr << "Condition in: " << pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
     for(atermpp::vector <data_expression_list>::const_iterator

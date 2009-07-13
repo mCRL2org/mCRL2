@@ -62,6 +62,9 @@ class linear_inequality
 
     class lhs_t:public atermpp::map < variable, data_expression >
     { private:
+        // TODO: the meta operations below insert variables with constant 0, which should
+        // be avoided to keep linear equations clean. Note that with the binary operation
+        // care must be taken to also consider the variables in this that do not occur in e.
         template < application Operation(const data_expression &, const data_expression &) >
         lhs_t &meta_operation_constant(const data_expression v, const rewriter &r)
         { for(lhs_t::iterator i=begin();i!=end();++i)
@@ -1026,7 +1029,7 @@ static void pivot_and_update(
                atermpp::set < variable > &basic_variables,
                std::map < variable, linear_inequality::lhs_t > &working_equalities,
                const rewriter &r)
-{ std::cerr << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
+{ // std::cerr << "Pivoting " << pp(xi) << "   " << pp(xj) << "\n";
   const data_expression aij=working_equalities[xi][xj];
   const data_expression theta=rewrite_with_memory(sort_real::divides(sort_real::minus(v,beta[xi]),aij),r);
   const data_expression theta_delta_correction=rewrite_with_memory(sort_real::divides(sort_real::minus(v,beta_delta_correction[xi]),aij),r);
@@ -1035,18 +1038,17 @@ static void pivot_and_update(
   beta[xj]=rewrite_with_memory(sort_real::plus(beta[xj],theta),r);
   beta_delta_correction[xj]=rewrite_with_memory(sort_real::plus(beta_delta_correction[xj],theta_delta_correction),r);
 
-  std::cerr << "Pivoting phase 0\n";
+  // std::cerr << "Pivoting phase 0\n";
   for(atermpp::set < variable >::const_iterator k=basic_variables.begin();
           k!=basic_variables.end(); ++k)
   { if ((*k!=xi) && (working_equalities[*k].count(xj)>0))
     { const data_expression akj=working_equalities[*k][xj];
-      std::cerr << "AAA " << pp(akj) << "   " << pp(theta) << "\n";
       beta[*k]=rewrite_with_memory(sort_real::plus(beta[*k],sort_real::times(akj ,theta)),r);
       beta_delta_correction[*k]=rewrite_with_memory(sort_real::plus(beta_delta_correction[*k],sort_real::times(akj ,theta_delta_correction)),r);
     }
   }
   // Apply pivoting on variables xi and xj;
-  std::cerr << "Pivoting phase 1\n";
+  // std::cerr << "Pivoting phase 1\n";
   basic_variables.erase(xi);
   basic_variables.insert(xj);
 
@@ -1054,29 +1056,42 @@ static void pivot_and_update(
   expression_for_xj.erase(xj);
   expression_for_xj[xi]=real_minus_one();
   expression_for_xj.multiply(sort_real::divides(real_minus_one(),aij),r);
-  std::cerr << "Pivoting phase 2\n";
+  // std::cerr << "Expression for xj:" << expression_for_xj.string() << "\n";   
+  // std::cerr << "Pivoting phase 2\n";
   working_equalities.erase(xi);
   for(std::map < variable, linear_inequality::lhs_t >::iterator j=working_equalities.begin();
            j!=working_equalities.end(); ++j)
   { if (j->second.count(xj)>0)
     { const data_expression factor=j->second[xj];
+      // std::cerr << "VAR: " << pp(j->first) << " Factor " << pp(factor) << "\n";
       j->second.erase(xj);
-      j->second.add(expression_for_xj.multiply(factor,r),r);
+      // We need a temporary copy of expression_for_xj as otherwise the multiply
+      // below will change this expression.
+      linear_inequality::lhs_t temporary_expression_for_xj(expression_for_xj);
+      j->second.add(temporary_expression_for_xj.multiply(factor,r),r);
     }
   }
   working_equalities[xj]=expression_for_xj;
 
-  std::cerr << "End pivoting " << pp(xj) << "\n";
+  // std::cerr << "Pivoting phase 3\n";
+  // Calculate the values for beta and beta_delta_correction for the basic variables
+  for(std::map < variable, linear_inequality::lhs_t >::const_iterator i=working_equalities.begin();
+            i!=working_equalities.end() ; ++i)
+  { beta[i->first]=i->second.evaluate(beta,r);
+    beta_delta_correction[i->first]=i->second.evaluate(beta_delta_correction,r);
+  }
+
+  // std::cerr << "End pivoting " << pp(xj) << "\n";
   if (core::gsDebug)
-  { for(atermpp::map < variable,data_expression > ::const_iterator i=beta.begin();
+  { for(atermpp::map < variable,data_expression >::const_iterator i=beta.begin();
                i!=beta.end(); ++i)
-    { // std::cerr << "beta[" << pp(i->first) << "]= " << pp(i->second) << "+ delta* " <<
+    { 
+      // std::cerr << "beta[" << pp(i->first) << "]= " << pp(beta[i->first]) << "+ delta* " <<
       //                  pp(beta_delta_correction[i->first]) << "\n";
     }
     for(std::map < variable, linear_inequality::lhs_t >::const_iterator i=working_equalities.begin();
             i!=working_equalities.end() ; ++i)
-    { // std::cerr << "EQ: " << pp(i->first) << " : " << i->second.string() << "\n";
-
+    { // std::cerr << "EQ: " << pp(i->first) << " := " << i->second.string() << "\n";
     }
   }
 }
@@ -1150,6 +1165,11 @@ inline bool is_inconsistent(
                                 r);
 
   assert(equalities.size()==0); // There are no resulting equalities left.
+  non_basic_variables.clear(); // gauss_elimination has removed certain variables. So, we reconstruct the non
+                               // basic variables again below.
+
+  // std::cerr << "Resulting equalities " << pp_vector(equalities) << "\n";
+  // std::cerr << "Resulting inequalities " << pp_vector(inequalities) << "\n";
 
   // Now bring the linear equalities in the basic form described
   // in the article by Bruno Dutertre and Leonardo de Moura.
@@ -1167,6 +1187,7 @@ inline bool is_inconsistent(
     if (!i->is_true(r))  // This inequality is redundant and can be skipped.
     { assert(i->comparison()!=linear_inequality::equal);
       assert(i->lhs_size()>0); // this signals a redundant or an inconsistent inequality.
+      i->add_variables(non_basic_variables);
 
       if (i->lhs_size()==1)  // the left hand side consists of a single variable.
       { variable v=i->lhs_begin()->first;
@@ -1215,6 +1236,7 @@ inline bool is_inconsistent(
         upperbounds_delta_correction[new_basic_variable]=
                 ((i->comparison()==linear_inequality::less)?real_minus_one():real_zero());
         working_equalities[new_basic_variable]=i->lhs();
+        // std::cerr << "New slack variable: " << pp(new_basic_variable) << ":=" << string(*i) << "\n";
       }
     }
   }
@@ -1245,7 +1267,7 @@ inline bool is_inconsistent(
       beta_delta_correction[*i]=real_zero();
     }
     // std::cerr << "beta[" << pp(*i) << "]=" << pp(beta[*i])<< "+delta*" <<
-    //                       pp(beta_delta_correction[*i]) <<"\n";
+                           // pp(beta_delta_correction[*i]) <<"\n";
   }
 
   // Subsequently set the values for the basic variables
@@ -1270,21 +1292,22 @@ inline bool is_inconsistent(
     variable xi;
     for(atermpp::set < variable > :: const_iterator i=basic_variables.begin() ;
            i!=basic_variables.end() ; ++i)
-    { std::cerr << "Evaluate start\n";
-      data_expression value=working_equalities[*i].evaluate(beta,r);
-      std::cerr << "Evaluate middle " << pp(value) << "\n";
-      data_expression value_delta_correction=working_equalities[*i].
-                        evaluate(beta_delta_correction,r);
-      std::cerr << "Evaluate end\n";
+    { // std::cerr << "Evaluate start\n";
+      assert(!found);
+      data_expression value=beta[*i]; // working_equalities[*i].evaluate(beta,r);
+      data_expression value_delta_correction=beta_delta_correction[*i]; // working_equalities[*i].evaluate(beta_delta_correction,r);
+      // std::cerr << "Evaluate end\n";
       if ((upperbounds.count(*i)>0) &&
           ((rewrite_with_memory(less(upperbounds[*i],value),r)==sort_bool::true_()) ||
            ((upperbounds[*i]==value) &&
             (rewrite_with_memory(less(upperbounds_delta_correction[*i],value_delta_correction),r)==sort_bool::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
+        // std::cerr << "Upperbound violation " << pp(*i) << "  bound: " << pp(upperbounds[*i]) << "\n";
         found=true;
         xi=*i;
         lowerbound_violation=false;
+        break;
       }
       else if ((lowerbounds.count(*i)>0) &&
                ((rewrite_with_memory(less(value,lowerbounds[*i]),r)==sort_bool::true_()) ||
@@ -1292,22 +1315,54 @@ inline bool is_inconsistent(
                  (rewrite_with_memory(less(value_delta_correction,lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
       { // The value of variable *i does not satisfy its upperbound. This must
         // be corrected using pivoting.
+        // std::cerr << "Lowerbound violation " << pp(*i) << "  bound: " << pp(lowerbounds[*i]) << "\n";
         found=true;
         xi=*i;
         lowerbound_violation=true;
+        break;
       }
     }
     if (!found)
     { // The in_equalities are consistent. Return false.
       if (core::gsDebug)
       { std::cerr << "Consistent while pivoting\n";
+        /* for(atermpp::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
+                      i!=lowerbounds.end(); ++i)
+        { variable v=i->first;
+          if (lowerbounds.count(v)>0) 
+          { if (rewrite_with_memory(less(beta[v],lowerbounds[v]),r)==sort_bool::true_())
+            { std::cerr << "FOUT1\n"; exit(0);
+            }
+            if (beta[v]==lowerbounds[v])
+            { if (rewrite_with_memory(less(beta_delta_correction[v],lowerbounds_delta_correction[v]),r)==sort_bool::true_())
+              { std::cerr << "FOUT2\n"; exit(0);
+              }
+            }
+            else 
+            { if (rewrite_with_memory(less(lowerbounds[v],beta[v]),r)!=sort_bool::true_()) 
+              { std::cerr << "FOUT2a\n"; exit(0);
+              }
+            }
+          }
+
+          if (upperbounds.count(v)>0)
+          { if (rewrite_with_memory(less(upperbounds[v],beta[v]),r)==sort_bool::true_())
+            { std::cerr << "FOUT3\n"; exit(0);
+            }
+            if ((beta[v]==upperbounds[v]) &&
+                (rewrite_with_memory(less(lowerbounds_delta_correction[v],beta_delta_correction[v]),r)==sort_bool::true_()))
+            { std::cerr << "FOUT4\n"; exit(0);
+            }
+          }
+        } */
       }
       return false;
     }
 
     // std::cerr << "The smallest basic variable that does not satisfy the bounds is " << pp(xi) << "\n";
     if (lowerbound_violation)
-    { // select the smallest non-basic variable with which pivoting can take place.
+    { // std::cerr << "Lowerbound violationdt \n";
+      // select the smallest non-basic variable with which pivoting can take place.
       bool found=false;
       const linear_inequality::lhs_t &lhs=working_equalities[xi];
       for(linear_inequality::lhs_t::const_iterator xj_it=lhs.begin(); xj_it!=lhs.end(); ++xj_it)
