@@ -82,6 +82,10 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
   local requirements-static = $(requirements) ;
   local requirements-object = $(requirements) ;
 
+  for local u in [ MATCH /libraries.*//(.*) : [ MATCH (/libraries.*//$(mcrl2-components)) : [ feature.get-values use : $(requirements) ] ] ] {
+    requirements-object += <use>/libraries/$(u)//$(u) ;
+  }
+
   for local u in [ MATCH /libraries.*//(.*) : $(internal-uses) ] {
     requirements-shared += <use>/libraries/$(u)//$(u)/<link>shared ;
     requirements-static += <library>/libraries/$(u)//$(u)/<link>static ;

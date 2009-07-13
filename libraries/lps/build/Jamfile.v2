@@ -5,7 +5,7 @@ project lps
 mcrl2-library lps
        : implementations.cpp
        : <library>/libraries//data
-         <library>/libraries//process
+         <use>/libraries//process
          <include>../include
          <use>/site-config//boost
        :
