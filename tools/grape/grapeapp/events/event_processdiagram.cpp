@@ -37,7 +37,7 @@ bool grape_event_add_process_diagram::Do( void )
   // add process diagram to grapespecification
   grape_specification* spec = m_main_frame->get_grape_specification();
   assert( spec != 0 );
-  process_diagram* new_proc_ptr = spec->add_process_diagram( m_proc, _T("ProcessDiagram") );
+  process_diagram* new_proc_ptr = spec->add_process_diagram( m_proc );
 
   m_main_frame->get_glcanvas()->set_diagram( new_proc_ptr );
 
@@ -67,7 +67,7 @@ bool grape_event_add_process_diagram::Undo( void )
 
   // update process listbox
   grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-  int pos = proc_listbox->FindString( del_proc_ptr->get_name() );
+  int pos = proc_listbox->FindString( del_proc_ptr->get_name(), true );
   proc_listbox->Delete( pos );
   if ( pos > 0 )
   {

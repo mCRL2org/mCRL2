@@ -247,10 +247,10 @@ arr_channel_id grape::mcrl2gen::get_reference_channels(wxXmlNode *p_doc_root, wx
   return channels;
 }
 
-wxArrayString grape::mcrl2gen::get_reference_blocked_channels(wxXmlNode *p_architecture_diagram, wxString &p_reference_id)
+wxArrayString grape::mcrl2gen::get_reference_channels(wxXmlNode *p_architecture_diagram, wxString &p_reference_id, wxString &p_channel_type)
 {
   // initialize variables
-  wxArrayString blockeds;
+  wxArrayString channels;
   wxString diagram_name = get_child_value(p_architecture_diagram, _T("name"));
   wxXmlNode *objects = get_child(p_architecture_diagram, _T("objectlist"));
   wxXmlNode *channel_list = get_child(objects, _T("channellist"));
@@ -260,7 +260,14 @@ wxArrayString grape::mcrl2gen::get_reference_blocked_channels(wxXmlNode *p_archi
   {
     // get channel type
     wxString channel_type = get_child_value(channel_child, _T("channeltype"));
-    if (channel_type == _T("blocked"))
+    wxXmlNode *connection_list = get_child(channel_child, _T("connectionlist"));
+    wxXmlNode *connection = 0;
+    if (connection_list)
+    {
+      connection = get_child(connection_list, _T("connectedtochannelcommunication"));
+    }
+
+    if (channel_type == p_channel_type && connection == 0)
     {
       // get channel id
       wxString channel_id = get_child_value(channel_child, _T("id"));
@@ -269,18 +276,18 @@ wxArrayString grape::mcrl2gen::get_reference_blocked_channels(wxXmlNode *p_archi
         // get channel name
         wxString channel_name = get_child_value(channel_child, _T("name"));
         // the blocked channel belongs to this reference, add name of channel to list
-        blockeds.Add(channel_name);
+        channels.Add(channel_name);
       }
     }
   }
-  return blockeds;
+  return channels;
 }
 
-list_of_action grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_blockeds)
+wxArrayString grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_invisibles)
 {
-  list_of_action hidden;
+  wxArrayString hidden;
 
-  // for each action in p_actions, if it is not in p_channels or p_blockeds, it is hidden
+  // for each action in p_actions, if it is not in p_channels or p_invisibles, it is hidden
   for(unsigned int i=0; i<p_actions.GetCount(); ++i)
   {
     bool is_hidden = true;
@@ -294,9 +301,9 @@ list_of_action grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_a
     }
     if (is_hidden)
     {
-      for(unsigned int j=0; j<p_blockeds.GetCount(); ++j)
+      for(unsigned int j=0; j<p_invisibles.GetCount(); ++j)
       {
-        if(p_blockeds[j] == p_actions[i].get_name())
+        if(p_invisibles[j] == p_actions[i].get_name())
         {
           is_hidden = false;
           break;
@@ -305,7 +312,7 @@ list_of_action grape::mcrl2gen::get_reference_hidden_actions(list_of_action &p_a
     }
     if(is_hidden)
     {
-      hidden.Add(p_actions[i]);
+      hidden.Add(p_actions[i].get_name());
     }
   }
 
@@ -467,7 +474,7 @@ arr_renamed grape::mcrl2gen::get_communication_channel_renamed(wxXmlNode *p_doc_
               visible_channel_name = get_child_value(channel_child, _T("name"));
             }
             renamed vis_ren;
-            vis_ren.m_old_name = p_refs[i].m_renamed[j].m_channel.get_name() + p_refs[i].m_renamed[j].m_channel_id;
+            vis_ren.m_old_name = p_refs[i].m_renamed[j].m_channel.get_name() + _T("_") + p_refs[i].m_renamed[j].m_channel_id;
             vis_ren.m_new.set_name( visible_channel_name );
             vis_ren.m_new.set_parameters( p_refs[i].m_renamed[j].m_channel.get_parameters() );
             ren.Add(vis_ren);
@@ -673,7 +680,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       {
         for (unsigned int j=0; j<refs[i].m_renamed.GetCount(); ++j)
         {
-          wxString ren = refs[i].m_renamed[j].m_channel.get_name() + refs[i].m_renamed[j].m_channel_id;
+          wxString ren = refs[i].m_renamed[j].m_channel.get_name() + _T("_") + refs[i].m_renamed[j].m_channel_id;
           action ren_decl;
           ren_decl.set_name( ren );
           ren_decl.set_parameters( refs[i].m_renamed[j].m_channel.get_parameters() );
@@ -1131,7 +1138,8 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   {
     if (p_refs[i].m_reference_id != _T("-1"))
     {
-      p_refs[i].m_blockeds = get_reference_blocked_channels(diagram, p_refs[i].m_reference_id);
+      wxString blocked_text = _T("blocked");
+      p_refs[i].m_blockeds = get_reference_channels(diagram, p_refs[i].m_reference_id, blocked_text);
     }
   }
   if (p_verbose)
@@ -1158,7 +1166,10 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   {
     if (p_refs[i].m_reference_id != _T("-1"))
     {
-      p_refs[i].m_hidden = get_reference_hidden_actions(p_refs[i].m_actions, p_refs[i].m_channels, p_refs[i].m_blockeds);
+      wxString hidden_text = _T("hidden");
+      wxArrayString hidden = get_reference_channels(diagram, p_refs[i].m_reference_id, hidden_text);
+      WX_APPEND_ARRAY(hidden, get_reference_hidden_actions(p_refs[i].m_actions, p_refs[i].m_channels, p_refs[i].m_blockeds));
+      p_refs[i].m_hidden = hidden;
     }
   }
   if (p_verbose)
@@ -1168,7 +1179,10 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
       if (p_refs[i].m_reference_id != _T("-1"))
       {
         cerr << " -" << p_refs[i].m_reference.ToAscii() << ":" << endl;
-        verbose_actions(p_refs[i].m_hidden);
+        for (unsigned int j=0; j<p_refs[i].m_hidden.GetCount(); ++j)
+        {
+          cerr << "  " << p_refs[i].m_hidden[j].ToAscii() << endl;
+        }
       }
     }
   }
@@ -1182,7 +1196,9 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
   {
     if (p_refs[i].m_reference_id != _T("-1"))
     {
-      p_refs[i].m_renamed = get_reference_renamed_actions(p_refs[i].m_channels, p_refs[i].m_blockeds);
+      wxArrayString invisibles = p_refs[i].m_blockeds;
+      WX_APPEND_ARRAY(invisibles, p_refs[i].m_hidden);
+      p_refs[i].m_renamed = get_reference_renamed_actions(p_refs[i].m_channels, invisibles);
     }
   }
   if (p_verbose)
@@ -1404,7 +1420,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
           {
             spec += _T(", ");
           }
-          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + p_channel_comms[i].m_channels[j].m_channel_id;
+          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + _T("_") + p_channel_comms[i].m_channels[j].m_channel_id;
           ++unique_channel_counter;
         }
       }
@@ -1439,7 +1455,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
           {
             spec += _T("|");
           }
-          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + p_channel_comms[i].m_channels[j].m_channel_id;
+          spec += p_channel_comms[i].m_channels[j].m_channel.get_name() + _T("_") + p_channel_comms[i].m_channels[j].m_channel_id;
           ++unique_channel_counter;
         }
       }
@@ -1491,7 +1507,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
 
             spec += p_refs[i].m_renamed[j].m_channel.get_name();
             spec += _T(" -> ");
-            spec += p_refs[i].m_renamed[j].m_channel.get_name() + p_refs[i].m_renamed[j].m_channel_id;
+            spec += p_refs[i].m_renamed[j].m_channel.get_name() + _T("_") + p_refs[i].m_renamed[j].m_channel_id;
             ++unique_renamed_counter;
           }
         }
@@ -1506,7 +1522,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
           bool found = false;
           for (unsigned int k=j+1; k<p_refs[i].m_hidden.GetCount(); ++k)
           {
-            if (p_refs[i].m_hidden[j].get_name() == p_refs[i].m_hidden[k].get_name())
+            if (p_refs[i].m_hidden[j] == p_refs[i].m_hidden[k])
             {
               found = true;
               break;
@@ -1518,7 +1534,7 @@ void grape::mcrl2gen::architecture_diagram_mcrl2(wxXmlNode *p_doc_root, wxString
             {
               spec += _T(", ");
             }
-            spec += p_refs[i].m_hidden[j].get_name();
+            spec += p_refs[i].m_hidden[j];
             ++unique_hide_counter;
           }
         }
@@ -1717,7 +1733,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_sort(wxXmlNode *p_process_diagra
       {
         wxString child_state_name = get_child_value(child_state, _T("name"));
         wxString child_state_id = get_child_value(child_state, _T("id"));
-        struct_names.Add(child_state_name + child_state_id);
+        struct_names.Add(child_state_name + _T("_") + child_state_id);
       }
     }
     else if (child->GetName() == _T("referencestatelist"))
@@ -1727,7 +1743,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_sort(wxXmlNode *p_process_diagra
       {
         wxString child_refstate_name = get_child_value(child_refstate, _T("name"));
         wxString child_refstate_id = get_child_value(child_refstate, _T("id"));
-        wxString ref_name = child_refstate_name + child_refstate_id;
+        wxString ref_name = child_refstate_name + _T("_") + child_refstate_id;
         struct_names.Add(_T("S") + ref_name + _T("_in"));
         struct_names.Add(_T("S") + ref_name + _T("_out"));
       }
@@ -1905,11 +1921,11 @@ wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNo
   decl_transition += _T("(s == ");
   if (is_ref_from)
   {
-    decl_transition += _T("S") + state_from + id_from + _T("_out) -> ");
+    decl_transition += _T("S") + state_from + _T("_") + id_from + _T("_out) -> ");
   }
   else
   {
-    decl_transition += state_from + id_from + _T(") -> ");
+    decl_transition += state_from + _T("_") + id_from + _T(") -> ");
   }
 
   // add optional variables
@@ -1942,11 +1958,11 @@ wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNo
     decl_transition += p_diagram_name + _T("_internal(");
     if (is_ref_to)
     {
-      decl_transition += _T("S") + state_to + id_to + _T("_in");
+      decl_transition += _T("S") + state_to + _T("_") + id_to + _T("_in");
     }
     else
     {
-      decl_transition += state_to + id_to;
+      decl_transition += state_to + _T("_") + id_to;
     }
 
     // process parameters, local variables and variable updates
@@ -2009,7 +2025,7 @@ wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXm
     decl_transition_reference += _T("       ");
   }
   decl_transition_reference += _T("(s == ");
-  decl_transition_reference += _T("S") + ref_name + ref_id;
+  decl_transition_reference += _T("S") + ref_name + _T("_") + ref_id;
   decl_transition_reference += _T("_in) -> ") + ref_name;
   if (ref_inits.GetCount() > 0)
   {
@@ -2024,7 +2040,7 @@ wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXm
     }
     decl_transition_reference += _T(")");
   }
-  decl_transition_reference += _T(".") + p_diagram_name + _T("_internal(") + _T("S") + ref_name + ref_id + _T("_out");
+  decl_transition_reference += _T(".") + p_diagram_name + _T("_internal(") + _T("S") + ref_name + _T("_") + ref_id + _T("_out");
   if (p_preamble_parameter_decls.GetCount() > 0)
   {
     for (unsigned int i=0; i<p_preamble_parameter_decls.GetCount(); ++i)
@@ -2056,7 +2072,7 @@ wxString grape::mcrl2gen::initial_designator_mcrl2(wxXmlNode *p_process_diagram)
 
   // make mcrl2 of initial designator
   bool is_ref;
-  wxString des_name = get_state_name(p_process_diagram, des_id, is_ref) + des_id;
+  wxString des_name = get_state_name(p_process_diagram, des_id, is_ref) + _T("_") + des_id;
   if (is_ref)
   {
     des_name = _T("S") + des_name + _T("_in");

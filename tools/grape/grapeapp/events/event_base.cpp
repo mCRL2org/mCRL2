@@ -33,7 +33,7 @@ diagram* grape::grapeapp::find_a_diagram( grape_frame *m_main_frame, wxString p_
     for ( unsigned int i = 0; i < spec->count_process_diagram(); ++i )
     {
       process_diagram* proc_dia_ptr = spec->get_process_diagram( i );
-      if ( proc_dia_ptr->get_name() == p_dia_name )
+      if ( proc_dia_ptr->get_name().IsSameAs(p_dia_name, true) )
       {
         result = proc_dia_ptr;
         break; // break from the for-loop; we've found something
@@ -45,7 +45,7 @@ diagram* grape::grapeapp::find_a_diagram( grape_frame *m_main_frame, wxString p_
     for ( unsigned int i = 0; ( result == 0 ) && ( i < spec->count_architecture_diagram() ); ++i )
     {
       architecture_diagram* arch_dia_ptr = spec->get_architecture_diagram( i );
-      if ( arch_dia_ptr->get_name() == p_dia_name )
+      if ( arch_dia_ptr->get_name().IsSameAs(p_dia_name, true) )
       {
         result = arch_dia_ptr;
         break; // break from the for-loop; we've found something

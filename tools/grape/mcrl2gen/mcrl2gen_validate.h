@@ -58,7 +58,7 @@ namespace grape
 
       arr_channel_id m_channels;    /**< An array of channels associated with this reference. */
       wxArrayString m_blockeds;     /**< An array of blocked channels associated with this reference. */
-      list_of_action m_hidden;      /**< An array of hidden channels associated with this reference. */
+      wxArrayString m_hidden;       /**< An array of hidden channels associated with this reference. */
       arr_channel_id m_renamed;     /**< An array of renamed channels associated with this reference. */
     };
 

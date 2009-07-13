@@ -169,8 +169,9 @@ bool grape_event_rename_diagram::Do( void )
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
       grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_orig_name ), m_new_name );
-      proc_list->SetStringSelection( m_new_name );
+      proc_list->SetString( proc_list->FindString( m_orig_name, true ), m_new_name );
+      int pos = proc_list->FindString( m_new_name, true);
+      proc_list->SetSelection( pos );
       // show selected diagram
       grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
@@ -182,8 +183,9 @@ bool grape_event_rename_diagram::Do( void )
       // check whether any  architecturereferences exist that should point to the new name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
       grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_orig_name ), m_new_name );
-      arch_list->SetStringSelection( m_new_name );
+      arch_list->SetString( arch_list->FindString( m_orig_name, true ), m_new_name );
+      int pos = arch_list->FindString( m_new_name, true);
+      arch_list->SetSelection( pos );
       // show selected diagram
       grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
@@ -212,8 +214,9 @@ bool grape_event_rename_diagram::Undo( void )
       // check whether any architecturereferences exist that should no longer point to the old name.
       spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
       grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_new_name ), m_orig_name );
-      proc_list->SetStringSelection( m_orig_name );
+      proc_list->SetString( proc_list->FindString( m_new_name, true ), m_orig_name );
+      int pos = proc_list->FindString( m_orig_name, true );
+      proc_list->SetSelection( pos );
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
@@ -222,8 +225,9 @@ bool grape_event_rename_diagram::Undo( void )
       // check whether any  architecturereferences exist that should point to the old name.
       spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
       grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_new_name ), m_orig_name );
-      arch_list->SetStringSelection( m_orig_name );
+      arch_list->SetString( arch_list->FindString( m_new_name, true ), m_orig_name );
+      int pos = arch_list->FindString( m_orig_name, true );
+      arch_list->SetSelection( pos );
       break;
     }
     default: m_main_frame->set_mode( GRAPE_MODE_SPEC ); break;
@@ -472,7 +476,7 @@ bool grape_event_remove_diagram::Do( void )
 
     // update architecture listbox
     grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
-    int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name() );
+    int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name(), true );
     arch_listbox->Delete( pos );
     if ( pos > 0 )
     {
@@ -542,7 +546,7 @@ bool grape_event_remove_diagram::Do( void )
 
     // update process listbox
     grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-    int pos = proc_listbox->FindString( proc_dia_ptr->get_name() );
+    int pos = proc_listbox->FindString( proc_dia_ptr->get_name(), true );
     proc_listbox->Delete( pos );
     if ( pos > 0 )
     {
@@ -582,7 +586,8 @@ bool grape_event_remove_diagram::Undo( void )
   grape_specification* spec = m_main_frame->get_grape_specification();
   if ( m_type == GRAPE_ARCHITECTURE_DIAGRAM )
   {
-    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram( m_diagram, m_name );
+    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram( m_diagram );
+    arch_dia_ptr->set_name( m_name );
     for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
     {
       grape_event_remove_comment event = m_comments.Item( i );
@@ -623,7 +628,8 @@ bool grape_event_remove_diagram::Undo( void )
   }
   else
   {
-    process_diagram* proc_dia_ptr = spec->add_process_diagram( m_diagram, m_name );
+    process_diagram* proc_dia_ptr = spec->add_process_diagram( m_diagram );
+    proc_dia_ptr->set_name( m_name );
     proc_dia_ptr->set_preamble( m_preamble );
     for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
     {

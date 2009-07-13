@@ -67,6 +67,7 @@ namespace grape
         wxHtmlHelpController    *m_help_controller;            /**< The help controller. */
         wxToggleButton      *m_dataspecbutton;             /**< The button to switch to datatype specification.*/
         wxTextCtrl          *m_datatext;                   /**< The text control for entering the datatype specification. */
+        wxFont              m_datatext_font;             /**< The monospace font used for the datatype specfication text control. */
         grape_mode            m_mode;                       /**< The frame's mode. */
         unsigned int                  m_counter;                    /**< The counter for new id's. */
         wxTimer             *m_timer;                       /**< Timer used to set the log panel right after some wall clock time. */
@@ -511,6 +512,11 @@ namespace grape
          * @param p_event The generated event.
          */
         void dataspec_modified( wxCommandEvent &p_event );
+
+        /**
+         * Sets the font style for the data specification text field.
+         */
+        void dataspec_setstyle( void );
     };
   } // namespace grapeapp
 } // namespace grape

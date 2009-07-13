@@ -208,7 +208,8 @@ bool grape::libgrape::open_process_diagrams( grape_specification* p_spec, wxXmlN
         proc_dia_info_node = proc_dia_info_node->GetNext();
       }
       // create the diagram with the information we've retrieved
-      process_diagram* new_process_diagram = p_spec->add_process_diagram( proc_dia_id, proc_dia_name );
+      process_diagram* new_process_diagram = p_spec->add_process_diagram( proc_dia_id );
+      new_process_diagram->set_name( proc_dia_name );
 
       // create the preamble
       new_process_diagram->get_preamble()->set_parameter_declarations_list(preamble_parameters);
@@ -1422,7 +1423,8 @@ bool grape::libgrape::open_architecture_diagrams( grape_specification* p_spec, w
         arch_dia_info_node = arch_dia_info_node->GetNext();
       }
       // create the diagram with the information we've retrieved
-      architecture_diagram* new_architecture_diagram = p_spec->add_architecture_diagram( arch_dia_id, arch_dia_name );
+      architecture_diagram* new_architecture_diagram = p_spec->add_architecture_diagram( arch_dia_id );
+      new_architecture_diagram->set_name( arch_dia_name );
       result = result && open_process_references( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_architecture_references( p_spec, arch_dia_node, new_architecture_diagram );
       result = result && open_channels( p_spec, arch_dia_node, new_architecture_diagram );

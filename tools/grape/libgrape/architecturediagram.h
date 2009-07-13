@@ -248,6 +248,15 @@ namespace grape
          * @return Returns the object that has the specified id.
         */
         static object* find_object( architecture_diagram* p_arch_dia, unsigned int p_id, object_type p_type = ANY );
+
+    private:
+        /**
+         * Channel existance function.
+         * @param p_name The base name of the channel.
+         * @param p_index The index appearing in the channel's name.
+         * @return Returns whether a channel with the specified name exists.
+         */
+        bool exists_channel( const wxString &p_name, int p_index );
     };
 
     /**

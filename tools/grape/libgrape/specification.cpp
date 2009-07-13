@@ -69,14 +69,7 @@ architecture_diagram* grape_specification::add_architecture_diagram( unsigned in
 
   // if no diagram with that name exists yet
   architecture_diagram* new_dia = new architecture_diagram;
-  if ( index == 0 )
-  {
-    new_dia->set_name( p_name );
-  }
-  else
-  {
-    new_dia->set_name( p_name + wxString::Format( _T( "%d" ), index ) );
-  }
+  new_dia->set_name( p_name + wxString::Format( _T( "%d" ), index ) );
   new_dia->set_id( p_id );
   m_architecture_diagrams.Add( new_dia );
   return new_dia;
@@ -144,14 +137,7 @@ process_diagram* grape_specification::add_process_diagram( unsigned int p_id, co
 
   // if no diagram with that name exists yet
   process_diagram* new_proc = new process_diagram;
-  if ( index == 0 )
-  {
-    new_proc->set_name( p_name );
-  }
-  else
-  {
-    new_proc->set_name( p_name + wxString::Format( _T( "%d" ), index ) );
-  }
+  new_proc->set_name( p_name + wxString::Format( _T( "%d" ), index ) );
   new_proc->set_id( p_id );
   m_process_diagrams.Add( new_proc );
   return new_proc;
@@ -224,20 +210,10 @@ bool grape_specification::exists_architecture_diagram( const wxString &p_name, i
   for ( int j = 0; j < count; ++j )
   {
     architecture_diagram* arch_dia = &( m_architecture_diagrams.Item( j ) );
-    if ( p_index == 0 )
+    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    if ( arch_dia->get_name() == concat_name )
     {
-      if ( arch_dia->get_name() == p_name )
-      {
-        return true;
-      }
-    }
-    else
-    {
-      wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
-      if ( arch_dia->get_name() == concat_name )
-      {
-        return true;
-      } // end if
+      return true;
     } // end if
   } // end for
   return false;
@@ -249,21 +225,11 @@ bool grape_specification::exists_process_diagram( const wxString &p_name, int p_
   for ( int j = 0; j < count; ++j )
   {
     process_diagram* proc_dia = & ( m_process_diagrams.Item( j ) );
-    if ( p_index == 0 )
+    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    if ( proc_dia->get_name() == concat_name )
     {
-      if ( proc_dia->get_name() == p_name )
-      {
-        return true;
-      }
+      return true;
     } // end if
-    else
-    {
-      wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
-      if ( proc_dia->get_name() == concat_name )
-      {
-        return true;
-      } // end if
-    }
   } // end for
   return false;
 }

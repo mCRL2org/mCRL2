@@ -17,6 +17,7 @@
 #include <wx/statusbr.h>
 #include <wx/tglbtn.h>
 #include <wx/timer.h>
+#include <wx/fontenum.h>
 
 #include "grape_frame.h"
 #include "grape_events.h"
@@ -52,7 +53,25 @@ grape_frame::grape_frame( const wxString &p_filename )
 
 
   int gl_args[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, 0};
-  m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
+  m_datatext = new wxTextCtrl( m_splitter, GRAPE_DATASPEC_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_RICH | wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_PROCESS_ENTER );
+  wxFontEnumerator font_enum;
+  font_enum.EnumerateFacenames(wxFONTENCODING_SYSTEM, true);
+  wxArrayString font_names = font_enum.GetFacenames();
+  font_names.Sort();
+  wxString facename;
+  for (unsigned int i = 0; i < font_names.GetCount(); ++i)
+  {
+    if (font_names[i].Find(_T("Courier")) != wxNOT_FOUND)
+    {
+      facename = font_names[i];
+      break;
+    }
+  }
+  if (facename.IsEmpty())
+  {
+    if (font_names.GetCount() > 0) facename = font_names[0];
+  }
+  m_datatext_font = wxFont(10, wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, facename);
   m_glcanvas = new grape_glcanvas(m_splitter, gl_args, this);
   m_logpanel = new grape_logpanel(this);
   m_logpanel->Hide();
@@ -69,12 +88,12 @@ grape_frame::grape_frame( const wxString &p_filename )
 	
   wxBoxSizer *process_box = new wxBoxSizer(wxVERTICAL);
   wxStaticText *proc_text = new wxStaticText( this, -1, _T("Processes"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
-  process_box->Add( proc_text, 0, wxALIGN_CENTRE | wxEXPAND );
+  process_box->Add( proc_text, 0, wxALIGN_CENTRE | wxEXPAND );  //Doesn't work in LINUX
   process_box->Add(m_process_diagram_list, 1, wxEXPAND | wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *architecture_box = new wxBoxSizer(wxVERTICAL);
   wxStaticText *arch_text = new wxStaticText( this, -1, _T("Architectures"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE );
-  architecture_box->Add( arch_text, 0, wxALIGN_CENTRE | wxEXPAND );
+  architecture_box->Add( arch_text, 0, wxALIGN_CENTRE | wxEXPAND );   //Doesn't work in LINUX
   architecture_box->Add(m_architecture_diagram_list, 1, wxEXPAND | wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *right_box = new wxBoxSizer(wxVERTICAL);
@@ -388,6 +407,7 @@ void grape_frame::toggle_view( grape_mode old_mode, grape_mode p_mode )
     load_datatype_specification();
     m_dataspecbutton->SetValue( true );
     m_splitter->ReplaceWindow(m_splitter->GetWindow1(), m_datatext);
+    dataspec_setstyle();
     m_datatext->Show();
     m_datatext->SetFocus();
     m_glcanvas->Hide();
@@ -406,9 +426,15 @@ void grape_frame::toggle_view( grape_mode old_mode, grape_mode p_mode )
     m_current_diagram = m_glcanvas->get_diagram();
     if (m_current_diagram)
     {
-      if ( !m_architecture_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() ) )
+      int pos = m_architecture_diagram_list->FindString(m_glcanvas->get_diagram()->get_name(), true);
+      if ( pos != wxNOT_FOUND )
       {
-        m_process_diagram_list->SetStringSelection( m_glcanvas->get_diagram()->get_name() );
+        m_architecture_diagram_list->SetSelection( pos );
+      }
+      else
+      {
+        pos = m_process_diagram_list->FindString(m_glcanvas->get_diagram()->get_name(), true);
+        m_process_diagram_list->SetSelection( pos );
       }
     }
   }

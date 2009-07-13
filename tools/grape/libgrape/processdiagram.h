@@ -341,6 +341,14 @@ namespace grape
          * Performs a dynamic cast on the specified pointer and removes the object from the corresponding list, which is either the list of nonterminating transitions or the list of terminating transitions.
          */
         void delete_transition( transition* p_trans );
+
+        /**
+         * State existance function.
+         * @param p_name The base name of the state.
+         * @param p_index The index appearing in the state's name.
+         * @return Returns whether a state with the specified name exists.
+         */
+        bool exists_state( const wxString &p_name, int p_index );
     };
 
     /**

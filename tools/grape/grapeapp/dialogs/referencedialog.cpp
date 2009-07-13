@@ -59,31 +59,24 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
   for ( unsigned int i = 0; i < count; ++i )
   {
     architecture_diagram *diagram = p_spec->get_architecture_diagram( i );
-    int pos = choices.Add( diagram->get_name() );
-    m_name2diagramid[ diagram->get_name() ] = diagram->get_id();
+    choices.Add( diagram->get_name() );
     if ( p_ref->get_relationship_refers_to() &&
          p_ref->get_relationship_refers_to()->get_id() == diagram->get_id() )
     {
-      selected = pos;
       selected_name = p_ref->get_relationship_refers_to()->get_name();
     }
   }
   m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND, 0 );
-  if (selected == wxNOT_FOUND)
-  {
-    m_combo->SetSelection( selected );
-  }
-  else
-  {
-    m_combo->SetStringSelection( selected_name );
-  }
 
   panel->SetSizer( grid );
 
   init( panel );
 
   m_combo->SetFocus();
+  m_combo->SetValue( selected_name );
+  selected = m_combo->FindString( selected_name, true );
+  m_combo->SetSelection( selected );
   CentreOnParent();
 }
 
@@ -106,24 +99,14 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   for ( unsigned int i = 0; i < count; ++i )
   {
     process_diagram *diagram = p_spec->get_process_diagram( i );
-    int pos = choices.Add( diagram->get_name() );
-    m_name2diagramid[ diagram->get_name() ] = diagram->get_id();
+    choices.Add( diagram->get_name() );
     if ( p_diagram && p_diagram->get_id() == diagram->get_id() )
     {
-      selected = pos;
       selected_name = p_diagram->get_name();
     }
   }
   m_combo = new wxComboBox( panel, GRAPE_COMBO_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
   grid->Add( m_combo, 1, wxEXPAND );
-  if (selected == wxNOT_FOUND)
-  {
-    m_combo->SetSelection( selected );
-  }
-  else
-  {
-    m_combo->SetStringSelection( selected_name );
-  }
 
   vsizer->Add( grid );
 
@@ -155,6 +138,9 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   init( panel );
 
   m_combo->SetFocus();
+  m_combo->SetValue( selected_name );
+  selected = m_combo->FindString( selected_name, true );
+  m_combo->SetSelection( selected );
   CentreOnParent();
 }
 
@@ -196,14 +182,24 @@ bool grape_reference_dialog::show_modal()
 
 int grape_reference_dialog::get_diagram_id()
 {
-  if (m_name2diagramid.find( m_combo->GetValue() ) == m_name2diagramid.end())
+  diagram* dia_ptr = find_a_diagram( m_main_frame, m_combo->GetValue() );
+  if ( dia_ptr != 0 )
+  {
+    return dia_ptr->get_id();
+  }
+  else
+  {
+    return wxNOT_FOUND;
+  }
+
+/*  if (m_name2diagramid.find( m_combo->GetValue() ) == m_name2diagramid.end())
   {
     return wxNOT_FOUND;
   }
   else
   {
     return m_name2diagramid[ m_combo->GetValue() ];
-  }
+  } */
 }
 
 wxString grape_reference_dialog::get_diagram_name() const

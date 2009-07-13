@@ -361,10 +361,12 @@ bool grape_event_validate_datatype_specification::Do( void )
   convert_spaces(export_doc);
   if (!validate_datatype_specification(export_doc))
   {
-    cerr << "mcrl2 conversion failed: datatype specification is not valid." << endl;
+    cerr << "mcrl2 conversion failed: data type specification is not valid." << endl;
     display_message(m_main_frame, false);
     return false;
   }
+
+  display_message(m_main_frame, true);
   return true;
 }
 

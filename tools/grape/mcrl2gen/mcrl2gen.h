@@ -106,27 +106,27 @@ namespace grape
     arr_channel_id get_reference_channels(wxXmlNode *p_doc_root, wxXmlNode *p_architecture_diagram, action_reference &p_reference, ATermAppl &datatype_spec);
 
     /**
-     * Blocked channels inference function.
-     * Infers the blocked channels of a given reference.
+     * Channels inference function.
+     * Infers the blocked, hidden or visible channels of a given reference.
      * @param p_architecture_diagram The XML architecture diagram containing the channels and references.
      * @param p_reference_id The identifier of the reference to infer its blocked channels of.
-     * @return An array of strings containing the names of the blocked channels of the reference.
+     * @return An array of strings containing the names of the blocked, hidden or visible channels of the reference.
      * @pre p_architecture_diagram is a valid pointer to an XML architecture diagram and p_reference_id is a valid reference to a reference identifier.
-     * @post An array containing the names of the blocked channels associated with the reference is returned or error messages are produced.
+     * @post An array containing the names of the blocked, hidden or visible channels associated with the reference is returned or error messages are produced.
      */
-    wxArrayString get_reference_blocked_channels(wxXmlNode *p_architecture_diagram, wxString &p_reference_id);
+    wxArrayString get_reference_channels(wxXmlNode *p_architecture_diagram, wxString &p_reference_id, wxString &p_channel_type);
 
     /**
      * Hidden actions inference function.
      * Infers the hidden actions of a reference.
      * @param p_actions The actions occuring inside the reference.
      * @param p_channels The channels on the reference.
-     * @param p_blockeds The channels on the reference that are blocked.
-     * @return An array of strings containing all the actions inside the reference that are hidden (not visible).
-     * @pre p_actions is a valid reference to an array of actions, p_channels is a valid reference to an array of channels and p_blockeds is a valid reference to an array of blocked channels.
+     * @param p_invisibles The channels on the reference that are blocked.
+     * @return An array of strings containing the names of the actions inside the reference that are hidden (not visible).
+     * @pre p_actions is a valid reference to an array of actions, p_channels is a valid reference to an array of channels and p_invisibles is a valid reference to an array of blocked and already hidden channels.
      * @post An array containing all hidden actions of this reference is returned.
      */
-    list_of_action get_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_blockeds);
+    wxArrayString get_reference_hidden_actions(list_of_action &p_actions, arr_channel_id &p_channels, wxArrayString &p_invisibles);
 
     /**
      * Renamed actions inference function.

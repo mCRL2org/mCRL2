@@ -65,9 +65,13 @@ state* process_diagram::add_state( unsigned int p_id, coordinate &p_coord, float
   new_state->set_width( p_def_width );
   new_state->set_height( p_def_height );
   new_state->set_diagram( this );
-  wxString name;
-  name.Printf( _T("State%d" ), p_id );
-  new_state->set_name( name );
+  int index = 0;
+  wxString name = _T("s");
+  while ( exists_state( name, index ) )
+  {
+    ++index;
+  }
+  new_state->set_name( name + wxString::Format( _T( "%d" ), index ) );
   select_object( new_state );
 
   // Establish relationships
@@ -132,6 +136,20 @@ arr_state* process_diagram::get_state_list( void )
   return &m_states;
 }
 
+bool process_diagram::exists_state( const wxString &p_name, int p_index )
+{
+  int count = m_states.GetCount();
+  for ( int j = 0; j < count; ++j )
+  {
+    state* state_ptr = & ( m_states.Item( j ) );
+    wxString concat_name = p_name + wxString::Format( _T( "%d" ), p_index );
+    if ( state_ptr->get_name() == concat_name )
+    {
+      return true;
+    } // end if
+  } // end for
+  return false;
+}
 
 
 reference_state* process_diagram::add_reference_state( unsigned int p_id, coordinate &p_coord, float p_def_width, float p_def_height )

@@ -36,7 +36,7 @@ bool grape_event_add_architecture_diagram::Do( void )
   // add architecture diagram to grapespecification
   grape_specification* spec = m_main_frame->get_grape_specification();
   assert( spec != 0 );
-  architecture_diagram* new_arch_ptr = spec->add_architecture_diagram( m_arch, _T("ArchitectureDiagram") );
+  architecture_diagram* new_arch_ptr = spec->add_architecture_diagram( m_arch );
 
   assert( new_arch_ptr != 0);
   m_main_frame->get_glcanvas()->set_diagram( new_arch_ptr );
@@ -68,7 +68,7 @@ bool grape_event_add_architecture_diagram::Undo( void )
 
   // update architecture listbox
   grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
-  int pos = arch_listbox->FindString( del_arch_ptr->get_name() );
+  int pos = arch_listbox->FindString( del_arch_ptr->get_name(), true );
   arch_listbox->Delete( pos );
   if ( pos > 0 )
   {

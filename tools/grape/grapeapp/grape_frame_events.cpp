@@ -288,8 +288,10 @@ void grape_frame::event_menu_about(wxCommandEvent& WXUNUSED(p_event))
 
 void grape_frame::event_select_diagram( wxCommandEvent &p_event )
 {
-  m_architecture_diagram_list->SetStringSelection(p_event.GetString());
-  m_process_diagram_list->SetStringSelection(p_event.GetString());
+  int pos = m_architecture_diagram_list->FindString(p_event.GetString(), true);
+  m_architecture_diagram_list->SetSelection(pos);
+  pos = m_process_diagram_list->FindString(p_event.GetString(), true);
+  m_process_diagram_list->SetSelection(pos);
   grape_event_select_diagram *event = new grape_event_select_diagram(this, p_event.GetString());
   m_event_handler->Submit(event, false);
   update_bars();
@@ -311,8 +313,8 @@ void grape_frame::event_menu_remove_diagram( wxCommandEvent &p_event )
     return;
   }
 
-  int arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
-  int proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+  int arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name(), true);
+  int proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
   {
     wxString s = _T( "Do you wish to remove the diagram " );
@@ -342,11 +344,11 @@ void grape_frame::event_listbox_remove_diagram( int p_diagram_type )
   int proc = wxNOT_FOUND;
   if (p_diagram_type == GRAPE_ARCHITECTURE_DIAGRAM_LIST)
   {
-    arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name());
+    arch = get_architecture_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   }
   else if (p_diagram_type == GRAPE_PROCESS_DIAGRAM_LIST)
   {
-    proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name());
+    proc = get_process_diagram_listbox()->FindString(dia_ptr->get_name(), true);
   }
 
   if ( ( ( arch != wxNOT_FOUND ) && ( get_architecture_diagram_listbox()->IsSelected(arch) ) ) || ( ( proc != wxNOT_FOUND ) && ( get_process_diagram_listbox()->IsSelected(proc) ) ) )
@@ -398,6 +400,12 @@ void grape_frame::grape_event_timer( wxTimerEvent &p_event )
 void grape_frame::dataspec_modified( wxCommandEvent & WXUNUSED(p_event) )
 {
   set_is_modified( true );
+  dataspec_setstyle();
 }
 
-
+void grape_frame::dataspec_setstyle( void )
+{
+  wxTextAttr datatext_attr;
+  datatext_attr.SetFont(m_datatext_font);
+  m_datatext->SetStyle(0, m_datatext->GetLastPosition(), datatext_attr);
+}
