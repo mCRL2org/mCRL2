@@ -41,7 +41,7 @@ namespace mcrl2 {
     template < typename Expression, typename SubstitutionFunction >
     inline Expression substitute(SubstitutionFunction const& f, Expression const& e)
     {
-      return static_cast< Expression >(f(static_cast< atermpp::aterm_appl const& >(e)));
+      return static_cast< Expression >(f(e));
     }
 
     /// \brief Applies a function to an expression
