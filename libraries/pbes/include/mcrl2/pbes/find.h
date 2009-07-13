@@ -78,6 +78,7 @@ namespace detail {
 /// \brief Returns all propositional variable instantiations that occur in the pbes expression t
 /// \param t A term
 /// \return All propositional variable instantiations that occur in the pbes expression t
+inline
 std::set<propositional_variable_instantiation> find_all_propositional_variable_instantiations(const pbes_expression& t)
 {
   std::set<propositional_variable_instantiation> variables;
