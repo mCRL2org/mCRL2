@@ -338,6 +338,16 @@ class specification_basic_type:public boost::noncopyable
     { return stringTable.count(str)>0;
     }
 
+    void insertalias(const alias& a)
+    {
+      data.add_alias(a);
+
+      if (a.reference().is_basic_sort())
+      {
+        insertsort(a.reference());
+      }
+    }
+
     void insertsort(const sort_expression sortterm)
     {
       data.add_sort(sortterm);
@@ -360,10 +370,6 @@ class specification_basic_type:public boost::noncopyable
         objectdata[n].objectname=sortterm;
         objectdata[n].object=sorttype;
         objectdata[n].constructor=0;
-        return;
-      }
-      if (sortterm.is_alias())
-      {
         return;
       }
       if (sortterm.is_function_sort())
@@ -2927,7 +2933,7 @@ class specification_basic_type:public boost::noncopyable
            constructors.push_back(sc_emptystack);
            stacksort=stack_sort_alias;
            //add data declarations for structured sort
-           spec.insertsort(alias(stack_sort_alias,structured_sort(constructors)));
+           spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
            empty=sc_emptystack.recogniser_function(stack_sort_alias);
@@ -3814,7 +3820,7 @@ class specification_basic_type:public boost::noncopyable
             structured_sort sort_struct(struct_conss);
 
             //add declaration of standard functions
-            spec.insertsort(alias(sort_id, sort_struct));
+            spec.insertalias(alias(sort_id, sort_struct));
 
             //store new declarations in return value w
             sortId = sort_struct;

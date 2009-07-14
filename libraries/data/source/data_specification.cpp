@@ -327,10 +327,6 @@ namespace mcrl2 {
           {
             return is_finite(structured_sort(s));
           }
-          else if (s.is_alias())
-          {
-            return is_finite(alias(s));
-          }
 
           return false;
         }
@@ -492,7 +488,7 @@ namespace mcrl2 {
       // Add sorts and aliases for a container or structured sort
       for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
-        if (i->is_alias())
+        if (data::is_alias(*i)) // Compatibility with legacy code
         {
           basic_sort      name(alias(*i).name());
           sort_expression reference(alias(*i).reference());
@@ -538,7 +534,7 @@ namespace mcrl2 {
 
       for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
-        if (!i->is_alias())
+        if (!data::is_alias(*i)) // Compatibility with legacy code
         {
           add_sort(atermpp::replace(*i, renaming_substitution));
         }
@@ -723,7 +719,8 @@ namespace mcrl2 {
 
           for (data_specification::sorts_const_range r(s.sorts()); !r.empty(); r.advance_begin(1))
           {
-            if (!r.front().is_alias() && !r.front().is_container_sort() && !r.front().is_structured_sort())
+            if ((!r.front().is_basic_sort() || !s.is_alias(basic_sort(r.front()))) &&
+			 !r.front().is_container_sort() && !r.front().is_structured_sort())
             {
               sorts.insert(r.front());
             }
@@ -737,8 +734,12 @@ namespace mcrl2 {
         }
         else
         {
+          atermpp::vector< sort_expression > sorts = convert< atermpp::vector< sort_expression > >(s.sorts());
+
+          sorts.insert(sorts.end(), s.aliases().begin(), s.aliases().end());
+
           return gsMakeDataSpec(
-             gsMakeSortSpec(convert< atermpp::aterm_list >(s.sorts())),
+             gsMakeSortSpec(convert< atermpp::aterm_list >(sorts)),
              gsMakeConsSpec(convert< atermpp::aterm_list >(s.constructors())),
              gsMakeMapSpec(convert< atermpp::aterm_list >(s.mappings())),
              gsMakeDataEqnSpec(convert< atermpp::aterm_list >(s.equations())));

@@ -659,8 +659,6 @@ namespace mcrl2 {
 
     /// \brief list of structured sorts
     typedef atermpp::term_list< structured_sort > structured_sort_list;
-    /// \brief vector of structured sorts
-    typedef atermpp::vector< structured_sort >    structured_sort_vector;
 
   } // namespace data
 

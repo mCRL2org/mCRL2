@@ -72,14 +72,15 @@ void test_sorts()
   atermpp::set< sort_expression > sl;
   sl.insert(s);
   sl.insert(s0);
-  sl.insert(s1);
+  sl.insert(s1.name());
 
   data_specification spec;
   spec.add_sort(s);
   spec.add_sort(s0);
-  spec.add_sort(s1);
+  spec.add_alias(s1);
   data_specification spec1;
-  spec1.add_sorts(boost::make_iterator_range(sl));
+  spec1.add_sorts(sl);
+  spec1.add_alias(s1);
 
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
@@ -93,11 +94,13 @@ void test_sorts()
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   BOOST_CHECK(spec.is_system_defined(s2));
-  BOOST_CHECK(!spec.is_system_defined(s1));
+  BOOST_CHECK(!spec.is_system_defined(s1.name()));
+  BOOST_CHECK(!spec.is_system_defined(s1.reference()));
   BOOST_CHECK(!spec.is_system_defined(s0));
   BOOST_CHECK(!spec.is_system_defined(s));
   BOOST_CHECK(spec1.is_system_defined(s2));
-  BOOST_CHECK(!spec1.is_system_defined(s1));
+  BOOST_CHECK(!spec1.is_system_defined(s1.name()));
+  BOOST_CHECK(!spec1.is_system_defined(s1.reference()));
   BOOST_CHECK(!spec1.is_system_defined(s0));
   BOOST_CHECK(!spec1.is_system_defined(s));
   spec.remove_sorts(s2l_range);
@@ -126,7 +129,7 @@ void test_aliases()
   atermpp::set< sort_expression > aliases;
   aliases.insert(s1);
   aliases.insert(s2);
-  spec.add_sorts(boost::make_iterator_range(aliases));
+  spec.add_aliases(boost::make_iterator_range(aliases));
 
   BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
   BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
@@ -134,7 +137,7 @@ void test_aliases()
 
   alias s3(basic_sort("S3"), basic_sort("S2"));
 
-  BOOST_CHECK(spec.find_referenced_sort(s3) == s);
+  BOOST_CHECK(spec.find_referenced_sort(s3.name()) == s);
 }
 
 void test_constructors()
@@ -356,9 +359,13 @@ void test_is_certainly_finite()
   spec.add_constructor(function_symbol("h", function_sort(s1, s2)));
   spec.add_constructor(function_symbol("i", function_sort(s2, s1)));
 
-  BOOST_CHECK(spec.is_certainly_finite(alias(basic_sort("a"), s)));
-  BOOST_CHECK(!spec.is_certainly_finite(alias(basic_sort("a0"), s0)));
-  BOOST_CHECK(!spec.is_certainly_finite(alias(basic_sort("a1"), s1)));
+  spec.add_alias(alias(basic_sort("a"), s));
+  spec.add_alias(alias(basic_sort("a0"), s0));
+  spec.add_alias(alias(basic_sort("a1"), s1));
+
+  BOOST_CHECK(spec.is_certainly_finite(basic_sort("a")));
+  BOOST_CHECK(!spec.is_certainly_finite(basic_sort("a0")));
+  BOOST_CHECK(!spec.is_certainly_finite(basic_sort("a1")));
 
   using namespace sort_list;
 
@@ -491,7 +498,7 @@ void test_system_defined()
   constructors.push_back(data::structured_sort_constructor("q",
      boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
 
-  specification.add_sort(alias(basic_sort("Q"), data::structured_sort(boost::make_iterator_range(constructors))));
+  specification.add_alias(alias(basic_sort("Q"), data::structured_sort(constructors)));
 }
 
 void test_utility_functionality()
@@ -510,7 +517,7 @@ void test_utility_functionality()
   spec.add_sort(s);
   BOOST_CHECK(spec.search_sort(s));
 
-  spec.add_sort(alias(basic_sort("a"), s));
+  spec.add_alias(alias(basic_sort("a"), s));
   BOOST_CHECK(spec.search_sort(a));
 
   BOOST_CHECK(spec.search_sort(s));

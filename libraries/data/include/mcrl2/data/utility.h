@@ -231,7 +231,7 @@ namespace mcrl2 {
 
       for (ForwardTraversalIterator i = context.begin(); i != context.end(); ++i)
       {
-        if (i->is_alias())
+        if (is_alias(*i))
         {
           s.insert(alias(*i).name().name());
         }

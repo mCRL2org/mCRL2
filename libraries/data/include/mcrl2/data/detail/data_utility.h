@@ -82,7 +82,7 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   {
     if (sorts.find(*i) == sorts.end()) {
       // sort *i is not well-typed, a system defined sort or an alias 
-      if (!(i->is_system_defined()) && i->is_alias()) {
+      if (!(i->is_system_defined()) && is_alias(*i)) {
         alias sort_alias(*i);
 
         if (sorts.find(sort_alias.name()) == sorts.end()) {

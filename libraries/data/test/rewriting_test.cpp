@@ -444,7 +444,7 @@ void structured_sort_rewrite_test() {
 
   data::structured_sort ls(boost::make_iterator_range(constructors));
 
-  specification.add_sort(alias(basic_sort("D"), ls));
+  specification.add_alias(alias(basic_sort("D"), ls));
 
   data::rewriter R(specification);
 

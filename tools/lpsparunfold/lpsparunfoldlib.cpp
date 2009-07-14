@@ -44,12 +44,6 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
       processed = true;
     }
 
-    if (i->is_alias()){
-      gsDebugMsg("\tFound Alias Sort: %s\n", std::string(alias( *i ).name().name()).c_str() );
-      sort_names.insert( (alias(*i)).name().name() );
-      processed = true;
-    }
-
     if (i->is_structured_sort()){
       gsDebugMsg("\tFound Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
       processed = true;
@@ -690,11 +684,6 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   if(lps_proc_pars[parameter_at_index].sort().is_basic_sort())
   {
     unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
-  }
-
-  if(lps_proc_pars[parameter_at_index].sort().is_alias())
-  {
-    unfold_parameter_name = alias(lps_proc_pars[parameter_at_index]).name().name();
   }
 
   if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())

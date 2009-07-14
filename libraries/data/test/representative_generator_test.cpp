@@ -43,8 +43,8 @@ void test_representative_generator()
   constructors.push_back(structured_sort_constructor("d", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(structured_sort_constructor("e", boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
 
-  specification.add_sort(alias(basic_sort("D"), structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
-  specification.add_sort(alias(basic_sort("E"), structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
+  specification.add_alias(alias(basic_sort("D"), structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
+  specification.add_alias(alias(basic_sort("E"), structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
 
   representative_generator default_expression_generator(specification);
 

@@ -31,7 +31,7 @@ void basic_sort_test()
   basic_sort s("S");
   BOOST_CHECK(s.is_basic_sort());
   BOOST_CHECK(!s.is_function_sort());
-  BOOST_CHECK(!s.is_alias());
+  BOOST_CHECK(!is_alias(s));
   BOOST_CHECK(!s.is_structured_sort());
   BOOST_CHECK(!s.is_container_sort());
   BOOST_CHECK(s.name() == "S");
@@ -60,7 +60,7 @@ void function_sort_test()
   function_sort fs(s01_range, s);
   BOOST_CHECK(!fs.is_basic_sort());
   BOOST_CHECK(fs.is_function_sort());
-  BOOST_CHECK(!fs.is_alias());
+  BOOST_CHECK(!is_alias(fs));
   BOOST_CHECK(!fs.is_structured_sort());
   BOOST_CHECK(!fs.is_container_sort());
   BOOST_CHECK(fs == fs);
@@ -95,11 +95,7 @@ void alias_test()
 
   basic_sort s0_name("other_S");
   alias s0_(s0_name, s0);
-  BOOST_CHECK(!s0_.is_basic_sort());
-  BOOST_CHECK(!s0_.is_function_sort());
-  BOOST_CHECK(s0_.is_alias());
-  BOOST_CHECK(!s0_.is_structured_sort());
-  BOOST_CHECK(!s0_.is_container_sort());
+  BOOST_CHECK(is_alias(s0_));
   BOOST_CHECK(s0_.name() == s0_name);
   BOOST_CHECK(s0_.reference() == s0);
 
@@ -146,7 +142,7 @@ void structured_sort_test()
 
   BOOST_CHECK(!s.is_basic_sort());
   BOOST_CHECK(!s.is_function_sort());
-  BOOST_CHECK(!s.is_alias());
+  BOOST_CHECK(!is_alias(s));
   BOOST_CHECK(s.is_structured_sort());
   BOOST_CHECK(!s.is_container_sort());
 

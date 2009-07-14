@@ -192,11 +192,9 @@ namespace mcrl2 {
 
         void insert_sort(const sort_expression& s)
         {
-          if (s.is_alias())
-          { // add aliases as names for sort expressions that are non-aliases
-            add_alias(s);
-          }
-          else if (s.is_system_defined())
+          assert(!data::is_alias(s)); // TODO remove
+
+          if (s.is_system_defined())
           {
             sort_expression normalised(normalise(s));
 
@@ -394,11 +392,16 @@ namespace mcrl2 {
       /// \post is_alias(s.name()) && find_referenced_sort(s.name()) = normalise(s.reference())
       void add_alias(alias const& s)
       {
-        assert(!search_sort(s.name()) || is_alias(s.name()) || (constructors(s.name()).empty()));
+        assert(!search_sort(s.name()) || ((constructors(s.name()).empty()) && !is_alias(s.name())));
 
         sort_expression canonical_sort(normalise(s.reference()));
 
-        m_sorts.insert(alias(s.name(), canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
+        if (!m_sorts.insert(s.name()).second)
+        {
+          // s.name() was known as sort but not as alias, remove standard mappings/equations and update aliases
+          remove_mappings(boost::make_iterator_range(standard_generate_functions_code(s.name())));
+          remove_equations(boost::make_iterator_range(standard_generate_equations_code(s.name())));
+        }
 
         m_aliases_by_name[s.name()] = canonical_sort;
         m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, s.name()));
@@ -407,19 +410,12 @@ namespace mcrl2 {
 
         if (!relevant_range.empty())
         {
-          // s.name() was known as sort but not as alias, remove standard mappings/equations and update aliases
-          remove_mappings(boost::make_iterator_range(standard_generate_functions_code(s.name())));
-          remove_equations(boost::make_iterator_range(standard_generate_equations_code(s.name())));
-
           for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
                                                                      j++ != relevant_range.end(); i = j)
           {
             m_aliases_by_name[i->second] = canonical_sort;
             m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, i->second));
             m_aliases_by_sort.erase(i);
-
-            m_sorts.erase(alias(i->second, i->first));        // TODO do aliases need to be part of the set of sorts? -- jwulp
-            m_sorts.insert(alias(i->second, canonical_sort)); // TODO do aliases need to be part of the set of sorts? -- jwulp
           }
         }
 
@@ -516,6 +512,20 @@ namespace mcrl2 {
         }
 
         make_complete(sl);
+      }
+
+      /// \brief Adds aliases to this specification
+      ///
+      /// \param[in] sl A container with sort expressions (objects of type convertible to sort expression).
+      /// \note this operation does not invalidate iterators of sorts_const_range
+      template < typename Container >
+      void add_aliases(const Container& sl,
+              typename detail::enable_if_container< Container, alias >::type* = 0)
+      {
+        for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
+        {
+          add_alias(*i);
+        }
       }
 
       /// \brief Adds sorts to this specification, and marks them as system
@@ -714,13 +724,11 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of sorts_const_range, only if they point to the element that is removed
       void remove_sort(const sort_expression& s)
       {
+        assert(!data::is_alias(s)); // TODO remove
+
         if (is_system_defined(s))
         {
           m_sys_sorts.remove(s);
-        }
-        if (s.is_alias())
-        {
-          remove_alias(s);
         }
         else {
           std::set< alias > aliases_of_s(convert< std::set< alias > >(aliases(s)));
@@ -739,7 +747,6 @@ namespace mcrl2 {
       void remove_alias(alias const& a)
       {
         m_sorts.erase(a.name());
-        m_sorts.erase(a); // TODO do aliases need to be part of the set of sorts -- jwulp
 
         m_aliases_by_sort.erase(std::find(m_aliases_by_sort.lower_bound(a.reference()),
                                           m_aliases_by_sort.upper_bound(a.reference()),

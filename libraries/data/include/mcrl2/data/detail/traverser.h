@@ -347,10 +347,6 @@ namespace mcrl2 {
             {
               static_cast< Derived& >(*this)(function_sort(e));
             }
-            else if (e.is_alias())
-            {
-              static_cast< Derived& >(*this)(alias(e));
-            }
           }
 
           void operator()(alias const& e)
@@ -386,7 +382,13 @@ namespace mcrl2 {
           // \deprecated
           void operator()(atermpp::aterm_appl const& e)
           {
-            static_cast< super& >(*this)(e);
+            if (is_alias(e))
+            {
+              static_cast< Derived& >(*this)(alias(e));
+            }
+            else {
+              static_cast< super& >(*this)(e);
+            }
           }
 
           // \deprecated

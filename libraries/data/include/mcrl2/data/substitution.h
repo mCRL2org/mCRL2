@@ -28,7 +28,7 @@ namespace mcrl2 {
     class data_expression;
     class variable;
 
-    /// /cond INTERNAL_DOCS
+    /// \cond INTERNAL_DOCS
     namespace detail {
       template < class Derived >
       struct substitution_procedure {

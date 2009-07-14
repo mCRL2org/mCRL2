@@ -79,13 +79,6 @@ namespace mcrl2 {
           return core::detail::gsIsSortArrow(*this);
         }
 
-        /// \brief Returns true iff this expression is a sort alias.
-        inline
-        bool is_alias() const
-        {
-          return core::detail::gsIsSortRef(*this);
-        }
-
         /// \brief Returns true iff the expression represents a standard sort.
         inline
         bool is_system_defined() const

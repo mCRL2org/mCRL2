@@ -31,6 +31,7 @@ namespace mcrl2 {
       bool is_bool(const sort_expression&);
     }
 
+    /// \cond INTERNAL_DOCS
     namespace detail {
 
       /// \ Component to facilitate code generation
@@ -93,6 +94,7 @@ namespace mcrl2 {
         }
       };
     }
+    /// \endcond
 
     /// \brief Constructor for function symbol ==
     /// \param[in] s A sort expression
