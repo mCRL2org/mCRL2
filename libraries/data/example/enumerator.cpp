@@ -24,8 +24,8 @@ void test1()
 {
   variable b("b", sort_bool::bool_());
   variable c("c", sort_bool::bool_());
-  variable T = sort_bool::true_();
-  variable F = sort_bool::false_();
+  data_expression T = sort_bool::true_();
+  data_expression F = sort_bool::false_();
 
   data_expression condition = sort_bool::and_(b, c);
 
