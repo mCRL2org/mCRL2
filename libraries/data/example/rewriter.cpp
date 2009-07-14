@@ -12,7 +12,6 @@ void rewrite1()
 {
   data_specification data_spec;
   data_spec.import_system_defined_sort(sort_nat::nat());
-  data_spec.import_system_defined_sort(sort_bool::bool_());
   rewriter r(data_spec);
 
   // Rewrite two data expressions, and check if they are the same
@@ -26,7 +25,6 @@ void rewrite2()
 {
   data_specification data_spec;
   data_spec.import_system_defined_sort(sort_nat::nat());
-  data_spec.import_system_defined_sort(sort_bool::bool_());
   rewriter r(data_spec);
 
   // Create a substitution sequence sigma with two substitutions: [m:=3, n:=4]
