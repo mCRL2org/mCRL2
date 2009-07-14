@@ -144,7 +144,7 @@ namespace mcrl2 {
                 return static_cast< Derived& >(*this)(data_expression(e));
               }
               else {
-                return apply(atermpp::aterm_appl(e));
+                return static_cast< Derived& >(*this)(atermpp::aterm_appl(e));
               }
             }
             else if (e.type() == AT_LIST)
@@ -156,7 +156,7 @@ namespace mcrl2 {
           }
 
           // \deprecated exists only for backwards compatibility
-          atermpp::aterm_appl apply(atermpp::aterm_appl const& e)
+          atermpp::aterm_appl operator()(atermpp::aterm_appl const& e)
           {
             if (!e.empty())
             {
@@ -164,7 +164,7 @@ namespace mcrl2 {
 
               for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
               {
-                new_arguments.push_back(static_cast< Derived& >(*this)(*i));
+                new_arguments.push_back((*this)(*i));
               }
 
               return atermpp::aterm_appl(e.function(), new_arguments.begin(), new_arguments.end());
@@ -180,7 +180,7 @@ namespace mcrl2 {
 
             for (atermpp::aterm_list::const_iterator i= e.begin(); i != e.end(); ++i)
             {
-              result.push_back(static_cast< Derived& >(*this)(*i));
+              result.push_back((*this)(*i));
             }
 
             return convert< atermpp::aterm_list >(result);

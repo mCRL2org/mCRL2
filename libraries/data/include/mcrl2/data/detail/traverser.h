@@ -62,7 +62,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).enter(static_cast< abstraction const& >(a));
             static_cast< Derived& >(*this).enter(a);
 
-            static_cast< Derived& >(*this)(a.variables());
+            (*this)(a.variables());
             static_cast< Derived& >(*this)(a.body());
 
             static_cast< Derived& >(*this).leave(a);
@@ -132,7 +132,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).enter(e);
 
             static_cast< Derived& >(*this)(e.head());
-            static_cast< Derived& >(*this)(e.arguments());
+            (*this)(e.arguments());
 
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
@@ -143,7 +143,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
 
-            static_cast< Derived& >(*this)(e.declarations());
+            (*this)(e.declarations());
             static_cast< Derived& >(*this)(e.body());
 
             static_cast< Derived& >(*this).leave(e);

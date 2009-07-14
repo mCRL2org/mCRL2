@@ -51,6 +51,11 @@ namespace mcrl2 {
 
           using detail::expression_manipulator< internal_format_conversion_helper >::operator();
 
+          sort_expression operator()(sort_expression const& s)
+          {
+            return m_data_specification.normalise(s);
+          }
+
           variable operator()(variable const& v)
           {
             return variable(v.name(), m_data_specification.normalise(v.sort()));
