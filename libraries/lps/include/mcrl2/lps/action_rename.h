@@ -372,9 +372,7 @@ namespace lps {
     //std::istringstream in(text);
     ATermAppl result = detail::parse_action_rename_specification(in);
     lps::specification copy_specification(spec);
-std::cerr << "ALIASES" << pp(spec.data()) << std::endl;
     copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data());
-std::cerr << "ALIASES" << pp(spec.data().aliases()) << std::endl;
     ATermAppl lps_spec = specification_to_aterm(copy_specification);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
     result           = data::detail::internal_format_conversion(spec.data(), result);
