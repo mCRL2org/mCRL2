@@ -19,6 +19,7 @@
 #include <sstream>
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/container_utility.h"
@@ -35,7 +36,7 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-using data::operator+;
+using atermpp::detail::operator+;
 using namespace data;
 using namespace lps;
 

@@ -360,48 +360,6 @@ namespace mcrl2 {
       };
     } // namespace detail
 
-    /// \brief Returns the concatenation of the lists l and m
-    /// \param l A sequence of data expressions
-    /// \param m A sequence of data variables
-    /// \return The concatenation of the lists l and m
-    /// \note Candidate for moving to atermpp library
-    template < typename Expression, typename CompatibleExpression >
-    inline
-    atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, atermpp::term_list< CompatibleExpression > m)
-    {
-      BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
-
-      return atermpp::term_list< Expression >(ATconcat(l, m));
-    }
-
-    /// \brief Returns the concatenation of the lists l and m
-    /// \param l A sequence of data expressions
-    /// \param m A sequence of data variables
-    /// \return The concatenation of the lists l and m
-    /// \note Candidate for moving to atermpp library
-    template < typename Expression, typename CompatibleExpression >
-    inline
-    atermpp::term_list< Expression > operator+(atermpp::term_list< Expression > l, CompatibleExpression const& m)
-    {
-      BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
-
-      return atermpp::push_back(l, static_cast< Expression >(m));
-    }
-
-    /// \brief Returns the concatenation of the lists l and m
-    /// \param l A sequence of data expressions
-    /// \param m A sequence of data variables
-    /// \return The concatenation of the lists l and m
-    /// \note Candidate for moving to atermpp library
-    template < typename Expression, typename CompatibleExpression >
-    inline
-    atermpp::term_list< Expression > operator+(CompatibleExpression const& m, atermpp::term_list< Expression > l)
-    {
-      BOOST_STATIC_ASSERT((boost::is_convertible< CompatibleExpression, Expression >::value));
-
-      return atermpp::push_front(l, static_cast< Expression >(m));
-    }
-
     /// \brief Constructs a vector with element type T of one argument.
     ///
     /// \param[in] t1 The first element of the vector.

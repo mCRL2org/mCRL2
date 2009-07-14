@@ -34,6 +34,7 @@
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/data/xyz_identifier_generator.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/atermpp/detail/aterm_list_utility.h"
 
 namespace mcrl2 {
 
@@ -112,7 +113,7 @@ class pbes_translate_algorithm
     data::variable_list Par(core::identifier_string x, data::variable_list l, state_formulas::state_formula f)
     {
       using namespace state_formulas::state_frm;
-      using data::operator+;
+      using atermpp::detail::operator+;
 
       if (is_data(f)) {
         return data::variable_list();
@@ -292,7 +293,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using lps::summand_list;
       namespace s = state_formulas::state_frm;
       namespace d = data;
-      using data::operator+;
+      using atermpp::detail::operator+;
 
       pbes_expression result;
 
@@ -609,7 +610,7 @@ std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end(
     pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
       using namespace state_formulas::state_frm;
-      using data::operator+;
+      using atermpp::detail::operator+;
 
       lps::linear_process lps = spec.process();
 
@@ -727,7 +728,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
       using namespace data::detail;
       using namespace accessors;
       using lps::summand_list;
-      using data::operator+;
+      using atermpp::detail::operator+;
       namespace s = state_formulas::state_frm;
 
       pbes_expression result;
@@ -1013,7 +1014,7 @@ std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end(
     pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
       using namespace state_formulas::state_frm;
-      using data::operator+;
+      using atermpp::detail::operator+;
       lps::linear_process lps = spec.process();
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
@@ -1037,7 +1038,6 @@ std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end(
       assert(result.is_normalized());
       assert(result.is_closed());
       complete_data_specification(result);
-      return result;
       return result;
     }
 };
