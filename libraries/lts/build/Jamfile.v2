@@ -10,6 +10,7 @@ mcrl2-library lts
        : <library>/libraries//svc
          <library>/site-config//BCG
          <use>/libraries//lps
+         <use>/libraries//core
        :
        : <include>../include
          <library>/site-config//BCG

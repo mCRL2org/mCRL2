@@ -77,15 +77,16 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
   local internal-libraries   = [ MATCH (/libraries.*//$(mcrl2-components)) : [ feature.get-values library : $(requirements) ] ] ;
   local internal-uses        = [ MATCH (/libraries.*//.*) : $(internal-libraries) ] ;
 
-  requirements  = [ set.difference $(requirements) : <library>$(internal-libraries) ] ;
-  uses          = [ feature.get-values use : $(requirements) ] ;
+  requirements     = [ set.difference $(requirements) : <library>$(internal-libraries) ] ;
+  uses             = [ feature.get-values use : $(requirements) ] ;
+  use-requirements = [ set.difference $(uses) : [ MATCH (/libraries.*//$(mcrl2-components)) : $(uses) ] ] ;
 
-  local requirements-shared = $(requirements) ;
-  local requirements-static = $(requirements) ;
-  local requirements-object = [ property.change $(requirements) : <use> ] ;
+  local requirements-shared = [ property.change $(requirements) : <use> ] ;
+  local requirements-static = [ property.change $(requirements) : <use> ] ;
+  local requirements-object = <use>$(use-requirements) [ property.change $(requirements) : <use> ] ;
 
   for local u in [ MATCH /libraries.*//(.*) : [ MATCH (/libraries.*//$(mcrl2-components)) : $(uses) ] ] {
-    requirements-object += <link>shared:<use>/libraries/$(u)//interface ;
+    requirements-object += <use>/libraries/$(u)//interface ;
   }
 
   for local u in [ MATCH /libraries.*//(.*) : $(internal-uses) ] {
@@ -96,8 +97,12 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
 
   objects = [ modules.call-in $(m) : object-targets $(sources) : $(requirements-object) ] ;
 
-  modules.call-in $(m) : library-targets-static  $(name) : $(objects) : $(requirements-static) : $(defaults) : $(usage-requirements) ;
-  modules.call-in $(m) : library-targets-dynamic $(name) : $(objects) : $(requirements-shared) : $(defaults) : $(usage-requirements) ;
+  if ! $(objects) {
+    usage-requirements += $(requirements-object) ;
+  }
+
+  modules.call-in $(m) : library-targets-static  $(name) : $(objects) : $(requirements-static) : $(defaults) : $(usage-requirements) $(requirements-static) ;
+  modules.call-in $(m) : library-targets-dynamic $(name) : $(objects) : $(requirements-shared) : $(defaults) : $(usage-requirements) $(requirements-shared) ;
 
   install-libraries $(name) : $(install-requirements) ;
 }
