@@ -66,7 +66,7 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
       }
 
       alias $(name) : : <link>shared : : $(usage-requirements) $(requirements) ;
-      alias interface : : <link>shared : : $(usage-requirements) ;
+      alias interface : : : : $(usage-requirements) ;
     }
   }
 
