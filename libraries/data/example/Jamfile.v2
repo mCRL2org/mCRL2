@@ -5,21 +5,21 @@ project libraries/data/example
        <define>BOOST_ALL_NO_LIB    # do not use automatic library selection
    ;
 
-exe example1  : example1.cpp : ;
-exe example2  : example2.cpp : ;
-exe example3  : example3.cpp : ;
-exe example4  : example4.cpp : ;
-exe example5  : example5.cpp : ;
-exe rewriter  : rewriter.cpp : ;
-exe parse_data  : parse_data.cpp : ;
+exe enumerator : enumerator.cpp : ;
+exe example1   : example1.cpp : ;
+exe example2   : example2.cpp : ;
+exe example3   : example3.cpp : ;
+exe example4   : example4.cpp : ;
+exe rewriter   : rewriter.cpp : ;
+exe parse_data : parse_data.cpp : ;
 
 install dist
    :
+     enumerator
      example1
      example2
      example3
      example4
-     example5
      rewriter
      parse_data
    :

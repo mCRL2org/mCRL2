@@ -2,7 +2,6 @@
 #include "mcrl2/data/parser.h"
 #include <iostream>
 
-using namespace mcrl2::core;
 using namespace mcrl2::data;
 
 int main(int argc, char* argv[])
@@ -26,7 +25,7 @@ int main(int argc, char* argv[])
   );
 
   // pretty print the data specification
-  std::cout << data::pp(data_spec) << "\n";
+  std::cout << pp(data_spec) << "\n";
 
   return 0;
 }
