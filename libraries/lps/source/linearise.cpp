@@ -341,11 +341,6 @@ class specification_basic_type:public boost::noncopyable
     void insertalias(const alias& a)
     {
       data.add_alias(a);
-
-      if (a.reference().is_basic_sort())
-      {
-        insertsort(a.reference());
-      }
     }
 
     void insertsort(const sort_expression sortterm)
@@ -2926,7 +2921,7 @@ class specification_basic_type:public boost::noncopyable
            sp_push_arguments.push_back(structured_sort_constructor_argument(stack_sort_alias,
                                spec.fresh_name("pop")));
            sorts=reverse(sorts);
-           structured_sort_constructor sc_push(spec.fresh_name("push"), boost::make_iterator_range(sp_push_arguments));
+           structured_sort_constructor sc_push(spec.fresh_name("push"), sp_push_arguments);
            structured_sort_constructor sc_emptystack(spec.fresh_name("emptystack"),spec.fresh_name("isempty"));
 
            structured_sort_constructor_vector constructors(1,sc_push);
@@ -3824,9 +3819,7 @@ class specification_basic_type:public boost::noncopyable
 
             //store new declarations in return value w
             sortId = sort_struct;
-            elementnames = data::convert< data::function_symbol_list >(
-                      data::structured_sort(data::sort_expression(sort_struct)).
-                                              constructor_functions());
+            elementnames = data::convert< data::function_symbol_list >(sort_struct.constructor_functions());
          }
         }
 
@@ -3863,8 +3856,8 @@ class specification_basic_type:public boost::noncopyable
       for(w=0; ((w<enumeratedtypes.size())&&(enumeratedtypes[w].size!=n)); ++w){};
 
       if (w==enumeratedtypes.size()) // There is no enumeratedtype of arity n.
-      { const enumeratedtype et(n,*this);
-        enumeratedtypes.push_back(et);
+      {
+        enumeratedtypes.push_back(enumeratedtype(n,*this));
       }
       return w;
     }
