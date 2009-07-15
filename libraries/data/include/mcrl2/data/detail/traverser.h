@@ -246,7 +246,10 @@ namespace mcrl2 {
           template < typename Container >
           void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
           {
-            std::for_each(container.begin(), container.end(), static_cast< Derived& >(*this));
+            for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+            {
+              static_cast< Derived& >(*this)(*i);
+            }
           }
       };
 
