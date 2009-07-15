@@ -43,13 +43,15 @@ namespace mcrl2 {
        **/
       class internal_format_conversion_helper : public detail::expression_manipulator< internal_format_conversion_helper >
       {
+          typedef detail::expression_manipulator< internal_format_conversion_helper > super;
+
         private:
 
           data_specification const& m_data_specification;
 
         public:
 
-          using detail::expression_manipulator< internal_format_conversion_helper >::operator();
+          using super::operator();
 
           sort_expression operator()(sort_expression const& s)
           {
@@ -125,6 +127,17 @@ namespace mcrl2 {
             }
 
             return application((*this)(expression.head()), (*this)(expression.arguments()));
+          }
+
+          // \deprecated exists only for backwards compatibility
+          atermpp::aterm_appl operator()(atermpp::aterm_appl const& e)
+          {
+            if (is_sort_expression(e))
+            {
+              return (*this)(sort_expression(e));
+            }
+
+            return static_cast< super& >(*this)(e);
           }
 
           /// Translates the numeric expressions to their internal representations
