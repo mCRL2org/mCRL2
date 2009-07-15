@@ -113,6 +113,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   lg_error = false;
 
   lgopts->specification.load(lgopts->filename);
+  lgopts->specification.instantiate_global_variables();
 
   if ( lgopts->removeunused )
   {
