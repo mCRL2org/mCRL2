@@ -20,6 +20,7 @@
 #include "mcrl2/data/enumerator_factory.h"
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/substitute.h"
 
 namespace mcrl2 {
   namespace lps {
@@ -45,8 +46,7 @@ namespace mcrl2 {
         void apply_substitution(action_summand& s, Substitution& sigma)
         {
           s.condition() = sigma(s.condition());
-          s.multi_action().actions() = replace_variables(s.multi_action().actions(), sigma);
-          s.multi_action().time() = sigma(s.multi_action().time());
+          substitute(s.multi_action(), sigma);
           s.assignments() = replace_variables(s.assignments(), sigma);
         }
 

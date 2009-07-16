@@ -68,7 +68,7 @@ namespace mcrl2 {
           else
           {
             int n = enumerated_elements.size();
-            int m = pow( static_cast<int>(2), static_cast<int>(new_parameters.size()) - 1);
+            int m = static_cast< int >(pow( static_cast<int>(2), static_cast<int>(new_parameters.size()) - 1));
 
             //m == 2^(new_parameters.size() - 1)
 
@@ -132,7 +132,7 @@ namespace mcrl2 {
               m_enumerated_elements[par] = enumerated_elements;
 
               //Calculate the number of booleans needed to encode par
-              int n = ceil(log(enumerated_elements.size()) / log(2));
+              int n = static_cast< int >(ceil(log(enumerated_elements.size()) / log(2)));
 
               //Set hint for fresh variable names
               generator.set_hint(par.name());
@@ -198,7 +198,7 @@ namespace mcrl2 {
                 while(k != elements.end())
                 {
                   // Elements that get boolean value false
-                  int count(round(pow(2, j)));
+                  int count(static_cast< int >(round(pow(2, j))));
                   // TODO: Why doesn't just std::advance(k,count) work?, i.e. if
                   // distance(k, elements.end()) > count, advance(k, count)
                   // entails k != elements.end().

@@ -19,6 +19,7 @@
 #define MCRL2_LPS_SUMELM_H
 
 #include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2 {
@@ -143,9 +144,8 @@ namespace mcrl2 {
           std::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
-		  s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
-          s.multi_action().actions() = replace_free_variables(s.multi_action().actions(), make_map_substitution_adapter(substitutions));
-          s.multi_action().time() = replace_free_variables(s.multi_action().time(), make_map_substitution_adapter(substitutions));
+          s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
+          substitute(s.multi_action(), make_map_substitution_adapter(substitutions));
           s.assignments() = replace_free_variables(s.assignments(), make_map_substitution_adapter(substitutions));
 
           remove_unused_summand_variables(s);

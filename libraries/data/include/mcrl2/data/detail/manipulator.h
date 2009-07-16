@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 #define MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H
 
+#include "boost/type_traits/is_convertible.hpp"
 #include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/data/assignment.h"
@@ -186,17 +187,31 @@ namespace mcrl2 {
             return convert< atermpp::aterm_list >(result);
           }
 
+          
+
+          template < typename Expression, bool = boost::is_convertible< Expression, data_expression >::value >
+          struct manipulation_result_type {
+            typedef Expression type;
+          };
+
           template < typename Expression >
-          atermpp::term_list< data_expression > operator()(atermpp::term_list< Expression > const& container)
+          struct manipulation_result_type< Expression, true > {
+            typedef data_expression type;
+          };
+
+          template < typename Expression >
+          atermpp::term_list< typename manipulation_result_type< Expression >::type > operator()(atermpp::term_list< Expression > const& container)
           {
-            atermpp::vector< data_expression > result;
+            typedef typename manipulation_result_type< Expression >::type result_type;
+
+            atermpp::vector< result_type > result;
 
             for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
             {
               result.push_back(static_cast< Derived& >(*this)(*i));
             }
 
-            return convert< atermpp::term_list< data_expression > >(result);
+            return convert< atermpp::term_list< result_type > >(result);
           }
 #endif // NO_TERM_TRAVERSAL
 
