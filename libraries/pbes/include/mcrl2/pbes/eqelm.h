@@ -22,9 +22,10 @@
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/core/detail/print_utility.h"
 
@@ -144,9 +145,10 @@ namespace pbes_system {
       }
 
       /// \brief Propagate the equivalence relations in vertex X over the edge Ye.
+      template <typename Substitution>
       void update_equivalence_classes(const string_type& X,
                                       const propositional_variable_type& Ye,
-                                      const std::map<variable_type, data_term_type>& vX,
+                                      const Substitution& vX,
                                       std::set<string_type>& todo
                                      )
       {
@@ -162,7 +164,7 @@ namespace pbes_system {
           for (typename std::set<variable_type>::iterator k = equiv.begin(); k != equiv.end(); ++k)
           {
             unsigned int p = index_of(*k, m_parameters[Y]);
-            w[m_data_rewriter(e[p], data::make_map_substitution_adapter(vX))].insert(*k);
+            w[m_data_rewriter(e[p], vX)].insert(*k);
           }
           if (w.size() > 1)
           {
@@ -180,9 +182,9 @@ namespace pbes_system {
       }
 
       /// \brief Computes a substitution that corresponds to the equivalence relations in X
-      std::map<variable_type, data_term_type> compute_substitution(const string_type& X)
+      data::mutable_map_substitution<> compute_substitution(const string_type& X)
       {
-        std::map<variable_type, data_term_type> result;
+        data::mutable_map_substitution<> result;
         const std::vector<std::set<variable_type> >& cX = m_vertices[X];
         for (typename std::vector<std::set<variable_type> >::const_iterator i = cX.begin(); i != cX.end(); ++i)
         {
@@ -205,10 +207,10 @@ namespace pbes_system {
         for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
         {
           string_type X = i->variable().name();
-          std::map<variable_type, data_term_type> replacements = compute_substitution(X);
-          if (!X.empty())
+          data::mutable_map_substitution<> sigma = compute_substitution(X);
+          if (!sigma.empty())
           {
-            *i = pbes_equation(i->symbol(), i->variable(), data::make_map_substitution_adapter(replacements)(i->formula()));
+            pbes_system::substitute(*i, sigma, false);
           }
         }
 
@@ -264,7 +266,7 @@ namespace pbes_system {
           todo.clear();
           propositional_variable_type kappa = p.initial_state();
           string_type X = kappa.name();
-          std::map<variable_type, data_term_type> vX = compute_substitution(X);
+          data::mutable_map_substitution<> vX = compute_substitution(X);
           std::set<propositional_variable_type> edges = find_all_propositional_variable_instantiations(kappa);
           for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
           {
@@ -301,7 +303,7 @@ namespace pbes_system {
           }
           
           // create a substitution function that corresponds to cX
-          std::map<variable_type, data_term_type> vX = compute_substitution(X);
+          data::mutable_map_substitution<> vX = compute_substitution(X);
           const atermpp::set<propositional_variable_type>& edges = m_edges[X];
           for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
           {
