@@ -9,12 +9,11 @@
 /// \file mcrl2/lps/substitute.h
 /// \brief add your file description here.
 
-#include "mcrl2/lps/detail/lps_substituter.h"
-
 #ifndef MCRL2_LPS_SUBSTITUTE_H
 #define MCRL2_LPS_SUBSTITUTE_H
 
 #include "mcrl2/lps/substitute_fwd.h"
+#include "mcrl2/lps/detail/lps_substituter.h"
 
 namespace mcrl2 {
 

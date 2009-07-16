@@ -55,6 +55,8 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
       else {
         alias $(name) : : <link>static : : $(usage-requirements) ;
       }
+
+      alias interface : : <link>static : : $(usage-requirements) ;
     }
 
     rule library-targets-dynamic ( name : sources * : requirements * : defaults * : usage-requirements * ) {
@@ -66,7 +68,7 @@ rule mcrl2-library ( name : sources * : requirements * : defaults * : usage-requ
       }
 
       alias $(name) : : <link>shared : : $(usage-requirements) $(requirements) ;
-      alias interface : : : : $(usage-requirements) ;
+      alias interface : : <link>shared : : $(usage-requirements) ;
     }
   }
 
