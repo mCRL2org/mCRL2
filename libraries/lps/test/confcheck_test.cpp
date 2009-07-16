@@ -38,10 +38,9 @@ const std::string case_3(
   "init a.b.delta ;\n");
 
 
-static bool check_for_ctau(ATermAppl s1)  // s1 is an lps.
+static bool check_for_ctau(lps::specification const& s)  // s1 is an lps.
 {
-  ATermAppl v_process_equation = ATAgetArgument(s1, 2);
-  ATermList v_summands = ATLgetArgument(v_process_equation, 2);
+  ATermList v_summands = static_cast< ATermList >(s.process().summands());
 
   for( ;  !ATisEmpty(v_summands) ; v_summands=ATgetNext(v_summands))
   { ATermAppl v_summand=ATAgetFirst(v_summands);
@@ -68,12 +67,12 @@ int test_main(int argc, char** argv)
   using namespace mcrl2::lps;
 
   specification s0;
-  ATermAppl s1;
+  specification s1;
 
   // case 1
   s0 = linearise(case_1);
   Confluence_Checker checker1(s0);
-  s1=checker1.check_confluence_and_mark(data::sort_bool::true_(),0);  // Check confluence for all summands and
+  s1=lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
   core::garbage_collect();
@@ -81,7 +80,7 @@ int test_main(int argc, char** argv)
   // case 2
   s0 = linearise(case_2);
   Confluence_Checker checker2(s0);
-  s1=checker2.check_confluence_and_mark(data::sort_bool::true_(),0);  // Check confluence for all summands and
+  s1=lps::specification(checker2.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(check_for_ctau(s1));
   core::garbage_collect();
@@ -89,7 +88,7 @@ int test_main(int argc, char** argv)
   // case 3
   s0 = linearise(case_3);
   Confluence_Checker checker3(s0);
-  s1=checker3.check_confluence_and_mark(data::sort_bool::true_(),0);  // Check confluence for all summands and
+  s1=lps::specification(checker3.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
   core::garbage_collect();
