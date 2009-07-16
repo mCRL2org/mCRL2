@@ -222,7 +222,7 @@ namespace pbes_expr {
   /// \param t A PBES expression
   /// \return True if the term t is a data expression
   inline bool is_data(pbes_expression t)
-  { return core::detail::gsIsDataExpr(t); }
+  { return data::is_data_expression(t); }
 
   /// \brief Returns true if the term t is a propositional variable expression
   /// \param t A PBES expression
@@ -242,7 +242,7 @@ namespace accessors {
   inline
   data::data_expression val(pbes_expression t)
   {
-    assert(core::detail::gsIsDataExpr(t));
+    assert(data::is_data_expression(t));
     return atermpp::aterm_appl(t);
   }
 
@@ -808,7 +808,7 @@ namespace core {
     static inline
     bool is_true(term_type t)
     {
-      return core::detail::gsIsPBESTrue(t) || core::detail::gsIsDataExprTrue(t);
+      return core::detail::gsIsPBESTrue(t) || data::sort_bool::is_true_function_symbol(t);
     }
 
     /// \brief Test for the value false
@@ -817,7 +817,7 @@ namespace core {
     static inline
     bool is_false(term_type t)
     {
-      return core::detail::gsIsPBESFalse(t) || core::detail::gsIsDataExprFalse(t);
+      return core::detail::gsIsPBESFalse(t) || data::sort_bool::is_false_function_symbol(t);
     }
 
     /// \brief Test for a negation
@@ -826,7 +826,7 @@ namespace core {
     static inline
     bool is_not(term_type t)
     {
-      return core::detail::gsIsPBESNot(t) || core::detail::gsIsDataExprNot(t);
+      return core::detail::gsIsPBESNot(t) || data::sort_bool::is_not_application(t);
     }
 
     /// \brief Test for a conjunction
@@ -880,7 +880,7 @@ namespace core {
     static inline
     bool is_data(term_type t)
     {
-      return core::detail::gsIsDataExpr(t);
+      return data::is_data_expression(t);
     }
 
     /// \brief Test for propositional variable instantiation
@@ -901,7 +901,7 @@ namespace core {
       return pbes_system::accessors::arg(t);
 /*
       // Forall and exists are not fully supported by the data library
-      assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
+      assert(!t.is_abstraction() || !(static_cast<data::abstraction>(t).is_forall() || static_cast<data::abstraction>(t).is_exists()));
       assert(is_not(t) || is_exists(t) || is_forall(t));
 
       if (core::detail::gsIsPBESNot(t))
@@ -948,7 +948,7 @@ namespace core {
     variable_sequence_type var(term_type t)
     {
       // Forall and exists are not fully supported by the data library
-      assert(!core::detail::gsIsDataExprForall(t) && !core::detail::gsIsDataExprExists(t));
+      assert(!t.is_abstraction() || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists()));
       assert(is_exists(t) || is_forall(t));
 
       return variable_sequence_type(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
