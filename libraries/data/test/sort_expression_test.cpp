@@ -113,7 +113,7 @@ void structured_sort_test()
   structured_sort_constructor_argument p0(s0, "p0");
   structured_sort_constructor_argument p1(s1);
   BOOST_CHECK(p0.name() == "p0");
-  BOOST_CHECK(p1.name() == std::string());
+  BOOST_CHECK(p1.name() == data::no_identifier());
   BOOST_CHECK(p0.sort() == s0);
   BOOST_CHECK(p1.sort() == s1);
 
@@ -132,13 +132,13 @@ void structured_sort_test()
   BOOST_CHECK(c1.recogniser() == "is_c1");
   BOOST_CHECK(c2.name() == "c2");
   BOOST_CHECK(c2.arguments() == a2_range);
-  BOOST_CHECK(c2.recogniser() == std::string());
+  BOOST_CHECK(c2.recogniser() == data::no_identifier());
 
   structured_sort_constructor_vector cs;
   cs.push_back(c1);
   cs.push_back(c2);
 
-  structured_sort s(boost::make_iterator_range(cs));
+  structured_sort s(cs);
 
   BOOST_CHECK(!s.is_basic_sort());
   BOOST_CHECK(!s.is_function_sort());

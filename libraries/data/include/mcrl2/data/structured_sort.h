@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Jeroen Keiren, Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -37,11 +37,34 @@ namespace mcrl2 {
 
     class structured_sort;
 
+    /// \brief Special identifier string that is used to specify the absence of an identifier
+    inline
+    static core::identifier_string const& no_identifier()
+    {
+      static core::identifier_string dummy;
+
+      return dummy;
+    }
+
+    /// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
+    inline
+    static core::identifier_string make_identifier(std::string const& name)
+    {
+      return (name.empty()) ? no_identifier() : core::identifier_string(name);
+    }
+
     /// \brief Argument of a structured sort constructor.
     ///
     /// This comprises an optional name and a mandatory sort.
     class structured_sort_constructor_argument: public atermpp::aterm_appl
     {
+      protected:
+
+        atermpp::aterm_appl make_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
+        {
+          return core::detail::gsMakeStructProj((name == no_identifier()) ?
+                   atermpp::aterm_appl(core::detail::gsMakeNil()) : atermpp::aterm_appl(name), sort);
+        }
 
       public:
 
@@ -67,21 +90,28 @@ namespace mcrl2 {
         /// \param[in] sort The sort of the argument.
         /// \param[in] name The name of the argument.
         /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name = "")
-          : atermpp::aterm_appl(core::detail::gsMakeStructProj(
-                  (name.empty()) ? atermpp::aterm_appl(core::detail::gsMakeNil()) :
-                                   atermpp::aterm_appl(atermpp::aterm_string(name)), sort))
+        structured_sort_constructor_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
+          : atermpp::aterm_appl(make_argument(sort, name))
+        {}
+
+        /// \brief Constructor
+        ///
+        /// \param[in] sort The sort of the argument.
+        /// \param[in] name The name of the argument.
+        /// The default name, the empty string, signifies that there is no name.
+        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name)
+          : atermpp::aterm_appl(make_argument(sort, make_identifier(name)))
         {}
 
         /// \brief Returns the name of the constructor argument.
         ///
         inline
-        std::string name() const
+        core::identifier_string name() const
         {
           atermpp::aterm_appl n = atermpp::arg1(*this);
           if (n == core::detail::gsMakeNil())
           {
-            return std::string();
+            return no_identifier();
           }
           else
           {
@@ -121,6 +151,25 @@ namespace mcrl2 {
             return s.sort();
           }
         };
+
+      protected:
+
+        inline
+        static atermpp::aterm_appl make_constructor(core::identifier_string const& name,
+			  atermpp::term_list<structured_sort_constructor_argument> arguments,
+                          core::identifier_string const& recogniser)
+        {
+          assert(name != no_identifier());
+
+          return atermpp::aterm_appl(core::detail::gsMakeStructCons(name, arguments,
+                  (recogniser == no_identifier()) ? core::detail::gsMakeNil() : static_cast< ATermAppl >(recogniser)));
+        }
+
+        inline
+        static atermpp::aterm_appl make_constructor(core::identifier_string const& name, core::identifier_string const& recogniser)
+        {
+          return make_constructor(name, atermpp::term_list< structured_sort_constructor_argument >(), recogniser);
+        }
 
       public:
 
@@ -171,17 +220,34 @@ namespace mcrl2 {
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
         template < typename Container >
+        structured_sort_constructor(const core::identifier_string& name,
+                                    const Container& arguments,
+                                    const core::identifier_string& recogniser = no_identifier(),
+                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+          : atermpp::aterm_appl(make_constructor(name, convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), recogniser))
+        { }
+
+        /// \brief Constructor
+        ///
+        /// \overload
+        template < typename Container >
         structured_sort_constructor(const std::string& name,
                                     const Container& arguments,
                                     const std::string& recogniser = "",
                                     typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                  convert< atermpp::term_list<structured_sort_constructor_argument> >(arguments),
-                                  (recogniser.empty()) ? core::detail::gsMakeNil()
-                                               : static_cast< ATermAppl >(atermpp::aterm_string(recogniser))))
-        {
-          assert(!name.empty());
-        }
+          : atermpp::aterm_appl(make_constructor(make_identifier(name),
+               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), make_identifier(recogniser)))
+        { }
+
+        /// \brief Constructor
+        ///
+        /// \param[in] name The name of the constructor.
+        /// \param[in] recogniser The name of the recogniser.
+        /// \pre name is not empty.
+        /// \pre recogniser is not empty.
+        structured_sort_constructor(const core::identifier_string& name, const core::identifier_string& recogniser = no_identifier())
+          : atermpp::aterm_appl(make_constructor(name, recogniser))
+        { }
 
         /// \brief Constructor
         ///
@@ -190,17 +256,12 @@ namespace mcrl2 {
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
         structured_sort_constructor(const std::string& name, const std::string& recogniser = "")
-          : atermpp::aterm_appl(core::detail::gsMakeStructCons(atermpp::aterm_string(name),
-                                  atermpp::term_list<structured_sort_constructor_argument>(),
-                                  (recogniser.empty()) ? core::detail::gsMakeNil()
-                                               : static_cast< ATermAppl >(atermpp::aterm_string(recogniser))))
-        {
-          assert(!name.empty());
-        }
+          : atermpp::aterm_appl(make_constructor(make_identifier(name), make_identifier(recogniser)))
+        { }
 
         /// \brief Returns the name of the constructor.
         ///
-        std::string name() const
+        core::identifier_string name() const
         {
           return atermpp::aterm_string(atermpp::arg1(*this));
         }
@@ -222,12 +283,12 @@ namespace mcrl2 {
         /// \brief Returns the arguments of the constructor, without the
         ///        projection names
         /// \brief Returns the name of the recogniser of the constructor.
-        std::string recogniser() const
+        core::identifier_string recogniser() const
         {
           atermpp::aterm_appl r = arg3(*this);
           if (r == core::detail::gsMakeNil())
           {
-            return std::string();
+            return no_identifier();
           }
           else
           {
@@ -260,7 +321,7 @@ namespace mcrl2 {
           function_symbol_vector result;
           for(arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
           {
-            if (!i.front().name().empty()) {
+            if (i.front().name() != no_identifier()) {
               result.push_back(function_symbol(i.front().name(), function_sort(s, i.front().sort())));
             }
           }
@@ -354,7 +415,7 @@ namespace mcrl2 {
           function_symbol_vector result;
           for(constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
           {
-            if (!i.front().recogniser().empty()) {
+            if (i.front().recogniser() != no_identifier()) {
               result.push_back(i.front().recogniser_function(s));
             }
           }
@@ -405,7 +466,7 @@ namespace mcrl2 {
                   }
 
                   // create first operand of ==, < or <=
-                  operand_left = application(i->constructor_function(s), boost::make_iterator_range(variables));
+                  operand_left = application(i->constructor_function(s), variables);
                 }
 
                 if (j->argument_sorts().empty())
@@ -495,7 +556,7 @@ namespace mcrl2 {
 
               for (structured_sort_constructor::arguments_const_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
               {
-                if (!j->name().empty()) {
+                if (j->name() != no_identifier()) {
                   application lhs(function_symbol(j->name(), function_sort(s, j->sort())),
                         application(i.front().constructor_function(s), variables));
 
@@ -518,7 +579,7 @@ namespace mcrl2 {
           {
             for (constructors_const_range::iterator j = cl.begin(); j != cl.end(); ++j)
             {
-              if(!j->recogniser().empty())
+              if(j->recogniser() != no_identifier())
               {
                 data_expression right = (*i == *j) ? sort_bool::true_() : sort_bool::false_();
 
