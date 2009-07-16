@@ -901,7 +901,8 @@ namespace core {
       return pbes_system::accessors::arg(t);
 /*
       // Forall and exists are not fully supported by the data library
-      assert(!t.is_abstraction() || !(static_cast<data::abstraction>(t).is_forall() || static_cast<data::abstraction>(t).is_exists()));
+      assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
+		 || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists())));
       assert(is_not(t) || is_exists(t) || is_forall(t));
 
       if (core::detail::gsIsPBESNot(t))
@@ -948,11 +949,11 @@ namespace core {
     variable_sequence_type var(term_type t)
     {
       // Forall and exists are not fully supported by the data library
-      assert(!t.is_abstraction() || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists()));
+      assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
+		 || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists())));
       assert(is_exists(t) || is_forall(t));
 
-      return variable_sequence_type(atermpp::term_list_iterator< data::variable >(atermpp::list_arg1(t)),
-                                    atermpp::term_list_iterator< data::variable >());
+      return variable_sequence_type(atermpp::list_arg1(t));
     }
 
     /// \brief Returns the name of a propositional variable instantiation
@@ -972,8 +973,7 @@ namespace core {
     data_term_sequence_type param(term_type t)
     {
       assert(is_prop_var(t));
-      return data_term_sequence_type(atermpp::term_list_iterator< data::data_expression >(atermpp::list_arg2(t)),
-                                    atermpp::term_list_iterator< data::data_expression >());
+      return variable_sequence_type(atermpp::list_arg2(t));
     }
 
     /// \brief Conversion from variable to term
