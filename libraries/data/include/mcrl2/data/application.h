@@ -74,7 +74,7 @@ namespace mcrl2 {
           : data_expression(core::detail::gsMakeDataAppl(head, convert< data_expression_list >(arguments)))
         {
           assert(head.sort().is_function_sort());
-          assert(function_sort(head.sort()).domain().size() == arguments.size());
+          assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
           assert(!arguments.empty());
         }
 

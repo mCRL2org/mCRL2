@@ -55,7 +55,7 @@ namespace mcrl2 {
           : atermpp::aterm_appl(a)
         {
 //          assert(is_assignment(a));
-          assert(core::gsIsDataVarIdInit(a));
+          assert(core::detail::gsIsDataVarIdInit(a));
         }
 
         /// \brief Constructor
