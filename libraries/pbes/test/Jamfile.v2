@@ -13,6 +13,7 @@ include $(TOP)/build/testing/header_test.jam ;
 
 test-suite pbes
     :
+      [ run pbesrewr_test.cpp ]
       [ run eqelm_test.cpp ]
       [ run find_test.cpp ]
       [ run pbes_solve_test.cpp ]

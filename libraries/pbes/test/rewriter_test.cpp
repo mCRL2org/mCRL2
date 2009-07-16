@@ -29,7 +29,6 @@
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -279,24 +278,6 @@ void test_enumerate_quantifiers_rewriter2()
   test_enumerate_quantifiers_rewriter(expr1, expr2, var_decl, sigma, data_spec);
 }
 
-void test_pbesrewr()
-{
-  std::string pbes_text =
-    "sort Enum = struct e1 | e2;                           \n"
-    "pbes mu X(n:Enum)=exists m1,m2:Enum.(X(m1) || X(m2)); \n"
-    "init X(e1);                                           \n"
-    ;
-  pbes<> p = txt2pbes(pbes_text);
-  data::rewriter datar(p.data(), data::rewriter::jitty);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<> datae(p.data(), datar, generator);
-  data::rewriter_with_variables datarv(datar);
-  bool enumerate_infinite_sorts = true;
-  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-  pbesrewr(p, pbesr);
-  // p.save("pbesrewr.pbes");
-}
-
 void test_enumerate_quantifiers_rewriter_finite()
 {
   std::cout << "<test_enumerate_quantifiers_rewriter_finite>" << std::endl;
@@ -539,7 +520,6 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_pbesrewr();
   test_simplifying_rewriter();
   test_enumerate_quantifiers_rewriter();
   test_enumerate_quantifiers_rewriter2();
