@@ -6,8 +6,14 @@ xml data_manual
         data_manual.qbk
     ;
 
+xml concept_manual
+    :
+        concept_manual.qbk
+    ;
+
 boostbook standalone
     :
+        concept_manual
         data_manual
     :
         <xsl:param>nav.layout=none
