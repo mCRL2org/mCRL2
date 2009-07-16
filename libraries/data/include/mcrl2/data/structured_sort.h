@@ -233,10 +233,21 @@ namespace mcrl2 {
         template < typename Container >
         structured_sort_constructor(const std::string& name,
                                     const Container& arguments,
-                                    const std::string& recogniser = "",
+                                    const std::string& recogniser,
                                     typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
           : atermpp::aterm_appl(make_constructor(make_identifier(name),
                convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), make_identifier(recogniser)))
+        { }
+
+        /// \brief Constructor
+        ///
+        /// \overload
+        template < typename Container >
+        structured_sort_constructor(const std::string& name,
+                                    const Container& arguments,
+                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+          : atermpp::aterm_appl(make_constructor(make_identifier(name),
+               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), no_identifier()))
         { }
 
         /// \brief Constructor
