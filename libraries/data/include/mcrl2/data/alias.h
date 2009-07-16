@@ -31,17 +31,24 @@ namespace mcrl2 {
     /// \brief alias.
     ///
     /// An alias introduces another name for a sort.
+    /// An example of an alias is L = List(S), where
+    /// L is an alternative name for List(S).
     class alias: public atermpp::aterm_appl
     {
       public:
 
-        /// \brief Constructor
+        /// \brief Default constructor for alias, this does not entail
+        ///        a valid expression.
         ///
         alias()
           : atermpp::aterm_appl(core::detail::constructSortRef())
         {}
 
-        /// \brief Constructor
+        /// \brief Construct an alias from a term.
+        ///
+        /// \param[in] s The term from which the alias is
+        ///            constructed.
+        /// \pre is_alias(s)
         ///
         alias(const atermpp::aterm_appl& s)
           : atermpp::aterm_appl(s)

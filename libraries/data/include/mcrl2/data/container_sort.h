@@ -27,11 +27,15 @@ namespace mcrl2 {
     /// \brief container sort.
     ///
     /// Container sorts are sorts with a name and an element sort.
+    /// An example of a container sort is List(S), where List is the name of
+    /// the container, and S is the element sort.
+    /// Currently only the containers List, Set, FSet, Bag and FBag are
+    /// supported.
     class container_sort: public sort_expression
     {
       protected:
 
-        // base class for abstraction types
+        // base class for list types
         struct variant : public atermpp::aterm_appl {
           variant(atermpp::aterm_appl const& e) : atermpp::aterm_appl(e)
           {}
@@ -39,31 +43,35 @@ namespace mcrl2 {
 
       public:
 
-        // Type for list variant
+        /// \brief Type for list variant
         struct list : public detail::singleton_expression< container_sort::list, container_sort::variant > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeSortList();
           }
         };
-        // Type for set_ variant
+
+        /// \brief Type for set_ variant
         struct set_ : public detail::singleton_expression< container_sort::set_, container_sort::variant > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeSortSet();
           }
         };
-        // Type for set_ variant
+
+        /// \brief Type for fset variant
         struct fset : public detail::singleton_expression< container_sort::fset, container_sort::variant > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeSortFSet();
           }
         };
-        // Type for set_ variant
+
+        /// \brief Type for bag variant
         struct bag : public detail::singleton_expression< container_sort::bag, container_sort::variant > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeSortBag();
           }
         };
-        // Type for set_ variant
+
+        /// \brief Type for fbag variant
         struct fbag : public detail::singleton_expression< container_sort::fbag, container_sort::variant > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeSortFBag();
@@ -72,13 +80,15 @@ namespace mcrl2 {
 
       public:
 
-        /// \brief Constructor
+        /// \brief Default constructor
+        ///
+        /// Note that this does not entail a valid sort expression.
         ///
         container_sort()
           : sort_expression(core::detail::constructSortCons())
         {}
 
-        /// \brief Constructor
+        /// \brief Construct a container sort from a sort expression.
         ///
         /// \param[in] s A sort expression.
         /// \pre s has the internal structure of a container sort.
@@ -90,8 +100,7 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
-        /// \param[in] container_name Name of the container, should be one of
-        ///            "List", "Set" or "Bag".
+        /// \param[in] container_name A container variant.
         /// \param[in] element_sort The sort of elements in the container.
         container_sort(const container_sort::variant& container_name,
                        const sort_expression& element_sort)
@@ -106,7 +115,7 @@ namespace mcrl2 {
           return true;
         }
 
-        /// \brief Returns the container name.
+        /// \brief Returns the container variant.
         ///
         inline
         container_sort::variant container_type() const
@@ -138,12 +147,28 @@ namespace mcrl2 {
           return container_type() == container_sort::set_();
         }
 
+        /// \brief Returns true iff container name is FSet.
+        ///
+        inline
+        bool is_fset_sort() const
+        {
+          return container_type() == container_sort::fset();
+        }
+
         /// \brief Returns true iff container name is Bag.
         ///
         inline
         bool is_bag_sort() const
         {
           return container_type() == container_sort::bag();
+        }
+
+        /// \brief Returns true iff container name is FBag.
+        ///
+        inline
+        bool is_fbag_sort() const
+        {
+          return container_type() == container_sort::fbag();
         }
 
     }; // class container_sort

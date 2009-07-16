@@ -21,8 +21,11 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief function symbol.
+    /// \brief application a data expression of a function sort to a number
+    ///        of arguments.
     ///
+    /// An example of an application is f(x,y), where f is the head of the
+    /// application, and x,y are the arguments.
     class application: public data_expression
     {
 
@@ -39,23 +42,26 @@ namespace mcrl2 {
 
       public:
 
-        /// \brief Constructor.
+        /// \brief Default constructor for an application, note that this is not
+        ///        a valid data expression.
         ///
         application()
           : data_expression(core::detail::constructDataAppl())
         {}
 
-        /// \brief Constructor.
+        /// \brief Construct an application from a data expression.
         ///
         /// \param[in] d A data expression.
-        /// \pre d has the internal structure of an application.
+        /// \pre d has the internal structure of an application, i.e.
+        ///      d.is_application().
         application(const data_expression& d)
           : data_expression(d)
         {
           assert(d.is_application());
         }
 
-        /// \brief Constructor.
+        /// \brief Constructor for an application with an abitrary number of
+        ///        arguments.
         ///
         /// \param[in] head The data expression that is applied.
         /// \param[in] arguments The data expressions that head is applied to (objects of type data_expression or derived).
@@ -68,6 +74,7 @@ namespace mcrl2 {
           : data_expression(core::detail::gsMakeDataAppl(head, convert< data_expression_list >(arguments)))
         {
           assert(head.sort().is_function_sort());
+          assert(function_sort(head.sort()).domain().size() == arguments.size());
           assert(!arguments.empty());
         }
 
@@ -144,16 +151,6 @@ namespace mcrl2 {
           return application(*this, e);
         }
 
-        /* Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return static_cast<const function_sort>(head().sort()).codomain();
-        }
-        */
-
         /// \brief Returns the head of the application
         inline
         data_expression head() const
@@ -170,7 +167,7 @@ namespace mcrl2 {
 
         /// \brief Returns the first argument of the application
         /// \pre head() is a binary operator
-        /// \return arguments()
+        /// \return arguments()[0]
         inline
         data_expression left() const
         {
@@ -180,6 +177,7 @@ namespace mcrl2 {
 
         /// \brief Returns the second argument of the application
         /// \pre head() is a binary operator
+        /// \return arguments()[1]
         inline
         data_expression right() const
         {

@@ -27,17 +27,19 @@ namespace mcrl2 {
     /// \brief basic sort.
     ///
     /// A basic sort is sort with only a name.
+    /// An example is the sort S, specified in mCRL2 with sort S;
     class basic_sort: public sort_expression
     {
       public:
 
-        /// \brief Constructor
+        /// \brief Default constructor. Note that this does not entail a
+        ///        valid sort expression.
         ///
         basic_sort()
           : sort_expression()
         {}
 
-        /// \brief Constructor
+        /// \brief Construct a basic sort from a sort expression.
         ///
         /// \param[in] s A sort expression.
         /// \pre s has the internal structure of a basic sort.
@@ -47,7 +49,7 @@ namespace mcrl2 {
           assert(s.is_basic_sort());
         }
 
-        /// \brief Constructor
+        /// \brief Construct a basic sort from a string.
         ///
         /// \param[in] s The name of the sort that is created.
         /// \post This is a sort with name s.
@@ -55,7 +57,7 @@ namespace mcrl2 {
           : sort_expression(mcrl2::core::detail::gsMakeSortId(core::identifier_string(s)))
         {}
 
-        /// \brief Constructor
+        /// \brief Construct a basic sort from an identifier string.
         ///
         /// \param[in] s The name of the sort that is created.
         /// \post This is a sort with name s.

@@ -32,24 +32,31 @@ namespace mcrl2 {
     template <typename Container, typename Substitution >
     Container replace_free_variables(Container const& container, Substitution replace_function);
 
-    /// \brief data assignment.
+    /// \brief assignment.
     ///
+    /// An example of an assignment is x := e, where x is a variable and e an
+    /// expression.
     class assignment: public atermpp::aterm_appl, public core::substitution_function<variable, data_expression>
     {
       public:
 
-        /// \brief Constructor.
+        /// \brief Default constructor. Note that this does not entail a valid
+        ///        assignment.
         ///
         assignment()
           : atermpp::aterm_appl(core::detail::constructDataVarIdInit())
         {}
 
-        /// \brief Constructor.
+        /// \brief Constructor for assignment from a term.
         ///
         /// \param[in] a A term adhering to the internal format.
+        /// \pre a is an expression adhering to the format of an assignment.
         assignment(const atermpp::aterm_appl& a)
           : atermpp::aterm_appl(a)
-        {}
+        {
+//          assert(is_assignment(a));
+          assert(core::gsIsDataVarIdInit(a));
+        }
 
         /// \brief Constructor
         ///
@@ -59,25 +66,30 @@ namespace mcrl2 {
           : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(lhs, rhs))
         {}
 
-        /// \brief Returns the name of the assignment.
+        /// \brief Returns the left hand side of the assignment, i.e. the
+        ///        variable that gets assigned a value.
         variable lhs() const
         {
           return variable(atermpp::arg1(*this));
         }
 
-        /// \brief Returns the right hand side of the assignment
+        /// \brief Returns the right hand side of the assignment, i.e. the
+        ///        value that is assigned.
         data_expression rhs() const
         {
           return atermpp::arg2(*this);
         }
 
+        /// \brief Applies the assignment to a variable
+        /// \param[in] x A variable
+        /// \return The value <tt>x[lhs() := rhs()]</tt>.
         data_expression operator()(const variable& x) const
         {
           return x == lhs() ? rhs() : data_expression(x);
         }
 
-        /// \brief Applies the substitution to a term
-        /// \param x A term
+        /// \brief Applies the assignment to a term
+        /// \param[in] x A term
         /// \return The value <tt>x[lhs() := rhs()]</tt>.
         template < typename Expression >
         data_expression operator()(const Expression& x) const
@@ -91,6 +103,16 @@ namespace mcrl2 {
     typedef atermpp::term_list<assignment> assignment_list;
     /// \brief vector of assignments
     typedef atermpp::vector<assignment>    assignment_vector;
+
+/*
+    /// \brief recogniser for an assignment
+    /// \param[in] a a term
+    /// \return true iff a is an assignment
+    bool is_assignment(const atermpp::aterm_appl& a)
+    {
+      return core::detail::gsIsDataVarIdInit(a);
+    }
+*/
 
     /// \brief Selects the right-hand side of an assignment
     struct left_hand_side : public std::unary_function< const assignment, variable >

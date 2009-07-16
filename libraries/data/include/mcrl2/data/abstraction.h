@@ -23,13 +23,18 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief function symbol.
+    /// \brief Expression for abstraction, i.e. an expression binding a
+    ///        number of variables.
+    ///
+    /// An example of an abstraction is lambda x,y:Pos . f(x,y),
+    /// where lambda is the binding operator, x,y are the variables,
+    /// and f(x,y) is the body of the abstraction.
     ///
     class abstraction: public data_expression
     {
       protected:
 
-        // base class for abstraction types
+        /// \brief base class for abstraction types
         struct binder_type : public atermpp::aterm_appl {
           binder_type(atermpp::aterm_appl const& e) : atermpp::aterm_appl(e)
           {}
@@ -40,19 +45,21 @@ namespace mcrl2 {
         /// \brief Iterator range over bound variables
         typedef atermpp::term_list< variable > variables_const_range;
 
-        // Type for lambda abstracions
+        /// \brief Type for lambda abstracions
         struct lambda : public detail::singleton_expression< abstraction::lambda, abstraction::binder_type > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeLambda();
           }
         };
-        // Type for universal quantifications
+
+        /// \brief Type for universal quantifications
         struct forall : public detail::singleton_expression< abstraction::forall, abstraction::binder_type > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeForall();
           }
         };
-        // Type for existential quantifications
+
+        /// \brief Type for existential quantifications
         struct exists : public detail::singleton_expression< abstraction::exists, abstraction::binder_type > {
           static atermpp::aterm_appl initialise() {
             return core::detail::gsMakeExists();
@@ -61,13 +68,16 @@ namespace mcrl2 {
 
       public:
 
-        /// Constructor.
+        /// Default constructor for abstraction (does not entail a
+        /// valid data expression.
         ///
         abstraction()
           : data_expression(core::detail::constructBinder())
         {}
 
-        /// Constructor.
+        /// Construct abstraction from a data expression.
+        /// \param[in] d a data expression
+        /// \pre d.is_abstraction()
         abstraction(const data_expression& d)
           : data_expression(d)
         {
@@ -93,16 +103,6 @@ namespace mcrl2 {
         {
           assert(!variables.empty());
         }
-
-        /*  Should be enabled when the implementation in data_expression is
-         * removed
-        /// \overload
-        inline
-        sort_expression sort() const
-        {
-          return function_sort(sorts_of_data_expressions(boost::make_iterator_range(m_variables.begin(), m_variables.end())), body().sort());
-        }
-        */
 
         /// \brief Returns the binding operator of the abstraction
         inline
