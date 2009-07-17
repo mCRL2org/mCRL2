@@ -213,6 +213,7 @@ namespace pbes_system {
 
         substitution_function sigma;
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);
+#ifdef MCRL2_SIMPLIFY_QUANTIFIERS
         simplifying_quantifier_rewriter<Term, DataRewriter> simplify(m_rewriter);
         term_type y = simplify(x);
 if (core::gsDebug)
@@ -228,6 +229,9 @@ if (core::gsDebug)
 std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << std::endl;
 #endif
         return result;
+#else
+        return r(x, sigma);
+#endif
       }
 
       /// \brief Rewrites a pbes expression.
