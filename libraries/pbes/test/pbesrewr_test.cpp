@@ -68,7 +68,7 @@ const std::string ABP_SPECIFICATION =
 "  );                                                                       \n"
 ;
 
-const std::string NO_DEADLOCK  = "[true*]<true*>true";
+const std::string NO_DEADLOCK  = "<true*>[true]false";
 
 void test_pbesrewr1()
 {
