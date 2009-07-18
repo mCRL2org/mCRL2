@@ -50,7 +50,7 @@ class propositional_variable: public atermpp::aterm_appl
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      m_parameters = data::make_variable_list(boost::make_iterator_range(p.second));
+      m_parameters = data::convert< data::variable_list >(p.second);
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarDecl(m_name, m_parameters));
     }
 
@@ -125,7 +125,7 @@ class propositional_variable_instantiation: public atermpp::aterm_appl
     {
       std::pair<std::string, data::data_expression_list> p = data::detail::parse_variable(s);
       m_name      = core::identifier_string(p.first);
-      m_parameters = data::make_variable_list(boost::make_iterator_range(p.second));
+      m_parameters = data::convert< data::variable_list >(p.second);
       m_term = reinterpret_cast<ATerm>(core::detail::gsMakePropVarInst(m_name, m_parameters));
     }
 

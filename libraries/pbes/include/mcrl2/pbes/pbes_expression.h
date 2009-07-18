@@ -404,7 +404,7 @@ namespace pbes_expr {
     {
       return p;
     }
-    return pbes_expression(core::detail::gsMakePBESForall(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
+    return pbes_expression(core::detail::gsMakePBESForall(l, p));
   }
 
   /// \brief Make an existential quantification
@@ -418,7 +418,7 @@ namespace pbes_expr {
     {
       return p;
     }
-    return pbes_expression(core::detail::gsMakePBESExists(atermpp::term_list< data::variable >(l.begin(), l.end()), p));
+    return pbes_expression(core::detail::gsMakePBESExists(l, p));
   }
 
   /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -773,7 +773,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESForall(atermpp::term_list< data::variable >(l.begin(), l.end()), p);
+      return core::detail::gsMakePBESForall(l, p);
     }
 
     /// \brief Make an existential quantification
@@ -787,7 +787,7 @@ namespace core {
       {
         return p;
       }
-      return core::detail::gsMakePBESExists(atermpp::term_list< data::variable >(l.begin(), l.end()), p);
+      return core::detail::gsMakePBESExists(l, p);
     }
 
     /// \brief Propositional variable instantiation

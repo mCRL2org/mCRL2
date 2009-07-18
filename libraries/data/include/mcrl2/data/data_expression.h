@@ -152,26 +152,13 @@ namespace mcrl2 {
       return core::detail::gsIsDataExpr(t);
     }
 
-    /// \brief Converts an iterator range to data_expression_list
+    /// \brief Converts an container with data expressions to data_expression_list
     /// \param r A range of data expressions.
     /// \note This function uses implementation details of the iterator type
     /// and hence is sometimes efficient than copying all elements of the list.
-    template < typename ForwardTraversalIterator >
-    inline data_expression_list make_data_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< data_expression_list >(r);
-    }
-
-    /// \brief Converts an iterator range to data_expression_list
-    /// \param r A range of data expressions.
-    template < typename ForwardTraversalIterator >
-    inline data_expression_vector  make_data_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r) {
-      return convert< data_expression_vector >(r);
-    }
-
-    /// \brief Converts a vector to a data_expression_list
-    /// \param r A range of data expressions.
-    template < typename Expression >
-    inline data_expression_list  make_data_expression_list(atermpp::vector< Expression >const& r) {
+    template < typename Container >
+    inline data_expression_list make_data_expression_list(Container const& r, typename detail::enable_if_container< Container, data_expression >::type* = 0)
+    {
       return convert< data_expression_list >(r);
     }
 
