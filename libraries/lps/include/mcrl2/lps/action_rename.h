@@ -23,6 +23,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/detail/algorithm.h"
@@ -316,42 +317,31 @@ namespace lps {
       return result;
     }
 
-    using namespace mcrl2::data;
-    using namespace mcrl2::lps;
-
     /// \brief Renames variables
     /// \param rcond A data expression
     /// \param rleft An action
     /// \param rright An action
     /// \param generator A generator for fresh identifiers
     template <typename IdentifierGenerator>
-    void rename_renamerule_variables(data_expression& rcond, action& rleft, action& rright, IdentifierGenerator& generator)
+    void rename_renamerule_variables(data::data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
     {
+      atermpp::map< data::variable, data::variable > renamings;
 
-      std::vector<variable> src;  // contains the variables that need to be renamed
-      std::vector<variable> dest; // contains the corresponding replacements
+      std::set< data::variable > new_vars = find_variables(rleft.arguments());
 
-      std::set<variable> new_vars;
-      std::set<variable> found_vars;
-      for(data_expression_list::iterator rleft_argument_i = rleft.arguments().begin();
-                                              rleft_argument_i != rleft.arguments().end();
-                                            ++rleft_argument_i){
-        found_vars = find_variables(*rleft_argument_i);
-        new_vars.insert(found_vars.begin(), found_vars.end());
-      }
+      for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
+      { 
+        mcrl2::core::identifier_string new_name = generator(i->name());
 
-      for (std::set<variable>::iterator i = new_vars.begin(); i != new_vars.end(); ++i)
-      { mcrl2::core::identifier_string new_name = generator(i->name());
         if (new_name != i->name())
         {
-          src.push_back(*i);
-          dest.push_back(variable(new_name, i->sort()));
+          renamings[*i] = data::variable(new_name, i->sort());
         }
       }
 
-      rcond = atermpp::partial_replace(rcond, mcrl2::lps::detail::make_variable_replacer(src, dest));
-      rleft = atermpp::partial_replace(rleft, mcrl2::lps::detail::make_variable_replacer(src, dest));
-      rright = atermpp::partial_replace(rright, mcrl2::lps::detail::make_variable_replacer(src, dest));
+      lps::substitute(rcond, mcrl2::data::make_map_substitution_adapter(renamings));
+      lps::substitute(rleft, mcrl2::data::make_map_substitution_adapter(renamings));
+      lps::substitute(rright, mcrl2::data::make_map_substitution_adapter(renamings));
     }
 
   } // namespace detail
