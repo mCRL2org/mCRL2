@@ -15,7 +15,7 @@
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/double_sequence_substitution.h"
+#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {

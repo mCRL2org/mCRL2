@@ -21,8 +21,8 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/data/detail/sequence_substitution.h"
 #include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/sequence_substitution.h"
 
 namespace mcrl2 {
 
@@ -108,7 +108,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d)
   {
-    return substitute(data::detail::make_sequence_substitution(replacements), d);
+    return pbes_expression(data::make_sequence_substitution_adaptor(replacements)(d));
   }
 
   /// \brief Visit forall node
@@ -120,7 +120,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    data::variable_list new_variables = replacement_count > 0 ? substitute(data::detail::make_sequence_substitution(replacements), variables) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_sequence_substitution_adaptor(replacements)) : variables;
     pop(replacement_count);
     return pbes_expr::forall(new_variables, new_expression);
   }
@@ -134,7 +134,7 @@ struct quantifier_rename_builder: public pbes_expression_builder<pbes_expression
   {
     unsigned int replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    data::variable_list new_variables = replacement_count > 0 ? substitute(data::detail::make_sequence_substitution(replacements), variables) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_sequence_substitution_adaptor(replacements)) : variables;
     pop(replacement_count);
     return pbes_expr::exists(new_variables, new_expression);
   }

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/double_sequence_substitution.h
+/// \file mcrl2/data/sequence_substitution.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_DOUBLE_SEQUENCE_SUBSTITUTION_H__
-#define MCRL2_DATA_DOUBLE_SEQUENCE_SUBSTITUTION_H__
+#ifndef MCRL2_DATA_SEQUENCE_SUBSTITUTION_H__
+#define MCRL2_DATA_SEQUENCE_SUBSTITUTION_H__
 
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/type_traits/add_reference.hpp"
@@ -22,9 +22,90 @@ namespace mcrl2 {
 
 namespace data {
 
+  template < typename VariableSequence,
+               template < typename Substitution > class SubstitutionProcedure = structural_substitution >
+  class sequence_substitution;
+
   template < typename VariableSequence, typename ExpressionSequence,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
   class double_sequence_substitution;
+
+  /// \cond INTERNAL_DOCS
+  namespace detail {
+    template < typename Assignment >
+    struct assignment_helper;
+
+    template < typename Variable, typename Expression>
+    struct assignment_helper< std::pair< Variable, Expression > >
+    {
+      typedef Variable   left_type;
+      typedef Expression right_type;
+
+      static Variable const& left(std::pair< Variable, Expression > const& a)
+      {
+        return a.first;
+      }
+
+      static Expression const& right(std::pair< Variable, Expression > const& a)
+      {
+        return a.second;
+      }
+    };
+  }
+  /// \endcond
+
+  /**
+   * \brief Substitution that uses a single sequences of assignments
+   *
+   * Variables and expressions are associated by their position in each of the sequences.
+   *  \arg[in] Sequence a sequence pairs of expressions and variables
+   */
+  template < typename Sequence, template < typename Substitution > class SubstitutionProcedure >
+  class sequence_substitution : public substitution< sequence_substitution< Sequence, SubstitutionProcedure >,
+               typename detail::assignment_helper< typename boost::remove_reference< Sequence >::type::value_type >::left_type,
+               typename detail::assignment_helper< typename boost::remove_reference< Sequence >::type::value_type >::right_type,
+	       SubstitutionProcedure >
+  {
+     template < typename D, typename V, typename E, template < typename Substitution > class P >
+     friend class substitution;
+
+     protected:
+
+       Sequence m_assignments;
+
+       typedef typename boost::remove_const< typename boost::remove_reference< Sequence >::type >::type sequence_type;
+
+       typedef detail::assignment_helper< typename sequence_type::value_type >                          assignment_helper;
+
+       /// \brief Applies the assignments to a variable v and returns the result.
+       /// \param v A term
+       /// \return The application of the assignments to the term.
+       data_expression apply(variable const& v) const
+       {
+         for (typename sequence_type::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
+         {
+           if (assignment_helper::left(*i) == v)
+           {
+             return assignment_helper::right(*i);
+           }
+         }
+  
+         return v;
+       }
+
+     public:
+
+       sequence_substitution(Sequence assignments) : m_assignments(assignments)
+       { }
+  };
+
+  /// \brief Factory function uses references to sequences
+  template < typename Sequence >
+  sequence_substitution< Sequence const& >
+  make_sequence_substitution_adaptor(Sequence const& s)
+  {
+    return sequence_substitution< Sequence const& >(s);
+  }
 
   /**
    * \brief Substitution that uses two sequences to represent replacements storing assignments
@@ -43,9 +124,8 @@ namespace data {
         typename boost::remove_reference< VariableSequence >::type::value_type,
         typename boost::remove_reference< ExpressionSequence >::type::value_type, SubstitutionProcedure >
   {
-      typedef substitution< double_sequence_substitution< VariableSequence, ExpressionSequence, SubstitutionProcedure >,
-        typename boost::remove_reference< VariableSequence >::type::value_type,
-        typename boost::remove_reference< VariableSequence >::type::value_type, SubstitutionProcedure > super;
+     template < typename D, typename V, typename E, template < typename Substitution > class P >
+     friend class substitution;
 
       typedef typename boost::remove_reference< VariableSequence >::type   variable_sequence;
       typedef typename boost::remove_reference< ExpressionSequence >::type expression_sequence;

@@ -18,40 +18,42 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/sequence_substitution.h"
 
 namespace mcrl2 {
 
 namespace data {
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+  template< >
+  struct assignment_helper< assignment >
+  {
+    typedef variable        left_type;
+    typedef data_expression right_type;
+
+    static variable left(assignment const& a)
+    {
+      return a.lhs();
+    }
+
+    static data_expression right(assignment const& a)
+    {
+      return a.rhs();
+    }
+  };
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // assignment_list_substitution
 /// \brief Sequence of data assignments.
 // A linear search is done in the list of assignments.
 // Note that a data_assigment_list doesn't allow for an efficient implementation.
-class assignment_list_substitution: public substitution< assignment_list_substitution, variable, data_expression, textual_substitution >
+class assignment_list_substitution : public sequence_substitution< atermpp::term_list< assignment >, textual_substitution >
 {
-  friend class substitution< assignment_list_substitution, variable_type, expression_type, textual_substitution >;
+  friend class sequence_substitution< atermpp::term_list< assignment >, textual_substitution >;
 
   private:
-
-    /// \brief An assignment list.
-    const assignment_list& m_assignments;
-
-    /// \brief Applies the assignments to a variable v and returns the result.
-    /// \param v A term
-    /// \return The application of the assignments to the term.
-    data_expression apply(variable const& v) const
-    {
-      for (assignment_list::const_iterator i = m_assignments.begin(); i != m_assignments.end(); ++i)
-      {
-        if (i->lhs() == v)
-        {
-          return i->rhs();
-        }
-      }
-
-      return v;
-    }
 
     assignment_list_substitution& operator=(const assignment_list_substitution&)
     {
@@ -63,7 +65,7 @@ class assignment_list_substitution: public substitution< assignment_list_substit
     /// \brief Constructor.
     /// \param assignments A sequence of assignments to data variables
     assignment_list_substitution(const assignment_list& assignments)
-      : m_assignments(assignments)
+      : sequence_substitution< atermpp::term_list< assignment >, textual_substitution >(assignments)
     {}
 };
 

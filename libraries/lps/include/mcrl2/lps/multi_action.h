@@ -132,7 +132,7 @@ namespace lps {
       template <typename Substitution>
       multi_action substitute(Substitution f)
       {
-        return multi_action(m_actions.substitute(f), data::substitute(f, m_time));
+        return multi_action(m_actions.substitute(f), f(m_time));
       }
 
       /// \brief Returns a string representation of the multi action

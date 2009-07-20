@@ -110,7 +110,7 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       template < typename Expression >
-      static data_expression generic_apply(Substitution const& s, Expression const& e) {
+      static Expression generic_apply(Substitution const& s, Expression const& e) {
         return replace_variables(e, s);
       }
     };
@@ -145,7 +145,7 @@ namespace mcrl2 {
       ///  \param[in] e the expression on which to apply variable replacement according to the substitution
       /// \return the result of substitution
       template < typename Expression >
-      static data_expression generic_apply(Substitution const& s, Expression const& e) {
+      static Expression generic_apply(Substitution const& s, Expression const& e) {
         return replace_free_variables(e, s);
       }
     };
@@ -214,7 +214,7 @@ namespace mcrl2 {
          * \note This overload is only available if Expression is not equal to Variable (modulo const-volatile qualifiers)
          **/
         template < typename OtherExpression >
-        expression_type operator()(OtherExpression const& e) const {
+        OtherExpression operator()(OtherExpression const& e) const {
           return SubstitutionProcedure< Derived >::apply(static_cast< Derived const& >(*this), e);
         }
 

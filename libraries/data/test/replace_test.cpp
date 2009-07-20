@@ -22,7 +22,7 @@
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/double_sequence_substitution.h"
+#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -134,7 +134,7 @@ void test_assignment_list()
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
   data_expression t1 = partial_replace(t, assignment_list_replacer(assignment_list(l.begin(), l.end())));
-  data_expression t2 = substitute(assignment_list_substitution(assignment_list(l.begin(), l.end())), t);
+  data_expression t2 = assignment_list_substitution(assignment_list(l.begin(), l.end()))(t);
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;

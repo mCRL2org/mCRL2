@@ -24,6 +24,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/container_utility.h"
@@ -339,9 +340,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = fresh_variables(yi, context);
-            ci = substitute(make_list_substitution(yi, y), ci);
-            ai = ai.substitute(make_list_substitution(yi, y));
-            gi = substitute(make_list_substitution(yi, y), gi);
+            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
+            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -372,9 +373,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = fresh_variables(yi, context);
-            ci = substitute(make_list_substitution(yi, y), ci);
-            ai = ai.substitute(make_list_substitution(yi, y));
-            gi = substitute(make_list_substitution(yi, y), gi);
+            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
+            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -776,9 +777,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = fresh_variables(yi, context);
-            ci = substitute(make_list_substitution(yi, y), ci);
-            ai = ai.substitute(make_list_substitution(yi, y));
-            gi = substitute(make_list_substitution(yi, y), gi);
+            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
+            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(data::assignment_list_substitution(gi));
@@ -805,9 +806,9 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             std::set<std::string> rhs_context = data::detail::find_variable_name_strings(rhs);
             context.insert(rhs_context.begin(), rhs_context.end());
             data::variable_list y = fresh_variables(yi, context);
-            ci = substitute(make_list_substitution(yi, y), ci);
-            ai = ai.substitute(make_list_substitution(yi, y));
-            gi = substitute(make_list_substitution(yi, y), gi);
+            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ai = ai.substitute(make_double_sequence_substitution_adaptor(yi, y));
+            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = rhs.substitute(data::assignment_list_substitution(gi));

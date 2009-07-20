@@ -37,8 +37,9 @@ namespace mcrl2 {
 
       // Component for doing top-down replacement of variables by expressions.
       //
-      // Binding is disregarded.  The Derived type parameter represents the
-      // type of a derived class (as per CRTP).
+      // Binding is disregarded. Especially, replacements are also executed on
+      // the left-hand sides of assignments. The Derived type parameter
+      // represents the type of a derived class (as per CRTP).
       //
       // The means of specifying and execution of replacement is deferred to the derived class.
       template < typename Substitution >
@@ -54,11 +55,6 @@ namespace mcrl2 {
         public:
 
           using expression_manipulator< variable_replace_helper< Substitution > >::operator();
-
-          assignment operator()(assignment const& a)
-          {
-            return assignment(a.lhs(), (*this)(a.rhs()));
-          }
 
           data_expression operator()(variable const& v)
           {

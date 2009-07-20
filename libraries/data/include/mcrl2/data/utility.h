@@ -33,93 +33,16 @@ namespace mcrl2 {
 
   namespace data {
 
-    /// \brief Applies a function to an expression
-    /// \param f a function to apply to the expression
-    /// \param e the expression on which to apply the assignment
-    /// \return The application of the assignment to the term.
-    /// \deprecated
-    template < typename Expression, typename SubstitutionFunction >
-    inline Expression substitute(SubstitutionFunction const& f, Expression const& e)
-    {
-      return static_cast< Expression >(f(e));
-    }
-
-    /// \brief Applies a function to an expression
-    /// \param c an assignment to apply to the expression
-    /// \param e the expression on which to apply the assignment
-    /// \return The application of the assignment to the term.
-    /// \deprecated
-    template < >
-    inline data_expression substitute(assignment const& c, data_expression const& e)
-    {
-      return atermpp::replace(e, atermpp::aterm(c.lhs()), atermpp::aterm(c.rhs()));
-    }
-
-    /// \brief Applies a substitution function to all elements of a container
-    /// \param[in] f substitution function
-    /// \param[in,out] c applies substitution function on elements of container
-    /// \deprecated
-    template < typename Expression, typename SubstitutionFunction >
-    atermpp::vector< Expression >& substitute(SubstitutionFunction const& f, atermpp::vector< Expression >& c)
-    {
-      for (typename atermpp::vector< Expression >::iterator i = c.begin(); i != c.end(); ++i)
+    /// \cond INTERNAL_DOCS
+    namespace detail {
+      template < typename Container >
+      struct sort_range
       {
-        (*i) = substitute(f, *i);
-      }
-
-      return c;
+        typedef boost::iterator_range< boost::transform_iterator<
+           detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > > type;
+      };
     }
-
-    /// \brief Applies a substitution function to all elements of a container
-    /// \param[in] f substitution function
-    /// \param[in,out] c applies substitution function to elements of container
-    /// \deprecated
-    template < typename Expression, typename SubstitutionFunction >
-    atermpp::term_list< Expression > substitute(SubstitutionFunction const& f, atermpp::term_list< Expression > c)
-    {
-      atermpp::vector< Expression > result;
-
-      for (typename atermpp::term_list< Expression >::iterator i = c.begin(); i != c.end(); ++i)
-      {
-        result.push_back(substitute(f, *i));
-      }
-
-      return convert< atermpp::term_list< Expression > >(result);
-    }
-
-    /// \brief Applies a substitution function to all elements of a container
-    /// \param[in] f substitution function
-    /// \param[in] c applies substitution function to elements of container
-    /// \return a vector of Expressions, such that the result is the vector of
-    ///         elements in c with f applied to them.
-    /// \deprecated
-    template < typename Expression, typename SubstitutionFunction >
-    atermpp::vector< Expression > substitute(SubstitutionFunction const& f, atermpp::vector< Expression > const& c)
-    {
-      atermpp::vector< Expression > result;
-
-      for (typename atermpp::vector< Expression >::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        result.push_back(substitute(f, *i));
-      }
-
-      return result;
-    }
-
-    /// \brief Applies a substitution function to all elements of a container
-    /// \param[in] f substitution function
-    /// \param[in] c applies substitution function to elements of container
-    /// \param[out] o output iterator to which the elements of c with f applied
-    ///             to them are added.
-    /// \deprecated
-    template < typename Container, typename SubstitutionFunction, typename OutputIterator >
-    void substitute(SubstitutionFunction const& f, Container const& c, OutputIterator o)
-    {
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i, ++o)
-      {
-        *o = f(*i);
-      }
-    }
+    /// \endcond
 
     /// \brief Gives a sequence of sorts for a given sequence of expressions
     /// 
@@ -131,24 +54,10 @@ namespace mcrl2 {
     /// \return s1, s2, ..., s3 such that sn = t.front().sort() where t = r.advance_begin(n)
     /// \note Behaviour is lazy, no intermediate containers are constructed
     template < typename Container >
-    boost::iterator_range< boost::transform_iterator<
-       detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > >
+    typename detail::sort_range< Container >::type
     make_sort_range(Container const& container, typename boost::enable_if< typename detail::is_container< Container >::type >::type* = 0)
     {
-      return boost::iterator_range< boost::transform_iterator<
-        detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > >(container);
-    }
-
-    /// \brief Gives a sequence of sorts for a given sequence of expressions
-    /// Overload for specific case that the container is an atermpp::term_list
-    /// \overload
-    template < typename Expression >
-    boost::iterator_range< boost::transform_iterator<
-       detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >
-    make_sort_range(atermpp::term_list< Expression > const& container)
-    {
-      return boost::iterator_range< boost::transform_iterator<
-        detail::sort_of_expression< Expression >, typename atermpp::term_list< Expression >::const_iterator > >(container);
+      return typename detail::sort_range< Container >::type(container);
     }
 
     /// \brief Returns a copy of t, but with a common postfix added to each variable name,
@@ -286,10 +195,9 @@ namespace mcrl2 {
     /// \param hint A string
     /// \return A variable that doesn't appear in context
     template <typename Term>
-    variable fresh_variable(Term const& context, sort_expression s, std::string hint)
+    variable fresh_variable(Term const& context, sort_expression s, std::string const& hint)
     {
-      core::identifier_string id = fresh_identifier(context, hint);
-      return variable(id, s);
+      return variable(fresh_identifier(context, hint), s);
     }
 
   } // namespace data

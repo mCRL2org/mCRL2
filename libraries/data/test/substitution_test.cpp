@@ -131,16 +131,18 @@ void test_list_substitution()
   assignment xy(x,y);
   assignment uz(u,z);
   assignment_list l(make_list(xy, uz));
+  assignment_list r = make_list(assignment(x, y1));
 
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), x) == y1);
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), y) == y);
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), z) == z);
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), u) == u);
+  BOOST_CHECK(replace_variables(x, assignment_list_substitution(r)) == y1);
+  BOOST_CHECK(replace_variables(y, assignment_list_substitution(r)) == y);
+  BOOST_CHECK(replace_variables(z, assignment_list_substitution(r)) == z);
+  BOOST_CHECK(replace_variables(u, assignment_list_substitution(r)) == u);
+std::cerr << replace_variables(xy, assignment_list_substitution(r)) << std::endl;
+  BOOST_CHECK(replace_variables(xy, assignment_list_substitution(r)) == assignment(y1,y));
+  BOOST_CHECK(replace_variables(uz, assignment_list_substitution(r)) == uz);
 
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), xy) == assignment(y1,y));
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), uz) == uz);
-
-  BOOST_CHECK(substitute(make_list_substitution(x,y1), l) == assignment_list(make_list(assignment(y1,y), uz)));
+std::cerr << replace_variables(l, assignment_list_substitution(r)) << std::endl;
+  BOOST_CHECK(replace_variables(l, assignment_list_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
 }
 
 void test_mutable_substitution_adapter()
