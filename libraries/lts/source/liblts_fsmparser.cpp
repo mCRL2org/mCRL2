@@ -80,6 +80,7 @@
 
 #include <vector>
 #include <sstream>
+#include <cstring>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"

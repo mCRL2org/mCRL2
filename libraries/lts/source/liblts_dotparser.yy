@@ -8,6 +8,7 @@
 
 %{
 #include <vector>
+#include <cstring>
 #include "mcrl2/lts/lts.h"
 #include "liblts_dotparser.h"
 #include "liblts_dotlexer.h"
