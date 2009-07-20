@@ -22,6 +22,7 @@
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/double_sequence_substitution.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -189,17 +190,22 @@ void test_variable_replace()
   l.push_back(e3);
 
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data_expression t1 = variable_sequence_replace(t, variables, replacements);
-  data_expression t2 = variable_sequence_replace(t, v, l);
+  data_expression t1 = make_double_sequence_substitution_adaptor(variables, replacements)(t);
+  data_expression t2 = make_double_sequence_substitution_adaptor(v, l)(t);
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t1 == t2);
 
   t = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  replace_variables(t, make_map_substitution(variables, replacements));
-
-  BOOST_CHECK(t1 == t2);
+  BOOST_CHECK(t1 == replace_variables(t, make_double_sequence_substitution_adaptor(variables, replacements)));
+  BOOST_CHECK(t1 == replace_variables(t, make_double_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_variables(t, make_double_sequence_substitution(v, l)));
+  BOOST_CHECK(t1 == replace_variables(t, make_map_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == make_double_sequence_substitution_adaptor(variables, replacements)(t));
+  BOOST_CHECK(t1 == make_double_sequence_substitution(variables, replacements)(t));
+  BOOST_CHECK(t1 == make_double_sequence_substitution(v, l)(t));
+  BOOST_CHECK(t1 == make_map_substitution(variables, replacements)(t));
 }
 
 void test_replace_with_binders()

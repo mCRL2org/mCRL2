@@ -50,13 +50,6 @@ namespace data {
       typedef typename boost::remove_cv<
                typename boost::remove_reference< UniqueSortedPairAssociativeContainer >::type >::type container_type;
 
-      struct non_trivial_assignments {
-        bool operator()(typename container_type::value_type const& p) const
-        {
-          return p.first != p.second;
-        }
-      };
-
     public:
 
       /// \brief type used to represent variables
@@ -215,27 +208,6 @@ namespace data {
       /// \brief Returns true if the sequence of assignments is empty
       bool empty() const {
         return this->m_map.empty();
-      }
-
-      /** \brief Comparison operation between substitutions
-       *
-       * \param[in] other object of another substitution object
-       * \return whether the substitution expressed by this object is equivalent to <|other|>
-       **/
-      bool operator==(map_substitution const& other) const {
-        typedef typename boost::filter_iterator< non_trivial_assignments,
-      		 typename container_type::const_iterator > assignment_iterator;
-
-        for (assignment_iterator
-          i(m_map.begin(), m_map.end()), j(other.m_map.begin(), other.m_map.end());
-                  i.base() != m_map.end() && j.base() != other.m_map.end(); ++i, ++j) {
-
-          if (i->second != j->second) {
-            return false;
-          }
-        }
-
-        return true;
       }
   };
 

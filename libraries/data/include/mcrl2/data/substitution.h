@@ -53,6 +53,37 @@ namespace mcrl2 {
            return (e.is_variable()) ? s(variable(e)) : Derived::generic_apply(s, e);
          }
       };
+
+      template < typename ValueType >
+      struct non_trivial_assignments {
+        bool operator()(ValueType const& p) const
+        {
+          return p.first != p.second;
+        }
+      };
+
+      /** \brief Comparison operation between substitutions
+       *
+       * \param[in] other object of another substitution object
+       * \return whether the substitution expressed by this object is equivalent to <|other|>
+       **/
+      template < typename Substitution >
+      bool compare_substitutions(Substitution const& one, Substitution const& other)
+      {
+        typedef typename boost::filter_iterator<
+	            non_trivial_assignments< typename Substitution::const_iterator::value_type >,
+                    typename Substitution::const_iterator > assignment_iterator;
+ 
+        for (assignment_iterator i(one.begin(), one.end()), j(other.begin(), other.end());
+                  i.base() != one.end() && j.base() != other.end(); ++i, ++j) {
+ 
+          if (i->second != j->second) {
+            return false;
+          }
+        }
+ 
+        return true;
+      }
     }
     /// \endcond
 
@@ -185,6 +216,16 @@ namespace mcrl2 {
         template < typename OtherExpression >
         expression_type operator()(OtherExpression const& e) const {
           return SubstitutionProcedure< Derived >::apply(static_cast< Derived const& >(*this), e);
+        }
+
+        /** \brief Comparison operation between substitutions
+         *
+         * \param[in] other object of another substitution object
+         * \pre Derived must behave as a Range in the sense that is must have begin() and end() methods
+         * \return whether the substitution expressed by this object is equivalent to <|other|>
+         **/
+        bool operator==(Derived const& other) const {
+          return detail::compare_substitutions< Derived >(static_cast< Derived const& >(*this), other);
         }
     };
 

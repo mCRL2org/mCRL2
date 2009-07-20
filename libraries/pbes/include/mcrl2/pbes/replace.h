@@ -15,6 +15,7 @@
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/double_sequence_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {
@@ -173,7 +174,7 @@ struct substitute_propositional_variable_helper
     }
     else
     {
-      return data::variable_sequence_replace(replacement_, variable_.parameters(), t.parameters());
+      return data::replace_variables(replacement_, data::make_double_sequence_substitution_adaptor(variable_.parameters(), t.parameters()));
     }
   }
 };

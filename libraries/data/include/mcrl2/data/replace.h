@@ -170,66 +170,6 @@ Container replace_free_variables(Container const& container, Substitution substi
   return detail::free_variable_replace_helper< typename boost::add_reference< Substitution >::type >(bound, substitution)(container);
 }
 
-/// \cond INTERNAL_DOCS
-template <typename VariableContainer, typename ExpressionContainer>
-struct variable_sequence_replace_helper:
-               public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
-{
-  const VariableContainer& variables_;
-  const ExpressionContainer& replacements_;
-
-  variable_sequence_replace_helper(const VariableContainer& variables,
-                                   const ExpressionContainer& replacements
-                                  )
-    : variables_(variables), replacements_(replacements)
-  {
-    BOOST_ASSERT(variables.size() == replacements.size());
-  }
-
-  /// \brief Function call operator
-  /// \param t A data variable
-  /// \return The function result
-  data_expression operator()(variable t) const
-  {
-    typename VariableContainer::const_iterator i = variables_.begin();
-    typename ExpressionContainer::const_iterator j = replacements_.begin();
-    for (; i != variables_.end(); ++i, ++j)
-    {
-      if (*i == t)
-      {
-        return *j;
-      }
-    }
-    return t;
-  }
-};
-/// \endcond
-
-template <typename Term, typename VariableContainer, typename ExpressionContainer>
-DEPRECATED(Term variable_sequence_replace(Term t,
-                               const VariableContainer& variables,
-                               const ExpressionContainer& replacements
-                              ));
-
-/// \brief Replaces variables in the term t using the specified sequence of replacements.
-/// \param container An expression or Container
-/// \param variables A sequence of variables
-/// \param replacements A sequence of expressions
-/// \return The replacement result. Each variable in \p t that occurs as the i-th element
-/// of variables is replaced by the i-th element of \p expressions. If the sequence
-/// \p variables contains duplicates, the first match is selected.
-template <typename Container, typename VariableContainer, typename ExpressionContainer>
-Container variable_sequence_replace(Container container,
-                               const VariableContainer& variables,
-                               const ExpressionContainer& replacements
-                              )
-{
-  using namespace detail;
-
-  return replace_variables< Container, variable_sequence_replace_helper< VariableContainer, ExpressionContainer > const& >(container,
-			 variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
-}
-
 } // namespace data
 
 } // namespace mcrl2
