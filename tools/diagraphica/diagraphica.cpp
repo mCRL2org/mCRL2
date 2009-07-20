@@ -13,16 +13,17 @@
 #define NAME "diagraphica"
 #define AUTHOR "A. Johannes Pretorius"
 
-#include <string>
 #include <wx/wx.h>
 #include <wx/sysopt.h>
 #include <wx/clrpicker.h>
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "diagraph.h"
 
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/lts/lts.h"
+
 // windows debug libraries
 #ifdef _MSC_VER
   #define _CRTDBG_MAP_ALLOC
@@ -31,9 +32,6 @@
 #endif
 
 using namespace std;
-
-std::string lts_file_argument;
-std::string parse_error;
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
@@ -158,19 +156,19 @@ int DiaGraph::OnExit()
 
 
 // ------------------------------------------
-void DiaGraph::openFile( const string &path )
+void DiaGraph::openFile( const std::string &path )
 // ------------------------------------------
 {
     Parser* parser   = NULL;
-    string fileName  = "";
-    string delims    = "\\/";
-    string::size_type begIdx;
-    string::size_type endIdx;
+    std::string fileName  = "";
+    std::string delims    = "\\/";
+    std::string::size_type begIdx;
+    std::string::size_type endIdx;
     int    fileSize  = 0;
 
     // get filename
     begIdx = path.find_last_of( delims );
-    if ( begIdx == string::npos )
+    if ( begIdx == std::string::npos )
         begIdx = 0;
     else
         begIdx += 1;
@@ -328,7 +326,7 @@ void DiaGraph::openFile( const string &path )
 
 
 // ------------------------------------------
-void DiaGraph::saveFile( const string &path )
+void DiaGraph::saveFile( const std::string &path )
 // ------------------------------------------
 {
     // init parser
@@ -353,7 +351,7 @@ void DiaGraph::saveFile( const string &path )
 
 
 // ------------------------------------------------------
-void DiaGraph::handleLoadAttrConfig( const string &path )
+void DiaGraph::handleLoadAttrConfig( const std::string &path )
 // ------------------------------------------------------
 {
     // init parser
@@ -363,7 +361,7 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
     try
     {
         map< int, int > attrIdxFrTo;
-        map< int, vector< string > > attrCurDomains;
+        map< int, vector< std::string > > attrCurDomains;
         map< int, map< int, int  > > attrOrigToCurDomains;
 
         parser->parseAttrConfig(
@@ -395,7 +393,7 @@ void DiaGraph::handleLoadAttrConfig( const string &path )
 
 
 // ------------------------------------------------------
-void DiaGraph::handleSaveAttrConfig( const string &path )
+void DiaGraph::handleSaveAttrConfig( const std::string &path )
 // ------------------------------------------------------
 {
     // init parser
@@ -420,7 +418,7 @@ void DiaGraph::handleSaveAttrConfig( const string &path )
 
 
 // ---------------------------------------------------
-void DiaGraph::handleLoadDiagram( const string &path )
+void DiaGraph::handleLoadDiagram( const std::string &path )
 // ---------------------------------------------------
 {
     // init parser
@@ -483,7 +481,7 @@ void DiaGraph::handleLoadDiagram( const string &path )
 
 
 // ---------------------------------------------------
-void DiaGraph::handleSaveDiagram( const string &path )
+void DiaGraph::handleSaveDiagram( const std::string &path )
 // ---------------------------------------------------
 {
     // init parser
@@ -513,8 +511,8 @@ void DiaGraph::handleSaveDiagram( const string &path )
 
 // -------------------------
 void DiaGraph::initProgress(
-    const string &title,
-    const string &msg,
+    const std::string &title,
+    const std::string &msg,
     const int &max )
 // -------------------------
 {
@@ -559,7 +557,7 @@ void DiaGraph::closeProgress()
 
 
 // ----------------------------------------------
-void DiaGraph::setOutputText( const string &msg )
+void DiaGraph::setOutputText( const std::string &msg )
 // ----------------------------------------------
 // ------------------------------------------------------------------
 // Clear existing text output and display 'msg'.
@@ -576,13 +574,13 @@ void DiaGraph::setOutputText( const int &val )
 // Clear existing text output and display 'val'.
 // ------------------------------------------------------------------
 {
-    string msg = Utils::intToStr( val );
+  std::string msg = Utils::intToStr( val );
     frame->appOutputText( msg );
 }
 
 
 // ----------------------------------------------
-void DiaGraph::appOutputText( const string &msg )
+void DiaGraph::appOutputText( const std::string &msg )
 // ----------------------------------------------
 // ------------------------------------------------------------------
 // Append 'msg' to the current text output without clearing it first.
@@ -599,7 +597,7 @@ void DiaGraph::appOutputText( const int &val )
 // Append 'val' to the current text output without clearing it first.
 // ------------------------------------------------------------------
 {
-    string msg = Utils::intToStr( val );
+  std::string msg = Utils::intToStr( val );
     frame->appOutputText( msg );
 }
 
@@ -807,7 +805,7 @@ void DiaGraph::handleAttributeDelete( const int &idx )
 // ----------------------------------
 void DiaGraph::handleAttributeRename(
         const int &idx,
-        const string &name )
+        const std::string &name )
 // ----------------------------------
 {
     if ( 0 <= idx && idx < graph->getSizeAttributes() )
@@ -1096,7 +1094,7 @@ void DiaGraph::handleMoveDomVal(
 void DiaGraph::handleDomainGroup(
     const int &attrIdx,
     const vector< int > domIndcs,
-    const string &newValue )
+    const std::string &newValue )
 // ------------------------------
 {
     Attribute *attr;
@@ -1223,7 +1221,7 @@ void DiaGraph::handleAttributePlot(
     }
 
     vector< int > indices;
-    vector< string > vals1;
+    vector< std::string > vals1;
     vector< vector< int > > corrlMap;
     vector< vector< int > > number;
 
@@ -1295,7 +1293,7 @@ void DiaGraph::handleAttributePlot( const vector< int > &indcs )
     }
     else
     {
-        string msg;
+    std::string msg;
         msg.append( "More than 2048 combinations. " );
         msg.append( "Please select fewer attributes " );
         msg.append( "or group their domains." );
@@ -1346,7 +1344,7 @@ void DiaGraph::handleClustFrameDisplay()
 // -------------------------------------
 {
     vector< int >    attrIdcs;
-    vector< string > attrNames;
+    vector< std::string > attrNames;
 
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
@@ -1401,7 +1399,7 @@ void DiaGraph::handleClustPlotFrameDisplay(
     }
 
     vector< int > indices;
-    vector< string > vals1;
+    vector< std::string > vals1;
     vector< vector< int > > corrlMap;
     vector< vector< int > > number;
 
@@ -1578,7 +1576,7 @@ void* DiaGraph::getGraph()
 
 
 // ----------------------------------
-void DiaGraph::handleNote( const int &shapeId, const string &msg )
+void DiaGraph::handleNote( const int &shapeId, const std::string &msg )
 // ----------------------------------
 {
     frame->handleNote( shapeId, msg );
@@ -1744,7 +1742,7 @@ void DiaGraph::handleEditShape(
 
 // ----------------------------
 void DiaGraph::handleShowVariable(
-    			const string &variable,
+    			const std::string &variable,
     			const int    &variableId)
 // ----------------------------
 {
@@ -1754,7 +1752,7 @@ void DiaGraph::handleShowVariable(
 
 
 // ----------------------------
-void DiaGraph::handleShowNote( const string &variable, const int &shapeId)
+void DiaGraph::handleShowNote( const std::string &variable, const int &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1763,7 +1761,7 @@ void DiaGraph::handleShowNote( const string &variable, const int &shapeId)
 
 
 // ----------------------------
-void DiaGraph::handleAddText( string &variable, int &shapeId)
+void DiaGraph::handleAddText( std::string &variable, int &shapeId)
 // ----------------------------
 {
     if ( mode == MODE_EDIT && editor != NULL )
@@ -1896,13 +1894,13 @@ void DiaGraph::handleCheckedVariable( const int &idDOF, const int &variableId )
 // ------------------------------------
 void DiaGraph::handleEditDOF(
     const vector< int > &degsOfFrdmIds,
-    const vector< string > &degsOfFrdm,
+    const vector< std::string > &degsOfFrdm,
     const vector< int > &attrIndcs,
     const int &selIdx )
 // ------------------------------------
 {
     // init attrIndcs
-    vector< string > attributes;
+    vector< std::string > attributes;
     {
     for ( size_t i = 0; i < attrIndcs.size(); ++i )
     {
@@ -3386,7 +3384,7 @@ void DiaGraph::handleKeyUpEvent(
 
 
 // -------------------------------------------
-void DiaGraph::operator<<( const string &msg )
+void DiaGraph::operator<<( const std::string &msg )
 // -------------------------------------------
 {
     this->appOutputText( msg );
@@ -3556,10 +3554,10 @@ void DiaGraph::displAttributes()
 {
     Attribute*       attr;
     vector< int >    indcs;
-    vector< string > names;
-    vector< string > types;
+    vector< std::string > names;
+    vector< std::string > types;
     vector< int >    cards;
-    vector< string > range;
+    vector< std::string > range;
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
@@ -3573,7 +3571,7 @@ void DiaGraph::displAttributes()
             range.push_back( "" );
         else
         {
-            string rge = "[";
+        std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3586,7 +3584,7 @@ void DiaGraph::displAttributes()
             range.push_back( "" );
         else
         {
-            string rge = "[";
+          std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3607,10 +3605,10 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
 {
     Attribute*       attr;
     vector< int >    indcs;
-    vector< string > names;
-    vector< string > types;
+    vector< std::string > names;
+    vector< std::string > types;
     vector< int >    cards;
-    vector< string > range;
+    vector< std::string > range;
     for ( int i = 0; i < graph->getSizeAttributes(); ++i )
     {
         attr = graph->getAttribute( i );
@@ -3624,7 +3622,7 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
             range.push_back( "" );
         else
         {
-            string rge = "[";
+        std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3637,7 +3635,7 @@ void DiaGraph::displAttributes( const int &selAttrIdx )
             range.push_back( "" );
         else
         {
-            string rge = "[";
+          std::string rge = "[";
             rge += Utils::dblToStr( attr->getLowerBound() );
             rge += ", ";
             rge += Utils::dblToStr( attr->getUpperBound() );
@@ -3660,7 +3658,7 @@ void DiaGraph::displAttrDomain( const int &attrIdx )
     int        numValues;
     int        numNodes;
     vector< int >    indices;
-    vector< string > values;
+    vector< std::string > values;
     vector< int >    number;
     vector< double>  perc;
 

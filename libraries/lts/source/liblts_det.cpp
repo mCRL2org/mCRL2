@@ -9,12 +9,12 @@
 /// \file liblts_det.cpp
 
 #include <vector>
+#include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/lts/detail/tree_set.h"
 //#include "mcrl2/lts/detail/liblts_private.h"
-
-#include "workarounds.h" // DECL_A
 
 using namespace std;
 using namespace mcrl2::core;
@@ -28,7 +28,7 @@ bool lts::is_deterministic()
 {
   p_sort_transitions();
   unsigned int *trans_lut = p_get_transition_indices();
-  DECL_A(seen,bool,nlabels);
+  boost::scoped_array< bool > seen(new bool[nlabels]);
 
   for (unsigned int state = 0; state < nstates; state++)
   {
@@ -42,7 +42,6 @@ bool lts::is_deterministic()
     {
       if ( seen[transitions[t].label] )
       {
-        FREE_A(seen);
         return false;
       }
       seen[transitions[t].label] = true;
@@ -50,7 +49,6 @@ bool lts::is_deterministic()
     }
   }
 
-  FREE_A(seen);
   return true;
 }
 

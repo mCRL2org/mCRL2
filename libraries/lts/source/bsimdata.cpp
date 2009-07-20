@@ -10,12 +10,11 @@
 
 #include <algorithm>
 #include <string>
+#include <boost/scoped_array.hpp>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/detail/bsim.h"
 #include "mcrl2/core/aterm_ext.h"
-
-#include "workarounds.h"
 
 #define ATisAppl(t) (ATgetType(t) == AT_APPL)
 
@@ -568,7 +567,7 @@ static int MakeEquivalenceClasses(int initState,
 
 static int WriteTransitions(lts &l) {
    int b, n_tau_transitions = 0;
-   DECL_A(label2new,int,nlabel);
+   boost::scoped_array< int > label2new(new int[nlabel]);
    for (b=0;b<nstate;b++) {
      l.add_state();
    }
@@ -594,7 +593,6 @@ static int WriteTransitions(lts &l) {
              }
              }
         }
-   FREE_A(label2new);
    return n_tau_transitions;
    }
 

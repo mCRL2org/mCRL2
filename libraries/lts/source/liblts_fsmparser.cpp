@@ -79,6 +79,7 @@
 #line 9 "liblts_fsmparser.yy"
 
 #include <vector>
+#include <sstream>
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"

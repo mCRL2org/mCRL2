@@ -11,17 +11,20 @@
 #ifndef _LTS_H
 #define _LTS_H
 
-#include <aterm2.h>
-#include <mcrl2/lps/nextstate.h>
-#include <mcrl2/lts/lts.h>
+#include <memory>
+#include "aterm2.h"
+#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lts/lts.h"
 
-typedef struct {
+struct lts_options {
   mcrl2::lts::lts_type outformat;
   bool outinfo;
   NextState *nstate;
-  ATermAppl spec;
-} lts_options;
+  std::auto_ptr< mcrl2::lps::specification > spec;
+};
 
+void reset();
 void open_lts(const char *filename, lts_options &opts);
 void save_initial_state(unsigned long long idx, ATerm state);
 void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to);

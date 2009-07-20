@@ -24,7 +24,7 @@
 #include "lts.h"
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
@@ -336,9 +336,7 @@ class lps2lts_tool : public lps2lts_base
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  lps2lts_tool tool;
-
-  return tool.execute(argc,argv);
+  return lps2lts_tool().execute(argc,argv);
 }

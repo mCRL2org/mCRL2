@@ -184,7 +184,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
     lts_opts.outformat = lgopts->outformat;
     lts_opts.outinfo = lgopts->outinfo;
     lts_opts.nstate = nstate;
-    lts_opts.spec = specification_to_aterm(lgopts->specification, true);
+    lts_opts.spec.reset(new mcrl2::lps::specification(lgopts->specification));
     open_lts(lgopts->lts.c_str(),lts_opts);
   } else {
     lgopts->outformat = mcrl2::lts::lts_none;

@@ -10,8 +10,8 @@
 
 #include <cstring>
 #include <fstream>
-#include <aterm2.h>
-#include <mcrl2/lps/specification.h>
+#include "mcrl2/lps/specification.h"
+#include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
@@ -205,14 +205,14 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         {
           gsErrorMsg("svcerror: %s\n",SVCerror(e));
         }
-        add_extra_mcrl2_svc_data(lts_filename,(ATermAppl) ATgetArgument(lts_opts.spec,0),(ATermList) ATgetArgument((ATermAppl) ATgetArgument(lts_opts.spec,3),0),(ATermAppl) ATgetArgument(lts_opts.spec,1));
+        add_extra_mcrl2_svc_data(lts_filename, mcrl2::data::detail::data_specification_to_aterm_data_spec(lts_opts.spec->data()),
+                     lts_opts.spec->process().process_parameters(), lts_opts.spec->action_labels());
       }
       break;
     case lts_none:
       break;
     default:
       {
-        mcrl2::lps::specification s;
         lts_extra ext;
         if ( !lts_opts.outinfo )
         {
@@ -220,8 +220,7 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         }
         if ( lts_opts.outformat == lts_fsm )
         {
-          s = mcrl2::lps::specification(lts_opts.spec);
-          ext = lts_extra(&s);
+          ext = lts_extra(*lts_opts.spec);
         } else if ( lts_opts.outformat == lts_dot )
         {
           string fn = lts_filename;
@@ -240,6 +239,9 @@ void close_lts(unsigned long long num_states, unsigned long long num_trans)
         break;
       }
   }
+
+  // Avoid static initialisation/descruction fiasco
+  lts_opts.spec.reset();
 }
 
 void remove_lts()
@@ -268,3 +270,4 @@ void remove_lts()
   }
   remove(lts_filename);
 }
+

@@ -24,7 +24,7 @@ namespace atermpp {
     /// \param s A string
     /// \return The converted string
     inline
-    ATermAppl str2appl(std::string s)
+    ATermAppl str2appl(std::string const& s)
     {
       return ATmakeAppl0(ATmakeAFun(s.c_str(), 0, ATtrue));
     }

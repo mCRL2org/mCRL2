@@ -8,6 +8,7 @@
 
 %{
 #include <vector>
+#include <sstream>
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"

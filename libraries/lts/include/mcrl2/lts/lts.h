@@ -24,8 +24,6 @@
 #include <iostream>
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/data/data_specification.h"
-#include "mcrl2/lps/specification.h"
 
 #ifdef USE_BCG
 #include <bcg_user.h>
@@ -33,6 +31,14 @@
 
 namespace mcrl2
 {
+namespace data
+{
+  class data_specification;
+}
+namespace lps
+{
+  class specification;
+}
 /** \brief The main LTS namespace.
  * \details This namespace contains all data structures and members of the LTS
  * library.
@@ -157,7 +163,7 @@ namespace lts
   /** \brief Options for the Dot format.
    * \details This struct stores options for the Dot format of the GraphViz
    * package. */
-  typedef struct
+  struct lts_dot_options
   {
     /** \brief Name of the graph.
      * \details Points to the name that is given to the graph in the Dot file. */
@@ -169,7 +175,7 @@ namespace lts
      *
      * If \a false, the states are not labelled. */
     bool print_states;
-  } lts_dot_options;
+  };
 
   /** \brief Adds transition labels to the list of internal actions.
    * \param[in,out] opts The object of which the list of internal actions will be
@@ -202,7 +208,7 @@ namespace lts
    *                       format (or NULL for none).
    * \pre                  The LTS in filename is a mCRL2 SVC without extra
    *                       information. */
-  void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec);
+  void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_spec);
 
   /** \cond */
   #include "detail/liblts_private.h"
@@ -222,7 +228,7 @@ namespace lts
       lts_extra(ATerm t);
       /** \brief Creates an object containing an mCRL2 specification.
        * \param[in] spec The mCRL2 specification that will be stored in the object. */
-      lts_extra(lps::specification *spec);
+      lts_extra(lps::specification const& spec);
       /** \brief Creates an object containing options for the Dot format.
        * \param[in] opts The options that will be stored in the object. */
       lts_extra(lts_dot_options opts);
@@ -240,7 +246,7 @@ namespace lts
       /** \brief Gets the mCRL2 specification stored in this object.
        * \pre This object contains an mCRL2 specification.
        * \return The mCRL2 specification stored in this object.*/
-      lps::specification *get_mcrl2_spec();
+      lps::specification get_mcrl2_spec();
       /** \brief Gets the Dot format options stored in this object.
        * \pre This object contains options for the Dot format.
        * \return The Dot format options stored in this object.*/
@@ -867,7 +873,7 @@ namespace lts
       /** \brief Set the mCRL2 data specification of this LTS.
        * \param[in] spec  The mCRL2 data specification for this LTS.
        * \pre             This is an mCRL2 LTS. */
-      void set_data_specification(data::data_specification spec);
+      void set_data_specification(data::data_specification const& spec);
 
       /** \brief Sorts the transitions using a sort style.
        * \param[in] ts The sort style to use. */

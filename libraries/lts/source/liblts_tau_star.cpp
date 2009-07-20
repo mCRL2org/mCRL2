@@ -8,10 +8,9 @@
 //
 /// \file liblts_tau_star.cpp
 
+#include "boost/scoped_array.hpp"
+#include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include <mcrl2/lts/lts.h>
-
-#include "workarounds.h" // DECL_A
 
 using namespace std;
 
@@ -19,13 +18,19 @@ namespace mcrl2
 {
 namespace lts
 {
+/// \cond INTERNAL_DOCS
+namespace detail
+{
+  enum t_reach { unknown, reached, explored };
+}
+/// \endcond
 
 void p_lts::tau_star_reduce()
   // This method assumes there are not tau loops!
 {
   p_sort_transitions();
   unsigned int *trans_lut = p_get_transition_indices();
-  DECL_A(new_trans_lut,unsigned int,nstates+1);
+  boost::scoped_array< unsigned int > new_trans_lut(new unsigned int[nstates + 1]);
 
   new_trans_lut[0] = ntransitions;
   for (unsigned int state = 0; state < nstates; state++)
@@ -94,10 +99,10 @@ void p_lts::tau_star_reduce()
     }
     new_trans_lut[state+1] = ntransitions;
   }
-  FREE_A(new_trans_lut);
 
-  typedef enum { unknown, reached, explored } t_reach;
-  DECL_A(reachable,t_reach,nstates);
+  using namespace mcrl2::lts::detail;
+
+  boost::scoped_array< t_reach > reachable(new t_reach[nstates]);
   for (unsigned int i=0; i<nstates; i++)
   {
     reachable[i] = unknown;
@@ -141,7 +146,7 @@ void p_lts::tau_star_reduce()
       }
     }
   }
-  DECL_A(state_map,unsigned int,nstates);
+  boost::scoped_array< unsigned int > state_map(new unsigned int[nstates]);
   unsigned int new_nstates = 0;
   for (unsigned int i=0; i < nstates; i++)
   {
@@ -156,7 +161,7 @@ void p_lts::tau_star_reduce()
     }
   }
 
-  DECL_A(label_map,unsigned int,nlabels);
+  boost::scoped_array< unsigned int > label_map(new unsigned int[nlabels]);
   unsigned int new_nlabels = 0;
   for (unsigned int i=0; i < nlabels; i++)
   {
@@ -190,10 +195,6 @@ void p_lts::tau_star_reduce()
   {
     taus[i] = false;
   }
-
-  FREE_A(label_map);
-  FREE_A(state_map);
-  FREE_A(reachable);
 
   nstates = new_nstates;
   nlabels = new_nlabels;

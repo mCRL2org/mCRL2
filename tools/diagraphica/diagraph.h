@@ -431,8 +431,6 @@ protected:
     void displAttrDomain( const int &attrIdx );
     void clearAttrDomain();
 
-    bool parse_command_line(int argc, wxChar** argv);
-
 private:
     // -- data members ----------------------------------------------
     Graph*            graph;          // composition
@@ -441,7 +439,9 @@ private:
     int               mode;
     int               view;
     bool              critSect;
-    bool			  clustered;
+    bool	      clustered;
+
+    std::string lts_file_argument;
 
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association

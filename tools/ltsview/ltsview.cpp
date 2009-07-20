@@ -20,7 +20,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include "mcrl2/lts/lts.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "cluster.h"
 #include "glcanvas.h"

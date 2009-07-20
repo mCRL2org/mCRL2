@@ -185,7 +185,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   return true;
 }
 
-bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specification *spec)
+bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specification const& spec)
 {
   bool applied_conversion = false;
 
@@ -250,7 +250,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
       if ( !ATisAppl(label_values[i]) || !(gsIsMultAct((ATermAppl) label_values[i]) || is_timed_pair((ATermAppl) label_values[i]) ) )
       {
         bool no_convert = true;
-        if ( (spec != NULL) )
+        if ( (&spec != &empty_specification()) )
         {
           stringstream ss(p_label_value_str(i));
           ATermAppl t = parse_mult_act(ss);
@@ -258,7 +258,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
           {
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
-            lps::specification copy(*spec);
+            lps::specification copy(spec);
             copy.data() = data::remove_all_system_defined(copy.data());
             t = type_check_mult_act(t,specification_to_aterm(copy));
             if ( t == NULL )
@@ -276,7 +276,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
         if ( no_convert )
         {
           gsVerboseMsg("cannot save LTS in mCRL2 format; label values are incompatible\n");
-          if ( spec == NULL )
+          if ( (&spec == &empty_specification()) )
           {
             gsVerboseMsg("using the -l/--lps option might help\n");
           }
@@ -348,12 +348,12 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
   {
     ATermAppl data_spec = NULL;
     ATermList params = NULL;
-    ATermAppl act_spec = NULL;
+    ATermList act_spec = NULL;
 
     if ( applied_conversion )
     {
-      data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec->data());
-      act_spec = ATAgetArgument(specification_to_aterm(*spec),1);
+      data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(spec.data());
+      act_spec = spec.action_labels();
     } else {
       data_spec = ATAgetArgument((ATermAppl) extra_data,0);
       if ( gsIsNil(data_spec) )
@@ -364,10 +364,10 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
       {
         params = ATLgetArgument(ATAgetArgument((ATermAppl) extra_data,1),0);
       }
-      act_spec = ATAgetArgument((ATermAppl) extra_data,2);
+      act_spec = (ATermList) ATAgetArgument((ATermAppl) ATAgetArgument((ATermAppl) extra_data,2), 0);
       if ( gsIsNil(data_spec) )
       {
-        act_spec = NULL;
+        act_spec = ATmakeList0();
       }
     }
 

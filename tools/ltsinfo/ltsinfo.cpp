@@ -19,7 +19,8 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 
@@ -343,9 +344,7 @@ class ltsinfo_tool : public ltsinfo_base
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  ltsinfo_tool tool;
-
-  return tool.execute(argc, argv);
+  return ltsinfo_tool().execute(argc, argv);
 }

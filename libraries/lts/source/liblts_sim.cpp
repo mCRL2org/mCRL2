@@ -9,6 +9,7 @@
 /// \file liblts_sim.cpp
 #include "mcrl2/lts/detail/liblts_sim.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/exception.h"
 
 #define LIST_END (-1)
 using namespace mcrl2::core;

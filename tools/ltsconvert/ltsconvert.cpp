@@ -19,6 +19,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/exception.h"
 
 using namespace mcrl2::lts;
 using namespace mcrl2::utilities::tools;
@@ -117,7 +119,7 @@ class t_tool_options {
           {
             if ( mcrl2::core::detail::gsIsLinProcSpec(spec) )
             {
-              return lts_extra(new mcrl2::lps::specification(spec)); // XXX Ugh!
+              return lts_extra(mcrl2::lps::specification(spec));
             } else {
               return lts_extra((ATerm) spec);
             }

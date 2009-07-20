@@ -42,6 +42,12 @@ namespace mcrl2
 namespace lts
 {
 
+lps::specification const& p_lts::empty_specification() {
+  static lps::specification dummy;
+
+  return dummy;
+}
+
 AFun timed_pair;
 bool timed_pair_not_set = true;
 static void set_timed_pair()
@@ -100,10 +106,10 @@ lts_extra::lts_extra(ATerm t)
   content.mcrl1_spec = t;
 }
 
-lts_extra::lts_extra(lps::specification *spec)
+lts_extra::lts_extra(lps::specification const& spec)
 {
   type = le_mcrl2;
-  content.mcrl2_spec = spec;
+  content.mcrl2_spec = lps::specification_to_aterm(spec);
 }
 
 lts_extra::lts_extra(lts_dot_options opts)
@@ -123,10 +129,10 @@ ATerm lts_extra::get_mcrl1_spec()
   return content.mcrl1_spec;
 }
 
-lps::specification *lts_extra::get_mcrl2_spec()
+lps::specification lts_extra::get_mcrl2_spec()
 {
   assert( type == le_mcrl2 );
-  return content.mcrl2_spec;
+  return lps::specification(content.mcrl2_spec);
 }
 
 lts_dot_options lts_extra::get_dot_options()
@@ -886,7 +892,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl1:
           return read_from_fsm(filename,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return read_from_fsm(filename,*extra.get_mcrl2_spec());
+          return read_from_fsm(filename,extra.get_mcrl2_spec());
         default:
           return read_from_fsm(filename);
       }
@@ -931,7 +937,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
         case le_mcrl1:
           return read_from_fsm(is,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return read_from_fsm(is,*extra.get_mcrl2_spec());
+          return read_from_fsm(is,extra.get_mcrl2_spec());
         default:
           return read_from_fsm(is);
       }
@@ -973,7 +979,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
         case le_mcrl1:
           return write_to_fsm(filename,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return write_to_fsm(filename,*extra.get_mcrl2_spec());
+          return write_to_fsm(filename,extra.get_mcrl2_spec());
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL )
           {
@@ -1021,7 +1027,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
         case le_mcrl1:
           return write_to_fsm(os,extra.get_mcrl1_spec());
         case le_mcrl2:
-          return write_to_fsm(os,*extra.get_mcrl2_spec());
+          return write_to_fsm(os,extra.get_mcrl2_spec());
         default:
           if ( this->type == lts_mcrl2 && extra_data != NULL && !gsIsNil(ATAgetArgument((ATermAppl) extra_data,1)) )
           {
@@ -1730,7 +1736,7 @@ data::data_specification lts::get_data_specification()
   return data::data_specification(ATAgetArgument((ATermAppl) extra_data,0));
 }
 
-void lts::set_data_specification(data::data_specification spec)
+void lts::set_data_specification(data::data_specification const& spec)
 {
   assert( type == lts_mcrl2 );
 
@@ -2307,7 +2313,7 @@ std::string lts::name_of_preorder(const lts_preorder pre)
   return preorder_desc_strings[pre];
 }
 
-void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermAppl act_spec)
+void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
 {
   FILE *f = fopen(filename.c_str(),"ab");
   if ( f == NULL )
@@ -2318,7 +2324,7 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
 
   ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
   ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
-  ATerm arg3 = (ATerm) ((act_spec == NULL)?gsMakeNil():act_spec);
+  ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
   ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
 
   long position;

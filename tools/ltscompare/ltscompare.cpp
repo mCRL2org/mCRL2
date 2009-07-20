@@ -18,6 +18,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/tool.h"
+#include "mcrl2/exception.h"
 
 using namespace std;
 using namespace mcrl2::lts;

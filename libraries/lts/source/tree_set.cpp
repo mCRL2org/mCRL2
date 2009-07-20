@@ -10,11 +10,10 @@
 
 #include <cstdlib>
 #include <vector>
+#include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/exception.h"
-
-#include "workarounds.h"
 
 using namespace mcrl2::core;
 
@@ -127,7 +126,7 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 	if (elems.size() == 0) {
 		return EMPTY_SET;
 	}
-	DECL_A(nodes,int,elems.size());
+        boost::scoped_array< int > nodes(new int[elems.size()]);
 	unsigned int node_size = 0;
 	unsigned int i,j;
 	for (i=0; i < elems.size(); ++i) {
@@ -148,7 +147,6 @@ int tree_set_store::create_set(vector<unsigned int> &elems) {
 		node_size = j;
 	}
 	unsigned int r = nodes[0];
-	FREE_A(nodes);
 	return r;
 }
 
