@@ -8,6 +8,7 @@
 //
 /// \file liblts_aut.cpp
 
+#include <cstring>
 #include <string>
 #include <cstdlib>
 #include <fstream>

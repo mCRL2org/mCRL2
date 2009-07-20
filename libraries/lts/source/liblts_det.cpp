@@ -8,6 +8,7 @@
 //
 /// \file liblts_det.cpp
 
+#include <algorithm>
 #include <vector>
 #include <boost/scoped_array.hpp>
 #include "mcrl2/core/messaging.h"
