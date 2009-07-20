@@ -15,7 +15,6 @@
 #include "aterm2.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
-#include "mcrl2/data/detail/prover/smt_solver_cvc_fast.h"
 #include "mcrl2/data/detail/prover/bdd_manipulator.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 

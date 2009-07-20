@@ -19,6 +19,10 @@
 #include "mcrl2/data/detail/prover/expression_info.h"
 #include "mcrl2/data/detail/prover/sort_info.h"
 
+#ifdef HAVE_CVC
+#include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
+#endif
+
 namespace mcrl2 {
   namespace data {
     namespace detail {
