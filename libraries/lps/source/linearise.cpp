@@ -56,7 +56,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/replace.h"
 
 //mCRL2 processes

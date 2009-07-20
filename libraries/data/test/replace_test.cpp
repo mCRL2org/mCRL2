@@ -21,7 +21,7 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/parser.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"

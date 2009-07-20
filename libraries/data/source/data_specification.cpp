@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"

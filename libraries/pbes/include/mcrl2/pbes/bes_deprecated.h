@@ -34,7 +34,7 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 
 
 #include "mcrl2/pbes/pbes.h"

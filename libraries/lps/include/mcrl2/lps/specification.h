@@ -30,7 +30,7 @@
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/lps/substitute_fwd.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/representative_generator.h"
 
 namespace mcrl2 {

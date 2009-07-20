@@ -21,7 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"

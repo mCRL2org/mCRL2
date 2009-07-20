@@ -21,7 +21,7 @@
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace mcrl2;

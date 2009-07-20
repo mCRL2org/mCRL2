@@ -12,7 +12,7 @@
 #ifndef MCRL2_DATA_MUTABLE_SUBSTITUTION_ADAPTER_H
 #define MCRL2_DATA_MUTABLE_SUBSTITUTION_ADAPTER_H
 
-#include "mcrl2/data/substitution.h"
+#include "mcrl2/data/map_substitution.h"
 
 namespace mcrl2 {
 

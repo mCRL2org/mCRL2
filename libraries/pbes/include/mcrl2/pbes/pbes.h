@@ -32,7 +32,7 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/map_substitution_adapter.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
