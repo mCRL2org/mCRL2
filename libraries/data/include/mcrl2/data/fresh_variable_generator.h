@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/core/find.h"
 
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/variable.h"
 

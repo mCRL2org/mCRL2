@@ -22,6 +22,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/replace.h"
 
 namespace mcrl2 {
@@ -68,12 +69,12 @@ namespace mcrl2 {
             return true;
           }
           else {
-            data_equation::variables_const_range o1variables(normalised_o1.variables());
-            data_equation::variables_const_range o2variables(normalised_o2.variables());
+            boost::iterator_range< data_equation::variables_const_range::const_iterator > o1variables(normalised_o1.variables());
+            boost::iterator_range< data_equation::variables_const_range::const_iterator > o2variables(normalised_o2.variables());
 
             // check alpha equivalence
             if (!o1variables.empty()) {
-              data::mutable_map_substitution< variable, variable > renamings;
+              std::map< variable, variable > renamings;
 
               // Assumes that the equation variables are declared in the same order
               while (!o1variables.empty() && !o2variables.empty()) {
@@ -89,7 +90,7 @@ namespace mcrl2 {
                 o2variables.advance_begin(1);
               }
 
-              if (normalised_o1 == renamings(normalised_o2)) {
+              if (normalised_o1 == data::make_map_substitution_adapter(renamings)(normalised_o2)) {
                 return true;
               }
             }
