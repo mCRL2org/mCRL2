@@ -31,11 +31,22 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-#include "mcrl2/core/detail/data_common.h"
+#include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2 {
   namespace core {
     namespace detail {
+
+/// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
+//     Real.
+/// \return if(BoolExpr, 1, 0) of sort SortExpr
+inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
+{
+  // TODO Maybe enforce that SortExpr is a PNIR sort
+  return gsMakeDataExprIf(BoolExpr,
+           gsMakeOpId(gsString2ATermAppl("1"), SortExpr),
+           gsMakeOpId(gsString2ATermAppl("0"), SortExpr));
+}
 
 //declarations
 //------------

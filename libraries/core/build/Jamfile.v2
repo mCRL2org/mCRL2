@@ -13,7 +13,6 @@ mcrl2-library core
          source/print.cpp
          source/print_c.cpp
          source/messaging.cpp
-         source/data_common.cpp
          source/alpha.cpp
          source/aterm_ext.cpp
          source/numeric_string.cpp
