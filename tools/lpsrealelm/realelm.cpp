@@ -585,33 +585,38 @@ void determine_real_inequalities(
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_postponed_inequalities_to_context(
-                const atermpp::vector < data_expression > &inequalities_to_add,
+                const std::vector < unsigned int > &inequalities_to_add_lhs_size,
+                const atermpp::vector < data_expression > &inequalities_to_add_lhs,
+                const atermpp::vector < data_expression > &inequalities_to_add_rhs,
                 std::vector < summand_information > &summand_info,
                 context_type& context,
                 const rewriter& r,
                 identifier_generator& variable_generator,
                 const comp_struct &c
                 )
-{ assert(inequalities_to_add.size() % 2==0);
-  for(atermpp::vector < data_expression > ::const_iterator i=inequalities_to_add.begin();
-             i!=inequalities_to_add.end(); i++)
-  { // std::cerr << "XXXX " << pp(*i) << "\n";
-  }
+{ assert(inequalities_to_add_lhs.size() ==inequalities_to_add_lhs_size.size() && 
+               inequalities_to_add_lhs.size() ==inequalities_to_add_rhs.size());
+  
+  // We add new next state arguments with increasing sizes of their lhs's.
+  std::set <unsigned int> sorted_lhs_sizes(inequalities_to_add_lhs_size.begin(),inequalities_to_add_lhs_size.end());
 
-  for(atermpp::vector < data_expression > ::const_iterator i=inequalities_to_add.begin();
-                        i!=inequalities_to_add.end(); i=i+2)
-  {
-    variable xi(variable_generator("xi"), c.sort());
-    context.push_back(real_representing_variable(xi,*i, *(i+1)));
-    if (core::gsVerbose)
-    { std::cerr << "Introduced variable " <<  pp(xi) << " for <" << pp(*i) << "," <<  pp(*(i+1)) << ">\n";
+  for(std::set <unsigned int>::const_iterator current_size=sorted_lhs_sizes.begin();
+                  current_size!=sorted_lhs_sizes.end(); ++current_size)
+  { for(unsigned int i=0; i<inequalities_to_add_lhs.size(); ++i)
+    { if (inequalities_to_add_lhs_size[i]== *current_size)
+      { variable xi(variable_generator("xi"), c.sort());
+        context.push_back(real_representing_variable(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i]));
+        if (core::gsVerbose)
+        { std::cerr << "Introduced variable " <<  pp(xi) << " for <" << pp(inequalities_to_add_lhs[i]) << 
+                                  "," <<  pp(inequalities_to_add_rhs[i]) << ">\n";
+        }
+  
+        for(std::vector < summand_information >::iterator j = summand_info.begin();
+                           j != summand_info.end(); ++j)
+        { j->add_a_new_next_state_argument(context,r,c);
+        }
+      }
     }
-
-    for(std::vector < summand_information >::iterator j = summand_info.begin();
-                       j != summand_info.end(); ++j)
-    { j->add_a_new_next_state_argument(context,r,c);
-    }
-
   }
 }
 
@@ -622,11 +627,14 @@ static void add_postponed_inequalities_to_context(
 /// \post All inequalities in l are in the context
 /// \ret true iff a variable has been added to the context
 static void add_inequalities_to_context_postponed(
-                atermpp::vector < data_expression > &inequalities_to_add,
+                std::vector < unsigned int > &inequalities_to_add_lhs_size,
+                atermpp::vector < data_expression > &inequalities_to_add_lhs,
+                atermpp::vector < data_expression > &inequalities_to_add_rhs,
                 std::vector < linear_inequality > &l,
                 context_type& context,
                 const rewriter& r)
-{ assert(inequalities_to_add.size() % 2==0);
+{ assert(inequalities_to_add_lhs.size()==inequalities_to_add_lhs_size.size() && 
+               inequalities_to_add_lhs.size() ==inequalities_to_add_rhs.size());
   // std::cerr << "Inequalities to add: " << pp_vector(inequalities_to_add) << "\n";
   for(vector < linear_inequality > ::iterator i = l.begin(); i != l.end(); )
   {
@@ -643,9 +651,8 @@ static void add_inequalities_to_context_postponed(
         }
       }
       if (pair_is_new)
-      { for(atermpp::vector < data_expression >::const_iterator j=inequalities_to_add.begin() ;
-                   j!=inequalities_to_add.end() && pair_is_new ; j=j+2)
-        { if ((*j==left) && (*(j+1)==right))
+      { for(unsigned int j=0; j<inequalities_to_add_lhs.size(); ++j)
+        { if ((inequalities_to_add_lhs[j]==left) && (inequalities_to_add_rhs[j]==right))
           { pair_is_new=false;
             ++i;
           }
@@ -657,8 +664,9 @@ static void add_inequalities_to_context_postponed(
           }
           else
           { std::cerr << "Reserved to be added <" << pp(left) << "," << pp(right) << "\n";
-            inequalities_to_add.push_back(left);
-            inequalities_to_add.push_back(right);
+            inequalities_to_add_lhs_size.push_back(i->lhs().size()); // store the number of variables at the lhs.
+            inequalities_to_add_lhs.push_back(left);
+            inequalities_to_add_rhs.push_back(right);
             ++i;
           }
         }
@@ -750,44 +758,67 @@ data_expression_list data_expression_map_replace_list(const data_expression_list
 /// \ret The summand corresponding to s with real part of condition cond, and
 ///      nextstate determined by i.
 static
-summand generate_summand(const summand_information &summand_info,
+summand generate_summand(summand_information &summand_info,
                          const data_expression &new_condition,
-                         const data_expression_list &extra_zeta_values,
-                         context_type& complete_context,
+                         std::vector <linear_inequality> &nextstate_condition,
+                         const context_type& complete_context,
                          const rewriter& r,
                          action_label_list &a,
                          identifier_generator& variable_generator,
+                         const comp_struct &cs,
                          const bool is_may_summand=false)
-{ // std::cerr << "SUMMNAD " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
+{ std::cerr << "SUMMNAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
   static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
                                          // Used to recall which may actions labels have been
                                          // introduced, in order to re-use them.
   const summand s=summand_info.get_summand();
-  // std::pair<data_expression_list, data_expression_list> real_nonreal_condition = s.condition();
-  // data_expression condition = and_(true_(), join_and(real_nonreal_condition.second.begin(), real_nonreal_condition.second.end()));
 
   assignment_list nextstate = get_nonreal_assignments(s.assignments());
   nextstate = reverse(nextstate);
-  context_type::const_iterator c_complete = complete_context.begin();
-  data_expression_list extra_zeta_values_reverse=reverse(extra_zeta_values);
-  data_expression_list::iterator extra_zeta_value=extra_zeta_values_reverse.begin();
 
-  for(atermpp::vector < data_expression >::const_iterator
-                j = summand_info.get_new_values_for_xi_variables_begin();
-                j != summand_info.get_new_values_for_xi_variables_end(); ++j,++c_complete)
-  {
-    if ((*j)!=data_expression())
-    { // We have a preset value for the j'th variable in the next state
-      nextstate=push_front(nextstate,assignment(c_complete->get_variable(),*j));
+  for(context_type::const_iterator c_complete = complete_context.begin();
+                c_complete != complete_context.end(); ++c_complete)
+  { data_expression substituted_lowerbound=
+                 realelm_data_expression_map_replace(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
+    data_expression substituted_upperbound=
+                 realelm_data_expression_map_replace(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
+    linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
+    data_expression t,u;
+    e.typical_pair(t,u,r);
+
+    bool success(false);
+    /* First check whether the pair < t,u >
+       already occurs in the context. In this case use the context variable */
+
+    for(context_type::const_reverse_iterator c=complete_context.rbegin();
+             ((c!=complete_context.rend()) && !success) ; ++c)
+    { if ((t==c->get_lowerbound()) && (u==c->get_upperbound()))
+      { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),c->get_variable()));
+        success=true;
+      }
     }
-    else
-    { // We have no preset value for the j'th variable in the next state. So, use the one from extra_zeta_value.
-      nextstate=push_front(nextstate,assignment(c_complete->get_variable(),*extra_zeta_value));
-      ++extra_zeta_value;
+    /* if the variable is not represented by a context variable, find out what value it
+       should get, based on the nextstate condition. By construction, there is exactly 
+       one possibility. The nextstate_condition is changed for this purpose. The changes
+       are restored at the end. */
+    if (!success)
+    { nextstate_condition.push_back(linear_inequality(t,u,linear_inequality::less_eq,r));
+      if (is_inconsistent(nextstate_condition,r))
+      { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.larger())));
+      }
+      else
+      { nextstate_condition[nextstate_condition.size()-1]=linear_inequality(u,t,linear_inequality::less_eq,r);
+        if (is_inconsistent(nextstate_condition,r))
+        { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.smaller())));
+        }
+        else
+        { nextstate=push_front(nextstate,assignment(c_complete->get_variable(),data_expression(cs.equal())));
+        }
+      }
+      nextstate_condition.pop_back();
     }
   }
-  assert(extra_zeta_value==extra_zeta_values_reverse.end());
 
   nextstate = reverse(nextstate);
 
@@ -900,16 +931,19 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
 
   context_type context; // Contains introduced variables
 
-  atermpp::vector < data_expression > new_inequalities; // New inequalities are stored in two consecutive positions;
-                                                        // I.e., for t<u, t is at position i, and u at position i+1.
+  std::vector < unsigned int > new_inequalities_sizes; 
+  atermpp::vector < data_expression > new_inequalities_lhss; 
+  atermpp::vector < data_expression > new_inequalities_rhss; 
   int iteration = 0;
   do
   {
-    new_inequalities.clear();
+    new_inequalities_sizes.clear();
+    new_inequalities_lhss.clear();
+    new_inequalities_rhss.clear();
     iteration++;
     gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration, context.size());
 
-    for(std::vector < summand_information >::const_iterator i = summand_info.begin();
+    for(std::vector < summand_information >::iterator i = summand_info.begin();
                        i != summand_info.end(); ++i)
     {
       std::cerr << "SUMMAND_IN " << pp(i->get_summand()) << "\n" ;
@@ -917,62 +951,59 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
       // occur in the condition or in the effect.
-      for(std::vector < std::vector < linear_inequality > >::const_iterator
+      for(std::vector < std::vector < linear_inequality > >::iterator
                 nextstate_combination = i->nextstate_context_combinations_begin();
                 nextstate_combination != i->nextstate_context_combinations_end();
-                        ++ nextstate_combination) // ,++ nextstate_value)
+                        ++ nextstate_combination)
       {
-        // zeta[x := g(x)]
-        // vector < linear_inequality > zeta_condition=*nextstate_combination;
-
-        // original condition of the summand && zeta[x := g(x)]
-        // vector < linear_inequality >  condition = *nextstate_combination;
-        // condition.insert(condition.end(),
-        //                 i->get_summand_real_conditions_begin(),
-        //                 i->get_summand_real_conditions_end());
-
-
         // Eliminate sum bound variables, resulting in inequalities over
         // process parameters of sort Real.
 
-        std::vector < linear_inequality > condition1;
         variable_list sumvars= i->get_real_summation_variables();
 
         // std::cerr << "SUMVARS " << pp(sumvars) << "\n" ;
+        std::vector < linear_inequality > condition2;
+        remove_redundant_inequalities(*nextstate_combination,condition2,r);
         std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
-        fourier_motzkin(*nextstate_combination,
+        std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM1 " << nextstate_combination->size() << " TO " << condition2.size() << "\n";
+        *nextstate_combination=condition2;
+
+        std::vector < linear_inequality > condition1;
+        fourier_motzkin(condition2,
                         sumvars.begin(),
                         sumvars.end(),
                         condition1,
                         r);
-        // condition.clear();
-        // Line below is the bottleneck in the second iteration for the railwaycrossing example.
-        // vector < linear_inequality >  condition2;
-        // remove_redundant_inequalities(condition1,condition2,r);
-        std::cerr << "CONDITION OUT" << pp_vector(condition1) << "\n" ;
 
         // First check which of these inequalities are equivalent to concrete values of xi variables.
         // Add these values for xi variables as a new condition. Remove these variables from the
         // context combinations to be considered for the xi variables.
 
+        std::vector < linear_inequality > condition3;
+        remove_redundant_inequalities(condition1,condition3,r);
+        std::cerr << "CONDITION OUT" << pp_vector(condition3) << "\n" ;
 
-        // if (condition.empty() || !condition.front().is_false(r))
-        if (!is_inconsistent(condition1,r))
-        {
-          // condition contains the inequalities over the process parameters
-          add_inequalities_to_context_postponed(new_inequalities,condition1, context, r);
+        std::cerr << "REMOVING REDUNDANT INEQUALITIES: FROM2 " << condition1.size() << " TO " << condition3.size() << "\n";
+        if (!is_inconsistent(condition3,r))
+        { // condition contains the inequalities over the process parameters
+          add_inequalities_to_context_postponed(new_inequalities_sizes,
+                                                new_inequalities_lhss,
+                                                new_inequalities_rhss,
+                                                condition3, context, r);
         }
       }
     }
     add_postponed_inequalities_to_context(
-                new_inequalities,
+                new_inequalities_sizes,
+                new_inequalities_lhss,
+                new_inequalities_rhss,
                 summand_info,
                 context,
                 r,
                 variable_generator,
                 c);
 
-  } while ((iteration < max_iterations) && !new_inequalities.empty());
+  } while ((iteration < max_iterations) && !new_inequalities_sizes.empty());
 
   gsVerboseMsg("Generated the following variables in %d iterations:\n", iteration);
   for(context_type::iterator i = context.begin(); i != context.end(); ++i)
@@ -980,7 +1011,7 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
                    (ATermAppl)i->get_upperbound(), (ATermAppl)i->get_variable());
   }
 
-  if (!new_inequalities.empty())
+  if (!new_inequalities_sizes.empty())
   { gsVerboseMsg("A may-bisimilar lps is being generated, which is most likely not strongly bisimilar.\n");
   }
   else
@@ -992,20 +1023,20 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
   // atermpp::vector < data_expression_list > nextstate_context_combinations;
   summand_list summands;
   action_label_list new_act_declarations;
-  for(std::vector < summand_information >::const_iterator i = summand_info.begin();
+  for(std::vector < summand_information >::iterator i = summand_info.begin();
                        i != summand_info.end(); ++i)
   {
     std::cerr << "SUMMAND_IN__ " << pp(i->get_summand()) << "\n";
 
     // Construct the real time condition for summand in terms of xi variables.
 
-    atermpp::vector < data_expression_list >::const_iterator
-                         nextstate_value=i->nextstate_value_combinations_begin();
+    /* atermpp::vector < data_expression_list >::const_iterator
+                         nextstate_value=i->nextstate_value_combinations_begin(); */
 
-    for(std::vector < std::vector < linear_inequality > >::const_iterator
+    for(std::vector < std::vector < linear_inequality > >::iterator
               nextstate_combination = i->nextstate_context_combinations_begin();
               nextstate_combination != i->nextstate_context_combinations_end();
-                      ++ nextstate_combination, ++nextstate_value)
+                      ++ nextstate_combination)
     {
       // std::cerr << "Nextstate cond: " << pp_vector(*nextstate_combination) << "\n";
 
@@ -1065,15 +1096,15 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       }
 
       if (!all_conditions_found)
-      // if (!new_inequalities.empty())
       { // add a may transition.
         summand s = generate_summand(*i,
                                      new_condition,
-                                     *nextstate_value,
+                                     *nextstate_combination,
                                      context,
                                      r,
                                      new_act_declarations,
                                      variable_generator,
+                                     c,
                                      true);
         // std::cerr << "MAY SUMMAND_OUT: " << pp(s) << "\n";
         summands = push_front(summands, s);
@@ -1081,13 +1112,14 @@ specification realelm(specification s, int max_iterations, const rewriter &r)
       else
       { // add a must transition.
         summand s = generate_summand(*i,
-                                  new_condition,
-                                   *nextstate_value,
-                                   context,
-                                   r,
-                                   new_act_declarations,
-                                   variable_generator,
-                                   false);
+                                     new_condition,
+                                     *nextstate_combination,
+                                     context,
+                                     r,
+                                     new_act_declarations,
+                                     variable_generator,
+                                     c,
+                                     false);
         // std::cerr << "MUST SUMMAND_OUT: " << pp(s) << "\n";
         summands = push_front(summands, s);
       }
