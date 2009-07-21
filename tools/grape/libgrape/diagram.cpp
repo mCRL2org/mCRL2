@@ -8,6 +8,10 @@
 //
 // Implements the Diagram class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "diagram.h"
 
 using namespace grape::libgrape;

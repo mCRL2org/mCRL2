@@ -8,6 +8,10 @@
 //
 // Implements the compound_state class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "compoundstate.h"
 
 using namespace grape::libgrape;

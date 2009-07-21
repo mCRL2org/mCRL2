@@ -50,7 +50,7 @@ namespace grape
          */
         bool update_validation();
         
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
          * Default destructor.

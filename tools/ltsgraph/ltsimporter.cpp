@@ -9,6 +9,10 @@
 /// \file ltsimporter.cpp
 /// \brief Importer for LTS files
 
+#include "wx.hpp" // precompiled headers
+
+#include <wx/wx.h>
+
 #include "ltsimporter.h"
 #include <mcrl2/lts/lts.h>
 #include <map>

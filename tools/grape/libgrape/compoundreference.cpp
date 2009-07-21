@@ -8,6 +8,10 @@
 //
 // Implements the compound_reference class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "compoundreference.h"
 
 using namespace grape::libgrape;

@@ -8,6 +8,10 @@
 //
 // Implements the architecture_reference class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "architecturereference.h"
 #include "architecturediagram.h"
 

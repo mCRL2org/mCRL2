@@ -15,7 +15,8 @@
 #include <limits>
 #include <memory>
 
-#include <boost/bind.hpp>
+#include "boost/bind.hpp"
+#include "boost/cstdint.hpp"
 
 #include "aterm2.h"
 #include "lts.h"
@@ -43,17 +44,17 @@ struct lts_generation_options {
   boost::function< std::string (std::string const&, std::string const&) >
                                                    generate_filename_for_trace;
   /* Method for status display */
-  boost::function< void (unsigned long, unsigned long long,
-                         unsigned long long, unsigned long long,
-                         unsigned long long) > display_status;
+  boost::function< void (unsigned long, boost::uint64_t,
+                         boost::uint64_t, boost::uint64_t,
+                         boost::uint64_t) > display_status;
 
   /* Default function for generate_filename_for_trace */
   std::string generate_trace_file_name(std::string const& info, std::string const& extension);
 
   /* Default function for status display */
-  void update_status_display(unsigned long, unsigned long long,
-                             unsigned long long, unsigned long long const,
-                             unsigned long long) {
+  void update_status_display(unsigned long, boost::uint64_t,
+                             boost::uint64_t, boost::uint64_t const,
+                             boost::uint64_t) {
   }
 
   mcrl2::data::rewriter::strategy strat;
@@ -62,7 +63,7 @@ struct lts_generation_options {
   int stateformat;
   mcrl2::lts::lts_type outformat;
   bool outinfo;
-  unsigned long long max_states;
+  boost::uint64_t max_states;
   std::string priority_action;
   bool trace;
   int num_trace_actions;
@@ -74,7 +75,7 @@ struct lts_generation_options {
   bool error_trace_saved;
   exploration_strategy expl_strat;
   bool bithashing;
-  unsigned long long bithashsize;
+  boost::uint64_t bithashsize;
   unsigned long todo_max;
   unsigned long initial_table_size;
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter;

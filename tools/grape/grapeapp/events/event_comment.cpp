@@ -291,4 +291,4 @@ bool grape_event_detach_comment::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_comment );
+WX_DEFINE_OBJARRAY( arr_event_remove_comment )

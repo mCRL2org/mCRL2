@@ -6,6 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <algorithm>
+#include <iterator>
+
 #define NO_MCRL2_TOOL_FACILITIES
 #include <tipi/tool.hpp>
 #include <tipi/detail/utility/standard_utility.hpp>
@@ -240,24 +243,27 @@ namespace mcrl2 {
         m_communicator->send_display_layout(d);
       }
 
-      std::ostream& operator<<(std::ostream& o, unsigned long const& t) {
-        char buf[21];
+      inline std::ostream& convert(std::ostream& o, boost::uint64_t t) {
+        std::string n;
 
-        sprintf(buf,"%lu",t);
+        for (boost::uint64_t i = t; 0 < i; i /= 10)
+        {
+          n.append(1, static_cast< char >('0' + static_cast< char >(i % 10)));
+        }
 
-        o << buf;
+        std::copy(n.rbegin(), n.rend(), std::ostream_iterator< char >(o));
 
         return o;
       }
 
-      std::ostream& operator<<(std::ostream& o, unsigned long long const& t) {
-        char buf[21];
+      std::ostream& operator<<(std::ostream& o, boost::uint64_t t) {
+        return convert(o, t);
+      }
 
-        sprintf(buf,"%llu",t);
+      std::ostream& operator<<(std::ostream& o, boost::int64_t t) {
+        o << ((t < 0) ? "-" : "");
 
-        o << buf;
-
-        return o;
+        return convert(o, static_cast< boost::uint64_t >(t));
       }
     }
   }

@@ -12,9 +12,10 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <wx/wx.h>
+#include <wx/colour.h>
 #include <vector>
 #include "state.h"
-#include <wx/colour.h>
 
 class Graph
 {

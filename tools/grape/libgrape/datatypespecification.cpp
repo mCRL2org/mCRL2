@@ -8,6 +8,10 @@
 //
 // Implements the datatype_specification datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "datatypespecification.h"
 
 using namespace grape::libgrape;
@@ -51,4 +55,4 @@ unsigned int datatype_specification::get_count_dataexpression( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_datatype_specification );
+WX_DEFINE_OBJARRAY( list_of_datatype_specification )

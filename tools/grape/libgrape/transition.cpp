@@ -8,6 +8,10 @@
 //
 // Implements the Transition class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "transition.h"
 #include "compoundstate.h"
 #include "visuals/geometric.h"

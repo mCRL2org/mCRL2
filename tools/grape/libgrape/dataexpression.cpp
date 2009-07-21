@@ -8,6 +8,10 @@
 //
 // Implements the dataexpression datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include <wx/wx.h>
+
 #include "dataexpression.h"
 
 using namespace grape::libgrape;
@@ -50,4 +54,4 @@ wxString dataexpression::get_type( void ) const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_dataexpression );
+WX_DEFINE_OBJARRAY( list_of_dataexpression )

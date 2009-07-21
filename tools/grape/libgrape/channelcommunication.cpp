@@ -8,6 +8,10 @@
 //
 // Implements the channel_communication class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "channelcommunication.h"
 
 using namespace grape::libgrape;
@@ -131,4 +135,4 @@ void channel_communication::set_channel_communication_type( const channel_commun
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_channel_communication );
+WX_DEFINE_OBJARRAY( arr_channel_communication )

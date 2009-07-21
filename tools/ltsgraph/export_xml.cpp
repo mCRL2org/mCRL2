@@ -9,6 +9,10 @@
 /// \file export_xml.cpp
 /// \brief Implementation of XML exporter.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "export_xml.h"
 #include "ticpp.h"
 

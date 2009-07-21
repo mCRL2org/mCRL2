@@ -165,7 +165,7 @@ class sim_tool : public rewriter_tool< input_tool > {
              "   q/quit           quit\n";
           } else if ( isdigit(s[0]) ) {
             unsigned int idx;
-            sscanf(s.c_str(),"%i",&idx);
+            sscanf(s.c_str(),"%u",&idx);
             if ( idx < (unsigned int) ATgetLength(next_states) )
             {
               gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));

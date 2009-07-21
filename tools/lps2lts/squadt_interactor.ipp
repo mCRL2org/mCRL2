@@ -10,10 +10,10 @@
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 #include <string>
-#include <boost/bind.hpp>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
+#include "boost/bind.hpp"
+#include "boost/cstdint.hpp"
+#include "boost/shared_ptr.hpp"
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/exception.h"
@@ -379,8 +379,8 @@ class squadt_interactor::status_display {
 
     status_display(squadt_interactor& c, lts_generation_options&);
 
-    void update(unsigned long, unsigned long long, unsigned long long,
-                unsigned long long, unsigned long long);
+    void update(unsigned long, boost::uint64_t, boost::uint64_t,
+                boost::uint64_t, boost::uint64_t);
 };
 
 squadt_interactor::status_display::status_display(squadt_interactor& c, lts_generation_options& lgopts) :
@@ -415,8 +415,8 @@ squadt_interactor::status_display::status_display(squadt_interactor& c, lts_gene
   m_communicator.send_display_layout(display.manager(m));
 }
 
-void squadt_interactor::status_display::update(unsigned long level, unsigned long long explored,
-    unsigned long long seen, unsigned long long num_found_same, unsigned long long transitions) {
+void squadt_interactor::status_display::update(unsigned long level, boost::uint64_t explored,
+    boost::uint64_t seen, boost::uint64_t num_found_same, boost::uint64_t transitions) {
 
   lb_level.set_text(boost::lexical_cast < std::string > (level));
   lb_explored.set_text(boost::lexical_cast < std::string > (explored));

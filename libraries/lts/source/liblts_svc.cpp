@@ -10,6 +10,7 @@
 
 #include <string>
 #include <sstream>
+#include "boost/cstdint.hpp"
 #include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -146,7 +147,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
     // Check to see if there is extra data at the end
     FILE *g = fopen(filename.c_str(),"rb");
     if ( (g == NULL) ||
-         (fseek(g,-(12+sizeof(unsigned long long int)),SEEK_END) != 0) )
+         (fseek(g,-(12+sizeof(boost::uint64_t)),SEEK_END) != 0) )
     {
       gsErrorMsg("could not determine whether mCRL2 SVC has extra information; continuing without\n");
     } else {
@@ -158,7 +159,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
         if ( !strncmp(((char *) buf)+8,"   1STL2LRCm",12) )
         {
           ATerm data;
-          unsigned long long int position = 0;
+          boost::uint64_t position = 0;
           for (unsigned int i=0; i<8; i++)
           {
             position = position*0x100 + buf[7-i];

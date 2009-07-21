@@ -8,6 +8,10 @@
 //
 // Implements the nonterminating_transition class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "nonterminatingtransition.h"
 #include "compoundstate.h"
 #include "visuals/geometric.h"
@@ -138,4 +142,4 @@ coordinate nonterminating_transition::get_begin_coordinate( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_nonterminating_transition );
+WX_DEFINE_OBJARRAY( arr_nonterminating_transition )

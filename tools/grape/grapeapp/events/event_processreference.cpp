@@ -238,4 +238,4 @@ bool grape_event_change_procref::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_proc_ref );
+WX_DEFINE_OBJARRAY( arr_event_remove_proc_ref )

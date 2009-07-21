@@ -39,7 +39,7 @@ namespace grape
         /** Default constructor. */
         grape_preamble_dialog();
 
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
         * Constructor.

@@ -22,18 +22,18 @@ class LiftingStatistics
 {
 public:
     LiftingStatistics(const ParityGame &game);
-    long long lifts_attempted() const { return lifts_attempted_; }
-    long long lifts_succeeded() const { return lifts_succeeded_; }
-    long long lifts_attempted(verti v) const { return vertex_stats_[v].first; }
-    long long lifts_succeeded(verti v) const { return vertex_stats_[v].second; }
+    boost::int64_t lifts_attempted() const { return lifts_attempted_; }
+    boost::int64_t lifts_succeeded() const { return lifts_succeeded_; }
+    boost::int64_t lifts_attempted(verti v) const { return vertex_stats_[v].first; }
+    boost::int64_t lifts_succeeded(verti v) const { return vertex_stats_[v].second; }
 
 private:
     void record_lift(verti v, bool success);
     friend class SmallProgressMeasures;
 
 private:
-    long long lifts_attempted_, lifts_succeeded_;
-    std::vector<std::pair<long long, long long> > vertex_stats_;
+    boost::int64_t lifts_attempted_, lifts_succeeded_;
+    std::vector<std::pair<boost::int64_t, boost::int64_t> > vertex_stats_;
 };
 
 /*! A parity game solver based on Marcin Jurdzinski's small progress measures

@@ -8,6 +8,10 @@
 //
 // Implements the Channel class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "channel.h"
 #include "compoundreference.h"
 #include "channelcommunication.h"

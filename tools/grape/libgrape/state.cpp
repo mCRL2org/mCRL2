@@ -9,6 +9,10 @@
 //
 // Implements the state class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "state.h"
 
 using namespace grape::libgrape;

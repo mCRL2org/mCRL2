@@ -8,6 +8,10 @@
 //
 // Implements the abstract object class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "object.h"
 #include "diagram.h"
 

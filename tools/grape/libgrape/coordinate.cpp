@@ -8,6 +8,9 @@
 //
 // Implements the coordinate datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include <wx/wx.h>
 #include "coordinate.h"
 
 using namespace grape::libgrape;
@@ -47,4 +50,4 @@ coordinate coordinate::operator+(const coordinate &p_c)
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_coordinate );
+WX_DEFINE_OBJARRAY( list_of_coordinate )

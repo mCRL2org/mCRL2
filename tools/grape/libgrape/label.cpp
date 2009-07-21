@@ -8,6 +8,10 @@
 //
 // Implements the label datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include <wx/tokenzr.h>
 
 #include <sstream>
@@ -261,4 +265,4 @@ void label::set_declarations_text( wxString p_declarations )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_label );
+WX_DEFINE_OBJARRAY( list_of_label )

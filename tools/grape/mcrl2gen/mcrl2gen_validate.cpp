@@ -8,6 +8,10 @@
 //
 // Implements internal functions used when validating process diagrams and architecture diagrams.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "mcrl2gen_validate.h"
 
 #include <sstream>

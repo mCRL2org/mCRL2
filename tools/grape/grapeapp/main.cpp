@@ -8,7 +8,9 @@
 //
 // Main file of the GraPE application
 
-#include <wx/wx.h>
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2gen/mcrl2gen.h"

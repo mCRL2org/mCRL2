@@ -130,4 +130,4 @@ bool grape_event_remove_initial_designator::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_init );
+WX_DEFINE_OBJARRAY( arr_event_remove_init )

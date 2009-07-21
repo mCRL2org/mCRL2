@@ -22,7 +22,7 @@ SOURCES = Compatibility.cc
           logging.c
         ;
 
-lib pg : $(SOURCES) ;
+lib pg : $(SOURCES) : <use>/site-config//boost ;
 obj timing.o : timing.c : ;
 obj timing.o : timing_msvc.c : <toolset>msvc ;
 obj timing.o : timing_msvc.c : <os>windows <toolset>intel ;

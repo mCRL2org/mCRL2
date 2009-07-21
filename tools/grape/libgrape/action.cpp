@@ -8,6 +8,10 @@
 //
 // Implements the action datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "action.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
@@ -91,4 +95,4 @@ void action::set_parameters_text( ATermList p_parameters )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_action );
+WX_DEFINE_OBJARRAY( list_of_action )

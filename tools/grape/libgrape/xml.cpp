@@ -8,6 +8,10 @@
 //
 // Implements XML generating functions.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "xml.h"
 
 using namespace grape::libgrape;
@@ -951,4 +955,4 @@ void grape::libgrape::write_channel_communication_type( wxXmlNode *p_parent, cha
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_wxXmlNode );
+WX_DEFINE_OBJARRAY( arr_wxXmlNode )

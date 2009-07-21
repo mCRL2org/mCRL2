@@ -9,6 +9,9 @@
 /// \file xmlimporter.cpp
 /// \brief Importer for XML files.
 
+#include "wx.hpp"
+
+#include <wx/wx.h>
 
 #include "xmlimporter.h"
 #include "ticpp.h"

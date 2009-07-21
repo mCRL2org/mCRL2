@@ -28,7 +28,7 @@ using namespace mcrl2::lts;
 static lts_options lts_opts;
 static ATermAppl term_nil;
 static AFun afun_pair;
-static unsigned long long initial_state;
+static boost::uint64_t initial_state;
 static ofstream aut;
 static SVCfile svcf;
 static SVCfile *svc = &svcf;
@@ -88,7 +88,7 @@ void open_lts(const char *filename, lts_options &opts)
   }
 }
 
-void save_initial_state(unsigned long long idx, ATerm state)
+void save_initial_state(boost::uint64_t idx, ATerm state)
 {
   initial_state = idx;
   switch ( lts_opts.outformat )
@@ -123,7 +123,7 @@ void save_initial_state(unsigned long long idx, ATerm state)
   }
 }
 
-void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to)
+void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to)
 {
   switch ( lts_opts.outformat )
   {
@@ -189,7 +189,7 @@ void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, 
   }
 }
 
-void close_lts(unsigned long long num_states, unsigned long long num_trans)
+void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans)
 {
   switch ( lts_opts.outformat )
   {

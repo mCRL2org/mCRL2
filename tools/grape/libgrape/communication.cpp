@@ -8,6 +8,10 @@
 //
 // Implements the communication association class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "communication.h"
 
 using namespace grape::libgrape;

@@ -514,8 +514,8 @@ void run_pg(ParityGame& game)
     }
 
     /* Print some game info: */
-    info("Number of vertices:        %12lld", (long long)game.graph().V());
-    info("Number of edges:           %12lld", (long long)game.graph().E());
+    info("Number of vertices:        %12lld", (boost::int64_t)game.graph().V());
+    info("Number of edges:           %12lld", (boost::int64_t)game.graph().E());
     info("Forward edge ratio:        %.10f",
           (double)count_forward_edges(game.graph())/game.graph().E() );
     info("Number of priorities:      %12d (was %d)", game.d(), old_d);
@@ -584,9 +584,9 @@ void run_pg(ParityGame& game)
 
         solve_time = time_used() - solve_time;
 
-        long long lifts_total       = stats.lifts_attempted();
-        long long lifts_successful  = stats.lifts_succeeded();
-        long long lifts_failed      = lifts_total - lifts_successful;
+        boost::int64_t lifts_total       = stats.lifts_attempted();
+        boost::int64_t lifts_successful  = stats.lifts_succeeded();
+        boost::int64_t lifts_failed      = lifts_total - lifts_successful;
                                                                          
         // Print some statistics
         info("Time used to solve:          %10.3f s", solve_time);

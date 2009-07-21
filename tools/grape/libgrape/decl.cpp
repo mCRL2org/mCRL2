@@ -8,6 +8,10 @@
 //
 // Implements the decl datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "decl.h"
 
 using namespace grape::libgrape;
@@ -72,9 +76,7 @@ void decl::set_type( const wxString &p_type )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_decl );
-
-
+WX_DEFINE_OBJARRAY( list_of_decl )
 
 decl_init::decl_init(void) : decl()
 {
@@ -128,4 +130,5 @@ void decl_init::set_value(const wxString &p_value)
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_decl_init );
+WX_DEFINE_OBJARRAY( list_of_decl_init )
+

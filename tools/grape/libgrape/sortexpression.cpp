@@ -8,6 +8,10 @@
 //
 // Implements the sortexpression datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "sortexpression.h"
 
 using namespace grape::libgrape;
@@ -38,5 +42,5 @@ wxString sortexpression::get_expression( void ) const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_sortexpression );
+WX_DEFINE_OBJARRAY( list_of_sortexpression )
 

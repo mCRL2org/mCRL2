@@ -2600,7 +2600,7 @@ gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",int2term[opid],opid);
 gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
 fflush(f);
 #endif
-	bool used[arity];
+        boost::scoped_array< bool > used(new bool[arity]);
 	for (int i=0; i<arity; i++)
 	{
 		used[i] = ((nf_args & (1 << i)) != 0);
@@ -2620,14 +2620,14 @@ fflush(f);
 			}
 		} else {
 			fprintf(f,"%s{\n",whitespace(2*d));
-			implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d+1,opid,used);
+			implement_tree(f,(ATermAppl) ATgetFirst(strat),arity,d+1,opid,used.get());
 			fprintf(f,"%s}\n",whitespace(2*d));
 		}
 
 		strat = ATgetNext(strat);
 	}
 
-	finish_function(f,arity,opid,used);
+	finish_function(f,arity,opid,used.get());
 }
 
 ATermAppl RewriterCompilingJitty::build_ar_expr(ATerm expr, ATermAppl var)
@@ -3357,12 +3357,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         set_nfs_array_value(nfs_a.get(),a,nfs);
         implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a.get()),a,1,j,nfs);
       } else {
-	bool used[a];
+        boost::scoped_array< bool > used(new bool[a]);
 	for (int k=0; k<a; k++)
 	{
 		used[k] = ((nfs & (1 << k)) != 0);
 	}
-	finish_function(f,a,j,used);
+	finish_function(f,a,j,used.get());
       }
 
 

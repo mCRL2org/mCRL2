@@ -12,6 +12,8 @@
 #ifndef MCRL2_SPECIFIC_SQUADT_INTERFACE_H_
 #define MCRL2_SPECIFIC_SQUADT_INTERFACE_H_
 
+#include <boost/cstdint.hpp>
+
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/deprecation.h"
 
@@ -147,10 +149,10 @@ namespace mcrl2 {
 #endif
 
       /// \brief Helper function for unsigned long to string conversion
-      std::ostream& operator<<(std::ostream& o, unsigned long const& t);
+      std::ostream& operator<<(std::ostream& o, boost::int64_t const& t);
 
       /// \brief Helper function for unsigned long long to string conversion
-      std::ostream& operator<<(std::ostream& o, unsigned long long const& t);
+      std::ostream& operator<<(std::ostream& o, boost::uint64_t const& t);
     }
   }
 }

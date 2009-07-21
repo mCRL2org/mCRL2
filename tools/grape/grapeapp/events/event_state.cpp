@@ -265,4 +265,4 @@ bool grape_event_change_state::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_state );
+WX_DEFINE_OBJARRAY( arr_event_remove_state )

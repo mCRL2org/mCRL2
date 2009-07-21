@@ -82,12 +82,12 @@ static lts_generation_options *lgopts;
 static NextState *nstate;
 
 static ATermIndexedSet states = NULL;
-static unsigned long long num_states;
-static unsigned long long trans;
+static boost::uint64_t num_states;
+static boost::uint64_t trans;
 static unsigned long level;
-static unsigned long long num_found_same;
-static unsigned long long current_state;
-static unsigned long long initial_state;
+static boost::uint64_t num_found_same;
+static boost::uint64_t current_state;
+static boost::uint64_t initial_state;
 
 static atermpp::vector<atermpp::aterm> backpointers;
 static unsigned long *bithashtable = NULL;
@@ -129,10 +129,10 @@ bool initialise_lts_generation(lts_generation_options *opts)
 
   if ( lgopts->bithashing )
   {
-    unsigned long long bithashtablesize;
+    boost::uint64_t bithashtablesize;
     if ( lgopts->bithashsize > ULLONG_MAX-4*sizeof(unsigned long) )
     {
-      bithashtablesize = (1ULL << (sizeof(unsigned long long)*8-3)) / sizeof(unsigned long);
+      bithashtablesize = (1ULL << (sizeof(boost::uint64_t)*8-3)) / sizeof(unsigned long);
     } else {
       bithashtablesize = (lgopts->bithashsize+4*sizeof(unsigned long))/(8*sizeof(unsigned long));
     }
@@ -607,15 +607,15 @@ static void calc_hash_add(unsigned long n)
       break;
   }
 }
-static unsigned long long calc_hash_finish()
+static boost::uint64_t calc_hash_finish()
 {
   while ( sh_i != 0 )
   {
     calc_hash_add(0x76a34e87);
   }
-  return (((unsigned long long) (sh_a & 0xffff0000)) << 24) |
-         (((unsigned long long) (sh_b & 0xffff0000)) << 16) |
-         (((unsigned long long) (sh_c & 0xffff0000))     ) |
+  return (((boost::uint64_t) (sh_a & 0xffff0000)) << 24) |
+         (((boost::uint64_t) (sh_b & 0xffff0000)) << 16) |
+         (((boost::uint64_t) (sh_c & 0xffff0000))     ) |
          ((sh_a & 0x0000ffff)^(sh_b & 0x0000ffff)^(sh_c & 0x0000ffff));
 }
 static void calc_hash_aterm(ATerm t)
@@ -647,7 +647,7 @@ static void calc_hash_aterm(ATerm t)
       break;
   }
 }
-static unsigned long long calc_hash(ATerm state)
+static boost::uint64_t calc_hash(ATerm state)
 {
   calc_hash_init();
 
@@ -656,27 +656,27 @@ static unsigned long long calc_hash(ATerm state)
   return calc_hash_finish() % lgopts->bithashsize;
 }
 
-static bool get_bithash(unsigned long long i)
+static bool get_bithash(boost::uint64_t i)
 {
   return (( bithashtable[i/(8*sizeof(unsigned long))] >> (i%(8*sizeof(unsigned long))) ) & 1UL) == 1UL;
 }
 
-static void set_bithash(unsigned long long i)
+static void set_bithash(boost::uint64_t i)
 {
   bithashtable[i/(8*sizeof(unsigned long))] |= 1UL << (i%(8*sizeof(unsigned long)));
 }
 
 static void remove_state_from_bithash(ATerm state)
 {
-  unsigned long long i = calc_hash(state);
+  boost::uint64_t i = calc_hash(state);
   bithashtable[i/(8*sizeof(unsigned long))] &=  ~(1UL << (i%(8*sizeof(unsigned long))));
 }
 
-static unsigned long long add_state(ATerm state, bool *is_new)
+static boost::uint64_t add_state(ATerm state, bool *is_new)
 {
   if ( lgopts->bithashing )
   {
-    unsigned long long i = calc_hash(state);
+    boost::uint64_t i = calc_hash(state);
     *is_new = !get_bithash(i);
     set_bithash(i);
     return i;
@@ -688,7 +688,7 @@ static unsigned long long add_state(ATerm state, bool *is_new)
   }
 }
 
-static unsigned long long state_index(ATerm state)
+static boost::uint64_t state_index(ATerm state)
 {
   if ( lgopts->bithashing )
   {
@@ -852,7 +852,7 @@ static void swap_queues()
 static bool add_transition(ATerm from, ATermAppl action, ATerm to)
 {
   bool new_state;
-  unsigned long long i;
+  boost::uint64_t i;
 
   i = add_state(to, &new_state);
 
@@ -885,13 +885,13 @@ bool generate_lts()
   current_state = 0;
   ++num_states;
 
-  lgopts->display_status(level,current_state,num_states, static_cast < unsigned long long > (0),trans);
+  lgopts->display_status(level,current_state,num_states, static_cast < boost::uint64_t > (0),trans);
 
   if ( lgopts->max_states != 0 )
   {
-    unsigned long long endoflevelat = 1;
-    unsigned long long prevtrans = 0;
-    unsigned long long prevcurrent = 0;
+    boost::uint64_t endoflevelat = 1;
+    boost::uint64_t prevtrans = 0;
+    boost::uint64_t prevcurrent = 0;
     num_found_same = 0;
     tracecnt = 0;
     gsVerboseMsg("generating state space with '%s' strategy...\n",expl_strat_to_str(lgopts->expl_strat));
@@ -1292,7 +1292,7 @@ bool generate_lts()
     } else if ( lgopts->expl_strat == es_breadth )
     {
       NextStateGenerator *nsgen = NULL;
-      unsigned long long int limit = lgopts->max_states;
+      boost::uint64_t limit = lgopts->max_states;
       if ( lgopts->bithashing )
       {
         lgopts->max_states = ULLONG_MAX;
@@ -1389,7 +1389,7 @@ bool generate_lts()
             fflush(stderr);
           }
           level++;
-          unsigned long long nextcurrent = endoflevelat;
+          boost::uint64_t nextcurrent = endoflevelat;
           endoflevelat = (limit>num_states)?num_states:limit;
           if ( lgopts->bithashing )
           {

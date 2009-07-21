@@ -11,6 +11,7 @@
 #ifndef GRAPE_CHANNEL_DIALOG_H
 #define GRAPE_CHANNEL_DIALOG_H
 
+#include "wx/wx.h"
 #include <wx/dialog.h>
 #include <wx/event.h>
 
@@ -51,7 +52,7 @@ namespace grape
          */
         bool update_validation();
 
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
       public:
         /**
          * Default destructor.

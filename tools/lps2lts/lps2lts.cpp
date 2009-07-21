@@ -15,8 +15,9 @@
 
 #include <string>
 #include <cassert>
-#include <aterm2.h>
-#include <boost/lexical_cast.hpp>
+#include "aterm2.h"
+#include "boost/cstdint.hpp"
+#include "boost/lexical_cast.hpp"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "lps2lts.h"
@@ -211,10 +212,10 @@ class lps2lts_tool : public lps2lts_base
 
       if (parser.options.count("bit-hash")) {
         options.bithashing  = true;
-        options.bithashsize = parser.option_argument_as< unsigned long long > ("bit-hash");
+        options.bithashsize = parser.option_argument_as< boost::uint64_t > ("bit-hash");
       }
       if (parser.options.count("max")) {
-        options.max_states = parser.option_argument_as< unsigned long long > ("max");
+        options.max_states = parser.option_argument_as< boost::uint64_t > ("max");
       }
       if (parser.options.count("action")) {
         options.detect_action = true;

@@ -12,6 +12,7 @@
 #define _LTS_H
 
 #include <memory>
+#include "boost/cstdint.hpp"
 #include "aterm2.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
@@ -26,9 +27,9 @@ struct lts_options {
 
 void reset();
 void open_lts(const char *filename, lts_options &opts);
-void save_initial_state(unsigned long long idx, ATerm state);
-void save_transition(unsigned long long idx_from, ATerm from, ATermAppl action, unsigned long long idx_to, ATerm to);
-void close_lts(unsigned long long num_states, unsigned long long num_trans);
+void save_initial_state(boost::uint64_t idx, ATerm state);
+void save_transition(boost::uint64_t idx_from, ATerm from, ATermAppl action, boost::uint64_t idx_to, ATerm to);
+void close_lts(boost::uint64_t num_states, boost::uint64_t num_trans);
 void remove_lts();
 
 #endif

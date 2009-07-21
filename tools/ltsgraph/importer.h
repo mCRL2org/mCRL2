@@ -18,8 +18,13 @@
 class Importer
 {
   public:
-    Importer();
-    virtual ~Importer();
+
+    inline Importer()
+    {}
+
+    inline virtual ~Importer()
+    {}
+
     virtual Graph* importFile(std::string file) = 0;
 
 };

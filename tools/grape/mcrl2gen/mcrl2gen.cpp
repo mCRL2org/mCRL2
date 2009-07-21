@@ -8,10 +8,15 @@
 //
 // Implements the functions to convert process diagrams and architecture diagrams to mCRL2.
 
+#include "wx.hpp" // precompiled headers
+
 #include "mcrl2gen.h"
 #include "mcrl2gen_validate.h"
 
 #include <sstream>
+
+#include "wx/wx.h"
+
 #include <wx/file.h>
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"            // Library for messaging.

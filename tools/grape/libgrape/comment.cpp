@@ -8,6 +8,10 @@
 //
 // Implements the comment class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "comment.h"
 
 using namespace grape::libgrape;
@@ -58,4 +62,4 @@ object* comment::get_attached_object( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_comment );
+WX_DEFINE_OBJARRAY( arr_comment )

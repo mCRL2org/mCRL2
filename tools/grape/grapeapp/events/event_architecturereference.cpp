@@ -224,4 +224,4 @@ bool grape_event_change_archref::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_arch_ref );
+WX_DEFINE_OBJARRAY( arr_event_remove_arch_ref )

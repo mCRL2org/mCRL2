@@ -134,7 +134,7 @@ int gsvfprintf(FILE *stream, const char *format, va_list args)
         if ( islong )
           fprintf(stream, fmt, va_arg(args, long int));
         else if ( islonglong )
-          fprintf(stream, fmt, va_arg(args, long long int));
+          fprintf(stream, fmt, va_arg(args, boost::int64_t));
         else if ( isintmax )
           fprintf(stream, fmt, va_arg(args, intmax_t));
         else if ( issize )

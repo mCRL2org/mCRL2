@@ -8,6 +8,10 @@
 //
 // Implements the varupdate datatype.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include <wx/tokenzr.h>
 
 #include "varupdate.h"
@@ -71,5 +75,5 @@ void varupdate::set_rhs( const wxString& p_update )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_varupdate );
+WX_DEFINE_OBJARRAY( list_of_varupdate )
 

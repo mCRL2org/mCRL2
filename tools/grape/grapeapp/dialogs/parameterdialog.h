@@ -53,7 +53,7 @@ namespace grape
       	 */
          void event_change_text( wxGridEvent &p_event );
        
-        DECLARE_EVENT_TABLE();
+        DECLARE_EVENT_TABLE()
 
       public:
 

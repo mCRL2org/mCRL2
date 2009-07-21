@@ -8,6 +8,10 @@
 //
 // Implements functions to convert an XML file into a grape specification.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "specification.h"
 #include "xmlopen.h"
 

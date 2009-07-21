@@ -40,8 +40,8 @@
 #define __simbase_H__
 
 #include <list>
-#include <aterm2.h>
-#include <mcrl2/lps/nextstate.h>
+#include "aterm2.h"
+#include "mcrl2/lps/nextstate.h"
 
 class SimulatorInterface;
 class SimulatorViewInterface;

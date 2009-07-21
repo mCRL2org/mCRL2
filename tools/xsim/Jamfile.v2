@@ -10,12 +10,7 @@ alias sim_shared
          [ obj simulator.o : simulator.cpp ]
        ;
 
-alias xsim_core
-       : [ obj simbasegui.o : simbasegui.cpp : <use>/site-config//wx_base ]
-         sim_shared
-       ;
-
-explicit sim_shared simbasegui.o xsim_core ;
+explicit sim_shared simbasegui.o ;
 
 local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
 
@@ -25,7 +20,6 @@ for plugin in $(plugins) {
 
 tool xsim
        : xsim.cpp
-         xsim_core
          simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp

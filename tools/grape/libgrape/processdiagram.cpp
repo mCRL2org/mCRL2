@@ -8,6 +8,10 @@
 //
 // Implements the process_diagram class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "processdiagram.h"
 
 using namespace grape::libgrape;
@@ -674,4 +678,4 @@ object* process_diagram::find_object( process_diagram* p_proc_dia, unsigned int 
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_process_diagram );
+WX_DEFINE_OBJARRAY( arr_process_diagram )

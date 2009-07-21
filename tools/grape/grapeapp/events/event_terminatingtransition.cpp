@@ -143,4 +143,4 @@ bool grape_event_remove_terminating_transition::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_tt );
+WX_DEFINE_OBJARRAY( arr_event_remove_tt )

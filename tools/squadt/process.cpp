@@ -27,6 +27,7 @@
 # include <unistd.h>
 # include <sys/wait.h>
 # if defined(__APPLE__)
+#  include "boost/scoped_array.hpp"
 #  include <Carbon/Carbon.h>
 #  include <ApplicationServices/ApplicationServices.h>
 # endif
@@ -257,13 +258,13 @@ namespace squadt {
       struct local {
         inline static std::string as_string(const CFStringRef s) {
           size_t length = CFStringGetLength(s) + 1;
-          char   buffer[length];
+          boost::scoped_array< char > buffer(new char[length]);
 
-          if (!CFStringGetCString(s, buffer, length, kCFStringEncodingASCII)) {
+          if (!CFStringGetCString(s, buffer.get(), length, kCFStringEncodingASCII)) {
             throw false;
           }
 
-          return std::string(buffer);
+          return std::string(buffer.get());
         }
 
         static OSStatus termination_handler(EventHandlerCallRef, EventRef e, void* d) {

@@ -8,6 +8,10 @@
 //
 // Implements the GrapeSpecification class.
 
+#include "wx.hpp" // precompiled headers
+
+#include "wx/wx.h"
+
 #include "specification.h"
 
 using namespace grape::libgrape;

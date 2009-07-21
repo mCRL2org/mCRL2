@@ -81,7 +81,7 @@ namespace grape
       	 */
          void event_change_combobox( wxCommandEvent &p_event );
        
-        DECLARE_EVENT_TABLE();		/**< The event table of this grid. */
+        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
 
 	      /**
 	       * Updates the combobox with variables.

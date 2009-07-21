@@ -12,12 +12,9 @@
 #include <cstdlib>
 #include <cassert>
 #include <climits>
+#include <sstream>
 
 #include "boost/scoped_array.hpp"
-
-#ifdef _MSC_VER
-#include <boost/format.hpp>
-#endif
 
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
@@ -195,39 +192,28 @@ ATermAppl create_new_var_name(bool cap, int index)
   gsDebugMsg("creating variable with index %d and cap %s\n",
     index, cap?"true":"false");
   int suffix = index / 3;
-#ifndef _MSC_VER
-  char name[suffix+2];
-#endif // _MSC_VER
-  char base;
+
+  std::ostringstream s;
+
   //choose x/X, y/Y or z/Z
   switch (index % 3) {
     case 0:
-      base = cap?'X':'x';
+      s << (cap?'X':'x');
       break;
     case 1:
-      base = cap?'Y':'y';
+      s << (cap?'Y':'y');
       break;
     default:
-      base = cap?'Z':'z';
+      s << (cap?'Z':'z');
       break;
   }
-#ifndef _MSC_VER
-  //append suffix if necessary
-  if (suffix == 0) {
-    sprintf(name, "%c", base);
-  } else {
-    sprintf(name, "%c%d", base, suffix);
+
+  if (suffix != 0)
+  {
+    s << std::dec << suffix;
   }
-  return gsString2ATermAppl(name);
-#endif // _MSC_VER
-#ifdef _MSC_VER
-  std::string name;
-  if (suffix == 0)
-    name = str(boost::format("%c") % base);
-  else
-    name = str(boost::format("%c%d") % base % suffix);
-  return gsString2ATermAppl(name.c_str());
-#endif
+
+  return gsString2ATermAppl(s.str().c_str());
 }
 
 ATermAppl create_fresh_var_name(bool cap, ATermList terms)

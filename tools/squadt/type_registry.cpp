@@ -9,7 +9,7 @@
 /// \file type_registry.cpp
 /// \brief Add your file description here.
 
-#include "boost.hpp" // precompiled headers
+#include "wx.hpp" // precompiled headers
 
 #include "type_registry.hpp"
 
@@ -24,6 +24,7 @@
 #include "tipi/mime_type.hpp"
 
 #ifdef USING_WX
+#include <wx/wx.h>
 #include <wx/mimetype.h>
 #endif
 

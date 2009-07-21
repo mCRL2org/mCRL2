@@ -12,14 +12,19 @@
 #ifndef EXPORTER_H
 #define EXPORTER_H
 
+#include <wx/wx.h>
 #include "graph.h"
 #include <wx/string.h>
 
 class Exporter
 {
   public:
-    Exporter(Graph* g);
-    virtual ~Exporter() {};
+
+    inline Exporter(Graph* g) : graph(g)
+    { }
+
+    inline virtual ~Exporter()
+    {};
 
     virtual bool export_to(wxString _filename) = 0;
   protected:

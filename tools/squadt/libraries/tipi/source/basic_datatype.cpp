@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include "boost/cstdint.hpp"
 #include "tipi/basic_datatype.hpp"
 
 #include "boost/xpressive/xpressive_static.hpp"
@@ -22,8 +23,8 @@ namespace tipi {
     template class integer_range< unsigned int >;
     template class integer_range< long int >;
     template class integer_range< unsigned long int >;
-    template class integer_range< long long int >;
-    template class integer_range< unsigned long long int >;
+    template class integer_range< boost::int64_t >;
+    template class integer_range< boost::uint64_t >;
     template class real_range< float, false, false >;
     template class real_range< float, false, true >;
     template class real_range< float, true, false >;

@@ -460,5 +460,5 @@ bool grape_event_change_channel_communication::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_channel_communication );
-WX_DEFINE_OBJARRAY( arr_event_detach_channel_communication );
+WX_DEFINE_OBJARRAY( arr_event_remove_channel_communication )
+WX_DEFINE_OBJARRAY( arr_event_detach_channel_communication )

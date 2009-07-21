@@ -287,4 +287,4 @@ bool grape_event_detach_nonterminating_transition_endstate::Undo( void )
 }
 
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_event_remove_ntt );
+WX_DEFINE_OBJARRAY( arr_event_remove_ntt )
