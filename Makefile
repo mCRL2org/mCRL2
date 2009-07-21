@@ -31,29 +31,34 @@ liblts_fsmparser:
 	cd libraries/lts/source; \
 	flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll; \
 	bison -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy; \
-	sed -i 's+#include "liblts_fsmparser.h"+#include "mcrl2/lts/detail/liblts_fsmparser.h"+' liblts_fsmparser.cpp
+	sed -i 's+#include "liblts_fsmparser.h"+#include "mcrl2/lts/detail/liblts_fsmparser.h"+' liblts_fsmparser.cpp; \
+	sed -i '/isatty/d' liblts_fsmlexer.cpp
 
 liblts_dotparser:
 	cd libraries/lts/source; \
 	flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll; \
 	bison -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy; \
-	sed -i 's+#include "liblts_dotparser.h"+#include "mcrl2/lts/detail/liblts_dotparser.h"+' liblts_dotparser.cpp
+	sed -i 's+#include "liblts_dotparser.h"+#include "mcrl2/lts/detail/liblts_dotparser.h"+' liblts_dotparser.cpp; \
+	sed -i '/isatty/d' liblts_dotlexer.cpp
 
 mcrl2parser:
 	cd libraries/core/source; \
 	flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll; \
 	bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy; \
-	sed -i 's+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+' mcrl2parser.cpp
+	sed -i 's+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+' mcrl2parser.cpp; \
+	sed -i '/isatty/d' mcrl2lexer.cpp
 
 chiparser:
 	cd tools/chi2mcrl2; \
 	flex -Pchi -ochilexer.cpp chilexer.ll; \
-	bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy;
+	bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy; \
+	sed -i '/isatty/d' chilexer.cpp
 
 lysaparser:
 	cd tools/lysa2mcrl2; \
-	flex -Pchi -olysalexer.cpp lysalexer.ll; \
-	bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy;
+	flex -Plysa -olysalexer.cpp lysalexer.ll; \
+	bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy; \
+	sed -i '/isatty/d' lysalexer.cpp
 
 tags:
 	ctags --languages=C,C++ --recurse=yes --extra=+q --fields=+i --totals=yes .

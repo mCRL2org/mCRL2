@@ -91,7 +91,7 @@ inline
 bool is_variable(aterm t)
 {
   return t.type() == AT_APPL && data_expression(t).is_variable();
-};
+}
 
 /// Search for a data variable in the term t. Precondition: t must contain
 /// at least one variable.

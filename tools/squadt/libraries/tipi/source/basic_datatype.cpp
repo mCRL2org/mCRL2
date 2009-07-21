@@ -15,14 +15,12 @@ namespace tipi {
 
   namespace datatype {
 
-    template class integer_range< char >;
-    template class integer_range< unsigned char >;
-    template class integer_range< short >;
-    template class integer_range< unsigned short >;
-    template class integer_range< int >;
-    template class integer_range< unsigned int >;
-    template class integer_range< long int >;
-    template class integer_range< unsigned long int >;
+    template class integer_range< boost::int8_t >;
+    template class integer_range< boost::uint8_t >;
+    template class integer_range< boost::int16_t >;
+    template class integer_range< boost::uint16_t >;
+    template class integer_range< boost::int32_t >;
+    template class integer_range< boost::uint32_t >;
     template class integer_range< boost::int64_t >;
     template class integer_range< boost::uint64_t >;
     template class real_range< float, false, false >;

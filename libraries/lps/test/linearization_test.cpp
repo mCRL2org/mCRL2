@@ -27,7 +27,7 @@ struct collect_after_test_case {
   }
 };
 
-BOOST_GLOBAL_FIXTURE(collect_after_test_case);
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 // Parameter i should be removed
 const std::string case_1(
