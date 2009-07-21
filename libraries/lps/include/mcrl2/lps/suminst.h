@@ -132,7 +132,7 @@ namespace mcrl2 {
             m_finite_sorts_only(finite_sorts_only),
             m_tau_summands_only(tau_summands_only),
             m_rewriter(r),
-            m_enumerator_factory(spec.data(), r)
+            m_enumerator_factory(spec.data(), m_rewriter)
         {}
 
         void run()

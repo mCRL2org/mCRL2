@@ -228,9 +228,6 @@ class function_declaration_list():
     for e in self.elements:
       if not is_constructor_declaration or not sort_spec.is_alias(target_sort(e.sort_expression)):
         code += e.generator_code(sort_spec, self)
-    if code == "":
-      code += "\n"
-      code += "        static_cast< void >(result); // suppress unused variable warnings\n"
     return code
 
   def projection_code(self, sort_spec):
@@ -1690,8 +1687,13 @@ class constructor_specification():
     code += "      function_symbol_vector %s_generate_constructors_code(%s)\n" % (self.namespace,sort_parameters)
     code += "      {\n"
     code += "        function_symbol_vector result;\n"
-    code += "%s" % (sort_spec.structured_sort_constructor_code())
-    code += "%s\n" % (self.declarations.generator_code(sort_spec, True))
+    add_constructors_code = self.declarations.generator_code(sort_spec) + (sort_spec.structured_sort_constructor_code())
+    if add_constructors_code == "":
+      for s in self.declarations.sort_parameters(sort_spec):
+        code += "        static_cast< void >(%s); // suppress unused variable warnings\n" % (s.to_string().lower())
+    else:
+      code += "%s" % (sort_spec.structured_sort_constructor_code())
+      code += "%s\n" % (self.declarations.generator_code(sort_spec, True))
     code += "        return result;\n"
     code += "      }\n"
     return code

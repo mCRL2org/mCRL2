@@ -73,9 +73,6 @@ namespace mcrl2 {
       function_symbol_vector real_generate_constructors_code()
       {
         function_symbol_vector result;
-
-        static_cast< void >(result); // suppress unused variable warnings
-
         return result;
       }
       /// \brief Generate identifier \@cReal

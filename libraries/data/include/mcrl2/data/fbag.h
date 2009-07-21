@@ -182,8 +182,6 @@ namespace mcrl2 {
         function_symbol_vector fbag_constructors = detail::fbag_struct(s).constructor_functions(fbag(s));
         result.insert(result.end(), fbag_constructors.begin(), fbag_constructors.end());
 
-        static_cast< void >(result); // suppress unused variable warnings
-
         return result;
       }
       /// \brief Generate identifier \@fbag_insert

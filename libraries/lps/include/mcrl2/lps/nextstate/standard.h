@@ -33,8 +33,8 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   }
 
   template < typename EquationSelector >
-  legacy_rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
-									 mcrl2::data::rewriter(d, selector, s)
+  legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
+                                 mcrl2::data::rewriter(d, selector, s)
   { }
 
   legacy_rewriter(mcrl2::data::rewriter const& other) :

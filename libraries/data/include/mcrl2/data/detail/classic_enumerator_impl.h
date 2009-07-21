@@ -198,20 +198,6 @@ namespace mcrl2 {
           }
 
           /// \param[in] v iterator range of the enumeration variables
-          template < typename Container >
-          static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
-              boost::shared_ptr< shared_context_type > const& context,
-                  Container const& v, expression_type const& c, substitution_type const& s = substitution_type(),
-                    typename detail::enable_if_container< Container, variable >::type* = 0) {
-
-            target.reset(new classic_enumerator_impl(context, c, s));
-
-            if (!target->initialise(v)) {
-              target.reset();
-            }
-          }
-
-          /// \param[in] v iterator range of the enumeration variables
           template < typename Container>
           static void create(boost::scoped_ptr< classic_enumerator_impl >& target,
               boost::shared_ptr< shared_context_type > const& context,

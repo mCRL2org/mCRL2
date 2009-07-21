@@ -248,7 +248,7 @@ namespace mcrl2 {
                          DataRewriter& r)
           : lps_algorithm(spec,core::gsVerbose),
             m_rewriter(r),
-            m_enumerator_factory(spec.data(), r)
+            m_enumerator_factory(spec.data(), m_rewriter)
         {}
 
         /// \brief Apply the algorithm to the specification passed in the

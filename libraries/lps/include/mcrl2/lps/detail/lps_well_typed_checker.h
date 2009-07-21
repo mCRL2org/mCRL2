@@ -85,21 +85,21 @@ namespace detail {
 
     /// \brief Checks well typedness of a sort expression
     /// \param d A sort expression
-    bool is_well_typed(const data::sort_expression& d) const
+    bool is_well_typed(const data::sort_expression&) const
     {                                         
       return true;
     } 
   
     /// \brief Checks well typedness of a variable
     /// \param d A variable
-    bool is_well_typed(const data::variable& d) const
+    bool is_well_typed(const data::variable&) const
     {                                         
       return true;
     } 
   
     /// \brief Checks well typedness of a data expression
     /// \param d A data expression
-    bool is_well_typed(const data::data_expression& d) const
+    bool is_well_typed(const data::data_expression&) const
     {                                         
       return true;
     } 
@@ -118,14 +118,14 @@ namespace detail {
     } 
 
     /// \brief Traverses an action label
-    bool is_well_typed(const action_label& l) const
+    bool is_well_typed(const action_label&) const
     {
       return true;
     }
 
     /// \brief Traverses an action
     /// \param a An action
-    bool is_well_typed(const action& a) const
+    bool is_well_typed(const action&) const
     {
       return true;
     }

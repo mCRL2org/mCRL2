@@ -70,9 +70,7 @@ namespace mcrl2 {
       function_symbol_vector set_generate_constructors_code(const sort_expression& s)
       {
         function_symbol_vector result;
-
-        static_cast< void >(result); // suppress unused variable warnings
-
+        static_cast< void >(s); // suppress unused variable warnings
         return result;
       }
       /// \brief Generate identifier \@set
