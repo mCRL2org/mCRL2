@@ -17,14 +17,14 @@
 #include <iostream>
 #include <sstream>
 
+#include "boost/scoped_array.hpp"
+
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-
-#include "workarounds.h" // DECL_A
 
 namespace mcrl2 {
   namespace core {
@@ -4373,11 +4373,9 @@ ATermAppl gsMakeDataExprPos(const char *p)
 ATermAppl gsMakeDataExprPos_int(const int p)
 {
   assert(p > 0);
-  DECL_A(s,char,NrOfChars(p)+1);
-  sprintf(s, "%d", p);
-  ATermAppl a = gsMakeDataExprPos(s);
-  FREE_A(s);
-  return a;
+  std::ostringstream s;
+  s << std::dec << p;
+  return gsMakeDataExprPos(s.str().c_str());
 }
 
 ATermAppl gsMakeDataExprNat(const char *n)
@@ -4392,11 +4390,9 @@ ATermAppl gsMakeDataExprNat(const char *n)
 ATermAppl gsMakeDataExprNat_int(const int n)
 {
   assert(n >= 0);
-  DECL_A(s,char,NrOfChars(n)+1);
-  sprintf(s, "%d", n);
-  ATermAppl a = gsMakeDataExprNat(s);
-  FREE_A(s);
-  return a;
+  std::ostringstream s;
+  s << std::dec << n;
+  return gsMakeDataExprNat(s.str().c_str());
 }
 
 ATermAppl gsMakeDataExprInt(const char *z)
@@ -4410,11 +4406,9 @@ ATermAppl gsMakeDataExprInt(const char *z)
 
 ATermAppl gsMakeDataExprInt_int(const int z)
 {
-  DECL_A(s,char,NrOfChars(z)+1);
-  sprintf(s, "%d", z);
-  ATermAppl a = gsMakeDataExprInt(s);
-  FREE_A(s);
-  return a;
+  std::ostringstream s;
+  s << std::dec << z;
+  return gsMakeDataExprInt(s.str().c_str());
 }
 
 ATermAppl gsMakeDataExprReal(const char *z)
@@ -4424,11 +4418,9 @@ ATermAppl gsMakeDataExprReal(const char *z)
 
 ATermAppl gsMakeDataExprReal_int(const int z)
 {
-  DECL_A(s,char,NrOfChars(z)+1);
-  sprintf(s, "%d", z);
-  ATermAppl a = gsMakeDataExprReal(s);
-  FREE_A(s);
-  return a;
+  std::ostringstream s;
+  s << std::dec << z;
+  return gsMakeDataExprReal(s.str().c_str());
 }
 
 bool gsIsPosConstant(const ATermAppl PosExpr)
@@ -6497,7 +6489,7 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
   assert(gsIsMultAct(MultAct));
   ATermList l = ATLgetArgument(MultAct,0);
   unsigned int len = ATgetLength(l);
-  DECL_A(acts,ATerm,len);
+  boost::scoped_array< ATerm > acts(new ATerm[len]);
   for (unsigned int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
   {
     acts[i] = ATgetFirst(l);
@@ -6522,7 +6514,6 @@ ATermAppl gsSortMultAct(ATermAppl MultAct)
   {
     l = ATinsert(l,acts[len-i-1]);
   }
-  FREE_A(acts);
   return gsMakeMultAct(l);
 }
 

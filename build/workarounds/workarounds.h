@@ -23,11 +23,6 @@
 # define fileno   _fileno
 # define isatty   _isatty
 
-//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
-//is not a constant value)
-# define DECL_A(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
-# define FREE_A(NAME)
-
 typedef int pid_t;
 
 #ifndef STDIN_FILENO
@@ -90,13 +85,6 @@ inline char *strdup(const char *s) {
 # define LLONG_MIN -9223372036854775807LL
 # define LLONG_MAX +9223372036854775807LL
 # define ULLONG_MAX 18446744073709551615ULL
-#endif
-
-//Declare a local array NAME of type TYPE and SIZE elements (where SIZE
-//is not a constant value)
-#ifndef DECL_A
-#define DECL_A(NAME,TYPE,SIZE)  TYPE NAME[SIZE]
-#define FREE_A(NAME)
 #endif
 
 #endif

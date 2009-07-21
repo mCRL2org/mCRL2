@@ -19,13 +19,12 @@
 #include <cassert>
 #include <stdexcept>
 #include <memory.h>
+#include "boost/scoped_array.hpp"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-
-#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -784,12 +783,11 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int *max_vars)
 	ATermAppl tree;
 	if ( r == NULL )
 	{
-		DECL_A(a,int,total_rule_vars);
-		treevars_usedcnt = a;
+		boost::scoped_array< int > a(new int[total_rule_vars]);
+		treevars_usedcnt = a.get();
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
 		tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
-		FREE_A(a);
 		for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 		{
 			tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);
@@ -942,13 +940,13 @@ ATfprintf(stderr,"no more args\n");
 
 ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 {
-	DECL_A(vars,ATermAppl,max_vars);
-	DECL_A(vals,ATerm,max_vars);
+	boost::scoped_array< ATermAppl > vars(new ATermAppl[max_vars]);
+	boost::scoped_array< ATerm > vals(new ATerm[max_vars]);
 	int len = 0;
 
 	while ( isC(tree) )
 	{
-		if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars,vals,len),trueint) )
+		if ( ATisEqual(build(ATgetArgument(tree,0),-1,vars.get(),vals.get(),len),trueint) )
 		{
 			tree = (ATermAppl) ATgetArgument(tree,0);
 		} else {
@@ -961,7 +959,7 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 	{
 		rargs = ATgetNext((ATermList) t);
 	} else {
-		rargs = tree_matcher_aux((ATerm) t,&tree,vars,vals,&len);
+		rargs = tree_matcher_aux((ATerm) t,&tree,vars.get(),vals.get(),&len);
 		rargs = ATgetNext(rargs);
 	}
 
@@ -985,16 +983,10 @@ ATerm RewriterInnermost::tree_matcher(ATermList t, ATermAppl tree)
 			}
 		}
 
-		ATerm r = build(rslt,rslt_len,vars,vals,len);
-
-		FREE_A(vals);
-		FREE_A(vars);
+		ATerm r = build(rslt,rslt_len,vars.get(),vals.get(),len);
 
 		return r;
 	} else {
-		FREE_A(vals);
-		FREE_A(vars);
-
 		return NULL;
 	}
 }

@@ -13,6 +13,8 @@
 #include <cassert>
 #include <climits>
 
+#include "boost/scoped_array.hpp"
+
 #ifdef _MSC_VER
 #include <boost/format.hpp>
 #endif
@@ -20,8 +22,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-
-#include "workarounds.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -165,7 +165,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
     AFun head = ATgetAFun(part);
     int nr_args = ATgetArity(head);
     if (nr_args > 0) {
-      DECL_A(args,ATerm,nr_args);
+      boost::scoped_array< ATerm > args(new ATerm[nr_args]);
       for (int i = 0; i < nr_args; i++) {
         ATerm arg = ATgetArgument(part, i);
         if (ATgetType(arg) == AT_APPL)
@@ -173,8 +173,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
         else //ATgetType(arg) == AT_LIST
           args[i] = (ATerm) translate_reg_frms_list((ATermList) arg);
       }
-      part = ATmakeApplArray(head, args);
-      FREE_A(args);
+      part = ATmakeApplArray(head, args.get());
     }
   }
   return part;

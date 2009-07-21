@@ -12,8 +12,6 @@
 
 #ifdef MCRL2_INNERC_AVAILABLE
 
-#include "workarounds.h" // DECL_A
-
 #define NAME std::string("rewr_innerc")
 
 #include <cstdio>
@@ -24,8 +22,9 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <cassert>
-#include <aterm2.h>
 #include <stdexcept>
+#include "boost/scoped_array.hpp"
+#include "aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
@@ -1006,12 +1005,11 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, unsigned int arity)
 	ATermAppl tree;
 	if ( r == NULL )
 	{
-		DECL_A(a,int,total_rule_vars);
-		treevars_usedcnt = a;
+		boost::scoped_array< int > a(new int[total_rule_vars]);
+		treevars_usedcnt = a.get();
 //		treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
 		tree = build_tree(init_pars,0);
 //		free(treevars_usedcnt);
-		FREE_A(a);
 		for (; !ATisEmpty(readies); readies=ATgetNext(readies))
 		{
 			tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);

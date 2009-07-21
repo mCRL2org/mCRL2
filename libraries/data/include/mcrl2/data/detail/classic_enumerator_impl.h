@@ -142,7 +142,7 @@ namespace mcrl2 {
 
           // do not use directly, use the create method
           classic_enumerator_impl(boost::shared_ptr< shared_context_type > const& context,
-                             expression_type const& c, substitution_type const& s, Evaluator const& e) :
+                             expression_type const& c, substitution_type const& s, Evaluator const&) :
                 m_shared_context(context), m_generator(m_shared_context->m_enumerator.getInfo()), m_evaluator(context->m_evaluator), m_condition(c), m_substitution(s) {
           }
 

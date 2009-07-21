@@ -19,14 +19,13 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
-#include <aterm2.h>
+#include "boost/scoped_array.hpp"
+#include "aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
-
-#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -249,7 +248,7 @@ static ATermList create_strategy(ATermList rules)
 			max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
 		}
 	}
-	DECL_A(used,bool,max_arity);
+	boost::scoped_array< bool > used(new bool[max_arity]);
 	for (unsigned int i = 0; i < max_arity; i++)
 	{
 		used[i] = false;
@@ -260,8 +259,8 @@ static ATermList create_strategy(ATermList rules)
 	{
 		ATermList l = ATmakeList0();
 		ATermList m = ATmakeList0();
-		DECL_A(args,int,arity);
-		DECL_A(bs,bool,arity);
+	        boost::scoped_array< int > args(new int[arity]);
+	        boost::scoped_array< bool > bs(new bool[arity]);
 //printf("arity = %i\n",arity);
 
 		for (unsigned int i = 0; i < arity; i++)
@@ -395,8 +394,6 @@ static ATermList create_strategy(ATermList rules)
 			}
 		}
 
-		FREE_A(bs);
-		FREE_A(args);
 		rules = ATreverse(l);
 		arity++;
 	}
@@ -405,7 +402,6 @@ static ATermList create_strategy(ATermList rules)
 
 //gsfprintf(stderr,"strat: %T\n\n",ATreverse(strat));
 
-	FREE_A(used);
 	return ATreverse(strat);
 }
 
@@ -582,7 +578,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 		{
 			new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
 		}
-		DECL_A(args,ATerm,new_arity);
+		boost::scoped_array< ATerm > args(new ATerm[new_arity]);
 		unsigned int i;
 		if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0) )
 		{
@@ -606,9 +602,9 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 
 		if ( arity == new_arity )
 		{
-			return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args);
+			return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args.get());
 		} else {
-			return (ATerm) ATmakeApplArray(getAppl(new_arity),args);
+			return (ATerm) ATmakeApplArray(getAppl(new_arity),args.get());
 		}
 	}
 }
@@ -727,8 +723,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 			}
 		}
 
-		DECL_A(rewritten,ATerm,arity);
-		DECL_A(args,ATermAppl,arity);
+		boost::scoped_array< ATerm > rewritten(new ATerm[arity]);
+		boost::scoped_array< ATermAppl > args(new ATermAppl[arity]);
 
 		if ( head_arity > 0 )
 		{
@@ -771,14 +767,14 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 					}
 
 					unsigned int max_len = ATgetLength(ATLgetFirst(rule));
-					DECL_A(vars,ATermAppl,max_len);
-					DECL_A(vals,ATerm,max_len);
+		                        boost::scoped_array< ATermAppl > vars(new ATermAppl[max_len]);
+		                        boost::scoped_array< ATerm > vals(new ATerm[max_len]);
 					unsigned int len = 0;
 					bool matches = true;
 
 					for (unsigned int i=1; i<rule_arity; i++)
 					{
-						if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars,vals,&len) )
+						if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars.get(),vals.get(),&len) )
 						{
 							matches = false;
 							break;
@@ -789,13 +785,13 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 //{
 //gsfprintf(stderr,"%T --> %T (%T)\n\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 //}
-					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true)) )
+					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.get(),vals.get(),len,ATelementAt(rule,1))),jitty_true)) )
 					{
 						ATermAppl rhs = ATAelementAt(rule,3);
 
 						if ( arity == rule_arity )
 						{
-							return rewrite_aux((ATermAppl) subst_values(vars,vals,len,(ATerm) rhs));
+							return rewrite_aux((ATermAppl) subst_values(vars.get(),vals.get(),len,(ATerm) rhs));
 						}
 
 						unsigned int rhs_arity;
@@ -804,7 +800,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
 						if ( gsIsDataVarId(rhs) )
 						{
-							arg0 = subst_values(vars,vals,len,(ATerm) rhs);
+							arg0 = subst_values(vars.get(),vals.get(),len,(ATerm) rhs);
 							if ( gsIsDataVarId((ATermAppl) arg0) )
 							{
 								rhs_arity = 0;
@@ -816,13 +812,13 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 						} else {
 							rhs_arity = ATgetArity(ATgetAFun(rhs));
 							new_arity = rhs_arity+arity-rule_arity;
-							arg0 = subst_values(vars,vals,len,ATgetArgument(rhs,0));
+							arg0 = subst_values(vars.get(),vals.get(),len,ATgetArgument(rhs,0));
 							if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)))
 							{
 								new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
 							}
 						}
-						DECL_A(newargs,ATerm,new_arity);
+		                                boost::scoped_array< ATerm > newargs(new ATerm[new_arity]);
 						unsigned int i;
 						if ( gsIsDataVarId(rhs) )
 						{
@@ -855,7 +851,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 							for (unsigned int j=1; j<rhs_arity; j++)
 							{
 //gsfprintf(stderr,"pre %T\n\n",ATgetArgument(rhs,i));
-								newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
+								newargs[i] = subst_values(vars.get(),vals.get(),len,ATgetArgument(rhs,j));
 								i++;
 //gsfprintf(stderr,"post %T\n\n",args[i]);
 							}
@@ -867,11 +863,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 							i++;
 						}
 
-						ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
-
-						FREE_A(newargs);
-						FREE_A(vals);
-						FREE_A(vars);
+						ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs.get());
 
 						ATermAppl aa = rewrite_aux(a);
 //gsfprintf(stderr,"return %T\n\n",aa);
@@ -879,8 +871,6 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 						return aa;
 					}
 
-					FREE_A(vals);
-					FREE_A(vars);
 				}
 			}
 		}
@@ -895,10 +885,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 			}
 		}
 
-		ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten);
+		ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten.get());
 
-		FREE_A(args);
-		FREE_A(rewritten);
 //gsfprintf(stderr,"return %T\n\n",a);
 //gsfprintf(stderr,"return3  %P\n\n",fromInner(a));
 		return a;

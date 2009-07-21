@@ -14,17 +14,15 @@
 #include <cstdlib>
 #include <cassert>
 #include <memory.h>
-#include <aterm2.h>
+#include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
-using namespace mcrl2::data::detail;
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "workarounds.h" // DECL_A
-
+using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 
 namespace mcrl2 {

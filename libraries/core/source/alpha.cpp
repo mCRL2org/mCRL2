@@ -12,14 +12,13 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include <aterm2.h>
+#include <sstream>
+#include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-
-#include "workarounds.h" // DECL_A
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -79,11 +78,9 @@ static bool push_comm_through_allow=true; //at some point is set to false to avo
 
     // on 128 bit architecture long cannot occupy more than 256/3+2=87 8-ary digits, even less 10-ary
     // char buf[90];
-    DECL_A(buf,char,NrOfChars(name)+1);
-    sprintf(buf, "%d", name);
-    AFun a=ATmakeAFun(buf, arity, quoted);
-    FREE_A(buf);
-    return a;
+    std::ostringstream s;
+    s << std::dec << name;
+    return ATmakeAFun(s.str().c_str(), arity, quoted);
   }
 
   //==================================================
