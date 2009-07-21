@@ -184,7 +184,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
 
     Enumerator make(ATermList v, ATerm c)
     {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< variable >(v), atermpp::aterm(c));
+      return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< mcrl2::data::variable >(v), atermpp::aterm(c));
     }
 
 
