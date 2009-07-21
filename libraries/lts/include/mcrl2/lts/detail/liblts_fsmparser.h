@@ -57,7 +57,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 31 "liblts_fsmparser.yy"
+#line 33 "liblts_fsmparser.yy"
 
   ATermAppl aterm;
   int number;

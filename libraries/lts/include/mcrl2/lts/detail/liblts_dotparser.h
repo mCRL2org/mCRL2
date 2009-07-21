@@ -65,7 +65,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 34 "liblts_dotparser.yy"
+#line 35 "liblts_dotparser.yy"
 
   ATermAppl aterm;
   ATermList atermlist;

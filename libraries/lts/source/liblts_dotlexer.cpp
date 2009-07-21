@@ -1494,6 +1494,7 @@ int yyFlexLexer::yy_get_next_buffer()
 	dotyyfree((void *) b  );
 }
 
+
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a yyrestart() or at EOF.

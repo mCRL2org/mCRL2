@@ -102,7 +102,7 @@ char* intToCString(int i);
 
 
 /* Line 189 of yacc.c  */
-#line 104 "liblts_fsmparser.cpp"
+#line 106 "liblts_fsmparser.cpp"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -147,7 +147,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 31 "liblts_fsmparser.yy"
+#line 33 "liblts_fsmparser.yy"
 
   ATermAppl aterm;
   int number;
@@ -155,7 +155,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 157 "liblts_fsmparser.cpp"
+#line 159 "liblts_fsmparser.cpp"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -167,7 +167,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 169 "liblts_fsmparser.cpp"
+#line 171 "liblts_fsmparser.cpp"
 
 #ifdef short
 # undef short
@@ -460,10 +460,10 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    52,    52,    57,    52,    67,    71,    70,    79,    78,
-      86,    94,    93,   114,   116,   119,   128,   131,   140,   143,
-     147,   160,   164,   168,   163,   181,   184,   201,   204,   209,
-     228,   230
+       0,    54,    54,    59,    54,    69,    73,    72,    81,    80,
+      88,    96,    95,   116,   118,   121,   130,   133,   142,   145,
+     149,   162,   166,   170,   165,   183,   186,   203,   206,   211,
+     230,   232
 };
 #endif
 
@@ -1389,7 +1389,7 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 52 "liblts_fsmparser.yy"
+#line 54 "liblts_fsmparser.yy"
     {
       num_pars = 0;
       ignore_par.clear();
@@ -1399,7 +1399,7 @@ yyreduce:
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 57 "liblts_fsmparser.yy"
+#line 59 "liblts_fsmparser.yy"
     {
       fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
     ;}
@@ -1408,7 +1408,7 @@ yyreduce:
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 71 "liblts_fsmparser.yy"
+#line 73 "liblts_fsmparser.yy"
     {
       ++num_pars;
     ;}
@@ -1417,7 +1417,7 @@ yyreduce:
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 79 "liblts_fsmparser.yy"
+#line 81 "liblts_fsmparser.yy"
     {
       fsm_lexer_obj->typeId = (yyvsp[(1) - (1)].aterm);
     ;}
@@ -1426,7 +1426,7 @@ yyreduce:
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 87 "liblts_fsmparser.yy"
+#line 89 "liblts_fsmparser.yy"
     {
       ignore_par.push_back((yyvsp[(2) - (3)].number) == 0);
     ;}
@@ -1435,7 +1435,7 @@ yyreduce:
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 94 "liblts_fsmparser.yy"
+#line 96 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
@@ -1448,7 +1448,7 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 102 "liblts_fsmparser.yy"
+#line 104 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
@@ -1462,21 +1462,21 @@ yyreduce:
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 114 "liblts_fsmparser.yy"
+#line 116 "liblts_fsmparser.yy"
     { safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) ;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 117 "liblts_fsmparser.yy"
+#line 119 "liblts_fsmparser.yy"
     { safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm)) ;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 120 "liblts_fsmparser.yy"
+#line 122 "liblts_fsmparser.yy"
     {
       std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(1) - (3)].aterm) ) )
         + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)(yyvsp[(3) - (3)].aterm) ) );
@@ -1487,14 +1487,14 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 129 "liblts_fsmparser.yy"
+#line 131 "liblts_fsmparser.yy"
     { safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm)) ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 132 "liblts_fsmparser.yy"
+#line 134 "liblts_fsmparser.yy"
     {
       std::string result = "(" + static_cast<std::string> ( ATwriteToString(
         (ATerm)(yyvsp[(2) - (3)].aterm)) ) + ")";
@@ -1505,7 +1505,7 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 148 "liblts_fsmparser.yy"
+#line 150 "liblts_fsmparser.yy"
     {
       if (!ignore_par[num_pars])
       {
@@ -1519,7 +1519,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 164 "liblts_fsmparser.yy"
+#line 166 "liblts_fsmparser.yy"
     {
       par_index = 0;
     ;}
@@ -1528,7 +1528,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 168 "liblts_fsmparser.yy"
+#line 170 "liblts_fsmparser.yy"
     {
       fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
       unsigned int i = fsm_lexer_obj->fsm_lts->add_state(
@@ -1544,7 +1544,7 @@ yyreduce:
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 185 "liblts_fsmparser.yy"
+#line 187 "liblts_fsmparser.yy"
     {
       if (!ignore_par[par_index])
       {
@@ -1562,7 +1562,7 @@ yyreduce:
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 210 "liblts_fsmparser.yy"
+#line 212 "liblts_fsmparser.yy"
     {
       unsigned int frState = (yyvsp[(1) - (3)].number)-1;
       unsigned int toState = (yyvsp[(2) - (3)].number)-1;
@@ -1582,21 +1582,21 @@ yyreduce:
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 228 "liblts_fsmparser.yy"
+#line 230 "liblts_fsmparser.yy"
     { safe_assign((yyval.aterm), ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) ;}
     break;
 
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 231 "liblts_fsmparser.yy"
+#line 233 "liblts_fsmparser.yy"
     { safe_assign((yyval.aterm), (yyvsp[(1) - (1)].aterm)) ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1598 "liblts_fsmparser.cpp"
+#line 1600 "liblts_fsmparser.cpp"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1808,7 +1808,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 234 "liblts_fsmparser.yy"
+#line 236 "liblts_fsmparser.yy"
 
 
 char* intToCString( int i )
