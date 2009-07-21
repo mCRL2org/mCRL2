@@ -163,9 +163,19 @@ cpp-pch boost.pch
               <library>boost_system
             ;
 
+rule use-precompiled-headers ( properties * ) {
+  local targets ;
+
+  if <pch>on in $(properties) {
+    targets = <source>boost.pch ;
+  }
+
+  return $(targets) ;
+}
+
 alias boost : : : :
               $(boost-requirements)
-              <pch>on:<source>boost.pch
+              <conditional>@use-precompiled-headers
               <toolset>msvc:<cxxflags>/FIboost.hpp
               <target-os>windows,<toolset>intel:<cxxflags>/FIboost.hpp ;
 
