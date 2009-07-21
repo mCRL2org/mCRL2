@@ -178,6 +178,8 @@ namespace mcrl2 {
         function_symbol_vector fset_constructors = detail::fset_struct(s).constructor_functions(fset(s));
         result.insert(result.end(), fset_constructors.begin(), fset_constructors.end());
 
+        static_cast< void >(result); // suppress unused variable warnings
+
         return result;
       }
       /// \brief Generate identifier \@fset_insert

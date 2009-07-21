@@ -73,6 +73,8 @@ namespace mcrl2 {
       {
         function_symbol_vector result;
 
+        static_cast< void >(result); // suppress unused variable warnings
+
         return result;
       }
       /// \brief Generate identifier \@bag

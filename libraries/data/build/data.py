@@ -228,6 +228,9 @@ class function_declaration_list():
     for e in self.elements:
       if not is_constructor_declaration or not sort_spec.is_alias(target_sort(e.sort_expression)):
         code += e.generator_code(sort_spec, self)
+    if code == "":
+      code += "\n"
+      code += "        static_cast< void >(result); // suppress unused variable warnings\n"
     return code
 
   def projection_code(self, sort_spec):

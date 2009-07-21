@@ -135,8 +135,7 @@ namespace data {
       basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
                        basic_rewriter< atermpp::aterm >(other),
                        m_conversion_helper(other.m_conversion_helper)
-      {
-      }
+      { }
 
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] expression an expression.
@@ -159,8 +158,7 @@ namespace data {
       basic_rewriter(basic_rewriter const& other) :
           basic_rewriter< atermpp::aterm >(other),
           m_conversion_helper(other.m_conversion_helper)
-      {
-      }
+      { }
 
       /// \brief Constructor.
       /// \param[in] d A data specification
@@ -168,8 +166,7 @@ namespace data {
       basic_rewriter(data_specification const& d, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
           m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
-      {
-      }
+      { }
 
       /// \brief Constructor.
       /// \param[in] d A data specification
@@ -179,8 +176,7 @@ namespace data {
       basic_rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
           m_conversion_helper(new detail::rewrite_conversion_helper::rewrite_conversion_helper(d, *m_rewriter, selector))
-      {
-      }
+      { }
 
       /// \brief Adds an equation to the rewrite rules.
       /// \param[in] equation The equation that is added.
