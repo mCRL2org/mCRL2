@@ -68,6 +68,12 @@ namespace lps {
       {}
 
       /// \brief Constructor
+      multi_action(const atermpp::aterm_appl& t) : m_time(core::detail::gsMakeNil())
+      {
+        m_actions = (core::detail::gsIsAction(t)) ? atermpp::term_list< action >(atermpp::make_list(t)) : atermpp::term_list< action >(t(0));
+      }
+
+      /// \brief Constructor
       multi_action(const action& l)
         : m_actions(atermpp::push_front(action_list(), l)),
           m_time(core::detail::gsMakeNil())
