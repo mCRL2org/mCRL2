@@ -10,7 +10,7 @@ alias sim_shared
          [ obj simulator.o : simulator.cpp ]
        ;
 
-explicit sim_shared simbasegui.o ;
+explicit sim_shared ;
 
 local plugins = [ MATCH plugins/(.*)/Jamfile.v2 : [ glob plugins/*/Jamfile.v2 ] ] ;
 
@@ -23,6 +23,7 @@ tool xsim
          simulatorgui.cpp
          xsimmain.cpp
          xsimtrace.cpp
+         sim_shared
          /libraries//trace
          /libraries//data
          /libraries//lps
