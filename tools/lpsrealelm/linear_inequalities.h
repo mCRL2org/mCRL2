@@ -162,13 +162,16 @@ class linear_inequality
                       const rewriter& r,
                       bool negate=false,
                       const data_expression factor=real_one())
-    { std::cerr << "EXPRESSION " << pp(e) << "\n";
-      if (sort_real::is_minus_application(e))
-      { parse_and_store_expression(application(e).left(),r,negate,factor);
+    { 
+      // std::cerr << "EXPRESSION " << pp(e) <<  "    --    " << e << "\n";
+      if (sort_real::is_minus_application(e) && application(e).arguments().size()==2)
+      { // std::cerr << "is_minus_application\n";
+        parse_and_store_expression(application(e).left(),r,negate,factor);
         parse_and_store_expression(application(e).right(),r,!negate,factor);
       }
-      else if (sort_real::is_negate_application(e))
-      { parse_and_store_expression(application(e).left(),r,!negate,factor);
+      else if (sort_real::is_negate_application(e) && application(e).arguments().size()==1)
+      { // std::cerr << "is_negate_application\n";
+        parse_and_store_expression(*(application(e).arguments().begin()),r,!negate,factor);
       }
       else if (sort_real::is_plus_application(e))
       { parse_and_store_expression(application(e).left(),r,negate,factor);
