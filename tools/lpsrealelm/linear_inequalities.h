@@ -1139,7 +1139,7 @@ inline bool is_inconsistent(
   atermpp::set < variable > basic_variables;
   std::map < variable, linear_inequality::lhs_t > working_equalities;
 
-  fresh_variable_generator fresh_variable("slack_var");
+  fresh_variable_generator<> fresh_variable("slack_var");
 
   for(std::vector < linear_inequality >::const_iterator i=inequalities_in.begin();
                 i!=inequalities_in.end(); ++i)

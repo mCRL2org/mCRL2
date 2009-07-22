@@ -39,14 +39,14 @@ void test_fresh_variable_generator()
   variable d00("d00", basic_sort("D"));
   data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
 
-  fresh_variable_generator generator(e, "d");
+  fresh_variable_generator< > generator(e, "d");
   variable x = generator(d.sort());
   BOOST_CHECK(x == variable("d1", basic_sort("D")));
   x = generator(d.sort());
   BOOST_CHECK(x == variable("d2", basic_sort("D")));
 
   variable a = fresh_variable(e, basic_sort("D"), "d");
-  BOOST_CHECK(a == variable("d01", basic_sort("D")));
+  BOOST_CHECK(a == variable("d1", basic_sort("D")));
 
   std::set<identifier_string> ids = find_identifiers(e);
   BOOST_CHECK(ids.size() == 8);
@@ -63,7 +63,7 @@ void test_fresh_variable_generator()
   x = generator(f);
   BOOST_CHECK(x == variable("f", basic_sort("F")));
   x = generator(f);
-  BOOST_CHECK(x == variable("f0", basic_sort("F")));
+  BOOST_CHECK(x == variable("f1", basic_sort("F")));
 
   atermpp::vector<data_expression> v;
   variable p("p", basic_sort("P"));
@@ -72,9 +72,9 @@ void test_fresh_variable_generator()
   v.push_back(q);
   generator.add_to_context(boost::make_iterator_range(v));
   x = generator(p);
-  BOOST_CHECK(x == variable("p0", basic_sort("P")));
+  BOOST_CHECK(x == variable("p1", basic_sort("P")));
   x = generator(q);
-  BOOST_CHECK(x == variable("q0", basic_sort("P")));
+  BOOST_CHECK(x == variable("q1", basic_sort("P")));
 }
 
 void test_fresh_variables()
@@ -83,11 +83,11 @@ void test_fresh_variables()
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
-  variable_vector w1 = fresh_variables(w, context);
+  variable_vector w1 = convert< variable_vector >(fresh_variables(w, context));
   std::cout << "w1 = " << mcrl2::data::pp(w1) << std::endl;
-  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d_01", basic_sort("D"))) != w1.end());
-  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e_01", basic_sort("E"))) != w1.end());
-  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f_01", basic_sort("F"))) != w1.end());
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d1", basic_sort("D"))) != w1.end());
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e1", basic_sort("E"))) != w1.end());
+  BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f1", basic_sort("F"))) != w1.end());
 }
 
 int test_main(int argc, char** argv)

@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 #define MCRL2_DATA_XYZ_IDENTIFIER_GENERATOR_H
 
+#include "boost/format.hpp"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2 {

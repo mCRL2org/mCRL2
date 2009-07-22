@@ -24,7 +24,7 @@ namespace data {
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
 /// context.
-class set_identifier_generator: public identifier_generator
+class set_identifier_generator: public identifier_generator<>
 {
   protected:
     /// \brief The context of the identifier generator.
@@ -87,7 +87,7 @@ class set_identifier_generator: public identifier_generator
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers can be generated that do not appear in the
 /// context.
-class multiset_identifier_generator: public identifier_generator
+class multiset_identifier_generator: public identifier_generator<>
 {
   protected:
     /// \brief The context of the identifier generator.

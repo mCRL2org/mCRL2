@@ -29,6 +29,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
@@ -130,48 +131,7 @@ namespace mcrl2 {
           {
             using namespace mcrl2::core::detail;
 
-            // Using local generator because existing generators do not satisfy requirements and performance expectations
-            struct local_generator {
-
-              std::string m_current;
-
-              local_generator() : m_current("lambda@")
-              {}
-
-              function_symbol operator()(mcrl2::data::sort_expression const& sort)
-              {
-                bool carry = true;
-
-                for (std::string::iterator i = m_current.begin() + 7; i != m_current.end() && carry; ++i) {
-                  if (*i < '9') {
-                    ++(*i);
-
-                    carry = false;
-                  }
-                  else if (*i < 'a') {
-                    *i = 'a';
-
-                    carry = false;
-                  }
-                  else if (*i < 'z') {
-                    ++(*i);
-
-                    carry = false;
-                  }
-                  else {
-                    *i = '0';
-                  }
-                }
-
-                if (carry) {
-                  m_current.append("0");
-                }
-
-                return mcrl2::data::function_symbol(m_current, sort);
-              }
-            };
-
-            static local_generator symbol_generator;
+            static number_postfix_generator symbol_generator("lambda@");
 
             atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
 
@@ -186,7 +146,8 @@ namespace mcrl2 {
 
                 function_sort   new_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
 
-                data_expression new_function(symbol_generator((free_variables.empty()) ? new_function_sort :
+                data_expression new_function(function_symbol(symbol_generator(),
+                        (free_variables.empty()) ? new_function_sort :
                                       function_sort(make_sort_range(free_variables), new_function_sort)));
 
                 // lambda f : type_of(free_variables). lambda b. type_of(bound_variables) = body

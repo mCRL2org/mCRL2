@@ -28,7 +28,10 @@ namespace mcrl2 {
 
   namespace data {
 
+    class number_postfix_generator;
+
     /// \brief Variable generator that generates data variables with names that do not appear in a given context.
+    template < typename IdentifierGenerator = number_postfix_generator >
     class fresh_variable_generator
     {
       protected:
@@ -36,43 +39,36 @@ namespace mcrl2 {
         atermpp::set<core::identifier_string> m_identifiers;
 
         /// \brief A hint for the name of generated variables.
-        std::string m_hint;
+        IdentifierGenerator                   m_generator;
 
-        std::string m_current;
-
-        std::string generate(std::string const& hint)
+        std::string generate(core::identifier_string const& hint)
         {
-          std::string new_name(hint);
+          core::identifier_string new_name = hint;
 
-          generate(new_name, hint.size());
+          if (m_identifiers.find(new_name) != m_identifiers.end())
+          {
+            IdentifierGenerator generator(hint);
+
+            while (m_identifiers.find(new_name) != m_identifiers.end())
+            {
+              new_name = generator();
+            }
+          }
+
+          m_identifiers.insert(new_name);
 
           return new_name;
         }
 
-        std::string generate(std::string& new_name, const size_t end_position)
+        core::identifier_string generate()
         {
-          while (m_identifiers.find(new_name) != m_identifiers.end())
+          core::identifier_string new_name = m_generator();
+
+          if (m_identifiers.find(new_name) != m_identifiers.end())
           {
-            bool carry = true;
-
-            for (std::string::reverse_iterator i = new_name.rbegin(),
-                        j = new_name.rbegin() + (new_name.size() - end_position);
-                                                               carry && i != j; ++i)
+            while (m_identifiers.find(new_name) != m_identifiers.end())
             {
-              if (*i == '9')
-              {
-                *i = '0';
-              }
-              else
-              {
-               carry = false;
-
-                ++(*i);
-              }
-            }
-
-            if (carry) {
-              new_name.append("0");
+              new_name = m_generator();
             }
           }
 
@@ -84,16 +80,16 @@ namespace mcrl2 {
       public:
 
         /// \brief Constructor.
-        fresh_variable_generator(std::string const& hint = "t") : m_hint(hint), m_current(hint)
+        fresh_variable_generator(std::string const& hint = "") : m_generator(hint)
         { }
 
         /// \brief Constructor.
         /// \param context data specification that serves as context
         /// \param hint A string
-        fresh_variable_generator(data_specification const& context, std::string const& hint = "t") :
+        fresh_variable_generator(data_specification const& context, std::string const& hint = "") :
           m_identifiers(convert< atermpp::set< core::identifier_string > >(
                 core::find_identifiers(convert< atermpp::aterm_list >(context.equations())))),
-          m_hint(hint), m_current(hint)
+          m_generator(hint)
         {
         }
 
@@ -101,8 +97,8 @@ namespace mcrl2 {
         /// \param context container of expressions from which to extract the context
         /// \param hint A string
         template < typename ForwardTraversalIterator >
-        fresh_variable_generator(boost::iterator_range< ForwardTraversalIterator > const& context, std::string const& hint = "t") :
-          m_hint(hint), m_current(hint)
+        fresh_variable_generator(boost::iterator_range< ForwardTraversalIterator > const& context, std::string const& hint = "") :
+          m_generator(hint)
         {
           set_context(context);
         }
@@ -110,8 +106,8 @@ namespace mcrl2 {
         /// \brief Constructor.
         /// \param context container of expressions from which to extract the context
         /// \param hint A string
-        fresh_variable_generator(atermpp::aterm_appl const& context, std::string const& hint = "t") :
-          m_hint(hint), m_current(hint)
+        fresh_variable_generator(atermpp::aterm_appl const& context, std::string const& hint = "") :
+          m_generator(hint)
         {
           set_context(context);
         }
@@ -121,15 +117,7 @@ namespace mcrl2 {
         /// \param hint A string
         void set_hint(std::string const& hint)
         {
-          m_hint    = hint;
-          m_current = hint;
-        }
-
-        /// \brief Returns the current hint.
-        /// \return The current hint.
-        std::string hint() const
-        {
-          return m_hint;
+          m_generator = IdentifierGenerator(hint);
         }
 
         /// \brief Set a new context.
@@ -138,7 +126,6 @@ namespace mcrl2 {
         void set_context(boost::iterator_range< ForwardTraversalIterator > const& context)
         {
           m_identifiers = core::find_identifiers(convert< atermpp::aterm_list >(context));
-          m_current     = m_hint;
         }
 
         /// \brief Set a new context.
@@ -147,7 +134,6 @@ namespace mcrl2 {
         void set_context(Expression const& expression)
         {
           m_identifiers = core::find_identifiers(expression);
-          m_current     = m_hint;
         }
 
         /// \brief Add term t to the context.
@@ -178,7 +164,7 @@ namespace mcrl2 {
         /// \return A fresh variable that does not appear in the current context.
         variable operator()(sort_expression const& s)
         {
-          return variable(generate(m_current, m_hint.size()), s);
+          return variable(generate(), s);
         }
 
         /// \brief Returns a unique variable with the same sort as the variable v, and with

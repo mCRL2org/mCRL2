@@ -18,6 +18,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/replace.h"
@@ -113,7 +114,7 @@ namespace mcrl2 {
             std::cerr << "Original process parameters: " << pp(process_parameters) << std::endl;
           }
 
-          data::fresh_variable_generator generator(specification_to_aterm(m_spec));
+          data::fresh_variable_generator<> generator(specification_to_aterm(m_spec));
           // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
           for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
           {

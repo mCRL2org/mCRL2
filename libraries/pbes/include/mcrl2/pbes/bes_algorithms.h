@@ -88,7 +88,7 @@ int pbes_gauss_elimination(pbes<Container>& p)
   typedef typename core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  data::number_postfix_generator name_generator;
+  data::number_postfix_generator name_generator("x");
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
 
@@ -118,7 +118,7 @@ pbes<> pbes2bes(const pbes<>& p, bool lazy = false)
   typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   data::rewriter datar(p.data());
-  data::number_postfix_generator name_generator;
+  data::number_postfix_generator name_generator("x");
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
   if (lazy)

@@ -591,7 +591,7 @@ static void add_postponed_inequalities_to_context(
                 std::vector < summand_information > &summand_info,
                 context_type& context,
                 const rewriter& r,
-                identifier_generator& variable_generator,
+                identifier_generator<>& variable_generator,
                 const comp_struct &c
                 )
 { assert(inequalities_to_add_lhs.size() ==inequalities_to_add_lhs_size.size() && 
@@ -764,7 +764,7 @@ summand generate_summand(summand_information &summand_info,
                          const context_type& complete_context,
                          const rewriter& r,
                          action_label_list &a,
-                         identifier_generator& variable_generator,
+                         identifier_generator<>& variable_generator,
                          const comp_struct &cs,
                          const bool is_may_summand=false)
 { std::cerr << "SUMMNAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";

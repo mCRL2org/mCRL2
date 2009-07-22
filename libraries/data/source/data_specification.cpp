@@ -593,9 +593,7 @@ namespace mcrl2 {
           // \brief find `THE' identifier for a structured sort or container sort
           basic_sort generate_name(const sort_expression& target)
           {
-             basic_sort generated(static_cast< std::string >(
-                        fresh_identifier(boost::make_iterator_range(m_generated),
-                                        std::string("@legacy_").append(sort_name(target)))));
+             basic_sort generated(fresh_identifier(m_generated, std::string("@legacy_").append(sort_name(target))));
 
              m_generated.insert(generated);
 

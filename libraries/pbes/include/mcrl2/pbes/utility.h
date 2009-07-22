@@ -328,10 +328,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
          in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
-      data::fresh_variable_generator variable_generator;
+      data::fresh_variable_generator<> variable_generator(expr, "x");
       unsigned int no_variables=0;
-      variable_generator.set_context(expr);
-      variable_generator.set_hint("x");
       data::variable_list data_vars;
       atermpp::set < pbes_expression > conjunction_set;
       distribute_and(expr,conjunction_set);
@@ -441,7 +439,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
          assuming 0 and successor are the constructors of Nat  (which is btw. not the case
          in de data-implementation of mCRL2).  Simplify the resulting expressions. */
 
-      data::fresh_variable_generator variable_generator(expr, "x");
+      data::fresh_variable_generator<> variable_generator(expr, "x");
       unsigned int no_variables=0;
       data::variable_list data_vars;
       atermpp::set < pbes_expression > disjunction_set;

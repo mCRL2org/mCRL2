@@ -22,32 +22,31 @@ namespace data {
 class postfix_identifier_generator: public set_identifier_generator
 {
   protected:
-    /// \brief A postfix.
-    std::string m_postfix;
+
+    number_postfix_generator m_generator;
 
   public:
     /// \brief Constructor.
     /// \param postfix A string
-    postfix_identifier_generator(std::string postfix)
-      : m_postfix(postfix)
+    postfix_identifier_generator(std::string const& postfix)
+      : m_generator(postfix)
     {}
 
-    /// \brief Returns a unique identifier, with the given hint as prefix.
-    /// The returned identifier is added to the context.
-    /// \param hint A string
-    /// \return A fresh identifier.
-    virtual core::identifier_string operator()(const std::string& hint)
+    core::identifier_string operator()(const std::string& hint)
     {
-      core::identifier_string id(hint);
-      int index = 0;
-      while (has_identifier(id))
-      {   
-        std::string name = str(boost::format(hint + m_postfix + "%02d") % index++);
-        id = core::identifier_string(name);
+      core::identifier_string id(hint + std::string(m_generator()));
+
+      if (has_identifier(id))
+      {
+        while (has_identifier(id))
+        {
+          id = core::identifier_string(hint + std::string(m_generator()));
+        }
       }
+
       add_to_context(id);
       return id;
-    }   
+    }
 };
 
 } // namespace data

@@ -676,7 +676,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 
         // replace e' (e1) by fresh variables e'' (e1_new)
         std::set<std::string> used_names = mcrl2::data::detail::find_variable_name_strings(atermpp::make_list(lps::linear_process_to_aterm(p), lps::linear_process_to_aterm(q)));
-        variable_list e1_new = fresh_variables(e1, used_names);
+        variable_list e1_new = data::convert< variable_list >(fresh_variables(e1, used_names));
         data_expression    cj_new = mcrl2::data::make_double_sequence_substitution_adaptor(e1, e1_new)(cj);
         data_expression_list gj_new = mcrl2::data::make_double_sequence_substitution_adaptor(e1, e1_new)(gj);
 
