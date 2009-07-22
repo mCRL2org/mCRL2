@@ -289,7 +289,7 @@ class summand_information
         unsigned int old_size=vec_lin_eq.size();
         
         // Note that at this point, vec_lin_eq is consistent.
-        assert(!is_inconsistent(vec_lin_eq));
+        assert(!is_inconsistent(vec_lin_eq,r));
         // If adding an equality t=u yields an inconsistency, then either adding t<u or t>u is
         // inconsistent. So, adding the reverse is redundant. Moreover, it cannot be that both
         // t<u and t>u are inconsistent (because then vec_lin_eq need to be inconsistent) and
