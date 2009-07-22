@@ -121,7 +121,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == c0_name();
+          return function_symbol(e) == c0();
         }
         return false;
       }
@@ -153,7 +153,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == cnat_name();
+          return function_symbol(e) == cnat();
         }
         return false;
       }
@@ -208,7 +208,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == cpair_name();
+          return function_symbol(e) == cpair();
         }
         return false;
       }
@@ -276,7 +276,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == pos2nat_name();
+          return function_symbol(e) == pos2nat();
         }
         return false;
       }
@@ -331,7 +331,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == nat2pos_name();
+          return function_symbol(e) == nat2pos();
         }
         return false;
       }
@@ -409,7 +409,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == maximum_name();
+          function_symbol f(e);
+          return f.name() == maximum_name() && function_sort(f.sort()).domain().size() == 2 && (f == maximum(sort_pos::pos(), nat()) || f == maximum(nat(), sort_pos::pos()) || f == maximum(nat(), nat()) || f == maximum(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -480,7 +481,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == minimum_name();
+          function_symbol f(e);
+          return f.name() == minimum_name() && function_sort(f.sort()).domain().size() == 2 && (f == minimum(nat(), nat()) || f == minimum(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -550,7 +552,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == abs_name();
+          function_symbol f(e);
+          return f.name() == abs_name() && function_sort(f.sort()).domain().size() == 1 && (f == abs(nat()) || f == abs(sort_pos::pos()));
         }
         return false;
       }
@@ -607,7 +610,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == succ_name();
+          function_symbol f(e);
+          return f.name() == succ_name() && function_sort(f.sort()).domain().size() == 1 && (f == succ(nat()) || f == succ(sort_pos::pos()));
         }
         return false;
       }
@@ -662,7 +666,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == pred_name();
+          return function_symbol(e) == pred();
         }
         return false;
       }
@@ -717,7 +721,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == dub_name();
+          return function_symbol(e) == dub();
         }
         return false;
       }
@@ -796,7 +800,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == plus_name();
+          function_symbol f(e);
+          return f.name() == plus_name() && function_sort(f.sort()).domain().size() == 2 && (f == plus(sort_pos::pos(), nat()) || f == plus(nat(), sort_pos::pos()) || f == plus(nat(), nat()) || f == plus(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -855,7 +860,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == gtesubt_name();
+          function_symbol f(e);
+          return f.name() == gtesubt_name() && function_sort(f.sort()).domain().size() == 2 && (f == gtesubt(sort_pos::pos(), sort_pos::pos()) || f == gtesubt(nat(), nat()));
         }
         return false;
       }
@@ -911,7 +917,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == gtesubtb_name();
+          return function_symbol(e) == gtesubtb();
         }
         return false;
       }
@@ -983,7 +989,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == times_name();
+          function_symbol f(e);
+          return f.name() == times_name() && function_sort(f.sort()).domain().size() == 2 && (f == times(nat(), nat()) || f == times(sort_pos::pos(), sort_pos::pos()));
         }
         return false;
       }
@@ -1042,7 +1049,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == div_name();
+          function_symbol f(e);
+          return f.name() == div_name() && function_sort(f.sort()).domain().size() == 2 && (f == div(sort_pos::pos(), sort_pos::pos()) || f == div(nat(), sort_pos::pos()));
         }
         return false;
       }
@@ -1101,7 +1109,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == mod_name();
+          function_symbol f(e);
+          return f.name() == mod_name() && function_sort(f.sort()).domain().size() == 2 && (f == mod(sort_pos::pos(), sort_pos::pos()) || f == mod(nat(), sort_pos::pos()));
         }
         return false;
       }
@@ -1172,7 +1181,8 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == exp_name();
+          function_symbol f(e);
+          return f.name() == exp_name() && function_sort(f.sort()).domain().size() == 2 && (f == exp(sort_pos::pos(), nat()) || f == exp(nat(), nat()));
         }
         return false;
       }
@@ -1228,7 +1238,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == even_name();
+          return function_symbol(e) == even();
         }
         return false;
       }
@@ -1283,7 +1293,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == monus_name();
+          return function_symbol(e) == monus();
         }
         return false;
       }
@@ -1339,7 +1349,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == swap_zero_name();
+          return function_symbol(e) == swap_zero();
         }
         return false;
       }
@@ -1395,7 +1405,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == swap_zero_add_name();
+          return function_symbol(e) == swap_zero_add();
         }
         return false;
       }
@@ -1453,7 +1463,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == swap_zero_min_name();
+          return function_symbol(e) == swap_zero_min();
         }
         return false;
       }
@@ -1511,7 +1521,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == swap_zero_monus_name();
+          return function_symbol(e) == swap_zero_monus();
         }
         return false;
       }
@@ -1569,7 +1579,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == swap_zero_lte_name();
+          return function_symbol(e) == swap_zero_lte();
         }
         return false;
       }
@@ -1626,7 +1636,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == first_name();
+          return function_symbol(e) == first();
         }
         return false;
       }
@@ -1681,7 +1691,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == last_name();
+          return function_symbol(e) == last();
         }
         return false;
       }
@@ -1736,7 +1746,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == divmod_name();
+          return function_symbol(e) == divmod();
         }
         return false;
       }
@@ -1792,7 +1802,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == gdivmod_name();
+          return function_symbol(e) == gdivmod();
         }
         return false;
       }
@@ -1849,7 +1859,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == ggdivmod_name();
+          return function_symbol(e) == ggdivmod();
         }
         return false;
       }

@@ -355,9 +355,9 @@ class function_declaration_list():
         code += "        function_symbol %s(%s_name(), %s);\n" % (name, name, sort)
         code += "        return %s;\n" % (name)
         code += "      }\n"
-        return code 
+        return code
 
-      def function_recogniser(self, fullname, name):
+      def function_recogniser(self, fullname, name, sortparams):
         code  = ""
         code += "      /// \\brief Recogniser for function %s\n" % (escape(fullname))
         code += "      /// \\param e A data expression\n"
@@ -367,7 +367,40 @@ class function_declaration_list():
         code += "      {\n"
         code += "        if (e.is_function_symbol())\n"
         code += "        {\n"
-        code += "          return static_cast< function_symbol >(e).name() == %s_name();\n" % (name)
+        sortparams_list = string.split(sortparams, ", ")
+        if sortparams_list == ['']:
+          code += "          return function_symbol(e) == %s();\n" % (name)
+        else:
+          # TODO, make something stronger here!
+          code += "          return function_symbol(e).name() == %s_name();\n" % (name)
+        code += "        }\n"
+        code += "        return false;\n"
+        code += "      }\n"
+        return code
+
+      def polymorphic_function_recogniser(self, fullname, name, sortparams):
+        code  = ""
+        code += "      /// \\brief Recogniser for function %s\n" % (escape(fullname))
+        code += "      /// \\param e A data expression\n"
+        code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
+        code += "      inline\n"
+        code += "      bool is_%s_function_symbol(const data_expression& e)\n" % (name)
+        code += "      {\n"
+        code += "        if (e.is_function_symbol())\n"
+        code += "        {\n"
+        code += "          function_symbol f(e);\n"
+        sortparams_list = string.split(sortparams, ", ")
+        if sortparams_list == ['']:
+          domain_size = len(self.sort_expression_list.elements[0].domain.elements)
+          cases = []
+          for s in self.sort_expression_list.elements:
+            d = s.domain
+            assert(len(d.elements) == domain_size)
+            cases.append("f == %s(%s)" % (name, d.code(sort_spec)))
+          code += "          return f.name() == %s_name() && function_sort(f.sort()).domain().size() == %d && (%s);\n" % (name, domain_size, string.join(cases, " || "))
+        else:
+          # TODO, make something stronger here!
+          code += "          return f.name() == %s_name();\n" % (name)
         code += "        }\n"
         code += "        return false;\n"
         code += "      }\n"
@@ -440,7 +473,7 @@ class function_declaration_list():
           sort = self.sort_expression_list.elements[0] # as len is 1
           code += self.function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec), sort.code(sort_spec))
           code += "\n"
-          code += self.function_recogniser(self.id.to_string(), self.label.to_string())
+          code += self.function_recogniser(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec))
           code += "\n"
           code += self.function_application_code(sort)
         else:
@@ -486,7 +519,7 @@ class function_declaration_list():
             comma = ", "
           code += self.polymorphic_function_constructor(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec), comma, string.join(domain_param_code, ", "), target_sort, new_sort.code(sort_spec))
           code += "\n"
-          code += self.function_recogniser(self.id.to_string(), self.label.to_string())
+          code += self.polymorphic_function_recogniser(self.id.to_string(), self.label.to_string(), self.sort_expression_list.formal_parameters_code(sort_spec))
           code += "\n"
           code += self.function_application_code(self.sort_expression_list.elements[0], True)
 

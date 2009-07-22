@@ -91,7 +91,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == c1_name();
+          return function_symbol(e) == c1();
         }
         return false;
       }
@@ -123,7 +123,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == cdub_name();
+          return function_symbol(e) == cdub();
         }
         return false;
       }
@@ -190,7 +190,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == maximum_name();
+          return function_symbol(e) == maximum();
         }
         return false;
       }
@@ -246,7 +246,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == minimum_name();
+          return function_symbol(e) == minimum();
         }
         return false;
       }
@@ -302,7 +302,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == abs_name();
+          return function_symbol(e) == abs();
         }
         return false;
       }
@@ -357,7 +357,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == succ_name();
+          return function_symbol(e) == succ();
         }
         return false;
       }
@@ -412,7 +412,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == plus_name();
+          return function_symbol(e) == plus();
         }
         return false;
       }
@@ -468,7 +468,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == add_with_carry_name();
+          return function_symbol(e) == add_with_carry();
         }
         return false;
       }
@@ -525,7 +525,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == times_name();
+          return function_symbol(e) == times();
         }
         return false;
       }
@@ -581,7 +581,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == multir_name();
+          return function_symbol(e) == multir();
         }
         return false;
       }

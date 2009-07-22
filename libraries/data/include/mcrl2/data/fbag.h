@@ -108,7 +108,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbag_empty_name();
+          return function_symbol(e).name() == fbag_empty_name();
         }
         return false;
       }
@@ -141,7 +141,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbag_cons_name();
+          return function_symbol(e).name() == fbag_cons_name();
         }
         return false;
       }
@@ -212,7 +212,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbaginsert_name();
+          return function_symbol(e).name() == fbaginsert_name();
         }
         return false;
       }
@@ -271,7 +271,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagcinsert_name();
+          return function_symbol(e).name() == fbagcinsert_name();
         }
         return false;
       }
@@ -330,7 +330,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagcount_name();
+          return function_symbol(e).name() == fbagcount_name();
         }
         return false;
       }
@@ -388,7 +388,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagin_name();
+          return function_symbol(e).name() == fbagin_name();
         }
         return false;
       }
@@ -446,7 +446,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbaglte_name();
+          return function_symbol(e).name() == fbaglte_name();
         }
         return false;
       }
@@ -505,7 +505,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagjoin_name();
+          return function_symbol(e).name() == fbagjoin_name();
         }
         return false;
       }
@@ -565,7 +565,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagintersect_name();
+          return function_symbol(e).name() == fbagintersect_name();
         }
         return false;
       }
@@ -625,7 +625,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbagdifference_name();
+          return function_symbol(e).name() == fbagdifference_name();
         }
         return false;
       }
@@ -685,7 +685,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fbag2fset_name();
+          return function_symbol(e).name() == fbag2fset_name();
         }
         return false;
       }
@@ -743,7 +743,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fset2fbag_name();
+          return function_symbol(e).name() == fset2fbag_name();
         }
         return false;
       }

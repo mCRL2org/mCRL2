@@ -105,7 +105,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fset_empty_name();
+          return function_symbol(e).name() == fset_empty_name();
         }
         return false;
       }
@@ -138,7 +138,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fset_cons_name();
+          return function_symbol(e).name() == fset_cons_name();
         }
         return false;
       }
@@ -208,7 +208,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetinsert_name();
+          return function_symbol(e).name() == fsetinsert_name();
         }
         return false;
       }
@@ -266,7 +266,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetcinsert_name();
+          return function_symbol(e).name() == fsetcinsert_name();
         }
         return false;
       }
@@ -325,7 +325,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetin_name();
+          return function_symbol(e).name() == fsetin_name();
         }
         return false;
       }
@@ -383,7 +383,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetlte_name();
+          return function_symbol(e).name() == fsetlte_name();
         }
         return false;
       }
@@ -442,7 +442,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetunion_name();
+          return function_symbol(e).name() == fsetunion_name();
         }
         return false;
       }
@@ -502,7 +502,7 @@ namespace mcrl2 {
       {
         if (e.is_function_symbol())
         {
-          return static_cast< function_symbol >(e).name() == fsetintersection_name();
+          return function_symbol(e).name() == fsetintersection_name();
         }
         return false;
       }
