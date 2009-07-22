@@ -13,7 +13,6 @@
 #include "wx/wx.h"
 
 #include "action.h"
-#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 
 using namespace mcrl2::core;
@@ -78,14 +77,14 @@ void action::set_parameters( list_of_dataexpression p_parameters)
   m_parameters = p_parameters;
 }
 
-void action::set_parameters_text( data_expression_list const& p_parameters )
+void action::set_parameters_text( mcrl2::data::data_expression_list const& p_parameters )
 {   
   m_parameters.Clear();
 
-  for (data_expression_list::const_iterator i = p_parameters.begin(); i != p_parameters.end(); ++i)
+  for (mcrl2::data::data_expression_list::const_iterator i = p_parameters.begin(); i != p_parameters.end(); ++i)
   {
     dataexpression dataexpression;
-    dataexpression.set_expression(wxString(data::pp(*i).c_str(), wxConvLocal));
+    dataexpression.set_expression(wxString(mcrl2::data::pp(*i).c_str(), wxConvLocal));
     m_parameters.Add(dataexpression);
   }
 }

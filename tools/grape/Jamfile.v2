@@ -2,7 +2,7 @@ project toolset/grape ;
 
 tool grape
       : [ glob-tree *.cpp : .svn ]
-        /libraries//data
+        /libraries//lps
         /libraries/utilities//font_renderer
       : <define>GRAPE_HELP_DIR=\"\\\"$(INSTALL_ROOT)/share/mcrl2/grape\\\"\"
         <include>libgrape

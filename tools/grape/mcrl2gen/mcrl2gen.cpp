@@ -18,6 +18,7 @@
 #include "wx/wx.h"
 
 #include <wx/file.h>
+#include "mcrl2/atermpp/aterm_init.h"            // Library for messaging.
 #include "mcrl2/core/messaging.h"            // Library for messaging.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
@@ -37,7 +38,7 @@ WX_DEFINE_OBJARRAY(arr_renamed)
 void grape::mcrl2gen::init_mcrl2libs(int p_argc, char** p_argv)
 {
   // initialize ATerm library and set verbose messaging
-  MCRL2_ATERM_INIT(p_argc, p_argv);
+  MCRL2_ATERMPP_INIT(p_argc, p_argv);
   gsSetVerboseMsg();
 }
 

@@ -9,12 +9,11 @@
 #ifndef TRANSLATE_H
 #define TRANSLATE_H
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 #include <iostream>
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include <cstdio>
 #include <vector>
 #include <map>

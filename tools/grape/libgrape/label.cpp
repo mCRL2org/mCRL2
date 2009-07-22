@@ -78,16 +78,16 @@ void label::set_actions_text( const wxString &p_actions )
   m_actions.Clear();
 
   std::istringstream r(string(p_actions.mb_str()).c_str());
-  ATermAppl a_parsed_multi_action(mcrl2::core::parse_mult_act(r));
+  atermpp::aterm_appl a_parsed_multi_action(mcrl2::core::parse_mult_act(r));
 
   if ( a_parsed_multi_action )
   {
     mcrl2::lps::multi_action m(a_parsed_multi_action);
 
-    for(mcrl2::lps::action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
+    for (mcrl2::lps::action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
     {
-      string a_name = i->label().name();
-      action.set_name(wxString(a_name.c_str(), wxConvLocal));
+      action action;
+      action.set_name(wxString(std::string(i->label().name()).c_str(), wxConvLocal));
       action.set_parameters_text(i->arguments());
       m_actions.Add(action);
     }

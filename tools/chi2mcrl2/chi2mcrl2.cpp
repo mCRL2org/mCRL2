@@ -22,6 +22,7 @@
 #include "aterm2.h"
 #include "chilexer.h"
 #include "translate.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 
 //Tool framework
@@ -181,6 +182,6 @@ ATermAppl translate_file(t_options &options)
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
   return chi2mcrl2_tool().execute(argc,argv);
 }
