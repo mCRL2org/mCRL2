@@ -12,9 +12,8 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include "aterm2.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -645,9 +644,7 @@ bool ltsconvert_tool::perform_task(tipi::configuration& c) {
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  ltsconvert_tool tool;
-
-  return tool.execute(argc,argv);
+  return ltsconvert_tool().execute(argc,argv);
 }

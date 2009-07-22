@@ -13,11 +13,11 @@
 
 #include <string>
 #include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -153,13 +153,11 @@ class ltsmin_tool : public ltsmin_base
 
 int main(int argc, char *argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
 
-  ltsmin_tool tool;
-
-  return tool.execute(argc,argv);
+  return ltsmin_tool().execute(argc,argv);
 }
 
 void doReduce(t_tool_options const& options)

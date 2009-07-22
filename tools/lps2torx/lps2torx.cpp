@@ -21,14 +21,13 @@
 #include <cassert>
 #include <iostream>
 #include <sstream>
-#include <aterm2.h>
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 
@@ -348,9 +347,7 @@ class lps2torx_tool : public lps2torx_base
 
 int main(int argc, char **argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  lps2torx_tool tool;
-
-  return tool.execute(argc,argv);
+  return lps2torx_tool().execute(argc,argv);
 }

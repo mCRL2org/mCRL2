@@ -13,16 +13,18 @@
 #include <time.h>
 #include <sstream>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/nat.h"
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/trace.h"
 #include "exploration.h"
 #include "lts.h"
-#include "mcrl2/atermpp/vector.h"
 
 
 using namespace std;
@@ -274,11 +276,11 @@ bool finalise_lts_generation()
 //                              Trace functions                               //
 ////////////////////////////////////////////////////////////////////////////////
 
-static bool occurs_in(ATermAppl name, ATermList ma)
+static bool occurs_in(atermpp::aterm_appl const& name, atermpp::term_list< atermpp::aterm_appl > const& ma)
 {
-  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
+  for (atermpp::term_list< atermpp::aterm_appl >::const_iterator i = ma.begin(); i != ma.end(); ++i)
   {
-    if ( ATisEqual(name,ATgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0)) )
+    if (name == atermpp::aterm_appl((*i)(0))(0))
     {
       return true;
     }
@@ -352,7 +354,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
   // if ( lgopts->detect_action )
   for (int j=0; j<lgopts->num_trace_actions; j++)
   {
-    if ( occurs_in(lgopts->trace_actions[j],ATLgetArgument(Transition,0)) )
+    if ( occurs_in(lgopts->trace_actions[j],atermpp::list_arg1(Transition)) )
     {
       if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
       {

@@ -29,9 +29,9 @@
 #include <string>
 
 //MCRL2-specific
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/input_tool.h"
 
 using namespace std;
@@ -227,9 +227,7 @@ class info_tool {
 
 int main(int argc, char** argv)
 {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  info_tool tool;
-
-  return tool.execute(argc, argv);
+  return info_tool().execute(argc, argv);
 }

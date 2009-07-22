@@ -19,12 +19,11 @@
 #include <cstring>
 #include <cassert>
 
-#include <aterm2.h>
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -130,8 +129,7 @@ class pbespp_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
-  pbespp_tool tool;
-  return tool.execute(argc, argv);
+  MCRL2_ATERMPP_INIT(argc, argv)
+  return pbespp_tool().execute(argc, argv);
 }
 

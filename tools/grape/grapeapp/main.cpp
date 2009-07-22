@@ -11,11 +11,11 @@
 #include "wx.hpp" // precompiled headers
 
 #include "wx/wx.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2gen/mcrl2gen.h"
 #include "grape_frame.h"
 
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -79,7 +79,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
                                   wxCmdLineArgType lpCmdLine,
                                   int nCmdShow) {
 
-  MCRL2_ATERM_INIT(0, lpCmdLine);
+  MCRL2_ATERMPP_INIT(0, lpCmdLine);
   gsSetVerboseMsg();
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }

@@ -12,8 +12,8 @@
 #include "mcrl2/core/detail/struct.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/lps/multi_action.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -287,7 +287,7 @@ void add_tau_action(char *action)
   gsVerboseMsg("marked action '%s' as a tau action\n",action);
 }
 
-bool is_tau_action(char *action)
+bool is_tau_action(char const* action)
 {
   for (int i=0; i<num_tau_actions; i++)
   {
@@ -299,18 +299,19 @@ bool is_tau_action(char *action)
   return false;
 }
 
-bool is_tau_mact(ATermAppl mact)
+bool is_tau_mact(atermpp::aterm_appl const& mact)
 {
-  ATermList l = ATLgetArgument(mact,0);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  mcrl2::lps::multi_action m(mact);
+
+  for (mcrl2::lps::action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
   {
-    ATermAppl actid = ATAgetArgument(ATAgetFirst(l),0);
-    if ( !is_tau_action(ATgetName(ATgetAFun(ATAgetArgument(actid,0)))) )
-    {
-      return false;
-    }
+     if (is_tau_action(std::string(i->label().name()).c_str()))
+     {
+       return true;
+     }
   }
-  return true;
+
+  return false;
 }
 
 SVCstateIndex ReadData(void)

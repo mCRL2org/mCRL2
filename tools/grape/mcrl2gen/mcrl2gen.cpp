@@ -18,7 +18,6 @@
 #include "wx/wx.h"
 
 #include <wx/file.h>
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"            // Library for messaging.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.

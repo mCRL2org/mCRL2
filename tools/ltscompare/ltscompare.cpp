@@ -12,11 +12,10 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include "aterm2.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/exception.h"
 
@@ -303,9 +302,7 @@ class ltscompare_tool : public ltscompare_base
 };
 
 int main(int argc, char **argv) {
-  MCRL2_ATERM_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-  ltscompare_tool tool;
-
-  return tool.execute(argc,argv);
+  return ltscompare_tool().execute(argc,argv);
 }

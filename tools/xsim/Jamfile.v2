@@ -1,13 +1,8 @@
-project toolset/xsim
-       : requirements
-          <use>/libraries//data
-          <use>/libraries//lps
-          <use>/libraries//trace
-       ;
+project toolset/xsim ;
 
 alias sim_shared
-       : [ obj simbase.o   : simbase.cpp   ]
-         [ obj simulator.o : simulator.cpp ]
+       : [ obj simbase.o   : simbase.cpp   : <use>/libraries//lps <use>/libraries//trace ]
+         [ obj simulator.o : simulator.cpp : <use>/libraries//lps <use>/libraries//trace ]
        ;
 
 explicit sim_shared ;
@@ -25,7 +20,6 @@ tool xsim
          xsimtrace.cpp
          sim_shared
          /libraries//trace
-         /libraries//data
          /libraries//lps
        : <squadt-connectivity>implemented
          <wx>gl

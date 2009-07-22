@@ -13,9 +13,8 @@
 #include "wx/wx.h"
 
 #include "action.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2::core;
 using namespace grape::libgrape;
@@ -79,16 +78,14 @@ void action::set_parameters( list_of_dataexpression p_parameters)
   m_parameters = p_parameters;
 }
 
-void action::set_parameters_text( ATermList p_parameters )
+void action::set_parameters_text( data_expression_list const& p_parameters )
 {   
   m_parameters.Clear();
 
-  for (ATermList a_args = p_parameters; !ATisEmpty(a_args); a_args = ATgetNext(a_args))
+  for (data_expression_list::const_iterator i = p_parameters.begin(); i != p_parameters.end(); ++i)
   {
     dataexpression dataexpression;
-    ATermAppl p = ATAgetFirst(a_args);
-    std::string a_param = PrintPart_CXX(ATerm(p));
-    dataexpression.set_expression(wxString(a_param.c_str(), wxConvLocal));
+    dataexpression.set_expression(wxString(data::pp(*i).c_str(), wxConvLocal));
     m_parameters.Add(dataexpression);
   }
 }

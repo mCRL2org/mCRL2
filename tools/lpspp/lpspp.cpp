@@ -19,12 +19,11 @@
 #include <cstring>
 #include <cassert>
 
-#include <aterm2.h>
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lps/specification.h"
 
@@ -97,7 +96,7 @@ class lpspp_tool: public input_output_tool
       }
 
       ATermAppl spec = lps::specification_to_aterm(specification, format != ppInternal);
-    
+
       //open output file for writing or set to stdout
       FILE *output_stream    = NULL;
       if (output_filename().empty()) {
@@ -128,7 +127,6 @@ class lpspp_tool: public input_output_tool
 
 int main(int argc, char* argv[])
 {
-  MCRL2_ATERM_INIT(argc, argv)
-  lpspp_tool tool;
-  return tool.execute(argc, argv);
+  MCRL2_ATERMPP_INIT(argc, argv)
+  return lpspp_tool().execute(argc, argv);
 }

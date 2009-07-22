@@ -16,7 +16,7 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/core/identifier_string.h"
 #include "label.h"
 #include "action.h"
@@ -77,17 +77,18 @@ void label::set_actions_text( const wxString &p_actions )
 {
   m_actions.Clear();
 
-  istringstream r(string(p_actions.mb_str()).c_str());
-  ATermAppl a_parsed_multi_action = mcrl2::core::parse_mult_act(r);
+  std::istringstream r(string(p_actions.mb_str()).c_str());
+  ATermAppl a_parsed_multi_action(mcrl2::core::parse_mult_act(r));
+
   if ( a_parsed_multi_action )
   {
-    for(ATermList l = ATLgetArgument(a_parsed_multi_action,0); !ATisEmpty(l); l = ATgetNext(l))
+    mcrl2::lps::multi_action m(a_parsed_multi_action);
+
+    for(mcrl2::lps::action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
     {
-      action action;
-      ATermAppl a = ATAgetFirst(l);
-      string a_name = identifier_string(ATAgetArgument(a,0));
+      string a_name = i->label().name();
       action.set_name(wxString(a_name.c_str(), wxConvLocal));
-      action.set_parameters_text(ATLgetArgument(a,1));
+      action.set_parameters_text(i->arguments());
       m_actions.Add(action);
     }
   }

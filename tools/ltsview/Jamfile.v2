@@ -28,10 +28,8 @@ tool ltsview
         /libraries//tr
         /libraries//gl2ps
         /libraries/utilities//colorbutton
-        /libraries//atermpp
         /libraries//lts
         /libraries//trace
-        /libraries//core
         /site-config//boost_signals
       : <squadt-connectivity>implemented
         <wx>gl
