@@ -14,7 +14,6 @@
 
 #include <cstdarg>
 #include <cassert>
-#include "aterm2.h"
 #include "boost/current_function.hpp"
 
 namespace mcrl2 {

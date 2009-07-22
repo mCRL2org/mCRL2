@@ -9,11 +9,11 @@
 /// \file mcrl2/lps/traverse.h
 /// \brief add your file description here.
 
-#include "mcrl2/lps/detail/lps_sort_traverser.h"
-#include "mcrl2/lps/detail/lps_variable_traverser.h"
-
 #ifndef MCRL2_LPS_TRAVERSE_H
 #define MCRL2_LPS_TRAVERSE_H
+
+#include "mcrl2/lps/detail/lps_sort_traverser.h"
+#include "mcrl2/lps/detail/lps_variable_traverser.h"
 
 namespace mcrl2 {
 

@@ -9,11 +9,11 @@
 /// \file mcrl2/lps/remove.h
 /// \brief add your file description here.
 
-#include "mcrl2/lps/detail/lps_parameter_remover.h"
-#include "mcrl2/lps/substitute.h"
-
 #ifndef MCRL2_LPS_REMOVE_H
 #define MCRL2_LPS_REMOVE_H
+
+#include "mcrl2/lps/detail/lps_parameter_remover.h"
+#include "mcrl2/lps/substitute.h"
 
 namespace mcrl2 {
 
