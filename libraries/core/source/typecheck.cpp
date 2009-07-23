@@ -1993,7 +1993,8 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   if(!PosTypeList) {gsErrorMsg("no %s %P with type %P is declared (while typechecking %P)\n",msg,Name,NewPosTypeList,ProcTerm);return NULL;}
 
   if(gstcIsNotInferredL(PosTypeList)){
-    gsWarningMsg("ambiguous %s %P\n",msg,Name);
+    gsErrorMsg("ambiguous %s %P\n",msg,Name);
+    return NULL;
   }
 
   Result=gstcMakeActionOrProc(action,Name,PosTypeList,NewPars);
@@ -2539,7 +2540,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesDown(Type),FreeVars,strict_ambiguous,warn_upcasting);
           if(!Type0) return NULL;
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2550,7 +2551,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesDown(Type),FreeVars,strict_ambiguous,warn_upcasting);
           if(!Type0) return NULL;
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2571,7 +2572,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         ATermList NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesDown(Type),FreeVars,strict_ambiguous,warn_upcasting);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -2582,7 +2583,7 @@ static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable Al
         NewArguments=ATmakeList0();
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Argument=ATAgetFirst(Arguments);
-          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesUp(Type),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,gstcExpandNumTypesDown(Type),FreeVars,strict_ambiguous,warn_upcasting);
           if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %T)\n", "element", Type,Argument);  return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
           Type=Type0;
@@ -3398,17 +3399,24 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
   if(gsIsSortUnknown(PosType) || gstcEqTypesA(Type,PosType)) return Type;
   if(gsIsSortsPossible(Type) && !gsIsSortsPossible(PosType)) {ATermAppl TmpType=PosType; PosType=Type; Type=TmpType; }
   if(gsIsSortsPossible(PosType)){
+    ATermList NewTypeList=ATmakeList0();
     for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList)){
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
       gsDebugMsg("Matching candidate gstcTypeMatchA Type: %T;    PosType: %T New Type: %T\n",Type,PosType,NewPosType);
 
       if((NewPosType=gstcTypeMatchA(Type,NewPosType))){
 	gsDebugMsg("Match gstcTypeMatchA Type: %T;    PosType: %T New Type: %T\n",Type,PosType,NewPosType);
-	return NewPosType;
+	NewTypeList=ATinsert(NewTypeList,(ATerm)NewPosType);
       }
     }
-    gsDebugMsg("No match gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
-    return NULL;
+    if(ATisEmpty(NewTypeList)){
+      gsDebugMsg("No match gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
+      return NULL;
+    }
+
+    if(ATisEmpty(ATgetNext(NewTypeList))) return ATAgetFirst(NewTypeList);
+
+    return gsMakeSortsPossible(ATreverse(NewTypeList));
   }
 
   //PosType is a normal type
