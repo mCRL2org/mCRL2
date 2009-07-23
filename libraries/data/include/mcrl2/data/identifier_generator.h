@@ -46,7 +46,7 @@ class number_postfix_generator
     /// \return A fresh identifier.
     core::identifier_string operator()()
     {
-      for (std::string::iterator i = m_current.begin() + m_base; i != m_current.end(); ++i) {
+      for (std::string::reverse_iterator i = m_current.rbegin(), j = m_current.rbegin() + (m_current.size() - m_base); i != j; ++i) {
         if (*i < '9') {
           ++(*i);
 
