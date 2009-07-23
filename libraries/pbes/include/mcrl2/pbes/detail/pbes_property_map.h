@@ -18,10 +18,8 @@
 #include <set>
 #include <sstream>
 #include <utility>
-// #include <boost/algorithm/string/join.hpp> Don't use this, it leads to stack overflows with Visual C++ 9.0 express
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/pbes/pbes.h"

@@ -16,6 +16,7 @@ mcrl2-library core
          source/alpha.cpp
          source/aterm_ext.cpp
          source/numeric_string.cpp
+         source/text_utility.cpp
        : <library>/libraries//atermpp
          <use>/libraries/utilities//exception
          <include>../include
