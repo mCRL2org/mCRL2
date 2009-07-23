@@ -9,5 +9,6 @@ mcrl2-library process
          <use>/site-config//boost
        :
        : <include>../include
+         <include>../../lps/include
          <use>/site-config//boost
        ;

@@ -303,7 +303,6 @@ void list_rewrite_test() {
 
   data::rewriter R(specification);
 
-  sort_expression list_bool(list(bool_()));
   data_expression empty(R(nil(bool_())));
   data_expression head_true(cons_(bool_(), true_(), empty));
 

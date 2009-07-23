@@ -334,13 +334,13 @@ void test_rename()
 
   state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
   set_identifier_generator generator;
-  generator.add_identifiers(find_identifiers(specification_to_aterm(spec)));
+  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = rename_predicate_variables(formula, generator);
   BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
   std::cout << "formula: " << pp(formula) << std::endl;
 
   generator = set_identifier_generator();
-  generator.add_identifiers(find_identifiers(specification_to_aterm(spec)));
+  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
   formula = mcf2statefrm("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);

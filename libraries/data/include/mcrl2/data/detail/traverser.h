@@ -79,10 +79,17 @@ namespace mcrl2 {
           void leave(DataExpression const&)
           {}
 
+          void operator()(core::identifier_string const& e)
+          {
+            static_cast< Derived& >(*this).enter(static_cast< core::identifier_string const& >(e));
+            static_cast< Derived& >(*this).leave(static_cast< core::identifier_string const& >(e));
+          }
+
           void operator()(function_symbol const& e)
           {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
@@ -91,6 +98,7 @@ namespace mcrl2 {
           {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
@@ -271,6 +279,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
             static_cast< Derived& >(*this)(e.sort());
+            static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
@@ -280,6 +289,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
             static_cast< Derived& >(*this)(e.sort());
+            static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(e));
           }
@@ -288,6 +298,7 @@ namespace mcrl2 {
           {
             static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
+            static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this).leave(e);
             static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
           }
@@ -403,7 +414,7 @@ namespace mcrl2 {
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
-            if (!is_nil(e)) { // REMOVE ME (condition)
+            if (e != atermpp::aterm(core::detail::gsMakeNil())) { // REMOVE ME (condition)
               static_cast< super& >(*this)(e);
             }
           }

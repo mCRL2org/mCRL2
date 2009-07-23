@@ -12,10 +12,10 @@
 #ifndef MCRL2_DATA_FIND_H
 #define MCRL2_DATA_FIND_H
 
-#include <set>
 #include <functional>
 #include <iterator>
 #include <functional>
+#include <set>
 #include "boost/bind.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
@@ -473,6 +473,38 @@ std::set<basic_sort> find_basic_sorts(Container const& container)
 {
   std::set<basic_sort> result;
   find_basic_sorts(container, std::inserter(result, result.end()));
+  return result;
+}
+
+/// \brief Returns true if the term has a given identifier as subterm.
+/// \param[in] container an expression or container of expressions
+/// \param[in] s An identifier
+/// \return True if the term has a given sort identifier as subterm.
+template < typename Container >
+bool search_identifiers(Container const& container, const core::identifier_string& s)
+{
+  return detail::make_sort_search_helper< core::identifier_string >(boost::bind(std::equal_to< core::identifier_string >(), s, _1)).apply(container);
+}
+
+/// \brief Returns all identifiers that occur in the term t
+/// \param[in] container an expression or container of expressions
+/// \param[out] o an output iterator
+/// \return All sort identifiers that occur in the term t
+template < typename Container, typename OutputIterator >
+void find_identifiers(Container const& container, OutputIterator o)
+{
+  return detail::make_sort_find_helper< core::identifier_string >(o)(container);
+}
+
+/// \brief Returns all basic sorts that occur in the term t
+/// \param[in] container an expression or container of expressions
+/// \param[in] o an output iterator
+/// \return All sort expressions that occur in the term t
+template < typename Container >
+std::set< core::identifier_string > find_identifiers(Container const& container)
+{
+  std::set< core::identifier_string > result;
+  find_identifiers(container, std::inserter(result, result.end()));
   return result;
 }
 

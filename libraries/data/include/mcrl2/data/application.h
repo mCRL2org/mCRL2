@@ -182,7 +182,7 @@ namespace mcrl2 {
         data_expression right() const
         {
           assert(arguments().size() == 2);
-          return *(++arguments().begin());
+          return *(++(arguments().begin()));
         }
 
     }; // class application

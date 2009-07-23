@@ -17,6 +17,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/core/garbage_collection.h"
 
 using namespace atermpp;

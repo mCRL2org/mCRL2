@@ -48,7 +48,8 @@ void test_fresh_variable_generator()
   variable a = fresh_variable(e, basic_sort("D"), "d");
   BOOST_CHECK(a == variable("d1", basic_sort("D")));
 
-  std::set<identifier_string> ids = find_identifiers(e);
+  std::set<identifier_string> ids = data::find_identifiers(e);
+
   BOOST_CHECK(ids.size() == 8);
   BOOST_CHECK(ids.find(identifier_string("d"))    != ids.end());
   BOOST_CHECK(ids.find(identifier_string("d0"))   != ids.end());
