@@ -29,6 +29,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/convert.h"
 #include "mcrl2/data/detail/container_utility.h"
 
