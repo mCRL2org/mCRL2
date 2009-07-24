@@ -18,6 +18,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h" // substitute
 #include "mcrl2/lps/action.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 
