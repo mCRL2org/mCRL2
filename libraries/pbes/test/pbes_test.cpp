@@ -210,12 +210,12 @@ void test_pbes()
 void test_global_variables()
 {
   std::string TEXT =
-    "var k, n:Nat;                            \n"
+    "glob k, m, n:Nat;                        \n"
+    "                                         \n"
     "pbes                                     \n"
     "   mu X1(n1, m1:Nat) = X2(n1) || X2(m1); \n"
     "   mu X2(n2:Nat)     = X1(n2, n);        \n"
     "                                         \n"
-    "var m, n: Nat;                           \n"
     "init                                     \n"
     "   X1(m, n);                             \n"
     ;
