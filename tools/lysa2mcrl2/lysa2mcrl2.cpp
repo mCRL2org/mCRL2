@@ -114,8 +114,8 @@ class lysa2mcrl2_tool: public input_output_tool
       desc.add_option("strategy", 
         make_optional_argument("STRATEGY", "symbolic"), 
         "Apply conversion using the specified strategy:\n"
-        "  'symbolic' for a symbolic conversion (default), or\n"
-        "  'straightforward' for a straightforward conversion.", 
+        "  'straightforward' for a straightforward conversion; most likely this yields an infinite state space.\n"
+        "  'symbolic' for a conversion in which symbolic representations are chosen to represent possibly infinite numbers of ciphertexts and names (default).",
         's');
       
       desc.add_option("attacker-index", 
