@@ -14,6 +14,7 @@
 
 #include <iterator>
 #include "mcrl2/atermpp/aterm_traits.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/detail/struct_core.h" // gsMakeNil
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/utility.h" // substitute

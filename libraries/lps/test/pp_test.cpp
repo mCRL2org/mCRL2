@@ -15,6 +15,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/lps_printer.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

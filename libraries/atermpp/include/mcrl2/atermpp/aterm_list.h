@@ -18,7 +18,6 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_convertible.hpp>
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/atermpp/aterm_make_match.h"
 #include "mcrl2/atermpp/detail/aterm_conversion.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 
@@ -416,7 +415,5 @@ namespace atermpp {
   {}
 
 } // namespace atermpp
-
-#include "mcrl2/atermpp/make_list.h"
 
 #endif // MCRL2_ATERMPP_ATERM_LIST_H

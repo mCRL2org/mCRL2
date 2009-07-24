@@ -16,6 +16,7 @@
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::process;

@@ -14,6 +14,9 @@
 
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/aterm_match.h"
 
 using namespace std;
 using namespace atermpp;

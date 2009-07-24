@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/detail/utility.h"
+#include "mcrl2/atermpp/utility.h"
 
 namespace atermpp
 {
@@ -98,6 +99,17 @@ namespace atermpp
         return std::string(function().name()) == other;
       }
   };
+
+  /// \brief Remove leading and trailing quotes from a quoted aterm_string.
+  /// \param t A term containing a quoted string.
+  /// \return The string without quotes.
+  inline
+  std::string unquote(aterm_string t)
+  {
+    std::string s(t);
+    assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
+    return std::string(s, 1, s.size() - 2);
+  }
 
   /// \cond INTERNAL_DOCS
   template <>

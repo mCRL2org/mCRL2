@@ -17,6 +17,7 @@
 //mCRL2
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 
 //LPS framework

@@ -13,14 +13,13 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/core/garbage_collection.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;

@@ -4,6 +4,7 @@
 #include <cassert>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

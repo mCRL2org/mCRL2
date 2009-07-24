@@ -13,7 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/function_symbol.h"

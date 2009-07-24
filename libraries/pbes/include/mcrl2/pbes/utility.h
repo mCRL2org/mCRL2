@@ -13,7 +13,7 @@
 #define MCRL2_PBES_UTILITY_H
 
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/sort_expression.h"

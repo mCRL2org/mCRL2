@@ -25,6 +25,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/process/parse.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 // #include "gc.h"  Required for ad hoc garbage collection. This is possible with ATcollect,
 // useful to find garbage collection problems.

@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

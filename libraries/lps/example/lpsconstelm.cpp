@@ -17,6 +17,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/constelm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using utilities::tools::input_output_tool;

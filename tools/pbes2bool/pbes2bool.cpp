@@ -46,6 +46,7 @@
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/pbes/bes_deprecated.h"
 #include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::utilities;

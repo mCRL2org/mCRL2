@@ -19,8 +19,8 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
-#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
@@ -34,6 +34,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using data::make_vector;

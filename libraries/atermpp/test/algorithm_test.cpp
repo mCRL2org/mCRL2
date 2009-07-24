@@ -16,11 +16,13 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_real.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
 

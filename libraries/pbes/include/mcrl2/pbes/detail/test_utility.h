@@ -12,7 +12,8 @@
 #define MCRL2_PBES_DETAIL_TEST_UTILITY_H
 
 #include <string>
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/pbes/pbes.h"

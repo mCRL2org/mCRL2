@@ -12,6 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

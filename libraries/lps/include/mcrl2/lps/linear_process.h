@@ -18,13 +18,9 @@
 #include <functional>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/filtered_list.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/utility.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/detail/sorted_sequence_algorithm.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 

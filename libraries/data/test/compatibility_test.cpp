@@ -16,6 +16,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/exception.h"

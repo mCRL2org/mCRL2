@@ -13,20 +13,18 @@
 #define ATERM_UTILITY_H
 
 #include <string>
-#include "mcrl2/atermpp/aterm_string.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace atermpp
 {
 
-  /// \brief Remove leading and trailing quotes from a quoted aterm_string.
-  /// \param t A term containing a quoted string.
-  /// \return The string without quotes.
+  /// \brief Make a term from a string pattern.
+  /// \param pattern A string
+  /// \return The term constructed from the pattern.
   inline
-  std::string unquote(aterm_string t)
+  aterm make_term(const std::string& pattern)
   {
-    std::string s(t);
-    assert(s.size() >= 2 && *s.begin() == '"' && *s.rbegin() == '"');
-    return std::string(s, 1, s.size() - 2);
+    return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
   }
 
 } // namespace atermpp

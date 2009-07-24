@@ -14,6 +14,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;

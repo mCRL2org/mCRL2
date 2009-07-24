@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/core/text_utility.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;

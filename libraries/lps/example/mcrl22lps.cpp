@@ -21,6 +21,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/process.h"
 #include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

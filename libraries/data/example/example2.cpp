@@ -1,5 +1,6 @@
 #include "mcrl2/data/data.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include <iostream>
 
 using namespace mcrl2::data;

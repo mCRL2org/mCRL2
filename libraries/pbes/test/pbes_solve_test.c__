@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::data;
 using namespace mcrl2::lps;

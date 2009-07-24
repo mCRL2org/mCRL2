@@ -13,7 +13,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/find.h"
 #include "mcrl2/data/data.h"

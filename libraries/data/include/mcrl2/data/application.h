@@ -13,6 +13,7 @@
 #define MCRL2_DATA_APPLICATION_H
 
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/data_expression.h"

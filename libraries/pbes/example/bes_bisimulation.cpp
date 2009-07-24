@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/utility.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 namespace mcrl2 {
 namespace bes {

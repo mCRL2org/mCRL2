@@ -20,6 +20,7 @@
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/pbes/parity_game_generator.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "logging.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"

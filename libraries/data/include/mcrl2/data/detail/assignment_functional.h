@@ -13,7 +13,7 @@
 #define MCRL2_DATA_DETAIL_DATA_ASSIGNMENT_FUNCTIONAL_H
 
 #include <set>
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
 
 namespace mcrl2 {
 

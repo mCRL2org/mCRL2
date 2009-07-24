@@ -41,6 +41,7 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 
 using namespace std;

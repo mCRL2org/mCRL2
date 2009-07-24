@@ -20,6 +20,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 
 using namespace mcrl2;

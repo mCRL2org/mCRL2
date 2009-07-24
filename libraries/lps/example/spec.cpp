@@ -20,6 +20,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

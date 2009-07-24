@@ -20,6 +20,7 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes_parse.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;

@@ -14,8 +14,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/data/detail/container_utility.h"
-#include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/variable.h"

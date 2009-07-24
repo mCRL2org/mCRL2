@@ -23,6 +23,7 @@ is:
     #include "mcrl2/new_data/parser.h"
     #include "mcrl2/new_data/pos.h"
     #include "mcrl2/new_data/nat.h"
+    #include "mcrl2/atermpp/aterm_init.h"
 
     using namespace mcrl2::new_data;
 

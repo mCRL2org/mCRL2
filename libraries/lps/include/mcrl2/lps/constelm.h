@@ -17,7 +17,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/convert.h"

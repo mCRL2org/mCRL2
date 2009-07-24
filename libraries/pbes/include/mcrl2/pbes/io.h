@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2 {

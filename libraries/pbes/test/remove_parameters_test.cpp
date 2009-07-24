@@ -10,13 +10,15 @@
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/detail/test_utility.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::core;
 using namespace atermpp;

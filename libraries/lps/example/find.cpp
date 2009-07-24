@@ -12,7 +12,7 @@
 #include <iostream>
 #include <iterator>
 
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/find.h"
 #include "mcrl2/data/data.h"
@@ -22,6 +22,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

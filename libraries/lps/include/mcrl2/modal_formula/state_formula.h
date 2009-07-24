@@ -18,11 +18,14 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/assignment.h"
 
 namespace mcrl2 {
 

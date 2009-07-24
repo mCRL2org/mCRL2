@@ -24,6 +24,7 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

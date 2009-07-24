@@ -10,6 +10,7 @@
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2;

@@ -12,9 +12,12 @@
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/data_expression.h"

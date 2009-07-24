@@ -1,4 +1,4 @@
-// Author(s): F.P.M. (Frank) Stappers, Wieger Wesselink
+// Author(s): Frank Stappers, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -13,14 +13,11 @@
 #define TOOLNAME "lpsinfo"
 #define AUTHOR "Frank Stappers, Wieger Wesselink"
 
-#include <exception>
-#include <set>
-#include <algorithm>
-#include <sstream>
-
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;

@@ -3,6 +3,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

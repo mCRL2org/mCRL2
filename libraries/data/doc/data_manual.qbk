@@ -31,6 +31,7 @@ Each data expression =d= has a type or sort =d.sort()= of type =sort_expression=
 Data Library is inside the namespace =mcrl2::new_data=. Let's look at a simple example:
 
     #include "mcrl2/new_data/data.h"
+    #include "mcrl2/atermpp/aterm_init.h"
     #include <cassert>
 
     using namespace mcrl2::data;

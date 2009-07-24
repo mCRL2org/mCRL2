@@ -15,6 +15,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;

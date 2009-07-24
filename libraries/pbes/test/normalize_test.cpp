@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

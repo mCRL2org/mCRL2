@@ -14,8 +14,11 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/atermpp.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/utility.h"
 
 using namespace std;
 using namespace atermpp;

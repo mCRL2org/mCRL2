@@ -30,6 +30,7 @@ example:
     #include <algorithm>
     #include <iostream>
     #include "atermpp/atermpp.h"
+    #include "mcrl2/atermpp/aterm_init.h"
 
     using namespace std;
     using namespace atermpp;

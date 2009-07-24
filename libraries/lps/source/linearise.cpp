@@ -48,7 +48,7 @@
 #include "mcrl2/atermpp/set.h"
 
 //mCRL2 data
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"

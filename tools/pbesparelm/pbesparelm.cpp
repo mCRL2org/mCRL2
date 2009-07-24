@@ -18,6 +18,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parelm.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using utilities::interface_description;

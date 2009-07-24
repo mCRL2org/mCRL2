@@ -21,6 +21,7 @@
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

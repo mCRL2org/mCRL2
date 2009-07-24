@@ -452,6 +452,4 @@ namespace atermpp {
 
 } // namespace atermpp
 
-#include "mcrl2/atermpp/make_list.h"
-
 #endif // MCRL2_ATERMPP_ATERM_LIST_H

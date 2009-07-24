@@ -14,10 +14,12 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/atermpp/transform.h"
 #include "mcrl2/atermpp/set_operations.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

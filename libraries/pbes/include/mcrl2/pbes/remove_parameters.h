@@ -15,7 +15,7 @@
 #include <map>
 #include <vector>
 #include <boost/bind.hpp>
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/detail/convert.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 

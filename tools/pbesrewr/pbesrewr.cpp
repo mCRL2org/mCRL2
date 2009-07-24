@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesrewr.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using utilities::tools::input_output_tool;

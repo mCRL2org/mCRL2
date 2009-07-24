@@ -15,9 +15,10 @@
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/find.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/utility.h"

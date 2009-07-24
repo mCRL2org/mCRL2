@@ -2,7 +2,8 @@
 The `main` function of each program that uses the ATerm Library
 must start with the following initialization code:
 
-   #include "atermpp/atermpp.h"
+   #include "mcrl2/atermpp/atermpp.h"
+   #include "mcrl2/atermpp/aterm_init.h"
 
    int main(int argc, char* argv[])
    {

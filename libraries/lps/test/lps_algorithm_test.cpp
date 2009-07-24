@@ -16,6 +16,7 @@
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace atermpp;

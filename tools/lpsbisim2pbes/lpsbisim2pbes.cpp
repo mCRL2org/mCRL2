@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/utilities/tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 //using namespace mcrl2::data;
 //using namespace mcrl2::pbes_system::pbes_expr;

@@ -19,6 +19,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/lps/summand.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

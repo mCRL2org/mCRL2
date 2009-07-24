@@ -23,6 +23,7 @@
 #include <mcrl2/atermpp/table.h>
 #include <mcrl2/atermpp/algorithm.h>
 #include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"

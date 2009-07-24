@@ -14,6 +14,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 const std::string case_no_influenced_parameters(
   "act a;\n\n"

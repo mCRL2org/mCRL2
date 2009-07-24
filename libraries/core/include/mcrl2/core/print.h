@@ -19,7 +19,7 @@
 #include <ostream>
 #include <string>
 #include "mcrl2/exception.h"
-#include "mcrl2/atermpp/atermpp.h"
+#include "mcrl2/atermpp/aterm.h"
 
 namespace mcrl2 {
   namespace core {

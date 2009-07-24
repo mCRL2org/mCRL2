@@ -14,7 +14,7 @@
 
 #include <functional>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
 namespace mcrl2 {

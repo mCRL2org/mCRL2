@@ -19,6 +19,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/core/garbage_collection.h"
 

@@ -27,6 +27,7 @@ The following program illustrates the usage of `make_term`.
 
   #include <iostream>
   #include "atermpp/atermpp.h"
+  #include "mcrl2/atermpp/aterm_init.h"
 
   using namespace atermpp;
 

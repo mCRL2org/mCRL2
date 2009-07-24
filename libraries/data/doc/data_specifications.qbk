@@ -11,6 +11,7 @@ An example of this is given below:
 
     #include "mcrl2/new_data/data.h"
     #include "mcrl2/new_data/parser.h"
+    #include "mcrl2/atermpp/aterm_init.h"
     #include <iostream>
 
     using namespace mcrl2::new_data;

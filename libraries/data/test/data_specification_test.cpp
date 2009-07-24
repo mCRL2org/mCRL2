@@ -16,7 +16,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/data.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/list.h"
@@ -24,6 +25,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/parser.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

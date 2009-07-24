@@ -9,7 +9,7 @@
 #include <boost/test/minimal.hpp>
 
 #include <aterm2.h>
-#include <mcrl2/atermpp/atermpp.h>
+#include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts.h>
 
 using namespace mcrl2::lts;

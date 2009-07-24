@@ -13,8 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/atermpp/atermpp.h"
-#include "mcrl2/atermpp/make_list.h"
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/nat.h"

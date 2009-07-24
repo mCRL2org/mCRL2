@@ -20,6 +20,7 @@ The following program illustrates this.
 
     #include <string>
     #include "atermpp/atermpp.h"
+    #include "mcrl2/atermpp/aterm_init.h"
     using namespace atermpp;
 
     aterm a; // using global aterm variables is in general not a good idea

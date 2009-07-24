@@ -13,6 +13,7 @@
 #include <string>
 #include <set>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/traverse.h"

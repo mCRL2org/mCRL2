@@ -19,6 +19,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 void test_data_expression(const std::string &de_in, bool test_type_checker = true)
 {

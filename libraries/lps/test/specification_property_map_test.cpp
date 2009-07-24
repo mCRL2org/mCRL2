@@ -17,6 +17,7 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;

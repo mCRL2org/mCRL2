@@ -15,6 +15,7 @@
 #include <boost/filesystem/operations.hpp>
 #include "mcrl2/pbes/bes.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 

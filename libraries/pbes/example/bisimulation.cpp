@@ -5,6 +5,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include "mcrl2/pbes/bisimulation.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
 using namespace mcrl2::data;

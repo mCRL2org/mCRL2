@@ -14,6 +14,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "test_specifications.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 
