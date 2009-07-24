@@ -113,33 +113,11 @@ class lysa2mcrl2_tool: public input_output_tool
       input_output_tool::add_options(desc);
       desc.add_option("strategy", 
         make_optional_argument("STRATEGY", "symbolic"), 
-        "FIXME", 
+        "Apply conversion using the specified strategy:\n"
+        "  'symbolic' for a symbolic conversion (default), or\n"
+        "  'straightforward' for a straightforward conversion.", 
         's');
       
-      /*
-      desc.add_option("no-attacker", 
-        "Produces a specification without support for a symbolic attacker. "
-        "This makes the specification significantly simpler and the state space significantly "
-        "smaller. However, no Dolev-Yao attacker is included so no outside attacks will be "
-        "found. Changes the default values of -p and -f.", 
-        'n');
-
-      desc.add_option("preamble", 
-        make_mandatory_argument("FILENAME"), 
-        "Prepend the mCRL2 preamble in FILENAME, instead of using the built-in preamble. "
-        "The preamble contains all mCRL2 code that is not directly dependent on the input "
-        "protocol, including all data expressions (except the Name and Ciphertext sorts), "
-        "the attacker process and auxiliary processes. Defaults to preamble.mcrl2 (or "
-        "preamble_straightforward.mcrl2 if -n is present).", 
-        'p');
-
-      desc.add_option("fmt-file", 
-        make_mandatory_argument("FILENAME"), 
-        "Use the format strings in FILENAME to build mCRL2 expressions. Defaults to "
-        "symbolic.fmt (or straightforward.fmt is -n is present).",
-        'f');
-      */
-
       desc.add_option("attacker-index", 
         make_mandatory_argument("NUM"), 
         "Assume that the attacker may be a legitimate (but dishonest) agent participating "
@@ -153,13 +131,13 @@ class lysa2mcrl2_tool: public input_output_tool
         make_optional_argument("PREFIX", "_"), 
         "Prefixes all identifiers found in the Typed LySa process in INPUT with an "
         "underscore or with PREFIX to prevent clashes with mCRL2 keywords or "
-        "identifiers used in the preamble", 
+        "identifiers used in the preamble.", 
         'i');
 
       desc.add_option("zero-action",
         "Generates a 'zero' action before deadlocking when Typed LySa's empty process (0) "
         "is encountered. This is a valid action in the supplied preambles. This option may "
-        "help you differentiate between a deadlock and a correct protocol run termination. ",
+        "help to differentiate between a deadlock and a correct protocol run termination. ",
         'z');
 
       desc.add_option("lysa",
@@ -172,37 +150,9 @@ class lysa2mcrl2_tool: public input_output_tool
     {
       input_output_tool::parse_options(parser);
       
-      //if(parser.options.count("strategy"))
-      {
-        options.strategy = lysa::Strategy::get(parser.option_argument("strategy"));
-      }
+      options.strategy = lysa::Strategy::get(parser.option_argument("strategy"));
 
       options.make_symbolic = options.strategy->makeSymbolicAttacker();
-
-      /*
-      if(parser.options.count("no-attacker"))
-      {
-        options.make_symbolic = false;
-        options.preamble_file_name = "preamble_straightforward.mcrl2";
-        options.fmt_file_name = "straightforward.fmt";
-      }
-      else
-      {
-        options.make_symbolic = true;
-        options.preamble_file_name = "preamble.mcrl2";
-        options.fmt_file_name = "symbolic.fmt";
-      }
-
-      if(parser.options.count("preamble"))
-      {
-        options.preamble_file_name = parser.option_argument("preamble");
-      }
-
-      if(parser.options.count("fmt-file"))
-      {
-        options.fmt_file_name = parser.option_argument("fmt-file");
-      }
-      */
 
       if(parser.options.count("prefix-idents"))
       {
