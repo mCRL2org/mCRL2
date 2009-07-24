@@ -129,6 +129,20 @@ namespace grape
     ATermAppl parse_proc_spec(wxString p_proc_spec);
 
     /**
+     * Convert numeric sorts in a sort expression to sort Real
+     * @param sort_expr An ATerm representation of a sort expression
+     * @return sort_expr in which the sorts Pos, Nat and Int are replaced by Real
+     */
+    ATermAppl convert_numeric_sorts_to_real(ATermAppl sort_expr);
+
+    /**
+     * Convert numeric sorts in a list of sort expressions to sort Real
+     * @param sort_exprs An ATerm representation of a list of sort expression
+     * @return sort_exprs in which the sorts Pos, Nat and Int are replaced by Real
+     */
+    ATermList convert_numeric_sorts_to_real(ATermList sort_exprs);
+
+    /**
      * XML node child retrieval function.
      * Retrieves a pointer to a child of an XML node.
      * @param p_parent The parent XML node.

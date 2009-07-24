@@ -19,6 +19,7 @@
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/real.h"
 
@@ -27,6 +28,60 @@ using namespace grape::libgrape;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
+
+ATermAppl grape::mcrl2gen::convert_numeric_sorts_to_real(ATermAppl sort_expr) {
+  assert(gsIsSortExpr(sort_expr)); 
+  if (gsIsSortExprPos(sort_expr) || gsIsSortExprNat(sort_expr) || gsIsSortExprInt(sort_expr)) {
+    return gsMakeSortExprReal();
+  } else if (gsIsSortId(sort_expr)) {
+    return sort_expr;
+  } else if (gsIsSortCons(sort_expr)) {
+    ATermAppl sort_cons_type = ATAgetArgument(sort_expr, 0);
+    ATermAppl sort_cons_arg  = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
+    return gsMakeSortCons(sort_cons_type, sort_cons_arg);
+  } else if (gsIsSortStruct(sort_expr)) {
+    ATermList struct_conss = ATmakeList0();
+    for (ATermList l = ATLgetArgument(sort_expr, 0); !ATisEmpty(l); l = ATgetNext(l)) {
+      ATermAppl struct_cons = ATAgetFirst(l);
+      ATermAppl struct_cons0 = ATAgetArgument(struct_cons, 0);
+      ATermList struct_cons1 = ATLgetArgument(struct_cons, 1);
+      ATermAppl struct_cons2 = ATAgetArgument(struct_cons, 2);
+      ATermList struct_projs = ATmakeList0();
+      for (ATermList m = struct_cons1; !ATisEmpty(m); m = ATgetNext(m)) {
+        ATermAppl struct_proj = ATAgetFirst(m);
+        ATermAppl struct_proj0 = ATAgetArgument(struct_proj, 0);
+        ATermAppl struct_proj1 = ATAgetArgument(struct_proj, 1);
+        struct_proj = gsMakeStructProj(struct_proj0, convert_numeric_sorts_to_real(struct_proj1));
+        struct_projs = ATinsert(struct_projs, (ATerm) struct_proj);
+      }
+      struct_projs = ATreverse(struct_projs);
+      struct_cons = gsMakeStructCons(struct_cons0, struct_projs, struct_cons2);
+      struct_conss = ATinsert(struct_conss, (ATerm) struct_cons);
+    }
+    struct_conss = ATreverse(struct_conss);
+    return gsMakeSortStruct(struct_conss);
+  } else if (gsIsSortArrow(sort_expr)) {
+    ATermList domain = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
+    ATermAppl result = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
+    return gsMakeSortArrow(domain, result);
+  } else if (gsIsSortUnknown(sort_expr)) {
+    return sort_expr;
+  } else if (gsIsSortsPossible(sort_expr)) {
+    ATermList sort_exprs = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
+    return gsMakeSortsPossible(sort_exprs);
+  } else {
+    throw mcrl2::runtime_error(pp(sort_expr) + "is not a sort expression");
+  }
+}
+
+ATermList grape::mcrl2gen::convert_numeric_sorts_to_real(ATermList sort_exprs) {
+  ATermList result = ATmakeList0();
+  for (ATermList l = sort_exprs; !ATisEmpty(l); l = ATgetNext(l)) {
+    ATermAppl sort_expr = convert_numeric_sorts_to_real(ATAgetFirst(l));
+    result = ATinsert(result, (ATerm) sort_expr);
+  }
+  return ATreverse(result);
+}
 
 ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 {
