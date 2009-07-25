@@ -41,6 +41,7 @@ namespace mcrl2 {
       template < typename Action >
       class dependent_sort_helper : public detail::selective_sort_traverser< dependent_sort_helper< Action >, unique_traversal_condition< sort_expression > >
       {
+        friend class detail::traverser< dependent_sort_helper >;
         friend class detail::sort_traverser< dependent_sort_helper >;
 
         typedef detail::selective_sort_traverser< dependent_sort_helper, unique_traversal_condition< sort_expression > > super;
@@ -58,8 +59,6 @@ namespace mcrl2 {
 
         protected:
 
-          using super::enter;
-
           void visit_constructors(basic_sort const& s)
           {
             for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
@@ -76,6 +75,8 @@ namespace mcrl2 {
               }
             }
           }
+
+          using super::enter;
 
           void enter(const container_sort& s)
           {
