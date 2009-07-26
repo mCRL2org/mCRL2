@@ -46,12 +46,22 @@ namespace mcrl2 {
       return dummy;
     }
 
-    /// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
-    inline
-    static core::identifier_string make_identifier(std::string const& name)
-    {
-      return (name.empty()) ? no_identifier() : core::identifier_string(name);
+    /// \cond INTERNAL_DOCS
+    namespace detail {
+      /// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
+      inline
+      static core::identifier_string make_identifier(std::string const& name)
+      {
+        return (name.empty()) ? no_identifier() : core::identifier_string(name);
+      }
+
+      inline
+      static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
+      {
+        return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
+      }
     }
+    /// \endcond
 
     /// \brief Argument of a structured sort constructor.
     ///
@@ -100,7 +110,7 @@ namespace mcrl2 {
         /// \param[in] name The name of the argument.
         /// The default name, the empty string, signifies that there is no name.
         structured_sort_constructor_argument(const sort_expression& sort, const std::string& name)
-          : atermpp::aterm_appl(make_argument(sort, make_identifier(name)))
+          : atermpp::aterm_appl(make_argument(sort, detail::make_identifier(name)))
         {}
 
         /// \brief Returns the name of the constructor argument.
@@ -108,15 +118,7 @@ namespace mcrl2 {
         inline
         core::identifier_string name() const
         {
-          atermpp::aterm_appl n = atermpp::arg1(*this);
-          if (n == core::detail::gsMakeNil())
-          {
-            return no_identifier();
-          }
-          else
-          {
-            return atermpp::aterm_string(n);
-          }
+          return detail::make_identifier(atermpp::arg1(*this));
         }
 
         /// \brief Returns the sort of the constructor argument.
@@ -235,8 +237,8 @@ namespace mcrl2 {
                                     const Container& arguments,
                                     const std::string& recogniser,
                                     typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(make_identifier(name),
-               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), make_identifier(recogniser)))
+          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
+               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
         { }
 
         /// \brief Constructor
@@ -246,7 +248,7 @@ namespace mcrl2 {
         structured_sort_constructor(const std::string& name,
                                     const Container& arguments,
                                     typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
-          : atermpp::aterm_appl(make_constructor(make_identifier(name),
+          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
                convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), no_identifier()))
         { }
 
@@ -267,7 +269,7 @@ namespace mcrl2 {
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
         structured_sort_constructor(const std::string& name, const std::string& recogniser = "")
-          : atermpp::aterm_appl(make_constructor(make_identifier(name), make_identifier(recogniser)))
+          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
         { }
 
         /// \brief Returns the name of the constructor.
@@ -296,15 +298,7 @@ namespace mcrl2 {
         /// \brief Returns the name of the recogniser of the constructor.
         core::identifier_string recogniser() const
         {
-          atermpp::aterm_appl r = arg3(*this);
-          if (r == core::detail::gsMakeNil())
-          {
-            return no_identifier();
-          }
-          else
-          {
-            return atermpp::aterm_string(r);
-          }
+          return detail::make_identifier(arg3(*this));
         }
 
         /// \brief Returns the constructor function for this constructor,
