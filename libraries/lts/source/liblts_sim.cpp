@@ -7,6 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file liblts_sim.cpp
+#include <cstdlib>
 #include "mcrl2/lts/detail/liblts_sim.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
