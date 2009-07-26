@@ -113,6 +113,14 @@ namespace mcrl2 {
           : atermpp::aterm_appl(make_argument(sort, detail::make_identifier(name)))
         {}
 
+        /// \brief Constructor
+        ///
+        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+        template < size_t S >
+        structured_sort_constructor_argument(const sort_expression& sort, const char (&name)[S])
+          : atermpp::aterm_appl(make_argument(sort, detail::make_identifier(name)))
+        {}
+
         /// \brief Returns the name of the constructor argument.
         ///
         inline
@@ -243,6 +251,18 @@ namespace mcrl2 {
 
         /// \brief Constructor
         ///
+        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+        template < typename Container, size_t S, size_t S0 >
+        structured_sort_constructor(const char (&name)[S],
+                                    const Container& arguments,
+                                    const char (&recogniser)[S0],
+                                    typename detail::enable_if_container< Container, structured_sort_constructor_argument >::type* = 0)
+          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name),
+               convert< atermpp::term_list< structured_sort_constructor_argument > >(arguments), detail::make_identifier(recogniser)))
+        { }
+
+        /// \brief Constructor
+        ///
         /// \overload
         template < typename Container >
         structured_sort_constructor(const std::string& name,
@@ -269,6 +289,14 @@ namespace mcrl2 {
         /// \pre name is not empty.
         /// \pre recogniser is not empty.
         structured_sort_constructor(const std::string& name, const std::string& recogniser = "")
+          : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
+        { }
+
+        /// \brief Constructor
+        ///
+        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+        template < size_t S, size_t S0 >
+        structured_sort_constructor(const char (&name)[S], const char (&recogniser)[S0] = "")
           : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
         { }
 
