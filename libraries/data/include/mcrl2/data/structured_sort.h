@@ -296,7 +296,7 @@ namespace mcrl2 {
         ///
         /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
         template < size_t S, size_t S0 >
-        structured_sort_constructor(const char (&name)[S], const char (&recogniser)[S0] = "")
+        structured_sort_constructor(const char (&name)[S], const char (&recogniser)[S0])
           : atermpp::aterm_appl(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
         { }
 
