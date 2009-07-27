@@ -20,6 +20,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/messaging.h"
 
 void test_data_expression(const std::string &de_in, bool test_type_checker = true)
 {
@@ -131,6 +132,14 @@ int test_main(int argc, char** argv)
   test_data_expression("{true, false}");
   mcrl2::core::garbage_collect();
   test_data_expression("{true: 1, false: 2}");
+  mcrl2::core::garbage_collect();
+
+  //test function updates
+  test_data_expression("(lambda x: Bool. x)[true -> false]", false);
+  mcrl2::core::garbage_collect();
+  test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]", false);
+  mcrl2::core::garbage_collect();
+  test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]", false);
   mcrl2::core::garbage_collect();
 
   //test data specification involving structured sorts

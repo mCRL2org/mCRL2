@@ -569,6 +569,8 @@ ATermAppl gsMakeOpIdNameMonusFunc();
 ATermAppl gsMakeOpIdNameNat2BoolFunc();
 ///Creation of name for the system operation identifier "Bool2NatFunc"
 ATermAppl gsMakeOpIdNameBool2NatFunc();
+///Creation of name for the system operation identifier "FuncUpdate"
+ATermAppl gsMakeOpIdNameFuncUpdate();
 
 
 // Creation of operation identifiers for system defined operations.
@@ -1105,6 +1107,9 @@ ATermAppl gsMakeOpIdNat2BoolFunc(ATermAppl SortExprElt);
 
 ///\return Operation identifier for Bool2NatFunc
 ATermAppl gsMakeOpIdBool2NatFunc(ATermAppl SortExprElt);
+
+///\return Operation identifier for FuncUpdate
+ATermAppl gsMakeOpIdFuncUpdate(ATermAppl SortExprDomain, ATermAppl SortExprRange);
 
 
 // Creation of data expressions for system defined operations.
@@ -1760,6 +1765,12 @@ ATermAppl gsMakeDataExprNat2BoolFunc(ATermAppl DataExprArg);
 ///\return Data expression for the Bool2Nat function over sort S,
 ///        which has sort (S -> Bool) -> (S -> Nat)
 ATermAppl gsMakeDataExprBool2NatFunc(ATermAppl DataExprArg);
+
+///\pre    DataExprArg1, DataExprArg2, and DataExprArg3 are data expressions of the
+///        form S -> T, S and T, respectively
+///\return Data expression for the function update over sort S -> T,
+///        which has sort (S -> T) # S # T -> (S -> T)
+ATermAppl gsMakeDataExprFuncUpdate(ATermAppl DataExprArg1, ATermAppl DataExprArg2, ATermAppl DataExprArg3);
 
 
 // Auxiliary functions concerning data expressions

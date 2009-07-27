@@ -332,6 +332,9 @@ static bool gsIsIdSetEnum(ATermAppl DataExpr);
 static bool gsIsIdBagEnum(ATermAppl DataExpr);
 //Ret: DataExpr is a bag enumeration identifier
 
+static bool gsIsIdFuncUpdate(ATermAppl DataExpr);
+//Ret: DataExpr is a function update identifier
+
 static bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength);
 //Ret: DataExpr is a prefix identifier and ArgsLength == 1
 
@@ -1369,6 +1372,18 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
+      } else if (gsIsIdFuncUpdate(Head)) {
+        //print function update
+        PRINT_FUNC(dbg_prints)("printing function update\n");
+        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 0),
+          pp_format, ShowSorts, gsPrecIdPrefix());
+        PRINT_FUNC(fprints)(OutStream, "[");
+        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 1),
+          pp_format, ShowSorts, 0);
+        PRINT_FUNC(fprints)(OutStream, " -> ");
+        PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 2),
+          pp_format, ShowSorts, 0);
+        PRINT_FUNC(fprints)(OutStream, "]");
       } else if (gsIsIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -2151,6 +2166,14 @@ bool gsIsIdBagEnum(ATermAppl DataExpr)
     return false;
   }
   return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameBagEnum();
+}
+
+bool gsIsIdFuncUpdate(ATermAppl DataExpr)
+{
+  if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
+    return false;
+  }
+  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameFuncUpdate();
 }
 
 bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)

@@ -1081,6 +1081,13 @@ inline ATermAppl initMakeOpIdNameBool2NatFunc(ATermAppl &t)
   return t;
 }
 
+inline ATermAppl initMakeOpIdNameFuncUpdate(ATermAppl &t)
+{
+  t = gsString2ATermAppl("@func_update");
+  ATprotectAppl(&t);
+  return t;
+}
+
 
 //Sort expressions
 //----------------
@@ -2297,6 +2304,11 @@ ATermAppl gsMakeOpIdNameBool2NatFunc() {
   return t;
 }
 
+ATermAppl gsMakeOpIdNameFuncUpdate() {
+  static ATermAppl t = initMakeOpIdNameFuncUpdate(t);
+  return t;
+}
+
 
 //Creation of operation identifiers for system defined operations.
 
@@ -3214,6 +3226,17 @@ ATermAppl gsMakeOpIdBool2NatFunc(ATermAppl SortExprElt)
     gsMakeSortArrow1(
       gsMakeSortArrow1(SortExprElt, gsMakeSortExprBool()),
       gsMakeSortArrow1(SortExprElt, gsMakeSortExprNat())
+  ));
+}
+
+ATermAppl gsMakeOpIdFuncUpdate(ATermAppl SortExprDomain, ATermAppl SortExprRange)
+{
+  return gsMakeOpId(gsMakeOpIdNameFuncUpdate(),
+    gsMakeSortArrow3(
+      gsMakeSortArrow1(SortExprDomain, SortExprRange),
+      SortExprDomain,
+      SortExprRange,
+      gsMakeSortArrow1(SortExprDomain, SortExprRange)
   ));
 }
 
@@ -4288,6 +4311,19 @@ ATermAppl gsMakeDataExprBool2NatFunc(ATermAppl DataExprArg)
   assert(ATgetLength(SortExprDom) == 1);
   return gsMakeDataAppl1(
     gsMakeOpIdBool2NatFunc(ATAgetFirst(SortExprDom)), DataExprArg);
+}
+
+ATermAppl gsMakeDataExprFuncUpdate(ATermAppl DataExprArg1, ATermAppl DataExprArg2, ATermAppl DataExprArg3)
+{
+  ATermAppl SortExprDomain = gsGetSort(DataExprArg2);
+  ATermAppl SortExprRange = gsGetSort(DataExprArg3);
+  assert(ATisEqual(
+    gsGetSort(DataExprArg1),
+    gsMakeSortArrow1(SortExprDomain, SortExprRange)
+  ));
+  return gsMakeDataAppl3(
+    gsMakeOpIdFuncUpdate(SortExprDomain, SortExprRange),
+    DataExprArg1, DataExprArg2, DataExprArg3);
 }
 
 //Auxiliary functions to create data expressions

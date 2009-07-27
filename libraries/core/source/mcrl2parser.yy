@@ -127,13 +127,20 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> struct_constructor recogniser struct_projection sort_expr_primary
 %type <appl> sort_constant sort_constructor
 //data expressions
-%type <appl> data_expr data_expr_whr id_init data_expr_quant data_expr_imp
-%type <appl> data_expr_imp_rhs data_expr_and data_expr_and_rhs data_expr_eq
-%type <appl> data_expr_eq_rhs data_expr_rel data_expr_cons data_expr_snoc
-%type <appl> data_expr_concat data_expr_add data_expr_div data_expr_mult
-%type <appl> data_expr_prefix data_expr_quant_prefix data_expr_postfix
-%type <appl> data_expr_primary data_constant data_enumeration
-%type <appl> data_comprehension data_var_decl
+%type <appl> data_expr
+%type <appl> data_expr_whr id_init
+%type <appl> data_expr_quant
+%type <appl> data_expr_imp data_expr_imp_rhs
+%type <appl> data_expr_and data_expr_and_rhs
+%type <appl> data_expr_eq data_expr_eq_rhs
+%type <appl> data_expr_rel
+%type <appl> data_expr_cons data_expr_snoc data_expr_concat
+%type <appl> data_expr_add data_expr_div data_expr_mult
+%type <appl> data_expr_prefix data_expr_quant_prefix 
+%type <appl> data_expr_postfix
+%type <appl> data_expr_primary
+%type <appl> data_constant data_enumeration data_comprehension
+%type <appl> data_var_decl
 //data specifications
 %type <appl> data_spec data_spec_elt sort_spec cons_spec map_spec
 %type <appl> data_eqn_spec data_eqn_decl
@@ -876,7 +883,13 @@ data_expr_postfix:
   | data_expr_postfix LPAR data_exprs_cs RPAR
     {
       safe_assign($$, gsMakeDataAppl($1, ATreverse($3)));
-      gsDebugMsg("parsed postfix data expression\n  %T\n", $$);
+      gsDebugMsg("parsed postfix data expression (function application)\n  %T\n", $$);
+    }
+  | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
+    {
+      safe_assign($$,
+        gsMakeDataAppl(gsMakeId(gsMakeOpIdNameFuncUpdate()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
+      gsDebugMsg("parsed postfix data expression (function update)\n  %T\n", $$);
     }
   ;
 
