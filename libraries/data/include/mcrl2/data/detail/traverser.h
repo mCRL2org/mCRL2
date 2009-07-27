@@ -233,20 +233,35 @@ namespace mcrl2 {
           {
             if (e.type() == AT_APPL)
             {
-              if (is_data_expression(e))
-              {
-                static_cast< Derived& >(*this)(data_expression(e));
-              }
-              else {
-                for (atermpp::aterm_appl::const_iterator i = atermpp::aterm_appl(e).begin(); i != atermpp::aterm_appl(e).end(); ++i)
-                {
-                  static_cast< Derived& >(*this)(*i);
-                }
-              }
+              static_cast< Derived& >(*this)(atermpp::aterm_appl(e));
             }
             else if (e.type() == AT_LIST)
             {
-              static_cast< Derived& >(*this)(atermpp::aterm_list(e));
+              (*this)(atermpp::aterm_list(e));
+            }
+          }
+
+          // \deprecated exists only for backwards compatibility
+          void operator()(atermpp::aterm_appl const& e)
+          {
+            if (is_data_expression(e))
+            {
+              static_cast< Derived& >(*this)(data_expression(e));
+            }
+            else {
+              for (atermpp::aterm_appl::const_iterator i = e.begin(); i != e.end(); ++i)
+              {
+                (*this)(*i);
+              }
+            }
+          }
+
+          // \deprecated exists only for backwards compatibility
+          void operator()(atermpp::aterm_list const& e)
+          {
+            for (atermpp::aterm_list::const_iterator i = e.begin(); i != e.end(); ++i)
+            {
+              (*this)(*i);
             }
           }
 #endif // NO_TERM_TRAVERSAL

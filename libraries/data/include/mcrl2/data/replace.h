@@ -52,9 +52,16 @@ namespace mcrl2 {
 
           Substitution m_substitution;
 
+          typedef expression_manipulator< variable_replace_helper< Substitution > > super;
+
         public:
 
-          using expression_manipulator< variable_replace_helper< Substitution > >::operator();
+          // Workaround for malfunctioning MSVC 2008 overload resolution
+          template < typename Container >
+          Container operator()(Container const& a)
+          {
+            return super::operator()(a);
+          }
 
           data_expression operator()(variable const& v)
           {
@@ -96,6 +103,13 @@ namespace mcrl2 {
         public:
 
           using super::operator();
+
+          // Workaround for malfunctioning MSVC 2008 overload resolution
+          template < typename Container >
+          Container operator()(Container const& a)
+          {
+            return super::operator()(a);
+          }
 
           assignment operator()(assignment const& a)
           {

@@ -16,6 +16,7 @@
 #include <memory>
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"

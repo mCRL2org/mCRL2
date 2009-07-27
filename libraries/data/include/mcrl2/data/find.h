@@ -201,9 +201,7 @@ namespace detail {
 
     public:
 
-      using super::operator();
       using super::enter;
-      using super::leave;
 
       void enter(variable const& v)
       {
@@ -216,6 +214,13 @@ namespace detail {
       void operator()(assignment const& a)
       {
         (*this)(a.rhs());
+      }
+
+      // Workaround for mal-functioning MSVC 2008 overload resolution
+      template < typename Expression >
+      void operator()(Expression const& a)
+      {
+        super::operator()(a);
       }
 
       free_variable_find_helper()
@@ -269,7 +274,6 @@ namespace detail {
 
       using super::operator();
       using super::enter;
-      using super::leave;
 
       void enter(variable const& v)
       {

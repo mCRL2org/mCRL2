@@ -187,8 +187,6 @@ namespace mcrl2 {
             return convert< atermpp::aterm_list >(result);
           }
 
-          
-
           template < typename Expression, bool = boost::is_convertible< Expression, data_expression >::value >
           struct manipulation_result_type {
             typedef Expression type;
@@ -297,7 +295,7 @@ namespace mcrl2 {
 
             where_clause result(static_cast< Derived& >(*this)(w.body()), make_assignment_range(
                                  make_assignment_left_hand_side_range(w.declarations()),
-                                 static_cast< Derived& >(*this)(make_assignment_right_hand_side_range(w.declarations()))));
+                                 (*this)(make_assignment_right_hand_side_range(w.declarations()))));
 
             decrease_bind_count(make_assignment_left_hand_side_range(w.declarations()));
 
