@@ -175,7 +175,7 @@ namespace data {
       template < typename EquationSelector >
       basic_rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
           basic_rewriter< atermpp::aterm >(s),
-          m_conversion_helper(new detail::rewrite_conversion_helper::rewrite_conversion_helper(d, *m_rewriter, selector))
+          m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter, selector))
       { }
 
       /// \brief Adds an equation to the rewrite rules.
