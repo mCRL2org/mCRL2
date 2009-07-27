@@ -79,7 +79,7 @@ struct substitute_builder: public pbes_expression_builder<pbes_expression>
 };
 
 template <typename Substitution>
-struct substitute_builder<Substitution> make_substitute_builder(const Substitution& sigma)
+substitute_builder<Substitution> make_substitute_builder(const Substitution& sigma)
 {
   return substitute_builder<Substitution>(sigma);
 }
