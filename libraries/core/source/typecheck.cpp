@@ -158,6 +158,8 @@ static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type);
 static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
 static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
+static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+
 
 static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
 
@@ -1178,6 +1180,9 @@ void gstcDataInit(void){
   gstcAddSystemFunction(gsMakeOpIdBagJoin(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagDiff(gsMakeSortExprBag(gsMakeSortUnknown())));
   gstcAddSystemFunction(gsMakeOpIdBagIntersect(gsMakeSortExprBag(gsMakeSortUnknown())));
+
+//function update
+  gstcAddSystemFunction(gsMakeOpIdFuncUpdate(gsMakeSortUnknown(),gsMakeSortUnknown()));
 }
 
 void gstcDataDestroy(void){
@@ -3187,6 +3192,16 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 	Type=NewType;
       }
 
+      if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0))){
+        gsDebugMsg("Doing FuncUpdate matching Type %T, PosType %T\n",Type,PosType);
+        ATermAppl NewType=gstcMatchFuncUpdate(Type);
+        if(!NewType){
+          gsErrorMsg("the function FuncUpdate has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
+          return NULL;
+        }
+        Type=NewType;
+      }
+
       *DataTerm=gsMakeOpId(Name,Type);
       if(variable) *DataTerm=gsMakeDataVarId(Name,Type);
 
@@ -4113,6 +4128,37 @@ static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
   if(!Arg) return NULL;
 
   return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)gsMakeSortExprBag(Arg)),gsMakeSortIdNat());
+}
+
+static ATermAppl gstcMatchFuncUpdate(ATermAppl Type){
+  //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
+  //If some of the parameters are Pos,Nat, or Int do upcasting.
+  
+  assert(gsIsSortArrow(Type));
+  ATermList Args=ATLgetArgument(Type,0);
+  assert((ATgetLength(Args)==3));
+  ATermAppl Arg1=ATAgetFirst(Args);
+  assert(gsIsSortArrow(Arg1));
+  Args=ATgetNext(Args);
+  ATermAppl Arg2=ATAgetFirst(Args);
+  Args=ATgetNext(Args);
+  ATermAppl Arg3=ATAgetFirst(Args);
+  ATermAppl Res=ATAgetArgument(Type,1);  
+  assert(gsIsSortArrow(Res));
+
+  Arg1=gstcUnifyMinType(Arg1,Res);
+  if(!Arg1) return NULL;
+
+  // determine A and B from Arg1:
+  ATermList LA=ATLgetArgument(Arg1,0);
+  assert((ATgetLength(LA)==1));
+  ATermAppl A=ATAgetFirst(LA);
+  ATermAppl B=ATAgetArgument(Arg1,1);
+
+  if(!gstcUnifyMinType(A,Arg2)) return NULL;
+  if(!gstcUnifyMinType(B,Arg3)) return NULL;
+
+  return gsMakeSortArrow(ATmakeList3((ATerm)Arg1,(ATerm)A,(ATerm)B),Arg1);
 }
 
 static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes){
