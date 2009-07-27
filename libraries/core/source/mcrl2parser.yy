@@ -108,7 +108,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %token <appl> ELSE
 %token <appl> SLASH STAR PLUS MINUS EQUALS DOT COMMA COLON SEMICOLON QMARK
 %token <appl> EXCLAM AT HASH BAR
-%token <appl> LPAR RPAR PBRACK LBRACK RBRACK LANG RANG PBRACE LBRACE RBRACE
+%token <appl> LPAR RPAR LBRACK RBRACK LANG RANG LBRACE RBRACE
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWGLOB KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
 %token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END
@@ -949,14 +949,14 @@ data_constant:
       safe_assign($$, gsMakeId($1));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
-  | PBRACK
+  | LBRACK RBRACK
     {
-      safe_assign($$, gsMakeId($1));
+      safe_assign($$, gsMakeId(gsMakeOpIdNameEmptyList()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
-  | PBRACE
+  | LBRACE RBRACE
     {
-      safe_assign($$, gsMakeId($1));
+      safe_assign($$, gsMakeId(gsMakeOpIdNameEmptySet()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   ;
@@ -1665,7 +1665,7 @@ proc_quant:
 
 //set of action names
 act_names_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed action name set\n  %T\n", $$);
@@ -1679,7 +1679,7 @@ act_names_set:
 
 //set of renaming expressions
 ren_expr_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
@@ -1716,7 +1716,7 @@ ren_expr:
 
 //set of communication expressions
 comm_expr_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed communication expression set\n  %T\n", $$);
@@ -1786,7 +1786,7 @@ ids_bs:
 
 //set of multi action names
 mult_act_names_set:
-  PBRACE
+  LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
       gsDebugMsg("parsed multi action name set\n  %T\n", $$);

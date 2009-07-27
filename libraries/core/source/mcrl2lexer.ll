@@ -120,12 +120,10 @@ Number     "0"|([1-9][0-9]*)
 "|"        { process_string(); return BAR; }
 "("        { process_string(); return LPAR; }
 ")"        { process_string(); return RPAR; }
-"[]"       { process_string(); return PBRACK; }
 "["        { process_string(); return LBRACK; }
 "]"        { process_string(); return RBRACK; }
 "<"        { process_string(); return LANG; }
 ">"        { process_string(); return RANG; }
-"{}"       { process_string(); return PBRACE; }
 "{"        { process_string(); return LBRACE; }
 "}"        { process_string(); return RBRACE; }
 
