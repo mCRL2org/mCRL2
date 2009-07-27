@@ -2,7 +2,7 @@
 " Language:   mCRL2
 " Extension:  mcrl2
 " Maintainer: Aad Mathijssen <A.H.J.Mathijssen@tue.nl>
-" Date:       29-06-2009
+" Date:       27-07-2009
 
 syntax clear
 
@@ -14,7 +14,7 @@ syntax keyword gsProcKW     sum block allow hide rename comm
 syntax keyword gsSortCKW    Bool Pos Nat Int Real
 syntax keyword gsSortKW     List Set Bag
 syntax keyword gsDataCKW    true false
-syntax keyword gsDataKW     whr end lambda forall exists div mod in
+syntax keyword gsDataKW     if whr end lambda forall exists div mod in
 syntax keyword gsTodo       contained TODO FIXME XXX
 
 syntax region gsComment     start=/%/ end='$' contains=gsTodo

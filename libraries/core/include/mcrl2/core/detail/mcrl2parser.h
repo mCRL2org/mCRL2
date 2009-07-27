@@ -106,30 +106,31 @@
      BAG = 323,
      CTRUE = 324,
      CFALSE = 325,
-     DIV = 326,
-     MOD = 327,
-     IN = 328,
-     LAMBDA = 329,
-     FORALL = 330,
-     EXISTS = 331,
-     WHR = 332,
-     END = 333,
-     DELTA = 334,
-     TAU = 335,
-     SUM = 336,
-     BLOCK = 337,
-     ALLOW = 338,
-     HIDE = 339,
-     RENAME = 340,
-     COMM = 341,
-     VAL = 342,
-     MU = 343,
-     NU = 344,
-     DELAY = 345,
-     YALED = 346,
-     NIL = 347,
-     ID = 348,
-     NUMBER = 349
+     IF = 326,
+     DIV = 327,
+     MOD = 328,
+     IN = 329,
+     LAMBDA = 330,
+     FORALL = 331,
+     EXISTS = 332,
+     WHR = 333,
+     END = 334,
+     DELTA = 335,
+     TAU = 336,
+     SUM = 337,
+     BLOCK = 338,
+     ALLOW = 339,
+     HIDE = 340,
+     RENAME = 341,
+     COMM = 342,
+     VAL = 343,
+     MU = 344,
+     NU = 345,
+     DELAY = 346,
+     YALED = 347,
+     NIL = 348,
+     ID = 349,
+     NUMBER = 350
    };
 #endif
 
@@ -206,7 +207,7 @@ typedef union YYSTYPE
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 210 "../include/mcrl2/core/detail/mcrl2parser.h"
+#line 211 "../include/mcrl2/core/detail/mcrl2parser.h"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

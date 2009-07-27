@@ -392,6 +392,7 @@ Bag
 \\
 true
 false
+if
 div
 mod
 in
@@ -450,7 +451,7 @@ The binary operator $\to$ associates to the right.
 
 Data expressions $d$:
 \[\begin{tightarray}{lrl}
-d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\
+d      & \mb{::=} & x\ \mb{|}\ f\ \mb{|}\ d(d, \mb{\ldots}, d)\ \mb{|}\ N\ \mb{|}\ \mathsf{true}\ \mb{|}\ \mathsf{false}\ \mb{|}\ \mathsf{if}\ \mb{|}\
                \lnot d\ \mb{|}\ -d\ \mb{|}\ \overline{d}\ \mb{|}\ \#d\ \mb{|}\ d\ \oplus\ d\\
        & \mb{|} & \el\ \mb{|}\ [d,\mb{\ldots},d]\ \mb{|}\ \set{}\ \mb{|}\ \set{d,\mb{\ldots},d}\ \mb{|}\
                \set{d: d,\mb{\ldots},d: d}\ \mb{|}\ \scompr{x: s}{d}\\

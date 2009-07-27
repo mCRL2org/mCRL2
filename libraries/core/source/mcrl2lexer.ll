@@ -150,6 +150,7 @@ Bag        { process_string(); return BAG; }
 
 true       { process_string(); return CTRUE; }
 false      { process_string(); return CFALSE; }
+if         { process_string(); return IF; }
 div        { process_string(); return DIV; }
 mod        { process_string(); return MOD; }
 in         { process_string(); return IN; }

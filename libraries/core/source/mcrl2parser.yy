@@ -111,7 +111,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %token <appl> LPAR RPAR LBRACK RBRACK LANG RANG LBRACE RBRACE
 %token <appl> KWSORT KWCONS KWMAP KWVAR KWEQN KWACT KWGLOB KWPROC KWPBES KWINIT
 %token <appl> KWSTRUCT BOOL POS NAT INT REAL LIST SET BAG
-%token <appl> CTRUE CFALSE DIV MOD IN LAMBDA FORALL EXISTS WHR END
+%token <appl> CTRUE CFALSE IF DIV MOD IN LAMBDA FORALL EXISTS WHR END
 %token <appl> DELTA TAU SUM BLOCK ALLOW HIDE RENAME COMM
 %token <appl> VAL MU NU DELAY YALED NIL
 %token <appl> ID NUMBER
@@ -940,6 +940,11 @@ data_constant:
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | CFALSE
+    {
+      safe_assign($$, gsMakeId($1));
+      gsDebugMsg("parsed data constant\n  %T\n", $$);
+    }
+  | IF
     {
       safe_assign($$, gsMakeId($1));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
