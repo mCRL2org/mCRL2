@@ -41,7 +41,7 @@ namespace mcrl2 {
         {
           std::set< function_symbol > used_symbols;
 
-          detail::make_find_helper< function_symbol >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
+          detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
           return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
         }
@@ -52,7 +52,7 @@ namespace mcrl2 {
           // Trick, traverse all but the data specification
           for (atermpp::aterm_appl::const_iterator i = ++(++context.begin()); i != context.end(); ++i)
           {
-            detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
+            detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
 
             if (add_symbols_for_global_variables)
             {
@@ -75,7 +75,7 @@ namespace mcrl2 {
           {
              std::set< function_symbol > used_symbols;
 
-             detail::make_find_helper< function_symbol >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+             detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
 
              symbols_for_equation[*i].swap(used_symbols);
           }
@@ -86,8 +86,8 @@ namespace mcrl2 {
             {
               if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
-                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-                detail::make_find_helper< function_symbol >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+                detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
 
                 equations.erase(i);
               }
