@@ -12,49 +12,293 @@
 #ifndef MCRL2_DATA_DETAIL_FIND_H
 #define MCRL2_DATA_DETAIL_FIND_H
 
-#include "mcrl2/data/find.h"
+#include "mcrl2/data/detail/traverser.h"
+#include "mcrl2/data/detail/sort_traverser.h"
+#include "mcrl2/data/detail/binding_aware_traverser.h"
 
 namespace mcrl2 {
 
 namespace data {
 
+/// \cond INTERNAL_DOCS
 namespace detail {
 
-/// \brief Returns all names of data variables that occur in the term t
-/// \param t A term
-/// \return All names of data variables that occur in the term t
-template <typename Term>
-std::set<core::identifier_string> find_variable_names(Term t)
-{
-  // find all data variables in t
-  std::set<variable> variables(find_variables(t));
+  template < typename Expression, typename OutputIterator >
+  class collect_action {
 
-  std::set<core::identifier_string> result;
-  for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+    protected:
+
+      OutputIterator m_sink;
+
+    public:
+
+      void operator()(Expression const& e)
+      {
+        *m_sink++ = e;
+      }
+
+      collect_action(OutputIterator const& sink) : m_sink(sink)
+      { }
+  };
+
+  template < typename Expression, typename Action, template < class > class Traverser = detail::traverser >
+  class find_helper : public Traverser< find_helper< Expression, Action, Traverser > > {
+
+     typedef Traverser< find_helper< Expression, Action, Traverser > > super;
+
+    protected:
+
+      Action m_action;
+
+    public:
+
+      using super::enter;
+      using super::leave;
+
+      void enter(Expression const& e)
+      {
+        m_action(e);
+      }
+
+      find_helper()
+      { }
+
+      find_helper(Action action) : m_action(action)
+      { }
+  };
+
+  template < typename Expression, template < class > class Traverser, typename OutputIterator >
+  find_helper< Expression, collect_action< Expression, OutputIterator >, Traverser >
+  make_find_helper(OutputIterator sink)
   {
-    result.insert(j->name());
+    return find_helper< Expression, collect_action< Expression, OutputIterator >, Traverser >(collect_action< Expression, OutputIterator >(sink));
   }
-  return result;
-}
 
-/// \brief Returns all names of data variables that occur in the term t
-/// \param t A term
-/// \return All names of data variables that occur in the term t
-template <typename Term>
-std::set<std::string> find_variable_name_strings(Term t)
-{
-  // find all data variables in t
-  std::set<variable> variables(find_variables(t));
+  class search_traversal_condition {
+    private:
+      bool m_result;
 
-  std::set<std::string> result;
-  for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+    public:
+
+      search_traversal_condition() : m_result(true)
+      { }
+
+      bool operator()() {
+        return m_result;
+      }
+
+      template < typename Expression >
+      bool operator()(Expression const&)
+      {
+        return m_result;
+      }
+
+      void operator=(bool result)
+      {
+        m_result = result;
+      }
+  };
+
+  /**
+   * \brief Component for searching expressions
+   *
+   * Types:
+   *  \arg Expression the type of sub expressions that is considered
+   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
+   *
+   * When m_predicate(e) becomes false traversal of sub-expressions will be
+   * cut-short. The search_traversal_condition represents a condition
+   * that is true initially and becomes false when the search predicate has
+   * become false. It is used to cut-short expression traversal to return a
+   * result.
+   **/
+  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_data_traverser >
+  class search_helper : public SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > {
+
+      typedef SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > super;
+
+    protected:
+
+      AdaptablePredicate m_predicate;
+
+    public:
+
+      using super::operator();
+      using super::enter;
+      using super::leave;
+
+      void enter(Expression const& e)
+      {
+        super::m_traverse_condition = super::m_traverse_condition() && !m_predicate(e);
+      }
+
+      template < typename Container >
+      bool apply(Container const& container) {
+        (*this)(container);
+
+        return !super::m_traverse_condition();
+      }
+
+      search_helper()
+      { }
+
+      search_helper(AdaptablePredicate search_predicate) : m_predicate(search_predicate)
+      { }
+  };
+
+  template < typename Expression, typename AdaptablePredicate >
+  search_helper< Expression, AdaptablePredicate >
+  make_search_helper(AdaptablePredicate search_predicate)
   {
-    result.insert(j->name());
+    return search_helper< Expression, AdaptablePredicate >(search_predicate);
   }
-  return result;
-}
 
-} // namespace detail
+  template < typename Expression, typename AdaptablePredicate >
+  search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >
+  make_sort_search_helper(AdaptablePredicate search_predicate)
+  {
+    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >(search_predicate);
+  }
+
+  template < typename AdaptablePredicate >
+  search_helper< variable, AdaptablePredicate, detail::selective_data_traverser >
+  make_variable_search_helper(AdaptablePredicate search_predicate)
+  {
+    return search_helper< variable, AdaptablePredicate >(search_predicate);
+  }
+
+  template < typename Action >
+  class free_variable_find_helper : public detail::binding_aware_traverser< free_variable_find_helper< Action > > {
+
+     typedef detail::binding_aware_traverser< free_variable_find_helper< Action > > super;
+
+    protected:
+
+      Action m_action;
+
+    public:
+
+      using super::enter;
+
+      void enter(variable const& v)
+      {
+        if (!super::is_bound(v))
+        {
+          m_action(v);
+        }
+      }
+
+      void operator()(assignment const& a)
+      {
+        (*this)(a.rhs());
+      }
+
+      // Workaround for mal-functioning MSVC 2008 overload resolution
+      template < typename Expression >
+      void operator()(Expression const& a)
+      {
+        super::operator()(a);
+      }
+
+      free_variable_find_helper()
+      { }
+
+      free_variable_find_helper(Action action) : m_action(action)
+      { }
+
+      template < typename Container >
+      free_variable_find_helper(Container const& bound, Action action) : super(bound), m_action(action)
+      { }
+  };
+
+  template < typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator > >
+  make_free_variable_find_helper(OutputIterator sink)
+  {
+    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
+							collect_action< variable, OutputIterator >(sink));
+  }
+
+  template < typename Container, typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator > >
+  make_free_variable_find_helper(Container const& bound, OutputIterator sink)
+  {
+    return free_variable_find_helper< collect_action< variable, OutputIterator > >(bound,
+							collect_action< variable, OutputIterator >(sink));
+  }
+
+  /**
+   * \brief Component for searching expressions
+   *
+   * Types:
+   *  \arg Expression the type of sub expressions that is considered
+   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
+   *
+   * When m_predicate(e) becomes true expression traversal will terminate.
+   **/
+  template < typename AdaptablePredicate >
+  class free_variable_search_helper : public detail::selective_binding_aware_traverser<
+			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > {
+
+      typedef detail::selective_binding_aware_traverser<
+			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > super;
+
+    protected:
+
+      AdaptablePredicate m_search_predicate;
+
+    public:
+
+      using super::operator();
+      using super::enter;
+
+      void enter(variable const& v)
+      {
+        if (!super::is_bound(v))
+        {
+          super::m_traverse_condition = !m_search_predicate(v);
+        }
+      }
+
+      void operator()(assignment const& a)
+      {
+        (*this)(a.rhs());
+      }
+
+      template < typename Container >
+      bool apply(Container const& container) {
+        (*this)(container);
+
+        return !super::m_traverse_condition();
+      }
+
+      free_variable_search_helper()
+      { }
+
+      free_variable_search_helper(AdaptablePredicate search_predicate) : m_search_predicate(search_predicate)
+      { }
+
+      template < typename Container >
+      free_variable_search_helper(Container const& bound,
+			 AdaptablePredicate search_predicate) : super(bound), m_search_predicate(search_predicate)
+      { }
+  };
+
+  template < typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate >
+  make_free_variable_search_helper(AdaptablePredicate search_predicate)
+  {
+    return free_variable_search_helper< AdaptablePredicate >(search_predicate);
+  }
+
+  template < typename Container, typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate >
+  make_free_variable_search_helper(Container const& bound, AdaptablePredicate search_predicate)
+  {
+    return free_variable_search_helper< AdaptablePredicate >(bound, search_predicate);
+  }
+}
+/// \endcond
 
 } // namespace data
 

@@ -21,307 +21,11 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/assignment.h"
-#include "mcrl2/data/detail/traverser.h"
+#include "mcrl2/data/detail/find.h"
 
 namespace mcrl2 {
 
 namespace data {
-
-/// \cond INTERNAL_DOCS
-namespace detail {
-
-  template < typename Expression, typename OutputIterator >
-  class collect_action {
-
-    protected:
-
-      OutputIterator m_sink;
-
-    public:
-
-      void operator()(Expression const& e)
-      {
-        *m_sink++ = e;
-      }
-
-      collect_action(OutputIterator const& sink) : m_sink(sink)
-      { }
-  };
-
-  template < typename Expression, typename Action, template < class > class Traverser = detail::traverser >
-  class find_helper : public Traverser< find_helper< Expression, Action, Traverser > > {
-
-     typedef Traverser< find_helper< Expression, Action, Traverser > > super;
-
-    protected:
-
-      Action m_action;
-
-    public:
-
-      using super::enter;
-      using super::leave;
-
-      void enter(Expression const& e)
-      {
-        m_action(e);
-      }
-
-      find_helper()
-      { }
-
-      find_helper(Action action) : m_action(action)
-      { }
-  };
-
-  template < typename Expression, typename OutputIterator >
-  find_helper< Expression, collect_action< Expression, OutputIterator > >
-  make_find_helper(OutputIterator sink)
-  {
-    return find_helper< Expression, collect_action< Expression, OutputIterator > >(collect_action< Expression, OutputIterator >(sink));
-  }
-
-  template < typename Expression, typename OutputIterator >
-  find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_traverser >
-  make_sort_find_helper(OutputIterator sink)
-  {
-    return find_helper< Expression, collect_action< Expression, OutputIterator >, detail::sort_traverser >(
-							collect_action< Expression, OutputIterator >(sink));
-  }
-
-  template < typename OutputIterator >
-  find_helper< variable, collect_action< variable, OutputIterator > >
-  make_variable_find_helper(OutputIterator sink)
-  {
-    return find_helper< variable, collect_action< variable, OutputIterator > >(
-							collect_action< variable, OutputIterator >(sink));
-  }
-
-  class search_traversal_condition {
-    private:
-      bool m_result;
-
-    public:
-
-      search_traversal_condition() : m_result(true)
-      { }
-
-      bool operator()() {
-        return m_result;
-      }
-
-      template < typename Expression >
-      bool operator()(Expression const&)
-      {
-        return m_result;
-      }
-
-      void operator=(bool result)
-      {
-        m_result = result;
-      }
-  };
-
-  /**
-   * \brief Component for searching expressions
-   *
-   * Types:
-   *  \arg Expression the type of sub expressions that is considered
-   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
-   *
-   * When m_predicate(e) becomes false traversal of sub-expressions will be
-   * cut-short. The search_traversal_condition represents a condition
-   * that is true initially and becomes false when the search predicate has
-   * become false. It is used to cut-short expression traversal to return a
-   * result.
-   **/
-  template < typename Expression, typename AdaptablePredicate, template < class, class > class SelectiveTraverser = detail::selective_data_traverser >
-  class search_helper : public SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > {
-
-      typedef SelectiveTraverser< search_helper< Expression, AdaptablePredicate, SelectiveTraverser >, search_traversal_condition > super;
-
-    protected:
-
-      AdaptablePredicate m_predicate;
-
-    public:
-
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      void enter(Expression const& e)
-      {
-        super::m_traverse_condition = super::m_traverse_condition() && !m_predicate(e);
-      }
-
-      template < typename Container >
-      bool apply(Container const& container) {
-        (*this)(container);
-
-        return !super::m_traverse_condition();
-      }
-
-      search_helper()
-      { }
-
-      search_helper(AdaptablePredicate search_predicate) : m_predicate(search_predicate)
-      { }
-  };
-
-  template < typename Expression, typename AdaptablePredicate >
-  search_helper< Expression, AdaptablePredicate >
-  make_search_helper(AdaptablePredicate search_predicate)
-  {
-    return search_helper< Expression, AdaptablePredicate >(search_predicate);
-  }
-
-  template < typename Expression, typename AdaptablePredicate >
-  search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >
-  make_sort_search_helper(AdaptablePredicate search_predicate)
-  {
-    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >(search_predicate);
-  }
-
-  template < typename AdaptablePredicate >
-  search_helper< variable, AdaptablePredicate, detail::selective_data_traverser >
-  make_variable_search_helper(AdaptablePredicate search_predicate)
-  {
-    return search_helper< variable, AdaptablePredicate >(search_predicate);
-  }
-
-  template < typename Action >
-  class free_variable_find_helper : public detail::binding_aware_traverser< free_variable_find_helper< Action > > {
-
-     typedef detail::binding_aware_traverser< free_variable_find_helper< Action > > super;
-
-    protected:
-
-      Action m_action;
-
-    public:
-
-      using super::enter;
-
-      void enter(variable const& v)
-      {
-        if (!super::is_bound(v))
-        {
-          m_action(v);
-        }
-      }
-
-      void operator()(assignment const& a)
-      {
-        (*this)(a.rhs());
-      }
-
-      // Workaround for mal-functioning MSVC 2008 overload resolution
-      template < typename Expression >
-      void operator()(Expression const& a)
-      {
-        super::operator()(a);
-      }
-
-      free_variable_find_helper()
-      { }
-
-      free_variable_find_helper(Action action) : m_action(action)
-      { }
-
-      template < typename Container >
-      free_variable_find_helper(Container const& bound, Action action) : super(bound), m_action(action)
-      { }
-  };
-
-  template < typename OutputIterator >
-  free_variable_find_helper< collect_action< variable, OutputIterator > >
-  make_free_variable_find_helper(OutputIterator sink)
-  {
-    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
-							collect_action< variable, OutputIterator >(sink));
-  }
-
-  template < typename Container, typename OutputIterator >
-  free_variable_find_helper< collect_action< variable, OutputIterator > >
-  make_free_variable_find_helper(Container const& bound, OutputIterator sink)
-  {
-    return free_variable_find_helper< collect_action< variable, OutputIterator > >(bound,
-							collect_action< variable, OutputIterator >(sink));
-  }
-
-  /**
-   * \brief Component for searching expressions
-   *
-   * Types:
-   *  \arg Expression the type of sub expressions that is considered
-   *  \arg AdaptablePredicate represents the search test on expressions (of type Expression)
-   *
-   * When m_predicate(e) becomes true expression traversal will terminate.
-   **/
-  template < typename AdaptablePredicate >
-  class free_variable_search_helper : public detail::selective_binding_aware_traverser<
-			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > {
-
-      typedef detail::selective_binding_aware_traverser<
-			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > super;
-
-    protected:
-
-      AdaptablePredicate m_search_predicate;
-
-    public:
-
-      using super::operator();
-      using super::enter;
-
-      void enter(variable const& v)
-      {
-        if (!super::is_bound(v))
-        {
-          super::m_traverse_condition = !m_search_predicate(v);
-        }
-      }
-
-      void operator()(assignment const& a)
-      {
-        (*this)(a.rhs());
-      }
-
-      template < typename Container >
-      bool apply(Container const& container) {
-        (*this)(container);
-
-        return !super::m_traverse_condition();
-      }
-
-      free_variable_search_helper()
-      { }
-
-      free_variable_search_helper(AdaptablePredicate search_predicate) : m_search_predicate(search_predicate)
-      { }
-
-      template < typename Container >
-      free_variable_search_helper(Container const& bound,
-			 AdaptablePredicate search_predicate) : super(bound), m_search_predicate(search_predicate)
-      { }
-  };
-
-  template < typename AdaptablePredicate >
-  free_variable_search_helper< AdaptablePredicate >
-  make_free_variable_search_helper(AdaptablePredicate search_predicate)
-  {
-    return free_variable_search_helper< AdaptablePredicate >(search_predicate);
-  }
-
-  template < typename Container, typename AdaptablePredicate >
-  free_variable_search_helper< AdaptablePredicate >
-  make_free_variable_search_helper(Container const& bound, AdaptablePredicate search_predicate)
-  {
-    return free_variable_search_helper< AdaptablePredicate >(bound, search_predicate);
-  }
-}
-/// \endcond
 
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
@@ -331,7 +35,7 @@ namespace detail {
 template < typename Container, typename OutputIterator >
 void find_variables(Container const& container, OutputIterator const& o)
 {
-  detail::make_variable_find_helper(o)(container);
+  detail::make_find_helper< variable, detail::traverser >(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -434,7 +138,7 @@ bool search_sort_expression(Container const& container, const sort_expression& s
 template < typename Container, typename OutputIterator >
 void find_sort_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_sort_find_helper< sort_expression >(o)(container);
+  detail::make_find_helper< sort_expression, detail::sort_traverser >(o)(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
@@ -465,7 +169,7 @@ bool search_basic_sort(Container const& container, const basic_sort& s)
 template < typename Container, typename OutputIterator >
 void find_basic_sorts(Container const& container, OutputIterator o)
 {
-  return detail::make_sort_find_helper< basic_sort >(o)(container);
+  return detail::make_find_helper< basic_sort, detail::sort_traverser >(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
@@ -497,7 +201,7 @@ bool search_identifiers(Container const& container, const core::identifier_strin
 template < typename Container, typename OutputIterator >
 void find_identifiers(Container const& container, OutputIterator o)
 {
-  return detail::make_sort_find_helper< core::identifier_string >(o)(container);
+  return detail::make_find_helper< core::identifier_string, detail::sort_traverser >(o)(container);
 }
 
 /// \brief Returns all basic sorts that occur in the term t
@@ -528,7 +232,7 @@ bool search_data_expression(Container const& container, const data_expression& s
 template < typename Container, typename OutputIterator >
 void find_data_expressions(Container const& container, OutputIterator o)
 {
-  detail::make_find_helper< data_expression >(o)(container);
+  detail::make_find_helper< data_expression, detail::traverser >(o)(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t
@@ -613,6 +317,47 @@ data_equation_vector find_equations(data_specification const& specification, con
   }
   return result;
 }
+
+/// \cond INTERNAL_DOCS
+namespace detail {
+
+  /// \brief Returns all names of data variables that occur in the term t
+  /// \param t A term
+  /// \return All names of data variables that occur in the term t
+  template <typename Term>
+  std::set<core::identifier_string> find_variable_names(Term t)
+  {
+    // find all data variables in t
+    std::set<variable> variables(find_variables(t));
+
+    std::set<core::identifier_string> result;
+    for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+    {
+      result.insert(j->name());
+    }
+    return result;
+  }
+
+/// \brief Returns all names of data variables that occur in the term t
+/// \param t A term
+/// \return All names of data variables that occur in the term t
+template <typename Term>
+std::set<std::string> find_variable_name_strings(Term t)
+{
+  // find all data variables in t
+  std::set<variable> variables(find_variables(t));
+
+  std::set<std::string> result;
+  for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+  {
+    result.insert(j->name());
+  }
+  return result;
+}
+
+} // namespace detail
+/// \endcond
+
 
 } // namespace data
 

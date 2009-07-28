@@ -20,7 +20,7 @@
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/forall.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/traverser.h"
+#include "mcrl2/data/detail/sort_traverser.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::data;
