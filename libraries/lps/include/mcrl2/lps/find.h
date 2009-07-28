@@ -12,12 +12,9 @@
 #ifndef MCRL2_LPS_FIND_H
 #define MCRL2_LPS_FIND_H
 
-#include <algorithm>
-#include <functional>
-#include "mcrl2/lps/action.h"
-#include "mcrl2/lps/summand.h"
-#include "mcrl2/data/find.h"
-#include "mcrl2/lps/detail/lps_free_variable_finder.h"
+#include "mcrl2/data/variable.h"
+#include "mcrl2/data/detail/find.h"
+#include "mcrl2/lps/detail/lps_binding_aware_traverser.h"
 
 namespace mcrl2 {
 
@@ -27,10 +24,9 @@ namespace mcrl2 {
     /// \param[in] container a container with expressions
     /// \return All data variables that occur in the term t
     template <typename Container, typename OutputIterator >
-    void find_free_variables(Container const& container, OutputIterator const& o)
+    void find_free_variables(Container const& container, OutputIterator o)
     {
-      lps::detail::lps_free_variable_finder<std::insert_iterator<std::set<data::variable> > > finder(o);
-      finder(container);
+      data::detail::make_free_variable_find_helper< lps::detail::lps_binding_aware_traverser >(o)(container);
     }
 
     /// \brief Returns all data variables that occur in a range of expressions

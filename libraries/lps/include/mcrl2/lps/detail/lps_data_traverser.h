@@ -6,14 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/lps/detail/lps_sort_traverser.h
+/// \file mcrl2/lps/detail/lps_data_traverser.h
 /// \brief add your file description here.
+
+// lps/test/free_variables_test fails if this is not here (strange dependencies)
+#include "mcrl2/lps/specification.h"
 
 #ifndef MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H
 #define MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H
 
 #include "mcrl2/data/detail/traverser.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 
@@ -22,10 +24,10 @@ namespace lps {
 namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
-  template < typename Derived >
-  struct lps_data_traverser : public data::detail::traverser< Derived >
+  template < typename Derived, template < class > class Traverser = data::detail::traverser >
+  struct lps_data_traverser : public Traverser< Derived >
   {
-    typedef data::detail::traverser< Derived > super;
+    typedef Traverser< Derived > super;
 
     using super::operator();
 
@@ -69,6 +71,7 @@ namespace detail {
     /// \param s A summand
     void operator()(const action_summand& s)
     {
+      (*this)(s.summation_variables());
       (*this)(s.condition());
       (*this)(s.multi_action());
       (*this)(s.assignments());
@@ -78,6 +81,7 @@ namespace detail {
     /// \param s A summand
     void operator()(const deadlock_summand& s)
     {
+      (*this)(s.summation_variables());
       (*this)(s.condition());
       (*this)(s.deadlock());
     }
@@ -108,6 +112,10 @@ namespace detail {
       (*this)(spec.action_labels());
     }
   };
+
+  template < typename Derived >
+  struct data_traverser : public lps_data_traverser< Derived >
+  { };
 
 } // namespace detail
 

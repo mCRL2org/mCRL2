@@ -13,7 +13,7 @@
 #define MCRL2_LPS_DETAIL_LPS_SORT_TRAVERSER_H
 
 #include "mcrl2/data/detail/sort_traverser.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/detail/lps_data_traverser.h"
 
 namespace mcrl2 {
 
@@ -23,9 +23,9 @@ namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
   template < typename Derived >
-  struct lps_sort_traverser : public data::detail::sort_traverser< Derived >
+  struct lps_sort_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::sort_traverser >
   {
-    typedef data::detail::sort_traverser< Derived > super;
+    typedef lps::detail::lps_data_traverser< Derived, data::detail::sort_traverser > super;
 
     using super::operator();
 
@@ -33,79 +33,6 @@ namespace detail {
     void operator()(const action_label& l)
     {
       (*this)(l.sorts());
-    }
-
-    /// \brief Traverses an action
-    /// \param a An action
-    void operator()(const action& a)
-    {
-      (*this)(a.label());
-      (*this)(a.arguments());
-    }
-
-    /// \brief Traverses a deadlock
-    /// \param d A deadlock
-    void operator()(const deadlock& d)
-    {
-      if (d.has_time())
-      {
-        (*this)(d.time());
-      }
-    } 
-
-    /// \brief Traverses a multi-action
-    /// \param a A multi-action
-    void operator()(const multi_action& a)
-    {
-      if (a.has_time())
-      {
-        (*this)(a.time());
-      }
-
-      (*this)(a.actions());
-    } 
-
-    /// \brief Traverses a summand
-    /// \param s A summand
-    void operator()(const action_summand& s)
-    {
-      (*this)(s.condition());
-      (*this)(s.multi_action());
-      (*this)(s.assignments());
-    }
-
-    /// \brief Traverses a summand
-    /// \param s A summand
-    void operator()(const deadlock_summand& s)
-    {
-      (*this)(s.condition());
-      (*this)(s.deadlock());
-    }
-    
-    /// \brief Traverses a process_initializer
-    /// \param s A process_initializer
-    void operator()(const process_initializer& i)
-    {
-      (*this)(i.assignments());
-    }
-
-    /// \brief Traverses a linear_process
-    /// \param s A linear_process
-    void operator()(const linear_process& p)
-    {
-      (*this)(p.process_parameters());
-      (*this)(p.action_summands());
-      (*this)(p.deadlock_summands());
-    }
-                        
-    /// \brief Traverses a linear process specification
-    /// \param spec A linear process specification
-    void operator()(const specification& spec)
-    {
-      (*this)(spec.process());
-      (*this)(spec.global_variables());
-      (*this)(spec.initial_process());
-      (*this)(spec.action_labels());
     }
   };
 

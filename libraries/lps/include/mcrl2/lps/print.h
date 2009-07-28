@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
-#include "mcrl2/data/print.h"
+#include "mcrl2/core/print.h"
 
 namespace mcrl2 {
 

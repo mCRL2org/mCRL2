@@ -33,7 +33,7 @@ namespace data {
 ///             are added.
 /// \return All data variables that occur in the term t
 template < typename Container, typename OutputIterator >
-void find_variables(Container const& container, OutputIterator const& o)
+void find_variables(Container const& container, OutputIterator o)
 {
   detail::make_find_helper< variable, detail::traverser >(o)(container);
 }
@@ -57,7 +57,7 @@ std::set< variable > find_variables(Container const& container)
 template < typename Container >
 bool search_variable(Container const& container, const variable& v)
 {
-  return detail::make_variable_search_helper(detail::compare_variable(v)).apply(container);
+  return detail::make_search_helper< variable, detail::selective_data_traverser >(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -66,10 +66,10 @@ bool search_variable(Container const& container, const variable& v)
 ///             are added.
 /// \return All data variables that occur in the term t
 template < typename Container, typename OutputIterator >
-void find_free_variables(Container const& container, OutputIterator const& o,
+void find_free_variables(Container const& container, OutputIterator o,
 		           typename detail::disable_if_container< OutputIterator >::type* = 0)
 {
-  detail::make_free_variable_find_helper(o)(container);
+  detail::make_free_variable_find_helper< detail::binding_aware_traverser >(o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -80,9 +80,9 @@ void find_free_variables(Container const& container, OutputIterator const& o,
 /// \return All data variables that occur in the term t
 /// TODO prevent copy of Sequence
 template < typename Container, typename OutputIterator, typename Sequence >
-void find_free_variables(Container const& container, OutputIterator const& o, Sequence const& bound)
+void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
 {
-  detail::make_free_variable_find_helper(bound, o)(container);
+  detail::make_free_variable_find_helper< detail::binding_aware_traverser >(bound, o)(container);
 }
 
 /// \brief Returns all data variables that occur in a range of expressions
@@ -117,7 +117,7 @@ std::set< variable > find_free_variables(Container const& container, Sequence co
 template < typename Container >
 bool search_free_variable(Container container, const variable& d)
 {
-  return detail::make_variable_search_helper(detail::compare_variable(d)).apply(container);
+  return detail::make_free_variable_search_helper< detail::selective_binding_aware_traverser >(detail::compare_variable(d)).apply(container);
 }
 
 
@@ -128,7 +128,7 @@ bool search_free_variable(Container container, const variable& d)
 template < typename Container >
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-  return detail::make_sort_search_helper< sort_expression >(detail::compare_sort(s))(container);
+  return detail::make_search_helper< sort_expression, detail::selective_sort_traverser >(detail::compare_sort(s))(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t
@@ -159,7 +159,7 @@ std::set<sort_expression> find_sort_expressions(Container const& container)
 template < typename Container >
 bool search_basic_sort(Container const& container, const basic_sort& s)
 {
-  return detail::make_sort_search_helper< basic_sort >(detail::compare_sort(s)).apply(container);
+  return detail::make_search_helper< basic_sort, detail::selective_sort_traverser >(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort identifiers that occur in the term t
@@ -191,7 +191,7 @@ std::set<basic_sort> find_basic_sorts(Container const& container)
 template < typename Container >
 bool search_identifiers(Container const& container, const core::identifier_string& s)
 {
-  return detail::make_sort_search_helper< core::identifier_string >(boost::bind(std::equal_to< core::identifier_string >(), s, _1)).apply(container);
+  return detail::make_search_helper< core::identifier_string, detail::selective_sort_traverser >(boost::bind(std::equal_to< core::identifier_string >(), s, _1)).apply(container);
 }
 
 /// \brief Returns all identifiers that occur in the term t
@@ -223,7 +223,7 @@ std::set< core::identifier_string > find_identifiers(Container const& container)
 template <typename Container >
 bool search_data_expression(Container const& container, const data_expression& s)
 {
-  return detail::make_search_helper< data_expression >(detail::compare_term< data_expression >(s)).apply(container);
+  return detail::make_search_helper< data_expression, detail::selective_data_traverser >(detail::compare_term< data_expression >(s)).apply(container);
 }
 
 /// \brief Returns all data expressions that occur in the term t

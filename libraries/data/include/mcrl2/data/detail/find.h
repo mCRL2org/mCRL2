@@ -37,7 +37,7 @@ namespace detail {
         *m_sink++ = e;
       }
 
-      collect_action(OutputIterator const& sink) : m_sink(sink)
+      collect_action(OutputIterator sink) : m_sink(sink)
       { }
   };
 
@@ -68,8 +68,15 @@ namespace detail {
   };
 
   template < typename Expression, template < class > class Traverser, typename OutputIterator >
+  find_helper< Expression, collect_action< Expression, OutputIterator& >, Traverser >
+  make_find_helper(OutputIterator& sink)
+  {
+    return find_helper< Expression, collect_action< Expression, OutputIterator& >, Traverser >(collect_action< Expression, OutputIterator& >(sink));
+  }
+
+  template < typename Expression, template < class > class Traverser, typename OutputIterator >
   find_helper< Expression, collect_action< Expression, OutputIterator >, Traverser >
-  make_find_helper(OutputIterator sink)
+  make_find_helper(OutputIterator const& sink)
   {
     return find_helper< Expression, collect_action< Expression, OutputIterator >, Traverser >(collect_action< Expression, OutputIterator >(sink));
   }
@@ -146,31 +153,17 @@ namespace detail {
       { }
   };
 
-  template < typename Expression, typename AdaptablePredicate >
-  search_helper< Expression, AdaptablePredicate >
+  template < typename Expression, template < class, class > class SelectiveTraverser, typename AdaptablePredicate >
+  search_helper< Expression, AdaptablePredicate, SelectiveTraverser >
   make_search_helper(AdaptablePredicate search_predicate)
   {
-    return search_helper< Expression, AdaptablePredicate >(search_predicate);
+    return search_helper< Expression, AdaptablePredicate, SelectiveTraverser >(search_predicate);
   }
 
-  template < typename Expression, typename AdaptablePredicate >
-  search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >
-  make_sort_search_helper(AdaptablePredicate search_predicate)
-  {
-    return search_helper< Expression, AdaptablePredicate, detail::selective_sort_traverser >(search_predicate);
-  }
+  template < typename Action, template < class > class BindingAwareTraverser >
+  class free_variable_find_helper : public BindingAwareTraverser< free_variable_find_helper< Action, BindingAwareTraverser > > {
 
-  template < typename AdaptablePredicate >
-  search_helper< variable, AdaptablePredicate, detail::selective_data_traverser >
-  make_variable_search_helper(AdaptablePredicate search_predicate)
-  {
-    return search_helper< variable, AdaptablePredicate >(search_predicate);
-  }
-
-  template < typename Action >
-  class free_variable_find_helper : public detail::binding_aware_traverser< free_variable_find_helper< Action > > {
-
-     typedef detail::binding_aware_traverser< free_variable_find_helper< Action > > super;
+     typedef BindingAwareTraverser< free_variable_find_helper< Action, BindingAwareTraverser > > super;
 
     protected:
 
@@ -211,20 +204,20 @@ namespace detail {
       { }
   };
 
-  template < typename OutputIterator >
-  free_variable_find_helper< collect_action< variable, OutputIterator > >
-  make_free_variable_find_helper(OutputIterator sink)
+  template < template < class > class BindingAwareTraverser, typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator& >, BindingAwareTraverser >
+  make_free_variable_find_helper(OutputIterator& sink)
   {
-    return free_variable_find_helper< collect_action< variable, OutputIterator > >(
-							collect_action< variable, OutputIterator >(sink));
+    return free_variable_find_helper< collect_action< variable, OutputIterator& >, BindingAwareTraverser >(
+							collect_action< variable, OutputIterator& >(sink));
   }
 
-  template < typename Container, typename OutputIterator >
-  free_variable_find_helper< collect_action< variable, OutputIterator > >
-  make_free_variable_find_helper(Container const& bound, OutputIterator sink)
+  template < template < class > class BindingAwareTraverser, typename Container, typename OutputIterator >
+  free_variable_find_helper< collect_action< variable, OutputIterator& >, BindingAwareTraverser >
+  make_free_variable_find_helper(Container const& bound, OutputIterator& sink)
   {
-    return free_variable_find_helper< collect_action< variable, OutputIterator > >(bound,
-							collect_action< variable, OutputIterator >(sink));
+    return free_variable_find_helper< collect_action< variable, OutputIterator& >, BindingAwareTraverser >(bound,
+							collect_action< variable, OutputIterator& >(sink));
   }
 
   /**
@@ -236,11 +229,11 @@ namespace detail {
    *
    * When m_predicate(e) becomes true expression traversal will terminate.
    **/
-  template < typename AdaptablePredicate >
-  class free_variable_search_helper : public detail::selective_binding_aware_traverser<
+  template < typename AdaptablePredicate, template < class, class > class SelectiveBindingAwareTraverser = detail::selective_binding_aware_traverser >
+  class free_variable_search_helper : public SelectiveBindingAwareTraverser<
 			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > {
 
-      typedef detail::selective_binding_aware_traverser<
+      typedef SelectiveBindingAwareTraverser<
 			 free_variable_search_helper< AdaptablePredicate >, search_traversal_condition > super;
 
     protected:
@@ -284,18 +277,18 @@ namespace detail {
       { }
   };
 
-  template < typename AdaptablePredicate >
-  free_variable_search_helper< AdaptablePredicate >
+  template < template < class, class > class BindingAwareTraverser, typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate, BindingAwareTraverser >
   make_free_variable_search_helper(AdaptablePredicate search_predicate)
   {
-    return free_variable_search_helper< AdaptablePredicate >(search_predicate);
+    return free_variable_search_helper< AdaptablePredicate, BindingAwareTraverser >(search_predicate);
   }
 
-  template < typename Container, typename AdaptablePredicate >
-  free_variable_search_helper< AdaptablePredicate >
+  template < template < class, class > class BindingAwareTraverser, typename Container, typename AdaptablePredicate >
+  free_variable_search_helper< AdaptablePredicate, BindingAwareTraverser >
   make_free_variable_search_helper(Container const& bound, AdaptablePredicate search_predicate)
   {
-    return free_variable_search_helper< AdaptablePredicate >(bound, search_predicate);
+    return free_variable_search_helper< AdaptablePredicate, BindingAwareTraverser >(bound, search_predicate);
   }
 }
 /// \endcond

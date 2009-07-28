@@ -12,7 +12,8 @@
 #ifndef MCRL2_PROCESS_DETAIL_PROCESS_SORT_TRAVERSER_H
 #define MCRL2_PROCESS_DETAIL_PROCESS_SORT_TRAVERSER_H
 
-#include "mcrl2/data/traverse.h"
+#include "mcrl2/data/find.h"
+
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
@@ -46,29 +47,29 @@ namespace detail {
     /// \brief Traverses a sort expression
     /// \param d A sort expression
     void traverse(const data::sort_expression& d)    
-    {                                         
-      dest = data::traverse_sort_expressions(d, dest);
-    } 
+    {
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
+    }
   
     /// \brief Traverses a variable
     /// \param d A variable
     void traverse(const data::variable& d)    
-    {                                         
-      dest = data::traverse_sort_expressions(d, dest);
-    } 
-  
+    {
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
+    }
+
     /// \brief Traverses a data expression
     /// \param d A data expression
-    void traverse(const data::data_expression& d)    
-    {                                         
-      dest = data::traverse_sort_expressions(d, dest);
-    } 
-  
+    void traverse(const data::data_expression& d)
+    {
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
+    }
+ 
     /// \brief Traverses an assignment
     /// \param a An assignment
     void traverse(const data::assignment& a)
     {
-      dest = data::traverse_sort_expressions(a, dest);
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(a);
     } 
 
     /// \brief Traverses a process expression

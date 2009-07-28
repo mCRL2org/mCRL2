@@ -13,7 +13,7 @@
 #define MCRL2_PBES_DETAIL_PBES_SORT_TRAVERSER_H
 
 #include <vector>
-#include "mcrl2/data/traverse.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_sort_expression_visitor.h"
 
@@ -47,28 +47,28 @@ namespace detail {
     /// \param d A sort expression
     void traverse(const data::sort_expression& d)    
     {                                         
-      dest = data::traverse_sort_expressions(d, dest);
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
     } 
   
     /// \brief Traverses a variable
     /// \param d A variable
     void traverse(const data::variable& d)    
     {                                         
-      dest = data::traverse_sort_expressions(d, dest);
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
     } 
   
     /// \brief Traverses a data expression
     /// \param d A data expression
     void traverse(const data::data_expression& d)    
     {                                         
-      dest = data::traverse_sort_expressions(d, dest);
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(d);
     } 
   
     /// \brief Traverses an assignment
     /// \param a An assignment
     void traverse(const data::assignment& a)
     {
-      dest = data::traverse_sort_expressions(a, dest);
+      data::detail::make_find_helper< data::sort_expression, data::detail::sort_traverser >(dest)(a);
     } 
 
     /// \brief Traverses a pbes expression

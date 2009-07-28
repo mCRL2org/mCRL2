@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
