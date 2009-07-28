@@ -103,7 +103,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
           if (j != assignments.end())
           {
             std::set<data::variable> vars;
-            data::traverse_variables(j->rhs(), std::inserter(vars, vars.end()));
+            data::find_variables(j->rhs(), std::inserter(vars, vars.end()));
             std::set<data::variable> new_variables = data::detail::set_difference(vars, significant_variables);
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
@@ -163,7 +163,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         {
           int j0 = m[j->lhs()];
           std::set<data::variable> vars;
-          data::traverse_variables(j->rhs(), std::inserter(vars, vars.end()));
+          data::find_variables(j->rhs(), std::inserter(vars, vars.end()));
           for (std::set<data::variable>::iterator k = vars.begin(); k != vars.end(); ++k)
           {
             int k0 = m[*k];

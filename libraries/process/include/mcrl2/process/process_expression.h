@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/assignment.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
