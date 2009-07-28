@@ -334,11 +334,6 @@ rule platform-configuration ( properties * ) {
   local requirements ;
   local pch-path = $(build-root)/precompile/dummies ;
 
-  if <variant>debug in $(properties) {
-    properties   += <warnings>all ;
-    requirements += <warnings>all ;
-  }
-
   if <regression-testing>no in $(properties) {
     requirements = <dll-path>$(dllpath) ; # dll-path required for rpath-linking
   }
@@ -346,6 +341,11 @@ rule platform-configuration ( properties * ) {
   if <toolset>gcc in $(properties) { # GCC
     requirements += <cxxflags>-pipe <cxxflags>-fno-operator-names
                     <cxxflags>-Woverloaded-virtual <cxxflags>-Wstrict-null-sentinel <cxxflags>-pipe ;
+
+    if <variant>debug in $(properties) {
+      properties   += <warnings>all ;
+      requirements += <warnings>all ;
+    }
 
     if <warnings>all in $(properties) {
       requirements += <cxxflags>-Wno-long-long ;
