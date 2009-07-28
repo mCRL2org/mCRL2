@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jeroen van der Wulp
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -9,10 +9,10 @@
 /// \file mcrl2/lps/detail/lps_sort_traverser.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_LPS_DETAIL_LPS_SORT_TRAVERSER_H
-#define MCRL2_LPS_DETAIL_LPS_SORT_TRAVERSER_H
+#ifndef MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H
+#define MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H
 
-#include "mcrl2/data/detail/sort_traverser.h"
+#include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
@@ -23,16 +23,16 @@ namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
   template < typename Derived >
-  struct lps_sort_traverser : public data::detail::sort_traverser< Derived >
+  struct lps_data_traverser : public data::detail::traverser< Derived >
   {
-    typedef data::detail::sort_traverser< Derived > super;
+    typedef data::detail::traverser< Derived > super;
 
     using super::operator();
 
     /// \brief Traverses an action label
     void operator()(const action_label& l)
     {
-      (*this)(l.sorts());
+      (*this)(l.name());
     }
 
     /// \brief Traverses an action

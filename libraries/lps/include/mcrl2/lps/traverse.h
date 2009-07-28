@@ -12,8 +12,9 @@
 #ifndef MCRL2_LPS_TRAVERSE_H
 #define MCRL2_LPS_TRAVERSE_H
 
+#include "mcrl2/data/detail/find.h"
 #include "mcrl2/lps/detail/lps_sort_traverser.h"
-#include "mcrl2/lps/detail/lps_variable_traverser.h"
+#include "mcrl2/lps/detail/lps_data_traverser.h"
 
 namespace mcrl2 {
 
@@ -24,8 +25,7 @@ namespace lps {
   template <typename Object, typename OutIter>
   void traverse_sort_expressions(const Object& o, OutIter dest)
   {
-    lps::detail::lps_sort_traverser<OutIter> r(dest);
-    r(o);
+    data::detail::make_find_helper< data::sort_expression, lps::detail::lps_sort_traverser >(dest)(o);
   }
 
   /// \brief Traverses all variables in the data type o, and writes them
@@ -33,8 +33,7 @@ namespace lps {
   template <typename Object, typename OutIter>
   void traverse_variables(const Object& o, OutIter dest)
   {
-    lps::detail::lps_variable_traverser<OutIter> r(dest);
-    r(o);
+    data::detail::make_find_helper< data::variable, lps::detail::lps_data_traverser >(dest)(o);
   }
 
 } // namespace lps
