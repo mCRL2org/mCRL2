@@ -16,6 +16,7 @@
 #include <iterator>
 #include <utility>
 
+#include "boost/config.hpp"
 #include "boost/assert.hpp"
 #include "boost/type_traits/add_reference.hpp"
 #include "boost/type_traits/remove_reference.hpp"
@@ -56,12 +57,16 @@ namespace mcrl2 {
 
         public:
 
+          using super::operator();
+
+#if BOOST_MSVC
           // Workaround for malfunctioning MSVC 2008 overload resolution
           template < typename Container >
           Container operator()(Container const& a)
           {
             return super::operator()(a);
           }
+#endif
 
           data_expression operator()(variable const& v)
           {
@@ -104,12 +109,14 @@ namespace mcrl2 {
 
           using super::operator();
 
+#if BOOST_MSVC
           // Workaround for malfunctioning MSVC 2008 overload resolution
           template < typename Container >
           Container operator()(Container const& a)
           {
             return super::operator()(a);
           }
+#endif
 
           assignment operator()(assignment const& a)
           {
