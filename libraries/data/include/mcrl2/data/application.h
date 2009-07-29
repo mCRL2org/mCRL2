@@ -188,6 +188,34 @@ namespace mcrl2 {
 
     }; // class application
 
+    /// \brief get first argument
+    /// \pre  e.is_application() && !application(e).arguments().empty()
+    inline data_expression first_argument(data_expression const& e)
+    {
+      assert(!application(e).arguments().empty());
+
+      return *(application(e).arguments().begin());
+    }
+
+    /// \brief get last argument
+    /// \pre  e.is_application() && !application(e).arguments().empty()
+    inline data_expression last_argument(data_expression const& e)
+    {
+      assert(!application(e).arguments().empty());
+
+      boost::iterator_range< application::arguments_const_range::const_iterator > r(application(e).arguments());
+
+      for (application::arguments_const_range::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
+      {
+        if (j == r.end())
+        {
+          return *i;
+        }
+      }
+
+      return *r.begin();
+    }
+
   } // namespace data
 
 } // namespace mcrl2
