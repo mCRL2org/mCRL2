@@ -50,7 +50,7 @@ static unsigned int is_initialised = 0;
 
 #define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 
-#if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN)
+#if defined(BOOST_WINDOWS) || defined(BOOST_INTEL_WIN) || (defined(BOOST_GCC) && BOOST_WINDOWS)
 #include "malloc.h"
 #define SYSTEM_SPECIFIC_ALLOCA(T, n) static_cast< T* >(_alloca(n * sizeof(T))), n
 #else
