@@ -21,6 +21,7 @@
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/container_utility.h"
@@ -200,7 +201,7 @@ namespace mcrl2 {
       {
         std::ostringstream s;
 
-        pretty_print(s, expression);
+        pretty_print< Expression >(s, expression);
 
         return s.str();
       }
@@ -332,7 +333,7 @@ namespace mcrl2 {
           }
         }
         else { // variable or other unknown head symbol
-          o << pretty_print(expression);
+          o << expression;
         }
 
         return o;
