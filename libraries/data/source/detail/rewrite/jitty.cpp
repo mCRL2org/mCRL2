@@ -14,12 +14,11 @@
 
 #define NAME std::string("rewr_jitty")
 
-#include <cstdio>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
-#include "boost/scoped_array.hpp"
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/messaging.h"
@@ -50,6 +49,54 @@ static unsigned int is_initialised = 0;
 
 #define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 
+#if defined(BOOST_MSVC) || defined(BOOST_INTEL_WIN)
+#include "malloc.h"
+#define SYSTEM_SPECIFIC_ALLOCA(T, n) static_cast< T* >(_alloca(n * sizeof(T))), n
+#else
+#define SYSTEM_SPECIFIC_ALLOCA(T, n) static_cast< T* >(alloca(n * sizeof(T))), n
+#endif
+
+
+// Special purpose minimal dynarray implementation (such as in the proposal for TR2)
+// \deprecated
+// This is only here for historic reasons; this is C99 code that is put in a
+// C++ class and compiled as C++ code. Since C++ does not now VLAs the only
+// option to save performance of the rewriter is to use stack allocation.
+// Proper encapsulating stack allocation is not possible to the best of my
+// knowledge. For the new C++ standard a proposal for dynarray was made. The
+// implementation below is just a poor compromise that only vaguely resembles
+// the dynarray interface, but it represents the same concept.
+template < typename T >
+class dynarray {
+
+  private:
+
+    T* m_elements;
+
+  public:
+
+    typedef size_t size_type;
+
+  public:
+
+    dynarray(T* p, size_t) : m_elements(p)
+    { }
+
+    dynarray(T* p, size_t n, T v) : m_elements(p)
+    {
+      std::fill(m_elements, m_elements + n, v);
+    }
+
+    T& operator[](size_type n)
+    {
+      return m_elements[n];
+    }
+
+    T* data()
+    {
+      return m_elements;
+    }
+};
 
 static void initialise_common()
 {
@@ -248,25 +295,15 @@ static ATermList create_strategy(ATermList rules)
 			max_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1;
 		}
 	}
-	boost::scoped_array< bool > used(new bool[max_arity]);
-	for (unsigned int i = 0; i < max_arity; i++)
-	{
-		used[i] = false;
-	}
+	dynarray< bool > used(SYSTEM_SPECIFIC_ALLOCA(bool, max_arity), false);
 
 	arity = 0;
 	while ( !ATisEmpty(rules) )
 	{
 		ATermList l = ATmakeList0();
 		ATermList m = ATmakeList0();
-	        boost::scoped_array< int > args(new int[arity]);
-	        boost::scoped_array< bool > bs(new bool[arity]);
+	        dynarray< int > args(SYSTEM_SPECIFIC_ALLOCA(int, arity), -1);
 //printf("arity = %i\n",arity);
-
-		for (unsigned int i = 0; i < arity; i++)
-		{
-			args[i] = -1;
-		}
 
 		for (; !ATisEmpty(rules); rules=ATgetNext(rules))
 		{
@@ -281,10 +318,7 @@ static ATermList create_strategy(ATermList rules)
 //gsfprintf(stderr,"rule: "); PrintPart_C(stderr,fromInner(ATAelementAt(ATgetFirst(rules),2))); gsfprintf(stderr,"\n");
 //gsprintf("pars: %T\n",pars);
 
-				for (unsigned int i = 0; i < arity; i++)
-				{
-					bs[i] = false;
-				}
+	                        dynarray< bool > bs(SYSTEM_SPECIFIC_ALLOCA(bool, arity), false);
 
 				for (unsigned int i = 0; i < arity; i++)
 				{
@@ -578,7 +612,7 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 		{
 			new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
 		}
-		boost::scoped_array< ATerm > args(new ATerm[new_arity]);
+		dynarray< ATerm > args(SYSTEM_SPECIFIC_ALLOCA(ATerm, new_arity));
 		unsigned int i;
 		if ( ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0) )
 		{
@@ -602,9 +636,9 @@ static ATerm subst_values(ATermAppl *vars, ATerm *vals, int len, ATerm t)
 
 		if ( arity == new_arity )
 		{
-			return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args.get());
+			return (ATerm) ATmakeApplArray(ATgetAFun((ATermAppl) t),args.data());
 		} else {
-			return (ATerm) ATmakeApplArray(getAppl(new_arity),args.get());
+			return (ATerm) ATmakeApplArray(getAppl(new_arity),args.data());
 		}
 	}
 }
@@ -723,8 +757,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 			}
 		}
 
-		boost::scoped_array< ATerm > rewritten(new ATerm[arity]);
-		boost::scoped_array< ATermAppl > args(new ATermAppl[arity]);
+		dynarray< ATerm > rewritten(SYSTEM_SPECIFIC_ALLOCA(ATerm, arity));
+		dynarray< ATermAppl > args(SYSTEM_SPECIFIC_ALLOCA(ATermAppl, arity));
 
 		if ( head_arity > 0 )
 		{
@@ -767,14 +801,14 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 					}
 
 					unsigned int max_len = ATgetLength(ATLgetFirst(rule));
-		                        boost::scoped_array< ATermAppl > vars(new ATermAppl[max_len]);
-		                        boost::scoped_array< ATerm > vals(new ATerm[max_len]);
+		                        dynarray< ATermAppl > vars(SYSTEM_SPECIFIC_ALLOCA(ATermAppl, max_len));
+		                        dynarray< ATerm > vals(SYSTEM_SPECIFIC_ALLOCA(ATerm, max_len));
 					unsigned int len = 0;
 					bool matches = true;
 
 					for (unsigned int i=1; i<rule_arity; i++)
 					{
-						if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars.get(),vals.get(),&len) )
+						if ( !match_jitty((rewritten[i]==NULL)?((ATerm) args[i]):rewritten[i],ATgetArgument(lhs,i),vars.data(),vals.data(),&len) )
 						{
 							matches = false;
 							break;
@@ -785,13 +819,13 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 //{
 //gsfprintf(stderr,"%T --> %T (%T)\n\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
 //}
-					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.get(),vals.get(),len,ATelementAt(rule,1))),jitty_true)) )
+					if ( matches && (gsIsNil(ATAelementAt(rule,1)) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,ATelementAt(rule,1))),jitty_true)) )
 					{
 						ATermAppl rhs = ATAelementAt(rule,3);
 
 						if ( arity == rule_arity )
 						{
-							return rewrite_aux((ATermAppl) subst_values(vars.get(),vals.get(),len,(ATerm) rhs));
+							return rewrite_aux((ATermAppl) subst_values(vars.data(),vals.data(),len,(ATerm) rhs));
 						}
 
 						unsigned int rhs_arity;
@@ -800,7 +834,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
 						if ( gsIsDataVarId(rhs) )
 						{
-							arg0 = subst_values(vars.get(),vals.get(),len,(ATerm) rhs);
+							arg0 = subst_values(vars.data(),vals.data(),len,(ATerm) rhs);
 							if ( gsIsDataVarId((ATermAppl) arg0) )
 							{
 								rhs_arity = 0;
@@ -812,13 +846,13 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 						} else {
 							rhs_arity = ATgetArity(ATgetAFun(rhs));
 							new_arity = rhs_arity+arity-rule_arity;
-							arg0 = subst_values(vars.get(),vals.get(),len,ATgetArgument(rhs,0));
+							arg0 = subst_values(vars.data(),vals.data(),len,ATgetArgument(rhs,0));
 							if ( !(ATisInt(arg0) || gsIsDataVarId((ATermAppl) arg0)))
 							{
 								new_arity += ATgetArity(ATgetAFun((ATermAppl) arg0))-1;
 							}
 						}
-		                                boost::scoped_array< ATerm > newargs(new ATerm[new_arity]);
+		                                dynarray< ATerm > newargs(SYSTEM_SPECIFIC_ALLOCA(ATerm, new_arity));
 						unsigned int i;
 						if ( gsIsDataVarId(rhs) )
 						{
@@ -851,7 +885,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 							for (unsigned int j=1; j<rhs_arity; j++)
 							{
 //gsfprintf(stderr,"pre %T\n\n",ATgetArgument(rhs,i));
-								newargs[i] = subst_values(vars.get(),vals.get(),len,ATgetArgument(rhs,j));
+								newargs[i] = subst_values(vars.data(),vals.data(),len,ATgetArgument(rhs,j));
 								i++;
 //gsfprintf(stderr,"post %T\n\n",args[i]);
 							}
@@ -863,7 +897,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 							i++;
 						}
 
-						ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs.get());
+						ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs.data());
 
 						ATermAppl aa = rewrite_aux(a);
 //gsfprintf(stderr,"return %T\n\n",aa);
@@ -885,7 +919,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 			}
 		}
 
-		ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten.get());
+		ATermAppl a = ATmakeApplArray(ATgetAFun(Term),rewritten.data());
 
 //gsfprintf(stderr,"return %T\n\n",a);
 //gsfprintf(stderr,"return3  %P\n\n",fromInner(a));

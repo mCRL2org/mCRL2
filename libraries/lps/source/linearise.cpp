@@ -531,25 +531,25 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    data_expression RewriteTerm(const data_expression t)
+    data_expression RewriteTerm(const data_expression& t)
     { if (!options.norewrite) return rewr(t);
       return t;
     }
 
-    data_expression_list RewriteTermList(data_expression_list t)
+    data_expression_list RewriteTermList(data_expression_list const& t)
     { if (t.empty()) return t;
       return push_front(RewriteTermList(pop_front(t)), RewriteTerm(t.front()));
     }
 
-    action RewriteAction(const action t)
+    action RewriteAction(const action& t)
     { return action(t.label(),RewriteTermList(t.arguments()));
     }
 
-    process_instance RewriteProcess(const process_instance t)
+    process_instance RewriteProcess(const process_instance& t)
     { return process_instance(t.identifier(),RewriteTermList(t.actual_parameters()));
     }
 
-    process_expression RewriteMultAct(const process_expression t)
+    process_expression RewriteMultAct(const process_expression& t)
     { if (is_tau(t))
       return t;
 
@@ -561,7 +561,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    process_expression pCRLrewrite(const process_expression t)
+    process_expression pCRLrewrite(const process_expression& t)
     { if (options.norewrite) return t;
 
       if (is_if_then(t))
@@ -608,7 +608,7 @@ class specification_basic_type:public boost::noncopyable
 
     /************ storeact ****************************************************/
 
-    long insertAction(const action_label actionId)
+    long insertAction(const action_label& actionId)
     { bool isnew=false;
       long n=addObject(actionId,isnew);
 
@@ -624,7 +624,7 @@ class specification_basic_type:public boost::noncopyable
       return n;
     }
 
-    void storeact(const action_label_list acts)
+    void storeact(const action_label_list& acts)
     { for(action_label_list::const_iterator l=acts.begin(); l!=acts.end(); ++l)
       { insertAction(*l);
       }
