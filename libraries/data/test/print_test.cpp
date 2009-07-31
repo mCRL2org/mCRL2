@@ -77,7 +77,7 @@ void test_abstraction_print() {
 bool stream_print_test(data_expression const& input, std::string const& expected_output) {
   std::ostringstream o;
 
-  detail::pretty_print(o, input);
+  detail::pretty_print< data_expression >(o, input);
 
   if (o.str() != expected_output) {
     std::clog << "Expected " << expected_output << " got " << o.str() << " instead" << std::endl;
