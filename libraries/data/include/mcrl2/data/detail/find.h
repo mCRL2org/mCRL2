@@ -55,6 +55,15 @@ namespace detail {
       using super::enter;
       using super::leave;
 
+#if BOOST_MSVC
+          // Workaround for malfunctioning MSVC 2008 overload resolution
+          template < typename Container >
+          void operator()(Container const& a)
+          {
+            super::operator()(a);
+          }
+#endif
+
       void enter(Expression const& e)
       {
         m_action(e);
@@ -130,9 +139,17 @@ namespace detail {
 
     public:
 
-      using super::operator();
       using super::enter;
       using super::leave;
+
+#if BOOST_MSVC
+          // Workaround for malfunctioning MSVC 2008 overload resolution
+          template < typename Container >
+          void operator()(Container const& a)
+          {
+            super::operator()(a);
+          }
+#endif
 
       void enter(Expression const& e)
       {
