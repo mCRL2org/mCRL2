@@ -16,6 +16,13 @@
 #include "transition.h"
 #include "label.h"
 #include "geometric.h"
+#include "pics/termtransition2.xpm"
+
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
 
 namespace grape {
 
@@ -24,6 +31,25 @@ using namespace grape::grapeapp;
 visualterminating_transition::visualterminating_transition( terminating_transition* p_terminating_transition )
 {
   m_object = p_terminating_transition;
+  
+  // Enable texture mapping
+  glEnable(GL_TEXTURE_2D);
+  
+  // Allocate texture memory
+  glGenTextures(1, &texture_id);
+
+  // Bind texture
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+
+  // Create a bitmap from xpm format
+  wxBitmap bitmap = wxBitmap( termtransition2_xpm );
+  
+  // Create an image from the bitmap
+	wxImage image = ( bitmap.ConvertToImage() );
+	
+	// Build the texture
+  gluBuild2DMipmaps(GL_TEXTURE_2D, 3, 28, 28, GL_RGB, GL_UNSIGNED_BYTE, image.GetData());
+
 }
 
 visualterminating_transition::visualterminating_transition( const visualterminating_transition &p_terminating_transition )
@@ -73,11 +99,18 @@ void visualterminating_transition::draw( void )
   // draw line
   draw_terminating_transition( fc, end_arrow, selected, text );
 
-  // draw white box
-  draw_filled_rectangle( tc, 0.1f, 0.1f, false, g_color_white );
-
   // draw tick
-  draw_tick(tc, 0.1f, 0.1f, selected);
+  glColor3f(1.0, 1.0, 1.0);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 1.0); glVertex3f(x+width-0.05, y+height-0.05, 0.0);
+    glTexCoord2f(0.0, 0.0); glVertex3f(x+width-0.05, y+height+0.05, 0.0);
+    glTexCoord2f(1.0, 0.0); glVertex3f(x+width+0.05, y+height+0.05, 0.0);
+    glTexCoord2f(1.0, 1.0); glVertex3f(x+width+0.05, y+height-0.05, 0.0);
+  glEnd();
+
+  // draw box
+  draw_line_rectangle( tc, 0.1f, 0.1f, selected, g_color_black );     
 }
 
 bool visualterminating_transition::is_inside( libgrape::coordinate &p_coord )

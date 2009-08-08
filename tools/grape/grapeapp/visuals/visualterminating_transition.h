@@ -12,6 +12,7 @@
 #define VISUALS_NTERMINATING_TRANSITION_H
 
 #include "visualobject.h"
+#include <wx/bitmap.h>s
 
 using namespace grape::libgrape;
 
@@ -27,6 +28,7 @@ namespace grape
     class visualterminating_transition : public visual_object
     {
       private:
+        GLuint texture_id; /**< The terminating transition texture id **/
       protected:
       public:
 

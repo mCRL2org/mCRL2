@@ -160,50 +160,7 @@ void grape_glcanvas::draw_visual_objects()
 
   visual_object *v_obj = m_main_frame->get_glcanvas()->get_selectable_visual_object( m_lmouse_down_coordinate );
   if (m_mousedown)
-  {   
-    // if we are selecting multiple object
-    if (m_multiple_selection)
-    {     
-      // set color of line black
-      set_color( g_color_black, true );
-
-      //enable dashed line
-      glLineStipple(1, 0x3F07);
-      glEnable(GL_LINE_STIPPLE);
-                
-      // draw selection rectangle
-      glBegin(GL_LINE_LOOP);
-        glVertex3f( m_lmouse_down_coordinate.m_x, m_lmouse_down_coordinate.m_y, 0.0f);
-        glVertex3f( m_lmouse_down_coordinate.m_x, m_mouse_coordinate.m_y, 0.0f);
-        glVertex3f( m_mouse_coordinate.m_x, m_mouse_coordinate.m_y, 0.0f);
-        glVertex3f( m_mouse_coordinate.m_x, m_lmouse_down_coordinate.m_y, 0.0f);
-      glEnd();  
-                 
-      // select objects inside selection
-      for ( unsigned int i = 0; i < m_visual_objects.GetCount(); ++i )
-      {
-        visual_object* vis_obj_ptr = m_visual_objects.Item( i );
-        object* obj = vis_obj_ptr->get_selectable_object();
-         
-        bool ver_between_lmouse_and_mouse = (m_lmouse_down_coordinate.m_y >= obj->get_coordinate().m_y - obj->get_height()*0.5) && (m_mouse_coordinate.m_y <= obj->get_coordinate().m_y + obj->get_height()*0.5); 
-        bool ver_between_mouse_and_lmouse = (m_mouse_coordinate.m_y >= obj->get_coordinate().m_y - obj->get_height()*0.5) && (m_lmouse_down_coordinate.m_y <= obj->get_coordinate().m_y + obj->get_height()*0.5);
-                  
-        bool hor_between_lmouse_and_mouse = (m_lmouse_down_coordinate.m_x >= obj->get_coordinate().m_x - obj->get_width()*0.5) && (m_mouse_coordinate.m_x <= obj->get_coordinate().m_x + obj->get_width()*0.5); 
-        bool hor_between_mouse_and_lmouse = (m_mouse_coordinate.m_x >= obj->get_coordinate().m_x - obj->get_width()*0.5) && (m_lmouse_down_coordinate.m_x <= obj->get_coordinate().m_x + obj->get_width()*0.5);
-         
-        bool inside_vertical = ver_between_lmouse_and_mouse || ver_between_mouse_and_lmouse;
-        bool inside_horizontal = hor_between_lmouse_and_mouse || hor_between_mouse_and_lmouse;
-        if (inside_horizontal && inside_vertical)
-        {
-          obj->select();
-        }
-        else
-        {
-          obj->deselect();
-        }        
-      }    
-    }
-    
+  {
     // if there is an object selected
     if (v_obj != 0 )
     { 
