@@ -81,7 +81,10 @@ namespace detail {
     void operator()()
     {
       data_expression d(replace_variables(e_, data_enumerator_replace_helper<variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_)));
-      std::vector<variable> v;
+      // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that 
+      // at times variables can occur only in this vector of variables, causing problems when garbage collected.
+      // Jan Friso Groote.
+      atermpp::vector<variable> v;
       for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
       {
         v.insert(v.end(), i->variables().begin(), i->variables().end());
