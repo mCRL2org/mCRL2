@@ -1,0 +1,12 @@
+project toolset/ltsgraph3d ;
+
+tool ltsgraph3d
+       : [ glob *.cpp ]
+         /libraries/utilities//spinctrlfloat
+         /libraries/utilities//font_renderer
+         /libraries//core
+         /libraries//lts
+         /libraries//ticpp
+       : <wx>gl
+         <squadt-connectivity>implemented
+       ;
