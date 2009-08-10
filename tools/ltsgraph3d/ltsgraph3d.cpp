@@ -6,18 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file LTSGraph3d.cpp
+/// \file ltsgraph3d.cpp
 /// \brief Implementation of application base class.
 
 #include "wx.hpp" // precompiled headers
 
-#include "LTSGraph3d.h"
+#include "ltsgraph3d.h"
 #include "ltsimporter.h"
 #include "xmlimporter.h"
 
 #include "springlayout.h"
 
 #include "mcrl2/lts/lts.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
