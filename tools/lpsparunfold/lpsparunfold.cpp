@@ -13,6 +13,8 @@
 
 // C++
 #include <iostream>
+#include <string>
+#include <algorithm>
 
 //mCRL2
 #include "mcrl2/lps/linear_process.h"
@@ -47,12 +49,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     //typedef squadt_tool< rewriter_tool<input_output_tool> > super;
     typedef rewriter_tool<input_output_tool> super;
 
-    int m_index; ///< Options of the algorithm
+    std::set< int > m_set_index; ///< Options of the algorithm
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("index", make_mandatory_argument("NUM"), "unfolds process parameter at given index", 'i');
+      desc.add_option("index", make_mandatory_argument("[NUM]"), "unfolds process parameters for comma separated indices", 'i');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -63,8 +65,20 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       {
         parser.error("Index of process parameter is not specified.");
       }
+      std::string  m_string_index;
 
-      m_index = parser.option_argument_as< int >("index");
+      m_string_index = parser.option_argument_as< std::string  >("index");
+
+      int s_index = m_string_index.find_first_of(",");
+      int s_old_index=0;     
+ 
+      while( s_index != std::string::npos ) {
+
+        m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
+        s_old_index = s_index+1;
+        s_index = m_string_index.find_first_of(",",s_old_index);
+      }
+      m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
     }
 
   public:
@@ -88,9 +102,14 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
-      lpsparunfold lpsparunfold( lps_specification );
 
-      lps_specification = lpsparunfold.algorithm( m_index );
+      while (!m_set_index.empty())
+      {
+        lpsparunfold lpsparunfold( lps_specification );
+        int index = *(max_element( m_set_index.begin(), m_set_index.end() ) );
+        lps_specification = lpsparunfold.algorithm( index );
+        m_set_index.erase( index );
+      }
 
       lps_specification.save(m_output_filename);
 
