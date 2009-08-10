@@ -24,7 +24,7 @@ BEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
   EVT_COLOURPICKER_CHANGED(myID_COLOUR, SettingsDialog::onColour)
 END_EVENT_TABLE()
 
-SettingsDialog::SettingsDialog(LTSGraph* owner, wxWindow* parent)
+SettingsDialog::SettingsDialog(LTSGraph3d* owner, wxWindow* parent)
   : wxDialog(parent, wxID_ANY, wxT("Visualization settings"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {

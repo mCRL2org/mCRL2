@@ -45,7 +45,7 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
 
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
+GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
                    const wxSize &size, int* attribList)
   : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER,
                wxEmptyString, attribList)
@@ -70,7 +70,7 @@ void GLCanvas::initialize()
   SetCurrent();
   glLoadIdentity();
   glShadeModel(GL_SMOOTH);
-  glClearColor(0.5f, 1.0f, 1.0f, 1.0f);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearDepth(1.0);									// Enables Clearing Of The Depth Buffer
   glDepthFunc(GL_LESS);								// The Type Of Depth Test To Do

@@ -48,8 +48,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-MainFrame::MainFrame(LTSGraph* owner)
-  : wxFrame(NULL, wxID_ANY, wxT("LTSGraph"),
+MainFrame::MainFrame(LTSGraph3d* owner)
+  : wxFrame(NULL, wxID_ANY, wxT("LTSGraph3d"),
     wxDefaultPosition, wxDefaultSize,
     wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
@@ -82,7 +82,7 @@ void MainFrame::setupMenuBar()
   fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"),
                wxT("Export this LTS to file."));
 
-  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph."));
+  fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph3d."));
 
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
@@ -322,7 +322,7 @@ void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
   infoDlg->setLTSInfo(is, ns, nt, nl);
 
   wxString title(app->getFileName().c_str(), wxConvLocal);
-  title = wxT("LTSGraph - ") + title;
+  title = wxT("LTSGraph3d - ") + title;
   SetTitle(title);
 }
 

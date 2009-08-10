@@ -15,10 +15,10 @@
 #include <wx/wx.h>
 #include <wx/frame.h>
 
-#ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+#ifndef LTSGRAPH3D_H
+  #include "ltsgraph3d.h"
 #else
-  class LTSGraph; // Forward declaration
+  class LTSGraph3d; // Forward declaration
 #endif
 
 #ifndef GLCANVAS_H
@@ -44,13 +44,13 @@
 class MainFrame : public wxFrame
 {
   public:
-    MainFrame(LTSGraph *owner);
+    MainFrame(LTSGraph3d *owner);
     GLCanvas* getGLCanvas();
 
     void setLTSInfo(int is, int ns, int nt, int nl);
 
   private:
-    LTSGraph *app;
+    LTSGraph3d *app;
     GLCanvas *glCanvas;
     AlgoDialog *algoDlg;
     SettingsDialog *settingsDlg;

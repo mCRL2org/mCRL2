@@ -14,10 +14,10 @@
 
 #include <wx/glcanvas.h>
 
-#ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+#ifndef LTSGRAPH3D_H
+  #include "ltsgraph3d.h"
 #else
-  class LTSGraph;
+  class LTSGraph3D;
 #endif
 
 #ifndef VISUALIZER_H
@@ -30,7 +30,7 @@ class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          LTSGraph* app,
+          LTSGraph3d* app,
           wxWindow* parent,
           const wxSize &size = wxDefaultSize,
           int* attribList = NULL);
@@ -64,7 +64,7 @@ class GLCanvas : public wxGLCanvas
 	double getMaxDepth() const;
 	void getRotations(double & roX, double & roY, double & roZ);
   private:
-    LTSGraph* owner;
+    LTSGraph3d* owner;
     Visualizer* visualizer;
     bool displayAllowed;
     double scaleFactor, maxDepth;

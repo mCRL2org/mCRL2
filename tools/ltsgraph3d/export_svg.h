@@ -14,18 +14,18 @@
 
 #include "exporter.h"
 
-class LTSGraph;
+class LTSGraph3d;
 
 class ExporterSVG : public Exporter
 {
   public:
-    ExporterSVG(Graph* g, LTSGraph* app);
+    ExporterSVG(Graph* g, LTSGraph3d* app);
     ~ExporterSVG();
     bool export_to(wxString _filename);
 
   private:
     std::string svg_code;
-    LTSGraph* owner;
+    LTSGraph3d* owner;
 
     void drawBezier(Transition* tr);
     void drawSelfLoop(Transition* tr);

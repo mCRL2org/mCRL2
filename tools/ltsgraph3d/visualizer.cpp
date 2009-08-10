@@ -16,7 +16,7 @@
 #include <cmath>
 #include "ids.h"
 
-Visualizer::Visualizer(LTSGraph* app)
+Visualizer::Visualizer(LTSGraph3d* app)
 {
   owner = app;
   width = 0;
@@ -127,14 +127,14 @@ void Visualizer::drawState(State* s)
 
   glPushMatrix();
   glTranslatef(x, y, z);
-  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	// A Disk Like The One Before
+  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glRotatef(90.0f,0.0f,1.0f,0.0f);
-  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	// A Disk Like The One Before
+  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glRotatef(-90.0f,0.0f,1.0f,0.0f);
   glRotatef(90.0f,1.0f,0.0f,0.0f);
-  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	// A Disk Like The One Before
+  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glPopMatrix();
-  
+ 
   if(s->isLocked())
   {
     // Grey out a locked state
@@ -151,45 +151,64 @@ void Visualizer::drawState(State* s)
 
   glPushName(IDS::STATE);
   glPushName(s->getValue());
-
+  
   glPushMatrix();
   glTranslatef(x, y, z);
   gluSphere(quadratic,rad,16,16);
   glPopMatrix();
   gluDeleteQuadric(quadratic);
 
-  
-
   // Draw label
 
   std::stringstream labelstr;
   labelstr << s->getValue();
 
-  if(showStateLabels) {
-    fr->draw_text(labelstr.str(), x, y, z, (rad - 2 * pixelSize) / 24.0f,
-                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+  if(showStateLabels) 
+  {
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	double tX, tY, tZ;
+	owner->getCanvasRots(tX, tY, tZ);
+	glRotatef(tZ,0.0f,0.0f,-1.0f);
+	glRotatef(tY,-1.0f,0.0f,0.0f);
+	glRotatef(tX,0.0f,-1.0f,0.0f);    
+	fr->draw_text(labelstr.str(), 0, 0, (rad - 2 * pixelSize) / 24.0f,
+		mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+	glPopMatrix();
   }
+ 
 
   glPopName();
   glPopName();
 
   // Draw state vector
   bool showStateVector = s->getShowStateVector();
-  if(showStateVector) {
+  
+  if(showStateVector) 
+  {
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	double tX, tY, tZ;
+	owner->getCanvasRots(tX, tY, tZ);
+	glRotatef(tZ,0.0f,0.0f,-1.0f);
+	glRotatef(tY,-1.0f,0.0f,0.0f);
+	glRotatef(tX,0.0f,-1.0f,0.0f);
+
     std::stringstream vectorstr;
-   std::map<std::string, std::string>::iterator it;
-   std::map<std::string, std::string> stateParameters = s->getParameters();
+    std::map<std::string, std::string>::iterator it;
+    std::map<std::string, std::string> stateParameters = s->getParameters();
 
     for(it = stateParameters.begin(); it != stateParameters.end(); ++it) {
      vectorstr << it->first <<": " << it->second << "\n";
     } 
 
-    fr->draw_wrapped_text(vectorstr.str(), z, x + rad * 2, width,  
-          height - y, y, (rad - 2 * pixelSize) / 24.0f,
+    fr->draw_wrapped_text(vectorstr.str(), rad * 2, width - x,  
+          height - 2 * y, 0, (rad - 2 * pixelSize) / 24.0f,
           mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
 
-  }
+	glPopMatrix();
 
+  }
 }
 
 void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
@@ -434,7 +453,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
       glPushName(IDS::LABEL);
       glPushName(from->getValue());
       glPushName(trid);
-      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
+      fr->draw_bounding_box(tr->getLabel(), 0, .025,
 				  8 * pixelSize / 20.0f,
                   mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
       glPopName();
@@ -442,7 +461,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
       glPopName();
     }
     else {
-      fr->draw_text(tr->getLabel(), 0, 0.025, 0,
+      fr->draw_text(tr->getLabel(), 0, .025,
                 8 * pixelSize / 20.0f,
                 mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
     }
@@ -499,7 +518,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
   xVirtual = xState + sin(alpha) * dist * 200.0f;
   yVirtual = yState + sin(beta) * dist * 200.0f;
-  zVirtual = zState + sin(gamma) * dist * 200.0f;;
+  zVirtual = zState + sin(gamma) * dist * 200.0f;
 
 
   // Calculate control points of the curve
@@ -641,11 +660,19 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
     labelY = (labelY / 2000.0) * (height - rad * 2);
 	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
 
+	glPushMatrix();
+	glTranslatef(labelX, labelY, labelZ);
+	double tX, tY, tZ;
+	owner->getCanvasRots(tX, tY, tZ);
+	glRotatef(tZ,0.0f,0.0f,-1.0f);
+	glRotatef(tY,-1.0f,0.0f,0.0f);
+	glRotatef(tX,0.0f,-1.0f,0.0f);
+
     if(selecting) {
       glPushName(IDS::SELF_LABEL);
       glPushName(s->getValue());
       glPushName(j);
-      fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025, labelZ,
+      fr->draw_bounding_box(tr->getLabel(), 0, .025,
                   8 * pixelSize / 20.0f,
                   mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
       glPopName();
@@ -653,10 +680,11 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
       glPopName();
     }
     else {
-      fr->draw_text(tr->getLabel(), labelX, labelY + .025, labelZ,
+      fr->draw_text(tr->getLabel(), 0, .025, 
                 8 * pixelSize / 20.0f,
                 mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
     }
+	glPopMatrix();
   }
 
 

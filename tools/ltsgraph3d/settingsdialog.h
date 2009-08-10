@@ -15,15 +15,15 @@
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include <wx/clrpicker.h>
-#include "ltsgraph.h"
+#include "ltsgraph3d.h"
 
 class SettingsDialog: public wxDialog {
   public:
-    SettingsDialog(LTSGraph* app, wxWindow* parent);
+    SettingsDialog(LTSGraph3d* app, wxWindow* parent);
 
 
   private:
-    LTSGraph* app;
+    LTSGraph3d* app;
     void onRadius(wxSpinEvent& evt);
     void onCurves(wxCommandEvent& evt);
     void onTransLabels(wxCommandEvent& evt);

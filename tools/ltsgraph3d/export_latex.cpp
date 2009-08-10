@@ -13,14 +13,14 @@
 
 #include "export_latex.h"
 #include <iostream>
-#include "ltsgraph.h"
+#include "ltsgraph3d.h"
 #include <boost/format.hpp>
 #include <cmath>
 #include <wx/textfile.h>
 
 #include <workarounds.h> // for M_PI
 
-ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
+ExporterLatex::ExporterLatex(Graph* g, LTSGraph3d* owner) : Exporter(g)
 {
   this->owner = owner;
 }

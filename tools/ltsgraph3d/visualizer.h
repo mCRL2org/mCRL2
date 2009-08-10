@@ -12,17 +12,26 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 
-#ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+#ifndef LTSGRAPH3D_H
+  #include "ltsgraph3d.h"
 #else
-  class LTSGraph;
+  class LTSGraph3d;
 #endif
 #include "state.h"
 #include "mcrl2/utilities/font_renderer.h"
+
+#ifndef __glu_h__
+#ifdef __APPLE__
+  #include <OpenGL/glu.h>
+#else
+  #include <GL/glu.h>
+#endif
+#endif
+
 class Visualizer
 {
   public:
-    Visualizer(LTSGraph* app);
+    Visualizer(LTSGraph3d* app);
     ~Visualizer();
 
     void visualize(double width, double height, double pixelSize,
@@ -41,7 +50,7 @@ class Visualizer
     // Getters
     int getRadius() const;
   private:
-    LTSGraph* owner;
+    LTSGraph3d* owner;
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height
