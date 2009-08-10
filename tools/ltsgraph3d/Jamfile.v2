@@ -8,5 +8,6 @@ tool ltsgraph3d
          /libraries//lts
          /libraries//ticpp
        : <wx>gl
-         <squadt-connectivity>implemented
+        <status>experimental
+        <squadt-connectivity>implemented
        ;
