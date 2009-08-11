@@ -65,7 +65,8 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     {
       super::parse_options(parser);
 
-      if ((0 == parser.options.count("index") and 0 == parser.options.count("sort")) or (0 < parser.options.count("index") and 0 < parser.options.count("sort")))
+      if (((0 == parser.options.count("index")) && (0 == parser.options.count("sort"))) ||
+          ((0 < parser.options.count("index") && (0 < parser.options.count("sort")))))
       {
         parser.error("Use either --sort or --index to unfold process parameters.");
       }
@@ -80,9 +81,8 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         int s_index = m_string_index.find_first_of(",");
         int s_old_index=0;     
  
-        while( s_index != std::string::npos ) {
-
-          m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
+        while( s_index != std::string::npos ) 
+        { m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
           s_old_index = s_index+1;
           s_index = m_string_index.find_first_of(",",s_old_index);
         }
@@ -118,7 +118,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
-      if (!m_unfoldsort.empty() and m_set_index.empty() )
+      if (!m_unfoldsort.empty() && m_set_index.empty() )
       {
         mcrl2::data::basic_sort b_sort( m_unfoldsort );
 
