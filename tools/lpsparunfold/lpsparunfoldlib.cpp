@@ -27,7 +27,7 @@ using namespace mcrl2::data;
 
 lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
 {
-  gsDebugMsg("Preprocessing\n");
+  gsDebugMsg("Processing\n");
   m_data_specification = spec.data() ;
   m_lps = spec.process();
   m_init_process = spec.initial_process();
@@ -68,8 +68,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                                       ++i){
       mapping_and_constructor_names.insert( i -> name() );
     };
-    gsDebugMsg("\t");
-    gsVerboseMsg("Specification has %d constructors\n",  mapping_and_constructor_names.size() - size );
+    gsDebugMsg("\tSpecification has %d constructors\n",  mapping_and_constructor_names.size() - size );
   }
 
   {
@@ -80,8 +79,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                                   ++i){
       mapping_and_constructor_names.insert( i -> name() );
     };
-    gsDebugMsg("\t");
-    gsVerboseMsg("Specification has %d mappings \n", mapping_and_constructor_names.size() - size );
+    gsDebugMsg("\tSpecification has %d mappings \n", mapping_and_constructor_names.size() - size );
   }
 }
 
@@ -140,8 +138,7 @@ function_symbol_vector lpsparunfold::new_constructors( mcrl2::data::function_sym
     mapping_and_constructor_names.insert(fresh_name);
 
   }
-  gsDebugMsg("\t");
-  gsVerboseMsg("Created %d fresh \" c_ \" mapping function(s)\n", set_of_new_sorts.size());
+  gsDebugMsg("\tCreated %d fresh \" c_ \" mapping function(s)\n", set_of_new_sorts.size());
   return set_of_new_sorts;
 }
 
@@ -160,8 +157,7 @@ mcrl2::data::function_symbol lpsparunfold::create_case_function(int k)
 
   fs = function_symbol( idstr , mcrl2::data::function_sort( fsl, m_unfold_process_parameter ));
 
-  gsDebugMsg("\t");
-  gsVerboseMsg("Created C map: %s\n", fs.to_string().c_str());
+  gsDebugMsg("\tCreated C map: %s\n", fs.to_string().c_str());
 
   return fs;
 }
@@ -347,7 +343,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   return del;
 }
 
-mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str)
+mcrl2::core::identifier_string lpsparunfold::generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names )
 {
   mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( process_parameter_names );
@@ -362,7 +358,6 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
    mcrl2::data::variable_list lps_proc_pars =  m_lps.process_parameters();
 
    /* Get process_parameters names from lps */
-   process_parameter_names.clear();
    std::set<mcrl2::core::identifier_string> process_parameter_names;
    for(mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
                                                 i != lps_proc_pars.end();
@@ -371,8 +366,8 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
      process_parameter_names.insert(i -> name() );
    }
 
-
-   gsDebugMsg("Updating LPS\n");
+   gsDebugMsg("");
+   gsVerboseMsg("Updating LPS\n");
    /* Create new process parameters */
    mcrl2::data::variable_vector new_process_parameters;
    for(mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
@@ -382,16 +377,15 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
      if( std::distance( lps_proc_pars.begin(), i ) == parameter_at_index )
      {
        gsDebugMsg("");
-       gsVerboseMsg("Unfold parameter %s found at index %d\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
+       gsVerboseMsg("Unfolding parameter %s at index %d\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
        gsDebugMsg("Inject process parameters\n");
        mcrl2::data::variable_vector process_parameters_injection;
 
        /* Generate fresh process parameter for new Sort */
-       mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name );
+       mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names );
        process_parameters_injection.push_back( mcrl2::data::variable( idstr , fresh_basic_sort ) );
 
-       gsDebugMsg("\t");
-       gsVerboseMsg("Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
+       gsDebugMsg("\tCreated process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
 
        for(mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
                                                 ; j != affected_constructors.end()
@@ -405,9 +399,9 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
            function_sort::domain_range dom = function_sort(j -> sort()).domain();
            for(function_sort::domain_range::iterator k = dom.begin(); k != dom.end(); ++k)
            {
-             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name ); 
+             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names ); 
              process_parameters_injection.push_back( mcrl2::data::variable( idstr ,  *k  ) );
-             gsDebugMsg( "\tInjected process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
+             gsVerboseMsg( "\tInjecting process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
            }
            processed = true;
          }
@@ -528,7 +522,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   //
   //update inital process  
   //
-  gsDebugMsg("Updating initialization\n\n");
+  gsVerboseMsg("Updating initialization\n\n");
   
   data::assignment_list ass = m_init_process.assignments();
   //Create new left-hand assignment_list 
@@ -642,7 +636,7 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
        }
      }
      gsDebugMsg("");
-     gsVerboseMsg( "parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( case_function, dev  ) ).c_str());
+     gsVerboseMsg( "Parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( case_function, dev  ) ).c_str());
      result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( case_function, dev ) ) );
    }
   return result ;
@@ -674,7 +668,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
   gsDebugMsg( "\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
-  gsVerboseMsg( "\tIndex parameters to unfold: %d\n", parameter_at_index );
+  gsVerboseMsg("Index parameters to unfold: %d\n", parameter_at_index );
   if(    (int(lps_proc_pars.size()) <= parameter_at_index) || parameter_at_index < 0  )
   {
     cerr << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;

@@ -50,35 +50,51 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     typedef rewriter_tool<input_output_tool> super;
 
     std::set< int > m_set_index; ///< Options of the algorithm
+    std::string m_unfoldsort;    
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("index", make_mandatory_argument("[NUM]"), "unfolds process parameters for comma separated indices", 'i');
+      desc.add_option("index", make_mandatory_argument("[NUM]"), 
+           "unfolds process parameters for comma separated indices", 'i');
+      desc.add_option("sort", make_mandatory_argument("NAME"),
+          "unfolds all process parameters of sort NAME", 's');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
 
-      if (0 == parser.options.count("index"))
+      if ((0 == parser.options.count("index") and 0 == parser.options.count("sort")) or (0 < parser.options.count("index") and 0 < parser.options.count("sort")))
       {
-        parser.error("Index of process parameter is not specified.");
+        parser.error("Use either --sort or --index to unfold process parameters.");
       }
-      std::string  m_string_index;
 
-      m_string_index = parser.option_argument_as< std::string  >("index");
-
-      int s_index = m_string_index.find_first_of(",");
-      int s_old_index=0;     
+      // Parse string argument to [NUM] (a set of indices)
+      if (0 < parser.options.count("index"))
+      {
+        std::string  m_string_index;
  
-      while( s_index != std::string::npos ) {
+        m_string_index = parser.option_argument_as< std::string  >("index");
 
+        int s_index = m_string_index.find_first_of(",");
+        int s_old_index=0;     
+ 
+        while( s_index != std::string::npos ) {
+
+          m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
+          s_old_index = s_index+1;
+          s_index = m_string_index.find_first_of(",",s_old_index);
+        }
         m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
-        s_old_index = s_index+1;
-        s_index = m_string_index.find_first_of(",",s_old_index);
       }
-      m_set_index.insert( atoi(m_string_index.substr( s_old_index, s_index - (s_old_index ) ).c_str() ) );
+
+      // Parse string argument NAME for sort argument
+      if (0 < parser.options.count("sort"))
+      {
+        m_unfoldsort = parser.option_argument_as< std::string  >("sort");
+      }
+
     }
 
   public:
@@ -88,7 +104,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
           "lpsparunfold",
           "Frank Stappers",
           "unfolds process parameter of an LPS",
-          "Unfolds the given process paramters of the linear process specification (LPS) "
+          "Unfolds a set of given process parameters of the linear process specification (LPS) "
           "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
           "used. If OUTFILE is not present, stdout is used."
         )
@@ -102,6 +118,33 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
+      if (!m_unfoldsort.empty() and m_set_index.empty() )
+      {
+        mcrl2::data::basic_sort b_sort( m_unfoldsort );
+
+        if (!search_basic_sort( lps_specification.data(), b_sort ))
+        {
+          std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
+          return false;
+        } 
+
+        mcrl2::data::assignment_list assignments = lps_specification.initial_process().assignments();
+        for(mcrl2::data::assignment_list::iterator k = assignments.begin()
+                                                 ; k != assignments.end()
+                                                 ; ++k)
+        {
+          if( k ->lhs().sort() == b_sort )
+            {  
+              m_set_index.insert (std::distance(assignments.begin(),k ) );
+            }
+        }      
+
+        if ( m_set_index.empty() )
+        {
+          std::cerr << "No process parameters found of sort " << m_unfoldsort << std::endl;
+          return false;
+        }
+      }
 
       while (!m_set_index.empty())
       {

@@ -86,9 +86,6 @@ class lpsparunfold
     /// \brief The set of constructor and mapping names occurring in the process specification.
     std::set<mcrl2::core::identifier_string> mapping_and_constructor_names;
 
-    /// \brief The set of process parameter that occur in the process specification.
-    std::set<mcrl2::core::identifier_string> process_parameter_names;
-
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
     std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
 
@@ -166,10 +163,11 @@ class lpsparunfold
       *         with respect to the set of process parameters (process_parameter_names). 
       * \return A fresh process parameter name. 
     **/
-    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str);
+    mcrl2::core::identifier_string generate_fresh_process_parameter_name(std::string str, std::set<mcrl2::core::identifier_string>& process_parameter_names );
 
     /** \brief  Get the sort of the process parameter at given index
-      * \param  parameter_at_index index value.
+      * \param  str denotes the prefered parameter_at_index name for index value.
+      * \param  parameters that are already in use
       * \return the sort of the process parameter at given index. 
     **/
     mcrl2::data::sort_expression sort_at_process_parameter_index(int parameter_at_index);
@@ -183,7 +181,7 @@ class lpsparunfold
         mcrl2::data::function_symbol case_function );
 
     /** \brief unfolds a data expression into a vector of process parameters
-      * \param  de the data expression
+      * \param  the data expression
       * \param  k vector of affected constructors 
       * \param  determine_function the determine function
       * \param  pi the projection functions 
