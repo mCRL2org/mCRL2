@@ -36,9 +36,9 @@ void grape_frame::event_click( coordinate &p_coord )
   update_bars();
 }
 
-void grape_frame::event_doubleclick( visual_object* p_vis_obj )
+void grape_frame::event_doubleclick( visual_object* p_vis_obj, wxMouseEvent &p_event )
 {
-  grape_event_doubleclick *event = new grape_event_doubleclick( this, p_vis_obj );
+  grape_event_doubleclick *event = new grape_event_doubleclick( this, p_vis_obj, p_event );
   m_event_handler->Submit( event, false );
   update_bars();
 }

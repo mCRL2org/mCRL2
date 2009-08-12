@@ -431,11 +431,12 @@ grape_event_properties::grape_event_properties( grape_frame *p_main_frame )
   }
 }
 
-grape_event_properties::grape_event_properties( grape_frame *p_main_frame, visual_object* p_vis_obj )
+grape_event_properties::grape_event_properties( grape_frame *p_main_frame, visual_object* p_vis_obj, wxMouseEvent &p_event )
 : grape_event_base( p_main_frame, false, _T( "properties" ) )
 {
   m_vis_obj = p_vis_obj;
   m_obj_ptr = 0;
+  m_mouse_event = p_event;
   if ( m_vis_obj )
   {
     m_obj_ptr = p_vis_obj->get_selectable_object();
@@ -526,7 +527,9 @@ bool grape_event_properties::Do( void )
       visualpreamble *vis_preamble_ptr = dynamic_cast< visualpreamble* >( m_vis_obj );
       if ( vis_preamble_ptr )
       {
-        grape_event_change_preamble *event = new grape_event_change_preamble( m_main_frame, vis_preamble_ptr->get_preamble() );
+        //if the mouse clicked on the left side of the preamble
+        bool clicked_on_parameter = m_mouse_event.GetX() <= 150;
+        grape_event_change_preamble *event = new grape_event_change_preamble( m_main_frame, vis_preamble_ptr->get_preamble(), clicked_on_parameter );
         m_main_frame->get_event_handler()->Submit( event, true );
       }
     }

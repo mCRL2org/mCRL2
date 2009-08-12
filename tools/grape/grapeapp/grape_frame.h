@@ -206,8 +206,9 @@ namespace grape
          * Doubleclick event handler.
          * Event handler called when a doubleclick on the canvas is performed.
          * @param p_vis_obj The doubleclicked object.
+         * @param p_event The triggered mouse event.
          */
-        void event_doubleclick( visual_object* p_vis_obj );
+        void event_doubleclick( visual_object* p_vis_obj, wxMouseEvent &p_event );
 
         /**
          * Move event handler.

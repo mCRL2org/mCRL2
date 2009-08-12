@@ -625,7 +625,7 @@ void grape_glcanvas::event_lmouse_doubleclick( wxMouseEvent &p_event )
   visual_object *selected_obj = get_selectable_visual_object( coord );
   if ( selected_obj )
   {
-    m_main_frame->event_doubleclick( selected_obj );
+    m_main_frame->event_doubleclick( selected_obj, p_event );
   }
 }
 

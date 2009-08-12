@@ -31,8 +31,6 @@ namespace grape
     class grape_preamble_dialog : public wxDialog
     {
       private:
-        //wxTextCtrl *m_parameters; /**< A text control containing the parameter initializations.*/
-        //wxTextCtrl *m_localvars; /** A text control containing the local variable declarations. */
         wxGrid        *m_parameter_grid; /**< Grid shown in the dialog, used for parameter declarations.*/
         wxGrid        *m_localvar_grid; /**< Grid shown in the dialog, used for localvar declarations.*/
 
@@ -44,8 +42,9 @@ namespace grape
         /**
         * Constructor.
         * @param p_preamble A pointer to the preamble which is being editted.
+        * @param p_edit_parameter Editing mode indicator.
         */
-        grape_preamble_dialog( preamble *p_preamble );
+        grape_preamble_dialog( preamble *p_preamble, bool p_edit_parameter );
 
         /** Destructor. */
         ~grape_preamble_dialog();

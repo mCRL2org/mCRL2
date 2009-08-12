@@ -73,8 +73,9 @@ namespace grape
          * Initializes the event.
          * @param p_main_frame Pointer to the main frame.
          * @param p_preamble The to be renamed preamble.
+         * @param p_edit_parameter Editing mode indicator.
          */
-        grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble );
+        grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble, bool p_edit_parameter );
 
         /**
          * Default destructor.

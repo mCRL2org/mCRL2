@@ -283,10 +283,11 @@ bool grape_event_click::Undo( void )
 
 
 
-grape_event_doubleclick::grape_event_doubleclick( grape_frame *p_main_frame, visual_object* p_vis_obj )
+grape_event_doubleclick::grape_event_doubleclick( grape_frame *p_main_frame, visual_object *p_vis_obj, wxMouseEvent &p_event )
 : grape_event_base( p_main_frame, false, _T( "doubleclick" ) )
 {
   m_vis_obj = p_vis_obj;
+  m_mouse_event = p_event;
 }
 
 grape_event_doubleclick::~grape_event_doubleclick( void )
@@ -295,7 +296,7 @@ grape_event_doubleclick::~grape_event_doubleclick( void )
 
 bool grape_event_doubleclick::Do( void )
 {
-  grape_event_properties *event = new grape_event_properties( m_main_frame, m_vis_obj );
+  grape_event_properties *event = new grape_event_properties( m_main_frame, m_vis_obj, m_mouse_event );
   return m_main_frame->get_event_handler()->Submit( event, false );
 }
 

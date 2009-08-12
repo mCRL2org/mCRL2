@@ -104,15 +104,15 @@ bool grape_event_add_process_diagram::Undo( void )
 
 
 
-grape_event_change_preamble::grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble )
+grape_event_change_preamble::grape_event_change_preamble( grape_frame *p_main_frame, preamble *p_preamble, bool p_edit_parameter )
 : grape_event_base( p_main_frame, true, _T( "edit preamble" ) )
 , m_preamble( p_preamble )
 {
   m_old_parameter_decls = p_preamble->get_parameter_declarations();
   m_old_local_var_decls = p_preamble->get_local_variable_declarations();
 
-  grape_preamble_dialog dialog( m_preamble );
-  m_ok_pressed = dialog.ShowModal() == wxID_OK;
+  grape_preamble_dialog dialog( m_preamble, p_edit_parameter );
+  m_ok_pressed = dialog.ShowModal();
 
   if ( m_ok_pressed )
   {
@@ -129,6 +129,7 @@ bool grape_event_change_preamble::Do( void )
 {
   if ( !m_ok_pressed )
   {
+    // user cancelled, don't push it on the undo stack
     return false;
   }
 

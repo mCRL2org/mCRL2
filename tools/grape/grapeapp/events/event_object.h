@@ -108,6 +108,7 @@ namespace grape
     class grape_event_properties : public grape_event_base
     {
       private:
+        wxMouseEvent  m_mouse_event;  /**< Mouse event */
         visual_object *m_vis_obj; /**< A pointer to the selected visual object, if applicable. */
         object        *m_obj_ptr; /**< A pointer to the selected object, if applicable. */
       public:
@@ -123,8 +124,9 @@ namespace grape
          * Initializes the event.
          * @param p_main_frame Pointer to the main frame.
          * @param p_vis_obj The visual object on which a click happened.
+         * @param p_event The triggered mouse event.
          */
-        grape_event_properties( grape_frame *p_main_frame, visual_object* p_vis_obj );
+        grape_event_properties( grape_frame *p_main_frame, visual_object* p_vis_obj, wxMouseEvent &p_event );
 
         /**
          * Default destructor.
