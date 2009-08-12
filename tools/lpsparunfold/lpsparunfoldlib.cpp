@@ -329,6 +329,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
 
     if(i -> sort().is_structured_sort())
     {
+
       data_expression lhs = application( determine_function , *i );
       gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > vars = find_variables( lhs );
@@ -336,6 +337,36 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       vars.insert( tmp_var.begin(), tmp_var.end() );
       del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, set_of_new_sorts[e] ) );
 
+    }
+ 
+    if(i -> sort().is_container_sort())
+    {
+      container_sort cs = container_sort( i -> sort() );
+      sort_expression element_sort = cs.element_sort();
+
+      if ((int)sort_vars[element_sort].size() == sort_index[ element_sort ] )
+      {
+        istr = generator( dstr );
+        data_expression v = variable( istr, element_sort );
+        sort_vars[ element_sort ].push_back(v);
+      }
+      variable y = sort_vars[ element_sort ].at( sort_index[ element_sort ]);
+      sort_index[ element_sort ] = sort_index[ element_sort ]+1;
+
+      data_expression lhs, rhs;
+      if( cs.is_list_sort() )
+      {
+        lhs = application( determine_function , sort_list::cons_( element_sort, y, sort_list::nil( element_sort ) )) ;
+      } else {
+        cerr << "ACCESSING UNINPLEMENTED CONTAINTER SORT" << endl;
+      }
+
+      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e]  )).c_str());
+      set< variable > vars = find_variables( lhs );
+      set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
+      vars.insert( tmp_var.begin(), tmp_var.end() );
+      del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, set_of_new_sorts[e] ) );
+      
     }
   e++;
   }
@@ -378,14 +409,13 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
      {
        gsDebugMsg("");
        gsVerboseMsg("Unfolding parameter %s at index %d\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
-       gsDebugMsg("Inject process parameters\n");
        mcrl2::data::variable_vector process_parameters_injection;
 
        /* Generate fresh process parameter for new Sort */
        mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names );
        process_parameters_injection.push_back( mcrl2::data::variable( idstr , fresh_basic_sort ) );
 
-       gsDebugMsg("\tCreated process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
+       gsVerboseMsg("\tCreated process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
 
        for(mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
                                                 ; j != affected_constructors.end()
@@ -635,6 +665,12 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
          dev.push_back( mcrl2::data::application( *m, arg ) );
        }
      }
+  
+     //cout << pp( i -> first, ppInternalDebug ).c_str() << endl;
+     //cout <<  mcrl2::data::pp( dev )  << endl;
+     //cout << pp( case_function ) << endl;
+        
+
      gsDebugMsg("");
      gsVerboseMsg( "Parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( case_function, dev  ) ).c_str());
      result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( case_function, dev ) ) );
@@ -665,6 +701,8 @@ mcrl2::data::data_expression_vector lpsparunfold::unfold_constructor( data_expre
 
 mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int parameter_at_index)
 {
+  bool generated_name = false;
+
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
   gsDebugMsg( "\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
@@ -678,6 +716,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   if(lps_proc_pars[parameter_at_index].sort().is_basic_sort())
   {
     unfold_parameter_name = basic_sort(lps_proc_pars[parameter_at_index].sort()).name();
+    generated_name = true;
   }
 
   if(lps_proc_pars[parameter_at_index].sort().is_structured_sort())
@@ -692,8 +731,30 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
     }
     generator.add_identifiers( sort_names );
     unfold_parameter_name = nstr; 
+    generated_name = true;
   }
 
+  if(lps_proc_pars[parameter_at_index].sort().is_function_sort())
+  {
+    generated_name = true;
+  }
+
+  if(lps_proc_pars[parameter_at_index].sort().is_container_sort())
+  {
+    mcrl2::data::postfix_identifier_generator generator("");
+    mcrl2::core::identifier_string nstr;
+    if( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).empty() )
+    {
+      nstr = generator( "S" );
+    } else{
+      nstr = generator( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).begin()->name().name() );
+    }
+    generator.add_identifiers( sort_names );
+    unfold_parameter_name = nstr; 
+    generated_name = true;
+  }
+
+  assert( generated_name );
   return lps_proc_pars[parameter_at_index].sort();
 }
 
