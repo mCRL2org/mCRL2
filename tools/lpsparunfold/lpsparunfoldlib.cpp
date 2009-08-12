@@ -99,6 +99,9 @@ mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str
 mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapping_name(std::string str)
 {
   //Generate a fresh name for a constructor of mapping
+
+  str.resize( std::remove_if(str.begin(), str.end(), &char_filter) - str.begin() );
+
   mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( mapping_and_constructor_names );
   mcrl2::core::identifier_string nstr = generator( str );
@@ -114,6 +117,7 @@ function_symbol_vector lpsparunfold::determine_affected_constructors()
   
   gsDebugMsg("k:\t");
   gsVerboseMsg("%s has %d constructor function(s)\n", unfold_parameter_name.c_str() , k.size() );
+
   for( function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i )
   {
     gsDebugMsg( "\t%s\n", i->to_string().c_str() );
@@ -708,7 +712,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
   gsDebugMsg( "\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
-  gsVerboseMsg("Index parameters to unfold: %d\n", parameter_at_index );
+  gsVerboseMsg("Unfolding process parameter at index: %d\n", parameter_at_index );
   if(    (int(lps_proc_pars.size()) <= parameter_at_index) || parameter_at_index < 0  )
   {
     cerr << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
@@ -766,6 +770,8 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
    m_unfold_process_parameter = sort_at_process_parameter_index( parameter_at_index);
 
    /* Var Dec */
+   mcrl2::lps::linear_process new_lps;
+   mcrl2::lps::process_initializer new_init;
    function_symbol_vector k;
    function_symbol_vector set_of_new_sorts;
    function_symbol_vector projection_functions;
@@ -776,27 +782,35 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
    /*   Alg */
    /*     1 */ fresh_basic_sort = generate_fresh_basic_sort( unfold_parameter_name );
    /*     2 */ k = determine_affected_constructors();
-   /*     4 */ set_of_new_sorts = new_constructors( k );
-   /*     6 */ case_function = create_case_function( k.size() );
-   /*     7 */ determine_function = create_determine_function( );
-   /*  8-12 */ projection_functions = create_projection_functions(k);
-   /* 13-xx */ data_equations = create_data_equations( projection_functions, case_function, set_of_new_sorts, k, determine_function);
-
-   /*----------------*/
-   mcrl2::lps::linear_process new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
-   mcrl2::lps::process_initializer new_init = update_linear_process_initialization(case_function, k, determine_function, parameter_at_index, projection_functions);
-
-  //Reconstruct specification
-  m_data_specification.add_sort( fresh_basic_sort );
-  boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(projection_functions));
-  m_data_specification.add_mappings( pi_range );
-  m_data_specification.add_mapping( determine_function );
-  m_data_specification.add_mapping( case_function );
-  boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
-  m_data_specification.add_mappings( set_of_new_sorts_range );
-
-  boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
-  m_data_specification.add_equations( dev_range );
+   if (k.empty())
+   {
+     gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
+     gsVerboseMsg("No need to unfold.\n");
+     new_lps = m_lps;
+     new_init = m_init_process; 
+   } else {
+     /*     4 */ set_of_new_sorts = new_constructors( k );
+     /*     6 */ case_function = create_case_function( k.size() );
+     /*     7 */ determine_function = create_determine_function( );
+     /*  8-12 */ projection_functions = create_projection_functions(k);
+     /* 13-xx */ data_equations = create_data_equations( projection_functions, case_function, set_of_new_sorts, k, determine_function);
+  
+     /*----------------*/
+     new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
+     new_init = update_linear_process_initialization(case_function, k, determine_function, parameter_at_index, projection_functions);
+  
+    //Reconstruct specification
+    m_data_specification.add_sort( fresh_basic_sort );
+    boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(projection_functions));
+    m_data_specification.add_mappings( pi_range );
+    m_data_specification.add_mapping( determine_function );
+    m_data_specification.add_mapping( case_function );
+    boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
+    m_data_specification.add_mappings( set_of_new_sorts_range );
+  
+    boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
+    m_data_specification.add_equations( dev_range );
+  }
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification( m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init );
 

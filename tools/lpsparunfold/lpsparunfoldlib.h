@@ -16,6 +16,7 @@
 #include <string>
 #include <set>
 #include <map>
+
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/basic_sort.h"
@@ -221,6 +222,16 @@ class lpsparunfold
         mcrl2::data::function_symbol determine_function, 
         int parameter_at_index, 
         mcrl2::data::function_symbol_vector pi);
+
+    static bool char_filter(char c)
+    {
+        // Put unwanted characters here
+	return c==' ' || c==':' || c==',' || c=='|' 
+            || c=='>' || c=='[' || c==']' || c=='@' 
+            || c=='.' || c=='{' || c=='}' || c=='#'
+            || c=='%' || c=='&' || c=='*' || c=='!'
+        ;
+    }
 
 };
 
