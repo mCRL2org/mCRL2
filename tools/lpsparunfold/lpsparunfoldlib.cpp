@@ -449,7 +449,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
          if (j -> sort().is_container_sort())
          {
-           processed = true;
+            processed = true;
          }
          if (!processed) {
            cerr << pp(*j) << " is not processed" << endl;
@@ -664,14 +664,16 @@ std::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparunfol
          }
          dev.push_back( mcrl2::data::application( *m, arg ) );
        }
-     }
-  
-     //cout << pp( i -> first, ppInternalDebug ).c_str() << endl;
-     //cout <<  mcrl2::data::pp( dev )  << endl;
-     //cout << pp( case_function ) << endl;
-        
 
+       if (m -> sort().is_container_sort())
+       {
+         dev.push_back( *m );
+       }
+
+     }
+    
      gsDebugMsg("");
+
      gsVerboseMsg( "Parameter substitution:\t%s\t->\t%s\n", pp( i -> first ).c_str(), pp( mcrl2::data::application( case_function, dev  ) ).c_str());
      result.insert( std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application( case_function, dev ) ) );
    }
