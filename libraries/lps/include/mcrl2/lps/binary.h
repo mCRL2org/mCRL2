@@ -151,7 +151,7 @@ namespace mcrl2 {
               
               if (core::gsVerbose)
               {
-                std::cerr << "Parameter `" << par << "' has been replaced by parameters " << pp(new_pars) << " of sort Bool" << std::endl;
+                std::cerr << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by parameters " << pp(new_pars) << " of sort Bool" << std::endl;
               }
 
               //Store new parameters in a hastable
