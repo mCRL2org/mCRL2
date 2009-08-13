@@ -191,6 +191,96 @@ namespace mcrl2 {
         }
       }
 
+	  void font_renderer::draw_text(
+	    const std::string& s,
+		const double x,
+		const double y,
+		const double z,
+		const double scale,
+		const Alignment& align_horizontal,
+		const Alignment& align_vertical)
+	  {
+        // Render text at the specified location
+        double xSLft;
+        double ySBot;
+
+        switch(align_horizontal)
+        {
+          case al_left:
+          {
+            xSLft = x - (s.length() * CHARWIDTH * scale);
+            break;
+          }
+          case al_center:
+          {
+            xSLft = x - (0.5 * s.length() * CHARWIDTH * scale);
+            break;
+          }
+          case al_right: // Fall through to default case
+          default:
+          {
+            xSLft = x;
+            break;
+          }
+        }
+
+        switch(align_vertical)
+        {
+          case al_top:
+          {
+            ySBot = y;
+            break;
+          }
+          case al_bottom:
+          {
+            ySBot = y - (CHARHEIGHT * scale);
+            break;
+          }
+          case al_center: // Fall through to default case
+          default:
+          {
+            ySBot = y - (.5 * CHARHEIGHT * scale);
+            break;
+          }
+        }
+
+        // Check if there actually is a label to render.
+        if(s.size() > 0)
+        {
+          // Enable texture mapping
+          glEnable(GL_TEXTURE_2D);
+
+          for( size_t i = 0; i < s.length(); ++i)
+          {
+            double xLft = xSLft + i * scale * CHARWIDTH;
+            double xRgt = xSLft + (i+1) * scale * CHARWIDTH;
+            double yTop = ySBot + .5 * scale * CHARHEIGHT;
+            double yBot = ySBot - .5 * scale * CHARHEIGHT;
+
+            size_t index = index_from_char(s[i]);
+            glBindTexture(GL_TEXTURE_2D, character_texture_id()[index]);
+
+            // Setup texture parameters
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glTexParameterf(GL_TEXTURE_2D,
+                            GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBegin(GL_QUADS);
+              glTexCoord2f(0.0, 0.0); glVertex3f(xLft, yTop, z);
+              glTexCoord2f(0.0, 1.0); glVertex3f(xLft, yBot, z);
+              glTexCoord2f(1.0, 1.0); glVertex3f(xRgt, yBot, z);
+              glTexCoord2f(1.0, 0.0); glVertex3f(xRgt, yTop, z);
+            glEnd();
+            glDisable(GL_BLEND);
+          }
+        }	    
+	  }
+
       void font_renderer::draw_bounding_box(
         const std::string& s,
         const double x,
@@ -270,10 +360,106 @@ namespace mcrl2 {
         }
       }
 
+	  void font_renderer::draw_bounding_box(
+        const std::string& s,
+        const double x,
+        const double y,
+		const double z,
+        const double scale,
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical,
+        const bool draw_border)
+      {
+        // Render text's bb at the specified location
+        double xSLft;
+        double ySBot;
+
+        switch(align_horizontal)
+        {
+          case al_left:
+          {
+            xSLft = x - (s.length() * CHARWIDTH * scale);
+            break;
+          }
+          case al_center:
+          {
+            xSLft = x - (0.5 * s.length() * CHARWIDTH * scale);
+            break;
+          }
+          case al_right: // Fall through to default case
+          default:
+          {
+            xSLft = x;
+            break;
+          }
+        }
+
+        switch(align_vertical)
+        {
+          case al_top:
+          {
+            ySBot = y;
+            break;
+          }
+          case al_bottom:
+          {
+            ySBot = y - (CHARHEIGHT * scale);
+            break;
+          }
+          case al_center: // Fall through to default case
+          default:
+          {
+            ySBot = y - (.5 * CHARHEIGHT * scale);
+            break;
+          }
+        }
+
+        // The bounding box has width CHARWIDTH * scale * s.length()...
+        double xSRgt = xSLft + CHARWIDTH * scale * s.length();
+        // ... and height CHARHEIGHT * scale
+        ySBot = ySBot - .5  * scale * CHARHEIGHT;
+        double ySTop = ySBot + CHARHEIGHT * scale;
+
+        // Draw the bounding box
+        glBegin(GL_QUADS); {
+          glVertex3d(xSRgt, ySBot, z);
+          glVertex3d(xSRgt, ySTop, z);
+          glVertex3d(xSLft, ySTop, z);
+          glVertex3d(xSLft, ySBot, z);
+        }
+        glEnd();
+
+        if(draw_border) {
+          glBegin(GL_LINE_STRIP); {
+            glVertex3d(xSRgt, ySBot, z);
+            glVertex3d(xSRgt, ySTop, z);
+            glVertex3d(xSLft, ySTop, z);
+            glVertex3d(xSLft, ySBot, z);
+          }
+          glEnd();
+        }
+      }
+
       void font_renderer::draw_cropped_text(
         const std::string& s,
         const double x,
         const double y,
+        const double xLft,
+        const double xRgt,
+        const double yTop,
+        const double yBot,
+        const double scale,
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical)
+      {
+        // Crop text to fit into bounding box.
+      }
+
+	  void font_renderer::draw_cropped_text(
+        const std::string& s,
+        const double x,
+        const double y,
+		const double z,
         const double xLft,
         const double xRgt,
         const double yTop,
@@ -426,6 +612,158 @@ namespace mcrl2 {
 
             // display text
             draw_text(subs, transx, transy , scale, al_right, al_center);
+                      
+            // break if we are outside the boundingbox
+            if ((y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop)) break;
+            
+            // calculate new y position
+            y = y - CHARHEIGHT*scale;
+          }
+        }
+      }
+
+	  void font_renderer::draw_wrapped_text(
+        const std::string& s,
+		const double z,
+        const double xLft,
+        const double xRgt,
+        const double yTop,
+        const double yBot,
+        const double scale,
+        const Alignment& align_horizontal,
+        const Alignment& align_vertical)
+      {
+        // Wrapped text to fit into bounding box.
+
+        const size_t addpos = static_cast< size_t >((xRgt-xLft)/(CHARWIDTH*scale));
+        double transx = 0;
+        double transy = 0;
+        std::string subs;
+        std::string temps;
+
+        double maxheight = 0;
+        std::string::size_type startpos = 0;
+        double y = 0;
+        temps = s;
+        
+        
+        
+        // do not draw anything if the text would not fit inside the box
+        if ((CHARWIDTH*scale < xRgt-xLft) && (CHARHEIGHT*scale < yTop-yBot))
+        {  
+          // caluclate the maximum height of the text
+          while (startpos < temps.length())
+          {
+            std::string::size_type findid = temps.find_first_of('\n');
+
+            if ((findid < 0) || (findid > startpos + addpos))
+            {
+               // if there is not a new line character
+               // just take the next part of the string
+               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+               startpos = startpos + addpos;
+            }
+            else
+            {
+              if (findid <= startpos + addpos)
+              {
+                // if we found a new line character
+                // cut the string at the new line position
+                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+                startpos = 0;
+                temps = temps.substr(findid+1);
+              }
+            }
+            y = y - CHARHEIGHT*scale;
+
+            //update maximum width and height
+            maxheight = maxheight + CHARHEIGHT * scale;
+
+            // break if we are outside the boundingbox
+            if (!((y - CHARHEIGHT*scale >= yBot-yTop) && (y - CHARHEIGHT*scale <= 0))) break;
+          }
+
+          startpos = 0;
+          temps = s;
+          y = 0;
+          // print text
+          while (startpos < s.length())
+          {
+            std::string::size_type findid = temps.find_first_of('\n');
+
+            if ((findid < 0) || (findid > startpos + addpos))
+            {
+               // if there is not a new line character
+               // just take the next part of the string
+               subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, addpos));
+               startpos = startpos + addpos;
+            }
+            else  
+            {
+              if (findid <= startpos + addpos)
+              {
+                // if we found a new line character
+                // cut the string at the new line position
+                subs = temps.substr((std::min)(temps.length(), startpos), (std::min)(temps.length()-startpos, findid-startpos));
+                startpos = 0;
+                temps = temps.substr(findid+1);
+              }
+            }
+        
+            bool moretext = startpos >= s.length();
+            bool lastlineinbox = (y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop);          
+            // print dots if there are more lines and we are at the bottem of our bounding box    
+            if ( !moretext && lastlineinbox ) 
+            {
+              //only shorten the text if the dots would be outside the bounding box
+              if (CHARWIDTH * scale * (subs.length() + 3) > xRgt-xLft) subs = subs.substr(0, subs.length()-3);
+              subs = subs.append("...");
+            }
+
+            // set correct horizontal alignment
+            switch(align_horizontal)
+            {
+              case al_left:
+              {
+                transx = xLft;
+                break;
+              }
+              case al_center:
+              {
+                transx = xLft + .5 * (xRgt - xLft - CHARWIDTH * scale * subs.length());
+                break;
+              }
+              case al_right: // Fall through to default case
+              default:
+              {
+                transx = xRgt - CHARWIDTH * scale * subs.length();
+                break;
+              }
+            }
+
+            // set correct vertical alignment
+            switch(align_vertical)
+            {
+              case al_top:
+              {
+                transy = yTop + y;
+                break;
+              }
+              case al_center:
+              {
+                transy = yTop + y + .5*(yBot - yTop + maxheight);
+                break;
+              }
+              case al_bottom: // Fall through to default case
+              default:
+              {
+                transy = yBot + maxheight + y;
+                break;
+              }
+            }
+
+            // display text
+            draw_text(subs, transx, transy, z, scale, al_right, al_center);
                       
             // break if we are outside the boundingbox
             if ((y - CHARHEIGHT*scale > yBot-yTop) && (y - 2*CHARHEIGHT*scale <= yBot-yTop)) break;
