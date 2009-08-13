@@ -72,10 +72,10 @@ void GLCanvas::initialize()
   glShadeModel(GL_SMOOTH);
   glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glClearDepth(1.0);									// Enables Clearing Of The Depth Buffer
-  glDepthFunc(GL_LESS);								// The Type Of Depth Test To Do
-  glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
+  glClearDepth(1.0);									
+  glDepthFunc(GL_LESS);								
+  glEnable(GL_DEPTH_TEST);							
+  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
   SwapBuffers();
   displayAllowed = true;
   visualizer->initFontRenderer();
@@ -104,16 +104,6 @@ void GLCanvas::display()
     // Cast to GLdouble for smooth transitions
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
-    /*if (aspect > 1)
-    {
-      // width > height
-      gluOrtho2D(aspect*(-1), aspect, -1.0, 1.0);
-    }
-    else
-    {
-      // height >= width
-      gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
-    }*/
 	double wwidth, wheight, wdepth;
 
     getSize(wwidth, wheight, wdepth);
@@ -153,10 +143,6 @@ void GLCanvas::display()
 	glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient2);		
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse2);		
 	glLightfv(GL_LIGHT1, GL_POSITION,LightPosition2);	
-
-//	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);					
-//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);					
-//	glEnable(GL_BLEND);
 
     double pS = getPixelSize();
 
@@ -232,7 +218,9 @@ void GLCanvas::getSize(
  *     So, the starting width was 2:
  *     world width      = 2 / scaleFactor;
  *     world height     = ( aspect*2 ) / scaleFactor
+ * Depth is just added for ease of use in 3D spaces.
  */
+
 {
   int widthViewPort;
   int heightViewPort;
@@ -421,19 +409,7 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 	depth = (width + height) / 2;
 
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
-/*
-    if (aspect > 1)
-    {
-      // width > height
-      gluOrtho2D(aspect * (-1), aspect, -1, 1);
-    }
-    else
-    {
-      // height >= width
-      gluOrtho2D(-1, 1, -1/aspect, (1/aspect));
-                               // calculate rotations etc.
-    }
-*/
+
     double wwidth, wheight, wdepth;
     getSize(wwidth, wheight, wdepth);
 

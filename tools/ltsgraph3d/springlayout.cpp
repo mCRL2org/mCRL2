@@ -233,36 +233,6 @@ void SpringLayout::layoutGraph(Graph* graph)
       newY = s->getY() + sumFY[i];
 	  newZ = s->getZ() + sumFZ[i];
 
-      if(newX > 1000)
-      {
-        newX = 1000;
-      }
-
-      if (newX < -1000)
-      {
-        newX = -1000;
-      }
-
-      if (newY > 1000)
-      {
-        newY = 1000;
-      }
-
-      if (newY < -1000)
-      {
-        newY = -1000;
-      }
-
-	  if (newZ > 1000)
-	  {
-		newZ = 1000;
-	  }
-
-	  if (newZ < -1000)
-	  {
-		newZ = -1000;
-	  }
-
       s->setX(newX);
       s->setY(newY);
 	  s->setZ(newZ);

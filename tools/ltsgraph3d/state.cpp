@@ -98,15 +98,6 @@ void State::setPosition(const Utils::Vect p)
 void State::setX(const double _x)
 {
   double newX = _x;
-  if (newX > 1000.0)
-  {
-    newX = 1000.0;
-  }
-
-  if (newX < -1000.0)
-  {
-    newX = -1000.0;
-  }
 
   pos.x = newX;
 }
@@ -115,32 +106,12 @@ void State::setY(const double _y)
 {
   double newY = _y;
 
-  if(newY > 1000.0)
-  {
-    newY = 1000.0;
-  }
-
-  if(newY < -1000.0)
-  {
-    newY = -1000.0;
-  }
-
   pos.y = newY;
 }
 
 void State::setZ(const double _z)
 {
   double newZ = _z;
-
-  if(newZ > 1000.0)
-  {
-    newZ = 1000.0;
-  }
-
-  if(newZ < -1000.0)
-  {
-    newZ = -1000.0;
-  }
 
   pos.z = newZ;
 }

@@ -77,6 +77,25 @@ void Visualizer::drawStates(bool inSelectMode)
         drawSelfLoop(t, j, inSelectMode);
       }
     }
+	if (showTransLabels)
+	{
+	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
+	  {
+		State* s = graph->getState(i);
+
+		for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
+		{
+			Transition* t = s->getTransition(j);
+			drawTransLabels(t, j, inSelectMode);
+		}
+
+		for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
+		{
+			Transition* t = s->getSelfLoop(j);
+			drawTransLabels(t, j, inSelectMode);
+		}
+	  }
+	}
   }
 }
 
@@ -106,9 +125,6 @@ void Visualizer::drawState(State* s)
   x = (x / 2000.0) * (width - rad * 2);
   y = (y / 2000.0) * (height - rad * 2);
   z = (z / 2000.0) * (depth - rad * 2);
-  float t = 0.0;
-  int prec = 50;  // TODO: Make parameterisable
-  float step = 1.0 / prec;
 
 
   // Draw border of states
@@ -436,55 +452,6 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     glPopName();
   }
 
-
-
-  if(showTransLabels) {
-    // Draw label near the control point
-    // point
-    double labelX, labelY, labelZ;
-    tr->getLabelPos(labelX, labelY, labelZ);
-    labelX = (labelX / 2000.0) * (width - rad * 2);
-    labelY = (labelY / 2000.0) * (height - rad * 2);
-	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
-
-    if(tr->isSelected())
-    {
-      glColor4ub(255, 0, 0, 255);
-    }
-    else
-    {
-      glColor4ub(0, 0, 0, 255);
-    }
-	glDepthMask(GL_FALSE);					
-	glPushMatrix();
-	glTranslatef(labelX, labelY, labelZ);
-	double tX, tY, tZ;
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f);
-	glRotatef(tY,-1.0f,0.0f,0.0f);
-
-    if(selecting) {
-      glPushName(IDS::LABEL);
-      glPushName(from->getValue());
-      glPushName(trid);
-      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
-				  8 * pixelSize / 20.0f,
-                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
-      glPopName();
-      glPopName();
-      glPopName();
-    }
-    else {
-      fr->draw_text(tr->getLabel(), 0, .025, 0,
-                8 * pixelSize / 20.0f,
-                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
-    }
-
-	glPopMatrix();
-	glDepthMask(GL_TRUE);
-  }
-
   glColor3ub(0, 0, 0);
 
   double xDif = xTo - xControl;
@@ -713,8 +680,55 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   glTranslatef(0.0f,  rad * 2, 0.0f);
   glRotatef(-90 - ang, 0.0f, 0.0f, 1.0f);
   glTranslatef(-xState, -yState, 0.0f);
+}
 
+void Visualizer::drawTransLabels(Transition* tr, size_t trid, bool selecting)
+{
+	// Draw label near the control point
+    double labelX, labelY, labelZ;
+    tr->getLabelPos(labelX, labelY, labelZ);
+	double rad = radius * pixelSize;
+    labelX = (labelX / 2000.0) * (width - rad * 2);
+    labelY = (labelY / 2000.0) * (height - rad * 2);
+	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
+	State* from = tr->getFrom();
 
+    if(tr->isSelected())
+    {
+      glColor4ub(255, 0, 0, 255);
+    }
+    else
+    {
+      glColor4ub(0, 0, 0, 255);
+    }
+	glDepthMask(GL_FALSE);					
+	glPushMatrix();
+	glTranslatef(labelX, labelY, labelZ);
+	double tX, tY, tZ;
+	owner->getCanvasRots(tX, tY, tZ);
+//	glRotatef(tZ,0.0f,0.0f,-1.0f);
+	glRotatef(tX,0.0f,-1.0f,0.0f);
+	glRotatef(tY,-1.0f,0.0f,0.0f);
+
+    if(selecting) {
+      glPushName(IDS::LABEL);
+      glPushName(from->getValue());
+      glPushName(trid);
+      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
+				  8 * pixelSize / 20.0f,
+                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
+      glPopName();
+      glPopName();
+      glPopName();
+    }
+    else {
+      fr->draw_text(tr->getLabel(), 0, .025, 0,
+                8 * pixelSize / 20.0f,
+                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+    }
+
+	glPopMatrix();
+	glDepthMask(GL_TRUE);
 }
 
 void Visualizer::setPixelSize(double ps)
@@ -754,3 +768,51 @@ void Visualizer::setStateLabels(bool value)
 {
   showStateLabels = value;
 }
+/*
+if(showTransLabels) {
+    // Draw label near the control point
+    // point
+    double labelX, labelY, labelZ;
+    tr->getLabelPos(labelX, labelY, labelZ);
+    labelX = (labelX / 2000.0) * (width - rad * 2);
+    labelY = (labelY / 2000.0) * (height - rad * 2);
+	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
+
+    if(tr->isSelected())
+    {
+      glColor4ub(255, 0, 0, 255);
+    }
+    else
+    {
+      glColor4ub(0, 0, 0, 255);
+    }
+	glDepthMask(GL_FALSE);					
+	glPushMatrix();
+	glTranslatef(labelX, labelY, labelZ);
+	double tX, tY, tZ;
+	owner->getCanvasRots(tX, tY, tZ);
+//	glRotatef(tZ,0.0f,0.0f,-1.0f);
+	glRotatef(tX,0.0f,-1.0f,0.0f);
+	glRotatef(tY,-1.0f,0.0f,0.0f);
+
+    if(selecting) {
+      glPushName(IDS::LABEL);
+      glPushName(from->getValue());
+      glPushName(trid);
+      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
+				  8 * pixelSize / 20.0f,
+                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
+      glPopName();
+      glPopName();
+      glPopName();
+    }
+    else {
+      fr->draw_text(tr->getLabel(), 0, .025, 0,
+                8 * pixelSize / 20.0f,
+                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+    }
+
+	glPopMatrix();
+	glDepthMask(GL_TRUE);
+  }
+*/
