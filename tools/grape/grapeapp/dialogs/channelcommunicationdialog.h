@@ -15,6 +15,7 @@
 
 #include <wx/dialog.h>
 #include <wx/event.h>
+#include <wx/radiobox.h>
 
 class wxTextCtrl;
 
@@ -31,8 +32,7 @@ namespace grape
     {
       private:
         wxTextCtrl       *m_name_input;       /**< The name input field shown in the dialog. */
-        wxComboBox       *m_combobox;           /**< The property combobox shown in the dialog. */
-
+        wxRadioBox       *m_radiobox;           /**< The property radiobox shown in the dialog. */
         /**
          * Private default constructor.
          */

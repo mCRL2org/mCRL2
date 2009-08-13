@@ -29,7 +29,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25) );
   
   // create name input
-  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );            
+  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(200, 25) );            
   m_name_input->ChangeValue(p_channel_communication.get_name_to());
   // create sizer
   wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -39,18 +39,14 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   
   wnd_sizer->AddSpacer( 5 );
 
-  // create property text
-  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(100, 25) );
-  
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
-  wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-  m_combobox = new wxComboBox( this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxSize(300, 25), 3, combobox_list, wxCB_READONLY );
-    
+  wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
+  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 95), 3, radiobox_list );
+  m_radiobox->SetSelection(index);
   // create sizer
-  wxSizer *property_sizer = new wxBoxSizer(wxHORIZONTAL);
-  property_sizer->Add( text_property );
-  property_sizer->Add( m_combobox );
+  wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
+  property_sizer->Add( m_radiobox );
   wnd_sizer->Add( property_sizer );
   
   wnd_sizer->AddSpacer( 5 );
@@ -77,8 +73,6 @@ grape_channel_communication_dlg::grape_channel_communication_dlg()
 
 grape_channel_communication_dlg::~grape_channel_communication_dlg()
 {
-  delete m_name_input;
-  delete m_combobox;
 }
 
 bool grape_channel_communication_dlg::show_modal( channel_communication &p_channel_communication )
@@ -86,9 +80,9 @@ bool grape_channel_communication_dlg::show_modal( channel_communication &p_chann
   if (ShowModal() != wxID_CANCEL)
   {      
     p_channel_communication.set_name_to(m_name_input->GetValue());     
-    if (m_combobox->GetValue() == _T("visible")) p_channel_communication.set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
-    if (m_combobox->GetValue() == _T("hidden")) p_channel_communication.set_channel_communication_type(HIDDEN_CHANNEL_COMMUNICATION);
-    if (m_combobox->GetValue() == _T("blocked")) p_channel_communication.set_channel_communication_type(BLOCKED_CHANNEL_COMMUNICATION);
+    if (m_radiobox->GetStringSelection() == _T("visible")) p_channel_communication.set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
+    if (m_radiobox->GetStringSelection() == _T("hidden")) p_channel_communication.set_channel_communication_type(HIDDEN_CHANNEL_COMMUNICATION);
+    if (m_radiobox->GetStringSelection() == _T("blocked")) p_channel_communication.set_channel_communication_type(BLOCKED_CHANNEL_COMMUNICATION);
   
     return true;
   }

@@ -29,7 +29,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create name input
-  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(200, 25) );
   m_name_input->ChangeValue(p_channel.get_name());
 
   // create sizer
@@ -44,7 +44,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxStaticText *text_rename = new wxStaticText( this, wxID_ANY, _T("Rename:"), wxDefaultPosition, wxSize(100, 25) );
 
   // create rename input
-  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(300, 25) );
+  m_rename_input = new wxTextCtrl(this, GRAPE_CHANNEL_RENAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(200, 25) );
   m_rename_input->ChangeValue(p_channel.get_rename_to());
 
   // create sizer
@@ -54,25 +54,25 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wnd_sizer->Add( rename_sizer );
 
   wnd_sizer->AddSpacer( 5 );
-  
-  // create property text
-  wxStaticText *text_property = new wxStaticText( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(100, 25) );
-      
+        
   // select the correct property of the channel
   int index = p_channel.get_channel_type();
   if (p_channel.get_channel_communications()->GetCount() == 0)
   { 
-    wxString combobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-    m_combobox = new wxComboBox( this, wxID_ANY, combobox_list[index], wxDefaultPosition, wxSize(300, 25), 3, combobox_list, wxCB_READONLY );
-  } else {
-    wxString combobox_list[1] = {_T("hidden")};
-    m_combobox = new wxComboBox( this, wxID_ANY, combobox_list[0], wxDefaultPosition, wxSize(300, 25), 1, combobox_list, wxCB_READONLY );
+    wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
+    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 95), 3, radiobox_list );
+    m_radiobox->SetSelection(index);
+  } 
+  else 
+  {
+    wxString radiobox_list[1] = {_T("hidden")};
+    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 1, radiobox_list );
+    m_radiobox->SetSelection(0);
   }
         
   // create sizer
-  wxSizer *property_sizer = new wxBoxSizer(wxHORIZONTAL);
-  property_sizer->Add( text_property );
-  property_sizer->Add( m_combobox );
+  wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
+  property_sizer->Add( m_radiobox );
   wnd_sizer->Add( property_sizer );
 
   wnd_sizer->AddSpacer( 5 );
@@ -99,9 +99,6 @@ grape_channel_dlg::grape_channel_dlg()
 
 grape_channel_dlg::~grape_channel_dlg()
 {
-  delete m_name_input;
-  delete m_rename_input;
-  delete m_combobox;
 }
 
 bool grape_channel_dlg::update_validation()
@@ -122,9 +119,9 @@ bool grape_channel_dlg::show_modal( channel &p_channel )
     p_channel.set_name(m_name_input->GetValue());     
     p_channel.set_rename_to(m_rename_input->GetValue());
   
-    if (m_combobox->GetValue() == _T("visible")) p_channel.set_channel_type(VISIBLE_CHANNEL);
-    if (m_combobox->GetValue() == _T("hidden")) p_channel.set_channel_type(HIDDEN_CHANNEL);
-    if (m_combobox->GetValue() == _T("blocked")) p_channel.set_channel_type(BLOCKED_CHANNEL);
+    if (m_radiobox->GetStringSelection() == _T("visible")) p_channel.set_channel_type(VISIBLE_CHANNEL);
+    if (m_radiobox->GetStringSelection() == _T("hidden")) p_channel.set_channel_type(HIDDEN_CHANNEL);
+    if (m_radiobox->GetStringSelection() == _T("blocked")) p_channel.set_channel_type(BLOCKED_CHANNEL);
   
     return true;
   }

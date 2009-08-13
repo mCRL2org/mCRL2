@@ -14,6 +14,7 @@
 #include "wx/wx.h"
 #include <wx/dialog.h>
 #include <wx/event.h>
+#include <wx/radiobox.h>
 
 #include "channel.h"
 
@@ -33,7 +34,7 @@ namespace grape
       private:
         wxTextCtrl       *m_name_input;         /**< The name field shown in the dialog. */
         wxTextCtrl       *m_rename_input;       /**< The rename field shown in the dialog. */
-        wxComboBox       *m_combobox;           /**< The property combobox shown in the dialog. */
+        wxRadioBox       *m_radiobox;           /**< The property radiobox shown in the dialog. */
 
         /**
          * Private default constructor.
