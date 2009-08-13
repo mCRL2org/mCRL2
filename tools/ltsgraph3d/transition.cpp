@@ -57,9 +57,9 @@ void Transition::getControl(double& x, double& y, double& z)
 {
   if(fromState == toState)
   {
-    x = fromState->getX() + controlDist * 200.0f * sin(controlAlpha);
-    y = fromState->getY() + controlDist * 200.0f * sin(controlBeta);
-	z = fromState->getZ() + controlDist * 200.0f * sin(controlGamma);
+    x = fromState->getX() + controlDist * 200.0f * cos(controlAlpha);
+    y = fromState->getY() + controlDist * 200.0f * cos(controlBeta);
+	z = fromState->getZ() + controlDist * 200.0f * cos(controlGamma);
   }
   else
   {

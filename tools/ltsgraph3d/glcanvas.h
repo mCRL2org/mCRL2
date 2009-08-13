@@ -59,10 +59,12 @@ class GLCanvas : public wxGLCanvas
 	void onMouseMidUp(wxMouseEvent& event);
 	void onMouseMidDown(wxMouseEvent& event);
 
-    double getPixelSize();
+    void getSize(double & width, double & height, double & depth);
+	double getPixelSize();
     double getAspectRatio() const;
 	double getMaxDepth() const;
 	void getRotations(double & roX, double & roY, double & roZ);
+
   private:
     LTSGraph3d* owner;
     Visualizer* visualizer;
@@ -70,8 +72,6 @@ class GLCanvas : public wxGLCanvas
     double scaleFactor, maxDepth;
     int oldX, oldY, Xold, Yold;
 	float lookX, lookY, lookZ, rotX, rotY, rotZ;
-	
-    void getSize(double & width, double & height, double & depth);
 
     void pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);

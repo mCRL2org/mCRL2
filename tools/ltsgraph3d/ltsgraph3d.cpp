@@ -207,8 +207,11 @@ void LTSGraph3d::moveObject(double ox, double oy, double nx, double ny, double h
 	ny = height - ny - 1;
 //	get2dCoords(ox, oy, z);
 //	get2dCoords(nx, ny, z);
-	double diffX = (nx - ox) / width * 2000;
-	double diffY = (ny - oy) / height * 2000;
+//	double a, b, c;
+//	glCanvas->getSize(a, b, c);
+//	double rad = visualizer->getRadius() * glCanvas->getPixelSize();
+	double diffX = (nx - ox) * 2000 / width; /// (a - 2 * rad);
+	double diffY = (ny - oy) * 2000 / height; /// (b - 2 * rad);
 	z = 0;
     selectedState->setX(selectedState->getX() + diffX);
     selectedState->setY(selectedState->getY() + diffY);
@@ -396,15 +399,20 @@ void LTSGraph3d::getCanvasRots(double & _X, double & _Y, double & _Z)
 
 void LTSGraph3d::get2dCoords(double &mx, double &my, double oz)
 {
-  double wx, wy, wz;
+  double wx, wy, wz, wzn, wzf, a, b, c;
   GLint viewport[4];
   GLdouble mvmatrix[16], projmatrix[16];
   glGetIntegerv(GL_VIEWPORT, viewport);
   glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
   glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-  double rad = glCanvas->getMaxDepth();
-  double depthR = (oz + 1000)/2000;
-  gluUnProject(mx, my, depthR, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+  double depth = glCanvas->getMaxDepth();
+  double rad = visualizer->getRadius() * glCanvas->getPixelSize();
+  glCanvas->getSize(a, b, c);
+  oz = (oz / 2000.0) * (c - rad * 2);
+  gluUnProject(mx, my, 0, mvmatrix, projmatrix, viewport, &wx, &wy, &wzn);
+  gluUnProject(mx, my, 1, mvmatrix, projmatrix, viewport, &wx, &wy, &wzf);
+  double rate = (wzn - oz) / (wzn - wzf);
+  gluUnProject(mx, my, rate, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
   mx = wx;
   my = wy;
 }

@@ -70,7 +70,7 @@ void GLCanvas::initialize()
   SetCurrent();
   glLoadIdentity();
   glShadeModel(GL_SMOOTH);
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearDepth(1.0);									// Enables Clearing Of The Depth Buffer
   glDepthFunc(GL_LESS);								// The Type Of Depth Test To Do
@@ -120,34 +120,42 @@ void GLCanvas::display()
 
 	double rad = visualizer->getRadius() * getPixelSize() ;
 
-	maxDepth = (wdepth - 2 * rad);
+	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
 
-	gluPerspective(45.0f, aspect, 0.1f, lookZ + maxDepth + 0.1f);
-/*	glDisable(GL_LIGHTING);
-	glDisable(GL_LIGHT0);
-	GLfloat LightAmbient[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
-	GLfloat LightDiffuse[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
-	GLfloat LightPosition[]=	{ 0.0f, 0.0f, lookZ, 0.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);		// Setup The Ambient Light
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);		// Setup The Diffuse Light
-	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);	// Position The Light
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);*/
+	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
 
-	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
+
+//	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
 
     glMatrixMode( GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
 
 
-/*	glTranslatef(lookX,lookY,lookZ);*/
+	glTranslatef(lookX,lookY,-lookZ - 0.1f - maxDepth / 2);
 
-	glRotatef(rotX,0.0f,1.0f,0.0f);
 	glRotatef(rotY,1.0f,0.0f,0.0f);
-	glRotatef(rotZ,0.0f,0.0f,1.0f);	
-//	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);					// Full Brightness.  50% Alpha
-//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);					// Set The Blending Function For Translucency
+	glRotatef(rotX,0.0f,1.0f,0.0f);
+	//glRotatef(rotZ,0.0f,0.0f,1.0f);	
+	double xl, yl, zl;
+	yl = sin(rotY * M_PI /180.0) * 100;
+	xl = cos(rotY * M_PI /180.0) * 100 * sin(-rotX * M_PI /180.0);
+	zl = cos(rotY * M_PI /180.0) * 100 * cos(-rotX * M_PI /180.0);
+	GLfloat LightAmbient[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
+	GLfloat LightDiffuse[]=		{ 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
+	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);	
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);	
+	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);	
+	GLfloat LightAmbient2[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
+	GLfloat LightDiffuse2[]=		{ 0.5f, 0.5f, 0.5f, 0.6f };
+	GLfloat LightPosition2[]=	{ xl, yl, zl, 0.0f};
+	glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient2);		
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse2);		
+	glLightfv(GL_LIGHT1, GL_POSITION,LightPosition2);	
+
+//	glColor4f(1.0f, 1.0f, 1.0f, 0.5f);					
+//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);					
 //	glEnable(GL_BLEND);
 
     double pS = getPixelSize();
@@ -431,10 +439,10 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 
 	double rad = visualizer->getRadius() * getPixelSize() ;
 
-	maxDepth = (wdepth - 2 * rad);
+	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
 
-	gluPerspective(45.0f, aspect, 0.1f, lookZ + maxDepth + 0.1f);
-	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
+	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
+//	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
 
     glMatrixMode( GL_MODELVIEW);
 
