@@ -142,7 +142,7 @@ function_symbol_vector lpsparunfold::new_constructors( mcrl2::data::function_sym
     mapping_and_constructor_names.insert(fresh_name);
 
   }
-  gsDebugMsg("\tCreated %d fresh \" c_ \" mapping function(s)\n", set_of_new_sorts.size());
+  gsDebugMsg("\tCreated %d fresh \" c_ \" constructor(s)\n", set_of_new_sorts.size());
   return set_of_new_sorts;
 }
 
@@ -801,12 +801,10 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
   
     //Reconstruct specification
     m_data_specification.add_sort( fresh_basic_sort );
-    boost::iterator_range<function_symbol_vector::const_iterator> pi_range(boost::make_iterator_range(projection_functions));
-    m_data_specification.add_mappings( pi_range );
-    m_data_specification.add_mapping( determine_function );
-    m_data_specification.add_mapping( case_function );
-    boost::iterator_range<function_symbol_vector::const_iterator> set_of_new_sorts_range(boost::make_iterator_range(set_of_new_sorts));
-    m_data_specification.add_mappings( set_of_new_sorts_range );
+    m_data_specification.add_constructors( set_of_new_sorts );
+    m_data_specification.add_constructor( determine_function );
+    m_data_specification.add_constructor( case_function );
+    m_data_specification.add_mappings( projection_functions );
   
     boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
     m_data_specification.add_equations( dev_range );
