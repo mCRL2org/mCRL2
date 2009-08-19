@@ -192,7 +192,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       } while (!dG.empty());
 
       // report the results
-      if (m_verbose)
+      if (m_verbose && !sigma.empty())
       {
         std::clog << "Removing the following constant parameters:" << std::endl;
         for (data::mutable_map_substitution<>::iterator i = sigma.begin(); i != sigma.end(); ++i)
