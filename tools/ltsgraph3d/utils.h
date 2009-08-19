@@ -27,5 +27,8 @@ namespace Utils {
   float vecLength(Vect v);
   float angDiff(Vect v1, Vect v2);
   float signum(float f);
+  void MultGLMatrices (const float leftm[16], const float rightm[16], float* ans);
+  void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx);
+
 }
 #endif

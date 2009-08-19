@@ -392,9 +392,9 @@ void LTSGraph3d::setTool(bool isColour)
   colouring = isColour;
 }
 
-void LTSGraph3d::getCanvasRots(double & _X, double & _Y, double & _Z)
+void LTSGraph3d::getCanvasMdlvwMtrx(float * mtrx)
 {
-  glCanvas->getRotations(_X, _Y, _Z);
+  glCanvas->getMdlvwMtrx(mtrx);
 }
 
 void LTSGraph3d::get2dCoords(double &mx, double &my, double oz)

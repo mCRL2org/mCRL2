@@ -86,16 +86,24 @@ void Visualizer::drawStates(bool inSelectMode)
 		for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
 		{
 			Transition* t = s->getTransition(j);
-			drawTransLabels(t, j, inSelectMode);
+			drawTransLabel(t, j, inSelectMode);
 		}
 
 		for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
 		{
 			Transition* t = s->getSelfLoop(j);
-			drawTransLabels(t, j, inSelectMode);
+			drawTransLabel(t, j, inSelectMode);
 		}
-	  }
+	  }	  
 	}
+	if(graph->getState(0)->getShowStateVector() || showStateLabels)
+	{
+	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
+	  {
+		State* s = graph->getState(i);
+		drawStateText(s);
+	  }
+	}	
   }
 }
 
@@ -130,24 +138,26 @@ void Visualizer::drawState(State* s)
   // Draw border of states
   if(s->isSelected())
   {
-    glColor4ub(255, 0, 0,255);  // TODO: Param
+    glColor4ub(255, 0, 0, 255);  // TODO: Param
   }
   else if(s->isInitialState())
   {
-    glColor4ub(0, 255, 0,255);
+    glColor4ub(0, 255, 0, 255);
   }
   else
   {
-    glColor4ub(0, 0, 0,255);
+    glColor4ub(0, 0, 0, 255);
   }
 
   glPushMatrix();
-  glTranslatef(x, y, z);
-  double tX, tY, tZ;
-  owner->getCanvasRots(tX, tY, tZ);
-//glRotatef(tZ,0.0f,0.0f,-1.0f);
-  glRotatef(tX,0.0f,-1.0f,0.0f);    
-  glRotatef(tY,-1.0f,0.0f,0.0f);
+  float cmvm[16];
+  float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
+  owner->getCanvasMdlvwMtrx(cmvm);
+  float dumatrix2[16];
+  Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
+  for (int i = 12; i < 16; i++)
+	  dumatrix[i] = dumatrix2[i];
+  glLoadMatrixf(dumatrix);
   gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glPopMatrix();
 
@@ -155,7 +165,7 @@ void Visualizer::drawState(State* s)
   {
 	glEnable(GL_LIGHT1);
     // Grey out a locked state
-    glColor4ub(125, 125, 125,255);
+    glColor4ub(125, 125, 125, 255);
   }
 
   else
@@ -163,7 +173,7 @@ void Visualizer::drawState(State* s)
     glEnable(GL_LIGHT0);
     wxColour c = s->getColour();
 
-    glColor4ub(c.Red(), c.Green(), c.Blue(),255);
+    glColor4ub(c.Red(), c.Green(), c.Blue(), 255);
   }
 
   glEnable(GL_LIGHTING);
@@ -179,67 +189,8 @@ void Visualizer::drawState(State* s)
   glDisable(GL_LIGHT0);
   glDisable(GL_LIGHT1);
 
-  // Draw label
-
-  std::stringstream labelstr;
-  labelstr << s->getValue();
-
-  if(showStateLabels) 
-  {
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LIGHTING);
-	glPushMatrix();
-	glTranslatef(x, y, z);
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f); 
-	glRotatef(tY,-1.0f,0.0f,0.0f);
-	tX = tX * M_PI / 180.0;
-	tY = tY * M_PI / 180.0;
-	tZ = tZ * M_PI / 180.0;
-	double xtx, ytx, ztx;
-	ytx = sin(tY) * rad;
-	xtx = cos(tY) * rad * sin(-tX);
-	ztx = cos(tY) * rad * cos(-tX);
-	fr->draw_text(labelstr.str(), xtx, ytx, ztx, (rad - 2 * pixelSize) / 24.0f,
-		mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
-	glPopMatrix();
-	glDisable(GL_LIGHTING);
-	glDisable(GL_LIGHT0);
-  }
- 
-
   glPopName();
   glPopName();
-
-  // Draw state vector
-  bool showStateVector = s->getShowStateVector();
-  
-  if(showStateVector) 
-  {
-	glPushMatrix();
-	glTranslatef(x, y, z);
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f);
-	glRotatef(tY,-1.0f,0.0f,0.0f);
-
-    std::stringstream vectorstr;
-    std::map<std::string, std::string>::iterator it;
-    std::map<std::string, std::string> stateParameters = s->getParameters();
-
-    for(it = stateParameters.begin(); it != stateParameters.end(); ++it)
-	{
-      vectorstr << it->first <<": " << it->second << "\n";
-    } 
-
-    fr->draw_wrapped_text(vectorstr.str(), 0, rad * 2, width - x,  
-          height - 2 * y, 0, (rad - 2 * pixelSize) / 24.0f,
-          mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
-
-	glPopMatrix();
-
-  }
 }
 
 void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
@@ -630,44 +581,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
     glPopName();
   }
 
-
-  // Draw label.
-  if(showTransLabels) {
-    double labelX, labelY, labelZ;
-    tr->getLabelPos(labelX, labelY, labelZ);
-    labelX = (labelX / 2000.0) * (width - rad * 2);
-    labelY = (labelY / 2000.0) * (height - rad * 2);
-	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
-
-	glPushMatrix();
-	glTranslatef(labelX, labelY, labelZ);
-	double tX, tY, tZ;
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f);
-	glRotatef(tY,-1.0f,0.0f,0.0f);
-
-    if(selecting) {
-      glPushName(IDS::SELF_LABEL);
-      glPushName(s->getValue());
-      glPushName(j);
-
-      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
-                  8 * pixelSize / 20.0f,
-                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
-      glPopName();
-      glPopName();
-      glPopName();
-    }
-    else {
-      fr->draw_text(tr->getLabel(), 0, .025, 0,
-                8 * pixelSize / 20.0f,
-                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
-    }
-  }
-
-  glPopMatrix();
-
   glColor3ub(0, 0, 0);
 
   float ang = atan2(yControl2 - yState, xControl2 - xState)
@@ -682,7 +595,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   glTranslatef(-xState, -yState, 0.0f);
 }
 
-void Visualizer::drawTransLabels(Transition* tr, size_t trid, bool selecting)
+void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 {
 	// Draw label near the control point
     double labelX, labelY, labelZ;
@@ -703,12 +616,14 @@ void Visualizer::drawTransLabels(Transition* tr, size_t trid, bool selecting)
     }
 	glDepthMask(GL_FALSE);					
 	glPushMatrix();
-	glTranslatef(labelX, labelY, labelZ);
-	double tX, tY, tZ;
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f);
-	glRotatef(tY,-1.0f,0.0f,0.0f);
+	float cmvm[16];
+	float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,labelX,labelY,labelZ,1};
+	owner->getCanvasMdlvwMtrx(cmvm);
+	float dumatrix2[16];
+	Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
+	for (int i = 12; i < 16; i++)
+		dumatrix[i] = dumatrix2[i];
+	glLoadMatrixf(dumatrix);
 
     if(selecting) {
       glPushName(IDS::LABEL);
@@ -729,6 +644,59 @@ void Visualizer::drawTransLabels(Transition* tr, size_t trid, bool selecting)
 
 	glPopMatrix();
 	glDepthMask(GL_TRUE);
+}
+
+void Visualizer::drawStateText(State* s)
+{
+  double x, y, z;
+  x = s->getX();
+  y = s->getY();
+  z = s->getZ();
+  double rad = radius * pixelSize;
+  x = (x / 2000.0) * (width - rad * 2);
+  y = (y / 2000.0) * (height - rad * 2);
+  z = (z / 2000.0) * (depth - rad * 2);
+  glPushMatrix();
+  float cmvm[16];
+  float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
+  owner->getCanvasMdlvwMtrx(cmvm);
+  float dumatrix2[16];
+  Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
+  for (int i = 12; i < 16; i++)
+	  dumatrix[i] = dumatrix2[i];
+  glLoadMatrixf(dumatrix);
+
+  // Draw label
+  std::stringstream labelstr;
+  labelstr << s->getValue();
+
+  if(showStateLabels) 
+  {
+	glColor3ub(0,0,0);
+	fr->draw_text(labelstr.str(), 0, 0, rad, (rad - 2 * pixelSize) / 24.0f,
+		mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+  }
+
+  // Draw state vector
+  bool showStateVector = s->getShowStateVector();
+  
+  if(showStateVector) 
+  {
+	std::stringstream vectorstr;
+    std::map<std::string, std::string>::iterator it;
+    std::map<std::string, std::string> stateParameters = s->getParameters();
+
+    for(it = stateParameters.begin(); it != stateParameters.end(); ++it)
+	{
+      vectorstr << it->first <<": " << it->second << "\n";
+    } 
+
+    fr->draw_wrapped_text(vectorstr.str(), rad, rad * 2, width - x,  
+          height - 2 * y, 0, (rad - 2 * pixelSize) / 24.0f,
+          mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
+
+  }
+  glPopMatrix();
 }
 
 void Visualizer::setPixelSize(double ps)
@@ -769,50 +737,60 @@ void Visualizer::setStateLabels(bool value)
   showStateLabels = value;
 }
 /*
-if(showTransLabels) {
-    // Draw label near the control point
-    // point
-    double labelX, labelY, labelZ;
-    tr->getLabelPos(labelX, labelY, labelZ);
-    labelX = (labelX / 2000.0) * (width - rad * 2);
-    labelY = (labelY / 2000.0) * (height - rad * 2);
-	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
+void Visualizer::drawCoorSystem()
+{
+	double length;
+	float cmvm[16];
+	length = 0.3;
+	owner->getCanvasMdlvwMtrx(cmvm);
+	glDisable(GL_DEPTH_TEST);
+	cmvm[12] = 0;
+	cmvm[13] = 0;
+	cmvm[14] = 0;
+	cmvm[15] = 1;
+	glLoadMatrixf(cmvm); 
+	glBegin(GL_LINES);
+	  glColor3ub(255, 0, 0);
+	  glVertex3f(0.0f, 0.0f, 0.0f);
+	  glVertex3f(length, 0.0f, 0.0f);
+	  glColor3ub(0, 255, 0);
+	  glVertex3f(0.0f, 0.0f, 0.0f);
+	  glVertex3f(0.0f, length, 0.0f);
+	  glColor3ub(0, 0, 255);
+	  glVertex3f(0.0f, 0.0f, 0.0f);
+	  glVertex3f(0.0f, 0.0f, length);
+	glEnd();
+//arrow heads for axises
+	float tanXZ = atan2(0.0, 0.0) * 180.0f / M_PI;
+	float angYxz = atan2(1.0, 0.0) * 180.0f / M_PI;
 
-    if(tr->isSelected())
-    {
-      glColor4ub(255, 0, 0, 255);
-    }
-    else
-    {
-      glColor4ub(0, 0, 0, 255);
-    }
-	glDepthMask(GL_FALSE);					
+	glColor3ub(0, 255, 0);
 	glPushMatrix();
-	glTranslatef(labelX, labelY, labelZ);
-	double tX, tY, tZ;
-	owner->getCanvasRots(tX, tY, tZ);
-//	glRotatef(tZ,0.0f,0.0f,-1.0f);
-	glRotatef(tX,0.0f,-1.0f,0.0f);
-	glRotatef(tY,-1.0f,0.0f,0.0f);
-
-    if(selecting) {
-      glPushName(IDS::LABEL);
-      glPushName(from->getValue());
-      glPushName(trid);
-      fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
-				  8 * pixelSize / 20.0f,
-                  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
-      glPopName();
-      glPopName();
-      glPopName();
-    }
-    else {
-      fr->draw_text(tr->getLabel(), 0, .025, 0,
-                8 * pixelSize / 20.0f,
-                mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
-    }
-
+	glTranslatef(0.0f, length, 0.0f);
+	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	drawArrowHead(0.1);
 	glPopMatrix();
-	glDepthMask(GL_TRUE);
-  }
+	tanXZ = atan2(1.0, 0.0) * 180.0f / M_PI;
+	angYxz = atan2(0.0, 1.0) * 180.0f / M_PI;
+
+    glColor3ub(255, 0, 0);
+	glPushMatrix();
+	glTranslatef(length, 0.0f, 0.0f);
+	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	drawArrowHead(0.1);
+	glPopMatrix();
+	tanXZ = atan2(0.0, 1.0) * 180.0f / M_PI;
+	angYxz = atan2(0.0, 1.0) * 180.0f / M_PI;
+
+	glColor3ub(0, 0, 255);
+	glPushMatrix();
+	glTranslatef(0.0f, 0.0f, length);
+	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	drawArrowHead(0.1);
+	glPopMatrix();
+	glEnable(GL_DEPTH_TEST);
+}
 */

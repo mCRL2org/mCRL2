@@ -68,5 +68,57 @@ float signum(float v)
   }
 }
 
+void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
+{
+	ans[0] = lhs[0] * rhs [0] + lhs[4] * rhs [1] + lhs[8] * rhs [2] + lhs[12] * rhs [3];
+	ans[1] = lhs[1] * rhs [0] + lhs[5] * rhs [1] + lhs[9] * rhs [2] + lhs[13] * rhs [3];
+	ans[2] = lhs[2] * rhs [0] + lhs[6] * rhs [1] + lhs[10] * rhs [2] + lhs[14] * rhs [3];
+	ans[3] = lhs[3] * rhs [0] + lhs[7] * rhs [1] + lhs[11] * rhs [2] + lhs[15] * rhs [3];
+	ans[4] = lhs[0] * rhs [4] + lhs[4] * rhs [5] + lhs[8] * rhs [6] + lhs[12] * rhs [7];
+	ans[5] = lhs[1] * rhs [4] + lhs[5] * rhs [5] + lhs[9] * rhs [6] + lhs[13] * rhs [7];
+	ans[6] = lhs[2] * rhs [4] + lhs[6] * rhs [5] + lhs[10] * rhs [6] + lhs[14] * rhs [7];
+	ans[7] = lhs[3] * rhs [4] + lhs[7] * rhs [5] + lhs[11] * rhs [6] + lhs[15] * rhs [7];
+	ans[8] = lhs[0] * rhs [8] + lhs[4] * rhs [9] + lhs[8] * rhs [10] + lhs[12] * rhs [11];
+	ans[9] = lhs[1] * rhs [8] + lhs[5] * rhs [9] + lhs[9] * rhs [10] + lhs[13] * rhs [11];
+	ans[10] = lhs[2] * rhs [8] + lhs[6] * rhs [9] + lhs[10] * rhs [10] + lhs[14] * rhs [11];
+	ans[11] = lhs[3] * rhs [8] + lhs[7] * rhs [9] + lhs[11] * rhs [10] + lhs[15] * rhs [11];
+	ans[12] = lhs[0] * rhs [12] + lhs[4] * rhs [13] + lhs[8] * rhs [14] + lhs[12] * rhs [15];
+	ans[13] = lhs[1] * rhs [12] + lhs[5] * rhs [13] + lhs[9] * rhs [14] + lhs[13] * rhs [15];
+	ans[14] = lhs[2] * rhs [12] + lhs[6] * rhs [13] + lhs[10] * rhs [14] + lhs[14] * rhs [15];
+	ans[15] = lhs[3] * rhs [12] + lhs[7] * rhs [13] + lhs[11] * rhs [14] + lhs[15] * rhs [15];
+}
+
+//preq: the axis is on the z = 0 plane.
+
+void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx)
+{
+	float angleRad = angle * float(3.1415926535897932384626433832795) / 180.0f;
+	float c = cos(angleRad);
+	float s = sin(angleRad);
+	float t = 1 - cos(angleRad);
+	float angleUnitVect = atan2(y1, x1);
+	float ax, ay, az;
+	ax = -1.0f * sin(angleUnitVect);
+	ay = cos(angleUnitVect);
+	az = 0;
+	rotmtrx[0] = t * ax * ax + c;
+	rotmtrx[1] = t * ax * ay - s * az;
+	rotmtrx[2] = t * ax * ay + s * ay;
+	rotmtrx[3] = 0;
+	rotmtrx[4] = t * ax * ay + s * az;
+	rotmtrx[5] = t * ay * ay + c;
+	rotmtrx[6] = t * ay * az - s * ax;
+	rotmtrx[7] = 0;
+	rotmtrx[8] = t * ax * az - s * ay;
+	rotmtrx[9] = t * ay * az + s * ax;
+	rotmtrx[10] = t * az * az + c;
+	rotmtrx[11] = 0;
+	rotmtrx[12] = 0;
+	rotmtrx[13] = 0;
+	rotmtrx[14] = 0;
+	rotmtrx[15] = 1;
+}
+
+
 
 }

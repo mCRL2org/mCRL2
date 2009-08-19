@@ -63,15 +63,16 @@ class GLCanvas : public wxGLCanvas
 	double getPixelSize();
     double getAspectRatio() const;
 	double getMaxDepth() const;
-	void getRotations(double & roX, double & roY, double & roZ);
+	void getMdlvwMtrx(float * mtrx);
 
   private:
     LTSGraph3d* owner;
     Visualizer* visualizer;
     bool displayAllowed;
     double scaleFactor, maxDepth;
-    int oldX, oldY, Xold, Yold;
-	float lookX, lookY, lookZ, rotX, rotY, rotZ;
+    int oldX, oldY;
+	float lookX, lookY, lookZ, rotX, rotY;
+	float currentModelviewMatrix[16];
 
     void pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);

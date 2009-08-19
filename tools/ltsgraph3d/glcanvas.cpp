@@ -57,8 +57,7 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
   lookZ = 0;
   rotX = 0;
   rotY = 0;
-  rotZ = 0;
-  scaleFactor = 1.0;
+  scaleFactor = 1.0;  
 }
 
 GLCanvas::~GLCanvas()
@@ -69,6 +68,7 @@ void GLCanvas::initialize()
 {
   SetCurrent();
   glLoadIdentity();
+  glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
   glShadeModel(GL_SMOOTH);
   glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -97,10 +97,6 @@ void GLCanvas::display()
     // This is current context
     SetCurrent();
 
-    // Set up viewing volume
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
     // Cast to GLdouble for smooth transitions
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
@@ -108,12 +104,15 @@ void GLCanvas::display()
 
     getSize(wwidth, wheight, wdepth);
 
+    // Set up viewing volume
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
 	double rad = visualizer->getRadius() * getPixelSize() ;
 
 	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
 
 	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
-
 
 //	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
 
@@ -121,16 +120,27 @@ void GLCanvas::display()
     glLoadIdentity();
     glViewport(0, 0, width, height);
 
+//	glTranslatef(lookX,lookY,-lookZ - 0.1f - maxDepth / 2);
 
-	glTranslatef(lookX,lookY,-lookZ - 0.1f - maxDepth / 2);
+	float dumtrx[16];
+	Utils::genRotArbAxs(sqrt(rotX * rotX + rotY * rotY), rotX, rotY, 0, dumtrx);
+	rotX = 0;
+	rotY = 0;
+	float dumtrx2[16];
+	Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
 
-	glRotatef(rotY,1.0f,0.0f,0.0f);
-	glRotatef(rotX,0.0f,1.0f,0.0f);
-	//glRotatef(rotZ,0.0f,0.0f,1.0f);	
+	for ( int i = 0; i < 12; i++)
+		currentModelviewMatrix[i] = dumtrx2[i];
+
+	currentModelviewMatrix[12] = lookX;
+	currentModelviewMatrix[13] = lookY;
+	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+	currentModelviewMatrix[15] = 1;
+
 	double xl, yl, zl;
-	yl = sin(rotY * M_PI /180.0) * 100;
-	xl = cos(rotY * M_PI /180.0) * 100 * sin(-rotX * M_PI /180.0);
-	zl = cos(rotY * M_PI /180.0) * 100 * cos(-rotX * M_PI /180.0);
+	xl = 0;
+	yl = 0;
+	zl = 100;
 	GLfloat LightAmbient[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
 	GLfloat LightDiffuse[]=		{ 0.8f, 0.8f, 0.8f, 1.0f };
 	GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
@@ -144,6 +154,8 @@ void GLCanvas::display()
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse2);		
 	glLightfv(GL_LIGHT1, GL_POSITION,LightPosition2);	
 
+	glLoadMatrixf(currentModelviewMatrix);
+
     double pS = getPixelSize();
 
     if (visualizer)
@@ -151,6 +163,29 @@ void GLCanvas::display()
       // Draw
       visualizer->visualize(wwidth, wheight, pS, false);
     }
+
+/*	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+    glLoadIdentity();
+	gluPerspective(45.0f, 1, 0.1f, 10.0f);
+	glMatrixMode( GL_MODELVIEW);
+	glPushMatrix();
+    glLoadIdentity();
+	glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
+
+	if (visualizer)
+	{
+		visualizer->drawCoorSystem();
+	}
+
+	glLoadIdentity();
+    glViewport(0, 0, width, height);
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+*/
 
     glFinish();
     SwapBuffers();
@@ -312,9 +347,9 @@ void GLCanvas::onMouseDblClck(wxMouseEvent& /*evt */)
 	lookX=0;
 	lookY=0;
 	lookZ=0;
-	rotX=0;
-	rotY=0;
-	rotZ=0;
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 }
 void GLCanvas::onMouseWhl(wxMouseEvent& event)
 {
@@ -323,8 +358,8 @@ void GLCanvas::onMouseWhl(wxMouseEvent& event)
 }
 void GLCanvas::onMouseMidDown(wxMouseEvent& event)
 {
-	Xold = event.GetX();
-	Yold = event.GetY();
+	oldX = event.GetX();
+	oldY = event.GetY();
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
 {
@@ -355,14 +390,10 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 	}
 	else if (event.MiddleIsDown())
 	{
-	    rotX -= 0.5f*(Xold-newX);
-	    rotY -= 0.5f*(Yold-newY);
-	    if (rotX >= 360.0f) rotX -= 360.0f;
-	    if (rotY >= 360.0f) rotY -= 360.0f;
-      	if (rotX < 0.0f) rotX += 360.0f;
-      	if (rotY < 0.0f) rotY += 360.0f;
-	    Xold = newX;
-	    Yold = newY;
+		rotX = 0.5f * (oldX - newX);
+	    rotY = -0.5f * (oldY - newY);
+	    oldX = newX;
+	    oldY = newY;
 	}
     display();
   }
@@ -399,8 +430,8 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     // Create picking region near cursor location
     gluPickMatrix((GLdouble) x,
                   (GLdouble)  viewport[3] - y,
-                  5.0,
-                  5.0,
+                  1.0,
+                  1.0,
                   viewport);
 
     // Get current size of canvas
@@ -418,7 +449,6 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
 
 	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
-//	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
 
     glMatrixMode( GL_MODELVIEW);
 
@@ -531,13 +561,11 @@ double GLCanvas::getMaxDepth() const
 	return maxDepth;
 }
 
-void GLCanvas::getRotations(double &roX, double &roY, double &roZ)
+void GLCanvas::getMdlvwMtrx(float * mtrx)
 {
-	roX = rotX;
-	roY = rotY;
-	roZ = rotZ;
+	for (int i = 0; i < 16; i++)
+		mtrx[i] = currentModelviewMatrix[i];
 }
-
 
 
 

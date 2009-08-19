@@ -47,6 +47,8 @@ class Visualizer
     void setCurves(bool value);
     void setTransLabels(bool value);
     void setStateLabels(bool value);
+//	void drawCoorSystem();
+
     // Getters
     int getRadius() const;
   private:
@@ -70,13 +72,17 @@ class Visualizer
     // Draws a single transition, from its in to its out transition
     void drawTransition(Transition* t, size_t trid, bool inSelectMode);
 
-	void drawTransLabels(Transition* t, size_t trid, bool inSelectMode);
+	// Draws the transition label
+	void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
 
-    // Draws an arrow head
-    void drawArrowHead(double baseLength);
+	// Draws the state label and vector
+	void drawStateText(State* s);
 
     // Draws a self-loop, a transition from a state to itself
     void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
+
+	// Draws an arrow head
+    void drawArrowHead(double baseLength);
 
     mcrl2::utilities::wx::font_renderer* fr;
 };
