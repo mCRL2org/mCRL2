@@ -53,6 +53,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     std::set< int > m_set_index; ///< Options of the algorithm
     std::string m_unfoldsort;    
     int m_repeat_unfold;
+    bool m_add_distribution_laws;
 
     void add_options(interface_description& desc)
     {
@@ -63,6 +64,8 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
           "unfolds all process parameters of sort NAME", 's');
       desc.add_option("repeat", make_mandatory_argument("NUM"),
           "repeat unfold NUM times", 'n');
+      desc.add_option("laws", 
+          "generates additional distribution laws for projection and determine functions", 'l');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -118,6 +121,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       if (0 < parser.options.count("repeat"))
       {
         m_repeat_unfold = parser.option_argument_as< int  >("repeat");
+      } 
+
+      m_add_distribution_laws = false;
+      if (0 < parser.options.count("laws"))
+      {
+        m_add_distribution_laws = true;
       } 
     }
 
@@ -192,7 +201,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         std::set< int > h_set_index = m_set_index;
         while (!h_set_index.empty())
           {
-            lpsparunfold lpsparunfold( lps_specification );
+            lpsparunfold lpsparunfold( lps_specification, m_add_distribution_laws );
             int index = *(max_element( h_set_index.begin(), h_set_index.end() ) );
             lps_specification = lpsparunfold.algorithm( index );
             h_set_index.erase( index );

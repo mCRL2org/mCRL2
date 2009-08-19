@@ -41,7 +41,7 @@ class lpsparunfold
       * \param[in] spec which is a valid mCRL2 process specification.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
-    lpsparunfold( mcrl2::lps::specification spec);
+    lpsparunfold( mcrl2::lps::specification spec, bool add_distribution_laws=false);
 
 
     /** \brief  Destructor for lpsparunfold algorithm.
@@ -89,6 +89,9 @@ class lpsparunfold
 
     /// \brief Mapping of the unfold process parameter to a vector process parameters.
     std::map<mcrl2::data::variable, mcrl2::data::variable_vector > proc_par_to_proc_par_inj;
+
+    /// \brief Boolean to indicate if additional distribution laws need to be generated.
+    bool m_add_distribution_laws;
 
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
@@ -222,6 +225,12 @@ class lpsparunfold
         mcrl2::data::function_symbol determine_function, 
         int parameter_at_index, 
         mcrl2::data::function_symbol_vector pi);
+
+    /** \brief Create distribution rules for distribution_functions over case_functions
+    **/
+    mcrl2::data::data_equation create_distribution_law_over_case( 
+        mcrl2::data::function_symbol distribution_function,
+        mcrl2::data::function_symbol case_function); 
 
     static bool char_filter(char c)
     {

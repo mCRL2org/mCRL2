@@ -25,8 +25,9 @@ using namespace mcrl2::data;
 - alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
-lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
+lpsparunfold::lpsparunfold( mcrl2::lps::specification spec, bool add_distribution_laws)
 {
+  m_add_distribution_laws = add_distribution_laws;
   gsDebugMsg("Processing\n");
   m_data_specification = spec.data() ;
   m_lps = spec.process();
@@ -39,23 +40,23 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                              ++i){
     bool processed = false;
     if (i->is_basic_sort()) {
-      gsDebugMsg("\tFound Basic Sort: %s\n", std::string(basic_sort( *i ).name()).c_str() );
+      gsDebugMsg("- Found Basic Sort: %s\n", std::string(basic_sort( *i ).name()).c_str() );
       sort_names.insert( (basic_sort(*i)).name() );
       processed = true;
     }
 
     if (i->is_structured_sort()){
-      gsDebugMsg("\tFound Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
+      gsDebugMsg("- Found Structured Sort: %s\n", pp(structured_sort( *i )).c_str() );
       processed = true;
     }
 
     if (i->is_container_sort()){
-      gsDebugMsg("\tFound Container Sort: %s\n", pp(container_sort( *i )).c_str() );
+      gsDebugMsg("- Found Container Sort: %s\n", pp(container_sort( *i )).c_str() );
       processed = true;
     }
     
     if (!processed){
-      cerr << "Failed to preprocess sort: "<< *i << endl;
+      cerr << "Failed to pre-process sort: "<< *i << endl;
       abort(); 
     }
   };
@@ -68,7 +69,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                                       ++i){
       mapping_and_constructor_names.insert( i -> name() );
     };
-    gsDebugMsg("\tSpecification has %d constructors\n",  mapping_and_constructor_names.size() - size );
+    gsDebugMsg("- Specification has %d constructors\n",  mapping_and_constructor_names.size() - size );
   }
 
   {
@@ -79,7 +80,7 @@ lpsparunfold::lpsparunfold( mcrl2::lps::specification spec)
                                                                   ++i){
       mapping_and_constructor_names.insert( i -> name() );
     };
-    gsDebugMsg("\tSpecification has %d mappings \n", mapping_and_constructor_names.size() - size );
+    gsDebugMsg("- Specification has %d mappings \n", mapping_and_constructor_names.size() - size );
   }
 }
 
@@ -89,9 +90,7 @@ mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort( std::string str
   mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers( sort_names );
   mcrl2::core::identifier_string nstr = generator( str );
-  gsDebugMsg("\t");
-  gsVerboseMsg("Generated a fresh sort for %s\n", string(str).c_str() );
-  gsDebugMsg("Generated sort: \t%s\n", string(nstr).c_str() );
+  gsVerboseMsg("Generated fresh sort \"%s\" for \"%s\"\n", string(nstr).c_str(), str.c_str() );
   sort_names.insert(nstr);
   return basic_sort( std::string(nstr) );
 }
@@ -142,7 +141,7 @@ function_symbol_vector lpsparunfold::new_constructors( mcrl2::data::function_sym
     mapping_and_constructor_names.insert(fresh_name);
 
   }
-  gsDebugMsg("\tCreated %d fresh \" c_ \" constructor(s)\n", set_of_new_sorts.size());
+  gsDebugMsg("- Created %d fresh \" c_ \" constructor(s)\n", set_of_new_sorts.size());
   return set_of_new_sorts;
 }
 
@@ -161,7 +160,7 @@ mcrl2::data::function_symbol lpsparunfold::create_case_function(int k)
 
   fs = function_symbol( idstr , mcrl2::data::function_sort( fsl, m_unfold_process_parameter ));
 
-  gsDebugMsg("\tCreated C map: %s\n", fs.to_string().c_str());
+  gsDebugMsg("- Created C map: %s\n", fs.to_string().c_str());
 
   return fs;
 }
@@ -215,6 +214,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   mcrl2::data::postfix_identifier_generator generator("");
   variable v;
 
+
   std::string fstr = "y";
   std::string cstr = "c";
   std::string dstr = "d";
@@ -239,7 +239,12 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   /* Create Equations */
   int e = 0;
   gsDebugMsg("");
-  gsVerboseMsg("Adding equations\n");
+  if (m_add_distribution_laws)
+  {
+    gsVerboseMsg("Adding equations with additional distribution laws...\n");
+  } else {
+    gsVerboseMsg("Adding equations...\n");
+  }
   for(function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i){
     data_expression_vector args;
     args.push_back(set_of_new_sorts[e]);
@@ -248,7 +253,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     }
     data_expression lhs = application(  case_function , mcrl2::data::data_expression_list(args.begin() , args.end()) );
 
-    gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
+    gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_variables( lhs );
     set< variable > tmp_var = find_variables( vars[e] );
     svars.insert( tmp_var.begin(), tmp_var.end() );
@@ -264,26 +269,25 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     }
     boost::iterator_range<data_expression_vector::const_iterator> arg (args); /* Omslachtig */
     data_expression lhs = application(  case_function , arg );
-    gsDebugMsg("\tAdded \"C_\" equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
+    gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_variables( lhs );
     svars.insert(vars[e] );
     del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, vars[e] ) );
   }
 
   /* Creating Detector equations */
-  std::map< sort_expression, variable_vector > sort_vars;//type_var_list;   /* Mapping for Sort |-> [Variable] */
+  std::map< sort_expression, variable_vector > sort_vars;//type_var_list;    /* Mapping for Sort |-> [Variable] */
   std::map< sort_expression, int             > sort_index;//type_var_count;  /* Mapping for counting the number of unique Sorts of an equation */
 
   e = 0;
   for(function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
   {
-    //type_var_count.clear();
     sort_index.clear();
 
     if( i -> sort().is_basic_sort() )
     {
       data_expression lhs = application( determine_function, *i );
-      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
+      gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > svars = find_variables( lhs );
       set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       svars.insert( tmp_var.begin(), tmp_var.end() );
@@ -310,7 +314,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
            dal.push_back(y);
       }
       data_expression lhs = application( determine_function , mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() ) ) );
-      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
+      gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > svars = find_variables( lhs );
       set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       svars.insert( tmp_var.begin(), tmp_var.end() );
@@ -321,11 +325,28 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
    
       while (!pi.empty() && f < std::distance(dal.begin(), dal.end()) ){
           data_expression lhs = application( pi.front(), mcrl2::data::application( *i, mcrl2::data::data_expression_list( dal.begin(), dal.end() )));
-          gsDebugMsg("\tAdded \"pi\" equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
+          gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, dal[f] )).c_str());
           set< variable > vars = find_variables( lhs );
           set< variable > tmp_var = find_variables( dal[f] );
           vars.insert( tmp_var.begin(), tmp_var.end() );
           del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, dal[f] ) );
+
+          if (m_add_distribution_laws)
+          {
+            /* Add additional distribution laws for pi over if 
+
+               pi(if(b,x,y))=if(b,pi(x),pi(y));
+            */
+            basic_sort bool_sort("Bool");
+            basic_sort if_arg_sort(function_sort(pi.front().sort()).domain().front());
+            function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
+            create_distribution_law_over_case( pi.front(), if_function_symbol );
+            /* Add additional distribution laws for pi over case
+
+               pi(C(e,x1,x2,...))=C(e,pi(x1),pi(x2),...);
+            */
+            create_distribution_law_over_case( pi.front(), case_function );
+          }
           ++f;
           pi.erase(pi.begin());
       }
@@ -335,7 +356,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     {
 
       data_expression lhs = application( determine_function , *i );
-      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
+      gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e] )).c_str());
       set< variable > vars = find_variables( lhs );
       set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       vars.insert( tmp_var.begin(), tmp_var.end() );
@@ -362,19 +383,36 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       {
         lhs = application( determine_function , sort_list::cons_( element_sort, y, sort_list::nil( element_sort ) )) ;
       } else {
-        cerr << "ACCESSING UNINPLEMENTED CONTAINTER SORT" << endl;
+        cerr << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
       }
 
-      gsDebugMsg("\tAdded \"Det\" equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e]  )).c_str());
+      gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, set_of_new_sorts[e]  )).c_str());
       set< variable > vars = find_variables( lhs );
       set< variable > tmp_var = find_variables( set_of_new_sorts[e] );
       vars.insert( tmp_var.begin(), tmp_var.end() );
       del.push_back( data_equation( variable_list(vars.begin(), vars.end()), lhs, set_of_new_sorts[e] ) );
       
     }
-  e++;
+    e++;
   }
 
+  if( m_add_distribution_laws )
+  {
+    /*  Add additional distribution laws for Det over if 
+
+               Det(if(b,x,y))=if(b,Det(x),Det(y));
+    */
+    basic_sort bool_sort("Bool");
+    basic_sort if_arg_sort(function_sort(determine_function.sort()).domain().front());
+    function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
+    del.push_back( create_distribution_law_over_case( determine_function, if_function_symbol ) );
+    
+    /*  Add additional distribution laws for Det over case 
+
+        Det(C(e,x1,x2,...))=C(e,Det(x1),Det(x2),...);
+    */
+    del.push_back( create_distribution_law_over_case( determine_function, case_function ) );
+  } 
   return del;
 }
 
@@ -402,7 +440,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
    }
 
    gsDebugMsg("");
-   gsVerboseMsg("Updating LPS\n");
+   gsVerboseMsg("Updating LPS...\n");
    /* Create new process parameters */
    mcrl2::data::variable_vector new_process_parameters;
    for(mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
@@ -412,14 +450,14 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
      if( std::distance( lps_proc_pars.begin(), i ) == parameter_at_index )
      {
        gsDebugMsg("");
-       gsVerboseMsg("Unfolding parameter %s at index %d\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
+       gsVerboseMsg("Unfolding parameter %s at index %d...\n", std::string(i->name()).c_str(), std::distance( lps_proc_pars.begin(), i ) );
        mcrl2::data::variable_vector process_parameters_injection;
 
        /* Generate fresh process parameter for new Sort */
        mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names );
        process_parameters_injection.push_back( mcrl2::data::variable( idstr , fresh_basic_sort ) );
 
-       gsVerboseMsg("\tCreated process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
+       gsVerboseMsg("- Created process parameter %s of type %s\n", pp( process_parameters_injection.back() ).c_str(), pp( fresh_basic_sort ).c_str());
 
        for(mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
                                                 ; j != affected_constructors.end()
@@ -435,14 +473,14 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
            {
              mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name( unfold_parameter_name, process_parameter_names ); 
              process_parameters_injection.push_back( mcrl2::data::variable( idstr ,  *k  ) );
-             gsVerboseMsg( "\tInjecting process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
+             gsVerboseMsg( "- Injecting process parameter: %s::%s\n", pp( idstr ).c_str(), pp( *k ). c_str() );
            }
            processed = true;
          }
 
          if (j -> sort().is_basic_sort())
          {
-           gsDebugMsg("\tNo processed parameter are injected for basic sort: %s\n", j->to_string().c_str() );
+           gsDebugMsg("- No processed parameter are injected for basic sort: %s\n", j->to_string().c_str() );
            processed = true;
          }
 
@@ -472,7 +510,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
        new_process_parameters.push_back( *i );
      }
    }
-   gsDebugMsg("\tNew LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
+   gsDebugMsg("- New LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str() );
 
   /* Reconstruct summands */
   mcrl2::lps::summand_vector new_summands;
@@ -556,7 +594,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   //
   //update inital process  
   //
-  gsVerboseMsg("Updating initialization\n\n");
+  gsVerboseMsg("Updating initialization...\n\n");
   
   data::assignment_list ass = m_init_process.assignments();
   //Create new left-hand assignment_list 
@@ -711,7 +749,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
 
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector( lps_proc_pars_list.begin(), lps_proc_pars_list.end() );
-  gsDebugMsg( "\tNumber of parameters in LPS: %d\n", lps_proc_pars.size() );
+  gsDebugMsg( "- Number of parameters in LPS: %d\n", lps_proc_pars.size() );
   gsVerboseMsg("Unfolding process parameter at index: %d\n", parameter_at_index );
   if(    (int(lps_proc_pars.size()) <= parameter_at_index) || parameter_at_index < 0  )
   {
@@ -764,6 +802,53 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   return lps_proc_pars[parameter_at_index].sort();
 }
 
+mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case( 
+   mcrl2::data::function_symbol function_for_distribution, 
+   mcrl2::data::function_symbol case_function)
+{
+  assert( function_sort(case_function.sort()).codomain() == function_sort(function_for_distribution.sort()).domain().front() );
+
+  mcrl2::data::postfix_identifier_generator generator("");
+  variable_vector variables_used;
+  mcrl2::core::identifier_string istr;
+
+  sort_expression_list case_function_sort_arguments = function_sort(case_function.sort()).domain();
+  for(sort_expression_list::iterator i = case_function_sort_arguments.begin();
+                                     i != case_function_sort_arguments.end();
+                                     ++i)
+  {
+    if (i == case_function_sort_arguments.begin())
+    {
+       istr = generator( "b" );
+    }  else {
+       istr = generator( "d" );
+    }
+    variable v(istr, *i );
+    variables_used.push_back( v );
+  }
+
+  data_expression lhs( application( function_for_distribution, application( case_function, variables_used ) ) );
+  data_expression_vector rw_data_expressions;
+  sort_expression_vector rw_sort_expressions;
+  for(variable_vector::iterator i = variables_used.begin();
+                                i != variables_used.end();
+                                ++i )
+  {
+    if( i == variables_used.begin() )
+    {
+      rw_data_expressions.push_back( *i );
+      rw_sort_expressions.push_back( i->sort() );
+    } else {
+      rw_data_expressions.push_back( application( function_for_distribution, *i ) );
+      rw_sort_expressions.push_back( function_sort(function_for_distribution.sort()).codomain() );
+    }
+  }
+
+  application rhs (  function_symbol( case_function.name(), function_sort(rw_sort_expressions,function_sort(function_for_distribution.sort()).codomain() )), rw_data_expressions);
+  
+  gsVerboseMsg("- Added distribution law for \"%s\" over \"%s\": %s\n", pp(function_for_distribution).c_str(), pp(case_function).c_str() , pp(data_equation( lhs,  rhs )).c_str());
+  return data_equation( lhs, rhs );
+}
 
 mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
 {
@@ -799,13 +884,13 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
      new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
      new_init = update_linear_process_initialization(case_function, k, determine_function, parameter_at_index, projection_functions);
   
-    //Reconstruct specification
+    //Reconstruct data specification
     m_data_specification.add_sort( fresh_basic_sort );
     m_data_specification.add_constructors( set_of_new_sorts );
     m_data_specification.add_mapping( determine_function );
     m_data_specification.add_mapping( case_function );
     m_data_specification.add_mappings( projection_functions );
-  
+
     boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
     m_data_specification.add_equations( dev_range );
   }
