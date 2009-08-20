@@ -40,16 +40,17 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/alpha.h"
-#include "mcrl2/lps/specification.h"
+// #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
+#include <mcrl2/lps/constelm.h>
 #include "mcrl2/exception.h"
 
 // atermpp includes
 #include "mcrl2/atermpp/set.h"
 
 //mCRL2 data
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/data_expression.h"
+// #include "mcrl2/data/variable.h"
+// #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
@@ -57,7 +58,8 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/replace.h"
+// #include "mcrl2/data/replace.h"
+// #include "mcrl2/data/data_specification.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
@@ -180,7 +182,7 @@ class objectdatatype
 class specification_basic_type:public boost::noncopyable
 { public:
     action_label_list acts;     /* storage place for actions */
-    variable_list global_variables; /* storage place for free variables occurring
+    atermpp::set < variable > global_variables; /* storage place for free variables occurring
                                    in processes ranging over data */
     variable_list initdatavars; /* storage place for free variables in
                                    init clause */
@@ -224,18 +226,18 @@ class specification_basic_type:public boost::noncopyable
                              const data_specification& ds,
                              const atermpp::set < data::variable > &glob_vars,
                              const t_lin_options &opt):
-                     acts(),global_variables(),data(ds),options(opt),
+                     acts(),global_variables(glob_vars),data(ds),options(opt),
                      timeIsBeingUsed(false)
     { objectIndexTable=ATindexedSetCreate(1024,75);
       stack_operations_list=NULL;
       acts.protect();
       acts=as;
       storeact(acts);
-      global_variables.protect();
-      for(atermpp::set <data::variable>::const_reverse_iterator i=glob_vars.rbegin();
-                     i!=glob_vars.rend(); ++i)
-      { global_variables=push_front(global_variables,*i);
-      }
+      // global_variables.protect();
+      // for(atermpp::set <data::variable>::const_reverse_iterator i=glob_vars.rbegin();
+      //                i!=glob_vars.rend(); ++i)
+      // { global_variables=push_front(global_variables,*i);
+      // }
       procs=ps;
       storeprocs(procs);
       initdatavars.protect();
@@ -268,7 +270,7 @@ class specification_basic_type:public boost::noncopyable
         stack_operations_list=temp;
       }
       acts.unprotect();
-      global_variables.unprotect();
+      // global_variables.unprotect();
       initdatavars.unprotect();
       terminationAction.unprotect();
       terminatedProcId.unprotect();
@@ -3063,7 +3065,7 @@ class specification_basic_type:public boost::noncopyable
                            const stacklisttype &stack)
     { /* first search whether the variable is a free process variable */
 
-      for(variable_list::const_iterator walker=global_variables.begin() ;
+      for(atermpp::set <variable>::const_iterator walker=global_variables.begin() ;
                    walker!=global_variables.end() ; ++walker)
       { if (*walker==var)
         { return var;
@@ -3269,7 +3271,7 @@ class specification_basic_type:public boost::noncopyable
     { if (!options.noglobalvars)
       { const variable newVariable(fresh_name("dc"),s);
         insertvariable(newVariable,true);
-        global_variables=push_front(global_variables,newVariable);
+        global_variables.insert(newVariable);
         return newVariable;
       }
       return representative_generator(data)(s);
@@ -3820,7 +3822,7 @@ class specification_basic_type:public boost::noncopyable
             //store new declarations in return value w
             sortId = sort_struct;
             elementnames = data::convert< data::function_symbol_list >(sort_struct.constructor_functions());
-         }
+          }
         }
 
         enumeratedtype(const enumeratedtype &e)
@@ -3864,6 +3866,7 @@ class specification_basic_type:public boost::noncopyable
 
     function_symbol find_case_function(unsigned int index, const sort_expression sort)
     {
+      std::cerr << "Use case function " << index << "Sort: " << pp(sort) << "\n";
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for(function_symbol_list::const_iterator w=functions.begin();
                   w!=functions.end(); ++w)
@@ -3882,15 +3885,17 @@ class specification_basic_type:public boost::noncopyable
     void define_equations_for_case_function(
                     const unsigned int index,
                     const function_symbol functionname,
-                    const sort_expression sortname)
+                    const sort_expression sort)
     { variable_list vars;
       data_expression_list args;
       data_expression_list xxxterm;
 
-      const variable v1=get_fresh_variable("x",sortname);
+      std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
+
+      const variable v1=get_fresh_variable("x",sort);
       const unsigned int n=enumeratedtypes[index].size;
       for(unsigned int j=0; (j<n); j++)
-      { const variable v=get_fresh_variable("y",sortname);
+      { const variable v=get_fresh_variable("y",sort);
         vars=push_front(vars,v);
         args=push_front(args,data_expression(v));
         xxxterm=push_front(xxxterm,data_expression(v1));
@@ -3918,7 +3923,6 @@ class specification_basic_type:public boost::noncopyable
 
         auxvars=pop_front(auxvars);
       }
-
     }
 
     void create_case_function_on_enumeratedtype(
@@ -3988,11 +3992,11 @@ class specification_basic_type:public boost::noncopyable
           spec.insertvariable(var,true);
 
           for(sort_expression_list::const_iterator w=fsorts.begin(); w!=fsorts.end(); ++w)
-          { spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
+          { spec.create_case_function_on_enumeratedtype(spec.data.normalise(*w),enumeratedtype_index);
           }
 
           for(sort_expression_list::const_iterator w=gsorts.begin(); w!=gsorts.end(); ++w)
-          { spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
+          { spec.create_case_function_on_enumeratedtype(spec.data.normalise(*w),enumeratedtype_index);
           }
 
           spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
@@ -5852,7 +5856,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      for(variable_list::const_iterator p=global_variables.begin();
+      for(atermpp::set<variable>::const_iterator p=global_variables.begin();
                 p!=global_variables.end() ; ++p)
       { if (occursinterm(*p,result))
         { variables=push_front(variables,*p);
@@ -6021,7 +6025,6 @@ class specification_basic_type:public boost::noncopyable
       for (summand_list::const_iterator walker1=sumlist1.begin();
                           walker1!=sumlist1.end(); ++walker1)
       { const summand summand1= *walker1;
-
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
         action_list multiaction1=summand1.actions();
         data_expression actiontime1=summand1.time();
@@ -6258,11 +6261,14 @@ class specification_basic_type:public boost::noncopyable
                        variable_list &pars,
                        assignment_list &init)
     { if (is_process_instance(t))
-      { summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
+      { 
+        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
         long n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
 
+        // Make the bound variables and parameters in this process unique.
+        
         if ((objectdata[n].processstatus==GNF)||
             (objectdata[n].processstatus==pCRL)||
             (objectdata[n].processstatus==GNFalpha)||
@@ -6275,6 +6281,54 @@ class specification_basic_type:public boost::noncopyable
           { t3=make_parameters_and_sum_variables_unique(t3,pars,init);
           }
         }
+
+        // We apply constant elimination on the obtained linear process.
+        // In order to do so, we have to create a complete process specification first, as
+        // this is what the interface of constelm requires.
+
+        linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
+        lps.set_summands(t3);
+        process_initializer initializer(init);
+        std::cerr << "TEMP SPEC " << "\n" << pp(pars) << "\n"
+                          << pp(t3) << "\n" << pp(initializer) << "\n\n";
+ 
+        specification temporary_spec(data,acts,global_variables,lps,initializer);
+
+        constelm_algorithm < rewriter > alg(temporary_spec,rewr,core::gsVerbose);
+        alg.run(true); // Remove constants from the specification, where global variables are
+                       // also instantiated if they exist.
+        // Reconstruct the variables from the temporary specification
+
+        init=temporary_spec.initial_process().assignments();
+        pars=temporary_spec.process().process_parameters();
+        t3=summand_list();
+        for(atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
+                i!=temporary_spec.process().action_summands().end(); ++i)
+        { if (i->condition()!=sort_bool::false_())
+          { t3=push_front(t3,summand_(i->summation_variables(),
+                                    i->condition(),
+                                    false, // Summand is a proper action summand, not a delta summand.
+                                    i->multi_action().actions(),
+                                    i->multi_action().has_time(),
+                                    i->multi_action().time(),
+                                    i->assignments()));
+          }
+        }
+        for(atermpp::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
+                i!=temporary_spec.process().deadlock_summands().end(); ++i)
+        { if (i->condition()!=sort_bool::false_())
+          { t3=push_front(t3,summand_(i->summation_variables(),
+                                    i->condition(),
+                                    true,   // Summand is delta.
+                                    action_list(),
+                                    i->deadlock().has_time(),
+                                    i->deadlock().time(),
+                                    assignment_list()));
+          }
+        }
+        // Now constelm has been applied.
+
+        std::cerr << "RESULTING SUMMANDS " << pp(t3) << " Init " << pp(init) << "  PARS" << pp(pars) << "\n";
         return t3;
       }
 
@@ -6285,7 +6339,8 @@ class specification_basic_type:public boost::noncopyable
                               regular,rename_variables,pars1,init1);
         const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),canterminate,
                               regular,true,pars2,init2);
-        return parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
+        summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
+        return t3;
       }
 
       if (is_hide(t))
@@ -6952,7 +7007,7 @@ class specification_basic_type:public boost::noncopyable
     /********************** SieveProcDataVars ***********************/
   public:
     variable_list SieveProcDataVarsSummands(
-                            const variable_list vars,
+                            const atermpp::set <variable> &vars,
                             const summand_list summands,
                             const variable_list parameters)
     { /* In this routine it is checked which free variables
@@ -6990,7 +7045,7 @@ class specification_basic_type:public boost::noncopyable
 
   public:
     variable_list SieveProcDataVarsAssignments(
-                            const variable_list vars,
+                            const atermpp::set <variable> &vars,
                             const assignment_list assignments,
                             const variable_list parameters)
     { // std::cerr << "INSIEVE: " << pp(vars) << "\n";
