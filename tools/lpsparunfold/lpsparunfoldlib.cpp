@@ -340,12 +340,12 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
             basic_sort bool_sort("Bool");
             basic_sort if_arg_sort(function_sort(pi.front().sort()).domain().front());
             function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
-            create_distribution_law_over_case( pi.front(), if_function_symbol );
+            del.push_back( create_distribution_law_over_case( pi.front(), if_function_symbol ) );
             /* Add additional distribution laws for pi over case
 
                pi(C(e,x1,x2,...))=C(e,pi(x1),pi(x2),...);
             */
-            create_distribution_law_over_case( pi.front(), case_function );
+            del.push_back( create_distribution_law_over_case( pi.front(), case_function ) );
           }
           ++f;
           pi.erase(pi.begin());
