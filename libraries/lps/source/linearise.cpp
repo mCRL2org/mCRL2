@@ -6289,8 +6289,8 @@ class specification_basic_type:public boost::noncopyable
         linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
         lps.set_summands(t3);
         process_initializer initializer(init);
-        std::cerr << "TEMP SPEC " << "\n" << pp(pars) << "\n"
-                          << pp(t3) << "\n" << pp(initializer) << "\n\n";
+        // std::cerr << "TEMP SPEC " << "\n" << pp(pars) << "\n"
+        //                  << pp(t3) << "\n" << pp(initializer) << "\n\n";
  
         specification temporary_spec(data,acts,global_variables,lps,initializer);
 
@@ -6328,7 +6328,7 @@ class specification_basic_type:public boost::noncopyable
         }
         // Now constelm has been applied.
 
-        std::cerr << "RESULTING SUMMANDS " << pp(t3) << " Init " << pp(init) << "  PARS" << pp(pars) << "\n";
+        // std::cerr << "RESULTING SUMMANDS " << pp(t3) << " Init " << pp(init) << "  PARS" << pp(pars) << "\n";
         return t3;
       }
 
