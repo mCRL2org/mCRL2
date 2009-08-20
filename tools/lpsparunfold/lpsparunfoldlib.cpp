@@ -847,7 +847,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   application rhs (  function_symbol( case_function.name(), function_sort(rw_sort_expressions,function_sort(function_for_distribution.sort()).codomain() )), rw_data_expressions);
   
   gsVerboseMsg("- Added distribution law for \"%s\" over \"%s\": %s\n", pp(function_for_distribution).c_str(), pp(case_function).c_str() , pp(data_equation( lhs,  rhs )).c_str());
-  return data_equation( lhs, rhs );
+  return data_equation( variables_used, lhs, rhs );
 }
 
 mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
