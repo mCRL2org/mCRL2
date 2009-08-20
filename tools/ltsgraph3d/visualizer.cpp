@@ -158,6 +158,7 @@ void Visualizer::drawState(State* s)
   for (int i = 12; i < 16; i++)
 	  dumatrix[i] = dumatrix2[i];
   glLoadMatrixf(dumatrix);
+  
   gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glPopMatrix();
 
@@ -429,7 +430,7 @@ void Visualizer::drawArrowHead(double baseLength)
 }
 
 void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
-{
+{/*
   // We are drawing a self loop, so t.to == t.from
   State* s = tr->getFrom();
 
@@ -437,114 +438,19 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double beta = .25 * M_PI;
 
   double xState, yState, zState;
-  double xVirtual, yVirtual;
-
-  double alpha = tr->getControlBeta();
-  double dist = tr->getControlDist();
-
-  xState = s->getX();
-  yState = s->getY();
-  zState = s->getZ();
-
-  xVirtual = xState + cos(alpha) * dist * 200.0f;
-  yVirtual = yState + sin(alpha) * dist * 200.0f;
-
-
-  // Calculate control points of the curve
-  // TODO: Explain
-  double gamma = alpha + beta;
-  double delta = alpha - beta;
-
-  double xFactor = 1;
-  double cosGamma = cos(gamma);
-  double cosDelta = cos(delta);
-  double sinGamma = sin(gamma);
-  double sinDelta = sin(delta);
-
-  if(fabs(cosGamma + cosDelta) > 0.01)
-  {
-    xFactor = (8 *(xVirtual - xState)) / (3 * (cosGamma + cosDelta));
-  }
-  double xControl1 = xState + xFactor * cosGamma;
-  double xControl2 = xState + xFactor * cosDelta;
-  double yControl1;
-  double yControl2;
-
-  if(fabs(sinGamma + sinDelta) <= 0.01)
-  {
-    float additive = tan(beta) * (xControl1 - xState);
-    yControl1 = yState + additive;
-    yControl2 = yState - additive;
-  }
-  else
-  {
-    double yFactor = (8 * (yVirtual - yState)) / (3 * (sinGamma + sinDelta));
-    yControl1 = yState + yFactor * sinGamma;
-    yControl2 = yState + yFactor * sinDelta;
-
-    if(fabs(cosGamma + cosDelta) <= .01)
-    {
-      float additive = tan(beta) * (yControl1 - yState);
-      xControl1 = xState - additive;
-      xControl2 = xState + additive;
-    }
-  }
-
-
-
-  // Normalize points for drawing on glContext
-  xState = (xState / 2000.0f) * (width - rad * 2.0);
-  yState = (yState / 2000.0f) * (height - rad * 2.0);
-
-  xVirtual = (xVirtual / 2000.0f) * (width - rad * 2.0);
-  yVirtual = (yVirtual / 2000.0f) * (height - rad * 2.0);
-
-  xControl1 = (xControl1 / 2000.0f) * (width - rad * 2.0);
-  yControl1 = (yControl1 / 2000.0f) * (height - rad * 2.0);
-
-  xControl2 = (xControl2 / 2000.0f) * (width - rad * 2.0);
-  yControl2 = (yControl2 / 2000.0f) * (height -rad * 2.0);
-
-
-  // Draw cubic Bezier curve through the control points
-  GLdouble ctrlPts[3][2] = {{xState, yState},
-                            {xControl1, yControl1},
-                            {xControl2, yControl2}};
-
-
-  double t, it, b0, b1, b2, b3, x, y;
-  int N = 50; // TODO: Parameterisable
-  glColor3ub(0, 0, 0); // TODO: Parameterisable
-
 
   glBegin(GL_LINE_STRIP);
-    for(int k  = 0; k < N; ++k)
+    while (t <= 1.0)
     {
-      t = static_cast<float>(k) / (N - 1);
-      it = 1.0f - t;
+      double phi = 2 * M_PI * t;
+      double nx = x + rad * cos(phi);
+      double ny = y + rad * sin(phi);
 
-      b0 =      t *  t *  t;
-      b1 = 3 *  t *  t * it;
-      b2 = 3 *  t * it * it;
-      b3 =     it * it * it;
+      glVertex2d(nx, ny);
 
-
-      x = b0 * ctrlPts[0][0] +
-          b1 * ctrlPts[1][0] +
-          b2 * ctrlPts[2][0] +
-          b3 * ctrlPts[0][0];
-
-
-      y = b0 * ctrlPts[0][1] +
-          b1 * ctrlPts[1][1] +
-          b2 * ctrlPts[2][1] +
-          b3 * ctrlPts[0][1];
-
-      glVertex3d(x, y, zState);
+      t += step;
     }
   glEnd();
-
-
 
   if(showHandles)
   {
@@ -592,7 +498,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   glTranslatef(0.0f,  rad * 2, 0.0f);
   glRotatef(-90 - ang, 0.0f, 0.0f, 1.0f);
   glTranslatef(-xState, -yState, 0.0f);
-}
+*/}
 
 void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 {
@@ -623,6 +529,7 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 	for (int i = 12; i < 16; i++)
 		dumatrix[i] = dumatrix2[i];
 	glLoadMatrixf(dumatrix);
+	
 
     if(selecting) {
       glPushName(IDS::LABEL);
@@ -666,6 +573,7 @@ void Visualizer::drawStateText(State* s)
   for (int i = 12; i < 16; i++)
 	  dumatrix[i] = dumatrix2[i];
   glLoadMatrixf(dumatrix);
+  
 
   double xDif = -dumatrix[12];
   double yDif = -dumatrix[13];
@@ -758,9 +666,10 @@ void Visualizer::drawCoorSystem()
 	glDisable(GL_DEPTH_TEST);
 	cmvm[12] = 0;
 	cmvm[13] = 0;
-	cmvm[14] = 0;
+	cmvm[14] = -1;
 	cmvm[15] = 1;
 	glLoadMatrixf(cmvm); 
+	
 	glBegin(GL_LINES);
 	  glColor3ub(255, 0, 0);
 	  glVertex3f(0.0f, 0.0f, 0.0f);

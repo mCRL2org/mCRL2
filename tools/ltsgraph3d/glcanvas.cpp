@@ -152,6 +152,7 @@ void GLCanvas::display()
 	glEnable(GL_COLOR_MATERIAL);
 
 	glLoadMatrixf(currentModelviewMatrix);
+	
 
     double pS = getPixelSize();
 
@@ -341,12 +342,16 @@ void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
 }
 void GLCanvas::onMouseDblClck(wxMouseEvent& /*evt */)
 {
-	lookX=0;
-	lookY=0;
-	lookZ=0;
 	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	glLoadIdentity();
 	glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	glPopMatrix();
+	currentModelviewMatrix[12] = -lookX;
+	currentModelviewMatrix[13] = -lookY;
+	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+	currentModelviewMatrix[15] = 1;
+	
 }
 void GLCanvas::onMouseWhl(wxMouseEvent& event)
 {
@@ -457,7 +462,7 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
-    glFlush();
+    
 
     hits = glRenderMode(GL_RENDER);
 
