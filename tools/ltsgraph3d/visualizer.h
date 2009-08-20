@@ -47,7 +47,7 @@ class Visualizer
     void setCurves(bool value);
     void setTransLabels(bool value);
     void setStateLabels(bool value);
-//	void drawCoorSystem();
+	void drawCoorSystem();
 
     // Getters
     int getRadius() const;

@@ -29,7 +29,7 @@ State::State(unsigned int _value, bool _isInitialState)
   pos.y = 0;
   pos.z = 0;
 
-  colour = *wxWHITE;
+  colour = wxColour(125,125,125);
 }
 
 State::~State()

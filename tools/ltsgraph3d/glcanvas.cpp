@@ -132,8 +132,8 @@ void GLCanvas::display()
 	for ( int i = 0; i < 12; i++)
 		currentModelviewMatrix[i] = dumtrx2[i];
 
-	currentModelviewMatrix[12] = lookX;
-	currentModelviewMatrix[13] = lookY;
+	currentModelviewMatrix[12] = -lookX;
+	currentModelviewMatrix[13] = -lookY;
 	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
 	currentModelviewMatrix[15] = 1;
 
@@ -141,18 +141,15 @@ void GLCanvas::display()
 	xl = 0;
 	yl = 0;
 	zl = 100;
-	GLfloat LightAmbient[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
-	GLfloat LightDiffuse[]=		{ 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat LightAmbient[]=		{ 0.2f, 0.2f, 0.2f, 0.2f };
+	GLfloat LightDiffuse[]=		{ 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
 	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);	
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);	
-	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);	
-	GLfloat LightAmbient2[]=		{ 1.0f, 1.0f, 1.0f, 0.0f };
-	GLfloat LightDiffuse2[]=		{ 0.5f, 0.5f, 0.5f, 0.6f };
-	GLfloat LightPosition2[]=	{ xl, yl, zl, 0.0f};
-	glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient2);		
-	glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse2);		
-	glLightfv(GL_LIGHT1, GL_POSITION,LightPosition2);	
+	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
+	
+	glColorMaterial(GL_FRONT,GL_AMBIENT);
+	glEnable(GL_COLOR_MATERIAL);
 
 	glLoadMatrixf(currentModelviewMatrix);
 
@@ -164,7 +161,7 @@ void GLCanvas::display()
       visualizer->visualize(wwidth, wheight, pS, false);
     }
 
-/*	glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
     glLoadIdentity();
 	gluPerspective(45.0f, 1, 0.1f, 10.0f);
@@ -178,14 +175,14 @@ void GLCanvas::display()
 		visualizer->drawCoorSystem();
 	}
 
-	glLoadIdentity();
+	glPopMatrix();
     glViewport(0, 0, width, height);
 
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
-*/
+
+
 
     glFinish();
     SwapBuffers();
@@ -377,9 +374,12 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 	if (event.LeftIsDown())
 	{
 		int width, height;
-		GetClientSize(&width, &height);
-
-	    owner->moveObject(oldX, oldY, newX, newY, width, height);
+		GetClientSize(&width, &height);	
+		float invect[] = {newX - oldX, oldY - newY, 0, 1};
+		float trans[4];
+		Utils::GLUnTransform(currentModelviewMatrix, invect, trans);
+		
+		owner->moveObject(trans[0], trans[1], trans[2]);
 
 		if ((x < newX) && (newX < x + width)) {
 		  oldX = newX;
@@ -566,6 +566,14 @@ void GLCanvas::getMdlvwMtrx(float * mtrx)
 	for (int i = 0; i < 16; i++)
 		mtrx[i] = currentModelviewMatrix[i];
 }
+
+void GLCanvas::getCamPos(double & x, double & y, double & z)
+{
+	x = lookX;
+	y = lookY;
+	z = lookZ + 0.1f + maxDepth / 2;
+}
+
 
 
 

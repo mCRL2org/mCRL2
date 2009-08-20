@@ -198,52 +198,28 @@ void LTSGraph3d::toggleVectorSelected() {
   display();
 }
 
-void LTSGraph3d::moveObject(double ox, double oy, double nx, double ny, double height, double width)
+void LTSGraph3d::moveObject(double diffX, double diffY, double diffZ)
 {
   if(selectedState != NULL)
   {
     double z = selectedState->getZ();
-	oy = height - oy - 1;
-	ny = height - ny - 1;
-//	get2dCoords(ox, oy, z);
-//	get2dCoords(nx, ny, z);
-//	double a, b, c;
-//	glCanvas->getSize(a, b, c);
-//	double rad = visualizer->getRadius() * glCanvas->getPixelSize();
-	double diffX = (nx - ox) * 2000 / width; /// (a - 2 * rad);
-	double diffY = (ny - oy) * 2000 / height; /// (b - 2 * rad);
-	z = 0;
-    selectedState->setX(selectedState->getX() + diffX);
+
+	selectedState->setX(selectedState->getX() + diffX);
     selectedState->setY(selectedState->getY() + diffY);
-	selectedState->setZ(selectedState->getZ() + z);
+	selectedState->setZ(selectedState->getZ() + diffZ);
   }
 
   if(selectedTransition != NULL)
   {
     double prevX, prevY, prevZ;
     selectedTransition->getControl(prevX, prevY, prevZ);
-	oy = height - oy - 1;
-	ny = height - ny - 1;
-//	get2dCoords(ox, oy, prevZ);
-//	get2dCoords(nx, ny, prevZ);
-	double diffX = (nx - ox) / width * 2000;
-	double diffY = (ny - oy) / height * 2000;
-	double z = 0;
-
-    selectedTransition->setControl(prevX + diffX, prevY + diffY, prevZ + z);
+    selectedTransition->setControl(prevX + diffX, prevY + diffY, prevZ + diffZ);
   }
   if(selectedLabel != NULL)
   {
     double prevX, prevY, prevZ;
     selectedLabel->getLabelPos(prevX, prevY, prevZ);
-	oy = height - oy - 1;
-	ny = height - ny - 1;
-//	get2dCoords(ox, oy, prevZ);
-//	get2dCoords(nx, ny, prevZ);
-	double diffX = (nx - ox) / width * 2000;
-	double diffY = (ny - oy) / height * 2000;
-	double z = 0;
-    selectedLabel->setLabelPos(prevX + diffX, prevY + diffY, prevZ + z);
+    selectedLabel->setLabelPos(prevX + diffX, prevY + diffY, prevZ + diffZ);
   }
 }
 
@@ -397,22 +373,9 @@ void LTSGraph3d::getCanvasMdlvwMtrx(float * mtrx)
   glCanvas->getMdlvwMtrx(mtrx);
 }
 
-void LTSGraph3d::get2dCoords(double &mx, double &my, double oz)
+void LTSGraph3d::getCanvasCamPos(double & x, double & y, double & z)
 {
-  double wx, wy, wz, wzn, wzf, a, b, c;
-  GLint viewport[4];
-  GLdouble mvmatrix[16], projmatrix[16];
-  glGetIntegerv(GL_VIEWPORT, viewport);
-  glGetDoublev(GL_MODELVIEW_MATRIX, mvmatrix);
-  glGetDoublev(GL_PROJECTION_MATRIX, projmatrix);
-  double depth = glCanvas->getMaxDepth();
-  double rad = visualizer->getRadius() * glCanvas->getPixelSize();
-  glCanvas->getSize(a, b, c);
-  oz = (oz / 2000.0) * (c - rad * 2);
-  gluUnProject(mx, my, 0, mvmatrix, projmatrix, viewport, &wx, &wy, &wzn);
-  gluUnProject(mx, my, 1, mvmatrix, projmatrix, viewport, &wx, &wy, &wzf);
-  double rate = (wzn - oz) / (wzn - wzf);
-  gluUnProject(mx, my, rate, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-  mx = wx;
-  my = wy;
+	glCanvas->getCamPos(x, y, z);
 }
+
+

@@ -75,7 +75,7 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     bool perform_task(tipi::configuration&);
 #endif
 
-    void moveObject(double ox, double oy, double nx, double ny, double height, double width);
+	void moveObject(double diffX, double diffY, double diffZ);
     void toggleVectorSelected();
     void lockObject();
     void dragObject();
@@ -107,7 +107,8 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     int getRadius() const;
     double getAspectRatio() const;
 	void getCanvasMdlvwMtrx(float * mtrx);
-	void get2dCoords(double & mx, double & my, double oz);
+	void getCanvasCamPos(double & x, double & y, double & z);
+;
 };
 
 

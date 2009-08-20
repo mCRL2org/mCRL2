@@ -64,6 +64,7 @@ class GLCanvas : public wxGLCanvas
     double getAspectRatio() const;
 	double getMaxDepth() const;
 	void getMdlvwMtrx(float * mtrx);
+	void getCamPos(double & x, double & y, double & z);
 
   private:
     LTSGraph3d* owner;

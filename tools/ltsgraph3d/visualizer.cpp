@@ -161,21 +161,20 @@ void Visualizer::drawState(State* s)
   gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glPopMatrix();
 
+
   if(s->isLocked())
   {
-	glEnable(GL_LIGHT1);
     // Grey out a locked state
-    glColor4ub(125, 125, 125, 255);
+    glColor4ub(50, 50, 50, 255);
   }
 
   else
   {
-    glEnable(GL_LIGHT0);
     wxColour c = s->getColour();
-
     glColor4ub(c.Red(), c.Green(), c.Blue(), 255);
   }
 
+  glEnable(GL_LIGHT0);
   glEnable(GL_LIGHTING);
   glPushName(IDS::STATE);
   glPushName(s->getValue());
@@ -187,10 +186,10 @@ void Visualizer::drawState(State* s)
   gluDeleteQuadric(quadratic);
   glDisable(GL_LIGHTING);
   glDisable(GL_LIGHT0);
-  glDisable(GL_LIGHT1);
 
   glPopName();
   glPopName();
+
 }
 
 void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
@@ -648,6 +647,7 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 
 void Visualizer::drawStateText(State* s)
 {
+  glDepthMask(GL_TRUE);
   double x, y, z;
   x = s->getX();
   y = s->getY();
@@ -656,6 +656,7 @@ void Visualizer::drawStateText(State* s)
   x = (x / 2000.0) * (width - rad * 2);
   y = (y / 2000.0) * (height - rad * 2);
   z = (z / 2000.0) * (depth - rad * 2);
+
   glPushMatrix();
   float cmvm[16];
   float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
@@ -666,6 +667,15 @@ void Visualizer::drawStateText(State* s)
 	  dumatrix[i] = dumatrix2[i];
   glLoadMatrixf(dumatrix);
 
+  double xDif = -dumatrix[12];
+  double yDif = -dumatrix[13];
+  double zDif = -dumatrix[14];
+  float tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+  float angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+
+  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+  glRotatef(-angYxz, 1.0f, 0.0f, 0.0f);
+
   // Draw label
   std::stringstream labelstr;
   labelstr << s->getValue();
@@ -673,7 +683,7 @@ void Visualizer::drawStateText(State* s)
   if(showStateLabels) 
   {
 	glColor3ub(0,0,0);
-	fr->draw_text(labelstr.str(), 0, 0, rad, (rad - 2 * pixelSize) / 24.0f,
+	fr->draw_text(labelstr.str(), 0, 0, 1.1 * rad, (rad - 2 * pixelSize) / 24.0f,
 		mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
   }
 
@@ -697,6 +707,8 @@ void Visualizer::drawStateText(State* s)
 
   }
   glPopMatrix();
+  glDepthMask(GL_TRUE);
+
 }
 
 void Visualizer::setPixelSize(double ps)
@@ -736,7 +748,7 @@ void Visualizer::setStateLabels(bool value)
 {
   showStateLabels = value;
 }
-/*
+
 void Visualizer::drawCoorSystem()
 {
 	double length;
@@ -793,4 +805,3 @@ void Visualizer::drawCoorSystem()
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
 }
-*/

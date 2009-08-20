@@ -29,7 +29,7 @@ class Graph
     void addState(State* n);
     size_t getNumberOfStates();
     State* selectState(size_t s);
-    void colourState(size_t s, wxColour colour = *wxWHITE);
+    void colourState(size_t s, wxColour colour = wxColour(125,125,125));
 
     Transition* selectTransition(size_t s, size_t t);
     Transition* selectSelfLoop(size_t s, size_t t);

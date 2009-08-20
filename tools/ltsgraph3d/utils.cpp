@@ -68,6 +68,8 @@ float signum(float v)
   }
 }
 
+//preq: ans is an array of size 16
+
 void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
 {
 	ans[0] = lhs[0] * rhs [0] + lhs[4] * rhs [1] + lhs[8] * rhs [2] + lhs[12] * rhs [3];
@@ -89,6 +91,7 @@ void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
 }
 
 //preq: the axis is on the z = 0 plane.
+//		rotmtrx is an array of size 16
 
 void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx)
 {
@@ -119,6 +122,16 @@ void genRotArbAxs (const float angle, const float x1, const float y1, const floa
 	rotmtrx[15] = 1;
 }
 
+//preq: ans is an array of size 4
+//		lhs is an only rotation matrix
+
+void GLUnTransform (const float lhs[16], const float rhs[4], float* ans)
+{
+	ans[0] = lhs[0] * rhs [0] + lhs[1] * rhs [1] + lhs[2] * rhs [2] + lhs[3] * rhs [3];
+	ans[1] = lhs[4] * rhs [0] + lhs[5] * rhs [1] + lhs[6] * rhs [2] + lhs[7] * rhs [3];
+	ans[2] = lhs[8] * rhs [0] + lhs[9] * rhs [1] + lhs[10] * rhs [2] + lhs[11] * rhs [3];
+	ans[3] = lhs[12] * rhs [0] + lhs[13] * rhs [1] + lhs[14] * rhs [2] + lhs[15] * rhs [3];
+}
 
 
 }
