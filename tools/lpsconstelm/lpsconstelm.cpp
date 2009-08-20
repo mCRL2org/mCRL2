@@ -90,7 +90,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       lps::specification spec;
       spec.load(m_input_filename);
-      mcrl2::data::rewriter R = create_rewriter();
+      mcrl2::data::rewriter R = create_rewriter(spec.data() );
 
       lps::constelm_algorithm<data::rewriter> algorithm(spec, R, mcrl2::core::gsVerbose);
 
