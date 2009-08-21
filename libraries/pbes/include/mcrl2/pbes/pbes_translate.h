@@ -126,49 +126,57 @@ class pbes_translate_algorithm
     {
       using namespace state_formulas::state_frm;
       using atermpp::detail::operator+;
-
+        
+      data::variable_list result;
+        
       if (is_data(f)) {
-        return data::variable_list();
+        // result = data::variable_list();
       } else if (is_true(f)) {
-        return data::variable_list();
+        // result = data::variable_list();
       } else if (is_false(f)) {
-        return data::variable_list();
+        // result = data::variable_list();
       } else if (is_not(f)) {
-        return Par(x, l, arg(f));
+        result = Par(x, l, arg(f));
       } else if (is_and(f)) {
-        return Par(x, l, left(f)) + Par(x, l, right(f));
+        result = Par(x, l, left(f)) + Par(x, l, right(f));
       } else if (is_or(f)) {
-        return Par(x, l, left(f)) + Par(x, l, right(f));
+        result = Par(x, l, left(f)) + Par(x, l, right(f));
       } else if (is_imp(f)) {
-        return Par(x, l, left(f)) + Par(x, l, right(f));
+        result = Par(x, l, left(f)) + Par(x, l, right(f));
       } else if (is_must(f)) {
-        return Par(x, l, arg(f));
+        result = Par(x, l, arg(f));
       } else if (is_may(f)) {
-        return Par(x, l, arg(f));
+        result = Par(x, l, arg(f));
       } else if (is_forall(f)) {
-        return Par(x, l + var(f), arg(f));
+        result = Par(x, l + var(f), arg(f));
       } else if (is_exists(f)) {
-        return Par(x, l + var(f), arg(f));
+        result = Par(x, l + var(f), arg(f));
       } else if (is_variable(f)) {
-        return data::variable_list();
+        result = data::variable_list();
       } else if (is_mu(f) || (is_nu(f))) {
         if (name(f) == x)
         {
-          return l;
+          result = l;
         }
         else
         {
           data::variable_list xf = detail::mu_variables(f);
           state_formulas::state_formula g = arg3(f);
-          return xf + Par(x, l + xf, g);
+          result = Par(x, l + xf, g);
         }
       } else if (is_yaled_timed(f)) {
-        return data::variable_list();
+        result = data::variable_list();
       } else if (is_delay_timed(f)) {
-        return data::variable_list();
+        result = data::variable_list();
       }
-      assert(false);
-      return data::variable_list();
+      else
+      {
+        assert(false);
+      }
+#ifdef MCRL2_PBES_TRANSLATE_PAR_DEBUG
+std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::pp(f) << ") = " << core::pp(result) << std::endl;
+#endif
+      return result;
     }
 
     /// \brief Renames data variables and predicate variables in the formula \p f, and
@@ -950,16 +958,6 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           state_formulas::state_formula g = arg(f);
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
-#ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<hieroooooooooo>"
-          << core::pp(f)
-          << " f0  = " << core::pp(f0)
-          << " xf  = " << core::pp(xf)
-          << " xp  = " << core::pp(xp)
-          << " par = " << core::pp(Par(X, data::variable_list(), f0))
-          << " -> " << core::pp(v)
-          << std::endl;
-#endif
           std::set<std::string> context;
           pbes_expression expr = RHS(f0, g, lps, context);
           pbes_equation e(sigma, v, expr);

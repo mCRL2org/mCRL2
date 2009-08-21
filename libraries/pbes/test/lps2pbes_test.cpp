@@ -196,7 +196,6 @@ void test_lps2pbes3()
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
   std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
-  BOOST_CHECK(false);
   core::garbage_collect();
 }
 
@@ -351,12 +350,12 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_lps2pbes();
-  test_lps2pbes2();
+//  test_lps2pbes();
+//  test_lps2pbes2();
   test_lps2pbes3();
-  test_trivial();
-  test_formulas();
-  test_equal_multi_actions();
+//  test_trivial();
+//  test_formulas();
+//  test_equal_multi_actions();
   //test_directory();
 
   return 0;
