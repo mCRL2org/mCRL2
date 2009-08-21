@@ -3866,7 +3866,7 @@ class specification_basic_type:public boost::noncopyable
 
     function_symbol find_case_function(unsigned int index, const sort_expression sort)
     {
-      std::cerr << "Use case function " << index << "Sort: " << pp(sort) << "\n";
+      // std::cerr << "Use case function " << index << " Sort: " << pp(sort) << "\n";
       const function_symbol_list functions=enumeratedtypes[index].functions;
       for(function_symbol_list::const_iterator w=functions.begin();
                   w!=functions.end(); ++w)
@@ -3890,7 +3890,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list args;
       data_expression_list xxxterm;
 
-      std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
+      // std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
 
       const variable v1=get_fresh_variable("x",sort);
       const unsigned int n=enumeratedtypes[index].size;
