@@ -134,6 +134,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
           {
             for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
             {
+              if (dG.find(*j) != dG.end())
+              {
+                continue;
+              }
               unsigned int index_j = m_index_of[*j];
               const data::variable& d_j = *j;
               data::data_expression g_ij = next_state(s, d_j);
