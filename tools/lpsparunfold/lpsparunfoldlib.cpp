@@ -338,7 +338,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
                pi(if(b,x,y))=if(b,pi(x),pi(y));
             */
             basic_sort bool_sort("Bool");
-            basic_sort if_arg_sort(function_sort(pi.front().sort()).domain().front());
+            sort_expression if_arg_sort(function_sort(pi.front().sort()).domain().front());
             function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
             del.push_back( create_distribution_law_over_case( pi.front(), if_function_symbol ) );
             /* Add additional distribution laws for pi over case
@@ -403,7 +403,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
                Det(if(b,x,y))=if(b,Det(x),Det(y));
     */
     basic_sort bool_sort("Bool");
-    basic_sort if_arg_sort(function_sort(determine_function.sort()).domain().front());
+    sort_expression if_arg_sort(function_sort(determine_function.sort()).domain().front());
     function_symbol if_function_symbol( "if", function_sort( bool_sort, if_arg_sort, if_arg_sort , if_arg_sort ) );
     del.push_back( create_distribution_law_over_case( determine_function, if_function_symbol ) );
     
