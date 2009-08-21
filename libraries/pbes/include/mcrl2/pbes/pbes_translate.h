@@ -99,6 +99,17 @@ namespace detail {
     }
   };
 
+  inline
+  std::string print(const atermpp::vector<pbes_equation>& v)
+  {
+    atermpp::vector<atermpp::aterm_appl> l;
+    for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      l.push_back(pbes_equation_to_aterm(*i));
+    }
+    return core::pp(data::convert<atermpp::aterm_list>(l));
+  }
+
 } // namespace detail
 /// \endcond
 
@@ -594,7 +605,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
 #endif
       return result;
     }
@@ -939,6 +950,16 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
           state_formulas::state_formula g = arg(f);
           fixpoint_symbol sigma = is_mu(f) ? fixpoint_symbol::mu() : fixpoint_symbol::nu();
           propositional_variable v(X, xf + xp + Par(X, data::variable_list(), f0));
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+std::cerr << "\n<hieroooooooooo>"
+          << core::pp(f)
+          << " f0  = " << core::pp(f0)
+          << " xf  = " << core::pp(xf)
+          << " xp  = " << core::pp(xp)
+          << " par = " << core::pp(Par(X, data::variable_list(), f0))
+          << " -> " << core::pp(v)
+          << std::endl;
+#endif
           std::set<std::string> context;
           pbes_expression expr = RHS(f0, g, lps, context);
           pbes_equation e(sigma, v, expr);
@@ -998,7 +1019,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-std::cerr << "\n<Eresult>" << pp(atermpp::aterm_list(result.begin(), result.end())) << std::flush;
+std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
 #endif
       return result;
     }

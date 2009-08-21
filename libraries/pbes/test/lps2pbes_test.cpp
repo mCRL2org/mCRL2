@@ -11,6 +11,8 @@
 
 // Test program for timed lps2pbes.
 
+#define MCRL2_PBES_TRANSLATE_DEBUG
+
 #include <iostream>
 #include <iterator>
 #include <boost/test/minimal.hpp>
@@ -87,6 +89,7 @@ void test_trivial()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
 }
 
 void test_lps2pbes()
@@ -136,6 +139,7 @@ void test_lps2pbes()
   formula = mcf2statefrm(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
 }
 
 void test_lps2pbes2()
@@ -163,6 +167,37 @@ void test_lps2pbes2()
   FORMULA = "nu X. ([true]X && forall d:D. [r1(d)]nu Y. ([!r1(d) && !s4(d)]Y && [r1(d)]false))";
   p = lps2pbes(ABP_SPECIFICATION, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
+}
+
+void test_lps2pbes3()
+{
+  std::string SPEC = "init delta;";
+
+  std::string FORMULA =
+    "(mu X(n:Nat = 0) . true) \n"
+    "&&                       \n"
+    "(mu X(n:Nat = 0) . true) \n"
+    ;   
+
+  // Expected result:
+  //
+  // pbes nu X1 =        
+  //        Y(0) && X(0);
+  //      mu Y(n: Nat) = 
+  //        true;        
+  //      mu X(n: Nat) = 
+  //        true;        
+  //                     
+  // init X1;            
+
+  pbes<> p;
+  bool timed = false;
+  p = lps2pbes(SPEC, FORMULA, timed);
+  BOOST_CHECK(p.is_well_typed());
+  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  BOOST_CHECK(false);
+  core::garbage_collect();
 }
 
 void test_directory(int argc, char** argv)
@@ -221,6 +256,7 @@ void test_directory(int argc, char** argv)
       }
     }
   }
+  core::garbage_collect();
 }
 
 void test_formulas()
@@ -258,6 +294,7 @@ void test_formulas()
     pbes<> result2 = lps2pbes(SPEC, *i, true);
     std::cout << " <untimed>" << std::endl;
   }
+  core::garbage_collect();
 }
 
 action act(std::string name, data_expression_list parameters)
@@ -276,6 +313,7 @@ void test_multi_actions(action_list a, action_list b, data_expression expected_r
   data_expression result = equal_multi_actions(a, b);
   std::cout << mcrl2::core::pp(result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
+  core::garbage_collect();
 }
 
 void test_equal_multi_actions()
@@ -314,15 +352,11 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_lps2pbes();
-  core::garbage_collect();
   test_lps2pbes2();
-  core::garbage_collect();
+  test_lps2pbes3();
   test_trivial();
-  core::garbage_collect();
   test_formulas();
-  core::garbage_collect();
   test_equal_multi_actions();
-  core::garbage_collect();
   //test_directory();
 
   return 0;
