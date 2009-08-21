@@ -70,6 +70,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// as a side effect.
     bool m_instantiate_global_variables;
 
+    /// \brief If true, conditions are not evaluated and assumed to be true.
+    bool m_ignore_conditions;
+
     /// \brief Maps process parameters to their index.
     std::map<data::variable, unsigned int> m_index_of;
 
@@ -80,7 +83,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
     /// \brief Constructor
     constelm_algorithm(specification& spec, const DataRewriter& R_, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose),
+      : 
+        lps::detail::lps_algorithm(spec, verbose),
+        m_instantiate_global_variables(false),
+        m_ignore_conditions(false),
         R(R_)
     {}
 
@@ -90,9 +96,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \param R A data rewriter
     /// \param instantiate_global_variables If true, the algorithm is allowed to instantiate free variables
     /// as a side effect
-    void run(bool instantiate_global_variables = false)
+    void run(bool instantiate_global_variables = false, bool ignore_conditions = false)
     {
       m_instantiate_global_variables = instantiate_global_variables;
+      m_ignore_conditions = ignore_conditions;
       data::data_expression_vector e = data::convert<data::data_expression_vector>(m_spec.initial_process().state());
 
       // optimization: rewrite the initial state vector e
@@ -130,7 +137,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         {
           const action_summand& s = *i;
           const data::data_expression& c_i = s.condition();
-          if (R(c_i, sigma) != data::sort_bool::false_())
+          if (m_ignore_conditions || (R(c_i, sigma) != data::sort_bool::false_()))
           {
             for (std::set<data::variable>::iterator j = G.begin(); j != G.end(); ++j)
             {

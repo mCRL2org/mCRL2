@@ -101,7 +101,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
       }
 
       // apply constelm
-      algorithm.run(m_instantiate_free_variables);
+      algorithm.run(m_instantiate_free_variables, m_ignore_conditions);
 
       // postprocess: remove trivial summands
       if (m_remove_trivial_summands)
