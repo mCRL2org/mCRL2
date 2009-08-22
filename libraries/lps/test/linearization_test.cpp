@@ -620,6 +620,15 @@ const std::string various_case_24=
       "proc P = a(x).P;"
       "init P;";
 
+// The testcase below is designed to test the constant elimination in the lineariser.
+// Typically, x1 and x2 can be eliminated as they are always constant. Care must be
+// taken however that the variable y does not become unbound in the process.
+const std::string various_case_25=
+      "act a:Pos#Pos#Pos;"
+      "    b;"
+      "proc Q(y:Pos)=P(y,1,1)||delta;"
+      "     P(x1,x2,x3:Pos)=a(x1,x2,x3).P(x1,x2,x3+1);"
+      "init Q(2);";
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -649,6 +658,7 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_21);
   spec = linearise(various_case_23);
   spec = linearise(various_case_24);
+  spec = linearise(various_case_25);
   BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
 }
 
