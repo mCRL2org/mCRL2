@@ -2705,6 +2705,7 @@ class specification_basic_type:public boost::noncopyable
         { throw mcrl2::runtime_error("there is something wrong with recursion");
         }
 
+        // std::cerr << "Linearised process " << pp(procIdDecl) << "   := " << pp(t) << "\n";
         objectdata[n].processbody=t;
         objectdata[n].processstatus=GNF;
         return;
@@ -5291,11 +5292,7 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression result=pairwiseMatch(pop_front(l1),pop_front(l2));
 
-      if (result==sort_bool::false_())
-      { return result;
-      }
-
-      return lazy::and_(equal_to(t1,t2),result);
+      return lazy::and_(result,RewriteTerm(equal_to(t1,t2))); 
     }
 
     // a tuple_list contains pairs of actions (multi-action) and the condition under which this action
@@ -5311,6 +5308,8 @@ class specification_basic_type:public boost::noncopyable
                          const tuple_list &L,
                          tuple_list S)
     { /* if firstaction==action(), it should not be added */
+      assert(condition!=sort_bool::false_()); // It makes no sense to add an action with condition false,
+                                              // as it cannot happen anyhow.
       for(unsigned int i=0; i<L.actions.size(); ++i)
       { S.actions.push_back((firstaction!=action())?
                    linInsertActionInMultiActionList(firstaction,L.actions[i]):
@@ -5410,7 +5409,8 @@ class specification_basic_type:public boost::noncopyable
       return action_label();
     }
 
-    bool might_communicate(const action_list m, comm_entry &comm_table,
+    bool might_communicate(const action_list m, 
+                           comm_entry &comm_table,
                            const action_list n,
                            const bool n_is_null)
     { /* this function indicates whether the actions in m
@@ -5563,12 +5563,19 @@ class specification_basic_type:public boost::noncopyable
       /* if n=[a(f)] \oplus o */
       const action firstaction=n.front();
       const action_list o=pop_front(n);
-      const tuple_list T=phi(push_back(m,firstaction),d,w,o,r,r_is_null,comm_table);
-      return addActionCondition(
+      const data_expression condition=pairwiseMatch(d,firstaction.arguments());
+      if (condition==sort_bool::false_())
+      { return phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table);
+      } 
+      else 
+      { 
+        const tuple_list T=phi(push_back(m,firstaction),d,w,o,r,r_is_null,comm_table);
+        return addActionCondition(
                     action(),
-                    pairwiseMatch(d,firstaction.arguments()),
+                    condition,
                     T,
                     phi(m,d,push_back(w,firstaction),o,r,r_is_null,comm_table));
+      }
     }
 
     bool xi(const action_list alpha, const action_list beta, comm_entry &comm_table)
@@ -5673,7 +5680,7 @@ class specification_basic_type:public boost::noncopyable
       { const action_name_multiset source=i->action_name();
         const identifier_string target=i->name();
         if (gsIsNil(i->name()))  // Right hand side of communication is empty. We receive a bad datatype.
-        { throw mcrl2::runtime_error("Right hand side of communication " + pp(source) + " in a comm command cannot be empty");
+        { throw mcrl2::runtime_error("Right hand side of communication " + pp(source) + " in a comm command cannot be empty or tau");
         }
         resultingCommunications=push_front(resultingCommunications,
                    communication_expression(sortActionLabels(source),target));
@@ -5694,7 +5701,7 @@ class specification_basic_type:public boost::noncopyable
                           smmnd);
         }
         else
-        {
+        { 
           const data_expression condition=smmnd.condition();
           const assignment_list nextstate=smmnd.assignments();
 
@@ -6002,15 +6009,12 @@ class specification_basic_type:public boost::noncopyable
                          const summand_list sumlist1,
                          const summand_list sumlist2,
                          const variable_list par1,
-                         const variable_list par2,
                          const variable_list par3,
-                         data_expression_list &rename_list,
                          const variable_list parametersOfsumlist2)
 
     { summand_list resultsumlist;
       variable_list allpars;
 
-      assert(rename_list.empty());
       allpars=par1 + par3;
 
       /* first we enumerate the summands of t1 */
@@ -6230,19 +6234,30 @@ class specification_basic_type:public boost::noncopyable
                          " || " << summands2.size() << " = ";
       }
 
+      // At this point the parameters of pars1 and pars2 are unique, except for
+      // those that are constant in both processes. Constant parameters do not occur
+      // in the initialisation of the processes.
+
       variable_list pars3;
-      variable_list pars2renaming;
+      for(variable_list::const_iterator i=pars2.begin(); i!=pars2.end(); ++i)
+      { if (std::find(pars1.begin(),pars1.end(),*i)==pars1.end())
+        { // *i does not occur in pars1.
+          pars3=push_front(pars3,*i);
+        }
+        else 
+        { assert(!search_free_variable(init1,*i));
+          assert(!search_free_variable(init2,*i));
+        }
+      }
 
-      data_expression_list renaming=construct_renaming(pars1,pars2,pars3,pars2renaming);
-      assert(renaming.empty() && pars2renaming.empty());
-
-      summand_list result=combine_summand_lists(summands1,summands2,pars1,pars2renaming,pars3,renaming,pars2);
+      pars3=reverse(pars3);
+      summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
 
       if (core::gsVerbose)
       { std::cerr << result.size() << " resulting summands.\n";
       }
       pars_result=pars1+pars3;
-      init_result=init1 + substitute_assignmentlist(renaming,pars2renaming,init2,pars2, 1,0);
+      init_result=init1 + init2; 
       return result;
     }
 
@@ -6289,8 +6304,6 @@ class specification_basic_type:public boost::noncopyable
         linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
         lps.set_summands(t3);
         process_initializer initializer(init);
-        // std::cerr << "TEMP SPEC " << "\n" << pp(pars) << "\n"
-        //                  << pp(t3) << "\n" << pp(initializer) << "\n\n";
  
         specification temporary_spec(data,acts,global_variables,lps,initializer);
 
@@ -6301,6 +6314,19 @@ class specification_basic_type:public boost::noncopyable
 
         init=temporary_spec.initial_process().assignments();
         pars=temporary_spec.process().process_parameters();
+       
+        // Add all free variables in objectdata[n].parameters that are not already in the parameter list
+        // and are not global variables to pars
+
+        const std::set <variable> variable_list = data::find_free_variables(args);
+        for(std::set <variable>::const_iterator i=variable_list.begin(); 
+               i!=variable_list.end(); ++i)
+        { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
+              global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
+          { pars=push_front(pars,*i);
+          }
+        }
+
         t3=summand_list();
         for(atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
                 i!=temporary_spec.process().action_summands().end(); ++i)
@@ -6328,7 +6354,6 @@ class specification_basic_type:public boost::noncopyable
         }
         // Now constelm has been applied.
 
-        // std::cerr << "RESULTING SUMMANDS " << pp(t3) << " Init " << pp(init) << "  PARS" << pp(pars) << "\n";
         return t3;
       }
 
@@ -6417,9 +6442,10 @@ class specification_basic_type:public boost::noncopyable
     process_expression alphaconversionterm(
                           const process_expression t,
                           const variable_list parameters,
-                          variable_list &varlist,
-                          data_expression_list &tl)
-    { if (is_choice(t))
+                          const variable_list varlist,         // the variables varlist and tl must not be passed by reference.
+                          const data_expression_list tl)
+    { 
+      if (is_choice(t))
       { return choice(
                   alphaconversionterm(choice(t).left(),parameters,varlist,tl),
                   alphaconversionterm(choice(t).right(),parameters,varlist,tl));
@@ -6470,9 +6496,11 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sum(t))
       { variable_list sumvars=sum(t).bound_variables();
-
-        alphaconvert(sumvars,varlist,tl,variable_list(),parameters);
-        return sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,varlist,tl));
+        variable_list varlist1(varlist);
+        data_expression_list tl1(tl);
+        alphaconvert(sumvars,varlist1,tl1,variable_list(),parameters);
+        const process_expression  result=sum(sumvars,alphaconversionterm(sum(t).operand(), sumvars+parameters,varlist1,tl1));
+        return result;
       }
 
       if (is_process_instance(t))

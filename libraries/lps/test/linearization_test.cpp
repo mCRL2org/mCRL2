@@ -605,10 +605,10 @@ const std::string various_case_21=
       "init X(1);";
 
 const std::string various_case_22=
-      "% This test is expected to fail with a proper error message."
-      "act a;"
-      "proc P = (a || a) . P;"
-      "init P;";
+      "% This test is expected to fail with a proper error message.\n"
+      "act a;\n"
+      "proc P = (a || a) . P;\n"
+      "init P;\n";
 
 const std::string various_case_23=
       "act a,b;"
@@ -630,36 +630,81 @@ const std::string various_case_25=
       "     P(x1,x2,x3:Pos)=a(x1,x2,x3).P(x1,x2,x3+1);"
       "init Q(2);";
 
+// The following testcase exhibits a problem that occurred in the lineariser in 
+// August 2009. The variable m would only be partly renamed, and show up as an
+// undeclared variable in the resulting LPS. The LPS turned out to be not well
+// typed.
+
+const std::string various_case_26=
+      "act  r,s1,s2:Nat;\n"
+      "proc P=sum m:Nat.r(m).((m==1)->s1(m).P+(m==2)->P+P);\n"
+      "init P;\n";
+
+const std::string various_case_27=
+      "act a:Pos;\n"
+      "proc P(id,n:Pos)=(id<n) -> a(n).P(id,n);\n"
+      "     Q(n:Pos)=P(1,n)||P(2,n)||P(3,n);\n"
+      "init Q(15);\n";
+
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
      library. */
   specification spec;
+  std::cerr << "Testcase 1\n";
   spec = linearise(various_case_1);
+  std::cerr << "Testcase 2\n";
   spec = linearise(various_case_2);
+  std::cerr << "Testcase 3\n";
   spec = linearise(various_case_3);
+  std::cerr << "Testcase 4\n";
   spec = linearise(various_case_4);
+  std::cerr << "Testcase 5\n";
   spec = linearise(various_case_5);
+  std::cerr << "Testcase 6\n";
   spec = linearise(various_case_6);
+  std::cerr << "Testcase 7\n";
   spec = linearise(various_case_7);
+  std::cerr << "Testcase 8\n";
   spec = linearise(various_case_8);
+  std::cerr << "Testcase 9\n";
   spec = linearise(various_case_9);
+  std::cerr << "Testcase 10\n";
   spec = linearise(various_case_10);
+  std::cerr << "Testcase 11\n";
   spec = linearise(various_case_11);
+  std::cerr << "Testcase 12\n";
   spec = linearise(various_case_12);
+  std::cerr << "Testcase 13\n";
   spec = linearise(various_case_13);
+  std::cerr << "Testcase 14\n";
   spec = linearise(various_case_14);
+  std::cerr << "Testcase 15\n";
   spec = linearise(various_case_15);
+  std::cerr << "Testcase 16\n";
   spec = linearise(various_case_16);
+  std::cerr << "Testcase 17\n";
   spec = linearise(various_case_17);
+  std::cerr << "Testcase 18\n";
   spec = linearise(various_case_18);
+  std::cerr << "Testcase 19\n";
   spec = linearise(various_case_19);
+  std::cerr << "Testcase 20\n";
   spec = linearise(various_case_20);
+  std::cerr << "Testcase 21\n";
   spec = linearise(various_case_21);
-  spec = linearise(various_case_23);
-  spec = linearise(various_case_24);
-  spec = linearise(various_case_25);
+  std::cerr << "Testcase 22\n";
   BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
+  std::cerr << "Testcase 23\n";
+  spec = linearise(various_case_23);
+  std::cerr << "Testcase 24\n";
+  spec = linearise(various_case_24);
+  std::cerr << "Testcase 25\n";
+  spec = linearise(various_case_25);
+  std::cerr << "Testcase 27\n";
+  spec = linearise(various_case_26);
+  std::cerr << "Testcase 27\n";
+  spec = linearise(various_case_27);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)

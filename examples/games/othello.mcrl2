@@ -85,29 +85,36 @@ map  At:Nat#Nat#Board->Piece;                       % At(x,y,b) give the piece a
      Opposite:Piece->Piece;                         % Give the opposite color of the current piece.
 
 
-var b:Board;
+var b,b':Board;
     r:Row;
     p,p':Piece;
     x,y:Nat;
+    c:Bool;
+    z:Pos;
 eqn Opposite(Red)=White;
     Opposite(White)=Red;
     Opposite(None)=None;
 
     y==1 -> At(x,y,r|>b)=At(x,r);
     1<y && y<=M -> At(x,y,r|>b)=At(x,Int2Nat(y-1),b);
-    y==0 || y>M -> At(x,y,b)=None;
+    y==0 || y>M || x==0 || x>N -> At(x,y,b)=None;
+    At(x,y,if(c,b,b'))=if(c,At(x,y,b),At(x,y,b'));  % This rewrite rule is instrumental to let lpsconstelm reduce the system substantially,
+                                                    % after applying lpsparunfold.
     x==1 -> At(x,p|>r)=p;
     1<x && x<=N -> At(x,p|>r)=At(Int2Nat(x-1),r);
     x==0 || x>N -> At(x,p|>r)=None;
 
-var b:Board;
+    At(x,Put(p,z,r))=if(x==z,p,At(x,r));
+
+var b,b':Board;
     r:Row;
     p,p':Piece;
     x,y:Pos;
     dx,dy:Int;
-    othercolorseen:Bool;
+    c,othercolorseen:Bool;
 eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
     y>1 && y<=M -> Put(p,x,y,r|>b)=r|>Put(p,x,Int2Pos(y-1),b);
+    Put(p,x,y,if(c,b,b'))=if(c,Put(p,x,y,b),Put(p,x,y,b'));  % See comments for distribution of At over if.
     x==1 -> Put(p,x,p'|>r)=p|>r;
     x>1 && x<=N -> Put(p,x,p'|>r)=p'|>Put(p,Int2Pos(x-1),r);
 
@@ -116,15 +123,10 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
     x==N && y==M ->
       Count(p,x,y,b)=if(At(x,y,b)==p,1,0);
 
-    x==N && y<M && At(x,y,b)==p ->
-      Count(p,x,y,b)=1+Count(p,1,y+1,b);
+    x==N && y<M ->
+         Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,1,y+1,b);
 
-    x==N && y<M && At(x,y,b)!=p ->
-      Count(p,x,y,b)=Count(p,1,y+1,b);
-
-    x<N && At(x,y,b)==p -> Count(p,x,y,b)=1+Count(p,x+1,y,b);
-
-    x<N && At(x,y,b)!=p -> Count(p,x,y,b)=Count(p,x+1,y,b);
+    x<N -> Count(p,x,y,b)=if(At(x,y,b)==p,1,0)+Count(p,x+1,y,b);
 
     Enclosing(p,x,y,b)=
        Search(p,x,y,1,0,false,b)||
@@ -136,25 +138,25 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
        Search(p,x,y,0,1,false,b)||
        Search(p,x,y,1,1,false,b);
 
-
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Opposite(p) ->
+    0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M ->
        Search(p,x,y,dx,dy,othercolorseen,b)=
-                 Search(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,true,b);
+         if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==None,false,
+            if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p,othercolorseen,
+                       Search(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,true,b)));
 
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p ->
-       Search(p,x,y,dx,dy,othercolorseen,b)=othercolorseen;
+    !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
+        Search(p,x,y,dx,dy,othercolorseen,b)=false;
 
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==None  ->
-       Search(p,x,y,dx,dy,othercolorseen,b)=false;
+    Swap(p,x,y,dx,dy,b)=if(Search(p,x,y,dx,dy,false,b),Swap1(p,x,y,dx,dy,b),b);
 
-    Search(p,x,y,dx,dy,false,b) -> Swap(p,x,y,dx,dy,b)=Swap1(p,x,y,dx,dy,b);
-    !Search(p,x,y,dx,dy,false,b) -> Swap(p,x,y,dx,dy,b)=b;
+    0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M ->
+      Swap1(p,x,y,dx,dy,b)=
+        if(At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Opposite(p), 
+             Put(p,Int2Pos(x+dx),Int2Pos(y+dy),Swap1(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,b)),
+             b);
 
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==None -> Swap1(p,x,y,dx,dy,b)=b;
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==p -> Swap1(p,x,y,dx,dy,b)=b;
-    At(Int2Nat(x+dx),Int2Nat(y+dy),b)==Opposite(p) ->
-        Swap1(p,x,y,dx,dy,b)=
-          Put(p,Int2Pos(x+dx),Int2Pos(y+dy),Swap1(p,Int2Pos(x+dx),Int2Pos(y+dy),dx,dy,b));
+    !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
+        Swap1(p,x,y,dx,dy,b)=b;
 
     PutPiece(p,x,y,b)=
        Put(p,x,y,
@@ -215,6 +217,6 @@ proc Othello(b:Board,WhiteMoves,RedMoves:Bool)=
 
 
 init Othello([[None,None,None,None],
-              [None, Red ,White,None],
-              [None,White, Red ,None],
+              [None,Red,White,None],
+              [None,White,Red,None],
               [None,None,None,None]],false,true);
