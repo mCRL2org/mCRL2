@@ -2929,9 +2929,9 @@ class specification_basic_type:public boost::noncopyable
 
            structured_sort_constructor_vector constructors(1,sc_push);
            constructors.push_back(sc_emptystack);
-           stacksort=stack_sort_alias;
            //add data declarations for structured sort
            spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
+           stacksort=spec.data.normalise(stack_sort_alias);
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
            empty=sc_emptystack.recogniser_function(stack_sort_alias);
@@ -3993,11 +3993,11 @@ class specification_basic_type:public boost::noncopyable
           spec.insertvariable(var,true);
 
           for(sort_expression_list::const_iterator w=fsorts.begin(); w!=fsorts.end(); ++w)
-          { spec.create_case_function_on_enumeratedtype(spec.data.normalise(*w),enumeratedtype_index);
+          { spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
           }
 
           for(sort_expression_list::const_iterator w=gsorts.begin(); w!=gsorts.end(); ++w)
-          { spec.create_case_function_on_enumeratedtype(spec.data.normalise(*w),enumeratedtype_index);
+          { spec.create_case_function_on_enumeratedtype(*w,enumeratedtype_index);
           }
 
           spec.create_case_function_on_enumeratedtype(sort_bool::bool_(),enumeratedtype_index);
