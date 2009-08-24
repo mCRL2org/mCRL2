@@ -80,6 +80,7 @@ Graph* XMLImporter::importFile(std::string filename)
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
+		s->setZ(z);
         s->setColour(colour);
         s->setParameters(parameters);
         g->addState(s);

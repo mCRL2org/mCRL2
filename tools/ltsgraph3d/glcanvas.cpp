@@ -114,13 +114,9 @@ void GLCanvas::display()
 
 	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
 
-//	gluLookAt(lookX,lookY,lookZ + 0.1f + maxDepth / 2,0,0,lookZ + 0.1f - maxDepth / 2,0,1,0);
-
     glMatrixMode( GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
-
-//	glTranslatef(lookX,lookY,-lookZ - 0.1f - maxDepth / 2);
 
 	float dumtrx[16];
 	Utils::genRotArbAxs(sqrt(rotX * rotX + rotY * rotY), rotX, rotY, 0, dumtrx);

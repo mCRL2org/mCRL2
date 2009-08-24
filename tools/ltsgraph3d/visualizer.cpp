@@ -430,39 +430,181 @@ void Visualizer::drawArrowHead(double baseLength)
 }
 
 void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
-{/*
+{
   // We are drawing a self loop, so t.to == t.from
   State* s = tr->getFrom();
 
   double rad = radius * pixelSize;
-  double beta = .25 * M_PI;
+  double piover4 = .25 * M_PI;
 
   double xState, yState, zState;
+  double xVirtual, yVirtual, zVirtual;
+
+  double alpha = tr->getControlAlpha();
+  double beta = tr->getControlBeta();
+  double gamma = tr->getControlGamma();
+  double dist = tr->getControlDist();
+
+  xState = s->getX();
+  yState = s->getY();
+  zState = s->getZ();
+
+  tr->getControl(xVirtual, yVirtual, zVirtual);
+
+
+  // Calculate control points of the curve
+  // TODO: Explain
+  double zeta = beta + piover4;
+  double delta = beta - piover4;
+
+  double xFactor = 1;
+  double cosZeta = cos(zeta);
+  double cosDelta = cos(delta);
+  double sinZeta = sin(zeta);
+  double sinDelta = sin(delta);
+
+  if(fabs(cosZeta + cosDelta) > 0.01)
+  {
+    xFactor = (8 *(xVirtual - xState)) / (3 * (cosZeta + cosDelta));
+  }
+  double xControl1 = xState + xFactor * cosZeta;
+  double xControl2 = xState + xFactor * cosDelta;
+  double yControl1;
+  double yControl2;
+
+  if(fabs(sinZeta + sinDelta) <= 0.01)
+  {
+    float additive = tan(piover4) * (xControl1 - xState);
+    yControl1 = yState + additive;
+    yControl2 = yState - additive;
+  }
+  else
+  {
+    double yFactor = (8 * (yVirtual - yState)) / (3 * (sinZeta + sinDelta));
+    yControl1 = yState + yFactor * sinZeta;
+    yControl2 = yState + yFactor * sinDelta;
+
+    if(fabs(cosZeta + cosDelta) <= .01)
+    {
+      float additive = tan(piover4) * (yControl1 - yState);
+      xControl1 = xState - additive;
+      xControl2 = xState + additive;
+    }
+  }
+
+  double zControl = zState;
+  if (fabs(sin(gamma)) > 0.01)
+  {
+	  double zFactor = (4 * (zVirtual - zState)) / (3 * (sin(gamma)));
+	  zControl = zState + zFactor * sin(gamma);
+  }
+
+
+
+  // Normalize points for drawing on glContext
+  xState = (xState / 2000.0f) * (width - rad * 2.0);
+  yState = (yState / 2000.0f) * (height - rad * 2.0);
+  zState = (zState / 2000.0f) * (depth - rad * 2.0);
+
+
+  xVirtual = (xVirtual / 2000.0f) * (width - rad * 2.0);
+  yVirtual = (yVirtual / 2000.0f) * (height - rad * 2.0);
+  zVirtual = (zVirtual / 2000.0f) * (depth - rad * 2.0);
+
+  xControl1 = (xControl1 / 2000.0f) * (width - rad * 2.0);
+  yControl1 = (yControl1 / 2000.0f) * (height - rad * 2.0);
+  zControl = (zControl / 2000.0f) * (depth - rad * 2.0);
+
+
+  xControl2 = (xControl2 / 2000.0f) * (width - rad * 2.0);
+  yControl2 = (yControl2 / 2000.0f) * (height - rad * 2.0);
+
+
+
+
+  // Draw cubic Bezier curve through the control points
+  GLdouble ctrlPts[3][3] = {{xState, yState, zState},
+                            {xControl1, yControl1, zControl},
+                            {xControl2, yControl2, zControl}};
+
+
+  double t, it, b0, b1, b2, b3, x, y, z;
+  int N = 50; // TODO: Parameterisable
+  glColor3ub(0, 0, 0); // TODO: Parameterisable
+
 
   glBegin(GL_LINE_STRIP);
-    while (t <= 1.0)
+    for(int k  = 0; k < N; ++k)
     {
-      double phi = 2 * M_PI * t;
-      double nx = x + rad * cos(phi);
-      double ny = y + rad * sin(phi);
+      t = static_cast<float>(k) / (N - 1);
+      it = 1.0f - t;
 
-      glVertex2d(nx, ny);
+      b0 =      t *  t *  t;
+      b1 = 3 *  t *  t * it;
+      b2 = 3 *  t * it * it;
+      b3 =     it * it * it;
 
-      t += step;
+
+      x = b0 * ctrlPts[0][0] +
+          b1 * ctrlPts[1][0] +
+          b2 * ctrlPts[2][0] +
+          b3 * ctrlPts[0][0];
+
+
+      y = b0 * ctrlPts[0][1] +
+          b1 * ctrlPts[1][1] +
+          b2 * ctrlPts[2][1] +
+          b3 * ctrlPts[0][1];
+
+	  
+	  z = b0 * ctrlPts[0][2] +
+          b1 * ctrlPts[1][2] +
+          b2 * ctrlPts[2][2] +
+          b3 * ctrlPts[0][2];
+
+      glVertex3d(x, y, z);
     }
   glEnd();
 
   if(showHandles)
   {
-    glPushName(IDS::SELF_LOOP);
+	glPushName(IDS::SELF_LOOP);
     glPushName(s->getValue());
     glPushName(j);
-    glColor3ub(255, 255, 255);
-    glBegin(GL_QUADS);
-      glVertex2d(xVirtual , yVirtual - .015);
-      glVertex2d(xVirtual - .015, yVirtual);
-      glVertex2d(xVirtual, yVirtual + .015);
-      glVertex2d(xVirtual + .015, yVirtual);
+
+	glColor3ub(255,255,255);
+	glBegin(GL_QUADS);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+
     glEnd();
 
     if(tr->isSelected())
@@ -474,11 +616,53 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
       glColor3ub(0, 0, 0);
     }
 
-    glBegin(GL_LINE_LOOP);
-      glVertex2d(xVirtual , yVirtual - .015);
-      glVertex2d(xVirtual - .015, yVirtual);
-      glVertex2d(xVirtual, yVirtual + .015);
-      glVertex2d(xVirtual + .015, yVirtual);
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+
+    glEnd();
+    glBegin(GL_LINE_STRIP);
+
+      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+
     glEnd();
 
     glPopName();
@@ -488,18 +672,22 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
   glColor3ub(0, 0, 0);
 
-  float ang = atan2(yControl2 - yState, xControl2 - xState)
-              * 180.0f / M_PI;
+  double xDif = xState - xControl2;
+  double yDif = yState - yControl2;
+  double zDif = zState - zControl;
 
-  glTranslatef(xState, yState, 0.0f);
-  glRotatef(90 + ang, 0.0, 0.0, 1.0f);
-  glTranslatef(0.0f, -rad * 2, 0.0f);
+  float tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+  float angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+
+  glPushMatrix();
+  glTranslatef(xState, yState, zState);
+  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+  glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+  glTranslatef(0.0f, 0.0f, -2 * rad);
   drawArrowHead(rad);
-  glTranslatef(0.0f,  rad * 2, 0.0f);
-  glRotatef(-90 - ang, 0.0f, 0.0f, 1.0f);
-  glTranslatef(-xState, -yState, 0.0f);
-*/}
-
+  glPopMatrix();
+}
+	
 void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 {
 	// Draw label near the control point
@@ -532,7 +720,10 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 	
 
     if(selecting) {
-      glPushName(IDS::LABEL);
+	  if(from == tr->getTo())
+		  glPushName(IDS::SELF_LABEL);
+	  else
+		  glPushName(IDS::LABEL);
       glPushName(from->getValue());
       glPushName(trid);
       fr->draw_bounding_box(tr->getLabel(), 0, .025, 0,
@@ -554,7 +745,7 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 
 void Visualizer::drawStateText(State* s)
 {
-  glDepthMask(GL_TRUE);
+  glDepthMask(GL_FALSE);
   double x, y, z;
   x = s->getX();
   y = s->getY();

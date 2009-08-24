@@ -21,8 +21,10 @@ Transition::Transition(State* from, State* to, std::string lbl)
   fromState = from;
   toState = to;
   label = lbl;
-
-  controlAlpha = 0;
+  if(fromState == toState)
+	  controlAlpha = 0.5 * M_PI;
+  else
+	  controlAlpha = 0;
   controlBeta = 0;
   controlGamma = 0;
   controlDist = 0.5;
@@ -57,9 +59,9 @@ void Transition::getControl(double& x, double& y, double& z)
 {
   if(fromState == toState)
   {
-    x = fromState->getX() + controlDist * 200.0f * cos(controlAlpha);
-    y = fromState->getY() + controlDist * 200.0f * cos(controlBeta);
-	z = fromState->getZ() + controlDist * 200.0f * cos(controlGamma);
+    x = fromState->getX() + controlDist * 200.0f * sin(controlAlpha);
+    y = fromState->getY() + controlDist * 200.0f * sin(controlBeta);
+	z = fromState->getZ() + controlDist * 200.0f * sin(controlGamma);
   }
   else
   {

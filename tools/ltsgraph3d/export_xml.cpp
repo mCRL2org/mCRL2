@@ -47,6 +47,7 @@ bool ExporterXML::export_to(wxString _filename)
       state->SetAttribute("isInitial", s->isInitialState());
       state->SetAttribute("x", s->getX());
       state->SetAttribute("y", s->getY());
+	  state->SetAttribute("z", s->getZ());
       state->SetAttribute("red", (int)c.Red());
       state->SetAttribute("green", (int)c.Green());
       state->SetAttribute("blue", (int)c.Blue());
