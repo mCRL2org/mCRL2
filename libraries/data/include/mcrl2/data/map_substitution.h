@@ -18,7 +18,7 @@ namespace mcrl2 {
 
 namespace data {
 
-  template < typename UniqueSortedPairAssociativeContainer,
+  template < typename UniqueSortedPairAssociativeContainer = atermpp::map< variable, data_expression >,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
   class map_substitution;
 
