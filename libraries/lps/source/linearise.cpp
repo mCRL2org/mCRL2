@@ -5105,10 +5105,11 @@ class specification_basic_type:public boost::noncopyable
 
     action rename_action(const rename_expression_list renamings, const action act)
     { const action_label actionId=act.label();
-      const std::string s=actionId.name();
+      const identifier_string s=actionId.name();
       for (rename_expression_list::const_iterator i=renamings.begin(); i!=renamings.end(); ++i)
       { if (s==i->source())
-        { return action(action_label(i->target(),actionId.sorts()),
+        { 
+          return action(action_label(i->target(),actionId.sorts()),
                         act.arguments());
         }
       }
@@ -5117,8 +5118,7 @@ class specification_basic_type:public boost::noncopyable
 
     action_list rename_actions(const rename_expression_list renamings,
                                const action_list multiaction)
-    {
-      action_list resultactionlist;
+    { action_list resultactionlist;
 
       for (action_list::const_iterator walker=multiaction.begin();
                  walker!=multiaction.end(); ++walker)
