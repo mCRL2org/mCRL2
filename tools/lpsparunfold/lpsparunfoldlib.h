@@ -232,6 +232,10 @@ class lpsparunfold
         mcrl2::data::function_symbol distribution_function,
         mcrl2::data::function_symbol case_function); 
 
+    mcrl2::data::data_equation_vector generate_case_functions(
+        mcrl2::data::function_symbol_vector elements_of_new_sorts, 
+        mcrl2::data::function_symbol case_function );
+
     static bool char_filter(char c)
     {
         // Put unwanted characters here
