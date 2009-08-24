@@ -22,6 +22,7 @@ namespace lps {
 namespace detail {
 
   /// \brief Function object for applying a substitution to LPS data types.
+  /// \note explicit static casts are used to work around malfunctioning MSVC overload resolution for anonymous template members
   template < typename Derived >
   struct lps_binding_aware_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::binding_aware_traverser >
   {
@@ -38,7 +39,7 @@ namespace detail {
       increase_bind_count(s.summation_variables());
       (*this)(s.condition());
       (*this)(s.multi_action());
-      (*this)(s.assignments());
+      super::operator()(s.assignments());
       decrease_bind_count(s.summation_variables());
     }
 
@@ -57,9 +58,9 @@ namespace detail {
     void operator()(const linear_process& p)
     {
       increase_bind_count(p.process_parameters());
-      (*this)(p.process_parameters());
-      (*this)(p.action_summands());
-      (*this)(p.deadlock_summands());
+      super::operator()(p.process_parameters());
+      super::operator()(p.action_summands());
+      super::operator()(p.deadlock_summands());
       decrease_bind_count(p.process_parameters());
     }
   };

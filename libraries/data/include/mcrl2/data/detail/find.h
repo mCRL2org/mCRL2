@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen van der Wulp
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -34,7 +34,7 @@ namespace detail {
 
       void operator()(Expression const& e)
       {
-        *m_sink++ = e;
+        m_sink = e;
       }
 
       collect_action(OutputIterator sink) : m_sink(sink)
@@ -56,12 +56,12 @@ namespace detail {
       using super::leave;
 
 #if BOOST_MSVC
-          // Workaround for malfunctioning MSVC 2008 overload resolution
-          template < typename Container >
-          void operator()(Container const& a)
-          {
-            super::operator()(a);
-          }
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
 #endif
 
       void enter(Expression const& e)
@@ -143,12 +143,12 @@ namespace detail {
       using super::leave;
 
 #if BOOST_MSVC
-          // Workaround for malfunctioning MSVC 2008 overload resolution
-          template < typename Container >
-          void operator()(Container const& a)
-          {
-            super::operator()(a);
-          }
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
 #endif
 
       void enter(Expression const& e)
@@ -275,9 +275,18 @@ namespace detail {
         (*this)(a.rhs());
       }
 
-      template < typename Container >
-      bool apply(Container const& container) {
-        (*this)(container);
+#if BOOST_MSVC
+      // Workaround for mal-functioning MSVC 2008 overload resolution
+      template < typename Expression >
+      void operator()(Expression const& a)
+      {
+        super::operator()(a);
+      }
+#endif
+
+      template < typename Expression >
+      bool apply(Expression const& container) {
+        super::operator()(container);
 
         return !super::m_traverse_condition();
       }

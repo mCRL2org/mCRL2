@@ -36,6 +36,8 @@ namespace mcrl2 {
           void leave(Expression const&)
           {}
 
+	  using super::operator();
+
           void operator()(function_symbol const& e)
           {
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(e));
@@ -181,15 +183,6 @@ namespace mcrl2 {
             }
           }
 #endif // NO_TERM_TRAVERSAL
-
-          template < typename Container >
-          void operator()(Container const& container, typename detail::enable_if_container< Container >::type* = 0)
-          {
-            for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-            {
-              static_cast< Derived& >(*this)(*i);
-            }
-          }
       };
 
       template < typename Derived, typename AdaptablePredicate >

@@ -64,7 +64,7 @@ void function_sort_test()
   BOOST_CHECK(!fs.is_structured_sort());
   BOOST_CHECK(!fs.is_container_sort());
   BOOST_CHECK(fs == fs);
-  BOOST_CHECK(fs.domain().size() == s01_range.size());
+  BOOST_CHECK(fs.domain().size() == static_cast< size_t >(s01_range.size()));
 
   // Element wise check
   sort_expression_vector::const_iterator i = s01_range.begin();

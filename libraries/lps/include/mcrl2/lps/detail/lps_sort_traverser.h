@@ -32,7 +32,7 @@ namespace detail {
     /// \brief Traverses an action label
     void operator()(const action_label& l)
     {
-      (*this)(l.sorts());
+      super::operator()(l.sorts());
     }
   };
 

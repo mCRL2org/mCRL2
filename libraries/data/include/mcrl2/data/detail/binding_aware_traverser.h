@@ -67,7 +67,7 @@ namespace mcrl2 {
 
             static_cast< Derived& >(*this).enter(static_cast< data_expression const& >(w));
             static_cast< Derived& >(*this).enter(w);
-            static_cast< Derived& >(*this)(make_assignment_left_hand_side_range(w.declarations()));
+            super::operator()(make_assignment_left_hand_side_range(w.declarations()));
             static_cast< Derived& >(*this)(w.body());
             static_cast< Derived& >(*this).leave(static_cast< data_expression const& >(w));
             static_cast< Derived& >(*this).leave(w);
