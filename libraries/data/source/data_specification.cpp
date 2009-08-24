@@ -493,6 +493,7 @@ namespace mcrl2 {
           basic_sort      name(alias(*i).name());
           sort_expression reference(alias(*i).reference());
 
+          // Apply renaming to right-hand sides
           for (atermpp::map< sort_expression, sort_expression >::iterator j = renamings.begin(); j != renamings.end(); ++j)
           {
             j->second = atermpp::replace(j->second, name, reference);
@@ -501,11 +502,11 @@ namespace mcrl2 {
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
             if (renamings.find(reference) == renamings.end())
-            { // no other name for the sort
-              renamings[name] = atermpp::replace(reference, detail::sort_map_substitution_adapter(renamings));
+            { // primary name for the sort
+              renamings.insert(std::pair< sort_expression, sort_expression >(name, atermpp::replace(reference, detail::sort_map_substitution_adapter(renamings))));
             }
             else
-            {
+            { // other name for the sort
               other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, detail::sort_map_substitution_adapter(renamings))));
             }
           }
