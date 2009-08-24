@@ -201,7 +201,7 @@ namespace data {
       }
 
       /// \brief Returns an iterator that references the expression associated with v or is equal to m_map.end()
-      iterator find(variable_type const& v) const {
+      const_iterator find(variable_type const& v) const {
         return m_map.find(v);
       }
 

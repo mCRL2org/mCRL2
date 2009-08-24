@@ -134,10 +134,10 @@ namespace data {
 
     data_vars = core::type_check_data_vars(data_vars, d);
 
-    // Undo sort renamings for compatibility with type checker
-    data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     if (data_vars == 0)
       throw mcrl2::runtime_error("Error while type checking data variable declarations.");
+    // Undo sort renamings for compatibility with type checker
+    data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
 
     // Check that variables do not have equal names.
@@ -281,10 +281,10 @@ namespace data {
     data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(
                         mcrl2::data::remove_all_system_defined(data_spec)), variables);
-    // Undo sort renamings for compatibility with type checker
-    data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
+    // Undo sort renamings for compatibility with type checker
+    data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
     detail::internal_format_conversion_helper converter(data_spec);
     return converter(data_expression(data_expr));
   }
@@ -360,10 +360,10 @@ namespace data {
     atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
                                                 mcrl2::data::remove_all_system_defined(data_spec));
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
-    // Undo sort renamings for compatibility with type checker
-    sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");
+    // Undo sort renamings for compatibility with type checker
+    sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
     return sort_expression(sort_expr);
   }
 
