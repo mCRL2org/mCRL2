@@ -151,7 +151,7 @@ namespace mcrl2 {
               
               if (core::gsVerbose)
               {
-                std::cerr << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by parameters " << pp(new_pars) << " of sort Bool" << std::endl;
+                std::cerr << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << pp(new_pars) << " of sort Bool" << std::endl;
               }
 
               //Store new parameters in a hastable
@@ -168,7 +168,7 @@ namespace mcrl2 {
 
           if (core::gsDebug)
           {
-            std::cerr << "New process parameters: " << pp(new_parameters) << std::endl;
+            std::cerr << "New process parameter(s): " << pp(new_parameters) << std::endl;
           }
           m_spec.process().process_parameters() = data::convert<data::variable_list>(new_parameters);
         }
@@ -191,6 +191,11 @@ namespace mcrl2 {
               data::variable_vector new_parameters = m_new_parameters[i->lhs()];
               data::data_expression_vector elements = m_enumerated_elements[i->lhs()];
 
+              if(core::gsDebug)
+              {
+                std::cerr << "Found " << new_parameters.size() << " new parameter(s) for parameter " << pp(i->lhs()) << std::endl;
+              }
+
               for(unsigned int j = 0; j < new_parameters.size(); ++j)
               {
                 data::data_expression_vector disjuncts;
@@ -203,7 +208,7 @@ namespace mcrl2 {
                   // TODO: Why doesn't just std::advance(k,count) work?, i.e. if
                   // distance(k, elements.end()) > count, advance(k, count)
                   // entails k != elements.end().
-                  if (std::distance(k, elements.end()) > count)
+                  if (std::distance(k, elements.end()) < count)
                   {
                     k = elements.end();
                   }
@@ -215,13 +220,20 @@ namespace mcrl2 {
                   // Elements that get value true
                   for(int l = 0; l < count && k != elements.end(); ++l)
                   {
-                      disjuncts.push_back(data::equal_to(i->rhs(), *k++));
+                    disjuncts.push_back(data::equal_to(i->rhs(), *k++));
                   }
                 }
                 result.push_back(data::assignment(new_parameters[j], data::lazy::join_or(disjuncts.begin(), disjuncts.end())));
               }
+
             }
           }
+
+          if(core::gsDebug)
+          {
+            std::cerr << "Replaced assignment(s) " << pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
+          }
+
           return data::convert<data::assignment_list>(result);
         }
 
@@ -259,9 +271,19 @@ namespace mcrl2 {
           replace_enumerated_parameters();
 
           // Initial process
+          if(core::gsDebug)
+          {
+            std::cerr << "Updating process initializer" << std::endl;
+          }
+
           m_spec.initial_process() = process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
 
           // Summands
+          if(core::gsDebug)
+          {
+            std::cerr << "Updating summands" << std::endl;
+          }
+
           std::for_each(m_spec.process().action_summands().begin(),
                         m_spec.process().action_summands().end(),
                         boost::bind(&binary_algorithm::update_action_summand, this, _1));
