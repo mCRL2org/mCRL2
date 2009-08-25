@@ -848,9 +848,10 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   }
 
   int e = 1;
-  
+  data_expression_vector sub_args(vars.begin(), vars.end());
   for(int i = 1 ; i < int(function_sort(case_function.sort()).domain().size()) ; ++i){
-    data_expression lhs = application(  case_function , vars ); 
+    sub_args[0] = data_expression(elements_of_new_sorts[i-1]);     
+    data_expression lhs = application(  case_function , sub_args ); 
     gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_variables( lhs );
     set< variable > tmp_var = find_variables( vars[e] );
