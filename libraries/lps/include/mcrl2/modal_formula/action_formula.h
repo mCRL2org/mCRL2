@@ -82,6 +82,253 @@ class action_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<action_formula> action_formula_list;
 
+//--- start generated text ---//
+/// \brief The value true for action formulas
+class true_: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    true_(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActTrue(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    true_()
+      : action_formula(core::detail::gsMakeActTrue())
+    {}
+};
+
+/// \brief The value false for action formulas
+class false_: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    false_(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActFalse(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    false_()
+      : action_formula(core::detail::gsMakeActFalse())
+    {}
+};
+
+/// \brief The not operator for action formulas
+class not_: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    not_(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActNot(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    not_(const action_formula& operand)
+      : action_formula(core::detail::gsMakeActNot(operand))
+    {}
+
+    action_formula operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+
+/// \brief The and operator for action formulas
+class and_: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    and_(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActAnd(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    and_(const action_formula& left, const action_formula& right)
+      : action_formula(core::detail::gsMakeActAnd(left, right))
+    {}
+
+    action_formula left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    action_formula right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The or operator for action formulas
+class or_: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    or_(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActOr(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    or_(const action_formula& left, const action_formula& right)
+      : action_formula(core::detail::gsMakeActOr(left, right))
+    {}
+
+    action_formula left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    action_formula right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The implication operator for action formulas
+class imp: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    imp(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActImp(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    imp(const action_formula& left, const action_formula& right)
+      : action_formula(core::detail::gsMakeActImp(left, right))
+    {}
+
+    action_formula left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    action_formula right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The universal quantification operator for action formulas
+class forall: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    forall(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActForall(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    forall(const data::variable_list& variables, const action_formula& operand)
+      : action_formula(core::detail::gsMakeActForall(variables, operand))
+    {}
+
+    data::variable_list variables() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    action_formula operand() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The existential quantification operator for action formulas
+class exists: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    exists(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActExists(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    exists(const data::variable_list& variables, const action_formula& operand)
+      : action_formula(core::detail::gsMakeActExists(variables, operand))
+    {}
+
+    data::variable_list variables() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    action_formula operand() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The at operator for action formulas
+class at: public action_formula
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    at(atermpp::aterm_appl term)
+      : action_formula(term)
+    {
+      assert(core::detail::check_term_ActAt(m_term));
+    }
+
+    /// \brief Constructor.
+    /// \param left A process expression
+    /// \param d A data expression
+    at(const action_formula& operand, const data::data_expression& time_stamp)
+      : action_formula(core::detail::gsMakeActAt(operand, time_stamp))
+    {}
+
+    action_formula operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    data::data_expression time_stamp() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated text ---//
+
 /// Accessor functions and predicates for action formulas.
 namespace act_frm
 {
