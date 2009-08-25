@@ -9,12 +9,17 @@
 // Implements the decl datatype.
 
 #include "wx.hpp" // precompiled headers
-
 #include "wx/wx.h"
+#include <sstream>
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/identifier_string.h"
 
 #include "decl.h"
 
+using namespace mcrl2::core;
 using namespace grape::libgrape;
+using namespace std;
 
 decl::decl( void )
 {
@@ -48,9 +53,24 @@ bool decl::set_decl( const wxString &p_decl )
   {
     return false;
   }
-  set_name( name );
-  set_type( type );
-  return true;
+
+  istringstream r(string(name.mb_str()).c_str());
+  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
+  if ( a_parsed_identifier )
+  {
+    string a_name = identifier_string(a_parsed_identifier);
+    set_name( wxString(a_name.c_str(), wxConvLocal) );
+
+    istringstream s(string(type.mb_str()).c_str());
+    ATermAppl a_parsed_sort_expr = mcrl2::core::parse_sort_expr(s);
+    if ( a_parsed_sort_expr )
+    {
+      string a_type = PrintPart_CXX(ATerm(a_parsed_sort_expr));
+      set_type( wxString(a_type.c_str(), wxConvLocal) );
+      return true;
+    }
+  }
+  return false;
 }
 
 wxString decl::get_name( void ) const
@@ -112,10 +132,32 @@ bool decl_init::set_decl_init( const wxString &p_decl_init )
   {
     return false;
   }
-  set_name( name );
-  set_type( type );
-  set_value( value );
-  return true;
+
+  istringstream r(string(name.mb_str()).c_str());
+  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
+  if ( a_parsed_identifier )
+  {
+    string a_name = identifier_string(a_parsed_identifier);
+    set_name( wxString(a_name.c_str(), wxConvLocal) );
+
+    istringstream s(string(type.mb_str()).c_str());
+    ATermAppl a_parsed_sort_expr = mcrl2::core::parse_sort_expr(s);
+    if ( a_parsed_sort_expr )
+    {
+      string a_type = PrintPart_CXX(ATerm(a_parsed_sort_expr));
+      set_type( wxString(a_type.c_str(), wxConvLocal) );
+
+      istringstream v(string(value.mb_str()).c_str());
+      ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(v);
+      if ( a_parsed_data_expr )
+      {
+        string a_value = PrintPart_CXX(ATerm(a_parsed_data_expr));
+        set_value( wxString(a_value.c_str(), wxConvLocal) );
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 wxString decl_init::get_value(void) const

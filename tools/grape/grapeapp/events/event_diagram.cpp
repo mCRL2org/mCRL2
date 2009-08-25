@@ -24,6 +24,7 @@
 #include "event_diagram.h"
 
 #include "dialogs/parameterdialog.h"
+#include "dialogs/textdialog.h"
 
 #include "libgrape/xml.h"
 #include "mcrl2gen/mcrl2gen.h"
@@ -260,8 +261,11 @@ bool grape_event_dialog_rename_diagram::Do(void)
   arr_architecture_diagram *arr_arch_dia = m_main_frame->get_grape_specification()->get_architecture_diagram_list();
   arr_process_diagram *arr_proc_dia = m_main_frame->get_grape_specification()->get_process_diagram_list();
 
-  wxString p_new_name = wxGetTextFromUser( _T("Please enter a name for the diagram."), _T("Rename diagram"), m_old_name, m_main_frame );
-  if ( p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
+  grape_text_dlg dialog( _T("Rename diagram"), _T("Please enter a name for the diagram."), m_old_name, false );
+  wxString p_new_name;
+  bool m_pressed_ok = dialog.show_modal( p_new_name );
+//  wxString p_new_name = wxGetTextFromUser( _T("Please enter a name for the diagram."), _T("Rename diagram"), m_old_name, m_main_frame );
+  if ( !m_pressed_ok || p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
   {
     return false;
   }

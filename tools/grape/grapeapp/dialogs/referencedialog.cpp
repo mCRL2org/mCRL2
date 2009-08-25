@@ -49,7 +49,9 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
   wxGridSizer *grid = new wxFlexGridSizer( 2, 3, 0 );
 
   wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Refers to:" ) );
-  grid->Add( text, 0 );
+  wxBoxSizer *text_sizer = new wxBoxSizer( wxHORIZONTAL );
+  text_sizer->Add( text, 0, wxTOP, 3 );
+  grid->Add( text_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5);
 
   // choices
   int selected = wxNOT_FOUND;
@@ -67,7 +69,7 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, archi
     }
   }
   m_combo = new wxComboBox( panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
-  grid->Add( m_combo, 1, wxEXPAND, 0 );
+  grid->Add( m_combo, 1, wxEXPAND | wxTOP | wxRIGHT, 5 );
 
   panel->SetSizer( grid );
 
@@ -89,7 +91,9 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
   // refers to
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
   wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Refers to:" ) );
-  grid->Add( text, 0 );
+  wxBoxSizer *text_sizer = new wxBoxSizer( wxHORIZONTAL );
+  text_sizer->Add( text, 0, wxTOP, 3 );
+  grid->Add( text_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5);
 
   // choices
   int selected = wxNOT_FOUND;
@@ -106,12 +110,12 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
     }
   }
   m_combo = new wxComboBox( panel, GRAPE_COMBO_TEXT, wxEmptyString, wxDefaultPosition, wxDefaultSize, choices, wxCB_SORT );
-  grid->Add( m_combo, 1, wxEXPAND );
+  grid->Add( m_combo, 1, wxEXPAND | wxTOP | wxRIGHT, 5 );
 
   vsizer->Add( grid );
 
   text = new wxStaticText( panel, wxID_ANY, _T("Parameter initializations:") );
-  vsizer->Add( text, 0 );
+  vsizer->Add( text, 0, wxALL, 5 );
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_TEXT, wxDefaultPosition, wxSize(400, 300));
@@ -125,12 +129,12 @@ void grape_reference_dialog::init_for_processes( diagram *p_diagram, list_of_var
     m_grid->SetCellValue(i, 1, parameter_assignment.get_rhs());
   }
 
-  m_grid->SetColSize( 0, 170 );
-  m_grid->SetColSize( 1, 100 );
   m_grid->SetColLabelValue(0, _T("Name"));
   m_grid->SetColLabelValue(1, _T("Value"));
-  m_grid->SetRowLabelSize(30);
-
+  m_grid->SetColSize( 0, 175 );
+  m_grid->SetColSize( 1, 200 );
+  m_grid->SetRowLabelSize(0);
+  m_grid->DisableDragColSize();
   vsizer->Add(m_grid, 1, wxEXPAND );
 
   panel->SetSizer( vsizer );
@@ -154,14 +158,13 @@ void grape_reference_dialog::init( wxPanel *p_panel )
 {
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
-  wnd_sizer->AddSpacer( 3 );
-  wnd_sizer->Add(p_panel, 1, wxEXPAND, 0 );
-  wnd_sizer->AddSpacer( 3 );
+  wnd_sizer->Add(p_panel, 1);
+  wnd_sizer->AddSpacer( 5 );
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
   // realize sizers
   SetSizer(wnd_sizer);
@@ -191,15 +194,6 @@ int grape_reference_dialog::get_diagram_id()
   {
     return wxNOT_FOUND;
   }
-
-/*  if (m_name2diagramid.find( m_combo->GetValue() ) == m_name2diagramid.end())
-  {
-    return wxNOT_FOUND;
-  }
-  else
-  {
-    return m_name2diagramid[ m_combo->GetValue() ];
-  } */
 }
 
 wxString grape_reference_dialog::get_diagram_name() const
@@ -252,6 +246,7 @@ void grape_reference_dialog::change_combobox()
       for ( int i = 0; i < param_count; ++i )
       {
         m_grid->SetCellValue(i, 0, parameter_declarations.Item( i ).get_name());
+        m_grid->SetReadOnly(i, 0);
         m_grid->SetCellValue(i, 1, _T(""));
       }
       start_index = parameter_declarations.GetCount();
@@ -261,6 +256,7 @@ void grape_reference_dialog::change_combobox()
     for ( int i = start_index; i < m_grid->GetNumberRows(); ++i )
     {
       m_grid->SetCellValue(i, 0, _T(""));
+      m_grid->SetReadOnly(i, 0);
       m_grid->SetCellValue(i, 1, _T(""));
     }
     

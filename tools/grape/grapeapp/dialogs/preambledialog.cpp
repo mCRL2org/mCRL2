@@ -43,7 +43,7 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
   if (p_edit_parameter)
   { 
     wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Parameter declarations:") );  
-    vsizer->Add( text, 0, wxEXPAND );
+    vsizer->Add( text, 0, wxALL, 5 );
   }
   
   // create grid
@@ -61,16 +61,16 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
   m_parameter_grid->SetColSize( 1, 170 );
   m_parameter_grid->SetColLabelValue(0, _T("Name"));
   m_parameter_grid->SetColLabelValue(1, _T("Type"));
-  m_parameter_grid->SetRowLabelSize(30);
+  m_parameter_grid->SetRowLabelSize(0);
   vsizer->Add(m_parameter_grid );
 
   
   if (!p_edit_parameter)
   { 
     wxStaticText *text = new wxStaticText( this, wxID_ANY, _T("Local variable declarations:") );
-    vsizer->Add( text, 0, wxEXPAND );
+    vsizer->Add( text, 0, wxALL, 5 );
   }
-  
+
   // create grid
   m_localvar_grid = new wxGrid( this, GRAPE_LOCALVAR_GRID_TEXT, wxDefaultPosition, localvar_grid_size );
   m_localvar_grid->CreateGrid( p_preamble->get_local_variable_declarations_list().GetCount()+1, 3 );
@@ -89,12 +89,14 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
   m_localvar_grid->SetColLabelValue(0, _T("Name"));
   m_localvar_grid->SetColLabelValue(1, _T("Type"));
   m_localvar_grid->SetColLabelValue(2, _T("Value"));
-  m_localvar_grid->SetRowLabelSize(30);
+  m_localvar_grid->SetRowLabelSize(0);
   vsizer->Add( m_localvar_grid );
   
+  vsizer->AddSpacer( 5 );
+
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  vsizer->Add( sizer, 0, wxALIGN_RIGHT );
+  vsizer->Add( sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1 );
   
   // realize sizers
   SetSizer(vsizer);

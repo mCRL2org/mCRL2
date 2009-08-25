@@ -326,7 +326,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_timestamp = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
 
       wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      while (!tt_label_timestamp_text.IsEmpty())
+      if (!tt_label_timestamp_text.IsEmpty())
       {
         new wxXmlNode( xml_terminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
       }
@@ -368,7 +368,7 @@ void grape::libgrape::add_terminating_transition_list( wxXmlNode* p_objectlist, 
       wxXmlNode* xml_terminating_trans_label_condition = new wxXmlNode( xml_terminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
 
       wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      while (!tt_label_condition_text.IsEmpty())
+      if (!tt_label_condition_text.IsEmpty())
       {
         new wxXmlNode( xml_terminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
       }
@@ -456,7 +456,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_timestamp = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "timestamp" ) );
 
       wxString tt_label_timestamp_text = tt_ptr->get_label()->get_timestamp();
-      while (!tt_label_timestamp_text.IsEmpty())
+      if (!tt_label_timestamp_text.IsEmpty())
       {
         new wxXmlNode( xml_nonterminating_trans_label_timestamp, wxXML_TEXT_NODE, _T( "value" ), tt_label_timestamp_text );
       }
@@ -498,7 +498,7 @@ void grape::libgrape::add_nonterminating_transition_list( wxXmlNode* p_objectlis
       wxXmlNode* xml_nonterminating_trans_label_condition = new wxXmlNode( xml_nonterminating_trans_label, wxXML_ELEMENT_NODE, _T( "condition" ) );
 
       wxString tt_label_condition_text = tt_ptr->get_label()->get_condition();
-      while (!tt_label_condition_text.IsEmpty())
+      if (!tt_label_condition_text.IsEmpty())
       {
         new wxXmlNode( xml_nonterminating_trans_label_condition, wxXML_TEXT_NODE, _T( "value" ), tt_label_condition_text );
       }

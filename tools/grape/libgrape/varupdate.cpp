@@ -14,9 +14,16 @@
 
 #include <wx/tokenzr.h>
 
+#include <sstream>
+#include "mcrl2/core/parse.h"
+#include "mcrl2/core/print.h"
+#include "mcrl2/core/identifier_string.h"
+
 #include "varupdate.h"
 
+using namespace mcrl2::core;
 using namespace grape::libgrape;
+using namespace std;
 
 varupdate::varupdate( void )
 {
@@ -48,9 +55,24 @@ bool varupdate::set_varupdate( const wxString &p_varupdate )
   {
     return false;
   }
-  set_lhs( variable_update_lhs );
-  set_rhs( variable_update_rhs );
-  return true;
+
+  istringstream r(string(variable_update_lhs.mb_str()).c_str());
+  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
+  if ( a_parsed_identifier )
+  {
+    string a_name = identifier_string(a_parsed_identifier);
+    set_lhs( wxString(a_name.c_str(), wxConvLocal) );
+
+    istringstream s(string(variable_update_rhs.mb_str()).c_str());
+    ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(s);
+    if ( a_parsed_data_expr )
+    {
+      string a_value = PrintPart_CXX(ATerm(a_parsed_data_expr));
+      set_rhs( wxString(a_value.c_str(), wxConvLocal) );
+      return true;
+    }
+  }
+  return false;
 }
 
 wxString varupdate::get_lhs( void ) const

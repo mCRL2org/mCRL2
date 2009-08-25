@@ -35,19 +35,19 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
   name_sizer->Add( text_name );
   name_sizer->Add( m_name_input );
-  wnd_sizer->Add( name_sizer );
+  wnd_sizer->Add( name_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5 );
   
   wnd_sizer->AddSpacer( 5 );
 
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
   wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 95), 3, radiobox_list );
+  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list );
   m_radiobox->SetSelection(index);
   // create sizer
   wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
   property_sizer->Add( m_radiobox );
-  wnd_sizer->Add( property_sizer );
+  wnd_sizer->Add( property_sizer, 0, wxLEFT | wxRIGHT, 5 );
   
   wnd_sizer->AddSpacer( 5 );
 
@@ -55,7 +55,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   FindWindow(GetAffirmativeId())->Enable( update_validation() );
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
   // realize sizers
   SetSizer(wnd_sizer);

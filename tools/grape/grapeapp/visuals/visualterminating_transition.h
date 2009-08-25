@@ -12,7 +12,7 @@
 #define VISUALS_NTERMINATING_TRANSITION_H
 
 #include "visualobject.h"
-#include <wx/bitmap.h>s
+#include <wx/bitmap.h>
 
 using namespace grape::libgrape;
 

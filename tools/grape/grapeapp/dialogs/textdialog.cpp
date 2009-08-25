@@ -24,7 +24,7 @@ grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_messa
   wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
   wxStaticText *text = new wxStaticText( this, wxID_ANY, p_message );
-  wnd_sizer->Add(text, 0, wxALIGN_TOP, 0 );
+  wnd_sizer->Add(text, 0, wxALIGN_TOP | wxLEFT | wxTOP | wxRIGHT, 5 );
 
   wnd_sizer->AddSpacer( 5 );
 
@@ -37,14 +37,14 @@ grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_messa
   {
     m_input = new wxTextCtrl(this, wxID_ANY, p_initial_text );
   }
-  wnd_sizer->Add(m_input, 0, wxEXPAND, 0);
+  wnd_sizer->Add(m_input, 0, wxEXPAND | wxLEFT | wxRIGHT, 5);
 
   wnd_sizer->AddSpacer( 5 );
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_BOTTOM, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_BOTTOM | wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
   // realize sizers
   SetSizer(wnd_sizer);

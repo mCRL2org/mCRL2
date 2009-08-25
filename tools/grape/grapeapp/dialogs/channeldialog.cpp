@@ -36,7 +36,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
   name_sizer->Add( text_name );
   name_sizer->Add( m_name_input );
-  wnd_sizer->Add( name_sizer );
+  wnd_sizer->Add( name_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5 );
   
   wnd_sizer->AddSpacer( 5 );
   
@@ -51,7 +51,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxSizer *rename_sizer = new wxBoxSizer(wxHORIZONTAL);
   rename_sizer->Add( text_rename );
   rename_sizer->Add( m_rename_input );
-  wnd_sizer->Add( rename_sizer );
+  wnd_sizer->Add( rename_sizer, 0, wxLEFT | wxRIGHT, 5 );
 
   wnd_sizer->AddSpacer( 5 );
         
@@ -60,7 +60,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   if (p_channel.get_channel_communications()->GetCount() == 0)
   { 
     wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 95), 3, radiobox_list );
+    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list );
     m_radiobox->SetSelection(index);
   } 
   else 
@@ -73,7 +73,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   // create sizer
   wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
   property_sizer->Add( m_radiobox );
-  wnd_sizer->Add( property_sizer );
+  wnd_sizer->Add( property_sizer, 0, wxLEFT | wxRIGHT, 5 );
 
   wnd_sizer->AddSpacer( 5 );
   
@@ -81,7 +81,7 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
   FindWindow(GetAffirmativeId())->Enable( update_validation() );
   sizer->Layout();
-  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT, 0);
+  wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
   // realize sizers
   SetSizer(wnd_sizer);

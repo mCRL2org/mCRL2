@@ -112,7 +112,7 @@ grape_event_change_preamble::grape_event_change_preamble( grape_frame *p_main_fr
   m_old_local_var_decls = p_preamble->get_local_variable_declarations();
 
   grape_preamble_dialog dialog( m_preamble, p_edit_parameter );
-  m_ok_pressed = dialog.ShowModal();
+  m_ok_pressed = dialog.ShowModal() == wxID_OK;
 
   if ( m_ok_pressed )
   {
