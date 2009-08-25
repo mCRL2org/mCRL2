@@ -212,8 +212,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         }
       }
 
-      // rewrite the specification with substitution sigma
-      lps::rewrite(m_spec, R, sigma);
+      // N.B. The order of removing constant parameters and rewriting has been reversed
+      // as requested by Jan Friso Groote. This may lead to some gain in performance (13%
+      // in the case of 6x6 othello). Note that due to this change the intermediate result
+      // after removing parameters may not be a valid LPS.
 
       // remove the constant parameters from the specification spec
       std::set<data::variable> constant_parameters;
@@ -222,6 +224,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
         constant_parameters.insert(i->first);
       }
       lps::remove_parameters(m_spec, constant_parameters);
+
+      // rewrite the specification with substitution sigma
+      lps::rewrite(m_spec, R, sigma);
     }
 };
 
