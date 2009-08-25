@@ -62,31 +62,6 @@ namespace mcrl2 {
         /// \param[in] condition The condition of the data_equation.
         /// \param[in] lhs The left hand side of the data_equation.
         /// \param[in] rhs The right hand side of the data_equation.
-        data_equation(const variable_list& variables,
-                      const data_expression& condition,
-                      const data_expression& lhs,
-                      const data_expression& rhs)
-          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  variables, condition, lhs, rhs))
-        {}
-
-        /// \brief Constructor
-        /// \overload for variable list as vector
-        data_equation(const variable_vector& variables,
-                      const data_expression& condition,
-                      const data_expression& lhs,
-                      const data_expression& rhs)
-          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  make_variable_list(variables), condition, lhs, rhs))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] variables The free variables of the data_equation.
-        /// \param[in] condition The condition of the data_equation.
-        /// \param[in] lhs The left hand side of the data_equation.
-        /// \param[in] rhs The right hand side of the data_equation.
-        /// \overload for variable list as iterator range
         template < typename Container >
         data_equation(const Container& variables,
                       const data_expression& condition,
@@ -111,34 +86,6 @@ namespace mcrl2 {
                       typename detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
                   convert< variable_list >(variables), core::detail::gsMakeNil(), lhs, rhs))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] variables The free variables of the data_equation.
-        /// \param[in] lhs The left hand side of the data_equation.
-        /// \param[in] rhs The right hand side of the data_equation.
-        /// \post this is the data equation representing the input, with
-        ///       condition true
-        data_equation(const variable_list& variables,
-                      const data_expression& lhs,
-                      const data_expression& rhs)
-          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  variables, core::detail::gsMakeNil(), lhs, rhs))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] variables The free variables of the data_equation.
-        /// \param[in] lhs The left hand side of the data_equation.
-        /// \param[in] rhs The right hand side of the data_equation.
-        /// \post this is the data equation representing the input, with
-        ///       condition true
-        data_equation(const variable_vector& variables,
-                      const data_expression& lhs,
-                      const data_expression& rhs)
-          : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  variable_list(variables.begin(), variables.end()), core::detail::gsMakeNil(), lhs, rhs))
         {}
 
         /// \brief Constructor

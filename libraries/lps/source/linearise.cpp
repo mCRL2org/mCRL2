@@ -2931,7 +2931,7 @@ class specification_basic_type:public boost::noncopyable
            constructors.push_back(sc_emptystack);
            //add data declarations for structured sort
            spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
-           stacksort=spec.data.normalise(stack_sort_alias);
+           stacksort=stack_sort_alias;
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
            empty=sc_emptystack.recogniser_function(stack_sort_alias);

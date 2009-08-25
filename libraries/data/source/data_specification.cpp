@@ -35,6 +35,7 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/data/detail/dependent_sorts.h"
 
 namespace mcrl2 {
@@ -537,31 +538,34 @@ namespace mcrl2 {
       {
         if (!data::is_alias(*i)) // Compatibility with legacy code
         {
-          add_sort(atermpp::replace(*i, renaming_substitution));
+          add_sort(normalise(*i));
         }
       }
 
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {
-        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
+        function_symbol new_function(i->name(), normalise(i->sort()));
 
         if (!search_constructor(new_function))
         {
-          m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), new_function));
+          m_constructors.insert(sort_to_symbol_map::value_type(new_function.sort().target_sort(), new_function));
         }
       }
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
       {
-        function_symbol new_function(atermpp::replace(*i, renaming_substitution));
+        function_symbol new_function(i->name(), normalise(i->sort()));
 
         if (!search_mapping(new_function))
         {
-          m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), new_function));
+          m_mappings.insert(sort_to_symbol_map::value_type(new_function.sort().target_sort(), new_function));
         }
       }
+
+      detail::internal_format_conversion_helper normaliser(*this);
+
       for (atermpp::term_list_iterator< data_equation > i = term_equations.begin(); i != term_equations.end(); ++i)
       {
-        data_equation new_equation(atermpp::replace(*i, renaming_substitution));
+        data_equation new_equation(normaliser(*i));
 
         if (!search_equation(new_equation))
         {
