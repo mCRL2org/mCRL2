@@ -52,6 +52,8 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
 {
   owner = app;
   displayAllowed = false;
+  panning = false;
+  dispSystem = false;
   lookX = 0;
   lookY = 0;
   lookZ = 0;
@@ -119,7 +121,9 @@ void GLCanvas::display()
     glViewport(0, 0, width, height);
 
 	float dumtrx[16];
-	Utils::genRotArbAxs(sqrt(rotX * rotX + rotY * rotY), rotX, rotY, 0, dumtrx);
+	float rotAngle = sqrt(rotX * rotX + rotY * rotY);
+
+	Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
 	rotX = 0;
 	rotY = 0;
 	float dumtrx2[16];
@@ -148,8 +152,7 @@ void GLCanvas::display()
 	glEnable(GL_COLOR_MATERIAL);
 
 	glLoadMatrixf(currentModelviewMatrix);
-	
-
+	glFinish();
     double pS = getPixelSize();
 
     if (visualizer)
@@ -158,27 +161,23 @@ void GLCanvas::display()
       visualizer->visualize(wwidth, wheight, pS, false);
     }
 
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-    glLoadIdentity();
-	gluPerspective(45.0f, 1, 0.1f, 10.0f);
-	glMatrixMode( GL_MODELVIEW);
-	glPushMatrix();
-    glLoadIdentity();
-	glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
-
-	if (visualizer)
+	if (visualizer && dispSystem)
 	{
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluPerspective(45.0f, 1, 0.1f, 10.0f);
+		glMatrixMode( GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
 		visualizer->drawCoorSystem();
+		glPopMatrix();
+		glViewport(0, 0, width, height);
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
 	}
-
-	glPopMatrix();
-    glViewport(0, 0, width, height);
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-
 
 
     glFinish();
@@ -338,15 +337,6 @@ void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
 }
 void GLCanvas::onMouseDblClck(wxMouseEvent& /*evt */)
 {
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
-	glPopMatrix();
-	currentModelviewMatrix[12] = -lookX;
-	currentModelviewMatrix[13] = -lookY;
-	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
-	currentModelviewMatrix[15] = 1;
 	
 }
 void GLCanvas::onMouseWhl(wxMouseEvent& event)
@@ -391,8 +381,17 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 	}
 	else if (event.MiddleIsDown())
 	{
-		rotX = 0.5f * (oldX - newX);
-	    rotY = -0.5f * (oldY - newY);
+		if(panning)
+		{
+			lookX += 0.01f * (oldX - newX);
+			lookY += -0.01f * (oldY - newY);
+
+		}
+		else
+		{
+			rotX = 0.5f * (oldX - newX);
+			rotY = -0.5f * (oldY - newY);
+		}
 	    oldX = newX;
 	    oldY = newY;
 	}
@@ -575,6 +574,37 @@ void GLCanvas::getCamPos(double & x, double & y, double & z)
 	z = lookZ + 0.1f + maxDepth / 2;
 }
 
+void GLCanvas::ResetAll()
+{
+	ResetRot();
+	ResetPan();
+}
 
+void GLCanvas::ResetRot()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	glPopMatrix();
+	currentModelviewMatrix[12] = -lookX;
+	currentModelviewMatrix[13] = -lookY;
+	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+	currentModelviewMatrix[15] = 1;	
+}
 
+void GLCanvas::ResetPan()
+{
+	lookX = 0;
+	lookY = 0;
+	lookZ = 0;
+}
+void GLCanvas::setMode(bool isPanning)
+{
+	panning = isPanning;
+}
 
+void GLCanvas::showSystem()
+{
+	dispSystem = !dispSystem;
+}

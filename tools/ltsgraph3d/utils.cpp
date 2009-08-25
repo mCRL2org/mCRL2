@@ -95,6 +95,7 @@ void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
 
 void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx)
 {
+	//TODO: make rotation available around the z-axis
 	float angleRad = angle * float(3.1415926535897932384626433832795) / 180.0f;
 	float c = cos(angleRad);
 	float s = sin(angleRad);

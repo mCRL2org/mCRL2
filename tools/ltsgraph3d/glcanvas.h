@@ -60,6 +60,11 @@ class GLCanvas : public wxGLCanvas
 	void onMouseMidDown(wxMouseEvent& event);
 
     void getSize(double & width, double & height, double & depth);
+	void ResetAll();
+	void ResetPan();
+	void ResetRot();
+	void setMode(bool isPanning);
+	void showSystem();
 	double getPixelSize();
     double getAspectRatio() const;
 	double getMaxDepth() const;
@@ -70,6 +75,8 @@ class GLCanvas : public wxGLCanvas
     LTSGraph3d* owner;
     Visualizer* visualizer;
     bool displayAllowed;
+	bool panning;
+	bool dispSystem;
     double scaleFactor, maxDepth;
     int oldX, oldY;
 	float lookX, lookY, lookZ, rotX, rotY;

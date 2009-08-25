@@ -72,6 +72,12 @@ class MainFrame : public wxFrame
     void onImport(wxCommandEvent& event);
     void onSelect(wxCommandEvent& event);
     void onColour(wxCommandEvent& event);
+	void onResetAll(wxCommandEvent& event);
+	void onResetRot(wxCommandEvent& event);
+	void onResetPan(wxCommandEvent& event);
+	void onRotate(wxCommandEvent& event);
+	void onPan(wxCommandEvent& event);
+	void onShowSystem(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()
 };

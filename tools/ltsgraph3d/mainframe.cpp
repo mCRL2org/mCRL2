@@ -45,6 +45,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(myID_TOOL_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
+  EVT_MENU(myID_ROTATE, MainFrame::onRotate)
+  EVT_MENU(myID_PAN, MainFrame::onPan)
+  EVT_MENU(myID_RESET_ALL, MainFrame::onResetAll)
+  EVT_MENU(myID_RESET_ROTATE, MainFrame::onResetRot)
+  EVT_MENU(myID_RESET_PAN, MainFrame::onResetPan)
+  EVT_MENU(myID_SHOW_SYSTEM, MainFrame::onShowSystem)
 END_EVENT_TABLE()
 
 
@@ -84,10 +90,22 @@ void MainFrame::setupMenuBar()
 
   fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph3d."));
 
+  // View menu
+  wxMenu* viewMenu = new wxMenu;
+  viewMenu->Append(myID_RESET_ALL, wxT("&Reset viewpoint \tF2"), wxT("Resets any panning and rotations done."));
+  viewMenu->Append(myID_RESET_ROTATE, wxT("&Reset rotations \tCTRL-r"), wxT("Resets any ratations done"));
+  viewMenu->Append(myID_RESET_PAN, wxT("Reset p&annings \tCTRL-a"), wxT("Resets and panning done"));
+  viewMenu->AppendSeparator();
+  viewMenu->AppendRadioItem(myID_ROTATE, wxT("&Rotation mode \tR"), wxT("Middle mouse button rotates the model"));
+  viewMenu->AppendRadioItem(myID_PAN, wxT("P&anning mode \tA"), wxT("Middle mouse button pans the model"));
+  viewMenu->AppendSeparator();
+  viewMenu->Append(myID_SHOW_SYSTEM, wxT("Display coor&dinate system \tD"), wxT("Displays a coordinate system at the left below corner of the window."));
+
+
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
-  toolsMenu->AppendRadioItem(
-    myID_TOOL_SELECT,wxT("&Select\tS"),wxT("Select tool"));
+  toolsMenu->AppendRadioItem(myID_TOOL_SELECT,
+	  wxT("&Select\tS"),wxT("Select tool"));
   toolsMenu->AppendRadioItem(myID_COLOUR,
     wxT("&Colour\tC"),wxT("Colouring tool"));
   toolsMenu->AppendSeparator();
@@ -110,6 +128,7 @@ void MainFrame::setupMenuBar()
 
 
   menuBar->Append(fileMenu, wxT("&File"));
+  menuBar->Append(viewMenu, wxT("&View"));
   menuBar->Append(toolsMenu, wxT("&Tools"));
   menuBar->Append(helpMenu, wxT("&Help"));
 
@@ -326,3 +345,38 @@ void MainFrame::setLTSInfo(int is, int ns, int nt, int nl)
   SetTitle(title);
 }
 
+void MainFrame::onResetAll(wxCommandEvent& /*evt*/)
+{
+	glCanvas->ResetAll();
+	glCanvas->display();
+}
+
+void MainFrame::onResetRot(wxCommandEvent& /*evt*/)
+{
+	glCanvas->ResetRot();
+	glCanvas->display();
+}
+
+void MainFrame::onResetPan(wxCommandEvent& /*evt*/)
+{
+	glCanvas->ResetPan();
+	glCanvas->display();
+}
+
+void MainFrame::onRotate(wxCommandEvent& /*evt*/)
+{
+	glCanvas->setMode(false);
+	glCanvas->display();
+}
+
+void MainFrame::onPan(wxCommandEvent& /*evt*/)
+{
+	glCanvas->setMode(true);
+	glCanvas->display();
+}
+
+void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
+{
+	glCanvas->showSystem();
+	glCanvas->display();
+}
