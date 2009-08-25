@@ -838,25 +838,20 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   mcrl2::core::identifier_string istr = generator( fstr );
 
   variable_vector vars;
-  variable lv = variable( istr, m_unfold_process_parameter );
-  for(int i = 0 ; i < int(function_sort(case_function.sort()).domain().size()) ; ++i){
+  //variable lv = variable( istr, m_unfold_process_parameter );
+  boost::iterator_range<sort_expression_list::const_iterator> dom = function_sort(case_function.sort()).domain();
+
+  for( sort_expression_list::const_iterator i = dom.begin(); i != dom.end(); ++i )
+  {
     istr = generator( fstr );
-    variable v( istr, m_unfold_process_parameter );
+    variable v( istr, *i );
     vars.push_back( v );
   }
-  vars.push_back(lv);
 
-  int e = 0;
+  int e = 1;
   
   for(int i = 1 ; i < int(function_sort(case_function.sort()).domain().size()) ; ++i){
-    data_expression_vector args;
-    args.push_back(elements_of_new_sorts[e]);
-    for(int j = 0 ; j < int(function_sort(case_function.sort()).domain().size()-1) ; ++j){
-      args.push_back(vars[ j ]);
-    }
-    data_expression lhs = application(  case_function , mcrl2::data::data_expression_list(args.begin() , args.end()) );
-    
-
+    data_expression lhs = application(  case_function , vars ); 
     gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
     set< variable > svars = find_variables( lhs );
     set< variable > tmp_var = find_variables( vars[e] );
@@ -866,17 +861,16 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   }
 
   {
-    data_expression_vector args;
-    args.push_back( vars[e+1] );
-    for(int j = 1 ; j < int(function_sort(case_function.sort()).domain().size()) ; ++j){
-        args.push_back(vars[ e ]);
-    }
-    boost::iterator_range<data_expression_vector::const_iterator> arg (args); /* Omslachtig */
-    data_expression lhs = application(  case_function , arg );
-    gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars[e] )).c_str());
+    data_expression_vector eq_args;
+
+    eq_args = data_expression_vector(int(function_sort(case_function.sort()).domain().size()) -1 , vars.back());
+    eq_args.insert( eq_args.begin(), vars.front() );
+
+    data_expression lhs = application(  case_function , eq_args );
+    gsVerboseMsg("- Added equation %s\n", pp(data_equation( lhs, vars.back() )).c_str());
     set< variable > svars = find_variables( lhs );
-    svars.insert(vars[e] );
-    del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, vars[e] ) );
+    svars.insert(vars.back() );
+    del.push_back( data_equation( variable_list(svars.begin(), svars.end()), lhs, vars.back() ) );
   }
   return del;
 }
