@@ -30,7 +30,7 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
   wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Parameter:" ) );
   grid->Add( text, 0 );
-  vsizer->Add(grid, wxALL, 5);
+  vsizer->Add(grid, 0, wxALL, 5);
 
   // create grid
   m_grid = new wxGrid( panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
