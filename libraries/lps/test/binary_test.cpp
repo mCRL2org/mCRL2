@@ -247,6 +247,35 @@ void test_case_6()
   BOOST_CHECK(bool_param_count == 2);
 }
 
+// This test case shows a bug where apparently d1 and d2 are mapped to the
+// same boolean value. Test case was provided by Jan Friso Groote along with
+// bug 623.
+void test_bug_623()
+{
+  std::clog << "test bug 623" << std::endl;
+  const std::string text(
+    "sort D;\n"
+    "cons d1,d2:D;\n"
+    "act a:D#D;\n"
+    "proc X(e1,e2:D) = a(e1,e2) . X(d1,d2);\n"
+    "init X(d2,d1);\n"
+  );
+
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1 = s0;
+  binary_algorithm<rewriter>(s1, r).run();
+  action_summand_vector summands1 = s1.process().action_summands();
+  for(action_summand_vector::const_iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    data_expression_list next_state = i->next_state(s1.process().process_parameters());
+    BOOST_CHECK(next_state.size() == 2);
+    BOOST_CHECK(*next_state.begin() != *(++next_state.begin()));
+    std::clog << "erroneous next state " << pp(next_state) << std::endl;
+  }
+
+}
+
 int test_main(int ac, char** av)
 {
   MCRL2_ATERMPP_INIT(ac, av)
@@ -262,6 +291,8 @@ int test_main(int ac, char** av)
   test_case_5();
   core::garbage_collect();
   test_case_6();
+  core::garbage_collect();
+  test_bug_623();
   core::garbage_collect();
 
   return 0;
