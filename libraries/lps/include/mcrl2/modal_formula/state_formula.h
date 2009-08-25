@@ -98,6 +98,8 @@ class state_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of state formulas
 typedef atermpp::term_list<state_formula> state_formula_list;
 
+// TODO: use these classes instead of the functions in the namespace state_frm
+namespace temp {
 //--- start generated text ---//
 /// \brief The value true for state formulas
 class true_: public state_formula
@@ -329,11 +331,11 @@ class must: public state_formula
     /// \brief Constructor.
     /// \param left A process expression
     /// \param d A data expression
-    must(const regular_formula& formula, const state_formula& operand)
+    must(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMust(formula, operand))
     {}
 
-    regular_formula formula() const
+    regular_formulas::regular_formula formula() const
     {
       return atermpp::arg1(*this);
     }
@@ -359,11 +361,11 @@ class may: public state_formula
     /// \brief Constructor.
     /// \param left A process expression
     /// \param d A data expression
-    may(const regular_formula& formula, const state_formula& operand)
+    may(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMay(formula, operand))
     {}
 
-    regular_formula formula() const
+    regular_formulas::regular_formula formula() const
     {
       return atermpp::arg1(*this);
     }
@@ -479,18 +481,18 @@ class variable: public state_formula
     /// \brief Constructor.
     /// \param left A process expression
     /// \param d A data expression
-    variable(const identifier_string& name, const data::data_expression& argument)
-      : state_formula(core::detail::gsMakeStateVar(name, argument))
+    variable(const core::identifier_string& name, const data::data_expression_list& arguments)
+      : state_formula(core::detail::gsMakeStateVar(name, arguments))
     {}
 
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
 
-    data::data_expression argument() const
+    data::data_expression_list arguments() const
     {
-      return atermpp::arg2(*this);
+      return atermpp::list_arg2(*this);
     }
 };
 
@@ -509,11 +511,11 @@ class nu: public state_formula
     /// \brief Constructor.
     /// \param left A process expression
     /// \param d A data expression
-    nu(const identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
+    nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
     {}
 
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
@@ -544,11 +546,11 @@ class mu: public state_formula
     /// \brief Constructor.
     /// \param left A process expression
     /// \param d A data expression
-    mu(const identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
+    mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
     {}
 
-    identifier_string name() const
+    core::identifier_string name() const
     {
       return atermpp::arg1(*this);
     }
@@ -564,6 +566,7 @@ class mu: public state_formula
     }
 };
 //--- end generated text ---//
+} // namespace temp
 
 /// Accessor functions and predicates for state formulas.
 namespace state_frm

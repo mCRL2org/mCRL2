@@ -57,23 +57,23 @@ MEMBER_FUNCTION = '''    TYPE NAME() const
     }'''
 
 STATE_FORMULA_CLASSES = r'''
-StateTrue       | true_()                                                                                                   | The value true for state formulas
-StateFalse      | false_()                                                                                                  | The value false for state formulas
-StateNot        | not_(const state_formula& operand)                                                                        | The not operator for state formulas
-StateAnd        | and_(const state_formula& left, const state_formula& right)                                               | The and operator for state formulas
-StateOr         | or_(const state_formula& left, const state_formula& right)                                                | The or operator for state formulas
-StateImp        | imp(const state_formula& left, const state_formula& right)                                                | The implication operator for state formulas
-StateForall     | forall(const data::variable_list& variables, const state_formula& operand)                                | The universal quantification operator for state formulas
-StateExists     | exists(const data::variable_list& variables, const state_formula& operand)                                | The existential quantification operator for state formulas
-StateMust       | must(const regular_formula& formula, const state_formula& operand)                                        | The must operator for state formulas
-StateMay        | may(const regular_formula& formula, const state_formula& operand)                                         | The may operator for state formulas
-StateYaled      | yaled()                                                                                                   | The yaled operator for state formulas
-StateYaledTimed | yaled_timed(const data::data_expression& time_stamp)                                                      | The timed yaled operator for state formulas
-StateDelay      | delay()                                                                                                   | The delay operator for state formulas      
-StateDelayTimed | delay_timed(const data::data_expression& time_stamp)                                                      | The timed delay operator for state formulas
-StateVar        | variable(const identifier_string& name, const data::data_expression& argument)                            | The state formula variable
-StateNu         | nu(const identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The nu operator for state formulas
-StateMu         | mu(const identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The mu operator for state formulas
+StateTrue       | true_()                                                                                                         | The value true for state formulas
+StateFalse      | false_()                                                                                                        | The value false for state formulas
+StateNot        | not_(const state_formula& operand)                                                                              | The not operator for state formulas
+StateAnd        | and_(const state_formula& left, const state_formula& right)                                                     | The and operator for state formulas
+StateOr         | or_(const state_formula& left, const state_formula& right)                                                      | The or operator for state formulas
+StateImp        | imp(const state_formula& left, const state_formula& right)                                                      | The implication operator for state formulas
+StateForall     | forall(const data::variable_list& variables, const state_formula& operand)                                      | The universal quantification operator for state formulas
+StateExists     | exists(const data::variable_list& variables, const state_formula& operand)                                      | The existential quantification operator for state formulas
+StateMust       | must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            | The must operator for state formulas
+StateMay        | may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             | The may operator for state formulas
+StateYaled      | yaled()                                                                                                         | The yaled operator for state formulas
+StateYaledTimed | yaled_timed(const data::data_expression& time_stamp)                                                            | The timed yaled operator for state formulas
+StateDelay      | delay()                                                                                                         | The delay operator for state formulas      
+StateDelayTimed | delay_timed(const data::data_expression& time_stamp)                                                            | The timed delay operator for state formulas
+StateVar        | variable(const core::identifier_string& name, const data::data_expression_list& arguments)                      | The state formula variable
+StateNu         | nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The nu operator for state formulas
+StateMu         | mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand) | The mu operator for state formulas
 '''
 
 ACTION_FORMULA_CLASSES = '''
