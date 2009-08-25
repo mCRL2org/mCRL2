@@ -93,6 +93,8 @@ class lpsparunfold
     /// \brief Boolean to indicate if additional distribution laws need to be generated.
     bool m_add_distribution_laws;
 
+    mcrl2::data::function_symbol_vector m_additional_mappings;
+
     /** \brief  Generates a fresh basic sort given an string.
       * \param  str a string value. The value is used to generate a fresh
       *         basic sort.

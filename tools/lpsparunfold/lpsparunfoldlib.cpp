@@ -817,6 +817,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   }
  
   mcrl2::data::function_symbol new_case_function = function_symbol( case_function.name(), function_sort(rw_sort_expressions,function_sort(function_for_distribution.sort()).codomain() ));
+  m_additional_mappings.push_back( new_case_function );
 
   /* Generate new case functions for laws */
   application rhs ( new_case_function , rw_data_expressions);
@@ -838,9 +839,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   mcrl2::core::identifier_string istr = generator( fstr );
 
   variable_vector vars;
-  //variable lv = variable( istr, m_unfold_process_parameter );
   boost::iterator_range<sort_expression_list::const_iterator> dom = function_sort(case_function.sort()).domain();
-
   for( sort_expression_list::const_iterator i = dom.begin(); i != dom.end(); ++i )
   {
     istr = generator( fstr );
@@ -914,6 +913,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(int parameter_at_index)
     m_data_specification.add_constructors( elements_of_new_sorts );
     m_data_specification.add_mapping( determine_function );
     m_data_specification.add_mapping( case_function );
+    m_data_specification.add_mappings( m_additional_mappings );
     m_data_specification.add_mappings( projection_functions );
 
     boost::iterator_range<data_equation_vector::const_iterator> dev_range(boost::make_iterator_range( data_equations ) );
