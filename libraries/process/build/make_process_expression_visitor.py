@@ -2,7 +2,7 @@ import re
 import string
 from path import *
 
-TEXT = '''action(const lps::action_label& l, const data::data_expression_list& v) (label, arguments)
+PROCESS_EXPRESSION_TEXT = '''action(const lps::action_label& l, const data::data_expression_list& v) (label, arguments)
 process_instance(const process_identifier pi, const data::data_expression_list& v) (identifier, actual_parameters)
 process_instance_assignment(const process_identifier& pi, const data::assignment_list& v) (identifier, assignments)
 delta() ()
@@ -23,14 +23,37 @@ merge(const process_expression& left, const process_expression& right) (left, ri
 left_merge(const process_expression& left, const process_expression& right) (left, right)
 choice(const process_expression& left, const process_expression& right) (left, right)'''
 
-PROCESS_EXPRESSION_VISITOR_CODE = r'''/// \\brief Visitor class for process expressions.
+PROCESS_EXPRESSION_TERMS = '''
+  action                      Action           
+  process_instance            Process          
+  process_instance_assignment ProcessAssignment
+  delta                       Delta            
+  tau                         Tau              
+  sum                         Sum              
+  block                       Block            
+  hide                        Hide             
+  rename                      Rename           
+  comm                        Comm             
+  allow                       Allow            
+  sync                        Sync             
+  at                          AtTime           
+  seq                         Seq              
+  if_then                     IfThen           
+  if_then_else                IfThenElse       
+  bounded_init                BInit            
+  merge                       Merge            
+  left_merge                  LMerge           
+  choice                      Choice           
+'''
+
+EXPRESSION_VISITOR_CODE = r'''/// \\brief Visitor class for expressions.
 ///
 /// There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
 /// must be overridden to add behavior. If the visit_<node> function returns true,
 /// the recursion is continued in the children of the node.
 template <typename Arg=void>
-struct process_expression_visitor
+struct MYEXPRESSION_visitor
 {
   /// \\brief The type of the additional argument for the recursion
   typedef Arg argument_type;
@@ -44,7 +67,7 @@ struct process_expression_visitor
   };
 
   /// \\brief Destructor.
-  virtual ~process_expression_visitor()
+  virtual ~MYEXPRESSION_visitor()
   { }
 %s
   /// \\brief Visits the nodes of the pbes expression, and calls the corresponding visit_<node>
@@ -52,18 +75,18 @@ struct process_expression_visitor
   /// recursion in this node is stopped.
   /// \param x A term
   /// \param a An additional argument for the recursion
-  void visit(const process_expression& x, Arg& a)
+  void visit(const MYEXPRESSION& x, Arg& a)
   {
 %s
   }
 };
 
-/// \\brief Visitor class for process expressions.
+/// \\brief Visitor class for expressions.
 ///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
 template <>
-struct process_expression_visitor<void>
+struct MYEXPRESSION_visitor<void>
 {
   /// \\brief The type of the additional argument for the recursion
   typedef void argument_type;
@@ -77,60 +100,60 @@ struct process_expression_visitor<void>
   };
 
   /// \\brief Destructor.
-  virtual ~process_expression_visitor()
+  virtual ~MYEXPRESSION_visitor()
   { }
 %s
 
-  /// \\brief Visits the nodes of the process expression and calls the corresponding visit_<node>
+  /// \\brief Visits the nodes of the expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   /// \param x A term
-  void visit(const process_expression& x)
+  void visit(const MYEXPRESSION& x)
   {
 %s
   }
 };
 '''
 
-PROCESS_EXPRESSION_BUILDER_CODE = r'''/// \\brief Modifying visitor class for process expressions.
+EXPRESSION_BUILDER_CODE = r'''/// \\brief Modifying visitor class for expressions.
 ///
 /// During traversal
 /// of the nodes, the expression is rebuilt from scratch.
-/// If a visit_<node> function returns process_expression(), the recursion is continued
+/// If a visit_<node> function returns MYEXPRESSION(), the recursion is continued
 /// in the children of this node, otherwise not.
 /// An arbitrary additional argument may be passed during the recursion.
 template <typename Arg = void>
-struct process_expression_builder
+struct MYEXPRESSION_builder
 {
   /// \\brief The type of the additional argument for the recursion
   typedef Arg argument_type;
 
-  /// \\brief Returns true if the process expression is not equal to process_expression().
+  /// \\brief Returns true if the expression is not equal to MYEXPRESSION().
   /// This is used to determine if the recursion in a node needs to be continued.
-  /// \\param x A process expression
-  /// \\return True if the term is not equal to process_expression()
-  bool is_finished(const process_expression& x)
+  /// \\param x A expression
+  /// \\return True if the term is not equal to MYEXPRESSION()
+  bool is_finished(const MYEXPRESSION& x)
   {
-    return x != process_expression();
+    return x != MYEXPRESSION();
   }
 
   /// \\brief Destructor.
-  virtual ~process_expression_builder()
+  virtual ~MYEXPRESSION_builder()
   { }
 %s
-  /// \\brief Visits the nodes of the process expression, and calls the corresponding visit_<node>
-  /// member functions. If the return value of a visit function equals process_expression(),
+  /// \\brief Visits the nodes of the expression, and calls the corresponding visit_<node>
+  /// member functions. If the return value of a visit function equals MYEXPRESSION(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  /// \\param x A process expression
+  /// \\param x A expression
   /// \\param a An additional argument for the recursion
   /// \\return The visit result
-  process_expression visit(const process_expression& x, Arg& a)
+  MYEXPRESSION visit(const MYEXPRESSION& x, Arg& a)
   {
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
-    process_expression result;
+    MYEXPRESSION result;
 %s
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit result>" << pp(result) << std::endl;
@@ -139,40 +162,40 @@ struct process_expression_builder
   }
 };
 
-/// \\brief Modifying visitor class for process expressions.
+/// \\brief Modifying visitor class for expressions.
 ///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
 template <>
-struct process_expression_builder<void>
+struct MYEXPRESSION_builder<void>
 {
   /// \\brief The type of the additional argument for the recursion
   typedef void argument_type;
 
-  /// \\brief Returns true if the process expression is not equal to process_expression().
+  /// \\brief Returns true if the expression is not equal to MYEXPRESSION().
   /// This is used to determine if the recursion in a node needs to be continued.
-  /// \\param x A process expression
-  /// \\return True if the term is not equal to process_expression()
-  bool is_finished(const process_expression& x)
+  /// \\param x A expression
+  /// \\return True if the term is not equal to MYEXPRESSION()
+  bool is_finished(const MYEXPRESSION& x)
   {
-    return x != process_expression();
+    return x != MYEXPRESSION();
   }
 
   /// \\brief Destructor.
-  virtual ~process_expression_builder()
+  virtual ~MYEXPRESSION_builder()
   { }
 %s
 
-  /// \\brief Visits the nodes of the process expression and calls the corresponding visit_<node>
+  /// \\brief Visits the nodes of the expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   /// \param x A term
-  process_expression visit(const process_expression& x)
+  MYEXPRESSION visit(const MYEXPRESSION& x)
   {
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
-    process_expression result;
+    MYEXPRESSION result;
 %s
 #ifdef MCRL2_PROCESS_EXPRESSION_BUILDER_DEBUG
   std::cerr << "<visit result>" << pp(result) << std::endl;
@@ -182,10 +205,10 @@ struct process_expression_builder<void>
 };
 '''
 
-PROCESS_EXPRESSION_VISITOR_NODE_TEXT = r'''
+EXPRESSION_VISITOR_NODE_TEXT = r'''
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual bool visit_NODE(const process_expression& xARGUMENTSEXTRA_ARG)
+  virtual bool visit_NODE(const MYEXPRESSION& xARGUMENTSEXTRA_ARG)
   {
     return continue_recursion;
   }
@@ -195,12 +218,12 @@ PROCESS_EXPRESSION_VISITOR_NODE_TEXT = r'''
   {}
 '''
 
-PROCESS_EXPRESSION_BUILDER_NODE_TEXT = r'''              
+EXPRESSION_BUILDER_NODE_TEXT = r'''              
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual process_expression visit_NODE(const process_expression& xARGUMENTSEXTRA_ARG)
+  virtual MYEXPRESSION visit_NODE(const MYEXPRESSION& xARGUMENTSEXTRA_ARG)
   {
-    return process_expression();
+    return MYEXPRESSION();
   }
 '''
 
@@ -225,8 +248,8 @@ def split_arguments(arguments):
         names.append(n)
     return (variables, names)
 
-def make_process_expression_visitor(filename):
-    lines = TEXT.split('\n')
+def make_expression_visitor(filename, expression, expression_text):
+    lines = expression_text.split('\n')
     vtext = ''
     wtext = ''
     else_text = ''
@@ -236,8 +259,9 @@ def make_process_expression_visitor(filename):
         arguments = words[1][:-1]
         accessors = re.split(r',\s*', words[2][:-1])
     
-        text = PROCESS_EXPRESSION_VISITOR_NODE_TEXT
+        text = EXPRESSION_VISITOR_NODE_TEXT
 
+        text = re.sub('MYEXPRESSION', expression, text)
         text = re.sub('NODE', node, text)
         args = arguments
         if args.strip() != '':
@@ -291,15 +315,16 @@ def make_process_expression_visitor(filename):
     wtext1 = re.sub('EXTRA_ARG', '', wtext)
     wtext2 = re.sub('EXTRA_ARG', ', a', wtext)
     
-    rtext = PROCESS_EXPRESSION_VISITOR_CODE % (vtext2, wtext2, vtext1, wtext1)
+    rtext = EXPRESSION_VISITOR_CODE % (vtext2, wtext2, vtext1, wtext1)
+    rtext = re.sub('MYEXPRESSION', expression, rtext)
     text = path(filename).text()
     text = re.compile(r'//--- start generated text ---//.*//--- end generated text ---//', re.S).sub(
                   '//--- start generated text ---//\n' + rtext + '//--- end generated text ---//',
                   text)
     path(filename).write_text(text)
 
-def make_process_expression_builder(filename):
-    lines = TEXT.split('\n')
+def make_expression_builder(filename, expression):
+    lines = PROCESS_EXPRESSION_TEXT.split('\n')
     vtext = ''
     wtext = ''
     else_text = ''
@@ -309,8 +334,9 @@ def make_process_expression_builder(filename):
         arguments = words[1][:-1]
         accessors = re.split(r',\s*', words[2][:-1])
     
-        text = PROCESS_EXPRESSION_BUILDER_NODE_TEXT
+        text = EXPRESSION_BUILDER_NODE_TEXT
 
+        text = re.sub('MYEXPRESSION', expression, text)
         text = re.sub('NODE', node, text)
         args = arguments
         if args.strip() != '':
@@ -363,14 +389,15 @@ def make_process_expression_builder(filename):
     wtext1 = re.sub('EXTRA_ARG', '', wtext)
     wtext2 = re.sub('EXTRA_ARG', ', a', wtext)
     
-    rtext = PROCESS_EXPRESSION_BUILDER_CODE % (vtext2, wtext2, vtext1, wtext1)
+    rtext = EXPRESSION_BUILDER_CODE % (vtext2, wtext2, vtext1, wtext1)
+    rtext = re.sub('MYEXPRESSION', expression, rtext)
     text = path(filename).text()
     text = re.compile(r'//--- start generated text ---//.*//--- end generated text ---//', re.S).sub(
                   '//--- start generated text ---//\n' + rtext + '//--- end generated text ---//',
                   text)
     path(filename).write_text(text)
 
-def make_process_is_functions(filename):
+def make_is_functions(filename, term_text):
     TERM_TRAITS_TEXT = r'''
     /// \\brief Test for a %s expression
     /// \\param t A term
@@ -382,38 +409,19 @@ def make_process_is_functions(filename):
     }
 '''
 
-    terms = [
-      ('action'                      , 'Action'           ),
-      ('process_instance'            , 'Process'          ),
-      ('process_instance_assignment' , 'ProcessAssignment'),
-      ('delta'                       , 'Delta'            ),
-      ('tau'                         , 'Tau'              ),
-      ('sum'                         , 'Sum'              ),
-      ('block'                       , 'Block'            ),
-      ('hide'                        , 'Hide'             ),
-      ('rename'                      , 'Rename'           ),
-      ('comm'                        , 'Comm'             ),
-      ('allow'                       , 'Allow'            ),
-      ('sync'                        , 'Sync'             ),
-      ('at'                          , 'AtTime'           ),
-      ('seq'                         , 'Seq'              ),
-      ('if_then'                     , 'IfThen'           ),
-      ('if_then_else'                , 'IfThenElse'       ),
-      ('bounded_init'                , 'BInit'            ),
-      ('merge'                       , 'Merge'            ),
-      ('left_merge'                  , 'LMerge'           ),
-      ('choice'                      , 'Choice'           ),
-    ]
-
     rtext = ''
+    terms = term_text.rsplit('\n')
     for t in terms:
-        rtext = rtext + TERM_TRAITS_TEXT % (t[0], t[0], t[0], t[1])
+        words = t.split()
+        if len(words) != 2:
+            continue
+        rtext = rtext + TERM_TRAITS_TEXT % (words[0], words[0], words[0], words[1])
     text = path(filename).text()
     text = re.compile(r'//--- start generated text ---//.*//--- end generated text ---//', re.S).sub(
                   '//--- start generated text ---//\n' + rtext + '//--- end generated text ---//',
                   text)
     path(filename).write_text(text)
 
-make_process_expression_visitor('../include/mcrl2/process/process_expression_visitor.h')
-make_process_expression_builder('../include/mcrl2/process/process_expression_builder.h')
-make_process_is_functions('../include/mcrl2/process/process_expression.h')
+make_expression_visitor('../include/mcrl2/process/process_expression_visitor.h', 'process_expression', PROCESS_EXPRESSION_TEXT)
+make_expression_builder('../include/mcrl2/process/process_expression_builder.h', 'process_expression')
+make_is_functions('../include/mcrl2/process/process_expression.h', PROCESS_EXPRESSION_TERMS)

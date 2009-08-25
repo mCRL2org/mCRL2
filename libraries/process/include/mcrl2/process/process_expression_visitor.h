@@ -22,7 +22,7 @@ namespace mcrl2 {
 namespace process {
 
 //--- start generated text ---//
-/// \brief Visitor class for process expressions.
+/// \brief Visitor class for expressions.
 ///
 /// There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
@@ -466,7 +466,7 @@ struct process_expression_visitor
   }
 };
 
-/// \brief Visitor class for process expressions.
+/// \brief Visitor class for expressions.
 ///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
@@ -709,7 +709,7 @@ struct process_expression_visitor<void>
   {}
 
 
-  /// \brief Visits the nodes of the process expression and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   /// \param x A term

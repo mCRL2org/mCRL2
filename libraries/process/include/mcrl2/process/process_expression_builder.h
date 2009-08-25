@@ -22,7 +22,7 @@ namespace mcrl2 {
 namespace process {
 
 //--- start generated text ---//
-/// \brief Modifying visitor class for process expressions.
+/// \brief Modifying visitor class for expressions.
 ///
 /// During traversal
 /// of the nodes, the expression is rebuilt from scratch.
@@ -35,9 +35,9 @@ struct process_expression_builder
   /// \brief The type of the additional argument for the recursion
   typedef Arg argument_type;
 
-  /// \brief Returns true if the process expression is not equal to process_expression().
+  /// \brief Returns true if the expression is not equal to process_expression().
   /// This is used to determine if the recursion in a node needs to be continued.
-  /// \param x A process expression
+  /// \param x A expression
   /// \return True if the term is not equal to process_expression()
   bool is_finished(const process_expression& x)
   {
@@ -188,11 +188,11 @@ struct process_expression_builder
     return process_expression();
   }
 
-  /// \brief Visits the nodes of the process expression, and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the expression, and calls the corresponding visit_<node>
   /// member functions. If the return value of a visit function equals process_expression(),
   /// the recursion in this node is continued automatically, otherwise the returned
   /// value is used for rebuilding the expression.
-  /// \param x A process expression
+  /// \param x A expression
   /// \param a An additional argument for the recursion
   /// \return The visit result
   process_expression visit(const process_expression& x, Arg& a)
@@ -406,7 +406,7 @@ struct process_expression_builder
   }
 };
 
-/// \brief Modifying visitor class for process expressions.
+/// \brief Modifying visitor class for expressions.
 ///
 /// If a visit_<node> function returns true, the recursion is continued
 /// in the children of this node, otherwise not.
@@ -416,9 +416,9 @@ struct process_expression_builder<void>
   /// \brief The type of the additional argument for the recursion
   typedef void argument_type;
 
-  /// \brief Returns true if the process expression is not equal to process_expression().
+  /// \brief Returns true if the expression is not equal to process_expression().
   /// This is used to determine if the recursion in a node needs to be continued.
-  /// \param x A process expression
+  /// \param x A expression
   /// \return True if the term is not equal to process_expression()
   bool is_finished(const process_expression& x)
   {
@@ -570,7 +570,7 @@ struct process_expression_builder<void>
   }
 
 
-  /// \brief Visits the nodes of the process expression and calls the corresponding visit_<node>
+  /// \brief Visits the nodes of the expression and calls the corresponding visit_<node>
   /// member functions. If the return value of a member function equals false, then the
   /// recursion in this node is stopped.
   /// \param x A term
