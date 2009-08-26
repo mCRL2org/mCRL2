@@ -37,12 +37,14 @@ namespace mcrl2 {
     template<typename DataRewriter>
     class binary_algorithm: public lps::detail::lps_algorithm
     {
+        typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+
       protected:
         /// Rewriter
         DataRewriter m_rewriter;
 
         /// Enumerator factory
-        data::enumerator_factory< data::classic_enumerator< > > m_enumerator_factory;
+        data::enumerator_factory< enumerator_type > m_enumerator_factory;
 
         /// Mapping of finite variables to boolean vectors
         atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
@@ -125,7 +127,7 @@ namespace mcrl2 {
               //Get all constructors for par
               data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-              for (data::classic_enumerator< > j(m_enumerator_factory.make(par)); j != data::classic_enumerator<>(); ++j)
+              for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type(); ++j)
               {
                 enumerated_elements.push_back((*j)(par));
               }

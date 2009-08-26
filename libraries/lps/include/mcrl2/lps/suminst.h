@@ -28,6 +28,9 @@ namespace mcrl2 {
     template<typename DataRewriter>
     class suminst_algorithm: public lps::detail::lps_algorithm
     {
+
+        typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+
       protected:
         /// Only instantiate finite sorts
         bool m_finite_sorts_only;
@@ -39,13 +42,13 @@ namespace mcrl2 {
         DataRewriter m_rewriter;
 
         /// Enumerator factory
-        data::enumerator_factory< data::classic_enumerator< > > m_enumerator_factory;
+        data::enumerator_factory< enumerator_type > m_enumerator_factory;
         
         // Temporary solution, should be replace with lps substitution
         template <typename Substitution>
         void apply_substitution(action_summand& s, Substitution& sigma)
         {
-          s.condition() = sigma(s.condition());
+          s.condition() = m_rewriter(s.condition(), sigma);
           substitute(s.multi_action(), sigma);
           s.assignments() = replace_variables(s.assignments(), sigma);
         }
@@ -54,7 +57,7 @@ namespace mcrl2 {
         template <typename Substitution>
         void apply_substitution(deadlock_summand& s, Substitution& sigma)
         {
-          s.condition() = sigma(s.condition());
+          s.condition() = m_rewriter(s.condition(), sigma);
           s.deadlock().time() = sigma(s.deadlock().time());
         }
 
@@ -93,7 +96,7 @@ namespace mcrl2 {
             try {
               core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
-              for (classic_enumerator< > i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != classic_enumerator<>(); ++i)
+              for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
               {
                 core::gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
 

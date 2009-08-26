@@ -57,9 +57,11 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
          std::set< variable > const& v,
                  data_expression const& c, size_t t) {
 
+  typedef classic_enumerator< mutable_map_substitution<>, rewriter, selectors::select_not< false > > enumerator_type;
+
   rewriter evaluator(d);
 
-  for (classic_enumerator< > i(d, v, evaluator, c); --t != 0 && i != classic_enumerator< >(); ++i) {
+  for (enumerator_type i(d, v, evaluator, c); --t != 0 && i != enumerator_type(); ++i) {
     std::clog << mcrl2::core::pp((*i)(c)) << std::endl;
   }
 }

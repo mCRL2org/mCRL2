@@ -133,7 +133,7 @@ struct legacy_selector
 {
   static atermpp::aterm& term()
   {
-    static atermpp::aterm term = mcrl2::data::sort_bool::false_();
+    static atermpp::aterm term = mcrl2::data::sort_bool::true_();
 
     return term;
   }
@@ -141,7 +141,7 @@ struct legacy_selector
   /// \brief returns true if and only if the argument is equal to true
   template < typename ExpressionType >
   static bool test(ExpressionType const& e) {
-    return e != term();
+    return e == term();
   }
 };
 
