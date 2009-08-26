@@ -192,8 +192,6 @@ namespace mcrl2 {
 
         void insert_sort(const sort_expression& s)
         {
-          assert(!data::is_alias(s)); // TODO remove
-
           if (s.is_system_defined())
           {
             sort_expression normalised(normalise(s));
@@ -724,8 +722,6 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of sorts_const_range, only if they point to the element that is removed
       void remove_sort(const sort_expression& s)
       {
-        assert(!data::is_alias(s)); // TODO remove
-
         if (is_system_defined(s))
         {
           m_sys_sorts.remove(s);

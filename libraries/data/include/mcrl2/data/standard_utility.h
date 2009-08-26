@@ -241,13 +241,6 @@ namespace mcrl2 {
 
     namespace sort_real {
       /// \brief Constructs expression of type pos from an integral type
-      //template < typename T >
-      //inline typename boost::enable_if< typename boost::is_floating_point< T >::type, data_expression >::type
-      //real_(const T) {
-      // TODO;
-      //}
-
-      /// \brief Constructs expression of type pos from an integral type
       /// \param t An expression of type T
       template < typename T >
       inline typename boost::enable_if< typename boost::is_integral< T >::type, data_expression >::type

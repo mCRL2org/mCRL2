@@ -50,7 +50,7 @@ bool is_well_typed(const Object& o);
 template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
-class specification;   
+class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&, bool compatible = true);
 void complete_data_specification(lps::specification&);
 
@@ -103,7 +103,19 @@ class specification
   public:
     /// \brief Constructor.
     specification()
-    {}
+    {
+      m_initial_process.protect();
+    }
+
+    specification(specification const& other)
+    {
+      m_data = other.m_data;
+      m_action_labels = other.m_action_labels;
+      m_global_variables = other.m_global_variables;
+      m_process = other.m_process;
+      m_initial_process = other.m_initial_process;
+      m_initial_process.protect();
+    }
 
     /// \brief Constructor.
     /// \param t A term
@@ -111,6 +123,7 @@ class specification
     {
       assert(core::detail::check_rule_LinProcSpec(t));
       construct_from_aterm(t);
+      m_initial_process.protect();
     }
 
     /// \brief Constructor.
@@ -129,7 +142,9 @@ class specification
         m_global_variables(global_variables),
         m_process(lps),
         m_initial_process(initial_process)
-    {}
+    {
+      m_initial_process.protect();
+    }
 
     /// \brief Reads the specification from file.
     /// \param filename A string
@@ -208,7 +223,6 @@ class specification
     action_label_list& action_labels()
     { return m_action_labels; }
 
-    
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
     const atermpp::set<data::variable>& global_variables() const
@@ -222,7 +236,7 @@ class specification
     {
       return m_global_variables;
     }
-    
+
     /// \brief Returns the initial process.
     /// \return The initial process.
     const process_initializer& initial_process() const
@@ -236,7 +250,7 @@ class specification
     {
       return m_initial_process;
     }
-    
+
     /// \brief Attempts to eliminate the free variables of the specification, by substituting
     /// a constant value for them. If no constant value is found for one of the variables,
     /// an exception is thrown.
@@ -259,6 +273,11 @@ class specification
       lps::substitute(*this, sigma, false);
       lps::remove_parameters(*this, to_be_removed);
       assert(global_variables().empty());
+    }
+
+    ~specification()
+    {
+      m_initial_process.unprotect();
     }
 };
 

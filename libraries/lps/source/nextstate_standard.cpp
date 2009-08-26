@@ -601,22 +601,12 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, NextStateGener
 
 class NextStateGeneratorSummand : public NextStateGeneratorStandard {
 
-  private:
-
-    int m_summand;
-
   public:
 
     NextStateGeneratorSummand(int summand, ATerm state, ns_info& info, unsigned int identifier)
-                          : NextStateGeneratorStandard(state, info, identifier, true), m_summand(summand) {
+                          : NextStateGeneratorStandard(state, info, identifier, true) {
 
       reset(state, summand);
-    }
-
-    void reset(ATerm state, int summand) {
-      m_summand = summand;
-
-      NextStateGeneratorStandard::reset(state, summand);
     }
 };
 

@@ -68,7 +68,6 @@ namespace mcrl2 {
         /// \brief Returns the name of this sort.
         /// \details For an alias defined as alias(S,s) with S a basic
         /// sort and s the basic sort S is returned.
-        
         inline
         basic_sort name() const
         {
