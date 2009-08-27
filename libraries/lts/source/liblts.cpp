@@ -109,7 +109,7 @@ lts_extra::lts_extra(ATerm t)
 lts_extra::lts_extra(lps::specification const& spec)
 {
   type = le_mcrl2;
-  content.mcrl2_spec = lps::specification_to_aterm(spec);
+  content.mcrl2_spec = lps::specification_to_aterm(spec, false);
 }
 
 lts_extra::lts_extra(lts_dot_options opts)
@@ -1742,9 +1742,9 @@ void lts::set_data_specification(data::data_specification const& spec)
 
   if ( extra_data == NULL )
   {
-    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
+    extra_data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false), (ATerm) gsMakeNil(), (ATerm) gsMakeNil());
   } else {
-    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec),0);
+    extra_data = (ATerm) ATsetArgument((ATermAppl) extra_data,(ATerm)(ATermAppl) mcrl2::data::detail::data_specification_to_aterm_data_spec(spec, false),0);
   }
 }
 

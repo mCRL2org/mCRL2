@@ -317,7 +317,7 @@ struct ns_info
     m_rewriter(m_enumerator_factory->get_evaluator()) {
 
     // Configure selector to compare with term that represents false
-    legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::false_());
+    legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::true_());
   }
 };
 /// \endcond
