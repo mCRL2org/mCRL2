@@ -75,8 +75,7 @@ class MainFrame : public wxFrame
 	void onResetAll(wxCommandEvent& event);
 	void onResetRot(wxCommandEvent& event);
 	void onResetPan(wxCommandEvent& event);
-	void onRotate(wxCommandEvent& event);
-	void onPan(wxCommandEvent& event);
+	void onMode(wxCommandEvent& event);
 	void onShowSystem(wxCommandEvent& event);
 
   DECLARE_EVENT_TABLE()

@@ -63,12 +63,12 @@ class GLCanvas : public wxGLCanvas
 	void ResetAll();
 	void ResetPan();
 	void ResetRot();
-	void setMode(bool isPanning);
+	void setMode(int tool);
 	void showSystem();
 	double getPixelSize();
     double getAspectRatio() const;
 	double getMaxDepth() const;
-	void getMdlvwMtrx(float * mtrx);
+	void getMdlvwMtrx(double * mtrx);
 	void getCamPos(double & x, double & y, double & z);
 
   private:
@@ -77,13 +77,17 @@ class GLCanvas : public wxGLCanvas
     bool displayAllowed;
 	bool panning;
 	bool dispSystem;
+	bool usingTool;
     double scaleFactor, maxDepth;
     int oldX, oldY;
 	float lookX, lookY, lookZ, rotX, rotY;
-	float currentModelviewMatrix[16];
+	double currentModelviewMatrix[16];
+	int currentTool;
 
-    void pickObjects(int x, int y, wxMouseEvent const&);
+	void normalizeMatrix();
+    bool pickObjects(int x, int y, wxMouseEvent const&);
     void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
+	void setMouseCursor(int theTool);
 
   DECLARE_EVENT_TABLE()
 };

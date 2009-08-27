@@ -368,7 +368,7 @@ void LTSGraph3d::setTool(bool isColour)
   colouring = isColour;
 }
 
-void LTSGraph3d::getCanvasMdlvwMtrx(float * mtrx)
+void LTSGraph3d::getCanvasMdlvwMtrx(double * mtrx)
 {
   glCanvas->getMdlvwMtrx(mtrx);
 }

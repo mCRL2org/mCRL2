@@ -43,10 +43,12 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
-  EVT_MENU(myID_TOOL_SELECT, MainFrame::onSelect)
+  EVT_MENU(myID_SELECT, MainFrame::onSelect)
   EVT_MENU(myID_COLOUR, MainFrame::onColour)
-  EVT_MENU(myID_ROTATE, MainFrame::onRotate)
-  EVT_MENU(myID_PAN, MainFrame::onPan)
+  EVT_MENU(myID_ROTATE, MainFrame::onMode)
+  EVT_MENU(myID_PAN, MainFrame::onMode)
+  EVT_MENU(myID_ZOOM, MainFrame::onMode)
+  EVT_MENU(myID_NONE, MainFrame::onMode)
   EVT_MENU(myID_RESET_ALL, MainFrame::onResetAll)
   EVT_MENU(myID_RESET_ROTATE, MainFrame::onResetRot)
   EVT_MENU(myID_RESET_PAN, MainFrame::onResetPan)
@@ -94,23 +96,23 @@ void MainFrame::setupMenuBar()
   wxMenu* viewMenu = new wxMenu;
   viewMenu->Append(myID_RESET_ALL, wxT("&Reset viewpoint \tF2"), wxT("Resets any panning and rotations done."));
   viewMenu->Append(myID_RESET_ROTATE, wxT("&Reset rotations \tCTRL-r"), wxT("Resets any ratations done"));
-  viewMenu->Append(myID_RESET_PAN, wxT("Reset p&annings \tCTRL-a"), wxT("Resets and panning done"));
+  viewMenu->Append(myID_RESET_PAN, wxT("Reset pannings \tCTRL-d"), wxT("Resets and panning done"));
   viewMenu->AppendSeparator();
-  viewMenu->AppendRadioItem(myID_ROTATE, wxT("&Rotation mode \tR"), wxT("Middle mouse button rotates the model"));
-  viewMenu->AppendRadioItem(myID_PAN, wxT("P&anning mode \tA"), wxT("Middle mouse button pans the model"));
-  viewMenu->AppendSeparator();
-  viewMenu->Append(myID_SHOW_SYSTEM, wxT("Display coor&dinate system \tD"), wxT("Displays a coordinate system at the left below corner of the window."));
+  viewMenu->Append(myID_SHOW_SYSTEM, wxT("Display coord&inate system \tI"), wxT("Displays a coordinate system at the left below corner of the window."));
 
 
   // Tools menu
   wxMenu* toolsMenu = new wxMenu;
-  toolsMenu->AppendRadioItem(myID_TOOL_SELECT,
-	  wxT("&Select\tS"),wxT("Select tool"));
-  toolsMenu->AppendRadioItem(myID_COLOUR,
-    wxT("&Colour\tC"),wxT("Colouring tool"));
+  toolsMenu->AppendRadioItem(myID_SELECT, wxT("Select\tS"), wxT("Select tool"));
+  toolsMenu->AppendRadioItem(myID_COLOUR, wxT("Colour \tC"), wxT("Colouring tool"));
+  toolsMenu->AppendSeparator();
+  toolsMenu->AppendRadioItem(myID_ZOOM, wxT("Zoom \tA"), wxT("Zoom tool"));
+  toolsMenu->AppendRadioItem(myID_PAN, wxT("Pan\tD"), wxT("Pan tool"));
+  toolsMenu->AppendRadioItem(myID_ROTATE, wxT("Rotate \tF"), wxT("Rotate tool"));
+  toolsMenu->AppendRadioItem(myID_NONE, wxT("Disable \tN"), wxT("Disable tool"));
   toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_TOGGLE_VECTOR, wxT("Toggle state &vector display \tCTRL-V"));
-  toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("&Toggle optimisation... \tCTRL-T"),
+  toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("Toggle optimisation... \tCTRL-T"),
                     wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
   toolsMenu->Append(myID_DLG_ALGO, wxT("O&ptimization... \tCTRL-p"),
@@ -319,7 +321,6 @@ void MainFrame::onToggleVector(wxCommandEvent&)
   app->toggleVectorSelected();
 }
 
-
 void MainFrame::onInfo(wxCommandEvent& /* event */)
 {
   infoDlg->Show();
@@ -363,15 +364,9 @@ void MainFrame::onResetPan(wxCommandEvent& /*evt*/)
 	glCanvas->display();
 }
 
-void MainFrame::onRotate(wxCommandEvent& /*evt*/)
+void MainFrame::onMode(wxCommandEvent& event)
 {
-	glCanvas->setMode(false);
-	glCanvas->display();
-}
-
-void MainFrame::onPan(wxCommandEvent& /*evt*/)
-{
-	glCanvas->setMode(true);
+	glCanvas->setMode(event.GetId());
 	glCanvas->display();
 }
 

@@ -150,14 +150,14 @@ void Visualizer::drawState(State* s)
   }
 
   glPushMatrix();
-  float cmvm[16];
-  float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
+  double cmvm[16];
+  double dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
   owner->getCanvasMdlvwMtrx(cmvm);
-  float dumatrix2[16];
+  double dumatrix2[16];
   Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
   for (int i = 12; i < 16; i++)
 	  dumatrix[i] = dumatrix2[i];
-  glLoadMatrixf(dumatrix);
+  glLoadMatrixd(dumatrix);
   
   gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
   glPopMatrix();
@@ -409,8 +409,8 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   double yDif = yTo - yControl;
   double zDif = zTo - zControl;
 
-  float tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
-  float angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
 
   glPushMatrix();
   glTranslatef(xTo, yTo, zTo);
@@ -676,8 +676,8 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double yDif = yState - yControl2;
   double zDif = zState - zControl;
 
-  float tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
-  float angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
 
   glPushMatrix();
   glTranslatef(xState, yState, zState);
@@ -709,14 +709,14 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
     }
 	glDepthMask(GL_FALSE);					
 	glPushMatrix();
-	float cmvm[16];
-	float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,labelX,labelY,labelZ,1};
+	double cmvm[16];
+	double dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,labelX,labelY,labelZ,1};
 	owner->getCanvasMdlvwMtrx(cmvm);
-	float dumatrix2[16];
+	double dumatrix2[16];
 	Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
 	for (int i = 12; i < 16; i++)
 		dumatrix[i] = dumatrix2[i];
-	glLoadMatrixf(dumatrix);
+	glLoadMatrixd(dumatrix);
 	
 
     if(selecting) {
@@ -756,21 +756,21 @@ void Visualizer::drawStateText(State* s)
   z = (z / 2000.0) * (depth - rad * 2);
 
   glPushMatrix();
-  float cmvm[16];
-  float dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
+  double cmvm[16];
+  double dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
   owner->getCanvasMdlvwMtrx(cmvm);
-  float dumatrix2[16];
+  double dumatrix2[16];
   Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
   for (int i = 12; i < 16; i++)
 	  dumatrix[i] = dumatrix2[i];
-  glLoadMatrixf(dumatrix);
+  glLoadMatrixd(dumatrix);
   
 
   double xDif = -dumatrix[12];
   double yDif = -dumatrix[13];
   double zDif = -dumatrix[14];
-  float tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
-  float angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
 
   glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
   glRotatef(-angYxz, 1.0f, 0.0f, 0.0f);
@@ -851,7 +851,7 @@ void Visualizer::setStateLabels(bool value)
 void Visualizer::drawCoorSystem()
 {
 	double length;
-	float cmvm[16];
+	double cmvm[16];
 	length = 0.3;
 	owner->getCanvasMdlvwMtrx(cmvm);
 	glDisable(GL_DEPTH_TEST);
@@ -859,7 +859,7 @@ void Visualizer::drawCoorSystem()
 	cmvm[13] = 0;
 	cmvm[14] = -1;
 	cmvm[15] = 1;
-	glLoadMatrixf(cmvm); 
+	glLoadMatrixd(cmvm); 
 	
 	glBegin(GL_LINES);
 	  glColor3ub(255, 0, 0);
@@ -873,8 +873,8 @@ void Visualizer::drawCoorSystem()
 	  glVertex3f(0.0f, 0.0f, length);
 	glEnd();
 //arrow heads for axises
-	float tanXZ = atan2(0.0, 0.0) * 180.0f / M_PI;
-	float angYxz = atan2(1.0, 0.0) * 180.0f / M_PI;
+	double tanXZ = atan2(0.0, 0.0) * 180.0f / M_PI;
+	double angYxz = atan2(1.0, 0.0) * 180.0f / M_PI;
 
 	glColor3ub(0, 255, 0);
 	glPushMatrix();

@@ -106,7 +106,7 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     std::string getFileName() const;
     int getRadius() const;
     double getAspectRatio() const;
-	void getCanvasMdlvwMtrx(float * mtrx);
+	void getCanvasMdlvwMtrx(double * mtrx);
 	void getCanvasCamPos(double & x, double & y, double & z);
 };
 

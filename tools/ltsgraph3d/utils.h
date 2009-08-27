@@ -24,12 +24,12 @@ namespace Utils {
   Vect operator*(double s, Vect v);
   Vect operator/(Vect v, double s);
 
-  float vecLength(Vect v);
-  float angDiff(Vect v1, Vect v2);
+  double vecLength(Vect v);
+  double angDiff(Vect v1, Vect v2);
   float signum(float f);
-  void MultGLMatrices (const float leftm[16], const float rightm[16], float* ans);
-  void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx);
-  void GLUnTransform (const float leftm[16], const float rightm[4], float* ans);
+  void MultGLMatrices (const double leftm[16], const double rightm[16], double* ans);
+  void genRotArbAxs (const double angle, const double x1, const double y1, const double z1, double* rotmtrx);
+  void GLUnTransform (const double leftm[16], const double rightm[4], double* ans);
 
 }
 #endif

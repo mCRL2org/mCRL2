@@ -13,6 +13,12 @@
 
 #include "glcanvas.h"
 #include <wx/dcclient.h>
+#include "icons/zoom_cursor.xpm"
+#include "icons/zoom_cursor_mask.xpm"
+#include "icons/pan_cursor.xpm"
+#include "icons/pan_cursor_mask.xpm"
+#include "icons/rotate_cursor.xpm"
+#include "icons/rotate_cursor_mask.xpm"
 #include <iostream>
 
 #include "ids.h"
@@ -22,7 +28,7 @@
 #else
   #include <GL/glu.h>
 #endif
-
+using namespace IDS;
 BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_PAINT(GLCanvas::onPaint)
   EVT_SIZE(GLCanvas::onSize)
@@ -52,8 +58,9 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
 {
   owner = app;
   displayAllowed = false;
-  panning = false;
   dispSystem = false;
+  currentTool = myID_ZOOM;
+  usingTool = false;
   lookX = 0;
   lookY = 0;
   lookZ = 0;
@@ -70,13 +77,14 @@ void GLCanvas::initialize()
 {
   SetCurrent();
   glLoadIdentity();
-  glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+  glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
   glShadeModel(GL_SMOOTH);
   glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearDepth(1.0);									
   glDepthFunc(GL_LESS);								
-  glEnable(GL_DEPTH_TEST);							
+  glEnable(GL_DEPTH_TEST);		
+  glEnable(GL_LINE_SMOOTH);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
   SwapBuffers();
   displayAllowed = true;
@@ -116,22 +124,23 @@ void GLCanvas::display()
 
 	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
 
-    glMatrixMode( GL_MODELVIEW);
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
 
-	float dumtrx[16];
-	float rotAngle = sqrt(rotX * rotX + rotY * rotY);
+	double dumtrx[16];
+	double rotAngle = sqrt(rotX * rotX + rotY * rotY);
 
 	Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
 	rotX = 0;
 	rotY = 0;
-	float dumtrx2[16];
+	double dumtrx2[16];
 	Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
 
 	for ( int i = 0; i < 12; i++)
 		currentModelviewMatrix[i] = dumtrx2[i];
 
+//	normalizeMatrix();
 	currentModelviewMatrix[12] = -lookX;
 	currentModelviewMatrix[13] = -lookY;
 	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
@@ -151,7 +160,7 @@ void GLCanvas::display()
 	glColorMaterial(GL_FRONT,GL_AMBIENT);
 	glEnable(GL_COLOR_MATERIAL);
 
-	glLoadMatrixf(currentModelviewMatrix);
+	glLoadMatrixd(currentModelviewMatrix);
 	glFinish();
     double pS = getPixelSize();
 
@@ -311,13 +320,20 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
 {
   oldX = event.GetX();
   oldY = event.GetY();
-  pickObjects(oldX, oldY, event);
-  owner->dragObject();
+  if (pickObjects(oldX, oldY, event))
+  {
+	  owner->dragObject();
+	  usingTool = false;
+  }
+  else
+	  usingTool = true;
   display();
 }
 
 void GLCanvas::onMouseLftUp(wxMouseEvent& /* evt */)
 {
+  usingTool = false;
+  setMouseCursor(myID_NONE);
   owner->stopDrag();
   display();
 }
@@ -327,21 +343,28 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldX = event.GetX();
   oldY = event.GetY();
 
-  pickObjects(oldX, oldY, event);
-  owner->lockObject();
+  if (pickObjects(oldX, oldY, event))
+  {
+	  owner->lockObject();
+	  usingTool = false;
+  }
+  else
+	  usingTool = true;  
   display();
 }
 
 void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
 {
+	setMouseCursor(myID_NONE);
+	usingTool = false;
 }
 void GLCanvas::onMouseDblClck(wxMouseEvent& /*evt */)
 {
-	
+	normalizeMatrix();
 }
 void GLCanvas::onMouseWhl(wxMouseEvent& event)
 {
-	lookZ -= float(event.GetWheelRotation())/(2400.0f);
+	lookZ -= double(event.GetWheelRotation())/(2400.0f);
 	display();
 }
 void GLCanvas::onMouseMidDown(wxMouseEvent& event)
@@ -351,49 +374,60 @@ void GLCanvas::onMouseMidDown(wxMouseEvent& event)
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
 {
-
+	setMouseCursor(myID_NONE);
 }
 
 void GLCanvas::onMouseMove(wxMouseEvent& event)
 {
-  if(event.Dragging() && (event.LeftIsDown() || event.MiddleIsDown()))
+  if(event.Dragging() && (event.LeftIsDown() || event.MiddleIsDown() || event.RightIsDown()))
   {
     int x, y;
     GetPosition(&x, &y);
 	int newX = static_cast<int>(event.GetX());
     int newY = static_cast<int>(event.GetY());
-	if (event.LeftIsDown())
+	int width, height;
+	GetClientSize(&width, &height);	
+	if (event.LeftIsDown() && !event.RightIsDown())
 	{
-		int width, height;
-		GetClientSize(&width, &height);	
-		float invect[] = {newX - oldX, oldY - newY, 0, 1};
-		float trans[4];
-		Utils::GLUnTransform(currentModelviewMatrix, invect, trans);
-		
-		owner->moveObject(trans[0], trans[1], trans[2]);
-
-		if ((x < newX) && (newX < x + width)) {
-		  oldX = newX;
-		}
-		if ((y < newY) && (newY < y + height)) {
-		  oldY = newY;
-		}
-	}
-	else if (event.MiddleIsDown())
-	{
-		if(panning)
+		if(!usingTool)
 		{
-			lookX += 0.01f * (oldX - newX);
-			lookY += -0.01f * (oldY - newY);
-
+			double invect[] = {newX - oldX, oldY - newY, 0, 1};
+			double trans[4];
+			Utils::GLUnTransform(currentModelviewMatrix, invect, trans);
+			
+			owner->moveObject(trans[0], trans[1], trans[2]);
 		}
 		else
 		{
-			rotX = 0.5f * (oldX - newX);
-			rotY = -0.5f * (oldY - newY);
+			switch(currentTool)
+			{
+				case myID_PAN:
+					lookX += 0.01f * (oldX - newX);
+					lookY += -0.01f * (oldY - newY);
+					break;
+				case myID_ZOOM:
+					lookZ += -0.01f * (oldY - newY);
+					break;
+				case myID_ROTATE:
+					rotX = 0.5f * (oldX - newX);
+					rotY = -0.5f * (oldY - newY);
+				default:
+					break;
+			}
+			setMouseCursor(currentTool);
 		}
-	    oldX = newX;
-	    oldY = newY;
+	}
+	else if (event.MiddleIsDown() || (event.RightIsDown() && usingTool) && !event.LeftIsDown())
+	{
+		rotX = 0.5f * (oldX - newX);
+		rotY = -0.5f * (oldY - newY);
+		setMouseCursor(myID_ROTATE);
+	}
+	if ((x < newX) && (newX < x + width)) {
+		oldX = newX;
+	}
+	if ((y < newY) && (newY < y + height)) {
+		oldY = newY;
 	}
     display();
   }
@@ -403,7 +437,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 }
 
 
-void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
+bool GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
@@ -464,6 +498,7 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     processHits(hits, selectBuf, e);
     reshape();
     display();
+	return hits > 0;
   }
 }
 
@@ -561,7 +596,7 @@ double GLCanvas::getMaxDepth() const
 	return maxDepth;
 }
 
-void GLCanvas::getMdlvwMtrx(float * mtrx)
+void GLCanvas::getMdlvwMtrx(double * mtrx)
 {
 	for (int i = 0; i < 16; i++)
 		mtrx[i] = currentModelviewMatrix[i];
@@ -585,7 +620,7 @@ void GLCanvas::ResetRot()
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 	glPopMatrix();
 	currentModelviewMatrix[12] = -lookX;
 	currentModelviewMatrix[13] = -lookY;
@@ -599,12 +634,75 @@ void GLCanvas::ResetPan()
 	lookY = 0;
 	lookZ = 0;
 }
-void GLCanvas::setMode(bool isPanning)
+void GLCanvas::setMode(int tool)
 {
-	panning = isPanning;
+	currentTool = tool;
 }
 
 void GLCanvas::showSystem()
 {
 	dispSystem = !dispSystem;
+}
+
+void GLCanvas::normalizeMatrix()
+{
+	double x, y, z, norm;
+	Utils::Vect yAx;
+	x = currentModelviewMatrix[8];
+	y = currentModelviewMatrix[9];
+	z = currentModelviewMatrix[10];
+	yAx.x = currentModelviewMatrix[4];
+	yAx.y = currentModelviewMatrix[5];
+	yAx.z = currentModelviewMatrix[6];
+	norm = sqrt(x * x + y * y + z * z);
+	x = x / norm;
+	y = y / norm;
+	z = z / norm;
+
+	double tanXZ = atan2(x, z) * 180.0f / M_PI;
+	double angYxz = atan2(y, sqrt(x * x + z * z)) * 180.0f / M_PI;
+	glPushMatrix();
+	glLoadIdentity();
+	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	Utils::Vect normal;
+	normal.x = currentModelviewMatrix[8];
+	normal.y = currentModelviewMatrix[9];
+	normal.z = currentModelviewMatrix[10];
+	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	glPopMatrix();
+}
+
+void GLCanvas::setMouseCursor(int theTool) {
+  wxCursor cursor;
+  wxImage img;
+  bool ok = true;
+  switch (theTool) {
+    case myID_NONE:
+      cursor = wxNullCursor;
+      break;
+    case myID_ZOOM:
+      img = wxImage(zoom_cursor);
+      img.SetMaskFromImage(wxImage(zoom_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
+      break;
+    case myID_PAN:
+      img = wxImage(pan_cursor);
+      img.SetMaskFromImage(wxImage(pan_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
+      break;
+    case myID_ROTATE:
+      img = wxImage(rotate_cursor);
+      img.SetMaskFromImage(wxImage(rotate_cursor_mask),255,0,0);
+      cursor = wxCursor(img);
+      break;
+    default:
+      ok = false;
+      break;
+  }
+
+  if (ok) {
+    SetCursor(cursor);
+  }
 }

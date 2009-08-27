@@ -211,6 +211,7 @@ void ExporterSVG::drawBezier(Transition* tr)
   // drawTransition method in visualizer.cpp
   xControl = 2.0 * xVirtual - .5 * (xFrom + xTo);
   yControl = 2.0 * yVirtual - .5 * (yFrom + yTo);
+  zControl = 2.0 * zVirtual - .5 * (zFrom + zTo);
 
   svg_code += "<path d = \"";
 

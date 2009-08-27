@@ -42,17 +42,17 @@ Utils::Vect operator/(Vect v, double s)
   return result;
 }
 
-float vecLength(Vect v)
+double vecLength(Vect v)
 {
-  return static_cast< float >(sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
+  return static_cast< double >(sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
 }
 
-float angDiff(Vect v1, Vect v2)
+double angDiff(Vect v1, Vect v2)
 {
-  float dotP = static_cast<float>(v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
-  float lenP = static_cast<float>(vecLength(v1) * vecLength(v2));
+  double dotP = static_cast<double>(v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
+  double lenP = static_cast<double>(vecLength(v1) * vecLength(v2));
 
-  return acosf(dotP / lenP);
+  return acos(dotP / lenP);
 
 }
 
@@ -70,7 +70,7 @@ float signum(float v)
 
 //preq: ans is an array of size 16
 
-void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
+void MultGLMatrices (const double lhs[16], const double rhs[16], double* ans)
 {
 	ans[0] = lhs[0] * rhs [0] + lhs[4] * rhs [1] + lhs[8] * rhs [2] + lhs[12] * rhs [3];
 	ans[1] = lhs[1] * rhs [0] + lhs[5] * rhs [1] + lhs[9] * rhs [2] + lhs[13] * rhs [3];
@@ -93,15 +93,15 @@ void MultGLMatrices (const float lhs[16], const float rhs[16], float* ans)
 //preq: the axis is on the z = 0 plane.
 //		rotmtrx is an array of size 16
 
-void genRotArbAxs (const float angle, const float x1, const float y1, const float z1, float* rotmtrx)
+void genRotArbAxs (const double angle, const double x1, const double y1, const double z1, double* rotmtrx)
 {
 	//TODO: make rotation available around the z-axis
-	float angleRad = angle * float(3.1415926535897932384626433832795) / 180.0f;
-	float c = cos(angleRad);
-	float s = sin(angleRad);
-	float t = 1 - cos(angleRad);
-	float angleUnitVect = atan2(y1, x1);
-	float ax, ay, az;
+	double angleRad = angle * double(3.1415926535897932384626433832795) / 180.0f;
+	double c = cos(angleRad);
+	double s = sin(angleRad);
+	double t = 1 - cos(angleRad);
+	double angleUnitVect = atan2(y1, x1);
+	double ax, ay, az;
 	ax = -1.0f * sin(angleUnitVect);
 	ay = cos(angleUnitVect);
 	az = 0;
@@ -126,7 +126,7 @@ void genRotArbAxs (const float angle, const float x1, const float y1, const floa
 //preq: ans is an array of size 4
 //		lhs is an only rotation matrix
 
-void GLUnTransform (const float lhs[16], const float rhs[4], float* ans)
+void GLUnTransform (const double lhs[16], const double rhs[4], double* ans)
 {
 	ans[0] = lhs[0] * rhs [0] + lhs[1] * rhs [1] + lhs[2] * rhs [2] + lhs[3] * rhs [3];
 	ans[1] = lhs[4] * rhs [0] + lhs[5] * rhs [1] + lhs[6] * rhs [2] + lhs[7] * rhs [3];
