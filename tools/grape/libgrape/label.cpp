@@ -16,8 +16,7 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/lps/multi_action.h"
-#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/print.h"
 #include "label.h"
 #include "action.h"
 #include "dataexpression.h"
@@ -82,13 +81,14 @@ void label::set_actions_text( const wxString &p_actions )
 
   if ( a_parsed_multi_action )
   {
-    mcrl2::lps::multi_action m(a_parsed_multi_action);
-
-    for (mcrl2::lps::action_list::const_iterator i = m.actions().begin(); i != m.actions().end(); ++i)
+    // get list of ParamId's from MultAct
+    atermpp::aterm_list al(a_parsed_multi_action.argument(0));
+    // loop through list of ParamId's
+    for (atermpp::aterm_list::const_iterator i = al.begin(); i != al.end(); ++i)
     {
       action action;
-      action.set_name(wxString(std::string(i->label().name()).c_str(), wxConvLocal));
-      action.set_parameters_text(i->arguments());
+      action.set_name(wxString(pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
+      action.set_parameters_text(atermpp::aterm_appl(*i).argument(1));
       m_actions.Add(action);
     }
   }
