@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_STANDARD_UTILITY_H
 #define MCRL2_DATA_DATA_EXPRESSION_STANDARD_UTILITY_H
 
+#include "boost/utility.hpp"
 #include "boost/utility/enable_if.hpp"
 #include "boost/assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
@@ -372,10 +373,10 @@ namespace mcrl2 {
       {
         data_expression fbag_expression(sort_fbag::fbag_empty(s));
 
-        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i) {
+        for (typename Sequence::const_iterator i = range.begin(); i != range.end(); ++i, ++i) {
           BOOST_ASSERT(is_convertible(i->sort(), s));
 
-          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, sort_nat::nat(1));
+          fbag_expression = sort_fbag::fbaginsert(s, *i, fbag_expression, *boost::next(i, 1));
         }
 
         return static_cast< application >(fbag_expression);

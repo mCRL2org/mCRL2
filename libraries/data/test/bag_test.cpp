@@ -15,6 +15,7 @@
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/fbag.h"
 #include "mcrl2/data/parser.h"
+#include "mcrl2/data/rewriter.h"
 
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -36,6 +37,12 @@ init P({20:4, 30:3, 40:2});
 */
 void bag_expression_test()
 {
+  data::data_specification specification;
+
+  specification.import_system_defined_sort(sort_bag::bag(sort_pos::pos()));
+
+  data::rewriter normaliser(specification);
+
   variable_vector v;
   v.push_back(parse_variable("b:Bag(Nat)"));
 
@@ -47,16 +54,16 @@ void bag_expression_test()
   BOOST_CHECK(is_bagjoin_application(e));
 
   e = parse_data_expression("{20:1}", v.begin(), v.end());
-  BOOST_CHECK(is_fbag_cons_application(e));
+  BOOST_CHECK(is_bagconstructor_application(normaliser(e)));
 
   e = parse_data_expression("{20:4, 30:3, 40:2}", v.begin(), v.end());
-  BOOST_CHECK(is_fbag_cons_application(e));
+  BOOST_CHECK(is_bagconstructor_application(normaliser(e)));
 
   e = parse_data_expression("(({} + b) - {20:1}) * {40:5}", v.begin(), v.end());
   BOOST_CHECK(is_bagintersect_application(e));
 
   e = parse_data_expression("{10:count(20,b)}", v.begin(), v.end());
-  BOOST_CHECK(is_fbag_cons_application(e));
+  BOOST_CHECK(is_bagconstructor_application(normaliser(e)));
 
   e = parse_data_expression("{10:count(20,b)} < b", v.begin(), v.end());
   BOOST_CHECK(is_less_application(e));
