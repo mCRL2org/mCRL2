@@ -122,7 +122,7 @@ namespace mcrl2 {
           {
             data::variable par = *i;
 
-            if (!data::sort_bool::is_bool(par) && m_spec.data().is_certainly_finite(par.sort()))
+            if (!data::sort_bool::is_bool(par.sort()) && m_spec.data().is_certainly_finite(par.sort()))
             {
               //Get all constructors for par
               data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter

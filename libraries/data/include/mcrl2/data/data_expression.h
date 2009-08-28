@@ -51,7 +51,9 @@ namespace mcrl2 {
         /// \param[in] t a term adhering to the internal format.
         data_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
-        {}
+        {
+          assert(is_data_expression(t));/
+        }
 
         /// \brief Returns the sort of the data expression
         inline

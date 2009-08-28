@@ -49,7 +49,9 @@ namespace mcrl2 {
         /// \pre t has the internal structure of a sort expression.
         sort_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
-        {}
+        {
+          assert(is_sort_expression(t));
+        }
 
         /// \brief Returns true iff this expression is a basic sort.
         inline
