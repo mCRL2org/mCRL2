@@ -61,7 +61,7 @@ namespace mcrl2 {
         data_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
         {
-          assert(is_data_expression(t));/
+          assert(is_data_expression(t));
         }
 
         /// \brief Returns the sort of the data expression
