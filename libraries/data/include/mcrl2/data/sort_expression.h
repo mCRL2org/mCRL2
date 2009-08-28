@@ -26,6 +26,16 @@ namespace mcrl2 {
 
   namespace data {
 
+    /// \brief Returns true if the term t is a sort_expression
+    /// \param t A term
+    /// \return True if the term is a sort expression.
+    inline
+    bool is_sort_expression(atermpp::aterm_appl t)
+    {
+      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t) ||
+             core::detail::gsIsSortStruct(t) || core::detail::gsIsSortCons(t);
+    }
+
     /// \brief sort expression.
     ///
     /// A sort expression can be any of:
@@ -136,16 +146,6 @@ namespace mcrl2 {
     template < typename Expression >
     inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
       return convert< sort_expression_list >(r);
-    }
-
-    /// \brief Returns true if the term t is a sort_expression
-    /// \param t A term
-    /// \return True if the term is a sort expression.
-    inline
-    bool is_sort_expression(atermpp::aterm_appl t)
-    {
-      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t) ||
-             core::detail::gsIsSortStruct(t) || core::detail::gsIsSortCons(t);
     }
 
   } // namespace data

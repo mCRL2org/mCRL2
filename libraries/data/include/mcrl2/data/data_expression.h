@@ -26,6 +26,15 @@ namespace mcrl2 {
 
   namespace data {
 
+    /// \brief Returns true if the term t is a data expression
+    /// \param t A term
+    /// \return True if the term is a data expression.
+    inline
+    bool is_data_expression(atermpp::aterm_appl t)
+    {
+      return core::detail::gsIsDataExpr(t);
+    }
+
     /// \brief data expression.
     ///
     /// A data expression can be any of:
@@ -144,15 +153,6 @@ namespace mcrl2 {
     /// \brief vector of data expressions
     ///
     typedef atermpp::vector<data_expression> data_expression_vector;
-
-    /// \brief Returns true if the term t is a data expression
-    /// \param t A term
-    /// \return True if the term is a data expression.
-    inline
-    bool is_data_expression(atermpp::aterm_appl t)
-    {
-      return core::detail::gsIsDataExpr(t);
-    }
 
     /// \brief Converts an container with data expressions to data_expression_list
     /// \param r A range of data expressions.
