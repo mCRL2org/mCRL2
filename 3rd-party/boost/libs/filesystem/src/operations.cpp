@@ -1283,6 +1283,7 @@ namespace boost
                                      // when iteration called from dtor, after
                                      // static had already been destroyed
         std::size_t path_size;
+        static_cast< void >(path_size);
         error_code ec = path_max( path_size );
         if ( ec ) return ec;
         dirent de;
