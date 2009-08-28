@@ -136,11 +136,9 @@ void GLCanvas::display()
 	rotY = 0;
 	double dumtrx2[16];
 	Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
-
 	for ( int i = 0; i < 12; i++)
 		currentModelviewMatrix[i] = dumtrx2[i];
-
-//	normalizeMatrix();
+	normalizeMatrix();
 	currentModelviewMatrix[12] = -lookX;
 	currentModelviewMatrix[13] = -lookY;
 	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
@@ -187,7 +185,7 @@ void GLCanvas::display()
 		glPopMatrix();
 		glMatrixMode(GL_MODELVIEW);
 	}
-
+	
 
     glFinish();
     SwapBuffers();
@@ -371,10 +369,12 @@ void GLCanvas::onMouseMidDown(wxMouseEvent& event)
 {
 	oldX = event.GetX();
 	oldY = event.GetY();
+	display();
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
 {
 	setMouseCursor(myID_NONE);
+	display();
 }
 
 void GLCanvas::onMouseMove(wxMouseEvent& event)
@@ -647,6 +647,7 @@ void GLCanvas::showSystem()
 void GLCanvas::normalizeMatrix()
 {
 	double x, y, z, norm;
+	bool xAx = currentModelviewMatrix[1] < 0;
 	Utils::Vect yAx;
 	x = currentModelviewMatrix[8];
 	y = currentModelviewMatrix[9];
@@ -664,12 +665,23 @@ void GLCanvas::normalizeMatrix()
 	glPushMatrix();
 	glLoadIdentity();
 	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
-	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
-	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	glRotated(tanXZ, 0.0, 1.0, 0.0);
+	glRotated(angYxz, -1.0, 0.0, 0.0);
 	Utils::Vect normal;
+	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 	normal.x = currentModelviewMatrix[8];
 	normal.y = currentModelviewMatrix[9];
 	normal.z = currentModelviewMatrix[10];
+	normal = normal / Utils::vecLength(normal);
+	Utils::Vect projection = yAx - (Utils::dotProd(yAx, normal)) * normal;
+	yAx.x = currentModelviewMatrix[4];
+	yAx.y = currentModelviewMatrix[5];
+	yAx.z = currentModelviewMatrix[6];
+	double angleRot = Utils::angDiff(yAx, projection) * 180.0f / M_PI;
+	if(xAx)
+		glRotated(-angleRot, 0.0, 0.0, 1.0);
+	else
+		glRotated(angleRot, 0.0, 0.0, 1.0);
 	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 	glPopMatrix();
 }

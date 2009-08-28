@@ -44,18 +44,21 @@ Utils::Vect operator/(Vect v, double s)
 
 double vecLength(Vect v)
 {
-  return static_cast< double >(sqrt(v.x * v.x + v.y * v.y + v.z * v.z));
+  return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
 double angDiff(Vect v1, Vect v2)
 {
-  double dotP = static_cast<double>(v1.x * v2.x + v1.y * v2.y + v1.z * v2.z);
-  double lenP = static_cast<double>(vecLength(v1) * vecLength(v2));
+  double lenP = vecLength(v1) * vecLength(v2);
 
-  return acos(dotP / lenP);
+  return acos(dotProd(v1, v2) / lenP);
 
 }
 
+double dotProd(Vect v1, Vect v2)
+{
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
 float signum(float v)
 {
   if (v < 0)

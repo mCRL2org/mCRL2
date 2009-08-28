@@ -26,6 +26,7 @@ namespace Utils {
 
   double vecLength(Vect v);
   double angDiff(Vect v1, Vect v2);
+  double dotProd(Vect v1, Vect v2);
   float signum(float f);
   void MultGLMatrices (const double leftm[16], const double rightm[16], double* ans);
   void genRotArbAxs (const double angle, const double x1, const double y1, const double z1, double* rotmtrx);
