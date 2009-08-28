@@ -41,7 +41,8 @@
                     >::type
                 actual_terminal_type;
                 typedef typename terminal<actual_terminal_type>::type expr_type;
-                typedef typename Expr::proto_domain::template result<void(expr_type)>::type type;
+                typedef typename Expr::proto_domain proto_domain;
+                typedef typename proto_domain::template result<proto_domain(expr_type)>::type type;
 
                 template<typename Expr2>
                 static type call(Expr2 const &expr)
@@ -170,10 +171,12 @@
                       , BOOST_PP_CAT(list, N)<
                             BOOST_PP_ENUM(N, BOOST_PROTO_DEFINE_DEEP_COPY_TYPE, ~)
                         >
+                      , N
                     >
                 expr_type;
 
-                typedef typename Expr::proto_domain::template result<void(expr_type)>::type type;
+                typedef typename Expr::proto_domain proto_domain;
+                typedef typename proto_domain::template result<proto_domain(expr_type)>::type type;
 
                 template<typename Expr2>
                 static type call(Expr2 const &expr)

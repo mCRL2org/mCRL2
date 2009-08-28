@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
+#include <iostream>
 
 #if (defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__))
 # include <windows.h>

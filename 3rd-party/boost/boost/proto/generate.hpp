@@ -56,6 +56,7 @@
                     proto::expr<
                         typename expr_params<Expr>::tag
                       , term<typename detail::term_traits<typename expr_params<Expr>::args::child0>::value_type>
+                      , 0
                     >
                 type;
 
@@ -246,7 +247,7 @@
             /// \param expr The expression to modify.
             /// \return <tt>deep_copy(expr)</tt>
             template<typename Expr>
-            typename result<void(Expr)>::type operator ()(Expr const &expr) const
+            typename result<by_value_generator(Expr)>::type operator ()(Expr const &expr) const
             {
                 return detail::by_value_generator_<Expr>::make(expr);
             }
@@ -275,7 +276,7 @@
             {
                 typedef
                     typename Second::template result<
-                        void(typename First::template result<void(Expr)>::type)
+                        Second(typename First::template result<First(Expr)>::type)
                     >::type
                 type;
             };
@@ -285,7 +286,7 @@
             {
                 typedef
                     typename Second::template result<
-                        void(typename First::template result<void(Expr)>::type)
+                        Second(typename First::template result<First(Expr)>::type)
                     >::type
                 type;
             };
@@ -295,7 +296,7 @@
             {
                 typedef
                     typename Second::template result<
-                        void(typename First::template result<void(Expr)>::type)
+                        Second(typename First::template result<First(Expr)>::type)
                     >::type
                 type;
             };
@@ -303,7 +304,7 @@
             /// \param expr The expression to modify.
             /// \return Second()(First()(expr))
             template<typename Expr>
-            typename result<void(Expr)>::type operator ()(Expr const &expr) const
+            typename result<compose_generators(Expr)>::type operator ()(Expr const &expr) const
             {
                 return Second()(First()(expr));
             }
@@ -343,6 +344,16 @@
 
     }}
 
+    // Specialization of boost::result_of to eliminate some unnecessary template instantiations
+    namespace boost
+    {
+        template<typename Expr>
+        struct result_of<proto::default_domain(Expr)>
+        {
+            typedef Expr type;
+        };
+    }
+
     #endif // BOOST_PROTO_GENERATE_HPP_EAN_02_13_2007
 
 #else // BOOST_PP_IS_ITERATING
@@ -359,6 +370,7 @@
                             // typename uncvref<typename expr_params<Expr>::args::child0>::type, ...
                             BOOST_PP_ENUM(N, BOOST_PROTO_DEFINE_BY_VALUE_TYPE, Expr)
                         >
+                      , N
                     >
                 type;
 

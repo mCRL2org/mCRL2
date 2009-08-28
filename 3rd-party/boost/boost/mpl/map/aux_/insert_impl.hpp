@@ -12,8 +12,8 @@
 // See http://www.boost.org/libs/mpl for documentation.
 
 // $Id$
-// $Date: 2008-10-11 08:19:02 +0200 (Sat, 11 Oct 2008) $
-// $Revision: 49267 $
+// $Date: 2009-08-24 06:11:00 +0200 (Mon, 24 Aug 2009) $
+// $Revision: 55751 $
 
 #include <boost/mpl/insert_fwd.hpp>
 #include <boost/mpl/next_prior.hpp>
@@ -39,7 +39,7 @@ struct map_insert_impl
             >
 #else
         , m_item<
-              next< typename Map::size >::type::value
+              Map::order::value
             , typename Pair::first
             , typename Pair::second
             , Map
