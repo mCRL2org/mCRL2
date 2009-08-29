@@ -95,7 +95,7 @@ void function_symbol_test()
   sort_expression_vector s01;
   s01.push_back(s0);
   s01.push_back(s1);
-  boost::iterator_range<sort_expression_vector::iterator> s01_range = boost::make_iterator_range(s01);
+  boost::iterator_range<sort_expression_vector::iterator> s01_range(s01);
   function_sort fs(s01_range, s);
 
 
@@ -131,13 +131,13 @@ void application_test()
   sort_expression_vector s01;
   s01.push_back(sort_expression(s0));
   s01.push_back(sort_expression(s1));
-  function_sort s01s(boost::make_iterator_range(s01), s);
+  function_sort s01s(s01, s);
 
   function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
   data_expression_vector xy = make_vector(x,y);
-  boost::iterator_range<data_expression_vector::const_iterator> xy_range(boost::make_iterator_range(xy.begin(), xy.end()));
+  boost::iterator_range<data_expression_vector::const_iterator> xy_range(xy.begin(), xy.end());
   application fxy(f, xy_range);
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
@@ -160,7 +160,7 @@ void abstraction_test()
 
   variable x("x", s);
   variable_vector xl = make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   abstraction I(abstraction::lambda(), xl_range, x);
   BOOST_CHECK(I.binding_operator() == abstraction::lambda());
   BOOST_CHECK(I.variables() == xl_range);
@@ -180,7 +180,7 @@ void lambda_test()
 
   variable x("x", s);
   variable_vector xl = make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   lambda I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == abstraction::lambda());
   BOOST_CHECK(I.is_lambda());
@@ -212,7 +212,7 @@ void forall_test()
 
   variable x("x", s);
   variable_vector xl = make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   forall I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == abstraction::forall());
   BOOST_CHECK(I.is_forall());
@@ -242,7 +242,7 @@ void exists_test()
 
   variable x("x", s);
   variable_vector xl = make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl.begin(), xl.end()));
+  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
   exists I(xl_range, x);
   BOOST_CHECK(I.binding_operator() == abstraction::exists());
   BOOST_CHECK(I.is_exists());

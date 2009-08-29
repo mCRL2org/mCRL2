@@ -475,10 +475,11 @@ namespace mcrl2 {
     {
       assert(core::detail::check_rule_DataSpec(term));
 
-      atermpp::term_list< sort_expression > term_sorts(atermpp::list_arg1(atermpp::arg1(term)));
-      atermpp::term_list< function_symbol > term_constructors(atermpp::list_arg1(atermpp::arg2(term)));
-      atermpp::term_list< function_symbol > term_mappings(atermpp::list_arg1(atermpp::arg3(term)));
-      atermpp::term_list< data_equation >   term_equations(atermpp::list_arg1(atermpp::arg4(term)));
+      // Note backwards compatibility measure: alias is no longer a sort_expression
+      atermpp::term_list< atermpp::aterm_appl >  term_sorts(atermpp::list_arg1(atermpp::arg1(term)));
+      atermpp::term_list< function_symbol >      term_constructors(atermpp::list_arg1(atermpp::arg2(term)));
+      atermpp::term_list< function_symbol >      term_mappings(atermpp::list_arg1(atermpp::arg3(term)));
+      atermpp::term_list< data_equation >        term_equations(atermpp::list_arg1(atermpp::arg4(term)));
 
       // Maps container unique name to a container sort expression
       atermpp::map< sort_expression, sort_expression >      renamings;
@@ -487,7 +488,7 @@ namespace mcrl2 {
       atermpp::multimap< sort_expression, sort_expression > other_names;
 
       // Add sorts and aliases for a container or structured sort
-      for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
+      for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
         if (data::is_alias(*i)) // Compatibility with legacy code
         {
@@ -534,7 +535,7 @@ namespace mcrl2 {
         add_alias(alias(i->second, atermpp::replace(i->first, renaming_substitution)));
       }
 
-      for (atermpp::term_list_iterator< sort_expression > i = term_sorts.begin(); i != term_sorts.end(); ++i)
+      for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
         if (!data::is_alias(*i)) // Compatibility with legacy code
         {
@@ -690,7 +691,7 @@ namespace mcrl2 {
 
         if (compatible)
         {
-          atermpp::set< sort_expression > sorts;
+          atermpp::set< atermpp::aterm_appl > sorts;
 
           // Maps container sort expressions to a unique name
           atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));

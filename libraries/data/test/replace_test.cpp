@@ -40,7 +40,7 @@ struct add_zero
 {
   aterm_appl operator()(aterm_appl t) const
   {
-    if (data_expression(t).is_variable())
+    if (is_data_expression(t) && data_expression(t).is_variable())
     {
       variable d(t);
       return variable(std::string(d.name()) + "0", d.sort());
@@ -77,7 +77,7 @@ struct assignment_list_replacer
 
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
-    if (!mcrl2::data::detail::is_variable(t))
+    if (!mcrl2::data::is_variable(t))
     {
       return std::make_pair(t, true); // continue the recursion
     }

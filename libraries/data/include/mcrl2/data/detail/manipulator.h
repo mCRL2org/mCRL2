@@ -202,7 +202,7 @@ namespace mcrl2 {
           {
             typedef typename manipulation_result_type< Expression >::type result_type;
 
-            atermpp::vector< result_type > result;
+            atermpp::vector< atermpp::aterm_appl > result;
 
             for (typename atermpp::term_list< Expression >::const_iterator i = container.begin(); i != container.end(); ++i)
             {

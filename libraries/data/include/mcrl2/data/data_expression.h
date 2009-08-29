@@ -35,6 +35,31 @@ namespace mcrl2 {
       return core::detail::gsIsDataExpr(t);
     }
 
+    /// \brief Returns true if the term t is a function symbol
+    inline bool is_abstraction(atermpp::aterm_appl p) {
+      return core::detail::gsIsBinder(p);
+    }
+
+    /// \brief Returns true if the term t is a function symbol
+    inline bool is_function_symbol(atermpp::aterm_appl p) {
+      return core::detail::gsIsOpId(p);
+    }
+
+    /// \brief Returns true if the term t is a variable
+    inline bool is_variable(atermpp::aterm_appl p) {
+      return core::detail::gsIsDataVarId(p);
+    }
+
+    /// \brief Returns true if the term t is an application
+    inline bool is_application(atermpp::aterm_appl p) {
+      return core::detail::gsIsDataAppl(p);
+    }
+
+    /// \brief Returns true if the term t is a where clause
+    inline bool is_where_clause(atermpp::aterm_appl p) {
+      return core::detail::gsIsWhr(p);
+    }
+
     /// \brief data expression.
     ///
     /// A data expression can be any of:
@@ -113,35 +138,35 @@ namespace mcrl2 {
         inline
         bool is_variable() const
         {
-          return core::detail::gsIsDataVarId(*this);
+          return data::is_variable(*this);
         }
 
         /// \brief Returns true iff the expression is a function symbol
         inline
         bool is_function_symbol() const
         {
-          return core::detail::gsIsOpId(*this);
+          return data::is_function_symbol(*this);
         }
 
         /// \brief Returns true iff the expression is an abstraction
         inline
         bool is_abstraction() const
         {
-          return core::detail::gsIsBinder(*this);
+          return data::is_abstraction(*this);
         }
 
         /// \brief Returns true iff the expression is an application
         inline
         bool is_application() const
         {
-          return core::detail::gsIsDataAppl(*this);
+          return data::is_application(*this);
         }
 
         /// \brief Returns true iff the expression is a where clause
         inline
         bool is_where_clause() const
         {
-          return core::detail::gsIsWhr(*this);
+          return data::is_where_clause(*this);
         }
 
     }; // class data_expression

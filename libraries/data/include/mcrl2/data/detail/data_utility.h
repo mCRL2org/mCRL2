@@ -77,7 +77,7 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
 inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
 {
   std::set<sort_expression> s_sorts;
-  atermpp::find_all_if(s, boost::bind(std::logical_not< bool >(), boost::bind(&detail::is_function_sort, _1)), std::inserter(s_sorts, s_sorts.begin()));
+  atermpp::find_all_if(s, boost::bind(std::logical_not< bool >(), boost::bind(&is_function_sort, _1)), std::inserter(s_sorts, s_sorts.begin()));
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
     if (sorts.find(*i) == sorts.end()) {

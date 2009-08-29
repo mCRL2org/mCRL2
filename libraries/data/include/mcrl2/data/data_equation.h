@@ -29,6 +29,11 @@ namespace mcrl2 {
 
   namespace data {
 
+    // predeclare
+    namespace sort_bool {
+      function_symbol const& true_();
+    }
+
     /// \brief data data_equation.
     ///
     class data_equation: public atermpp::aterm_appl
@@ -85,7 +90,7 @@ namespace mcrl2 {
                       const data_expression& rhs,
                       typename detail::enable_if_container< Container, variable >::type* = 0)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  convert< variable_list >(variables), core::detail::gsMakeNil(), lhs, rhs))
+                  convert< variable_list >(variables), sort_bool::true_(), lhs, rhs))
         {}
 
         /// \brief Constructor
@@ -111,7 +116,7 @@ namespace mcrl2 {
         data_equation(const data_expression& lhs,
                       const data_expression& rhs)
           : atermpp::aterm_appl(core::detail::gsMakeDataEqn(
-                  variable_list(), core::detail::gsMakeNil(), lhs, rhs))
+                  variable_list(), sort_bool::true_(), lhs, rhs))
         {}
 
         /// \brief Returns the variables of the data equation.

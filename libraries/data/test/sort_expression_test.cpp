@@ -99,8 +99,7 @@ void alias_test()
   BOOST_CHECK(s0_.name() == s0_name);
   BOOST_CHECK(s0_.reference() == s0);
 
-  sort_expression s0_e(s0_);
-  alias s0_e_(s0_e);
+  alias s0_e_(s0_);
   BOOST_CHECK(s0_e_ == s0_);
   BOOST_CHECK(s0_e_.name() == s0_.name());
   BOOST_CHECK(s0_e_.reference() == s0_.reference());

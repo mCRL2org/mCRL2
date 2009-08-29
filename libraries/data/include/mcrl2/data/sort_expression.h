@@ -36,6 +36,26 @@ namespace mcrl2 {
              core::detail::gsIsSortStruct(t) || core::detail::gsIsSortCons(t);
     }
 
+    /// \brief Returns true if the term t is a basic sort
+    inline bool is_basic_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortId(p);
+    }
+
+    /// \brief Returns true if the term t is a function sort
+    inline bool is_function_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortArrow(p);
+    }
+
+    /// \brief Returns true if the term t is a container sort
+    inline bool is_container_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortCons(p);
+    }
+
+    /// \brief Returns true if the term t is a structured sort
+    inline bool is_structured_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortStruct(p);
+    }
+
     /// \brief sort expression.
     ///
     /// A sort expression can be any of:
@@ -67,28 +87,28 @@ namespace mcrl2 {
         inline
         bool is_basic_sort() const
         {
-          return core::detail::gsIsSortId(*this);
+          return data::is_basic_sort(*this);
         }
 
         /// \brief Returns true iff this expression is a structured sort.
         inline
         bool is_structured_sort() const
         {
-          return core::detail::gsIsSortStruct(*this);
+          return data::is_structured_sort(*this);
         }
 
         /// \brief Returns true iff this expression is a container sort.
         inline
         bool is_container_sort() const
         {
-          return core::detail::gsIsSortCons(*this);
+          return data::is_container_sort(*this);
         }
 
         /// \brief Returns true iff this expression is a function sort.
         inline
         bool is_function_sort() const
         {
-          return core::detail::gsIsSortArrow(*this);
+          return data::is_function_sort(*this);
         }
 
         /// \brief Returns true iff the expression represents a standard sort.

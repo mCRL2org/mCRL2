@@ -34,30 +34,6 @@ namespace data {
 
 namespace detail {
 
-inline bool is_basic_sort(atermpp::aterm_appl p) {
-  return sort_expression(p).is_basic_sort();
-}
-
-inline bool is_function_sort(atermpp::aterm_appl p) {
-  return sort_expression(p).is_function_sort();
-}
-
-inline bool is_container_sort(atermpp::aterm_appl p) {
-  return sort_expression(p).is_container_sort();
-}
-
-inline bool is_structured_sort(atermpp::aterm_appl p) {
-  return sort_expression(p).is_structured_sort();
-}
-
-inline bool is_variable(atermpp::aterm_appl p) {
-  return data_expression(p).is_variable();
-}
-
-inline bool is_function_symbol(atermpp::aterm_appl p) {
-  return data_expression(p).is_function_symbol();
-}
-
 template <typename Term>
 struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
 {
