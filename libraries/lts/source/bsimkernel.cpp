@@ -46,10 +46,12 @@ static ATermList GetLabels(INTERVAL *p)
    }
 
 /* static ATbool AllTausAreExitting(int p) {
-     ATermList
-     targets = (ATermList) ATtableGet(lab_src_tgt[label_tau],(ATerm) ATmakeInt(p));
-     int b = blockref[p];
-     if (!targets) return ATtrue;
+     ATermList targets;
+     int b;
+     if ( lab_src_tgt[label_tau].count((ATerm) ATmakeInt(p)) == 0 )
+        return ATtrue;
+     targets = (ATermList) lab_src_tgt[label_tau][(ATerm) ATmakeInt(p)];
+     b = blockref[p];
      for (;!ATisEmpty(targets);targets=ATgetNext(targets))
           {ATerm target = ATgetFirst(targets);
 
@@ -68,7 +70,7 @@ static void AddBlock(int b) {
 
 static void Unstable(int a, INTERVAL *p)
      {
-     ATermTable act = lab_tgt_src[a];
+     atermpp::map<ATerm,ATerm> &act = lab_tgt_src[a];
 /* Returns a set of blocks which are candidates for splitting */
      int left = p->left, right = p->right, i;
      for (i=left;i<right;i++)
@@ -77,7 +79,7 @@ static void Unstable(int a, INTERVAL *p)
         if (IndexOf(lab[target],a,0)<0) continue;
         {
         ATermList sources =
-             (ATermList) ATtableGet(act, (ATerm) ATmakeInt(target));
+             (ATermList) act[(ATerm) ATmakeInt(target)];
         /* if (!sources) sources = ATmakeList0(); */
         for (;!ATisEmpty(sources);sources = ATgetNext(sources))
              {
@@ -293,7 +295,7 @@ static ATbool MarkTau(int b,  INTERVAL *p2) {
      /* ATwarning("Entry MarkTau b = %d left = %d right = %d\n", b, left, right); */
      for (i=left;i<right;i++) {
           ATermList sources = (ATermList)
-               ATtableGet(lab_tgt_src[label_tau],(ATerm) ATmakeInt(s[i]));
+               lab_tgt_src[label_tau][(ATerm) ATmakeInt(s[i])];
 
           if (!sources) continue;
           /* ATwarning("Sources = %t\n",sources); */
@@ -394,8 +396,8 @@ static ATbool PrintNonBisimilarStates(int *p, int *q) {
      */
      splitter = blok[b1].splitter;
      action = blok[b1].action == -1? blok[b2].action: blok[b1].action;
-     tgt1 = (ATermList) ATtableGet(lab_src_tgt[action],(ATerm) ATmakeInt(*p));
-     tgt2 = (ATermList) ATtableGet(lab_src_tgt[action],(ATerm) ATmakeInt(*q));
+     tgt1 = (ATermList) lab_src_tgt[action][(ATerm) ATmakeInt(*p)];
+     tgt2 = (ATermList) lab_src_tgt[action][(ATerm) ATmakeInt(*q)];
      if (blok[b1].action == -1) {
             if (!tgt1) {
                  PrintTransition(p_lab, ATtrue, action, q_lab, ATfalse);

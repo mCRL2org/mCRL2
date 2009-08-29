@@ -16,6 +16,7 @@
 #include <cerrno>
 #include "aterm1.h"
 #include <cassert>
+#include <mcrl2/atermpp/map.h>
 #include "mcrl2/lts/lts.h"
 
 /* extern declarations data structures */
@@ -62,7 +63,7 @@ extern int second_lts_states_offset;
 
 extern int label_tau;
 extern int traceLevel, optimal, classes;
-extern ATermTable *lab_src_tgt, *lab_tgt_src;
+extern atermpp::map<ATerm,ATerm> *lab_src_tgt, *lab_tgt_src;
 
 /* MACRO definitions */
 #define RemoveInterval(p) ((p)->mode=REMOVED)

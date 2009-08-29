@@ -38,7 +38,7 @@ INTERVAL *Pi;
 BLOK *blok;
 BLOCKS blocks;
 
-ATermTable *lab_src_tgt, *lab_tgt_src, graph, graph_i;
+atermpp::map<ATerm,ATerm> *lab_src_tgt, *lab_tgt_src, *graph, *graph_i;
 ATerm *label_name, *par_name;
 /* End data definition */
 
@@ -103,17 +103,15 @@ static void AllocData(void)
      ATprotectArray((ATerm*) lab, nstate);
      if (!(Pi = (INTERVAL*) calloc(2*nstate, sizeof(INTERVAL))))
         ATerror("Indexed array Pi is not allocated (%d)\n",2*nstate);
-     if (!(lab_src_tgt = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
+     if (!(lab_src_tgt = new atermpp::map<ATerm,ATerm>[nlabel]))
            ATerror("Array of tables is not allocated (%d)\n",nlabel);
-     if (!(lab_tgt_src = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
+     if (!(lab_tgt_src = new atermpp::map<ATerm,ATerm>[nlabel]))
            ATerror("Array of tables is not allocated (%d)\n",nlabel);
      if (!(blok = (BLOK*) malloc(2*nstate * sizeof(BLOK))))
         ATerror("BLOK is not allocated (%d)\n",nstate);
      for (i=0;i<nlabel;i++) {
-          if (!(lab_src_tgt[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
-               ATerror("Not possible to create table (%d)",i);
-          if (!(lab_tgt_src[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
-               ATerror("Not possible to create table (%d)",i);
+          lab_src_tgt[i].clear();
+          lab_tgt_src[i].clear();
           }
      label_name = MakeArrayOfATerms(nlabel);
      for (i=0;i<nstate;i++)
@@ -168,12 +166,12 @@ static void ExtraNode(void) {
      int i;
      ATermList states = ATempty;
      for (i=0;i<nstate;i++) states = ATinsert(states, (ATerm) ATmakeInt(i));
-     ATtablePut(graph, (ATerm) ATmakeInt(nstate), (ATerm) ATreverse(states));
+     (*graph)[(ATerm) ATmakeInt(nstate)] = (ATerm) ATreverse(states);
 }
 
 static void RemoveExtraNode(void) {
      /* Remove extra node which is connected to each point */
-     ATtableRemove(graph, (ATerm) ATmakeInt(nstate));
+     graph->erase((ATerm) ATmakeInt(nstate));
      dfsn--;
 }
 
@@ -182,7 +180,7 @@ void DfsNumbering(ATerm t) {
      if (visited[d]>=0) return;
      visited[d] = 0;
      {
-     ATermList targets = (ATermList) ATtableGet(graph, t);
+     ATermList targets = (ATermList) (*graph)[t];
      if (targets) {
           for (;!ATisEmpty(targets);targets=ATgetNext(targets)) {
                ATerm target = ATgetFirst(targets);
@@ -202,7 +200,7 @@ int TakeComponent(ATerm t) {
      /* ATwarning("Help d = %d visited[d] = %d dfsn = %d\n",d, visited[d], dfsn); */
      if (visited[d]<0) return s_pt;
      {
-     ATermList sources = (ATermList) ATtableGet(graph_i, t);
+     ATermList sources = (ATermList) (*graph_i)[t];
      if (visited[d] == dfsn) {
           dfsn--; /* Removal of deepest node */
           while (dfsn>=0 && visited[dfsn2state[dfsn]]== -1) dfsn--;
@@ -238,8 +236,8 @@ static void MakeUnitPartition(void) {
 void SCC(void) {
      int i, left = 0;
      if (label_tau<0) {MakeUnitPartition(); return;}
-     graph = lab_src_tgt[label_tau];
-     graph_i = lab_tgt_src[label_tau];
+     graph = &lab_src_tgt[label_tau];
+     graph_i = &lab_tgt_src[label_tau];
      ExtraNode();
      if (!(visited = (int*) calloc(nstate+1, sizeof(int))))
         ATerror("Visited is not allocated (%d)\n",nstate);
@@ -264,14 +262,12 @@ void SCC(void) {
 --------------- End Strongly Connected Components -------------------------
 */
 
-static void UpdateTable(ATermTable db, int key, int val) {
+static void UpdateTable(atermpp::map<ATerm,ATerm> &db, int key, int val) {
      ATerm newkey = (ATerm) ATmakeInt(key);
-     ATermList newval = (ATermList) ATtableGet(db , newkey);
-     if (!newval)
-          newval = ATmakeList1((ATerm) ATmakeInt(val));
+     if ( db.count(newkey) == 0 )
+          db[newkey] = (ATerm) ATmakeList1((ATerm) ATmakeInt(val));
      else
-          newval = ATinsert(newval, (ATerm) ATmakeInt(val));
-     ATtablePut(db, newkey, (ATerm) newval);
+          db[newkey] = (ATerm) ATinsert((ATermList) db[newkey], (ATerm) ATmakeInt(val));
 }
 
 static void UpdateLabArray(int state, int label) {
@@ -364,7 +360,7 @@ int ReadData(lts &l)
    label_tau = nlabel-1;
    label_name[label_tau] = (ATerm) gsMakeMultAct(ATmakeList0());
    transition_iterator i(&l);
-   for (; i.more(); ++i)
+   for (int c = 0; i.more(); ++i,++c)
       {
       int label = get_label_index(l,i.label(),label_tau);
       UpdateLabArray(i.to(), label);
@@ -477,15 +473,15 @@ static void TransitionsGoingToBlock(int b, ATermList *newlab) {
         ATerm ss = (ATerm) ATmakeInt(s[i]);
         for (;!ATisEmpty(labels);labels = ATgetNext(labels)) {
              int label = ATgetInt((ATermInt) ATgetFirst(labels));
-             ATermList val = (ATermList) ATtableGet(lab_src_tgt[label], bb);
-             ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], ss);
+             ATermList val = (ATermList) lab_src_tgt[label][bb];
+             ATermList sources = (ATermList) lab_tgt_src[label][ss];
              ATermList newsources = BlockNumbers(sources);
              if (val)
                     newsources = Union(val, newsources);
              if (omitTauLoops && label_tau == label)
                   newsources = ATremoveElement(newsources, bb);
              if (!val || !ATisEqual(val, newsources))
-                  ATtablePut(lab_src_tgt[label], bb, (ATerm) newsources);
+                  lab_src_tgt[label][bb] = (ATerm) newsources;
              if (ATindexOf(newlabels, ATgetFirst(labels),0)<0)
                   newlabels = ATinsert(newlabels, ATgetFirst(labels));
              }
@@ -506,8 +502,8 @@ static void TransitionsGoingToBlock(int b, ATermList *newlab) {
 static void SwapClearTables(void) {
      int i;
      for (i=0;i<nlabel;i++) {
-          ATermTable swap = lab_tgt_src[i];
-          ATtableReset(swap);
+          atermpp::map<ATerm,ATerm> &swap = lab_tgt_src[i];
+          swap.clear();
           lab_tgt_src[i] = lab_src_tgt[i];
           lab_src_tgt[i] = swap;
           }
@@ -522,7 +518,7 @@ static int MakeEquivalenceClasses(int initState,
      if (!(newlab = (ATermList*) calloc(n_states,  sizeof(ATermList))))
      ATerror("Cannot allocate array with [labels] of size %d\n", n_states);
      ATprotectArray((ATerm*) newlab, n_states);
-     for (i=0;i<nlabel;i++) ATtableReset(lab_src_tgt[i]);
+     for (i=0;i<nlabel;i++) lab_src_tgt[i].clear();
      for (;!ATisEmpty(blocks);blocks=ATgetNext(blocks))
          {int b = ATgetInt((ATermInt) ATgetFirst(blocks));
          TransitionsGoingToBlock(b, newlab);
@@ -538,17 +534,17 @@ static int MakeEquivalenceClasses(int initState,
 
          for (;!ATisEmpty(labels);labels=ATgetNext(labels))
            {int label = ATgetInt((ATermInt) ATgetFirst(labels));
-           ATermList sources = (ATermList) ATtableGet(lab_tgt_src[label], bb);
+           ATermList sources = (ATermList) lab_tgt_src[label][bb];
            for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
            ATermList tgts = (ATermList)
-                ATtableGet(lab_src_tgt[label],ATgetFirst(sources));
+                lab_src_tgt[label][ATgetFirst(sources)];
            if (!tgts)
-                ATtablePut(lab_src_tgt[label], ATgetFirst(sources),
-                     (ATerm) ATmakeList1(bb));
+                lab_src_tgt[label][ATgetFirst(sources)] =
+                     (ATerm) ATmakeList1(bb);
            else {
                 if (ATindexOf(tgts, ATgetFirst(sources), 0) < 0) tgts =
                      ATinsert(tgts, ATgetFirst(sources));
-                ATtablePut(lab_src_tgt[label], ATgetFirst(sources),(ATerm) tgts);
+                lab_src_tgt[label][ATgetFirst(sources)] = (ATerm) tgts;
                 }
            }
            }
@@ -581,7 +577,7 @@ static int WriteTransitions(lts &l) {
                label_name[label] = NULL;
              }
              ATermList sources =
-             (ATermList) ATtableGet(lab_tgt_src[label], (ATerm) ATmakeInt(b));
+             (ATermList) lab_tgt_src[label][(ATerm) ATmakeInt(b)];
 	     if (!ATisEmpty(sources))
 	     {
              for (;!ATisEmpty(sources);sources=ATgetNext(sources)) {
@@ -595,13 +591,6 @@ static int WriteTransitions(lts &l) {
         }
    return n_tau_transitions;
    }
-
-/*static void TestTransitions(void) {
-int label;
-for (label=0;label<nlabel;label++) {
-ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
-}
-}*/
 
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */
