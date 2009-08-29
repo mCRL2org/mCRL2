@@ -147,8 +147,8 @@ namespace atermpp
       /// \return The result of the assignment.
       term_appl<Term>& operator=(ATermAppl t)
       {
+        assert(t==NULL || ATgetType(t) != AT_FREE);
         m_term = reinterpret_cast<ATerm>(t);
-        assert(ATgetType(m_term) != AT_FREE);
         return *this;
       }
 
