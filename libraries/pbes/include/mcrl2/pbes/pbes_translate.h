@@ -125,6 +125,7 @@ class pbes_translate_algorithm
     data::variable_list Par(core::identifier_string x, data::variable_list l, state_formulas::state_formula f)
     {
       using namespace state_formulas::state_frm;
+      using state_formulas::state_frm::is_variable;
       using atermpp::detail::operator+;
         
       data::variable_list result;
@@ -189,6 +190,7 @@ std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::p
     {
       using namespace detail;
       using namespace state_formulas::state_frm;
+      using state_formulas::state_frm::is_variable;
 
       state_formulas::state_formula f = formula;
       std::set<core::identifier_string> formula_variable_names = data::detail::find_variable_names(formula);
@@ -520,6 +522,7 @@ std::cerr << "\n<RHSresult>" << pp(result) << std::flush;
 std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace state_formulas::state_frm;
+      using state_formulas::state_frm::is_variable;
       using namespace data;
       atermpp::vector<pbes_equation> result;
 
@@ -630,6 +633,7 @@ std::cerr << "\n<Eresult>" << detail::print(result) << std::flush;
     pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec)
     {
       using namespace state_formulas::state_frm;
+      using state_formulas::state_frm::is_variable;
       using atermpp::detail::operator+;
 
       lps::linear_process lps = spec.process();
@@ -923,6 +927,7 @@ std::cerr << "\n<E>" << pp(f) << std::flush;
 #endif
       using namespace state_formulas::state_frm;
       using namespace data;
+      using state_formulas::state_frm::is_variable;
       atermpp::vector<pbes_equation> result;
 
       if (!is_not(f))

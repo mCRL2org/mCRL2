@@ -65,7 +65,7 @@ bool DiaGraph::check_configuration(tipi::configuration const& c) const {
 bool DiaGraph::perform_task(tipi::configuration& c) {
   m_input_filename = c.get_input("main-input").location();
 
-  return super::perform_task(c);
+  return true;
 }
 #endif
 

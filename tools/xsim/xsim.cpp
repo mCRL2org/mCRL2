@@ -122,7 +122,7 @@ public:
    bool perform_task(tipi::configuration& c) {
      this->m_input_filename = c.get_input("main-input").location();
 
-     return super::perform_task(c);
+     return true;
    }
 #endif
 };
