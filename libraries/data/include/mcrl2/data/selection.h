@@ -49,22 +49,29 @@ namespace mcrl2 {
         // temporary measure: use aterm
         used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context, bool add_symbols_for_global_variables = true)
         {
+          atermpp::aterm_appl::const_iterator start = ++context.begin();
+
+          if (core::detail::gsIsLinProcSpec(context))
+          {
+            ++start;
+          }
+
+          if (add_symbols_for_global_variables)
+          {
+            variable_list variables(atermpp::aterm_appl(*start)(0));
+
+            // Compensate for symbols that could be used as part of an instantiation of free variables
+            for (variable_list::const_iterator j = variables.begin(); j != variables.end(); ++j)
+            {
+              add_symbols(specification.constructors(j->sort()));
+              add_symbols(specification.mappings(j->sort()));
+            }
+          }
+
           // Trick, traverse all but the data specification
-          for (atermpp::aterm_appl::const_iterator i = ++(++context.begin()); i != context.end(); ++i)
+          for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
           {
             detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
-
-            if (add_symbols_for_global_variables)
-            {
-              const std::set< variable > variables = find_free_variables(*i);
-
-              // Compensate for symbols that could be used as part of an instantiation of free variables
-              for (std::set< variable >::const_iterator j = variables.begin(); j != variables.end(); ++j)
-              {
-                add_symbols(specification.constructors(j->sort()));
-                add_symbols(specification.mappings(j->sort()));
-              }
-            }
           }
 
           std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
