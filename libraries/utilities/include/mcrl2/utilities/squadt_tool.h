@@ -70,17 +70,9 @@ namespace mcrl2 {
        **/
       template < typename Tool >
       class squadt_tool: public Tool,
-#if defined(__WXWINDOWS__)
-                         public squadt::basic_wx_tool_interface< squadt::tool_interface >
-#else
                          public squadt::tool_interface
-#endif
       {
-#if defined(__WXWINDOWS__)
-        typedef squadt::basic_wx_tool_interface< squadt::tool_interface > super;
-#else
         typedef squadt::tool_interface super;
-#endif
 
         /// \brief relays messages from the mCRL2 messaging system
         template < class T >
@@ -175,7 +167,7 @@ namespace mcrl2 {
           int execute(int& argc, Char* argv[])
           {
             try {
-              if (mcrl2::utilities::squadt::free_activation(*this, argc, argv)) {
+              if (try_interaction(argc, argv)) {
                 return EXIT_SUCCESS;
               }
 
