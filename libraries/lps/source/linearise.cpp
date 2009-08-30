@@ -2196,7 +2196,7 @@ class specification_basic_type:public boost::noncopyable
 
     process_expression distribute_sum(
                                     const variable_list sumvars,
-                                    const data_expression body1)
+                                    const process_expression body1)
     { if (is_choice(body1))
       { return choice(
                    distribute_sum(sumvars,choice(body1).left()),
@@ -2272,7 +2272,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     void extract_names(
-          const data_expression sequence,
+          const process_expression sequence,
           atermpp::vector < process_instance > &result)
     { if (is_action(sequence)||is_process_instance(sequence))
       { result.push_back(sequence);
@@ -2435,13 +2435,13 @@ class specification_basic_type:public boost::noncopyable
        this variable by a single one, putting the new variable
        on the todo list, to be transformed to regular form also. */
     { if (is_choice(t))
-      { const data_expression t1=to_regular_form(choice(t).left(),todo,freevars);
-        const data_expression t2=to_regular_form(choice(t).right(),todo,freevars);
+      { const process_expression t1=to_regular_form(choice(t).left(),todo,freevars);
+        const process_expression t2=to_regular_form(choice(t).right(),todo,freevars);
         return choice(t1,t2);
       }
 
       if (is_seq(t))
-      { const data_expression firstact=seq(t).left();
+      { const process_expression firstact=seq(t).left();
         assert(is_at(firstact)||is_tau(firstact)||is_action(firstact)||is_sync(firstact));
         /* the sequence of variables in
                    the second argument must be replaced */
@@ -2705,7 +2705,6 @@ class specification_basic_type:public boost::noncopyable
         { throw mcrl2::runtime_error("there is something wrong with recursion");
         }
 
-        // std::cerr << "Linearised process " << pp(procIdDecl) << "   := " << pp(t) << "\n";
         objectdata[n].processbody=t;
         objectdata[n].processstatus=GNF;
         return;
@@ -6560,7 +6559,7 @@ class specification_basic_type:public boost::noncopyable
         // during a call to alphaconversionterm.
         variable_list vars;
         data_expression_list dl;
-        const data_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,vars,dl);
+        const process_expression tempvar=alphaconversionterm(objectdata[n].processbody,parameters,vars,dl);
         objectdata[n].processbody=tempvar;
       }
       else
