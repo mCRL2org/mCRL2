@@ -86,9 +86,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching []
       inline
-      bool is_nil_function_symbol(const data_expression& e)
+      bool is_nil_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == nil_name();
         }
@@ -119,9 +119,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching |>
       inline
-      bool is_cons_function_symbol(const data_expression& e)
+      bool is_cons_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == cons_name();
         }
@@ -144,9 +144,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol cons_ to a
       ///     number of arguments
       inline
-      bool is_cons_application(const data_expression& e)
+      bool is_cons_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_cons_function_symbol(static_cast< application >(e).head());
         }
@@ -189,9 +189,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching in
       inline
-      bool is_in_function_symbol(const data_expression& e)
+      bool is_in_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == in_name();
         }
@@ -214,9 +214,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol in to a
       ///     number of arguments
       inline
-      bool is_in_application(const data_expression& e)
+      bool is_in_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_in_function_symbol(static_cast< application >(e).head());
         }
@@ -247,9 +247,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching #
       inline
-      bool is_count_function_symbol(const data_expression& e)
+      bool is_count_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == count_name();
         }
@@ -271,9 +271,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol count to a
       ///     number of arguments
       inline
-      bool is_count_application(const data_expression& e)
+      bool is_count_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_count_function_symbol(static_cast< application >(e).head());
         }
@@ -304,9 +304,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching <|
       inline
-      bool is_snoc_function_symbol(const data_expression& e)
+      bool is_snoc_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == snoc_name();
         }
@@ -329,9 +329,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol snoc to a
       ///     number of arguments
       inline
-      bool is_snoc_application(const data_expression& e)
+      bool is_snoc_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_snoc_function_symbol(static_cast< application >(e).head());
         }
@@ -362,9 +362,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching ++
       inline
-      bool is_concat_function_symbol(const data_expression& e)
+      bool is_concat_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == concat_name();
         }
@@ -387,9 +387,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol concat to a
       ///     number of arguments
       inline
-      bool is_concat_application(const data_expression& e)
+      bool is_concat_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_concat_function_symbol(static_cast< application >(e).head());
         }
@@ -420,9 +420,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching .
       inline
-      bool is_element_at_function_symbol(const data_expression& e)
+      bool is_element_at_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == element_at_name();
         }
@@ -445,9 +445,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol element_at to a
       ///     number of arguments
       inline
-      bool is_element_at_application(const data_expression& e)
+      bool is_element_at_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_element_at_function_symbol(static_cast< application >(e).head());
         }
@@ -478,9 +478,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching head
       inline
-      bool is_head_function_symbol(const data_expression& e)
+      bool is_head_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == head_name();
         }
@@ -502,9 +502,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol head to a
       ///     number of arguments
       inline
-      bool is_head_application(const data_expression& e)
+      bool is_head_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_head_function_symbol(static_cast< application >(e).head());
         }
@@ -535,9 +535,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching tail
       inline
-      bool is_tail_function_symbol(const data_expression& e)
+      bool is_tail_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == tail_name();
         }
@@ -559,9 +559,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol tail to a
       ///     number of arguments
       inline
-      bool is_tail_application(const data_expression& e)
+      bool is_tail_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_tail_function_symbol(static_cast< application >(e).head());
         }
@@ -592,9 +592,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching rhead
       inline
-      bool is_rhead_function_symbol(const data_expression& e)
+      bool is_rhead_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == rhead_name();
         }
@@ -616,9 +616,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol rhead to a
       ///     number of arguments
       inline
-      bool is_rhead_application(const data_expression& e)
+      bool is_rhead_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_rhead_function_symbol(static_cast< application >(e).head());
         }
@@ -649,9 +649,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching rtail
       inline
-      bool is_rtail_function_symbol(const data_expression& e)
+      bool is_rtail_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e).name() == rtail_name();
         }
@@ -673,9 +673,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol rtail to a
       ///     number of arguments
       inline
-      bool is_rtail_application(const data_expression& e)
+      bool is_rtail_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_rtail_function_symbol(static_cast< application >(e).head());
         }

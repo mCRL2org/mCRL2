@@ -86,9 +86,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching true
       inline
-      bool is_true_function_symbol(const data_expression& e)
+      bool is_true_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == true_();
         }
@@ -118,9 +118,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching false
       inline
-      bool is_false_function_symbol(const data_expression& e)
+      bool is_false_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == false_();
         }
@@ -161,9 +161,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching !
       inline
-      bool is_not_function_symbol(const data_expression& e)
+      bool is_not_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == not_();
         }
@@ -184,9 +184,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol not_ to a
       ///     number of arguments
       inline
-      bool is_not_application(const data_expression& e)
+      bool is_not_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_not_function_symbol(static_cast< application >(e).head());
         }
@@ -216,9 +216,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching &&
       inline
-      bool is_and_function_symbol(const data_expression& e)
+      bool is_and_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == and_();
         }
@@ -240,9 +240,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol and_ to a
       ///     number of arguments
       inline
-      bool is_and_application(const data_expression& e)
+      bool is_and_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_and_function_symbol(static_cast< application >(e).head());
         }
@@ -272,9 +272,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching ||
       inline
-      bool is_or_function_symbol(const data_expression& e)
+      bool is_or_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == or_();
         }
@@ -296,9 +296,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol or_ to a
       ///     number of arguments
       inline
-      bool is_or_application(const data_expression& e)
+      bool is_or_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_or_function_symbol(static_cast< application >(e).head());
         }
@@ -328,9 +328,9 @@ namespace mcrl2 {
       /// \param e A data expression
       /// \return true iff e is the function symbol matching =>
       inline
-      bool is_implies_function_symbol(const data_expression& e)
+      bool is_implies_function_symbol(const atermpp::aterm_appl& e)
       {
-        if (e.is_function_symbol())
+        if (is_function_symbol(e))
         {
           return function_symbol(e) == implies();
         }
@@ -352,9 +352,9 @@ namespace mcrl2 {
       /// \return true iff e is an application of function symbol implies to a
       ///     number of arguments
       inline
-      bool is_implies_application(const data_expression& e)
+      bool is_implies_application(const atermpp::aterm_appl& e)
       {
-        if (e.is_application())
+        if (is_application(e))
         {
           return is_implies_function_symbol(static_cast< application >(e).head());
         }

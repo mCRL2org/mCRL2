@@ -738,7 +738,7 @@ namespace mcrl2 {
         }
         else
         {
-          atermpp::vector< sort_expression > sorts = convert< atermpp::vector< sort_expression > >(s.sorts());
+          atermpp::vector< atermpp::aterm_appl > sorts = convert< atermpp::vector< atermpp::aterm_appl > >(s.sorts());
 
           sorts.insert(sorts.end(), s.aliases().begin(), s.aliases().end());
 

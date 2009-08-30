@@ -363,9 +363,9 @@ class function_declaration_list():
         code += "      /// \\param e A data expression\n"
         code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
         code += "      inline\n"
-        code += "      bool is_%s_function_symbol(const data_expression& e)\n" % (name)
+        code += "      bool is_%s_function_symbol(const atermpp::aterm_appl& e)\n" % (name)
         code += "      {\n"
-        code += "        if (e.is_function_symbol())\n"
+        code += "        if (is_function_symbol(e))\n"
         code += "        {\n"
         sortparams_list = string.split(sortparams, ", ")
         if sortparams_list == ['']:
@@ -384,9 +384,9 @@ class function_declaration_list():
         code += "      /// \\param e A data expression\n"
         code += "      /// \\return true iff e is the function symbol matching %s\n" % (escape(fullname))
         code += "      inline\n"
-        code += "      bool is_%s_function_symbol(const data_expression& e)\n" % (name)
+        code += "      bool is_%s_function_symbol(const atermpp::aterm_appl& e)\n" % (name)
         code += "      {\n"
-        code += "        if (e.is_function_symbol())\n"
+        code += "        if (is_function_symbol(e))\n"
         code += "        {\n"
         code += "          function_symbol f(e);\n"
         sortparams_list = string.split(sortparams, ", ")
@@ -432,9 +432,9 @@ class function_declaration_list():
         code += "      /// \\return true iff e is an application of function symbol %s to a\n" % (escape(name))
         code += "      ///     number of arguments\n"
         code += "      inline\n"
-        code += "      bool is_%s_application(const data_expression& e)\n" % (name)
+        code += "      bool is_%s_application(const atermpp::aterm_appl& e)\n" % (name)
         code += "      {\n"
-        code += "        if (e.is_application())\n"
+        code += "        if (is_application(e))\n"
         code += "        {\n"
         code += "          return is_%s_function_symbol(static_cast< application >(e).head());\n" % (name)
         code += "        }\n"
