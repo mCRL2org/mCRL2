@@ -3806,13 +3806,13 @@ class specification_basic_type:public boost::noncopyable
             sortId=sort_id;
             //create structured sort
             //  Enumi = struct en_i | ... | e0_i;
-            function_symbol_list struct_conss;
+            structured_sort_constructor_list struct_conss;
             for(unsigned int j=0 ; (j<n) ; j++)
             { //create constructor declaration of the structured sort
               const identifier_string s=spec.fresh_name(str(boost::format("e%d_%d") % j % n));
               const structured_sort_constructor struct_cons(s,"");
 
-              struct_conss = push_front(struct_conss, function_symbol(struct_cons));
+              struct_conss = push_front(struct_conss, struct_cons);
             }
             structured_sort sort_struct(struct_conss);
 
