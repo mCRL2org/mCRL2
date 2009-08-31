@@ -158,7 +158,8 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
     !(0<x+dx && x+dx<=N && 0<y+dy && y+dy<=M) ->
         Swap1(p,x,y,dx,dy,b)=b;
 
-    PutPiece(p,x,y,b)=
+    #b!=0 -> 
+     PutPiece(p,x,y,b)=                      % See for the condition remark below at CanMove.
        Put(p,x,y,
        Swap(p,x,y,1,0,
        Swap(p,x,y,1,-1,
@@ -170,7 +171,10 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
        Swap(p,x,y,1,1,b)))))))));
 
 
-    CanMove(p,b)=CanMove(p,1,1,b);
+    #b!=0 -> CanMove(p,b)=CanMove(p,1,1,b);   % The condition is only required to prevent
+                                              % rewriting when linearising. When premature
+                                              % rewriting starts, terms become far too big
+                                              % and termination appears endless.
 
     x==N && y==M ->
       CanMove(p,x,y,b)=At(x,y,b)==None && Enclosing(p,x,y,b);
