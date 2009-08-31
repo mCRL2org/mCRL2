@@ -52,7 +52,7 @@ bool LTSGraph3d::check_configuration(tipi::configuration const& c) const {
 bool LTSGraph3d::perform_task(tipi::configuration& c) {
   m_input_filename = c.get_input("main-input").location();
 
-  return true;
+  return super::perform_task(c);
 }
 #endif
 
@@ -198,28 +198,62 @@ void LTSGraph3d::toggleVectorSelected() {
   display();
 }
 
-void LTSGraph3d::moveObject(double diffX, double diffY, double diffZ)
-{
+void LTSGraph3d::moveObject(double invect[4])
+{ 
+  double trans[4];
+  double theMtrx[16];
+  glCanvas->getMdlvwMtrx(theMtrx);
+  Utils::GLUnTransform(theMtrx, invect, trans);
+  double x, y, z;
   if(selectedState != NULL)
   {
-    double z = selectedState->getZ();
+	x = selectedState->getX();
+    y = selectedState->getY();
+	z = selectedState->getZ();
+  }
+  else if(selectedTransition != NULL)
+  {
+    selectedTransition->getControl(x, y, z);
+  }
+  else if(selectedLabel != NULL)
+  {
+    selectedLabel->getLabelPos(x, y, z);
+  }
+  else
+	  return;
+  double width, height, depth;
+  glCanvas->getSize(width, height, depth);
+  double rad = glCanvas->getPixelSize() * visualizer->getRadius();
+  x = (x / 2000.0) * (width - rad * 2);
+  y = (y / 2000.0) * (height - rad * 2);
+  z = (z / 2000.0) * (depth - rad * 2);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glTranslated(x, y, z);
+  glGetDoublev(GL_MODELVIEW_MATRIX, theMtrx);
+  glPopMatrix();
+  trans[0] = -trans[0] / (width - rad * 2) * theMtrx[14] * 3;
+  trans[1] = -trans[1] / (height - rad * 2) * theMtrx[14] * 3;
+  trans[2] = -trans[2] / (depth - rad * 2) * theMtrx[14] * 3;
+  if(selectedState != NULL)
+  {
 
-	selectedState->setX(selectedState->getX() + diffX);
-    selectedState->setY(selectedState->getY() + diffY);
-	selectedState->setZ(selectedState->getZ() + diffZ);
+	selectedState->setX(selectedState->getX() + trans[0]);
+    selectedState->setY(selectedState->getY() + trans[1]);
+	selectedState->setZ(selectedState->getZ() + trans[2]);
   }
 
   if(selectedTransition != NULL)
   {
     double prevX, prevY, prevZ;
     selectedTransition->getControl(prevX, prevY, prevZ);
-    selectedTransition->setControl(prevX + diffX, prevY + diffY, prevZ + diffZ);
+    selectedTransition->setControl(prevX + trans[0], prevY + trans[1], prevZ + trans[2]);
   }
   if(selectedLabel != NULL)
   {
     double prevX, prevY, prevZ;
     selectedLabel->getLabelPos(prevX, prevY, prevZ);
-    selectedLabel->setLabelPos(prevX + diffX, prevY + diffY, prevZ + diffZ);
+    selectedLabel->setLabelPos(prevX + trans[0], prevY + trans[1], prevZ + trans[2]);
   }
 }
 

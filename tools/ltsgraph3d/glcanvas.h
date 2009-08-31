@@ -83,6 +83,8 @@ class GLCanvas : public wxGLCanvas
 	float lookX, lookY, lookZ, rotX, rotY;
 	double currentModelviewMatrix[16];
 	int currentTool;
+	bool calcRot;
+	double previousmtrx[16];
 
 	void normalizeMatrix();
     bool pickObjects(int x, int y, wxMouseEvent const&);

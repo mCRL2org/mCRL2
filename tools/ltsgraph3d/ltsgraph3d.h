@@ -75,7 +75,7 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     bool perform_task(tipi::configuration&);
 #endif
 
-	void moveObject(double diffX, double diffY, double diffZ);
+	void moveObject(double invect[4]);
     void toggleVectorSelected();
     void lockObject();
     void dragObject();

@@ -50,9 +50,12 @@ double vecLength(Vect v)
 double angDiff(Vect v1, Vect v2)
 {
   double lenP = vecLength(v1) * vecLength(v2);
-
-  return acos(dotProd(v1, v2) / lenP);
-
+  double dotP = dotProd(v1, v2);
+  if (dotP / lenP < -1)
+	  return acos(-1.0);
+  else if (dotP / lenP > 1)
+	  return acos(1.0);
+  return acos(dotP / lenP);
 }
 
 double dotProd(Vect v1, Vect v2)

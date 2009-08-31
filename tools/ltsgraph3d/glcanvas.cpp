@@ -61,6 +61,7 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
   dispSystem = false;
   currentTool = myID_ZOOM;
   usingTool = false;
+  calcRot = false;
   lookX = 0;
   lookY = 0;
   lookZ = 0;
@@ -127,23 +128,25 @@ void GLCanvas::display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
+	if(calcRot)
+	{
+		double dumtrx[16];
+		double rotAngle = sqrt(rotX * rotX + rotY * rotY);
 
-	double dumtrx[16];
-	double rotAngle = sqrt(rotX * rotX + rotY * rotY);
-
-	Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
-	rotX = 0;
-	rotY = 0;
-	double dumtrx2[16];
-	Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
-	for ( int i = 0; i < 12; i++)
-		currentModelviewMatrix[i] = dumtrx2[i];
-	normalizeMatrix();
+		Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
+		double dumtrx2[16];
+		Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
+		for ( int i = 0; i < 12; i++)
+			currentModelviewMatrix[i] = dumtrx2[i];
+		calcRot = false;
+		normalizeMatrix();
+		rotX = 0;
+		rotY = 0;
+	}
 	currentModelviewMatrix[12] = -lookX;
 	currentModelviewMatrix[13] = -lookY;
 	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
 	currentModelviewMatrix[15] = 1;
-
 	double xl, yl, zl;
 	xl = 0;
 	yl = 0;
@@ -259,14 +262,12 @@ void GLCanvas::getSize(
 {
   int widthViewPort;
   int heightViewPort;
-  int depthViewPort;
   double aspect;
 
   // get pixel (device) sizes
   GetClientSize(
     &widthViewPort,
     &heightViewPort);
-  depthViewPort = (widthViewPort + heightViewPort) / 2;
   aspect = (double) widthViewPort /  (double) heightViewPort;
 
   if (aspect > 1)
@@ -392,10 +393,8 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 		if(!usingTool)
 		{
 			double invect[] = {newX - oldX, oldY - newY, 0, 1};
-			double trans[4];
-			Utils::GLUnTransform(currentModelviewMatrix, invect, trans);
 			
-			owner->moveObject(trans[0], trans[1], trans[2]);
+			owner->moveObject(invect);
 		}
 		else
 		{
@@ -421,6 +420,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 	{
 		rotX = 0.5f * (oldX - newX);
 		rotY = -0.5f * (oldY - newY);
+		calcRot = true;
 		setMouseCursor(myID_ROTATE);
 	}
 	if ((x < newX) && (newX < x + width)) {
@@ -500,6 +500,7 @@ bool GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     display();
 	return hits > 0;
   }
+  return false;
 }
 
 void GLCanvas::processHits(const GLint hits, GLuint *buffer, wxMouseEvent const& e)
@@ -664,11 +665,10 @@ void GLCanvas::normalizeMatrix()
 	double angYxz = atan2(y, sqrt(x * x + z * z)) * 180.0f / M_PI;
 	glPushMatrix();
 	glLoadIdentity();
-	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 	glRotated(tanXZ, 0.0, 1.0, 0.0);
 	glRotated(angYxz, -1.0, 0.0, 0.0);
-	Utils::Vect normal;
 	glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	Utils::Vect normal;
 	normal.x = currentModelviewMatrix[8];
 	normal.y = currentModelviewMatrix[9];
 	normal.z = currentModelviewMatrix[10];
@@ -686,11 +686,13 @@ void GLCanvas::normalizeMatrix()
 	glPopMatrix();
 }
 
-void GLCanvas::setMouseCursor(int theTool) {
+void GLCanvas::setMouseCursor(int theTool) 
+{
   wxCursor cursor;
   wxImage img;
   bool ok = true;
-  switch (theTool) {
+  switch (theTool) 
+  {
     case myID_NONE:
       cursor = wxNullCursor;
       break;
@@ -713,8 +715,6 @@ void GLCanvas::setMouseCursor(int theTool) {
       ok = false;
       break;
   }
-
-  if (ok) {
-    SetCursor(cursor);
-  }
+  if (ok)
+	  SetCursor(cursor);
 }
