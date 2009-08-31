@@ -3354,7 +3354,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       // Implement strategy
       if ( jittyc_eqns[j] != NULL )
       {
-        set_nfs_array_value(nfs_a.get(),a,nfs);
+        if (0 < a)
+        {
+          set_nfs_array_value(nfs_a.get(),a,nfs);
+        }
         implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a.get()),a,1,j,nfs);
       } else {
         boost::scoped_array< bool > used(new bool[a]);
@@ -3671,6 +3674,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataSpec)
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
   finalise_common();
+  ATtableDestroy(tmp_eqns);
   ATtableDestroy(subst_store);
   ATtableDestroy(term2int);
 #ifndef NDEBUG

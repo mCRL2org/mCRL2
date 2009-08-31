@@ -12,6 +12,8 @@
 
 #ifdef MCRL2_INNERC_AVAILABLE
 
+#define USE_VARAFUN_VALUE 1
+
 #define NAME std::string("rewr_innerc")
 
 #include <cstdio>
@@ -1482,6 +1484,8 @@ bool RewriterCompilingInnermost::addRewriteRule(ATermAppl Rule)
     return false;
   }
 
+  need_rebuild = true;
+
   ATerm u = toInner(ATAgetArgument(Rule,2),true);
   ATerm head;
   ATermList args;
@@ -1574,8 +1578,6 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     innerc_eqns[ATgetInt(i)] = (ATermList) ATtableGet(tmp_eqns,(ATerm) i);
   }
 
-  ATtableDestroy(tmp_eqns);
-
   s = (char *) malloc(50);
   sprintf(s,"innerc_%i_%lx",getpid(),(long) this);
   t = (char *) malloc(100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
@@ -1662,8 +1664,13 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   //
   fprintf(f,
       "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
+#ifdef USE_VARAFUN_VALUE
+      "#define isAppl(x) (ATgetAFun(x) != %li)\n"
+      "\n", (long int) ATgetAFun(gsMakeDataVarId(gsString2ATermAppl("x"),gsMakeSortExprBool()))
+#else
       "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
       "\n"
+#endif
          );
   for (int i=0; i < num_opids; i++)
   {
@@ -1672,7 +1679,9 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
   fprintf(f,  "\n"
       "static AFun *apples;\n"
+#ifndef USE_VARAFUN_VALUE
       "static AFun varAFun;\n"
+#endif
       "static AFun dataapplAFun;\n"
       "static AFun opidAFun;\n"
          );
@@ -2018,12 +2027,14 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 
   fprintf(f,  "void rewrite_init()\n"
       "{\n"
+#ifndef USE_VARAFUN_VALUE
       "  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
       "  ATprotectAFun(varAFun);\n"
       "  dataapplAFun = ATmakeAFun(\"DataAppl\", 2, ATfalse);\n"
       "  ATprotectAFun(dataapplAFun);\n"
       "  opidAFun = ATmakeAFun(\"OpId\", 2, ATfalse);\n"
       "  ATprotectAFun(opidAFun);\n"
+#endif
       "\n"
       "  apples = NULL;\n"
       "  getAppl(%i);\n",
@@ -2159,6 +2170,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
          );
 
   fclose(f);
+
   gsVerboseMsg("compiling rewriter...\n");
   sprintf(t,INNERC_COMPILE_COMMAND,s);
   gsVerboseMsg("%s\n",t);
@@ -2246,6 +2258,7 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataSpec)
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
 {
   finalise_common();
+  ATtableDestroy(tmp_eqns);
   ATtableDestroy(term2int);
   ATtableDestroy(subst_store);
 #ifndef NDEBUG
