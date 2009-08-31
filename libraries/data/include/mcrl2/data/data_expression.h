@@ -85,8 +85,11 @@ namespace mcrl2 {
         /// \param[in] t a term adhering to the internal format.
         data_expression(const atermpp::aterm_appl& t)
           : atermpp::aterm_appl(t)
-        {
-          assert(is_data_expression(t));
+        { // As Nil is used to indicate a non existing time value
+          // in a linear process, we allow the occurrence of a Nil
+          // term as a data_expression. This is a workaround which
+          // should be removed.
+          assert(is_data_expression(t) || core::detail::gsIsNil(t));
         }
 
         /// \brief Returns the sort of the data expression
