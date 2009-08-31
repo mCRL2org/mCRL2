@@ -101,10 +101,9 @@ void GLCanvas::display()
 {
   if (GetContext())
   {
-    int width, height, depth;
+    int width, height;
 
     GetClientSize( &width, &height);
-	depth = (width + height) / 2;
     // This is current context
     SetCurrent();
 
@@ -150,7 +149,7 @@ void GLCanvas::display()
 	double xl, yl, zl;
 	xl = 0;
 	yl = 0;
-	zl = 100;
+	zl = lookZ + 100;
 	GLfloat LightAmbient[]=		{ 0.2f, 0.2f, 0.2f, 0.2f };
 	GLfloat LightDiffuse[]=		{ 1.0f, 1.0f, 1.0f, 1.0f };
 	GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
