@@ -46,6 +46,26 @@
 %        ((forall x,y:Pos.[RedMove(x,y)]false || exists x,y:Pos.<RedMove(x,y)>X) &&
 %          forall x,y:Pos.[WhiteMove(x,y)]X ))
 %
+% Commands to generate and explore the state space efficiently are:
+% 
+% mcrl22lps -vDo othello.mcrl2 othello.lps &&
+% lpssuminst -v -rjittyc othello.lps temp0.lps &&
+% lpsparunfold -lv -n4 -sBoard temp0.lps temp1.lps &&
+% lpsparunfold -lv -n4 -sRow temp1.lps   temp2.lps &&
+% lpsconstelm -c -t -rjittyc -v temp2.lps temp4.lps &&
+% lps2lts -v temp4.lps &&
+% echo ---------------------------------------------- &&
+% echo Red wins always. &&
+% echo ----------------------------------------------  &&
+% lps2pbes -v -fred_wins_always.mcf temp4.lps othello.pbes &&
+% pbes2bool -v -rjittyc othello.pbes &&
+% echo ---------------------------------------------- &&
+% echo White wins always. &&
+% echo ----------------------------------------------  &&
+% lps2pbes -v -fwhite_wins_always.mcf temp4.lps othello.pbes &&
+% pbes2bool -v -rjittyc othello.pbes &&
+% echo ---------------------------------------------- 
+%
 % Thanks go to Mark Winands for suggesting the game.
 %
 % Reijkjavik, May 16, 2006, Jan Friso Groote
@@ -175,6 +195,7 @@ eqn y==1 -> Put(p,x,y,r|>b)=Put(p,x,r)|>b;
                                               % rewriting when linearising. When premature
                                               % rewriting starts, terms become far too big
                                               % and termination appears endless.
+    CanMove(p,if(c,b,b'))=if(c,CanMove(p,b),CanMove(p,b'));
 
     x==N && y==M ->
       CanMove(p,x,y,b)=At(x,y,b)==None && Enclosing(p,x,y,b);
