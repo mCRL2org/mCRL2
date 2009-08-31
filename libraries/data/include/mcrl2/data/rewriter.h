@@ -140,7 +140,7 @@ namespace data {
       /// \brief Performs data implementation before rewriting (should become obsolete)
       /// \param[in] expression an expression.
       template < typename Expression >
-      data_expression implement(Expression const& expression) const
+      Expression implement(Expression const& expression) const
       {
         return m_conversion_helper->implement(expression);
       }
