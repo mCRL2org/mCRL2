@@ -101,7 +101,7 @@ bool is_variable(aterm t)
 template <typename Term>
 variable find_variable(Term t)
 {
-  aterm_appl result = atermpp::find_if(t, is_variable);
+  aterm_appl result = atermpp::find_if(t, ::is_variable);
   assert((result)); // check if a variable has been found
   return result;
 }
@@ -146,7 +146,7 @@ int test_main(int argc, char** argv)
 
   // find all data variables in lps
   std::set<variable> variables;
-  find_all_if(linear_process_to_aterm(lps), is_variable, inserter(variables, variables.end()));
+  find_all_if(linear_process_to_aterm(lps), ::is_variable, inserter(variables, variables.end()));
 
   core::garbage_collect();
 
