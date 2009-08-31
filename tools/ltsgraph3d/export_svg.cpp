@@ -187,7 +187,7 @@ bool ExporterSVG::export_to(wxString filename)
 void ExporterSVG::drawBezier(Transition* tr)
 {
   State *from, *to;
-  double xFrom, yFrom, zFrom, xTo, yTo, zTo, xVirtual, yVirtual, zVirtual, xControl, yControl, zControl;
+  double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, zVirtual, xControl, yControl;
   double aspect = owner->getAspectRatio();
 
   from = tr->getFrom();
@@ -195,11 +195,9 @@ void ExporterSVG::drawBezier(Transition* tr)
 
   xFrom = (1000.0 + from->getX()) * aspect;
   yFrom = 1000.0 - from->getY();
-  zFrom = from->getZ();
 
   xTo = (1000.0 + to->getX()) * aspect;
   yTo = 1000.0 - to->getY();
-  zTo = from->getZ();
 
   tr->getControl(xVirtual, yVirtual, zVirtual);
 
@@ -211,7 +209,6 @@ void ExporterSVG::drawBezier(Transition* tr)
   // drawTransition method in visualizer.cpp
   xControl = 2.0 * xVirtual - .5 * (xFrom + xTo);
   yControl = 2.0 * yVirtual - .5 * (yFrom + yTo);
-  zControl = 2.0 * zVirtual - .5 * (zFrom + zTo);
 
   svg_code += "<path d = \"";
 
@@ -242,7 +239,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   // For a self-loop, t.to == t.from
   State* s = tr->getFrom();
 
-  double alpha = tr->getControlAlpha();
+  double alpha = tr->getControlBeta();
   double beta = .25 * M_PI;
   double dist = tr->getControlDist();
   double aspect = owner->getAspectRatio();

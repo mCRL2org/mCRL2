@@ -128,7 +128,7 @@ bool ExporterLatex::export_to(wxString filename)
 
 void ExporterLatex::drawBezier(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%6%} controls (%3%pt, %4%pt, %5%pt) .. (state%2%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%6%} controls (%3%pt, %4%pt) .. (state%2%);\n");
 
   State* from = tr->getFrom();
   State* to = tr->getTo();
@@ -144,7 +144,7 @@ void ExporterLatex::drawBezier(Transition* tr)
   controlY /= 10.0;
 
   draw%fromState%toState
-      %controlX%controlY%controlZ
+      %controlX%controlY
       %tr->getLabel();
   tikz_code += boost::str(draw);
 
@@ -165,7 +165,7 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   double xVirtual,  yVirtual;
   double xControl1, yControl1;
   double xControl2, yControl2;
-  double alpha = tr->getControlAlpha();
+  double alpha = tr->getControlBeta();
   double dist = tr->getControlDist();
 
   xState = s->getX() / 10.0;
