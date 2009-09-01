@@ -162,7 +162,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
   
           mcrl2::data::basic_sort b_sort( m_unfoldsort );
   
-          if (!search_basic_sort( lps_specification.data(), b_sort ))
+          if (!search_sort_expression( lps_specification.data().sorts(), b_sort ))
           {
             std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
