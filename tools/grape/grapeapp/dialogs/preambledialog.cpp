@@ -16,12 +16,11 @@
 
 #include "grape_ids.h"
 #include "preambledialog.h"
-#include "inputvalidation.h"
 
 using namespace grape::grapeapp;
 
 grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_parameter )
-: wxDialog( 0, wxID_ANY, _T( "Edit preamble" ), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
+: wxDialog( 0, wxID_ANY, (p_edit_parameter?_T( "Edit parameter declarations" ):_T( "Edit local variable declarations" )), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
 {
   wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
 
@@ -105,7 +104,8 @@ grape_preamble_dialog::grape_preamble_dialog( preamble *p_preamble, bool p_edit_
 
   m_parameter_grid->SetFocus();
   CentreOnParent();
-  check_text();
+  check_parameter_text();
+  check_local_variable_text();
 }
 
 grape_preamble_dialog::grape_preamble_dialog()
@@ -148,30 +148,25 @@ wxString grape_preamble_dialog::get_local_variable_declarations() const
 
 }
 
-void grape_preamble_dialog::check_text()
+void grape_preamble_dialog::check_parameter_text()
 {
   bool valid = true;
   static grape::libgrape::preamble tmp_preamble;
   valid = tmp_preamble.set_parameter_declarations( get_parameter_declarations() );
-  valid &= tmp_preamble.set_local_variable_declarations( get_local_variable_declarations() );
-  
-  for ( int i = 0; i < m_parameter_grid->GetNumberRows(); ++i )
-  {
-    //check all the names in the grid
-    valid &= identifier_valid( m_parameter_grid->GetCellValue(i, 0) );
-  }
-  for ( int i = 0; i < m_localvar_grid->GetNumberRows(); ++i )
-  {
-    //check all the names in the grid
-    valid &= identifier_valid( m_localvar_grid->GetCellValue(i, 0) );
-  }
-   
+  FindWindow(GetAffirmativeId())->Enable(valid);
+}
+
+void grape_preamble_dialog::check_local_variable_text()
+{
+  bool valid = true;
+  static grape::libgrape::preamble tmp_preamble;
+  valid = tmp_preamble.set_local_variable_declarations( get_local_variable_declarations() );
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
 void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
 {
-  check_text();
+  check_parameter_text();
   int rows_count = m_parameter_grid->GetNumberRows();
 
   while ( (m_parameter_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_parameter_grid->GetCellValue(rows_count-1, 1) != _T(""))) {
@@ -182,7 +177,7 @@ void grape_preamble_dialog::event_change_parameter_text( wxGridEvent &p_event )
 
 void grape_preamble_dialog::event_change_localvar_text( wxGridEvent &p_event )
 {
-  check_text();
+  check_local_variable_text();
   int rows_count = m_localvar_grid->GetNumberRows();
 
   while ( (m_localvar_grid->GetCellValue(rows_count-1, 0) != _T("")) || (m_localvar_grid->GetCellValue(rows_count-1, 1) != _T("")) || (m_localvar_grid->GetCellValue(rows_count-1, 2) != _T(""))) {

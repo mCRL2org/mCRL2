@@ -28,6 +28,9 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, proce
   m_main_frame = p_main_frame;
   list_of_varupdate varupdate_list = p_ref->get_parameter_updates();
   init_for_processes( p_ref->get_relationship_refers_to(), varupdate_list, p_spec );
+  if (varupdate_list.GetCount() == 0) {
+    change_combobox();
+  }
 }
 
 grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, reference_state *p_ref, grape_specification *p_spec )
@@ -35,7 +38,11 @@ grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, refer
 // reference state
 {
   m_main_frame = p_main_frame;
+  list_of_varupdate varupdate_list = p_ref->get_parameter_updates();
   init_for_processes( p_ref->get_relationship_refers_to(), p_ref->get_parameter_updates(), p_spec );
+  if (varupdate_list.GetCount() == 0) {
+    change_combobox();
+  }
 }
 
 grape_reference_dialog::grape_reference_dialog( grape_frame *p_main_frame, architecture_reference *p_ref, grape_specification *p_spec )

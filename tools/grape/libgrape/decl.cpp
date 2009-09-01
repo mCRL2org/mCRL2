@@ -11,14 +11,14 @@
 #include "wx.hpp" // precompiled headers
 #include "wx/wx.h"
 #include <sstream>
-#include "mcrl2/core/parse.h"
+#include "mcrl2gen/mcrl2gen_validate.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/identifier_string.h"
 
 #include "decl.h"
 
 using namespace mcrl2::core;
 using namespace grape::libgrape;
+using namespace grape::mcrl2gen;
 using namespace std;
 
 decl::decl( void )
@@ -48,24 +48,24 @@ bool decl::set_decl( const wxString &p_decl )
   wxString type = p_decl.Mid( pos+1 );
   name.Trim(true); name.Trim(false);
   type.Trim(true); type.Trim(false);
-  //TODO: pos check not nessesary after update preambledialog
   if ( name.IsEmpty() || type.IsEmpty() || pos == wxNOT_FOUND )
   {
     return false;
   }
 
-  istringstream r(string(name.mb_str()).c_str());
-  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
-  if ( a_parsed_identifier )
+  ATermAppl a_parsed_identifier = parse_identifier(name);
+
+// TODO: use other line
+  if ( is_identifier(name) )
+//  if ( a_parsed_identifier )
   {
     string a_name = identifier_string(a_parsed_identifier);
     set_name( wxString(a_name.c_str(), wxConvLocal) );
 
-    istringstream s(string(type.mb_str()).c_str());
-    ATermAppl a_parsed_sort_expr = mcrl2::core::parse_sort_expr(s);
+    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
     if ( a_parsed_sort_expr )
     {
-      string a_type = PrintPart_CXX(ATerm(a_parsed_sort_expr));
+      string a_type = pp(a_parsed_sort_expr);
       set_type( wxString(a_type.c_str(), wxConvLocal) );
       return true;
     }
@@ -127,31 +127,29 @@ bool decl_init::set_decl_init( const wxString &p_decl_init )
   name.Trim(true); name.Trim(false);
   type.Trim(true); type.Trim(false);
   value.Trim(true); value.Trim(false);
-  //TODO: pos check not nessesary after update preambledialog
   if ( name.IsEmpty() || type.IsEmpty() || value.IsEmpty() || pos == wxNOT_FOUND || pos1 == wxNOT_FOUND )
   {
     return false;
   }
 
-  istringstream r(string(name.mb_str()).c_str());
-  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
-  if ( a_parsed_identifier )
+  ATermAppl a_parsed_identifier = parse_identifier(name);
+// TODO: use other line
+  if ( is_identifier(name) )
+//  if ( a_parsed_identifier )
   {
     string a_name = identifier_string(a_parsed_identifier);
     set_name( wxString(a_name.c_str(), wxConvLocal) );
 
-    istringstream s(string(type.mb_str()).c_str());
-    ATermAppl a_parsed_sort_expr = mcrl2::core::parse_sort_expr(s);
+    ATermAppl a_parsed_sort_expr = parse_sort_expr(type);
     if ( a_parsed_sort_expr )
     {
-      string a_type = PrintPart_CXX(ATerm(a_parsed_sort_expr));
+      string a_type = pp(a_parsed_sort_expr);
       set_type( wxString(a_type.c_str(), wxConvLocal) );
 
-      istringstream v(string(value.mb_str()).c_str());
-      ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(v);
+      ATermAppl a_parsed_data_expr = parse_data_expr(value);
       if ( a_parsed_data_expr )
       {
-        string a_value = PrintPart_CXX(ATerm(a_parsed_data_expr));
+        string a_value = pp(a_parsed_data_expr);
         set_value( wxString(a_value.c_str(), wxConvLocal) );
         return true;
       }

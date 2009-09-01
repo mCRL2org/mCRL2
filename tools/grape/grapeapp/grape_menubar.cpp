@@ -39,12 +39,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetHelp( _T("Open specification") );
   m_menu_file->Append( item );
 
-/*
-  item = new wxMenuItem( m_menu_file, wxID_CLOSE );
-  item->SetBitmap( g_icons[ _T("close") ] );
-  item->SetHelp( _T("Close current specification") );
-  m_menu_file->Append( item );
-*/
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_SAVE );
@@ -57,11 +51,6 @@ grape_menubar::grape_menubar(void) : wxMenuBar()
   item->SetHelp( _T("Save current specification with a different filename") );
   m_menu_file->Append( item );
 
-/*
-  item = new wxMenuItem( m_menu_file, wxID_PRINT );
-  m_menu_file->Append( item );
-  m_menu_file->Enable(wxID_PRINT, false);
-*/
   m_menu_file->AppendSeparator();
 
   item = new wxMenuItem( m_menu_file, wxID_EXIT );
@@ -267,11 +256,8 @@ void grape_menubar::set_mode( int p_mode )
   bool in_diagram = (p_mode & ( GRAPE_MENUMODE_ARCH + GRAPE_MENUMODE_PROC )) != 0;
 
   // update menubar
-//  Enable(wxID_CLOSE, in_spec);
   Enable(wxID_SAVE, in_spec);
   Enable(wxID_SAVEAS, in_spec);
-// Low prioritiy, not implemented; disabled
-  //Enable(wxID_PRINT, false );
   Enable(GRAPE_MENU_ADD_ARCHITECTURE_DIAGRAM, in_spec);
   Enable(GRAPE_MENU_ADD_PROCESS_DIAGRAM, in_spec);
 
@@ -284,9 +270,12 @@ void grape_menubar::set_mode( int p_mode )
 
   Enable(wxID_DELETE, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_PROPERTIES, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
-  // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
-  //Enable(GRAPE_MENU_SELECT_ALL, false );
-  //Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_SELECT_ALL, !( p_mode & GRAPE_MENUMODE_DATASPEC ) );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_SELECT_ALL, false );
+// Low priority, not implemented; disabled
+ // Enable(GRAPE_MENU_DESELECT_ALL, ( p_mode & GRAPE_MENUMODE_DATASPEC ) == 0 );
   Enable(GRAPE_MENU_DATATYPESPEC, in_spec );
 
   Enable(GRAPE_TOOL_SELECT, in_diagram );
@@ -294,8 +283,6 @@ void grape_menubar::set_mode( int p_mode )
 
   Enable(GRAPE_MENU_RENAME_DIAGRAM, in_diagram );
   Enable(GRAPE_MENU_REMOVE_DIAGRAM, in_diagram );
-//  Enable(GRAPE_MENU_VALIDATE, in_diagram);
-//  Enable(GRAPE_MENU_EXPORTMCRL2, in_diagram);
   Enable(GRAPE_MENU_EXPORTIMAGE, in_diagram);
 
   // architecture diagram specific items

@@ -202,7 +202,7 @@ bool grape_event_remove_channel_communication::Do( void )
     } else {
       // remove the selected channel
       channel* chan = dynamic_cast<channel*> ( find_object( m_communication_channel, CHANNEL, dia_ptr->get_id() ) );
-      //channel* chan = comm_ptr->get_attached_channel( m_communication_selected );
+      // channel* chan = comm_ptr->get_attached_channel( m_communication_selected );
       if (comm_ptr->has_channel(chan))
       {
         dia_ptr->detach_channel_from_channel_communication(chan, comm_ptr);

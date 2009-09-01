@@ -87,9 +87,6 @@ void grape_glcanvas::update_scrollbars(void)
 
 grape_glcanvas::~grape_glcanvas(void)
 {
-  // free textures in video memory
-//  glDeleteTextures(256, &g_pool.m_textures[0]);
-
   m_visual_objects.Clear();
 }
 
@@ -112,9 +109,6 @@ void grape_glcanvas::init_gl(void)
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-
-  // load used textures
-//  init_textures();
 
   m_initialized = true;
 }

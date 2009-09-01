@@ -14,9 +14,12 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
+#include "mcrl2gen/mcrl2gen_validate.h"
 #include "textdialog.h"
+#include "grape_ids.h"
 
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
 
 grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_message, const wxString &p_initial_text, bool p_multiline )
 : wxDialog( 0, wxID_ANY, p_title )
@@ -31,11 +34,12 @@ grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_messa
   // create text control
   if ( p_multiline )
   {
-    m_input = new wxTextCtrl(this, wxID_ANY, p_initial_text, wxDefaultPosition, wxSize(400, 300), wxTE_MULTILINE );
+    m_input = new wxTextCtrl(this, GRAPE_INPUT_TEXT, p_initial_text, wxDefaultPosition, wxSize(400, 300), wxTE_MULTILINE );
   }
   else
   {
-    m_input = new wxTextCtrl(this, wxID_ANY, p_initial_text );
+    m_input = new wxTextCtrl(this, GRAPE_INPUT_TEXT, wxEmptyString );
+    m_input->ChangeValue(p_initial_text);
   }
   wnd_sizer->Add(m_input, 0, wxEXPAND | wxLEFT | wxRIGHT, 5);
 
@@ -43,6 +47,7 @@ grape_text_dlg::grape_text_dlg( const wxString &p_title, const wxString &p_messa
 
   // create buttons
   wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
+  FindWindow(GetAffirmativeId())->Enable( update_validation() );
   sizer->Layout();
   wnd_sizer->Add(sizer, 0, wxALIGN_BOTTOM | wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
@@ -76,3 +81,28 @@ bool grape_text_dlg::show_modal( wxString &p_text )
   p_text = m_input->GetValue();
   return true;
 }
+
+bool grape_text_dlg::update_validation()
+{
+  wxString m_input_altered = m_input->GetValue();
+  m_input_altered.Replace(_T(" "), _T("_"));
+// TODO: use other line
+  return is_identifier(m_input_altered);
+//  return mcrl2::core::detail::gsIsUserIdentifier(m_input_altered.fn_str());
+}
+
+void grape_text_dlg::event_update_validation( wxCommandEvent &p_event )
+{
+  if (m_input->IsSingleLine())
+  {
+    FindWindow(GetAffirmativeId())->Enable( update_validation() );
+  }
+  else
+  {
+    FindWindow(GetAffirmativeId())->Enable( true );
+  }
+}
+
+BEGIN_EVENT_TABLE(grape_text_dlg, wxDialog)
+  EVT_TEXT(GRAPE_INPUT_TEXT, grape_text_dlg::event_update_validation)   
+END_EVENT_TABLE()

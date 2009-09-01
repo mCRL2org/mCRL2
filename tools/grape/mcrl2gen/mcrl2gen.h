@@ -324,7 +324,7 @@ namespace grape
      * @pre p_doc_root is a valid pointer to an XML node, p_reference_state is a valid pointer to an XML reference state, p_diagram name is a valid process diagram name, p_declarations is a valid reference to an mCRL2 process definition, p_preamble_parameter_decls is a valid reference to a parameter declaration, p_preamble_local_var_decls is a valid reference to a loval variable declaration.
      * @post The hidden transition of the process reference is parsed and the results are appended to p_declarations or error messages are produced.
      */
-    wxString transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, bool p_alternative, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
+    wxString transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, bool p_alternative, wxXmlNode *p_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec);
 
     /**
      * XML initial designator inference function.

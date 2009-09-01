@@ -57,7 +57,6 @@ void grape_toolbar::set_mode( int p_mode )
 
   // actions for both process and arch diagrams
 // Needed for cut, copy paste. Low priority, cut copy paste not implemented; outcommented.
-//  bool in_diagram = p_mode & ( GRAPE_TOOLMODE_ARCH + GRAPE_TOOLMODE_PROC );
 
 // Low priority, not implemented; disabled.
   EnableTool(wxID_CUT, false );

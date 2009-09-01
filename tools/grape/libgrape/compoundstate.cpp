@@ -89,6 +89,8 @@ wxString compound_state::get_name( void )
 void compound_state::set_name( const wxString &p_name )
 {
   m_name = p_name;
+  m_name.Trim(true);
+  m_name.Trim(false);
 }
 
 void compound_state::attach_transition_beginstate( transition* p_transition )

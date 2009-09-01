@@ -345,7 +345,7 @@ namespace grape
      /**
      * Display the logpanel text in a statusbar or messagebox
      */
-    void display_message(grape_frame *p_main_frame, bool is_valid);
+    void display_message(grape_frame *p_main_frame, bool is_valid, int error);
   }
 }
 #endif // GRAPE_EVENT_DIAGRAM_H

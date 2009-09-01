@@ -71,6 +71,7 @@ namespace grape
       GRAPE_DATASPEC_TEXT,
 
       // dialog events
+      GRAPE_INPUT_TEXT,
       GRAPE_GRID_TEXT,
       GRAPE_PARAMETER_GRID_TEXT,
       GRAPE_LOCALVAR_GRID_TEXT,

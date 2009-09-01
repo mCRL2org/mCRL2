@@ -22,7 +22,15 @@
 #include <aterm2.h>
 #include "mcrl2/atermpp/table.h"
 
-#define CONVERSION_ERROR            17
+#define CONVERSION_ERROR                17
+#define XML_ERROR                       18
+#define DATA_TYPE_SPEC_PARSE_ERROR      19
+#define DATA_TYPE_SPEC_TYPE_CHECK_ERROR 20
+#define ARCH_DIA_ERROR                  21
+#define PROC_DIA_ERROR                  22
+#define PROC_DIA_PARSE_ERROR            23
+#define PROC_DIA_TYPE_CHECK_ERROR       24
+#define SPEC_ERROR                      25
 
 using namespace grape::libgrape;
 
@@ -143,6 +151,14 @@ namespace grape
     ATermList convert_numeric_sorts_to_real(ATermList sort_exprs);
 
     /**
+     * TODO: is to be removed when gsIsUserIdentifier is working properly.
+     * Workaround function to test if a string is a valid identifier
+     * @param p_identifier A string which should be an identifier
+     * @return bool representing whether the string was a valid identifier or not
+     */
+    bool is_identifier(wxString p_identifier);
+
+    /**
      * XML node child retrieval function.
      * Retrieves a pointer to a child of an XML node.
      * @param p_parent The parent XML node.
@@ -257,16 +273,6 @@ namespace grape
      * @post True is returned if the last element in p_checked does not refer to itself, false is returned otherwise and error messages are produced.
      */
     bool is_reference_acyclic(wxXmlNode *p_doc_root, wxArrayString p_checked);
-
-    /**
-     * XML specification validation function.
-     * Validates an XML GraPE specification and produces error messages if necessary.
-     * @param p_spec The specification to validate.
-     * @return True if the specification is valid, false otherwise.
-     * @pre True.
-     * @post The XML specification is validated and error messages are produced if necessary.
-     */
-    bool validate(wxXmlDocument &p_spec);
 
     /**
      * Datatype specification validation function.
@@ -388,7 +394,18 @@ namespace grape
      * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
      * @post p_parameter_initialisation contains the list of paramter initialisations and error messages are produced if necessary.
      */
-    bool validate_reference_parameters(wxXmlNode *p_doc_root, wxXmlNode *p_reference, wxString &p_diagram_name, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec);
+    bool validate_reference_parameters(wxXmlNode *p_doc_root, wxXmlNode *p_reference, wxXmlNode *p_diagram_id, list_of_varupdate &p_parameter_initialisation, ATermAppl &datatype_spec);
+
+    /**
+     * Parameter initialisation validation function.
+     * Validates the parameter initialisation as it is given during export of a process diagram.
+     * @param p_spec The GraPE XML specification containing the data type specification needed to validate.
+     * @param p_parameter_initialisation The list of declaration initialisation representing the parameter initialisation.
+     * @return True if the list of reference parameter initialisations is valid, false otherwise.
+     * @pre p_parameter_initialisation is a valid reference to a string containing the parameter initialisation.
+     * @post p_parameter_initialisation contains the list of paramter initialisations and error messages are produced if necessary.
+     */
+    bool validate_parameter_initialisations(wxXmlDocument &p_spec, list_of_decl_init &p_parameter_initialisation);
 
     /**
      * State list validation function.

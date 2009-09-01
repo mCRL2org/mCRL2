@@ -28,6 +28,7 @@
 
 #include "libgrape/xml.h"
 #include "mcrl2gen/mcrl2gen.h"
+#include "mcrl2/core/messaging.h"
 
 
 using namespace grape::libgrape;
@@ -36,21 +37,64 @@ using namespace grape::mcrl2gen;
 
 using namespace std;
 
-void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid)
+void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid, int error)
 {
+  int nl = p_main_frame->get_logpanel()->GetNumberOfLines();
   if (is_valid)
   {
     // display message in statusbar
-    p_main_frame->get_statusbar()->SetStatusText( p_main_frame->get_logpanel()->GetValue() );  
+    p_main_frame->get_statusbar()->SetStatusText( p_main_frame->get_logpanel()->GetLineText(nl-2) );  
   } 
   else
   {
     // display message in box
-    wxString message = p_main_frame->get_logpanel()->GetValue();
-    message.Replace(_T("\n"), _T("\n\n"));
-    message.Replace(_T("\n+ "), _T("\nData type specification cannot be parsed/type checked: "));
-    
-    wxMessageBox( message, _T("Validation error"), wxOK | wxICON_ERROR );
+    wxString message;
+    if (nl > 1) {
+      message = p_main_frame->get_logpanel()->GetLineText(nl-2);
+      for (int i = 0; i < nl-2; ++i)
+      {
+        message += _T("\n\n") + p_main_frame->get_logpanel()->GetLineText(i);
+      }
+    }
+    else
+    {
+      message = p_main_frame->get_logpanel()->GetValue();
+    }
+
+    switch ( error )
+    {
+    case CONVERSION_ERROR:
+      message = _T("Export to mCRL2 failed: \n\n") + message;
+      break;
+    case XML_ERROR:
+      message = _T("XML error: \n\n") + message;
+      break;
+    case DATA_TYPE_SPEC_PARSE_ERROR:
+      message = _T("Data type specification could not be parsed: \n\n") + message;
+      break;
+    case DATA_TYPE_SPEC_TYPE_CHECK_ERROR:
+      message = _T("Data type specification could not be type checked: \n\n") + message;
+      break;
+    case ARCH_DIA_ERROR:
+      message = _T("Architecture diagram error: \n\n") + message;
+      break;
+    case PROC_DIA_ERROR:
+      message = _T("Process diagram error: \n\n") + message;
+      break;
+    case PROC_DIA_PARSE_ERROR:
+      message = _T("Process diagram could not be parsed: \n\n") + message;
+      break;
+    case PROC_DIA_TYPE_CHECK_ERROR:
+      message = _T("Process diagram could not be type checked: \n\n") + message;
+      break;
+    case SPEC_ERROR:
+      message = _T("Specification error: \n\n") + message;
+      break;
+    default:
+      message = _T("Unknown error: \n\n") + message;
+      break;
+    }
+    wxMessageBox( message, (error==CONVERSION_ERROR?_T("Export error"):_T("Validation error")), wxOK | wxICON_ERROR );
   }    
 }
 
@@ -264,7 +308,8 @@ bool grape_event_dialog_rename_diagram::Do(void)
   grape_text_dlg dialog( _T("Rename diagram"), _T("Please enter a name for the diagram."), m_old_name, false );
   wxString p_new_name;
   bool m_pressed_ok = dialog.show_modal( p_new_name );
-//  wxString p_new_name = wxGetTextFromUser( _T("Please enter a name for the diagram."), _T("Rename diagram"), m_old_name, m_main_frame );
+  p_new_name.Trim(true);
+  p_new_name.Trim(false);
   if ( !m_pressed_ok || p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
   {
     return false;
@@ -852,7 +897,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   convert_spaces(export_doc);
 
   // determine current diagram and ask for a parameter initialisation in case it is a process diagram
-  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  diagram *export_diagram = m_main_frame->get_glcanvas()->get_diagram();
   wxString diagram_id;
   diagram_id.Printf(_T("%d"), export_diagram->get_id());
   wxString diagram_name = export_diagram->get_name();
@@ -863,6 +908,20 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
   process_diagram *proc_diag = dynamic_cast<process_diagram*>(export_diagram);
   if(proc_diag != 0)
   {
+    // validate process diagram
+    try
+    {
+      validate_process_diagram(export_doc, diagram_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
+
+    // clear logpanel and catch cout
+    m_main_frame->get_logpanel()->Clear();
+
     // get parameter initialisation
     param_init.Empty();
     preamble *export_preamble = proc_diag->get_preamble();
@@ -874,6 +933,28 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       if (!dialog->show_modal()) return false;
       param_init = dialog->get_initialisations();
       delete dialog;
+      try
+      {
+        validate_parameter_initialisations(export_doc, param_init);
+      }
+      catch (int i)
+      {
+        display_message(m_main_frame, false, i);
+        return false;
+      }
+    }
+  }
+  else if (arch_diag != 0)
+  {
+    // validate architecture diagram
+    try
+    {
+      validate_architecture_diagram(export_doc, diagram_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
     }
   }
 
@@ -897,40 +978,39 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
       if ( result == wxNO ) return false;
     }    
   }
-      
+
+  // clear logpanel and catch cout
+  m_main_frame->get_logpanel()->Clear();
+
   wxString export_name = filename.GetFullPath(); 
   if(arch_diag != 0)
   {
     // export architecture diagram
-    if (!validate_architecture_diagram(export_doc, diagram_id))
+    try
     {
-      cerr << "+mcrl2 conversion failed: architecture diagram is not valid." << endl;
-      display_message(m_main_frame, false);
-      return false;
+      export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, mcrl2::core::gsVerbose);
     }
-    if(!export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, false))
+    catch ( int i )
     { 
-      display_message(m_main_frame, false);
+      display_message(m_main_frame, false, i);
       return false;
     }
   }
   else if(proc_diag != 0)
   {
     // export process diagram
-    if (!validate_process_diagram(export_doc, diagram_id))
+    try
     {
-      cerr << "+mcrl2 conversion failed: process diagram is not valid." << endl;
-      display_message(m_main_frame, false);
-      return false;
+      export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, mcrl2::core::gsVerbose);
     }
-    if(!export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, false))
+    catch ( int i )
     {
-      display_message(m_main_frame, false);
+      display_message(m_main_frame, false, i);
       return false;
     }
   }
   
-  display_message(m_main_frame, true);
+  display_message(m_main_frame, true, 0);
   
   return true;
 }
@@ -967,19 +1047,34 @@ bool grape_event_validate_diagram::Do(void)
   d_id.Printf(_T("%u"), diagram_id);
 
   // determine type of diagram to validate
-  bool is_valid;
   architecture_diagram *arch_dia = dynamic_cast<architecture_diagram*>(dia);
   process_diagram *proc_dia = dynamic_cast<process_diagram*>(dia);
-  if(arch_dia != 0)
+  if (arch_dia != 0)
   {
-    is_valid = validate_architecture_diagram(validate_doc, d_id);
+    try
+    {
+      validate_architecture_diagram(validate_doc, d_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
   }
   else if(proc_dia != 0)
   {
-    is_valid = validate_process_diagram(validate_doc, d_id);
+    try
+    {
+      validate_process_diagram(validate_doc, d_id);
+    }
+    catch ( int i )
+    {
+      display_message(m_main_frame, false, i);
+      return false;
+    }
   }
 
-  display_message(m_main_frame, is_valid);
+  display_message(m_main_frame, true, 0);
     
   return true;
 }

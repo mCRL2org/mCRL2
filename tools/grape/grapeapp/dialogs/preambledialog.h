@@ -55,12 +55,17 @@ namespace grape
         /** @return The value of the local variable declaration input box. */
         wxString get_local_variable_declarations() const;
 
-
         /**
-         * Check wether the text is valid.
+         * Check wether the parameter name is valid.
          * If not, the OK button is disabled
          */
-        void check_text();
+        void check_parameter_text();
+
+        /**
+         * Check wether the local variable name is valid.
+         * If not, the OK button is disabled
+         */
+        void check_local_variable_text();
 
         /**
          * Change parameter grid event handler.

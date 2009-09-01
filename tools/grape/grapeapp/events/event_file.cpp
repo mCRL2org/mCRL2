@@ -23,6 +23,7 @@
 #include "event_diagram.h"
 #include "event_file.h"
 #include "mcrl2gen/mcrl2gen.h"
+#include "mcrl2/core/messaging.h"
 
 using namespace grape::libgrape;
 using namespace grape::grapeapp;
@@ -359,14 +360,17 @@ bool grape_event_validate_datatype_specification::Do( void )
   grape_specification *export_spec = m_main_frame->get_grape_specification();
   wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
   convert_spaces(export_doc);
-  if (!validate_datatype_specification(export_doc))
+  try
   {
-    cerr << "mcrl2 conversion failed: data type specification is not valid." << endl;
-    display_message(m_main_frame, false);
+    validate_datatype_specification(export_doc);
+  }
+  catch( int i )
+  {
+    display_message(m_main_frame, false, i);
     return false;
   }
 
-  display_message(m_main_frame, true);
+  display_message(m_main_frame, true, 0);
   return true;
 }
 
@@ -421,18 +425,25 @@ bool grape_event_export_datatype_specification_mcrl2::Do( void )
       
   wxString export_name = filename.GetFullPath(); 
   // export architecture diagram
-  if (!validate_datatype_specification(export_doc))
+  try
   {
-    cerr << "mcrl2 conversion failed: datatype specification is not valid." << endl;
-    display_message(m_main_frame, false);
+    validate_datatype_specification(export_doc);
+  }
+  catch ( int i )
+  {
+    display_message(m_main_frame, false, i);
     return false;
   }
-  if(!export_datatype_specification_to_mcrl2(export_doc, export_name))
+  try
+  {
+    export_datatype_specification_to_mcrl2(export_doc, export_name, mcrl2::core::gsVerbose);
+  }
+  catch ( int i )
   { 
-    display_message(m_main_frame, false);
+    display_message(m_main_frame, false, i);
     return false;
   }
-  display_message(m_main_frame, true);
+  display_message(m_main_frame, true, 0);
   
   return true;
 }

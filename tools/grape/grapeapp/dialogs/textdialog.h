@@ -31,6 +31,20 @@ namespace grape
          * Private default constructor.
          */
         grape_text_dlg();
+
+        /**
+         * Update validation event handler.
+         * @param p_event The generated event.
+         */
+        void event_update_validation( wxCommandEvent &p_event );
+
+        /**
+         * Update validation function
+         * @return Returns whether the input field is valid
+         */
+        bool update_validation();
+
+        DECLARE_EVENT_TABLE()		/**< The event table of this dialog. */
       public:
         /**
          * Constructor.

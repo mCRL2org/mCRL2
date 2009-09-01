@@ -22,7 +22,6 @@ namespace grape
     class compound_reference;
     class channel_communication;
 
-//    WX_DECLARE_ARRAY_PTR(channel_communication*, arr_channel_communication_ptr);
     /**
      * Array of ChannelCommunication.
      */

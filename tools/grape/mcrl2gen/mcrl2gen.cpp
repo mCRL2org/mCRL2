@@ -145,11 +145,7 @@ list_of_varupdate grape::mcrl2gen::get_process_reference_initialisation(wxXmlNod
   wxXmlNode *referenced_diagram = 0;
   referenced_diagram = get_diagram(p_doc_root, proc_ref_prop);
 
-  try
-  {
-    validate_reference_parameters(p_doc_root, reference, diagram_name, inits, datatype_spec);
-  }
-  catch(...)
+  if (!validate_reference_parameters(p_doc_root, reference, p_architecture_diagram, inits, datatype_spec))
   {
     return inits;
   }
@@ -776,7 +772,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     }
     for (unsigned int i=0; i<actions.GetCount(); ++i)
     {
-      specification += _T(" ");
+      specification += _T("  ");
       specification += actions[i].get_name();
       wxString action_text = wxEmptyString;
       if (actions[i].get_parameters().GetCount() != 0)
@@ -817,6 +813,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       cerr << specification.ToAscii() << endl;
     }
 
+/* For DEBUG
     wxFile file_error;
     wxString error_filename = p_filename;
     error_filename.Replace(_T(".mcrl2"), _T(".error"));
@@ -824,27 +821,27 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
     if(!file_error.IsOpened())
     {
       // ERROR: could not open file to write to
-      cerr << "mCRL2 conversion error: could not open file "
+      cerr << "Could not open file "
            << error_filename.ToAscii() << "." << endl;
       throw CONVERSION_ERROR;
     }
     file_error.Write(specification);
     file_error.Close();
-
+*/
 
     // try to parse constructed mCRL2 specification
     ATermAppl a_parsed_mcrl2_spec = parse_proc_spec(specification);
     if (a_parsed_mcrl2_spec == 0)
     {
       // ERROR: failed to parse constructed spec
-      cerr << "mCRL2 conversion error: could not parse exported specification." << endl;
+      cerr << "Exported specification could not be parsed." << endl;
       throw CONVERSION_ERROR;
     }
     ATermAppl a_typed_mcrl2_spec = type_check_proc_spec(a_parsed_mcrl2_spec);
     if (a_typed_mcrl2_spec == 0)
     {
       // ERROR: failed to type check constructed spec
-      cerr << "mCRL2 conversion error: exported specification is not well-typed." << endl;
+      cerr << "Exported specification is not well-typed." << endl;
       throw CONVERSION_ERROR;
     }
 
@@ -855,7 +852,7 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       if(!file_out.IsOpened())
       {
         // ERROR: could not open file to write to
-        cerr << "mCRL2 conversion error: could not open file "
+        cerr << "Could not open file "
              << p_filename.ToAscii() << "." << endl;
         throw CONVERSION_ERROR;
       }
@@ -863,13 +860,13 @@ bool grape::mcrl2gen::export_architecture_diagram_to_mcrl2(wxXmlDocument &p_spec
       file_out.Close();
     }
   }
-  catch(...)
+  catch( int i)
   {
-//    cerr << "mCRL2 conversion failed." << endl;
+    throw i;
     return false;
   }
 
-  cerr << "mCRL2 conversion successful." << endl;
+  cerr << "Export to mCRL2 is successful." << endl;
   return true;
 }
 
@@ -964,7 +961,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     }
     for(unsigned int i=0; i<actions.GetCount(); ++i)
     {
-      specification += _T(" ");
+      specification += _T("  ");
       specification += actions[i].get_name();
       wxString action_text = wxEmptyString;
       if(actions[i].get_parameters().GetCount() != 0)
@@ -1006,14 +1003,14 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
     if(a_parsed_mcrl2_spec == NULL)
     {
       // ERROR: failed to parse constructed spec
-      cerr << "mCRL2 conversion error: could not parse exported specification." << endl;
+      cerr << "Exported specification could not be parsed." << endl;
       throw CONVERSION_ERROR;
     }
     ATermAppl a_typed_mcrl2_spec = type_check_proc_spec(a_parsed_mcrl2_spec);
     if(a_typed_mcrl2_spec == NULL)
     {
       // ERROR: failed to type check constructed spec
-      cerr << "mCRL2 conversion error: exported specification is not well-typed." << endl;
+      cerr << "Exported specification is not well-typed." << endl;
       throw CONVERSION_ERROR;
     }
 
@@ -1024,7 +1021,7 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       if(!file_out.IsOpened())
       {
         // ERROR: could not open file to write to
-        cerr << "mCRL2 conversion error: could not open file "
+        cerr << "Could not open file "
              << p_filename.ToAscii() << "." << endl;
         throw CONVERSION_ERROR;
       }
@@ -1032,13 +1029,13 @@ bool grape::mcrl2gen::export_process_diagram_to_mcrl2(wxXmlDocument &p_spec, wxS
       file_out.Close();
     }
   }
-  catch(...)
+  catch( int i)
   {
-//    cerr << "mCRL2 conversion failed." << endl;
+    throw i;
     return false;
   }
 
-  cerr << "mCRL2 conversion successful." << endl;
+  cerr << "Export to mCRL2 is successful." << endl;
   return true;
 }
 
@@ -1053,14 +1050,15 @@ bool grape::mcrl2gen::export_datatype_specification_to_mcrl2(wxXmlDocument &p_sp
     if(!file_out.IsOpened())
     {
       // ERROR: could not open file to write to
-      cerr << "mCRL2 conversion error: could not open file "
+      cerr << "Could not open file "
            << p_filename.ToAscii() << "." << endl;
+      throw CONVERSION_ERROR;
       return false;
     }
     file_out.Write(dat_spec);
     file_out.Close();
   }
-  cerr << "mCRL2 conversion succesful." << endl;
+  cerr << "Export to mCRL2 is succesful." << endl;
   return true;
 }
 
@@ -1820,7 +1818,7 @@ wxString grape::mcrl2gen::process_diagram_mcrl2_internal_proc(wxXmlNode *p_doc_r
       // parse all reference states in this <referencestatelist>
       for (wxXmlNode *child_ref = child->GetChildren(); child_ref != 0; child_ref = child_ref->GetNext())
       {
-        decl_trans += transition_reference_mcrl2(p_doc_root, child_ref, !first_line, diagram_name, p_preamble_parameter_decls, p_preamble_local_var_decls, datatype_spec);
+        decl_trans += transition_reference_mcrl2(p_doc_root, child_ref, !first_line, p_process_diagram, p_preamble_parameter_decls, p_preamble_local_var_decls, datatype_spec);
         first_line = false;
       }
     }
@@ -1896,12 +1894,10 @@ wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNo
 
   // load label
   label trans_label;
-  try
+  if (!validate_transition_label(p_transition, p_preamble_parameter_decls, p_preamble_local_var_decls, trans_label, p_diagram_name, datatype_spec))
   {
-    validate_transition_label(p_transition, p_preamble_parameter_decls, p_preamble_local_var_decls, trans_label, p_diagram_name, datatype_spec);
+    return wxEmptyString;
   }
-  catch(...)
-  {}
   wxString variables = trans_label.get_declarations_text();
   wxString condition = trans_label.get_condition();
   wxString actions = trans_label.get_actions_text();
@@ -2004,20 +2000,20 @@ wxString grape::mcrl2gen::transition_mcrl2(wxXmlNode *p_process_diagram, wxXmlNo
   return decl_transition;
 }
 
-wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, bool p_alternative, wxString &p_diagram_name, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
+wxString grape::mcrl2gen::transition_reference_mcrl2(wxXmlNode *p_doc_root, wxXmlNode *p_reference_state, bool p_alternative, wxXmlNode *p_diagram, list_of_decl &p_preamble_parameter_decls, list_of_decl_init &p_preamble_local_var_decls, ATermAppl &datatype_spec)
 {
   // initialize variables
   wxString decl_transition_reference;
   wxString ref_name = get_child_value(p_reference_state, _T("name"));
   wxString ref_id = get_child_value(p_reference_state, _T("id"));
 
+
+  wxString p_diagram_name = get_child_value(p_diagram, _T("name"));
   list_of_varupdate ref_inits;
-  try
+  if (!validate_reference_parameters(p_doc_root, p_reference_state, p_diagram, ref_inits, datatype_spec))
   {
-    validate_reference_parameters(p_doc_root, p_reference_state, p_diagram_name, ref_inits, datatype_spec);
+    return wxEmptyString;
   }
-  catch(...)
-  {}
 
   decl_transition_reference += _T("\n");
 

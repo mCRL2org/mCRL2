@@ -14,11 +14,12 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
-#include "inputvalidation.h"
+#include "mcrl2gen/mcrl2gen_validate.h"
 #include "channelcommunicationdialog.h"
 #include "grape_ids.h"
 
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
 
 grape_channel_communication_dlg::grape_channel_communication_dlg( channel_communication &p_channel_communication )
 : wxDialog( 0, wxID_ANY, _T("Edit channel communication"), wxDefaultPosition, wxDefaultSize )
@@ -42,7 +43,7 @@ grape_channel_communication_dlg::grape_channel_communication_dlg( channel_commun
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
   wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list );
+  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list, 1, wxRA_SPECIFY_ROWS );
   m_radiobox->SetSelection(index);
   // create sizer
   wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
@@ -92,8 +93,11 @@ bool grape_channel_communication_dlg::show_modal( channel_communication &p_chann
 
 bool grape_channel_communication_dlg::update_validation()
 {
-  return identifier_valid(m_name_input->GetValue());
+// TODO: use other line
+  return is_identifier(m_name_input->GetValue());
+//  return mcr2::core::detail::gsIsUserIdentifier(m_name_input->GetValue().fn_str());
 }
+
 void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &p_event )
 {
   FindWindow(GetAffirmativeId())->Enable( update_validation() );

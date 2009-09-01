@@ -14,11 +14,12 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
-#include "inputvalidation.h"
+#include "mcrl2gen/mcrl2gen_validate.h"
 #include "channeldialog.h"
 #include "grape_ids.h"
 
 using namespace grape::grapeapp;
+using namespace grape::mcrl2gen;
 
 grape_channel_dlg::grape_channel_dlg( channel &p_channel )
 : wxDialog( 0, wxID_ANY, wxT("Edit channel"), wxDefaultPosition, wxDefaultSize )
@@ -60,13 +61,13 @@ grape_channel_dlg::grape_channel_dlg( channel &p_channel )
   if (p_channel.get_channel_communications()->GetCount() == 0)
   { 
     wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list );
+    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list, 1, wxRA_SPECIFY_ROWS );
     m_radiobox->SetSelection(index);
   } 
   else 
   {
     wxString radiobox_list[1] = {_T("hidden")};
-    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 1, radiobox_list );
+    m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 1, radiobox_list, 1, wxRA_SPECIFY_ROWS );
     m_radiobox->SetSelection(0);
   }
         
@@ -103,8 +104,11 @@ grape_channel_dlg::~grape_channel_dlg()
 
 bool grape_channel_dlg::update_validation()
 {
-  bool is_valid = !m_name_input->GetValue().IsEmpty() && identifier_valid(m_name_input->GetValue());
-  is_valid &= identifier_valid(m_rename_input->GetValue());
+// TODO: use other lines
+  bool is_valid = !m_name_input->GetValue().IsEmpty() && is_identifier(m_name_input->GetValue());
+  is_valid &= (m_rename_input->GetValue().IsEmpty() || is_identifier(m_rename_input->GetValue()));
+//  bool is_valid = !m_name_input->GetValue().IsEmpty() && mcrl2::core::detail::gsIsUserIdentifier(m_name_input->GetValue().fn_str());
+//  is_valid &= (m_rename_input->GetValue().IsEmpty() || mcrl2::core::detail::gsIsUserIdentifier(m_rename_input->GetValue().fn_str()));
   return is_valid;
 }
 void grape_channel_dlg::event_update_validation( wxCommandEvent &p_event )
