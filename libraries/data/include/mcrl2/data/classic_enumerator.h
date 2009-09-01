@@ -44,10 +44,7 @@ namespace mcrl2 {
         }
       };
 
-      /** \brief Configuration component for expression selection
-       *
-       * Evaluatates and selects substitutions that make the condition evaluate to Value.
-       **/
+      /// \cond INTERNAL_DOCS
       template < >
       struct select< false > {
         /// \brief returns true if and only if the argument is equal to false
@@ -56,6 +53,7 @@ namespace mcrl2 {
           return core::term_traits< ExpressionType >::is_false(e);
         }
       };
+      /// \endcond
 
       /** \brief Configuration component for expression selection
        *

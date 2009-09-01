@@ -76,6 +76,7 @@ namespace mcrl2 {
 
       private:
 
+        /// \cond INTERNAL_DOCS
         /// \brief projects a pair of sort and a constructor to the latter
         struct symbol_projection : public std::unary_function< sort_to_symbol_map::value_type const, function_symbol >
         {
@@ -92,6 +93,7 @@ namespace mcrl2 {
             return alias(e.second, e.first);
           }
         };
+        /// \endcond
 
       public:
 
