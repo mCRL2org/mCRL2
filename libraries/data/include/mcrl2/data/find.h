@@ -128,7 +128,7 @@ bool search_free_variable(Container container, const variable& d)
 template < typename Container >
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-  return detail::make_search_helper< sort_expression, detail::selective_sort_traverser >(detail::compare_sort(s))(container);
+  return detail::make_search_helper< sort_expression, detail::selective_sort_traverser >(detail::compare_sort(s)).apply(container);
 }
 
 /// \brief Returns all sort expressions that occur in the term t

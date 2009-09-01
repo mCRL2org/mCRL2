@@ -110,5 +110,10 @@ std::cout << "<sexpr>" << sexpr << std::endl;
 
   core::garbage_collect();
 
+  BOOST_CHECK(search_basic_sort(data_specification(), sort_bool::bool_()));
+  BOOST_CHECK(search_sort_expression(data_specification(), sort_bool::bool_()));
+  BOOST_CHECK(search_data_expression(data_specification(), sort_bool::true_()));
+  BOOST_CHECK(!search_variable(data_specification(), variable("a", sort_bool::bool_())));
+
   return 0;
 }
