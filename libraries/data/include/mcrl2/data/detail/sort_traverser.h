@@ -129,14 +129,12 @@ namespace mcrl2 {
 
           void operator()(alias const& e)
           {
-            static_cast< Derived& >(*this).enter(static_cast< sort_expression const& >(e));
             static_cast< Derived& >(*this).enter(e);
 
             static_cast< Derived& >(*this)(e.name());
             static_cast< Derived& >(*this)(e.reference());
 
             static_cast< Derived& >(*this).leave(e);
-            static_cast< Derived& >(*this).leave(static_cast< sort_expression const& >(e));
           }
 
           void operator()(assignment const& a)
