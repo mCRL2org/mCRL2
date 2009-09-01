@@ -90,18 +90,12 @@ bool occurs_in(data_expression d, variable v)
   return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
-inline
-bool is_variable(aterm t)
-{
-  return t.type() == AT_APPL && data_expression(t).is_variable();
-}
-
 /// Search for a data variable in the term t. Precondition: t must contain
 /// at least one variable.
 template <typename Term>
 variable find_variable(Term t)
 {
-  aterm_appl result = atermpp::find_if(t, ::is_variable);
+  aterm_appl result = atermpp::find_if(t, data::is_variable);
   assert((result)); // check if a variable has been found
   return result;
 }
@@ -124,9 +118,8 @@ void insert(C& c, D const& d) {
 int test_main(int argc, char** argv)
 {
   struct local {
-    static bool is_exists(atermpp::aterm p) {
-      mcrl2::data::data_expression e(p);
-      return e.is_abstraction() && mcrl2::data::abstraction(e).is_exists();
+    static bool is_exists(atermpp::aterm_appl const& p) {
+      return data::is_abstraction(p) && mcrl2::data::abstraction(p).is_exists();
     }
   };
 
@@ -146,7 +139,7 @@ int test_main(int argc, char** argv)
 
   // find all data variables in lps
   std::set<variable> variables;
-  find_all_if(linear_process_to_aterm(lps), ::is_variable, inserter(variables, variables.end()));
+  find_all_if(linear_process_to_aterm(lps), data::is_variable, inserter(variables, variables.end()));
 
   core::garbage_collect();
 

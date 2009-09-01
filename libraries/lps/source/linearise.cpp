@@ -1721,10 +1721,10 @@ class specification_basic_type:public boost::noncopyable
                 make_pars(pop_front(sortlist)),get_fresh_variable("a",sort));
     }
 
-    data_expression distributeActionOverConditions(
+    process_expression distributeActionOverConditions(
                           const action act,
                           const data_expression condition,
-                          const data_expression restterm,
+                          const process_expression restterm,
                           const variable_list freevars)
     { if (is_if_then(restterm))
       { /* Here we check whether the process body has the form
@@ -1947,7 +1947,7 @@ class specification_basic_type:public boost::noncopyable
                with a factor up to 2. */
 
 
-            const data_expression c=data_expression(if_then_else(body2).condition());
+            const data_expression c(if_then_else(body2).condition());
 
             const process_expression r= choice(
                            distributeActionOverConditions(body1,c,if_then_else(body2).then_case(),freevars),

@@ -87,7 +87,7 @@ void test_system_defined_sorts()
   boost::iterator_range<data_specification::constructors_const_iterator> r = spec.data().constructors(data::sort_nat::nat());
   
   // make a copy of the range, since it is a filter iterator
-  std::vector<data::sort_expression> c;
+  std::vector< data::function_symbol > c;
   std::copy(r.begin(), r.end(), std::back_inserter(c));
 
   BOOST_CHECK(c.size() != 0);
