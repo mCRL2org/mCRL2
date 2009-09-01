@@ -1562,6 +1562,12 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   free(int2term);
   free(innerc_eqns);
 
+  if ( so_rewr_cleanup != NULL )
+  {
+    so_rewr_cleanup();
+    dlclose(so_handle);
+  }
+  
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
   ATprotectArray((ATerm *) int2term,num_opids);
@@ -2034,8 +2040,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
       "  ATprotectAFun(dataapplAFun);\n"
       "  opidAFun = ATmakeAFun(\"OpId\", 2, ATfalse);\n"
       "  ATprotectAFun(opidAFun);\n"
-#endif
       "\n"
+#endif
       "  apples = NULL;\n"
       "  getAppl(%i);\n",
       max_arity
@@ -2079,6 +2085,29 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   { gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i;\n",i,j,j,i);
   }
   }
+  }
+  fprintf(f,  "}\n"
+      "\n"
+      "void rewrite_cleanup()\n"
+      "{\n"
+#ifndef USE_VARAFUN_VALUE
+      "  ATunprotectAFun(varAFun);\n"
+      "  ATunprotectAFun(dataapplAFun);\n"
+      "  ATunprotectAFun(opidAFun);\n"
+      "\n"
+#endif
+      "  free(apples);\n"
+      "\n");
+  for (int i=0; i < num_opids; i++)
+  {
+  fprintf(f,  "  ATunprotect(&int2ATerm%i);\n",i);
+  fprintf(f,  "  ATunprotectAppl(&rewrAppl%i);\n",i);
+  }
+  fprintf(f,  "\n");
+  fprintf(f,  "  free(int2func);\n");
+  for (int i=0;i<max_arity;i++)
+  {
+  fprintf(f,  "  free(int2func%i);\n",i);
   }
   fprintf(f,  "}\n"
       "\n"
@@ -2191,7 +2220,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
 
   sprintf(t,"./%s.so",s);
-  if ( (h = dlopen(t,RTLD_NOW)) == NULL )
+  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
   {
     unlink(file_so);
     unlink(file_o);
@@ -2200,6 +2229,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
   if ( so_rewr_init    == NULL ) gsErrorMsg("%s\n",dlerror());
+  so_rewr_cleanup = (void (*)()) dlsym(h,"rewrite_cleanup");
+  if ( so_rewr_cleanup == NULL ) gsErrorMsg("%s\n",dlerror());
   so_rewr = (ATermAppl (*)(ATermAppl)) dlsym(h,"rewrite");
   if ( so_rewr         == NULL ) gsErrorMsg("%s\n",dlerror());
   so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
@@ -2211,6 +2242,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   so_clear_substs = (void (*)()) dlsym(h,"clear_substs");
   if ( so_clear_substs == NULL ) gsErrorMsg("%s\n",dlerror());
   if ( (so_rewr_init    == NULL ) ||
+       (so_rewr_cleanup == NULL ) ||
        (so_rewr         == NULL ) ||
        (so_set_subst    == NULL ) ||
        (so_get_subst    == NULL ) ||
@@ -2251,6 +2283,7 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataSpec)
 {
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);
+  so_rewr_cleanup = NULL;
   initialise_common();
   CompileRewriteSystem(DataSpec);
 }

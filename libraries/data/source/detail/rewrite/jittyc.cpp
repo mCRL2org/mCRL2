@@ -2881,6 +2881,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   free(int2ar_idx);
   free(ar);
 
+  if ( so_rewr_cleanup != NULL )
+  {
+    so_rewr_cleanup();
+    dlclose(so_handle);
+  }
+
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
   ATprotectArray((ATerm *) int2term,num_opids);
@@ -3465,6 +3471,31 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   fprintf(f,  "}\n"
       "\n"
+      "void rewrite_cleanup()\n"
+      "{\n"
+#ifndef USE_VARAFUN_VALUE
+      "  ATunprotectAFun(varAFun);\n"
+      "\n"
+#endif
+      "  free(apples);\n"
+         );
+  fprintf(f,  "\n");
+  for (int i=0; i < num_opids; i++)
+  {
+#ifndef USE_INT2ATERM_VALUE
+  fprintf(f,  "  ATunprotect(&int2ATerm%i);\n",i);
+#endif
+#ifndef USE_REWRAPPL_VALUE
+  fprintf(f,  "  ATunprotectAppl(&rewrAppl%i);\n",i);
+#endif
+  }
+  fprintf(f,  "\n");
+  for (int i=0;i<=max_arity;i++)
+  {
+  fprintf(f,  "  free(int2func%i);\n",i);
+  }
+  fprintf(f,  "}\n"
+      "\n"
       "ATermAppl rewrite(ATermAppl t)\n"
       "{\n"
 //      "  ATfprintf(stderr,\"rewrite: %%t\\n\",t);\n"
@@ -3607,7 +3638,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
 
   sprintf(t,"./%s.so",s);
-  if ( (h = dlopen(t,RTLD_NOW)) == NULL )
+  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
   {
     unlink(file_so);
     unlink(file_o);
@@ -3616,6 +3647,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
   if ( so_rewr_init    == NULL ) gsErrorMsg("%s\n",dlerror());
+  so_rewr_cleanup = (void (*)()) dlsym(h,"rewrite_cleanup");
+  if ( so_rewr_cleanup    == NULL ) gsErrorMsg("%s\n",dlerror());
   so_rewr = (ATermAppl (*)(ATermAppl)) dlsym(h,"rewrite");
   if ( so_rewr         == NULL ) gsErrorMsg("%s\n",dlerror());
   so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
@@ -3627,6 +3660,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   so_clear_substs = (void (*)()) dlsym(h,"clear_substs");
   if ( so_clear_substs == NULL ) gsErrorMsg("%s\n",dlerror());
   if ( (so_rewr_init    == NULL ) ||
+       (so_rewr_cleanup == NULL ) ||
        (so_rewr         == NULL ) ||
        (so_set_subst    == NULL ) ||
        (so_get_subst    == NULL ) ||
@@ -3667,6 +3701,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataSpec)
 {
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);
+  so_rewr_cleanup = NULL;
   initialise_common();
   CompileRewriteSystem(DataSpec);
 }

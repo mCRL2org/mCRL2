@@ -76,7 +76,9 @@ class RewriterCompilingJitty: public Rewriter
 		char *file_o;
 		char *file_so;
 
+		void *so_handle;
 		void (*so_rewr_init)();
+		void (*so_rewr_cleanup)();
 		ATermAppl (*so_rewr)(ATermAppl);
 		void (*so_set_subst)(ATermAppl, ATerm);
 		ATerm (*so_get_subst)(ATermAppl);
