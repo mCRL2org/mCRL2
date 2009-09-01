@@ -7,7 +7,7 @@ install: bjam config.status
 	$(BOOST_BUILD) --install
 
 test: bjam config.status
-	$(BJAM) ./status -l300 --enable-experimental --enable-deprecated --tool-tests
+	$(BJAM) ./status -l300 regression-testing=yes --enable-experimental --enable-deprecated --tool-tests
 
 clean:
 	@$(RM) -r autom4te.cache core core.* tags build/bin/.jamdeps

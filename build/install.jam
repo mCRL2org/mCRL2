@@ -334,8 +334,11 @@ rule platform-configuration ( properties * ) {
   local requirements ;
   local pch-path = $(build-root)/precompile/dummies ;
 
-  if <regression-testing>no in $(properties) {
+  if <regression-testing>no in $(properties) && <install>yes in $(properties) {
     requirements = <dll-path>$(dllpath) ; # dll-path required for rpath-linking
+  }
+  else {
+    requirements += <hardcode-dll-paths>true ;
   }
 
   if <toolset>gcc in $(properties) { # GCC
