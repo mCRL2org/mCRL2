@@ -42,6 +42,10 @@ bool compare_for_equality(data_specification const& left, data_specification con
       std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
       std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
     }
+    if (left.aliases() != right.aliases()) {
+      std::clog << "Aliases (left)  " << pp(left.aliases()) << std::endl;
+      std::clog << "Aliases (right) " << pp(right.aliases()) << std::endl;
+    }
     if (left.constructors() != right.constructors()) {
       std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
       std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;

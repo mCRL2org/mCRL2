@@ -218,6 +218,40 @@ namespace mcrl2 {
           }
         }
 
+        void insert_alias(const basic_sort& name, const sort_expression& reference, bool insert_sort = true)
+        {
+          assert(!search_sort(name) || ((constructors(name).empty()) && !is_alias(name)));
+
+          if (!m_sorts.insert(name).second)
+          {
+            // name was known as sort but not as alias, remove standard mappings/equations and update aliases
+            remove_mappings(boost::make_iterator_range(standard_generate_functions_code(name)));
+            remove_equations(boost::make_iterator_range(standard_generate_equations_code(name)));
+          }
+
+          m_aliases_by_name[name] = reference;
+          m_aliases_by_sort.insert(rtl_aliases_map::value_type(reference, name));
+
+          boost::iterator_range< rtl_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(name));
+
+          if (!relevant_range.empty())
+          {
+            for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
+                                                                     j++ != relevant_range.end(); i = j)
+            {
+              m_aliases_by_name[i->second] = reference;
+              m_aliases_by_sort.insert(rtl_aliases_map::value_type(reference, i->second));
+              m_aliases_by_sort.erase(i);
+            }
+          }
+
+          if (insert_sort)
+          {
+            // Make sure that the sort is also part of the specification
+            add_sort(reference);
+          }
+        }
+
         void add_function(sort_to_symbol_map& container, const function_symbol& f)
         {
           sort_expression index_sort(normalise(f.sort().target_sort()));
@@ -263,7 +297,6 @@ namespace mcrl2 {
       data_specification(const atermpp::aterm_appl& t)
       {
         build_from_aterm(t);
-        make_complete();
       }
 
       ///\brief Constructor
@@ -394,33 +427,7 @@ namespace mcrl2 {
       {
         assert(!search_sort(s.name()) || ((constructors(s.name()).empty()) && !is_alias(s.name())));
 
-        sort_expression canonical_sort(normalise(s.reference()));
-
-        if (!m_sorts.insert(s.name()).second)
-        {
-          // s.name() was known as sort but not as alias, remove standard mappings/equations and update aliases
-          remove_mappings(boost::make_iterator_range(standard_generate_functions_code(s.name())));
-          remove_equations(boost::make_iterator_range(standard_generate_equations_code(s.name())));
-        }
-
-        m_aliases_by_name[s.name()] = canonical_sort;
-        m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, s.name()));
-
-        boost::iterator_range< rtl_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(s.name()));
-
-        if (!relevant_range.empty())
-        {
-          for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
-                                                                     j++ != relevant_range.end(); i = j)
-          {
-            m_aliases_by_name[i->second] = canonical_sort;
-            m_aliases_by_sort.insert(rtl_aliases_map::value_type(canonical_sort, i->second));
-            m_aliases_by_sort.erase(i);
-          }
-        }
-
-        // Make sure that the sort is also part of the specification
-        add_sort(s.reference());
+        insert_alias(s.name(), normalise(s.reference()));
       }
 
       /// \brief Adds a constructor to this specification

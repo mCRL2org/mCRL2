@@ -495,25 +495,36 @@ namespace mcrl2 {
           basic_sort      name(alias(*i).name());
           sort_expression reference(alias(*i).reference());
 
-          // Apply renaming to right-hand sides
-          for (atermpp::map< sort_expression, sort_expression >::iterator j = renamings.begin(); j != renamings.end(); ++j)
-          {
-            j->second = atermpp::replace(j->second, name, reference);
-          }
-
           if (reference.is_container_sort() || reference.is_structured_sort())
           {
+            sort_expression new_reference = atermpp::replace(reference, detail::sort_map_substitution_adapter(renamings));
+
+            // Apply renaming to right-hand sides
+            for (atermpp::map< sort_expression, sort_expression >::iterator j = renamings.begin(); j != renamings.end(); ++j)
+            {
+              if (!j->second.is_basic_sort())
+              {
+                j->second = atermpp::replace(j->second, name, reference);
+              }
+            }
+
             if (renamings.find(reference) == renamings.end())
             { // primary name for the sort
-              renamings.insert(std::pair< sort_expression, sort_expression >(name, atermpp::replace(reference, detail::sort_map_substitution_adapter(renamings))));
+              renamings.insert(std::pair< sort_expression, sort_expression >(name, new_reference));
             }
             else
-            { // other name for the sort
+            { // other name for the sort, should become dead code
               other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, detail::sort_map_substitution_adapter(renamings))));
             }
           }
           else
           {
+            // Apply renaming to right-hand sides
+            for (atermpp::map< sort_expression, sort_expression >::iterator j = renamings.begin(); j != renamings.end(); ++j)
+            {
+              j->second = atermpp::replace(j->second, name, reference);
+            }
+
             renamings.insert(std::pair< sort_expression, sort_expression >(name, reference));
           }
         }
@@ -524,7 +535,7 @@ namespace mcrl2 {
       {
         if (std::string(basic_sort(i->first).name()).find("@legacy_") != 0)
         {
-          add_alias(alias(i->first, i->second));
+          insert_alias(i->first, i->second, false);
         }
       }
 
@@ -532,8 +543,10 @@ namespace mcrl2 {
 
       for (atermpp::multimap< sort_expression, sort_expression >::const_iterator i = other_names.begin(); i != other_names.end(); ++i)
       {
-        add_alias(alias(i->second, atermpp::replace(i->first, renaming_substitution)));
+        insert_alias(i->first, atermpp::replace(i->first, renaming_substitution), false);
       }
+
+      make_complete();
 
       for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
@@ -573,6 +586,8 @@ namespace mcrl2 {
           m_equations.insert(new_equation);
         }
       }
+
+      make_complete();
     }
 
     /// \cond INTERNAL_DOCS
@@ -710,6 +725,9 @@ namespace mcrl2 {
               partial_renamings.erase(j->first);
 
               sorts.insert(alias(r.front().name(), atermpp::replace(r.front().reference(), sort_map_substitution_adapter(partial_renamings))));
+            }
+            else { // Intruduces another name for a known sort
+              sorts.insert(r.front());
             }
           }
 

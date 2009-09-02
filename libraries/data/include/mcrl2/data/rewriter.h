@@ -87,7 +87,7 @@ namespace data {
 
       /// \brief Constructor.
       basic_rewriter(strategy s = jitty) :
-          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(data_specification()), static_cast< detail::RewriteStrategy >(s)))
+          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(data_specification(), false), static_cast< detail::RewriteStrategy >(s)))
       {}
 
     public:
