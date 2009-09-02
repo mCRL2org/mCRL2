@@ -211,7 +211,16 @@ namespace mcrl2 {
         data_specification                specification(*term.begin());
         internal_format_conversion_helper converter(specification);
 
-        return atermpp::replace(term, converter);
+        atermpp::vector< atermpp::aterm_appl > arguments;
+
+        arguments.push_back(*term.begin());
+
+        for (atermpp::aterm_appl::iterator i = ++term.begin(); i != term.end(); ++i)
+        {
+          arguments.push_back(atermpp::replace(*i, converter));
+        }
+
+        return atermpp::aterm_appl(term.function(), arguments.begin(), arguments.end());
       }
 
     } // namespace detail

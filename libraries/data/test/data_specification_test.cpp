@@ -406,6 +406,29 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
+
+  data_specification specification = parse_data_specification(
+    "sort A = struct a(B);"
+    "sort B = struct b(A);");
+
+  arguments.clear();
+
+  arguments.push_back(structured_sort_constructor_argument(basic_sort("B")));
+  arguments.push_back(structured_sort_constructor_argument(basic_sort("A")));
+
+  constructors.clear();
+
+  constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
+
+  structured_sort A(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
+  structured_sort B(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
+
+  BOOST_CHECK(specification.search_sort(specification.normalise(A)));
+  BOOST_CHECK(specification.search_sort(specification.normalise(B)));
+
+  BOOST_CHECK(specification.normalise(A) == specification.normalise(specification.normalise(A)));
+  BOOST_CHECK(specification.normalise(B) == specification.normalise(specification.normalise(B)));
 }
 
 void test_constructor()
