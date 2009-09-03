@@ -232,9 +232,11 @@ void LTSGraph3d::moveObject(double invect[4])
   glTranslated(x, y, z);
   glGetDoublev(GL_MODELVIEW_MATRIX, theMtrx);
   glPopMatrix();
-  trans[0] = -trans[0] / (width - rad * 2) * theMtrx[14] * 3;
-  trans[1] = -trans[1] / (height - rad * 2) * theMtrx[14] * 3;
-  trans[2] = -trans[2] / (depth - rad * 2) * theMtrx[14] * 3;
+  int pwidth, pheight;
+  glCanvas->GetClientSize(&pwidth, &pheight);
+  trans[0] = -trans[0] / (width - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
+  trans[1] = -trans[1] / (height - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
+  trans[2] = -trans[2] / (depth - rad * 2) * theMtrx[14] * 3.0 * 550.0 / double(pheight);
   if(selectedState != NULL)
   {
 

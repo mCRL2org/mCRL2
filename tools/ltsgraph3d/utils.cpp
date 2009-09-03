@@ -137,7 +137,7 @@ void GLUnTransform (const double lhs[16], const double rhs[4], double* ans)
 	ans[0] = lhs[0] * rhs [0] + lhs[1] * rhs [1] + lhs[2] * rhs [2] + lhs[3] * rhs [3];
 	ans[1] = lhs[4] * rhs [0] + lhs[5] * rhs [1] + lhs[6] * rhs [2] + lhs[7] * rhs [3];
 	ans[2] = lhs[8] * rhs [0] + lhs[9] * rhs [1] + lhs[10] * rhs [2] + lhs[11] * rhs [3];
-	ans[3] = lhs[12] * rhs [0] + lhs[13] * rhs [1] + lhs[14] * rhs [2] + lhs[15] * rhs [3];
+	ans[3] = 1;
 }
 
 
