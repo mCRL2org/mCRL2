@@ -10,7 +10,6 @@ tool grape
         <include>mcrl2gen
         <include>.
         <wx>gl
-        <status>experimental
         <install-dependency>manual
       ;
 

@@ -25,11 +25,18 @@ obj squadt_interface
         <include>../include
       ;
 
+import notfile ;
+
+rule empty {
+}
+
+# Triggering build of tag file (necessary for correct tagging on incremental builds)
+notfile build-trigger : @empty : : :  ;
+
 obj toolset_revision
       : source/toolset_revision.cpp
-      : <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
-      :
-      :
+      : <install>yes:<dependency>build-trigger
+        <define>MCRL2_REVISION=\"\\\"$(BUILD_TAG)\\\"\"
       ;
 
 obj command_line_interface

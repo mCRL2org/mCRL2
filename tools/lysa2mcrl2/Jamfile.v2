@@ -9,5 +9,4 @@ tool lysa2mcrl2
          string_template.cpp
          strategy.cpp
          /libraries//data
-       : <status>experimental
        ;
