@@ -95,14 +95,12 @@ void Visualizer::drawStates(bool inSelectMode)
 			drawTransLabel(t, j, inSelectMode);
 		}
 	  }	  
-	}
-	if(graph->getState(0)->getShowStateVector() || showStateLabels)
+	}	
+	for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
 	{
-	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
-	  {
 		State* s = graph->getState(i);
-		drawStateText(s);
-	  }
+		if(s->getShowStateVector() || showStateLabels)
+			drawStateText(s);
 	}	
   }
 }
@@ -207,11 +205,6 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   double yTo = to->getY();
   double zTo = to->getZ();
 
-
-  double seBx = xFrom - xTo;
-  double seBy = yFrom - yTo;
-  double seBz = zFrom - zTo;
-  double normalise = 4.0;
   double xVirtual, yVirtual, zVirtual;
   double xControl, yControl, zControl;
 
@@ -237,10 +230,6 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   xControl = 2.0 * xVirtual - .5 * (xFrom + xTo);
   yControl = 2.0 * yVirtual - .5 * (yFrom + yTo);
   zControl = 2.0 * zVirtual - .5 * (zFrom + zTo);
-
-  seBx /= normalise;
-  seBy /= normalise;
-  seBz /= normalise;
 
   xFrom = (xFrom / 2000.0) * (width - rad * 2);
   yFrom = (yFrom / 2000.0) * (height - rad * 2);
@@ -440,7 +429,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double xState, yState, zState;
   double xVirtual, yVirtual, zVirtual;
 
-  double alpha = tr->getControlAlpha();
   double beta = tr->getControlBeta();
   double gamma = tr->getControlGamma();
   double dist = tr->getControlDist();
