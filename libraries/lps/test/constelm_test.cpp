@@ -361,6 +361,81 @@ std::string case_9 =
   ;
 const std::string expected_9 = "process_parameter_names = b, c";
 
+// Test case provided by Jan Friso Groote (2-9-2009). It is based on the process
+//
+// act  a:Bool;
+// proc X(p:List(Bool))=sum b:Bool.a(head(p)).X(b|>tail(p)); init X([true]);
+//
+// The list has always length one. After application of lpsconstelm, only one of the
+// three parameters should remain.
+// 
+// Before linearization:
+//
+// sort S11;
+// 
+// cons c_1,c_2: S11;
+// 
+// map  C_S11_1: S11 # List(Bool) # List(Bool) -> List(Bool);
+//      pi_S11_2: List(Bool) -> List(Bool);
+//      pi_S11_1: List(Bool) -> Bool;
+//      Det_S11_1: List(Bool) -> S11;
+// 
+// var  y3,y4,d3: List(Bool);
+//      y2: S11;
+//      d2: Bool;
+// eqn  C_S11_1(c_1, y3, y4)  =  y3;
+//      C_S11_1(c_2, y3, y4)  =  y4;
+//      C_S11_1(y2, y4, y4)  =  y4;
+//      Det_S11_1([])  =  c_1;
+//      Det_S11_1(d2 |> d3)  =  c_2;
+//      pi_S11_1(d2 |> d3)  =  d2;
+//      pi_S11_2(d2 |> d3)  =  d3;
+// 
+// act  a: Bool;
+// 
+// proc P(S1_pp1: S11, S1_pp2: Bool, S1_pp3: List(Bool)) =
+//        sum b_X: Bool.  
+//          a(head(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))) .
+//          P(S1_pp1 = Det_S11_1(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))), S1_pp2 = pi_S11_1(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))), S1_pp3 = pi_S11_2(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))))
+//      + true ->
+//          delta;
+// 
+// init P(Det_S11_1(true |> []), pi_S11_1(true |> []), pi_S11_2(true |> []));
+//
+std::string case_10 =
+  "sort S11;                                                                                                    \n"
+  "                                                                                                             \n"
+  "cons c_1,c_2: S11;                                                                                           \n"
+  "                                                                                                             \n"
+  "map  C_S11_1: S11 # List(Bool) # List(Bool) -> List(Bool);                                                   \n"
+  "     pi_S11_2: List(Bool) -> List(Bool);                                                                     \n"
+  "     pi_S11_1: List(Bool) -> Bool;                                                                           \n"
+  "     Det_S11_1: List(Bool) -> S11;                                                                           \n"
+  "                                                                                                             \n"
+  "var  y3,y4,d3: List(Bool);                                                                                   \n"
+  "     y2: S11;                                                                                                \n"
+  "     d2: Bool;                                                                                               \n"
+  "eqn  C_S11_1(c_1, y3, y4)  =  y3;                                                                            \n"
+  "     C_S11_1(c_2, y3, y4)  =  y4;                                                                            \n"
+  "     C_S11_1(y2, y4, y4)  =  y4;                                                                             \n"
+  "     Det_S11_1([])  =  c_1;                                                                                  \n"
+  "     Det_S11_1(d2 |> d3)  =  c_2;                                                                            \n"
+  "     pi_S11_1(d2 |> d3)  =  d2;                                                                              \n"
+  "     pi_S11_2(d2 |> d3)  =  d3;                                                                              \n"
+  "                                                                                                             \n"
+  "act  a: Bool;                                                                                                \n"
+  "                                                                                                             \n"
+  "proc P(S1_pp1_P: S11, S1_pp2_P: Bool, S1_pp3_P: List(Bool)) =                                                \n"
+  "       sum b_X_P: Bool.                                                                                      \n"
+  "         true ->                                                                                             \n"
+  "         a(head(C_S11_1(S1_pp1_P, [], S1_pp2_P |> S1_pp3_P))) .                                              \n"
+  "         P(S1_pp1_P = c_2, S1_pp2_P = b_X_P, S1_pp3_P = tail(C_S11_1(S1_pp1_P, [], S1_pp2_P |> S1_pp3_P)));  \n"
+  "                                                                                                             \n"
+  "init P(Det_S11_1(true |> []), pi_S11_1(true |> []), pi_S11_2(true |> []));                                   \n"
+  ;
+
+const std::string expected_10 = "process_parameter_count = 1";
+
 void test_constelm(const std::string& message, const std::string& spec_text, const std::string& expected_result)
 {
   specification spec = parse_linear_process_specification(spec_text);
@@ -383,6 +458,7 @@ void test_constelm()
   test_constelm("case_6a", case_6a, expected_6a);
   test_constelm("case_6b", case_6b, expected_6b);
   test_constelm("case_9" , case_9,  expected_9);
+  test_constelm("case_10" , case_10,  expected_10);
 }
 
 void test_abp()
@@ -444,3 +520,4 @@ int test_main(int argc, char* argv[])
 
   return 0;
 }
+

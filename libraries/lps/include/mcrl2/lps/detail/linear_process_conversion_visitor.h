@@ -90,6 +90,31 @@ namespace detail {
       return true;
     }
 
+    /// \brief Checks if a process_equation matches with a process instance assignment
+    bool match_initial_process(const process_equation& eq, const process_instance_assignment& init) const
+    {
+      if (eq.identifier() != init.identifier())
+      {
+        return false;
+      }
+      data::variable_list v = eq.formal_parameters();
+      data::assignment_list a = init.assignments();
+      if (v.size() != a.size())
+      {
+        return false;
+      }
+      data::variable_list::const_iterator i = v.begin();
+      data::assignment_list::const_iterator j = a.begin();
+      for (; i != v.end(); ++i, ++j)
+      {
+        if (i->sort() != j->lhs().sort())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
     {
@@ -284,20 +309,35 @@ namespace detail {
     {
       visit(left);
 
-      // Check 1) The expression right must be a process instance
-      if (!is_process_instance(right))
+      // Check 1) The expression right must be a process instance or a process assignment
+      if (is_process_instance(right))
       {
+        process_instance p = right;
+        // Check 2) The process equation and and the process instance must match
+        if (!match_initial_process(m_equation, p))
+        {
+          std::clog << "seq right hand side: " << core::pp(right) << std::endl;
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
+        }
+        m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
+      }
+      else if (is_process_instance_assignment(right))
+      {
+        process_instance_assignment p = right;
+        // Check 2) The process equation and and the process instance assignment must match
+        if (!match_initial_process(m_equation, p))
+        {
+          std::clog << "seq right hand side: " << core::pp(right) << std::endl;
+          throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
+        }
+        m_next_state = p.assignments(); // TODO: check if this is correct
+      }
+      else
+      {
+        std::clog << "seq right hand side: " << core::pp(right) << std::endl;
         throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered with an unexpected right hand side");
       }
-      process_instance p = right;
 
-      // Check 2) The process equation and and the process instance must match
-      if (!match_initial_process(m_equation, p))
-      {
-        throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
-      }
-
-      m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
 // std::cout << "adding next state\n" << core::pp(m_next_state) << std::endl;
       return stop_recursion;
     }
