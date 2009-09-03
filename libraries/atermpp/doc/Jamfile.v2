@@ -1,6 +1,6 @@
 import quickbook ;
 
-xml atermpp
+xml atermpp_manual
     :
         atermpp.qbk
     ;

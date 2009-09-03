@@ -21,6 +21,7 @@
   <part id="libraries">
     <title>The mCRL2 C++ Libraries (BoostBook Subset)</title>
 
+    <xi:include href="atermpp_manual.xml"/>
     <xi:include href="concept_manual.xml"/>
     <xi:include href="data_manual.xml"/>
     <xi:include href="process_manual.xml"/>
