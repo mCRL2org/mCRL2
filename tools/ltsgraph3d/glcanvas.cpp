@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -69,6 +69,9 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
   rotX = 0;
   rotY = 0;
   scaleFactor = 1.0;  
+  double someMatrix[] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+  for ( int i = 0; i < 16; i++)
+	  currentModelviewMatrix[i] = someMatrix[i];
 }
 
 GLCanvas::~GLCanvas()
@@ -81,7 +84,6 @@ void GLCanvas::initialize()
   glLoadIdentity();
   if(drawIn3D)
   {
-	  glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
 	  glShadeModel(GL_SMOOTH);
 	  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
 	  glClearDepth(1.0);									

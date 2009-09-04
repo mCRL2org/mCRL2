@@ -1,4 +1,4 @@
-// Author(s): Carst Tankink
+// Author(s): Carst Tankink and Ali Deniz Aladagli
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -61,7 +61,7 @@ LTSGraph3d::LTSGraph3d() : super("LTSGraph3d",
     "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.", // GUI specific description
     "Draw graphs and optimize their layout in a graphical environment. "
     "If INFILE is supplied, the tool will use this file as input for drawing.",
-    std::vector< std::string >(1, "Carst Tankink"))
+    std::vector< std::string >(1, "Carst Tankink, Ali Deniz Aladagli"))
 { }
 
 bool LTSGraph3d::run()
@@ -279,24 +279,27 @@ void LTSGraph3d::moveObject(double x, double y)
 	prevX = prevX + x;
 	prevY = prevY + y;
   }
-  if(prevX > 1000)
+  if(selectedState != NULL || selectedTransition != NULL || selectedLabel != NULL)
   {
-	  prevX = 1000;
-  }
+	  if(prevX > 1000)
+	  {
+		  prevX = 1000;
+	  }
 
-  if (prevX < -1000)
-  {
-	  prevX = -1000;
-  }
+	  if (prevX < -1000)
+	  {
+		  prevX = -1000;
+	  }
 
-  if (prevY > 1000)
-  {
-	  prevY = 1000;
-  }
+	  if (prevY > 1000)
+	  {
+		  prevY = 1000;
+	  }
 
-  if (prevY < -1000)
-  {
-	  prevY = -1000;
+	  if (prevY < -1000)
+	  {
+		  prevY = -1000;
+	  }
   }
   
   
