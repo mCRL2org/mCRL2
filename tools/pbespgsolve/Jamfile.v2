@@ -24,8 +24,7 @@ SOURCES = Compatibility.cc
 
 lib pg : $(SOURCES) : <use>/site-config//boost ;
 obj timing.o : timing.c : ;
-obj timing.o : timing_msvc.c : <toolset>msvc ;
-obj timing.o : timing_msvc.c : <os>windows <toolset>intel ;
+obj timing.o : timing_msvc.c : <os>windows ;
 
 tool pbespgsolve
    : pbespgsolve.cpp

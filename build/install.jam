@@ -240,9 +240,14 @@ rule install-tool ( name : requirements * ) {
     }
   }
   else {
-    local install-rule-name = [ feature.get-values install-rule : $(requirements) ] install ;
+    if [ property.select install-rule : $(requirements) ] {
+      local install-rule-name = [ feature.get-values install-rule : $(requirements) ] ;
 
-    alias $(install-rule-name[1]) ;
+      alias $(install-rule-name[1]) ;
+    }
+    else {
+      alias install ;
+    }
   }
 }
 
