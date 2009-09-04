@@ -28,7 +28,7 @@ obj timing.o : timing_msvc.c : <os>windows ;
 
 tool pbespgsolve
    : pbespgsolve.cpp
-     pg
+     pg/<link>static
      timing.o
    : <status>experimental
    ;

@@ -137,7 +137,7 @@ class ltsmin_tool : public ltsmin_base
         std::string::size_type pos, lastpos = 0;
         while ( (pos = s.find(',',lastpos)) != std::string::npos )
         {
-          add_tau_action(strdup(s.substr(lastpos,pos-lastpos).c_str()));
+          add_tau_action(s.substr(lastpos,pos-lastpos));
           lastpos = pos+1;
         }
       }

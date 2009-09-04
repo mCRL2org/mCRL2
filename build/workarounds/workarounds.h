@@ -14,7 +14,6 @@
 # include <malloc.h>
 
 # define chdir    _chdir
-# define strdup   _strdup
 # define dup      _dup
 # define dup2     _dup2
 # define getpid   _getpid
@@ -65,20 +64,6 @@ inline double round(double d) {
 #endif
 
 #include <limits.h>
-
-//String manipulation
-//-------------------
-//
-//Re-implementation of strdup (because it is not part of the C99 standard)
-#if !(defined __sun__ || defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__ || defined __FreeBSD__)
-inline char *strdup(const char *s) {
-    char *p;
-
-    if((p = (char *)malloc(strlen(s) + 1)) == NULL)
-      return NULL;
-    return strcpy(p, s);
-}
-#endif
 
 // Part of C99 but not C++98
 #if !defined(LLONG_MIN)

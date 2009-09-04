@@ -275,16 +275,17 @@ static void UpdateParArray(int state, int parameter) {
 static char **tau_actions = NULL;
 static int num_tau_actions = 0;
 static int size_tau_actions = 0;
-void add_tau_action(char *action)
+void add_tau_action(std::string const& action)
 {
   if ( num_tau_actions == size_tau_actions )
   {
     size_tau_actions += 8;
     tau_actions = (char **) realloc(tau_actions,size_tau_actions*sizeof(char *));
   }
-  tau_actions[num_tau_actions] = action;
+  tau_actions[num_tau_actions] = (char*) malloc((action.size() + 1) * sizeof(char));
+  strncpy(tau_actions[num_tau_actions], action.c_str(), action.size() + 1);
+  gsVerboseMsg("marked action '%s' as a tau action\n", tau_actions[num_tau_actions]);
   num_tau_actions++;
-  gsVerboseMsg("marked action '%s' as a tau action\n",action);
 }
 
 bool is_tau_action(char const* action)

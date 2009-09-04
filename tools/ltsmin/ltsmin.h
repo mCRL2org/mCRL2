@@ -12,9 +12,10 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <cerrno>
 #include "aterm1.h"
-#include <assert.h>
+#include <cassert>
 #include "svc/svcerrno.h"
 #include "svc/svc.h"
 #define EXIT_OK 0
@@ -103,7 +104,7 @@ SVCstateIndex ReadData(void);
 void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2);
 int WriteData(SVCstateIndex initState, int tau_toops);
 int WriteDataAddParam(SVCfile *f, SVCstateIndex initState, int tau_toops);
-void add_tau_action(char *s);
+void add_tau_action(std::string const& s);
 //void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right);
 //void Check(void);
 void StartSplitting(void);
