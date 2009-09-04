@@ -22,8 +22,6 @@
 
 #include "mcrl2/core/messaging.h"
 
-#include "workarounds.h" // for strdup
-
 const char*  ::squadt_interactor::option_lts_type             = "lts_type";
 const char*  ::squadt_interactor::option_out_info             = "out_info";
 
@@ -485,7 +483,7 @@ bool squadt_interactor::perform_task(tipi::configuration &configuration)
   }
 
   if (configuration.get_option_argument< bool >(option_confluence_reduction)) {
-    lgopts.priority_action = strdup(configuration.get_option_argument< std::string >(option_confluent_tau).c_str());
+    lgopts.priority_action = configuration.get_option_argument< std::string >(option_confluent_tau);
   }
 
   lgopts.max_states = (configuration.option_exists(option_max_states)) ?

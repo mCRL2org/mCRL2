@@ -410,29 +410,6 @@ void test_is_certainly_finite()
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
-
-  data_specification specification = parse_data_specification(
-    "sort A = struct a(B);"
-    "sort B = struct b(A);");
-
-  arguments.clear();
-
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("B")));
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("A")));
-
-  constructors.clear();
-
-  constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
-  constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
-
-  structured_sort A(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
-  structured_sort B(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
-
-  BOOST_CHECK(specification.search_sort(specification.normalise(A)));
-  BOOST_CHECK(specification.search_sort(specification.normalise(B)));
-
-  BOOST_CHECK(specification.normalise(A) == specification.normalise(specification.normalise(A)));
-  BOOST_CHECK(specification.normalise(B) == specification.normalise(specification.normalise(B)));
 }
 
 void test_constructor()
@@ -497,6 +474,7 @@ void test_system_defined()
   BOOST_CHECK(specification.is_alias(basic_sort("D")));
   BOOST_CHECK(specification.is_alias(basic_sort("F")));
   BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
+std::cerr << pp(specification.constructors()) << std::endl;
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
@@ -601,6 +579,33 @@ void test_normalisation()
   BOOST_CHECK(specification.normalise(list(S)) == list(set_(A)));
   BOOST_CHECK(specification.normalise(B) == bag(A));
   BOOST_CHECK(specification.normalise(list(B)) == list(bag(A)));
+
+  specification = parse_data_specification(
+    "sort A = struct a(B);"
+    "sort B = struct b(A);");
+
+  atermpp::vector< structured_sort_constructor_argument > arguments;
+
+  arguments.push_back(structured_sort_constructor_argument(basic_sort("B")));
+  arguments.push_back(structured_sort_constructor_argument(basic_sort("A")));
+
+  atermpp::vector< structured_sort_constructor > constructors;
+
+  constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+  constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
+std::cerr << "SEARCH " << data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)) << std::endl;
+std::cerr << "GOT " << pp(specification.sorts()) << std::endl;
+
+  structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
+  structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
+
+  BOOST_CHECK(specification.search_sort(specification.normalise(sA)));
+  BOOST_CHECK(!specification.search_sort(specification.normalise(sA)));
+  BOOST_CHECK(specification.search_sort(specification.normalise(sB)));
+  BOOST_CHECK(!specification.search_sort(specification.normalise(sB)));
+
+  BOOST_CHECK(specification.normalise(sA) == specification.normalise(specification.normalise(sA)));
+  BOOST_CHECK(specification.normalise(sB) == specification.normalise(specification.normalise(sB)));
 }
 
 void test_copy()

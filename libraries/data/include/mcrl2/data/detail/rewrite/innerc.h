@@ -58,9 +58,9 @@ class RewriterCompilingInnermost: public Rewriter
 		ATermAppl *int2term;
 		ATermList *innerc_eqns;
 
-		char *file_c;
-		char *file_o;
-		char *file_so;
+		std::string file_c;
+		std::string file_o;
+		std::string file_so;
 
 		void *so_handle;
 		void (*so_rewr_init)();

@@ -60,7 +60,7 @@ namespace mcrl2 {
 
     void Formula_Checker::save_dot_file(int a_formula_number) {
 
-      if (f_dot_file_name != 0) {
+      if (!f_dot_file_name.empty()) {
         std::ostringstream  v_file_name(f_dot_file_name);
 
         v_file_name << "-" << a_formula_number << ".dot";
@@ -74,15 +74,10 @@ namespace mcrl2 {
       mcrl2::data::data_specification a_data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
       bool a_apply_induction, bool a_counter_example, bool a_witness, char const* a_dot_file_name
     ):
-      f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
+      f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
     {
       f_counter_example = a_counter_example;
       f_witness = a_witness;
-      if (a_dot_file_name == 0) {
-        f_dot_file_name = 0;
-      } else {
-        f_dot_file_name = strdup(a_dot_file_name);
-      }
     }
 
     // --------------------------------------------------------------------------------------------

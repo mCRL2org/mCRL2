@@ -48,13 +48,11 @@ bool p_lts::read_from_bcg(string const& filename)
   BCG_TYPE_OBJECT_TRANSITION bcg_graph;
 
   BCG_OT_READ_BCG_SURVIVE(BCG_TRUE);
-  char *s = strdup(filename.c_str());
   BCG_OT_READ_BCG_BEGIN(
-      s,
+      const_cast< char* >(filename.c_str()),
       &bcg_graph,
       0
       );
-  free(s);
   BCG_OT_READ_BCG_SURVIVE(BCG_FALSE);
 
   if ( bcg_graph == NULL )
@@ -94,17 +92,13 @@ bool p_lts::read_from_bcg(string const& filename)
 bool p_lts::write_to_bcg(string const& filename)
 {
   BCG_IO_WRITE_BCG_SURVIVE(BCG_TRUE);
-  char *s = strdup(filename.c_str());
-  char *t = strdup(creator.c_str());
   BCG_TYPE_BOOLEAN b = BCG_IO_WRITE_BCG_BEGIN(
-      s,
+      const_cast< char* >(filename.c_str()),
       init_state,
       1, // XXX add check to see if this might be 2?
-      (creator != "")?t:NULL,
+      (creator != "")?const_cast< char* >(creator.c_str()):NULL,
       0
       );
-  free(t);
-  free(s);
   BCG_IO_WRITE_BCG_SURVIVE(BCG_FALSE);
 
   if ( b == BCG_TRUE )

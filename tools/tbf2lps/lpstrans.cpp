@@ -301,10 +301,8 @@ static ATermList convert_funcs(ATermList funcs, ATermList *ids, bool funcs_are_c
     {
       if ( funcs_are_cons && remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),2)))) )
       {
-        char *name = strdup(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
-        *strchr(name,'#') = '\0';
-        gsErrorMsg("constructor %s of sort Bool found (only T and F are allowed)\n",name);
-        free(name);
+        std::string name(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
+        gsErrorMsg("constructor %s of sort Bool found (only T and F are allowed)\n",const_cast< char* >(name.substr(0, name.find_last_of('#')).c_str()));
         exit(1);
       }
       add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));

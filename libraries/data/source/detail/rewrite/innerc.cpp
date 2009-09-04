@@ -25,6 +25,7 @@
 #include <dlfcn.h>
 #include <cassert>
 #include <stdexcept>
+#include <sstream>
 #include "boost/scoped_array.hpp"
 #include "aterm2.h"
 #include "mcrl2/core/messaging.h"
@@ -1541,13 +1542,12 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
   innerc_eqns = NULL;
 }
 
-static void cleanup_file(char *f)
+static void cleanup_file(std::string const& f)
 {
-  if ( unlink(f) )
+  if ( unlink(const_cast< char* >(f.c_str())) )
   {
-	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
+	  fprintf(stderr,"unable to remove file %s: %s\n",const_cast< char* >(f.c_str()),strerror(errno));
   }
-  free(f);
 }
 
 void RewriterCompilingInnermost::BuildRewriteSystem()
@@ -1556,7 +1556,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  char *s,*t;
+  boost::scoped_array< char > t(new char[100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND)]);
   void *h;
 
   free(int2term);
@@ -1584,18 +1584,15 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     innerc_eqns[ATgetInt(i)] = (ATermList) ATtableGet(tmp_eqns,(ATerm) i);
   }
 
-  s = (char *) malloc(50);
-  sprintf(s,"innerc_%i_%lx",getpid(),(long) this);
-  t = (char *) malloc(100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND));
+  std::ostringstream file_base("innerc_");
 
-  sprintf(t,"%s.c",s);
-  file_c = strdup(t);
-  sprintf(t,"%s.o",s);
-  file_o = strdup(t);
-  sprintf(t,"%s.so",s);
-  file_so = strdup(t);
+  file_base << getpid() << "_" << reinterpret_cast< long >(this);
 
-  f = fopen(file_c,"w");
+  file_c  = file_base.str() + ".c";
+  file_o  = file_base.str() + ".o";
+  file_so = file_base.str() + ".so";
+
+  f = fopen(const_cast< char* >(file_c.c_str()),"w");
   if ( f == NULL )
   {
 	  perror("fopen");
@@ -2201,30 +2198,30 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   fclose(f);
 
   gsVerboseMsg("compiling rewriter...\n");
-  sprintf(t,INNERC_COMPILE_COMMAND,s);
-  gsVerboseMsg("%s\n",t);
-  if ( system(t) != 0 )
+  sprintf(t.get(),INNERC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t.get());
+  if ( system(t.get()) != 0 )
   {
     // unlink(file_c); In case of compile errors the .c file is not removed.
     throw mcrl2::runtime_error("Could not compile rewriter.");
   }
 
   gsVerboseMsg("linking rewriter...\n");
-  sprintf(t,INNERC_LINK_COMMAND,s,s);
-  gsVerboseMsg("%s\n",t);
-  if ( system(t) != 0 )
+  sprintf(t.get(),INNERC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()), const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t.get());
+  if ( system(t.get()) != 0 )
   {
-    unlink(file_o);
+    unlink(const_cast< char* >(file_o.c_str()));
     // unlink(file_c); In case of link errors the .c file is not removed.
     throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
-  sprintf(t,"./%s.so",s);
-  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
+  sprintf(t.get(),"./%s.so",const_cast< char* >(file_base.str().c_str()));
+  if ( (h = so_handle = dlopen(t.get(),RTLD_NOW)) == NULL )
   {
-    unlink(file_so);
-    unlink(file_o);
-    unlink(file_c);
+    unlink(const_cast< char* >(file_so.c_str()));
+    unlink(const_cast< char* >(file_o.c_str()));
+    unlink(const_cast< char* >(file_c.c_str()));
     throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
@@ -2249,9 +2246,9 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
        (so_clear_subst  == NULL ) ||
        (so_clear_substs == NULL ) )
   {
-    unlink(file_so);
-    unlink(file_o);
-    unlink(file_c);
+    unlink(const_cast< char* >(file_so.c_str()));
+    unlink(const_cast< char* >(file_o.c_str()));
+    unlink(const_cast< char* >(file_c.c_str()));
     throw mcrl2::runtime_error("Cannot load rewriter functions.");
   }
 
@@ -2274,9 +2271,6 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     made_files = true;
 #endif
   }
-
-  free(t);
-  free(s);
 }
 
 RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataSpec)

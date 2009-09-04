@@ -13,6 +13,6 @@
 
 #define NAME "lps2lts"
 
-ATermAppl *parse_action_list(const char *s, int *len);
+ATermAppl *parse_action_list(std::string const& s, int *len);
 
 #endif

@@ -39,16 +39,12 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 
-ATermAppl *parse_action_list(const char *s, int *len)
+ATermAppl *parse_action_list(const std::string& s, int *len)
 {
-  const char *p;
-
-  *len = 0;
-  p = s;
-  while ( p != NULL )
+  *len = s.empty() ? 0 : 1;
+  for (std::string::size_type position(s.find_first_of(",")); position != std::string::npos; position = s.find_first_of(",", position + 1))
   {
-    *len = (*len)+1;
-    p = strstr(p+1,",");
+    *len = (*len) + 1;
   }
 
   ATermAppl *r = (ATermAppl *) malloc((*len)*sizeof(ATermAppl));
@@ -57,24 +53,23 @@ ATermAppl *parse_action_list(const char *s, int *len)
     gsErrorMsg("not enough memory to store action list\n");
     exit(1);
   }
-  for (int i=0; i<(*len); i++)
+  for (int i = 0; i< (*len); ++i)
   {
     r[i] = NULL;
   }
   ATprotectArray((ATerm *) r,*len);
 
-  char *t = strdup(s);
-  p = strtok(t,",");
-  int i=0;
-  while ( p != NULL )
+  for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
   {
-    r[i] = mcrl2::core::identifier_string(p);
-    i++;
-    p = strtok(NULL,",");
-  }
-  free(t);
+    *r++ = mcrl2::core::identifier_string(s.substr(p, q - p));
 
-  return r;
+    if (q == std::string::npos)
+    {
+       break;
+    }
+  }
+
+  return r - *len;
 }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY

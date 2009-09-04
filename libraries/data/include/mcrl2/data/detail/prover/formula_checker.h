@@ -75,7 +75,7 @@ class Formula_Checker {
     bool f_witness;
 
     /// \brief Prefix for the names of the files containing BDDs in dot format.
-    char const* f_dot_file_name;
+    std::string f_dot_file_name;
 
     /// \brief Displays a witness.
     void print_witness();

@@ -36,6 +36,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <cassert>
+#include <sstream>
 #include "boost/scoped_array.hpp"
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
@@ -2858,13 +2859,12 @@ void RewriterCompilingJitty::CompileRewriteSystem(ATermAppl DataSpec)
   ar = NULL;
 }
 
-static void cleanup_file(char *f)
+static void cleanup_file(std::string const& f)
 {
-  if ( unlink(f) )
+  if ( unlink(const_cast< char* >(f.c_str())) )
   {
-	  fprintf(stderr,"unable to remove file %s: %s\n",f,strerror(errno));
+	  fprintf(stderr,"unable to remove file %s: %s\n",const_cast< char* >(f.c_str()),strerror(errno));
   }
-  free(f);
 }
 
 void RewriterCompilingJitty::BuildRewriteSystem()
@@ -2873,7 +2873,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ATermInt i;
   int j;
   FILE *f;
-  char *s,*t;
+  boost::scoped_array< char > t(new char[100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND)]);
   void *h;
 
   free(int2term);
@@ -2921,18 +2921,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fill_always_rewrite_array();
 #endif
 
-  s = (char *) malloc(50);
-  sprintf(s,"jittyc_%i_%lx",getpid(),(long) this);
-  t = (char *) malloc(100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
+  std::ostringstream file_base("jittyc_");
 
-  sprintf(t,"%s.c",s);
-  file_c = strdup(t);
-  sprintf(t,"%s.o",s);
-  file_o = strdup(t);
-  sprintf(t,"%s.so",s);
-  file_so = strdup(t);
+  file_base << getpid() << "_" << reinterpret_cast< long >(this);
 
-  f = fopen(file_c,"w");
+  file_c  = file_base.str() + ".c";
+  file_o  = file_base.str() + ".o";
+  file_so = file_base.str() + ".so";
+
+  f = fopen(const_cast< char* >(file_c.c_str()),"w");
   if ( f == NULL )
   {
 	  perror("fopen");
@@ -3619,30 +3616,31 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   fclose(f);
   gsVerboseMsg("compiling rewriter...\n");
-  sprintf(t,JITTYC_COMPILE_COMMAND,s);
-  gsVerboseMsg("%s\n",t);
-  if ( system(t) != 0 )
+  sprintf(t.get(),JITTYC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t.get());
+  if ( system(t.get()) != 0 )
   {
     // unlink(file_c); In case of compile errors, the .c file is not removed.
     throw mcrl2::runtime_error("Could not compile rewriter.");
   }
 
   gsVerboseMsg("linking rewriter...\n");
-  sprintf(t,JITTYC_LINK_COMMAND,s,s);
-  gsVerboseMsg("%s\n",t);
-  if ( system(t) != 0 )
+
+  sprintf(t.get(),JITTYC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()),const_cast< char* >(file_base.str().c_str()));
+  gsVerboseMsg("%s\n",t.get());
+  if ( system(t.get()) != 0 )
   {
-    unlink(file_o);
+    unlink(const_cast< char* >(file_o.c_str()));
     // unlink(file_c); In case of link errors, the .c file is not removed.
     throw mcrl2::runtime_error("Could not link rewriter.");
   }
 
-  sprintf(t,"./%s.so",s);
-  if ( (h = so_handle = dlopen(t,RTLD_NOW)) == NULL )
+  sprintf(t.get(),"./%s.so",const_cast< char* >(file_base.str().c_str()));
+  if ( (h = so_handle = dlopen(t.get(),RTLD_NOW)) == NULL )
   {
-    unlink(file_so);
-    unlink(file_o);
-    unlink(file_c);
+    unlink(const_cast< char* >(file_so.c_str()));
+    unlink(const_cast< char* >(file_o.c_str()));
+    unlink(const_cast< char* >(file_c.c_str()));
     throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
   }
   so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
@@ -3667,9 +3665,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
        (so_clear_subst  == NULL ) ||
        (so_clear_substs == NULL ) )
   {
-    unlink(file_so);
-    unlink(file_o);
-    unlink(file_c);
+    unlink(const_cast< char* >(file_so.c_str()));
+    unlink(const_cast< char* >(file_o.c_str()));
+    unlink(const_cast< char* >(file_c.c_str()));
     throw mcrl2::runtime_error("Cannot load rewriter functions.");
   }
 
@@ -3684,17 +3682,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 #ifndef NDEBUG
   if ( !gsDebug )
 #endif
-  { cleanup_file(file_c);
-    cleanup_file(file_o);
-    cleanup_file(file_so);
+  { cleanup_file(file_c.c_str());
+    cleanup_file(file_o.c_str());
+    cleanup_file(file_so.c_str());
 #ifndef NDEBUG
   } else {
     made_files = true;
 #endif
   }
-  
-  free(t);
-  free(s);
 }
 
 RewriterCompilingJitty::RewriterCompilingJitty(ATermAppl DataSpec)
@@ -3714,9 +3709,9 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   ATtableDestroy(term2int);
 #ifndef NDEBUG
   if ( made_files )
-  { cleanup_file(file_c);
-    cleanup_file(file_o);
-    cleanup_file(file_so);
+  { cleanup_file(file_c.c_str());
+    cleanup_file(file_o.c_str());
+    cleanup_file(file_so.c_str());
   }
 #endif
 }

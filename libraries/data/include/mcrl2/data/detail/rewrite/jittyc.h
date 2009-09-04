@@ -72,9 +72,9 @@ class RewriterCompilingJitty: public Rewriter
 		bool calc_ar(ATermAppl expr);
 		void fill_always_rewrite_array();
 
-		char *file_c;
-		char *file_o;
-		char *file_so;
+		std::string file_c;
+		std::string file_o;
+		std::string file_so;
 
 		void *so_handle;
 		void (*so_rewr_init)();

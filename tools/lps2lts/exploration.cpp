@@ -97,7 +97,7 @@ static unsigned long *bithashtable = NULL;
 static bool trace_support = false;
 static unsigned long tracecnt;
 
-static char *basefilename = NULL;
+static std::string basefilename;
 
 static bool lg_error = false;
 
@@ -117,12 +117,7 @@ bool initialise_lts_generation(lts_generation_options *opts)
   lgopts->specification.load(lgopts->filename);
   lgopts->specification.instantiate_global_variables();
 
-  basefilename = strdup(lgopts->filename.c_str());
-  char *s = strrchr(basefilename,'.');
-  if ( s != NULL )
-  {
-    *s = '\0';
-  }
+  basefilename = lgopts->filename.substr(0, basefilename.find_last_of('.'));
 
   if ( lgopts->bithashing )
   {
@@ -267,7 +262,6 @@ bool finalise_lts_generation()
   }
   free(bithashtable);
   bithashtable = NULL;
-  free(basefilename);
 
   return true;
 }
@@ -358,7 +352,7 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
     {
       if ( lgopts->trace && (tracecnt < lgopts->max_traces) )
       {
-        if ( basefilename == NULL )
+        if ( basefilename.empty() )
         {
         }
         std::ostringstream ss;
@@ -370,9 +364,9 @@ static void check_actiontrace(ATerm OldState, ATermAppl Transition, ATerm NewSta
         {
           if ( saved_ok )
           {
-            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc'.\n",Transition,const_cast< char* >(basefilename.c_str()),tracecnt,lgopts->trace_actions[j]);
           } else {
-            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,basefilename,tracecnt,lgopts->trace_actions[j]);
+            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%P.trc'.\n",Transition,const_cast< char* >(basefilename.c_str()),tracecnt,lgopts->trace_actions[j]);
           }
           fflush(stderr);
         }
@@ -394,9 +388,9 @@ static void save_error_trace(ATerm state)
     if ( saved_ok )
     {
       lgopts->error_trace_saved = true;
-      gsVerboseMsg("saved trace to error in '%s_error.trc'.\n",basefilename);
+      gsVerboseMsg("saved trace to error in '%s_error.trc'.\n",const_cast< char* >(basefilename.c_str()));
     } else {
-      gsVerboseMsg("trace to error could not be saved in '%s_error.trc'.\n",basefilename);
+      gsVerboseMsg("trace to error could not be saved in '%s_error.trc'.\n",const_cast< char* >(basefilename.c_str()));
     }
     fflush(stderr);
   }
@@ -417,9 +411,9 @@ static void check_deadlocktrace(ATerm state)
       {
         if ( saved_ok )
         {
-          gsMessage("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsMessage("deadlock-detect: deadlock found and saved to '%s_dlk_%lu.trc'.\n",const_cast< char* >(basefilename.c_str()),tracecnt);
         } else {
-          gsMessage("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",basefilename,tracecnt);
+          gsMessage("deadlock-detect: deadlock found, but could not be saved to '%s_dlk_%lu.trc'.\n",const_cast< char* >(basefilename.c_str()),tracecnt);
         }
         fflush(stderr);
       }

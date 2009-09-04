@@ -41,8 +41,7 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
   SVCfile f;
   SVCbool b;
 
-  char *fn = strdup(filename.c_str());
-  if ( SVCopen(&f,fn,SVCread,&b) )
+  if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b) )
   {
     gsVerboseMsg("cannot open SVC file '%s' for reading\n",filename.c_str());
     return false;
@@ -56,7 +55,6 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
     if ( svc_type != "generic" )
     {
       gsVerboseMsg("SVC file '%s' is not in the mCRL format\n",filename.c_str());
-      free(fn);
       return false;
     }
     state_info = (SVCgetIndexFlag(&f) == SVCfalse);
@@ -70,25 +68,20 @@ bool p_lts::read_from_svc(string const& filename, lts_type type)
       state_info = true;
     } else {
       gsVerboseMsg("SVC file '%s' is not in the mCRL2 format\n",filename.c_str());
-      free(fn);
       return false;
     }
   } else {
     if ( svc_type == "generic" )
     {
       gsVerboseMsg("SVC file '%s' is in the mCRL format\n",filename.c_str());
-      free(fn);
       return false;
     } else if ( (svc_type == "mCRL2") || (svc_type == "mCRL2+info") )
     {
       gsVerboseMsg("SVC file '%s' is in the mCRL2 format\n",filename.c_str());
-      free(fn);
       return false;
     }
     state_info = (SVCgetIndexFlag(&f) == SVCfalse);
   }
-
-  free(fn);
 
   label_info = true;
 
@@ -299,14 +292,11 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
 
   SVCfile f;
   SVCbool b = state_info ? SVCfalse : SVCtrue;
-  char *fn = strdup(filename.c_str());
-  if ( SVCopen(&f,fn,SVCwrite,&b) )
+  if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b) )
   {
-    gsVerboseMsg("cannot open SVC file '%s' for writing\n",fn);
-    free(fn);
+    gsVerboseMsg("cannot open SVC file '%s' for writing\n",const_cast< char* >(filename.c_str()));
     return false;
   }
-  free(fn);
 
   if ( type == lts_mcrl )
   {
@@ -327,9 +317,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
   {
     SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
   } else {
-    char *s = strdup(creator.c_str());
-    SVCsetCreator(&f,s);
-    free(s);
+    SVCsetCreator(&f, const_cast< char* >(creator.c_str()));
   }
 
   SVCsetInitialState(&f,SVCnewState(&f, state_info ? state_values[init_state] : (ATerm) ATmakeInt(init_state) ,&b));
