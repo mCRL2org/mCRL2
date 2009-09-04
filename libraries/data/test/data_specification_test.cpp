@@ -593,16 +593,12 @@ void test_normalisation()
 
   constructors.push_back(structured_sort_constructor("a", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(structured_sort_constructor("b", boost::make_iterator_range(arguments.begin() + 1, arguments.end())));
-std::cerr << "SEARCH " << data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)) << std::endl;
-std::cerr << "GOT " << pp(specification.sorts()) << std::endl;
 
   structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
 
   BOOST_CHECK(specification.search_sort(specification.normalise(sA)));
-  BOOST_CHECK(!specification.search_sort(specification.normalise(sA)));
   BOOST_CHECK(specification.search_sort(specification.normalise(sB)));
-  BOOST_CHECK(!specification.search_sort(specification.normalise(sB)));
 
   BOOST_CHECK(specification.normalise(sA) == specification.normalise(specification.normalise(sA)));
   BOOST_CHECK(specification.normalise(sB) == specification.normalise(specification.normalise(sB)));
