@@ -112,133 +112,262 @@ void SpringLayout::onStop(wxCommandEvent& /* event */)
 
 void SpringLayout::layoutGraph(Graph* graph)
 {
-  size_t nrStates = graph->getNumberOfStates();
-  std::vector<float> sumFX(nrStates, 0.0f);
-  std::vector<float> sumFY(nrStates, 0.0f);
-  std::vector<float> sumFZ(nrStates, 0.0f);
-
-  double windowWidth = 2000;
-  double windowHeight = 2000;
-  double windowDepth = 2000;
-
-  for(size_t i = 0; i < nrStates; ++i)
+  if(app->get3dMode())
   {
-    State* s1 = graph->getState(i);
+	  size_t nrStates = graph->getNumberOfStates();
+	  std::vector<float> sumFX(nrStates, 0.0f);
+	  std::vector<float> sumFY(nrStates, 0.0f);
+	  std::vector<float> sumFZ(nrStates, 0.0f);
 
-    // Calculate forces
-    double x1 = s1->getX();
-    double y1 = s1->getY();
-	double z1 = s1->getZ();
+	  double windowWidth = 2000;
+	  double windowHeight = 2000;
+	  double windowDepth = 2000;
 
-    for (size_t j = i + 1; j < nrStates; ++j)
-    {
-      State* s2 = graph->getState(j);
+	  for(size_t i = 0; i < nrStates; ++i)
+	  {
+		State* s1 = graph->getState(i);
 
-      double x2 = s2->getX();
-      double y2 = s2->getY();
-	  double z2 = s2->getZ();
-      double xDiff = x1 - x2;
-      double yDiff = y1 - y2;
-	  double zDiff = z1 - z2;
+		// Calculate forces
+		double x1 = s1->getX();
+		double y1 = s1->getY();
+		double z1 = s1->getZ();
 
-      // Euclidean distance
-      double distance = sqrt (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+		for (size_t j = i + 1; j < nrStates; ++j)
+		{
+		  State* s2 = graph->getState(j);
 
-      if (distance > 1)
-      {
-		double s = nodeStrength / (distance * distance * distance);
+		  double x2 = s2->getX();
+		  double y2 = s2->getY();
+		  double z2 = s2->getZ();
+		  double xDiff = x1 - x2;
+		  double yDiff = y1 - y2;
+		  double zDiff = z1 - z2;
 
-		sumFX[i] += s * xDiff;
-		sumFY[i] += s * yDiff;
-		sumFZ[i] += s * zDiff;
-		sumFX[j] -= s * xDiff;
-		sumFY[j] -= s * yDiff;
-		sumFZ[j] -= s * zDiff;
+		  // Euclidean distance
+		  double distance = sqrt (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+
+		  if (distance > 1)
+		  {
+			double s = nodeStrength / (distance * distance * distance);
+
+			sumFX[i] += s * xDiff;
+			sumFY[i] += s * yDiff;
+			sumFZ[i] += s * zDiff;
+			sumFX[j] -= s * xDiff;
+			sumFY[j] -= s * yDiff;
+			sumFZ[j] -= s * zDiff;
+		  }
+		  else
+		  {
+			sumFX[j] += 5;
+			sumFY[j] += 5;
+			sumFZ[j] += 5;
+			sumFX[i] += -5;
+			sumFY[i] += -5;
+			sumFZ[i] += -5;
+		  }
+		}
+
+		sumFX[i] += -2 * x1 / windowWidth;
+		sumFY[i] += -2 * y1 / windowHeight;
+		sumFZ[i] += -2 * z1 / windowDepth;
+
+		for(size_t j = 0; j < s1->getNumberOfTransitions(); ++j)
+		{
+		  State* s2 = s1->getTransition(j)->getTo();
+		  double x1 = s1->getX();
+		  double x2 = s2->getX();
+		  double y1 = s1->getY();
+		  double y2 = s2->getY();
+		  double z1 = s1->getZ();
+		  double z2 = s2->getZ();
+
+
+		  double xDiff = x2 - x1;
+		  double yDiff = y2 - y1;
+		  double zDiff = z2 - z1;
+		  double distance = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+
+		  if (distance > 0.1)
+		  {
+			double s = (edgeStiffness * log (distance / naturalLength)) / distance;
+
+			sumFX[i] += s * xDiff;
+			sumFY[i] += s * yDiff;
+			sumFZ[i] += s * zDiff;
+		  }
+		}
+
+		for(size_t j = 0; j < s1->getNumberOfInTransitions(); ++j)
+		{
+		  State* s2 = s1->getInTransition(j)->getFrom();
+		  double x1 = s2->getX();
+		  double x2 = s1->getX();
+		  double y1 = s2->getY();
+		  double y2 = s1->getY();
+		  double z1 = s2->getZ();
+		  double z2 = s1->getZ();
+
+		  double xDiff = x2 - x1;
+		  double yDiff = y2 - y1;
+		  double zDiff = z2 - z1;
+		  double distance = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+
+		  if (distance > 0.1)
+		  {
+			double s = (edgeStiffness * log(distance / naturalLength)) / distance;
+			sumFX[i] -= s * xDiff;
+			sumFY[i] -= s * yDiff;
+			sumFZ[i] -= s * zDiff;
+		  }
+		}
 	  }
-      else
-      {
-        sumFX[j] += 5;
-        sumFY[j] += 5;
-		sumFZ[j] += 5;
-        sumFX[i] += -5;
-        sumFY[i] += -5;
-		sumFZ[i] += -5;
-      }
-    }
 
-    sumFX[i] += -2 * x1 / windowWidth;
-    sumFY[i] += -2 * y1 / windowHeight;
-	sumFZ[i] += -2 * z1 / windowDepth;
+	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+	  {
+		double newX = 0;
+		double newY = 0;
+		double newZ = 0;
+		State* s = graph->getState(i);
+		if (!(s->isLocked() || s->isDragged()))
+		{
+		  newX = s->getX() + sumFX[i];
+		  newY = s->getY() + sumFY[i];
+		  newZ = s->getZ() + sumFZ[i];
 
-    for(size_t j = 0; j < s1->getNumberOfTransitions(); ++j)
-    {
-      State* s2 = s1->getTransition(j)->getTo();
-      double x1 = s1->getX();
-      double x2 = s2->getX();
-      double y1 = s1->getY();
-      double y2 = s2->getY();
-	  double z1 = s1->getZ();
-	  double z2 = s2->getZ();
-
-
-      double xDiff = x2 - x1;
-      double yDiff = y2 - y1;
-	  double zDiff = z2 - z1;
-      double distance = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
-
-      if (distance > 0.1)
-      {
-        double s = (edgeStiffness * log (distance / naturalLength)) / distance;
-
-        sumFX[i] += s * xDiff;
-        sumFY[i] += s * yDiff;
-		sumFZ[i] += s * zDiff;
-      }
-    }
-
-    for(size_t j = 0; j < s1->getNumberOfInTransitions(); ++j)
-    {
-      State* s2 = s1->getInTransition(j)->getFrom();
-      double x1 = s2->getX();
-      double x2 = s1->getX();
-      double y1 = s2->getY();
-      double y2 = s1->getY();
-	  double z1 = s2->getZ();
-	  double z2 = s1->getZ();
-
-      double xDiff = x2 - x1;
-      double yDiff = y2 - y1;
-	  double zDiff = z2 - z1;
-      double distance = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
-
-      if (distance > 0.1)
-      {
-        double s = (edgeStiffness * log(distance / naturalLength)) / distance;
-        sumFX[i] -= s * xDiff;
-        sumFY[i] -= s * yDiff;
-		sumFZ[i] -= s * zDiff;
-      }
-    }
+		  s->setX(newX);
+		  s->setY(newY);
+		  s->setZ(newZ);
+		}
+	  }
   }
-
-  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  else
   {
-    double newX = 0;
-    double newY = 0;
-	double newZ = 0;
-    State* s = graph->getState(i);
-    if (!(s->isLocked() || s->isDragged()))
-    {
-      newX = s->getX() + sumFX[i];
-      newY = s->getY() + sumFY[i];
-	  newZ = s->getZ() + sumFZ[i];
+	  size_t nrStates = graph->getNumberOfStates();
+	  std::vector<float> sumFX(nrStates, 0.0f);
+	  std::vector<float> sumFY(nrStates, 0.0f);
 
-      s->setX(newX);
-      s->setY(newY);
-	  s->setZ(newZ);
-    }
+	  double windowWidth = 2000;
+	  double windowHeight = 2000;
+
+	  for(size_t i = 0; i < nrStates; ++i)
+	  {
+		State* s1 = graph->getState(i);
+
+		// Calculate forces
+		double x1 = s1->getX();
+		double y1 = s1->getY();
+
+		for (size_t j = i + 1; j < nrStates; ++j)
+		{
+		  State* s2 = graph->getState(j);
+
+		  double x2 = s2->getX();
+		  double y2 = s2->getY();
+		  double xDiff = x1 - x2;
+		  double yDiff = y1 - y2;
+
+		  // Euclidean distance
+		  double distance = sqrt (xDiff * xDiff + yDiff * yDiff);
+
+		  if (distance > 1)
+		  {
+			double s = nodeStrength / (distance * distance * distance);
+
+			sumFX[i] += s * xDiff;
+			sumFY[i] += s * yDiff;
+			sumFX[j] -= s * xDiff;
+			sumFY[j] -= s * yDiff;
+		  }
+		  else
+		  {
+			sumFX[j] += 5;
+			sumFY[j] += 5;
+			sumFX[i] += -5;
+			sumFX[i] += -5;
+		  }
+		}
+
+		sumFX[i] += -2 * x1 / windowWidth;
+		sumFY[i] += -2 * y1 / windowHeight;
+
+		for(size_t j = 0; j < s1->getNumberOfTransitions(); ++j)
+		{
+		  State* s2 = s1->getTransition(j)->getTo();
+		  double x1 = s1->getX();
+		  double x2 = s2->getX();
+		  double y1 = s1->getY();
+		  double y2 = s2->getY();
+
+		  double xDiff = x2 - x1;
+		  double yDiff = y2 - y1;
+		  double distance = sqrt(xDiff * xDiff + yDiff * yDiff);
+
+		  if (distance > 0.1)
+		  {
+			double s = (edgeStiffness * log (distance / naturalLength)) / distance;
+
+			sumFX[i] += s * xDiff;
+			sumFY[i] += s * yDiff;
+		  }
+		}
+
+		for(size_t j = 0; j < s1->getNumberOfInTransitions(); ++j)
+		{
+		  State* s2 = s1->getInTransition(j)->getFrom();
+		  double x1 = s2->getX();
+		  double x2 = s1->getX();
+		  double y1 = s2->getY();
+		  double y2 = s1->getY();
+
+		  double xDiff = x2 - x1;
+		  double yDiff = y2 - y1;
+		  double distance = sqrt(xDiff * xDiff + yDiff * yDiff);
+
+		  if (distance > 0.1)
+		  {
+			double s = (edgeStiffness * log(distance / naturalLength)) / distance;
+			sumFX[i] -= s * xDiff;
+			sumFY[i] -= s * yDiff;
+		  }
+		}
+	  }
+
+	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+	  {
+		double newX = 0;
+		double newY = 0;
+		State* s = graph->getState(i);
+		if (!(s->isLocked() || s->isDragged()))
+		{
+		  newX = s->getX() + sumFX[i];
+		  newY = s->getY() + sumFY[i];
+
+		  if(newX > 1000)
+		  {
+			newX = 1000;
+		  }
+
+		  if (newX < -1000)
+		  {
+			newX = -1000;
+		  }
+
+		  if (newY > 1000)
+		  {
+			newY = 1000;
+		  }
+
+		  if (newY < -1000)
+		  {
+			newY = -1000;
+		  }
+
+		  s->setX(newX);
+		  s->setY(newY);
+		}
+	  }
   }
-
 }
 
 void SpringLayout::onNodeStrength(wxScrollEvent& evt)

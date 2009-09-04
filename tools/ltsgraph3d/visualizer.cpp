@@ -35,11 +35,12 @@ Visualizer::~Visualizer()
 }
 
 void Visualizer::visualize(double _width, double _height, double _pixelSize,
-                           bool inSelectMode)
+                           bool inSelectMode, bool enabled3d)
 {
   width = _width;
   height = _height;
   depth = (width + height) / 2;
+  draw3d = enabled3d;
   pixelSize = _pixelSize;
 
   if (!fr)
@@ -60,51 +61,67 @@ void Visualizer::drawStates(bool inSelectMode)
 
   if (graph)
   {
-    for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
-    {
-      State* s = graph->getState(i);
-	  drawState(s);
-
-      for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
-      {
-        Transition* t = s->getTransition(j);
-        drawTransition(t, j, inSelectMode);
-      }
-
-      for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
-      {
-        Transition* t = s->getSelfLoop(j);
-        drawSelfLoop(t, j, inSelectMode);
-      }
-    }
-	if (showTransLabels)
-	{
-	  for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
+      for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
 	  {
 		State* s = graph->getState(i);
+		if(draw3d)
+			drawState(s);
 
 		for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
 		{
-			Transition* t = s->getTransition(j);
-			drawTransLabel(t, j, inSelectMode);
+		  Transition* t = s->getTransition(j);
+		  drawTransition(t, j, inSelectMode);
 		}
-
+		
 		for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
 		{
-			Transition* t = s->getSelfLoop(j);
-			drawTransLabel(t, j, inSelectMode);
+  		  Transition* t = s->getSelfLoop(j);
+		  drawSelfLoop(t, j, inSelectMode);
 		}
-	  }	  
-	}	
-	for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
-	{
-		State* s = graph->getState(i);
-		if(s->getShowStateVector() || showStateLabels)
-			drawStateText(s);
-	}	
+	  }
+	  if(draw3d)
+	  {
+		  if (showTransLabels)
+		  {
+			for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
+			{
+			  State* s = graph->getState(i);
+
+			  for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
+			  {
+  				Transition* t = s->getTransition(j);
+				drawTransLabel(t, j, inSelectMode);
+			  }
+			  for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
+			  {
+  				Transition* t = s->getSelfLoop(j);
+				drawTransLabel(t, j, inSelectMode);
+			  }
+			}	  
+		  }	
+		  for(size_t i = 0; i < graph->getNumberOfStates(); ++i) 
+		  {
+			State* s = graph->getState(i);
+			if(s->getShowStateVector() || showStateLabels)
+			  drawStateText(s);
+		  }	
+	  }
+	  else
+	  {
+	    for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+		{
+		  State* s = graph->getState(i);
+
+
+		  //glPushMatrix();
+
+		  drawState(s);
+
+		  //glPopMatrix();
+		}
+	  }
   }
 }
-
 void Visualizer::setWidth(double _width)
 {
   width = _width;
@@ -120,75 +137,180 @@ void Visualizer::setHeight(double _height)
 
 void Visualizer::drawState(State* s)
 {
-  quadratic=gluNewQuadric();							
-  gluQuadricNormals(quadratic, GLU_SMOOTH);		
-
-  double x = s->getX();
-  double y = s->getY();
-  double z = s->getZ();
-  double rad =  radius * pixelSize;
-
-  x = (x / 2000.0) * (width - rad * 2);
-  y = (y / 2000.0) * (height - rad * 2);
-  z = (z / 2000.0) * (depth - rad * 2);
-
-
-  // Draw border of states
-  if(s->isSelected())
+  if(draw3d)
   {
-    glColor4ub(255, 0, 0, 255);  // TODO: Param
-  }
-  else if(s->isInitialState())
-  {
-    glColor4ub(0, 255, 0, 255);
+	  quadratic=gluNewQuadric();							
+	  gluQuadricNormals(quadratic, GLU_SMOOTH);		
+
+	  double x = s->getX();
+	  double y = s->getY();
+	  double z = s->getZ();
+	  double rad =  radius * pixelSize;
+
+	  x = (x / 2000.0) * (width - rad * 2);
+	  y = (y / 2000.0) * (height - rad * 2);
+	  z = (z / 2000.0) * (depth - rad * 2);
+
+
+	  // Draw border of states
+	  if(s->isSelected())
+	  {
+		glColor4ub(255, 0, 0, 255);  // TODO: Param
+	  }
+	  else if(s->isInitialState())
+	  {
+		glColor4ub(0, 255, 0, 255);
+	  }
+	  else
+	  {
+		glColor4ub(0, 0, 0, 255);
+	  }
+
+	  glPushMatrix();
+	  double cmvm[16];
+	  double dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
+	  owner->getCanvasMdlvwMtrx(cmvm);
+	  double dumatrix2[16];
+	  Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
+	  for (int i = 12; i < 16; i++)
+		  dumatrix[i] = dumatrix2[i];
+	  glLoadMatrixd(dumatrix);
+	  
+	  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
+	  glPopMatrix();
+
+
+	  if(s->isLocked())
+	  {
+		// Grey out a locked state
+		glColor4ub(50, 50, 50, 255);
+	  }
+
+	  else
+	  {
+		wxColour c = s->getColour();
+		glColor4ub(c.Red(), c.Green(), c.Blue(), 255);
+	  }
+
+	  glEnable(GL_LIGHT0);
+	  glEnable(GL_LIGHTING);
+	  glPushName(IDS::STATE);
+	  glPushName(s->getValue());
+	  
+	  glPushMatrix();
+	  glTranslatef(x, y, z);
+	  gluSphere(quadratic,rad,16,16);
+	  glPopMatrix();
+	  gluDeleteQuadric(quadratic);
+	  glDisable(GL_LIGHTING);
+	  glDisable(GL_LIGHT0);
+
+	  glPopName();
+	  glPopName();
   }
   else
   {
-    glColor4ub(0, 0, 0, 255);
+	  double x = s->getX();
+	  double y = s->getY();
+	  double rad =  radius * pixelSize;
+
+	  x = (x / 2000.0) * (width - rad * 2);
+	  y = (y / 2000.0) * (height - rad * 2);
+	  float t = 0.0;
+	  int prec = 50;  // TODO: Make parameterisable
+	  float step = 1.0 / prec;
+
+
+	  if(s->isLocked())
+	  {
+		// Grey out a locked state
+		glColor3ub(170, 170, 170);
+	  }
+
+	  else
+	  {
+		wxColour c = s->getColour();
+
+		glColor3ub(c.Red(), c.Green(), c.Blue());
+	  }
+
+
+	  glPushName(IDS::STATE);
+	  glPushName(s->getValue());
+
+
+	  glBegin(GL_TRIANGLE_FAN);
+		glVertex2d(x, y);
+		while ( t <= 1.0 )
+		{
+		  double phi = 2 * M_PI * t;
+		  double nx = x + rad * cos(phi);
+		  double ny = y + rad * sin(phi);
+
+		  glVertex2d(nx, ny);
+
+		  t += step;
+		}
+	  glEnd();
+
+	  t = 0.0f;
+	  // Draw border of states
+	  if(s->isSelected())
+	  {
+		glColor3ub(255, 0, 0);  // TODO: Param
+	  }
+	  else if(s->isInitialState())
+	  {
+		glColor3ub(0, 255, 0);
+	  }
+	  else
+	  {
+		glColor3ub(0, 0, 0);
+	  }
+
+	  glBegin(GL_LINE_STRIP);
+		while (t <= 1.0)
+		{
+		  double phi = 2 * M_PI * t;
+		  double nx = x + rad * cos(phi);
+		  double ny = y + rad * sin(phi);
+
+		  glVertex2d(nx, ny);
+
+		  t += step;
+		}
+	  glEnd();
+
+
+	  // Draw label
+	  std::stringstream labelstr;
+	  labelstr << s->getValue();
+
+	  if(showStateLabels) {
+		fr->draw_text(labelstr.str(), x, y, (rad - 2 * pixelSize) / 24.0f,
+					mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+	  }
+
+	  glPopName();
+	  glPopName();
+
+	  // Draw state vector
+	  bool showStateVector = s->getShowStateVector();
+	  if(showStateVector) {
+		std::stringstream vectorstr;
+	   std::map<std::string, std::string>::iterator it;
+	   std::map<std::string, std::string> stateParameters = s->getParameters();
+
+		for(it = stateParameters.begin(); it != stateParameters.end(); ++it) {
+		 vectorstr << it->first <<": " << it->second << "\n";
+		} 
+
+		fr->draw_wrapped_text(vectorstr.str(), x + rad * 2, width,  
+			  height - y, y, (rad - 2 * pixelSize) / 24.0f,
+			  mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
+
+	  }
   }
-
-  glPushMatrix();
-  double cmvm[16];
-  double dumatrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1};
-  owner->getCanvasMdlvwMtrx(cmvm);
-  double dumatrix2[16];
-  Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
-  for (int i = 12; i < 16; i++)
-	  dumatrix[i] = dumatrix2[i];
-  glLoadMatrixd(dumatrix);
-  
-  gluPartialDisk(quadratic,rad,rad*1.1,16,16,0,360);	
-  glPopMatrix();
-
-
-  if(s->isLocked())
-  {
-    // Grey out a locked state
-    glColor4ub(50, 50, 50, 255);
-  }
-
-  else
-  {
-    wxColour c = s->getColour();
-    glColor4ub(c.Red(), c.Green(), c.Blue(), 255);
-  }
-
-  glEnable(GL_LIGHT0);
-  glEnable(GL_LIGHTING);
-  glPushName(IDS::STATE);
-  glPushName(s->getValue());
-  
-  glPushMatrix();
-  glTranslatef(x, y, z);
-  gluSphere(quadratic,rad,16,16);
-  glPopMatrix();
-  gluDeleteQuadric(quadratic);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_LIGHT0);
-
-  glPopName();
-  glPopName();
-
 }
 
 void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
@@ -214,7 +336,7 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   // (xVirtual, yVirtual, zVirtual) is a "virtual" control point, which should lie on the
   // curve (For non-selfloops).
   // We need to calculate a spline control point such that the 2nd order
-  // Bezier curve has its apex on (xControl, yControl, zVirtual) = V.
+  // Bezier curve has its apex on (xControl, yControl, zControl) = V.
   //
   // A (2nd order) Bezier spline is defined by:
   // P(t) =  t    *    t  * S
@@ -247,10 +369,6 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
   yVirtual = (yVirtual / 2000.0) * (height - rad * 2);
   zVirtual = (zVirtual / 2000.0) * (depth - rad * 2);
 
-
-
-
-
   // Draw a Bezier curve through the control points
   GLdouble ctrlPts[3][3] = {{xFrom, yFrom, zFrom},
                             {xControl, yControl, zControl},
@@ -279,8 +397,10 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
       z = b0 * ctrlPts[0][2] +
           b1 * ctrlPts[1][2] +
           b2 * ctrlPts[2][2];
-
-      glVertex3d(x, y, z);
+	  if(draw3d)
+		  glVertex3d(x, y, z);
+	  else
+		  glVertex2d(x, y);
     }
   glEnd();
 
@@ -295,39 +415,52 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     glPushName(trid);
 
 	glColor3ub(255,255,255);
-	glBegin(GL_QUADS);
+	if(draw3d)
+	{
+		glBegin(GL_QUADS);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
 
-    glEnd();
+		glEnd();
+	}
+	else
+	{
+		glColor3ub(255, 255, 255);
+		glBegin(GL_QUADS);
+			glVertex2d(xVirtual , yVirtual - .015);
+			glVertex2d(xVirtual - .015, yVirtual);
+			glVertex2d(xVirtual, yVirtual + .015);
+			glVertex2d(xVirtual + .015, yVirtual);
+		glEnd();
+	}
 
     if(tr->isSelected())
     {
@@ -337,85 +470,159 @@ void Visualizer::drawTransition(Transition* tr, size_t trid, bool selecting)
     {
       glColor3ub(0, 0, 0);
     }
+	if(draw3d)
+		{
+		glBegin(GL_LINE_STRIP);
 
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-
-    glEnd();
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_LINE_LOOP);
+			glVertex2d(xVirtual , yVirtual - .015);
+			glVertex2d(xVirtual - .015, yVirtual);
+			glVertex2d(xVirtual, yVirtual + .015);
+			glVertex2d(xVirtual + .015, yVirtual);
+		glEnd();
+	}
 
     glPopName();
     glPopName();
     glPopName();
   }
 
-  glColor3ub(0, 0, 0);
+  if(draw3d)
+  {
+	  glColor3ub(0, 0, 0);
 
-  double xDif = xTo - xControl;
-  double yDif = yTo - yControl;
-  double zDif = zTo - zControl;
+	  double xDif = xTo - xControl;
+	  double yDif = yTo - yControl;
+	  double zDif = zTo - zControl;
 
-  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
-  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+	  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+	  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
 
-  glPushMatrix();
-  glTranslatef(xTo, yTo, zTo);
-  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
-  glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
-  glTranslatef(0.0f, 0.0f, -2 * rad);
-  drawArrowHead(rad);
-  glPopMatrix();
+	  glPushMatrix();
+	  glTranslatef(xTo, yTo, zTo);
+	  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	  glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	  glTranslatef(0.0f, 0.0f, -2 * rad);
+	  drawArrowHead3d(rad);
+	  glPopMatrix();
+  }
+  else
+  {
+	  if(showTransLabels) {
+		  // Draw label near the control point
+		  // point
+		  double labelX, labelY, labelZ;
+		  tr->getLabelPos(labelX, labelY, labelZ);
+		  labelX = (labelX / 2000.0) * (width - rad * 2);
+		  labelY = (labelY / 2000.0) * (height - rad * 2);
+
+
+		  if(tr->isSelected())
+		  {
+			  glColor3ub(255, 0, 0);
+		  }
+		  else
+		  {
+			  glColor3ub(0, 0, 0);
+		  }
+
+		  if(selecting) {
+			  glPushName(IDS::LABEL);
+			  glPushName(from->getValue());
+			  glPushName(trid);
+			  fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
+				  8 * pixelSize / 20.0f,
+				  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
+			  glPopName();
+			  glPopName();
+			  glPopName();
+		  }
+		  else {
+			  fr->draw_text(tr->getLabel(), labelX, labelY + .025,
+				  8 * pixelSize / 20.0f,
+				  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+		  }
+	  }
+
+	  glColor3ub(0, 0, 0);
+	  
+	  float ang = atan2(yControl - yTo, xControl - xTo)
+		  * 180.0f / M_PI;
+
+	  glTranslatef(xTo, yTo, 0.0f);
+	  glRotatef(90 + ang, 0.0, 0.0, 1.0f);
+	  glTranslatef(0.0f, -rad * 2, 0.0f);
+	  drawArrowHead(rad);
+	  glTranslatef(0.0f,  rad * 2, 0.0f);
+	  glRotatef(-90 - ang, 0.0f, 0.0f, 1.0f);
+	  glTranslatef(-xTo, -yTo, 0.0f);
+  }
 }
 
-void Visualizer::drawArrowHead(double baseLength)
+void Visualizer::drawArrowHead3d(double baseLength)
 {
   quadratic = gluNewQuadric();							
   gluQuadricNormals(quadratic, GLU_SMOOTH);
   gluCylinder(quadratic,baseLength/5,0.0f,baseLength,64,64);
   gluDeleteQuadric(quadratic);
+}
+
+void Visualizer::drawArrowHead(double baseLength)
+{
+  glBegin(GL_TRIANGLES);
+    glVertex2d(-baseLength / 2, 0);
+    glVertex2d( baseLength / 2, 0);
+    glVertex2d( 0,  baseLength);
+  glEnd();
 }
 
 void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
@@ -429,6 +636,7 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double xState, yState, zState;
   double xVirtual, yVirtual, zVirtual;
 
+  double alpha = tr->getControlAlpha();
   double beta = tr->getControlBeta();
   double gamma = tr->getControlGamma();
   double dist = tr->getControlDist();
@@ -439,7 +647,11 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 
   tr->getControl(xVirtual, yVirtual, zVirtual);
 
-
+  double theAngle;
+  if(draw3d)
+	  theAngle = beta;
+  else
+	  theAngle = alpha;
   // Calculate control points of the curve
   // TODO: Explain
   double zeta = beta + piover4;
@@ -550,7 +762,10 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
           b2 * ctrlPts[2][2] +
           b3 * ctrlPts[0][2];
 
-      glVertex3d(x, y, z);
+	  if(draw3d)
+		  glVertex3d(x, y, z);
+	  else
+		  glVertex2d(x, y);
     }
   glEnd();
 
@@ -561,39 +776,51 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
     glPushName(j);
 
 	glColor3ub(255,255,255);
-	glBegin(GL_QUADS);
+	if(draw3d)
+		{
+		glBegin(GL_QUADS);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
 
-    glEnd();
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_QUADS);
+			glVertex2d(xVirtual , yVirtual - .015);
+			glVertex2d(xVirtual - .015, yVirtual);
+			glVertex2d(xVirtual, yVirtual + .015);
+			glVertex2d(xVirtual + .015, yVirtual);
+		glEnd();
+	}
 
     if(tr->isSelected())
     {
@@ -604,76 +831,132 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
       glColor3ub(0, 0, 0);
     }
 
-    glBegin(GL_LINE_STRIP);
+	if(draw3d)
+	{
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual + 0.00725);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual + 0.00725);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual + 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual + 0.00725);
 
-    glEnd();
-    glBegin(GL_LINE_STRIP);
+		glEnd();
+		glBegin(GL_LINE_STRIP);
 
-      glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
-      glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
-      glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual - 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual + 0.00725, zVirtual - 0.00725);
+		  glVertex3d(xVirtual + 0.00725, yVirtual, zVirtual - 0.00725);
+		  glVertex3d(xVirtual, yVirtual - 0.00725, zVirtual - 0.00725);
 
-    glEnd();
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_LINE_LOOP);
+			glVertex2d(xVirtual , yVirtual - .015);
+			glVertex2d(xVirtual - .015, yVirtual);
+			glVertex2d(xVirtual, yVirtual + .015);
+			glVertex2d(xVirtual + .015, yVirtual);
+		glEnd();
+	}
 
     glPopName();
     glPopName();
     glPopName();
   }
 
-  glColor3ub(0, 0, 0);
 
-  double xDif = xState - xControl2;
-  double yDif = yState - yControl2;
-  double zDif = zState - zControl;
+  if(draw3d)
+  {
+	  double xDif = xState - xControl2;
+	  double yDif = yState - yControl2;
+	  double zDif = zState - zControl;
 
-  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
-  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+	  double tanXZ = atan2(xDif, zDif) * 180.0f / M_PI;
+	  double angYxz = atan2(yDif, sqrt(xDif * xDif + zDif * zDif)) * 180.0f / M_PI;
+	  glColor3ub(0, 0, 0);
+	  glPushMatrix();
+	  glTranslatef(xState, yState, zState);
+	  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
+	  glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
+	  glTranslatef(0.0f, 0.0f, -2 * rad);
+	  drawArrowHead3d(rad);
+	  glPopMatrix();
+  }
+  else
+  {
+	  // Draw label.
+	  if(showTransLabels) {
+		double labelX, labelY, labelZ;
+		tr->getLabelPos(labelX, labelY, labelZ);
+		labelX = (labelX / 2000.0) * (width - rad * 2);
+		labelY = (labelY / 2000.0) * (height - rad * 2);
 
-  glPushMatrix();
-  glTranslatef(xState, yState, zState);
-  glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
-  glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
-  glTranslatef(0.0f, 0.0f, -2 * rad);
-  drawArrowHead(rad);
-  glPopMatrix();
+		if(selecting) {
+		  glPushName(IDS::SELF_LABEL);
+		  glPushName(s->getValue());
+		  glPushName(j);
+
+		  fr->draw_bounding_box(tr->getLabel(), labelX, labelY + .025,
+					  8 * pixelSize / 20.0f,
+					  mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top, false);
+		  glPopName();
+		  glPopName();
+		  glPopName();
+		}
+		else {
+		  fr->draw_text(tr->getLabel(), labelX, labelY + .025,
+					8 * pixelSize / 20.0f,
+					mcrl2::utilities::wx::al_center, mcrl2::utilities::wx::al_top);
+		}
+	  }
+
+
+	  glColor3ub(0, 0, 0);
+
+	  float ang = atan2(yControl2 - yState, xControl2 - xState)
+				  * 180.0f / M_PI;
+
+	  glTranslatef(xState, yState, 0.0f);
+	  glRotatef(90 + ang, 0.0, 0.0, 1.0f);
+	  glTranslatef(0.0f, -rad * 2, 0.0f);
+	  drawArrowHead(rad);
+	  glTranslatef(0.0f,  rad * 2, 0.0f);
+	  glRotatef(-90 - ang, 0.0f, 0.0f, 1.0f);
+	  glTranslatef(-xState, -yState, 0.0f);
+  }
 }
 	
 void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
@@ -869,7 +1152,7 @@ void Visualizer::drawCoorSystem()
 	glTranslatef(0.0f, length, 0.0f);
 	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
 	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
-	drawArrowHead(0.1);
+	drawArrowHead3d(0.1);
 	glPopMatrix();
 	tanXZ = atan2(1.0, 0.0) * 180.0f / M_PI;
 	angYxz = atan2(0.0, 1.0) * 180.0f / M_PI;
@@ -879,7 +1162,7 @@ void Visualizer::drawCoorSystem()
 	glTranslatef(length, 0.0f, 0.0f);
 	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
 	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
-	drawArrowHead(0.1);
+	drawArrowHead3d(0.1);
 	glPopMatrix();
 	tanXZ = atan2(0.0, 1.0) * 180.0f / M_PI;
 	angYxz = atan2(0.0, 1.0) * 180.0f / M_PI;
@@ -889,7 +1172,7 @@ void Visualizer::drawCoorSystem()
 	glTranslatef(0.0f, 0.0f, length);
 	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);
 	glRotatef(angYxz, -1.0f, 0.0f, 0.0f);
-	drawArrowHead(0.1);
+	drawArrowHead3d(0.1);
 	glPopMatrix();
 	glEnable(GL_DEPTH_TEST);
 }

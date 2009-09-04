@@ -62,6 +62,7 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
   currentTool = myID_ZOOM;
   usingTool = false;
   calcRot = false;
+  drawIn3D = true;
   lookX = 0;
   lookY = 0;
   lookZ = 0;
@@ -78,15 +79,22 @@ void GLCanvas::initialize()
 {
   SetCurrent();
   glLoadIdentity();
-  glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
-  glShadeModel(GL_SMOOTH);
-  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+  if(drawIn3D)
+  {
+	  glGetDoublev(GL_MODELVIEW_MATRIX, currentModelviewMatrix);
+	  glShadeModel(GL_SMOOTH);
+	  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+	  glClearDepth(1.0);									
+	  glDepthFunc(GL_LESS);								
+	  glEnable(GL_DEPTH_TEST);		
+	  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
+  }
+  else
+  {
+	  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	  glDisable(GL_DEPTH_TEST);
+  }
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glClearDepth(1.0);									
-  glDepthFunc(GL_LESS);								
-  glEnable(GL_DEPTH_TEST);		
-  glEnable(GL_LINE_SMOOTH);
-  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	
   SwapBuffers();
   displayAllowed = true;
   visualizer->initFontRenderer();
@@ -118,76 +126,103 @@ void GLCanvas::display()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-	double rad = visualizer->getRadius() * getPixelSize() ;
+	if(drawIn3D)
+	{
+		double rad = visualizer->getRadius() * getPixelSize() ;
 
-	maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
+		maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
 
-	gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
-
+		gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
+	}
+	else
+	{
+		if (aspect > 1)
+		{
+			// width > height
+			gluOrtho2D(aspect*(-1), aspect, -1.0, 1.0);
+		}
+		else
+		{
+			// height >= width
+			gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
+		}
+	}
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, width, height);
-	if(calcRot)
+	if(drawIn3D)
 	{
-		double dumtrx[16];
-		double rotAngle = sqrt(rotX * rotX + rotY * rotY);
+		if(calcRot)
+		{
+			double dumtrx[16];
+			double rotAngle = sqrt(rotX * rotX + rotY * rotY);
 
-		Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
-		double dumtrx2[16];
-		Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
-		for ( int i = 0; i < 12; i++)
-			currentModelviewMatrix[i] = dumtrx2[i];
-		calcRot = false;
-		normalizeMatrix();
-		rotX = 0;
-		rotY = 0;
+			Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
+			double dumtrx2[16];
+			Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
+			for ( int i = 0; i < 12; i++)
+				currentModelviewMatrix[i] = dumtrx2[i];
+			calcRot = false;
+			normalizeMatrix();
+			rotX = 0;
+			rotY = 0;
+		}
+		currentModelviewMatrix[12] = -lookX;
+		currentModelviewMatrix[13] = -lookY;
+		currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+		currentModelviewMatrix[15] = 1;
+		double xl, yl, zl;
+		xl = 0;
+		yl = 0;
+		zl = lookZ + 100;
+		GLfloat LightAmbient[]=		{ 0.2f, 0.2f, 0.2f, 0.2f };
+		GLfloat LightDiffuse[]=		{ 1.0f, 1.0f, 1.0f, 1.0f };
+		GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
+		glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);	
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);	
+		glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
+		
+		glColorMaterial(GL_FRONT,GL_AMBIENT);
+		glEnable(GL_COLOR_MATERIAL);
+
+		glLoadMatrixd(currentModelviewMatrix);
+		glFinish();
+		double pS = getPixelSize();
+
+		if (visualizer)
+		{
+		  // Draw
+		  visualizer->visualize(wwidth, wheight, pS, false, true);
+		}
+
+		if (visualizer && dispSystem)
+		{
+			glMatrixMode(GL_PROJECTION);
+			glPushMatrix();
+			glLoadIdentity();
+			gluPerspective(45.0f, 1, 0.1f, 10.0f);
+			glMatrixMode( GL_MODELVIEW);
+			glPushMatrix();
+			glLoadIdentity();
+			glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
+			visualizer->drawCoorSystem();
+			glPopMatrix();
+			glViewport(0, 0, width, height);
+			glMatrixMode(GL_PROJECTION);
+			glPopMatrix();
+			glMatrixMode(GL_MODELVIEW);
+		}
 	}
-	currentModelviewMatrix[12] = -lookX;
-	currentModelviewMatrix[13] = -lookY;
-	currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
-	currentModelviewMatrix[15] = 1;
-	double xl, yl, zl;
-	xl = 0;
-	yl = 0;
-	zl = lookZ + 100;
-	GLfloat LightAmbient[]=		{ 0.2f, 0.2f, 0.2f, 0.2f };
-	GLfloat LightDiffuse[]=		{ 1.0f, 1.0f, 1.0f, 1.0f };
-	GLfloat LightPosition[]=	{ xl, yl, zl, 0.0f};
-	glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);	
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);	
-	glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
-	
-	glColorMaterial(GL_FRONT,GL_AMBIENT);
-	glEnable(GL_COLOR_MATERIAL);
-
-	glLoadMatrixd(currentModelviewMatrix);
-	glFinish();
-    double pS = getPixelSize();
-
-    if (visualizer)
-    {
-      // Draw
-      visualizer->visualize(wwidth, wheight, pS, false);
-    }
-
-	if (visualizer && dispSystem)
+	else
 	{
-		glMatrixMode(GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		gluPerspective(45.0f, 1, 0.1f, 10.0f);
-		glMatrixMode( GL_MODELVIEW);
-		glPushMatrix();
-		glLoadIdentity();
-		glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
-		visualizer->drawCoorSystem();
-		glPopMatrix();
-		glViewport(0, 0, width, height);
-		glMatrixMode(GL_PROJECTION);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
+		double pS = getPixelSize();
+
+		if (visualizer)
+		{
+			// Draw
+			visualizer->visualize(wwidth, wheight, pS, false, false);
+		}
 	}
-	
 
     glFinish();
     SwapBuffers();
@@ -310,7 +345,8 @@ void GLCanvas::onMouseEnter(wxMouseEvent& /* event */)
   this->SetFocus();
 }
 
-void GLCanvas::onMouseLeave(wxFocusEvent& /* event */) {
+void GLCanvas::onMouseLeave(wxFocusEvent& /* event */) 
+{
   owner->deselect();
 }
 
@@ -318,13 +354,21 @@ void GLCanvas::onMouseLftDown(wxMouseEvent& event)
 {
   oldX = event.GetX();
   oldY = event.GetY();
-  if (pickObjects(oldX, oldY, event))
+  if(drawIn3D)
   {
-	  owner->dragObject();
-	  usingTool = false;
+	  if (pickObjects3d(oldX, oldY, event))
+	  {
+		  owner->dragObject();
+		  usingTool = false;
+	  }
+	  else
+		  usingTool = true;
   }
   else
-	  usingTool = true;
+  {
+	  pickObjects(oldX, oldY, event);
+	  owner->dragObject();
+  }
   display();
 }
 
@@ -341,13 +385,22 @@ void GLCanvas::onMouseRgtDown(wxMouseEvent& event)
   oldX = event.GetX();
   oldY = event.GetY();
 
-  if (pickObjects(oldX, oldY, event))
+  if(drawIn3D)
   {
-	  owner->lockObject();
-	  usingTool = false;
+	  if (pickObjects3d(oldX, oldY, event))
+	  {
+		  owner->lockObject();
+		  usingTool = false;
+	  }
+	  else
+		  usingTool = true;  
   }
   else
-	  usingTool = true;  
+  {
+	  pickObjects(oldX, oldY, event);
+	  owner->lockObject();
+  }
+
   display();
 }
 
@@ -358,85 +411,125 @@ void GLCanvas::onMouseRgtUp(wxMouseEvent& /*evt */)
 }
 void GLCanvas::onMouseDblClck(wxMouseEvent& /*evt */)
 {
-	normalizeMatrix();
+//to be assigned
 }
 void GLCanvas::onMouseWhl(wxMouseEvent& event)
 {
-	lookZ -= double(event.GetWheelRotation())/(2400.0f);
-	display();
+	if(drawIn3D)
+	{
+		lookZ -= double(event.GetWheelRotation())/(2400.0f);
+		display();
+	}
 }
 void GLCanvas::onMouseMidDown(wxMouseEvent& event)
 {
-	oldX = event.GetX();
-	oldY = event.GetY();
-	display();
+	if(drawIn3D)
+	{
+		oldX = event.GetX();
+		oldY = event.GetY();
+		display();
+	}
 }
 void GLCanvas::onMouseMidUp(wxMouseEvent& /*evt */)
 {
-	setMouseCursor(myID_NONE);
-	display();
+	if(drawIn3D)
+	{
+		setMouseCursor(myID_NONE);
+		display();
+	}
 }
 
 void GLCanvas::onMouseMove(wxMouseEvent& event)
 {
-  if(event.Dragging() && (event.LeftIsDown() || event.MiddleIsDown() || event.RightIsDown()))
+  if(drawIn3D)
   {
-    int x, y;
-    GetPosition(&x, &y);
-	int newX = static_cast<int>(event.GetX());
-    int newY = static_cast<int>(event.GetY());
-	int width, height;
-	GetClientSize(&width, &height);	
-	if (event.LeftIsDown() && !event.RightIsDown())
-	{
-		if(!usingTool)
+	  if(event.Dragging() && (event.LeftIsDown() || event.MiddleIsDown() || event.RightIsDown()))
+	  {
+		int x, y;
+		GetPosition(&x, &y);
+		int newX = static_cast<int>(event.GetX());
+		int newY = static_cast<int>(event.GetY());
+		int width, height;
+		GetClientSize(&width, &height);	
+		if (event.LeftIsDown() && !event.RightIsDown())
 		{
-			double invect[] = {newX - oldX, oldY - newY, 0, 1};
-			
-			owner->moveObject(invect);
-		}
-		else
-		{
-			switch(currentTool)
+			if(!usingTool)
 			{
-				case myID_PAN:
-					lookX += 0.01f * (oldX - newX);
-					lookY += -0.01f * (oldY - newY);
-					break;
-				case myID_ZOOM:
-					lookZ += -0.01f * (oldY - newY);
-					break;
-				case myID_ROTATE:
-					rotX = 0.5f * (oldX - newX);
-					rotY = -0.5f * (oldY - newY);
-				default:
-					break;
+				double invect[] = {newX - oldX, oldY - newY, 0, 1};
+				
+				owner->moveObject(invect);
 			}
-			setMouseCursor(currentTool);
+			else
+			{
+				switch(currentTool)
+				{
+					case myID_PAN:
+						lookX += 0.01f * (oldX - newX);
+						lookY += -0.01f * (oldY - newY);
+						break;
+					case myID_ZOOM:
+						lookZ += -0.01f * (oldY - newY);
+						break;
+					case myID_ROTATE:
+						rotX = 0.5f * (oldX - newX);
+						rotY = -0.5f * (oldY - newY);
+					default:
+						break;
+				}
+				setMouseCursor(currentTool);
+			}
 		}
-	}
-	else if (event.MiddleIsDown() || (event.RightIsDown() && usingTool) && !event.LeftIsDown())
-	{
-		rotX = 0.5f * (oldX - newX);
-		rotY = -0.5f * (oldY - newY);
-		calcRot = true;
-		setMouseCursor(myID_ROTATE);
-	}
-	if ((x < newX) && (newX < x + width)) {
-		oldX = newX;
-	}
-	if ((y < newY) && (newY < y + height)) {
-		oldY = newY;
-	}
-    display();
+		else if (event.MiddleIsDown() || (event.RightIsDown() && usingTool) && !event.LeftIsDown())
+		{
+			rotX = 0.5f * (oldX - newX);
+			rotY = -0.5f * (oldY - newY);
+			calcRot = true;
+			setMouseCursor(myID_ROTATE);
+		}
+		if ((x < newX) && (newX < x + width)) {
+			oldX = newX;
+		}
+		if ((y < newY) && (newY < y + height)) {
+			oldY = newY;
+		}
+		display();
+	  }
+	  else {
+		event.Skip();
+	  }
   }
-  else {
-    event.Skip();
+  else
+  {
+	  if(event.Dragging() && event.LeftIsDown())
+	  {
+		  int width, height;
+		  int x, y;
+		  GetPosition(&x, &y);
+		  GetClientSize(&width, &height);
+
+		  int newX = static_cast<int>(event.GetX());
+		  int newY = static_cast<int>(event.GetY());
+
+		  double diffX = static_cast<double>(newX - oldX) / static_cast<double>(width) * 2000;
+		  double diffY = static_cast<double>(oldY - newY) / static_cast<double>(height) * 2000;
+
+		  if ((x < newX) && (newX < x + width)) {
+			  oldX = newX;
+		  }
+		  if ((y < newY) && (newY < y + height)) {
+			  oldY = newY;
+		  }
+
+		  owner->moveObject(diffX, diffY);
+		  display();
+	  } else {
+		  event.Skip();
+	  }
   }
 }
 
 
-bool GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
+bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
 {
   owner->deselect();
 
@@ -486,7 +579,7 @@ bool GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     glMatrixMode( GL_MODELVIEW);
 
     double pS = getPixelSize();
-    visualizer->visualize(wwidth, wheight, pS, true);
+    visualizer->visualize(wwidth, wheight, pS, true, true);
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -500,6 +593,74 @@ bool GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
 	return hits > 0;
   }
   return false;
+}
+
+void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
+{
+  owner->deselect();
+
+
+  if(GetContext())
+  {
+    GLuint selectBuf[512];
+    GLint  hits = 0;
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    glSelectBuffer(512, selectBuf);
+    // Swith to selection mode
+    (void) glRenderMode(GL_SELECT);
+
+    glInitNames();
+
+    // Create new projection transformation
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // Create picking region near cursor location
+    gluPickMatrix((GLdouble) x,
+                  (GLdouble)  viewport[3] - y,
+                  5.0,
+                  5.0,
+                  viewport);
+
+    // Get current size of canvas
+    int width,height;
+    GetClientSize(&width,&height);
+
+    GLdouble aspect = (GLdouble)width / (GLdouble)height;
+
+    if (aspect > 1)
+    {
+      // width > height
+      gluOrtho2D(aspect * (-1), aspect, -1, 1);
+    }
+    else
+    {
+      // height >= width
+      gluOrtho2D(-1, 1, -1/aspect, (1/aspect));
+                               // calculate rotations etc.
+    }
+
+    glMatrixMode( GL_MODELVIEW);
+    double wwidth, wheight, wdepth;
+    getSize(wwidth, wheight, wdepth);
+    double pS = getPixelSize();
+
+    visualizer->visualize(wwidth, wheight, pS, true, false);
+
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glFlush();
+
+    hits = glRenderMode(GL_RENDER);
+
+    processHits(hits, selectBuf, e);
+    reshape();
+    display();
+  }
 }
 
 void GLCanvas::processHits(const GLint hits, GLuint *buffer, wxMouseEvent const& e)
@@ -716,4 +877,16 @@ void GLCanvas::setMouseCursor(int theTool)
   }
   if (ok)
 	  SetCursor(cursor);
+}
+
+void GLCanvas::changeDrawMode()
+{
+	drawIn3D = !drawIn3D;
+	initialize();
+	display();
+}
+
+bool GLCanvas::get3D()
+{
+	return drawIn3D;
 }

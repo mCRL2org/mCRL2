@@ -35,7 +35,7 @@ class Visualizer
     ~Visualizer();
 
     void visualize(double width, double height, double pixelSize,
-                   bool inSelectMode);
+                   bool inSelectMode, bool enabled3D);
 
     void initFontRenderer();
 
@@ -62,6 +62,7 @@ class Visualizer
     bool showTransLabels;
     bool showStateLabels;
     bool showStateVector;
+	bool draw3d;
 
 	GLUquadricObj *quadratic;	
 
@@ -81,8 +82,11 @@ class Visualizer
     // Draws a self-loop, a transition from a state to itself
     void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
 
+	// Draws an arrow head in 3d
+    void drawArrowHead3d(double baseLength);
+
 	// Draws an arrow head
-    void drawArrowHead(double baseLength);
+	void drawArrowHead(double baseLength);
 
     mcrl2::utilities::wx::font_renderer* fr;
 };

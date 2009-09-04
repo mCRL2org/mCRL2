@@ -39,6 +39,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_CLOSE(MainFrame::onClose)
   EVT_MENU(myID_TOGGLE_POSITIONING, MainFrame::onTogglePositioning)
   EVT_MENU(myID_TOGGLE_VECTOR, MainFrame::onToggleVector)
+  EVT_MENU(myID_TOGGLE_3D, MainFrame::onToggle3D)
   EVT_MENU(myID_DLG_INFO, MainFrame::onInfo)
   EVT_MENU(myID_DLG_ALGO, MainFrame::onAlgo)
   EVT_MENU(wxID_PREFERENCES, MainFrame::onSettings)
@@ -94,8 +95,9 @@ void MainFrame::setupMenuBar()
 
   // View menu
   wxMenu* viewMenu = new wxMenu;
-  viewMenu->Append(myID_RESET_ALL, wxT("&Reset viewpoint \tF2"), wxT("Resets any panning and rotations done."));
-  viewMenu->Append(myID_RESET_ROTATE, wxT("&Reset rotations \tCTRL-r"), wxT("Resets any ratations done"));
+  viewMenu->Append(myID_TOGGLE_3D, wxT("Toggle the ltsgraph version (3d or 2d) \tCTRL-s"), wxT("Changes the ltsgraph version"));
+  viewMenu->Append(myID_RESET_ALL, wxT("Reset viewpoint \tF2"), wxT("Resets any panning and rotations done."));
+  viewMenu->Append(myID_RESET_ROTATE, wxT("Reset rotations \tCTRL-r"), wxT("Resets any ratations done"));
   viewMenu->Append(myID_RESET_PAN, wxT("Reset pannings \tCTRL-d"), wxT("Resets and panning done"));
   viewMenu->AppendSeparator();
   viewMenu->Append(myID_SHOW_SYSTEM, wxT("Display coord&inate system \tI"), wxT("Displays a coordinate system at the left below corner of the window."));
@@ -373,5 +375,13 @@ void MainFrame::onMode(wxCommandEvent& event)
 void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
 {
 	glCanvas->showSystem();
+	glCanvas->display();
+}
+
+void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
+{
+	if(glCanvas->get3D())
+		app->forceWalls();
+	glCanvas->changeDrawMode();
 	glCanvas->display();
 }

@@ -259,6 +259,58 @@ void LTSGraph3d::moveObject(double invect[4])
   }
 }
 
+void LTSGraph3d::moveObject(double x, double y)
+{
+  double prevX, prevY, prevZ;
+  if(selectedState != NULL)
+  {
+    prevX = selectedState->getX() + x;
+    prevY = selectedState->getY() + y;
+  }
+  if(selectedTransition != NULL)
+  {
+    selectedTransition->getControl(prevX, prevY, prevZ);
+	prevX = prevX + x;
+	prevY = prevY + y;
+  }
+  if(selectedLabel != NULL)
+  {
+    selectedLabel->getLabelPos(prevX, prevY, prevZ);
+	prevX = prevX + x;
+	prevY = prevY + y;
+  }
+  if(prevX > 1000)
+  {
+	  prevX = 1000;
+  }
+
+  if (prevX < -1000)
+  {
+	  prevX = -1000;
+  }
+
+  if (prevY > 1000)
+  {
+	  prevY = 1000;
+  }
+
+  if (prevY < -1000)
+  {
+	  prevY = -1000;
+  }
+  
+  
+  if(selectedState != NULL)
+  {
+	  selectedState->setX(prevX);
+	  selectedState->setY(prevY);
+  }
+  if(selectedTransition != NULL)
+    selectedTransition->setControl(prevX, prevY, prevZ);
+  if(selectedLabel != NULL)
+    selectedLabel->setLabelPos(prevX, prevY, prevZ);
+}
+
 void LTSGraph3d::lockObject()
 {
   if(selectedState != NULL)
@@ -411,7 +463,47 @@ void LTSGraph3d::getCanvasMdlvwMtrx(double * mtrx)
 
 void LTSGraph3d::getCanvasCamPos(double & x, double & y, double & z)
 {
-	glCanvas->getCamPos(x, y, z);
+  glCanvas->getCamPos(x, y, z);
 }
 
+bool LTSGraph3d::get3dMode()
+{
+  return glCanvas->get3D();
+}
 
+void LTSGraph3d::forceWalls()
+{
+  if (graph)
+  {
+      for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+	  {
+		State* s = graph->getState(i);
+		double newX, newY;
+		newX = s->getX();
+		newY = s->getY();
+		if(newX > 1000)
+		{
+			newX = 1000;
+		}
+
+		if (newX < -1000)
+		{
+			newX = -1000;
+		}
+
+		if (newY > 1000)
+		{
+			newY = 1000;
+		}
+
+		if (newY < -1000)
+		{
+			newY = -1000;
+		}
+
+		s->setX(newX);
+		s->setY(newY);
+	  }
+	  glCanvas->display();
+  }
+}

@@ -68,6 +68,7 @@ class MainFrame : public wxFrame
     void onInfo(wxCommandEvent& event);
     void onTogglePositioning(wxCommandEvent& event);
     void onToggleVector(wxCommandEvent& event);
+	void onToggle3D(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
     void onImport(wxCommandEvent& event);
     void onSelect(wxCommandEvent& event);

@@ -76,6 +76,7 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
 #endif
 
 	void moveObject(double invect[4]);
+	void moveObject(double x, double y);
     void toggleVectorSelected();
     void lockObject();
     void dragObject();
@@ -108,6 +109,8 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     double getAspectRatio() const;
 	void getCanvasMdlvwMtrx(double * mtrx);
 	void getCanvasCamPos(double & x, double & y, double & z);
+	void forceWalls();
+	bool get3dMode();
 };
 
 
