@@ -639,7 +639,6 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
   double alpha = tr->getControlAlpha();
   double beta = tr->getControlBeta();
   double gamma = tr->getControlGamma();
-  double dist = tr->getControlDist();
 
   xState = s->getX();
   yState = s->getY();

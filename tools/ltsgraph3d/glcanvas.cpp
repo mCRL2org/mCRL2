@@ -479,7 +479,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 				setMouseCursor(currentTool);
 			}
 		}
-		else if (event.MiddleIsDown() || (event.RightIsDown() && usingTool) && !event.LeftIsDown())
+		else if ((event.MiddleIsDown() || (event.RightIsDown() && usingTool)) && !event.LeftIsDown())
 		{
 			rotX = 0.5f * (oldX - newX);
 			rotY = -0.5f * (oldY - newY);
