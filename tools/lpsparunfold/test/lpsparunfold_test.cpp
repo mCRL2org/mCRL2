@@ -93,7 +93,7 @@ int test_main(int argc, char* argv[])
         std::clog << "expected 2nd process parameter to be of type Bool" << std::endl;
         std::clog << "computed process parameter of type "  << pp(i->sort()) << std::endl;
       }
-      BOOST_CHECK( not( std::distance( p1.begin(), i ) == 1 && pp(i->sort()).compare("Bool") != 0 ) );
+      BOOST_CHECK( !( std::distance( p1.begin(), i ) == 1 && pp(i->sort()).compare("Bool") != 0 ) );
 
       if( std::distance( p1.begin(), i ) == 2 && pp(i->sort()).compare("Pos") != 0 )
       {
@@ -102,7 +102,7 @@ int test_main(int argc, char* argv[])
         std::clog << "expected 3th process parameter to be of type Pos " << std::endl;
         std::clog << "computed process parameter of type "  << pp(i->sort()) << std::endl;
       }
-      BOOST_CHECK( not( std::distance( p1.begin(), i ) == 2 && pp(i->sort()).compare("Pos") != 0 ) );
+      BOOST_CHECK( !( std::distance( p1.begin(), i ) == 2 && pp(i->sort()).compare("Pos") != 0 ) );
     }
   }
   
