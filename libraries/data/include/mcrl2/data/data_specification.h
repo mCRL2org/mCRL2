@@ -148,6 +148,8 @@ namespace mcrl2 {
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
         void make_complete();
 
+        bool is_recursive(const sort_expression& s);
+
         /// \brief Helper function for make_complete() methods
         template < typename Term >
         void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
@@ -161,34 +163,34 @@ namespace mcrl2 {
       protected:
 
         ///\brief The basic sorts and structured sorts in the specification.
-        atermpp::set< sort_expression > m_sorts;
+        atermpp::set< sort_expression >     m_sorts;
 
         ///\brief The basic sorts and structured sorts in the specification.
-        ltr_aliases_map                 m_aliases_by_name;
+        ltr_aliases_map                     m_aliases_by_name;
 
         ///\brief The basic sorts and structured sorts in the specification.
-        rtl_aliases_map                 m_aliases_by_sort;
+        rtl_aliases_map                     m_aliases_by_sort;
 
         ///\brief A mapping of sort expressions to the constructors corresponding to that sort.
-        sort_to_symbol_map              m_constructors;
+        sort_to_symbol_map                  m_constructors;
 
         ///\brief The mappings of the specification.
-        sort_to_symbol_map              m_mappings;
+        sort_to_symbol_map                  m_mappings;
 
         ///\brief The equations of the specification.
-        atermpp::set< data_equation >   m_equations;
+        atermpp::set< data_equation >       m_equations;
 
-        ///\brief Table containing system defined sorts.
-        mutable atermpp::table m_sys_sorts;
+        ///\brief Set containing system defined sorts.
+        mutable std::set< sort_expression > m_sys_sorts;
 
-        ///\brief Table containing system defined constructors.
-        mutable atermpp::table m_sys_constructors;
-
-        ///\brief Table containing system defined mappings.
-        mutable atermpp::table m_sys_mappings;
+        ///\brief Set containing system defined functions.
+        mutable std::set< function_symbol > m_sys_functions;
 
         ///\brief Table containing system defined equations.
-        mutable atermpp::table m_sys_equations;
+        mutable std::set< data_equation >   m_sys_equations;
+
+        ///\brief Table containing system defined equations.
+        mutable std::set< data_equation >   m_recursive_sorts;
 
       protected:
 
@@ -215,6 +217,11 @@ namespace mcrl2 {
             { // standard functions for the sort
               add_standard_mappings_and_equations(normalised);
             }
+          }
+
+          if (is_recursive(s))
+          {
+            m_recursive_sorts.insert(s);
           }
         }
 
@@ -250,6 +257,10 @@ namespace mcrl2 {
             // Make sure that the sort is also part of the specification
             add_sort(reference);
           }
+          if (is_recursive(name))
+          {
+            m_recursive_sorts.insert(name);
+          }
         }
 
         void add_function(sort_to_symbol_map& container, const function_symbol& f)
@@ -271,7 +282,7 @@ namespace mcrl2 {
           for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
           {
             add_function(m_mappings, *i);
-            m_sys_mappings.put(*i,*i);
+            m_sys_functions.insert(*i);
           }
 
           data_equation_vector   equations(standard_generate_equations_code(sort));
@@ -279,7 +290,7 @@ namespace mcrl2 {
           for (data_equation_vector::const_iterator i = equations.begin(); i != equations.end(); ++i)
           {
             m_equations.insert(*i);
-            m_sys_equations.put(*i,*i);
+            m_sys_equations.insert(*i);
           }
         }
 
@@ -414,7 +425,7 @@ namespace mcrl2 {
       void add_system_defined_sort(const sort_expression& s)
       {
         insert_sort(s);
-        m_sys_sorts.put(s,s);
+        m_sys_sorts.insert(s);
       }
 
       /// \brief Adds an alias (new name for a sort) to this specification
@@ -453,7 +464,7 @@ namespace mcrl2 {
       void add_system_defined_constructor(const function_symbol& f)
       {
         add_function(m_constructors, f);
-        m_sys_constructors.put(f,f);
+        m_sys_functions.insert(f);
       }
 
       /// \brief Adds a mapping to this specification
@@ -478,7 +489,7 @@ namespace mcrl2 {
       void add_system_defined_mapping(const function_symbol& f)
       {
         add_function(m_mappings, f);
-        m_sys_mappings.put(f,f);
+        m_sys_functions.insert(f);
       }
 
       /// \brief Adds an equation to this specification
@@ -502,7 +513,7 @@ namespace mcrl2 {
       void add_system_defined_equation(const data_equation& e)
       {
         m_equations.insert(e);
-        m_sys_equations.put(e,e);
+        m_sys_equations.insert(e);
       }
 
       /// \brief Adds sorts to this specification
@@ -644,7 +655,7 @@ namespace mcrl2 {
         for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
         {
           m_equations.insert(*i);
-          m_sys_equations.put(*i,*i);
+          m_sys_equations.insert(*i);
         }
       }
 
@@ -733,7 +744,7 @@ namespace mcrl2 {
       {
         if (is_system_defined(s))
         {
-          m_sys_sorts.remove(s);
+          m_sys_sorts.erase(s);
         }
         else {
           std::set< alias > aliases_of_s(convert< std::set< alias > >(aliases(s)));
@@ -745,6 +756,8 @@ namespace mcrl2 {
 
           m_sorts.erase(s);
         }
+
+        m_recursive_sorts.erase(s);
       }
 
       /// \brief Removes alias from specification.
@@ -785,7 +798,7 @@ namespace mcrl2 {
         assert(std::count(cs.begin(), cs.end(), f) != 0);
         if (is_system_defined(f))
         {
-          m_sys_constructors.remove(f);
+          m_sys_functions.erase(f);
         }
 
         boost::iterator_range< sort_to_symbol_map::iterator > r(m_constructors.equal_range(normalise(f.sort().target_sort())));
@@ -821,7 +834,7 @@ namespace mcrl2 {
       {
         if (is_system_defined(f))
         {
-          m_sys_mappings.remove(f);
+          m_sys_functions.erase(f);
         }
 
         boost::iterator_range< sort_to_symbol_map::iterator > r(m_mappings.equal_range(normalise(f.sort().target_sort())));
@@ -856,7 +869,7 @@ namespace mcrl2 {
       {
         if (is_system_defined(e))
         {
-          m_sys_equations.remove(e);
+          m_sys_equations.erase(e);
         }
         m_equations.erase(std::find(m_equations.begin(), m_equations.end(), e));
       }
@@ -880,7 +893,7 @@ namespace mcrl2 {
       /// \return true iff s is system defined, false otherwise.
       bool is_system_defined(const sort_expression& s) const
       {
-        return m_sys_sorts.get(s) != atermpp::aterm();
+        return m_sys_sorts.find(s) != m_sys_sorts.end();
       }
 
       /// \brief Checks whether a function symbol is system defined.
@@ -890,8 +903,7 @@ namespace mcrl2 {
       ///      mapping), false otherwise.
       bool is_system_defined(const function_symbol& f) const
       {
-        return (m_sys_constructors.get(f) != atermpp::aterm() ||
-                m_sys_mappings.get(f)    != atermpp::aterm());
+        return m_sys_functions.find(f) != m_sys_functions.end();
       }
 
       /// \brief Checks whether an equation is system defined.
@@ -900,7 +912,7 @@ namespace mcrl2 {
       /// \return true iff e is system defined, false otherwise.
       bool is_system_defined(const data_equation& e) const
       {
-        return m_sys_equations.get(e) != atermpp::aterm();
+        return m_sys_equations.find(e) != m_sys_equations.end();
       }
 
       /// \brief Checks whether two sort expressions represent the same sort

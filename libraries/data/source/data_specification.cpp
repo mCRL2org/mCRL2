@@ -67,7 +67,10 @@ namespace mcrl2 {
     {
       if (e.is_basic_sort())
       {
-        return find_referenced_sort(e);
+        if (m_recursive_sorts.find(e) == m_recursive_sorts.end())
+        {
+          return find_referenced_sort(e);
+        }
       }
       else if (m_aliases_by_sort.find(e) == m_aliases_by_sort.end())
       { // only normalise when no name has been introduced for the sort (needed for recursive structured sorts)
@@ -175,6 +178,13 @@ namespace mcrl2 {
       container.insert(sequence.begin(), sequence.end());
     }
 
+    bool data_specification::is_recursive(const sort_expression& s)
+    {
+      std::set< sort_expression > dependent_sorts = find_dependent_sorts(*this, s);
+
+      return dependent_sorts.find(s) != dependent_sorts.end();
+    }
+
     ///\brief Adds standard sorts when necessary
     ///
     /// Assumes that if constructors of a sort are part of the specification,
@@ -188,10 +198,13 @@ namespace mcrl2 {
 
       // sorts
       dependent_sorts.insert(m_sorts.begin(), m_sorts.end());
+
       // constructors
       insert(dependent_sorts, make_sort_range(constructors()));
+
       // mappings
       insert(dependent_sorts, make_sort_range(mappings()));
+
       // equations
       for (equations_const_range r(equations()); !r.empty(); r.advance_begin(1))
       { // make function sort in case of constants to add the corresponding sort as needed
@@ -513,7 +526,7 @@ namespace mcrl2 {
               renamings.insert(std::pair< sort_expression, sort_expression >(name, new_reference));
             }
             else
-            { // other name for the sort, should become dead code
+            { // other name for the sort
               other_names.insert(std::pair< sort_expression, sort_expression >(reference, atermpp::replace(name, detail::sort_map_substitution_adapter(renamings))));
             }
           }
