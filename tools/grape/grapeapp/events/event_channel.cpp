@@ -127,7 +127,7 @@ bool grape_event_remove_channel::Do( void )
   assert( chan_ptr != 0 );
 
   dia_ptr->remove_channel( chan_ptr );
-
+  
   finish_modification();
   return true;
 }

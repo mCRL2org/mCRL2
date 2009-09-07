@@ -99,13 +99,13 @@ bool grape_event_remove_comment::Do(  void  )
   {
     visualcomment* vis_comm_ptr = static_cast<visualcomment*> (m_main_frame->get_glcanvas()->get_visual_object( comm_ptr ) );
     
-    bool reference_selected = vis_comm_ptr->get_reference_selected();
-    
     // if there is no valid selected communication
-    if (reference_selected)
+    if (comm_ptr->get_reference_selected())
     {
-      // remove the selected channel
+      // remove the selected reference
       comm_ptr->detach_from_object();
+      // deselect reference
+      comm_ptr->set_reference_selected(false);
     } else {
       // remove the entire comment
       dia_ptr->remove_comment( comm_ptr );
@@ -220,9 +220,9 @@ bool grape_event_attach_comment::Do( void )
   comment* comm_ptr = static_cast<comment*> ( find_object( m_comment, COMMENT ) );
   object* obj_ptr = find_object( m_object );
   dia_ptr->attach_comment_to_object( comm_ptr, obj_ptr );
-
   finish_modification();
   return true;
+  comm_ptr->set_reference_selected(true);
 }
 
 bool grape_event_attach_comment::Undo( void )

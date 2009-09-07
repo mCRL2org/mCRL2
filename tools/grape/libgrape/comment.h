@@ -28,6 +28,7 @@ namespace grape
 
         object    *m_connected_to;  /**< object comment is connected to. */
 
+        bool m_reference_selected; /**< Selected reference of the comment. */
       public:
         /**
          * Default constructor.
@@ -81,6 +82,18 @@ namespace grape
          * @return Returns the object the comment is attached to.
          */
         object* get_attached_object( void );
+        
+        /**
+         * Set the reference selected value
+         * @param p_is_reference_selected assigned value
+         */
+        void set_reference_selected(bool p_is_reference_selected);
+
+        /** 
+         * Get the reference selected value
+         * @return Returns whether the reference of the comment is selected.
+         */
+        bool get_reference_selected();
     };
 
     /**

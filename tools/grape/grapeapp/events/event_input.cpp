@@ -383,11 +383,21 @@ bool grape_event_drag::Do( void )
             s_orig_ntt[i] = ntt->get_coordinate();
           }
         }
-        if (new_drag == true)
+        if (new_drag)
         {
           s_flag = -1;
           new_drag = false;
 
+          if (begin_object_ptr->get_type() == COMMENT) 
+          {
+            // get initial object
+            visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_visual_object( begin_object_ptr );
+            visualcomment* v_com = static_cast<grapeapp::visualcomment*> (visual_beginobject);
+        
+            comment* com = static_cast<libgrape::comment*> (begin_object_ptr); 
+            com->set_reference_selected(v_com->is_inside_reference(s_coord_mousedown));
+          }
+        
           if (begin_object_ptr->get_type() == NONTERMINATING_TRANSITION)  //change flag if the object is a nonterminating transition
           {
             nonterminating_transition* ntt_ptr = static_cast<nonterminating_transition*> ( begin_object_ptr );
@@ -400,7 +410,14 @@ bool grape_event_drag::Do( void )
             if (distance(head_coordinate, m_up) < 0.05f) s_flag = 0;
           }
         }
-      } else if ( !m_mousedown ) new_drag = true;
+      } 
+      else
+      {
+        if ( !m_mousedown ) 
+        {
+          new_drag = true;
+        }
+      }
 
       coordinate delta = m_up - s_coord_mousedown;
 
@@ -483,13 +500,12 @@ bool grape_event_drag::Do( void )
         
         // get initial object
         visual_object* visual_beginobject = m_main_frame->get_glcanvas()->get_visual_object( begin_object_ptr );
-        visualcomment* v_com = static_cast<grapeapp::visualcomment*> (visual_beginobject);
-   
+     
         if (visual_beginobject->get_type() == COMMENT)
         {       
           comment* com = static_cast<libgrape::comment*> (begin_object_ptr); 
           // test if the reference on the comment is selected
-          if (v_com->is_inside_reference(s_coord_mousedown))
+          if (com->get_reference_selected())
           {
             if (visual_endobject && (visual_endobject->get_type() != COMMENT)) //only attach if it is not attached to a comment
             { 

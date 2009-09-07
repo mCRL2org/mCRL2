@@ -175,10 +175,9 @@ void grape_glcanvas::draw_visual_objects()
         }
       }
     
-      if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (get_selectable_visual_object( m_mouse_coordinate ) == 0))
+      comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
+      if ((m_canvas_state == SELECT) && (v_obj->get_type() == COMMENT) && (comm_ptr->get_reference_selected()) && (comm_ptr->get_attached_object() == 0))
       {
-        comment* comm_ptr = static_cast<comment*> ( v_obj->get_selectable_object() );
-      
         // find position on border rectangle
         coordinate coord = move_to_border_rectangle( comm_ptr->get_coordinate(), comm_ptr->get_width(), comm_ptr->get_height(), m_mouse_coordinate );     
         

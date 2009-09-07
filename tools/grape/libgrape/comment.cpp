@@ -21,6 +21,7 @@ comment::comment( void )
 {
   m_text = wxEmptyString;
   m_connected_to = 0;
+  m_reference_selected = false;
 }
 
 comment::comment( const comment &p_comment )
@@ -28,6 +29,7 @@ comment::comment( const comment &p_comment )
 {
   m_text = p_comment.m_text;
   m_connected_to = p_comment.m_connected_to;
+  m_reference_selected = p_comment.m_reference_selected;
 }
 
 comment::~comment( void )
@@ -58,6 +60,16 @@ void comment::detach_from_object( void )
 object* comment::get_attached_object( void )
 {
   return m_connected_to;
+}
+
+bool comment::get_reference_selected()
+{
+  return m_reference_selected;
+}
+
+void comment::set_reference_selected(bool p_is_reference_selected)
+{
+  m_reference_selected = p_is_reference_selected;
 }
 
 // WxWidgets dynamic array implementation.
