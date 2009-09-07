@@ -719,7 +719,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print data equation (without variables)
     PRINT_FUNC(dbg_prints)("printing data equation\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
-    if (!gsIsNil(Condition)) {
+    if (!gsIsNil(Condition) && !gsIsDataExprTrue(Condition)) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, Condition,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, "  ->  ");
@@ -929,7 +929,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print action rename rule (without variables)
     PRINT_FUNC(dbg_prints)("printing action rename rule\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
-    if (!gsIsNil(Condition)) {
+    if (!gsIsNil(Condition) && !gsIsDataExprTrue(Condition)) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, Condition,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, "  ->  ");
@@ -2007,7 +2007,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   }
   //print condition
   ATermAppl Cond = ATAgetArgument(Summand, 1);
-  if (!gsIsNil(Cond)) {
+  if (!gsIsNil(Cond) && !gsIsDataExprTrue(Cond)) {
     PRINT_FUNC(PrintDataExpr)(OutStream, Cond, pp_format, ShowSorts, gsPrecIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " ->\n         ");
   }
