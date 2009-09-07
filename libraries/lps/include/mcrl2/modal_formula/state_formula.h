@@ -100,7 +100,7 @@ typedef atermpp::term_list<state_formula> state_formula_list;
 
 // TODO: use these classes instead of the functions in the namespace state_frm
 namespace temp {
-//--- start generated text ---//
+//--- start generated expression classes ---//
 /// \brief The value true for state formulas
 class true_: public state_formula
 {
@@ -114,8 +114,6 @@ class true_: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     true_()
       : state_formula(core::detail::gsMakeStateTrue())
     {}
@@ -134,8 +132,6 @@ class false_: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     false_()
       : state_formula(core::detail::gsMakeStateFalse())
     {}
@@ -154,8 +150,6 @@ class not_: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     not_(const state_formula& operand)
       : state_formula(core::detail::gsMakeStateNot(operand))
     {}
@@ -179,8 +173,6 @@ class and_: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     and_(const state_formula& left, const state_formula& right)
       : state_formula(core::detail::gsMakeStateAnd(left, right))
     {}
@@ -209,8 +201,6 @@ class or_: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     or_(const state_formula& left, const state_formula& right)
       : state_formula(core::detail::gsMakeStateOr(left, right))
     {}
@@ -239,8 +229,6 @@ class imp: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     imp(const state_formula& left, const state_formula& right)
       : state_formula(core::detail::gsMakeStateImp(left, right))
     {}
@@ -269,8 +257,6 @@ class forall: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     forall(const data::variable_list& variables, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateForall(variables, operand))
     {}
@@ -299,8 +285,6 @@ class exists: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     exists(const data::variable_list& variables, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateExists(variables, operand))
     {}
@@ -329,8 +313,6 @@ class must: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     must(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMust(formula, operand))
     {}
@@ -359,8 +341,6 @@ class may: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     may(const regular_formulas::regular_formula& formula, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMay(formula, operand))
     {}
@@ -389,8 +369,6 @@ class yaled: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     yaled()
       : state_formula(core::detail::gsMakeStateYaled())
     {}
@@ -409,8 +387,6 @@ class yaled_timed: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     yaled_timed(const data::data_expression& time_stamp)
       : state_formula(core::detail::gsMakeStateYaledTimed(time_stamp))
     {}
@@ -434,8 +410,6 @@ class delay: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     delay()
       : state_formula(core::detail::gsMakeStateDelay())
     {}
@@ -454,8 +428,6 @@ class delay_timed: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     delay_timed(const data::data_expression& time_stamp)
       : state_formula(core::detail::gsMakeStateDelayTimed(time_stamp))
     {}
@@ -479,8 +451,6 @@ class variable: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     variable(const core::identifier_string& name, const data::data_expression_list& arguments)
       : state_formula(core::detail::gsMakeStateVar(name, arguments))
     {}
@@ -509,8 +479,6 @@ class nu: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     nu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateNu(name, assignments, operand))
     {}
@@ -544,8 +512,6 @@ class mu: public state_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     mu(const core::identifier_string& name, const data::assignment_list& assignments, const state_formula& operand)
       : state_formula(core::detail::gsMakeStateMu(name, assignments, operand))
     {}
@@ -565,7 +531,7 @@ class mu: public state_formula
       return atermpp::arg3(*this);
     }
 };
-//--- end generated text ---//
+//--- end generated expression classes ---//
 } // namespace temp
 
 /// Accessor functions and predicates for state formulas.

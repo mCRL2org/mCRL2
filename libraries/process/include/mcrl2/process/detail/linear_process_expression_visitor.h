@@ -95,7 +95,7 @@ namespace detail {
     {
       return is_tau(x)
           || is_sync(x)
-          || is_action(x)
+          || is_process_action(x)
           ;
     }
 

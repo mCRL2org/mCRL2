@@ -94,6 +94,209 @@ class pbes_expression: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<pbes_expression> pbes_expression_list;
 
+namespace temp {
+//--- start generated expression classes ---//
+/// \brief The value true for pbes expressions
+class true_: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    true_(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESTrue(m_term));
+    }
+
+    /// \brief Constructor.
+    true_()
+      : pbes_expression(core::detail::gsMakePBESTrue())
+    {}
+};
+
+/// \brief The value false for pbes expressions
+class false_: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    false_(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESFalse(m_term));
+    }
+
+    /// \brief Constructor.
+    false_()
+      : pbes_expression(core::detail::gsMakePBESFalse())
+    {}
+};
+
+/// \brief The not operator for pbes expressions
+class not_: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    not_(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESNot(m_term));
+    }
+
+    /// \brief Constructor.
+    not_(const pbes_expression& operand)
+      : pbes_expression(core::detail::gsMakePBESNot(operand))
+    {}
+
+    pbes_expression operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+
+/// \brief The and operator for pbes expressions
+class and_: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    and_(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESAnd(m_term));
+    }
+
+    /// \brief Constructor.
+    and_(const pbes_expression& left, const pbes_expression& right)
+      : pbes_expression(core::detail::gsMakePBESAnd(left, right))
+    {}
+
+    pbes_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    pbes_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The or operator for pbes expressions
+class or_: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    or_(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESOr(m_term));
+    }
+
+    /// \brief Constructor.
+    or_(const pbes_expression& left, const pbes_expression& right)
+      : pbes_expression(core::detail::gsMakePBESOr(left, right))
+    {}
+
+    pbes_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    pbes_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The implication operator for pbes expressions
+class imp: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    imp(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESImp(m_term));
+    }
+
+    /// \brief Constructor.
+    imp(const pbes_expression& left, const pbes_expression& right)
+      : pbes_expression(core::detail::gsMakePBESImp(left, right))
+    {}
+
+    pbes_expression left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    pbes_expression right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The universal quantification operator for pbes expressions
+class forall: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    forall(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESForall(m_term));
+    }
+
+    /// \brief Constructor.
+    forall(const data::variable_list& variables, const pbes_expression& body)
+      : pbes_expression(core::detail::gsMakePBESForall(variables, body))
+    {}
+
+    data::variable_list variables() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    pbes_expression body() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief The existential quantification operator for pbes expressions
+class exists: public pbes_expression
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    exists(atermpp::aterm_appl term)
+      : pbes_expression(term)
+    {
+      assert(core::detail::check_term_PBESExists(m_term));
+    }
+
+    /// \brief Constructor.
+    exists(const data::variable_list& variables, const pbes_expression& body)
+      : pbes_expression(core::detail::gsMakePBESExists(variables, body))
+    {}
+
+    data::variable_list variables() const
+    {
+      return atermpp::list_arg1(*this);
+    }
+
+    pbes_expression body() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+//--- end generated expression classes ---//
+} // namespace temp
+
 /// \brief The namespace for predicates on pbes expressions.
 namespace pbes_expr {
 

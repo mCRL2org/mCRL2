@@ -188,7 +188,7 @@ namespace detail {
     /// \param x A process expression
     /// \param l An action label
     /// \param v A sequence of data expressions
-    bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
+    bool visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
     {
       m_multi_action = lps::multi_action(x);
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;

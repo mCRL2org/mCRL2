@@ -82,7 +82,7 @@ class action_formula: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of data expressions
 typedef atermpp::term_list<action_formula> action_formula_list;
 
-//--- start generated text ---//
+//--- start generated expression classes ---//
 /// \brief The value true for action formulas
 class true_: public action_formula
 {
@@ -96,8 +96,6 @@ class true_: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     true_()
       : action_formula(core::detail::gsMakeActTrue())
     {}
@@ -116,8 +114,6 @@ class false_: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     false_()
       : action_formula(core::detail::gsMakeActFalse())
     {}
@@ -136,8 +132,6 @@ class not_: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     not_(const action_formula& operand)
       : action_formula(core::detail::gsMakeActNot(operand))
     {}
@@ -161,8 +155,6 @@ class and_: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     and_(const action_formula& left, const action_formula& right)
       : action_formula(core::detail::gsMakeActAnd(left, right))
     {}
@@ -191,8 +183,6 @@ class or_: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     or_(const action_formula& left, const action_formula& right)
       : action_formula(core::detail::gsMakeActOr(left, right))
     {}
@@ -221,8 +211,6 @@ class imp: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     imp(const action_formula& left, const action_formula& right)
       : action_formula(core::detail::gsMakeActImp(left, right))
     {}
@@ -251,8 +239,6 @@ class forall: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     forall(const data::variable_list& variables, const action_formula& operand)
       : action_formula(core::detail::gsMakeActForall(variables, operand))
     {}
@@ -281,8 +267,6 @@ class exists: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     exists(const data::variable_list& variables, const action_formula& operand)
       : action_formula(core::detail::gsMakeActExists(variables, operand))
     {}
@@ -311,8 +295,6 @@ class at: public action_formula
     }
 
     /// \brief Constructor.
-    /// \param left A process expression
-    /// \param d A data expression
     at(const action_formula& operand, const data::data_expression& time_stamp)
       : action_formula(core::detail::gsMakeActAt(operand, time_stamp))
     {}
@@ -327,7 +309,7 @@ class at: public action_formula
       return atermpp::arg2(*this);
     }
 };
-//--- end generated text ---//
+//--- end generated expression classes ---//
 
 /// Accessor functions and predicates for action formulas.
 namespace act_frm

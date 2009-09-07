@@ -50,7 +50,7 @@ struct process_expression_builder
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
   {
     return process_expression();
   }
@@ -201,11 +201,11 @@ struct process_expression_builder
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (is_action(x))
+    if (is_process_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
-      result = visit_action(x, l, v, a);
+      result = visit_process_action(x, l, v, a);
       if (!is_finished(result))
       {
         result = action(l, v);
@@ -431,7 +431,7 @@ struct process_expression_builder<void>
               
   /// \brief Visit action node
   /// \return The result of visiting the node
-  virtual process_expression visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
+  virtual process_expression visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
   {
     return process_expression();
   }
@@ -580,11 +580,11 @@ struct process_expression_builder<void>
   std::cerr << "<visit>" << pp(x) << std::endl;
 #endif
     process_expression result;
-    if (is_action(x))
+    if (is_process_action(x))
     {
       lps::action_label l = action(x).label();
       data::data_expression_list v = action(x).arguments();
-      result = visit_action(x, l, v);
+      result = visit_process_action(x, l, v);
       if (!is_finished(result))
       {
         result = action(l, v);
