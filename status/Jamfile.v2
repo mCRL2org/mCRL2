@@ -12,10 +12,11 @@ project status
 
 build-project ../libraries/atermpp/test ;            # test-suite atermpp
 build-project ../libraries/core/test ;               # test-suite core
-build-project ../libraries/data/test ;           # test-suite data
+build-project ../libraries/data/test ;               # test-suite data
 build-project ../libraries/lps/test ;                # test-suite lps
 build-project ../libraries/lts/test ;                # test-suite lts
 build-project ../libraries/pbes/test ;               # test-suite pbes
+build-project ../libraries/process/test ;            # test-suite process
 build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
 build-project ../libraries/utilities/test ;
