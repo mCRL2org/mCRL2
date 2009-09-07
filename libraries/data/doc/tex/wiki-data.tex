@@ -189,7 +189,7 @@ We define the syntax that is used to describe data in mCRL2.
 
 \begin{definition}\textbf{(Sort expressions)}
 We assume a set of basic sorts $\basicsort$.
-Sort expressions $S$ are defined as follows, where $b \in \basicsort$, and $\rightarrow$ is right-associative:
+Sort expressions $S$ are defined as follows, where $\Bools \in \basicsort$, and $\rightarrow$ is right-associative:
 \begin{equation*}
  S ::= \basicsort \shortmid \containersort \shortmid S \times \dots \times S \rightarrow S \shortmid \structsort
 \end{equation*}
@@ -568,7 +568,7 @@ We inductively define predicate $\f{Finite}: S \rightarrow \Bools$ as follows:
 \end{equation*}
 
 \subsubsection{Equivalence of sorts}
-\comment{To be defined}
+For this topic see the note titled ``An algorithm to find a representant for sorts in the context of sort aliases and recursive sorts''.
 
 \subsection{Some notions on data expressions}
 \begin{definition}\textbf{(Free variables)}
@@ -588,7 +588,6 @@ We say that a data expression $e$ is closed iff $FV(e) = \emptyset$.
 \section{Predefined sort specifications}\label{sec:predef_sorts}
 % Retrieved from the RADV lecture notes
 mCRL2 provides a number of predefined sorts. For an overview of these sorts, with the full specifications that are generated see \cite[Appendix A]{groote07dubs}.
-\comment{To be copied from the book}
 
 \section{Type checking}
 In mCRL2 types are only made explicit in function declarations and abstractions. For places where type information is not explicitly included these can be inferred by a type-checking algorithm if the specification is typable. This algorithm attempts to infer the types of expressions in the program from their contexts. Type checking is outside the scope of this document.
@@ -685,8 +684,8 @@ Let $range(e)$ be the set of all possible values that data expression $e$ can at
 \section{Mapping an data specification to the signature}
 In this section we map the current implementation of a data specification to the signature as described in this document.
 
-\subsection{Details of the current implementation}
-We now map parts of the current (procedural style) implementation in the mCRL2 toolset to the signature as described above. This is the implementation directly built upon the ATerm library.
+\subsection{Details of the implementation up to revision 5967}
+We now map parts of the current (procedural style) implementation in the mCRL2 toolset to the signature as described above. This is the implementation directly built upon the ATerm library as it was available up to revision 5967 of the mCRL2 toolset.
 
 \subsubsection{Sort expressions}
 \begin{description}
@@ -701,27 +700,27 @@ We now map parts of the current (procedural style) implementation in the mCRL2 t
 \subsubsection{Data expressions}
 \begin{description}
  \item[Data expressions] are the data expressions. Internally referred to as \texttt{DataExpr}.
- \item[Data variable] is a variable of a certain sort. Corresponding to the first case above. Internally referred to as \texttt{DataVarId}.
- \item[Data operation] is a function with its sort, an element of $\Omega$ as in the second case above. Internally referred to as \texttt{OpId}.
+ \item[Data variable] is a variable of a certain sort. Internally referred to as \texttt{DataVarId}.
+ \item[Data operation] is a function with its sort, an element of $\Omega$. Internally referred to as \texttt{OpId}.
  \item[Data application] is an expression applied to a (number of) argument(s). Internally referred to as \texttt{DataAppl}. Note that the sorts must match!
  \item[Binder] is an expression that denotes abstraction, i.e. either a lambda abstraction, or a universal or existential quantification. This is denoted internally as \texttt{Binder(BindingOperator, DataVarId+, DataExpr)}, in which \texttt{BindingOperator} is one of \texttt{Forall}, \texttt{Exists}, \texttt{Lambda}, \texttt{SetBagComp}, \texttt{SetComp}, \texttt{BagComp}, \texttt{DataVarId+} is a non-empty list of variables over which is abstracted in \texttt{DataExpr}.
 \end{description}
 
-\subsection{Some notes on the current data implementation}
-The current data implementation in the mCRL2 toolset has got two---relatively closely related---tasks. First of all it completes the equational specification for standard data types (Bool, Pos, Nat, Int, Real). Furthermore it translates complex constructs (List, Set, Bag, structured sort) that are present in the mCRL2 format \emph{after typechecking} (before data implementation) away to a simpler construct, and generates the corresponding equational specification, to facilitate efficient rewriting.
+\subsection{Some notes on the data implementation up to revision 5967}
+The data implementation in the mCRL2 toolset had two---relatively closely related---tasks. First of all it completed the equational specification for standard data types (Bool, Pos, Nat, Int, Real). Furthermore it translated complex constructs (List, Set, Bag, structured sort) that are present in the mCRL2 format \emph{after typechecking} (before data implementation) away to a simpler construct, and generated the corresponding equational specification, to facilitate efficient rewriting.
 
 \subsubsection{Transformations for standard data types}
-In the data implementation phase, the following transformations are made:
+In the data implementation phase, the following transformations were made:
 \begin{itemize}
- \item Rules for Bool, Pos, Nat, Int and Real are added
- \item Standard functions $\approx, \not \approx, \f{if}$ are added
- \item Numerical pattern matching is implemented, this makes sure that explicit casts (e.g. Pos2Nat) are translated away. This way \texttt{Pos2Nat(p:Pos)} may be rewritten to \texttt{p:Nat}.
+ \item Rules for Bool, Pos, Nat, Int and Real were added
+ \item Standard functions $\approx, \not \approx, \f{if}$ were added
+ \item Numerical pattern matching was implemented, this made sure that explicit casts (e.g. Pos2Nat) were translated away. This way \texttt{Pos2Nat(p:Pos)} may be rewritten to \texttt{p:Nat}.
 \end{itemize}
 
-Observe that the rewrite rules that are introduced for the standard data types are closely tailored to the setting in which rewriters are used. With this we mean that the equational specification is constructed in such a way that efficient rewriting is possible. Therefore generation of equational specifications for system defined sorts is closely linked to the rewriter that is used.
+Observe that the rewrite rules that were introduced for the standard data types are closely tailored to the setting in which rewriters are used. With this we mean that the equational specification is constructed in such a way that efficient rewriting is possible. Therefore generation of equational specifications for system defined sorts is closely linked to the rewriter that is used.
 
 \subsubsection{Data implementation of complex constructs}
-Complex constructs are implemented to a more simple form in order to facilitate a simpler rewriting mechanism. Currently data implementation includes the implementation of:
+Complex constructs were implemented to a more simple form in order to facilitate a simpler rewriting mechanism. Data implementation included the implementation of:
 \begin{itemize}
  \item Sort references
  \item Structured sorts
@@ -733,9 +732,11 @@ Complex constructs are implemented to a more simple form in order to facilitate 
 \subsubsection{The need for a data implementation}
 As we have seen in the previous sections, it can be argued that the data implementation is an implementation detail, tailored to efficient rewriting, and should be treated as such.
 
-A result of this would be that the data library gets an interface conforming to the current internal format \emph{before data implementation}, i.e. in the data library we should support high-level concepts such as structured sorts, lists, sets, bags, binders and numeric constants. This might typically also lead to an interface which could more easily incorporate support for provers.
+As a result of this, the data library gets an interface conforming to the current internal format \emph{before data implementation}, i.e. in the data library we should support high-level concepts such as structured sorts, lists, sets, bags, binders and numeric constants. This might typically also lead to an interface which could more easily incorporate support for provers.
 
 I would therefore propose such a high-level interface for the data library, but in order to support facilities like rewriting and theorem proving, it should be able to make a systematic translation between the data format and a format supported by e.g. a rewriter of a prover, this way treating low-level details really as implementation issue for the used backend.
+
+This results in a format in which the most fundamental transformation work, namely that concerning system defined sorts, is always done immediately after type checking, i.e. after typechecking numbers, lists, sets and bags are translated to the format as described in Appendix A of \cite{groote07dubs}. However, as we also want to work on a level that remains close to the level of theory, concepts such as binding and existential and universal quantification should remain available at an interface level in the implementation. For more details on the specific format that is used in the new data library see Section~\ref{sec:new_data_format}.
 
 \section{Designing a new data library}
 In the basic design for the new implementation of a data library we want to stick as close to the theory as possible. Furthermore we want to integrate enumeration, rewriting and in the end proving with this library.
@@ -814,17 +815,6 @@ We provide an overview of the classes with a short description, we also describe
 
 
 \dataclass
-  {alias}
-  {This denotes an alternative name for a sort, i.e. $S_0 = S_1$.}
-  {sort\_expression}
-  {}
-  {\begin{description}
-    \item[name] Returns the name of the alias. For example the name of the alias $S = T$ is $S$.
-    \item[reference] Returns the sort the name refers to. For example the reference of the alias $S = T$ is $T$.
-   \end{description}}
-
-
-\dataclass
   {structured\_sort}
   {This denotes a structured sort
    \begin{eqnarray*}
@@ -854,7 +844,6 @@ We provide an overview of the classes with a short description, we also describe
     \item[container\_name] Returns the name of the container. For example the container name of $\List(Nat)$ is $List$.
     \item[element\_sort] Returns the sort of the elements of the container. For example the element sort of $\List(Nat)$ is $Nat$.
    \end{description}}
-
 
 %  \item[sort\_visitor] is an abstract visitor class. This can be used by concrete visitors to implement operations on sorts. For an in-depth explanation of the visitor pattern see also \cite{gamma94dp}.
 
@@ -1096,6 +1085,15 @@ A data specification represents a signature $\Sigma$ with an associated set of e
     \item[add\_equations(el)] Adds all equations in $el$ to the specification.
    \end{description}}
 
+\dataclass
+  {alias}
+  {This denotes an alternative name for a sort, i.e. $S_0 = S_1$.}
+  {sort\_expression}
+  {}
+  {\begin{description}
+    \item[name] Returns the name of the alias. For example the name of the alias $S = T$ is $S$.
+    \item[reference] Returns the sort the name refers to. For example the reference of the alias $S = T$ is $T$.
+   \end{description}}
 
 \dataclass
   {data\_equation}
@@ -1262,6 +1260,12 @@ Additionally there are a number of functions to facilitate replacements. Again t
 
 \subsection{System defined functions and equations}
 For each system defined sort, i.e. $Bool$, $Pos$, $Nat$, $Int$ and $Real$, utility functions will be created to add the declarations of these sorts, with their constructors, mappings and equations to a data specification. For other system defined mappings and equations similar functions will be constructed. Note that for everything that is added in this way, it is recorded that it is system defined. Furthermore utility functions will be added to facilitate easy manipulation of these system defined sorts.
+
+\subsection{The internal format used in the new data library design}
+\label{sec:new_data_format}
+As noted before, the format used in the new data library is an intermediate format between the internal format after typechecking and the internal format after data implementation as used up to revision 5976. In essence it is the format after typechecking, except for some minor adjustments. Namely, numbers, lists, sets and bags are stored in their concrete, or implemented, form, i.e. they are stored according to the specification given in Appendix A of \cite{groote07dubs}. This is the format assumed in the data library. Furthermore there are facilities that automatically import the necessary declarations for standard data types. This functionality is provided by the function \texttt{make\_complete}.
+
+The rewriters still use their original (undocumented) formats, however, as we now do have binders available explicitly on the data library level (along with where clauses), these need to be translated away to a rewrite rules. This translation is carried out internally in the interface to the rewriters that is provided by the data library.
 
 \bibliography{references}
 
