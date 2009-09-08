@@ -1,6 +1,0 @@
-proc P(s: Set(Nat)) = (1 in s) -> tau . P({} + s - {20} * {40})
-                    + ({10} < s) -> tau . P(!s)
-                    + (s <= {20} + Bag2Set({20:4, 30:3, 40:2})) -> tau . P(s)
-                    + (s <= { n:Nat | true }) -> tau . P(s);
-
-init P({20, 30, 40});
