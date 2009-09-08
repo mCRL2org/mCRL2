@@ -19,6 +19,7 @@ test-suite data
       [ run bool_test.cpp ]
       [ run bag_test.cpp ]
       [ run int_test.cpp ]
+      [ run list_test.cpp ]
       [ run find_test.cpp ]
       [ run replace_test.cpp ]
       [ run data_utility_test.cpp ]
