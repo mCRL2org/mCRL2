@@ -424,7 +424,7 @@ struct MYEXPRESSION_builder<void>
 EXPRESSION_VISITOR_NODE_TEXT = r'''
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual bool visit_NODE(const MYEXPRESSION& xARGUMENTSEXTRA_ARG)
+  virtual bool visit_NODE(const NODE& xEXTRA_ARG)
   {
     return continue_recursion;
   }
@@ -465,12 +465,7 @@ def make_expression_visitor(filename, expression, text):
         arguments = f.argument_text()
 
         text = EXPRESSION_VISITOR_NODE_TEXT
-        text = re.sub('MYEXPRESSION', expression, text)
         text = re.sub('NODE', node, text)
-        args = arguments
-        if args != '':
-            args = ', ' + args
-        text = re.sub('ARGUMENTS', args, text)
         vtext = vtext + text
     
         #--- generate code fragments like this
@@ -491,8 +486,8 @@ def make_expression_visitor(filename, expression, text):
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
-        for i in range(len(types)):
-            text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
+        #for i in range(len(types)):
+        #    text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
         has_children = expression in map(extract_type, types)
         args = ', '.join(names)
         if args != '':
@@ -500,12 +495,14 @@ def make_expression_visitor(filename, expression, text):
         rtext = ''
         if has_children:
             rtext = 'bool result = '
-        text = text + '  %svisit_%s(x%sEXTRA_ARG);\n' % (rtext, node, args)
+        #text = text + '  %svisit_%s(x%sEXTRA_ARG);\n' % (rtext, node, args)
+        text = text + '  %svisit_%s(%s(x)EXTRA_ARG);\n' % (rtext, node, node)
         if has_children:
             text = text + '  if (result) {\n'
             for i in range(len(types)):
                 if extract_type(types[i]) == expression:
-                    text = text + '    visit(%sEXTRA_ARG);\n' % names[i]
+                    #text = text + '    visit(%sEXTRA_ARG);\n' % names[i]
+                    text = text + '    visit(%s(x).%s()EXTRA_ARG);\n' % (node, names[i])
             text = text + '  }\n'
         text = text + '  leave_%s();\n' % node
         text = text + '}\n'

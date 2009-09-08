@@ -156,25 +156,14 @@ namespace detail {
           ;
     }
 
-    /// \brief Visit process_instance node
-    /// \return The result of visiting the node
-    /// \param x A process expression
-    /// \param pi A process identifier
-    /// \param v A sequence of data expressions
-    bool visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
-    {
-      return continue_recursion;
-    }
-
     /// \brief Visit process_instance_assignment node
     /// \return The result of visiting the node
     /// \param x A process expression
     /// \param pi A process identifier
     /// \param v A sequence of assignments to data variables
-    bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+    bool visit_process_instance_assignment(const process_instance_assignment& x)
     {
-      process_instance_assignment a = x;
-      if (!check_process_instance_assignment(a))
+      if (!check_process_instance_assignment(x))
       {
         throw non_linear_process();
       }
@@ -186,9 +175,9 @@ namespace detail {
     /// \param x A process expression
     /// \param v A sequence of data variables
     /// \param right A process expression
-    bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
+    bool visit_sum(const sum& x)
     {
-      if (!is_alternative(right))
+      if (!is_alternative(x.operand()))
       {
         throw non_linear_process();
       }
@@ -200,7 +189,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    bool visit_block(const block& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -211,7 +200,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    bool visit_hide(const hide& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -222,7 +211,7 @@ namespace detail {
     /// \param x A process expression
     /// \param r A sequence of rename expressions
     /// \param right A process expression
-    bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
+    bool visit_rename(const rename& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -233,7 +222,7 @@ namespace detail {
     /// \param x A process expression
     /// \param c A sequence of communication expressions
     /// \param right A process expression
-    bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
+    bool visit_comm(const comm& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -244,7 +233,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of multi-action names
     /// \param right A process expression
-    bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
+    bool visit_allow(const allow& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -255,9 +244,9 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_sync(const sync& x)
     {
-      if (!is_multiaction(left) || !is_multiaction(right))
+      if (!is_multiaction(x.left()) || !is_multiaction(x.right()))
       {
         throw non_linear_process();
       }
@@ -269,9 +258,9 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param d A data expression
-    bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at(const at& x)
     {
-      if (!is_multiaction(left) && !is_delta(left))
+      if (!is_multiaction(x.operand()) && !is_delta(x.operand()))
       {
         throw non_linear_process();
       }
@@ -283,23 +272,23 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_seq(const seq& x)
     {
-      if (!is_timed_multiaction(left) || !is_process(right))
+      if (!is_timed_multiaction(x.left()) || !is_process(x.right()))
       {
         throw non_linear_process();
       }
-      if (is_process_instance(right))
+      if (is_process_instance(x.right()))
       {
-        process_instance q = right;
+        process_instance q = x.right();
         if (q.identifier() != eqn.identifier())
         {
           throw non_linear_process();
         }
       }
-      else if (is_process_instance_assignment(right))
+      else if (is_process_instance_assignment(x.right()))
       {
-        process_instance_assignment q = right;
+        process_instance_assignment q = x.right();
         if (q.identifier() != eqn.identifier())
         {
           throw non_linear_process();
@@ -307,7 +296,7 @@ namespace detail {
       }
       else
       {
-        std::cerr << "seq right hand side: " << core::pp(right) << std::endl;
+        std::cerr << "seq right hand side: " << core::pp(x.right()) << std::endl;
         throw std::runtime_error("unexpected error in visit_seq");
       }
       return continue_recursion;
@@ -318,9 +307,9 @@ namespace detail {
     /// \param x A process expression
     /// \param d A data expression
     /// \param right A process expression
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const if_then& x)
     {
-      if (!is_action_prefix(right) && !is_timed_deadlock(right))
+      if (!is_action_prefix(x.then_case()) && !is_timed_deadlock(x.then_case()))
       {
         throw non_linear_process();
       }
@@ -333,7 +322,7 @@ namespace detail {
     /// \param d A data expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const if_then_else& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -344,7 +333,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_bounded_init(const bounded_init& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -355,7 +344,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_merge(const merge& x)
     {
       throw non_linear_process();
       return continue_recursion;
@@ -366,7 +355,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_left_merge(const left_merge& x)
     {
       throw non_linear_process();
       return continue_recursion;

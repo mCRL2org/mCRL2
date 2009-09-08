@@ -48,7 +48,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_action node
   /// \return The result of visiting the node
-  virtual bool visit_process_action(const process_expression& x, const lps::action_label& label, const data::data_expression_list& arguments, Arg& /* a */)
+  virtual bool visit_process_action(const process_action& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -59,7 +59,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance(const process_expression& x, const process_identifier identifier, const data::data_expression_list& actual_parameters, Arg& /* a */)
+  virtual bool visit_process_instance(const process_instance& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -70,7 +70,7 @@ struct process_expression_visitor
 
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance_assignment(const process_expression& x, const process_identifier& identifier, const data::assignment_list& assignments, Arg& /* a */)
+  virtual bool visit_process_instance_assignment(const process_instance_assignment& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -81,7 +81,7 @@ struct process_expression_visitor
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual bool visit_delta(const process_expression& x, Arg& /* a */)
+  virtual bool visit_delta(const delta& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -92,7 +92,7 @@ struct process_expression_visitor
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual bool visit_tau(const process_expression& x, Arg& /* a */)
+  virtual bool visit_tau(const tau& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -103,7 +103,7 @@ struct process_expression_visitor
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual bool visit_sum(const process_expression& x, const data::variable_list& bound_variables, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_sum(const sum& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -114,7 +114,7 @@ struct process_expression_visitor
 
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual bool visit_block(const process_expression& x, const core::identifier_string_list& block_set, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_block(const block& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -125,7 +125,7 @@ struct process_expression_visitor
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual bool visit_hide(const process_expression& x, const core::identifier_string_list& hide_set, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_hide(const hide& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -136,7 +136,7 @@ struct process_expression_visitor
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual bool visit_rename(const process_expression& x, const rename_expression_list& rename_set, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_rename(const rename& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -147,7 +147,7 @@ struct process_expression_visitor
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual bool visit_comm(const process_expression& x, const communication_expression_list& comm_set, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_comm(const comm& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -158,7 +158,7 @@ struct process_expression_visitor
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const process_expression& x, const action_name_multiset_list& allow_set, const process_expression& operand, Arg& /* a */)
+  virtual bool visit_allow(const allow& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -169,7 +169,7 @@ struct process_expression_visitor
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_sync(const sync& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -180,7 +180,7 @@ struct process_expression_visitor
 
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at(const process_expression& x, const process_expression& operand, const data::data_expression& time_stamp, Arg& /* a */)
+  virtual bool visit_at(const at& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -191,7 +191,7 @@ struct process_expression_visitor
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_seq(const seq& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -202,7 +202,7 @@ struct process_expression_visitor
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual bool visit_if_then(const process_expression& x, const data::data_expression& condition, const process_expression& then_case, Arg& /* a */)
+  virtual bool visit_if_then(const if_then& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -213,7 +213,7 @@ struct process_expression_visitor
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual bool visit_if_then_else(const process_expression& x, const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case, Arg& /* a */)
+  virtual bool visit_if_then_else(const if_then_else& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -224,7 +224,7 @@ struct process_expression_visitor
 
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_bounded_init(const bounded_init& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -235,7 +235,7 @@ struct process_expression_visitor
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_merge(const merge& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -246,7 +246,7 @@ struct process_expression_visitor
 
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_left_merge(const left_merge& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -257,7 +257,7 @@ struct process_expression_visitor
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual bool visit_choice(const choice& x, Arg& /* a */)
   {
     return continue_recursion;
   }
@@ -275,190 +275,153 @@ struct process_expression_visitor
   {
     if (is_process_action(x))
     {
-      const lps::action_label& label = process_action(x).label();
-      const data::data_expression_list& arguments = process_action(x).arguments();
-      visit_process_action(x, label, arguments, a);
+      visit_process_action(process_action(x), a);
       leave_process_action();
     }
     else if (is_process_instance(x))
     {
-      const process_identifier identifier = process_instance(x).identifier();
-      const data::data_expression_list& actual_parameters = process_instance(x).actual_parameters();
-      visit_process_instance(x, identifier, actual_parameters, a);
+      visit_process_instance(process_instance(x), a);
       leave_process_instance();
     }
     else if (is_process_instance_assignment(x))
     {
-      const process_identifier& identifier = process_instance_assignment(x).identifier();
-      const data::assignment_list& assignments = process_instance_assignment(x).assignments();
-      visit_process_instance_assignment(x, identifier, assignments, a);
+      visit_process_instance_assignment(process_instance_assignment(x), a);
       leave_process_instance_assignment();
     }
     else if (is_delta(x))
     {
-      visit_delta(x, a);
+      visit_delta(delta(x), a);
       leave_delta();
     }
     else if (is_tau(x))
     {
-      visit_tau(x, a);
+      visit_tau(tau(x), a);
       leave_tau();
     }
     else if (is_sum(x))
     {
-      const data::variable_list& bound_variables = sum(x).bound_variables();
-      const process_expression& operand = sum(x).operand();
-      bool result = visit_sum(x, bound_variables, operand, a);
+      bool result = visit_sum(sum(x), a);
       if (result) {
-        visit(operand, a);
+        visit(sum(x).operand(), a);
       }
       leave_sum();
     }
     else if (is_block(x))
     {
-      const core::identifier_string_list& block_set = block(x).block_set();
-      const process_expression& operand = block(x).operand();
-      bool result = visit_block(x, block_set, operand, a);
+      bool result = visit_block(block(x), a);
       if (result) {
-        visit(operand, a);
+        visit(block(x).operand(), a);
       }
       leave_block();
     }
     else if (is_hide(x))
     {
-      const core::identifier_string_list& hide_set = hide(x).hide_set();
-      const process_expression& operand = hide(x).operand();
-      bool result = visit_hide(x, hide_set, operand, a);
+      bool result = visit_hide(hide(x), a);
       if (result) {
-        visit(operand, a);
+        visit(hide(x).operand(), a);
       }
       leave_hide();
     }
     else if (is_rename(x))
     {
-      const rename_expression_list& rename_set = rename(x).rename_set();
-      const process_expression& operand = rename(x).operand();
-      bool result = visit_rename(x, rename_set, operand, a);
+      bool result = visit_rename(rename(x), a);
       if (result) {
-        visit(operand, a);
+        visit(rename(x).operand(), a);
       }
       leave_rename();
     }
     else if (is_comm(x))
     {
-      const communication_expression_list& comm_set = comm(x).comm_set();
-      const process_expression& operand = comm(x).operand();
-      bool result = visit_comm(x, comm_set, operand, a);
+      bool result = visit_comm(comm(x), a);
       if (result) {
-        visit(operand, a);
+        visit(comm(x).operand(), a);
       }
       leave_comm();
     }
     else if (is_allow(x))
     {
-      const action_name_multiset_list& allow_set = allow(x).allow_set();
-      const process_expression& operand = allow(x).operand();
-      bool result = visit_allow(x, allow_set, operand, a);
+      bool result = visit_allow(allow(x), a);
       if (result) {
-        visit(operand, a);
+        visit(allow(x).operand(), a);
       }
       leave_allow();
     }
     else if (is_sync(x))
     {
-      const process_expression& left = sync(x).left();
-      const process_expression& right = sync(x).right();
-      bool result = visit_sync(x, left, right, a);
+      bool result = visit_sync(sync(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(sync(x).left(), a);
+        visit(sync(x).right(), a);
       }
       leave_sync();
     }
     else if (is_at(x))
     {
-      const process_expression& operand = at(x).operand();
-      const data::data_expression& time_stamp = at(x).time_stamp();
-      bool result = visit_at(x, operand, time_stamp, a);
+      bool result = visit_at(at(x), a);
       if (result) {
-        visit(operand, a);
+        visit(at(x).operand(), a);
       }
       leave_at();
     }
     else if (is_seq(x))
     {
-      const process_expression& left = seq(x).left();
-      const process_expression& right = seq(x).right();
-      bool result = visit_seq(x, left, right, a);
+      bool result = visit_seq(seq(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(seq(x).left(), a);
+        visit(seq(x).right(), a);
       }
       leave_seq();
     }
     else if (is_if_then(x))
     {
-      const data::data_expression& condition = if_then(x).condition();
-      const process_expression& then_case = if_then(x).then_case();
-      bool result = visit_if_then(x, condition, then_case, a);
+      bool result = visit_if_then(if_then(x), a);
       if (result) {
-        visit(then_case, a);
+        visit(if_then(x).then_case(), a);
       }
       leave_if_then();
     }
     else if (is_if_then_else(x))
     {
-      const data::data_expression& condition = if_then_else(x).condition();
-      const process_expression& then_case = if_then_else(x).then_case();
-      const process_expression& else_case = if_then_else(x).else_case();
-      bool result = visit_if_then_else(x, condition, then_case, else_case, a);
+      bool result = visit_if_then_else(if_then_else(x), a);
       if (result) {
-        visit(then_case, a);
-        visit(else_case, a);
+        visit(if_then_else(x).then_case(), a);
+        visit(if_then_else(x).else_case(), a);
       }
       leave_if_then_else();
     }
     else if (is_bounded_init(x))
     {
-      const process_expression& left = bounded_init(x).left();
-      const process_expression& right = bounded_init(x).right();
-      bool result = visit_bounded_init(x, left, right, a);
+      bool result = visit_bounded_init(bounded_init(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(bounded_init(x).left(), a);
+        visit(bounded_init(x).right(), a);
       }
       leave_bounded_init();
     }
     else if (is_merge(x))
     {
-      const process_expression& left = merge(x).left();
-      const process_expression& right = merge(x).right();
-      bool result = visit_merge(x, left, right, a);
+      bool result = visit_merge(merge(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(merge(x).left(), a);
+        visit(merge(x).right(), a);
       }
       leave_merge();
     }
     else if (is_left_merge(x))
     {
-      const process_expression& left = left_merge(x).left();
-      const process_expression& right = left_merge(x).right();
-      bool result = visit_left_merge(x, left, right, a);
+      bool result = visit_left_merge(left_merge(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(left_merge(x).left(), a);
+        visit(left_merge(x).right(), a);
       }
       leave_left_merge();
     }
     else if (is_choice(x))
     {
-      const process_expression& left = choice(x).left();
-      const process_expression& right = choice(x).right();
-      bool result = visit_choice(x, left, right, a);
+      bool result = visit_choice(choice(x), a);
       if (result) {
-        visit(left, a);
-        visit(right, a);
+        visit(choice(x).left(), a);
+        visit(choice(x).right(), a);
       }
       leave_choice();
     }
@@ -490,7 +453,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_action node
   /// \return The result of visiting the node
-  virtual bool visit_process_action(const process_expression& x, const lps::action_label& label, const data::data_expression_list& arguments)
+  virtual bool visit_process_action(const process_action& x)
   {
     return continue_recursion;
   }
@@ -501,7 +464,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance(const process_expression& x, const process_identifier identifier, const data::data_expression_list& actual_parameters)
+  virtual bool visit_process_instance(const process_instance& x)
   {
     return continue_recursion;
   }
@@ -512,7 +475,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual bool visit_process_instance_assignment(const process_expression& x, const process_identifier& identifier, const data::assignment_list& assignments)
+  virtual bool visit_process_instance_assignment(const process_instance_assignment& x)
   {
     return continue_recursion;
   }
@@ -523,7 +486,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual bool visit_delta(const process_expression& x)
+  virtual bool visit_delta(const delta& x)
   {
     return continue_recursion;
   }
@@ -534,7 +497,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual bool visit_tau(const process_expression& x)
+  virtual bool visit_tau(const tau& x)
   {
     return continue_recursion;
   }
@@ -545,7 +508,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual bool visit_sum(const process_expression& x, const data::variable_list& bound_variables, const process_expression& operand)
+  virtual bool visit_sum(const sum& x)
   {
     return continue_recursion;
   }
@@ -556,7 +519,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual bool visit_block(const process_expression& x, const core::identifier_string_list& block_set, const process_expression& operand)
+  virtual bool visit_block(const block& x)
   {
     return continue_recursion;
   }
@@ -567,7 +530,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual bool visit_hide(const process_expression& x, const core::identifier_string_list& hide_set, const process_expression& operand)
+  virtual bool visit_hide(const hide& x)
   {
     return continue_recursion;
   }
@@ -578,7 +541,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual bool visit_rename(const process_expression& x, const rename_expression_list& rename_set, const process_expression& operand)
+  virtual bool visit_rename(const rename& x)
   {
     return continue_recursion;
   }
@@ -589,7 +552,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual bool visit_comm(const process_expression& x, const communication_expression_list& comm_set, const process_expression& operand)
+  virtual bool visit_comm(const comm& x)
   {
     return continue_recursion;
   }
@@ -600,7 +563,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual bool visit_allow(const process_expression& x, const action_name_multiset_list& allow_set, const process_expression& operand)
+  virtual bool visit_allow(const allow& x)
   {
     return continue_recursion;
   }
@@ -611,7 +574,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_sync(const sync& x)
   {
     return continue_recursion;
   }
@@ -622,7 +585,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual bool visit_at(const process_expression& x, const process_expression& operand, const data::data_expression& time_stamp)
+  virtual bool visit_at(const at& x)
   {
     return continue_recursion;
   }
@@ -633,7 +596,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_seq(const seq& x)
   {
     return continue_recursion;
   }
@@ -644,7 +607,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual bool visit_if_then(const process_expression& x, const data::data_expression& condition, const process_expression& then_case)
+  virtual bool visit_if_then(const if_then& x)
   {
     return continue_recursion;
   }
@@ -655,7 +618,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual bool visit_if_then_else(const process_expression& x, const data::data_expression& condition, const process_expression& then_case, const process_expression& else_case)
+  virtual bool visit_if_then_else(const if_then_else& x)
   {
     return continue_recursion;
   }
@@ -666,7 +629,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_bounded_init(const bounded_init& x)
   {
     return continue_recursion;
   }
@@ -677,7 +640,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_merge(const merge& x)
   {
     return continue_recursion;
   }
@@ -688,7 +651,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_left_merge(const left_merge& x)
   {
     return continue_recursion;
   }
@@ -699,7 +662,7 @@ struct process_expression_visitor<void>
 
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual bool visit_choice(const choice& x)
   {
     return continue_recursion;
   }
@@ -717,190 +680,153 @@ struct process_expression_visitor<void>
   {
     if (is_process_action(x))
     {
-      const lps::action_label& label = process_action(x).label();
-      const data::data_expression_list& arguments = process_action(x).arguments();
-      visit_process_action(x, label, arguments);
+      visit_process_action(process_action(x));
       leave_process_action();
     }
     else if (is_process_instance(x))
     {
-      const process_identifier identifier = process_instance(x).identifier();
-      const data::data_expression_list& actual_parameters = process_instance(x).actual_parameters();
-      visit_process_instance(x, identifier, actual_parameters);
+      visit_process_instance(process_instance(x));
       leave_process_instance();
     }
     else if (is_process_instance_assignment(x))
     {
-      const process_identifier& identifier = process_instance_assignment(x).identifier();
-      const data::assignment_list& assignments = process_instance_assignment(x).assignments();
-      visit_process_instance_assignment(x, identifier, assignments);
+      visit_process_instance_assignment(process_instance_assignment(x));
       leave_process_instance_assignment();
     }
     else if (is_delta(x))
     {
-      visit_delta(x);
+      visit_delta(delta(x));
       leave_delta();
     }
     else if (is_tau(x))
     {
-      visit_tau(x);
+      visit_tau(tau(x));
       leave_tau();
     }
     else if (is_sum(x))
     {
-      const data::variable_list& bound_variables = sum(x).bound_variables();
-      const process_expression& operand = sum(x).operand();
-      bool result = visit_sum(x, bound_variables, operand);
+      bool result = visit_sum(sum(x));
       if (result) {
-        visit(operand);
+        visit(sum(x).operand());
       }
       leave_sum();
     }
     else if (is_block(x))
     {
-      const core::identifier_string_list& block_set = block(x).block_set();
-      const process_expression& operand = block(x).operand();
-      bool result = visit_block(x, block_set, operand);
+      bool result = visit_block(block(x));
       if (result) {
-        visit(operand);
+        visit(block(x).operand());
       }
       leave_block();
     }
     else if (is_hide(x))
     {
-      const core::identifier_string_list& hide_set = hide(x).hide_set();
-      const process_expression& operand = hide(x).operand();
-      bool result = visit_hide(x, hide_set, operand);
+      bool result = visit_hide(hide(x));
       if (result) {
-        visit(operand);
+        visit(hide(x).operand());
       }
       leave_hide();
     }
     else if (is_rename(x))
     {
-      const rename_expression_list& rename_set = rename(x).rename_set();
-      const process_expression& operand = rename(x).operand();
-      bool result = visit_rename(x, rename_set, operand);
+      bool result = visit_rename(rename(x));
       if (result) {
-        visit(operand);
+        visit(rename(x).operand());
       }
       leave_rename();
     }
     else if (is_comm(x))
     {
-      const communication_expression_list& comm_set = comm(x).comm_set();
-      const process_expression& operand = comm(x).operand();
-      bool result = visit_comm(x, comm_set, operand);
+      bool result = visit_comm(comm(x));
       if (result) {
-        visit(operand);
+        visit(comm(x).operand());
       }
       leave_comm();
     }
     else if (is_allow(x))
     {
-      const action_name_multiset_list& allow_set = allow(x).allow_set();
-      const process_expression& operand = allow(x).operand();
-      bool result = visit_allow(x, allow_set, operand);
+      bool result = visit_allow(allow(x));
       if (result) {
-        visit(operand);
+        visit(allow(x).operand());
       }
       leave_allow();
     }
     else if (is_sync(x))
     {
-      const process_expression& left = sync(x).left();
-      const process_expression& right = sync(x).right();
-      bool result = visit_sync(x, left, right);
+      bool result = visit_sync(sync(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(sync(x).left());
+        visit(sync(x).right());
       }
       leave_sync();
     }
     else if (is_at(x))
     {
-      const process_expression& operand = at(x).operand();
-      const data::data_expression& time_stamp = at(x).time_stamp();
-      bool result = visit_at(x, operand, time_stamp);
+      bool result = visit_at(at(x));
       if (result) {
-        visit(operand);
+        visit(at(x).operand());
       }
       leave_at();
     }
     else if (is_seq(x))
     {
-      const process_expression& left = seq(x).left();
-      const process_expression& right = seq(x).right();
-      bool result = visit_seq(x, left, right);
+      bool result = visit_seq(seq(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(seq(x).left());
+        visit(seq(x).right());
       }
       leave_seq();
     }
     else if (is_if_then(x))
     {
-      const data::data_expression& condition = if_then(x).condition();
-      const process_expression& then_case = if_then(x).then_case();
-      bool result = visit_if_then(x, condition, then_case);
+      bool result = visit_if_then(if_then(x));
       if (result) {
-        visit(then_case);
+        visit(if_then(x).then_case());
       }
       leave_if_then();
     }
     else if (is_if_then_else(x))
     {
-      const data::data_expression& condition = if_then_else(x).condition();
-      const process_expression& then_case = if_then_else(x).then_case();
-      const process_expression& else_case = if_then_else(x).else_case();
-      bool result = visit_if_then_else(x, condition, then_case, else_case);
+      bool result = visit_if_then_else(if_then_else(x));
       if (result) {
-        visit(then_case);
-        visit(else_case);
+        visit(if_then_else(x).then_case());
+        visit(if_then_else(x).else_case());
       }
       leave_if_then_else();
     }
     else if (is_bounded_init(x))
     {
-      const process_expression& left = bounded_init(x).left();
-      const process_expression& right = bounded_init(x).right();
-      bool result = visit_bounded_init(x, left, right);
+      bool result = visit_bounded_init(bounded_init(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(bounded_init(x).left());
+        visit(bounded_init(x).right());
       }
       leave_bounded_init();
     }
     else if (is_merge(x))
     {
-      const process_expression& left = merge(x).left();
-      const process_expression& right = merge(x).right();
-      bool result = visit_merge(x, left, right);
+      bool result = visit_merge(merge(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(merge(x).left());
+        visit(merge(x).right());
       }
       leave_merge();
     }
     else if (is_left_merge(x))
     {
-      const process_expression& left = left_merge(x).left();
-      const process_expression& right = left_merge(x).right();
-      bool result = visit_left_merge(x, left, right);
+      bool result = visit_left_merge(left_merge(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(left_merge(x).left());
+        visit(left_merge(x).right());
       }
       leave_left_merge();
     }
     else if (is_choice(x))
     {
-      const process_expression& left = choice(x).left();
-      const process_expression& right = choice(x).right();
-      bool result = visit_choice(x, left, right);
+      bool result = visit_choice(choice(x));
       if (result) {
-        visit(left);
-        visit(right);
+        visit(choice(x).left());
+        visit(choice(x).right());
       }
       leave_choice();
     }

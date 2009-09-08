@@ -164,7 +164,7 @@ namespace detail {
     /// \brief Visit delta node
     /// \return The result of visiting the node
     /// \param x A process expression
-    bool visit_delta(const process_expression& x)
+    bool visit_delta(const delta& x)
     {
       m_deadlock = lps::deadlock();
       m_deadlock_changed = true;
@@ -175,7 +175,7 @@ namespace detail {
     /// \brief Visit tau node
     /// \return The result of visiting the node
     /// \param x A process expression
-    bool visit_tau(const process_expression& x)
+    bool visit_tau(const tau& x)
     {
       m_multi_action = lps::multi_action();
       m_multi_action_changed = true;
@@ -188,9 +188,10 @@ namespace detail {
     /// \param x A process expression
     /// \param l An action label
     /// \param v A sequence of data expressions
-    bool visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
+    bool visit_process_action(const process_action& x)
     {
-      m_multi_action = lps::multi_action(x);
+      action a(x.label(), x.arguments());
+      m_multi_action = lps::multi_action(a);
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       return stop_recursion;
     }
@@ -200,10 +201,10 @@ namespace detail {
     /// \param x A process expression
     /// \param v A sequence of data variables
     /// \param right A process expression
-    bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
+    bool visit_sum(const sum& x)
     {
-      visit(right);
-      m_sum_variables = m_sum_variables + v;
+      visit(x.operand());
+      m_sum_variables = m_sum_variables + x.bound_variables();
 // std::cout << "adding sum variables\n" << core::pp(v) << std::endl;
       return stop_recursion;
     }
@@ -213,7 +214,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    bool visit_block(const block& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -224,7 +225,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of identifiers
     /// \param right A process expression
-    bool visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+    bool visit_hide(const hide& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -235,7 +236,7 @@ namespace detail {
     /// \param x A process expression
     /// \param r A sequence of rename expressions
     /// \param right A process expression
-    bool visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
+    bool visit_rename(const rename& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -246,7 +247,7 @@ namespace detail {
     /// \param x A process expression
     /// \param c A sequence of communication expressions
     /// \param right A process expression
-    bool visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
+    bool visit_comm(const comm& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -257,7 +258,7 @@ namespace detail {
     /// \param x A process expression
     /// \param s A sequence of multi-action names
     /// \param right A process expression
-    bool visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
+    bool visit_allow(const allow& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -268,11 +269,11 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_sync(const sync& x)
     {
-      visit(left);
+      visit(x.left());
       lps::multi_action l = m_multi_action;
-      visit(right);
+      visit(x.right());
       lps::multi_action r = m_multi_action;
       m_multi_action = l + r;
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
@@ -284,17 +285,17 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param d A data expression
-    bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at(const at& x)
     {
-      visit(left);
+      visit(x.operand());
       if (is_delta(x))
       {
-        m_deadlock.time() = d;
+        m_deadlock.time() = x.time_stamp();
 // std::cout << "adding deadlock\n" << m_deadlock.to_string() << std::endl;
       }
       else
       {
-        m_multi_action.time() = d;
+        m_multi_action.time() = x.time_stamp();
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
       }
       return stop_recursion;
@@ -305,36 +306,36 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_seq(const seq& x)
     {
-      visit(left);
+      visit(x.left());
 
       // Check 1) The expression right must be a process instance or a process assignment
-      if (is_process_instance(right))
+      if (is_process_instance(x.right()))
       {
-        process_instance p = right;
+        process_instance p = x.right();
         // Check 2) The process equation and and the process instance must match
         if (!match_initial_process(m_equation, p))
         {
-          std::clog << "seq right hand side: " << core::pp(right) << std::endl;
+          std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
         }
         m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
       }
-      else if (is_process_instance_assignment(right))
+      else if (is_process_instance_assignment(x.right()))
       {
-        process_instance_assignment p = right;
+        process_instance_assignment p = x.right();
         // Check 2) The process equation and and the process instance assignment must match
         if (!match_initial_process(m_equation, p))
         {
-          std::clog << "seq right hand side: " << core::pp(right) << std::endl;
+          std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
         }
         m_next_state = p.assignments(); // TODO: check if this is correct
       }
       else
       {
-        std::clog << "seq right hand side: " << core::pp(right) << std::endl;
+        std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
         throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered with an unexpected right hand side");
       }
 
@@ -347,10 +348,10 @@ namespace detail {
     /// \param x A process expression
     /// \param d A data expression
     /// \param right A process expression
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const if_then& x)
     {
-      visit(right);
-      m_condition = d;
+      visit(x.then_case());
+      m_condition = x.condition();
 // std::cout << "adding condition\n" << core::pp(m_condition) << std::endl;
       return stop_recursion;
     }
@@ -361,7 +362,7 @@ namespace detail {
     /// \param d A data expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const if_then_else& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -372,7 +373,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_bounded_init(const bounded_init& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -383,7 +384,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_merge(const merge& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -394,7 +395,7 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_left_merge(const left_merge& x)
     {
       throw non_linear_process(x);
       return continue_recursion;
@@ -405,15 +406,15 @@ namespace detail {
     /// \param x A process expression
     /// \param left A process expression
     /// \param right A process expression
-    bool visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
+    bool visit_choice(const choice& x)
     {
-      visit(left);
-      if (!is_choice(left))
+      visit(x.left());
+      if (!is_choice(x.left()))
       {
         add_summand();
       }
-      visit(right);
-      if (!is_choice(right))
+      visit(x.right());
+      if (!is_choice(x.right()))
       {
         add_summand();
       }

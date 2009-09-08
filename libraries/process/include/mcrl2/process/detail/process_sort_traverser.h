@@ -125,51 +125,51 @@ namespace detail {
 
     /// \brief Visit action node
     /// \return The result of visiting the node
-    bool visit_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
+    bool visit_process_action(const process_action& x)
     {
-      traverse(l);
-      traverse_container(v);
+      traverse(x.label());
+      traverse_container(x.arguments());
       return continue_recursion;
     }
   
     /// \brief Visit process_assignment node
     /// \return The result of visiting the node
-    bool visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+    bool visit_process_instance_assignment(const process_instance_assignment& x)
     {
-      traverse(pi);
-      traverse_container(v);
+      traverse(x.identifier());
+      traverse_container(x.assignments());
       return continue_recursion;
     }
   
     /// \brief Visit sum node
     /// \return The result of visiting the node
-    bool visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
+    bool visit_sum(const sum& x)
     {
-      traverse_container(v);
+      traverse_container(x.bound_variables());
       return continue_recursion;
     }
   
     /// \brief Visit at_time node
     /// \return The result of visiting the node
-    bool visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
+    bool visit_at(const at& x)
     {
-      traverse(d);
+      traverse(x.time_stamp());
       return continue_recursion;
     }
   
     /// \brief Visit if_then node
     /// \return The result of visiting the node
-    bool visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+    bool visit_if_then(const if_then& x)
     {
-      traverse(d);
+      traverse(x.condition());
       return continue_recursion;
     }
   
     /// \brief Visit if_then_else node
     /// \return The result of visiting the node
-    bool visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+    bool visit_if_then_else(const if_then_else& x)
     {
-      traverse(d);
+      traverse(x.condition());
       return continue_recursion;
     }
   };
