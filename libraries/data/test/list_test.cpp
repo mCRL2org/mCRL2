@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file bag_test.cpp
-/// \brief Basic regression test for bag expressions.
+/// \file list_test.cpp
+/// \brief Basic regression test for list expressions.
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
@@ -22,6 +22,13 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
+
+template <typename Predicate>
+void test_data_expression(std::string s, mcrl2::data::variable_vector v, Predicate p)
+{
+  data_expression e = parse_data_expression(s, v.begin(), v.end());
+  BOOST_CHECK(p(e));
+}
 
 /* Test case for various list expressions, based
    on the following specification:
@@ -43,39 +50,20 @@ void list_expression_test()
   variable_vector v;
   v.push_back(parse_variable("l:List(Nat)"));
 
-  data_expression e;
-  e = parse_data_expression("1 in l", v.begin(), v.end());
-  BOOST_CHECK(is_in_application(e));
+  test_data_expression("1 in l", v, is_in_application);
+  test_data_expression("10 |> l", v, is_cons_application);
+  test_data_expression("l <| 10", v, is_snoc_application);
+  test_data_expression("#l", v, is_count_application);
+  test_data_expression("l ++ [10]", v, is_concat_application);
+  test_data_expression("l.1", v, is_element_at_application);
+  test_data_expression("head(l)", v, is_head_application);
+  test_data_expression("rhead(l)", v, is_rhead_application);
+  test_data_expression("tail(l)", v, is_tail_application);
+  test_data_expression("rtail(l)", v, is_rtail_application);
 
-  e = parse_data_expression("10 |> l", v.begin(), v.end());
-  BOOST_CHECK(is_cons_application(e));
-
-  e = parse_data_expression("l <| 10", v.begin(), v.end());
-  BOOST_CHECK(is_snoc_application(e));
-
-  e = parse_data_expression("#l", v.begin(), v.end());
-  BOOST_CHECK(is_count_application(e));
-  
-  e = parse_data_expression("[10]", v.begin(), v.end());
+  data_expression e = parse_data_expression("[10]", v.begin(), v.end());
   BOOST_CHECK(is_cons_application(normaliser(e)));
 
-  e = parse_data_expression("l ++ [10]", v.begin(), v.end());
-  BOOST_CHECK(is_concat_application(e));
-
-  e = parse_data_expression("l.1", v.begin(), v.end());
-  BOOST_CHECK(is_element_at_application(e));
-
-  e = parse_data_expression("head(l)", v.begin(), v.end());
-  BOOST_CHECK(is_head_application(e));
-
-  e = parse_data_expression("rhead(l)", v.begin(), v.end());
-  BOOST_CHECK(is_rhead_application(e));
-
-  e = parse_data_expression("tail(l)", v.begin(), v.end());
-  BOOST_CHECK(is_tail_application(e));
-
-  e = parse_data_expression("rtail(l)", v.begin(), v.end());
-  BOOST_CHECK(is_rtail_application(e));
 }
 
 int test_main(int argc, char** argv)
