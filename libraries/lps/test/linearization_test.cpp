@@ -646,6 +646,14 @@ const std::string various_case_27=
       "     Q(n:Pos)=P(1,n)||P(2,n)||P(3,n);\n"
       "init Q(15);\n";
 
+const std::string various_case_28=
+      "sort A=List(Nat->Nat);"
+      "T=struct f(Nat->Nat);"
+      "act b:A;"
+      "proc P(a:A)=b(a).P([]);"
+      "init P([lambda n:Nat.n]);";
+      
+
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
      debugging the translation of the linearizer to the new data
@@ -701,10 +709,12 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_24);
   std::cerr << "Testcase 25\n";
   spec = linearise(various_case_25);
-  std::cerr << "Testcase 27\n";
+  std::cerr << "Testcase 26\n";
   spec = linearise(various_case_26);
   std::cerr << "Testcase 27\n";
   spec = linearise(various_case_27);
+  std::cerr << "Testcase 28\n";
+  spec = linearise(various_case_28);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
