@@ -1244,7 +1244,9 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part) {
   if (gsIsDataExprC1(Part) || gsIsDataExprCDub(Part)) {
   //  gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
     if (gsIsPosConstant(Part)) {
-      Part = gsMakeOpId(gsString2ATermAppl(gsPosValue(Part)), gsMakeSortExprPos());
+      char* PosValue = gsPosValue(Part);
+      Part = gsMakeOpId(gsString2ATermAppl(PosValue), gsMakeSortExprPos());
+      free(PosValue);
     } else {
       Part = reconstruct_pos_mult(Part, "1");
     }
