@@ -169,6 +169,24 @@ void test_case_5()
   BOOST_CHECK(!sum_occurs);
 }
 
+void test_case_6()
+{
+  const std::string text(
+    "proc P(n0:Nat) = sum n : Nat . (n == n0) -> delta@n . P(n);\n"
+    "init P(5);\n"
+  );
+
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r, false).run();
+  summand_list summands1 = s1.process().summands();
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    BOOST_CHECK(i->summation_variables().empty());
+  }
+}
+
 int test_main(int ac, char** av)
 {
   MCRL2_ATERMPP_INIT(ac, av)
@@ -182,6 +200,8 @@ int test_main(int ac, char** av)
   test_case_4();
   core::garbage_collect();
   test_case_5();
+  core::garbage_collect();
+  test_case_6();
   core::garbage_collect();
 
   return 0;
