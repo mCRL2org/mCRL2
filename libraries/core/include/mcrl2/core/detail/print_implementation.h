@@ -1212,6 +1212,7 @@ static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
     ATermAppl PosArg = ATAelementAt(Args, 1);
     char* NewMult = gsStringDub(Mult, 0);
     PosArg = reconstruct_pos_mult(PosArg, NewMult);
+    free(NewMult);
     if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
       //Mult*v(b) = 0
       return PosArg;
