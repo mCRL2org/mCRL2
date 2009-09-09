@@ -187,6 +187,28 @@ void test_case_6()
   }
 }
 
+void test_case_7()
+{
+  const std::string text(
+    "sort S;\n"
+    "act a:S;\n"
+    "proc P = sum s : S . a(s) . P;\n"
+    "init P;\n"
+  );
+
+  specification s0 = linearise(text);
+  rewriter r(s0.data());
+  specification s1(s0);
+  suminst_algorithm<rewriter>(s1, r, false).run();
+  summand_list summands1 = s1.process().summands();
+  int sum_count = 0;
+  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    sum_count += i->summation_variables().size();
+  }
+  BOOST_CHECK(sum_count == 1);
+}
+
 int test_main(int ac, char** av)
 {
   MCRL2_ATERMPP_INIT(ac, av)
