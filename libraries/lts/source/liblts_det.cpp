@@ -50,6 +50,8 @@ bool lts::is_deterministic()
     }
   }
 
+  free(trans_lut);
+
   return true;
 }
 

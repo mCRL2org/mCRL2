@@ -98,6 +98,8 @@ void p_lts::tau_star_reduce()
       t++;
     }
     new_trans_lut[state+1] = ntransitions;
+
+    free(trans_lut);
   }
 
   using namespace mcrl2::lts::detail;
