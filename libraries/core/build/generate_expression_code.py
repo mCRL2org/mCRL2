@@ -437,7 +437,7 @@ EXPRESSION_VISITOR_NODE_TEXT = r'''
 EXPRESSION_BUILDER_NODE_TEXT = r'''              
   /// \\brief Visit NODE node
   /// \\return The result of visiting the node
-  virtual MYEXPRESSION visit_NODE(const MYEXPRESSION& xARGUMENTSEXTRA_ARG)
+  virtual MYEXPRESSION visit_NODE(const NODE& xEXTRA_ARG)
   {
     return MYEXPRESSION();
   }
@@ -486,8 +486,6 @@ def make_expression_visitor(filename, expression, text):
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
-        #for i in range(len(types)):
-        #    text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
         has_children = expression in map(extract_type, types)
         args = ', '.join(names)
         if args != '':
@@ -495,7 +493,6 @@ def make_expression_visitor(filename, expression, text):
         rtext = ''
         if has_children:
             rtext = 'bool result = '
-        #text = text + '  %svisit_%s(x%sEXTRA_ARG);\n' % (rtext, node, args)
         text = text + '  %svisit_%s(%s(x)EXTRA_ARG);\n' % (rtext, node, node)
         if has_children:
             text = text + '  if (result) {\n'
@@ -540,10 +537,6 @@ def make_expression_builder(filename, expression, text):
         text = EXPRESSION_BUILDER_NODE_TEXT
         text = re.sub('MYEXPRESSION', expression, text)
         text = re.sub('NODE', node, text)
-        args = arguments
-        if args.strip() != '':
-            args = ', ' + args
-        text = re.sub('ARGUMENTS', args, text)
         vtext = vtext + text
     
         #--- generate code fragments like this
@@ -562,22 +555,23 @@ def make_expression_builder(filename, expression, text):
         if else_text == '':
             else_text = 'else '
         text = text + '{\n'
-        for i in range(len(types)):
-            text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
-        args = ', '.join(names)
-        if args != '':
-            args = ', ' + args
-        text = text + '  result = visit_%s(x%sEXTRA_ARG);\n' % (node, args)
+        #for i in range(len(types)):
+        #    text = text + '  %s %s = %s(x).%s();\n' % (types[i], names[i], node, names[i])
+        #args = ', '.join(names)
+        #if args != '':
+        #    args = ', ' + args
+        text = text + '  result = visit_%s(xEXTRA_ARG);\n' % (node)
         text = text + '  if (!is_finished(result))\n'
         text = text + '  {\n'
         stext = ''
         for i in range(len(types)):
             if stext != '':
                 stext = stext + ', '
-            if types[i] == expression:
-                stext = stext + 'visit(%sEXTRA_ARG)' % names[i]
+            fcall = '%s(x).%s()' % (node, names[i])
+            if extract_type(types[i]) == expression:
+                stext = stext + 'visit(%sEXTRA_ARG)' % fcall
             else:
-                stext = stext + names[i]
+                stext = stext + fcall
         text = text + '    result = %s(%s);\n' % (node, stext)
         text = text + '  }\n'
         text = text + '}\n'

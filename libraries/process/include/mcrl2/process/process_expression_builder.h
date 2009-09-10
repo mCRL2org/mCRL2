@@ -21,7 +21,7 @@ namespace mcrl2 {
 
 namespace process {
 
-//--- start generated text ---//
+//--- start generated visitor ---//
 /// \brief Modifying visitor class for expressions.
 ///
 /// During traversal
@@ -48,142 +48,142 @@ struct process_expression_builder
   virtual ~process_expression_builder()
   { }
               
-  /// \brief Visit action node
+  /// \brief Visit process_action node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_process_action(const process_action& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v, Arg& /* a */)
+  virtual process_expression visit_process_instance(const process_instance& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v, Arg& /* a */)
+  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual process_expression visit_delta(const process_expression& x, Arg& /* a */)
+  virtual process_expression visit_delta(const delta& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual process_expression visit_tau(const process_expression& x, Arg& /* a */)
+  virtual process_expression visit_tau(const tau& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_sum(const sum& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_block(const block& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_hide(const hide& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_rename(const rename& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_comm(const comm& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual process_expression visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_allow(const allow& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_sync(const sync& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual process_expression visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d, Arg& /* a */)
+  virtual process_expression visit_at(const at& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_seq(const seq& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_if_then(const if_then& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_if_then_else(const if_then_else& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_bounded_init(const bounded_init& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_merge(const merge& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_left_merge(const left_merge& x, Arg& /* a */)
   {
     return process_expression();
   }
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right, Arg& /* a */)
+  virtual process_expression visit_choice(const choice& x, Arg& /* a */)
   {
     return process_expression();
   }
@@ -203,32 +203,26 @@ struct process_expression_builder
     process_expression result;
     if (is_process_action(x))
     {
-      lps::action_label l = action(x).label();
-      data::data_expression_list v = action(x).arguments();
-      result = visit_process_action(x, l, v, a);
+      result = visit_process_action(x, a);
       if (!is_finished(result))
       {
-        result = action(l, v);
+        result = process_action(process_action(x).label(), process_action(x).arguments());
       }
     }
     else if (is_process_instance(x))
     {
-      process_identifier pi = process_instance(x).identifier();
-      data::data_expression_list v = process_instance(x).actual_parameters();
-      result = visit_process_instance(x, pi, v, a);
+      result = visit_process_instance(x, a);
       if (!is_finished(result))
       {
-        result = process_instance(pi, v);
+        result = process_instance(process_instance(x).identifier(), process_instance(x).actual_parameters());
       }
     }
     else if (is_process_instance_assignment(x))
     {
-      process_identifier pi = process_instance_assignment(x).identifier();
-      data::assignment_list v = process_instance_assignment(x).assignments();
-      result = visit_process_instance_assignment(x, pi, v, a);
+      result = visit_process_instance_assignment(x, a);
       if (!is_finished(result))
       {
-        result = process_instance_assignment(pi, v);
+        result = process_instance_assignment(process_instance_assignment(x).identifier(), process_instance_assignment(x).assignments());
       }
     }
     else if (is_delta(x))
@@ -249,153 +243,122 @@ struct process_expression_builder
     }
     else if (is_sum(x))
     {
-      data::variable_list v = sum(x).bound_variables();
-      process_expression right = sum(x).operand();
-      result = visit_sum(x, v, right, a);
+      result = visit_sum(x, a);
       if (!is_finished(result))
       {
-        result = sum(v, visit(right, a));
+        result = sum(sum(x).bound_variables(), visit(sum(x).operand(), a));
       }
     }
     else if (is_block(x))
     {
-      core::identifier_string_list s = block(x).block_set();
-      process_expression right = block(x).operand();
-      result = visit_block(x, s, right, a);
+      result = visit_block(x, a);
       if (!is_finished(result))
       {
-        result = block(s, visit(right, a));
+        result = block(block(x).block_set(), visit(block(x).operand(), a));
       }
     }
     else if (is_hide(x))
     {
-      core::identifier_string_list s = hide(x).hide_set();
-      process_expression right = hide(x).operand();
-      result = visit_hide(x, s, right, a);
+      result = visit_hide(x, a);
       if (!is_finished(result))
       {
-        result = hide(s, visit(right, a));
+        result = hide(hide(x).hide_set(), visit(hide(x).operand(), a));
       }
     }
     else if (is_rename(x))
     {
-      rename_expression_list r = rename(x).rename_set();
-      process_expression right = rename(x).operand();
-      result = visit_rename(x, r, right, a);
+      result = visit_rename(x, a);
       if (!is_finished(result))
       {
-        result = rename(r, visit(right, a));
+        result = rename(rename(x).rename_set(), visit(rename(x).operand(), a));
       }
     }
     else if (is_comm(x))
     {
-      communication_expression_list c = comm(x).comm_set();
-      process_expression right = comm(x).operand();
-      result = visit_comm(x, c, right, a);
+      result = visit_comm(x, a);
       if (!is_finished(result))
       {
-        result = comm(c, visit(right, a));
+        result = comm(comm(x).comm_set(), visit(comm(x).operand(), a));
       }
     }
     else if (is_allow(x))
     {
-      action_name_multiset_list s = allow(x).allow_set();
-      process_expression right = allow(x).operand();
-      result = visit_allow(x, s, right, a);
+      result = visit_allow(x, a);
       if (!is_finished(result))
       {
-        result = allow(s, visit(right, a));
+        result = allow(allow(x).allow_set(), visit(allow(x).operand(), a));
       }
     }
     else if (is_sync(x))
     {
-      process_expression left = sync(x).left();
-      process_expression right = sync(x).right();
-      result = visit_sync(x, left, right, a);
+      result = visit_sync(x, a);
       if (!is_finished(result))
       {
-        result = sync(visit(left, a), visit(right, a));
+        result = sync(visit(sync(x).left(), a), visit(sync(x).right(), a));
       }
     }
     else if (is_at(x))
     {
-      process_expression left = at(x).operand();
-      data::data_expression d = at(x).time_stamp();
-      result = visit_at(x, left, d, a);
+      result = visit_at(x, a);
       if (!is_finished(result))
       {
-        result = at(visit(left, a), d);
+        result = at(visit(at(x).operand(), a), at(x).time_stamp());
       }
     }
     else if (is_seq(x))
     {
-      process_expression left = seq(x).left();
-      process_expression right = seq(x).right();
-      result = visit_seq(x, left, right, a);
+      result = visit_seq(x, a);
       if (!is_finished(result))
       {
-        result = seq(visit(left, a), visit(right, a));
+        result = seq(visit(seq(x).left(), a), visit(seq(x).right(), a));
       }
     }
     else if (is_if_then(x))
     {
-      data::data_expression d = if_then(x).condition();
-      process_expression right = if_then(x).then_case();
-      result = visit_if_then(x, d, right, a);
+      result = visit_if_then(x, a);
       if (!is_finished(result))
       {
-        result = if_then(d, visit(right, a));
+        result = if_then(if_then(x).condition(), visit(if_then(x).then_case(), a));
       }
     }
     else if (is_if_then_else(x))
     {
-      data::data_expression d = if_then_else(x).condition();
-      process_expression left = if_then_else(x).then_case();
-      process_expression right = if_then_else(x).else_case();
-      result = visit_if_then_else(x, d, left, right, a);
+      result = visit_if_then_else(x, a);
       if (!is_finished(result))
       {
-        result = if_then_else(d, visit(left, a), visit(right, a));
+        result = if_then_else(if_then_else(x).condition(), visit(if_then_else(x).then_case(), a), visit(if_then_else(x).else_case(), a));
       }
     }
     else if (is_bounded_init(x))
     {
-      process_expression left = bounded_init(x).left();
-      process_expression right = bounded_init(x).right();
-      result = visit_bounded_init(x, left, right, a);
+      result = visit_bounded_init(x, a);
       if (!is_finished(result))
       {
-        result = bounded_init(visit(left, a), visit(right, a));
+        result = bounded_init(visit(bounded_init(x).left(), a), visit(bounded_init(x).right(), a));
       }
     }
     else if (is_merge(x))
     {
-      process_expression left = merge(x).left();
-      process_expression right = merge(x).right();
-      result = visit_merge(x, left, right, a);
+      result = visit_merge(x, a);
       if (!is_finished(result))
       {
-        result = merge(visit(left, a), visit(right, a));
+        result = merge(visit(merge(x).left(), a), visit(merge(x).right(), a));
       }
     }
     else if (is_left_merge(x))
     {
-      process_expression left = left_merge(x).left();
-      process_expression right = left_merge(x).right();
-      result = visit_left_merge(x, left, right, a);
+      result = visit_left_merge(x, a);
       if (!is_finished(result))
       {
-        result = left_merge(visit(left, a), visit(right, a));
+        result = left_merge(visit(left_merge(x).left(), a), visit(left_merge(x).right(), a));
       }
     }
     else if (is_choice(x))
     {
-      process_expression left = choice(x).left();
-      process_expression right = choice(x).right();
-      result = visit_choice(x, left, right, a);
+      result = visit_choice(x, a);
       if (!is_finished(result))
       {
-        result = choice(visit(left, a), visit(right, a));
+        result = choice(visit(choice(x).left(), a), visit(choice(x).right(), a));
       }
     }
     
@@ -429,142 +392,142 @@ struct process_expression_builder<void>
   virtual ~process_expression_builder()
   { }
               
-  /// \brief Visit action node
+  /// \brief Visit process_action node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_action(const process_expression& x, const lps::action_label& l, const data::data_expression_list& v)
+  virtual process_expression visit_process_action(const process_action& x)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance(const process_expression& x, const process_identifier pi, const data::data_expression_list& v)
+  virtual process_expression visit_process_instance(const process_instance& x)
   {
     return process_expression();
   }
               
   /// \brief Visit process_instance_assignment node
   /// \return The result of visiting the node
-  virtual process_expression visit_process_instance_assignment(const process_expression& x, const process_identifier& pi, const data::assignment_list& v)
+  virtual process_expression visit_process_instance_assignment(const process_instance_assignment& x)
   {
     return process_expression();
   }
               
   /// \brief Visit delta node
   /// \return The result of visiting the node
-  virtual process_expression visit_delta(const process_expression& x)
+  virtual process_expression visit_delta(const delta& x)
   {
     return process_expression();
   }
               
   /// \brief Visit tau node
   /// \return The result of visiting the node
-  virtual process_expression visit_tau(const process_expression& x)
+  virtual process_expression visit_tau(const tau& x)
   {
     return process_expression();
   }
               
   /// \brief Visit sum node
   /// \return The result of visiting the node
-  virtual process_expression visit_sum(const process_expression& x, const data::variable_list& v, const process_expression& right)
+  virtual process_expression visit_sum(const sum& x)
   {
     return process_expression();
   }
               
   /// \brief Visit block node
   /// \return The result of visiting the node
-  virtual process_expression visit_block(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+  virtual process_expression visit_block(const block& x)
   {
     return process_expression();
   }
               
   /// \brief Visit hide node
   /// \return The result of visiting the node
-  virtual process_expression visit_hide(const process_expression& x, const core::identifier_string_list& s, const process_expression& right)
+  virtual process_expression visit_hide(const hide& x)
   {
     return process_expression();
   }
               
   /// \brief Visit rename node
   /// \return The result of visiting the node
-  virtual process_expression visit_rename(const process_expression& x, const rename_expression_list& r, const process_expression& right)
+  virtual process_expression visit_rename(const rename& x)
   {
     return process_expression();
   }
               
   /// \brief Visit comm node
   /// \return The result of visiting the node
-  virtual process_expression visit_comm(const process_expression& x, const communication_expression_list& c, const process_expression& right)
+  virtual process_expression visit_comm(const comm& x)
   {
     return process_expression();
   }
               
   /// \brief Visit allow node
   /// \return The result of visiting the node
-  virtual process_expression visit_allow(const process_expression& x, const action_name_multiset_list& s, const process_expression& right)
+  virtual process_expression visit_allow(const allow& x)
   {
     return process_expression();
   }
               
   /// \brief Visit sync node
   /// \return The result of visiting the node
-  virtual process_expression visit_sync(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_sync(const sync& x)
   {
     return process_expression();
   }
               
   /// \brief Visit at node
   /// \return The result of visiting the node
-  virtual process_expression visit_at(const process_expression& x, const process_expression& left, const data::data_expression& d)
+  virtual process_expression visit_at(const at& x)
   {
     return process_expression();
   }
               
   /// \brief Visit seq node
   /// \return The result of visiting the node
-  virtual process_expression visit_seq(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_seq(const seq& x)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then(const process_expression& x, const data::data_expression& d, const process_expression& right)
+  virtual process_expression visit_if_then(const if_then& x)
   {
     return process_expression();
   }
               
   /// \brief Visit if_then_else node
   /// \return The result of visiting the node
-  virtual process_expression visit_if_then_else(const process_expression& x, const data::data_expression& d, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_if_then_else(const if_then_else& x)
   {
     return process_expression();
   }
               
   /// \brief Visit bounded_init node
   /// \return The result of visiting the node
-  virtual process_expression visit_bounded_init(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_bounded_init(const bounded_init& x)
   {
     return process_expression();
   }
               
   /// \brief Visit merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_merge(const merge& x)
   {
     return process_expression();
   }
               
   /// \brief Visit left_merge node
   /// \return The result of visiting the node
-  virtual process_expression visit_left_merge(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_left_merge(const left_merge& x)
   {
     return process_expression();
   }
               
   /// \brief Visit choice node
   /// \return The result of visiting the node
-  virtual process_expression visit_choice(const process_expression& x, const process_expression& left, const process_expression& right)
+  virtual process_expression visit_choice(const choice& x)
   {
     return process_expression();
   }
@@ -582,32 +545,26 @@ struct process_expression_builder<void>
     process_expression result;
     if (is_process_action(x))
     {
-      lps::action_label l = action(x).label();
-      data::data_expression_list v = action(x).arguments();
-      result = visit_process_action(x, l, v);
+      result = visit_process_action(x);
       if (!is_finished(result))
       {
-        result = action(l, v);
+        result = process_action(process_action(x).label(), process_action(x).arguments());
       }
     }
     else if (is_process_instance(x))
     {
-      process_identifier pi = process_instance(x).identifier();
-      data::data_expression_list v = process_instance(x).actual_parameters();
-      result = visit_process_instance(x, pi, v);
+      result = visit_process_instance(x);
       if (!is_finished(result))
       {
-        result = process_instance(pi, v);
+        result = process_instance(process_instance(x).identifier(), process_instance(x).actual_parameters());
       }
     }
     else if (is_process_instance_assignment(x))
     {
-      process_identifier pi = process_instance_assignment(x).identifier();
-      data::assignment_list v = process_instance_assignment(x).assignments();
-      result = visit_process_instance_assignment(x, pi, v);
+      result = visit_process_instance_assignment(x);
       if (!is_finished(result))
       {
-        result = process_instance_assignment(pi, v);
+        result = process_instance_assignment(process_instance_assignment(x).identifier(), process_instance_assignment(x).assignments());
       }
     }
     else if (is_delta(x))
@@ -628,153 +585,122 @@ struct process_expression_builder<void>
     }
     else if (is_sum(x))
     {
-      data::variable_list v = sum(x).bound_variables();
-      process_expression right = sum(x).operand();
-      result = visit_sum(x, v, right);
+      result = visit_sum(x);
       if (!is_finished(result))
       {
-        result = sum(v, visit(right));
+        result = sum(sum(x).bound_variables(), visit(sum(x).operand()));
       }
     }
     else if (is_block(x))
     {
-      core::identifier_string_list s = block(x).block_set();
-      process_expression right = block(x).operand();
-      result = visit_block(x, s, right);
+      result = visit_block(x);
       if (!is_finished(result))
       {
-        result = block(s, visit(right));
+        result = block(block(x).block_set(), visit(block(x).operand()));
       }
     }
     else if (is_hide(x))
     {
-      core::identifier_string_list s = hide(x).hide_set();
-      process_expression right = hide(x).operand();
-      result = visit_hide(x, s, right);
+      result = visit_hide(x);
       if (!is_finished(result))
       {
-        result = hide(s, visit(right));
+        result = hide(hide(x).hide_set(), visit(hide(x).operand()));
       }
     }
     else if (is_rename(x))
     {
-      rename_expression_list r = rename(x).rename_set();
-      process_expression right = rename(x).operand();
-      result = visit_rename(x, r, right);
+      result = visit_rename(x);
       if (!is_finished(result))
       {
-        result = rename(r, visit(right));
+        result = rename(rename(x).rename_set(), visit(rename(x).operand()));
       }
     }
     else if (is_comm(x))
     {
-      communication_expression_list c = comm(x).comm_set();
-      process_expression right = comm(x).operand();
-      result = visit_comm(x, c, right);
+      result = visit_comm(x);
       if (!is_finished(result))
       {
-        result = comm(c, visit(right));
+        result = comm(comm(x).comm_set(), visit(comm(x).operand()));
       }
     }
     else if (is_allow(x))
     {
-      action_name_multiset_list s = allow(x).allow_set();
-      process_expression right = allow(x).operand();
-      result = visit_allow(x, s, right);
+      result = visit_allow(x);
       if (!is_finished(result))
       {
-        result = allow(s, visit(right));
+        result = allow(allow(x).allow_set(), visit(allow(x).operand()));
       }
     }
     else if (is_sync(x))
     {
-      process_expression left = sync(x).left();
-      process_expression right = sync(x).right();
-      result = visit_sync(x, left, right);
+      result = visit_sync(x);
       if (!is_finished(result))
       {
-        result = sync(visit(left), visit(right));
+        result = sync(visit(sync(x).left()), visit(sync(x).right()));
       }
     }
     else if (is_at(x))
     {
-      process_expression left = at(x).operand();
-      data::data_expression d = at(x).time_stamp();
-      result = visit_at(x, left, d);
+      result = visit_at(x);
       if (!is_finished(result))
       {
-        result = at(visit(left), d);
+        result = at(visit(at(x).operand()), at(x).time_stamp());
       }
     }
     else if (is_seq(x))
     {
-      process_expression left = seq(x).left();
-      process_expression right = seq(x).right();
-      result = visit_seq(x, left, right);
+      result = visit_seq(x);
       if (!is_finished(result))
       {
-        result = seq(visit(left), visit(right));
+        result = seq(visit(seq(x).left()), visit(seq(x).right()));
       }
     }
     else if (is_if_then(x))
     {
-      data::data_expression d = if_then(x).condition();
-      process_expression right = if_then(x).then_case();
-      result = visit_if_then(x, d, right);
+      result = visit_if_then(x);
       if (!is_finished(result))
       {
-        result = if_then(d, visit(right));
+        result = if_then(if_then(x).condition(), visit(if_then(x).then_case()));
       }
     }
     else if (is_if_then_else(x))
     {
-      data::data_expression d = if_then_else(x).condition();
-      process_expression left = if_then_else(x).then_case();
-      process_expression right = if_then_else(x).else_case();
-      result = visit_if_then_else(x, d, left, right);
+      result = visit_if_then_else(x);
       if (!is_finished(result))
       {
-        result = if_then_else(d, visit(left), visit(right));
+        result = if_then_else(if_then_else(x).condition(), visit(if_then_else(x).then_case()), visit(if_then_else(x).else_case()));
       }
     }
     else if (is_bounded_init(x))
     {
-      process_expression left = bounded_init(x).left();
-      process_expression right = bounded_init(x).right();
-      result = visit_bounded_init(x, left, right);
+      result = visit_bounded_init(x);
       if (!is_finished(result))
       {
-        result = bounded_init(visit(left), visit(right));
+        result = bounded_init(visit(bounded_init(x).left()), visit(bounded_init(x).right()));
       }
     }
     else if (is_merge(x))
     {
-      process_expression left = merge(x).left();
-      process_expression right = merge(x).right();
-      result = visit_merge(x, left, right);
+      result = visit_merge(x);
       if (!is_finished(result))
       {
-        result = merge(visit(left), visit(right));
+        result = merge(visit(merge(x).left()), visit(merge(x).right()));
       }
     }
     else if (is_left_merge(x))
     {
-      process_expression left = left_merge(x).left();
-      process_expression right = left_merge(x).right();
-      result = visit_left_merge(x, left, right);
+      result = visit_left_merge(x);
       if (!is_finished(result))
       {
-        result = left_merge(visit(left), visit(right));
+        result = left_merge(visit(left_merge(x).left()), visit(left_merge(x).right()));
       }
     }
     else if (is_choice(x))
     {
-      process_expression left = choice(x).left();
-      process_expression right = choice(x).right();
-      result = visit_choice(x, left, right);
+      result = visit_choice(x);
       if (!is_finished(result))
       {
-        result = choice(visit(left), visit(right));
+        result = choice(visit(choice(x).left()), visit(choice(x).right()));
       }
     }
     
@@ -784,7 +710,7 @@ struct process_expression_builder<void>
     return result;
   }
 };
-//--- end generated text ---//
+//--- end generated visitor ---//
 
 } // namespace process
 
