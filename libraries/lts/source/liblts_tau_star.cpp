@@ -8,6 +8,7 @@
 //
 /// \file liblts_tau_star.cpp
 
+#include <cstdlib> // free
 #include "boost/scoped_array.hpp"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
