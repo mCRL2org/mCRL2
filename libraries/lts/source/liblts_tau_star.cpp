@@ -98,8 +98,6 @@ void p_lts::tau_star_reduce()
       t++;
     }
     new_trans_lut[state+1] = ntransitions;
-
-    free(trans_lut);
   }
 
   using namespace mcrl2::lts::detail;
@@ -148,6 +146,9 @@ void p_lts::tau_star_reduce()
       }
     }
   }
+
+  free(trans_lut);
+
   boost::scoped_array< unsigned int > state_map(new unsigned int[nstates]);
   unsigned int new_nstates = 0;
   for (unsigned int i=0; i < nstates; i++)
