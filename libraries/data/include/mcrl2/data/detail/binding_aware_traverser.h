@@ -104,8 +104,6 @@ namespace mcrl2 {
                               m_bound(bound_by_context.begin(), bound_by_context.end())
           { }
 
-          virtual ~binding_aware_traverser()
-          { }
       };
 
       template < typename Derived, typename AdaptablePredicate >
