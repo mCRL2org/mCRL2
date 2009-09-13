@@ -122,6 +122,47 @@ namespace mcrl2 {
       return result;
     }
 
+    /// \brief Determines whether a boolean expression is in standard form.
+    /// \param e a boolean expression
+    /// \return true iff e is in standard form.
+    inline
+    bool is_standard_form(boolean_expression const& e)
+    {
+      typedef core::term_traits<boolean_expression> tr;
+      if(tr::is_true(e) || tr::is_false(e))
+      {
+        return true;
+      }
+      else if(tr::is_and(e))
+      {
+        atermpp::set<boolean_expression> arguments(split_and(e));
+        for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+        {
+          if(tr::is_or(*i) || tr::is_imp(*i))
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+      else if(tr::is_or(e))
+      {
+        atermpp::set<boolean_expression> arguments(split_or(e));
+        for(atermpp::set<boolean_expression>::const_iterator i = arguments.begin(); i != arguments.end(); ++i)
+        {
+          if(tr::is_and(*i) || tr::is_imp(*i))
+          {
+            return false;
+          }
+        }
+        return true;
+      }   
+      else
+      {
+        return true;
+      }
+    }
+
     /// \brief Determines whether a BES is in standard form
     /// \param bes a boolean equation system.
     /// \return true iff bes is in standard form.

@@ -13,6 +13,8 @@ project libraries/pbes/example
 
 exe paritygame   : paritygame.cpp : ;
 exe bes_bisimulation : bes_bisimulation.cpp : ;
+exe bes2besformat : bes2besformat.cpp : ;
+exe bes2txt      : bes2txt.cpp : ;
 exe bisimulation : bisimulation.cpp : ;
 exe lps2pbes     : lps2pbes.cpp : ;
 exe bessolve     : bessolve.cpp : ;
