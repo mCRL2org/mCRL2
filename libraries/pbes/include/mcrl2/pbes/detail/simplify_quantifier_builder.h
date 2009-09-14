@@ -37,11 +37,11 @@ namespace detail {
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
-    DataRewriter& m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
     
     /// \brief Store the variables of the lhs and rhs of any application of and/or for later reference
-    variable_sequence_type lvar;
-    variable_sequence_type rvar;
+    mutable variable_sequence_type lvar;
+    mutable variable_sequence_type rvar;
 
     /// \brief A binary function with the side effect that the dependent variables of the arguments are stored
     template <typename BinaryFunction>
@@ -49,9 +49,9 @@ namespace detail {
     {
       variable_sequence_type& lvar;
       variable_sequence_type& rvar;
-      const BinaryFunction& op;
+      BinaryFunction& op;
       
-      store_variables_function(variable_sequence_type& l, variable_sequence_type& r, const BinaryFunction& o)
+      store_variables_function(variable_sequence_type& l, variable_sequence_type& r, BinaryFunction& o)
         : lvar(l), rvar(r), op(o)
       {}
       
@@ -90,7 +90,7 @@ namespace detail {
 
     /// \brief Constructor.
     /// \param rewr A data rewriter
-    simplify_quantifier_builder(DataRewriter& rewr)
+    simplify_quantifier_builder(const DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
 

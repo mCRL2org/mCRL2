@@ -78,7 +78,7 @@ namespace pbes_system {
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         detail::simplify_rewrite_builder<Term, DataRewriter> r(m_rewriter);
         return r(x);
@@ -89,7 +89,7 @@ namespace pbes_system {
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
         detail::simplify_rewrite_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
         return r(x, sigma);
@@ -103,7 +103,7 @@ namespace pbes_system {
     protected:
 
       /// \brief The data rewriter
-      DataRewriter m_rewriter;
+      const DataRewriter& m_rewriter;
 
     public:
       /// \brief The term type
@@ -121,7 +121,7 @@ namespace pbes_system {
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         detail::simplify_quantifier_builder<Term, DataRewriter> r(m_rewriter);
         return r(x);
@@ -132,7 +132,7 @@ namespace pbes_system {
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
         detail::simplify_quantifier_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
         return r(x, sigma);

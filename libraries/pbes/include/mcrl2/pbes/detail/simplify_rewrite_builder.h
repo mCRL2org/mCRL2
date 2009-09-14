@@ -36,7 +36,7 @@ namespace detail {
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
-    DataRewriter& m_data_rewriter;
+    const DataRewriter& m_data_rewriter;
 
     /// \brief Is called in the case rewriting is done with a substitution function.
     /// \param d A data term
@@ -60,7 +60,7 @@ namespace detail {
 
     /// \brief Constructor.
     /// \param rewr A data rewriter
-    simplify_rewrite_builder(DataRewriter& rewr)
+    simplify_rewrite_builder(const DataRewriter& rewr)
       : m_data_rewriter(rewr)
     { }
 
