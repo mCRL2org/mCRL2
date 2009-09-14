@@ -235,13 +235,27 @@ namespace mcrl2 {
 
               if (head.name() == "exists")
               {
-                lambda argument(reconstruct(*expression.arguments().begin()));
+                data_expression argument_expression(reconstruct(*expression.arguments().begin()));
+                if(!argument_expression.is_abstraction())
+                {
+                  throw mcrl2::runtime_error("Unexpected expression occurred in transforming existential quantification from rewriter format. "
+                                             "This is caused by the lack of proper support for abstraction in the rewriters.");
+                }
+
+                lambda argument(argument_expression);
 
                 return exists(argument.variables(), argument.body());
               }
               else if (head.name() == "forall")
               {
-                lambda argument(reconstruct(*expression.arguments().begin()));
+                data_expression argument_expression(reconstruct(*expression.arguments().begin()));
+                if(!argument_expression.is_abstraction())
+                {
+                  throw mcrl2::runtime_error("Unexpected expression occurred in transforming universal quantification from rewriter format. "
+                                             "This is caused by the lack of proper support for abstraction in the rewriters.");
+                }
+
+                lambda argument(argument_expression);
 
                 return forall(argument.variables(), argument.body());
               }
