@@ -43,6 +43,7 @@ bool lts::is_deterministic()
     {
       if ( seen[transitions[t].label] )
       {
+        free(trans_lut);
         return false;
       }
       seen[transitions[t].label] = true;
