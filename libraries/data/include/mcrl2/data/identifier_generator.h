@@ -14,6 +14,7 @@
 
 #include <set>
 #include <string>
+#include <sstream>
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/find.h"
 #include "mcrl2/data/detail/container_utility.h"
@@ -26,40 +27,32 @@ namespace data {
 class number_postfix_generator
 {
   protected:
-
     /// \brief A prefix.
-    std::string            m_current;
+    std::string m_prefix;
 
     /// \brief An index.
-    std::string::size_type m_base;
+    unsigned int m_index;
   
   public:
+    /// \brief Constructor.
+    number_postfix_generator()
+      : m_prefix("x"), m_index(0)
+    {}
 
     /// \brief Constructor.
     /// \param prefix A string
     /// \param index A positive integer
-    number_postfix_generator(const std::string& prefix = "")
-     : m_current(prefix), m_base(m_current.size())
+    number_postfix_generator(const std::string& prefix, unsigned int index = 0)
+     : m_prefix(prefix), m_index(index)
     {}
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
     /// \return A fresh identifier.
     core::identifier_string operator()()
     {
-      for (std::string::reverse_iterator i = m_current.rbegin(), j = m_current.rbegin() + (m_current.size() - m_base); i != j; ++i) {
-        if (*i < '9') {
-          ++(*i);
-
-          return core::identifier_string(m_current);
-        }
-        else {
-          *i = '0';
-        }
-      }
-
-      m_current.insert(m_base, 1, '1');
-
-      return core::identifier_string(m_current);
+      std::ostringstream out;
+      out << m_prefix << m_index++;
+      return core::identifier_string(out.str());
     }
 };
 
