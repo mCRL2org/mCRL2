@@ -109,6 +109,7 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
     to << text << std::endl;
 #endif
   }
+  core::garbage_collect();
 }
 
 void test_parity_game_generator()
@@ -271,18 +272,16 @@ void test_parity_game_generator2()
       int priority = pgg.get_priority(v);
       printf("%6d: player=%d priority=%d\n", v, and_op, priority);
   }
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_parity_game_generator();
-  core::garbage_collect();
-  //test_parity_game_generator2();
-  core::garbage_collect();
   test_bes_examples();
-  core::garbage_collect();
+  //test_parity_game_generator();
+  //test_parity_game_generator2();
 
   return 0;
 }
