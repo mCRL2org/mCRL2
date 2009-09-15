@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <functional>
 
 StaticGraph::StaticGraph()
     : successors_(NULL), predecessors_(NULL),

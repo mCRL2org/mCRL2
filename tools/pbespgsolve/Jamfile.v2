@@ -22,13 +22,15 @@ SOURCES = Compatibility.cc
           logging.c
         ;
 
-lib pg : $(SOURCES) : <use>/site-config//boost ;
-obj timing.o : timing.c : ;
-obj timing.o : timing_msvc.c : <os>windows ;
+lib pg
+  : $(SOURCES)
+  : <toolset>gcc:<source>timing.c
+    <toolset>msvc:<source>timing_msvc.c
+    <use>/site-config//boost
+  ;
 
 tool pbespgsolve
    : pbespgsolve.cpp
      pg/<link>static
-     timing.o
    : <status>experimental
    ;
