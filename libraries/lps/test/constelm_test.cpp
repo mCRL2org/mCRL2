@@ -181,63 +181,19 @@ const std::string expected_6b = "process_parameter_names = s3_P";
 
 // % Test Case 7 -- Free Variables
 // %
-// % Process parameters s3, j and i are marked constant and all occurrences are
-// % substituted.
-// %
-// % If \"--no-condition\" is used only j is marked constant and all occurrences of
-// % are substituted.
-//
-// act action :Nat;
-//
-// proc P(i,j: Nat) = (i > 5) -> action(i). P(i+1,j) +
-//                    (i == 5) -> action(j). Q(j);
-//      Q(i: Nat)   = action(i). Q(i);
-//
-// init P(0,0);
-//
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// %% NOTE:                                                  %%
-// %% =====                                                  %%
-// %%                                                        %%
-// %% Use: mcrl22lps --no-cluster $DIR$/case7.mcrl2          %%
-// %%                                                        %%
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// %%                                                        %%
-// %% var  freevar,freevar0: Nat;                            %%
-// %% proc P(s3: Pos, j,i: Nat) =                            %%
-// %%        (s3 == 2) ->                                    %%
-// %%          action(i) .                                   %%
-// %%          P(s3 := 2, j := freevar0)                     %%
-// %%      + (s3 == 1 && 5 < i ) ->                          %%
-// %%          action(i) .                                   %%
-// %%          P(s3 := 1, i := i + 1)                        %%
-// %%      + (s3 == 1 && i == 5) ->                          %%
-// %%          action(j) .                                   %%
-// %%          P(s3 := 2, j := freevar, i := j);             %%
-// %%                                                        %%
-// %% init P(s3 := 1, j := 0, i := 0);                       %%
-// %%                                                        %%
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 std::string case_7 =
-  "act  action: Nat;                 \n"
-  "                                  \n"
-  "var  dc,dc1: Nat;                 \n"
-  "proc P(s3_P: Pos, j_P,i_P: Nat) = \n"
-  "       (s3_P == 2) ->             \n"
-  "         action(i_P) .            \n"
-  "         P(2, dc1, i_P)           \n"
-  "     + (s3_P == 1 && i_P == 5) -> \n"
-  "         action(j_P) .            \n"
-  "         P(2, dc, j_P)            \n"
-  "     + (s3_P == 1 && i_P > 5) ->  \n"
-  "         action(i_P) .            \n"
-  "         P(1, j_P, i_P + 1);      \n"
-  "                                  \n"
-  "init P(1, 0, 0);                  \n"
+  "glob  v: Nat ;                     \n"
+  "                                   \n"
+  "act a: Nat ;                       \n"
+  "                                   \n"
+  "proc P(i, j: Nat) =                \n"
+  "       (i == j) -> a(i) . P(1, 1)  \n"
+  "       ;                           \n"
+  "                                   \n"
+  "init P(i = 1, j = v) ;             \n"
   ;
+const std::string expected_7 = "process_parameter_names = j";
 
 // % Test Case 8 -- Free Variables                                                 
 // %                                                                               
@@ -299,6 +255,7 @@ std::string case_8 =
   "var  dc: Nat;                     \n"
   "init P(1, 0, dc);                 \n"
   ;
+const std::string expected_8 = "process_parameter_names = ";
 
 // examples/games/domineering.mcrl2
 std::string case_9 =
@@ -457,6 +414,8 @@ void test_constelm()
   test_constelm("case_5" , case_5,  expected_5);
   test_constelm("case_6a", case_6a, expected_6a);
   test_constelm("case_6b", case_6b, expected_6b);
+  test_constelm("case_7" , case_7,  expected_7);
+  // test_constelm("case_8" , case_8,  expected_8);
   test_constelm("case_9" , case_9,  expected_9);
   test_constelm("case_10" , case_10,  expected_10);
 }

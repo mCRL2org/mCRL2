@@ -184,7 +184,17 @@ std::string CASE11 =
   "         P(s3_P = 1, y_P = dc0);     \n"
   "init P(1, dc);                       \n"
   ;
- 
+
+std::string CASE12 =
+  " act a: Nat ;                      \n"
+  " glob  v: Nat ;                    \n"
+  " proc P(i, j: Nat) =               \n"
+  "        (i == j) -> a(i) . P(1, 1) \n"
+  "        ;                          \n"
+  "                                   \n"
+  " init P(i = 1, j = v) ;            \n"
+  ;
+
 void test_process(std::string text)
 {
   process_specification spec = parse_process_specification(text);
@@ -205,7 +215,8 @@ void test_linear(const std::string& text, bool result = true)
     std::cerr << "--- Failed linearity test ---" << std::endl;  
     std::cerr << text << std::endl;
   }
-  BOOST_CHECK(is_linear(p) == result);
+  bool verbose = true;
+  BOOST_CHECK(is_linear(p, verbose) == result);
   core::garbage_collect();
 }
 
@@ -227,6 +238,7 @@ int test_main(int argc, char* argv[])
   test_linear(CASE9);
   test_linear(CASE10);
   test_linear(CASE11);
+  test_linear(CASE12);
   
   return 0;
 }

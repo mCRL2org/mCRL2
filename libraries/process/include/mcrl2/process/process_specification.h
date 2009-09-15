@@ -220,20 +220,30 @@ namespace process {
   /// \param p A process specification
   /// \return True if the process specification is linear.
   inline
-  bool is_linear(const process_specification& p)
+  bool is_linear(const process_specification& p, bool verbose = false)
   {
     if (p.equations().size() != 1)
     {
+      if (verbose)
+      {
+        std::clog << "The number of equations is not equal to 1" << std::endl;
+      }
       return false;
     }
     detail::linear_process_expression_visitor visitor;
-    if (!visitor.is_linear(*p.equations().begin()))
     {
-      return false;
-    }
-    if (!is_process_instance(p.init()))
-    {
-      return false;
+      if (!visitor.is_linear(*p.equations().begin(), verbose))
+      {
+        return false;
+      }
+      if (!is_process_instance(p.init()) && ! (is_process_instance_assignment(p.init())))
+      {
+        if (verbose)
+        {
+          std::clog << "The initial process " << core::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
+        }
+        return false;
+      }
     }
     return true;
   }

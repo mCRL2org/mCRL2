@@ -30,7 +30,13 @@ namespace detail {
 
     /// \brief Exception that is thrown by linear_process_expression_visitor.
     struct non_linear_process
-    {};
+    {
+      std::string msg;
+        
+      non_linear_process(const std::string& s)
+        : msg(s)
+      {}
+    };
 
     /// \brief These names can be used as return types of the visit functions, to make
     /// the code more readible.
@@ -165,7 +171,7 @@ namespace detail {
     {
       if (!check_process_instance_assignment(x))
       {
-        throw non_linear_process();
+        throw non_linear_process(core::pp(x) + " is not a process instance assignment");
       }
       return continue_recursion;
     }
@@ -179,7 +185,7 @@ namespace detail {
     {
       if (!is_alternative(x.operand()))
       {
-        throw non_linear_process();
+        throw non_linear_process(core::pp(x.operand()) + " is not an alternative expression");
       }
       return continue_recursion;
     }
@@ -191,7 +197,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_block(const block& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("block expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -202,7 +208,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_hide(const hide& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("hide expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -213,7 +219,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_rename(const rename& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("rename expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -224,7 +230,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_comm(const comm& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("comm expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -235,7 +241,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_allow(const allow& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("allow expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -248,7 +254,14 @@ namespace detail {
     {
       if (!is_multiaction(x.left()) || !is_multiaction(x.right()))
       {
-        throw non_linear_process();
+        if (!is_multiaction(x.left()))
+        {
+          throw non_linear_process(core::pp(x.left()) + " is not a multi action");
+        }
+        else
+        {
+          throw non_linear_process(core::pp(x.right()) + " is not a multi action");
+        }
       }
       return continue_recursion;
     }
@@ -262,7 +275,7 @@ namespace detail {
     {
       if (!is_multiaction(x.operand()) && !is_delta(x.operand()))
       {
-        throw non_linear_process();
+        throw non_linear_process(core::pp(x.operand()) + " is not a multi action and not a deadlock");
       }
       return continue_recursion;
     }
@@ -276,14 +289,14 @@ namespace detail {
     {
       if (!is_timed_multiaction(x.left()) || !is_process(x.right()))
       {
-        throw non_linear_process();
+        throw non_linear_process(core::pp(x.left()) + " is not a timed multi action and not a process");
       }
       if (is_process_instance(x.right()))
       {
         process_instance q = x.right();
         if (q.identifier() != eqn.identifier())
         {
-          throw non_linear_process();
+          throw non_linear_process(core::pp(q) + " has an unexpected identifier");
         }
       }
       else if (is_process_instance_assignment(x.right()))
@@ -291,7 +304,7 @@ namespace detail {
         process_instance_assignment q = x.right();
         if (q.identifier() != eqn.identifier())
         {
-          throw non_linear_process();
+          throw non_linear_process(core::pp(q) + " has an unexpected identifier");
         }
       }
       else
@@ -311,7 +324,7 @@ namespace detail {
     {
       if (!is_action_prefix(x.then_case()) && !is_timed_deadlock(x.then_case()))
       {
-        throw non_linear_process();
+        throw non_linear_process(core::pp(x) + " is not an action prefix and not a timed deadlock");
       }
       return continue_recursion;
     }
@@ -324,7 +337,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_if_then_else(const if_then_else& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("if then else expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -335,7 +348,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_bounded_init(const bounded_init& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("bounded init expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -346,7 +359,7 @@ namespace detail {
     /// \param right A process expression
     bool visit_merge(const merge& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("merge expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
@@ -357,22 +370,26 @@ namespace detail {
     /// \param right A process expression
     bool visit_left_merge(const left_merge& x)
     {
-      throw non_linear_process();
+      throw non_linear_process("left merge expression " + core::pp(x) + " encountered");
       return continue_recursion;
     }
 
     /// \brief Returns true if the process equation e is linear.
     /// \param e A process equation
     /// \return True if the process equation e is linear.
-    bool is_linear(const process_equation& e)
+    bool is_linear(const process_equation& e, bool verbose = false)
     {
       eqn = e;
       try
       {
         visit(e.expression());
       }
-      catch(non_linear_process&)
+      catch(non_linear_process& p)
       {
+        if (verbose)
+        {
+          std::clog << p.msg << std::endl;
+        }
         return false;
       }
       return true;
