@@ -347,11 +347,15 @@ rule platform-configuration ( properties * ) {
   }
 
   if <toolset>gcc in $(properties) { # GCC
-    requirements += <cflags>-std=c99 <cxxflags>-std=c++98 <cxxflags>-pipe <cxxflags>-fno-operator-names
+    if ! <os>NT in $(properties) {
+      standard = <cxxflags>-std=c++98 ;
+    }
+
+    requirements += <cflags>-std=c99 $(standard) <cxxflags>-pipe <cxxflags>-fno-operator-names
                     <cxxflags>-Woverloaded-virtual <cxxflags>-Wstrict-null-sentinel <cxxflags>-pipe ;
 
     if ! $(BOOST_INCLUDE_PATH) {
-      requirements += <cflags>-std=c99 <cxxflags>-std=c++98 ;
+      requirements += <cflags>-std=c99 $(standard) ;
     }
 
     if <variant>debug in $(properties) {
