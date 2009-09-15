@@ -41,7 +41,7 @@
 In process specifications and in parameterised boolean equation systems (PBESs), it is
 possible to use free variables. An example is the following:
 \begin{mcrl2}
-act  & a;\\
+act  & a:\Nat;\\
 glob & x:\Nat;\\
 proc & P=a(x).P;\\
 init & P;
@@ -49,13 +49,13 @@ init & P;
 This represents a whole class of processes, namely for every value of
 $x$ this process has a different value. The keyword ${\bf glob}$ stands
 for {\it global variable}.
-In each specification the keyword {\bf glob} can 
+In each specification the keyword {\bf glob} can
 be used once any arbitrary of times. The scope of the variables
 mentioned in a {\bf glob} declaration is the global file. All {\bf glob}
 declarations are grouped together. The names of the variables cannot coincide with other
-declared functions, processes, actions, variables (both in equations and 
-in sum operators) and process and PBES parameters. 
-Global variables can occur in 
+declared functions, processes, actions, variables (both in equations and
+in sum operators) and process and PBES parameters.
+Global variables can occur in
 process equations, in parameterised fixed point formulas and in {\bf init}
 sections.
 
@@ -63,14 +63,14 @@ Such global variables can be used in the common mathematical way. Consider
 for instance the polynomial:
 \[ax^2+bx+c=0.\]
 There are four variables in this equation, namely $a$, $b$, $c$ and $x$.
-The use of the variables $a$, $b$ and $c$ allow to study this polynomial in 
+The use of the variables $a$, $b$ and $c$ allow to study this polynomial in
 a far more general setting than when these variables would have concrete values.
 
 In some cases, the concrete values for global variables do not have influence
 on the process. In such a case instantiating the global variables to various concrete
 values will mean that the process has the same behaviour modulo strong bisimulation,
 or the same solution as a parameterised boolean equation system. In this case
-we call the process or PBES {\it global variable insensitive}. 
+we call the process or PBES {\it global variable insensitive}.
 An example is the following linearisation of the buffer
 \begin{mcrl2}
 sort & D;\\
@@ -80,17 +80,17 @@ proc& P(b:\Bool,d\ap D)=\sum_{e\ap D} b\rightarrow {\it read}(e){\it \cdot}P(\fa
 init& P(\true,{\it dummy}_2);
 \end{mcrl2}
 The idea is that if the parameter $b$ is $\true$, the value of the second parameter
-is not relevant anymore. Therefore, it can be set to any arbitrary value, which is 
+is not relevant anymore. Therefore, it can be set to any arbitrary value, which is
 indicated by the use of ${\it dummy}_1$ and ${\it dummy}_2$. As this specification is
 global variable insensitive, concrete values can be chosen for these global variables
-when this would be fruitful. 
+when this would be fruitful.
 
 The tool {\tt mcrl22lps} generates linear processes with global variables. It guarantees
 that the resulting specification is global variable insensitive. Certain transformation
-tools, like {\tt lpsconstelm} and {\tt lps2pbes} yield global variable insensitive output, 
-provided the input in global variable insensitive. In case systems are not global variable 
+tools, like {\tt lpsconstelm} and {\tt lps2pbes} yield global variable insensitive output,
+provided the input in global variable insensitive. In case systems are not global variable
 insensitive the output of these tools can be garbage. It is the responsibility of those who
 apply the tools that the tools are used in a proper way. It is likely that most tools
-leave global variables untouched, unless a switch indicates that global variable 
+leave global variables untouched, unless a switch indicates that global variable
 insensitivity can be used.
 \end{document}
