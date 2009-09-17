@@ -1,0 +1,9 @@
+project toolset/lts2lps ;
+
+tool lts2lps
+       : lts2lps.cpp
+         /libraries//lps
+         /libraries//data
+         /libraries//lts
+       :<status>experimental 
+       ;
