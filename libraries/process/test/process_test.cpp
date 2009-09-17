@@ -185,6 +185,7 @@ std::string CASE11 =
   "init P(1, dc);                       \n"
   ;
 
+// test case containing a global variable
 std::string CASE12 =
   " act a: Nat ;                      \n"
   " glob  v: Nat ;                    \n"
@@ -193,6 +194,29 @@ std::string CASE12 =
   "        ;                          \n"
   "                                   \n"
   " init P(i = 1, j = v) ;            \n"
+  ;
+
+// this process is considered to be NOT linear
+std::string CASE13a =
+  "proc X = tau; \n"
+  "              \n"
+  "init delta;   \n"
+  ;
+
+// this process is considered to be NOT linear
+std::string CASE13b =
+  "proc X = delta; \n"
+  "                \n"
+  "init X;         \n"
+  ;
+
+// this process is considered to be NOT linear
+std::string CASE14 =
+  "act a;        \n"
+  "              \n"
+  "proc X = tau; \n"
+  "              \n"
+  "init a;       \n"
   ;
 
 void test_process(std::string text)
@@ -239,6 +263,9 @@ int test_main(int argc, char* argv[])
   test_linear(CASE10);
   test_linear(CASE11);
   test_linear(CASE12);
+  test_linear(CASE13a, false);
+  test_linear(CASE13b);
+  test_linear(CASE14, false);
   
   return 0;
 }
