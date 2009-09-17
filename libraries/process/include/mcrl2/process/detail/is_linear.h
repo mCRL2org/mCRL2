@@ -25,6 +25,7 @@ namespace detail {
     /// \param eq A process equation
     /// \param a A process instance assignment
     /// \return True if the process assignment a matches with the process equation eq.
+    inline
     bool check_process_instance_assignment(const process_equation& eq, const process_instance_assignment& a)
     {
       if (a.identifier() != eq.identifier())
@@ -49,6 +50,7 @@ namespace detail {
     /// \param eq A process equation
     /// \param a A process instance
     /// \return True if the process assignment a matches with the process equation eq.
+    inline
     bool check_process_instance(const process_equation& eq, const process_instance& init)
     {
       if (eq.identifier() != init.identifier())
