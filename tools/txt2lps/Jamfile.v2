@@ -1,0 +1,7 @@
+project toolset/txt2lps ;
+
+tool txt2lps
+       : txt2lps.cpp
+         /libraries//lps
+       :
+       ;
