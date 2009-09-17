@@ -14,6 +14,7 @@
 
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/process_expression_visitor.h"
+#include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2 {
 
@@ -45,34 +46,6 @@ namespace detail {
       stop_recursion = false,
       continue_recursion = true
     };
-
-    /// \brief Returns true if the process assignment a matches with the
-    /// process equation eqn.
-    /// \param a A process assignment
-    /// \return True if the process assignment a matches with the process equation eqn.
-    bool check_process_instance_assignment(const process_instance_assignment& a) const
-    {
-      if (a.identifier() != eqn.identifier())
-      {
-        return false;
-      }
-      data::assignment_list a1 = a.assignments();
-      data::variable_list v = eqn.formal_parameters();
-      if (a1.size() != v.size())
-      {
-        return false;
-      }
-      data::assignment_list::iterator i;
-      data::variable_list::iterator j;
-      for (i = a1.begin(), j = v.begin(); i != a1.end(); i++, j++)
-      {
-        if (i->lhs() != *j)
-        {
-          return false;
-        }
-      }
-      return true;
-    }
 
     /// \brief Returns true if the argument is a process instance
     /// \param x A process expression
@@ -162,6 +135,19 @@ namespace detail {
           ;
     }
 
+    // TODO: check if this function is needed
+    /// \brief Visit process_instance node
+    /// \return The result of visiting the node
+    /// \param x A process instance
+    bool visit_process_instance(const process_instance& x)
+    {
+      if (!detail::check_process_instance(eqn, x))
+      {
+        throw non_linear_process(core::pp(x) + " is not a valid process instance");
+      }
+      return continue_recursion;
+    }
+
     /// \brief Visit process_instance_assignment node
     /// \return The result of visiting the node
     /// \param x A process expression
@@ -169,9 +155,9 @@ namespace detail {
     /// \param v A sequence of assignments to data variables
     bool visit_process_instance_assignment(const process_instance_assignment& x)
     {
-      if (!check_process_instance_assignment(x))
+      if (!detail::check_process_instance_assignment(eqn, x))
       {
-        throw non_linear_process(core::pp(x) + " is not a process instance assignment");
+        throw non_linear_process(core::pp(x) + " is not a valid process instance assignment");
       }
       return continue_recursion;
     }

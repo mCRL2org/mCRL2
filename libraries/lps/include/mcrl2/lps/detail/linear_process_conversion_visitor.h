@@ -18,6 +18,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/process_expression_visitor.h"
+#include "mcrl2/process/detail/is_linear.h"
 
 namespace mcrl2 {
 
@@ -64,56 +65,6 @@ namespace detail {
 
     /// \brief Contains intermediary results.
     lps::deadlock_summand m_deadlock_summand;
-
-    /// \brief Checks if a process_equation matches with a process instance
-    bool match_initial_process(const process_equation& eq, const process_instance& init) const
-    {
-      if (eq.identifier() != init.identifier())
-      {
-        return false;
-      }
-      data::variable_list v = eq.formal_parameters();
-      data::data_expression_list e = init.actual_parameters();
-      if (v.size() != e.size())
-      {
-        return false;
-      }
-      data::variable_list::const_iterator i = v.begin();
-      data::data_expression_list::const_iterator j = e.begin();
-      for (; i != v.end(); ++i, ++j)
-      {
-        if (i->sort() != j->sort())
-        {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /// \brief Checks if a process_equation matches with a process instance assignment
-    bool match_initial_process(const process_equation& eq, const process_instance_assignment& init) const
-    {
-      if (eq.identifier() != init.identifier())
-      {
-        return false;
-      }
-      data::variable_list v = eq.formal_parameters();
-      data::assignment_list a = init.assignments();
-      if (v.size() != a.size())
-      {
-        return false;
-      }
-      data::variable_list::const_iterator i = v.begin();
-      data::assignment_list::const_iterator j = a.begin();
-      for (; i != v.end(); ++i, ++j)
-      {
-        if (i->sort() != j->lhs().sort())
-        {
-          return false;
-        }
-      }
-      return true;
-    }
 
     /// \brief Exception that is thrown to denote that the process is not linear.
     struct non_linear_process
@@ -315,7 +266,7 @@ namespace detail {
       {
         process_instance p = x.right();
         // Check 2) The process equation and and the process instance must match
-        if (!match_initial_process(m_equation, p))
+        if (!detail::check_process_instance(m_equation, p))
         {
           std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
@@ -326,7 +277,7 @@ namespace detail {
       {
         process_instance_assignment p = x.right();
         // Check 2) The process equation and and the process instance assignment must match
-        if (!match_initial_process(m_equation, p))
+        if (!detail::check_process_instance_assignment(m_equation, p))
         {
           std::clog << "seq right hand side: " << core::pp(x.right()) << std::endl;
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: seq expression encountered that does not match the process equation");
@@ -456,7 +407,7 @@ namespace detail {
       if (is_process_instance(p.init()))
       {
         process_instance init = p.init();
-        if (!match_initial_process(m_equation, init))
+        if (!check_process_instance(m_equation, init))
         {
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process does not match the process equation");
         }
@@ -465,7 +416,7 @@ namespace detail {
       else if (is_process_instance_assignment(p.init()))
       {
         process_instance_assignment init = p.init();
-        if (!match_initial_process(m_equation, init))
+        if (!check_process_instance_assignment(m_equation, init))
         {
           throw mcrl2::runtime_error("Error in linear_process_conversion_visitor::convert: the initial process does not match the process equation");
         }
