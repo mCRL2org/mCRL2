@@ -66,7 +66,7 @@ class untime_tool: public squadt_tool< input_output_tool >
     /** \brief queries the user via SQuADT if needed to obtain configuration information */
     void user_interactive_configuration(tipi::configuration& configuration)
     {
-      if (!configuration.output_exists("main-input")) {
+      if (!configuration.output_exists("main-output")) {
         configuration.add_output("main-output",
                  tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
       }
