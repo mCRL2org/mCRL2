@@ -21,14 +21,15 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
-using mcrl2::utilities::tools::input_output_tool;
+using namespace mcrl2::utilities::tools;
 
-class txt2lps_tool : public input_output_tool
+class txt2lps_tool : public squadt_tool< input_output_tool >
 {
-  typedef input_output_tool super;
+  typedef squadt_tool< input_output_tool > super;
 
   public:
 
@@ -61,6 +62,46 @@ class txt2lps_tool : public input_output_tool
       spec.save(output_filename());
       return true;
     }
+
+//Squadt connectivity
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+  protected:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities& capabilities) const
+    {
+      // The tool has only one main input combination
+      capabilities.add_input_configuration("main-input",
+                 tipi::mime_type("txt", tipi::mime_type::application), tipi::tool::category::transformation);
+    }
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration& configuration)
+    {
+      if (!configuration.output_exists("main-output")) {
+        configuration.add_output("main-output",
+                 tipi::mime_type("lps", tipi::mime_type::application), configuration.get_output_name(".lps"));
+      }
+    }
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const& configuration) const
+    {
+      // Check if everything present
+      return (configuration.input_exists("main-input") &&
+              configuration.output_exists("main-output"));
+    }
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration& configuration)
+    {
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(configuration);
+
+      return run() == 0;
+    }
+#endif //ENABLE_SQUADT_CONNECTIVITY
+
 };
 
 int main(int argc, char** argv)
