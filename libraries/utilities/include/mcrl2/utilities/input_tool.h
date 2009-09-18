@@ -12,6 +12,7 @@
 #ifndef MCRL2_UTILITIES_INPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_TOOL_H
 
+#include <sstream>
 #include "mcrl2/utilities/tool.h"
 
 namespace mcrl2 {
@@ -55,6 +56,21 @@ namespace tools {
         }
       }
 
+      /// \brief Returns a message about the input filename
+      std::string input_file_message() const
+      {
+        std::ostringstream out;
+        out << "Input read from " << ((m_input_filename.empty())? "standard input" : ("'" + m_input_filename + "'"));
+        return out.str();
+      }
+
+      /// \brief Adds a message about input files to the given description.
+      std::string make_tool_description(const std::string& description) const
+      {
+        return description +
+          "\nIf INFILE is not present, standard input is used.";
+      }
+
     public:
       /// \brief Constructor.
       input_tool(const std::string& name,
@@ -77,7 +93,7 @@ namespace tools {
       std::string& input_filename()
       {
         return m_input_filename;
-      }
+      }     
   };
 
 } // namespace tools

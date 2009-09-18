@@ -1,4 +1,4 @@
-// Author(s): Alexander van Dam
+// Author(s): Alexander van Dam, Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file pbesinfo.cpp
-/// \brief Add your file description here.
+/// \brief Tool that displays information about a PBES.
 
 // ======================================================================
 //
@@ -18,9 +18,6 @@
 // author(s)     : Alexander van Dam <avandam@damdonk.nl>
 //
 // ======================================================================
-
-#define NAME "pbesinfo"
-#define AUTHOR "Alexander van Dam"
 
 //C++
 #include <cstdio>
@@ -40,64 +37,62 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::utilities::tools;
 
-class info_tool {
-
-  private:
+class pbesinfo_tool: public input_tool
+{
+  protected:
+    typedef input_tool super;
 
     bool opt_full;
-    string file_name; // Name of the file to read input from
+
+    /// Parse the non-default options.
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      opt_full = parser.options.count("full") > 0;
+    }
+    
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("full",
+                      "display the predicate variables and their signature",
+                      'f'
+                     )
+      ;
+    }
 
   public:
+    pbesinfo_tool()
+      : super(
+          "pbesinfo",
+          "Alexander van Dam, Wieger Wesselink",
+          "display basic information about a PBES",
+          super::make_tool_description("Print basic information about the PBES in INFILE.")
+        ),
+        opt_full(false)
+     {}
 
-    info_tool() : opt_full(false) {
-    }
-
-    bool parse_command_line(int ac, char** av) {
-      interface_description clinterface(av[0], NAME, AUTHOR,
-                           "display basic information about a PBES",
-                           "[OPTION]... [INFILE]\n",
-                           "Print basic information on the PBES in INFILE. If INFILE is not present, stdin\n"
-                           "is used.");
-
-      clinterface.add_option("full", "display the predicate variables and their signature", 'f');
-
-      command_line_parser parser(clinterface, ac, av);
-
-      if (parser.continue_execution()) {
-        opt_full = 0 < parser.options.count("full");
-
-        if (0 < parser.arguments.size()) {
-          file_name = parser.arguments[0];
-        }
-        if (1 < parser.arguments.size()) {
-          parser.error("too many file arguments");
-        }
-      }
-
-      return parser.continue_execution();
-    }
-
-    void process() {
-      pbes<> pbes_specification;
-
-      /// If PBES can be loaded from file_name, then
-      /// - Show if PBES is closed and if it is well formed
-      ///       - Show number of equations
-      /// - Show number of mu's / nu's.
-      /// - Show which predicate variables have mu's and which predicate variables have nu's
-      /// - Show predicate variables and their type
-      /// else
-      /// - Give error
-
-      pbes_specification.load(file_name);
+    /// If PBES can be loaded from file_name, then
+    /// - Show if PBES is closed and if it is well formed
+    ///       - Show number of equations
+    /// - Show number of mu's / nu's.
+    /// - Show which predicate variables have mu's and which predicate variables have nu's
+    /// - Show predicate variables and their type
+    /// else
+    /// - Give error
+    bool run()
+    {
+      pbes<> p;
+      p.load(input_filename());
 
       // Get PBES equations. Makes a lot of function calls more readable.
       atermpp::vector<pbes_equation> eqsys;
-      eqsys = pbes_specification.equations();
+      eqsys = p.equations();
 
-      bool pbes_well_formed = pbes_specification.is_well_typed();
-      bool pbes_closed = pbes_specification.is_closed();
+      bool pbes_well_formed = p.is_well_typed();
+      bool pbes_closed = p.is_closed();
 
       // Vectors for storing intermediate results
       vector<identifier_string> predvar_mu;
@@ -141,7 +136,7 @@ class info_tool {
       }
 
       // Show file from which PBES was read
-      cout << "Input read from '" << ((file_name == "") ? "standard input" : file_name) << "'" << endl << endl;
+      std::cout << input_file_message() << "\n\n";
 
       // Check if errors occurred in reading PBEs
       if (fp_errors != 0)
@@ -184,6 +179,12 @@ class info_tool {
      // Show binding variables with their signature
       if (opt_full)
       {
+        std::cout << "Predicate variables:\n";
+        for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          std::cout << core::pp(i->symbol()) << "." << core::pp(i->variable()) << std::endl;
+        }
+/*        
         int nr_predvar = 1;
         for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
         {
@@ -207,27 +208,14 @@ class info_tool {
           cout << endl;
           nr_predvar++;
         }
+*/        
       }
-    }
-
-    int execute(int argc, char** argv) {
-      try {
-        if (parse_command_line(argc, argv)) {
-          process();
-        }
-      }
-      catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
-      }
-
-      return EXIT_SUCCESS;
+      return true;
     }
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  return info_tool().execute(argc, argv);
+  return pbesinfo_tool().execute(argc, argv);
 }

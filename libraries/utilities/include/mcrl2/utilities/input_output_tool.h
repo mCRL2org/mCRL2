@@ -12,6 +12,7 @@
 #ifndef MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 #define MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 
+#include <sstream>
 #include "mcrl2/utilities/input_tool.h"
 
 namespace mcrl2 {
@@ -54,6 +55,22 @@ namespace tools {
         {
           m_output_filename = parser.arguments[1];
         }
+      }
+
+      /// \brief Returns a message about the output filename
+      std::string output_file_message() const
+      {
+        std::ostringstream out;
+        out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
+        return out.str();
+      }
+
+      /// \brief Adds a message about input and output files to the given description.
+      std::string make_tool_description(const std::string& description) const
+      {
+        return description +
+          "\nIf INFILE is not present, standard input is used. If OUTFILE is not present,\n"
+          "standard output is used.";
       }
 
     public:
