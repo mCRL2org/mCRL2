@@ -5,5 +5,5 @@ tool lts2lps
          /libraries//lps
          /libraries//data
          /libraries//lts
-       :<status>experimental 
+       : <status>experimental 
        ;
