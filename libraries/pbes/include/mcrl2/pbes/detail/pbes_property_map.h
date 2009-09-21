@@ -37,6 +37,7 @@ namespace detail {
   /// <tr><td>equation_count              </td><td>The number of equation                  </td><td>NUMBER                               </td></tr>
   /// <tr><td>mu_equation_count           </td><td>The number of mu equations              </td><td>NUMBER                               </td></tr>
   /// <tr><td>nu_equation_count           </td><td>The number of nu equations              </td><td>NUMBER                               </td></tr>
+  /// <tr><td>block_nesting_depth         </td><td>The number of mu/nu alternations        </td><td>NUMBER                               </td></tr>
   /// <tr><td>declared_free_variables     </td><td>The declared free variables             </td><td>PARAMLIST                            </td></tr>
   /// <tr><td>declared_free_variable_names</td><td>The names of the declared free variables</td><td>NAME, ..., NAME                      </td></tr>
   /// <tr><td>declared_variable_count     </td><td>The number of declared free variables   </td><td>NUMBER                               </td></tr>
@@ -49,7 +50,7 @@ namespace detail {
   /// <tr><td>occurring_variable_names    </td><td>The names of the occurring variables    </td><td>NAME(PARAMLIST), ..., NAME(PARAMLIST)</td></tr>
   /// </table>
   /// where <tt>PARAMLIST</tt> is defined as <tt>NAME:SORT, ... ,NAME:SORT</tt>.
-  class pbes_property_map : protected mcrl2::data::detail::data_property_map< pbes_property_map >
+  class pbes_property_map : public mcrl2::data::detail::data_property_map< pbes_property_map >
   {
     protected:
 
@@ -73,6 +74,7 @@ namespace detail {
         if     (property == "equation_count"              ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         else if(property == "mu_equation_count"           ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         else if(property == "nu_equation_count"           ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
+        else if(property == "block_nesting_depth"         ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
         else if(property == "declared_free_variables"     ) { return compare(property, parse_set_string(x), parse_set_string(y)); }
         else if(property == "declared_free_variable_names") { return compare(property, parse_set_string(x), parse_set_string(y)); }
         else if(property == "declared_variable_count"     ) { return compare(property, parse_unsigned_int(x), parse_unsigned_int(y)); }
@@ -108,6 +110,27 @@ namespace detail {
         return std::make_pair(mu_count, nu_count);
       }
 
+      // number of changes from mu to nu or vice versa
+      template <typename Container>
+      unsigned int compute_block_nesting_depth(const pbes<Container>& p) const
+      {
+        unsigned int block_nesting_depth = 0;
+        bool last_symbol_is_mu = false;
+        
+        for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+        {
+          if (i != p.equations().begin())
+          {
+            if (i->symbol().is_mu() != last_symbol_is_mu)
+            {
+              block_nesting_depth++;
+            }
+          }
+          last_symbol_is_mu = i->symbol().is_mu();
+        }
+        return block_nesting_depth;
+      }
+
     public:
       /// \brief Constructor.
       /// The strings may appear in a random order, and not all of them need to be present
@@ -121,6 +144,7 @@ namespace detail {
       pbes_property_map(const pbes<Container>& p)
       {
         std::pair<unsigned int, unsigned int>  equation_counts              = compute_equation_counts(p);
+        unsigned int block_nesting_depth                                    = compute_block_nesting_depth(p);
         atermpp::set<data::variable>           declared_free_variables      = p.global_variables();
         std::set<data::variable>               used_free_variables          = find_free_variables(p);
         std::set<propositional_variable>       binding_variables            = p.binding_variables();
@@ -128,7 +152,8 @@ namespace detail {
 
         m_data["equation_count"              ] = print(equation_counts.first + equation_counts.second);
         m_data["mu_equation_count"           ] = print(equation_counts.first);
-        m_data["nu_equation_count"           ] = print(equation_counts.second);
+        m_data["nu_equation_count"           ] = print(equation_counts.second);       
+        m_data["block_nesting_depth"         ] = print(block_nesting_depth);
         m_data["declared_free_variables"     ] = print(declared_free_variables, false);
         m_data["declared_free_variable_names"] = print(names(declared_free_variables), false);
         m_data["declared_variable_count"     ] = print(declared_free_variables.size());

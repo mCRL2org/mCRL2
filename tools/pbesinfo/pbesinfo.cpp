@@ -26,9 +26,10 @@
 #include <string>
 
 //MCRL2-specific
+#include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
 
 using namespace std;
@@ -87,96 +88,30 @@ class pbesinfo_tool: public input_tool
       pbes<> p;
       p.load(input_filename());
 
+      pbes_system::detail::pbes_property_map info(p);
+
       // Get PBES equations. Makes a lot of function calls more readable.
-      atermpp::vector<pbes_equation> eqsys;
-      eqsys = p.equations();
-
-      bool pbes_well_formed = p.is_well_typed();
-      bool pbes_closed = p.is_closed();
-
-      // Vectors for storing intermediate results
-      vector<identifier_string> predvar_mu;
-      vector<identifier_string> predvar_nu;
-      vector<propositional_variable> predvar_data;
-
-      // Integers for showing totals
-      int mu = 0;
-      int nu = 0;
-      int fp_errors = 0;
-
-      for (atermpp::vector<pbes_equation>::iterator fp_i = eqsys.begin(); fp_i != eqsys.end(); fp_i++)
-      {
-         // - Store variables
-         predvar_data.push_back(fp_i->variable());
-
-         // Check on mu or nu
-         if (fp_i->symbol().is_mu())
-         {
-           // If fp is mu:
-           // - Increase #mu's
-           // - Store predicate variable in mu-list and common list
-           // - Store variables
-           mu++;
-           if (opt_full)
-             predvar_mu.push_back(fp_i->variable().name());
-         }
-         else if (fp_i->symbol().is_nu())
-         {
-         // If fp is nu:
-         // - Increase #nu's
-         // - Store predicate variable in nu-list and common list
-           nu++;
-           if (opt_full)
-             predvar_nu.push_back(fp_i->variable().name());
-         }
-         else
-         {
-           fp_errors++;
-         }
-      }
+      const atermpp::vector<pbes_equation>& eqsys = p.equations();
 
       // Show file from which PBES was read
       std::cout << input_file_message() << "\n\n";
 
-      // Check if errors occurred in reading PBEs
-      if (fp_errors != 0)
-      {
-        cerr << "WARNING: Reading number of mu's and nu's had errors. Results may be incorrect" << endl;
-      }
-
       // Show if PBES is closed and well formed
-      cout << "The PBES is " << (pbes_closed ? "" : "not ") << "closed and " << (pbes_well_formed ? "" : "not ") << "well formed" << endl;
+      std::cout << "The PBES is " << (p.is_closed() ? "" : "not ") << "closed and " << (p.is_well_typed() ? "" : "not ") << "well formed" << std::endl;
 
       // Show number of equations
-      cout << "Number of equations: " << eqsys.size() << endl;
+      std::cout << "Number of equations: " << eqsys.size() << std::endl;
 
       // Show number of mu's with the predicate variables from the mu's
-      cout << "Number of mu's:      " << mu;
-      int size_mu = predvar_mu.size();
-      int mu_done = 1;
-      if (size_mu > 0)
-        cout << "   (";
-      for (vector<identifier_string>::iterator i = predvar_mu.begin(); i != predvar_mu.end(); i++)
-      {
-        cout << *i << ((mu_done == size_mu) ? ")" : ", ");
-        mu_done++;
-      }
-      cout << endl;
+      std::cout << "Number of mu's:      " << info["mu_equation_count"] << std::endl;
 
       // Show number of nu's with the predicate variables from the nu's
-      cout << "Number of nu's:      " << nu;
-      int size_nu = predvar_nu.size();
-      int nu_done = 1;
-      if (size_nu > 0)
-        cout << "   (";
-      for (vector<identifier_string>::iterator i = predvar_nu.begin(); i != predvar_nu.end(); i++)
-      {
-        cout << *i << ((mu_done == size_mu) ? ")" : ", ");
-        nu_done++;
-      }
-      cout << endl;
+      std::cout << "Number of nu's:      " << info["nu_equation_count"] << std::endl;
 
-     // Show binding variables with their signature
+      // Show number of nu's with the predicate variables from the nu's
+      std::cout << "Block nesting depth: " << info["block_nesting_depth"] << std::endl;
+
+      // Show binding variables with their signature
       if (opt_full)
       {
         std::cout << "Predicate variables:\n";
@@ -184,31 +119,6 @@ class pbesinfo_tool: public input_tool
         {
           std::cout << core::pp(i->symbol()) << "." << core::pp(i->variable()) << std::endl;
         }
-/*        
-        int nr_predvar = 1;
-        for (vector<propositional_variable>::iterator pv_i = predvar_data.begin(); pv_i != predvar_data.end(); pv_i++)
-        {
-          int bv_size = pv_i->parameters().size();
-          int nr_sorts = 1;
-          if (nr_predvar == 1)
-            cout << "Predicate variables: " << pv_i->name() << " :: ";
-          else
-            cout << "                     " << pv_i->name() << " :: ";
-          for (atermpp::term_list<variable>::iterator dv_i = pv_i->parameters().begin(); dv_i != pv_i->parameters().end(); dv_i++)
-          {
-            cout << core::pp(dv_i->sort());
-            if (nr_sorts < bv_size)
-            {
-              cout << " x ";
-              nr_sorts++;
-            }
-            else
-              cout << " -> " << core::pp(sort_bool::bool_());
-            }
-          cout << endl;
-          nr_predvar++;
-        }
-*/        
       }
       return true;
     }
