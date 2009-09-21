@@ -1,3 +1,14 @@
+# Author(s): Wieger Wesselink
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+# 
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+# 
+#  \file wiki_tool_table.py
+#  \brief Generate tool table in wikimedia format, see http://www.mcrl2.org/mcrl2/wiki/index.php/Private:Tool_Status_Overview
+
 from path import *
 import re
 import string
@@ -95,9 +106,9 @@ TOOLITEM = '''|-
 
 TOOLS = '''
 chi2mcrl2         | +               | ? | ? (Process Library)
-diagraphica       | not applicable  | ? | not applicable
+diagraphica       | +               | ? | not applicable
 formulacheck      | +               | ? | -
-grape             | not applicable  | ? | -
+grape             | +               | ? | -
 lps2lts           | +               | ? | -
 lps2pbes          | +               | ? | +
 lps2torx          | +               | ? | -
@@ -118,14 +129,13 @@ lpssuminst        | +               | ? | +
 lpsuntime         | +               | ? | +
 ltscompare        | +               | ? | ?
 ltsconvert        | +               | ? | ?
-ltsgraph          | not applicable  | ? | not applicable
+ltsgraph          | +               | ? | not applicable
 ltsinfo           | +               | ? | ?
 ltsmin            | +               | ? | ?
-ltsview           | not applicable  | ? | ?
+ltsview           | +               | ? | ?
 lysa2mcrl2        | +               | ? | +
-mcrl22lps         | +               | ? | -
+mcrl22lps         | +               | ? | +
 mcrl2i            | +               | ? | +
-mcrl2pp           | -               | ? | -
 pbes2bes          | +               | ? | +
 pbes2bool         | +               | ? | +
 pbesconstelm      | +               | ? | +
@@ -136,12 +146,13 @@ pbespgsolve       | +               | ? | +
 pbespp            | +               | ? | -
 pbesrewr          | +               | ? | +                                                              
 pnml2mcrl2        | +               | ? | -
-sim               | not applicable  | ? | -                                                                      
-squadt            | not applicable  | ? | not applicable
+sim               | +               | ? | -                                                                      
+squadt            | +               | ? | not applicable
 tbf2lps           | +               | ? | -                                                               
 tracepp           | +               | ? | ?
+txt2lps           | +               | ? | +
 txt2pbes          | +               | ? | -
-xsim              | not applicable  | ? | -                                                                      
+xsim              | +               | ? | -                                                                      
 '''                                                                                            
 
 text = ''
