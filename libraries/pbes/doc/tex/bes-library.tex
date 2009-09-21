@@ -1,0 +1,444 @@
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{a4wide}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage[british]{babel}
+\usepackage{xspace}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{hyperref}
+
+\newcommand{\ie}{\textit{i.e.}\xspace }
+\newcommand{\eg}{\textit{e.g.}\xspace }
+\newcommand{\viz}{\textit{viz.}\xspace }
+%\newcommand{\tle}{\ensuremath{\mathrel{\trianglelefteqslant}}}
+\newcommand{\tle}{\ensuremath{\triangleleft}}
+\newcommand{\isdef}{\ensuremath{\stackrel{\Delta}{=}}}
+\newcommand{\ap}{{:}}
+
+\newcommand{\floor}[1]{\ensuremath{\lfloor #1 \rfloor}}
+\newcommand{\ceil}[1]{\ensuremath{\lceil #1 \rceil}}
+\renewcommand{\leq}{\ensuremath{\leqslant}}    % make <= look nicer
+\renewcommand{\geq}{\ensuremath{\geqslant}}    % make >= look nicer
+
+% Font style definitions
+\newcommand{\rel}[1]{\ensuremath{\mathrel{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\bool}{\ensuremath{\mathbb{B}}}   % set of booleans
+\newcommand{\nat}{\ensuremath{\mathbb{N}}}   % set of booleans
+\newcommand{\true}{\ensuremath{\mathsf{true}}}
+\newcommand{\false}{\ensuremath{\mathsf{false}}}
+
+% BES related definitions
+\newcommand{\bnd}[1]{\ensuremath{\mathsf{bnd}(#1)}}
+\newcommand{\var}[1]{\ensuremath{\mathsf{var}(#1)}}
+\newcommand{\occ}[1]{\ensuremath{\mathsf{occ}(#1)}}
+\newcommand{\rhs}[2]{\ensuremath{\mathsf{rhs}(#1, #2)}}
+\newcommand{\sem}[1]{\ensuremath{[\![ #1 ]\!]}}
+
+\newcommand{\ad}[1]{\ensuremath{\mathsf{rank}(#1)}}
+\newcommand{\ah}[1]{\ensuremath{\mathsf{ah}(#1)}}
+\newcommand{\cad}[3]{\ensuremath{\mathsf{rank}_{#1,#2}(#3)}}
+\newcommand{\op}[1]{\ensuremath{\mathsf{op}(#1)}}
+
+\newcommand{\limitrank}[2]{\ensuremath{\mathsf{limrank}_{#1}(#2)}}
+\newcommand{\climitrank}[5]{\ensuremath{\mathsf{limrank}_{#1,#2,#3}(#4,#5)}}
+
+\newcommand{\imp}{\ensuremath{\Rightarrow}}
+
+\newcommand{\successor}{\mathit{successor}}
+
+\usepackage{pifont} % \ding
+
+% \todo{Note}. Prints Note in the margin.
+\newcommand\todo[1]{\ding{56}\marginpar[\raggedleft\footnotesize \sf #1]{
+  \raggedright\footnotesize \sf #1
+}}
+
+%comment command
+\newcommand{\comment}[1]{\begin{quotation} {\sf *** #1 ***} \end{quotation}}
+
+% Environments
+\newcounter{theoremcnt}[section]
+\renewcommand{\thetheoremcnt}{\thesection.\arabic{theoremcnt}}
+
+\newenvironment{example}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Example \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{definition}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Definition \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{lemma}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Lemma \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{theorem}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Theorem \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{corollary}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Corollary \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{property}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Property \thetheoremcnt.}}
+{\end{trivlist}}
+
+\newenvironment{remark}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Remark \thetheoremcnt.}}{\end{trivlist}}
+
+\newenvironment{convention}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Convention \thetheoremcnt.}}{\end{trivlist}}
+
+\newenvironment{exercise}%
+{\begin{trivlist}\refstepcounter{theoremcnt}
+\item{\bf Exercise \thetheoremcnt.}}{\end{trivlist}}
+
+% \newenvironment{algorithm}%
+% {\begin{trivlist}\refstepcounter{theoremcnt}
+% \item{\bf Algorithm \thetheoremcnt.}}{\end{trivlist}}
+
+%nicer QED
+% alternative
+ \newcommand{\openbox}{\leavevmode
+   \hbox to.77778em{%
+   \hfil\vrule
+   \vbox to.675em{\hrule width.6em\vfil\hrule}%
+   \vrule\hfil}}
+ \def\squareforqed{\hbox{\rlap{$\sqcap$}$\sqcup$}}
+ \def\qed{\ifmmode\squareforqed\else{\unskip\nobreak\hfil
+ \penalty50\hskip1em\null\nobreak\hfil\squareforqed
+ \parfillskip=0pt\finalhyphendemerits=0\endgraf}\fi}
+ \newenvironment{proof}{\textbf{Proof}\thinspace}{\qed}
+ \newenvironment{proofs}{\textbf{Proofs}\thinspace}{\qed}
+
+\title{Some notes on a BES library}
+\author{Jeroen Keiren}
+
+\begin{document}
+\maketitle
+
+\section{Boolean Equation Systems}
+Boolean Equation Systems (BESs) \cite{Mader1997} are a class of equation
+system that can be employed to perform model checking of modal $\mu$-calculus
+formulae. Basically, BESs are finite sequences of least and greatest fixpoint
+equations, where each right-hand side of an equation is a proposition in
+positive form. It has been shown \cite{Mader1997} that solving a BES is equivalent
+to the model-checking problem. BESs are used for this purpose in \eg the tool sets
+CADP \cite{GaravelLMS2007} and mCRL2
+\cite{GrooteMWU2007}. Several algorithms for solving BESs exist, see
+\cite{Mader1997, Keinanen2006}. Furthermore there are efficient algorithms
+for some special cases, see \cite{Mateescu2003, Keinanen2006}. We formally introduce
+the theory required for understanding the results obtained in this paper.
+
+\begin{definition}
+We assume a set $\mc{X}$ of Boolean variables, with typical elements $X$, $X_1$,
+$X_2$, $\dots$ and a type $\bool$ with elements $\true$, $\false$ representing
+the Booleans. Furthermore we have fixpoint symbols $\mu$ for least
+fixpoint and $\nu$ for greatest fixpoint.
+
+A Boolean Equation System is a system of fixpoint equations, inductively defined
+as follows:
+\begin{itemize}
+\item $\epsilon$ is the empty BES
+\item if $\mc{E}$ is a BES, then $(\sigma X = f)\mc{E}$ is also a BES, with
+$\sigma \in \{ \mu, \nu \}$ a fixpoint symbol and $f$ a negation free formula
+over $\mc{X}$, defined by the following grammar:
+\begin{equation*}
+  f,g ::= c \mid X \mid \neg f \mid f \land g \mid f \lor g \mid f \imp g
+\end{equation*}
+\comment{Do we also need to include $if(f,g,h)$ as expression; it is available
+in the deprecated BES header?}
+where $X \in \mc{X}$ is a proposition variable of type $\bool$ and $c \in \{ \true, \false \}$ is a Boolean constant.
+\end{itemize}
+\end{definition}
+
+%
+For any equation system $\mc{E}$, the set of \emph{bound proposition variables},
+$\bnd{\mc{E}}$, is the set of variables occurring at the left-hand side of
+some equation in $\mc{E}$. The set of \emph{occurring proposition variables},
+$\occ{\mc{E}}$, is the set of variables occurring at the right-hand side of
+some equation in $\mc{E}$. 
+\begin{align*}
+\bnd{\epsilon} & \isdef \emptyset &
+\bnd{(\sigma X = f)~\mc{E}} & \isdef \bnd{\mc{E}} \cup \{X\}\\
+  \occ{\epsilon} & \isdef \emptyset &
+  \occ{(\sigma X = f)~\mc{E}} & \isdef \occ{\mc{E}} \cup \occ{f} 
+\end{align*}
+%
+where $\occ{f}$ is defined inductively as follows:
+\begin{align*}
+  \occ{c} & \isdef \emptyset  & \occ{X}     & \isdef \{X\}   \\
+  \occ{\neg f} & \isdef \occ{f} &
+  \occ{f \imp g} \isdef \occ{f} \cup \occ{g} \\
+  \occ{f \vee g} & \isdef \occ{f} \cup \occ{g} & 
+  \occ{f \wedge g} & \isdef \occ{f} \cup \occ{g} 
+\end{align*}
+%
+BESs $\mc{E}$ and $\mc{F}$ with $\bnd{\mc{E}} \cap \bnd{\mc{F}} = \emptyset$
+are referred to as \emph{non-conflicting} BESs.
+
+As usual, we consider only equation systems $\mc{E}$ in which
+every proposition variable occurs at the left-hand side of at most one
+equation of $\mc{E}$. We define an ordering $\tle$
+on bound variables of an equation system $\mc{E}$, where $X \tle X'$
+indicates that the equation for $X$ precedes the equation for $X'$.
+
+Proposition formulae are interpreted in a context of an
+\emph{environment} $\eta \ap \mc{X} \to \bool$. For an
+arbitrary environment $\eta$, we write $\eta [X:=b]$ for the environment
+$\eta$ in which the proposition variable $X$ has
+Boolean value $b$.
+%
+
+Finding a solution of a BES amounts to finding an assignment of $\true$ or
+$\false$ to each variable $X_i$ such that all equations are satisfied.
+Furthermore if $\sigma_i = \mu$, then the assignment to $X_i$ is as strong as
+possible, and if $\sigma_i = \nu$ it is as weak as possible, where the
+leftmost equation takes priority over equations that follow. The concept
+of a solution is formalised below.
+
+\begin{definition}
+Let $\eta \ap \mc{X} \to \bool$ be an environment.  The
+\emph{interpretation} $\sem{f}{\eta}$ maps a proposition formula $f$
+to $\true$ or $\false$:
+\begin{align*}
+\sem{c}{\eta} &\isdef c & \sem{X}{\eta}      &\isdef \eta(X) \\
+\sem{f \vee g}{\eta} &\isdef \sem{f}{\eta} \vee \sem{g}{\eta} &
+\sem{f \wedge g}{\eta} &\isdef \sem{f}{\eta} \wedge \sem{g}{\eta} 
+\end{align*}
+
+Let $\eta$ be an environment. Let $b_{\mu} = \false$ and $b_{\nu} = \true$.
+The \emph{solution} of a BES, given $\eta$, is inductively
+defined as follows:
+\begin{eqnarray*}
+\sem{\epsilon}\eta & = & \eta\\
+\sem{(\sigma X = f)\mc{E}}\eta & = & \sem{\mc{E}}\eta[X := f(\sem{\mc{E}}\eta[X := b_{\sigma}])]
+\end{eqnarray*}
+\end{definition}
+We also write $\eta(X)$ to denote the interpretation of $X$ in environment $\eta$.
+In the sequel, when we refer to solving a BES we mean computing the solution of
+the BES.
+
+% In the rest of this paper we assume that the constants $\true$ and $\false$ do
+% not occur in the right hand sides of the equations. We may do this as we can
+% replace each occurrence of $\true$\ by a reference to $X_{\true}$ and each
+% occurrence of $\false$\ by a reference to $X_{\false}$, where $X_{\true}$ and
+% $X_{\false}$ are defined as follows:
+% \begin{eqnarray*}
+% \nu X_{\true} & = & X_{\true}\\
+% \mu X_{\false} & = & X_{\false}
+% \end{eqnarray*}
+
+%Assuming that $\false < \true$ we define an ordering on boolean equation systems
+%as follows:
+%\begin{definition} \cite{Mader1997}
+%Given boolean equation systems $\mc{E} \equiv (\sigma_1 X_1 = f_1) \dots
+%(\sigma_n X_n = f_n)$ and $\mc{E}' \equiv (\sigma_1 X_1 = g_1) \dots (\sigma_n X_n
+%= g_n)$, then $\mc{E} \leq \mc{E}'$ if and only if $f_i \leq g_i$. 
+%\end{definition}
+
+We introduce the following terminology.
+\begin{definition} Let $\mc{E}$ be an equation system. Then
+\begin{itemize}
+\item $\mc{E}$ is \emph{closed} whenever $\occ{\mc{E}} \subseteq \bnd{\mc{E}}$;
+\item $\mc{E}$ is \emph{solved} whenever $\occ{\mc{E}} = \emptyset$;
+\end{itemize}
+\end{definition}
+For closed BES $\mc{E}$, $\sem{\mc{E}}\eta = \sem{\mc{E}}\eta'$ for arbitrary
+environments $\eta$ and $\eta'$, hence we may omit the environment in this case.
+Also observe that according to the semantics $\land$ and $\lor$ are commutative and
+associative, hence we may write \eg $\bigwedge_{i=0}^j f_i$ instead of $f_0 \land
+\dots f_n$, for formulae $f_i$.
+
+For a closed BES $\mc{E}$ we define the right hand side $\mathsf{rhs}$ of a
+propositional variable $X \in \bnd{\mc{E}}$ as the \emph{right hand side} of the
+defining equation of $X$ in $\mc{E}$:
+\begin{equation*}
+\rhs{X}{(\sigma Y = f)\mc{E}} \isdef \begin{cases}
+                                             f & \text{if $X = Y$}\\
+                                             \rhs{X}{\mc{E}} & \text{otherwise}
+                                           \end{cases}\\
+\end{equation*}
+
+
+\begin{definition}
+A closed BES $\mc{E}$ is in simple form (SF) if every equation in $\mc{E}$ is of the form
+$\sigma X = f$, $\sigma X = \bigwedge_{i=0}^n f_{i}$ or
+$\sigma X = \bigvee_{i=0}^n f_{i}$, where $n > 0$, and $f$ is either a propositional
+variable, or one of the Boolean constants $\true$ or $\false$.
+\end{definition}
+That is, a closed BES is in simple form if every right hand side is
+either a single variable or Boolean constant, or it is a conjunction or a
+disjunction over propositional variables or Boolean constants.
+Conjunctions and disjunctions may not appear mixed in a
+single right hand side. Note that every closed BES can be transformed into
+simple form in polynomial time in such a way that the variables in the original BES
+are preserved, and variables that occur in both BESs have the same solution, see
+\cite{Mader1997}. An equation can, for example, be transformed to simple form as
+follows.
+Given an equation $\sigma X = \bigwedge_{i=0}^k f_i$, and some $f_j$ is disjunctive,
+replace this single equation by two equations $(\sigma X = \bigwedge_{i=0}^{j-1} \land X' \bigwedge_{i=j+1}^k)(\sigma X' = f_j)$,
+where $X'$ is fresh. The case for $\lor$ is analogous, and the transformation can
+be repeated until a BES in simple form is obtained.
+
+We can also restrict a BES such that it does not contain Boolean constants. This is
+referred to as recursive form.
+\begin{definition}
+A closed BES $\mc{E}$ is in recursive form (RF) if the Boolean constants $\true$ and $\false$ do not occur in $\mc{E}$.
+\end{definition}
+The transformation of a BES to a BES in RF can also be done in a solution preserving
+way, introducing auxiliary equations for Boolean constants $\true$ and $\false$.
+
+When we combine the notions of simple form and recursive form we obtain the concept
+of simple recursive form.
+\begin{definition}
+A closed BES $\mc{E}$ is in simple recursive form (SRF) if $\mc{E}$ is in simple form, and the Boolean constants $\true$ and $\false$ do not occur in $\mc{E}$.
+\end{definition}
+The translation of a BES to SRF is simply the composition of the translations of a BES
+to SF and RF, and hence is also solution preserving.
+
+%\begin{definition}[Standard form]
+%A BES $\mc{E}$ is in standard form if every $\phi_i$ is either $X_j$ or $X_k \lor X_k$ or $X_j \land X_k$.
+%\end{definition}
+
+\begin{definition}
+A BES $\mc{E}$ is in conjunctive form if every equation in $\mc{E}$ is of the form
+$\sigma X = \bigwedge_{i=0}^n f_{i}$, with $n \geq 0$, and $f_i$ a propositional
+variable or a Boolean constant.
+\end{definition}
+That is, a BES in conjunctive form only contains conjuncts, single variables or
+Boolean constants
+as right hand sides. It has been shown \cite{Mader1997}
+that given a BES $\mc{E}$ and an environment $\eta$ there is a BES $\mc{E}'$ in
+conjunctive form such that $\mc{E}$ and $\mc{E'}$ have the same solutions in $\eta$. 
+
+A similar notion is a BES in disjunctive form, \ie a BES that only contains
+disjuncts, single variables or Boolean constants as right hand sides.
+\begin{definition}
+A BES $\mc{E}$ is in disjunctive form if every equation in $\mc{E}$ is of the form
+$\sigma X = \bigvee_{i=0}^n f_{i}$, with $n \geq 0$, and $f_i$ a propositional
+variable or Boolean constant.
+\end{definition}
+
+A derived notion of a closed equation system $\mc{E}$ is its 
+\emph{dependency graph} $\mc{G}_\mc{E}$, which is defined as a structure
+$\langle V, \to \rangle$, where:
+\begin{itemize}
+\item $V = \bnd{\mc{E}}$;
+\item $X \to Y$ iff there is some equation $\sigma X = f$ in $\mc{E}$ with
+$Y \in \occ{f}$;
+\end{itemize}
+
+We introduce the notion of rank of an equation, and some derived notions. These
+notions are an indication of the complexity of the BES, as well as a
+measure that occurs in the computational complexity of some of the algorithms for
+solving BESs.
+\begin{definition} Let $\mc{E}$ be an arbitrary equation system. The
+\emph{rank} of some $X \in \bnd{\mc{E}}$, denoted
+$\ad{X}$, is defined as $\ad{X} = \cad{\nu}{X}{\mc{E}}$, where
+$\cad{\nu}{X}{\mc{E}}$ is defined inductively as follows:
+%
+\begin{align*}
+\cad{\sigma}{X}{\epsilon} & = 0 \\
+\cad{\sigma}{X}{(\sigma' Y = f) \mc{E}} & =
+\left \{ 
+  \begin{array}{ll}
+  0 & \text{ if $\sigma = \sigma'$ and $X = Y$} \\
+  \cad{\sigma}{X}{\mc{E}} & \text{ if $\sigma = \sigma'$ and $X \not= Y$} \\
+  1+ \cad{\sigma'}{X}{(\sigma' Y = f) \mc{E}} & \text{ if $\sigma \not= \sigma'$} \\
+  \end{array}
+\right .
+\end{align*} 
+Observe that $\ad{X}$ is odd iff $X$ is defined in a least fixpoint equation.
+\end{definition}
+
+The \emph{alternation hierarchy} of an equation system can be thought of
+as the number of syntactic alternations of fixpoint signs occurring
+in the equation system. The alternation hierarchy $\ah{\mc{E}}$ of an
+equation system $\mc{E}$ can be defined as the difference between the largest
+and the smallest rank occurring in $\mc{E}$, formally
+$\ah{\mc{E}} = \max\{ \ad{X} \mid X \in \bnd{\mc{E}} \} - \min{\{ \ad{X} \mid X \in \bnd{\mc{E}} \}}$.
+
+Given an equation $(\sigma X = f)$ in SF, the function $\op{X}$ 
+returns whether $f$ is conjunctive ($\wedge$), disjunctive ($\vee$) or
+neither ($\bot$);
+
+%
+An alternative characterisation of the solution of a particular
+proposition variable $X$ in an equation system
+$\mc{E}$ in SRF is obtained through the use of the dependency graph $\mc{G}_\mc{E}$.
+We first define the notion of a $\nu$-dominated lasso.
+%
+\begin{definition} Let $\mc{E}$ be a closed equation system, and let $\mc{G}_\mc{E}$
+be its dependency graph. A \emph{lasso} through $\mc{G}_\mc{E}$, starting in
+a node $X$, is a finite path $\langle X_0, X_1, \ldots, X_n\rangle$, satisfying
+$X_0 = X$, $X_n = X_j$ for some $j \le n$, and for each 
+$1 < i \le n$, $X_{i-1} \to X_i$. A lasso is said to be \emph{$\nu$-dominated}
+if $\min \{ \ad{X_i} ~|~ j \le i \le n \}$ is even; otherwise, it is
+\emph{$\mu$-dominated}.
+\end{definition}
+The following lemma is loosely based on lemmata taken from Kein\"anen 
+(see lemmata~40 and~41 in~\cite{Keinanen2006}).
+%
+\begin{lemma}\label{lem:d_c}
+Let $\mc{E}$ be a closed equation system in SRF, and let
+$\mc{G}_{\mc{E}}$ be its dependency graph. Let $X \in \bnd{\mc{E}}$. Then:
+\begin{enumerate}
+\item If $\mc{E}$ is \emph{disjunctive}, then $\sem{\mc{E}}(X) = \true$
+iff some lasso starting in $X$ in $\mc{G}_\mc{E}$ is $\nu$-dominated;
+\label{lem:disjunctive_cycles} 
+
+\item If $\mc{E}$ is \emph{conjunctive}, then $\sem{\mc{E}}(X) = \false$
+iff some lasso starting in $X$ in $\mc{G}_\mc{E}$ is $\mu$-dominated;
+\label{lem:conjunctive_cycles} 
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+We only consider the first statement; the proof of the
+second statement is analogous.  Observe that when the proposition
+variable on the cycle of the lasso has an even lowest rank, it is a
+greatest fixpoint equation $\nu X'= f$, with $X' \tle Y$ for all other
+equations $\sigma Y = g$ that are on the cycle. This follows from the fact
+that these have higher ranks.  \emph{Gau\ss\ elimination}~\cite{Mader1997}
+allows one to substitute $g$ for $Y$ in the equation for $X'$, yielding
+$\nu X' = f[Y {:=} g]$.  Since, ultimately, $X'$ depends on $X'$ again,
+this effectively enables one to rewrite $\nu X' = f$ to $\nu X' = f'
+\vee X'$.  The solution to $\nu X' = f' \vee X'$ is easily seen to be $X'
+= \true$.  Since all equations on the lasso are disjunctive, this solution
+ultimately propagates through the entire lasso, leading to $X = \true$.
+
+Conversely, observe that there is an
+equation system $\mc{E}'$ consisting entirely of equations of the form
+$\sigma X' = X''$ (follows from Corollary 3.37 in \cite{Mader1997}),
+with the additional property that $\sem{\mc{E}} =
+\sem{\mc{E}'}$. In $\mc{E}'$, the answer to $X$ can only be $\true$ if it
+depends at some point on some $\nu X' = X''$, where ultimately, $X''$
+again depends on $X'$, leading to a cycle in the dependency graph with
+even lowest rank.
+\end{proof}
+
+\section{Some requirements for an implementation}
+\begin{itemize}
+\item Substitutions (give inductive definition)
+\item Output formats/methods
+\item Graph interface
+\item Investigate requirements from bes\_deprecated.h
+\end{itemize}
+
+
+\end{document}
+
