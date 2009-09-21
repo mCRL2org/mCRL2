@@ -10,9 +10,6 @@
 
 #include "boost.hpp" // precompiled headers
 
-#define NAME "lpsconstelm"
-#define AUTHOR "Frank Stappers"
-
 //mCRL2
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/constelm.h"
@@ -76,11 +73,11 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     lpsconstelm_tool()
       : super(
           "lpsconstelm",
-          "Wieger Wesselink",
+          "Frank Stappers, Wieger Wesselink",
           "removes constant parameters from an LPS",
-          "Removes constant process parameters from the LPS in INFILE and write the result "
-          "to OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not"
-          "present, standard input is used."
+          make_tool_description(
+            "Remove constant process parameters from the LPS in INFILE and write the result to OUTFILE."
+          )
         )
     {}
 

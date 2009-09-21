@@ -150,6 +150,62 @@ namespace core {
     return result;
   }
 
+  /// \brief Apply word wrapping to a text that doesn't contain newlines.
+  /// \param text A string of text.
+  /// \param max_line_length The maximum line length.
+  /// \return The wrapped text.
+  std::vector<std::string> word_wrap_line(const std::string& line, unsigned int max_line_length)
+  {
+    std::vector<std::string> result;
+    std::string text = line;
+
+    for (;;)
+    {
+      if (text.size() <= max_line_length)
+      {
+        result.push_back(boost::trim_right_copy(text));
+        break;
+      }
+      std::string::size_type i = text.find_last_of(" \t", max_line_length);
+      if (i == std::string::npos)
+      {
+        result.push_back(text.substr(0, max_line_length));
+        text = text.substr(max_line_length);
+      }
+      else
+      {
+        result.push_back(text.substr(0, i));
+        text = text.substr(i + 1);
+      }
+    }
+    return result;
+  }
+
+  /// \brief Apply word wrapping to a text.
+  /// \param text A string of text.
+  /// \param max_line_length The maximum line length.
+  /// \return The wrapped text.
+  std::string word_wrap_text(const std::string& text, unsigned int max_line_length)
+  {
+    std::vector<std::string> result;
+
+    // split the lines and remove trailing white space
+    std::vector<std::string> lines = split(text, "\n");
+    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    {
+      boost::trim_right(*i);
+    }
+
+    // word wrap each of the lines
+    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    {
+      std::vector<std::string> v = word_wrap_line(*i, max_line_length);
+      result.insert(result.end(), v.begin(), v.end());
+    }
+
+    return string_join(result, "\n");
+  }
+
 } // namespace core
 
 } // namespace mcrl2

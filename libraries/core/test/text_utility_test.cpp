@@ -34,7 +34,32 @@ void test_remove_comments()
   BOOST_CHECK(text == TEXT2);
 }
 
-int test_main(int, char*[])
+std::string TEXT3 =
+"abcdef gh       \n"
+"c\n"
+"\n"
+"abcde ghi"
+;
+
+std::string TEXT4 =
+"abcde\n"
+"f gh\n"
+"c\n"
+"\n"
+"abcde\n"
+"ghi"
+;
+
+void test_word_wrap()
 {
+  std::string text = core::word_wrap_text(TEXT3, 5);
+  BOOST_CHECK(text == TEXT4);
+}
+
+int test_main(int, char*[])
+{ 
+  test_remove_comments();
+  test_word_wrap();
+
   return 0;
 }

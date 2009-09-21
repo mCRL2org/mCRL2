@@ -55,7 +55,7 @@ class lpsinfo_tool: public squadt_tool<input_tool>
       specification spec;
       spec.load(input_filename());
       lps::detail::specification_property_map info(spec);
-      std::cout << "Input read from " << ((m_input_filename.empty())?"stdin":("'" + m_input_filename + "'")) << "\n\n";
+      std::cout << input_file_message() << "\n\n";
       std::cout << info.info();
       return true;
     }

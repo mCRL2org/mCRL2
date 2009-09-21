@@ -79,6 +79,12 @@ namespace core {
     return out.str();
   }
 
+  /// \brief Apply word wrapping to a text.
+  /// \param text A string of text.
+  /// \param max_line_length The maximum line length.
+  /// \return The wrapped text.
+  std::string word_wrap_text(const std::string& text, unsigned int max_line_length = 78);
+
 } // namespace core
 
 } // namespace mcrl2
