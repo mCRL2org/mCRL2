@@ -35,6 +35,7 @@ TOOLS = '''
 # in the command line help.
 extended_short_description = {
   'lpsconstelm' : '''
+
 If it can be determined that certain parameters of this LPS remain constant throughout any run of the process, all occurrences of these process parameter are replaced by the initial value and the process parameters are removed from the LPS.
 
 If the initial value of a process parameter is a global variable and remains a global variable throughout the run of the process, the process variable is considered constant.
@@ -42,10 +43,12 @@ If the initial value of a process parameter is a global variable and remains a g
 If the initial value of a process parameter is a global variable and is only changed once to a certain value, the process parameter is constant and the specific value is used for substitution.
 ''',
   'lps2pbes' : '''
+
 The concrete syntax of state formulas can be found at 
 <http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/mu-calculus_syntax>.
 ''',
   'lpsinfo' : '''
+
 By default, the following information about the LPS is shown: 
 * number of summands
 * number of tau-summands
@@ -56,9 +59,11 @@ By default, the following information about the LPS is shown:
 * number of sorts
 ''',
   'lpsparelm' : '''
+
 Removing parameters from the LPS can lead to a reduction when generating a state space of an LPS.
 ''',
   'lpsrewr' : '''
+
 The following data expressions are rewritten: 
 * conditions, action parameters, time expressions and next states of LPS summands
 * process parameters of the initial state
@@ -67,11 +72,13 @@ The following data expressions are rewritten:
 Rewriting LPS summands and the initial state is done to simplify these parts of the LPS. Rewriting data equations is done to speed up state space generation. In most cases, this results in a performance gain of at most 5%.
 ''',
   'pbesinfo' : '''
+
 By default, the following information about the PBES is shown: 
 * information if the PBES is closed and well-formed;
 * number of equations, &mu;s and &nu;s.
 ''',
   'txt2pbes' : '''
+
 The textual description should adhere to the following [[Language reference/PBES syntax|BNF syntax description]].
 ''',
 }
@@ -91,4 +98,5 @@ for tool in TOOLS.split():
     filename = 'output/User_manual%s%s' % (os.sep, tool)
     if extended_short_description.has_key(tool):
         manual = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + extended_short_description[tool] + r'\2', manual)
-    path(filename).write_text(manual)
+        path(filename).write_text(manual)
+
