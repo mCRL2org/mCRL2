@@ -12,6 +12,7 @@
 from path import *
 import re
 import string
+import os
 
 # == Release tools ==
 # 
@@ -187,5 +188,8 @@ for line in tools:
     item = re.sub('VALUE3', words[3], item)
     text = text + item
 text = re.sub('TOOLTEXT', text, TEXT)
-print text
 
+# create subdirectory output if it doesn't exist
+if not os.path.exists('output'):
+    os.makedirs('output')
+path('output/Tool_Status_Overview').write_text(text)
