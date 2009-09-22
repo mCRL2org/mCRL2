@@ -94,8 +94,8 @@ for tool in TOOLS.split():
 
 # update tool pages with custom additions
 for tool in TOOLS.split():
-    manual = path(filename).text()
     filename = 'output/User_manual%s%s' % (os.sep, tool)
+    manual = path(filename).text()
     if extended_short_description.has_key(tool):
         manual = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + extended_short_description[tool] + r'\2', manual)
         path(filename).write_text(manual)
