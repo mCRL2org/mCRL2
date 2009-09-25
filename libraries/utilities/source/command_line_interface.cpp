@@ -33,6 +33,13 @@
 namespace mcrl2 {
   namespace utilities {
 
+    template <typename Iter>
+    std::string substring(const std::string& s, Iter first, Iter last)
+    {
+      assert(last <= s.end());
+      return s.substr(first - s.begin(), last - first);
+    }
+
     /// \cond INTERNAL
     /**
      * Inserts newline characters while reading the input from left to right.
@@ -60,14 +67,14 @@ namespace mcrl2 {
       while (i != input.end()) {
         if (space_left - (i - word_start) < 1) { // line too long
 
-          out << std::endl << indent << variable_indent << std::string(word_start, i);
+          out << std::endl << indent << variable_indent << substring(input, word_start, i);
 
           space_left = width - (i - word_start) - variable_indent.size();
           word_start = i;
         }
         else if (*i == '\n') {
           if (word_start != i) {
-            out << std::string(word_start, i);
+            out << substring(input, word_start, i);
           }
 
           ++i;
@@ -91,7 +98,7 @@ namespace mcrl2 {
           word_start = i;
         }
         else if (1 < space_left && (*i == ' ' || *i == '\t')) {
-          out << std::string(word_start, ++i);
+          out << substring(input, word_start, ++i);
 
           space_left -= i - word_start;
           word_start  = i;
@@ -101,7 +108,7 @@ namespace mcrl2 {
         }
       }
 
-      out << std::string(word_start, input.end());
+      out << substring(input, word_start, input.end());
 
       return out.str();
     }
