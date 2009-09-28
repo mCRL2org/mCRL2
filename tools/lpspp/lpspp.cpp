@@ -11,21 +11,16 @@
 #include "boost.hpp" // precompiled headers
 
 #define NAME "lpspp"
-#define AUTHOR "Aad Mathijssen"
+#define AUTHOR "Aad Mathijssen and Jeroen Keiren"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cerrno>
-#include <cstring>
-#include <cassert>
+#include <string>
+#include <iostream>
+#include <fstream>
 
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/print.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -43,7 +38,7 @@ class lpspp_tool: public input_output_tool
         ),
         format(ppDefault)
     {}
-    
+
     bool run()
     {
       print_specification();
@@ -84,45 +79,33 @@ class lpspp_tool: public input_output_tool
   private:
     void print_specification()
     {
-      std::string str_in  = (input_filename().empty())?"stdin":("'" + input_filename() + "'");
-      std::string str_out = (output_filename().empty())?"stdout":("'" + output_filename() + "'");
-    
       lps::specification specification;
       specification.load(input_filename());
 
-      if (format != ppDebug)
-      {
-        specification.data() = mcrl2::data::remove_all_system_defined(specification.data());
-      }
-
-      ATermAppl spec = lps::specification_to_aterm(specification, format != ppInternal);
-
-      //open output file for writing or set to stdout
-      FILE *output_stream    = NULL;
-      if (output_filename().empty()) {
-        output_stream = stdout;
-        gsDebugMsg("output to stdout.\n");
-      } else {
-        output_stream = fopen(output_filename().c_str(), "w");
-        if (output_stream == NULL) {
-          std::string err_msg(strerror(errno));
-          if (err_msg.length() > 0 && err_msg[err_msg.length()-1] == '\n') {
-            err_msg.replace(err_msg.length()-1, 1, "");
-          }
-          throw mcrl2::runtime_error("could not open output file " + str_out + " for writing (" + err_msg + ")");
-        }
-        gsDebugMsg("output file %s is opened for writing.\n", str_out.c_str());
-      }
-      assert(output_stream != NULL);
-      //print spec to output_stream
       gsVerboseMsg("printing LPS from %s to %s in the %s format\n",
-        str_in.c_str(), str_out.c_str(), pp_format_to_string(format).c_str());
-      //pretty print spec to output_stream
-      PrintPart_C(output_stream, (ATerm) spec, format);
-      if (output_stream != stdout) {
-        fclose(output_stream);
+        input_filename().empty()?"standard input":input_filename().c_str(),
+        output_filename().empty()?"standard output":output_filename().c_str(),
+        pp_format_to_string(format).c_str());
+
+      if(output_filename().empty())
+      {
+        std::cout << lps::pp(specification, format);
+      }
+      else
+      {
+        std::ofstream output_stream(output_filename().c_str());
+        if(output_stream.is_open())
+        {
+          output_stream << lps::pp(specification, format);
+          output_stream.close();
+        }
+        else
+        {
+          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
+        }
       }
     }
+
 };
 
 int main(int argc, char* argv[])
