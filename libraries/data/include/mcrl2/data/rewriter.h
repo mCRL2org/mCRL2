@@ -231,7 +231,14 @@ namespace data {
       /// \return The normal form of d.
       data_expression operator()(const data_expression& d) const
       {
-        return reconstruct(m_rewriter->rewrite(implement(d)));
+        # ifdef MCRL2_PRINT_REWRITE_STEPS
+          std::cerr << "REWRITE: " << d;
+          data_expression result(reconstruct(m_rewriter->rewrite(implement(d))));
+          std::cerr << " ------------> " << result << std::endl;
+          return result;
+        #else
+          return reconstruct(m_rewriter->rewrite(implement(d)));
+        #endif
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -242,7 +249,14 @@ namespace data {
       template <typename SubstitutionFunction>
       data_expression operator()(const data_expression& d, SubstitutionFunction const& sigma) const
       {
-        return reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma))));
+        # ifdef MCRL2_PRINT_REWRITE_STEPS
+          std::cerr << "REWRITE " << d;
+          data_expression result(reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma)))));
+          std::cerr << " ------------> " << result << std::endl;
+          return result;
+        # else
+          return reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma))));
+        #endif
       }
   };
 
@@ -310,16 +324,16 @@ namespace data {
   {
     const DataRewriter& R_;
     const Substitution& sigma_;
-    
+
     rewriter_adapter(const DataRewriter& R, const Substitution& sigma)
       : R_(R), sigma_(sigma)
     {}
-    
+
     data::data_expression operator()(const data::data_expression& t) const
     {
       return R_(t, sigma_);
     }
-  }; 
+  };
 
 } // namespace data
 
