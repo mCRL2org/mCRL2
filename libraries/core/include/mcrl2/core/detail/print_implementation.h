@@ -456,37 +456,12 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
   } else if (pp_format == ppInternalDebug) {
     PRINT_FUNC(IndentedATerm)(OutStream, Part);
   } else {
-    ATerm ReconstructedPart = Part;
-    // Tries to remove system defined sorts in case of non-debug prints
-    // This currently fails because the information of what is system defined or not is lost in translation to ATerm
-    if (pp_format != ppDebug) {
-//      if (gsIsDataSpec((ATermAppl) Part))
-//      {
-//        ReconstructedPart = (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
-//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification(Part))));
-//      }
-//      else if (gsIsProcSpec((ATermAppl) Part) ||
-//          gsIsLinProcSpec((ATermAppl) Part))
-//      {
-//        ReconstructedPart = reinterpret_cast< ATerm >(
-//            ATmakeAppl4(ATgetAFun((ATermAppl) Part), (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
-//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification((ATermAppl) ATAgetArgument((ATermAppl) Part, 0))))),
-//                 ATgetArgument((ATermAppl) Part, 1), ATgetArgument((ATermAppl) Part, 2), ATgetArgument((ATermAppl) Part, 3)));
-//      }
-//      else if (gsIsPBES((ATermAppl) Part))
-//      {
-//        ReconstructedPart = reinterpret_cast< ATerm >(
-//            ATmakeAppl3(ATgetAFun((ATermAppl) Part), (ATerm) static_cast< ATermAppl >(mcrl2::data::detail::data_specification_to_aterm_data_spec(
-//                mcrl2::data::remove_all_system_defined(mcrl2::data::data_specification((ATermAppl) ATAgetArgument((ATermAppl) Part, 0))))),
-//                 ATgetArgument((ATermAppl) Part, 1), ATgetArgument((ATermAppl) Part, 2)));
-//      }
-    }
-    if (ATgetType(ReconstructedPart) == AT_APPL) {
-      PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) ReconstructedPart, pp_format,
+    if (ATgetType(Part) == AT_APPL) {
+      PRINT_FUNC(PrintPart_Appl)(OutStream, (ATermAppl) Part, pp_format,
         false, 0);
-    } else if (ATgetType(ReconstructedPart) == AT_LIST) {
+    } else if (ATgetType(Part) == AT_LIST) {
       PRINT_FUNC(fprints)(OutStream, "[");
-      PRINT_FUNC(PrintPart_List)(OutStream, (ATermList) ReconstructedPart,
+      PRINT_FUNC(PrintPart_List)(OutStream, (ATermList) Part,
         pp_format, false, 0, "", ", ");
       PRINT_FUNC(fprints)(OutStream, "]");
     } else {
