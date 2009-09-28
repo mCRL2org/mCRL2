@@ -48,6 +48,7 @@
 \newcommand{\climitrank}[5]{\ensuremath{\mathsf{limrank}_{#1,#2,#3}(#4,#5)}}
 
 \newcommand{\imp}{\ensuremath{\Rightarrow}}
+\newcommand{\subst}[1]{\ensuremath{\sigma(#1)}}
 
 \newcommand{\successor}{\mathit{successor}}
 
@@ -155,14 +156,15 @@ as follows:
 \begin{itemize}
 \item $\epsilon$ is the empty BES
 \item if $\mc{E}$ is a BES, then $(\sigma X = f)\mc{E}$ is also a BES, with
-$\sigma \in \{ \mu, \nu \}$ a fixpoint symbol and $f$ a negation free formula
+$\sigma \in \{ \mu, \nu \}$ a fixpoint symbol and $f$ a formula
 over $\mc{X}$, defined by the following grammar:
 \begin{equation*}
   f,g ::= c \mid X \mid \neg f \mid f \land g \mid f \lor g \mid f \imp g
 \end{equation*}
 \comment{Do we also need to include $if(f,g,h)$ as expression; it is available
-in the deprecated BES header?}
-where $X \in \mc{X}$ is a proposition variable of type $\bool$ and $c \in \{ \true, \false \}$ is a Boolean constant.
+in the deprecated BES header? Its use is in the construction of BDD structures for the comparison of formulae. Note that this could also be encoded as $(f \imp g) \land (\neg f \imp g)$}
+where $X \in \mc{X}$ is a proposition variable of type $\bool$ and $c \in \{ \true, \false \}$ is a Boolean constant. We refer to the set of formulae over
+$\mc{X}$ with $\mc{F}_{\mc{X}}$.
 \end{itemize}
 \end{definition}
 
@@ -183,7 +185,7 @@ where $\occ{f}$ is defined inductively as follows:
 \begin{align*}
   \occ{c} & \isdef \emptyset  & \occ{X}     & \isdef \{X\}   \\
   \occ{\neg f} & \isdef \occ{f} &
-  \occ{f \imp g} \isdef \occ{f} \cup \occ{g} \\
+  \occ{f \imp g} & \isdef \occ{f} \cup \occ{g} \\
   \occ{f \vee g} & \isdef \occ{f} \cup \occ{g} & 
   \occ{f \wedge g} & \isdef \occ{f} \cup \occ{g} 
 \end{align*}
@@ -274,7 +276,24 @@ defining equation of $X$ in $\mc{E}$:
                                            \end{cases}\\
 \end{equation*}
 
+Besides assignments we can also define the notion of substitution on a
+BES.
+\begin{definition}
+A substitution $\sigma {:} \mc{X} \to \mc{F}_{\mc{X}}$ is a function assigning
+a boolean expression to a variable. We define application of a substitution
+$\sigma$ to a boolean expression inductively as follows:
+\begin{align*}
+  \subst{c} & \isdef c  &
+  \subst{X}  & \isdef \begin{cases} Y & \text{if $X := Y$ in $\sigma$}\\ X  & \text{otherwise}\end{cases} \\
+  \subst{\neg f} & \isdef \neg \subst{f} &
+  \subst{f \imp g} & \isdef \subst{f} \imp \subst{g} \\
+  \subst{f \vee g} & \isdef \subst{f} \vee \subst{g} & 
+  \subst{f \wedge g} & \isdef \subst{f} \wedge \subst{g} 
+\end{align*}
+\end{definition}
 
+We now introduce some restricted BES formats which exhibit some interesting
+theoretic properties.
 \begin{definition}
 A closed BES $\mc{E}$ is in simple form (SF) if every equation in $\mc{E}$ is of the form
 $\sigma X = f$, $\sigma X = \bigwedge_{i=0}^n f_{i}$ or
@@ -432,10 +451,38 @@ even lowest rank.
 \end{proof}
 
 \section{Some requirements for an implementation}
+
+\subsection{Output formats}
+For BESs several output formats are available. First of all, we should
+support a boolean output format (probably ATerm based, like the file
+format of the PBES library). Furthermore, for compatibility with other
+tools it is useful to have output in CWI format (a textual format).
+Furthermore we know that BES in SRF coincide with parity games, hence
+for this class of equation systems it is useful to be able to output
+in the format used by the PGSolver toolset.
+
+In the future it could become useful to write part of an already generated
+BES to disk (in order to save internal memory). Hence a design for a BES
+library should take this possibility into account.
+
+\subsection{Graph interface}
+As was described before, the notion of dependency graphs for BES
+in SRF has some nice properties. As an example it is straightforward
+to implement reduction modulo strong bisimulation (and also some weaker
+equivalences) on top of this interface (see \cite{KeirenW2009} for more
+details). A more flexible notion of structure graph is also known
+\cite{ReniersW2009}, but at the moment it is not clear what the
+advantages of this notion are in an implementation.
+
+\subsection{Flexible storage}
+It is unclear how formulae in a BES should be stored exactly in an
+implementation. Sometimes \eg storing in BDD format provides some
+advantages, whereas in other cases (like BES encoding bisimilarity of
+to LPSs), the effect is adverse. Hence the design should be sufficiently
+high-level as to leave a possibility for variation in the underlying format.
+
+\section{TODO}
 \begin{itemize}
-\item Substitutions (give inductive definition)
-\item Output formats/methods
-\item Graph interface
 \item Investigate requirements from bes\_deprecated.h
 \end{itemize}
 
