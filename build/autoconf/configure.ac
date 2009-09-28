@@ -72,20 +72,30 @@ AC_SUBST([BJAM_CXX])
 AC_SUBST([TOOLSET_FLAGS])
 AC_SUBST([HOST_OS])
 
+
+# Fix for ticket 643
+
 # Default is 32 bits, test is probably very incomplete
-case $host in
-  *64*-*-*)
-    ADDRESS_MODEL=64
-    ;;
-  *32*-*-*)
-    ADDRESS_MODEL=32
-    ;;
-  *16*-*-*)
-    ADDRESS_MODEL=16
-    ;;
-  *)
-    ADDRESS_MODEL=32
-    ;;
+#case $host in
+#  *64*-*-*)
+#    ADDRESS_MODEL=64
+#    ;;
+#  *32*-*-*)
+#    ADDRESS_MODEL=32
+#    ;;
+#  *16*-*-*)
+#    ADDRESS_MODEL=16
+#    ;;
+#  *)
+#    ADDRESS_MODEL=32
+#    ;;
+#esac
+#
+AC_CHECK_SIZEOF([void *])
+case "$ac_cv_sizeof_void_p" in
+    4) ADDRESS_MODEL=32 ;;
+    8) ADDRESS_MODEL=64 ;;
+    *)  AC_MSG_FAILURE([unknown address model]) ;;
 esac
 
 BUILD_OPTIONS="${BUILD_OPTIONS} address-model=${ADDRESS_MODEL}"
