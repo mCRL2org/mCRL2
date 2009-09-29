@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/print.h"
+#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;

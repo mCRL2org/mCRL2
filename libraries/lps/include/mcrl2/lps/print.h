@@ -12,24 +12,12 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
-#include <string>
 #include "mcrl2/core/print.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 
 namespace lps {
 
-  inline
-  std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
-  {
-    if (pp_format == core::ppDefault || pp_format == core::ppInternal)
-    {
-      spec.data() = mcrl2::data::remove_all_system_defined(spec.data());
-    }
-
-    return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
-  }
 
 } // namespace lps
 

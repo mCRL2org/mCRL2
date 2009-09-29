@@ -23,7 +23,6 @@
 #include <set>
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
@@ -346,6 +345,17 @@ bool operator!=(const specification& spec1, const specification& spec2)
   return !(spec1 == spec2);
 }
 
+inline
+std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
+{
+  if (pp_format == core::ppDefault || pp_format == core::ppInternal)
+  {
+    spec.data() = data::remove_all_system_defined(spec.data());
+  }
+  
+  return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
+}
+
 } // namespace lps                                                                                         
 
 } // namespace mcrl2                                                                                        
@@ -368,6 +378,10 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_FIND_H
 #include "mcrl2/lps/find.h"
+#endif
+
+#ifndef MCRL2_LPS_PRINT_H
+#include "mcrl2/lps/print.h"
 #endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       
