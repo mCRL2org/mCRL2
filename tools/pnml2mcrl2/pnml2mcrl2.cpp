@@ -15,6 +15,8 @@
 #define AUTHOR "Johfra Kamphuis and Yaroslav Usenko"
 
 #include <sstream>
+#include <ostream>
+#include <fstream>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -122,7 +124,7 @@ static ATermList pn2gsMakeListOfLists(ATermList l);
 
 static std::string pn2gsGetText(ticpp::Element* cur);
 
-bool do_pnml2mcrl2(char const* InFileName, FILE* OutStream);
+bool do_pnml2mcrl2(char const* InFileName, std::ostream& output_stream);
 
 class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
 {
@@ -178,21 +180,22 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
 
   public:
     bool run()
-    { FILE* OutStream = stdout;
-
-      if (!output_filename().empty()) {
-        OutStream = fopen(output_filename().c_str(),"w");
-
-        if (OutStream == 0) {
+    { 
+      if(output_filename().empty())
+      {
+        return do_pnml2mcrl2(input_filename().c_str(), std::cout);
+      }
+      else
+      {
+        std::ofstream output_stream(output_filename().c_str());
+        if(!output_stream.is_open())
+        {
           throw mcrl2::runtime_error("cannot open file '" + output_filename() + "' for writing\n");
         }
+        bool result = do_pnml2mcrl2(input_filename().c_str(), output_stream);
+        output_stream.close();
+        return result;
       }
-
-      bool result = do_pnml2mcrl2(input_filename().c_str(), OutStream);
-
-      fclose(OutStream);
-
-      return result;
     }
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
@@ -2268,7 +2271,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
   //==================================================
   // PrintHelp performs actual conversion by calling more specialised functions
   //==================================================
-  bool do_pnml2mcrl2(char const* InFileName, FILE* OutStream)
+  bool do_pnml2mcrl2(char const* InFileName, std::ostream& output_stream)
   { ATprotectList(&(context.transitions));
     ATprotectAppl(&Appl0);
     ATprotectAppl(&IdX);
@@ -2405,7 +2408,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     Spec = type_check_proc_spec(Spec);
 
     if(Spec){
-      PrintPart_C(OutStream, (ATerm) Spec, ppDefault);
+      PrintPart_CXX(output_stream, (ATerm) Spec, ppDefault);
     }
 
     return (true);
