@@ -326,9 +326,15 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
 }
 
 /// \brief Pretty print function
-inline std::string pp(const specification& spec)
+inline
+std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
 {
-  return core::pp(specification_to_aterm(spec));
+  if (pp_format == core::ppDefault || pp_format == core::ppInternal)
+  {
+    spec.data() = data::remove_all_system_defined(spec.data());
+  }
+  
+  return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
 }
 
 /// \brief Equality operator
@@ -343,17 +349,6 @@ inline
 bool operator!=(const specification& spec1, const specification& spec2)
 {
   return !(spec1 == spec2);
-}
-
-inline
-std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  if (pp_format == core::ppDefault || pp_format == core::ppInternal)
-  {
-    spec.data() = data::remove_all_system_defined(spec.data());
-  }
-  
-  return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
 }
 
 } // namespace lps                                                                                         
