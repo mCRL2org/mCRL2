@@ -464,7 +464,7 @@ void test_system_defined()
 
   remove_all_system_defined(copy);
 
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy, false)), specification));
 
   specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"
@@ -474,7 +474,7 @@ void test_system_defined()
   BOOST_CHECK(specification.is_alias(basic_sort("D")));
   BOOST_CHECK(specification.is_alias(basic_sort("F")));
   BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
-std::cerr << pp(specification.constructors()) << std::endl;
+
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(specification.find_referenced_sort(basic_sort("D"))));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
@@ -573,12 +573,12 @@ void test_normalisation()
   specification.add_alias(alias(S, set_(A)));
   specification.add_alias(alias(B, bag(A)));
 
-  BOOST_CHECK(specification.normalise(L) == list(A));
-  BOOST_CHECK(specification.normalise(list(L)) == list(list(A)));
-  BOOST_CHECK(specification.normalise(S) == set_(A));
-  BOOST_CHECK(specification.normalise(list(S)) == list(set_(A)));
-  BOOST_CHECK(specification.normalise(B) == bag(A));
-  BOOST_CHECK(specification.normalise(list(B)) == list(bag(A)));
+  BOOST_CHECK(specification.normalise(L) == specification.normalise(list(A)));
+  BOOST_CHECK(specification.normalise(list(L)) == specification.normalise(list(list(A))));
+  BOOST_CHECK(specification.normalise(S) == specification.normalise(set_(A)));
+  BOOST_CHECK(specification.normalise(list(S)) == specification.normalise(list(set_(A))));
+  BOOST_CHECK(specification.normalise(B) == specification.normalise(bag(A)));
+  BOOST_CHECK(specification.normalise(list(B)) == specification.normalise(list(bag(A))));
 
   specification = parse_data_specification(
     "sort A = struct a(B);"
@@ -625,7 +625,7 @@ void test_copy()
 
   core::garbage_collect();
 
-  BOOST_CHECK(other.normalise(basic_sort("A")) == basic_sort("S"));
+  BOOST_CHECK(other.normalise(basic_sort("A")) == other.normalise(basic_sort("S")));
   BOOST_CHECK(!specification.search_sort(basic_sort("A")));
 }
 

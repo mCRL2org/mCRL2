@@ -72,7 +72,7 @@ namespace mcrl2 {
         typedef atermpp::map< basic_sort, sort_expression >           ltr_aliases_map;
 
         /// \brief map from sort expression to names
-        typedef std::multimap< sort_expression, basic_sort >          rtl_aliases_map;
+        typedef std::multimap< sort_expression, basic_sort >          reverse_aliases_map;
 
       private:
 
@@ -108,9 +108,9 @@ namespace mcrl2 {
         typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
 
         /// \brief iterator over aliases (objects of type function_symbol)
-        typedef boost::transform_iterator< convert_to_alias, rtl_aliases_map::iterator >              aliases_iterator;
+        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::iterator >              aliases_iterator;
         /// \brief const iterator over aliases (objects of type function_symbol)
-        typedef boost::transform_iterator< convert_to_alias, rtl_aliases_map::const_iterator >        aliases_const_iterator;
+        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::const_iterator >        aliases_const_iterator;
         /// \brief iterator range over list of aliases
         typedef boost::iterator_range< aliases_iterator >                                             aliases_range;
         /// \brief iterator range over constant list of aliases
@@ -148,8 +148,6 @@ namespace mcrl2 {
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
         void make_complete();
 
-        bool is_recursive(const sort_expression& s);
-
         /// \brief Helper function for make_complete() methods
         template < typename Term >
         void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
@@ -160,37 +158,99 @@ namespace mcrl2 {
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
 
+        class expression_normaliser
+        {
+          private:
+
+            atermpp::map< sort_expression, sort_expression > m_normalised_aliases;
+
+            atermpp::map< sort_expression, sort_expression > m_reverse_aliases;
+
+          protected:
+
+            void normalise_names_in_aliases();
+
+            void initialise();
+
+          public:
+
+            template < typename ForwardRange >
+            void initialise(ForwardRange const& aliases)
+            {
+              m_normalised_aliases.clear();
+
+              for (typename ForwardRange::iterator i = aliases.begin(); i != aliases.end(); ++i)
+              {
+                m_normalised_aliases[i->name()] = i->reference();
+              }
+
+              initialise();
+            }
+
+            sort_expression find_referenced_sort(basic_sort const& s) const
+            {
+              sort_expression found = s;
+
+              std::set< sort_expression > visited;
+
+              do {
+                visited.insert(found);
+
+                // search aliases for a reference that matches s
+                atermpp::map< sort_expression, sort_expression >::const_iterator result(m_normalised_aliases.find(found));
+
+                if (result != m_normalised_aliases.end())
+                {
+                  found = result->second;
+                }
+              } while (found.is_basic_sort() && visited.find(found) == visited.end());
+
+              return found;
+            }
+
+
+            void add(alias const& a);
+
+            void remove(alias const& a);
+
+            sort_expression normalise(sort_expression const& e) const;
+
+            sort_expression normalise_forward(sort_expression const& e) const;
+
+            sort_expression normalise_backward(sort_expression const& e) const;
+        };
+
       protected:
 
-        ///\brief The basic sorts and structured sorts in the specification.
+        /// \brief The basic sorts and structured sorts in the specification.
         atermpp::set< sort_expression >     m_sorts;
 
-        ///\brief The basic sorts and structured sorts in the specification.
+        /// \brief The basic sorts and structured sorts in the specification.
         ltr_aliases_map                     m_aliases_by_name;
 
-        ///\brief The basic sorts and structured sorts in the specification.
-        rtl_aliases_map                     m_aliases_by_sort;
+        /// \brief The basic sorts and structured sorts in the specification.
+        reverse_aliases_map                     m_aliases_by_sort;
 
-        ///\brief A mapping of sort expressions to the constructors corresponding to that sort.
+        /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
         sort_to_symbol_map                  m_constructors;
 
-        ///\brief The mappings of the specification.
+        /// \brief The mappings of the specification.
         sort_to_symbol_map                  m_mappings;
 
-        ///\brief The equations of the specification.
+        /// \brief The equations of the specification.
         atermpp::set< data_equation >       m_equations;
 
-        ///\brief Set containing system defined sorts.
-        mutable std::set< sort_expression > m_sys_sorts;
+        /// \brief Set containing system defined sorts.
+        std::set< sort_expression >         m_sys_sorts;
 
-        ///\brief Set containing system defined functions.
-        mutable std::set< function_symbol > m_sys_functions;
+        /// \brief Set containing system defined functions.
+        std::set< function_symbol >         m_sys_functions;
 
-        ///\brief Table containing system defined equations.
-        mutable std::set< data_equation >   m_sys_equations;
+        /// \brief Table containing system defined equations.
+        std::set< data_equation >           m_sys_equations;
 
-        ///\brief Table containing system defined equations.
-        mutable std::set< data_equation >   m_recursive_sorts;
+        /// \brief Table containing system defined equations.
+        expression_normaliser               m_expression_normaliser;
 
       protected:
 
@@ -198,7 +258,7 @@ namespace mcrl2 {
         {
           if (s.is_system_defined())
           {
-            sort_expression normalised(normalise(s));
+            sort_expression normalised(find_referenced_sort(normalise(s)));
 
             if (!search_sort(normalised))
             {
@@ -209,7 +269,7 @@ namespace mcrl2 {
           }
           else if (!s.is_function_sort()) // do not add function sorts
           {
-            sort_expression normalised(normalise(s));
+            sort_expression normalised(find_referenced_sort(normalise(s)));
 
             m_sorts.insert(normalised);
 
@@ -217,11 +277,6 @@ namespace mcrl2 {
             { // standard functions for the sort
               add_standard_mappings_and_equations(normalised);
             }
-          }
-
-          if (is_recursive(s))
-          {
-            m_recursive_sorts.insert(s);
           }
         }
 
@@ -232,22 +287,22 @@ namespace mcrl2 {
           if (!m_sorts.insert(name).second)
           {
             // name was known as sort but not as alias, remove standard mappings/equations and update aliases
-            remove_mappings(boost::make_iterator_range(standard_generate_functions_code(name)));
-            remove_equations(boost::make_iterator_range(standard_generate_equations_code(name)));
+            remove_mappings(standard_generate_functions_code(name));
+            remove_equations(standard_generate_equations_code(name));
           }
 
           m_aliases_by_name[name] = reference;
-          m_aliases_by_sort.insert(rtl_aliases_map::value_type(reference, name));
+          m_aliases_by_sort.insert(reverse_aliases_map::value_type(reference, name));
 
-          boost::iterator_range< rtl_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(name));
+          boost::iterator_range< reverse_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(name));
 
           if (!relevant_range.empty())
           {
-            for (rtl_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
+            for (reverse_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
                                                                      j++ != relevant_range.end(); i = j)
             {
               m_aliases_by_name[i->second] = reference;
-              m_aliases_by_sort.insert(rtl_aliases_map::value_type(reference, i->second));
+              m_aliases_by_sort.insert(reverse_aliases_map::value_type(reference, i->second));
               m_aliases_by_sort.erase(i);
             }
           }
@@ -257,15 +312,11 @@ namespace mcrl2 {
             // Make sure that the sort is also part of the specification
             add_sort(reference);
           }
-          if (is_recursive(name))
-          {
-            m_recursive_sorts.insert(name);
-          }
         }
 
         void add_function(sort_to_symbol_map& container, const function_symbol& f)
         {
-          sort_expression index_sort(normalise(f.sort().target_sort()));
+          sort_expression index_sort(find_referenced_sort(normalise(f.sort().target_sort())));
 
           constructors_const_range relevant_range(container.equal_range(index_sort));
 
@@ -311,12 +362,13 @@ namespace mcrl2 {
       }
 
       ///\brief Constructor
-      template < typename SortsIterator, typename ConstructorsIterator,
-                 typename MappingsIterator, typename EquationsIterator >
-      data_specification(const boost::iterator_range< SortsIterator >& sorts,
-                         const boost::iterator_range< ConstructorsIterator >& constructors,
-                         const boost::iterator_range< MappingsIterator >& mappings,
-                         const boost::iterator_range< EquationsIterator >& equations)
+      template < typename SortsRange, typename AliasesRange, typename ConstructorsRange,
+                 typename MappingsRange, typename EquationsRange >
+      data_specification(const SortsRange& sorts,
+                         const AliasesRange& aliases,
+                         const ConstructorsRange& constructors,
+                         const MappingsRange& mappings,
+                         const EquationsRange& equations)
       {
         add_sorts(sorts);
         add_constructors(constructors);
@@ -332,7 +384,7 @@ namespace mcrl2 {
       inline
       sorts_const_range sorts() const
       {
-        return boost::make_iterator_range(m_sorts);
+        return sorts_const_range(m_sorts);
       }
 
       /// \brief Gets the aliases
@@ -360,7 +412,7 @@ namespace mcrl2 {
       inline
       constructors_const_range constructors() const
       {
-        return boost::iterator_range< constructors_const_iterator >(m_constructors);
+        return constructors_const_range(m_constructors);
       }
 
       /// \brief Gets all constructors of a sort.
@@ -368,9 +420,10 @@ namespace mcrl2 {
       /// Time complexity of this operation is constant.
       /// \param[in] s A sort expression.
       /// \return The constructors for sort s in this specification.
+      inline
       constructors_const_range constructors(const sort_expression& s) const
       {
-        return boost::iterator_range< constructors_const_iterator >(m_constructors.equal_range(normalise(s)));
+        return constructors_const_range(m_constructors.equal_range(find_referenced_sort(normalise(s))));
       }
 
       /// \brief Gets all mappings in this specification
@@ -381,7 +434,7 @@ namespace mcrl2 {
       inline
       mappings_const_range mappings() const
       {
-        return boost::iterator_range< mappings_const_iterator >(m_mappings);
+        return mappings_const_range(m_mappings);
       }
 
       /// \brief Gets all mappings of a sort
@@ -389,9 +442,10 @@ namespace mcrl2 {
       /// \param[in] s A sort expression.
       /// \return All mappings in this specification, for which s occurs as a
       /// right-hand side of the mapping's sort.
+      inline
       mappings_const_range mappings(const sort_expression& s) const
       {
-        return boost::iterator_range< mappings_const_iterator >(m_mappings.equal_range(normalise(s)));
+        return mappings_const_range(m_mappings.equal_range(find_referenced_sort(normalise(s))));
       }
 
       /// \brief Gets all equations in this specification
@@ -402,7 +456,7 @@ namespace mcrl2 {
       inline
       equations_const_range equations() const
       {
-        return boost::make_iterator_range(m_equations);
+        return equations_const_range(m_equations);
       }
 
       /// \brief Adds a sort to this specification
@@ -430,15 +484,17 @@ namespace mcrl2 {
 
       /// \brief Adds an alias (new name for a sort) to this specification
       ///
-      /// \param[in] s an alias
+      /// \param[in] a an alias
       /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
       /// \note this operation does not invalidate iterators of aliases_const_range
-      /// \post is_alias(s.name()) && find_referenced_sort(s.name()) = normalise(s.reference())
-      void add_alias(alias const& s)
+      /// \post is_alias(s.name()) && normalise(s.name()) = normalise(s.reference())
+      void add_alias(alias const& a)
       {
-        assert(!search_sort(s.name()) || ((constructors(s.name()).empty()) && !is_alias(s.name())));
+        assert(!search_sort(a.name()) || ((constructors(a.name()).empty()) && !is_alias(a.name())));
 
-        insert_alias(s.name(), normalise(s.reference()));
+        m_expression_normaliser.add(a);
+
+        insert_alias(a.name(), a.reference());
       }
 
       /// \brief Adds a constructor to this specification
@@ -704,17 +760,21 @@ namespace mcrl2 {
 
       /// \brief Normalises a sort expression by replacing aliases by sort expressions
       /// \param[in] e a sort expression
+      /// \pre e can be normalised by unfolding sort definitions
       /// \result normalise(e) = normalise(normalise(e))
-      sort_expression normalise(sort_expression const& e) const;
+      sort_expression normalise(sort_expression const& e) const
+      {
+        return m_expression_normaliser.normalise(e);
+      }
 
       /// \brief Follows aliases to the sort expression for which
       /// constructors, mappings equations are added
       ///
       /// \param[in] s A sort basic sort.
       /// \return the final sort referenced by s or s in case of failure
-      sort_expression find_referenced_sort(basic_sort const& s) const
+      sort_expression find_referenced_sort(basic_sort const& e) const
       {
-        sort_expression found = s;
+        sort_expression found = e;
 
         std::set< sort_expression > visited;
 
@@ -722,7 +782,7 @@ namespace mcrl2 {
           visited.insert(found);
 
           // search aliases for a reference that matches s
-          ltr_aliases_map::const_iterator result(m_aliases_by_name.find(found));
+          atermpp::map< basic_sort, sort_expression >::const_iterator result(m_aliases_by_name.find(found));
 
           if (result != m_aliases_by_name.end())
           {
@@ -731,6 +791,16 @@ namespace mcrl2 {
         } while (found.is_basic_sort() && visited.find(found) == visited.end());
 
         return found;
+      }
+
+      /// \brief Follows aliases to the sort expression for which
+      /// constructors, mappings equations are added
+      ///
+      /// \param[in] s A sort basic sort.
+      /// \return the final sort referenced by s or s in case of failure
+      sort_expression find_referenced_sort(sort_expression const& e) const
+      {
+        return (e.is_basic_sort()) ? find_referenced_sort(basic_sort(e)) : e;
       }
 
       /// \brief Removes sort from specification.
@@ -756,8 +826,6 @@ namespace mcrl2 {
 
           m_sorts.erase(s);
         }
-
-        m_recursive_sorts.erase(s);
       }
 
       /// \brief Removes alias from specification.
@@ -768,18 +836,20 @@ namespace mcrl2 {
 
         m_aliases_by_sort.erase(std::find(m_aliases_by_sort.lower_bound(a.reference()),
                                           m_aliases_by_sort.upper_bound(a.reference()),
-                                      rtl_aliases_map::value_type(a.reference(), a.name())));
+                                      reverse_aliases_map::value_type(a.reference(), a.name())));
         m_aliases_by_name.erase(a.name());
+
+        m_expression_normaliser.remove(a);
       }
 
       /// \brief Removes sorts from specification.
       ///
       /// \param[in] sl A range of sorts.
       /// \post for all s in sl: s no in sorts()
-      template < typename ForwardTraversalIterator >
-      void remove_sorts(const boost::iterator_range< ForwardTraversalIterator >& sl)
+      template < typename SortsForwardRange >
+      void remove_sorts(const SortsForwardRange& sl)
       {
-        for (ForwardTraversalIterator i = sl.begin(); i != sl.end(); ++i)
+        for (typename SortsForwardRange::iterator i = sl.begin(); i != sl.end(); ++i)
         {
           remove_sort(*i);
         }
@@ -815,10 +885,10 @@ namespace mcrl2 {
       ///
       /// \param[in] cl A range of constructors.
       /// \post for all c in cl: c not in constructors()
-      template < typename ForwardTraversalIterator >
-      void remove_constructors(const boost::iterator_range< ForwardTraversalIterator >& cl)
+      template < typename ConstructorsForwardRange >
+      void remove_constructors(const ConstructorsForwardRange& cl)
       {
-        for (ForwardTraversalIterator i = cl.begin(); i != cl.end(); ++i)
+        for (typename ConstructorsForwardRange::const_iterator i = cl.begin(); i != cl.end(); ++i)
         {
           remove_constructor(*i);
         }
@@ -851,10 +921,10 @@ namespace mcrl2 {
       ///
       /// \param[in] fl A range of constructors.
       /// \post for all f in fl: f not in mappings()
-      template < typename ForwardTraversalIterator >
-      void remove_mappings(const boost::iterator_range< ForwardTraversalIterator >& fl)
+      template < typename MappingsForwardRange >
+      void remove_mappings(const MappingsForwardRange& fl)
       {
-        for (ForwardTraversalIterator i = fl.begin(); i != fl.end(); ++i)
+        for (typename MappingsForwardRange::const_iterator i = fl.begin(); i != fl.end(); ++i)
         {
           remove_mapping(*i);
         }
@@ -878,10 +948,10 @@ namespace mcrl2 {
       ///
       /// \param[in] el A range of equations.
       /// \post for all e in el: e not in equations()
-      template < typename ForwardTraversalIterator >
-      void remove_equations(const boost::iterator_range< ForwardTraversalIterator >& el)
+      template < typename EquationsForwardRange >
+      void remove_equations(const EquationsForwardRange& el)
       {
-        for (ForwardTraversalIterator i = el.begin(); i != el.end(); ++i)
+        for (typename EquationsForwardRange::const_iterator i = el.begin(); i != el.end(); ++i)
         {
           remove_equation(*i);
         }
@@ -921,15 +991,7 @@ namespace mcrl2 {
       /// \param[in] s2 A sort expression
       bool equal_sorts(sort_expression const& s1, sort_expression const& s2) const
       {
-        if (s1 == s2)
-        {
-          return true;
-        }
-
-        sort_expression normal_s1 = (s1.is_basic_sort()) ? find_referenced_sort(s1) : s1;
-        sort_expression normal_s2 = (s2.is_basic_sort()) ? find_referenced_sort(s2) : s2;
-
-        return normal_s1 == normal_s2;
+        return (s1 == s2) ? true : normalise(s1) == normalise(s2);
       }
 
       /// \brief Checks whether a sort is certainly finite.
@@ -953,10 +1015,11 @@ namespace mcrl2 {
       /// \brief Checks whether all sort expressions are certainly finite.
       ///
       /// \param[in] s A range of sort expressions
-      template < typename ForwardTraversalIterator >
-      bool is_certainly_finite(const boost::iterator_range< ForwardTraversalIterator >& s) const
+      template < typename ForwardRange >
+      bool is_certainly_finite(const ForwardRange& s,
+		 typename detail::enable_if_container< ForwardRange, sort_expression >::type* = 0) const
       {
-        for (ForwardTraversalIterator i = s.begin(); i != s.end(); ++i) {
+        for (typename ForwardRange::const_iterator i = s.begin(); i != s.end(); ++i) {
           if (!is_certainly_finite(*i)) {
             return false;
           }

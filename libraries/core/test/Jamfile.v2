@@ -10,22 +10,8 @@ project libraries/core/test
 
 include $(TOP)/build/testing/header_test.jam ;
 
-use-project /tools/mcrl22lps : ../../../tools/mcrl22lps ;
-use-project /tools/lpspp : ../../../tools/lpspp ;
-
-for file in [ glob-tree *.mcrl2 : .svn ] {
-  tests-with-files += [
-        run /tools/mcrl22lps//mcrl22lps
-              : -D
-              : $(file)
-              : <testing.preserve>true
-                <testing.post-pipes>/tools/lpspp//lpspp
-              : mcrl22lps-core-$(file:B) ] ;
-}
-
 test-suite core
     : [ run test_lib.cpp ]
-      $(tests-with-files)
       [ run identifier_string_test.cpp ]
       [ run text_utility_test.cpp ]
       [ run sequence_test.cpp ]
