@@ -370,7 +370,14 @@ namespace mcrl2 {
     template < typename Term >
     void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
     {
-      find_sort_expressions(term, std::inserter(sorts, sorts.end()));
+      std::set< sort_expression > all_sorts;
+
+      find_sort_expressions(term, std::inserter(all_sorts, all_sorts.end()));
+
+      for (std::set< sort_expression >::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+      {
+        sorts.insert(normalise(*i));
+      }
     }
 
     template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
@@ -421,7 +428,7 @@ namespace mcrl2 {
     {
       std::set< sort_expression > sorts;
 
-      sorts.insert(s);
+      sorts.insert(normalise(s));
 
       make_complete(sorts);
     }
