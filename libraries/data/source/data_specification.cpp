@@ -298,35 +298,42 @@ namespace mcrl2 {
       {
         sort_pos::add_pos_to_specification(*this);
       }
-      else if (sort.is_container_sort())
+      else
       {
-        sort_expression element_sort(container_sort(sort).element_sort());
+        sort_expression normalised_sort(normalise(sort));
 
-        if (sort_list::is_list(sort))
+        if (sort.is_container_sort())
         {
-          sort_list::add_list_to_specification(*this, element_sort);
-        }
-        else if (sort_set::is_set(sort))
-        {
-          sort_set::add_set_to_specification(*this, element_sort);
-        }
-        else if (sort_bag::is_bag(sort))
-        {
-          sort_bag::add_bag_to_specification(*this, element_sort);
-        }
-      }
-      else if (sort.is_structured_sort())
-      {
-        add_system_defined_sort(sort);
+          sort_expression element_sort(container_sort(sort).element_sort());
 
-        structured_sort s_sort(sort);
+          if (sort_list::is_list(sort))
+          {
+            sort_list::add_list_to_specification(*this, element_sort);
+          }
+          else if (sort_set::is_set(sort))
+          {
+            sort_set::add_set_to_specification(*this, element_sort);
+          }
+          else if (sort_bag::is_bag(sort))
+          {
+            sort_bag::add_bag_to_specification(*this, element_sort);
+          }
+        }
+        else if (sort.is_structured_sort())
+        {
+          add_system_defined_sort(sort);
+       
+          structured_sort s_sort(sort);
+       
+          add_system_defined_constructors(s_sort.constructor_functions(normalised_sort));
+          add_system_defined_mappings(s_sort.projection_functions(normalised_sort));
+          add_system_defined_mappings(s_sort.recogniser_functions(normalised_sort));
+          add_system_defined_equations(s_sort.constructor_equations(normalised_sort));
+          add_system_defined_equations(s_sort.projection_equations(normalised_sort));
+          add_system_defined_equations(s_sort.recogniser_equations(normalised_sort));
+        }
 
-        add_system_defined_constructors(s_sort.constructor_functions(sort));
-        add_system_defined_mappings(s_sort.projection_functions(sort));
-        add_system_defined_mappings(s_sort.recogniser_functions(sort));
-        add_system_defined_equations(s_sort.constructor_equations(sort));
-        add_system_defined_equations(s_sort.projection_equations(sort));
-        add_system_defined_equations(s_sort.recogniser_equations(sort));
+        add_standard_mappings_and_equations(normalised_sort);
       }
 
       add_standard_mappings_and_equations(sort);
