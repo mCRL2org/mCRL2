@@ -176,6 +176,8 @@ namespace mcrl2 {
 
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
+                assert(static_cast< variable_type >((*i)(0)).sort() == m_evaluator.convert_from((*i)(1)).sort());
+
                 m_substitution[static_cast< variable_type >((*i)(0))] =
                                m_evaluator.convert_from((*i)(1));
               }
