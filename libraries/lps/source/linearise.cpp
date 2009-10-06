@@ -3820,7 +3820,7 @@ class specification_basic_type:public boost::noncopyable
             spec.insertalias(alias(sort_id, sort_struct));
 
             //store new declarations in return value w
-            sortId = sort_struct;
+            sortId = sort_id;
             elementnames = data::convert< data::function_symbol_list >(sort_struct.constructor_functions());
           }
         }
@@ -4303,7 +4303,6 @@ class specification_basic_type:public boost::noncopyable
 
     summand collect_sum_arg_arg_cond(
                        const enumtype &e,
-                       // const enumtype *e,
                        int n,
                        const summand_list sumlist,
                        const variable_list gsorts)
