@@ -730,7 +730,7 @@ void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
   traverse_sort_expressions(p, std::inserter(s, s.end()));
-  p.data().make_complete(boost::make_iterator_range(s));
+  p.data().make_complete(s);
 }
 
 /// \brief Equality operator on PBESs
