@@ -66,10 +66,6 @@ namespace mcrl2 {
             using namespace tipi::layout;
             using namespace tipi::layout::elements;
 
-            bool initialised = activate_strategy_conversion();
-
-            static_cast< void >(initialised);
-
             mcrl2::utilities::squadt::radio_button_helper< rewriter::strategy > strategy_selector(display);
 
             horizontal_box& m = display.create< horizontal_box >();
@@ -132,7 +128,11 @@ namespace mcrl2 {
                         const std::string& tool_description,
                         std::string known_issues = "")
             : super_type(name, author, what_is, tool_description, known_issues)
-          {}
+          {
+            bool initialised = activate_strategy_conversion();
+
+            static_cast< void >(initialised);
+          }
       };
     }
   }

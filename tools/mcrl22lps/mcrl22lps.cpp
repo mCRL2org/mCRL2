@@ -122,7 +122,6 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
-      m_linearisation_options.rewrite_strategy        = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
       m_linearisation_options.lin_method = lmRegular;
 
       if (0 < parser.options.count("lin-method")) {
@@ -159,12 +158,11 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
              "translate an mCRL2 specification to an LPS",
              "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
              "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used."),noalpha(false),opt_check_only(false)
+             "stdin is used."), noalpha(false), opt_check_only(false)
     {}
 
     bool run() 
     { //linearise infilename with options
-      
       process_specification spec;
       if (m_linearisation_options.infilename.empty()) 
       { //parse specification from stdin
@@ -222,24 +220,23 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     /** \brief compiles a t_lin_options instance from a configuration */
     bool extract_task_options(tipi::configuration const& c)
     {
-      bool result = true;
-
       if (c.option_exists(option_linearisation_method)) 
       { m_linearisation_options.lin_method = c.get_option_argument< t_lin_method >(option_linearisation_method, 0);
       }
       else 
       { send_error("Configuration does not contain a linearisation method\n");
-        result = false;
+
+        return false;
       }
 
       m_linearisation_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
       m_linearisation_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
-      noalpha                 = c.get_option_argument< bool >(option_no_alpha);
+      noalpha                                         = c.get_option_argument< bool >(option_no_alpha);
       m_linearisation_options.newstate                = c.get_option_argument< bool >(option_newstate);
       m_linearisation_options.binary                  = c.get_option_argument< bool >(option_binary);
       m_linearisation_options.statenames              = c.get_option_argument< bool >(option_statenames);
       m_linearisation_options.norewrite               = c.get_option_argument< bool >(option_no_rewrite);
-      m_linearisation_options.noglobalvars              = c.get_option_argument< bool >(option_no_globalvars);
+      m_linearisation_options.noglobalvars            = c.get_option_argument< bool >(option_no_globalvars);
       opt_check_only                                  = c.get_option_argument< bool >(option_check_only);
       m_linearisation_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
       m_linearisation_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
@@ -249,7 +246,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.outfilename      = output_filename();
       m_linearisation_options.rewrite_strategy = rewrite_strategy();
 
-      return (result);
+      return true;
     }
 
     static bool initialise_types()
@@ -264,15 +261,20 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       return true;
     }
 
-  public:
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
+    void synchronise_with_configuration(tipi::configuration& c)
     {
       bool initialised = initialise_types();
 
       static_cast< void > (initialised); // harmless, and prevents unused variable warnings
 
+      super::synchronise_with_configuration(c);
+    }
+
+  public:
+
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities& c) const
+    {
       c.add_input_configuration("main-input", tipi::mime_type("mcrl2", tipi::mime_type::text),
                                                             tipi::tool::category::transformation);
     }
@@ -350,7 +352,7 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       checkbox& alpha               = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_alpha));
       checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
       checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
-      checkbox& globalvars            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_globalvars));
+      checkbox& globalvars          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_globalvars));
       checkbox& check_only          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_check_only));
 
       // two columns to select the linearisation options of the tool
