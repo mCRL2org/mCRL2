@@ -50,17 +50,37 @@ namespace mcrl2 {
 
         bool operator()(data_equation const& e) const
         {
-          return true;
+          // return true;
           // Disabled because of too agressive removal of equations,
           // causing the statespace of 1394-fin to exists of a single state
           // and no transitions. (JK & JFG, 7/10/2009)
-          /*
+          // Potentially repaired by also adding the constructors of all sorts into m_used_symbols (JFG 7/10/2009)
+          
           std::set< function_symbol > used_symbols;
+
+          // std::cerr << "Data equation " << e << "\n";
 
           detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
+          /* for(std::set< function_symbol >::const_iterator i=used_symbols.begin();
+                 i!=used_symbols.end(); ++i)
+          { std::cerr  << "Used symbol in equation " << *i << "\n";
+          }
+
+          for(std::set< function_symbol >::const_iterator i=m_used_symbols.begin();
+                 i!=m_used_symbols.end(); ++i)
+          { std::cerr  << "Used symbol in context " << *i << "\n";
+          } */
+
           return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
-          */
+          /* bool result=std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
+          if (result) 
+          { std::cerr << "True +++++++++++++++++++++++++++++++++++++++\n";
+          }
+          else
+          { std::cerr << "False +++++++++++++++++++++++++++++++++++++++\n";
+          }
+          return result; */
         }
 
         // temporary measure: use aterm
@@ -83,6 +103,12 @@ namespace mcrl2 {
               add_symbols(specification.constructors(j->sort()));
               add_symbols(specification.mappings(j->sort()));
             }
+          }
+
+          // Add all constructors of all sorts as they may be used when enumerating over these sorts
+          atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
+          for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
+          { add_symbols(specification.constructors(*j));
           }
 
           // Trick, traverse all but the data specification
