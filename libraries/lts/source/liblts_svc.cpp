@@ -190,8 +190,8 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
       for (unsigned int i=0; i<nstates; i++)
       {
         if ( !ATisList(state_values[i]) )
-        {
-          gsWarningMsg("state values are not saved as they are not the in mCRL format\n");
+        { 
+          gsWarningMsg("state values are not saved as they are not in mCRL format\n");
 	  state_info = false;
           break;
         }
@@ -228,7 +228,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
       {
         if ( !ATisAppl(state_values[i]) || strcmp(ATgetName(ATgetAFun((ATermAppl) state_values[i])),"STATE") )
         {
-          gsWarningMsg("state values are not saved as they are not the in mCRL2 format\n");
+          gsWarningMsg("state values are not saved as they are not in mCRL2 format\n");
 	  state_info = false;
           break;
         }
