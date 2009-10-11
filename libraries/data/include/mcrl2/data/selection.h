@@ -50,11 +50,15 @@ namespace mcrl2 {
 
         bool operator()(data_equation const& e) const
         {
-          // return true;
+          return true;
           // Disabled because of too agressive removal of equations,
           // causing the statespace of 1394-fin to exists of a single state
           // and no transitions. (JK & JFG, 7/10/2009)
           // Potentially repaired by also adding the constructors of all sorts into m_used_symbols (JFG 7/10/2009)
+          // It turns out that this does not work properly, due to the fact that
+          // linear specifications are not properly timed normalized, causing
+          // identical functions to have different types. Incomplete type normalisation
+          // can cause many other problems also.
           
           std::set< function_symbol > used_symbols;
 
