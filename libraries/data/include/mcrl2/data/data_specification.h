@@ -179,7 +179,7 @@ namespace mcrl2 {
             {
               m_normalised_aliases.clear();
 
-              for (typename ForwardRange::iterator i = aliases.begin(); i != aliases.end(); ++i)
+              for (typename ForwardRange::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
               {
                 m_normalised_aliases[i->name()] = i->reference();
               }
