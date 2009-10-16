@@ -128,10 +128,14 @@ using namespace mcrl2::lts;
         for (atermpp::set< ATerm >::iterator z = tmp.begin(); z !=  tmp.end() ; z++)
         {
           line.append( " \"");
-          line.append(l.pretty_print_state_parameter_value(*z));
+          string str = l.pretty_print_state_parameter_value(*z);
+          if (str.empty())
+          {
+            str ="-"; 
+          }
+          line.append(str);
           line.append("\"");
         }
-        //cout << line  << endl;
                         parseStateVarDescr(
                             line,
                             graph );

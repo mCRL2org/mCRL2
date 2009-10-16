@@ -105,8 +105,9 @@ bool DiaGraph::run()
     clustered = false;
     critSect = false;
 
-    if (!lts_file_argument.empty()) {
-      openFile(lts_file_argument);
+    if (!input_filename().empty())
+    {
+      openFile(input_filename().c_str());
     }
 
     // start event loop

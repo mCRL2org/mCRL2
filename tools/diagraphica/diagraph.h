@@ -441,8 +441,6 @@ private:
     bool              critSect;
     bool	      clustered;
 
-    std::string lts_file_argument;
-
     // -- visualization ---------------------------------------------
     GLCanvas* canvasArcD;  // association
     ArcDiagram* arcDgrm;   // composition
