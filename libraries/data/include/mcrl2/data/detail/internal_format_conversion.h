@@ -65,8 +65,7 @@ namespace mcrl2 {
 
           data_equation operator()(data_equation const& e)
           {
-            return data_equation((*this)(e.variables()),
-                (is_nil(e.argument(1))) ? static_cast< data_expression const& >(sort_bool::true_()) : (*this)(e.condition()),
+            return data_equation((*this)(e.variables()), (*this)(e.condition()), // JK 15/10/2009 removed is_nil check
                        (*this)(e.lhs()), (*this)(e.rhs()));
           }
 

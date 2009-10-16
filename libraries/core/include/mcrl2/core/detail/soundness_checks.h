@@ -3759,7 +3759,7 @@ bool check_term_StateVar(Term t)
   return true;
 }
 
-// ActionRenameRule(DataVarId*, DataExprOrNil, ParamIdOrAction, ActionRenameRuleRHS)
+// ActionRenameRule(DataVarId*, DataExpr, ParamIdOrAction, ActionRenameRuleRHS)
 template <typename Term>
 bool check_term_ActionRenameRule(Term t)
 {
@@ -3781,9 +3781,9 @@ bool check_term_ActionRenameRule(Term t)
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
-      std::cerr << "check_rule_DataExprOrNil" << std::endl;
+      std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
   if (!check_term_argument(a(2), check_rule_ParamIdOrAction<atermpp::aterm>))
@@ -3868,7 +3868,7 @@ bool check_term_ActAt(Term t)
   return true;
 }
 
-// DataEqn(DataVarId*, DataExprOrNil, DataExpr, DataExpr)
+// DataEqn(DataVarId*, DataExpr, DataExpr, DataExpr)
 template <typename Term>
 bool check_term_DataEqn(Term t)
 {
@@ -3890,9 +3890,9 @@ bool check_term_DataEqn(Term t)
       std::cerr << "check_rule_DataVarId" << std::endl;
       return false;
     }
-  if (!check_term_argument(a(1), check_rule_DataExprOrNil<atermpp::aterm>))
+  if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
     {
-      std::cerr << "check_rule_DataExprOrNil" << std::endl;
+      std::cerr << "check_rule_DataExpr" << std::endl;
       return false;
     }
   if (!check_term_argument(a(2), check_rule_DataExpr<atermpp::aterm>))

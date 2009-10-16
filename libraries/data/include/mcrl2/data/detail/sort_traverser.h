@@ -36,7 +36,7 @@ namespace mcrl2 {
           void leave(Expression const&)
           {}
 
-	  using super::operator();
+    using super::operator();
 
           void operator()(function_symbol const& e)
           {
@@ -176,9 +176,7 @@ namespace mcrl2 {
           template < typename Expression >
           void operator()(Expression const& e, typename detail::disable_if_container< Expression >::type* = 0)
           {
-            if (e != atermpp::aterm(core::detail::gsMakeNil())) { // REMOVE ME (condition)
-              static_cast< super& >(*this)(e);
-            }
+            static_cast< super& >(*this)(e);
           }
 #endif // NO_TERM_TRAVERSAL
       };

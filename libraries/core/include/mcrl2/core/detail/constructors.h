@@ -1768,7 +1768,7 @@ ATermAppl constructStateVar()
 inline
 ATermAppl initConstructActionRenameRule(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructParamIdOrAction()), reinterpret_cast<ATerm>(constructActionRenameRuleRHS()));
+  t = ATmakeAppl4(gsAFunActionRenameRule(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructParamIdOrAction()), reinterpret_cast<ATerm>(constructActionRenameRuleRHS()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }
@@ -1816,7 +1816,7 @@ ATermAppl constructActAt()
 inline
 ATermAppl initConstructDataEqn(ATermAppl& t)
 {
-  t = ATmakeAppl4(gsAFunDataEqn(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExprOrNil()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()));
+  t = ATmakeAppl4(gsAFunDataEqn(), reinterpret_cast<ATerm>(constructList()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()), reinterpret_cast<ATerm>(constructDataExpr()));
   ATprotect(reinterpret_cast<ATerm*>(&t));
   return t;
 }

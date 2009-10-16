@@ -450,7 +450,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
         l = ATmakeList0();
         for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
         {
-                if ( b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)) )
+                if ( b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)) ) // Summand is timed
                 {
                         gsWarningMsg("specification uses time, which is (currently) not supported; ignoring timing\n");
                         b = false;

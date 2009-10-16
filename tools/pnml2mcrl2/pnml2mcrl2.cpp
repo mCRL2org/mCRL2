@@ -180,7 +180,7 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
 
   public:
     bool run()
-    { 
+    {
       if(output_filename().empty())
       {
         return do_pnml2mcrl2(input_filename().c_str(), std::cout);
@@ -2244,7 +2244,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     if(error) {
       //add nMaxTockens
       ATermAppl ExtraMap=mcrl2::data::function_symbol(ATAgetArgument(nMaxTokens,0),mcrl2::data::sort_pos::pos());
-      ATermAppl ExtraEqn=gsMakeDataEqn(ATmakeList0(),gsMakeNil(),nMaxTokens,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(error))));
+      ATermAppl ExtraEqn=gsMakeDataEqn(ATmakeList0(),gsMakeDataExprTrue(),nMaxTokens,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(error))));
       ATermAppl DataSpec=ATAgetArgument(Result,0);
       ATermAppl NewMapSpec=gsMakeMapSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,2),0),(ATerm)ExtraMap));
       ATermAppl NewDataEqnSpec=gsMakeDataEqnSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,3),0),(ATerm)ExtraEqn));

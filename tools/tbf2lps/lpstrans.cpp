@@ -343,7 +343,7 @@ static ATermList convert_datas(ATermAppl spec, ATermList *ids)
     }
     lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args);
     rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
-    r = ATappend(r,(ATerm) gsMakeDataEqn(args,gsMakeNil(),lhs,rhs));
+    r = ATappend(r,(ATerm) gsMakeDataEqn(args,gsMakeDataExprTrue(),lhs,rhs));
   }
 
   return r;

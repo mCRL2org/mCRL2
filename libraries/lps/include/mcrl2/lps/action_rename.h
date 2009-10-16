@@ -330,7 +330,7 @@ namespace lps {
       std::set< data::variable > new_vars = find_variables(rleft.arguments());
 
       for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
-      { 
+      {
         mcrl2::core::identifier_string new_name = generator(i->name());
 
         if (new_name != i->name())
@@ -529,9 +529,11 @@ lps::specification action_rename(
           action renamed_rule_new_action=rule_new_action;
           detail::rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
+          /*
           if (is_nil(renamed_rule_condition))
           { renamed_rule_condition=sort_bool::true_();
           }
+          */ // JK 15/10/2009 condition is always a data expression
 
           //go through the arguments of the action
           data_expression_list::iterator

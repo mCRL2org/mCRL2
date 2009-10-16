@@ -136,7 +136,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 %type <appl> data_expr_rel
 %type <appl> data_expr_cons data_expr_snoc data_expr_concat
 %type <appl> data_expr_add data_expr_div data_expr_mult
-%type <appl> data_expr_prefix data_expr_quant_prefix 
+%type <appl> data_expr_prefix data_expr_quant_prefix
 %type <appl> data_expr_postfix
 %type <appl> data_expr_primary
 %type <appl> data_constant data_enumeration data_comprehension
@@ -1239,7 +1239,7 @@ data_eqn_decls_scs:
 data_eqn_decl:
   data_expr EQUALS data_expr
     {
-      safe_assign($$, gsMakeDataEqn(ATmakeList0(), gsMakeNil(), $1, $3));
+      safe_assign($$, gsMakeDataEqn(ATmakeList0(), gsMakeDataExprTrue(), $1, $3));
       gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
     }
   | data_expr ARROW data_expr EQUALS data_expr
@@ -2619,7 +2619,7 @@ action_rename_rule_sect:
       int n = ATgetLength($4);
       for (int i = 0; i < n; i++) {
         ATermAppl ActionRenameRule = ATAelementAt($4, i);
-	safe_assign($$, ATinsert($$,
+  safe_assign($$, ATinsert($$,
           (ATerm) gsMakeActionRenameRule($2,
             ATAgetArgument(ActionRenameRule, 1),
             ATAgetArgument(ActionRenameRule, 2),
@@ -2652,7 +2652,7 @@ action_rename_rule:
     }
   | param_id IMP action_rename_rule_rhs
     {
-      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), gsMakeNil(), $1, $3));
+      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), gsMakeDataExprTrue(), $1, $3));
       gsDebugMsg("parsed action rename rule\n %T\n", $$);
     }
   ;

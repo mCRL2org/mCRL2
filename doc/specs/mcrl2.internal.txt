@@ -124,7 +124,7 @@
                  | SortRef(<String>, <SortExpr>)                     
 
 //data equation
-<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExprOrNil>,
+<DataEqn>      ::= DataEqn(<DataVarId>*, <DataExpr>,
                      <DataExpr>, <DataExpr>)
 
 //data expression or nil
@@ -293,7 +293,7 @@
 
 //Action rename rule
 <ActionRenameRule>
-               ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
+               ::= ActionRenameRule(<DataVarId>*, <DataExpr>,
                      <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
 //Right-hand side of an action rename rule

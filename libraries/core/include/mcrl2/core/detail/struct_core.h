@@ -3004,9 +3004,9 @@ ATermAppl gsMakeAction(ATermAppl ActId_0, ATermList DataExpr_1)
 }
 
 inline
-ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl ParamIdOrAction_2, ATermAppl ActionRenameRuleRHS_3)
+ATermAppl gsMakeActionRenameRule(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl ParamIdOrAction_2, ATermAppl ActionRenameRuleRHS_3)
 {
-  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
+  return ATmakeAppl4(gsAFunActionRenameRule(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) ParamIdOrAction_2, (ATerm) ActionRenameRuleRHS_3);
 }
 
 inline
@@ -3142,9 +3142,9 @@ ATermAppl gsMakeDataAppl(ATermAppl DataExpr_0, ATermList DataExpr_1)
 }
 
 inline
-ATermAppl gsMakeDataEqn(ATermList DataVarId_0, ATermAppl DataExprOrNil_1, ATermAppl DataExpr_2, ATermAppl DataExpr_3)
+ATermAppl gsMakeDataEqn(ATermList DataVarId_0, ATermAppl DataExpr_1, ATermAppl DataExpr_2, ATermAppl DataExpr_3)
 {
-  return ATmakeAppl4(gsAFunDataEqn(), (ATerm) DataVarId_0, (ATerm) DataExprOrNil_1, (ATerm) DataExpr_2, (ATerm) DataExpr_3);
+  return ATmakeAppl4(gsAFunDataEqn(), (ATerm) DataVarId_0, (ATerm) DataExpr_1, (ATerm) DataExpr_2, (ATerm) DataExpr_3);
 }
 
 inline

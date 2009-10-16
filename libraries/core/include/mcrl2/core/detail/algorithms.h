@@ -59,7 +59,7 @@ namespace detail {
   {
     ATermAppl result = core::type_check_proc_spec(proc_spec);
     if (result == NULL)
-      throw mcrl2::runtime_error("type check error");
+      throw mcrl2::runtime_error("type check error when checking process specification");
     return result;
   }
 
@@ -112,7 +112,7 @@ namespace detail {
   {
     ATermAppl result = core::type_check_state_frm(state_formula, spec);
     if (result == NULL)
-      throw mcrl2::runtime_error("type check error");
+      throw mcrl2::runtime_error("type check error when checking state formula");
     return result;
   }
 
