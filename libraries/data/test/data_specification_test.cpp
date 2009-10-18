@@ -464,7 +464,7 @@ void test_system_defined()
 
   remove_all_system_defined(copy);
 
-  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy, false)), specification));
+  BOOST_CHECK(compare_for_equality(data_specification(detail::data_specification_to_aterm_data_spec(copy)), specification));
 
   specification = parse_data_specification(
     "sort D = struct d(bla : Bool)?is_d;"

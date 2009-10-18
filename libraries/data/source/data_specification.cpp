@@ -62,13 +62,13 @@ namespace mcrl2 {
           if (is_sort_expression(a))
           {
             atermpp::map< sort_expression, sort_expression >::const_iterator i = m_map.find(sort_expression(a));
-     
+
             if (i != m_map.end())
             {
               return i->second;
             }
           }
-     
+
           return a;
         }
 
@@ -680,7 +680,7 @@ namespace mcrl2 {
           if (i->second == j->second && !detail::has_legacy_name(i->first))
           {
             j->second = i->first;
-      
+
             normalise_names_in_aliases();
           }
         }
@@ -691,15 +691,16 @@ namespace mcrl2 {
       atermpp::map< sort_expression, sort_expression > original_aliases(m_normalised_aliases);
 
       // Step 3. normalise right-hand sides (left to right)
-      for (atermpp::map< sort_expression, sort_expression >::iterator i = original_aliases.begin(); i != original_aliases.end(); ++i)
+      for (atermpp::map< sort_expression, sort_expression >::iterator i = m_normalised_aliases.begin(); i != m_normalised_aliases.end(); ++i)
       {
-        sort_expression right(i->second);
+        atermpp::map< sort_expression, sort_expression >::iterator p(original_aliases.find(i->first));
+        sort_expression                                            new_right(i->first);
 
-        i->second = i->first;
+        std::swap(p->second, new_right);
 
-        i->second = detail::sort_map_substitution_adapter(m_normalised_aliases)(i->second);
+        i->second = detail::sort_map_substitution_adapter(original_aliases)(i->second);
 
-        original_aliases[i->first] = right;
+        std::swap(p->second, new_right);
       }
 
       atermpp::map< sort_expression, sort_expression > reversed_aliases(m_normalised_aliases);
@@ -723,7 +724,7 @@ namespace mcrl2 {
           {
             throw mcrl2::runtime_error("Fatal error, alias " + pp(alias(i->first, i->second)) + " could be reduced to " + pp(alias(i->first, new_right)));
           }
-          else if (new_right != i->second) 
+          else if (new_right != i->second)
           {
             i->second = new_right;
           }
@@ -864,6 +865,7 @@ namespace mcrl2 {
 
       m_expression_normaliser.initialise(aliases);
 
+std::cerr << pp(aliases) << std::endl;
       // Step two: Normalise names for container sorts
       for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
@@ -871,6 +873,7 @@ namespace mcrl2 {
         {
           if (!detail::has_legacy_name(alias(*i).name()))
           {
+std::cerr << pp(alias(*i).name()) << " => " << pp(alias(*i).reference()) << std::endl;
             insert_alias(alias(*i).name(), alias(*i).reference());
           }
         }
@@ -878,6 +881,7 @@ namespace mcrl2 {
           add_sort(normalise(*i));
         }
       }
+std::cerr << pp(this->aliases()) << std::endl;
 
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {

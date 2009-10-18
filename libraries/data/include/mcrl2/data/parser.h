@@ -130,7 +130,7 @@ namespace data {
 
     // Type check the variabl list.
     atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                        mcrl2::data::remove_all_system_defined(data_spec));
+                                        mcrl2::data::remove_all_system_defined(data_spec), true);
 
     data_vars = core::type_check_data_vars(data_vars, d);
 
@@ -280,7 +280,7 @@ namespace data {
     }
     data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                        mcrl2::data::remove_all_system_defined(data_spec)), variables);
+                        mcrl2::data::remove_all_system_defined(data_spec), true), variables);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
     // Undo sort renamings for compatibility with type checker
@@ -358,7 +358,7 @@ namespace data {
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error parsing sort expression");
     atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                                mcrl2::data::remove_all_system_defined(data_spec));
+                                                mcrl2::data::remove_all_system_defined(data_spec), true);
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");

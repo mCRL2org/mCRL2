@@ -214,7 +214,7 @@ namespace lps {
       /// \param data A data specification
       /// \param action_labels A sequence of action labels
       /// \param rules A sequence of action rename rules
-      action_rename_specification(data::data_specification  data, action_label_list action_labels, action_rename_rule_list rules)
+      action_rename_specification(data::data_specification const& data, action_label_list action_labels, action_rename_rule_list rules)
         :
           m_data(data),
           m_action_labels(action_labels),
@@ -222,7 +222,7 @@ namespace lps {
       {
           m_term = reinterpret_cast<ATerm>(
           core::detail::gsMakeActionRenameSpec(
-            data::detail::data_specification_to_aterm_data_spec(data),
+            data::detail::data_specification_to_aterm_data_spec(data, true),
             core::detail::gsMakeActSpec(action_labels),
             core::detail::gsMakeActionRenameRules(rules)
           )

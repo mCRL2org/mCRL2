@@ -6274,7 +6274,7 @@ class specification_basic_type:public boost::noncopyable
                        variable_list &pars,
                        assignment_list &init)
     { if (is_process_instance(t))
-      { 
+      {
         summand_list t3=generateLPEmCRL(process_instance(t).identifier(),canterminate,regular,pars,init);
         long n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();

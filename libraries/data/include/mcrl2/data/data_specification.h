@@ -44,7 +44,7 @@ namespace mcrl2 {
       Term apply_compatibility_renamings(const data_specification&, Term const&);
       template < typename Term >
       Term undo_compatibility_renamings(const data_specification&, Term const&);
-      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = true);
+      atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&, bool = false);
     }
     /// \endcond
 
@@ -108,9 +108,9 @@ namespace mcrl2 {
         typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
 
         /// \brief iterator over aliases (objects of type function_symbol)
-        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::iterator >              aliases_iterator;
+        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::iterator >          aliases_iterator;
         /// \brief const iterator over aliases (objects of type function_symbol)
-        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::const_iterator >        aliases_const_iterator;
+        typedef boost::transform_iterator< convert_to_alias, reverse_aliases_map::const_iterator >    aliases_const_iterator;
         /// \brief iterator range over list of aliases
         typedef boost::iterator_range< aliases_iterator >                                             aliases_range;
         /// \brief iterator range over constant list of aliases
@@ -293,19 +293,6 @@ namespace mcrl2 {
 
           m_aliases_by_name[name] = reference;
           m_aliases_by_sort.insert(reverse_aliases_map::value_type(reference, name));
-
-          boost::iterator_range< reverse_aliases_map::iterator > relevant_range(m_aliases_by_sort.equal_range(name));
-
-          if (!relevant_range.empty())
-          {
-            for (reverse_aliases_map::iterator i = relevant_range.begin(), j = relevant_range.begin();
-                                                                     j++ != relevant_range.end(); i = j)
-            {
-              m_aliases_by_name[i->second] = reference;
-              m_aliases_by_sort.insert(reverse_aliases_map::value_type(reference, i->second));
-              m_aliases_by_sort.erase(i);
-            }
-          }
 
           if (insert_sort)
           {

@@ -73,7 +73,6 @@ namespace mcrl2 {
             b = recursive_substitute_equalities(summand_, application(working_condition).right(), substitutions);
             result = lazy::and_(a,b);
           }
-
           else if (is_equal_to_application(working_condition))
           {
             //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
@@ -103,16 +102,19 @@ namespace mcrl2 {
                          data::search_variable(summand_.summation_variables(), variable(application(working_condition).right()))) 
                 { // check whether the converse is possible
                   if (substitutions.count(application(working_condition).right()) == 0) 
-                  { sumelm_add_replacement(substitutions, application(working_condition).right(), 
+                  {
+                    sumelm_add_replacement(substitutions, application(working_condition).right(), 
                                                   substitutions[application(working_condition).left()]);
                     result = sort_bool::true_();
                   }
                 } 
                 else 
-                { if (substitutions[application(working_condition).left()].is_variable() &&
+                {
+                  if (substitutions[application(working_condition).left()].is_variable() &&
                       substitutions.count(substitutions[application(working_condition).left()]) == 0 &&
                       data::search_variable(summand_.summation_variables(), variable(substitutions[application(working_condition).left()]))) 
-                  { sumelm_add_replacement(substitutions, substitutions[application(working_condition).left()], application(working_condition).right());
+                  {
+                    sumelm_add_replacement(substitutions, substitutions[application(working_condition).left()], application(working_condition).right());
                     sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
                     result = sort_bool::true_();
                   }
