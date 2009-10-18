@@ -865,7 +865,6 @@ namespace mcrl2 {
 
       m_expression_normaliser.initialise(aliases);
 
-std::cerr << pp(aliases) << std::endl;
       // Step two: Normalise names for container sorts
       for (atermpp::term_list_iterator< atermpp::aterm_appl > i = term_sorts.begin(); i != term_sorts.end(); ++i)
       {
@@ -873,7 +872,6 @@ std::cerr << pp(aliases) << std::endl;
         {
           if (!detail::has_legacy_name(alias(*i).name()))
           {
-std::cerr << pp(alias(*i).name()) << " => " << pp(alias(*i).reference()) << std::endl;
             insert_alias(alias(*i).name(), alias(*i).reference());
           }
         }
@@ -881,7 +879,6 @@ std::cerr << pp(alias(*i).name()) << " => " << pp(alias(*i).reference()) << std:
           add_sort(normalise(*i));
         }
       }
-std::cerr << pp(this->aliases()) << std::endl;
 
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
       {
@@ -892,6 +889,7 @@ std::cerr << pp(this->aliases()) << std::endl;
           m_constructors.insert(sort_to_symbol_map::value_type(new_function.sort().target_sort(), new_function));
         }
       }
+
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
       {
         function_symbol new_function(i->name(), normalise(i->sort()));
