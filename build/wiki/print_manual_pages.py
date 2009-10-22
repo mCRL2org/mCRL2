@@ -83,6 +83,13 @@ The textual description should adhere to the following [[Language reference/PBES
 ''',
 }
 
+# change the line 'Written by X; Y' into 'Implemented by X, with contributions from Y'
+def process_authors(filename):
+  text = path(filename).text()
+  text = re.compile(r'^Written by (.*)$', re.M).sub(r'Implemented by \1', text)
+  text = re.compile(r'^(Implemented by .*);', re.M).sub(r'\1, with contributions from', text)
+  path(filename).write_text(text)
+
 # create subdirectory output/User_manual if it doesn't exist
 if not os.path.exists('output/User_manual'):
     os.makedirs('output/User_manual')
@@ -91,6 +98,7 @@ if not os.path.exists('output/User_manual'):
 for tool in TOOLS.split():
     filename = 'output/User_manual%s%s' % (os.sep, tool)
     os.system('..%sstage%s%s --generate-wiki-page > %s' % (os.sep, os.sep, tool, filename))
+    process_authors(filename)
 
 # update tool pages with custom additions
 for tool in TOOLS.split():
