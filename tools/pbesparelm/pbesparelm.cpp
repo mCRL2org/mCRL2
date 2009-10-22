@@ -38,7 +38,7 @@ class pbes_parelm_tool: public input_output_tool
     pbes_parelm_tool()
       : input_output_tool(
           "pbesparelm",
-          "Wieger Wesselink",
+          "Wieger Wesselink; Simon Janssen and Tim Willemse",
           "remove unused parameters from a PBES",
           "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
           "is not present, standard output is used. If INFILE is not present, standard input is used."

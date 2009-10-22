@@ -15,9 +15,6 @@
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 //#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
 
-#define NAME "pbes2bes"
-#define AUTHOR "Alexander van Dam, Wieger Wesselink"
-
 //C++
 #include <stdexcept>
 #include <iostream>
@@ -195,7 +192,7 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     pbes2bes_tool()
       : super(
           "pbes2bes",
-          "Alexander van Dam, Wieger Wesselink",
+          "Wieger Wesselink; Alexander van Dam and Tim Willemse",
           "compute a BES out of a PBES",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
           "If INFILE is not present, standard input is used. If OUTFILE is not present,   "

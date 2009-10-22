@@ -72,7 +72,7 @@ class lps2pbes_tool : public squadt_tool<input_output_tool>
   public:
     lps2pbes_tool() : super(
       "lps2pbes",
-      "Aad Mathijssen and Wieger Wesselink",
+      "Wieger Wesselink; Tim Willemse",
       "generate a PBES from an LPS and a state formula",
       "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
       "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "

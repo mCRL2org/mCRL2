@@ -11,7 +11,7 @@
 /*include "boost.hpp" // precompiled headers*/
 
 #define TOOLNAME "lpsinfo"
-#define AUTHOR "Frank Stappers, Wieger Wesselink"
+#define AUTHOR "Wieger Wesselink and Frank Stappers"
 
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/squadt_tool.h"

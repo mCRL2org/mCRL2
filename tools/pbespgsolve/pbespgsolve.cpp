@@ -690,7 +690,7 @@ class pg_solver_tool: public input_tool
     pg_solver_tool()
       : super(
           "pbespgsolve",
-          "Michael Weber, Maks Verver, Wieger Wesselink",
+          "Maks Verver and Wieger Wesselink; Michael Weber",
           "Solve a PBES using a parity game solver",
           "Reads a file containing a PBES, instantiates it into a BES, and applies a\n"
           "parity game solver to it. If INFILE is not present, standard input is used."

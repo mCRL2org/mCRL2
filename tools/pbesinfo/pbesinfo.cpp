@@ -68,7 +68,7 @@ class pbesinfo_tool: public input_tool
     pbesinfo_tool()
       : super(
           "pbesinfo",
-          "Alexander van Dam, Wieger Wesselink",
+          "Wieger Wesselink; Alexander van Dam",
           "display basic information about a PBES",
           super::make_tool_description("Print basic information about the PBES in INFILE.")
         ),

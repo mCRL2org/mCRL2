@@ -28,7 +28,7 @@ class lps_parelm_tool : public squadt_tool< input_output_tool >
 
     lps_parelm_tool() : super(
              "lpsparelm",
-             "Jeroen van der Wulp and Wieger Wesselink",
+             "Wieger Wesselink and Jeroen van der Wulp; Frank Stappers and Tim Willemse",
              "remove unused parameters from an LPS",
              "Remove unused parameters from the linear process specification (LPS) in INFILE "
              "and write the result to OUTFILE. If INFILE is not present, stdin is used. If "

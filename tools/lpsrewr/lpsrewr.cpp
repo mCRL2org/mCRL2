@@ -61,7 +61,7 @@ class lps_rewriter_tool : public squadt_tool< rewriter_tool< input_output_tool >
     lps_rewriter_tool()
       : super(
           "lpsrewr",
-          "Wieger Wesselink",
+          "Wieger Wesselink and Muck van Weerdenburg",
           "rewrite data expressions in an LPS",
           "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
           "If OUTFILE is not present, standard output is used. If INFILE is not present,"

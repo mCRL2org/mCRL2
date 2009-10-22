@@ -164,7 +164,7 @@ class lpsbisim2pbes_tool: public input_input_tool
     lpsbisim2pbes_tool()
       : input_input_tool(
           "lpsbisim2pbes",
-          "Wieger Wesselink",
+          "Wieger Wesselink; Tim Willemse and Bas Ploeger",
           "computes a bisimulation relation between two LPSs",
           "Reads two files containing an LPS, and computes a PBES that expresses "
           "bisimulation between the two. If OUTFILE is not present, standard "

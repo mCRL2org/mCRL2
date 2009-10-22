@@ -73,7 +73,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     lpsconstelm_tool()
       : super(
           "lpsconstelm",
-          "Frank Stappers, Wieger Wesselink",
+          "Wieger Wesselink; Frank Stappers",
           "removes constant parameters from an LPS",
           make_tool_description(
             "Remove constant process parameters from the LPS in INFILE and write the result to OUTFILE."
