@@ -942,24 +942,23 @@ namespace lts
        * equivalent to the original LTS by equivalence \a eq, and
        * similarly for the LTS \a l.
        */
-      bool compare(const lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options) const;
+      bool destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
 
       /** \brief Checks whether this LTS is equivalent to another LTS.
+       * \details The input labelled transition systems are duplicated in memory to carry
+       *          out the comparison. When space efficiency is a concern, one can consider
+       *          to use destructive_compare.
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] eq The equivalence with respect to which the LTSs will be
        * compared.
        * \param[in] opts The options that will be used for the comparison.
        * \retval true if the LTSs are found to be equivalent.
        * \retval false otherwise.
-       * \warning This function alters the internal data structure of
-       * both LTSs for efficiency reasons. After comparison, this LTS is
-       * equivalent to the original LTS by equivalence \a eq, and
-       * similarly for the LTS \a l.
        */
-      bool destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+      bool compare(const lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options) const;
 
       /** \brief Checks whether this LTS is smaller than another LTS according
-       * to a preorder.
+       * to a preorder. 
        * \param[in] l The LTS to which this LTS will be compared.
        * \param[in] pre The preorder with respect to which the LTSs will be
        * compared.
@@ -985,12 +984,6 @@ namespace lts
        * \retval true if this LTS is smaller than LTS \a l according to
        * preorder \a pre.
        * \retval false otherwise.
-       * \warning This function alters the internal data structure of
-       * both LTSs for efficiency reasons. After comparison, this LTS is
-       * equivalent to the original LTS by equivalence \a eq, and
-       * similarly for the LTS \a l, where \a eq is the equivalence
-       * induced by the preorder \a pre (i.e. \f$eq = pre \cap
-       * pre^{-1}\f$).
        */
       bool compare(const lts &l, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options) const;
 
@@ -1014,19 +1007,20 @@ namespace lts
       bool is_deterministic();
 
       
-      /** \brief Reduce this transition system with respect to strong or branching bisimulation.
+      /** \brief Reduce this transition system with respect to strong or (divergence preserving) branching bisimulation.
        * \param[branching] If true branching bisimulation is applied, otherwise strong bisimulation
-       * \param[add_class_to_state] Obsolete. Will not do anything.
        * \param[tau_actions] Indicates the actions that will be considered tau actions. In the resulting
        *                     lts these actions are renamed to tau. Tau itself is also an internal action.  */
-
       void bisimulation_reduce(
                  bool branching = false,
                  bool preserve_divergences = false,
                  const std::vector<std::string> *tau_actions = NULL);
 
+
       /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
-       * \detail This lts and the lts l2 are not usable anymore after applyin this call.
+       * \details This lts and the lts l2 are not usable anymore after this call.
+       *          The space consumption is O(n) and time is O(nm). It uses the branching bisimulation
+       *          algorithm by Groote and Vaandrager from 1990.
        * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
        * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
        * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
@@ -1037,12 +1031,17 @@ namespace lts
                const bool preserve_divergences=false, 
                const std::vector<std::string> *tau_actions=NULL);
 
+
       /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+       *  \details The current transitions system and the lts l2 are first duplicated and subsequently
+       *           reduced modulo bisimulation. If memory space is a concern, one could consider to
+       *           use destructive_bisimulation_compare. This routine uses the Groote-Vaandrager
+       *           branching bisimulation routine. It runs in O(mn) and uses O(n) memory where n is the
+       *           number of states and m is the number of transitions.
        * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
        * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
        * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
        * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
-
       bool bisimulation_compare(
                const lts &l2, 
                const bool branching=false, 
@@ -1050,9 +1049,9 @@ namespace lts
                const std::vector<std::string> *tau_actions=NULL) const;
 
       /** \brief Removes tau cycles by mapping all the states on a cycle to one state.
+ *        \details This routine is linear in the number of states and transitions.
        *  \param [preserve_divergence_loops] If true leave a self loop on states that resided on a tau
        *            cycle in the original transition system.
-       *  \param [add_class_to_state] Obsolete.
        *  \param [tau actions] Names of actions that are taken to be internal actions. */
       void scc_reduce(const bool preserve_divergence_loops=false,
                       const std::vector<std::string> *tau_actions=NULL);
