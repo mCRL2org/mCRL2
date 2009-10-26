@@ -29,7 +29,7 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 using namespace mcrl2::trace;
 
-enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone };
+enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
 static void print_state(ostream &os, ATermAppl state)
 {
@@ -83,6 +83,39 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   os << "}" << endl;
 }
 
+static void trace2statevector(ostream &os, Trace&trace)
+{
+  if ( trace.currentState() != NULL )
+  {
+    print_state(os,trace.currentState());
+  }
+  ATermAppl act = trace.nextAction();
+  while (act != NULL)
+  {
+    os << " -";
+    if (mcrl2::core::detail::gsIsMultAct(act))
+    {
+      PrintPart_CXX(os,(ATerm) act,ppDefault);
+    }
+    else
+    {
+      os << ATgetName(ATgetAFun(act));
+    }
+    os << "-> ";
+    ATermAppl CurrentState = trace.currentState();
+    if ( CurrentState != NULL )
+    {
+      print_state(os, trace.currentState());
+    }
+    os << std::endl;
+    act = trace.nextAction();
+    if (act != NULL && CurrentState != NULL)
+    {
+      print_state(os, trace.currentState());
+    }
+  }
+}
+
 static void trace2aut(ostream &os, Trace &trace)
 {
   os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
@@ -127,6 +160,10 @@ inline void save_trace(Trace& trace, output_type outtype, std::ostream& out) {
       case otSvc:
       trace2svc(*OutStream,trace);
       break;*/
+  case otStates:
+    gsVerboseMsg("writing result in plain text with state vectors...\n");
+    trace2statevector(out,trace);
+    break;
   default:
     break;
   }
@@ -169,6 +206,7 @@ public:
                                    input_filename() + "' for reading");
       }
     }
+
 
     if (output_filename().empty()) {
       gsVerboseMsg("writing result to stdout...\n");
@@ -215,6 +253,7 @@ protected:
     desc.add_option("format", make_mandatory_argument("FORMAT"),
                     "print the trace in the specified FORMAT:\n"
                     "  'plain' for plain text (default),\n"
+                    "  'states' for plain text with state vectors,\n"
                     "  'mcrl2' for the mCRL2 format,\n"
                     "  'aut' for the Aldebaran format, or\n"
                     "  'dot' for the GraphViz format"
@@ -228,6 +267,8 @@ protected:
       std::string eq_name(parser.option_argument("format"));
       if (eq_name == "plain") {
         format_for_output = otPlain;
+      } else if (eq_name == "states") {
+        format_for_output = otStates;
       } else if (eq_name == "mcrl2") {
         format_for_output = otMcrl2;
       } else if (eq_name == "dot") {
@@ -244,5 +285,5 @@ protected:
 int main(int argc, char **argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-      return tracepp_tool().execute(argc, argv);
+  return tracepp_tool().execute(argc, argv);
 }
