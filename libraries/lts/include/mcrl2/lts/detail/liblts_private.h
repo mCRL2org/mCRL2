@@ -21,12 +21,27 @@
 
   class lts;
 
-  typedef struct
+  struct transition
   {
     unsigned int from;
     unsigned int label;
     unsigned int to;
-  } transition;
+
+    transition():from(0),label(0),to(0)
+    {}
+
+    transition(const unsigned int f, 
+               const unsigned int l,
+               const unsigned int t):from(f),label(l),to(t)
+    {}
+    
+     bool operator <(const transition &t) const
+     { return from < t.from ||
+              (from==t.from && (label<t.label ||
+                   (label==t.label && to<t.to)));
+     }
+
+  };
 
   class p_state_iterator
   {
@@ -66,10 +81,10 @@
       unsigned int nstates;
       unsigned int nlabels;
       unsigned int ntransitions;
+      transition *transitions;
       ATerm *state_values;
       bool *taus;
       ATerm *label_values;
-      transition *transitions;
       unsigned int init_state;
       ATerm extra_data;
 

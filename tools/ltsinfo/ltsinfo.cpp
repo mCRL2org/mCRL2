@@ -36,6 +36,7 @@ static const std::set<mcrl2::lts::lts_equivalence> &initialise_allowed_eqs()
   static std::set<lts_equivalence> s;
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_divergence_preserving_branching_bisim);
   s.insert(lts_eq_isomorph);
   return s;
 }
@@ -90,6 +91,8 @@ class ltsinfo_tool : public ltsinfo_base
                 + lts::name_of_equivalence(lts_eq_bisim) + ",\n"
           "  '" + lts::string_for_equivalence(lts_eq_branching_bisim) + "' for "
                 + lts::name_of_equivalence(lts_eq_branching_bisim) + ", or\n"
+          "  '" + lts::string_for_equivalence(lts_eq_divergence_preserving_branching_bisim) + "' for "
+                + lts::name_of_equivalence(lts_eq_divergence_preserving_branching_bisim) + ", or\n"
           "  'none' for not performing the check at all",
           'e').
         add_option("in", make_mandatory_argument("FORMAT"),
@@ -230,7 +233,8 @@ class ltsinfo_tool : public ltsinfo_base
             append(determinism_selector.associate(mcrl2::lts::lts_eq_none, "None")).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_isomorph, "Isomorphism", true)).
             append(determinism_selector.associate(mcrl2::lts::lts_eq_bisim, "Strong bisimilarity")).
-            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")));
+            append(determinism_selector.associate(mcrl2::lts::lts_eq_branching_bisim, "Branching bisimilarity")).
+            append(determinism_selector.associate(mcrl2::lts::lts_eq_divergence_preserving_branching_bisim, "Divergence preserving branching bisimilarity")));
 
       // Add okay button
       button& okay_button = d.create< button >().set_label("OK");

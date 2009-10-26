@@ -18,8 +18,8 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts.h"
 
-struct lts_options {
-  mcrl2::lts::lts_type outformat;
+struct lts_options 
+{ mcrl2::lts::lts_type outformat;
   bool outinfo;
   NextState *nstate;
   std::auto_ptr< mcrl2::lps::specification > spec;

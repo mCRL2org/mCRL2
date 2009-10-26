@@ -31,6 +31,7 @@ static const std::set<lts_equivalence> &initialise_allowed_eqs()
   static std::set<lts_equivalence> s;
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_divergence_preserving_branching_bisim);
   s.insert(lts_eq_sim);
   s.insert(lts_eq_trace);
   s.insert(lts_eq_weak_trace);
@@ -456,6 +457,7 @@ void ltsconvert_tool::user_interactive_configuration(tipi::configuration& c) {
     append(transformation_selector.associate(lts_eq_none, "none", true)).
     append(transformation_selector.associate(lts_eq_bisim, "reduction modulo strong bisimulation equivalence")).
     append(transformation_selector.associate(lts_eq_branching_bisim, "reduction modulo branching bisimulation equivalence")).
+    append(transformation_selector.associate(lts_eq_divergence_preserving_branching_bisim, "reduction modulo divergence preserving branching bisimulation equivalence")).
     append(transformation_selector.associate(lts_eq_sim, "reduction modulo strong simulation equivalence")).
     append(transformation_selector.associate(lts_eq_trace, "determinisation and reduction modulo trace equivalence")).
     append(transformation_selector.associate(lts_eq_weak_trace, "determinisation and reduction modulo weak trace equivalence")).

@@ -165,6 +165,13 @@ lts::lts(istream &is, lts_type type) : p_lts(this)
   read_from(is,type);
 }
 
+lts::lts(const std::string &s) : p_lts(this)
+{
+  init();
+  std::istringstream is(s);
+  read_from(is,lts_aut);
+}
+
 lts::lts(lts const &l) : p_lts(this)
 {
   init(l);
@@ -524,7 +531,7 @@ lts_type p_lts::detect_type(string const& filename)
   ifstream is(filename.c_str(),ifstream::in|ifstream::binary);
   if ( !is.is_open() )
   {
-    gsVerboseMsg("cannot open file '%s' for reading\n",filename.c_str());
+    throw mcrl2::runtime_error("Cannot open file '" + filename + "' for reading.");
     return lts_none;
   }
 
@@ -694,7 +701,7 @@ lts_type p_lts::detect_type(istream &is)
 {
   if ( is == cin ) // XXX better test to see if is is seekable?
   {
-    gsVerboseMsg("type detection does not work on stdin\n");
+    mcrl2::runtime_error("Type detection does not work on stdin.");
     return lts_none;
   }
 
@@ -726,8 +733,9 @@ lts_type p_lts::detect_type(istream &is)
       // if we are not at the end of the buffer, then we expect a opening
       // parenthesis
       if ( (i >= r) || (buf[i] == '(') )
-      {
-        gsVerboseMsg("detected AUT input file\n");
+      { if (core::gsVerbose)
+        { std::cerr << "detected AUT input file\n";
+        }
         return lts_aut;
       }
     }
@@ -747,7 +755,9 @@ lts_type p_lts::detect_type(istream &is)
     if ( (i+7 <= r) && !memcmp(buf+i,"digraph",7) )
     {
       i = i + 7;
-      gsVerboseMsg("detected DOT input file\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected DOT input file.\n";
+      }
       return lts_dot;
     }
   }
@@ -800,14 +810,19 @@ lts_type p_lts::detect_type(istream &is)
                   {
                     if ( s == "generic" )
                     {
-                      gsVerboseMsg("detected mCRL input file\n");
+                      if (core::gsVerbose)
+                      { std::cerr << "Detected mCRL input file.\n";
+                      }
                       return lts_mcrl;
                     } else if ( (s == "mCRL2") || (s == "mCRL2+info") )
-                    {
-                      gsVerboseMsg("detected mCRL2 input file\n");
+                    { if (core::gsVerbose)
+                      { std::cerr << "Detected mCRL2 input file.\n";
+                      }
                       return lts_mcrl2;
                     } else {
-                      gsVerboseMsg("detected SVC input file\n");
+                      if (core::gsVerbose)
+                      { std::cerr << "Detected SVC input file\n";
+                      }
                       return lts_svc;
                     }
                   }
@@ -853,7 +868,9 @@ lts_type p_lts::detect_type(istream &is)
 
       if ( valid )
       {
-        gsVerboseMsg("detected BCG input file\n");
+        if (core::gsVerbose)
+        { std::cerr << "Detected BCG input file.\n";
+        }
         return lts_bcg;
       }
     }
@@ -871,7 +888,9 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
     type = detect_type(filename);
     if ( type == lts_none && (type = guess_format(filename)) == lts_none )
     {
-      gsVerboseMsg("could not determine type of input file '%s'\n",filename.c_str());
+      if (core::gsVerbose)
+      { std::cerr << std::string("Could not determine type of input file '") + filename + "'.";
+      }
       return false;
     }
   }
@@ -904,7 +923,7 @@ bool lts::read_from(string const& filename, lts_type type, lts_extra extra)
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown source LTS type\n");
+      throw runtime_error ("Unknown source LTS type");
       return false;
   }
 }
@@ -916,8 +935,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
   {
     type = detect_type(is);
     if ( type == lts_none )
-    {
-      gsVerboseMsg("could not determine type of input stream\n");
+    { throw mcrl2::runtime_error("Could not determine type of input stream.");
       return false;
     }
   }
@@ -929,7 +947,7 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
-      gsVerboseMsg("cannot read SVC based files from streams\n");
+      throw mcrl2::runtime_error("Cannot read SVC based files from streams");
       return false;
     case lts_fsm:
       switch ( extra.get_type() )
@@ -945,12 +963,12 @@ bool lts::read_from(istream &is, lts_type type, lts_extra extra)
       return read_from_dot(is);
 #ifdef USE_BCG
     case lts_bcg:
-      gsVerboseMsg("cannot read BCG files from streams\n");
+      throw mcrl2::runtime_error("Cannot read BCG files from streams.");
       return false;
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown source LTS type\n");
+      throw mcrl2::runtime_error("Unknown source LTS type.");
       return false;
   }
 }
@@ -1005,7 +1023,7 @@ bool lts::write_to(string const& filename, lts_type type, lts_extra extra)
 #endif
     default:
       assert(0);
-      gsVerboseMsg("unknown target LTS type\n");
+      throw mcrl2::runtime_error("Unknown target LTS type.");
       return false;
   }
 }
@@ -1019,7 +1037,7 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
     case lts_mcrl:
     case lts_mcrl2:
     case lts_svc:
-      gsVerboseMsg("cannot write SVC based files to streams\n");
+      throw mcrl2::runtime_error("Cannot write SVC based files to streams.");
       return false;
     case lts_fsm:
       switch ( extra.get_type() )
@@ -1049,32 +1067,32 @@ bool lts::write_to(ostream &os, lts_type type, lts_extra extra)
       }
 #ifdef USE_BCG
     case lts_bcg:
-      gsVerboseMsg("cannot write BCG files to streams\n");
+      throw mcrl2::runtime_error("Cannot write BCG files to streams.");
       return false;
 #endif
     default:
+      throw mcrl2::runtime_error("Unknown target LTS type.");
       assert(0);
-      gsVerboseMsg("unknown target LTS type\n");
       return false;
   }
 }
 
-unsigned int lts::num_states()
+unsigned int lts::num_states() const
 {
   return nstates;
 }
 
-unsigned int lts::num_labels()
+unsigned int lts::num_labels() const
 {
   return nlabels;
 }
 
-unsigned int lts::num_transitions()
+unsigned int lts::num_transitions() const
 {
   return ntransitions;
 }
 
-unsigned int lts::initial_state()
+unsigned int lts::initial_state() const
 {
   return init_state;
 }
@@ -1880,7 +1898,9 @@ bool lts::reachability_check(bool remove_unreachable)
   // must must hold for all states s reachable from the initial state
   if ( todo_stack == NULL )
   {
-    gsDebugMsg("checking reachability with incremental algorithm\n");
+    if (core::gsDebug)
+    { std::cerr << "Checking reachability with incremental algorithm.\n";
+    }
     // We're doing the slower algorithm: just loop over all transitions and add
     // target states from transitions that have a source that we have already
     // reached.
@@ -1901,8 +1921,10 @@ bool lts::reachability_check(bool remove_unreachable)
       }
     }
 
-  } else {
-    gsDebugMsg("checking reachability with todo list\n");
+  } else 
+  { if (core::gsDebug)
+    { std::cerr << "Checking reachability with todo list.\n";
+    }
     // We're doing the faster algorithm: we know that all transitions are
     // grouped on source state with state2trans[s] being the beginning of such
     // a group for source s. We keep a todo list in todo_stack of states that
@@ -2134,28 +2156,40 @@ lts_type lts::guess_format(string const& s) {
 
     if ( ext == "aut" )
     {
-      gsVerboseMsg("detected Aldebaran extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Aldebaran extension.\n";
+      }
       return lts_aut;
     } else if ( ext == "lts" )
     {
-      gsVerboseMsg("detected mCRL2 extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected mCRL2 extension.\n";
+      }
       return lts_mcrl2;
     } else if ( ext == "svc" )
     {
-      gsVerboseMsg("detected SVC extension; assuming mCRL format\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected SVC extension; assuming mCRL format.\n";
+      }
       return lts_mcrl;
     } else if ( ext == "fsm" )
     {
-      gsVerboseMsg("detected Finite State Machine extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Finite State Machine extension.\n";
+      }
       return lts_fsm;
     } else if ( ext == "dot" )
     {
-      gsVerboseMsg("detected GraphViz extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected GraphViz extension.\n";
+      }
       return lts_dot;
 #ifdef USE_BCG
     } else if ( ext == "bcg" )
     {
-      gsVerboseMsg("detected Binary Coded Graph extension\n");
+      if (core::gsVerbose)
+      { std::cerr << "Detected Binary Coded Graph extension.\n";
+      }
       return lts_bcg;
 #endif
     }
@@ -2228,6 +2262,9 @@ lts_equivalence lts::parse_equivalence(std::string const& s)
   } else if ( s == "branching-bisim" )
   {
     return lts_eq_branching_bisim;
+  } else if ( s == "dpbranching-bisim" )
+  {
+    return lts_eq_divergence_preserving_branching_bisim;
   } else if ( s == "sim" )
   {
     return lts_eq_sim;
@@ -2249,6 +2286,7 @@ static std::string equivalence_strings[] = {
   "unknown",
   "bisim",
   "branching-bisim",
+  "dpbranching-bisim",
   "sim",
   "trace",
   "weak-trace",
@@ -2259,6 +2297,7 @@ static std::string equivalence_desc_strings[] = {
   "unknown equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
+  "divergence preserving branching bisimilarity",
   "strong simulation equivalence",
   "strong trace equivalence",
   "weak trace equivalence",
@@ -2318,7 +2357,7 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   FILE *f = fopen(filename.c_str(),"ab");
   if ( f == NULL )
   {
-    gsErrorMsg("could not open file '%s' to add extra LTS information\n",filename.c_str());
+    throw mcrl2::runtime_error("Could not open file '" + filename + "' to add extra LTS information.");
     return;
   }
 
@@ -2330,15 +2369,17 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   long position;
   if ( (position = ftell(f)) == -1 )
   {
-    gsErrorMsg("could not determine file size of '%s'; not adding extra information\n",filename.c_str());
     fclose(f);
+    throw mcrl2::runtime_error("Could not determine file size of '" + filename + 
+                          "'; not adding extra information.");
     return;
   }
 
   if ( ATwriteToBinaryFile(data,f) == ATfalse )
   {
-    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
     fclose(f);
+    throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename + 
+               "', file could be corrupted.");
     return;
   }
 
@@ -2350,8 +2391,9 @@ void add_extra_mcrl2_svc_data(std::string const &filename, ATermAppl data_spec, 
   }
   if ( fwrite(buf,1,8+12,f) != 8+12 )
   {
-    gsErrorMsg("error writing extra LTS information to '%s', file could be corrupted\n",filename.c_str());
     fclose(f);
+    mcrl2::runtime_error("error writing extra LTS information to '" + filename + 
+                     "', file could be corrupted.");
     return;
   }
 

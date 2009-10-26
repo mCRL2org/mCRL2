@@ -33,6 +33,8 @@ static const char *equivalent_string(lts_equivalence eq)
       return "strongly bisimilar";
     case lts_eq_branching_bisim:
       return "branching bisimilar";
+    case lts_eq_divergence_preserving_branching_bisim:
+      return "divergence preserving branching bisimilar";
     case lts_eq_sim:
       return "strongly simulation equivalent";
     case lts_eq_trace:
@@ -64,6 +66,7 @@ static const std::set<lts_equivalence> &initialise_allowed_eqs()
   static std::set<lts_equivalence> s;
   s.insert(lts_eq_bisim);
   s.insert(lts_eq_branching_bisim);
+  s.insert(lts_eq_divergence_preserving_branching_bisim);
   s.insert(lts_eq_sim);
   s.insert(lts_eq_trace);
   s.insert(lts_eq_weak_trace);

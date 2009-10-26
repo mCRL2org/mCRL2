@@ -32,27 +32,27 @@
 
 /* Pi_u is stack */
 typedef struct
-  {
-  int left, right;
-  int mode;
-  } INTERVAL;
+{ unsigned int left, right;
+  unsigned int mode;
+} INTERVAL;
 
 typedef struct
-  {
-  int action, parent, splitter;
-  } BLOK;
+{ int action; 
+  unsigned int parent, splitter;
+} BLOK;
 
-typedef struct {
-   int pt;
-   int *b;
+typedef struct 
+{ unsigned int pt;
+  unsigned int *b;
 } BLOCKS;
+
 /* List of candidate blocks for being splitted */
 
 extern BLOK *blok;
 extern BLOCKS blocks;
-extern unsigned int Pi_pt, n_partitions;
-extern int nstate, nlabel; /* number of states, number of labels */
-extern ATbool *mark;
+extern unsigned int n_partitions;
+extern unsigned int nstate, nlabel; /* number of states, number of labels */
+extern bool *mark;
 extern int *blockref;
 extern int *s; /* In this resides the partition */
 extern ATerm *label_name;
@@ -88,8 +88,8 @@ void StartSplitting(void);
 void Reduce(void);
 void ReduceBranching(void);
 void SCC(void);
-bool Compare(int init1, int init2);
-bool CompareBranching(int init1, int init2);
-int ReturnEquivalenceClasses(int initState, ATbool tauloops);
+bool Compare(const unsigned int init1, const unsigned int init2);
+bool CompareBranching(const unsigned int init1, const unsigned int init2);
+int ReturnEquivalenceClasses(int initState, bool tauloops);
 
 void bsim_reset_kernel_data();

@@ -79,6 +79,8 @@ namespace lts
     lts_eq_none,             /**< Unknown or no equivalence */
     lts_eq_bisim,            /**< Strong bisimulation equivalence */
     lts_eq_branching_bisim,  /**< Branching bisimulation equivalence */
+    lts_eq_divergence_preserving_branching_bisim,  
+                             /**< Divergence preserving branching bisimulation equivalence */
     lts_eq_sim,              /**< Strong simulation equivalence */
     lts_eq_trace,            /**< Strong trace equivalence*/
     lts_eq_weak_trace,       /**< Weak trace equivalence */
@@ -398,6 +400,7 @@ namespace lts
        * \details The following strings may be used:
        * \li "bisim" for strong bisimilarity;
        * \li "branching-bisim" for branching bisimilarity;
+       * \li "dpbranching-bisim" for divergence preserving branching bisimilarity;
        * \li "sim" for strong simulation equivalence;
        * \li "trace" for strong trace equivalence;
        * \li "weak-trace" for weak trace equivalence;
@@ -554,6 +557,12 @@ namespace lts
        * stream. */
       lts(std::istream &is, lts_type type = lts_none);
 
+      /** \brief Creates an LTS from a string in aut format.
+       * \param[in] is The input stream from which the data will be read.
+       * an attempt is made to determine the format from the contents of the
+       * stream. */
+      lts(const std::string &s);
+
       /** \brief Creates a copy of the supplied LTS.
        * \param[in] l The LTS to copy. */
       lts(lts const &l);
@@ -609,19 +618,19 @@ namespace lts
 
       /** \brief Gets the number of states of this LTS.
        * \return The number of states of this LTS. */
-      unsigned int num_states();
+      unsigned int num_states() const;
 
       /** \brief Gets the number of transitions of this LTS.
        * \return The number of transitions of this LTS. */
-      unsigned int num_transitions();
+      unsigned int num_transitions() const;
 
       /** \brief Gets the number of labels of this LTS.
        * \return The number of labels of this LTS. */
-      unsigned int num_labels();
+      unsigned int num_labels() const;
 
       /** \brief Gets the initial state number of this LTS.
        * \return The number of the initial state of this LTS. */
-      unsigned int initial_state();
+      unsigned int initial_state() const;
 
       /** \brief Sets the initial state number of this LTS.
        * \param[in] state The number of the state that will become the initial
@@ -710,6 +719,19 @@ namespace lts
       /** \brief Gets an iterator to the transitions of this LTS.
        * \return An iterator to the transitions of this LTS. */
       transition_iterator get_transitions();
+
+      /** \brief Sets the transitions to t malloced array of transitions t.
+       *  The existing transitions are freed if necessary. If t is NULL the
+       *  transitions are set to NULL. ntransitions and transition_size are
+       *  set to nt and ts respectively */
+      void set_transitions(transition *t, const unsigned int nt, const unsigned int ts)
+      { if (transitions!=NULL)
+        { free(transitions);
+        }
+        transitions=t;
+        ntransitions=nt;
+        transitions_size=ts;
+      }
 
       /** \brief Checks whether a label is a tau action.
        * \param[in] label The number of the label.
@@ -920,7 +942,21 @@ namespace lts
        * equivalent to the original LTS by equivalence \a eq, and
        * similarly for the LTS \a l.
        */
-      bool compare(lts &l, lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
+      bool compare(const lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options) const;
+
+      /** \brief Checks whether this LTS is equivalent to another LTS.
+       * \param[in] l The LTS to which this LTS will be compared.
+       * \param[in] eq The equivalence with respect to which the LTSs will be
+       * compared.
+       * \param[in] opts The options that will be used for the comparison.
+       * \retval true if the LTSs are found to be equivalent.
+       * \retval false otherwise.
+       * \warning This function alters the internal data structure of
+       * both LTSs for efficiency reasons. After comparison, this LTS is
+       * equivalent to the original LTS by equivalence \a eq, and
+       * similarly for the LTS \a l.
+       */
+      bool destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options const&opts = lts_eq_no_options);
 
       /** \brief Checks whether this LTS is smaller than another LTS according
        * to a preorder.
@@ -938,7 +974,25 @@ namespace lts
        * induced by the preorder \a pre (i.e. \f$eq = pre \cap
        * pre^{-1}\f$).
        */
-      bool compare(lts &l, lts_preorder pre, lts_eq_options const&opts = lts_eq_no_options);
+      bool destructive_compare(lts &l, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options);
+
+      /** \brief Checks whether this LTS is smaller than another LTS according
+       * to a preorder.
+       * \param[in] l The LTS to which this LTS will be compared.
+       * \param[in] pre The preorder with respect to which the LTSs will be
+       * compared.
+       * \param[in] opts The options that will be used for the comparison.
+       * \retval true if this LTS is smaller than LTS \a l according to
+       * preorder \a pre.
+       * \retval false otherwise.
+       * \warning This function alters the internal data structure of
+       * both LTSs for efficiency reasons. After comparison, this LTS is
+       * equivalent to the original LTS by equivalence \a eq, and
+       * similarly for the LTS \a l, where \a eq is the equivalence
+       * induced by the preorder \a pre (i.e. \f$eq = pre \cap
+       * pre^{-1}\f$).
+       */
+      bool compare(const lts &l, const lts_preorder pre, lts_eq_options const &opts = lts_eq_no_options) const;
 
       /** \brief Determinises this LTS. */
       void determinise();
@@ -958,6 +1012,51 @@ namespace lts
        * \retval true if this LTS is deterministic;
        * \retval false otherwise. */
       bool is_deterministic();
+
+      
+      /** \brief Reduce this transition system with respect to strong or branching bisimulation.
+       * \param[branching] If true branching bisimulation is applied, otherwise strong bisimulation
+       * \param[add_class_to_state] Obsolete. Will not do anything.
+       * \param[tau_actions] Indicates the actions that will be considered tau actions. In the resulting
+       *                     lts these actions are renamed to tau. Tau itself is also an internal action.  */
+
+      void bisimulation_reduce(
+                 bool branching = false,
+                 bool preserve_divergences = false,
+                 const std::vector<std::string> *tau_actions = NULL);
+
+      /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+       * \detail This lts and the lts l2 are not usable anymore after applyin this call.
+       * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
+       * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+       * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
+       * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
+      bool destructive_bisimulation_compare(
+               lts &l2, 
+               const bool branching=false, 
+               const bool preserve_divergences=false, 
+               const std::vector<std::string> *tau_actions=NULL);
+
+      /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
+       * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
+       * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
+       * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
+       * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
+
+      bool bisimulation_compare(
+               const lts &l2, 
+               const bool branching=false, 
+               const bool preserve_divergences=false, 
+               const std::vector<std::string> *tau_actions=NULL) const;
+
+      /** \brief Removes tau cycles by mapping all the states on a cycle to one state.
+       *  \param [preserve_divergence_loops] If true leave a self loop on states that resided on a tau
+       *            cycle in the original transition system.
+       *  \param [add_class_to_state] Obsolete.
+       *  \param [tau actions] Names of actions that are taken to be internal actions. */
+      void scc_reduce(const bool preserve_divergence_loops=false,
+                      const std::vector<std::string> *tau_actions=NULL);
+
 
       friend class state_iterator;
 

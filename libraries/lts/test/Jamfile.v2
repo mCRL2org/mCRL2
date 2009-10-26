@@ -11,5 +11,6 @@ test-suite lts
     :
       [ run test_lib.cpp ]
       [ run trace_compare.cpp ]
+      [ run ltsconvert_test.cpp ]
       [ compile-headers ../include ]
     ;
