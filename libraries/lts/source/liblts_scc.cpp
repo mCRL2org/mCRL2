@@ -52,7 +52,7 @@ namespace detail
     }
     equivalence_class_index=0;
     block_index_of_a_state=std::vector < state_type >(aut.num_states(),0);
-    for(std::vector < state_type >::const_reverse_iterator i=dfsn2state.rbegin();
+    for(std::vector < state_type >::reverse_iterator i=dfsn2state.rbegin();
                  i!=dfsn2state.rend(); ++i)
     { if (visited[*i])  // Visited is used inversely here.
       { group_components(*i,equivalence_class_index,tgt_src,visited);
