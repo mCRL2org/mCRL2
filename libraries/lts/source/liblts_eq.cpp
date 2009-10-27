@@ -47,7 +47,7 @@ void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_nam
 
 bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
 {
-  // set_tau_actions(&opts.reduce.tau_actions);
+  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
 
   switch ( eq )
   {
@@ -106,10 +106,8 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
 }
 
 bool lts::compare(const lts &l, const lts_equivalence eq, const lts_eq_options &opts) const
-{
-  switch ( eq )
-  {
-    case lts_eq_none:
+{ switch ( eq )
+  { case lts_eq_none:
       return false;
     default:
       lts l_copy(l);
@@ -117,7 +115,7 @@ bool lts::compare(const lts &l, const lts_equivalence eq, const lts_eq_options &
       return this_copy.destructive_compare(l_copy,eq,opts);
   }
   return false;
-}
+} 
 
 bool lts::destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options const&opts)
 {
@@ -126,7 +124,7 @@ bool lts::destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options c
   // state number i + N where N is the number of states in this
   // LTS (before the merge).
 
-  // set_tau_actions(&opts.reduce.tau_actions);
+  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
 
   switch ( eq )
   {
@@ -228,7 +226,7 @@ bool lts::compare(const lts &l, const lts_preorder pre, lts_eq_options const&opt
 
 bool lts::destructive_compare(lts &l, const lts_preorder pre, lts_eq_options const&opts)
 {
-  // set_tau_actions(&opts.reduce.tau_actions);
+  // set_tau_actions(&opts.reduce.tau_actions); TODO. This might not be properly dealt with now.
   switch ( pre )
   {
     case lts_pre_sim:

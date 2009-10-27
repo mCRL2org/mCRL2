@@ -10,7 +10,6 @@
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
-// #include "mcrl2/lts/detail/bsim.h"
 
 using namespace mcrl2::core;
 using namespace std;

@@ -13,7 +13,6 @@
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/detail/liblts_bisim.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
-#include "mcrl2/lts/detail/bsim.h"
 
 using namespace mcrl2::core;
 using namespace std;
@@ -31,18 +30,14 @@ namespace detail
                    mcrl2::lts::lts &l,
                    const bool branching,
                    const bool preserve_divergence)
-             :aut(l), partition_has_been_calculated(false), tau_label(l.num_labels()),
-                      preserve_divergences_loops(preserve_divergence)
-  { 
+             :aut(l), tau_label(l.num_labels())
+  { assert( branching || !preserve_divergence); 
     if (core::gsVerbose)
     { std::cerr << (preserve_divergence?"Divergence preserving b)":"B") <<
                    (branching?"ranching b":"") << "isimulation partitioner created for " << l.num_states() << " states and " << 
              l.num_transitions() << " transitions\n";
     }
-    create_initial_partition(branching,preserve_divergences_loops);
-    /* if (preserve_divergences_loops)
-    { refine_partion_with_respect_to_divergences();
-    } */
+    create_initial_partition(branching,preserve_divergence);
     refine_partition_until_it_becomes_stable(preserve_divergence);
   }
 
@@ -51,8 +46,7 @@ namespace detail
   }
   
   void bisim_partitioner::bisim_partitioner::replace_transitions(const bool branching, const bool preserve_divergences)
-  { assert(partition_has_been_calculated);
-    
+  { 
     // Put all the non inert transitions in a set. Add the transitions that form a self
     // loop. Such transitions only exist in case divergence preserving branching bisimulation is
     // used. A set is used to remove double occurrences of transitions. 
@@ -88,19 +82,16 @@ namespace detail
   }
 
   unsigned int bisim_partitioner::num_eq_classes() const
-  { assert(partition_has_been_calculated);
-    return blocks.size();
+  { return blocks.size();
   }
 
   unsigned int bisim_partitioner::get_eq_class(const unsigned int s) const
-  { assert(partition_has_been_calculated);
-    assert(s<block_index_of_a_state.size());
+  { assert(s<block_index_of_a_state.size());
     return block_index_of_a_state[s];
   }
 
   bool bisim_partitioner::in_same_class(const unsigned int s, const unsigned int t) const
-  { assert(partition_has_been_calculated);
-    return get_eq_class(s)==get_eq_class(t);
+  { return get_eq_class(s)==get_eq_class(t);
   }
 
 // Private methods of bisim_partitioner
@@ -446,7 +437,6 @@ namespace detail
     state_flags.clear();
     to_be_processed.clear();
     BL.clear();
-    partition_has_been_calculated=true;
   }
 
 #ifndef NDEBUG  
