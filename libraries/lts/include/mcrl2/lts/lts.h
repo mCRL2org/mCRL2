@@ -739,6 +739,7 @@ namespace lts
        * \retval false otherwise.  */
       bool is_tau(unsigned int label);
 
+
       /** \brief Sets the tau attribute of a label.
        * \param[in] label The number of the label.
        * \param[in] is_tau Indicates whether the label should become a tau action. */
@@ -1008,13 +1009,12 @@ namespace lts
 
       
       /** \brief Reduce this transition system with respect to strong or (divergence preserving) branching bisimulation.
-       * \param[branching] If true branching bisimulation is applied, otherwise strong bisimulation
-       * \param[tau_actions] Indicates the actions that will be considered tau actions. In the resulting
-       *                     lts these actions are renamed to tau. Tau itself is also an internal action.  */
+       * \param[in] branching If true branching bisimulation is applied, otherwise strong bisimulation.
+       * \param[in] preserve_divergences Indicates whether loops of internal actions on states must be preserved. If false
+       *            these are removed. If true these are preserved.  */
       void bisimulation_reduce(
-                 bool branching = false,
-                 bool preserve_divergences = false,
-                 const std::vector<std::string> *tau_actions = NULL);
+                 const bool branching = false,
+                 const bool preserve_divergences = false);
 
 
       /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
@@ -1023,13 +1023,11 @@ namespace lts
        *          algorithm by Groote and Vaandrager from 1990.
        * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
        * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
-       * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
        * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
       bool destructive_bisimulation_compare(
                lts &l2, 
                const bool branching=false, 
-               const bool preserve_divergences=false, 
-               const std::vector<std::string> *tau_actions=NULL);
+               const bool preserve_divergences=false);
 
 
       /** \brief Checks whether the two initial states of two lts's are strong or branching bisimilar.
@@ -1040,21 +1038,18 @@ namespace lts
        *           number of states and m is the number of transitions.
        * \param[branching] If true branching bisimulation is used, otherwise strong bisimulation is applied.
        * \param[preserve_divergences] If true and branching is true, preserve tau loops on states.
-       * \param[tau_actions] A vector of actions to be taken as being equal to tau. 
        * \retval True iff the initial states of the current transition system and l2 are (divergence preserving) (branching) bisimilar */
       bool bisimulation_compare(
                const lts &l2, 
                const bool branching=false, 
-               const bool preserve_divergences=false, 
-               const std::vector<std::string> *tau_actions=NULL) const;
+               const bool preserve_divergences=false) const;
 
       /** \brief Removes tau cycles by mapping all the states on a cycle to one state.
- *        \details This routine is linear in the number of states and transitions.
+       *  \details This routine is linear in the number of states and transitions.
        *  \param [preserve_divergence_loops] If true leave a self loop on states that resided on a tau
-       *            cycle in the original transition system.
-       *  \param [tau actions] Names of actions that are taken to be internal actions. */
-      void scc_reduce(const bool preserve_divergence_loops=false,
-                      const std::vector<std::string> *tau_actions=NULL);
+       *            cycle in the original transition system. 
+       */
+      void scc_reduce(const bool preserve_divergence_loops=false);
 
 
       friend class state_iterator;

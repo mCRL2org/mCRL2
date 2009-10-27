@@ -9,9 +9,8 @@
 /// \file liblts_scc.cpp
 
 #include "mcrl2/core/messaging.h"
-// #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/detail/liblts_scc.h"
-#include "mcrl2/lts/detail/bsim.h"
+// #include "mcrl2/lts/detail/bsim.h"
 
 using namespace mcrl2::core;
 using namespace std;
@@ -23,7 +22,7 @@ namespace lts
 namespace detail
 {
   scc_partitioner::scc_partitioner(mcrl2::lts::lts &l) 
-             :aut(l), tau_label(l.num_labels())
+             :aut(l)
   { if (core::gsDebug)
     {  std::cerr << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " << 
              l.num_transitions() << " transitions\n";
@@ -97,7 +96,6 @@ namespace detail
       counter++;
     }
 
-    // Set the resulting number of states and transitions.
     aut.set_transitions(new_transitions,resulting_transitions.size(),equivalence_class_index);
   }
 
@@ -157,19 +155,18 @@ namespace detail
 
 } // namespace detail
 
-  void lts::scc_reduce(const bool preserve_divergence_loops /* = false */,
-                       std::vector<std::string> const*tau_actions /* = NULL */)
+  void lts::scc_reduce(const bool preserve_divergence_loops /* = false */)
   { 
-    set_tau_actions(tau_actions); // TODO: ought to be removed.
     detail::scc_partitioner scc_part(*this);
   
     // Clear this LTS, but keep the labels
     clear_type();
     clear_states();
     
-    // Assign the reduced LTS
+    // Set the resulting number of states and transitions.
     nstates = scc_part.num_eq_classes();
     init_state = scc_part.get_eq_class(init_state);
+
     scc_part.replace_transitions(preserve_divergence_loops);
   }
 }

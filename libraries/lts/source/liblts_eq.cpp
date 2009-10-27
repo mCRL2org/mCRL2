@@ -47,21 +47,23 @@ void lts_reduce_add_tau_actions(lts_eq_options& opts, std::string const& act_nam
 
 bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
 {
+  // set_tau_actions(&opts.reduce.tau_actions);
+
   switch ( eq )
   {
     case lts_eq_none:
     case lts_eq_isomorph:
       return true;
     case lts_eq_bisim:
-      { bisimulation_reduce(false,false,&opts.reduce.tau_actions);
+      { bisimulation_reduce(false,false);
         return true;
       }
     case lts_eq_branching_bisim:
-      { bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+      { bisimulation_reduce(true,false);
         return true;
       } 
     case lts_eq_divergence_preserving_branching_bisim:
-      { bisimulation_reduce(true,true,&opts.reduce.tau_actions);
+      { bisimulation_reduce(true,true);
         return true;
       }
     case lts_eq_sim:
@@ -92,7 +94,7 @@ bool lts::reduce(lts_equivalence eq, lts_eq_options const&opts)
       bisimulation_reduce(false);
       return true;
     case lts_eq_weak_trace:
-      bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+      bisimulation_reduce(true,false);
       tau_star_reduce();
       bisimulation_reduce(false);
       determinise();
@@ -123,6 +125,8 @@ bool lts::destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options c
   // In the resulting LTS, the initial state i of l will have the
   // state number i + N where N is the number of states in this
   // LTS (before the merge).
+
+  // set_tau_actions(&opts.reduce.tau_actions);
 
   switch ( eq )
   {
@@ -195,13 +199,13 @@ bool lts::destructive_compare(lts &l, const lts_equivalence eq, lts_eq_options c
     case lts_eq_weak_trace:
       {
         // Eliminate silent steps and determinise first LTS
-        bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+        bisimulation_reduce(true,false);
         this->tau_star_reduce();
         bisimulation_reduce(false);
         this->determinise();
 
         // Eliminate silent steps and determinise second LTS
-        l.bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+        l.bisimulation_reduce(true,false);
         l.tau_star_reduce();
         l.bisimulation_reduce(false);
         l.determinise();
@@ -224,6 +228,7 @@ bool lts::compare(const lts &l, const lts_preorder pre, lts_eq_options const&opt
 
 bool lts::destructive_compare(lts &l, const lts_preorder pre, lts_eq_options const&opts)
 {
+  // set_tau_actions(&opts.reduce.tau_actions);
   switch ( pre )
   {
     case lts_pre_sim:
@@ -268,11 +273,11 @@ bool lts::destructive_compare(lts &l, const lts_preorder pre, lts_eq_options con
     case lts_pre_weak_trace:
       {
         // Eliminate silent steps of first LTS
-        l.bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+        l.bisimulation_reduce(true,false);
         this->tau_star_reduce();
 
         // Eliminate silent steps of second LTS
-        l.bisimulation_reduce(true,false,&opts.reduce.tau_actions);
+        l.bisimulation_reduce(true,false);
         l.tau_star_reduce();
 
         // Weak trace preorder now corresponds to strong trace preorder

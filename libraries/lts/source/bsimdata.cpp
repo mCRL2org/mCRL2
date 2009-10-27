@@ -11,28 +11,16 @@
 #include <vector>
 #include <string>
 #include "mcrl2/core/aterm_ext.h"
-/* #include <algorithm>
-#include <boost/scoped_array.hpp>
-#include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
-#include "mcrl2/lts/detail/bsim.h"
-
-#define ATisAppl(t) (ATgetType(t) == AT_APPL)
-
-using namespace std;
-using namespace mcrl2::lts;
-using namespace mcrl2::core;
-using namespace mcrl2::core::detail; */
 
 /* Data definition */
 
-unsigned int nlabel=0; 
+/* unsigned int nlabel=0; 
 ATerm *label_name; 
-int label_tau = -1;
+int label_tau = -1; 
 
 static std::vector<std::string> const*tau_actions = NULL;
 
 void set_tau_actions(std::vector<std::string> const*actions)
 { tau_actions = actions;
-}
+} */
 

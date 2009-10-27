@@ -585,14 +585,9 @@ namespace detail
 #endif // not NDEBUG
 } // namespace detail
 
-  void lts::bisimulation_reduce(bool branching /*=false */,
-                           const bool preserve_divergences /*=false */,
-                           std::vector<std::string> const*tau_actions /*=NULL */)
-  { if (branching)
-    { set_tau_actions(tau_actions);
-    }
-
-    // First remove tau loops in case of branching bisimulation.
+  void lts::bisimulation_reduce(const bool branching /*=false */,
+                                const bool preserve_divergences /*=false */)
+  { // First remove tau loops in case of branching bisimulation.
     if (branching)
     { detail::scc_partitioner scc_part(*this);
       scc_part.replace_transitions(preserve_divergences);
@@ -618,25 +613,19 @@ namespace detail
   bool lts::bisimulation_compare(
               const lts &l, 
               const bool branching /* =false*/, 
-              const bool preserve_divergences /*=false*/,
-              const std::vector<std::string> *tau_actions /*=NULL*/) const
+              const bool preserve_divergences /*=false*/) const
   { lts this_copy(*this);
     lts l_copy(l);
-    return this_copy.destructive_bisimulation_compare(l_copy,branching,preserve_divergences,tau_actions);
+    return this_copy.destructive_bisimulation_compare(l_copy,branching,preserve_divergences);
   }
 
   bool lts::destructive_bisimulation_compare(
               lts &l, 
               const bool branching /* =false*/, 
-              const bool preserve_divergences /*=false*/,
-              const std::vector<std::string> *tau_actions /*=NULL*/)
+              const bool preserve_divergences /*=false*/)
   { unsigned int init_l = l.initial_state() + nstates;
     merge(&l);
     l.clear(); // No use for l anymore.
-
-    if (branching)
-    { set_tau_actions(tau_actions);
-    }
 
     // First remove tau loops in case of branching bisimulation.
     if (branching)
