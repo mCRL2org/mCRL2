@@ -13,7 +13,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, October 19, 2009 15:45:27}
-%TCIDATA{LastRevised=Thursday, October 29, 2009 13:24:50}
+%TCIDATA{LastRevised=Thursday, October 29, 2009 15:00:37}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -66,7 +66,10 @@ where $t$ is a term, $x$ is a variable and $f$ is a function symbol.
 Flattened terms are an extension of simple terms:%
 \begin{equation}
 t:=x\ |\ f\ |\ f(t,\cdots ,t)\ |\ x(t,\cdots ,t).  \label{eq:flattened_terms}
-\end{equation}
+\end{equation}%
+N.B. The notion of flattened terms doesn't seem very useful. The only reason
+we introduce it here is that several algorithms in \cite{weerdenburg2009}
+are only defined for flattened terms.
 
 \subsection{Applicative terms}
 
@@ -203,11 +206,13 @@ The reason we are interested in such an algorithm is that it can be
 implemented more efficiently than the straightforward solution to first
 compute $u=t\sigma $ and then compute $rewrite(u)$.
 
-\subsection{Match trees}
+\section{Match trees}
 
-A match tree is a tree structure that represents a number of rewrite rules.
-It is used to compute the result of applying one rewrite step to a term. A
-match tree consists of nodes of the following types:
+A match tree is a tree structure that represents a number of rewrite rules
+that have left hand sides with the same function symbol as head. It is used
+to compute all possible results of applying one of these rules to a term.
+Currently match trees are only defined for flattened terms. A match tree
+consists of nodes of the following types:
 
 \begin{itemize}
 \item $F(f,T,U):$ If the current term has the form $f(t_{1},\cdots ,t_{n})$
@@ -300,10 +305,6 @@ where $T$ and $U$ are match trees, $f$ and $g$ are function symbols, $l$ and
 $m$ are sequences of terms and $t$ and $t_{i}$ are terms. The evaluation of
 a match tree $T$ in a single term $t$ with substitution $\sigma $ is defined
 as $T([t],\sigma )$.
-
-\begin{problem}
-How can the evaluation of match trees be extended to applicative terms?
-\end{problem}
 
 \subsection{Building a match tree}
 
@@ -429,7 +430,12 @@ R(Q)[x/V] & = & R(Q[x/y:y\in V]) &
 \begin{equation*}
 \begin{array}{llll}
 clean(T) & = & T^{\prime } & \text{if }\chi (T)=\left\langle T^{\prime
-},V\right\rangle  \\ 
+},V\right\rangle ,%
+\end{array}%
+\end{equation*}%
+where $\chi $ is defined as%
+\begin{equation*}
+\begin{array}{llll}
 \chi (X) & = & \left\langle X,\emptyset \right\rangle  &  \\ 
 \chi (F(f,T,U)) & = & \left\langle F(f,T^{\prime },U^{\prime }),V\cup
 W\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
@@ -474,11 +480,11 @@ W\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
 \subsection{Prioritized rewrite rules}
 
 By adding priorities to rewrite rules, the selection of rewrite rules that
-are considered for a term can be reduced. We model priorities of rewrite
-rules using a function $\varphi $, that selects the rules of highest
-priorities of a given set of rules. So $\varphi (R)\subseteq R$ and $\varphi
-(R)=\emptyset $ if and only if $R=\emptyset $. The function $prior$ applies $%
-\varphi $ to a match tree%
+is considered for a term can be reduced. We model priorities of rewrite
+rules using a function $\varphi $, that returns the rules of highest
+priority for a set of rules. So $\varphi (R)\subseteq R$ and $\varphi
+(R)=\emptyset $ if and only if $R=\emptyset $. We define a function $prior$
+that applies a priority function $\varphi $ to a match tree:%
 \begin{equation*}
 \begin{array}{lll}
 prior(X,\varphi ) & = & X \\ 
@@ -491,13 +497,17 @@ prior(R(Q),\varphi ) & = & R(\varphi (Q)) \\
 prior(E(T,U),\varphi ) & = & E(prior(T,\varphi ),prior(U,\varphi )).%
 \end{array}%
 \end{equation*}%
-The effect of applying the function $prior$ to a match tree is that the $R$%
--nodes will contain less elements.  This can be useful to remove unwanted
-results. Consider for example the rewrite system%
-\begin{eqnarray*}
-x &=&x\rightarrow true \\
-x &=&y\rightarrow false
-\end{eqnarray*}%
+The effect of applying $prior$ to a match tree is that the $R$-nodes will
+contain less elements.  This can be useful to remove unwanted results.
+Consider for example the rewrite system%
+\begin{equation*}
+\left\{ 
+\begin{array}{ccc}
+x=x & \rightarrow  & true \\ 
+x=y & \rightarrow  & false%
+\end{array}%
+\right. 
+\end{equation*}%
 This system can have both $true$ and $false$ as a result of rewriting the
 term $true=true$. But if we give the first equation a higher priority than
 the second, the undesired derivation $true=true\rightarrow false$ is
@@ -530,6 +540,11 @@ rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n})\sigma
 \end{equation*}%
 The function $rewr_{M}$ is defined for flattened terms.
 
+\section{Rewriting Strategies}
+
+In this section we describe rewriting strategies. For the moment we only
+consider innermost rewriting.
+
 \subsection{Innermost rewriting}
 
 We now define an algorithm $rewr_{I}$ for innermost rewriting. It is defined
@@ -546,11 +561,6 @@ rewr_{I}(x,\sigma ) & = & \sigma (x)%
 \end{equation*}%
 Here we assume that $\sigma (x)$ is in normal form already.
 
-\begin{problem}
-How can the definition of $rewr_{I}$ be extended to applicative terms (\ref%
-{eq:applicative_terms})?
-\end{problem}
-
 A possible extension to applicative terms might look as follows:%
 \begin{equation*}
 \begin{array}{lll}
@@ -562,6 +572,25 @@ rewr_{I}(t(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(rewr_{I}(t,\sigma
 \end{array}%
 \end{equation*}%
 This requires an extension of $rewr_{M}$ to applicative terms as well.
+
+\section{Further work}
+
+\begin{itemize}
+\item Extend the algorithms $rewr_{M}$ and $rewr_{I}$ to applicative terms.
+For this we have to extend match trees to applicative terms.
+
+\item Extend the definition of terms with lambda expressions and quantifier
+expressions, and extend the algorithms so they can handle them.
+
+\item Design an algorithm for rewriting using strategies as defined in \cite%
+{weerdenburg2009}.
+
+\item Extend the rewrite algorithms so they handle evaluation of conditions
+(as is required in the evaluation of a $C$-node).
+
+\item Collect examples of higher order rewrite systems for testing the
+algorithms.
+\end{itemize}
 
 \bibliographystyle{alpha}
 \bibliography{wiki-rewriter}
