@@ -13,7 +13,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Monday, October 19, 2009 15:45:27}
-%TCIDATA{LastRevised=Monday, October 26, 2009 17:03:40}
+%TCIDATA{LastRevised=Thursday, October 29, 2009 13:24:50}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -145,7 +145,7 @@ A rewrite rule is a rule $l\rightarrow r\ \mathbf{if}\ c$, with $l,r,c\in
 \begin{array}{ll}
 1) & l\text{ is a simple term} \\ 
 2) & l\notin \mathbb{V} \\ 
-3) & var(l)\cup var(c)\subseteq var(r)%
+3) & var(r)\cup var(c)\subseteq var(l)%
 \end{array}%
 \end{equation*}
 
@@ -247,7 +247,7 @@ and $\sigma $ is a set of terms and is defined as follows:%
 \begin{array}{lll}
 F(f,T,U)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }l=[] \\ 
+\emptyset  & \text{if }l=[] \\ 
 T(m,\sigma ) & \text{if }l=f\rhd m \\ 
 T(t_{1}\rhd \cdots \rhd t_{n}\rhd m,\sigma ) & \text{if }l=f(t_{1},\cdots
 ,t_{n})\rhd m \\ 
@@ -255,45 +255,45 @@ U(l,\sigma ) & \text{if }l=g(t_{1},\cdots ,t_{n})\rhd m\wedge f\neq g \\
 U(l,\sigma ) & \text{if }l=x\rhd m \\ 
 U(l,\sigma ) & \text{if }l=x(t_{1},\cdots ,t_{n})\rhd m%
 \end{array}%
-\right. \\ 
-X(l,\sigma ) & = & \emptyset \\ 
+\right.  \\ 
+X(l,\sigma ) & = & \emptyset  \\ 
 R(Q)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
 \{\sigma (t)\ |\ t^{\alpha }\in Q\} & \text{if }l=[] \\ 
-\emptyset & \text{if }l\neq \lbrack ]%
+\emptyset  & \text{if }l\neq \lbrack ]%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 S(x,T) & = & \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }l=[] \\ 
+\emptyset  & \text{if }l=[] \\ 
 T(l,\sigma \lbrack x\rightarrow t]) & \text{if }l=t\rhd m%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 M(x,T,U)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }l=[] \\ 
+\emptyset  & \text{if }l=[] \\ 
 T(l,\sigma ) & \text{if }l=t\rhd m\wedge \sigma (x)=t \\ 
 U(l,\sigma ) & \text{if }l=t\rhd m\wedge \sigma (x)\neq t%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 N(n,T)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
-\emptyset & \text{if }|l|\ <n \\ 
+\emptyset  & \text{if }|l|\ <n \\ 
 T(m,\sigma ) & \text{if }l=t_{1}\rhd \cdots \rhd t_{n}\rhd m%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 E(T,U)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
 U(l,\sigma ) & \text{if }l=[] \\ 
 T(l,\sigma ) & \text{if }l=t\rhd m%
 \end{array}%
-\right. \\ 
+\right.  \\ 
 C(t,T,U)(l,\sigma ) & = & \left\{ 
 \begin{array}{ll}
 T(l,\sigma ) & \text{if }t\sigma \text{ evaluates to }true \\ 
 U(l,\sigma ) & \text{if }t\sigma \text{ does not evalute to }true%
 \end{array}%
-\right.%
+\right. 
 \end{array}%
 \end{equation*}%
 where $T$ and $U$ are match trees, $f$ and $g$ are function symbols, $l$ and 
@@ -326,11 +326,6 @@ M(x,N(\gamma (s,Q,V\cup \{x\})),X) & \text{if }x\in V%
 \end{equation*}%
 Match trees are only defined for rewrite rules with simple terms at the left
 hand side.
-
-\begin{problem}
-How can the construction of match trees be extended to rewrite rules with
-applicative terms at the left hand side?
-\end{problem}
 
 \subsection{Joining match trees}
 
@@ -367,23 +362,10 @@ F(f,N(ar(f),T)\ ||\ U,left) & \text{if} & left=N(T) & \text{and} &
 right=F(f,U,X) \\ 
 N(T\ ||\ U) & \text{if} & left=N(T) & \text{and} & right=N(U) \\ 
 E(T,right\ ||\ T^{\prime }) & \text{if} & left=E(T,T^{\prime }) & \text{and}
-& head(right)\in \{F,M,N,R,S\}%
+& head(right)\in \{F,M,N,R,S\},%
 \end{array}%
-\end{equation*}
-
-\subsection{Rewriting using match trees}
-
-Let $M_{f}$ be a match tree corresponding to rewrite rules with head symbol $%
-f$. We define the function $rewr_{M}$ as:%
-\begin{equation*}
-\begin{array}{lll}
-rewr_{M}(x,\sigma ) & = & \sigma (x) \\ 
-rewr_{M}(f,\sigma ) & = & M_{f}([f],\sigma ) \\ 
-rewr_{M}(f(t_{1},\cdots ,t_{n}),\sigma ) & = & M_{f}([f(t_{1},\cdots
-,t_{n})],\sigma ) \\ 
-rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n})\sigma%
-\end{array}%
-\end{equation*}
+\end{equation*}%
+where $head$ is defined as $head(F(f,T,U))=F$, $head(R(Q))=R$ etc.
 
 \subsection{Optimizing match trees}
 
@@ -446,48 +428,107 @@ R(Q)[x/V] & = & R(Q[x/y:y\in V]) &
 \end{equation*}%
 \begin{equation*}
 \begin{array}{llll}
-clean(T) & = & T^{\prime } & \text{if }\left\langle T^{\prime
-},V\right\rangle =\chi (T) \\ 
-\chi (X) & = & \left\langle X,\emptyset \right\rangle &  \\ 
+clean(T) & = & T^{\prime } & \text{if }\chi (T)=\left\langle T^{\prime
+},V\right\rangle  \\ 
+\chi (X) & = & \left\langle X,\emptyset \right\rangle  &  \\ 
 \chi (F(f,T,U)) & = & \left\langle F(f,T^{\prime },U^{\prime }),V\cup
-W\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
-\wedge \chi (U)=\left\langle U^{\prime },W\right\rangle \\ 
+W\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
+\wedge \chi (U)=\left\langle U^{\prime },W\right\rangle  \\ 
 \chi (S(x,T)) & = & \left\langle S(x,T^{\prime }),V\setminus
-\{x\}\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+\{x\}\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime
 },V\right\rangle \wedge x\in V \\ 
-\chi (S(x,T)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }\chi
-(T)=\left\langle T^{\prime },V\right\rangle \wedge x\notin V \\ 
-\chi (M(x,T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }%
+\chi (S(x,T)) & = & \left\langle T^{\prime },V\right\rangle  & \text{if }%
+\chi (T)=\left\langle T^{\prime },V\right\rangle \wedge x\notin V \\ 
+\chi (M(x,T,U)) & = & \left\langle T^{\prime },V\right\rangle  & \text{if }%
 \chi (T)=\left\langle T^{\prime },V\right\rangle \wedge \chi
 (U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime }=U^{\prime }
 \\ 
 \chi (M(x,T,U)) & = & \left\langle M(x,T^{\prime },U^{\prime }),V\cup W\cup
-\{x\}\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+\{x\}\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime
 },V\right\rangle \wedge \chi (U)=\left\langle U^{\prime },W\right\rangle
 \wedge T^{\prime }\neq U^{\prime } \\ 
-\chi (C(t,T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }%
+\chi (C(t,T,U)) & = & \left\langle T^{\prime },V\right\rangle  & \text{if }%
 \chi (T)=\left\langle T^{\prime },V\right\rangle \wedge \chi
 (U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime }=U^{\prime }
 \\ 
 \chi (C(t,T,U)) & = & \left\langle C(t,T^{\prime },U^{\prime }),V\cup W\cup
-var(t)\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime
+var(t)\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime
 },V\right\rangle \wedge \chi (U)=\left\langle U^{\prime },W\right\rangle
 \wedge T^{\prime }\neq U^{\prime } \\ 
-\chi (N(n,T)) & = & \left\langle N(n,T^{\prime }),V\right\rangle & \text{if }%
-\left\langle T^{\prime },V\right\rangle =\chi (T) \\ 
-\chi (E(T,U)) & = & \left\langle T^{\prime },V\right\rangle & \text{if }\chi
-(T)=\left\langle T^{\prime },V\right\rangle \wedge \chi (U)=\left\langle
-X,W\right\rangle \\ 
-\chi (E(T,U)) & = & \left\langle U^{\prime },W\right\rangle & \text{if }\chi
-(T)=\left\langle X,V\right\rangle \wedge \chi (U)=\left\langle U^{\prime
-},W\right\rangle \\ 
+\chi (N(n,T)) & = & \left\langle N(n,T^{\prime }),V\right\rangle  & \text{if 
+}\left\langle T^{\prime },V\right\rangle =\chi (T) \\ 
+\chi (E(T,U)) & = & \left\langle T^{\prime },V\right\rangle  & \text{if }%
+\chi (T)=\left\langle T^{\prime },V\right\rangle \wedge \chi
+(U)=\left\langle X,W\right\rangle  \\ 
+\chi (E(T,U)) & = & \left\langle U^{\prime },W\right\rangle  & \text{if }%
+\chi (T)=\left\langle X,V\right\rangle \wedge \chi (U)=\left\langle
+U^{\prime },W\right\rangle  \\ 
 \chi (E(T,U)) & = & \left\langle E(T^{\prime },U^{\prime }),V\cup
-W\right\rangle & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
+W\right\rangle  & \text{if }\chi (T)=\left\langle T^{\prime },V\right\rangle
 \wedge \chi (U)=\left\langle U^{\prime },W\right\rangle \wedge T^{\prime
 }\neq X\wedge U^{\prime }\neq X \\ 
-\chi (R(Q)) & = & \left\langle R(Q),var(Q)\right\rangle & 
+\chi (R(Q)) & = & \left\langle R(Q),var(Q)\right\rangle  & 
 \end{array}%
 \end{equation*}
+
+\subsection{Prioritized rewrite rules}
+
+By adding priorities to rewrite rules, the selection of rewrite rules that
+are considered for a term can be reduced. We model priorities of rewrite
+rules using a function $\varphi $, that selects the rules of highest
+priorities of a given set of rules. So $\varphi (R)\subseteq R$ and $\varphi
+(R)=\emptyset $ if and only if $R=\emptyset $. The function $prior$ applies $%
+\varphi $ to a match tree%
+\begin{equation*}
+\begin{array}{lll}
+prior(X,\varphi ) & = & X \\ 
+prior(F(f,T,U),\varphi ) & = & F(f,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(S(x,T),\varphi ) & = & S(x,prior(T,\varphi )) \\ 
+prior(M(x,T,U),\varphi ) & = & M(x,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(C(t,T,U),\varphi ) & = & C(t,prior(T,\varphi ),prior(U,\varphi )) \\ 
+prior(N(n,T),\varphi ) & = & N(n,prior(T,\varphi )) \\ 
+prior(R(Q),\varphi ) & = & R(\varphi (Q)) \\ 
+prior(E(T,U),\varphi ) & = & E(prior(T,\varphi ),prior(U,\varphi )).%
+\end{array}%
+\end{equation*}%
+The effect of applying the function $prior$ to a match tree is that the $R$%
+-nodes will contain less elements.  This can be useful to remove unwanted
+results. Consider for example the rewrite system%
+\begin{eqnarray*}
+x &=&x\rightarrow true \\
+x &=&y\rightarrow false
+\end{eqnarray*}%
+This system can have both $true$ and $false$ as a result of rewriting the
+term $true=true$. But if we give the first equation a higher priority than
+the second, the undesired derivation $true=true\rightarrow false$ is
+eliminated.
+
+\subsection{Rewriting using match trees}
+
+Suppose that we have a rewrite system, and that for each function symbol $f$
+a match tree $M_{f}$ has been constructed that corresponds to rewrite rules
+with head symbol $f$. We define the function $rewr_{M}$ as:%
+\begin{equation*}
+\begin{array}{lll}
+rewr_{M}(x,\sigma ) & = & \sigma (x) \\ 
+rewr_{M}(f,\sigma ) & = & \left\{ 
+\begin{array}{ll}
+f & \text{if }M_{f}([f],\sigma )=\emptyset  \\ 
+u\in M_{f}([f],\sigma ) & \text{if }M_{f}([f],\sigma )\neq \emptyset 
+\end{array}%
+\right.  \\ 
+rewr_{M}(f(t_{1},\cdots ,t_{n}),\sigma ) & = & \left\{ 
+\begin{array}{ll}
+f(t_{1},\cdots ,t_{n}) & \text{if }M_{f}([f(t_{1},\cdots ,t_{n})],\sigma
+)=\emptyset  \\ 
+u\in M_{f}([f(t_{1},\cdots ,t_{n})],\sigma ) & \text{if }M_{f}([f(t_{1},%
+\cdots ,t_{n})],\sigma )\neq \emptyset 
+\end{array}%
+\right.  \\ 
+rewr_{M}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & x(t_{1},\cdots ,t_{n})\sigma 
+\end{array}%
+\end{equation*}%
+The function $rewr_{M}$ is defined for flattened terms.
 
 \subsection{Innermost rewriting}
 
@@ -509,6 +550,18 @@ Here we assume that $\sigma (x)$ is in normal form already.
 How can the definition of $rewr_{I}$ be extended to applicative terms (\ref%
 {eq:applicative_terms})?
 \end{problem}
+
+A possible extension to applicative terms might look as follows:%
+\begin{equation*}
+\begin{array}{lll}
+rewr_{I}(x(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(flatten(\sigma
+(x)(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma ))) \\ 
+rewr_{I}(f,\sigma ) & = & rewr_{M}(f,\sigma ) \\ 
+rewr_{I}(t(t_{1},\cdots ,t_{n}),\sigma ) & = & rewr_{M}(rewr_{I}(t,\sigma
+)(rewr_{I}(t_{1},\sigma ),\cdots ,rewr_{I}(t_{n},\sigma ))).%
+\end{array}%
+\end{equation*}%
+This requires an extension of $rewr_{M}$ to applicative terms as well.
 
 \bibliographystyle{alpha}
 \bibliography{wiki-rewriter}
