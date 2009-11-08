@@ -64,7 +64,7 @@ namespace detail
   {
   }
   
-  void scc_partitioner::scc_partitioner::replace_transitions(const bool preserve_divergence_loops)
+  void scc_partitioner::replace_transitions(const bool preserve_divergence_loops)
   { // Put all the non inert transitions in a set. Add the transitions that form a self
     // loop. Such transitions only exist in case divergence preserving branching bisimulation is
     // used. A set is used to remove double occurrences of transitions. 

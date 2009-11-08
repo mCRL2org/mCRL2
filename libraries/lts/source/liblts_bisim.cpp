@@ -45,7 +45,7 @@ namespace detail
   {
   }
   
-  void bisim_partitioner::bisim_partitioner::replace_transitions(const bool branching, const bool preserve_divergences)
+  void bisim_partitioner::replace_transitions(const bool branching, const bool preserve_divergences)
   { 
     // Put all the non inert transitions in a set. Add the transitions that form a self
     // loop. Such transitions only exist in case divergence preserving branching bisimulation is
@@ -241,7 +241,7 @@ namespace detail
         // Move the unflagged states to the new block.
           
         if (core::gsVerbose)
-        { const unsigned int m=pow(10,floor(log10(blocks.size())));
+        { const unsigned int m=pow(10,floor(log10( static_cast<double>( blocks.size()))));
           if (blocks.size() % m==0)
           { std::cerr << "Bisimulation partitioner: create block " << blocks.size() << "\n";
           }

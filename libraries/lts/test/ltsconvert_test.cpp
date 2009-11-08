@@ -127,7 +127,7 @@ const std::string test11=
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
 { 
-  lts::lts t1(test1);
+  lts t1(test1);
   t1.bisimulation_reduce(); //Strong bisimulation reduction
   BOOST_CHECK(t1.num_states()==1 && t1.num_transitions()==1);
 
