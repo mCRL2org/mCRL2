@@ -54,7 +54,7 @@ class lpsconstelm_tool: public squadt_tool< rewriter_tool<input_output_tool> >
         // boolean flag (default off)
         .add_option("instantiate-free-variables",
           "allow free variables to be instantiated as a side effect of the algorithm"
-          "NOTE: this functionality is untested!",
+          "\nNOTE: this functionality is untested!",
           'f')
         .add_option("ignore-conditions",
           "ignore conditions by assuming they evaluate to true",
