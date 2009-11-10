@@ -29,6 +29,9 @@ namespace mcrl2 {
     class sumelm_algorithm: public lps::detail::lps_algorithm
     {
       protected:
+        /// Stores the number of summation variables that has been removed.
+        int m_removed;
+
         /// Adds replacement lhs := rhs to the specified map of replacements.
         /// All replacements that have lhs as a right hand side will be changed to
         /// have rhs as a right hand side.
@@ -131,15 +134,32 @@ namespace mcrl2 {
         ///             applied.
         /// \param verbose Control whether verbose output should be given.
         sumelm_algorithm(specification& spec, bool verbose = false)
-          : lps::detail::lps_algorithm(spec, verbose)
+          : lps::detail::lps_algorithm(spec, verbose),
+            m_removed(0)
         {}
 
         /// \brief Apply the sum elimination lemma to all summands in the
         ///        specification.
         void run()
         {
-          std::for_each(m_spec.process().action_summands().begin(), m_spec.process().action_summands().end(), (*this));
-          std::for_each(m_spec.process().deadlock_summands().begin(), m_spec.process().deadlock_summands().end(), (*this));
+          m_removed = 0; // Re-initialise number of removed variables for a fresh run.
+
+          for(action_summand_vector::iterator i = m_spec.process().action_summands().begin();
+              i != m_spec.process().action_summands().end(); ++i)
+          {
+            (*this)(*i);
+          }
+
+          for(deadlock_summand_vector::iterator i = m_spec.process().deadlock_summands().begin();
+              i != m_spec.process().deadlock_summands().end(); ++i)
+          {
+            (*this)(*i);
+          }
+
+          if(m_verbose)
+          {
+            std::cerr << "Removed " << m_removed << " summation variables" << std::endl;
+          }
         }
 
         /// \brief Apply the sum elimination lemma to summand s.
@@ -155,7 +175,9 @@ namespace mcrl2 {
           substitute(s.multi_action(), make_map_substitution_adapter(substitutions));
           s.assignments() = replace_free_variables(s.assignments(), make_map_substitution_adapter(substitutions));
 
+          const int var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);
+          m_removed += var_count - s.summation_variables().size();
         }
 
         /// \brief Apply the sum elimination lemma to summand s.
@@ -170,7 +192,9 @@ namespace mcrl2 {
           s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
           s.deadlock().time() = replace_free_variables(s.deadlock().time(), make_map_substitution_adapter(substitutions));
 
+          const int var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);
+          m_removed += var_count - s.summation_variables().size();
         }
     };
 
