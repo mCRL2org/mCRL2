@@ -95,7 +95,7 @@ void MainFrame::setupMenuBar()
 
   // View menu
   wxMenu* viewMenu = new wxMenu;
-  viewMenu->Append(myID_TOGGLE_3D, wxT("Toggle the ltsgraph version (3d or 2d) \tCTRL-s"), wxT("Changes the ltsgraph version"));
+  viewMenu->Append(myID_TOGGLE_3D, wxT("Toggle the ltsgraph version (2d or 3d) \tCTRL-s"), wxT("Changes the ltsgraph version"));
   viewMenu->Append(myID_RESET_ALL, wxT("Reset viewpoint \tF2"), wxT("Resets any panning and rotations done."));
   viewMenu->Append(myID_RESET_ROTATE, wxT("Reset rotations \tCTRL-r"), wxT("Resets any ratations done"));
   viewMenu->Append(myID_RESET_PAN, wxT("Reset pannings \tCTRL-d"), wxT("Resets and panning done"));
@@ -381,7 +381,7 @@ void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
 void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
 {
 	if(glCanvas->get3D())
-		app->forceWalls();
+	app->forceWalls();
 	glCanvas->changeDrawMode();
 	glCanvas->display();
 }

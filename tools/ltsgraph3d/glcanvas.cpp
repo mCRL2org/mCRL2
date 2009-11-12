@@ -62,7 +62,7 @@ GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
   currentTool = myID_ZOOM;
   usingTool = false;
   calcRot = false;
-  drawIn3D = true;
+  drawIn3D = false;
   lookX = 0;
   lookY = 0;
   lookZ = 0;

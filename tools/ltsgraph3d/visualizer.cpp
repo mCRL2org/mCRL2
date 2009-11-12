@@ -961,11 +961,11 @@ void Visualizer::drawSelfLoop(Transition* tr, size_t j, bool selecting)
 void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 {
 	// Draw label near the control point
-    double labelX, labelY, labelZ;
-    tr->getLabelPos(labelX, labelY, labelZ);
+  double labelX, labelY, labelZ;
+  tr->getLabelPos(labelX, labelY, labelZ);
 	double rad = radius * pixelSize;
-    labelX = (labelX / 2000.0) * (width - rad * 2);
-    labelY = (labelY / 2000.0) * (height - rad * 2);
+  labelX = (labelX / 2000.0) * (width - rad * 2);
+  labelY = (labelY / 2000.0) * (height - rad * 2);
 	labelZ = (labelZ / 2000.0) * (depth - rad * 2);
 	State* from = tr->getFrom();
 
@@ -985,7 +985,7 @@ void Visualizer::drawTransLabel(Transition* tr, size_t trid, bool selecting)
 	double dumatrix2[16];
 	Utils::MultGLMatrices(cmvm, dumatrix, dumatrix2);
 	for (int i = 12; i < 16; i++)
-		dumatrix[i] = dumatrix2[i];
+	dumatrix[i] = dumatrix2[i];
 	glLoadMatrixd(dumatrix);
 	
 
@@ -1071,8 +1071,8 @@ void Visualizer::drawStateText(State* s)
     } 
 
     fr->draw_wrapped_text(vectorstr.str(), rad, rad * 2, width - x,  
-          height - 2 * y, 0, (rad - 2 * pixelSize) / 24.0f,
-          mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
+    height - 2 * y, 0, (rad - 2 * pixelSize) / 24.0f,
+    mcrl2::utilities::wx::al_left, mcrl2::utilities::wx::al_bottom);
 
   }
   glPopMatrix();
@@ -1156,7 +1156,7 @@ void Visualizer::drawCoorSystem()
 	tanXZ = atan2(1.0, 0.0) * 180.0f / M_PI;
 	angYxz = atan2(0.0, 1.0) * 180.0f / M_PI;
 
-    glColor3ub(255, 0, 0);
+  glColor3ub(255, 0, 0);
 	glPushMatrix();
 	glTranslatef(length, 0.0f, 0.0f);
 	glRotatef(tanXZ, 0.0f, 1.0f, 0.0f);

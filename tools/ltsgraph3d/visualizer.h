@@ -47,7 +47,7 @@ class Visualizer
     void setCurves(bool value);
     void setTransLabels(bool value);
     void setStateLabels(bool value);
-	void drawCoorSystem();
+    void drawCoorSystem();
 
     // Getters
     int getRadius() const;
@@ -56,15 +56,15 @@ class Visualizer
     double pixelSize; // Pixel size in world coordinates.
     double width; // Canvas width
     double height; // Canvas height
-	double depth;
+    double depth;
     int radius;
     bool showHandles;
     bool showTransLabels;
     bool showStateLabels;
     bool showStateVector;
-	bool draw3d;
+    bool draw3d;
 
-	GLUquadricObj *quadratic;	
+    GLUquadricObj *quadratic;	
 
     void drawStates(bool inSelectMode);
     // Draws a single state s
@@ -73,20 +73,20 @@ class Visualizer
     // Draws a single transition, from its in to its out transition
     void drawTransition(Transition* t, size_t trid, bool inSelectMode);
 
-	// Draws the transition label
-	void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
+  	// Draws the transition label
+	  void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
 
-	// Draws the state label and vector
-	void drawStateText(State* s);
+	  // Draws the state label and vector
+	  void drawStateText(State* s);
 
     // Draws a self-loop, a transition from a state to itself
     void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
 
-	// Draws an arrow head in 3d
+	  // Draws an arrow head in 3d
     void drawArrowHead3d(double baseLength);
 
-	// Draws an arrow head
-	void drawArrowHead(double baseLength);
+	  // Draws an arrow head
+	  void drawArrowHead(double baseLength);
 
     mcrl2::utilities::wx::font_renderer* fr;
 };

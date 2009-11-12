@@ -57,7 +57,7 @@ bool LTSGraph3d::perform_task(tipi::configuration& c) {
 #endif
 
 LTSGraph3d::LTSGraph3d() : super("LTSGraph3d",
-    "visualise an LTS as a graph and manipulate its layout", // what-is
+    "visualise an LTS as a graph and manipulate its layout in 2D and 3D", // what-is
     "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.", // GUI specific description
     "Draw graphs and optimize their layout in a graphical environment. "
     "If INFILE is supplied, the tool will use this file as input for drawing.",
@@ -75,8 +75,6 @@ bool LTSGraph3d::run()
   graph = NULL;
   SpringLayout* springLayout = new SpringLayout(this);
   algorithms.push_back(springLayout);
-/*  GemLayout* gemLayout = new GemLayout(this);
-  algorithms.push_back(gemLayout);*/
 
   mainFrame = new MainFrame(this);
   visualizer = new Visualizer(this);
@@ -240,9 +238,9 @@ void LTSGraph3d::moveObject(double invect[4])
   if(selectedState != NULL)
   {
 
-	selectedState->setX(selectedState->getX() + trans[0]);
+    selectedState->setX(selectedState->getX() + trans[0]);
     selectedState->setY(selectedState->getY() + trans[1]);
-	selectedState->setZ(selectedState->getZ() + trans[2]);
+    selectedState->setZ(selectedState->getZ() + trans[2]);
   }
 
   if(selectedTransition != NULL)
