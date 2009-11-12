@@ -1,6 +1,6 @@
-project toolset/ltsgraph3d ;
+project toolset/ltsgraph ;
 
-tool ltsgraph3d
+tool ltsgraph
        : [ glob *.cpp ]
          /libraries/utilities//spinctrlfloat
          /libraries/utilities//font_renderer
