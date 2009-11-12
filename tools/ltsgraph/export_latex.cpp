@@ -13,7 +13,7 @@
 
 #include "export_latex.h"
 #include <iostream>
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 #include <boost/format.hpp>
 #include <cmath>
 #include <wx/textfile.h>

@@ -13,7 +13,7 @@
 #define VISUALIZER_H
 
 #ifndef LTSGRAPH3D_H
-  #include "ltsgraph3d.h"
+  #include "ltsgraph.h"
 #else
   class LTSGraph3d;
 #endif

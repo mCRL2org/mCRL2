@@ -14,7 +14,7 @@
 
 #include <wx/dialog.h>
 
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 
 class AlgoDialog : public wxDialog
 {

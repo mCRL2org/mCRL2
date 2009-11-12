@@ -16,7 +16,7 @@
 #include <wx/frame.h>
 
 #ifndef LTSGRAPH3D_H
-  #include "ltsgraph3d.h"
+  #include "ltsgraph.h"
 #else
   class LTSGraph3d; // Forward declaration
 #endif

@@ -9,11 +9,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>ltsgraph3d</string>
+	<string>ltsgraph</string>
 	<key>CFBundleIconFile</key>
 	<string>ltsgraph.icns</string>
 	<key>CFBundleName</key>
-	<string>ltsgraph3d</string>
+	<string>ltsgraph</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
@@ -23,7 +23,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleGetInfoString</key>
-	<string>ltsgraph3d January 2009 (development), (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
+	<string>ltsgraph January 2009 (development), (c) 2005-2008 OAS, Computer Science, TUE, NL</string>
 	<key>CFBundleLongVersionString</key>
 	<string>June 2009 (development)</string>
 	<key>NSHumanReadableCopyright</key>

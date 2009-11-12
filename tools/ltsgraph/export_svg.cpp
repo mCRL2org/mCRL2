@@ -17,7 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 
 #include "workarounds.h" // for M_PI on Windows with MSVC
 

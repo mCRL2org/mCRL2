@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsgraph3d.cpp
+/// \file ltsgraph.cpp
 /// \brief Implementation of application base class.
 
 #include "wx.hpp" // precompiled headers
 
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 #include "ltsimporter.h"
 #include "xmlimporter.h"
 

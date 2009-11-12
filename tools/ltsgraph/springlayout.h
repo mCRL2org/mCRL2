@@ -12,7 +12,7 @@
 #ifndef SPRING_LAYOUT_H
 #define SPRING_LAYOUT_H
 #include "layoutalgo.h"
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 
 // This class defines the "spring layout" algorithm of the original LTSgraph
 class SpringLayout : public LayoutAlgorithm

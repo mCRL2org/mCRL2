@@ -15,7 +15,7 @@
 #include <wx/glcanvas.h>
 
 #ifndef LTSGRAPH3D_H
-  #include "ltsgraph3d.h"
+  #include "ltsgraph.h"
 #else
   class LTSGraph3D;
 #endif

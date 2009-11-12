@@ -15,7 +15,7 @@
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include <wx/clrpicker.h>
-#include "ltsgraph3d.h"
+#include "ltsgraph.h"
 
 class SettingsDialog: public wxDialog {
   public:

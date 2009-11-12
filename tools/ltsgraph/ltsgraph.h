@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file ltsgraph3d.h
+/// \file ltsgraph.h
 /// \brief Main application class.
 
 #ifndef LTSGRAPH3D_H
