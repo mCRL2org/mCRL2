@@ -25,6 +25,9 @@
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #ifdef USE_BCG
 #include <bcg_user.h>
 #endif
