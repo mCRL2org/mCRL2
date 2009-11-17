@@ -18,11 +18,12 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
-using namespace mcrl2::utilities::tools;
+using mcrl2::utilities::tools::input_output_tool;
+using mcrl2::utilities::tools::squadt_tool;
 
 class lps_parelm_tool : public squadt_tool< input_output_tool >
 {
-  typedef squadt_tool< mcrl2::utilities::tools::input_output_tool > super;
+  typedef squadt_tool< input_output_tool > super;
 
   public:
 
@@ -82,3 +83,4 @@ int main(int argc, char** argv)
 
   return lps_parelm_tool().execute(argc, argv);
 }
+
