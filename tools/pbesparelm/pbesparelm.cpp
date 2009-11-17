@@ -28,13 +28,6 @@ class pbes_parelm_tool: public squadt_tool< input_output_tool >
 {
   typedef squadt_tool< input_output_tool > super;
 
-  protected:
-    void add_options(interface_description& desc) /*< One can add command line
-                     options by overriding the virtual function `add_options`. >*/
-    {
-      desc.add_option("compute-conditions", "compute propagation conditions", 'c');
-    }
-
   public:
     pbes_parelm_tool()
       : super(
