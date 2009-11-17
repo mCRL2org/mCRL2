@@ -46,7 +46,7 @@ namespace squadt {
       "lpsparelm", "lpsrewr", "lpssumelm", "lpssuminst", "lpsuntime",
       "ltsconvert", "ltsinfo", "ltsgraph.app", "ltsview.app",
       "mcrl22lps",
-      "pbes2bool",
+      "pbes2bool", "pbesparelm",
       "pnml2mcrl2", "xsim.app", 0 };
 
     using boost::filesystem::basename;

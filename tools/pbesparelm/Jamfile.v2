@@ -5,4 +5,5 @@ tool pbesparelm
          /libraries//pbes
        : <status>experimental
          <use>/libraries//lps
+         <squadt-connectivity>implemented
        ;

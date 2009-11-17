@@ -13,20 +13,21 @@
 // #define MCRL2_PBES_CONSTELM_DEBUG
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
-#include <iostream>
-#include <string>
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using utilities::interface_description;
 using utilities::tools::input_output_tool;
+using utilities::tools::squadt_tool;
 
 //[pbes_parelm_tool
-class pbes_parelm_tool: public input_output_tool
+class pbes_parelm_tool: public squadt_tool< input_output_tool >
 {
+  typedef squadt_tool< input_output_tool > super;
+
   protected:
     void add_options(interface_description& desc) /*< One can add command line
                      options by overriding the virtual function `add_options`. >*/
@@ -36,7 +37,7 @@ class pbes_parelm_tool: public input_output_tool
 
   public:
     pbes_parelm_tool()
-      : input_output_tool(
+      : super(
           "pbesparelm",
           "Wieger Wesselink; Simon Janssen and Tim Willemse",
           "remove unused parameters from a PBES",
@@ -71,13 +72,45 @@ class pbes_parelm_tool: public input_output_tool
 
       return true;
     }
+
+// Squadt protocol interface
+#ifdef ENABLE_SQUADT_CONNECTIVITY
+    /** \brief configures tool capabilities */
+    void set_capabilities(tipi::tool::capabilities& c) const {
+      c.add_input_configuration("main-input",
+                 tipi::mime_type("pbes", tipi::mime_type::application),
+                                         tipi::tool::category::transformation);
+    }
+
+    /** \brief queries the user via SQuADT if needed to obtain configuration information */
+    void user_interactive_configuration(tipi::configuration& c) {
+      if (!c.output_exists("main-output")) {
+        c.add_output("main-output",
+                 tipi::mime_type("pbes", tipi::mime_type::application),
+                                                 c.get_output_name(".pbes"));
+      }
+    }
+
+    /** \brief check an existing configuration object to see if it is usable */
+    bool check_configuration(tipi::configuration const& c) const {
+      return c.input_exists("main-input") && c.output_exists("main-output");
+    }
+
+    /** \brief performs the task specified by a configuration */
+    bool perform_task(tipi::configuration& c) {
+      // Let squadt_tool update configuration for rewriter and add output file configuration
+      synchronise_with_configuration(c);
+
+      return run();
+    }
+#endif
 };
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  pbes_parelm_tool tool;
-  return tool.execute(argc, argv); /*< The function `execute` first parses the command line
+
+  return pbes_parelm_tool().execute(argc, argv); /*< The function `execute` first parses the command line
                                        arguments, and then calls the function `run`. >*/
 }
 //]
