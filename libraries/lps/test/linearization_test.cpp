@@ -652,7 +652,37 @@ const std::string various_case_28=
       "act b:A;"
       "proc P(a:A)=b(a).P([]);"
       "init P([lambda n:Nat.n]);";
-      
+
+/* Original name: LR2plus.mcrl2      
+ This example can only be parsed unambiguously by an LR(k) parser generator
+ for the current grammar, where k > 1. Namely, process expression 'a + tau'
+ cannot be parsed unambiguously. After parsing the identifier 'a', it has to
+ be determined if 'a' is an action or process reference, or if 'a' is a data
+ expression, viz. part of the left hand side of a conditional process
+ expression. With a lookahead of 1, we may only use the '+' as extra
+ information, which is not enough, because this symbol is also ambiguous.
+*/
+const std::string various_case_LR2plus=
+  "act\n"
+  " a;\n\n"
+  "init\n"
+  " a + tau;";
+
+/* Original name: LR2par.mcrl2
+ This example can only be parsed unambiguously by an LR(k) parser generator
+ for the current grammar, where k > 1. Namely, process expression '(a)'
+ cannot be parsed unambiguously. After parsing the left parenthesis '(', it
+ has to be determined if it is part of a process or data expression, viz.
+ part of the left hand side of a conditional process expression. With a
+ lookahead of 1, we may only use the identifier 'a' as extra information,
+ which is not enough, because this symbol is also ambiguous.
+*/
+const std::string various_case_LR2par=
+  "act\n"
+  " a;\n\n"
+  "init\n"
+  " (a);";
+
 
 void test_various_aux(t_lin_options &options)
 { /* Here various testcases are checked, which have been used in
@@ -715,6 +745,10 @@ void test_various_aux(t_lin_options &options)
   spec = linearise(various_case_27);
   std::cerr << "Testcase 28\n";
   spec = linearise(various_case_28);
+  std::cerr << "Testcase LR2plus\n";
+  spec = linearise(various_case_LR2plus);
+  std::cerr << "Testcase LR2par\n";
+  spec = linearise(various_case_LR2par);
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
