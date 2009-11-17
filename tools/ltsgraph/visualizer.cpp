@@ -16,7 +16,7 @@
 #include <cmath>
 #include "ids.h"
 
-Visualizer::Visualizer(LTSGraph3d* app)
+Visualizer::Visualizer(LTSGraph* app)
 {
   owner = app;
   width = 0;

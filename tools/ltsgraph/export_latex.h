@@ -13,17 +13,17 @@
 #define LATEX_EXPORT_H
 
 #include "exporter.h"
-class LTSGraph3d;
+class LTSGraph;
 
 class ExporterLatex: public Exporter
 {
   public:
-    ExporterLatex(Graph* g, LTSGraph3d* app);
+    ExporterLatex(Graph* g, LTSGraph* app);
     ~ExporterLatex() {};
     bool export_to(wxString _filename);
 
   private:
-    LTSGraph3d* owner;
+    LTSGraph* owner;
     std::string tikz_code;
 
     void drawBezier(Transition* tr);

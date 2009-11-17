@@ -19,10 +19,10 @@
 class AlgoDialog : public wxDialog
 {
   public:
-    AlgoDialog(LTSGraph3d* owner, wxWindow* parent);
+    AlgoDialog(LTSGraph* owner, wxWindow* parent);
 
   private:
-    LTSGraph3d* app;
+    LTSGraph* app;
 
 };
 

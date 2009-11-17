@@ -19,11 +19,11 @@
 
 class SettingsDialog: public wxDialog {
   public:
-    SettingsDialog(LTSGraph3d* app, wxWindow* parent);
+    SettingsDialog(LTSGraph* app, wxWindow* parent);
 
 
   private:
-    LTSGraph3d* app;
+    LTSGraph* app;
     void onRadius(wxSpinEvent& evt);
     void onCurves(wxCommandEvent& evt);
     void onTransLabels(wxCommandEvent& evt);

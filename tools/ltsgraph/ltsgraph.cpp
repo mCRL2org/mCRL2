@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_SQUADT_CONNECTIVITY
 // Configures tool capabilities.
-void LTSGraph3d::set_capabilities(tipi::tool::capabilities& c) const {
+void LTSGraph::set_capabilities(tipi::tool::capabilities& c) const {
   std::set< mcrl2::lts::lts_type > const& input_formats(mcrl2::lts::lts::supported_lts_formats());
 
   for (std::set< mcrl2::lts::lts_type >::const_iterator i = input_formats.begin(); i != input_formats.end(); ++i) {
@@ -31,10 +31,10 @@ void LTSGraph3d::set_capabilities(tipi::tool::capabilities& c) const {
 }
 
 // Queries the user via SQuADt if needed to obtain configuration information
-void LTSGraph3d::user_interactive_configuration(tipi::configuration&) { }
+void LTSGraph::user_interactive_configuration(tipi::configuration&) { }
 
 // Check an existing configuration object to see if it is usable
-bool LTSGraph3d::check_configuration(tipi::configuration const& c) const {
+bool LTSGraph::check_configuration(tipi::configuration const& c) const {
   if (c.input_exists("main-input")) {
     /* The input object is present, verify whether the specified format is supported */
     if (mcrl2::lts::lts::parse_format(c.get_input("main-input").type().sub_type().c_str()) == mcrl2::lts::lts_none) {
@@ -49,14 +49,14 @@ bool LTSGraph3d::check_configuration(tipi::configuration const& c) const {
   return false;
 }
 
-bool LTSGraph3d::perform_task(tipi::configuration& c) {
+bool LTSGraph::perform_task(tipi::configuration& c) {
   m_input_filename = c.get_input("main-input").location();
 
   return true;
 }
 #endif
 
-LTSGraph3d::LTSGraph3d() : super("LTSGraph3d",
+LTSGraph::LTSGraph() : super("LTSGraph",
     "visualise an LTS as a graph and manipulate its layout in 2D and 3D", // what-is
     "Tool for visualizing a labelled transition systems as a graph, and optimizing graph layout.", // GUI specific description
     "Draw graphs and optimize their layout in a graphical environment. "
@@ -64,7 +64,7 @@ LTSGraph3d::LTSGraph3d() : super("LTSGraph3d",
     std::vector< std::string >(1, "Carst Tankink, Ali Deniz Aladagli"))
 { }
 
-bool LTSGraph3d::run()
+bool LTSGraph::run()
 {
   wxApp::SetExitOnFrameDelete(true);
   colouring = false;
@@ -96,7 +96,7 @@ bool LTSGraph3d::run()
   return true;
 }
 
-IMPLEMENT_APP_NO_MAIN(LTSGraph3d)
+IMPLEMENT_APP_NO_MAIN(LTSGraph)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 }
 #endif
 
-void LTSGraph3d::openFile(std::string const &path)
+void LTSGraph::openFile(std::string const &path)
 {
   // Set fileName
   fileName = path;
@@ -156,22 +156,22 @@ void LTSGraph3d::openFile(std::string const &path)
   // Setup graph in rest of tool.
 }
 
-Graph* LTSGraph3d::getGraph()
+Graph* LTSGraph::getGraph()
 {
   return graph;
 }
 
-size_t LTSGraph3d::getNumberOfAlgorithms() const
+size_t LTSGraph::getNumberOfAlgorithms() const
 {
   return algorithms.size();
 }
 
-LayoutAlgorithm* LTSGraph3d::getAlgorithm(size_t i) const
+LayoutAlgorithm* LTSGraph::getAlgorithm(size_t i) const
 {
   return algorithms[i];
 }
 
-void LTSGraph3d::display()
+void LTSGraph::display()
 {
   if(glCanvas)
   {
@@ -187,7 +187,7 @@ void LTSGraph3d::display()
   }
 }
 
-void LTSGraph3d::toggleVectorSelected() {
+void LTSGraph::toggleVectorSelected() {
   if(selectedState != NULL)
   {
     selectedState->setShowStateVector(
@@ -196,7 +196,7 @@ void LTSGraph3d::toggleVectorSelected() {
   display();
 }
 
-void LTSGraph3d::moveObject(double invect[4])
+void LTSGraph::moveObject(double invect[4])
 { 
   double trans[4];
   double theMtrx[16];
@@ -257,7 +257,7 @@ void LTSGraph3d::moveObject(double invect[4])
   }
 }
 
-void LTSGraph3d::moveObject(double x, double y)
+void LTSGraph::moveObject(double x, double y)
 {
   double prevX, prevY, prevZ;
   if(selectedState != NULL)
@@ -312,7 +312,7 @@ void LTSGraph3d::moveObject(double x, double y)
     selectedLabel->setLabelPos(prevX, prevY, prevZ);
 }
 
-void LTSGraph3d::lockObject()
+void LTSGraph::lockObject()
 {
   if(selectedState != NULL)
   {
@@ -320,7 +320,7 @@ void LTSGraph3d::lockObject()
   }
 }
 
-void LTSGraph3d::dragObject()
+void LTSGraph::dragObject()
 {
   if(selectedState != NULL)
   {
@@ -328,7 +328,7 @@ void LTSGraph3d::dragObject()
   }
 }
 
-void LTSGraph3d::stopDrag()
+void LTSGraph::stopDrag()
 {
   if(selectedState != NULL)
   {
@@ -336,13 +336,13 @@ void LTSGraph3d::stopDrag()
   }
 }
 
-size_t LTSGraph3d::getNumberOfObjects()
+size_t LTSGraph::getNumberOfObjects()
 {
   // TODO: needs to be adapted when new types of selectable objects are added
   return graph->getNumberOfStates();
 }
 
-void LTSGraph3d::deselect()
+void LTSGraph::deselect()
 {
   if(selectedState != NULL)
   {
@@ -364,7 +364,7 @@ void LTSGraph3d::deselect()
   display();
 }
 
-void LTSGraph3d::uncolourState(size_t selectedObject) 
+void LTSGraph::uncolourState(size_t selectedObject) 
 {
   if(colouring) 
   {
@@ -372,7 +372,7 @@ void LTSGraph3d::uncolourState(size_t selectedObject)
   }
 }
 
-void LTSGraph3d::colourState(size_t selectedObject) 
+void LTSGraph::colourState(size_t selectedObject) 
 {
   if(colouring) 
   {
@@ -380,7 +380,7 @@ void LTSGraph3d::colourState(size_t selectedObject)
   }
 }
 
-void LTSGraph3d::selectState(size_t selectedObject)
+void LTSGraph::selectState(size_t selectedObject)
 {
   if(!colouring) 
   {
@@ -388,91 +388,91 @@ void LTSGraph3d::selectState(size_t selectedObject)
   }
 }
 
-void LTSGraph3d::selectTransition(size_t state, size_t transition)
+void LTSGraph::selectTransition(size_t state, size_t transition)
 {
   selectedTransition = graph->selectTransition(state, transition);
 }
 
-void LTSGraph3d::selectSelfLoop(size_t state, size_t transition)
+void LTSGraph::selectSelfLoop(size_t state, size_t transition)
 {
   selectedTransition = graph->selectSelfLoop(state, transition);
 }
 
-void LTSGraph3d::selectLabel(size_t state, size_t transition)
+void LTSGraph::selectLabel(size_t state, size_t transition)
 {
   selectedLabel = graph->selectTransition(state, transition);
 }
 
-void LTSGraph3d::selectSelfLabel(size_t state, size_t transition) 
+void LTSGraph::selectSelfLabel(size_t state, size_t transition) 
 {
   selectedLabel = graph->selectSelfLoop(state, transition);
 }
 
-void LTSGraph3d::setRadius(int radius)
+void LTSGraph::setRadius(int radius)
 {
   visualizer->setRadius(radius);
   display();
 }
 
-int LTSGraph3d::getRadius() const 
+int LTSGraph::getRadius() const 
 {
   return visualizer->getRadius();
 }
 
-void LTSGraph3d::setTransLabels(bool value) 
+void LTSGraph::setTransLabels(bool value) 
 {
   visualizer->setTransLabels(value);
   display();
 }
 
-void LTSGraph3d::setStateLabels(bool value) 
+void LTSGraph::setStateLabels(bool value) 
 {
   visualizer->setStateLabels(value);
   display();
 }
 
-void LTSGraph3d::setCurves(bool value)
+void LTSGraph::setCurves(bool value)
 {
   visualizer->setCurves(value);
   display();
 }
 
-std::string LTSGraph3d::getFileName() const
+std::string LTSGraph::getFileName() const
 {
   return fileName;
 }
 
-double LTSGraph3d::getAspectRatio() const
+double LTSGraph::getAspectRatio() const
 {
   return glCanvas->getAspectRatio();
 }
 
-void LTSGraph3d::setBrushColour(wxColour colour) 
+void LTSGraph::setBrushColour(wxColour colour) 
 {
   brushColour = colour;
 }
 
-void LTSGraph3d::setTool(bool isColour) 
+void LTSGraph::setTool(bool isColour) 
 {
   colouring = isColour;
 }
 
-void LTSGraph3d::getCanvasMdlvwMtrx(double * mtrx)
+void LTSGraph::getCanvasMdlvwMtrx(double * mtrx)
 {
   glCanvas->getMdlvwMtrx(mtrx);
 }
 
-void LTSGraph3d::getCanvasCamPos(double & x, double & y, double & z)
+void LTSGraph::getCanvasCamPos(double & x, double & y, double & z)
 {
   glCanvas->getCamPos(x, y, z);
 }
 
-bool LTSGraph3d::get3dMode()
+bool LTSGraph::get3dMode()
 {
   return glCanvas->get3D();
 }
 
-void LTSGraph3d::forceWalls()
+void LTSGraph::forceWalls()
 {
   if (graph)
   {

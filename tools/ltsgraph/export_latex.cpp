@@ -20,7 +20,7 @@
 
 #include <workarounds.h> // for M_PI
 
-ExporterLatex::ExporterLatex(Graph* g, LTSGraph3d* owner) : Exporter(g)
+ExporterLatex::ExporterLatex(Graph* g, LTSGraph* owner) : Exporter(g)
 {
   this->owner = owner;
 }

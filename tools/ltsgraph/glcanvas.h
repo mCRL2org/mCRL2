@@ -17,7 +17,7 @@
 #ifndef LTSGRAPH3D_H
   #include "ltsgraph.h"
 #else
-  class LTSGraph3D;
+  class LTSGraph;
 #endif
 
 #ifndef VISUALIZER_H
@@ -30,7 +30,7 @@ class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          LTSGraph3d* app,
+          LTSGraph* app,
           wxWindow* parent,
           const wxSize &size = wxDefaultSize,
           int* attribList = NULL);
@@ -74,7 +74,7 @@ class GLCanvas : public wxGLCanvas
 	bool get3D();
 
   private:
-    LTSGraph3d* owner;
+    LTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
 	bool panning;

@@ -9,8 +9,8 @@
 /// \file ltsgraph.h
 /// \brief Main application class.
 
-#ifndef LTSGRAPH3D_H
-#define LTSGRAPH3D_H
+#ifndef LTSGRAPH_H
+#define LTSGRAPH_H
 
 #ifndef MAINFRAME_H
   #include "mainframe.h"
@@ -38,10 +38,10 @@
 #endif
 #endif
 
-class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
+class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
    mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >
 {
-    typedef mcrl2::utilities::wx::tool< LTSGraph3d,
+    typedef mcrl2::utilities::wx::tool< LTSGraph,
        mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
 
   private:
@@ -61,7 +61,7 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
     wxColour brushColour;
 
   public:
-    LTSGraph3d();
+    LTSGraph();
 
     bool run();
 
@@ -114,4 +114,4 @@ class LTSGraph3d : public mcrl2::utilities::wx::tool< LTSGraph3d,
 };
 
 
-#endif //LTSGRAPH3D_H
+#endif //LTSGRAPH_H

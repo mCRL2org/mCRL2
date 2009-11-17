@@ -18,7 +18,7 @@
 class SpringLayout : public LayoutAlgorithm
 {
   public:
-    SpringLayout(LTSGraph3d* owner);
+    SpringLayout(LTSGraph* owner);
     void setupPane(wxPanel* pane);
     void stop();
     void start();
@@ -36,7 +36,7 @@ class SpringLayout : public LayoutAlgorithm
     wxPanel* pane;
     wxButton* optimizeBtn;
     wxButton* stopBtn;
-    LTSGraph3d* app;
+    LTSGraph* app;
 
     void layoutGraph(Graph* g);
 

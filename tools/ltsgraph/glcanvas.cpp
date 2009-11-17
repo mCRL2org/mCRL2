@@ -51,7 +51,7 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
 
 END_EVENT_TABLE()
 
-GLCanvas::GLCanvas(LTSGraph3d* app, wxWindow* parent,
+GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
                    const wxSize &size, int* attribList)
   : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, size, wxSUNKEN_BORDER,
                wxEmptyString, attribList)

@@ -15,7 +15,7 @@
 #include <wx/sizer.h>
 #include <wx/notebook.h>
 
-AlgoDialog::AlgoDialog(LTSGraph3d* owner, wxWindow* parent)
+AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   : wxDialog(parent, wxID_ANY, wxT("Layout optimization"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
 

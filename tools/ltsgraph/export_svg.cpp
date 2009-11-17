@@ -21,7 +21,7 @@
 
 #include "workarounds.h" // for M_PI on Windows with MSVC
 
-ExporterSVG::ExporterSVG(Graph* g, LTSGraph3d* app) : Exporter(g) {
+ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g) {
   owner = app;
 }
 
