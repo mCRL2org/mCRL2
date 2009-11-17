@@ -20,7 +20,6 @@ build-project ../libraries/process/test ;            # test-suite process
 build-project ../tools/squadt/libraries/tipi/test ;  # test-suite tipi
 build-project ../libraries/trace/test ;              # test-suite trace
 build-project ../libraries/utilities/test ;
-build-project ../tools/mcrl22lps/test ;
 
 import set ;
 
@@ -38,7 +37,7 @@ if tool-tests in [ MATCH "^-?-?(tool-tests)" : [ modules.peek : ARGV ] ] {
   local lts-tools  = [ MATCH .*/tools/(lts[^/]*)/Jamfile.v2 : $(all-tools) ] ;
 
   lps-tools = [ set.difference $(lps-tools) : lps2pbes lps2lts lps2torx ] ;
-  lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] ] ;
+  lts-tools = [ set.difference $(lts-tools) : [ MATCH .*/tools/.*/(.*).plist : [ path.glob-tree $(TOP)/tools/ : *.plist ] ] lts2lps ] ;
 
   actions generate-lps {
     $(>) $(<)
