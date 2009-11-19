@@ -3,6 +3,5 @@ project toolset/pbesconstelm ;
 tool pbesconstelm
        : pbesconstelm.cpp
          /libraries//pbes
-       : <status>release
-         <use>/libraries//lps
+       : <use>/libraries//lps
        ;

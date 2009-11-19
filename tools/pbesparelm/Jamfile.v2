@@ -3,7 +3,6 @@ project toolset/pbesparelm ;
 tool pbesparelm
        : pbesparelm.cpp
          /libraries//pbes
-       : <status>release
-         <use>/libraries//lps
+       : <use>/libraries//lps
          <squadt-connectivity>implemented
        ;
