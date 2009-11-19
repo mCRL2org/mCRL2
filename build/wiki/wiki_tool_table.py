@@ -97,12 +97,12 @@ TEXT = '''== Tools ==
 
 {| class="wikitable" align="center"
 |-
-! Tool !! Uses tool classes || Has regression tests || Not using libraries
+! Tool !! Uses tool classes || Has regression tests || Not using libraries || Tool status || Has squadt
 TOOLTEXT|}
 '''
 
 TOOLITEM = '''|-
-| [[User manual/TOOL|TOOL]] ||align="center" COLOR1| VALUE1 ||align="center"| VALUE2 ||align="center" COLOR3| VALUE3
+| [[User manual/TOOL|TOOL]] ||align="center" COLOR1| VALUE1 ||align="center"| VALUE2 ||align="center" COLOR3| VALUE3 || STATUS ||align="center"| HAS_SQUADT
 '''
 
 TOOLS = '''
@@ -158,11 +158,31 @@ xsim              | +               | ? | -
 
 text = ''
 tools = re.split('\n', TOOLS)
-for line in tools:                                                                                          
+for line in tools:
     line = string.strip(line)
     if len(line) == 0:
         continue
     words = map(string.strip, line.split('|'))
+
+    tool = words[0].strip()
+    if tool == 'sim':
+      tooldir = 'xsim'
+    else:
+      tooldir = tool
+
+    jamfile = path('../../tools').joinpath(tooldir).joinpath('Jamfile.v2').normcase().text()
+    jamfile = re.search(r'(tool\s+%s[^;]*;)' % tool, jamfile).group(1)
+    m = re.search(r'<status>(\w*)', jamfile)
+    if m == None:
+      status = 'release'
+    else:
+      status = m.group(1)
+    m = re.search('<squadt-connectivity>implemented', jamfile)
+    if m == None:
+      has_squadt = 'no'
+    else:
+      has_squadt = 'yes'
+
     item = TOOLITEM
     if words[1] == '-':
         color1 = 'bgcolor="red"'
@@ -186,6 +206,8 @@ for line in tools:
     item = re.sub('VALUE1', words[1], item)
     item = re.sub('VALUE2', words[2], item)
     item = re.sub('VALUE3', words[3], item)
+    item = re.sub('STATUS', status, item)
+    item = re.sub('HAS_SQUADT', has_squadt, item)
     text = text + item
 text = re.sub('TOOLTEXT', text, TEXT)
 
