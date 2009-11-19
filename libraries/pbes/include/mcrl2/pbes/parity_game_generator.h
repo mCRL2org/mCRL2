@@ -336,7 +336,7 @@ namespace pbes_system {
         }
         else
         {
-          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi)));
+          throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi) + "\n" + psi.to_string()));
         }
         return result;
       }

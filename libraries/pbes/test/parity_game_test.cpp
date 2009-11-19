@@ -112,7 +112,7 @@ void test_bes(std::string bes_spec, std::string output_file, bool expected_resul
   core::garbage_collect();
 }
 
-void test_parity_game_generator()
+void test_one_bit_sliding_window()
 {
   std::string spec_text =
     "% This file describes the onebit sliding window protocol as documented     \n"
@@ -197,8 +197,7 @@ void test_bes_examples()
   test_bes(BES8, "parity_game_test_bes8.pg", true);
 }
 
-// Another test example from Maks Verver that triggers a garbage collection problem.
-void test_parity_game_generator2()
+void test_abp()
 {
   using namespace pbes_system;
 
@@ -241,7 +240,7 @@ void test_parity_game_generator2()
     "    )                                                                      \n"
     "  );                                                                       \n"
     ;
-    
+
   std::string NODEADLOCK = "[true*]<true>true";
 
   pbes<> pbes = lps2pbes(ABP, NODEADLOCK, true);
@@ -280,8 +279,8 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes_examples();
-  //test_parity_game_generator();
-  //test_parity_game_generator2();
+  test_one_bit_sliding_window();
+  test_abp();
 
   return 0;
 }
