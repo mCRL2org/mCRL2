@@ -3,6 +3,6 @@ project toolset/pbesconstelm ;
 tool pbesconstelm
        : pbesconstelm.cpp
          /libraries//pbes
-       : <status>experimental
+       : <status>release
          <use>/libraries//lps
        ;
