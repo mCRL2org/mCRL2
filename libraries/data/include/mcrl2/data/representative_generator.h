@@ -42,8 +42,7 @@ namespace mcrl2 {
       struct has_non_function_sort : public std::unary_function< data_expression const&, bool >
       {
         bool operator()(data_expression const& e)
-        {
-          return !e.sort().is_function_sort();
+        { return !e.sort().is_function_sort();
         }
       };
     }
@@ -133,9 +132,9 @@ namespace mcrl2 {
         /// \param[in] maximum_depth the maximum depth for recursive exploration of the sort
         /// \return an element of sort sort or the default constructed data_expression object
         data_expression find_representative(sort_expression const& sort, const unsigned int maximum_depth)
-        {
-          data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
+        { data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
           data_specification::mappings_const_range     local_mappings(m_specification.mappings());
+          // std::cerr << "COnstructors length " << local_constructors.size() << "\n";
 
           if (sort.is_function_sort())
           { // s is a function sort. We search for a constructor of mapping of this sort

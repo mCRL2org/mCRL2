@@ -12,6 +12,7 @@
 #define __REWR_INNER_H
 
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 //#define _INNER_STORE_TREES
 
@@ -22,7 +23,7 @@ namespace mcrl2 {
 class RewriterInnermost: public Rewriter
 {
 	public:
-		RewriterInnermost(ATermAppl DataSpec);
+		RewriterInnermost(const data_specification &DataSpec);
 		~RewriterInnermost();
 
 		RewriteStrategy getStrategy();

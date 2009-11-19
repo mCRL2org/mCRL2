@@ -177,6 +177,9 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
                 m_set_index.insert (std::distance(assignments.begin(),k ) );
               }
   
+/*          This code has been changed by JFG because with the new sort library sorts in linear processes
+            should be uniquely defined. There are no sort aliases anymore. 
+  
             mcrl2::data::data_specification::aliases_const_range aliases = lps_specification.data().aliases( k ->lhs().sort());
             for(mcrl2::data::data_specification::aliases_const_range::iterator j = aliases.begin()
                                              ; j != aliases.end()
@@ -187,7 +190,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
                 m_set_index.insert (std::distance(assignments.begin(),k ) );
               }
             }
-   
+*/
+
+            if ( b_sort == k ->lhs().sort())
+            { 
+              m_set_index.insert (std::distance(assignments.begin(),k ) );
+            }
           }      
   
           if ( m_set_index.empty() )

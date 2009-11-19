@@ -23,7 +23,7 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
-#include "mcrl2/data/data_equation.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
@@ -87,7 +87,7 @@ namespace data {
 
       /// \brief Constructor.
       basic_rewriter(strategy s = jitty) :
-          m_rewriter(detail::createRewriter(detail::data_specification_to_aterm_data_spec(data_specification(), false), static_cast< detail::RewriteStrategy >(s)))
+          m_rewriter(detail::createRewriter(data_specification(), static_cast< detail::RewriteStrategy >(s)))
       {}
 
     public:

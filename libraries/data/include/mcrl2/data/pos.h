@@ -793,7 +793,7 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for pos
       /// \param specification a specification
       inline
-      void add_pos_to_specification(data_specification& specification)
+      void add_pos_to_specification(const data_specification& specification) 
       {
          if (specification.constructors(sort_bool::bool_()).empty())
          {

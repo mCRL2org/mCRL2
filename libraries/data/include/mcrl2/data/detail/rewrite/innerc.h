@@ -12,10 +12,10 @@
 #define __REWR_INNERC_H
 
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 #ifdef MCRL2_INNERC_AVAILABLE
 
-#include "mcrl2/data/data_specification.h"
 
 //#define _INNERC_STORE_TREES
 
@@ -26,7 +26,7 @@ namespace mcrl2 {
 class RewriterCompilingInnermost: public Rewriter
 {
 	public:
-		RewriterCompilingInnermost(ATermAppl DataSpec);
+		RewriterCompilingInnermost(const data_specification &DataSpec);
 		~RewriterCompilingInnermost();
 
 		RewriteStrategy getStrategy();
@@ -80,7 +80,7 @@ class RewriterCompilingInnermost: public Rewriter
 		void calcTerm(FILE *f, ATerm t, int startarg);
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid);
-		void CompileRewriteSystem(ATermAppl DataSpec);
+		void CompileRewriteSystem(const data_specification &DataSpec);
 		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);

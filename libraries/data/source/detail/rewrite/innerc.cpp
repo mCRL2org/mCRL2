@@ -1519,10 +1519,8 @@ bool RewriterCompilingInnermost::removeRewriteRule(ATermAppl Rule)
   return false;
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification &DataSpec)
 {
-  ATermList l;
-
   made_files = false;
   need_rebuild = true;
 
@@ -1532,10 +1530,10 @@ void RewriterCompilingInnermost::CompileRewriteSystem(ATermAppl DataSpec)
 
   true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
 
-  l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
-  for (; !ATisEmpty(l); l=ATgetNext(l))
-  {
-    addRewriteRule(ATAgetFirst(l));
+  // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
+  const data_specification::equations_const_range l=DataSpec.equations();
+  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  { addRewriteRule(*j);
   }
 
   int2term = NULL;
@@ -2273,7 +2271,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(ATermAppl DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification &DataSpec)
 {
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);

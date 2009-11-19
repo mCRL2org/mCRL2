@@ -50,7 +50,7 @@ void bag_expression_test()
 {
   data::data_specification specification;
 
-  specification.import_system_defined_sort(sort_bag::bag(sort_pos::pos()));
+  specification.make_complete(sort_bag::bag(sort_pos::pos()));
 
   data::rewriter normaliser(specification);
 

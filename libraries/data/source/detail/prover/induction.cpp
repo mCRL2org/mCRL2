@@ -106,11 +106,12 @@ namespace mcrl2 {
 
   // Class Induction - Functions declared public --------------------------------------------------
 
-    Induction::Induction(ATermAppl const& a_data_spec) {
+    Induction::Induction(const data_specification &a_data_spec) {
       f_list_variables = ATindexedSetCreate(50, 75);
       f_lists_to_sorts = ATtableCreate(50, 75);
 
-      f_constructors = reinterpret_cast< ATermList >(static_cast< ATermAppl >(atermpp::arg2(a_data_spec)));
+      // f_constructors = reinterpret_cast< ATermList >(static_cast< ATermAppl >(atermpp::arg2(a_data_spec)));
+      f_constructors=convert< atermpp::aterm_list > (a_data_spec.constructors());
       f_cons_name = gsMakeOpIdNameCons();
     }
 

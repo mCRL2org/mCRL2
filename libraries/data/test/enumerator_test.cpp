@@ -175,7 +175,7 @@ void test4()
 void test5()
 {
   data_specification data_spec;
-  data_spec.import_system_defined_sort(sort_nat::nat());
+  data_spec.make_complete(sort_nat::nat());
   rewriter datar(data_spec);
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> datae(data_spec, datar, generator);

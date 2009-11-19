@@ -85,7 +85,7 @@ class Prover {
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(
-      ATermAppl a_data_spec,
+      const data_specification &a_data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0
     );

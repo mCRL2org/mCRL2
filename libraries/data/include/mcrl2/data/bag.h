@@ -1210,7 +1210,7 @@ namespace mcrl2 {
       /// \param specification a specification
       /// \param element the sort of elements stored by the container
       inline
-      void add_bag_to_specification(data_specification& specification, sort_expression const& element)
+      void add_bag_to_specification(const data_specification& specification, sort_expression const& element)
       {
          if (specification.constructors(sort_fbag::fbag(element)).empty())
          {

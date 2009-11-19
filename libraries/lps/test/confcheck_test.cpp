@@ -71,25 +71,31 @@ int test_main(int argc, char** argv)
   specification s1;
 
   // case 1
+  std::cerr << "Confluence check case 1\n";
   s0 = linearise(case_1);
   Confluence_Checker checker1(s0);
-  s1=lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
+  s1=lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0));  
+                                                             // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
   core::garbage_collect();
 
   // case 2
+  std::cerr << "Confluence check case 2\n";
   s0 = linearise(case_2);
   Confluence_Checker checker2(s0);
-  s1=lps::specification(checker2.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
+  s1=lps::specification(checker2.check_confluence_and_mark(data::sort_bool::true_(),0));  
+                                                             // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(check_for_ctau(s1));
   core::garbage_collect();
 
   // case 3
+  std::cerr << "Confluence check case 3\n";
   s0 = linearise(case_3);
   Confluence_Checker checker3(s0);
-  s1=lps::specification(checker3.check_confluence_and_mark(data::sort_bool::true_(),0));  // Check confluence for all summands and
+  s1=lps::specification(checker3.check_confluence_and_mark(data::sort_bool::true_(),0));  
+                                                             // Check confluence for all summands and
                                                              // replace confluents tau's by ctau's.
   BOOST_CHECK(!check_for_ctau(s1));
   core::garbage_collect();

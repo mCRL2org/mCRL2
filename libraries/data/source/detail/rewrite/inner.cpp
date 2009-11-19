@@ -25,6 +25,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/data/data_equation.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -1102,9 +1103,9 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
   return a;
 }
 
-RewriterInnermost::RewriterInnermost(ATermAppl DataSpec)
+RewriterInnermost::RewriterInnermost(const data_specification &DataSpec)
 {
-  ATermList l,m,n;
+  ATermList m,n;
   ATermTable tmp_eqns;
   ATermInt i;
 
@@ -1128,18 +1129,18 @@ RewriterInnermost::RewriterInnermost(ATermAppl DataSpec)
   }*/
 
 //	l = dataappl_eqns;
-  l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  const data_specification::equations_const_range l = DataSpec.equations();
+  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     try
     {
-      CheckRewriteRule(ATAgetFirst(l));
+      CheckRewriteRule(*j);
     } catch ( std::runtime_error &e ) {
       gsWarningMsg("%s\n",e.what());
       continue;
     }
 
-    ATerm u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
+    ATerm u = toInner(j->lhs(),true);
     ATerm head;
     ATermList args;
 
@@ -1156,7 +1157,11 @@ RewriterInnermost::RewriterInnermost(ATermAppl DataSpec)
     {
       n = ATmakeList0();
     }
-    n = ATinsert(n,(ATerm) ATmakeAppl4(ruleAFun,ATgetArgument(ATAgetFirst(l),0),toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) args,toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+    n = ATinsert(n,(ATerm) ATmakeAppl4(ruleAFun,
+                                       (ATerm) static_cast<ATermList>(j->variables()),
+                                       (ATerm) toInner(j->condition(),true),
+                                       (ATerm) args,
+                                       (ATerm) toInner(j->rhs(),true)));
     ATtablePut(tmp_eqns,head,(ATerm) n);
   }
 
@@ -1173,17 +1178,17 @@ RewriterInnermost::RewriterInnermost(ATermAppl DataSpec)
   ATprotectArray((ATerm *) inner_eqns,num_opids);
   ATprotectArray((ATerm *) inner_trees,num_opids);
 
-  l = ATtableKeys(term2int);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  ATermList l1 = ATtableKeys(term2int);
+  for (; !ATisEmpty(l1); l1=ATgetNext(l1))
   {
-    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-    int2term[ATgetInt(i)] = ATAgetFirst(l);
+    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l1));
+    int2term[ATgetInt(i)] = ATAgetFirst(l1);
   }
 
-  l = ATtableKeys(term2int);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  l1 = ATtableKeys(term2int);
+  for (; !ATisEmpty(l1); l1=ATgetNext(l1))
   {
-    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l1));
     if ( (m = (ATermList) ATtableGet(tmp_eqns,(ATerm) i)) != NULL )
     {
       inner_eqns[ATgetInt(i)] = m;

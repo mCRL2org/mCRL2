@@ -253,7 +253,7 @@ bool p_lts::write_to_svc(string const& filename, lts_type type, lps::specificati
             gsVerboseMsg("cannot parse action as mCRL2\n");
           } else {
             lps::specification copy(spec);
-            copy.data() = data::remove_all_system_defined(copy.data());
+            /* copy.data() = data::remove_all_system_defined(copy.data()); */
             t = type_check_mult_act(t,specification_to_aterm(copy));
             if ( t == NULL )
             {

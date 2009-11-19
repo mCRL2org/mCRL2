@@ -737,14 +737,9 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   {
     mcrl2::data::postfix_identifier_generator generator("");
     mcrl2::core::identifier_string nstr;
-    if( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).empty() )
-    {
-      nstr = generator( "S" );
-      sort_names.insert( nstr );
-      generator.add_identifiers( sort_names );
-    } else{
-      nstr = m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).begin()->name().name() ;
-    }
+    nstr = generator( "S" );
+    sort_names.insert( nstr );
+    generator.add_identifiers( sort_names );
     unfold_parameter_name = nstr; 
     generated_name = true;
   }
@@ -758,14 +753,9 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(int p
   {
     mcrl2::data::postfix_identifier_generator generator("");
     mcrl2::core::identifier_string nstr;
-    if( m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).empty() )
-    {
-      nstr = generator( "S" );
-      sort_names.insert( nstr );
-      generator.add_identifiers( sort_names );
-    } else{
-      nstr = m_data_specification.aliases(lps_proc_pars[parameter_at_index].sort()).begin()->name().name() ;
-    }
+    nstr = generator( "S" );
+    sort_names.insert( nstr );
+    generator.add_identifiers( sort_names );
     unfold_parameter_name = nstr; 
     generated_name = true;
   }

@@ -43,7 +43,7 @@ namespace mcrl2 {
        **/
       class internal_format_conversion_helper : public detail::expression_manipulator< internal_format_conversion_helper >
       {
-          typedef detail::expression_manipulator< internal_format_conversion_helper > super;
+        typedef detail::expression_manipulator< internal_format_conversion_helper > super;
 
         private:
 
@@ -55,16 +55,16 @@ namespace mcrl2 {
 
           sort_expression operator()(sort_expression const& s)
           {
-            return m_data_specification.normalise(s);
+            return m_data_specification.normalise_sorts(s);
           }
 
           variable operator()(variable const& v)
           {
-            return variable(v.name(), m_data_specification.normalise(v.sort()));
+            return variable(v.name(), m_data_specification.normalise_sorts(v.sort()));
           }
 
           data_equation operator()(data_equation const& e)
-          {
+          { std::cerr << "Data equation:: " << e << "\n";
             return data_equation((*this)(e.variables()), (*this)(e.condition()), // JK 15/10/2009 removed is_nil check
                        (*this)(e.lhs()), (*this)(e.rhs()));
           }
@@ -79,7 +79,7 @@ namespace mcrl2 {
               return number(expression.sort(), name);
             }
 
-            return function_symbol(expression.name(), m_data_specification.normalise(expression.sort()));
+            return function_symbol(expression.name(), m_data_specification.normalise_sorts(expression.sort()));
           }
 
           /// Translates contained numeric expressions to their internal representations
@@ -114,7 +114,7 @@ namespace mcrl2 {
 
               if (head.name() == "@ListEnum")
               { // convert to snoc list
-                sort_expression element_sort(m_data_specification.normalise(*function_sort(head.sort()).domain().begin()));
+                sort_expression element_sort(m_data_specification.normalise_sorts(*function_sort(head.sort()).domain().begin()));
 
                 return sort_list::list(element_sort, (*this)(expression.arguments()));
               }
@@ -150,6 +150,7 @@ namespace mcrl2 {
           void operator()(data_specification& specification)
           {
             std::set< data_equation > to_remove;
+            std::set< data_equation > to_insert;
 
             for (data_specification::equations_const_range r(specification.equations()); !r.empty(); r.advance_begin(1))
             {
@@ -157,13 +158,15 @@ namespace mcrl2 {
 
               if (r.front() != converted_equation)
               { // assumes that the range is not invalidated by inserts and remove operations
-                to_remove.insert(converted_equation);
+                to_remove.insert(r.front());
+                to_insert.insert(converted_equation);
 
-                specification.add_equation(converted_equation);
+                // specification.add_equation(converted_equation);
               }
             }
 
             specification.remove_equations(boost::make_iterator_range(to_remove));
+            specification.add_equations(boost::make_iterator_range(to_insert));
           }
 
           // assume the term represents a (linear) process or pbes

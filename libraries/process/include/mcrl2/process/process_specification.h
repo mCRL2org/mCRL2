@@ -170,13 +170,7 @@ namespace process {
   {
     std::set<data::sort_expression> s;
     traverse_sort_expressions(spec, std::inserter(s, s.end()));
-    for (std::set<data::sort_expression>::iterator i = s.begin(); i != s.end(); ++i)
-    {
-      if (i->is_system_defined())
-      {
-        spec.data().import_system_defined_sort(*i);
-      }
-    }
+    spec.data().make_complete(s);
   }
 
   /// \brief Conversion to ATermAppl.

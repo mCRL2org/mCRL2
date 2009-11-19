@@ -12,6 +12,7 @@
 #define __REWR_JITTYC_H
 
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
@@ -28,7 +29,7 @@ typedef unsigned int* nfs_array;
 class RewriterCompilingJitty: public Rewriter
 {
 	public:
-		RewriterCompilingJitty(ATermAppl DataSpec);
+		RewriterCompilingJitty(const data_specification &DataSpec);
 		~RewriterCompilingJitty();
 
 		RewriteStrategy getStrategy();
@@ -103,7 +104,7 @@ class RewriterCompilingJitty: public Rewriter
 		void implement_tree_aux(FILE *f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool *used, ATermList nnfvars);
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
 		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
-		void CompileRewriteSystem(ATermAppl DataSpec);
+		void CompileRewriteSystem(const data_specification &DataSpec);
 		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);

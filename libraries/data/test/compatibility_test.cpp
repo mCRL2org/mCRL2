@@ -40,9 +40,9 @@ void compatibility_test()
   
   atermpp::aterm_appl data_spec_aterm_new =
     mcrl2::data::detail::data_specification_to_aterm_data_spec(
-      mcrl2::data::remove_all_system_defined(
+      // mcrl2::data::remove_all_system_defined(
         mcrl2::data::data_specification(data_spec_aterm)
-      )
+      // )
     );
 
   BOOST_CHECK(data_spec_aterm == data_spec_aterm_new);

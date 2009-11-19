@@ -141,7 +141,7 @@ class Confluence_Checker {
     BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
-    ATermAppl f_lps;
+    const mcrl2::lps::specification &f_lps;
 
     /// \brief Flag indicating whether or not the tau actions of confluent tau summands are renamed to ctau.
     bool f_no_marking;

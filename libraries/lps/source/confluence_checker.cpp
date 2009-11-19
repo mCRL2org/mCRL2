@@ -284,7 +284,7 @@ using namespace mcrl2::core::detail;
 
     bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, int a_summand_number_1, ATermAppl a_summand_2, int a_summand_number_2) {
       assert(is_tau_summand(a_summand_1));
-      ATermList v_variables = ATLgetArgument(ATAgetArgument(f_lps, 3), 0);
+      ATermList v_variables = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 0);
       bool v_is_confluent = true;
 
       if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
@@ -335,7 +335,7 @@ using namespace mcrl2::core::detail;
 
     ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number, bool& a_is_marked) {
       assert(is_tau_summand(a_summand));
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(f_lps, 3), 1);
+      ATermList v_summands = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 1);
       ATermAppl v_summand, v_marked_summand;
       int v_summand_number = 1;
       bool v_is_confluent = true;
@@ -404,19 +404,28 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-      mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
-      bool a_apply_induction, bool a_no_marking, bool a_check_all, bool a_counter_example, bool a_generate_invariants, std::string const& a_dot_file_name
-    ):
+                     mcrl2::lps::specification const& a_lps, 
+                     mcrl2::data::rewriter::strategy a_rewrite_strategy, 
+                     int a_time_limit, 
+                     bool a_path_eliminator, 
+                     SMT_Solver_Type a_solver_type,
+                     bool a_apply_induction, 
+                     bool a_no_marking, 
+                     bool a_check_all, 
+                     bool a_counter_example, 
+                     bool a_generate_invariants, 
+                     std::string const& a_dot_file_name):
       f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
-      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
-    {
-      if (has_ctau_action(a_lps)) {
+      f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
+      f_lps(a_lps)
+    { if (has_ctau_action(a_lps)) {
         throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
       }
 
       // FIXME
-      f_lps = specification_to_aterm(a_lps);
+      // f_lps = specification_to_aterm(a_lps);
+      // f_lps = a_lps;
       f_no_marking = a_no_marking;
       f_check_all = a_check_all;
       f_counter_example = a_counter_example;
@@ -426,13 +435,13 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    Confluence_Checker::~Confluence_Checker() {
-    }
+    Confluence_Checker::~Confluence_Checker() 
+    {}
 
     // --------------------------------------------------------------------------------------------
 
     ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, int a_summand_number) {
-      ATermAppl v_process_equation = ATAgetArgument(f_lps, 3);
+      ATermAppl v_process_equation = linear_process_to_aterm(f_lps.process()); //ATAgetArgument(f_lps, 3);
       ATermList v_summands = ATLgetArgument(v_process_equation, 1);
       ATermAppl v_summand;
       ATermList v_marked_summands = ATmakeList0();
@@ -466,9 +475,9 @@ using namespace mcrl2::core::detail;
       }
       v_marked_summands = ATreverse(v_marked_summands);
       v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 1);
-      ATermAppl v_lps = ATsetArgument(f_lps, (ATerm) v_process_equation, 3);
+      ATermAppl v_lps = ATsetArgument(specification_to_aterm(f_lps), (ATerm) v_process_equation, 3);
 
-      if (v_is_marked && !has_ctau_action(mcrl2::lps::specification(f_lps))) {
+      if (v_is_marked && !has_ctau_action(f_lps)) {
         v_lps = add_ctau_action(v_lps);
       }
 

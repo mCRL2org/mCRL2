@@ -212,8 +212,10 @@ class confcheck_tool : public squadt_tool< prover_tool< rewriter_tool<input_outp
     if (check_invariant(specification))
     {
       Confluence_Checker v_confluence_checker(
-        specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), m_apply_induction, m_no_marking, m_check_all, m_counter_example,
-        m_generate_invariants, m_dot_file_name);
+        specification, rewrite_strategy(), 
+        m_time_limit, m_path_eliminator, solver_type(), 
+        m_apply_induction, m_no_marking, m_check_all, 
+        m_counter_example, m_generate_invariants, m_dot_file_name);
 
       specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
 

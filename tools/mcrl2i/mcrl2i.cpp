@@ -173,7 +173,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
       // Import all standard data types should be available even if they are
       // not port of the loaded lps or pbes.
-      spec.import_system_defined_sort(sort_real::real_());
+      spec.make_complete(sort_real::real_());
 
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 

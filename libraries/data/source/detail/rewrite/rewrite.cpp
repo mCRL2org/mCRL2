@@ -222,7 +222,7 @@ ATerm Rewriter::lookupSubstitution(ATermAppl Var)
 }
 
 
-Rewriter *createRewriter(ATermAppl DataSpec, RewriteStrategy Strategy)
+Rewriter *createRewriter(const data_specification &DataSpec, RewriteStrategy Strategy)
 {
 	switch ( Strategy )
 	{

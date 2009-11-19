@@ -343,7 +343,10 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
       }
       init_term(atermpp::aterm_appl(t));
 
-      complete_data_specification(*this);
+      complete_data_specification(*this); // Add all the sorts that are used in the specification
+                                          // to the data specification. This is important for those
+                                          // sorts that are built in, because these are not explicitly 
+                                          // declared.
 
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
@@ -405,7 +408,7 @@ if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
       assert(no_well_typedness_check || is_well_typed());
 
       pbes<Container> tmp(*this);
-      tmp.data() = data::remove_all_system_defined(tmp.data());
+      // tmp.data() = data::remove_all_system_defined(tmp.data());
       atermpp::aterm_appl t = pbes_to_aterm(tmp, false);
       core::detail::save_aterm(t, filename, binary);
     }

@@ -1575,7 +1575,7 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for int_
       /// \param specification a specification
       inline
-      void add_int_to_specification(data_specification& specification)
+      void add_int_to_specification(const data_specification& specification) 
       {
          if (specification.constructors(sort_nat::nat()).empty())
          {

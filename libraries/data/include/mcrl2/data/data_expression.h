@@ -130,7 +130,8 @@ namespace mcrl2 {
           {
             result = data_expression(atermpp::arg1(*this)).sort();
           }
-          else {
+          else 
+          { std::cerr << "Failing term " << *this << "\n";
             assert(false);
           }
 

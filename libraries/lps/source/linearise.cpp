@@ -2930,7 +2930,7 @@ class specification_basic_type:public boost::noncopyable
            constructors.push_back(sc_emptystack);
            //add data declarations for structured sort
            spec.insertalias(alias(stack_sort_alias,structured_sort(constructors)));
-           stacksort=spec.data.normalise(stack_sort_alias);
+           stacksort=spec.data.normalise_sorts(stack_sort_alias);
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
            empty=sc_emptystack.recogniser_function(stack_sort_alias);
@@ -7131,6 +7131,49 @@ class specification_basic_type:public boost::noncopyable
       return t3;
     }
 
+    /* normalise the sorts in action_label_lists */
+    action_label_list normalise_sorts_action_labels(
+                const action_label_list &l,
+                const data_specification &data) const
+    { action_label_list result;
+      for(action_label_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      { result=push_back(result,action_label(i->name(),data.normalise_sorts(i->sorts())));
+      }
+      return reverse(result);
+    } 
+
+    action_list normalise_sorts(
+                const action_list &l,
+                const data_specification &data)
+    { action_list result;
+      for(action_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      { const action_label label(i->label());
+        result=push_back(result,
+                  action(action_label(label.name(),data.normalise_sorts(label.sorts())),
+                         data.normalise_sorts(i->arguments()))
+                 );
+      }
+      return reverse(result);
+    }
+  
+    summand_list normalise_sorts(
+                const summand_list &l,
+                const data_specification &data)
+    { summand_list result;
+      for(summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      { result=push_back(result,
+                    summand_(data.normalise_sorts(i->summation_variables()),
+                             data.normalise_sorts(i->condition()),
+                             i->is_delta(),
+                             (i->is_delta()?i->actions():normalise_sorts(i->actions(),data)),
+                             i->has_time(),
+                             (i->has_time()?data.normalise_sorts(i->time()):i->time()),
+                             (i->is_delta()?i->assignments():data.normalise_sorts(i->assignments()))));
+      }
+      return reverse(result);
+    }
+
+    
 }; // End of the class specification basictype
 
 /**************** linearise **************************************/
@@ -7139,7 +7182,9 @@ mcrl2::lps::specification mcrl2::lps::linearise(
                  const mcrl2::process::process_specification& type_checked_spec,
                  mcrl2::lps::t_lin_options lin_options)
 { 
-  gsVerboseMsg("linearising process specification using the '%s' method...\n", lin_method_to_string(lin_options.lin_method).c_str());
+  if (core::gsVerbose)
+  { std::cerr << "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n"; 
+  }
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
@@ -7154,23 +7199,23 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const summand_list result = spec.transform(init,parameters,initial_state);
 
   // compute global variables
-  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
-  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
+  data::variable_list globals1 = spec.data.normalise_sorts(spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters));
+  data::variable_list globals2 = spec.data.normalise_sorts(spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters));
   atermpp::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
-  linear_process lps(      parameters,  
-                           deadlock_summand_vector(),
-                           action_summand_vector());
-  lps.set_summands(result);
+  linear_process lps(spec.data.normalise_sorts(parameters),  
+                     deadlock_summand_vector(),
+                     action_summand_vector());
+  lps.set_summands(spec.normalise_sorts(result,spec.data));
 
   lps::specification spec1(
               spec.data,
-              spec.acts,
+              spec.normalise_sorts_action_labels(spec.acts,spec.data),
               global_variables,
               lps,
-              process_initializer(initial_state));
+              process_initializer(spec.data.normalise_sorts(initial_state)));
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);

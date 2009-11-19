@@ -11,6 +11,7 @@
 #include "boost.hpp" // precompiled headers
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
+// #include "mcrl2/data/data_equation.h"
 
 #define NAME std::string("rewr_jitty")
 
@@ -441,9 +442,9 @@ static ATermList create_strategy(ATermList rules)
   return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(ATermAppl DataSpec)
+RewriterJitty::RewriterJitty(const data_specification &DataSpec)
 {
-  ATermList l,n;
+  ATermList n;
   ATermInt i;
 
   initialise_common();
@@ -466,29 +467,34 @@ RewriterJitty::RewriterJitty(ATermAppl DataSpec)
   }
 
   l = dataappl_eqns;*/
-  l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
-  for (; !ATisEmpty(l); l=ATgetNext(l))
-  {
+  // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
+  const data_specification::equations_const_range l = DataSpec.equations();
+  for (atermpp::set< data_equation >::const_iterator j=l.begin(); 
+          j!=l.end(); ++j)
+  { 
     try
     {
-      CheckRewriteRule(ATAgetFirst(l));
+      CheckRewriteRule(*j);
     } catch ( std::runtime_error &e )
     {
       gsWarningMsg("%s\n",e.what());
       continue;
     }
 
-    ATermAppl u = toInner(ATAgetArgument(ATAgetFirst(l),2),true);
+    ATermAppl u = toInner((ATermAppl)j->lhs(),true);
 
     if ( (n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0))) == NULL )
     {
       n = ATmakeList0();
     }
-    if ( ATgetLength(ATLgetArgument(ATAgetFirst(l),0)) > max_vars)
+    if ( j->variables().size() > max_vars)
     {
-      max_vars = ATgetLength(ATLgetArgument(ATAgetFirst(l),0));
+      max_vars = j->variables().size(); 
     }
-    n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(ATAgetFirst(l),0),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) u,(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true)));
+    n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
+                                       (ATerm) toInner(j->condition(),true),
+                                       (ATerm) u,
+                                       (ATerm) toInner(j->rhs(),true)));
     ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
   }
 
@@ -500,18 +506,18 @@ RewriterJitty::RewriterJitty(ATermAppl DataSpec)
   ATprotectArray((ATerm *) jitty_strat,num_opids);
 
 
-  l = ATtableKeys(term2int);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  ATermList l1 = ATtableKeys(term2int);
+  for (; !ATisEmpty(l1); l1=ATgetNext(l1))
   {
     ATermList n;
 
-    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-    int2term[ATgetInt(i)] = ATAgetFirst(l);
+    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l1));
+    int2term[ATgetInt(i)] = ATAgetFirst(l1);
     if ( (n = (ATermList) ATtableGet(jitty_eqns,(ATerm) i)) == NULL )
     {
       jitty_strat[ATgetInt(i)] = NULL;
     } else {
-//gsfprintf(stderr,"%T\n",ATAgetFirst(l));
+//gsfprintf(stderr,"%T\n",ATAgetFirst(l1));
       jitty_strat[ATgetInt(i)] = create_strategy(ATreverse(n));
     }
   }

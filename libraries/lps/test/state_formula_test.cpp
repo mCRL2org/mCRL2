@@ -330,7 +330,7 @@ const std::string MODEL =
 void test_rename()
 {
   using mcrl2::core::pp;
-
+  std::cerr << "test_rename";
   specification spec    = linearise(SPECIFICATION);
 
   state_formula formula = mcf2statefrm("(mu X. X) && (mu X. X)", spec);
@@ -353,6 +353,7 @@ void test_normalize()
 {
   using mcrl2::core::pp;
   using namespace state_frm;
+  std::cerr << "test_normalize\n";
 
   state_formula x = state_formulas::state_frm::variable(identifier_string("X"), data_expression_list());
   state_formula y = state_formulas::state_frm::variable(identifier_string("Y"), data_expression_list());
@@ -391,6 +392,7 @@ void test_normalize()
 void test_type_checking()
 {
   using namespace state_frm;
+  std::cerr << "test_type_checking\n";
 
   specification context = linearise(
     "sort B = struct d;"
@@ -400,6 +402,7 @@ void test_type_checking()
 
   state_formula formula = mcf2statefrm("<a([d])>true", context);
 
+  std::cerr << "Hier\n";
   BOOST_CHECK(is_may(formula));
   BOOST_CHECK(act(formula));
 }

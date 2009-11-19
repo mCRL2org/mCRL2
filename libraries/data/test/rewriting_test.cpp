@@ -41,8 +41,8 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 
 template <typename Rewriter>
-void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output) {
-  data_expression output = R(input);
+void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output) 
+{ data_expression output = R(input);
 
   BOOST_CHECK(output == expected_output);
 
@@ -50,7 +50,7 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected_output) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected_output) << std::endl
-              << "R(input) " << core::pp(output) << std::endl
+              << "output " << core::pp(output) << std::endl
               << " -- term representations -- " << std::endl
               << "input    " << input << std::endl
               << "expected " << expected_output << std::endl
@@ -63,7 +63,7 @@ void bool_rewrite_test() {
 
   data_specification specification;
 
-  specification.import_system_defined_sort(bool_());
+  specification.make_complete(bool_());
 
   data::rewriter R(specification);
 
@@ -85,7 +85,7 @@ void pos_rewrite_test() {
 
   data_specification specification;
 
-  specification.import_system_defined_sort(pos());
+  specification.make_complete(pos());
 
   data::rewriter R(specification);
 
@@ -116,7 +116,7 @@ void nat_rewrite_test() {
 
   data_specification specification;
 
-  specification.import_system_defined_sort(nat());
+  specification.make_complete(nat());
 
   data::rewriter R(specification);
 
@@ -179,7 +179,7 @@ void int_rewrite_test() {
 
   data_specification specification;
 
-  specification.import_system_defined_sort(int_());
+  specification.make_complete(int_());
 
   data::rewriter R(specification);
 
@@ -232,12 +232,13 @@ void int_rewrite_test() {
   data_rewrite_test(R, exp(p2, int2nat(p2)), p4);
 }
 
-void real_rewrite_test() {
-  using namespace mcrl2::data::sort_real;
+void real_rewrite_test() 
+{ using namespace mcrl2::data::sort_real;
 
   data_specification specification;
-
-  specification.import_system_defined_sort(real_());
+  const data::function_symbol f("f",real_());
+  specification.add_mapping(f);
+  // specification.make_complete(real_());
 
   data::rewriter R(specification);
 
@@ -298,7 +299,7 @@ void list_rewrite_test() {
 
   data_specification specification;
 
-  specification.import_system_defined_sort(list(bool_()));
+  specification.make_complete(list(bool_()));
 
   data::rewriter R(specification);
 
@@ -327,7 +328,7 @@ void set_rewrite_test() {
     "sort A = Set(Nat);"
   );
 
-  specification.import_system_defined_sort(set_(nat()));
+  specification.make_complete(set_(nat()));
 
   data::rewriter R(specification);
 
@@ -372,7 +373,7 @@ void bag_rewrite_test() {
     "sort A = Bag(Nat);"
   );
 
-  specification.import_system_defined_sort(bag(nat()));
+  specification.make_complete(bag(nat()));
 
   data::rewriter R(specification);
 
@@ -443,6 +444,7 @@ void structured_sort_rewrite_test() {
   data::structured_sort ls(boost::make_iterator_range(constructors));
 
   specification.add_alias(alias(basic_sort("D"), ls));
+  // specification.normalise_sorts();
 
   data::rewriter R(specification);
 

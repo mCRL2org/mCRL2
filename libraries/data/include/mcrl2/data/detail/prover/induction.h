@@ -87,7 +87,7 @@ class Induction {
     );
   public:
     /// \brief
-    Induction(ATermAppl const& a_data_spec);
+    Induction(const data_specification &a_data_spec);
 
     /// \brief
     ~Induction();

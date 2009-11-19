@@ -93,7 +93,7 @@ class BDD_Prover: public Prover {
     bool f_apply_induction;
 
     /// \brief A data specification.
-    ATermAppl f_data_spec;
+    const data_specification &f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
@@ -146,14 +146,14 @@ class BDD_Prover: public Prover {
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
     /// precondition: the argument passed as parameter a_lps is an LPS
-    BDD_Prover(
-      ATermAppl data_spec,
+    /* BDD_Prover(
+      const data_specification &data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_ario,
       bool a_apply_induction = false
-    );
+    ); */
 
     BDD_Prover(
       mcrl2::data::data_specification const&,

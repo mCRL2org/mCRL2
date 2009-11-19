@@ -50,7 +50,7 @@ namespace mcrl2 {
 
         bool operator()(data_equation const& e) const
         {
-          return true;
+          // return true;
           // Disabled because of too agressive removal of equations,
           // causing the statespace of 1394-fin to exists of a single state
           // and no transitions. (JK & JFG, 7/10/2009)
@@ -62,7 +62,7 @@ namespace mcrl2 {
           
           std::set< function_symbol > used_symbols;
 
-          // std::cerr << "Data equation " << e << "\n";
+          /* std::cerr << "Data equation " << e << "\n"; */
 
           detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
@@ -84,7 +84,7 @@ namespace mcrl2 {
           else
           { std::cerr << "False +++++++++++++++++++++++++++++++++++++++\n";
           }
-          return result; */
+          return result;  */
         }
 
         // temporary measure: use aterm

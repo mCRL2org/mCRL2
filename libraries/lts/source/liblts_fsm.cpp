@@ -48,7 +48,7 @@ static ATerm parse_mcrl2_action(ATerm label, lps::specification const& spec)
     gsVerboseMsg("cannot parse action as mCRL2\n");
   } else {
     lps::specification copy(spec);
-    copy.data() = data::remove_all_system_defined(copy.data());
+    /* copy.data() = data::remove_all_system_defined(copy.data()); */
     t = type_check_mult_act(t,specification_to_aterm(copy));
     if ( t == NULL )
     {
@@ -73,7 +73,7 @@ static ATerm parse_mcrl2_state(ATerm state, lps::specification const& spec)
     // typechecking and data implementation of terms needs an lps
     // before data implementation
     lps::specification copy(spec);
-    copy.data() = data::remove_all_system_defined(copy.data());
+    /* copy.data() = data::remove_all_system_defined(copy.data()); */
     ATermAppl spec_for_type_check(specification_to_aterm(copy));
 
     std::stringstream sort_ss(ATgetName(ATgetAFun(sort)));

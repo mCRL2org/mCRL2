@@ -1644,7 +1644,7 @@ namespace bes
       else if (pbes_expr::is_false(p))
       { return false_();
       }
-
+      std::cerr << "TEYPETET " << p << "\n";
       throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " + pp(p) + "\n");
       return false_();
     }
@@ -1973,7 +1973,7 @@ namespace bes
           }
         }
         nr_of_processed_variables++;
-        if (nr_of_processed_variables % 1000 == 0)
+        if (nr_of_processed_variables % 10 == 0)
         {
           if (mcrl2::core::gsVerbose)
           {

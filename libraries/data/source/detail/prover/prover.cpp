@@ -18,6 +18,7 @@
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/data/detail/prover/info.h"
+#include "mcrl2/data/data_specification.h"
 
 using namespace mcrl2::core;
 
@@ -29,7 +30,7 @@ namespace mcrl2 {
   // Class Prover - Functions declared public -----------------------------------------------------
 
     Prover::Prover(
-      ATermAppl data_spec,
+      const data_specification &data_spec,
       mcrl2::data::rewriter::strategy a_rewrite_strategy,
       int a_time_limit
     ) {

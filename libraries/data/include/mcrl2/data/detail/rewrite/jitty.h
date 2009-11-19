@@ -12,6 +12,7 @@
 #define __REWR_JITTY_H
 
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
   namespace data {
@@ -20,7 +21,7 @@ namespace mcrl2 {
 class RewriterJitty: public Rewriter
 {
 	public:
-		RewriterJitty(ATermAppl DataSpec);
+		RewriterJitty(const data_specification &DataSpec);
 		~RewriterJitty();
 
 		RewriteStrategy getStrategy();

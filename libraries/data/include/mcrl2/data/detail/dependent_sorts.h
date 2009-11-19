@@ -67,7 +67,8 @@ namespace mcrl2 {
               {
                 for (boost::iterator_range< function_sort::domain_const_range::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
+                  // if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
+                  if (i.front() != s && (!i.front().is_basic_sort() || m_specification.normalise_sorts(i.front()) != s))
                   {
                     static_cast< super& >(*this)(i.front());
                   }
@@ -90,7 +91,8 @@ namespace mcrl2 {
 
           void enter(const basic_sort& s)
           {
-            sort_expression actual_sort = m_specification.find_referenced_sort(s);
+            // sort_expression actual_sort = m_specification.find_referenced_sort(s);
+            sort_expression actual_sort = m_specification.normalise_sorts(s);
 
             if (actual_sort == s)
             {
@@ -148,7 +150,8 @@ namespace mcrl2 {
               m_action(s);
             }
 
-            if (is_basic_sort(s) && m_specification.find_referenced_sort(s))
+            // if (is_basic_sort(s) && m_specification.find_referenced_sort(s))
+            if (is_basic_sort(s) && m_specification.normalise_sorts(s))
             {
               visit_constructors(s);
             }

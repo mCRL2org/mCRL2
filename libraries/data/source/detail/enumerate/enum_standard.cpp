@@ -650,7 +650,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
           atermpp::aterm_list constructors;
 
           for (data_specification::constructors_const_range rc(data_spec.constructors(r.front())); !rc.empty(); rc.advance_begin(1))
-          {
+          { 
             constructors = atermpp::push_front(constructors,
               atermpp::aterm(ATmakeAppl2(info.tupAFun,
                 reinterpret_cast< ATerm >(static_cast< ATermAppl >(rc.front())),

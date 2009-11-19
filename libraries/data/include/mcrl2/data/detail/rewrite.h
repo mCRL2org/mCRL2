@@ -12,6 +12,8 @@
 #define __LIBREWRITE_H
 
 #include <aterm2.h>
+#include "mcrl2/data/data_specification.h"
+
 
 #ifndef NO_DYNLOAD
 #define MCRL2_INNERC_AVAILABLE /** \brief If defined the compiling innermost
@@ -247,7 +249,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter *createRewriter(ATermAppl DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
+Rewriter *createRewriter(const data_specification &DataSpec, RewriteStrategy Strategy = GS_REWR_INNER);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.

@@ -66,8 +66,7 @@ namespace mcrl2 {
           {
             // Add rewrite rules (needed only for lambda expressions)
             for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
-            {
-              if (!m_rewriter->addRewriteRule(implement(*i)))
+            { if (!m_rewriter->addRewriteRule(implement(*i)))
               {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");
               }
@@ -105,7 +104,7 @@ namespace mcrl2 {
           // For normalising sort expressions
           sort_expression implement(sort_expression const& expression)
           {
-            return m_data_specification->normalise(expression);
+            return m_data_specification->normalise_sorts(expression);
           }
 
           function_symbol implement(function_symbol const& f)
@@ -334,12 +333,13 @@ namespace mcrl2 {
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {
-            initialise(specification.equations());
+            initialise(specification.equations()); 
           }
 
           template < typename EquationSelector >
           rewrite_conversion_helper(data_specification const& specification,
-                                    detail::Rewriter& rewriter, EquationSelector& selector) :
+                                    detail::Rewriter& rewriter, 
+                                    EquationSelector& selector) :
                    m_data_specification(&specification),
                    m_rewriter(&rewriter)
           {

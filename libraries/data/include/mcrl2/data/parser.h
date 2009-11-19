@@ -77,7 +77,10 @@ namespace data {
     spec = core::type_check_data_spec(spec);
     if (spec == 0)
       throw mcrl2::runtime_error("Error while type checking data specification");
-    return detail::internal_format_conversion(data_specification(spec));
+    data_specification d(spec);
+    std::cerr << "READ SPEC " << spec << "\n";
+    detail::internal_format_conversion(d); // Translate bag/set enumerations and numbers to internal format.
+    return d;
   }
 
   /// \brief Parses a and type checks a data specification.
@@ -128,9 +131,10 @@ namespace data {
     if (data_vars == 0)
       throw mcrl2::runtime_error("Error while parsing data variable declarations.");
 
-    // Type check the variabl list.
-    atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                        mcrl2::data::remove_all_system_defined(data_spec), true);
+    // Type check the variable list.
+    /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+                                        mcrl2::data::remove_all_system_defined(data_spec), true); */
+    atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true);
 
     data_vars = core::type_check_data_vars(data_vars, d);
 
@@ -278,11 +282,15 @@ namespace data {
       // the name of the variable is quoted, which is what the typechecker expects.
       variables.put(atermpp::aterm_string(v->name()),v->sort());
     }
-    data_expr = core::type_check_data_expr(data_expr, 0,
+    std::cerr << "Parsed data expression " << data_expr << "\n";
+    /* data_expr = core::type_check_data_expr(data_expr, 0,
                  mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                        mcrl2::data::remove_all_system_defined(data_spec), true), variables);
+                        mcrl2::data::remove_all_system_defined(data_spec), true), variables); */
+    data_expr = core::type_check_data_expr(data_expr, 0,
+                 mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true), variables);
     if (data_expr == 0)
       throw mcrl2::runtime_error("error type checking data expression");
+    std::cerr << "Typed data expression " << data_expr << "\n";
     // Undo sort renamings for compatibility with type checker
     data_expr = data::detail::undo_compatibility_renamings(data_spec, data_expr);
     detail::internal_format_conversion_helper converter(data_spec);
@@ -357,8 +365,9 @@ namespace data {
     atermpp::aterm_appl sort_expr = core::parse_sort_expr(text);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error parsing sort expression");
-    atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                                mcrl2::data::remove_all_system_defined(data_spec), true);
+    /* atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
+                                                mcrl2::data::remove_all_system_defined(data_spec), true); */
+    atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec, true);
     sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
     if (sort_expr == 0)
       throw mcrl2::runtime_error("error type checking sort expression");
@@ -383,6 +392,7 @@ namespace data {
     return parse_sort_expression(spec_stream, data_spec);
   }
 
+
   /// \brief Parses a single data expression.
   /// \param text A string
   /// \param var_decl A string
@@ -396,35 +406,8 @@ namespace data {
   /// \return The parsed expression
   inline
   data_expression parse_data_expression(std::string text, std::string var_decl, std::string data_spec)
-  {
-    data_expression result;
-
-    // make an equation of the form 'x == x'
-    std::string s = "eqn (" + text + ") = (" + text + ");";
-    if (!boost::trim_copy(var_decl).empty())
-    {
-      s = "var\n" + var_decl + "\n" + s;
-    }
-    s = data_spec + (data_spec.empty() ? "" : "\n") + s;
-
-    try
-    {
-      data_specification data_spec(remove_all_system_defined(data::parse_data_specification(s)));
-
-      // extract the left hand side of the equation 'x == x'
-      std::vector<data_equation> eqn(data_spec.equations().begin(), data_spec.equations().end());
-      result = eqn.back().lhs();
-
-      detail::internal_format_conversion_helper converter(data_spec);
-      result = converter(result);
-    }
-    catch (std::runtime_error e)
-    {
-      std::cout << "<specification>" << s << std::endl;
-      std::cout << e.what() << std::endl;
-    }
-
-    return result;
+  { 
+    return parse_data_expression(text,var_decl,data::parse_data_specification(data_spec));
   }
 
   /// \cond INTERNAL_DOCS

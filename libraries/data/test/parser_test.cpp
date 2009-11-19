@@ -19,6 +19,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/data/basic_sort.h"
 
 using namespace mcrl2;
 
@@ -30,11 +31,13 @@ void parser_test()
     "map f:S -> List(S);\n"
   );
 
-  data::data_specification spec1(data::parse_data_specification(text));
-  data::data_specification spec(data::remove_all_system_defined(data::parse_data_specification(text)));
-  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 1);
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors()).size() == 1);
-  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 1);
+  data::data_specification spec(data::parse_data_specification(text));
+
+  std::cerr << "aaa " << boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() << "\n";
+  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 3);
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
+  std::cerr << "aaa " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
+  BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 26);
 
   BOOST_CHECK(data::parse_data_expression("2") == data::sort_pos::pos(2));
   BOOST_CHECK(data::parse_data_expression("0") == data::sort_nat::nat(0));

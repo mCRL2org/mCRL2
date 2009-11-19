@@ -274,7 +274,7 @@ namespace mcrl2 {
 
   // Class BDD_Prover - Functions declared public -------------------------------------------------
 
-    BDD_Prover::BDD_Prover(
+/*    BDD_Prover::BDD_Prover(
       ATermAppl data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
@@ -298,15 +298,15 @@ namespace mcrl2 {
       } else {
         f_bdd_simplifier = new BDD_Simplifier();
       }
-    }
+    } */
 
     BDD_Prover::BDD_Prover(
       mcrl2::data::data_specification const& data_spec, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type, bool a_apply_induction
     ):
-      Prover(data_specification_to_aterm_data_spec(data_spec), a_rewrite_strategy, a_time_limit),
-      f_data_spec(data_specification_to_aterm_data_spec(data_spec)),
-      f_induction(data_specification_to_aterm_data_spec(data_spec))
-    {
+      Prover(data_spec, a_rewrite_strategy, a_time_limit),
+      f_data_spec(data_spec),
+      f_induction(data_spec)
+    { 
       f_reverse = true;
       f_full = true;
       f_apply_induction = a_apply_induction;
@@ -329,8 +329,8 @@ namespace mcrl2 {
 
     // --------------------------------------------------------------------------------------------
 
-    BDD_Prover::~BDD_Prover() {
-      delete f_bdd_simplifier;
+    BDD_Prover::~BDD_Prover() 
+    { delete f_bdd_simplifier;
       f_bdd_simplifier = 0;
     }
 

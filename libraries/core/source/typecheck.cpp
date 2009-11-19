@@ -481,7 +481,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
-    {
+    { ATfprintf(stderr,"State formula %t\n",state_frm);
       gsVerboseMsg("type checking state formula...\n");
       assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
       //check correctness of the state formula in state_formula using
@@ -1789,6 +1789,7 @@ namespace mcrl2 {
          !ATisEqual(Name,gsMakeOpIdNameCount())
         ){
         gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
+        assert(0);
         return ATfalse;
       }
 
@@ -1822,8 +1823,8 @@ namespace mcrl2 {
       ATtablePut(gssystem.constants,(ATerm)OpIdName,(ATerm)Types);
     }
 
-    static void gstcAddSystemFunction(ATermAppl OpId){
-      //Pre: OpId is an OpId
+    static void gstcAddSystemFunction(ATermAppl OpId)
+    { //Pre: OpId is an OpId
       // append the Type to the entry of the Name of the OpId in gssystem.functions table
       assert(gsIsOpId(OpId));
       ATermAppl OpIdName = gsGetName(OpId);
@@ -1833,7 +1834,7 @@ namespace mcrl2 {
       ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpIdName);
 
       if (!Types) Types=ATmakeList0();
-      Types=ATappend(Types,(ATerm)Type);
+      Types=ATappend(Types,(ATerm)Type); // TODO: Avoid ATappend!!!!
       ATtablePut(gssystem.functions,(ATerm)OpIdName,(ATerm)Types);
     }
 

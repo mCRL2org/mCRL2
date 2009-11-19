@@ -23,7 +23,7 @@ namespace mcrl2 {
 class RewriterProver: public Rewriter
 {
 	public:
-		RewriterProver(ATermAppl DataSpec, mcrl2::data::rewriter::strategy strat);
+		RewriterProver(const data_specification &DataSpec, mcrl2::data::rewriter::strategy strat);
 		~RewriterProver();
 
 		mcrl2::data::detail::RewriteStrategy getStrategy();

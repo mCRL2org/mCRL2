@@ -216,7 +216,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this)(e.sorts());
             static_cast< Derived& >(*this)(e.constructors());
             static_cast< Derived& >(*this)(e.mappings());
-            static_cast< Derived& >(*this)(e.aliases());
+            // static_cast< Derived& >(*this)(e.aliases());
             static_cast< Derived& >(*this)(e.equations());
           }
 

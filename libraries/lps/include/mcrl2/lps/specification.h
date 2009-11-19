@@ -150,7 +150,7 @@ class specification
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
-    {
+    { 
       atermpp::aterm t = core::detail::load_aterm(filename);
       if (!t || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
@@ -161,10 +161,6 @@ class specification
       // The well typedness check is only done in debug mode, since for large
       // LPSs it takes too much time                                        
       assert(is_well_typed(*this));
-      //if (!is_well_typed())
-      //{
-      //  throw mcrl2::runtime_error("specification is not well typed (specification::load())");
-      //}
       complete_data_specification(*this);
     }
 
@@ -182,7 +178,7 @@ class specification
       // LPSs it takes too much time                                        
       assert(is_well_typed(*this));
       specification tmp(*this);
-      tmp.data() = data::remove_all_system_defined(tmp.data());
+      // tmp.data() = data::remove_all_system_defined(tmp.data());
       core::detail::save_aterm(specification_to_aterm(tmp, false), filename, binary);
     }
 
@@ -284,8 +280,7 @@ class specification
 /// \param l A linear process specification
 inline
 void complete_data_specification(lps::specification& spec)
-{
-  std::set<data::sort_expression> s;
+{ std::set<data::sort_expression> s;
   traverse_sort_expressions(spec, std::inserter(s, s.end()));
   spec.data().make_complete(s);
 }
@@ -329,10 +324,10 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
 inline
 std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
 {
-  if (pp_format == core::ppDefault || pp_format == core::ppInternal)
+  /* if (pp_format == core::ppDefault || pp_format == core::ppInternal)
   {
     spec.data() = data::remove_all_system_defined(spec.data());
-  }
+  } */
   
   return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
 }

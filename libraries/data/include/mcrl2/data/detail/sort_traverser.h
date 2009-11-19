@@ -150,7 +150,7 @@ namespace mcrl2 {
           void operator()(data_specification const& e)
           {
             static_cast< Derived& >(*this)(e.sorts());
-            static_cast< Derived& >(*this)(e.aliases());
+            // static_cast< Derived& >(*this)(e.aliases());
             static_cast< super& >(*this)(e);
           }
 

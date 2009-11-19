@@ -43,7 +43,7 @@ void list_expression_test()
 {
   data::data_specification specification;
 
-  specification.import_system_defined_sort(sort_list::list(sort_pos::pos()));
+  specification.make_complete(sort_list::list(sort_pos::pos()));
 
   data::rewriter normaliser(specification);
 

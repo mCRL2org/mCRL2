@@ -41,6 +41,7 @@
 //Data Framework
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
+#include "mcrl2/data/data_equation.h" // for debug std::cerr
 
 //Boolean equation systems
 #include "mcrl2/pbes/utility.h"
@@ -238,6 +239,10 @@ class pbes2bool_tool: public squadt_tool< pbes_rewriter_tool<rewriter_tool<input
       }
 */
       // data rewriter
+      /* for (std::set <mcrl2::data::data_equation >::const_iterator i=p.data().equations();
+               i!=p.data().equations(); ++i)
+      { std::cerr << "AKAKAKAKAKAK " << *i << "\n";
+      } */
       data::rewriter datar= (opt_data_elm) ?
             data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_to_aterm(p, false)), rewrite_strategy()) :
             data::rewriter(p.data(), rewrite_strategy());
