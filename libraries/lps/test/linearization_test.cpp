@@ -690,81 +690,140 @@ void test_various_aux(t_lin_options &options)
      library. */
   specification spec;
   std::cerr << "Testcase 1\n";
-  spec = linearise(various_case_1);
+  spec = linearise(various_case_1, options);
   std::cerr << "Testcase 2\n";
-  spec = linearise(various_case_2);
+  spec = linearise(various_case_2, options);
   std::cerr << "Testcase 3\n";
-  spec = linearise(various_case_3);
+  spec = linearise(various_case_3, options);
   std::cerr << "Testcase 4\n";
-  spec = linearise(various_case_4);
+  spec = linearise(various_case_4, options);
   std::cerr << "Testcase 5\n";
-  spec = linearise(various_case_5);
+  spec = linearise(various_case_5, options);
   std::cerr << "Testcase 6\n";
-  spec = linearise(various_case_6);
+  spec = linearise(various_case_6, options);
   std::cerr << "Testcase 7\n";
-  spec = linearise(various_case_7);
+  spec = linearise(various_case_7, options);
   std::cerr << "Testcase 8\n";
-  spec = linearise(various_case_8);
+  spec = linearise(various_case_8, options);
   std::cerr << "Testcase 9\n";
-  spec = linearise(various_case_9);
+  spec = linearise(various_case_9, options);
   std::cerr << "Testcase 10\n";
-  spec = linearise(various_case_10);
+  spec = linearise(various_case_10, options);
   std::cerr << "Testcase 11\n";
-  spec = linearise(various_case_11);
+  spec = linearise(various_case_11, options);
   std::cerr << "Testcase 12\n";
-  spec = linearise(various_case_12);
+  spec = linearise(various_case_12, options);
   std::cerr << "Testcase 13\n";
-  spec = linearise(various_case_13);
+  spec = linearise(various_case_13, options);
   std::cerr << "Testcase 14\n";
-  spec = linearise(various_case_14);
+  spec = linearise(various_case_14, options);
   std::cerr << "Testcase 15\n";
-  spec = linearise(various_case_15);
+  spec = linearise(various_case_15, options);
   std::cerr << "Testcase 16\n";
-  spec = linearise(various_case_16);
+  spec = linearise(various_case_16, options);
   std::cerr << "Testcase 17\n";
-  spec = linearise(various_case_17);
+  spec = linearise(various_case_17, options);
   std::cerr << "Testcase 18\n";
-  spec = linearise(various_case_18);
+  spec = linearise(various_case_18, options);
   std::cerr << "Testcase 19\n";
-  spec = linearise(various_case_19);
+  spec = linearise(various_case_19, options);
   std::cerr << "Testcase 20\n";
-  spec = linearise(various_case_20);
+  spec = linearise(various_case_20, options);
   std::cerr << "Testcase 21\n";
-  spec = linearise(various_case_21);
+  spec = linearise(various_case_21, options);
   std::cerr << "Testcase 22\n";
-  BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
+  BOOST_CHECK_THROW(linearise(various_case_22, options), mcrl2::runtime_error);
   std::cerr << "Testcase 23\n";
-  spec = linearise(various_case_23);
+  spec = linearise(various_case_23, options);
   std::cerr << "Testcase 24\n";
-  spec = linearise(various_case_24);
+  spec = linearise(various_case_24, options);
   std::cerr << "Testcase 25\n";
-  spec = linearise(various_case_25);
+  spec = linearise(various_case_25, options);
   std::cerr << "Testcase 26\n";
-  spec = linearise(various_case_26);
+  spec = linearise(various_case_26, options);
   std::cerr << "Testcase 27\n";
-  spec = linearise(various_case_27);
+  spec = linearise(various_case_27, options);
   std::cerr << "Testcase 28\n";
-  spec = linearise(various_case_28);
+  spec = linearise(various_case_28, options);
   std::cerr << "Testcase LR2plus\n";
-  spec = linearise(various_case_LR2plus);
+  spec = linearise(various_case_LR2plus, options);
   std::cerr << "Testcase LR2par\n";
-  spec = linearise(various_case_LR2par);
+  spec = linearise(various_case_LR2par, options);
+}
+
+std::string print_rewrite_strategy(const mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy s)
+{
+  switch(s)
+  {
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
+      return "inner";
+      break;
+#ifdef MCRL2_INNERC_AVAILABLE
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
+      return "innerc";
+      break;
+#endif
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty:
+      return "jitty";
+      break;
+#ifdef MCRL2_JITTYC_AVAILABLE
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling:
+      return "jittyc";
+      break;
+#endif
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
+      return "innerp";
+      break;
+#ifdef MCRL2_INNERC_AVAILABLE
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
+      return "innercp";
+      break;
+#endif
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
+      return "jittyp";
+      break;
+#ifdef MCRL2_JITTYC_AVAILABLE
+    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling_prover:  
+      return "jittycp";
+      break;
+#endif          
+    default:
+      return "unknown";
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_various)
-{ t_lin_options options;
-  test_various_aux(options);
-  options.lin_method=lmRegular2;
-  test_various_aux(options);
-  options.lin_method=lmStack;
-  test_various_aux(options);
-  options.binary=true;
-  test_various_aux(options);
-  options.lin_method=lmRegular;
-  test_various_aux(options);
-  options.binary=false;
-  options.no_intermediate_cluster=true;
-  test_various_aux(options);
+{ 
+  // Set various rewrite strategies
+  std::vector<mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy > rewrite_strategies;
+  rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
+  rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
+  #ifdef MCRL2_JITTYC_AVAILABLE
+    rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
+  #endif
+  #ifdef MCRL2_INNERC_AVAILABLE
+    rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
+  #endif
+
+  for(std::vector<mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy >::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
+  {
+    std::cerr << std::endl << "Testing with rewrite strategy " << print_rewrite_strategy(*i) << std::endl;
+
+    t_lin_options options;
+    options.rewrite_strategy=*i;
+    test_various_aux(options);
+    options.lin_method=lmRegular2;
+    test_various_aux(options);
+    options.lin_method=lmStack;
+    test_various_aux(options);
+    options.binary=true;
+    test_various_aux(options);
+    options.lin_method=lmRegular;
+    test_various_aux(options);
+    options.binary=false;
+    options.no_intermediate_cluster=true;
+    test_various_aux(options);
+  }
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
