@@ -76,7 +76,7 @@ eqn ==(@c0, @cNat(p)) = false;
     <=(@c0, n) = true;
     <=(@cNat(p), @c0) = false;
     <=(@cNat(p), @cNat(q)) = <=(p,q);
-    Pos2Nat = @cNat;
+    Pos2Nat(p) = @cNat(p);
     Nat2Pos(@cNat(p)) = p;
     max(p, @c0) = p;
     max(p, @cNat(q)) = if(<=(p,q),q,p);

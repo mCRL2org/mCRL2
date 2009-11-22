@@ -25,7 +25,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/bool.h"
@@ -707,8 +706,9 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for fset
       /// \param specification a specification
       /// \param element the sort of elements stored by the container
+      template <typename SpecificationType>
       inline
-      void add_fset_to_specification(const data_specification& specification, sort_expression const& element)
+      void add_fset_to_specification(SpecificationType const& specification, sort_expression const& element)
       {
          if (specification.constructors(sort_bool::bool_()).empty())
          {

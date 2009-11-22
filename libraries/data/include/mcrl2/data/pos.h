@@ -25,7 +25,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/bool.h"
 
 namespace mcrl2 {
@@ -792,8 +791,9 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for pos
       /// \param specification a specification
+      template <typename SpecificationType>
       inline
-      void add_pos_to_specification(const data_specification& specification) 
+      void add_pos_to_specification(SpecificationType const& specification)
       {
          if (specification.constructors(sort_bool::bool_()).empty())
          {

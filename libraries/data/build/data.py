@@ -1919,7 +1919,7 @@ class specification():
     code += "#include \"mcrl2/data/data_equation.h\"\n"
     code += "#include \"mcrl2/data/detail/container_utility.h\"\n"
     code += "#include \"mcrl2/data/standard.h\"\n"
-    code += "#include \"mcrl2/data/data_specification.h\"\n"
+#    code += "#include \"mcrl2/data/data_specification.h\"\n"
     if self.has_lambda():
       code += "#include \"mcrl2/data/lambda.h\"\n"
     if self.has_forall():
@@ -1963,8 +1963,9 @@ class specification():
       code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
       code += "      /// \\param specification a specification\n"
       code += "      /// \\param element the sort of elements stored by the container\n"
+      code += "      template <typename SpecificationType>\n"
       code += "      inline\n"
-      code += "      void add_%s_to_specification(data_specification& specification, sort_expression const& element)\n" % (self.namespace)
+      code += "      void add_%s_to_specification(SpecificationType const& specification, sort_expression const& element)\n" % (self.namespace)
       code += "      {\n"
       code += string.join(dependent_sorts, "")
       code += string.join(auxiliary_sorts, "")
@@ -1976,8 +1977,9 @@ class specification():
     else:
       code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
       code += "      /// \\param specification a specification\n"
+      code += "      template <typename SpecificationType>\n"
       code += "      inline\n"
-      code += "      void add_%s_to_specification(data_specification& specification)\n" % (self.namespace)
+      code += "      void add_%s_to_specification(SpecificationType const& specification)\n" % (self.namespace)
       code += "      {\n"
       code += string.join(dependent_sorts, "")
       code += string.join(auxiliary_sorts, "")

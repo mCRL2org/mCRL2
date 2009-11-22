@@ -25,7 +25,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/standard.h"
-// #include "mcrl2/data/data_specification.h"
 
 namespace mcrl2 {
 
@@ -441,15 +440,16 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for bool_
       /// \param specification a specification
-      template <typename SPEC> 
-      void add_bool_to_specification(const SPEC &specification) 
+      template <typename SpecificationType>
+      inline
+      void add_bool_to_specification(SpecificationType const& specification)
       {
          specification.add_system_defined_sort(bool_());
          specification.add_system_defined_constructors(bool_generate_constructors_code());
          specification.add_system_defined_mappings(bool_generate_functions_code());
          specification.add_system_defined_equations(bool_generate_equations_code());
       }
-    } // namespace sort_bool
+    } // namespace sort_bool_
 
   } // namespace data
 

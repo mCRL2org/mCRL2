@@ -25,7 +25,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/standard.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -1519,7 +1518,7 @@ namespace mcrl2 {
         result.push_back(data_equation(make_vector(vn, vp), less_equal(cint(vn), cneg(vp)), sort_bool::false_()));
         result.push_back(data_equation(make_vector(vn, vp), less_equal(cneg(vp), cint(vn)), sort_bool::true_()));
         result.push_back(data_equation(make_vector(vp, vq), less_equal(cneg(vp), cneg(vq)), less_equal(vq, vp)));
-        result.push_back(data_equation(variable_list(), nat2int(), cint()));
+        result.push_back(data_equation(make_vector(vn), nat2int(vn), cint(vn)));
         result.push_back(data_equation(make_vector(vn), int2nat(cint(vn)), vn));
         result.push_back(data_equation(make_vector(vp), pos2int(vp), cint(sort_nat::cnat(vp))));
         result.push_back(data_equation(make_vector(vn), int2pos(cint(vn)), sort_nat::nat2pos(vn)));
@@ -1574,8 +1573,9 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for int_
       /// \param specification a specification
+      template <typename SpecificationType>
       inline
-      void add_int_to_specification(const data_specification& specification) 
+      void add_int_to_specification(SpecificationType const& specification)
       {
          if (specification.constructors(sort_nat::nat()).empty())
          {
