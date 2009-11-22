@@ -63,10 +63,11 @@ namespace mcrl2 {
 
           template < typename Sequence >
           void initialise(Sequence const& s)
-          {
+          { 
             // Add rewrite rules (needed only for lambda expressions)
             for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
-            { if (!m_rewriter->addRewriteRule(implement(*i)))
+            { // std::cerr << "ADD REWRITE RULE AT A LATER MOMENT: " << *i << "\n";
+              if (!m_rewriter->addRewriteRule(implement(*i)))
               {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");
               }

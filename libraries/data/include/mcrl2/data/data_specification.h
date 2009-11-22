@@ -177,7 +177,7 @@ namespace mcrl2 {
         /// \brief The sorts that occur in the context of this data specification.
         /// The normalised sorts, constructors, mappings and equations are complete
         /// with respect to these sorts. 
-        mutable atermpp::set< sort_expression >     m_sorts_in_context;
+        mutable atermpp::set< sort_expression >     m_sorts_in_context; // TODO Zou niet mutable moeten zijn.
 
         /// \brief The basic sorts and structured sorts in the specification.
         ltr_aliases_map                     m_aliases;
@@ -234,8 +234,7 @@ namespace mcrl2 {
         /// \post is_system_defined(s) = true
         /// \note this operation does not invalidate iterators of sorts_const_range
         void add_system_defined_sort(const sort_expression& s) const
-        { 
-          m_normalised_sorts.insert(normalise_sorts(s));
+        { m_normalised_sorts.insert(normalise_sorts(s));
         }
   
         /// \brief Adds a constructor to this specification, and marks it as
@@ -258,8 +257,7 @@ namespace mcrl2 {
         /// \post is_system_defined(f) == true
         /// \note this operation does not invalidate iterators of mappings_const_range
         void add_system_defined_mapping(const function_symbol& f) const
-        {
-          // add_function(m_mappings, f);
+        { // std::cerr << "ADD SYSTEM DEFINED MAPPING " << normalise_sorts(f) << "\n";
           add_function(m_normalised_mappings,normalise_sorts(f));
         }
   
@@ -271,8 +269,7 @@ namespace mcrl2 {
         /// \post is_system_defined(f) == true
         /// \note this operation does not invalidate iterators of equations_const_range
         void add_system_defined_equation(const data_equation& e) const
-        { const data_equation normalised_equation=normalise_sorts(e);
-          m_normalised_equations.insert(normalised_equation);
+        { m_normalised_equations.insert(normalise_sorts(e));
         }
   
         /// \brief Adds equations to this specification, and marks them as system
@@ -300,8 +297,7 @@ namespace mcrl2 {
                 typename detail::enable_if_container< Container, function_symbol >::type* = 0) const
         {
           for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-          {
-            add_system_defined_constructor(*i);
+          { add_system_defined_constructor(*i);
           }
         }
   
@@ -314,10 +310,8 @@ namespace mcrl2 {
         template < typename Container >
         void add_system_defined_mappings(const Container& fl,
                 typename detail::enable_if_container< Container, function_symbol >::type* = 0) const
-        {
-          for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
-          {
-            add_system_defined_mapping(*i);
+        { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
+          { add_system_defined_mapping(*i);
           }
         }
   
@@ -330,18 +324,15 @@ namespace mcrl2 {
         template < typename Container >
         void add_system_defined_sorts(const Container& sl,
                 typename detail::enable_if_container< Container, sort_expression >::type* = 0) const
-        {
-          for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
-          {
-            add_system_defined_sort(*i);
+        { for (typename Container::const_iterator i = sl.begin(); i != sl.end(); ++i)
+          { add_system_defined_sort(*i);
           }
         }
 
     protected:
 
         void insert_mappings_constructors_for_structured_sort(const structured_sort &sort) const
-        { 
-          add_system_defined_sort(normalise_sorts(sort));
+        { add_system_defined_sort(normalise_sorts(sort));
 
           structured_sort s_sort(sort);
           add_system_defined_constructors(s_sort.constructor_functions(sort));
@@ -350,7 +341,6 @@ namespace mcrl2 {
           add_system_defined_equations(s_sort.constructor_equations(sort));
           add_system_defined_equations(s_sort.projection_equations(sort));
           add_system_defined_equations(s_sort.recogniser_equations(sort));
-
         }
 
         void remove_function(sort_to_symbol_map& container, const function_symbol& f)
@@ -506,8 +496,7 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of aliases_const_range
       /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
       void add_alias(alias const& a)
-      { assert(!search_sort(a.name()) || ((constructors(a.name()).empty()) && !is_alias(a.name())));
-        m_aliases[a.name()] = a.reference(); 
+      { m_aliases[a.name()] = a.reference(); 
         data_is_not_necessarily_normalised_anymore();
       }
 
@@ -517,10 +506,8 @@ namespace mcrl2 {
       /// \pre a mapping f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of constructors_const_range
       void add_constructor(const function_symbol& f)
-      { assert(!search_mapping(f));
-        add_function(m_constructors, f);
-        add_system_defined_constructor(f);
-        make_complete(f.sort());
+      { add_function(m_constructors, f);
+        data_is_not_necessarily_normalised_anymore();
       }
 
       /// \brief Adds a mapping to this specification
@@ -529,10 +516,8 @@ namespace mcrl2 {
       /// \pre a constructor f does not yet occur in this specification.
       /// \note this operation does not invalidate iterators of mappings_const_range
       void add_mapping(const function_symbol& f)
-      { assert(!search_constructor(f));
-        add_function(m_mappings, f);
-        add_system_defined_mapping(f);
-        make_complete(f.sort());
+      { add_function(m_mappings, f);
+        data_is_not_necessarily_normalised_anymore();
       }
 
       /// \brief Adds an equation to this specification
@@ -542,8 +527,7 @@ namespace mcrl2 {
       /// \note this operation does not invalidate iterators of equations_const_range
       void add_equation(const data_equation& e)
       { m_equations.insert(e);
-        add_system_defined_equation(e);
-        make_complete(e);
+        data_is_not_necessarily_normalised_anymore();
       }
 
       /// \brief Adds sorts to this specification
@@ -861,7 +845,6 @@ namespace mcrl2 {
       bool is_constructor_sort(const sort_expression& s) const
       { normalise_specification_if_required();
         const sort_expression normalised_sort=normalise_sorts(s);
-        assert(search_sort(normalised_sort));
         return !normalised_sort.is_function_sort() && !constructors(normalised_sort).empty();
       }
 

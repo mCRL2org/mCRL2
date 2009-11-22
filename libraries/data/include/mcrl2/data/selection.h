@@ -34,7 +34,8 @@ namespace mcrl2 {
      * \note Use of this component can have a dramatic effect of rewriter
      * initialisation time and overall performance.
      **/
-    class used_data_equation_selector {
+    class used_data_equation_selector 
+    {
       
       private:
 
@@ -61,8 +62,6 @@ namespace mcrl2 {
           // can cause many other problems also.
           
           std::set< function_symbol > used_symbols;
-
-          /* std::cerr << "Data equation " << e << "\n"; */
 
           detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
@@ -118,7 +117,8 @@ namespace mcrl2 {
           // Trick, traverse all but the data specification
           for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
           {
-            detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
+            detail::make_find_helper< function_symbol, detail::traverser >
+                   (std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
           }
 
           std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
@@ -147,6 +147,11 @@ namespace mcrl2 {
               }
             }
           }
+          /* for(std::set < function_symbol > :: const_iterator i=m_used_symbols.begin();
+                   i!=m_used_symbols.end(); ++i)
+          { std::cerr << "SYMBOL USED: " << *i << "\n";
+          } */
+
         }
     };
 

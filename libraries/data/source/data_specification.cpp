@@ -286,23 +286,47 @@ namespace mcrl2 {
       const sort_expression normalised_sort=normalise_sorts(sort);
       // add sorts, constructors, mappings and equations
       if (normalised_sort == sort_bool::bool_())
-      { sort_bool::add_bool_to_specification(*this);
+      { // Add bool to the specification 
+        add_system_defined_sort(sort_bool::bool_());
+        add_system_defined_constructors(sort_bool::bool_generate_constructors_code());
+        add_system_defined_mappings(sort_bool::bool_generate_functions_code());
+        add_system_defined_equations(sort_bool::bool_generate_equations_code());
       }
       else if (normalised_sort == sort_real::real_())
-      { sort_real::add_real_to_specification(*this);
+      { // Add Real to the specification
+        add_system_defined_sort(sort_real::real_());
+        add_system_defined_constructors(sort_real::real_generate_constructors_code());
+        add_system_defined_mappings(sort_real::real_generate_functions_code());
+        add_system_defined_equations(sort_real::real_generate_equations_code());
+ 
         import_system_defined_sort(sort_int::int_()); // A full definition of Int is required
                                                       // as the rewrite rules of Real rely on it.
       }
       else if (normalised_sort == sort_int::int_())
-      { sort_int::add_int_to_specification(*this);
+      { // Add Int to the specification 
+        add_system_defined_sort(sort_int::int_()); 
+        add_system_defined_constructors(sort_int::int_generate_constructors_code());
+        add_system_defined_mappings(sort_int::int_generate_functions_code());
+        add_system_defined_equations(sort_int::int_generate_equations_code());
+
         import_system_defined_sort(sort_nat::nat());  // See above, Int requires Nat.
       }
       else if (normalised_sort == sort_nat::nat())
-      { sort_nat::add_nat_to_specification(*this);
+      { // Add Nat to the specification
+        add_system_defined_sort(sort_nat::natpair());
+        add_system_defined_sort(sort_nat::nat());
+        add_system_defined_constructors(sort_nat::nat_generate_constructors_code());
+        add_system_defined_mappings(sort_nat::nat_generate_functions_code());
+        add_system_defined_equations(sort_nat::nat_generate_equations_code());
+
         import_system_defined_sort(sort_pos::pos());  // See above, Nat requires Pos.
       }
       else if (normalised_sort == sort_pos::pos())
-      { sort_pos::add_pos_to_specification(*this);    
+      { // Add Pos to the specification
+        add_system_defined_sort(sort_pos::pos());
+        add_system_defined_constructors(sort_pos::pos_generate_constructors_code());
+        add_system_defined_mappings(sort_pos::pos_generate_functions_code());
+        add_system_defined_equations(sort_pos::pos_generate_equations_code());
       }
       else
       { if (sort.is_container_sort())

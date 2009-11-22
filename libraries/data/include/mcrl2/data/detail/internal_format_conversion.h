@@ -64,7 +64,7 @@ namespace mcrl2 {
           }
 
           data_equation operator()(data_equation const& e)
-          { std::cerr << "Data equation:: " << e << "\n";
+          { // std::cerr << "Data equation:: " << e << "\n";
             return data_equation((*this)(e.variables()), (*this)(e.condition()), // JK 15/10/2009 removed is_nil check
                        (*this)(e.lhs()), (*this)(e.rhs()));
           }

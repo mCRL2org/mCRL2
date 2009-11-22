@@ -58,6 +58,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/detail/internal_format_conversion.h"
 // #include "mcrl2/data/replace.h"
 // #include "mcrl2/data/data_specification.h"
 
@@ -377,7 +378,8 @@ class specification_basic_type:public boost::noncopyable
 
     void insert_equation(const data_equation eqn)
     {
-      if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
+      // if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
+      // if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
       data.add_equation(eqn);
     }
 
@@ -7185,10 +7187,12 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   if (core::gsVerbose)
   { std::cerr << "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n"; 
   }
+  data_specification data_spec=type_checked_spec.data();
+  internal_format_conversion(data_spec);
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
-                                type_checked_spec.data(),
+                                data_spec,
                                 type_checked_spec.global_variables(),
                                 lin_options);
   process_identifier init=spec.storeinit(type_checked_spec.init());
@@ -7218,7 +7222,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
               process_initializer(spec.data.normalise_sorts(initial_state)));
 
   // add missing sorts to the data specification
-  lps::complete_data_specification(spec1);
+  // lps::complete_data_specification(spec1);
 
   return spec1;
 }
