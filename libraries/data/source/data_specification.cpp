@@ -223,6 +223,11 @@ namespace mcrl2 {
     } // namespace detail
     /// \endcond
 
+    template < typename Container, typename Sequence >
+    void insert(Container& container, Sequence sequence)
+    { container.insert(sequence.begin(), sequence.end());
+    }
+
     void data_specification::normalise_sorts() const
     { // Normalise the sorts of the constructors.
       m_normalised_sorts.clear();
@@ -240,6 +245,35 @@ namespace mcrl2 {
            i!=m_sorts_in_context.end(); ++i)
       { import_system_defined_sort(*i);
       }
+
+      std::set< sort_expression > dependent_sorts;
+      dependent_sorts.insert(sort_bool::bool_());
+
+      // constructors
+      insert(dependent_sorts, make_sort_range(constructors_const_range(m_constructors)));
+
+      // mappings
+      insert(dependent_sorts, make_sort_range(constructors_const_range(m_mappings)));
+
+      // equations
+      for (equations_const_range r(m_equations); !r.empty(); r.advance_begin(1))
+      { // make function sort in case of constants to add the corresponding sort as needed
+        insert(dependent_sorts, find_sort_expressions(r.front()));
+      }
+
+      // aliases, with both left and right hand sides.
+      for(ltr_aliases_map::const_iterator i=m_aliases.begin();
+                  i!=m_aliases.end(); ++i)
+      { dependent_sorts.insert(i->first);
+        insert(dependent_sorts,find_sort_expressions(i->second));
+      } 
+
+      for(atermpp::set< sort_expression >::const_iterator i=dependent_sorts.begin();
+           i!=dependent_sorts.end(); ++i)
+      { m_normalised_sorts.insert(normalise_sorts(*i));
+        import_system_defined_sort(*i);
+      }
+
 
       for(ltr_aliases_map ::const_iterator i=m_aliases.begin();  
            i!=m_aliases.end(); ++i)
@@ -348,16 +382,11 @@ namespace mcrl2 {
       add_standard_mappings_and_equations(normalised_sort);
     }
 
-    template < typename Container, typename Sequence >
-    void insert(Container& container, Sequence sequence)
-    { container.insert(sequence.begin(), sequence.end());
-    }
-
     ///\brief Adds standard sorts when necessary
     ///
     /// Assumes that if constructors of a sort are part of the specification,
     /// then the sort was already imported.
-    void data_specification::make_complete() const
+    /* void data_specification::make_complete() const
     { std::set< sort_expression > dependent_sorts;
 
       // make sure that sort bool is part of the specification
@@ -387,7 +416,7 @@ namespace mcrl2 {
 
       m_sorts_in_context.insert(dependent_sorts.begin(),dependent_sorts.end());
       data_is_not_necessarily_normalised_anymore();
-    }
+    } */
 
     template < typename Term >
     void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
@@ -797,16 +826,12 @@ namespace mcrl2 {
 
       // Store the constructors.
       for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
-      { assert(!search_constructor(*i));
-        assert(!search_mapping(*i));
-        m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      { m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
       }
 
       // Store the mappings.
       for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
-      { assert(!search_constructor(*i));
-        assert(!search_mapping(*i));
-        m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
+      { m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
       }
 
       // Store the equations.
@@ -814,6 +839,7 @@ namespace mcrl2 {
       { m_equations.insert(*i);
       }
 
+      data_is_not_necessarily_normalised_anymore();
     }
   } // namespace data
 } // namespace mcrl2

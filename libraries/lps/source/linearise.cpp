@@ -7189,6 +7189,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   }
   data_specification data_spec=type_checked_spec.data();
   internal_format_conversion(data_spec);
+  data_spec.make_complete(sort_real::real_()); // Take care essential rewrite rules are present.
   specification_basic_type spec(type_checked_spec.action_labels(),
                                 type_checked_spec.equations(),
                                 action_label_list(data::convert<data::variable_list>(type_checked_spec.global_variables())),
@@ -7222,7 +7223,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
               process_initializer(spec.data.normalise_sorts(initial_state)));
 
   // add missing sorts to the data specification
-  // lps::complete_data_specification(spec1);
+  lps::complete_data_specification(spec1);
 
   return spec1;
 }
