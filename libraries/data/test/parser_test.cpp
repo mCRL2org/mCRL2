@@ -34,7 +34,7 @@ void parser_test()
   data::data_specification spec(data::parse_data_specification(text));
 
   std::cerr << "aaa " << boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 3);
+  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 4); // Bool, S, List(S), S->List(S).
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
   std::cerr << "aaa " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 26);

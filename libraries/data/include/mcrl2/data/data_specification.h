@@ -150,7 +150,6 @@ namespace mcrl2 {
         friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&, bool);
 
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
-        void make_complete() const;
 
         ///\brief Normalise sorts.
         sort_expression normalise_sorts_helper(const sort_expression & e) const;
@@ -389,14 +388,12 @@ namespace mcrl2 {
 
       ///\brief Default constructor
       data_specification():m_normalised_data_is_up_to_date(false)
-      { make_complete();
-      }
+      {}
 
       ///\brief Constructor from an aterm.
       /// \param[in] t a term adhering to the internal format.
       data_specification(const atermpp::aterm_appl& t):m_normalised_data_is_up_to_date(false)
       { build_from_aterm(t);
-        make_complete();
       }
 
       ///\brief Constructor

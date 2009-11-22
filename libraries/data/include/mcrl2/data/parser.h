@@ -78,7 +78,6 @@ namespace data {
     if (spec == 0)
       throw mcrl2::runtime_error("Error while type checking data specification");
     data_specification d(spec);
-    std::cerr << "READ SPEC " << spec << "\n";
     detail::internal_format_conversion(d); // Translate bag/set enumerations and numbers to internal format.
     return d;
   }

@@ -82,13 +82,13 @@ void bool_rewrite_test() {
 
 void pos_rewrite_test() {
   using namespace mcrl2::data::sort_pos;
+  std::cerr << "pos_rewrite_test\n";
 
   data_specification specification;
 
   specification.make_complete(pos());
 
   data::rewriter R(specification);
-
   data_expression p1(pos("1"));
   data_expression p2(pos("2"));
   data_expression p3(pos("3"));
@@ -113,6 +113,7 @@ void pos_rewrite_test() {
 
 void nat_rewrite_test() {
   using namespace mcrl2::data::sort_nat;
+  std::cerr << "nat_rewrite_test\n";
 
   data_specification specification;
 
@@ -176,6 +177,7 @@ void nat_rewrite_test() {
 
 void int_rewrite_test() {
   using namespace mcrl2::data::sort_int;
+  std::cerr << "int_rewrite_test\n";
 
   data_specification specification;
 
@@ -234,11 +236,10 @@ void int_rewrite_test() {
 
 void real_rewrite_test() 
 { using namespace mcrl2::data::sort_real;
+  std::cerr << "real_rewrite_test\n";
 
   data_specification specification;
-  const data::function_symbol f("f",real_());
-  specification.add_mapping(f);
-  // specification.make_complete(real_());
+  specification.make_complete(real_());
 
   data::rewriter R(specification);
 
@@ -293,10 +294,10 @@ void real_rewrite_test()
   data_rewrite_test(R, int2real(round(real_(24, 10))), p2);
 }
 
-void list_rewrite_test() {
-  using namespace mcrl2::data::sort_bool;
+void list_rewrite_test() 
+{ using namespace mcrl2::data::sort_bool;
   using namespace mcrl2::data::sort_list;
-
+  std::cerr << "list_rewrite_test\n";
   data_specification specification;
 
   specification.make_complete(list(bool_()));
@@ -323,7 +324,7 @@ void set_rewrite_test() {
   using namespace mcrl2::data::sort_fset;
   using namespace mcrl2::data::sort_nat;
   using namespace mcrl2::data::sort_bool;
-
+  std::cerr << "set_rewrite_test\n";
   data_specification specification = parse_data_specification(
     "sort A = Set(Nat);"
   );

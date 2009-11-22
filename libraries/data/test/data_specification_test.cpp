@@ -176,6 +176,8 @@ void test_constructors()
 
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl_range);
+  std::cerr << "AAA1 " << constructors.size() << "\n";
+  std::cerr << "AAA1 " << pp(constructors) << "\n";
   BOOST_CHECK(constructors.size() == 5); // f,g,h, true, false.
   BOOST_CHECK(spec.search_constructor(f));
   BOOST_CHECK(spec.search_constructor(g));
@@ -239,6 +241,7 @@ void test_functions()
   data_specification spec1(spec);
   spec1.add_mappings(fghl_range);
 
+  std::cerr << "BBB " << boost::distance(spec.mappings()) << "\n";
   BOOST_CHECK(boost::distance(spec.mappings()) == 35);
   BOOST_CHECK(spec.search_mapping(f));
   BOOST_CHECK(spec.search_mapping(g));
@@ -294,7 +297,6 @@ void test_equations()
   spec.add_sort(s0);
 
   spec1 = spec;
-  std::clog << "HIER\n";
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
   data_equation_vector fxxl(make_vector(fxx));
@@ -431,7 +433,6 @@ void test_system_defined()
 
   BOOST_CHECK(!specification.constructors(sort_bool::bool_()).empty());
 
-  std::cerr << "HIER HIER \n";
   specification = parse_data_specification(
     "sort S;"
     "map f: Set(S);");
@@ -563,8 +564,6 @@ void test_normalisation()
   specification.add_alias(alias(B, bag(A)));
   // specification.normalise_sorts();
 
-  std::cerr << "Normalise sorts XXXXX " << specification.normalise_sorts(L) << " and " << 
-                  specification.normalise_sorts(list(A)) << "\n";
   BOOST_CHECK(specification.normalise_sorts(L) == specification.normalise_sorts(list(A)));
   BOOST_CHECK(specification.normalise_sorts(list(L)) == specification.normalise_sorts(list(list(A))));
   BOOST_CHECK(specification.normalise_sorts(S) == specification.normalise_sorts(set_(A)));
