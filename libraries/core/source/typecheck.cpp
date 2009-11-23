@@ -481,7 +481,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
-    { ATfprintf(stderr,"State formula %t\n",state_frm);
+    { // ATfprintf(stderr,"State formula %t\n",state_frm);
       gsVerboseMsg("type checking state formula...\n");
       assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
       //check correctness of the state formula in state_formula using

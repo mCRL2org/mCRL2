@@ -379,7 +379,7 @@ class specification_basic_type:public boost::noncopyable
     void insert_equation(const data_equation eqn)
     {
       // if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
-      // if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
+      // if (!options.norewrite) rewr.add_rule(data.normalise_sorts(eqn));
       data.add_equation(eqn);
     }
 
@@ -536,7 +536,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression RewriteTerm(const data_expression& t)
-    { if (!options.norewrite) return rewr(t);
+    { std::cerr << "REWRITE " << t << "\n";
+      if (!options.norewrite) return rewr(t);
       return t;
     }
 
@@ -6245,7 +6246,9 @@ class specification_basic_type:public boost::noncopyable
           pars3=push_front(pars3,*i);
         }
         else 
-        { assert(!search_free_variable(init1,*i));
+        { std::cerr << "INIT 2x " << init1 << "   " << init2 << "   " << *i << "\n";
+
+          assert(!search_free_variable(init1,*i));
           assert(!search_free_variable(init2,*i));
         }
       }
@@ -6297,59 +6300,63 @@ class specification_basic_type:public boost::noncopyable
           }
         }
 
-        // We apply constant elimination on the obtained linear process.
-        // In order to do so, we have to create a complete process specification first, as
-        // this is what the interface of constelm requires.
-
-        linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
-        lps.set_summands(t3);
-        process_initializer initializer(init);
- 
-        specification temporary_spec(data,acts,global_variables,lps,initializer);
-
-        constelm_algorithm < rewriter > alg(temporary_spec,rewr,core::gsVerbose);
-        alg.run(true); // Remove constants from the specification, where global variables are
-                       // also instantiated if they exist.
-        // Reconstruct the variables from the temporary specification
-
-        init=temporary_spec.initial_process().assignments();
-        pars=temporary_spec.process().process_parameters();
-       
-        // Add all free variables in objectdata[n].parameters that are not already in the parameter list
-        // and are not global variables to pars
-
-        const std::set <variable> variable_list = data::find_free_variables(args);
-        for(std::set <variable>::const_iterator i=variable_list.begin(); 
-               i!=variable_list.end(); ++i)
-        { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
-              global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
-          { pars=push_front(pars,*i);
+        if (regular)
+        { // We apply constant elimination on the obtained linear process.
+          // In order to do so, we have to create a complete process specification first, as
+          // this is what the interface of constelm requires.
+          // Note that this is only useful, in regular mode. This does not make sense if
+          // stacks are being used.
+  
+          linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
+          lps.set_summands(t3);
+          process_initializer initializer(init);
+   
+          specification temporary_spec(data,acts,global_variables,lps,initializer);
+  
+          constelm_algorithm < rewriter > alg(temporary_spec,rewr,core::gsVerbose);
+          alg.run(true); // Remove constants from the specification, where global variables are
+                         // also instantiated if they exist.
+          // Reconstruct the variables from the temporary specification
+  
+          init=temporary_spec.initial_process().assignments();
+          pars=temporary_spec.process().process_parameters();
+         
+          // Add all free variables in objectdata[n].parameters that are not already in the parameter list
+          // and are not global variables to pars
+  
+          const std::set <variable> variable_list = data::find_free_variables(args);
+          for(std::set <variable>::const_iterator i=variable_list.begin(); 
+                 i!=variable_list.end(); ++i)
+          { if (std::find(pars.begin(),pars.end(),*i)==pars.end() && // The free variable is not in pars
+                global_variables.find(*i)==global_variables.end())   // and it is neither a glabal variable
+            { pars=push_front(pars,*i);
+            }
           }
-        }
-
-        t3=summand_list();
-        for(atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
-                i!=temporary_spec.process().action_summands().end(); ++i)
-        { if (i->condition()!=sort_bool::false_())
-          { t3=push_front(t3,summand_(i->summation_variables(),
-                                    i->condition(),
-                                    false, // Summand is a proper action summand, not a delta summand.
-                                    i->multi_action().actions(),
-                                    i->multi_action().has_time(),
-                                    i->multi_action().time(),
-                                    i->assignments()));
+  
+          t3=summand_list();
+          for(atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
+                  i!=temporary_spec.process().action_summands().end(); ++i)
+          { if (i->condition()!=sort_bool::false_())
+            { t3=push_front(t3,summand_(i->summation_variables(),
+                                      i->condition(),
+                                      false, // Summand is a proper action summand, not a delta summand.
+                                      i->multi_action().actions(),
+                                      i->multi_action().has_time(),
+                                      i->multi_action().time(),
+                                      i->assignments()));
+            }
           }
-        }
-        for(atermpp::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
-                i!=temporary_spec.process().deadlock_summands().end(); ++i)
-        { if (i->condition()!=sort_bool::false_())
-          { t3=push_front(t3,summand_(i->summation_variables(),
-                                    i->condition(),
-                                    true,   // Summand is delta.
-                                    action_list(),
-                                    i->deadlock().has_time(),
-                                    i->deadlock().time(),
-                                    assignment_list()));
+          for(atermpp::vector < deadlock_summand >::const_iterator i=temporary_spec.process().deadlock_summands().begin();
+                  i!=temporary_spec.process().deadlock_summands().end(); ++i)
+          { if (i->condition()!=sort_bool::false_())
+            { t3=push_front(t3,summand_(i->summation_variables(),
+                                      i->condition(),
+                                      true,   // Summand is delta.
+                                      action_list(),
+                                      i->deadlock().has_time(),
+                                      i->deadlock().time(),
+                                      assignment_list()));
+            }
           }
         }
         // Now constelm has been applied.
