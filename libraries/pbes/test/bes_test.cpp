@@ -94,16 +94,16 @@ void test_boolean_equation()
   expected.insert(Z);
 
   atermpp::set<boolean_variable> found;
-  atermpp::find_all_if(Y, &tr::is_variable, std::inserter(found, found.end()));
-  atermpp::find_all_if(Z, &tr::is_variable, std::inserter(found, found.end()));
+  atermpp::find_all_if(Y, is_boolean_variable, std::inserter(found, found.end()));
+  atermpp::find_all_if(Z, is_boolean_variable, std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);
 
   found.clear();
-  atermpp::find_all_if(tr::and_(Y,Z), &tr::is_variable, std::inserter(found, found.end()));
+  atermpp::find_all_if(tr::and_(Y,Z), is_boolean_variable, std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);
 
   found.clear();
-  atermpp::find_all_if(e.formula(), &tr::is_variable, std::inserter(found, found.end()));
+  atermpp::find_all_if(e.formula(), is_boolean_variable, std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);
 }
 

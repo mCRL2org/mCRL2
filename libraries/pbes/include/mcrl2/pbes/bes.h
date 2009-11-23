@@ -110,6 +110,15 @@ namespace bes {
     return core::pp(v.name());
   }
 
+  /// \brief Returns true if the term t is a boolean variable
+  /// \param t A boolean variable
+  /// \return True if the term t is a boolean variable
+  inline
+  bool is_boolean_variable(atermpp::aterm_appl t)
+  {
+    return core::detail::gsIsBooleanVariable(t);
+  }
+
 } // namespace bes
 } // namespace mcrl2
 
@@ -159,6 +168,24 @@ namespace bes {
 
   /// \brief Read-only singly linked list of boolean expressions
   typedef atermpp::term_list<boolean_expression> boolean_expression_list;
+
+  /// \brief Returns true if the term t is a boolean expression
+  /// \param t A boolean expression
+  /// \return True if the term t is a boolean expression
+  inline
+  bool is_boolean_expression(atermpp::aterm_appl t)
+  {
+    // TODO: this code should be generated
+    return
+      core::detail::gsIsBooleanTrue    (t) ||
+      core::detail::gsIsBooleanFalse   (t) ||
+      core::detail::gsIsBooleanVariable(t) ||
+      core::detail::gsIsBooleanNot     (t) ||
+      core::detail::gsIsBooleanAnd     (t) ||
+      core::detail::gsIsBooleanOr      (t) ||
+      core::detail::gsIsBooleanImp     (t)
+    ;
+  }
 
 } // namespace bes
 } // namespace mcrl2
