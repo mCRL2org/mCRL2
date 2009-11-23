@@ -32,7 +32,7 @@
 #include "settingsframe.h"
 #include "utils.h"
 
-class Frame : public Colleague, public wxFrame
+class Frame : public wxFrame, public Colleague
 {
 public:
     // -- constructors and destructors ------------------------------
