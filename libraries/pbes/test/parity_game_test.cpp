@@ -279,7 +279,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes_examples();
-  test_one_bit_sliding_window();
+  // test_one_bit_sliding_window();
   test_abp();
 
   return 0;
