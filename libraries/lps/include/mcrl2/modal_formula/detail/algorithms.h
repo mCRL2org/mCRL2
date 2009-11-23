@@ -80,8 +80,7 @@ namespace detail {
   /// \return The converted modal formula
   inline
   state_formula mcf2statefrm(std::istream& formula_stream, lps::specification& spec)
-  { std::cerr << "SPEC ACTS " << spec.action_labels() << "\n";
-    atermpp::aterm_appl f = parse_state_formula(formula_stream);
+  { atermpp::aterm_appl f = parse_state_formula(formula_stream);
     lps::specification copy_spec = spec;
     /* copy_spec.data() = remove_all_system_defined(spec.data()); */
     atermpp::aterm_appl reconstructed_spec = specification_to_aterm(copy_spec,false);
