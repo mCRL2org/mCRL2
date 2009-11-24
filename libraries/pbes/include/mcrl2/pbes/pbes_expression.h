@@ -59,8 +59,11 @@ class pbes_expression: public atermpp::aterm_appl
     /// \param term A term
     pbes_expression(atermpp::aterm_appl term)
       : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_PBExpr(m_term));
+    { if (!core::detail::check_rule_PBExpr(m_term))
+      { std::cerr << "XXXX " << term << "\n";
+        assert(0);
+      }
+      // assert(core::detail::check_rule_PBExpr(m_term));
     }
 
     /// \brief Constructor.

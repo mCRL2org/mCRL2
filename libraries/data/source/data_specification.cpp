@@ -366,13 +366,40 @@ namespace mcrl2 {
       { if (sort.is_container_sort())
         { sort_expression element_sort(container_sort(sort).element_sort());
           if (sort_list::is_list(sort))
-          { sort_list::add_list_to_specification(*this, element_sort);
+          { import_system_defined_sort(sort_nat::nat()); // Required for lists.
+               
+            // Add a list to the specification.
+            add_system_defined_sort(sort);
+            add_system_defined_constructors(sort_list::list_generate_constructors_code(element_sort));
+            add_system_defined_mappings(sort_list::list_generate_functions_code(element_sort));
+            add_system_defined_equations(sort_list::list_generate_equations_code(element_sort));
           }
           else if (sort_set::is_set(sort))
-          { sort_set::add_set_to_specification(*this, element_sort);
+          { // Add a set to the specification.
+            add_system_defined_sort(sort);
+            add_system_defined_constructors(sort_set::set_generate_constructors_code(element_sort));
+            add_system_defined_mappings(sort_set::set_generate_functions_code(element_sort));
+            add_system_defined_equations(sort_set::set_generate_equations_code(element_sort));
+
+            // Add also the finite set specification.
+            add_system_defined_sort(sort);
+            add_system_defined_constructors(sort_fset::fset_generate_constructors_code(element_sort));
+            add_system_defined_mappings(sort_fset::fset_generate_functions_code(element_sort));
+            add_system_defined_equations(sort_fset::fset_generate_equations_code(element_sort));
           }
           else if (sort_bag::is_bag(sort))
-          { sort_bag::add_bag_to_specification(*this, element_sort);
+          { import_system_defined_sort(sort_nat::nat()); // Required for bags.
+            import_system_defined_sort(sort_set::set_(element_sort));
+            // Add a bag to the specification.
+            add_system_defined_sort(sort);
+            add_system_defined_constructors(sort_bag::bag_generate_constructors_code(element_sort));
+            add_system_defined_mappings(sort_bag::bag_generate_functions_code(element_sort));
+            add_system_defined_equations(sort_bag::bag_generate_equations_code(element_sort));
+            // Add a finite bag to the specification
+            add_system_defined_sort(sort_fbag::fbag(element_sort));
+            add_system_defined_constructors(sort_fbag::fbag_generate_constructors_code(element_sort));
+            add_system_defined_mappings(sort_fbag::fbag_generate_functions_code(element_sort));
+            add_system_defined_equations(sort_fbag::fbag_generate_equations_code(element_sort));
           }
         }
         else if (sort.is_structured_sort())
@@ -419,21 +446,21 @@ namespace mcrl2 {
     } */
 
     template < typename Term >
-    void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts)
+    void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts) const
     {
       std::set< sort_expression > all_sorts;
 
       find_sort_expressions(term, std::inserter(all_sorts, all_sorts.end()));
 
       for (std::set< sort_expression >::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
-      { sorts.insert(normalise_sorts(*i));
+      { sorts.insert(*i);
       }
     }
 
-    template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&);
-    template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&);
+    template void data_specification::gather_sorts< sort_expression >(sort_expression const&, std::set< sort_expression >&) const;
+    template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&) const;
+    template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&) const;
+    template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&) const;
 
     // Assumes that a system defined sort s is not (full) part of the specification if:
     //  - the set of sorts does not contain s
@@ -693,7 +720,7 @@ namespace mcrl2 {
     }
 
     /* template <typename Object> Object data_specification::normalise_sorts(const Object& o) const
-    { 
+    { normalise_specification_if_required();
       std::cerr << "Object " << o << "\n";
       substitution < Object, sort_expression, Object > sigma(m_normalised_aliases);
       return sigma(o);
@@ -775,8 +802,8 @@ namespace mcrl2 {
       { return function_symbol(function_symbol(e).name(),normalise_sorts(e.sort()));
       }
       /* if (e.is_list_expression())
-      { return 
-      } */
+      { return COMMENTARIEER UIT
+      }*/
       if (e.is_variable())
       { return variable(variable(e).name(),normalise_sorts(e.sort()));
       }
@@ -792,7 +819,7 @@ namespace mcrl2 {
       }
       
       return where_clause(normalise_sorts(w.body()),normalised_assignments);
-    }
+    } 
     /// \endcond
 
     /// There are two types of representations of ATerms:

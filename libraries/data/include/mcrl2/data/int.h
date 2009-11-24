@@ -1573,7 +1573,7 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for int_
       /// \param specification a specification
-      template <typename SpecificationType>
+      /* template <typename SpecificationType>
       inline
       void add_int_to_specification(SpecificationType const& specification)
       {
@@ -1593,7 +1593,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(int_generate_constructors_code());
          specification.add_system_defined_mappings(int_generate_functions_code());
          specification.add_system_defined_equations(int_generate_equations_code());
-      }
+      } */
     } // namespace sort_int_
 
   } // namespace data

@@ -283,7 +283,7 @@ void test_enumerate_quantifiers_rewriter_finite()
   std::cout << "<test_enumerate_quantifiers_rewriter_finite>" << std::endl;
 
   data::data_specification data_spec = data::data_specification();
-  data_spec.add_system_defined_sort(data::sort_list::list(data::sort_nat::nat()));
+  data_spec.make_complete(data::sort_list::list(data::sort_nat::nat()));
   data::rewriter datar(data_spec);
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);

@@ -967,7 +967,7 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for set_
       /// \param specification a specification
       /// \param element the sort of elements stored by the container
-      template <typename SpecificationType>
+      /* template <typename SpecificationType>
       inline
       void add_set_to_specification(SpecificationType const& specification, sort_expression const& element)
       {
@@ -983,7 +983,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(set_generate_constructors_code(element));
          specification.add_system_defined_mappings(set_generate_functions_code(element));
          specification.add_system_defined_equations(set_generate_equations_code(element));
-      }
+      } */
     } // namespace sort_set_
 
   } // namespace data

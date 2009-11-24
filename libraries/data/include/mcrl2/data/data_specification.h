@@ -27,6 +27,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/assignment.h"
+// #include "mcrl2/data/map_substitution.h"
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
@@ -145,8 +146,6 @@ namespace mcrl2 {
 
       private:
 
-        // friend data_specification& remove_all_system_defined(data_specification&);
-        // friend data_specification  remove_all_system_defined(data_specification const&);
         friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&, bool);
 
         ///\brief Adds system defined sorts and standard mappings for all internally used sorts
@@ -156,7 +155,7 @@ namespace mcrl2 {
 
         /// \brief Helper function for make_complete() methods
         template < typename Term >
-        void gather_sorts(Term const& term, std::set< sort_expression >& sorts);
+        void gather_sorts(Term const& term, std::set< sort_expression >& sorts) const;
 
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
@@ -176,7 +175,7 @@ namespace mcrl2 {
         /// \brief The sorts that occur in the context of this data specification.
         /// The normalised sorts, constructors, mappings and equations are complete
         /// with respect to these sorts. 
-        mutable atermpp::set< sort_expression >     m_sorts_in_context; // TODO Zou niet mutable moeten zijn.
+        mutable atermpp::set< sort_expression >     m_sorts_in_context; 
 
         /// \brief The basic sorts and structured sorts in the specification.
         ltr_aliases_map                     m_aliases;
@@ -196,10 +195,7 @@ namespace mcrl2 {
         /// \brief Set containing all the sorts, including the system defined ones.
         mutable atermpp::set< sort_expression >         m_normalised_sorts;
 
-        /// \brief Set containing system defined functions.
-        // std::set< function_symbol >         m_sys_functions;
-
-        /// \brief Set containing system defined all constructors, including the system defined ones.
+        /// \brief Set containing all constructors, including the system defined ones.
         /// The types in these constructors are normalised.
         mutable sort_to_symbol_map         m_normalised_constructors;
         
@@ -219,7 +215,7 @@ namespace mcrl2 {
         { m_normalised_data_is_up_to_date=false;
         }
 
-    public: 
+    protected: 
         // The add_system_defined should be private or protected. Currently they are
         // used by functions adding standard data types. The standard data types should
         // just provide the constructors, mappings and equations. The specification should
@@ -256,8 +252,7 @@ namespace mcrl2 {
         /// \post is_system_defined(f) == true
         /// \note this operation does not invalidate iterators of mappings_const_range
         void add_system_defined_mapping(const function_symbol& f) const
-        { // std::cerr << "ADD SYSTEM DEFINED MAPPING " << normalise_sorts(f) << "\n";
-          add_function(m_normalised_mappings,normalise_sorts(f));
+        { add_function(m_normalised_mappings,normalise_sorts(f));
         }
   
         /// \brief Adds an equation to this specification, and marks it as system
@@ -283,7 +278,7 @@ namespace mcrl2 {
         { for (typename Container::const_iterator i = el.begin(); i != el.end(); ++i)
           { add_system_defined_equation(*i); 
           }
-        }
+        } 
   
         /// \brief Adds constructors to this specification, and marks them as
         ///        system defined.
@@ -294,11 +289,10 @@ namespace mcrl2 {
         template < typename Container >
         void add_system_defined_constructors(const Container& fl,
                 typename detail::enable_if_container< Container, function_symbol >::type* = 0) const
-        {
-          for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
+        { for (typename Container::const_iterator i = fl.begin(); i != fl.end(); ++i)
           { add_system_defined_constructor(*i);
           }
-        }
+        } 
   
         /// \brief Adds mappings to this specification, and marks them as system
         ///        defined.
@@ -327,8 +321,6 @@ namespace mcrl2 {
           { add_system_defined_sort(*i);
           }
         }
-
-    protected:
 
         void insert_mappings_constructors_for_structured_sort(const structured_sort &sort) const
         { add_system_defined_sort(normalise_sorts(sort));
@@ -384,9 +376,9 @@ namespace mcrl2 {
           }
         }
 
-      public:
+    public:
 
-      ///\brief Default constructor
+      ///\brief Default constructor. Generate a data specification that contains only booleans.
       data_specification():m_normalised_data_is_up_to_date(false)
       {}
 
@@ -598,9 +590,11 @@ namespace mcrl2 {
               typename detail::enable_if_container< Container >::type* = 0) const
       { std::set< sort_expression > sorts;
         for (typename Container::const_iterator i = range.begin(); i != range.end(); ++i)
-        { gather_sorts(*i, sorts);
+        { // gather_sorts(*i, sorts);
+          // std::cerr << " AKJSA " << *i << "\n";
+          make_complete(*i);
         }
-        make_complete(sorts);
+        // make_complete(sorts);
       }
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
@@ -648,6 +642,25 @@ namespace mcrl2 {
       void import_system_defined_sort(sort_expression const&) const;
 
    public:
+
+      /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
+      /// \details Sort aliases and structured sorts have as effect that different sort names
+      /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
+      /// and every object of sort A is an object of sort B. As all algorithms use syntactic equality
+      /// to check whether objects are the same, the sorts A and B must be made equal. This is done
+      /// by defining a unique representative for each sort, and to replace each sort by this representative.
+      /// For sort aliases, the reprentative is always the sort at the right hand side, and for structured
+      /// sorts the sort at the left hand side is taken.
+      /// \param[in] e a sort expression
+      /// \result a sort expression with normalised sorts satisfying 
+      /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
+      // template <typename Object> Object normalise_sorts(const Object& o) const;
+      /* { normalise_specification_if_required();
+        std::cerr << "Object " << o << "\n";
+        substitution < Object, sort_expression, Object > sigma(m_normalised_aliases);
+        return sigma(o);
+      } */
+      
       /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
       /// \details Sort aliases and structured sorts have as effect that different sort names
       /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
@@ -676,7 +689,6 @@ namespace mcrl2 {
       { normalise_specification_if_required();
         return variable(v.name(),normalise_sorts(v.sort()));
       }
-
  
       /// \brief Normalises the sorts in a function symbol.
       function_symbol normalise_sorts(function_symbol const& f) const;
@@ -715,7 +727,7 @@ namespace mcrl2 {
         { result=push_front(result,normalise_sorts(*i));
         }
         return reverse(result);
-      }
+      } 
 
       /// \brief Removes sort from specification.
       /// Note that this also removes aliases for the sort but does not remove

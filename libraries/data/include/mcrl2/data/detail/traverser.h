@@ -25,7 +25,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/structured_sort.h"
-#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/exists.h"
@@ -211,6 +210,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this).leave(e);
           }
 
+          /* ENG. Substitutie moet plaatsvinden op interne data structuur. TODO.
           void operator()(data_specification const& e)
           {
             static_cast< Derived& >(*this)(e.sorts());
@@ -218,7 +218,7 @@ namespace mcrl2 {
             static_cast< Derived& >(*this)(e.mappings());
             // static_cast< Derived& >(*this)(e.aliases());
             static_cast< Derived& >(*this)(e.equations());
-          }
+          } */
 
 #ifndef NO_TERM_TRAVERSAL
           // \deprecated exists only for backwards compatibility

@@ -2238,7 +2238,7 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for nat
       /// \param specification a specification
-      template <typename SpecificationType>
+      /* template <typename SpecificationType>
       inline
       void add_nat_to_specification(SpecificationType const& specification)
       {
@@ -2255,7 +2255,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(nat_generate_constructors_code());
          specification.add_system_defined_mappings(nat_generate_functions_code());
          specification.add_system_defined_equations(nat_generate_equations_code());
-      }
+      } */
     } // namespace sort_nat
 
   } // namespace data

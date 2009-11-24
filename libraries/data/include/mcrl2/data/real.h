@@ -1863,7 +1863,7 @@ namespace mcrl2 {
 
       /// \brief Add sort, constructors, mappings and equations for real_
       /// \param specification a specification
-      template <typename SpecificationType>
+      /* template <typename SpecificationType>
       inline
       void add_real_to_specification(SpecificationType const& specification)
       {
@@ -1887,7 +1887,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(real_generate_constructors_code());
          specification.add_system_defined_mappings(real_generate_functions_code());
          specification.add_system_defined_equations(real_generate_equations_code());
-      }
+      } */
     } // namespace sort_real_
 
   } // namespace data

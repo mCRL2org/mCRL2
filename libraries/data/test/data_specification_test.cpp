@@ -93,20 +93,10 @@ void test_sorts()
   basic_sort s2("S2");
   sort_expression_vector s2l(make_vector(reinterpret_cast<sort_expression&>(s2)));
   boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
-  spec.add_system_defined_sort(s2);
-  spec1.add_system_defined_sorts(s2l_range);
+  spec.make_complete(s2);
+  spec1.make_complete(s2l_range);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  /* BOOST_CHECK(spec.is_system_defined(s2));
-  BOOST_CHECK(!spec.is_system_defined(s1.name()));
-  BOOST_CHECK(!spec.is_system_defined(s1.reference()));
-  BOOST_CHECK(!spec.is_system_defined(s0));
-  BOOST_CHECK(!spec.is_system_defined(s));
-  BOOST_CHECK(spec1.is_system_defined(s2));
-  BOOST_CHECK(!spec1.is_system_defined(s1.name()));
-  BOOST_CHECK(!spec1.is_system_defined(s1.reference()));
-  BOOST_CHECK(!spec1.is_system_defined(s0));
-  BOOST_CHECK(!spec1.is_system_defined(s)); */
   spec.remove_sorts(s2l_range);
   spec1.remove_sort(s2);
   compare_for_equality(spec, spec1);
@@ -194,10 +184,10 @@ void test_constructors()
   spec.remove_constructor(i);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  spec.add_system_defined_constructor(i);
+  spec.add_constructor(i);
   function_symbol_vector il(make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  spec1.add_system_defined_constructors(il_range);
+  spec1.add_constructors(il_range);
   BOOST_CHECK(compare_for_equality(spec, spec1));
   /* BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
@@ -258,10 +248,10 @@ void test_functions()
   BOOST_CHECK(std::find(spec1.mappings(s0).begin(), spec1.mappings(s0).end(), h) != spec1.mappings(s0).end());
 
   function_symbol i("i", s0);
-  spec.add_system_defined_mapping(i);
+  spec.add_mapping(i);
   function_symbol_vector il(make_vector(i));
   boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  spec1.add_system_defined_mappings(il_range);
+  spec1.add_mappings(il_range);
   compare_for_equality(spec, spec1);
   /* BOOST_CHECK(spec.is_system_defined(i));
   BOOST_CHECK(!spec.is_system_defined(f));
@@ -308,8 +298,8 @@ void test_equations()
   data_equation fxf(x_range, x, fx, f);
   data_equation_vector fxfl(make_vector(fxf));
   boost::iterator_range<data_equation_vector::const_iterator> fxfl_range(fxfl);
-  spec.add_system_defined_equation(fxf);
-  spec1.add_system_defined_equations(fxfl_range);
+  spec.add_equation(fxf);
+  spec1.add_equations(fxfl_range);
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
   /* BOOST_CHECK(spec.is_system_defined(fxf));

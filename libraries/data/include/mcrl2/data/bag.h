@@ -1208,7 +1208,7 @@ namespace mcrl2 {
       /// \brief Add sort, constructors, mappings and equations for bag
       /// \param specification a specification
       /// \param element the sort of elements stored by the container
-      template <typename SpecificationType>
+      /* template <typename SpecificationType>
       inline
       void add_bag_to_specification(SpecificationType const& specification, sort_expression const& element)
       {
@@ -1240,7 +1240,7 @@ namespace mcrl2 {
          specification.add_system_defined_constructors(bag_generate_constructors_code(element));
          specification.add_system_defined_mappings(bag_generate_functions_code(element));
          specification.add_system_defined_equations(bag_generate_equations_code(element));
-      }
+      } */
     } // namespace sort_bag
 
   } // namespace data

@@ -1840,10 +1840,10 @@ namespace bes
             assert(elist==current_variable_instantiation.parameters().end());
           }
 
+          // std::cerr << "CURRENT: " << current_pbeq.formula() << "\n";
           pbes_expression new_pbes_expression =
                 pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma));
-          // pbes_expression new_pbes_expression = pbes_rewriter(current_pbeq.formula());
-
+          // std::cerr << "NEW: " << pp(new_pbes_expression) << "\n";
 
           bes_expression new_bes_expression=
                add_propositional_variable_instantiations_to_indexed_set_and_translate(
@@ -1856,6 +1856,7 @@ namespace bes
                             // bes_equations,
                             variable_to_be_processed,
                             opt_store_as_tree);
+          // std::cerr << "BES: " << new_bes_expression << "\n\n";
 
           /* No need to clear up sigma, as it was locally declared. */
           /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter();

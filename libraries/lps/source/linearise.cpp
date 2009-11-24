@@ -6245,9 +6245,7 @@ class specification_basic_type:public boost::noncopyable
           pars3=push_front(pars3,*i);
         }
         else 
-        { std::cerr << "INIT 2x " << init1 << "   " << init2 << "   " << *i << "\n";
-
-          assert(!search_free_variable(init1,*i));
+        { assert(!search_free_variable(init1,*i));
           assert(!search_free_variable(init2,*i));
         }
       }
