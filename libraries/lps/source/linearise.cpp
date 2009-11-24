@@ -536,8 +536,7 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression RewriteTerm(const data_expression& t)
-    { std::cerr << "REWRITE " << t << "\n";
-      if (!options.norewrite) return rewr(t);
+    { if (!options.norewrite) return rewr(t);
       return t;
     }
 
