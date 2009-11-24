@@ -232,11 +232,6 @@ class pbes
     pbes(atermpp::aterm_appl t)
     {
       init_term(t);
-if (!core::detail::check_rule_PBES(pbes_to_aterm(*this)))
-{
-  std::cerr << "Offending PBES:\n" << pbes_to_aterm(*this) << std::endl;
-  std::cerr << "Original PBES:\n" << t << std::endl;
-}
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
