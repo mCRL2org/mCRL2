@@ -366,11 +366,7 @@ namespace pbes_expr {
   /// \return True if it is a negation
   inline bool is_not(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    return is_pbes_not(t) || data::sort_bool::is_not_application(t);
-#else
     return is_pbes_not(t);
-#endif
   }
 
   /// \brief Test for a conjunction
@@ -378,11 +374,7 @@ namespace pbes_expr {
   /// \return True if it is a conjunction
   inline bool is_and(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-     return is_pbes_and(t) || data::sort_bool::is_and_application(t);
-#else
      return is_pbes_and(t);
-#endif
   }
 
   /// \brief Test for a disjunction
@@ -390,11 +382,7 @@ namespace pbes_expr {
   /// \return True if it is a disjunction
   inline bool is_or(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    return is_pbes_or(t) || data::sort_bool::is_or_application(t);
-#else
      return is_pbes_or(t);
-#endif
   }
 
   /// \brief Test for an implication
@@ -402,11 +390,7 @@ namespace pbes_expr {
   /// \return True if it is an implication
   inline bool is_imp(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    return is_pbes_imp(t) || data::sort_bool::is_implies_application(t);
-#else
      return is_pbes_imp(t);
-#endif
   }
 
   /// \brief Test for an universal quantification
@@ -455,26 +439,15 @@ namespace accessors {
   inline
   pbes_expression arg(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    if (pbes_expr::is_pbes_not(t))
-    {
-      return atermpp::arg1(t);
-    }
-    assert(data::sort_bool::is_not_application(t) ||
-           pbes_expr::is_forall(t)    ||
-           pbes_expr::is_exists(t)
-          );
-    return atermpp::arg2(t);
-#else
     if (pbes_expr::is_pbes_not(t))
     {
       return atermpp::arg1(t);
     }
     else
     {
+      assert(pbes_expr::is_forall(t) || pbes_expr::is_exists(t));
       return atermpp::arg2(t);
     }
-#endif
   }
 
   /// \brief Returns the left hand side of an expression of type and, or or imp.
@@ -484,11 +457,7 @@ namespace accessors {
   pbes_expression left(pbes_expression t)
   {
     assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    return data::is_data_expression(t) ? atermpp::arg2(t) : atermpp::arg1(t);
-#else
     return atermpp::arg1(t);
-#endif
   }
 
   /// \brief Returns the right hand side of an expression of type and, or or imp.
@@ -497,12 +466,7 @@ namespace accessors {
   inline
   pbes_expression right(pbes_expression t)
   {
-#ifdef MCRL2_PBES_TRAVERSE_DATA_EXPRESSIONS      
-    assert(pbes_expr::is_and(t) || pbes_expr::is_or(t) || pbes_expr::is_imp(t));
-    return data::is_data_expression(t) ? atermpp::arg3(t) : atermpp::arg2(t);
-#else
     return atermpp::arg2(t);
-#endif
   }
 
   /// \brief Returns the variables of a quantification expression

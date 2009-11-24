@@ -160,6 +160,7 @@ void test_accessors()
     q1 = split_or(a);
     q1 = split_and(a);
   }
+  core::garbage_collect();
 }
 
 void test_pbes_expression_with_variables()
@@ -192,6 +193,7 @@ void test_pbes_expression_with_variables()
 
   pbes_expression_with_variables yz = tr::and_(y, z);
   BOOST_CHECK(yz.variables().size() == 2);
+  core::garbage_collect();
 }
 
 void test_pbes_expression_with_propositional_variables()
@@ -220,18 +222,112 @@ void test_pbes_expression_with_propositional_variables()
   pbes_expression_with_propositional_variables Z = tr::and_(X, Y);
   BOOST_CHECK(Z.variables().size() == 2);
   BOOST_CHECK(Z.propositional_variables().size() == 4);
+  core::garbage_collect();
+}
+
+void test_term_traits()
+{
+  typedef core::term_traits<pbes_expression> tr;
+  
+  const std::string VARSPEC =
+    "datavar         \n"
+    "  m: Nat;       \n"
+    "  n: Nat;       \n"
+    "  b: Bool;      \n"
+    "  c: Bool;      \n"
+    "                \n"
+    "predvar         \n"
+    "  X: Bool, Pos; \n"
+    "  Y: Nat;       \n"
+    ;
+
+  pbes_expression x, y, z;
+  data::variable_list v;
+  data::data_expression_list e;
+
+  // and 1
+  x = parse_pbes_expression("Y(1) && Y(2)", VARSPEC);
+  z = tr::left(x);
+  z = tr::right(x);
+
+  // and 2
+  x = parse_pbes_expression("val(b && c)", VARSPEC);
+  if (tr::is_and(x))
+  {
+    BOOST_CHECK(false);
+    z = tr::left(x);
+    z = tr::right(x);
+  }
+  
+  // or 1
+  x = parse_pbes_expression("Y(1) || Y(2)", VARSPEC);
+  z = tr::left(x);
+  z = tr::right(x);
+  
+  // or 2
+  x = parse_pbes_expression("val(b || c)", VARSPEC);
+  if (tr::is_or(x))
+  {
+    BOOST_CHECK(false);
+    z = tr::left(x);
+    z = tr::right(x);
+  }
+
+  // imp 1
+  x = parse_pbes_expression("Y(1) => !Y(2)", VARSPEC);
+  z = tr::left(x);
+  z = tr::right(x);
+
+  // imp 2
+  x = parse_pbes_expression("val(b => c)", VARSPEC);
+  if (tr::is_imp(x))
+  {
+    BOOST_CHECK(false);
+    z = tr::left(x);
+    z = tr::right(x);
+  }
+
+  // not 1
+  x = parse_pbes_expression("!(Y(1) || Y(2))", VARSPEC);
+  z = tr::arg(x);
+
+  // not 2
+  x = parse_pbes_expression("!val(n < 10)", VARSPEC);
+  z = tr::arg(x);
+
+  // not 3
+  x = parse_pbes_expression("val(!(n < 10))", VARSPEC);
+  if (tr::is_not(x))
+  {
+    BOOST_CHECK(false);
+    z = tr::arg(x);
+  }
+
+  // prop var 1
+  x = parse_pbes_expression("Y(1)", VARSPEC);
+  e = tr::param(x);
+
+  // forall 1
+  x = parse_pbes_expression("forall k:Nat.Y(k)", VARSPEC);
+  v = tr::var(x);
+  z = tr::arg(x);
+
+  // exists 1
+  x = parse_pbes_expression("exists k:Nat.Y(k)", VARSPEC);
+  v = tr::var(x);
+  z = tr::arg(x);
+
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_term_traits();
   test_accessors();
-  core::garbage_collect();
   test_pbes_expression_with_variables();
-  core::garbage_collect();
   test_pbes_expression_with_propositional_variables();
-  core::garbage_collect();
 
   return 0;
 }
