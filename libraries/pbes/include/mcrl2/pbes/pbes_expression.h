@@ -1029,7 +1029,7 @@ namespace core {
     static inline
     bool is_not(term_type t)
     {
-      return core::detail::gsIsPBESNot(t) || data::sort_bool::is_not_application(t);
+      return core::detail::gsIsPBESNot(t);
     }
 
     /// \brief Test for a conjunction
