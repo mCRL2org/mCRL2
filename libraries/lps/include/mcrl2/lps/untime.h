@@ -130,8 +130,6 @@ namespace mcrl2 {
             s.summation_variables() = push_front(s.summation_variables(), time_var);
 
             // Extend the original condition with an additional argument time_var > m_last_action_time && time_var > 0
-            std::cerr << "real_zero: " << data::sort_real::real_(0) << std::endl;
-            std::cerr << "m_last_action_time: " << m_last_action_time << std::endl;
             s.condition() = data::lazy::and_(s.condition(),
                               data::lazy::and_(data::greater(time_var, m_last_action_time),
                                 data::greater(time_var, data::sort_real::real_(0))));
