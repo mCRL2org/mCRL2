@@ -49,7 +49,6 @@ void test_representative_generator()
 
   specification.add_alias(alias(basic_sort("D"), structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
   specification.add_alias(alias(basic_sort("E"), structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
-  // specification.normalise_sorts();
 
   representative_generator default_expression_generator(specification);
 
@@ -69,13 +68,17 @@ void test_representative_generator()
 
   // Should be e(0), since constants are preferred to other constructors or mappings
   std::cerr << "Wat is het dan2: " << default_expression_generator(basic_sort("E")) << "\n";
+  // BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
+  //    application(boost::next(constructors.begin(), 1)->constructor_function(specification.normalise_sorts(basic_sort("E"))), default_expression_generator(sort_nat::nat())));
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
-      application(boost::next(constructors.begin(), 1)->constructor_function(specification.normalise_sorts(basic_sort("E"))), default_expression_generator(sort_nat::nat())));
+      application(boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E")), default_expression_generator(sort_nat::nat())));
 
   // Should be d(e(0)), since constants are preferred to other constructors or mappings
   std::cerr << "Wat is het dan3: " << default_expression_generator(basic_sort("D")) << "\n";
+  // BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
+  //      application(boost::next(constructors.begin(), 0)->constructor_function(specification.normalise_sorts(basic_sort("D"))), default_expression_generator(basic_sort("E"))));
   BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
-       application(boost::next(constructors.begin(), 0)->constructor_function(specification.normalise_sorts(basic_sort("D"))), default_expression_generator(basic_sort("E"))));
+       application(boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D")), default_expression_generator(basic_sort("E"))));
 }
 
 int test_main(int argc, char** argv)

@@ -54,7 +54,6 @@ namespace mcrl2 {
         private:
 
           data_specification const&   m_specification;
-
           Action                      m_action;
 
         protected:
@@ -67,7 +66,6 @@ namespace mcrl2 {
               {
                 for (boost::iterator_range< function_sort::domain_const_range::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  // if (i.front() != s && (!i.front().is_basic_sort() || m_specification.find_referenced_sort(i.front()) != s))
                   if (i.front() != s && (!i.front().is_basic_sort() || m_specification.normalise_sorts(i.front()) != s))
                   {
                     static_cast< super& >(*this)(i.front());
@@ -91,7 +89,6 @@ namespace mcrl2 {
 
           void enter(const basic_sort& s)
           {
-            // sort_expression actual_sort = m_specification.find_referenced_sort(s);
             sort_expression actual_sort = m_specification.normalise_sorts(s);
 
             if (actual_sort == s)
@@ -101,8 +98,7 @@ namespace mcrl2 {
               m_action(s);
             }
             else
-            {
-              static_cast< super& >(*this)(actual_sort);
+            { static_cast< super& >(*this)(actual_sort);
             }
           }
 
@@ -110,8 +106,7 @@ namespace mcrl2 {
 
           // Alternative traversal for function_sort
           void operator()(const function_sort& s)
-          {
-            m_action(s);
+          { m_action(s);
             static_cast< super& >(*this)(s.domain());
           }
 
@@ -132,8 +127,7 @@ namespace mcrl2 {
           template < typename Sequence >
           void add(const Sequence& s, bool assume_self_dependence = false,
                        typename detail::enable_if_container< Sequence >::type* = 0)
-          {
-            for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
+          { for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
             {
               add(*i, assume_self_dependence);
             }
@@ -146,25 +140,21 @@ namespace mcrl2 {
           /// \return All sorts on which s depends.
           void add(const sort_expression& s, bool assume_self_dependence = false)
           {
-            if (assume_self_dependence) {
-              m_action(s);
+            if (assume_self_dependence) 
+            { m_action(s);
             }
 
-            // if (is_basic_sort(s) && m_specification.find_referenced_sort(s))
-            if (is_basic_sort(s) && m_specification.normalise_sorts(s))
-            {
-              visit_constructors(s);
+            if (is_basic_sort(s))
+            { visit_constructors(s);
             }
             else
-            {
-              static_cast< super& >(*this)(s);
+            { static_cast< super& >(*this)(s);
             }
           }
 
           template < typename Expression >
           void add(Expression const& s, bool assume_self_dependence = false, typename detail::disable_if_container< Expression >::type* = 0)
-          {
-            (*this)(s);
+          { (*this)(s);
           }
       };
     } // namespace detail

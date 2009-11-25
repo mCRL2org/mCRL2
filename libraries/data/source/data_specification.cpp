@@ -445,7 +445,7 @@ namespace mcrl2 {
       data_is_not_necessarily_normalised_anymore();
     } */
 
-    template < typename Term >
+    /* template < typename Term >
     void data_specification::gather_sorts(Term const& term, std::set< sort_expression >& sorts) const
     {
       std::set< sort_expression > all_sorts;
@@ -461,34 +461,35 @@ namespace mcrl2 {
     template void data_specification::gather_sorts< data_expression >(data_expression const&, std::set< sort_expression >&) const;
     template void data_specification::gather_sorts< data_equation >(data_equation const&, std::set< sort_expression >&) const;
     template void data_specification::gather_sorts< function_symbol >(function_symbol const&, std::set< sort_expression >&) const;
+    */
 
     // Assumes that a system defined sort s is not (full) part of the specification if:
     //  - the set of sorts does not contain s
     //  - the specification has no constructors for s
-    void data_specification::make_complete(std::set< sort_expression > const& sorts) const
+    /* void data_specification::make_complete(std::set< sort_expression > const& sorts) const
     { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
       m_sorts_in_context.insert(sorts.begin(),sorts.end());
       if (m_sorts_in_context.size()!=old_size)
       { data_is_not_necessarily_normalised_anymore();
       } 
-    }
+    } */
 
-    void data_specification::make_complete(data_expression const& e) const
+    /* void data_specification::make_complete(data_expression const& e) const
     { make_complete(find_sort_expressions(e));
-    }
+    } */
 
-    void data_specification::make_complete(data_equation const& e) const
+    /* void data_specification::make_complete(data_equation const& e) const
     { make_complete(find_sort_expressions(e));
-    }
+    } */
 
-    void data_specification::make_complete(sort_expression const& s) const
+    /* void data_specification::make_complete(sort_expression const& s) const
     { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
       m_sorts_in_context.insert(s);
 
       if (m_sorts_in_context.size()!=old_size)
       { data_is_not_necessarily_normalised_anymore();
       }
-    }
+    } */
 
     class finiteness_helper 
     { protected:

@@ -79,12 +79,10 @@ void test_sorts()
   spec.add_sort(s);
   spec.add_sort(s0);
   spec.add_alias(s1);
-  // spec.normalise_sorts();
   data_specification spec1;
   spec1.add_alias(s1);
   spec1.add_sort(s0);
   spec1.add_sort(s);
-  // spec1.normalise_sorts();
 
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
   BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
@@ -127,11 +125,7 @@ void test_aliases()
 
   BOOST_CHECK(boost::distance(spec.aliases(s)) == 2);
   BOOST_CHECK(boost::distance(spec.aliases(t)) == 0);
-  BOOST_CHECK(spec.aliases(s) == boost::make_iterator_range(aliases));
-
-  alias s3(basic_sort("S3"), basic_sort("S2"));
-
-  BOOST_CHECK(spec.normalise_sorts(s3.name()) == s); */
+  BOOST_CHECK(spec.aliases(s) == boost::make_iterator_range(aliases)); */
 }
 
 void test_constructors()
@@ -158,11 +152,9 @@ void test_constructors()
   spec.add_constructor(f);
   spec.add_constructor(g);
   spec.add_constructor(h);
-  // spec.normalise_sorts();
 
   data_specification spec1(spec);
   spec1.add_constructors(fghl_range);
-  // spec1.normalise_sorts();
 
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
   BOOST_CHECK(spec.constructors(s) == fgl_range);
@@ -350,7 +342,6 @@ void test_is_certainly_finite()
   spec.add_alias(alias(basic_sort("a"), s));
   spec.add_alias(alias(basic_sort("a0"), s0));
   spec.add_alias(alias(basic_sort("a1"), s1));
-  // spec.normalise_sorts();
 
   BOOST_CHECK(spec.is_certainly_finite(spec.normalise_sorts(basic_sort("a"))));
   BOOST_CHECK(!spec.is_certainly_finite(spec.normalise_sorts(basic_sort("a0"))));
@@ -507,11 +498,9 @@ void test_utility_functionality()
   spec.add_mapping(g);
   BOOST_CHECK(!spec.search_mapping(h));
   spec.add_mapping(h);
-  // spec.normalise_sorts();
 
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"), s));
-  // spec.normalise_sorts();
   BOOST_CHECK(spec.search_sort(s));
 
   BOOST_CHECK(spec.search_sort(a));
@@ -552,7 +541,6 @@ void test_normalisation()
   specification.add_alias(alias(L, list(A)));
   specification.add_alias(alias(S, set_(A)));
   specification.add_alias(alias(B, bag(A)));
-  // specification.normalise_sorts();
 
   BOOST_CHECK(specification.normalise_sorts(L) == specification.normalise_sorts(list(A)));
   BOOST_CHECK(specification.normalise_sorts(list(L)) == specification.normalise_sorts(list(list(A))));

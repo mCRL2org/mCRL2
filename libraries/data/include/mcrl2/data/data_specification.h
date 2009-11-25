@@ -154,8 +154,8 @@ namespace mcrl2 {
         sort_expression normalise_sorts_helper(const sort_expression & e) const;
 
         /// \brief Helper function for make_complete() methods
-        template < typename Term >
-        void gather_sorts(Term const& term, std::set< sort_expression >& sorts) const;
+        /* template < typename Term >
+        void gather_sorts(Term const& term, std::set< sort_expression >& sorts) const; */
 
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
@@ -580,53 +580,71 @@ namespace mcrl2 {
       }
 
   public:
+      ///\brief Adds the sorts in t to the context sorts
+      /// \param[in] t an object of which the sort expressions occurring in it are
+      /// added to m_sorts_in_context. For these sorts standard functions are generated
+      /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
+      /// the necessary constructors, mappings and equations are added to the data type.
+
+      template < typename T >
+      void make_complete(const T &t) const
+      { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
+        find_sort_expressions(t, std::inserter(m_sorts_in_context, m_sorts_in_context.end()));
+        if (m_sorts_in_context.size()!=old_size)
+        { data_is_not_necessarily_normalised_anymore();
+        }
+      }
+
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] range an iterator range of objects: data/sort expressions,
       ///  equations, assignments for which the specificaiton should be complete
       /// \pre specification is complete, but not necessarily with respect to sorts in e
       /// \post specification has all constructors/mappings/equations for sorts referenced in range
-      template < typename Container >
+      /* template < typename Container >
       void make_complete(Container const& range,
               typename detail::enable_if_container< Container >::type* = 0) const
       { std::set< sort_expression > sorts;
         for (typename Container::const_iterator i = range.begin(); i != range.end(); ++i)
-        { // gather_sorts(*i, sorts);
-          // std::cerr << " AKJSA " << *i << "\n";
-          make_complete(*i);
+        { make_complete(*i);
         }
-        // make_complete(sorts);
-      }
+      }  */
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] s a set of sort expressions that is added to a specification that is system-defined complete 
       /// \pre specification is complete, but not necessarily with respect to sorts in e
       /// \post specification has all constructors/mappings/equations for sorts in e
-      void make_complete(std::set< sort_expression > const& s) const;
+      /* void make_complete(std::set< sort_expression > const& s) const
+      { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
+        m_sorts_in_context.insert(s.begin(),s.end());
+        if (m_sorts_in_context.size()!=old_size)
+        { data_is_not_necessarily_normalised_anymore();
+        } 
+      } */
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] e a data expression that is added to a specification that is system-defined complete 
       /// \pre specification is complete, but not necessarily with respect to sorts in e
       /// \post specification has all constructors/mappings/equations for sorts in e
-      void make_complete(data_expression const& e) const;
+      // void make_complete(data_expression const& e) const;
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] e a equation that is added to a specification that is system-defined complete 
       /// \pre specification is complete, but not necessarily with respect to sorts in e
       /// \post specification has all constructors/mappings/equations for sorts in e
-      void make_complete(data_equation const& e) const;
+      // void make_complete(data_equation const& e) const;
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
       /// \param[in] s a sort that is added to a specification that is system-defined complete 
       /// \pre specification is complete, but not necessarily with respect to s
       /// \post specification has all constructors/mappings/equations for s
-      void make_complete(sort_expression const& s) const;
+      // void make_complete(sort_expression const& s) const;
+
+  private:
 
       ///\brief Normalises the sorts in the data specification
       ///\details See \ref normalise_sorts on arbitrary objects for a more detailed description.
       /// All sorts in the constructors, mappings and equations are normalised.
     
-  private:
-
       void normalise_sorts() const;
 
       /// \brief 
