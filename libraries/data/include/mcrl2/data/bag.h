@@ -1205,42 +1205,6 @@ namespace mcrl2 {
         return result;
       }
 
-      /// \brief Add sort, constructors, mappings and equations for bag
-      /// \param specification a specification
-      /// \param element the sort of elements stored by the container
-      /* template <typename SpecificationType>
-      inline
-      void add_bag_to_specification(SpecificationType const& specification, sort_expression const& element)
-      {
-         if (specification.constructors(sort_fbag::fbag(element)).empty())
-         {
-           sort_fbag::add_fbag_to_specification(specification, element);
-         }
-         if (specification.constructors(sort_bool::bool_()).empty())
-         {
-           sort_bool::add_bool_to_specification(specification);
-         }
-         if (specification.constructors(sort_nat::nat()).empty())
-         {
-           sort_nat::add_nat_to_specification(specification);
-         }
-         if (specification.constructors(sort_pos::pos()).empty())
-         {
-           sort_pos::add_pos_to_specification(specification);
-         }
-         if (specification.constructors(sort_fset::fset(element)).empty())
-         {
-           sort_fset::add_fset_to_specification(specification, element);
-         }
-         if (specification.constructors(sort_set::set_(element)).empty())
-         {
-           sort_set::add_set_to_specification(specification, element);
-         }
-         specification.add_system_defined_sort(bag(element));
-         specification.add_system_defined_constructors(bag_generate_constructors_code(element));
-         specification.add_system_defined_mappings(bag_generate_functions_code(element));
-         specification.add_system_defined_equations(bag_generate_equations_code(element));
-      } */
     } // namespace sort_bag
 
   } // namespace data

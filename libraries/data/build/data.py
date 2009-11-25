@@ -1944,50 +1944,8 @@ class specification():
     dependent_sorts = set([])
     auxiliary_sorts = set([])
     for e in self.sort_specification.declarations.elements:
-      if e.original_namespace <> self.namespace:
-        if e.defines_container():
-          result  = "         if (specification.constructors(sort_%s::%s(element)).empty())\n" % (e.original_namespace, e.original_namespace)
-          result += "         {\n"
-          result += "           sort_%s::add_%s_to_specification(specification, element);\n" % (e.original_namespace, e.original_namespace)
-          result += "         }\n"
-          dependent_sorts.add(result)
-        else:
-          result  = "         if (specification.constructors(sort_%s::%s()).empty())\n" % (e.original_namespace, e.original_namespace)
-          result += "         {\n"
-          result += "           sort_%s::add_%s_to_specification(specification);\n" % (e.original_namespace, e.original_namespace)
-          result += "         }\n"
-          dependent_sorts.add(result)
       if e.to_string()[0] == '@' and e.original_namespace == self.namespace:
         auxiliary_sorts.add("         specification.add_system_defined_sort(%s);\n" % (e.inline_code(self.sort_specification)))
-    if self.defines_container():
-      code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
-      code += "      /// \\param specification a specification\n"
-      code += "      /// \\param element the sort of elements stored by the container\n"
-      code += "      template <typename SpecificationType>\n"
-      code += "      inline\n"
-      code += "      void add_%s_to_specification(SpecificationType const& specification, sort_expression const& element)\n" % (self.namespace)
-      code += "      {\n"
-      code += string.join(dependent_sorts, "")
-      code += string.join(auxiliary_sorts, "")
-      code += "         specification.add_system_defined_sort(%s(element));\n" % (escape(self.namespace))
-      code += "         specification.add_system_defined_constructors(%s_generate_constructors_code(element));\n" % (self.namespace)
-      code += "         specification.add_system_defined_mappings(%s_generate_functions_code(element));\n" % (self.namespace)
-      code += "         specification.add_system_defined_equations(%s_generate_equations_code(element));\n" % (self.namespace)
-      code += "      }\n"
-    else:
-      code += "      /// \\brief Add sort, constructors, mappings and equations for %s\n" % (escape(self.namespace))
-      code += "      /// \\param specification a specification\n"
-      code += "      template <typename SpecificationType>\n"
-      code += "      inline\n"
-      code += "      void add_%s_to_specification(SpecificationType const& specification)\n" % (self.namespace)
-      code += "      {\n"
-      code += string.join(dependent_sorts, "")
-      code += string.join(auxiliary_sorts, "")
-      code += "         specification.add_system_defined_sort(%s());\n" % (escape(self.namespace))
-      code += "         specification.add_system_defined_constructors(%s_generate_constructors_code());\n" % (self.namespace)
-      code += "         specification.add_system_defined_mappings(%s_generate_functions_code());\n" % (self.namespace)
-      code += "         specification.add_system_defined_equations(%s_generate_equations_code());\n" % (self.namespace)
-      code += "      }\n"
     code += "    } // namespace sort_%s\n\n" % (self.namespace)
     code += "  } // namespace data\n\n"
     code += "} // namespace mcrl2\n\n"

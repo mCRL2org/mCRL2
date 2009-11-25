@@ -1861,33 +1861,6 @@ namespace mcrl2 {
         return result;
       }
 
-      /// \brief Add sort, constructors, mappings and equations for real_
-      /// \param specification a specification
-      /* template <typename SpecificationType>
-      inline
-      void add_real_to_specification(SpecificationType const& specification)
-      {
-         if (specification.constructors(sort_int::int_()).empty())
-         {
-           sort_int::add_int_to_specification(specification);
-         }
-         if (specification.constructors(sort_bool::bool_()).empty())
-         {
-           sort_bool::add_bool_to_specification(specification);
-         }
-         if (specification.constructors(sort_pos::pos()).empty())
-         {
-           sort_pos::add_pos_to_specification(specification);
-         }
-         if (specification.constructors(sort_nat::nat()).empty())
-         {
-           sort_nat::add_nat_to_specification(specification);
-         }
-         specification.add_system_defined_sort(real_());
-         specification.add_system_defined_constructors(real_generate_constructors_code());
-         specification.add_system_defined_mappings(real_generate_functions_code());
-         specification.add_system_defined_equations(real_generate_equations_code());
-      } */
     } // namespace sort_real_
 
   } // namespace data

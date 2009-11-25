@@ -703,22 +703,6 @@ namespace mcrl2 {
         return result;
       }
 
-      /// \brief Add sort, constructors, mappings and equations for fset
-      /// \param specification a specification
-      /// \param element the sort of elements stored by the container
-      /* template <typename SpecificationType>
-      inline
-      void add_fset_to_specification(SpecificationType const& specification, sort_expression const& element)
-      {
-         if (specification.constructors(sort_bool::bool_()).empty())
-         {
-           sort_bool::add_bool_to_specification(specification);
-         }
-         specification.add_system_defined_sort(fset(element));
-         specification.add_system_defined_constructors(fset_generate_constructors_code(element));
-         specification.add_system_defined_mappings(fset_generate_functions_code(element));
-         specification.add_system_defined_equations(fset_generate_equations_code(element));
-      } */
     } // namespace sort_fset
 
   } // namespace data
