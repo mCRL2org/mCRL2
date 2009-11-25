@@ -1970,7 +1970,7 @@ void ArcDiagram::updateMarkBundles()
     {
         Cluster* clst;
         Node* node;
-        Edge* edge;
+        Edge* edge = NULL;
 
         clst = framesDgrm[currIdxDgrm][frameIdxDgrm[currIdxDgrm]];
         for ( int j = 0; j < clst->getSizeNodes(); ++j )
@@ -1980,7 +1980,12 @@ void ArcDiagram::updateMarkBundles()
             for ( int k = 0; k < node->getSizeInEdges(); ++k )
             {
                 edge = node->getInEdge( k );
-                markBundles[edge->getBundle()->getIndex()] = true;
+				if( edge != NULL &&
+					0 <= edge->getBundle()->getIndex() &&
+					static_cast<int>(markBundles.size()) > edge->getBundle()->getIndex() )
+				{
+					markBundles[edge->getBundle()->getIndex()] = true;
+				}
             }
 
             }
@@ -1988,7 +1993,12 @@ void ArcDiagram::updateMarkBundles()
             for ( int k = 0; k < node->getSizeOutEdges(); ++k )
             {
                 edge = node->getOutEdge( k );
-                markBundles[edge->getBundle()->getIndex()] = true;
+				if( edge != NULL &&
+					0 <= edge->getBundle()->getIndex() &&
+					static_cast<int>(markBundles.size()) > edge->getBundle()->getIndex() )
+				{
+					markBundles[edge->getBundle()->getIndex()] = true;
+				}
             }
             }
         }
