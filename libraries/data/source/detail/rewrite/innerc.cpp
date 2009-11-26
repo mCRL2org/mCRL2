@@ -1548,6 +1548,22 @@ static void cleanup_file(std::string const& f)
   }
 }
 
+void RewriterCompilingInnermost::CleanupRewriteSystem()
+{
+  if ( so_rewr_cleanup != NULL )
+  {
+    so_rewr_cleanup();
+    dlclose(so_handle);
+  }
+  if ( int2term != NULL )
+  {
+    ATunprotectArray((ATerm *) int2term);
+    ATunprotectArray((ATerm *) innerc_eqns);
+    free(int2term);
+    free(innerc_eqns);
+  }
+}
+
 void RewriterCompilingInnermost::BuildRewriteSystem()
 {
   ATermList l;
@@ -1557,14 +1573,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   boost::scoped_array< char > t(new char[100+strlen(INNERC_COMPILE_COMMAND)+strlen(INNERC_LINK_COMMAND)]);
   void *h;
 
-  free(int2term);
-  free(innerc_eqns);
-
-  if ( so_rewr_cleanup != NULL )
-  {
-    so_rewr_cleanup();
-    dlclose(so_handle);
-  }
+  CleanupRewriteSystem();
 
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
@@ -2282,6 +2291,7 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification 
 
 RewriterCompilingInnermost::~RewriterCompilingInnermost()
 {
+  CleanupRewriteSystem();
   finalise_common();
   ATtableDestroy(tmp_eqns);
   ATtableDestroy(term2int);

@@ -105,6 +105,7 @@ class RewriterCompilingJitty: public Rewriter
 		void implement_tree(FILE *f, ATermAppl tree, int arity, int d, int opid, bool *used);
 		void implement_strategy(FILE *f, ATermList strat, int arity, int d, int opid, unsigned int nf_args);
 		void CompileRewriteSystem(const data_specification &DataSpec);
+		void CleanupRewriteSystem();
 		void BuildRewriteSystem();
 
 		ATerm OpId2Int(ATermAppl Term, bool add_opids);

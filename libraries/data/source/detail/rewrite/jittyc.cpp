@@ -2866,6 +2866,25 @@ static void cleanup_file(std::string const& f)
   }
 }
 
+void RewriterCompilingJitty::CleanupRewriteSystem()
+{
+  if ( so_rewr_cleanup != NULL )
+  {
+    so_rewr_cleanup();
+    dlclose(so_handle);
+  }
+  if ( int2term != NULL )
+  {
+    ATunprotectArray((ATerm *) int2term);
+    free(int2term);
+    ATunprotectArray((ATerm *) jittyc_eqns);
+    free(jittyc_eqns);
+    ATtableDestroy(int2ar_idx);
+    ATunprotectArray((ATerm *) ar);
+    free(ar);
+  }
+}
+
 void RewriterCompilingJitty::BuildRewriteSystem()
 {
   ATermList l;
@@ -2875,16 +2894,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   boost::scoped_array< char > t(new char[100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND)]);
   void *h;
 
-  free(int2term);
-  free(jittyc_eqns);
-  free(int2ar_idx);
-  free(ar);
-
-  if ( so_rewr_cleanup != NULL )
-  {
-    so_rewr_cleanup();
-    dlclose(so_handle);
-  }
+  CleanupRewriteSystem();
 
   int2term = (ATermAppl *) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
@@ -3702,6 +3712,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(const data_specification &DataSpe
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
 {
+  CleanupRewriteSystem();
   finalise_common();
   ATtableDestroy(tmp_eqns);
   ATtableDestroy(subst_store);
