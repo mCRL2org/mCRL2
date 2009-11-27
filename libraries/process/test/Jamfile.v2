@@ -14,5 +14,6 @@ test-suite process
       [ run sort_traverser_test.cpp ]
       [ run process_test.cpp ]
       [ run typecheck_test.cpp ]
+      [ run parse_test.cpp ]     
       [ compile-headers ../include ]
     ;

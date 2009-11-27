@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/core/detail/algorithms.h"
 #include "mcrl2/process/process_specification.h"
@@ -33,11 +34,12 @@ namespace process {
                                   const bool alpha_reduce=false)
   {
     ATermAppl result = core::detail::parse_process_specification(spec_stream);
-    result           = core::detail::type_check_process_specification(result);
+    result = core::detail::type_check_process_specification(result);
     if (alpha_reduce)
-    { result           = core::detail::alpha_reduce_process_specification(result);
+    {
+      result = core::detail::alpha_reduce_process_specification(result);
     }
-    result           = data::detail::internal_format_conversion(result);
+    result = data::detail::internal_format_conversion(result);
     return atermpp::aterm_appl(result);
   }
 
@@ -52,6 +54,24 @@ namespace process {
   {
     std::istringstream spec_stream(spec_string);
     return parse_process_specification(spec_stream, alpha_reduce);
+  }
+
+  /// \brief Parses and type checks a process expression.
+  /// \param[in] text The input text containing a process expression.
+  /// \param[in] data_decl A declaration of data and actions ("glob m:Nat; act a:Nat;").
+  /// \param[in] proc_decl A process declaration ("proc P(n: Nat);").
+  inline
+  process_expression parse_process_expression(const std::string& text,
+                                              const std::string& data_decl,
+                                              const std::string& proc_decl
+                                             )
+  {
+    std::string proc_text = core::regex_replace(";", " = delta;", proc_decl);
+    std::string init_text = "init\n     " + text + ";\n";
+    std::string spec_text = data_decl + "\n" + proc_text + "\n" + init_text;
+    std::cout << spec_text << std::endl;
+    process_specification spec = parse_process_specification(spec_text);
+    return spec.init();
   }
 
 } // namespace process
