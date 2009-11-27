@@ -33,4 +33,5 @@ tool ltsview
         /site-config//boost_signals
       : <squadt-connectivity>implemented
         <wx>gl
+        <toolset>gcc:<linkflags>-lGLU
       ;

@@ -7,5 +7,6 @@ tool diagraphica
         /libraries//lts
         /libraries//ticpp
       : <squadt-connectivity>implemented
+        <toolset>gcc:<linkflags>-lGLU
         <wx>gl
       ;
