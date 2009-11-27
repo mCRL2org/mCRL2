@@ -6,6 +6,11 @@ xml data_manual
         data_manual.qbk
     ;
 
+xml algorithms_manual
+    :
+        algorithms_manual.qbk
+    ;
+
 xml concept_manual
     :
         concept_manual.qbk
@@ -13,6 +18,7 @@ xml concept_manual
 
 boostbook standalone
     :
+        algorithms_manual
         concept_manual
         data_manual
     :

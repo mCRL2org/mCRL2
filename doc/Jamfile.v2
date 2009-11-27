@@ -13,6 +13,7 @@ boostbook doc
     ## Build the various generated docs (Doxygen and QuickBook)...
 
     <dependency>../libraries/atermpp/doc//atermpp_manual
+    <dependency>../libraries/data/doc//algorithms_manual
     <dependency>../libraries/data/doc//concept_manual
     <dependency>../libraries/data/doc//data_manual
     <dependency>../libraries/process/doc//process_manual
@@ -23,6 +24,7 @@ boostbook doc
     ## Add path references to the QuickBook generated docs...
 
     <implicit-dependency>../libraries/atermpp/doc//atermpp_manual
+    <implicit-dependency>../libraries/data/doc//algorithms_manual
     <implicit-dependency>../libraries/data/doc//concept_manual
     <implicit-dependency>../libraries/data/doc//data_manual
     <implicit-dependency>../libraries/process/doc//process_manual

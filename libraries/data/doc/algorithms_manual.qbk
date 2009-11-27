@@ -1,0 +1,165 @@
+[library Algorithms Library
+    [quickbook 1.4]
+    [authors [Wulp, Jeroen van der], [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+        Algorithms for the mCRL2 Library
+    ]
+]
+
+[/  Links   ]
+[def __boost__                 [@http://www.boost.org www.boost.org]]
+[def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
+[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
+[def __mcrl__                  mCRL]
+[def __atermlib__              [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
+[def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
+[def __mcrl2_language_reference__      [@http://www.mcrl2.org/wiki/index.php/Language_reference/Data_types mCRL2 Language Reference]]
+[def __lps_library__           [@http://www.mcrl2.org/devel/lps/ LPS library]]
+
+[section: Introduction]
+
+The mCRL2 Library contains some algorithms that are applicable to several libraries.
+The most prominent example is a traversal framework and a family of find functions
+that has been implemented on top of that. This chapter discusses some of these
+algorithms.
+
+[endsect]
+
+[section: Traversal functions]
+
+The mCRL2 Library contains a range of generic traversal functions. There are
+different types of travelsals possible:
+
+[table Traversal types
+    [ [Type]                     [Meaning]          ]
+    [ [normal traversal        ] [Traverse an object completely ] ]
+    [ [binding aware traversal ] [Traverse an object completely, while maintaining the bound variables] ]
+    [ [sort traversal          ] [Traverses only the parts of an object that contain sorts] ]
+]
+
+The Data Library defines classes that support these traversal types, namely
+`traverser`, `binding_aware_traverser` and 
+. They are
+the most common occurring traversals. When writing an algorithm that needs to
+traverse an object, one can usually implement it using one of the predefined
+traversal classes.
+
+[note It is possible to change the way an object is traversed by overriding member
+functions. How that works exactly needs be figured out.
+]
+
+[section: Implementation]
+                                         
+The traverser classes in the Data Library have the following structure:
+
+    template < typename Derived >
+    class traverser
+    {
+      public:     
+        void operator()(function_symbol const& e);
+        void operator()(data_expression const& e);
+        ...
+    };
+
+    template < typename Derived >
+    class binding_aware_traverser : public traverser< Derived >;
+
+    template < typename Derived >
+    class sort_traverser : public traverser< Derived >;
+        
+The default implementation for `operator()` calls the function `enter` upon
+entering and `leave` upon leaving an object. By default these functions have an
+empty body, so they can be optimized away by the compiler. The user can override
+these functions in a base class to add behavior. If an object has any sub objects,
+they can be visited by applying the `operator()` function to them. In the example
+below this is done with the `name()` attribute of a `variable`.
+
+      void operator()(variable const& e)
+      {
+        ...
+        static_cast< Derived& >(*this).enter(e);
+        static_cast< Derived& >(*this)(e.name());
+        static_cast< Derived& >(*this).leave(e);
+        ...
+      }
+
+Note that the [@http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern Curiously recurring template pattern]
+needs to be applied in the implementation of `traverser`, since it needs access
+to protected interfaces of derived classes.
+
+The traversal framework can be reused in other libraries.
+The LPS Library defines classes `lps_data_traverser` and `lps_binding_aware_traverser` like this:
+
+    template < typename Derived, template < class > class Traverser = mcrl2::data::detail::traverser >
+    class lps_data_traverser : public Traverser< Derived >
+    {
+      public:
+        void operator()(const multi_action& a);
+        void operator()(const linear_process& p);
+        ...
+    };
+        
+    template < typename Derived >
+    struct lps_binding_aware_traverser : public lps::detail::lps_data_traverser< Derived, data::detail::binding_aware_traverser >
+
+[warning The traversal classes have only been partly defined for the LPS Library
+and not yet for the Process and PBES Library.]
+
+[endsect]
+    
+[endsect]
+
+[section: Find functions]
+
+The mCRL2 Library contains a range of generic find functions. These are:
+
+[table Generic find functions
+    [ [Function]                  [Meaning]          ]
+    [ [`find_basic_sorts`       ] [Finds basic sorts that occur in an object] ]
+    [ [`find_data_expressions`  ] [Finds data expressions that occur in an object] ]
+    [ [`find_free_variables`    ] [Finds free variables that occur in an object] ]
+    [ [`find_identifiers`       ] [Finds identifiers that occur in an object] ]
+    [ [`find_sort_expressions`  ] [Finds sort expressions that occur in an object] ]
+    [ [`find_variables`         ] [Finds variables that occur in an object] ]
+]
+
+These functions can be applied to a wide range of objects in the mCRL2 Library,
+ranging from `data_expression` to `action_summand`.
+
+[table Find functions for data specifications
+    [ [Function]            [Meaning]          ]
+    [ [`find_constructor` ] [Finds a constructor] ]
+    [ [`find_equations`   ] [Finds equations with a given expression as head on one of its sides] ]
+    [ [`find_mapping`     ] [Finds a mapping    ] ]
+    [ [`find_sort`        ] [Finds a sort       ] ]
+]
+
+[section: Implementation]
+
+The implementation of find functions is not finished yet. It has to be figured out
+how to extend the functionality of the Data Library to other libraries.
+The file =mcrl2/lps/find.h= currently contains this:
+
+    /// \brief Returns all data variables that occur in a range of expressions
+    /// \param[in] container a container with expressions
+    /// \return All data variables that occur in the term t
+    template <typename Container, typename OutputIterator >
+    void find_free_variables(Container const& container, OutputIterator o)
+    {
+      data::detail::make_free_variable_find_helper< lps::detail::lps_binding_aware_traverser >(o)(container);
+    }
+
+    /// \brief Returns all data variables that occur in a range of expressions
+    /// \param[in] container a container with expressions
+    /// \return All data variables that occur in the term t
+    /// TODO replace uses by data::find_free_variables
+    template <typename Container >
+    std::set< data::variable > find_free_variables(Container const& container)
+    { ... }
+
+[endsect]
+
+[endsect]
+
