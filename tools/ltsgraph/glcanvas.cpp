@@ -239,8 +239,9 @@ void GLCanvas::display()
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  wxPaintDC dc(this);
   display();
+  wxPaintDC dc(this);
+
 }
 
 void GLCanvas::onSize(wxSizeEvent& /*event*/)
