@@ -25,7 +25,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;

@@ -33,7 +33,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"

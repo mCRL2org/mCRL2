@@ -1,6 +1,6 @@
 #include <cassert>
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
 

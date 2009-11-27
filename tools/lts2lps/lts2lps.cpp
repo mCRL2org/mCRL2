@@ -21,7 +21,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lts/lts.h"
 

@@ -16,7 +16,7 @@
 #include <vector>
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 
 namespace mcrl2 {
 

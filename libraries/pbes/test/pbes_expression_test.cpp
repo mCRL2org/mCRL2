@@ -17,7 +17,7 @@
 #include "mcrl2/data/detail/container_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/core/garbage_collection.h"

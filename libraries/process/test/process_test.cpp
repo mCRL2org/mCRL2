@@ -18,7 +18,6 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/process_expression_visitor.h"
 #include "mcrl2/process/process_expression_builder.h"
-#include "mcrl2/process/parse.h"
 #include "mcrl2/process/detail/linear_process_expression_visitor.h"
 #include "mcrl2/atermpp/aterm_init.h"
 

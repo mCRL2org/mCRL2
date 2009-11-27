@@ -12,7 +12,7 @@
 #include <string>
 #include <sstream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 

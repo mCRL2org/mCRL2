@@ -14,7 +14,7 @@
 
 #include <sstream>
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/core/messaging.h"
 
 namespace mcrl2 {

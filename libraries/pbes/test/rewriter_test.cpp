@@ -18,14 +18,14 @@
 #include <sstream>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/text_utility.h"
-#include "mcrl2/pbes/pbes_parse.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"

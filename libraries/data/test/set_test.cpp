@@ -15,7 +15,7 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/fset.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 
 #include "mcrl2/core/garbage_collection.h"

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbes_parse.h
+/// \file mcrl2/pbes/parse.h
 /// \brief Parser for pbes expressions.
 
-#ifndef MCRL2_PBES_PARSER_H
-#define MCRL2_PBES_PARSER_H
+#ifndef MCRL2_PBES_PARSE_H
+#define MCRL2_PBES_PARSE_H
 
 #include <iostream>
 #include <stdexcept>
@@ -23,7 +23,7 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -303,4 +303,4 @@ std::cout << "------------------------------------------------------------------
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_PARSER_H
+#endif // MCRL2_PBES_PARSE_H

@@ -24,7 +24,7 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"

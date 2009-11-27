@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/parser.h
+/// \file mcrl2/data/parse.h
 /// \brief Parser for data specifications.
 
-#ifndef MCRL2_DATA_PARSER_H
-#define MCRL2_DATA_PARSER_H
+#ifndef MCRL2_DATA_PARSE_H
+#define MCRL2_DATA_PARSE_H
 
 #include <sstream>
 #include <climits>
@@ -458,4 +458,4 @@ namespace data {
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_PARSER_H
+#endif // MCRL2_DATA_PARSE_H

@@ -10,8 +10,9 @@
 /// \brief Test for find functions.
 
 #include <algorithm>
-#include <vector>
+#include <iterator>
 #include <set>
+#include <vector>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/sort_expression.h"
@@ -137,6 +138,10 @@ int test_main(int argc, char* argv[])
   std::set<sort_expression> eV = find_sort_expressions(V);
   BOOST_CHECK(eS == eV);
 
+  std::set<sort_expression> Z;
+  find_sort_expressions(q1, std::inserter(Z, Z.end()));
+  find_sort_expressions(S, std::inserter(Z, Z.end()));
+
   core::garbage_collect();
 
   //--- find_data_expressions ---//
@@ -151,6 +156,7 @@ int test_main(int argc, char* argv[])
 
   core::garbage_collect();
 
+  //--- data_specification ---//
   BOOST_CHECK(search_basic_sort(data_specification().sorts(), sort_bool::bool_()));
   BOOST_CHECK(search_sort_expression(data_specification().sorts(), sort_bool::bool_()));
   BOOST_CHECK(search_data_expression(data_specification().constructors(), sort_bool::true_()));

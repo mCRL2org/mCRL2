@@ -14,7 +14,7 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/invariant_eliminator.h"
 #include "mcrl2/lps/invariant_checker.h"

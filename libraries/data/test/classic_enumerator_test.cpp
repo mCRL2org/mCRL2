@@ -14,7 +14,7 @@
 
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/classic_enumerator.h"

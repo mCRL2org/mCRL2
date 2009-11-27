@@ -15,7 +15,7 @@
 
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"

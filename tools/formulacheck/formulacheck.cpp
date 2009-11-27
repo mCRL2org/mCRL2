@@ -15,7 +15,7 @@
 #include <string>
 #include <fstream>
 
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
 #include "mcrl2/data/detail/prover/formula_checker.h"
 #include "mcrl2/lps/specification.h"

@@ -17,7 +17,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
-#include "mcrl2/pbes/pbes_parse.h"
+#include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/garbage_collection.h"

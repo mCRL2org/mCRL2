@@ -21,7 +21,7 @@
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/sequence_substitution.h"

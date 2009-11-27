@@ -18,7 +18,7 @@
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/parser.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
