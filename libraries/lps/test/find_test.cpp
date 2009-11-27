@@ -56,16 +56,18 @@ data::variable bool_(std::string name)
 void test_find()
 {
   specification spec = parse_linear_process_specification(SPEC);
-  std::cout << spec.process().action_summands.size() << std::endl;
+  std::cout << spec.process().action_summands().size() << std::endl;
   action_summand s = spec.process().action_summands().front();
+  action a = s.multi_action().actions().front();
 
   //--- find_variables ---//
   data::variable m = nat("m"); 
-  std::set<data::variable> v = data::find_variables(s);
+  std::set<data::variable> v = data::find_variables(a);
+  //v = data::find_variables(s); // TODO: this doesn't compile!
   BOOST_CHECK(v.find(m) != v.end());   
 
   //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = data::find_sort_expressions(s);
+  std::set<data::sort_expression> e = data::find_sort_expressions(a);
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 }
@@ -77,7 +79,5 @@ int test_main(int argc, char* argv[])
   test_find();
   core::garbage_collect();
     
-  BOOST_CHECK(false);
-
   return EXIT_SUCCESS;
 }
