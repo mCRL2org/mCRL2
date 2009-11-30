@@ -113,6 +113,28 @@ void test_data_enumerator()
   }
 }
 
+void test_data_enumerator2()
+{
+  std::string DATA_SPEC =
+  "sort D;\n"
+  "map f:D -> Bool;\n"
+  ;
+
+  data_specification data_spec = parse_data_specification(DATA_SPEC);
+  variable x = parse_variable("d:D", data_spec);
+
+  rewriter rewr(data_spec);
+  number_postfix_generator generator("x_");
+  data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
+
+  atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
+  for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
+  {
+    std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
+  }
+  BOOST_CHECK(values.size() > 0);
+}
+
 class A: public data_expression
 {
   public:
@@ -219,6 +241,9 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_data_enumerator();
+  core::garbage_collect();
+
+  test_data_enumerator2();
   core::garbage_collect();
 
   test2();
