@@ -9,10 +9,10 @@
 /// \file rewriter_test.cpp
 /// \brief Test for the pbes rewriters.
 
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define MCRL2_SIMPLIFY_QUANTIFIERS
+#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+#define MCRL2_SIMPLIFY_QUANTIFIERS
 
 #include <iostream>
 #include <boost/test/minimal.hpp>
@@ -126,9 +126,16 @@ void test_pbesrewr3()
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-  pbesrewr(p, pbesr);
-  BOOST_CHECK(p.is_well_typed());
-  BOOST_CHECK(p.equations().begin()->formula() != parse_pbes_expression("val(false)"));
+  try
+  {
+    pbesrewr(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated
+  }
+  catch(mcrl2::runtime_error)
+  {
+    // this is OK
+    return;
+  }
+  BOOST_CHECK(false); // this point should not be reached
 }
 
 int test_main(int argc, char* argv[])

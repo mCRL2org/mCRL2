@@ -89,28 +89,37 @@ void test_enumerator()
 
 void test_data_enumerator()
 {
-  data_specification data_spec = parse_data_specification(DATA_SPEC1);
-  rewriter rewr(data_spec);
-  number_postfix_generator generator("x_");
-  data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
-
-  variable x(identifier_string("x"), sort_pos::pos());
-  atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
-  for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
+  try
   {
-    std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
-  }
+    data_specification data_spec = parse_data_specification(DATA_SPEC1);
+    rewriter rewr(data_spec);
+    number_postfix_generator generator("x_");
+    data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
-  data_expression_with_variables expr(x, make_vector(x));
-  atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
-  for (atermpp::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
-  {
-    atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
-    for (atermpp::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
+    variable x(identifier_string("x"), sort_pos::pos());
+    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
+    for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
     {
-      std::cout << mcrl2::core::pp(*j) << " " << mcrl2::data::pp(j->variables()) << std::endl;
+      std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
+    }
+
+    data_expression_with_variables expr(x, make_vector(x));
+    atermpp::vector<data_expression_with_variables> y = e.enumerate(x);
+    for (atermpp::vector<data_expression_with_variables>::const_iterator i = y.begin(); i != y.end(); ++i)
+    {
+      atermpp::vector<data_expression_with_variables> z = e.enumerate(*i);
+      for (atermpp::vector<data_expression_with_variables>::const_iterator j = z.begin(); j != z.end(); ++j)
+      {
+        std::cout << mcrl2::core::pp(*j) << " " << mcrl2::data::pp(j->variables()) << std::endl;
+      }
     }
   }
+  catch(mcrl2::runtime_error)
+  {
+    // this is OK
+    return;
+  }
+  BOOST_CHECK(false); // this point should not be reached
 }
 
 void test_data_enumerator2()
@@ -127,12 +136,16 @@ void test_data_enumerator2()
   number_postfix_generator generator("x_");
   data_enumerator<number_postfix_generator> e(data_spec, rewr, generator);
 
-  atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
-  for (atermpp::vector<data_expression_with_variables>::const_iterator i = values.begin(); i != values.end(); ++i)
+  try
   {
-    std::cout << mcrl2::core::pp(*i) << " " << mcrl2::data::pp(i->variables()) << std::endl;
+    atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
   }
-  BOOST_CHECK(values.size() > 0);
+  catch(mcrl2::runtime_error)
+  {
+    // this is OK
+    return;
+  }
+  BOOST_CHECK(false); // this point should not be reached
 }
 
 class A: public data_expression

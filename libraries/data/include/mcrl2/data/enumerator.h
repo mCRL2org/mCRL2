@@ -24,6 +24,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -182,7 +183,10 @@ class data_enumerator
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
-
+      if (result.empty())
+      {
+        throw mcrl2::runtime_error("error: could not enumerate variable " + core::pp(v));
+      }
       return result;
     }
 
