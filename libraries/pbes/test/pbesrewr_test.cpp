@@ -108,12 +108,36 @@ void test_pbesrewr2()
   BOOST_CHECK(p.is_well_typed());
 }
 
+// Check that existential quantification over empty domain is not automatically
+// rewritten to false.
+void test_pbesrewr3()
+{
+  std::string pbes_text =
+  "sort D;\n"
+  "map f:D -> Bool;\n"
+  "pbes nu X = exists d:D . val(f(d));\n"
+  "init X;\n"
+  ;
+
+  pbes<> p = txt2pbes(pbes_text);
+  data::rewriter datar(p.data(), data::rewriter::jitty);
+  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<> datae(p.data(), datar, generator);
+  data::rewriter_with_variables datarv(datar);
+  bool enumerate_infinite_sorts = true;
+  enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+  pbesrewr(p, pbesr);
+  BOOST_CHECK(p.is_well_typed());
+  BOOST_CHECK(p.equations().begin()->formula() != parse_pbes_expression("val(false)"));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_pbesrewr1();
   test_pbesrewr2();
+  test_pbesrewr3();
 
   return 0;
 }
