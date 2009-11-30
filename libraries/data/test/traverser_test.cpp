@@ -26,9 +26,16 @@ class identity_traverser: public mcrl2::data::detail::traverser<identity_travers
   public:
     typedef mcrl2::data::detail::traverser<identity_traverser> super;
       
-    using super::operator();
     using super::enter;
     using super::leave;
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
 };
 
 class identity_sort_traverser: public mcrl2::data::detail::sort_traverser<identity_sort_traverser>
@@ -36,9 +43,16 @@ class identity_sort_traverser: public mcrl2::data::detail::sort_traverser<identi
   public:
     typedef mcrl2::data::detail::traverser<identity_sort_traverser> super;
       
-    using super::operator();
     using super::enter;
     using super::leave;
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
 };
 
 class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
@@ -49,9 +63,16 @@ class my_traverser: public mcrl2::data::detail::traverser<my_traverser>
   public:
     typedef mcrl2::data::detail::traverser<my_traverser> super;
       
-    using super::operator();
     using super::enter;
     using super::leave;
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
 
     my_traverser() : m_sort_count(0)
     { }
@@ -75,9 +96,16 @@ class my_sort_traverser: public mcrl2::data::detail::sort_traverser<my_sort_trav
   public:
     typedef mcrl2::data::detail::sort_traverser<my_sort_traverser> super;
       
-    using super::operator();
     using super::enter;
     using super::leave;
+#if BOOST_MSVC
+      // Workaround for malfunctioning MSVC 2008 overload resolution
+      template < typename Container >
+      void operator()(Container const& a)
+      {
+        super::operator()(a);
+      }
+#endif
 
     my_sort_traverser() : m_sort_count(0)
     { }
