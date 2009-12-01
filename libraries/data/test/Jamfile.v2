@@ -33,6 +33,7 @@ test-suite data
       [ run set_test.cpp ]
       [ run sort_expression_test.cpp ]
       [ run substitution_test.cpp ]
+      [ run template_test.cpp ]
       [ run traverser_test.cpp ]
       [ run utility_test.cpp ]
       [ compile-headers ../include ]
