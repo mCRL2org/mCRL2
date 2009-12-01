@@ -15,7 +15,7 @@
 #include <vector>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/find.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 
@@ -62,12 +62,12 @@ void test_find()
 
   //--- find_variables ---//
   data::variable m = nat("m"); 
-  std::set<data::variable> v = data::find_variables(a);
+  std::set<data::variable> v = lps::find_variables(a);
   //v = data::find_variables(s); // TODO: this doesn't compile!
   BOOST_CHECK(v.find(m) != v.end());   
 
   //--- find_sort_expressions ---//
-  std::set<data::sort_expression> e = data::find_sort_expressions(a);
+  std::set<data::sort_expression> e = lps::find_sort_expressions(a);
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_nat::nat()) != e.end());
   BOOST_CHECK(std::find(e.begin(), e.end(), data::sort_pos::pos()) == e.end());
 }

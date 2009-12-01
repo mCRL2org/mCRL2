@@ -165,6 +165,7 @@ void test_simplifying_rewriter()
   test_expressions(R, "forall n: Nat. forall b: Bool. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
   test_expressions(R, "forall n: Nat. val(b) && Y(n)"                                   , "val(b) && forall n: Nat. Y(n)");
   test_expressions(R, "forall n: Nat. val(b)"                                           , "val(b)");
+  test_expressions(R, "exists d: Nat. X && val(d == 0)"                                 , "val(d == 0) && exists d: Nat. X");
 
   // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
   // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");

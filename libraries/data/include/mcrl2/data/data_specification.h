@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <vector>
 
 #include "boost/iterator/transform_iterator.hpp"
 
@@ -34,6 +35,8 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/standard.h"
+
+#include "mcrl2/data/detail/container_utility.h"
 
 namespace mcrl2 {
 
@@ -92,7 +95,7 @@ namespace mcrl2 {
 
         struct convert_to_alias : public std::unary_function< ltr_aliases_map::value_type const, alias >
         {
-          /// \brief Application to constant pair
+          /// \brief Applicmation to constant pair
           alias operator()(ltr_aliases_map::value_type const& e) const 
           { return alias(e.first,e.second);
           }
@@ -580,19 +583,48 @@ namespace mcrl2 {
       }
 
   public:
-      ///\brief Adds the sorts in t to the context sorts
-      /// \param[in] t an object of which the sort expressions occurring in it are
+      // ///\brief Adds the sorts in t to the context sorts
+      // /// \param[in] t an object of which the sort expressions occurring in it are
+      // /// added to m_sorts_in_context. For these sorts standard functions are generated
+      // /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
+      // /// the necessary constructors, mappings and equations are added to the data type.
+      // 
+      // template < typename T >
+      // void make_complete(const T &t) const
+      // { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
+      //   find_sort_expressions(t, std::inserter(m_sorts_in_context, m_sorts_in_context.end()));
+      //   if (m_sorts_in_context.size()!=old_size)
+      //   { data_is_not_necessarily_normalised_anymore();
+      //   }
+      // }
+
+      ///\brief Adds the sorts in c to the context sorts
+      /// \param[in] c a container of sort expressions. These are
       /// added to m_sorts_in_context. For these sorts standard functions are generated
       /// automatically (if, <,<=,==,!=,>=,>) and if the sorts are standard sorts,
       /// the necessary constructors, mappings and equations are added to the data type.
-
-      template < typename T >
-      void make_complete(const T &t) const
-      { atermpp::set < sort_expression >::size_type old_size=m_sorts_in_context.size();
-        find_sort_expressions(t, std::inserter(m_sorts_in_context, m_sorts_in_context.end()));
+      template <typename Container>
+      void make_complete(const Container &c, typename detail::enable_if_container<Container>::type* = 0) const
+      { 
+        atermpp::set<sort_expression>::size_type old_size = m_sorts_in_context.size();
+        m_sorts_in_context.insert(c.begin(), c.end());
         if (m_sorts_in_context.size()!=old_size)
-        { data_is_not_necessarily_normalised_anymore();
+        {
+          data_is_not_necessarily_normalised_anymore();
         }
+      }
+
+      ///\brief Adds the sort s to the context sorts
+      /// \param[in] s a sort expression. It is
+      /// added to m_sorts_in_context. For this sort standard functions are generated
+      /// automatically (if, <,<=,==,!=,>=,>) and if the sort is a standard sort,
+      /// the necessary constructors, mappings and equations are added to the data type.
+      // TODO: efficiency of this function can be improved
+      void make_complete(const sort_expression& s) const
+      { 
+        std::vector<sort_expression> S;
+        S.push_back(s);
+        make_complete(S);
       }
 
       ///\brief Adds system defined sorts when necessary to make the specification complete
