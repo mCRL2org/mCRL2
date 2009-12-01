@@ -161,10 +161,14 @@ class data_enumerator
     /// \param v A data variable
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
     atermpp::vector<data_expression_with_variables> enumerate(const variable& v)
-    {
+    { // std::cerr << "Enumerate " << v << "\n";
       atermpp::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
 
+      if (c.empty())
+      {
+        throw mcrl2::runtime_error("Could not enumerate variable " + core::pp(v) + " of sort " + core::pp(v.sort()) + " as there are no constructors.");
+      }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
         if (i->sort().is_function_sort()) {
@@ -183,10 +187,10 @@ class data_enumerator
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
-      if (result.empty())
-      {
-        throw mcrl2::runtime_error("error: could not enumerate variable " + core::pp(v));
-      }
+      /* for(atermpp::vector<data_expression_with_variables>::const_iterator i=result.begin();
+               i!=result.end(); ++i)
+      { std::cerr << "Enumerate result " << core::pp(*i) << "\n";
+      } */
       return result;
     }
 
