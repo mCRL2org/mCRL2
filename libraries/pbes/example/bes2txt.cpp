@@ -213,7 +213,32 @@ namespace mcrl2 {
     std::string pp_pgsolver(const boolean_equation_system<Container>& p)
     {
       std::ostringstream out;
+
+      // Compute maximal rank
+      unsigned int max_rank = 0;
       fixpoint_symbol symbol = fixpoint_symbol::nu();
+      for(typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      {
+        if(i->symbol() != symbol)
+        {
+          ++max_rank;
+          symbol = i->symbol();
+        }
+      }
+
+      // Max rank needs to be even, and >= 2
+      if(max_rank % 2 == 1)
+      {
+        ++max_rank;
+      }
+
+      if(max_rank == 0)
+      {
+        max_rank = 2;
+      }
+
+      // Start outputting
+      symbol = fixpoint_symbol::nu();
       unsigned int rank = 0;
       BOOST_FOREACH(const boolean_equation& eq, p.equations())
       {
