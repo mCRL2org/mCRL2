@@ -22,6 +22,7 @@
 #include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/detail/boolean_simplify_builder.h"
+#include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
 #include "mcrl2/pbes/detail/simplify_quantifier_builder.h"
 #include "mcrl2/pbes/detail/enumerate_quantifiers_builder.h"
@@ -50,6 +51,49 @@ namespace pbes_system {
       {
         bes::detail::boolean_simplify_builder<Term> r;
         return r(x);
+      }
+  };
+
+  /// \brief A rewriter that applies a data rewriter to data expressions in a term.
+  template <typename Term, typename DataRewriter>
+  class data_rewriter
+  {
+    protected:
+
+      /// \brief The data rewriter
+      DataRewriter m_rewriter;
+
+    public:
+      /// \brief The term type
+      typedef typename core::term_traits<Term>::term_type term_type;
+
+      /// \brief The variable type
+      typedef typename core::term_traits<Term>::variable_type variable_type;
+
+      /// \brief Constructor
+      /// \param rewriter A data rewriter
+      data_rewriter(const DataRewriter& rewriter)
+        : m_rewriter(rewriter)
+      {}
+
+      /// \brief Rewrites a pbes expression.
+      /// \param x A term
+      /// \return The rewrite result.
+      term_type operator()(const term_type& x) const
+      {
+        detail::data_rewrite_builder<Term, DataRewriter> r(m_rewriter);
+        return r(x);
+      }
+
+      /// \brief Rewrites a pbes expression.
+      /// \param x A term
+      /// \param sigma A substitution function
+      /// \return The rewrite result.
+      template <typename SubstitutionFunction>
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
+      {
+        detail::data_rewrite_builder<Term, DataRewriter, SubstitutionFunction> r(m_rewriter);
+        return r(x, sigma);
       }
   };
 
@@ -153,7 +197,7 @@ namespace pbes_system {
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         pbes_system::detail::pfnf_visitor<term_type> visitor;
         visitor.visit(x);
@@ -165,7 +209,7 @@ namespace pbes_system {
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
         return sigma(this->operator()(x));
       }
@@ -206,7 +250,7 @@ namespace pbes_system {
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         typedef data::mutable_map_substitution<atermpp::map< variable_type, data_term_type> > substitution_function;
         typedef core::term_traits<term_type> tr;
@@ -239,7 +283,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
         typedef data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
         typedef core::term_traits<term_type> tr;
@@ -292,7 +336,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         return m_rewriter(pbes_expression_with_variables(x, data::variable_list()));
       }
@@ -302,7 +346,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma)
+      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
         return m_rewriter(pbes_expression_with_variables(x, data::variable_list()), sigma);
       }

@@ -266,11 +266,11 @@ namespace detail {
         data::variable_list rv = tt::set_intersection(variables, rvar);
         if (lv.empty())
         {
-          result = core::optimized_and(l, core::optimized_forall(rv, r));
+          result = core::optimized_and(l, core::optimized_exists(rv, r));
         }
         else if (rv.empty())
         {
-          result = core::optimized_and(r, core::optimized_forall(lv, l));
+          result = core::optimized_and(r, core::optimized_exists(lv, l));
         }
         else
         {

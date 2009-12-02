@@ -152,7 +152,7 @@ class data_enumerator
 
     /// \brief The data specification.
     /// \return The data specification.
-    const data_specification& data()
+    const data_specification& data() const
     {
       return *m_data;
     }

@@ -119,120 +119,6 @@ void test_expressions(Rewriter R, std::string expr1, std::string expr2, std::str
   test_expressions(R, expr1, R, expr2, var_decl, substitutions, data_spec);
 }
 
-void test_simplifying_rewriter()
-{
-  std::cout << "<test_simplifying_rewriter>" << std::endl;
-
-  data::data_specification data_spec = data::data_specification();
-  data_spec.make_complete(data::sort_nat::nat());
-  data::rewriter datar(data_spec);
-  pbes_system::simplifying_quantifier_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
-
-  test_expressions(R, "val(n >= 0) || Y(n)"                                             , "val(true)");
-  test_expressions(R, "false"                                                           , "val(false)");
-  test_expressions(R, "true"                                                            , "val(true)");
-  test_expressions(R, "true && true"                                                    , "val(true)");
-  test_expressions(R, "(true && true) && true"                                          , "val(true)");
-  test_expressions(R, "true && false"                                                   , "val(false)");
-  test_expressions(R, "true => val(b)"                                                  , "val(b)");
-  test_expressions(R, "X && true"                                                       , "X");
-  test_expressions(R, "true && X"                                                       , "X");
-  test_expressions(R, "X && false"                                                      , "val(false)");
-  test_expressions(R, "X && val(false)"                                                 , "val(false)");
-  test_expressions(R, "false && X"                                                      , "val(false)");
-  test_expressions(R, "X && (false && X)"                                               , "val(false)");
-  test_expressions(R, "Y(1+2)"                                                          , "Y(3)");
-  test_expressions(R, "true || true"                                                    , "true");
-  test_expressions(R, "(true || true) || true"                                          , "true");
-  test_expressions(R, "true || false"                                                   , "true");
-  test_expressions(R, "false => X"                                                      , "true");
-  test_expressions(R, "Y(n+n)"                                                          , "Y(n+n)");
-  test_expressions(R, "Y(n+p)"                                                          , "Y(n+p)");
-  test_expressions(R, "forall m:Nat. false"                                             , "false");
-  test_expressions(R, "X && X"                                                          , "X");
-  test_expressions(R, "val(true)"                                                       , "true");
-  test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
-  test_expressions(R, "exists m:Nat.true"                                               , "true");
-  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3)"                               , "false");
-  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) => Y(n)"                       , "true");
-  test_expressions(R, "forall m:Nat. Y(n)"                                              , "Y(n)");
-  test_expressions(R, "forall m:Nat. val(m < 0 && m > 3) || Y(n)"                       , "Y(n)");
-  test_expressions(R, "!!X"                                                             , "X");
-  test_expressions(R, "forall m:Nat. X"                                                 , "X");
-  test_expressions(R, "forall m,n:Nat. Y(n)"                                            , "forall n:Nat. Y(n)");
-  test_expressions(R, "forall m,n:Nat. Y(m)"                                            , "forall m:Nat. Y(m)");
-  test_expressions(R, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
-  test_expressions(R, "forall n: Nat. forall b: Bool. val(n > 3) || Y(n)"               , "forall n: Nat. val(n > 3) || Y(n)");
-  test_expressions(R, "forall n: Nat. val(b) && Y(n)"                                   , "val(b) && forall n: Nat. Y(n)");
-  test_expressions(R, "forall n: Nat. val(b)"                                           , "val(b)");
-  test_expressions(R, "exists d: Nat. X && val(d == 0)"                                 , "val(d == 0) && exists d: Nat. X");
-
-  // test_expressions(R, "Y(n+p) && Y(p+n)"                                                , "Y(n+p)");
-  // test_expressions(R, "exists m:Nat. val( m== p) && Y(m)"                               , "Y(p)");
-  // test_expressions(R, "X && (Y(p) || X)"                                                , "X");
-  // test_expressions(R, "X || (Y(p) && X)"                                                , "X");
-  // test_expressions(R, "val(b || !b)"                                                    , "val(true)");
-  // test_expressions(R, "Y(n1 + n2)"                                                      , "Y(n2 + n1)");
-
-  // pbes_expression p = R(expr("Y(n)"));
-  // BOOST_CHECK(!core::term_traits<pbes_expression>::is_constant(p));
-}
-
-void test_enumerate_quantifiers_rewriter()
-{
-  std::cout << "<test_enumerate_quantifiers_rewriter>" << std::endl;
-
-  data::data_specification data_spec = data::data_specification();
-  data_spec.make_complete(data::sort_nat::nat());
-  data::rewriter datar(data_spec);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
-  data::rewriter_with_variables datarv(data_spec);
-
-  data::variable   v = data::parse_data_expression("n", "n: Pos;\n");
-  data::data_expression d = data::parse_data_expression("n < 10", "n: Pos;\n");
-  data::data_expression_with_variables dv(d);
-
-  pbes_system::pbes_expression y = pbes_system::parse_pbes_expression("Y(n)", VARIABLE_SPECIFICATION);
-  pbes_system::pbes_expression_with_variables yv(y, data::variable_list());
-
-  pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
-
-  test_expressions(R, "(Y(0) && Y(1)) => (Y(1) && Y(0))"                                , "true");
-  test_expressions(R, "forall b: Bool. forall n: Nat. val(n > 3) || Y(n)"               , "Y(2) && Y(1) && Y(3) && Y(0)");
-  test_expressions(R, "(Y(0) && Y(1)) => (Y(0) && Y(1))"                                , "true");
-  test_expressions(R, "exists b: Bool. val(if(b, false, b))"                            , "val(false)");
-  test_expressions(R, "exists b: Bool. W(b)"                                            , "W(true) || W(false)");
-  test_expressions(R, "forall n: Nat.val(!(n < 1)) || Y(n)"                             , "Y(0)");
-  test_expressions(R, "false"                                                           , "val(false)");
-  test_expressions(R, "true"                                                            , "val(true)");
-  test_expressions(R, "true && true"                                                    , "val(true)");
-  test_expressions(R, "(true && true) && true"                                          , "val(true)");
-  test_expressions(R, "true && false"                                                   , "val(false)");
-  test_expressions(R, "true => val(b)"                                                  , "val(b)");
-  test_expressions(R, "X && true"                                                       , "X");
-  test_expressions(R, "true && X"                                                       , "X");
-  test_expressions(R, "X && false"                                                      , "val(false)");
-  test_expressions(R, "X && val(false)"                                                 , "val(false)");
-  test_expressions(R, "false && X"                                                      , "val(false)");
-  test_expressions(R, "X && (false && X)"                                               , "val(false)");
-  test_expressions(R, "Y(1+2)"                                                          , "Y(3)");
-  test_expressions(R, "true || true"                                                    , "true");
-  test_expressions(R, "(true || true) || true"                                          , "true");
-  test_expressions(R, "true || false"                                                   , "true");
-  test_expressions(R, "false => X"                                                      , "true");
-  test_expressions(R, "Y(n+n)"                                                          , "Y(n+n)");
-  test_expressions(R, "Y(n+p)"                                                          , "Y(n+p)");
-  test_expressions(R, "forall m:Nat. false"                                             , "false");
-  test_expressions(R, "X && X"                                                          , "X");
-  test_expressions(R, "val(true)"                                                       , "true");
-  test_expressions(R, "false => (exists m:Nat. exists k:Nat. val(m*m == k && k > 20))"  , "true");
-  test_expressions(R, "exists m:Nat.true"                                               , "true");
-  test_expressions(R, "forall m:Nat.val(m < 3)"                                         , "false");
-  test_expressions(R, "exists m:Nat.val(m > 3)"                                         , "true");
-  test_expressions(R, "forall m:Nat. X"                                                 , "X");
-}
-
 void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, std::string var_decl, std::string sigma, std::string data_spec)
 {
   std::cout << "<enumerate_quantifiers_rewriter>" << std::endl;
@@ -521,8 +407,6 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_simplifying_rewriter();
-  test_enumerate_quantifiers_rewriter();
   test_enumerate_quantifiers_rewriter2();
   test_enumerate_quantifiers_rewriter_finite();
   test_substitutions1();

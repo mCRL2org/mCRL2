@@ -170,6 +170,26 @@ namespace core {
       return term_type(tr::or_(p, q), atermpp::term_list_union(p.variables(), q.variables()));
     }
 
+    /// \brief Make a sorted conjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p && q</tt>
+    static inline
+    term_type sorted_and(term_type p, term_type q)
+    {
+      return term_type(tr::sorted_and(p, q), atermpp::term_list_union(p.variables(), q.variables()));
+    }
+
+    /// \brief Make a sorted disjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p || q</tt>
+    static inline
+    term_type sorted_or(term_type p, term_type q)
+    {
+      return term_type(tr::sorted_or(p, q), atermpp::term_list_union(p.variables(), q.variables()));
+    }
+
     /// \brief Make an implication
     /// \param p A term
     /// \param q A term

@@ -895,12 +895,7 @@ namespace core {
     static inline
     term_type and_(term_type p, term_type q)
     {
-#ifdef MCRL2_SMART_ARGUMENT_SORTING
-      bool sorted = is_sorted(p, q);
-#else
-      bool sorted = p < q;
-#endif
-      return sorted ? core::detail::gsMakePBESAnd(p,q) : core::detail::gsMakePBESAnd(q,p);
+      return core::detail::gsMakePBESAnd(p,q);
     }
 
     /// \brief Make a disjunction
@@ -909,6 +904,31 @@ namespace core {
     /// \return The value <tt>p || q</tt>
     static inline
     term_type or_(term_type p, term_type q)
+    {
+      return core::detail::gsMakePBESOr(p,q);
+    }
+
+    /// \brief Make a sorted conjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p && q</tt>, or <tt>q && p</tt>
+    static inline
+    term_type sorted_and(term_type p, term_type q)
+    {
+#ifdef MCRL2_SMART_ARGUMENT_SORTING
+      bool sorted = is_sorted(p, q);
+#else
+      bool sorted = p < q;
+#endif
+      return sorted ? core::detail::gsMakePBESAnd(p,q) : core::detail::gsMakePBESAnd(q,p);
+    }
+
+    /// \brief Make a sorted disjunction
+    /// \param p A term
+    /// \param q A term
+    /// \return The value <tt>p || q</tt>
+    static inline
+    term_type sorted_or(term_type p, term_type q)
     {
 #ifdef MCRL2_SMART_ARGUMENT_SORTING
       bool sorted = is_sorted(p, q);
@@ -1065,21 +1085,6 @@ namespace core {
     term_type arg(term_type t)
     {
       return pbes_system::accessors::arg(t);
-/*
-      // Forall and exists are not fully supported by the data library
-      assert(!data::is_data_expression(t) || (!data::data_expression(t).is_abstraction()
-		 || (!static_cast<data::abstraction>(t).is_forall() && !static_cast<data::abstraction>(t).is_exists())));
-      assert(is_not(t) || is_exists(t) || is_forall(t));
-
-      if (core::detail::gsIsPBESNot(t))
-      {
-        return atermpp::arg1(t);
-      }
-      else
-      {
-        return atermpp::arg2(t);
-      }
-*/
     }
 
     /// \brief Returns the left argument of a term of type and, or or imp
@@ -1089,10 +1094,6 @@ namespace core {
     term_type left(term_type t)
     {
       return pbes_system::accessors::left(t);
-/*
-      assert(is_and(t) || is_or(t) || is_imp(t));
-      return atermpp::arg1(t);
-*/
     }
 
     /// \brief Returns the right argument of a term of type and, or or imp
@@ -1102,10 +1103,6 @@ namespace core {
     term_type right(term_type t)
     {
       return pbes_system::accessors::right(t);
-/*
-      assert(is_and(t) || is_or(t) || is_imp(t));
-      return atermpp::arg2(t);
-*/
     }
 
     /// \brief Returns the quantifier variables of a quantifier expression

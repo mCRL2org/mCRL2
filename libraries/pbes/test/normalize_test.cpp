@@ -6,11 +6,13 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes_test.cpp
+/// \file normalize_test.cpp
 /// \brief Test for normalization functions.
 
+#include <functional>
 #include <iostream>
 #include <boost/test/minimal.hpp>
+#include "mcrl2/core/detail/test_operation.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/detail/algorithms.h"
@@ -22,8 +24,10 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/detail/normalize_and_or.h"
 
 using namespace mcrl2;
+using namespace mcrl2::pbes_system;
 
 void test_normalize1()
 {
@@ -102,6 +106,7 @@ void test_normalize1()
   z = normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
+  core::garbage_collect();
 }
 
 void test_normalize2()
@@ -112,6 +117,7 @@ void test_normalize2()
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
+  core::garbage_collect();
 }
 
 void test_normalize3()
@@ -125,6 +131,7 @@ void test_normalize3()
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   p.normalize();
+  core::garbage_collect();
 }
 
 const std::string VARIABLE_SPECIFICATION =
@@ -173,6 +180,7 @@ void test_pfnf_expression(std::string s)
     std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
     std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
   }
+  core::garbage_collect();
 }
 
 void test_pfnf_visitor()
@@ -181,6 +189,54 @@ void test_pfnf_visitor()
   test_pfnf_expression("X && Y(3) || X");
   // test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
   // test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
+  core::garbage_collect();
+}
+
+inline
+pbes_expression parse(const std::string& expr)
+{
+  std::string var_decl = 
+    "datavar    \n"
+    "  m: Nat;  \n"
+    "  n: Nat;  \n"
+    "           \n"
+    "predvar    \n"
+    "  X;       \n"
+    "  Y;       \n"
+    "  Z;       \n"
+    ;
+
+  std::string data_spec = "";
+  return pbes_system::parse_pbes_expression(expr, var_decl, data_spec);
+}
+
+inline
+std::string print(const pbes_expression& x)
+{
+	return core::pp(x);
+}
+
+void test_normalize_and_or_equality(std::string expr1, std::string expr2)
+{
+  core::detail::test_operation(
+    expr1,
+    expr2,
+    parse,
+    print,
+	  detail::normalize_and_or,
+	  detail::normalize_and_or,
+    "normalize_and_or",
+    "normalize_and_or",
+	  std::equal_to<pbes_expression>()
+  );
+}
+
+void test_normalize_and_or()
+{
+	test_normalize_and_or_equality("X && Y", "Y && X");
+	test_normalize_and_or_equality("X && X && Y", "X && Y && X");
+	test_normalize_and_or_equality("X && X && Y", "Y && X && X");
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
@@ -188,13 +244,10 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_normalize1();
-  core::garbage_collect();
   test_normalize2();
-  core::garbage_collect();
   test_normalize3();
-  core::garbage_collect();
   test_pfnf_visitor();
-  core::garbage_collect();
+  test_normalize_and_or();
 
   return 0;
 }

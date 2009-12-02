@@ -489,7 +489,7 @@ namespace detail {
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<Term> tr;
 
-    DataEnumerator& m_data_enumerator;
+    const DataEnumerator& m_data_enumerator;
 
     /// If true, quantifier variables of infinite sort are enumerated.
     bool m_enumerate_infinite_sorts;
@@ -498,7 +498,7 @@ namespace detail {
     /// \param r A data rewriter
     /// \param enumerator A data enumerator
     /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-    enumerate_quantifiers_builder(DataRewriter& r, DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
+    enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
       : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
     { }
 
