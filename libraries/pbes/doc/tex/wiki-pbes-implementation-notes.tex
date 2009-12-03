@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Monday, July 13, 2009 11:32:07}
+%TCIDATA{LastRevised=Thursday, December 03, 2009 16:38:36}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -488,20 +488,20 @@ l & \mathsf{if\ }Y=X \\
 {\mathbf{RHS}}(\exists {x{:}D}.\varphi ) & =_{def} & \exists {x{:}D}.{%
 \mathbf{RHS}}(\varphi ) \\ 
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
-{:}E_{i}}((\mathbf{Sat}_{true }(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
-t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+{:}E_{i}}((\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
+t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
-\wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\ 
+\wedge t_{i}(x_{p},y)>T\ )\Rightarrow  \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
-(\varphi )[T:=t_{i}(x_{p},y)][x_{p}:=g_{i}(x_{p},y)]) \\ 
+(\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
-I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true }(a_{i}(f_{i}(x_{p},y))%
+I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))%
 \mbox{\aap
-,}t_{i}(x_{p},y),\alpha )\ \wedge \\ 
+,}t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
-t_{i}(x_{p},y)>T\ \wedge \\ 
+t_{i}(x_{p},y)>T\ \wedge  \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(} {\mathbf{RHS}}%
-(\varphi )[T:=t_{i}(x_{p},y)][x_{p}:=g_{i}(x_{p},y)]) \\ 
+(\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(X(d)) & =_{def} & \tilde{X}(T,d,x_{p},\mathbf{Par}%
 _{X,[]}(\varphi _{0})) \\ 
 {\mathbf{RHS}}(\sigma X(x_{f}{:}D_{f}:=d).~\varphi ) & =_{def}~~~ & \tilde{X}%
@@ -892,10 +892,10 @@ initial state.%
 \begin{array}{l}
 \text{\textsc{Pbes2besLazy(}}\mathcal{E}\text{, }X_{init}(e_{init})\text{, }R%
 \text{, }\rho \text{\textsc{)}} \\ 
-\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}%
-_{i}:=\epsilon  \\ 
+\text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\mathcal{E}_{i}:=\epsilon
+\\ 
 todo:=\{R(X_{init}(e_{init}))\} \\ 
-done:=\emptyset  \\ 
+done:=\emptyset \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X_{k}(e)\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X_{k}(e)\} \\ 
@@ -917,7 +917,7 @@ predicate formulae using%
 )\oplus \rho (\psi )%
 \end{array}%
 \end{equation*}%
-\pagebreak 
+\pagebreak
 
 \subsection{Finite algorithm}
 
@@ -947,11 +947,11 @@ R(\lnot \varphi ) &=&\lnot R(\varphi ) \\
 R(\varphi \oplus \psi ) &=&R(\varphi )\oplus (\psi ) \\
 R(X_{i}(d,e)) &=&\left\{ 
 \begin{array}{cc}
-\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset  \\ 
+\rho (X_{i},r(d))(r(e)) & \text{if }FV(d)=\emptyset \\ 
 \dbigvee\limits_{d_{i}\in D_{i}}r(d=d_{i})\wedge \rho (X_{i},d_{i})(r(e)) & 
-\text{if }FV(d)\neq \emptyset 
+\text{if }FV(d)\neq \emptyset%
 \end{array}%
-\right.  \\
+\right. \\
 R(\forall _{d:D}.\varphi ) &=&\forall _{d:D}.R(\varphi ) \\
 R(\exists _{d:D}.\varphi ) &=&\exists _{d:D}.R(\varphi )
 \end{eqnarray*}%
@@ -959,7 +959,7 @@ where $\oplus \in \{\vee ,\wedge ,\Rightarrow \}$, $b$ a data expression and
 $\varphi $ and $\psi $ pbes expressions and $FV(d)$ is the set of free
 variables appearing in $d$.
 
-\newpage 
+\newpage
 
 \section{Constant Parameter Detection and Elimination}
 

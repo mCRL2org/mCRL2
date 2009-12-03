@@ -369,8 +369,10 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             pbes_expression p3 = d::greater(ti, T);
-            rhs = rhs.substitute(make_substitution(T, ti));
+
+            // N.B. The order of these two substitutions is important!
             rhs = rhs.substitute(data::assignment_list_substitution(gi));
+            rhs = rhs.substitute(make_substitution(T, ti));
 
             pbes_expression p = pbes_expr::forall(y, imp(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
@@ -402,8 +404,10 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             pbes_expression p3 = d::greater(ti, T);
-            rhs = rhs.substitute(make_substitution(T, ti));
+            
+            // N.B. The order of these two substitutions is important!
             rhs = rhs.substitute(data::assignment_list_substitution(gi));
+            rhs = rhs.substitute(make_substitution(T, ti));
 
             pbes_expression p = pbes_expr::exists(y, and_(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
@@ -757,7 +761,7 @@ std::cerr << "\n<RHS>" << pp(f) << std::flush;
 
       pbes_expression result;
 
-    if (!s::is_not(f))
+      if (!s::is_not(f))
       {
         if (s::is_data(f)) {
           result = pbes_expression(f);
