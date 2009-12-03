@@ -243,7 +243,8 @@ void test_abp()
 
   std::string NODEADLOCK = "[true*]<true>true";
 
-  pbes<> pbes = lps2pbes(ABP, NODEADLOCK, true);
+  bool timed = false;
+  pbes<> pbes = lps2pbes(ABP, NODEADLOCK, timed);
                                                                                 
   // Generate min-priority parity game
   mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true);
