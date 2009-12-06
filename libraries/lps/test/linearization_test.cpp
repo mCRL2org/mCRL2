@@ -653,6 +653,17 @@ const std::string various_case_28=
       "proc P(a:A)=b(a).P([]);"
       "init P([lambda n:Nat.n]);";
 
+const std::string various_case_29=
+      "sort Data = struct x;"
+      "Coloured = struct flow(data : Data) | noflowG | noflowR;"
+      "act A, B : Coloured;"
+      "proc Sync = ( (A(noflowG) | B(noflowR))  + "
+      "     (A(noflowR) | B(noflowR)) + "
+      "     (sum d : Data.(A(flow(d)) | B(flow(d)))) "
+      "  ).Sync;"
+      "init Sync;";
+
+
 /* Original name: LR2plus.mcrl2      
  This example can only be parsed unambiguously by an LR(k) parser generator
  for the current grammar, where k > 1. Namely, process expression 'a + tau'
@@ -772,6 +783,9 @@ void test_various_aux(t_lin_options &options)
   core::garbage_collect();
   std::cerr << "Testcase 28\n";
   spec = linearise(various_case_28, options);
+  core::garbage_collect();
+  std::cerr << "Testcase 29\n";
+  spec = linearise(various_case_29, options);
   core::garbage_collect();
   std::cerr << "Testcase LR2plus\n";
   spec = linearise(various_case_LR2plus, options);

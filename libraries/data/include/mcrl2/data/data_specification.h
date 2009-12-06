@@ -219,10 +219,6 @@ namespace mcrl2 {
         }
 
     protected: 
-        // The add_system_defined should be private or protected. Currently they are
-        // used by functions adding standard data types. The standard data types should
-        // just provide the constructors, mappings and equations. The specification should
-        // put these at the right spot. The type checker can the also use these.
 
         /// \brief Adds a sort to this specification, and marks it as system
         ///        defined
@@ -405,7 +401,7 @@ namespace mcrl2 {
         add_equations(equations);
       }
 
-      /// \brief Gets the sort declarations
+      /// \brief Gets all sort declarations including those that are system defined.
       ///
       /// Time complexity of this operation is constant.
       /// \return The sort declarations of this specification.
@@ -415,7 +411,7 @@ namespace mcrl2 {
         return sorts_const_range(m_normalised_sorts);
       }
 
-      /// \brief Gets all constructors
+      /// \brief Gets all constructors including those that are system defined.
       ///
       /// \return All constructors in this specification, including those for
       /// structured sorts.
@@ -425,7 +421,7 @@ namespace mcrl2 {
         return constructors_const_range(m_normalised_constructors);
       }
 
-      /// \brief Gets all constructors of a sort.
+      /// \brief Gets all constructors of a sort including those that are system defined.
       ///
       /// Time complexity of this operation is constant.
       /// \param[in] s A sort expression.
@@ -436,7 +432,7 @@ namespace mcrl2 {
         return constructors_const_range(m_normalised_constructors.equal_range(normalise_sorts(s)));
       }
 
-      /// \brief Gets all mappings in this specification
+      /// \brief Gets all mappings in this specification including those that are system defined
       ///
       /// Time complexity of this operation is constant.
       /// \return All mappings in this specification, including recognisers and
@@ -447,7 +443,7 @@ namespace mcrl2 {
         return mappings_const_range(m_normalised_mappings);
       }
 
-      /// \brief Gets all mappings of a sort
+      /// \brief Gets all mappings of a sort including those that are system defined
       ///
       /// \param[in] s A sort expression.
       /// \return All mappings in this specification, for which s occurs as a
@@ -458,7 +454,7 @@ namespace mcrl2 {
          return mappings_const_range(m_normalised_mappings.equal_range(normalise_sorts(s)));
       }
 
-      /// \brief Gets all equations in this specification
+      /// \brief Gets all equations in this specification including those that are system defined
       ///
       /// Time complexity of this operation is constant.
       /// \return All equations in this specification, including those for
@@ -468,6 +464,17 @@ namespace mcrl2 {
       { normalise_specification_if_required();
         return equations_const_range(m_normalised_equations);
       } 
+
+      /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
+      /// \details When in a specification sort aliases are used, like sort A=B or
+      ///    sort Tree=struct leaf | node(Tree,Tree) then there are different representations
+      ///    for each sort. The normalisation mapping maps each sort to a unique representant.
+      ///    Moreover, it is this unique sort that it provides in internal mappings.
+      /// 
+      const atermpp::map< sort_expression, sort_expression > &sort_alias_map() const
+      { normalise_specification_if_required();
+        return m_normalised_aliases;
+      }
 
       /// \brief Adds a sort to this specification
       ///

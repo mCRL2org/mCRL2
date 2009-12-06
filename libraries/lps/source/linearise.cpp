@@ -4482,10 +4482,12 @@ class specification_basic_type:public boost::noncopyable
               }
             }
           }
+          a=multiActionList[0].begin();
+          for(long i=1 ; i<multiactioncount ; ++i,++a) {}
           resultmultiactionlist=
                 push_front(
                   resultmultiactionlist,
-                  action(multiActionList[0].front().label(),resultf));
+                  action(a->label(),resultf));
         }
       }
 
