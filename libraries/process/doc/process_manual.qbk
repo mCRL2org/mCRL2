@@ -10,9 +10,26 @@
 [def __mcrl2__                 [@http://mcrl2.org mCRL2]]
 [def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
 
-[section: Process Library]
+[section: Introduction]
 
 The Process library contains classes and algorithms for general processes.
 The code in the Process library is contained in the namespace =process=.
 
 [endsect]
+
+[section: Process Library classes]
+
+[endsect]
+
+[section: Process Library algorithms]
+
+[endsect]
+
+[section: Linear process expressions]
+
+[endsect]
+
+[section: Linearization]
+
+[endsect]
+

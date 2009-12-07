@@ -1,24 +1,3 @@
-[library Concept Library
-    [quickbook 1.4]
-    [authors [Wulp, Jeroen van der], [Wesselink, Wieger]]
-    [copyright 2005-2009 Technische Universiteit Eindhoven]
-    [category string-text]
-    [purpose
-        Concepts for the mCRL2 Library
-    ]
-]
-
-[/  Links   ]
-[def __boost__                 [@http://www.boost.org www.boost.org]]
-[def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
-[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
-[def __mcrl__                  mCRL]
-[def __atermlib__              [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
-[def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
-[def __mcrl2_language_reference__      [@http://www.mcrl2.org/wiki/index.php/Language_reference/Data_types mCRL2 Language Reference]]
-[def __lps_library__           [@http://www.mcrl2.org/devel/lps/ LPS library]]
-[def __sigma  [' '''&sigma;''']]
-
 [section: Concepts]
 
 In the tables below, X is an substitution type, a and b are constant objects of

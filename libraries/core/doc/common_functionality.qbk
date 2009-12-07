@@ -1,0 +1,39 @@
+[chapter Common Functionality
+    [quickbook 1.5]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+       - 
+    ]
+]
+
+The mCRL2 Library contains some algorithms that are applicable to several libraries.
+The most prominent example is a traversal framework and a family of find functions
+that has been implemented on top of that. This chapter discusses some of these
+algorithms.
+
+[include algorithms_manual.qbk]
+
+[section: Generic programming techniques]
+
+The file =mcrl2/data/detail/container_utility.h= contains two utility functions
+`enable_if_container` and `disable_if_container` for determining if a type is a container type.
+It can be used to create an interface that does different things for containers and for
+other types:
+
+    template <typename Container>
+    void operator()(const Container& t, typename data::detail::enable_if_container<Container>::type* = 0)
+    {
+      traverse_container(t);
+    }
+
+    template <typename Term>
+    void operator()(const Term& t, typename data::detail::disable_if_container<Term>::type* = 0)
+    {
+      traverse(t);
+    }
+
+[endsect]
+
+[include concept_manual.qbk]

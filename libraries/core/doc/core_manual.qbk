@@ -1,0 +1,22 @@
+[library Core Library
+    [quickbook 1.5]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+       - 
+    ]
+]
+
+[section: Introduction]
+Introduction
+[endsect]
+
+[section: Classes]
+Classes
+[endsect]
+
+[section: Algorithms]
+Algorithms
+[endsect]
+

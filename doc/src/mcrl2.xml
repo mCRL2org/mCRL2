@@ -3,27 +3,14 @@
   "http://www.boost.org/tools/boostbook/dtd/boostbook.dtd">
 <boostbook xmlns:xi="http://www.w3.org/2001/XInclude"
            last-revision="$Date: 2008-08-11 09:10:51 +0200 (ma, 11 aug 2008) $">
-  <title>The mCRL2 Toolset BoostBook Documentation Subset</title>
+  <title>The mCRL2 Libraries Tutorial</title>
 
-  <preface id="about">
-    <title>What's Included in This Document</title>
-
-    <para>This document represents only a subset of the full mCRL2
-    documentation: that part which is generated from BoostBook or
-    QuickBook sources. Please
-    see <ulink
-    url="http://mcrl2.org/mcrl2/wiki/index.php/Library_documentation">http://mcrl2.org/mcrl2/wiki/index.php/Library_documentation</ulink>
-    for complete documentation.
-    </para>
-
-  </preface>
-
-  <part id="libraries">
-    <title>The mCRL2 C++ Libraries (BoostBook Subset)</title>
-
+  <part id="chapters">
+    <title>Contents</title>
+    <xi:include href="library_structure.xml"/>
+    <xi:include href="common_functionality.xml"/>
     <xi:include href="atermpp_manual.xml"/>
-    <xi:include href="algorithms_manual.xml"/>
-    <xi:include href="concept_manual.xml"/>
+    <xi:include href="core_manual.xml"/>
     <xi:include href="data_manual.xml"/>
     <xi:include href="process_manual.xml"/>
     <xi:include href="lps_manual.xml"/>

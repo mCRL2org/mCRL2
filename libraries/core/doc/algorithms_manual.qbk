@@ -1,32 +1,3 @@
-[library Algorithms Library
-    [quickbook 1.4]
-    [authors [Wulp, Jeroen van der], [Wesselink, Wieger]]
-    [copyright 2005-2009 Technische Universiteit Eindhoven]
-    [category string-text]
-    [purpose
-        Algorithms for the mCRL2 Library
-    ]
-]
-
-[/  Links   ]
-[def __boost__                 [@http://www.boost.org www.boost.org]]
-[def __mcrllib__               [@http://www.cwi.nl/~mcrl mCRL]]
-[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
-[def __mcrl__                  mCRL]
-[def __atermlib__              [@http://www.cwi.nl/htbin/sen1/twiki/bin/view/Meta-Environment/ATerms ATerm Library]]
-[def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
-[def __mcrl2_language_reference__      [@http://www.mcrl2.org/wiki/index.php/Language_reference/Data_types mCRL2 Language Reference]]
-[def __lps_library__           [@http://www.mcrl2.org/devel/lps/ LPS library]]
-
-[section: Introduction]
-
-The mCRL2 Library contains some algorithms that are applicable to several libraries.
-The most prominent example is a traversal framework and a family of find functions
-that has been implemented on top of that. This chapter discusses some of these
-algorithms.
-
-[endsect]
-
 [section: Traversal functions]
 
 The mCRL2 Library contains a range of generic traversal functions. There are
@@ -46,11 +17,29 @@ the most common occurring traversals. When writing an algorithm that needs to
 traverse an object, one can usually implement it using one of the predefined
 traversal classes.
 
+When deriving from a traverser class, the `enter` and `leave` functions must be made visible using
+
+    using super::enter;
+    using super::leave;
+
+[note For Visual C++ the following workaround must be applied as well, otherwise it will
+complain about ambiguities of `operator()`.
+]
+
+    #if BOOST_MSVC
+          // Workaround for malfunctioning MSVC 2008 overload resolution
+          template < typename Container >
+          void operator()(Container const& a)
+          {
+            super::operator()(a);
+          }
+    #endif
+
 [note It is possible to change the way an object is traversed by overriding member
 functions. How that works exactly needs be figured out.
 ]
 
-[section: Implementation]
+[section: Implementation details]
                                          
 The traverser classes in the Data Library have the following structure:
 
@@ -136,7 +125,7 @@ ranging from `data_expression` to `action_summand`.
     [ [`find_sort`        ] [Finds a sort       ] ]
 ]
 
-[section: Implementation]
+[section: Implementation details]
 
 The implementation of find functions is not finished yet. It has to be figured out
 how to extend the functionality of the Data Library to other libraries.
@@ -162,4 +151,6 @@ The file =mcrl2/lps/find.h= currently contains this:
 [endsect]
 
 [endsect]
+
+
 

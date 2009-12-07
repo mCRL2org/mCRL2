@@ -1,0 +1,36 @@
+[chapter Library structure
+    [quickbook 1.5]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+       - 
+    ]
+]
+
+[section: Introduction]
+The mCRL2 codebase is organized as a set of libraries, located in the directory
+<MCRL2ROOT>/libraries. Each library has the following directory structure:
+...
+
+[endsect]
+
+[section: Libraries Overview]
+
+[table Libraries
+    [ [Name]                     [Contents]          ]
+    [ [ ATerm++ Library ] [ C++ interface for the ATerm Library ] ]
+    [ [ Core Library ] [ Common functionality ] ]
+    [ [ Data Library ] [ The data language and constructs ] ]
+    [ [ LPS Library ] [ Linear Processes ] ]
+    [ [ Process Library ] [ Processes ] ]
+    [ [ PBES Library ] [ Parameterized Boolean Equation Systems ] ]
+    [ [ Utilities Library ] [ Utilities ] ]
+]
+
+[note It is not very clear what the difference is between the  
+Core Library and the Utilities Library.
+]
+
+[endsect]
+
