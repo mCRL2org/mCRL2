@@ -3685,11 +3685,14 @@ class specification_basic_type:public boost::noncopyable
       /* in this case we have two possibilities: the process
          can or cannot terminate after the action. So, we must
          generate two conditions. For regular processes, we assume
-         that processes do not terminate */
-      /* first we generate the non terminating summands */
+         that processes do not terminate.  */
+      /* first we generate the non terminating summands.  */
+      /* With the introduction of terminate actions to indicate termination,
+         it has become impossible that a process will ever terminate. Therefore,
+         no distinction needs to be made between terminating and non terminating
+         summands. JFG 8/12/2009 */
 
-
-      data_expression emptypops;
+      /* data_expression emptypops;
       data_expression condition2;
       if (canterminate)
       { emptypops=application(stack.opns->empty,
@@ -3698,22 +3701,28 @@ class specification_basic_type:public boost::noncopyable
         condition2=lazy::and_(notemptypops,condition1);
       }
       else condition2=condition1;
+      */
 
       multiAction=adapt_multiaction_to_stack(multiAction,stack,sumvars);
       procargs=push_front(data_expression_list(),data_expression(application(stack.opns->pop,stack.stackvar)));
 
-      sumlist=insert_summand(sumlist,parameters,
+      sumlist=insert_summand(
+                        sumlist,
+                        parameters,
                         sumvars,
-                        RewriteTerm(condition2),
+                        // RewriteTerm(condition2),
+                        RewriteTerm(condition1),
                         multiAction,
                         atTime,
                         procargs,
                         has_time,
                         is_delta_summand);
 
-      if (canterminate)
+      /* if (canterminate)
       { condition2=lazy::and_(emptypops,condition1);
-        sumlist=insert_summand(sumlist,parameters,
+        sumlist=insert_summand(
+                      sumlist,
+                      parameters,
                       sumvars,
                       RewriteTerm(condition2),
                       multiAction,
@@ -3721,7 +3730,7 @@ class specification_basic_type:public boost::noncopyable
                       assignment_list(),
                       has_time,
                       is_delta_summand);
-      }
+      } */
 
       return;
     }
