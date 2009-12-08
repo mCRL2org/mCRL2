@@ -36,6 +36,7 @@ test-suite pbes
       [ run rewriter_test.cpp ]
       [ run rewriter2_test.cpp ]
       [ run sort_traverser_test.cpp ]
+      [ run substitute_test.cpp ]
       [ run txt2pbes_test.cpp ]
       [ compile-headers ../include ]
     ;
