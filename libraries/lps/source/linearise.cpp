@@ -410,7 +410,7 @@ class specification_basic_type:public boost::noncopyable
       { return push_front(action_label_list(),action(multiAction).label());
       }
       assert(is_sync(multiAction));
-      return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).left());
+      return getnames(process::sync(multiAction).left())+getnames(process::sync(multiAction).right());
     }
 
     // Returns a list of variables with the same sort as the expressions in the list.
@@ -1801,25 +1801,24 @@ class specification_basic_type:public boost::noncopyable
          operators alt, seq, sum_state, cond, name, delta, tau, sync, AtTime in it */
 
       if (is_choice(body))
-       {
-         if (alt_state>=s)
-          {
-            const process_expression body1=bodytovarheadGNF(choice(body).left(),alt_state,freevars,first);
-            const process_expression body2=bodytovarheadGNF(choice(body).right(),alt_state,freevars,first);
-            if (isDeltaAtZero(body1))
-            { return body2;
-            }
-            if (isDeltaAtZero(body2))
-            { return body1;
-            }
-            return choice(body1,body2);
-          }
-         const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first);
-         const process_identifier newproc=newprocess(freevars,body1,pCRL,
-                                        canterminatebody(body1),
-                                        containstimebody(body1));
-         return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
-       }
+      { if (alt_state>=s)
+         {
+           const process_expression body1=bodytovarheadGNF(choice(body).left(),alt_state,freevars,first);
+           const process_expression body2=bodytovarheadGNF(choice(body).right(),alt_state,freevars,first);
+           if (isDeltaAtZero(body1))
+           { return body2;
+           }
+           if (isDeltaAtZero(body2))
+           { return body1;
+           }
+           return choice(body1,body2);
+         }
+        const process_expression body1=bodytovarheadGNF(body,alt_state,freevars,first);
+        const process_identifier newproc=newprocess(freevars,body1,pCRL,
+                                       canterminatebody(body1),
+                                       containstimebody(body1));
+        return process_instance(newproc,objectdata[objectIndex(newproc)].parameters);
+      }
 
       if (is_sum(body))
       {
@@ -4714,7 +4713,6 @@ class specification_basic_type:public boost::noncopyable
 
       atermpp::vector < process_identifier > pCRLprocs;
       pCRLprocs.push_back(procId);
-
       makepCRLprocs(objectdata[n].processbody,pCRLprocs);
       /* now pCRLprocs contains a list of all process id's in this
          pCRL process */
@@ -5986,7 +5984,6 @@ class specification_basic_type:public boost::noncopyable
 
         actiontime=substitute_time(unique_pars,pars,actiontime);
         actiontime=substitute_time(unique_sumvars,sumvars,actiontime);
-
         multiaction=substitute_multiaction(unique_pars,pars,multiaction),
         multiaction=substitute_multiaction(unique_sumvars,sumvars,multiaction),
 
@@ -7050,7 +7047,6 @@ class specification_basic_type:public boost::noncopyable
          parameters are needed to check occurrences of vars
          in the assignment list */
 
-      // std::cerr << "INSIEVE1: " << pp(vars) << "\n";    
       atermpp::set < variable > vars_set(vars.begin(),vars.end());
       atermpp::set < variable > vars_result_set;
 
@@ -7073,7 +7069,6 @@ class specification_basic_type:public boost::noncopyable
       { result=push_front(result,*i);
       }
 
-      // std::cerr << "OUTSIEVE1: " << pp(result) << "\n";    
       return result;
     }
 
@@ -7082,8 +7077,7 @@ class specification_basic_type:public boost::noncopyable
                             const atermpp::set <variable> &vars,
                             const assignment_list assignments,
                             const variable_list parameters)
-    { // std::cerr << "INSIEVE: " << pp(vars) << "\n";
-      const atermpp::set < variable > vars_set(vars.begin(),vars.end());
+    { const atermpp::set < variable > vars_set(vars.begin(),vars.end());
       atermpp::set < variable > vars_result_set;
 
 
@@ -7095,7 +7089,6 @@ class specification_basic_type:public boost::noncopyable
       { result=push_front(result,*i);
       }
 
-      // std::cerr << "OUTSIEVE: " << pp(result) << "\n";
       return result;
     }
 
