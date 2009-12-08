@@ -148,8 +148,8 @@ namespace mcrl2 {
 
           /// \param[in] v iterator range of the enumeration variables
           template < typename Container >
-          bool initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) {
-            m_shared_context->m_enumerator.findSolutions(convert(v), m_evaluator.convert_to(m_condition), false, &m_generator);
+          bool initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type* = 0) 
+          { m_shared_context->m_enumerator.findSolutions(convert(v), m_evaluator.convert_to(m_condition), false, &m_generator); // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009. Tools like lpssuminst require that an enumeration is made for all elements satisfying the condition, except for those where the condition is false. 
 
             return increment();
           }
@@ -170,9 +170,9 @@ namespace mcrl2 {
             ATermList assignment_list;
 
             while (m_generator.next(&assignment_list)) {
-              if (m_generator.errorOccurred()) {
-                throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
-              }
+              /* if (m_generator.errorOccurred()) {
+              //  throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
+              } */
 
               for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
@@ -205,12 +205,13 @@ namespace mcrl2 {
               boost::shared_ptr< shared_context_type > const& context,
                                Container const& v, expression_type const& c,
                                Evaluator const& e, substitution_type const& s = substitution_type(),
-                    typename detail::enable_if_container< Container, variable >::type* = 0) {
+                    typename detail::enable_if_container< Container, variable >::type* = 0) 
+          {
 
             target.reset(new classic_enumerator_impl(context, c, s, e));
 
-            if (!target->initialise(v)) {
-              target.reset();
+            if (!target->initialise(v)) 
+            { target.reset();
             }
           }
 

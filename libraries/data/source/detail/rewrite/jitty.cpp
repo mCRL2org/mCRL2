@@ -227,14 +227,14 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
 {
   ATermAppl a;
 
-//gsprintf("in: %T\n\n",Term);
+// ATfprintf(stderr,"in: %t\n\n",Term);
   if ( gsIsDataVarId(Term) )
   {
-//gsprintf("out: %T\n\n",Term);
+// ATfprintf(stderr,"out: %t\n\n",Term);
     return Term;
   }
 
-        int arity = ATgetArity(ATgetAFun(Term));
+  int arity = ATgetArity(ATgetAFun(Term));
   ATerm t = ATgetArgument(Term,0);
   if ( ATisInt(t) )
   {
@@ -263,6 +263,8 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
                         sort = ATAgetArgument(sort, 1);
                 }
         }
+
+// ATfprintf(stderr,"to_out: %t\n\n",a);
 
         return a;
 }
@@ -737,11 +739,11 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl *vars, ATerm *vals, unsigned
 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
-//gsfprintf(stderr,"rewrite(%T)\n\n",Term);
-//gsfprintf(stderr,"rewrite(  %P  )\n\n",fromInner(Term));
+// ATfprintf(stderr,"rewrite(%t)\n",fromInner(Term));
+// ATfprintf(stderr,"rewrite(  %P  )\n\n",fromInner(Term));
   if ( gsIsDataVarId(Term) )
   {
-//gsfprintf(stderr,"return %T\n\n",Term);
+//ATfprintf(stderr,"return %t\n",fromInner(Term));
 //gsfprintf(stderr,"return1  %P\n\n",fromInner((ATermAppl) lookupSubstitution(Term)));
     return (ATermAppl) lookupSubstitution(Term);
   } else {
@@ -908,7 +910,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
             ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs.data());
 
             ATermAppl aa = rewrite_aux(a);
-//gsfprintf(stderr,"return %T\n\n",aa);
+// ATfprintf(stderr,"return %t\n",fromInner(aa));
 //gsfprintf(stderr,"return2  %P\n\n",fromInner(aa));
             return aa;
           }
@@ -992,7 +994,11 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     }
     need_rebuild = false;
   }
-  return (ATerm) rewrite_aux((ATermAppl) Term);
+ // ATfprintf(stderr,"rewrite(%t)\n",fromInner((ATermAppl)Term));
+  ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
+ // ATfprintf(stderr,"return(%t)\n",fromInner((ATermAppl)aaa));
+  return aaa; 
+  // return (ATerm) rewrite_aux((ATermAppl) Term);
 }
 
 RewriteStrategy RewriterJitty::getStrategy()

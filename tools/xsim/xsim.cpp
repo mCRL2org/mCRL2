@@ -83,8 +83,16 @@ public:
       frame->simulator->rewr_strat  = rewrite_strategy();
       frame->Show(true);
     
-      if (!this->m_input_filename.empty()) {
-        frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
+      if (!this->m_input_filename.empty()) 
+      { try
+        { frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
+        }
+        catch(mcrl2::runtime_error e)
+        { wxString mystring(e.what(), wxConvUTF8);
+          wxMessageDialog msg(NULL, mystring ,wxT("Error"),wxOK|wxICON_ERROR); 
+          msg.ShowModal();
+          exit(EXIT_FAILURE);
+        }
       }
     
       instance = this;

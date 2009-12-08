@@ -218,9 +218,9 @@ namespace mcrl2 {
         ATermList assignment_list;
 
         while (m_generator.next(&assignment_list)) {
-          if (m_generator.errorOccurred()) {
+          /*if (m_generator.errorOccurred()) {
             throw mcrl2::runtime_error(std::string("Failed enumeration of condition ") + pp(m_condition) + "; cause unknown");
-          }
+          }*/
 
           for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
                              i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) {
@@ -239,9 +239,10 @@ namespace mcrl2 {
       template < >
       template < typename Container >
       bool classic_enumerator_impl< mcrl2::data::mutable_map_substitution< std::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type*) {
+                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename detail::enable_if_container< Container, variable >::type*) 
+      { // assert(0);
 
-        m_shared_context->m_enumerator.findSolutions(data::convert< atermpp::term_list< variable_type > >(v), m_condition, false, &m_generator);
+        m_shared_context->m_enumerator.findSolutions(data::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
 
         return increment();
       }
@@ -330,7 +331,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
     bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
 
-    bool errorOccurred();
+    // bool errorOccurred();
 
     void reset(ATerm State, size_t SummandIndex = 0);
 
@@ -340,7 +341,7 @@ class NextStateGeneratorStandard : public NextStateGenerator
     ns_info info;
     unsigned int id;
 
-    bool error;
+    // bool error;
     bool single_summand;
 
     int sum_idx;

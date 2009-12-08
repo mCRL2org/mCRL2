@@ -111,26 +111,27 @@ class sim_tool : public rewriter_tool< input_tool > {
 
       bool notdone = true;
       while ( notdone )
-      {
-                    ATermList next_states = simulator.GetNextStates();
-        int i = 0;
-        for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l) )
-        {
-          ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
-          ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-          gsMessage("%i: %P  ->  [ ",i,Transition);
-          PrintState(NewState,simulator.GetNextState());
-          gsMessage(" ]\n\n");
-          i++;
-        }
-        if ( simulator.ErrorOccurred() )
-        {
-          gsMessage("an error occurred while calculating the transitions from this state; this likely means that not all possible transitions are shown\n\n");
-        }
-
-        if ( ATisEmpty(next_states) )
-        {
-          printf("deadlock\n\n");
+      { ATermList next_states=ATempty;
+        try
+        { next_states = simulator.GetNextStates();
+          int i = 0;
+          for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l) )
+          {
+            ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
+            ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
+            gsMessage("%i: %P  ->  [ ",i,Transition);
+            PrintState(NewState,simulator.GetNextState());
+            gsMessage(" ]\n\n");
+            i++;
+          }
+          if ( ATisEmpty(next_states) )
+          { printf("deadlock\n\n");
+          }
+        } 
+        catch (mcrl2::runtime_error e)
+        // if ( simulator.ErrorOccurred() )
+        { std::cerr << "an error occurred while calculating the transitions from this state;\n" << e.what() << "\n";
+        // { gsMessage(std::string("an error occurred while calculating the transitions from this state;\n") + e.what() + "\n");
         }
 
         while ( true )
@@ -164,10 +165,11 @@ class sim_tool : public rewriter_tool< input_tool > {
              "   s/save FILENAME  save trace to file FILENAME\n"
              "   h/help           print this help gsMessage\n"
              "   q/quit           quit\n";
-          } else if ( isdigit(s[0]) ) {
-            unsigned int idx;
+          } 
+          else if ( isdigit(s[0]) ) 
+          { unsigned int idx;
             sscanf(s.c_str(),"%u",&idx);
-            if ( idx < (unsigned int) ATgetLength(next_states) )
+            if (idx < (unsigned int)ATgetLength(next_states))
             {
               gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));
               simulator.ChooseTransition(idx);

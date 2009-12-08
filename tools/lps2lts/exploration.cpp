@@ -299,6 +299,7 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
     ATerm t;
     bool priority;
     nsgen = nstate->getNextStates(ns,nsgen);
+    try {
     while ( nsgen->next(&trans,&t,&priority) )
     {
       if ( !priority && ATisEqual(s,get_repr(t)) )
@@ -306,12 +307,16 @@ static bool savetrace(string const &info, ATerm state, NextState *nstate, ATerm 
         break;
       }
     }
-    if ( nsgen->errorOccurred() )
+    } catch (mcrl2::runtime_error e)
+    { delete nsgen;
+      throw e;
+    }
+    /* if ( nsgen->errorOccurred() )
     {
       gsErrorMsg("error occurred while reconstructing trace\n");
       delete nsgen;
       return false;
-    }
+    } */
     tr = ATinsert(tr, (ATerm) ATmakeList2((ATerm) trans,s));
     s = ns;
   }
@@ -914,12 +919,12 @@ bool generate_lts()
           }
         }
 
-        if ( nsgen->errorOccurred() )
+        /* if ( nsgen->errorOccurred() )
         {
           lg_error = true;
           save_error_trace(state);
           break;
-        }
+        } */
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -1071,12 +1076,12 @@ bool generate_lts()
         tmp_trans=ATreverse(new_tmp_trans);
         tmp_states=ATreverse(new_tmp_states);
 
-        if ( nsgen->errorOccurred() )
+        /* if ( nsgen->errorOccurred() )
         {
           lg_error = true;
           save_error_trace(state);
           break;
-        }
+        } */
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -1243,12 +1248,12 @@ bool generate_lts()
           tmp_states=ATempty;
         }
 
-        if ( nsgen->errorOccurred() )
+        /* if ( nsgen->errorOccurred() )
         {
           lg_error = true;
           save_error_trace(state);
           break;
-        }
+        } */
 
         int len = ATgetLength(tmp_trans);
         if ( len > 0 )
@@ -1338,12 +1343,12 @@ bool generate_lts()
           }
         }
 
-        if ( nsgen->errorOccurred() )
+        /* if ( nsgen->errorOccurred() )
         {
           lg_error = true;
           save_error_trace(state);
           break;
-        }
+        } */
         if ( deadlockstate )
         {
           check_deadlocktrace(state);
@@ -1483,12 +1488,12 @@ bool generate_lts()
         }
         // inv
 
-        if ( nsgen->errorOccurred() )
+        /* if ( nsgen->errorOccurred() )
         {
           lg_error = true;
           save_error_trace(state);
           break;
-        }
+        } */
         if ( state_is_deadlock )
         {
           check_deadlocktrace(state);

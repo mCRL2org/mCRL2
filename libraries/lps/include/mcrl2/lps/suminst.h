@@ -93,12 +93,11 @@ namespace mcrl2 {
             // because we only need to calculate it once.
             variable_list new_summation_variables = term_list_difference(s.summation_variables(), convert< variable_list >(variables));
 
-            try {
-              core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
+            try 
+            { core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
               for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
-              {
-                core::gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
+              { core::gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
 
                 SummandType t(s);
                 t.summation_variables() = new_summation_variables;
@@ -113,12 +112,15 @@ namespace mcrl2 {
               }
               core::gsVerboseMsg("Replaced with %d summands\n", nr_summands);
             }
-            catch (mcrl2::runtime_error const&)
+            catch (mcrl2::runtime_error const& e)
             {
               // If an error occurs in enumerating, remove all summands that
               // have been added to result thus far, and re-add the original.
               // This prevents problems e.g. in case of a sort without constructors.
-              core::gsDebugMsg("An error occurred in enumeration, removing already added summands, and keeping the original\n");
+              if (core::gsDebug)
+              { std::cerr << "An error occurred in enumeration, removing already added summands, and keeping the original\n";
+                std::cerr << e.what() << "\n";
+              }
 
               result.resize(result.size() - nr_summands);
               result.push_back(s);

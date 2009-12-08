@@ -63,8 +63,9 @@ void test_case_2()
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
+  std::cerr << "SUMMANDS " << summands1 << "\n";
   for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
-  {
+  { std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
   }
 

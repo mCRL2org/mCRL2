@@ -378,20 +378,20 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
 
                 if ( gsIsSortArrow(sort) )
                 {
-                        gsErrorMsg("cannot enumerate all elements of functions sorts\n");
-                        error = true;
-                        fs_reset();
-                } else {
+                  fs_reset();
+                  throw mcrl2::runtime_error("cannot enumerate all elements of functions sort " + pp(sort));
+                        // error = true;
+                } else 
+                {
                         ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
                         if (l == NULL)
                         {
                           l = ATempty;
       }
                         if ( ATisEmpty(l) )
-                        {
-                                gsErrorMsg("cannot enumerate elements of sort %P; it does not have constructor functions\n",sort);
-                                error = true;
-                                fs_reset();
+                        { fs_reset();
+                          throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + "as it does not have constructor functions");
+                                // error = true;
                         }
 
                         for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -449,13 +449,14 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                                                 if ( !ATisEqual(fs_top().expr,info.rewr_false) )
                                                 {
                                                         if ( check_true && !ATisEqual(fs_top().expr,info.rewr_true) )
+                                                        { std::string error_message("term does not evaluate to true or false: " + pp(info.rewr_obj->fromRewriteFormat(fs_top().expr)));
+                                                          fs_reset();
+                                                          info.rewr_obj->clearSubstitution(var);
+                                                          throw mcrl2::runtime_error(error_message);
+                                                         //       error = true;
+                                                         //       break;
+                                                        } else 
                                                         {
-                                                                gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_top().expr));
-                                                                error = true;
-                                                                fs_reset();
-                                                                info.rewr_obj->clearSubstitution(var);
-                                                                break;
-                                                        } else {
                                                                 ss_push(build_solution(enum_vars,fs_top().vals));
                                                         }
                                                 }
@@ -477,10 +478,11 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
         }
 }
 
-bool EnumeratorSolutionsStandard::errorOccurred()
+/* bool EnumeratorSolutionsStandard::errorOccurred()
 {
-        return error;
-}
+   ATfprintf(stderr,"Check for error is %d\n",error);
+   return error;
+} */
 
 void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_only)
 {
@@ -491,7 +493,7 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
         fs_reset();
         ss_reset();
 
-        error = false;
+        // error = false;
 
         used_vars = 0;
 
@@ -505,15 +507,14 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
         {
                 fs_pop();
         } else if ( ATisEmpty(fs_bottom().vars) )
-        {
-                if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
-                {
-                        gsErrorMsg("term does not evaluate to true or false: %P\n",info.rewr_obj->fromRewriteFormat(fs_bottom().expr));
-                        error = true;
-                } else {
-                        ss_push(build_solution(enum_vars,fs_bottom().vals));
-                }
-                fs_pop();
+        { if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
+          { throw mcrl2::runtime_error("term does not evaluate to true or false " + 
+                                pp(info.rewr_obj->fromRewriteFormat(fs_bottom().expr)));
+                  // error = true;
+          } else {
+                   ss_push(build_solution(enum_vars,fs_bottom().vals));
+          }
+          fs_pop();
         }
 }
 
@@ -529,18 +530,19 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
         ss_stack = NULL;
         ss_stack_size = 0;
         ss_stack_pos = 0;
-
+        // error=false;
         enum_vars = NULL;
         enum_expr = NULL;
         ATprotectList(&enum_vars);
         ATprotect(&enum_expr);
-
+        
         reset(Vars,Expr,true_only);
 }
 
 EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
 	 info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
-         check_true(other.check_true), error(other.error), used_vars(other.used_vars),
+         // check_true(other.check_true), error(other.error), used_vars(other.used_vars),
+         check_true(other.check_true), used_vars(other.used_vars),
          fs_stack(0), ss_stack(0)
 {
   fs_stack_pos = other.fs_stack_pos;
@@ -703,7 +705,8 @@ ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolu
         ATermList r = ATmakeList0();
 
         ATermList l;
-        while ( sols->next(&l) && !sols->errorOccurred() )
+        // while ( sols->next(&l) && !sols->errorOccurred() )
+        while (sols->next(&l))
         {
                 if ( f == NULL )
                 {

@@ -67,7 +67,7 @@ class EnumeratorSolutions
 		 *        enumeration.
 		 * \return Whether or not an error occurred during enumeration.
 		 **/
-		virtual bool errorOccurred() = 0;
+		// virtual bool errorOccurred() = 0;
 };
 
 /**

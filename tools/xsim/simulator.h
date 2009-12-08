@@ -40,7 +40,7 @@ public:
      * This function throws a string on errors */
     virtual bool IsActive();
     /* Returns true iff a specification has been loaded */
-    bool ErrorOccurred();
+    // bool ErrorOccurred();
     /* Returns true iff an error occurred while computing transitions
      * from the current state */
 

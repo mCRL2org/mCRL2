@@ -189,7 +189,7 @@ class lps2torx_tool : public lps2torx_base
       gsVerboseMsg("generating state space...\n");
   
       NextStateGenerator *nsgen = NULL;
-      bool err = false;
+      // bool err = false;
       bool notdone = true;
       while ( notdone && !cin.eof() )
       {
@@ -243,11 +243,11 @@ class lps2torx_tool : public lps2torx_base
             }
             cout << "EE" << endl;
   
-            if ( nsgen->errorOccurred() )
+            /* if ( nsgen->errorOccurred() )
             {
               err = true;
               notdone = false;
-            }
+            } */
             break;
             }
           case 'q': // Quit

@@ -53,7 +53,7 @@ StandardSimulator::StandardSimulator()
     seen_states = ATindexedSetCreate(100,80);
 
     tau_prior = false;
-    error = false;
+    // error = false;
 
     nextstate = NULL;
     nextstategen = NULL;
@@ -523,10 +523,10 @@ void StandardSimulator::UpdateTransitions()
 	{
 		next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
 	}
-	error = nextstategen->errorOccurred();
+	// error = nextstategen->errorOccurred();
 }
 
-bool StandardSimulator::ErrorOccurred()
+/* bool StandardSimulator::ErrorOccurred()
 {
 	return error;
-}
+} */

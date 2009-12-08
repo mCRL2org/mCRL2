@@ -393,20 +393,25 @@ void XSimMain::Initialise(ATermList Pars)
 
 void XSimMain::StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates)
 {
-  SetCurrentState(State);
-  UpdateTransitions(NextStates);
-  if ( simulator->ErrorOccurred() )
-  {
-    wxMessageDialog msg(this,wxT("An error occurred while calculating the transitions from this state. This likely means that not all possible transitions are shown."),wxT("Error while calculating transitions"),wxOK|wxICON_ERROR);
+  try
+  { SetCurrentState(State);
+    UpdateTransitions(NextStates);
+  // if ( simulator->ErrorOccurred() )
+  }
+  catch (mcrl2::runtime_error e)
+  { // TODO: print error message.
+    wxString mystring(e.what(), wxConvUTF8);
+    wxMessageDialog msg(this,
+                        mystring,
+                        wxT("Error while calculating transitions"),
+                        wxOK|wxICON_ERROR);
     msg.ShowModal();
     StopAutomation();
-
-        }
-        if ( interactive )
-  {
-    undo->Enable(simulator->GetTracePos()>0);
+  }
+  if (interactive)
+  { undo->Enable(simulator->GetTracePos()>0);
     redo->Enable(simulator->GetTracePos() != simulator->GetTraceLength()-1);
-        }
+  }
 }
 
 void XSimMain::Reset(ATerm State)

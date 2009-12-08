@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <iostream>
 #include <cassert>
 
 namespace mcrl2 {

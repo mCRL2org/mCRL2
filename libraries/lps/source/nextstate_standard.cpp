@@ -708,7 +708,7 @@ void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
 NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, unsigned int identifier, bool SingleSummand) : info(Info)
 {
         id = identifier;
-        error = false;
+        // error = false;
         single_summand = SingleSummand;
 
         cur_state = NULL;
@@ -764,7 +764,7 @@ void NextStateGeneratorStandard::set_substitutions()
 
 void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 {
-        error = false;
+        // error = false;
 
         cur_state = State;
 
@@ -794,6 +794,7 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
             set_substitutions();
           }
 
+          // ATfprintf(stderr,"Summand: %t\n%t\n",ATLgetArgument(info.summands[sum_idx],0),ATgetArgument(info.summands[sum_idx],1));
           valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
                                      ATgetArgument(info.summands[sum_idx],1));
 
@@ -810,7 +811,8 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
           {
                   set_substitutions();
           }
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) {
+          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
+          { // std::cerr << "Interessant " << i->first << " aaa " << i->second << "\n";
             info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
           }
 
@@ -836,10 +838,10 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
         return false;
 }
 
-bool NextStateGeneratorStandard::errorOccurred()
+/* bool NextStateGeneratorStandard::errorOccurred()
 {
         return error;
-}
+} */
 
 ATerm NextStateGeneratorStandard::get_state() const
 {

@@ -74,7 +74,7 @@ class NextStateGenerator
 		 *        exploration.
 		 * \return Whether or not an error occurred during exploration.
 		 **/
-		virtual bool errorOccurred() = 0;
+		// virtual bool errorOccurred() = 0; Should be done via exception handling.
 
 		/**
 		 * \brief Get the state from which the transitions (if any)

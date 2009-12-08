@@ -81,7 +81,7 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		~EnumeratorSolutionsStandard();
 
 		bool next(ATermList *solution);
-		bool errorOccurred();
+		// bool errorOccurred();
 
 		void reset(ATermList Vars, ATerm Expr, bool true_only);
 
@@ -96,7 +96,7 @@ class EnumeratorSolutionsStandard : public EnumeratorSolutions
 		ATerm enum_expr;
 
 		bool check_true;
-		bool error;
+		// bool error;
 
 		int used_vars;
 
