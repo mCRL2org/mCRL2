@@ -19,10 +19,11 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  // TODO: g++ doesn't like 'const Substitution& sigma here; why???
+  // TODO: with g++ both 'const Substitution& sigma' nor 'Substitution sigma' leads
+  // to problems at different locations; why???
   /// \brief Applies a substitution to a PBES data type.
   template <typename Object, typename Substitution>
-  void substitute(Object& o, Substitution sigma, bool replace_parameters = false)
+  void substitute(Object& o, const Substitution& sigma, bool replace_parameters = false)
   {
     pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
     r(o);
