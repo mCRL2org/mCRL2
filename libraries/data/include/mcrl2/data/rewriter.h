@@ -300,7 +300,11 @@ namespace data {
       data_expression_with_variables operator()(const data_expression_with_variables& d) const
       {
         data_expression t = reconstruct(m_rewriter->rewrite(implement(d)));
-        return data_expression_with_variables(t, find_free_variables(t));
+        data_expression_with_variables result(t, find_free_variables(t));
+        #ifdef MCRL2_PRINT_REWRITE_STEPS
+          std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;
+        #endif
+        return result;
       }
 
       /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -312,7 +316,11 @@ namespace data {
       data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction const& sigma) const
       {
         data_expression t = this->operator()(replace_free_variables(static_cast< data_expression const& >(d), sigma));
-        return data_expression_with_variables(t, find_free_variables(t));
+        data_expression_with_variables result(t, find_free_variables(t));
+        #ifdef MCRL2_PRINT_REWRITE_STEPS
+          std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;
+        #endif
+        return result;
       }
   };
 
