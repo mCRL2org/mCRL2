@@ -290,9 +290,9 @@ void complete_data_specification(lps::specification& spec)
 inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compatible)
 {
-  if (compatible)
-  {
-    atermpp::aterm_appl specification_term(core::detail::gsMakeLinProcSpec(
+  /* if (compatible)
+  { assert(0);
+      atermpp::aterm_appl specification_term(core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
       core::detail::gsMakeActSpec(spec.action_labels()),
       core::detail::gsMakeGlobVarSpec(data::convert<data::variable_list>(spec.global_variables())),
@@ -308,8 +308,8 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec, bool compa
         atermpp::aterm_appl(specification_term(2)),
         atermpp::aterm_appl(specification_term(3)),
         atermpp::aterm_appl(specification_term(4))
-    );
-  }
+    ); 
+  } */
 
   return core::detail::gsMakeLinProcSpec(
       data::detail::data_specification_to_aterm_data_spec(spec.data(), compatible),
@@ -329,7 +329,8 @@ std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault
     spec.data() = data::remove_all_system_defined(spec.data());
   } */
   
-  return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
+  // return core::pp(specification_to_aterm(spec, pp_format != core::ppInternal), pp_format);
+  return core::pp(specification_to_aterm(spec, false), pp_format);
 }
 
 /// \brief Equality operator

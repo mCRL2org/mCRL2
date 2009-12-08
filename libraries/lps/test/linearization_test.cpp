@@ -663,6 +663,20 @@ const std::string various_case_29=
       "  ).Sync;"
       "init Sync;";
 
+// The test case below is to test whether the elements of a multi-action
+// are dealt with properly when they occur in a subexpression. The linearised
+// process below should have three and not two summand.
+const std::string various_case_30=
+      "act a;"
+      "    b,b':Nat;"
+      "init a.(b(0)|b'(0))+a.(b(0)|b(0));";
+
+
+const std::string various_case_31=
+      "act a:List(List(Nat));"
+      "proc X(x:List(List(Nat)))=a(x).delta;"
+      "init X([[]]);";
+
 
 /* Original name: LR2plus.mcrl2      
  This example can only be parsed unambiguously by an LR(k) parser generator
@@ -786,6 +800,12 @@ void test_various_aux(t_lin_options &options)
   core::garbage_collect();
   std::cerr << "Testcase 29\n";
   spec = linearise(various_case_29, options);
+  core::garbage_collect();
+  std::cerr << "Testcase 30\n";
+  spec = linearise(various_case_30, options);
+  core::garbage_collect();
+  std::cerr << "Testcase 31\n";
+  spec = linearise(various_case_31, options);
   core::garbage_collect();
   std::cerr << "Testcase LR2plus\n";
   spec = linearise(various_case_LR2plus, options);

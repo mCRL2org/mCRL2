@@ -181,8 +181,9 @@ namespace mcrl2 {
       atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification& s, bool compatible)
       { using namespace core::detail;
 
-        if (compatible)
-        { atermpp::set< atermpp::aterm_appl > sorts;
+        /* if (compatible)
+        { assert(0);
+          atermpp::set< atermpp::aterm_appl > sorts;
 
           // Maps container sort expressions to a unique name
           atermpp::map< sort_expression, sort_expression > renamings(make_compatible_renaming_map(s));
@@ -210,8 +211,9 @@ namespace mcrl2 {
              gsMakeMapSpec(atermpp::replace(convert< atermpp::aterm_list >(
                                      data_specification::constructors_const_range(s.m_mappings)), renaming_substitution)),
              gsMakeDataEqnSpec(atermpp::replace(convert< atermpp::aterm_list >(s.m_equations), renaming_substitution)));
+          
         }
-        else
+        else */
         { return gsMakeDataSpec(
              gsMakeSortSpec(convert< atermpp::aterm_list >(s.m_sorts) +
                             convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),

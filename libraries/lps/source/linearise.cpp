@@ -7236,6 +7236,5 @@ mcrl2::lps::specification mcrl2::lps::linearise(
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);
-
   return spec1;
 }

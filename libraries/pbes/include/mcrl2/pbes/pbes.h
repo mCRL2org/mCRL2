@@ -689,9 +689,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
   ATermAppl initial_state = core::detail::gsMakePBInit(p.initial_state());
   atermpp::aterm_appl result;
 
-  if (compatible)
-  {
-    atermpp::aterm_appl pbes_term(core::detail::gsMakePBES(
+  /* if (compatible)
+  { assert(0);
+     atermpp::aterm_appl pbes_term(core::detail::gsMakePBES(
       data::detail::data_specification_to_aterm_data_spec(data::data_specification()),
       global_variables,
       equations,
@@ -707,9 +707,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p, bool compatible)
         atermpp::aterm_appl(pbes_term(2)),
         atermpp::aterm_appl(pbes_term(3))
     );
-    return result;
+    return result; 
   }
-  else
+  else */
   {
     result = core::detail::gsMakePBES(
       data::detail::data_specification_to_aterm_data_spec(p.data(), compatible),
