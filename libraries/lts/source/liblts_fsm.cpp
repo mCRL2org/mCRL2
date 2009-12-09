@@ -265,8 +265,9 @@ bool p_lts::write_to_fsm(std::ostream &os, lts_type type, ATermList params)
         assert(gsIsDataVarId(param));
         PrintPart_CXX(os,ATgetArgument(param, 0),ppDefault);
         os << "(" << ATgetLength(vals) << ") ";
+        os << "\"";
         PrintPart_CXX(os,ATgetArgument(param, 1),ppDefault);
-        os << " ";
+        os << "\" ";
       }
 
       params = ATgetNext(params);
