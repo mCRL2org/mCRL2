@@ -9,6 +9,11 @@
 /// \file mcrl2/lps/detail/lps_sort_traverser.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_DETAIL_LPS_BINDING_AWARE_TRAVERSER_H
 #define MCRL2_LPS_DETAIL_LPS_BINDING_AWARE_TRAVERSER_H
 

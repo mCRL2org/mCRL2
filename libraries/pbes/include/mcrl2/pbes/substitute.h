@@ -29,6 +29,16 @@ namespace pbes_system {
     r(o);
   }
 
+  // TODO: with g++ both 'const Substitution& sigma' nor 'Substitution sigma' leads
+  // to problems at different locations; why???
+  /// \brief Applies a substitution to a PBES data type.
+  template <typename Object, typename Substitution>
+  void substitute_gcc_workaround(Object& o, const Substitution& sigma, bool replace_parameters = false)
+  {
+    pbes_system::detail::pbes_substituter<Substitution> r(sigma, replace_parameters);
+    r(o);
+  }
+
   /// \brief Applies a propositional variable substitution to a PBES data type.
   template <typename Object, typename PropositionalVariableSubstitution>
   void propositional_variable_substitute(Object& o, PropositionalVariableSubstitution sigma, bool replace_parameters = false)

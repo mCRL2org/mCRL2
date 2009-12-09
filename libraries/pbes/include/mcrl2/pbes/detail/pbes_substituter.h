@@ -9,12 +9,16 @@
 /// \file mcrl2/pbes/detail/pbes_substituter.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_PBES_PBES_H
+#include "mcrl2/pbes/pbes.h"
+#endif
+
 #ifndef MCRL2_PBES_DETAIL_PBES_SUBSTITUTER_H
 #define MCRL2_PBES_DETAIL_PBES_SUBSTITUTER_H
 
 #include <vector>
 #include "mcrl2/data/replace.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/substitute_builder.h"
 
 namespace mcrl2 {
@@ -117,7 +121,7 @@ namespace detail {
     /// \param t A pbes expression
     void substitute(pbes_expression& t) const
     {
-      t = detail::make_substitute_builder(sigma).visit(t);
+      t = pbes_system::detail::make_substitute_builder(sigma).visit(t);
     } 
 
     /// \brief Applies the substitution to a propositional variable declaration

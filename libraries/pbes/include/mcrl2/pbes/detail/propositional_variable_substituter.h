@@ -9,11 +9,15 @@
 /// \file mcrl2/pbes/detail/propositional_variable_substituter.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_PBES_PBES_H
+#include "mcrl2/pbes/pbes.h"
+#endif
+
 #ifndef MCRL2_PBES_DETAIL_PROPOSITIONAL_VARIABLE_SUBSTITUTER_H
 #define MCRL2_PBES_DETAIL_PROPOSITIONAL_VARIABLE_SUBSTITUTER_H
 
 #include <vector>
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
 namespace mcrl2 {

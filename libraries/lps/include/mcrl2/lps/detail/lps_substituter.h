@@ -9,12 +9,16 @@
 /// \file mcrl2/lps/detail/lps_substituter.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_DETAIL_LPS_SUBSTITUTER_H
 #define MCRL2_LPS_DETAIL_LPS_SUBSTITUTER_H
 
 #include <vector>
 #include "mcrl2/data/replace.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 

@@ -9,13 +9,17 @@
 /// \file mcrl2/lps/detail/lps_well_typed_checker.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 #define MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {

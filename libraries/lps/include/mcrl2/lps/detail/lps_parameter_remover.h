@@ -9,13 +9,17 @@
 /// \file mcrl2/lps/detail/lps_parameter_remover.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_DETAIL_LPS_PARAMETER_REMOVER_H
 #define MCRL2_LPS_DETAIL_LPS_PARAMETER_REMOVER_H
 
 #include <algorithm>
 #include <vector>
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 

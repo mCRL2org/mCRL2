@@ -9,8 +9,10 @@
 /// \file mcrl2/lps/detail/lps_data_traverser.h
 /// \brief add your file description here.
 
-// lps/test/free_variables_test fails if this is not here (strange dependencies)
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
 #include "mcrl2/lps/specification.h"
+#endif
 
 #ifndef MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H
 #define MCRL2_LPS_DETAIL_LPS_DATA_TRAVERSER_H

@@ -17,6 +17,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/linear_process.h"
+#include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {
 

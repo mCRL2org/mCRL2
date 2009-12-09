@@ -21,36 +21,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-namespace detail {
-  
-  struct my_double_sequence_substitution: public std::unary_function<data::variable, data::data_expression>
-  {                            
-    typedef data::variable variable_type;
-    typedef data::data_expression expression_type;
-    
-    const data::variable_list& v;
-    const data::data_expression_list& e;
-      
-    my_double_sequence_substitution(const data::variable_list& v0, const data::data_expression_list& e0)
-      : v(v0), e(e0)
-    {}   
-
-    data::data_expression operator()(const data::variable& d) const
-    {
-      data::variable_list::const_iterator i = v.begin();
-      data::data_expression_list::const_iterator j = e.begin();
-      for (; i != v.end(); ++i, ++j)
-      {
-        if (*i == d)
-        {
-          return *j;
-        }
-      }
-      return d;
-    }
-  };
-}
-
   /** \brief Substitution function for propositional variables
    *
    * Model of Substitution.
@@ -90,7 +60,7 @@ namespace detail {
         const data::data_expression_list& e = v.parameters();
 
         // return phi[d := e]
-        pbes_system::substitute(phi, data::make_double_sequence_substitution_adaptor(d, e));
+        pbes_system::substitute_gcc_workaround(phi, data::make_double_sequence_substitution_adaptor(d, e));
         return phi;
       }
 

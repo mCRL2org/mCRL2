@@ -9,12 +9,16 @@
 /// \file mcrl2/pbes/detail/pbes_free_variable_finder.h
 /// \brief add your file description here.
 
+// This is to deal with circular header file dependencies
+#ifndef MCRL2_PBES_PBES_H
+#include "mcrl2/pbes/pbes.h"
+#endif
+
 #ifndef MCRL2_PBES_DETAIL_PBES_FREE_VARIABLE_FINDER_H
 #define MCRL2_PBES_DETAIL_PBES_FREE_VARIABLE_FINDER_H
 
 #include <set>
 #include "mcrl2/data/find.h"
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
 namespace mcrl2 {

@@ -14,6 +14,7 @@
 
 #include <set>
 #include "mcrl2/data/variable.h"
+#include "mcrl2/data/assignment.h"
 
 namespace mcrl2 {
 

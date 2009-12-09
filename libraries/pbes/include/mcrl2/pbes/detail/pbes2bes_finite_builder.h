@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_PBES2BES_FINITE_BUILDER_H
 #define MCRL2_PBES_DETAIL_PBES2BES_FINITE_BUILDER_H
 
+#include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
@@ -35,7 +36,7 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
   std::map<core::identifier_string, std::vector<data::variable> >& m_finite_variables;
   
   pbes2bes_finite_builder(const DataRewriter& r, RenameFunction& rho, const data::data_specification& dataspec, std::map<core::identifier_string, std::vector<data::variable> >& finite_variables)
-    : m_rewriter(r_), m_rename(rho_), m_dataspec(dataspec), m_finite_variables(finite_variables)
+    : m_rewriter(r), m_rename(rho), m_dataspec(dataspec), m_finite_variables(finite_variables)
   {}
 
   /// \brief Computes the subset with variables of finite sort and infinite.
@@ -63,6 +64,7 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
     }
   }
 
+  template <typename VariableContainer, typename ExpressionContainer>
   data::data_expression make_condition(const VariableContainer& variables, const ExpressionContainer& expressions) const
   {
     using namespace data::sort_bool;
@@ -77,8 +79,8 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
     return result;
   }
 
-  template <typename ExpressionContainer, typename Substitution>
-  data::data_expression_list rewrite(const ExpressionContainer& e, const Substitution& sigma) const
+  template <typename ExpressionContainer, typename Substitution1>
+  data::data_expression_list rewrite(const ExpressionContainer& e, const Substitution1& sigma) const
   {
     std::vector<data::data_expression> result = data::convert<std::vector<data::data_expression> >(e);
     for (std::vector<data::data_expression>::iterator i = e.begin(); i != e.end(); ++i)
@@ -110,8 +112,8 @@ struct pbes2bes_finite_builder: public pbes_expression_builder<pbes_expression, 
     data::data_expression condition = make_condition(finite_variables, finite_expressions);
 std::cerr << "<condition>" << core::pp(condition) << std::endl;
 
-    atermpp::vector<pbes_expression> result;
-    for (classic_enumerator<> i(m_dataspec, finite_variables, m_rewriter, condition); i != classic_enumerator<>(); ++i)
+    atermpp::set<pbes_expression> result;
+    for (data::classic_enumerator<> i(m_dataspec, finite_variables, m_rewriter, condition); i != data::classic_enumerator<>(); ++i)
     {
       data::data_expression c = (*i)(condition);
 std::cerr << "<c>" << core::pp(c) << std::endl;
@@ -122,7 +124,7 @@ std::cerr << "<Y>" << core::pp(Y) << std::endl;
       result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_infinite)));
     }
     
-    return tr::join_or(result.begin(), result.end());
+    return pbes_expr::join_or(result.begin(), result.end());
   }
 };
 

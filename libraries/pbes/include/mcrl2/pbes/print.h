@@ -26,7 +26,7 @@ namespace pbes_system {
   {
     if (pp_format == core::ppDefault || pp_format == core::ppInternal)
     {
-      pbes_spec.data() = mcrl2::data::remove_all_system_defined(pbes_spec.data());
+      //pbes_spec.data() = mcrl2::data::remove_all_system_defined(pbes_spec.data());
     }
 
     return core::pp(pbes_to_aterm(pbes_spec, pp_format != core::ppInternal), pp_format);

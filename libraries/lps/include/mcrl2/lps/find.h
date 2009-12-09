@@ -6,8 +6,8 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/find.h
-/// \brief Search functions of the data library.
+/// \file mcrl2/lps/find.h
+/// \brief Search functions of the LPS library.
 
 #ifndef MCRL2_LPS_FIND_H
 #define MCRL2_LPS_FIND_H

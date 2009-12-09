@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_DETAIL_COMPARE_PBES_EXPRESSION_VISITOR_H
 #define MCRL2_PBES_DETAIL_COMPARE_PBES_EXPRESSION_VISITOR_H
 
+#include "mcrl2/pbes/detail/free_variable_visitor.h"
+
 namespace mcrl2 {
 
 namespace pbes_system {

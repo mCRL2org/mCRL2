@@ -13,7 +13,7 @@
 #define MCRL2_PBES_DETAIL_SUBSTITUTE_BUILDER_H
 
 #include "mcrl2/data/replace.h"
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_builder.h"
 
 namespace mcrl2 {

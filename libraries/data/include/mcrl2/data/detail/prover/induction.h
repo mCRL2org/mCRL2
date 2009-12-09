@@ -13,6 +13,7 @@
 #define INDUCTION_H
 
 #include "aterm2.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include "mcrl2/data/detail/prover/expression_info.h"
 #include "mcrl2/data/detail/prover/sort_info.h"
