@@ -862,10 +862,14 @@ BOOST_AUTO_TEST_CASE(test_various)
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
   #ifdef MCRL2_JITTYC_AVAILABLE
+  #ifdef TEST_COMPILERS
   rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
   #endif
+  #endif
   #ifdef MCRL2_INNERC_AVAILABLE
+  #ifdef TEST_COMPILERS
     rewrite_strategies.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
+  #endif
   #endif
 
   for(std::vector<mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy >::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)

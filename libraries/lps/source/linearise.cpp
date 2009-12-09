@@ -3902,10 +3902,11 @@ class specification_basic_type:public boost::noncopyable
 
       // std::cerr << "Define case function " << index << "Sort: " << pp(sort) << "\n";
 
-      const variable v1=get_fresh_variable("x",sort);
+      const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
+      const variable v1=get_fresh_variable("x",normalised_sort);
       const unsigned int n=enumeratedtypes[index].size;
       for(unsigned int j=0; (j<n); j++)
-      { const variable v=get_fresh_variable("y",sort);
+      { const variable v=get_fresh_variable("y",normalised_sort);
         vars=push_front(vars,v);
         args=push_front(args,data_expression(v));
         xxxterm=push_front(xxxterm,data_expression(v1));
