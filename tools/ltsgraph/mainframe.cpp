@@ -113,7 +113,7 @@ void MainFrame::setupMenuBar()
   toolsMenu->AppendRadioItem(myID_ROTATE, wxT("Rotate \tF"), wxT("Rotate tool"));
   toolsMenu->AppendRadioItem(myID_NONE, wxT("Disable \tN"), wxT("Disable tool"));
   toolsMenu->AppendSeparator();
-  toolsMenu->Append(myID_TOGGLE_VECTOR, wxT("Toggle state &vector display \tCTRL-V"));
+  toolsMenu->Append(myID_TOGGLE_VECTOR, wxT("Toggle selected state &vector display \tCTRL-V"));
   toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("Toggle optimisation... \tCTRL-T"),
                     wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
