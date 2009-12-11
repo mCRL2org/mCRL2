@@ -82,6 +82,7 @@ bool p_lts::read_from_dot(istream &is)
       }
     } else 
     {
+      init_state = vec_of_possible_inits[0]; 
       if (vec_of_possible_inits.size() > 1)
       {
         gsWarningMsg("multiple suitable initial states; taking first suitable state (%s) as initial\n",ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument((ATermAppl)state_values[vec_of_possible_inits[0]],0),0))));
