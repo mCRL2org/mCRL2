@@ -19,7 +19,7 @@
 #include "aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
@@ -1577,7 +1577,7 @@ ATerm lts::state_parameter_sort(unsigned int idx)
 {
   if ( type == lts_mcrl2 )
   {
-    return (ATerm) gsGetSort((ATermAppl) get_state_parameter_value(0,idx));
+    return (ATerm) static_cast<ATermAppl>(data::data_expression(get_state_parameter_value(0,idx)).sort());
   } else if ( type == lts_mcrl )
   {
     char s[2+sizeof(unsigned int)*3];
