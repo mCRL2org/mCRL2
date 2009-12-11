@@ -29,8 +29,8 @@ namespace mcrl2 {
 
     void Induction::recurse_expression_for_lists(ATermAppl a_expression) {
       if (gsIsDataVarId(a_expression)) {
-        ATermAppl v_sort = gsGetSort(a_expression);
-        if (f_sort_info.is_sort_list(v_sort)) {
+        sort_expression v_sort = data_expression(a_expression).sort();
+        if (sort_list::is_list(v_sort)) {
           ATindexedSetPut(f_list_variables, (ATerm) a_expression, 0);
         }
       } else if (f_expression_info.is_operator(a_expression)) {
@@ -65,21 +65,25 @@ namespace mcrl2 {
       ATermList v_constructors;
       ATermAppl v_constructor;
       ATermAppl v_constructor_name;
-      ATermAppl v_constructor_sort;
+      sort_expression v_constructor_sort;
       ATermAppl v_constructor_element_sort;
       ATermAppl v_list_sort;
       ATermAppl v_result = 0;
 
       v_constructors = f_constructors;
-      v_list_sort = gsGetSort(a_list_variable);
+      v_list_sort = data_expression(a_list_variable).sort();
       while (!ATisEmpty(v_constructors)) {
         v_constructor = ATAgetFirst(v_constructors);
         v_constructors = ATgetNext(v_constructors);
         v_constructor_name = ATAgetArgument(v_constructor, 0);
         if (v_constructor_name == f_cons_name) {
-          v_constructor_sort = gsGetSort(v_constructor);
-          v_constructor_element_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),0);
-          v_constructor_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),1);
+          v_constructor_sort = data_expression(v_constructor).sort();
+          //(JK) This seems dangerous, assumes the constructor sort is a
+          //function!
+          v_constructor_element_sort = *(function_sort(v_constructor_sort).domain().begin());
+          v_constructor_sort = *(++(function_sort(v_constructor_sort).domain().begin()));
+          //v_constructor_element_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),0);
+          //v_constructor_sort = ATAelementAt(f_sort_info.get_domain(v_constructor_sort),1);
           if (v_constructor_sort == v_list_sort) {
             v_result = v_constructor_element_sort;
           }
@@ -161,7 +165,7 @@ namespace mcrl2 {
       ATermAppl v_result;
 
       v_induction_variable = ATAgetFirst(ATindexedSetElements(f_list_variables));
-      v_induction_variable_sort = gsGetSort(v_induction_variable);
+      v_induction_variable_sort = data_expression(v_induction_variable).sort();
 
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
@@ -209,7 +213,7 @@ namespace mcrl2 {
       ATermList a_list_of_variables, ATermList a_list_of_dummies
     ) {
       ATermAppl v_variable = (ATermAppl) ATindexedSetGetElem(f_list_variables, a_variable_number);
-      ATermAppl v_variable_sort = gsGetSort(v_variable);
+      ATermAppl v_variable_sort = data_expression(v_variable).sort();
       ATermList v_list_of_variables = ATinsert(a_list_of_variables, (ATerm) v_variable);
       ATermAppl v_dummy_sort = get_sort_of_list_elements(v_variable);
       ATermAppl v_dummy = get_fresh_dummy(v_dummy_sort);

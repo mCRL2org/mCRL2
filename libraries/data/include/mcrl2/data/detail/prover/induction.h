@@ -16,7 +16,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include "mcrl2/data/detail/prover/expression_info.h"
-#include "mcrl2/data/detail/prover/sort_info.h"
 
 namespace mcrl2 {
   namespace data {
@@ -51,9 +50,6 @@ class Induction {
 
     /// \brief
     Expression_Info f_expression_info;
-
-    /// \brief
-    Sort_Info f_sort_info;
 
     /// \brief
     void recurse_expression_for_lists(ATermAppl a_expression);

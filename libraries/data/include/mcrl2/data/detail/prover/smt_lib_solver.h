@@ -17,7 +17,6 @@
 #include "aterm2.h"
 #include "mcrl2/data/detail/prover/smt_solver.h"
 #include "mcrl2/data/detail/prover/expression_info.h"
-#include "mcrl2/data/detail/prover/sort_info.h"
 
 #ifdef HAVE_CVC
 #include "mcrl2/data/detail/prover/smt_solver_cvc_fast.ipp"
@@ -37,7 +36,6 @@ namespace mcrl2 {
 class SMT_LIB_Solver: public SMT_Solver {
   private:
     Expression_Info f_expression_info;
-    Sort_Info f_sort_info;
     std::string f_sorts_notes;
     std::string f_operators_notes;
     std::string f_predicates_notes;

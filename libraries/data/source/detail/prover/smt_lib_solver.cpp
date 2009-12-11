@@ -42,17 +42,17 @@ namespace mcrl2 {
           v_variables = ATgetNext(v_variables);
           char* v_variable_string;
           v_variable_string = gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          if (f_sort_info.is_sort_real(gsGetSort(v_variable))) {
+          sort_expression v_sort = data_expression(v_variable).sort();
+          if (sort_real::is_real(v_sort)) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
-          } else if (f_sort_info.is_sort_int(gsGetSort(v_variable))) {
+          } else if (sort_int::is_int(v_sort)) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (f_sort_info.is_sort_nat(gsGetSort(v_variable))) {
+          } else if (sort_nat::is_nat(v_sort)) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (f_sort_info.is_sort_pos(gsGetSort(v_variable))) {
+          } else if (sort_pos::is_pos(v_sort)) {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
           } else {
-            ATermAppl v_sort = gsGetSort(v_variable);
-            int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort, 0);
+            int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
             char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%d", v_sort_number);
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
@@ -80,33 +80,33 @@ namespace mcrl2 {
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
           free(v_operator_string);
           v_operator_string = 0;
-          ATermAppl v_sort = gsGetSort(v_operator);
+          sort_expression v_sort = data_expression(v_operator).sort();
           do {
             ATermList v_sort_domain_list;
-            if (f_sort_info.is_sort_arrow_prod(v_sort)) {
-              v_sort_domain_list = f_sort_info.get_domain(v_sort);
-              v_sort = f_sort_info.get_range(v_sort);
+            if (is_function_sort(v_sort)) {
+              v_sort_domain_list = function_sort(v_sort).domain();
+              v_sort = function_sort(v_sort).codomain();
             } else {
-              v_sort_domain_list = ATmakeList1((ATerm) v_sort);
-              v_sort = 0;
+              v_sort_domain_list = ATmakeList1((ATerm) static_cast<ATermAppl>(v_sort));
+              v_sort = sort_expression();
             }
             for(ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
             {
-              ATermAppl v_sort_domain_elt = ATAgetFirst(l);
-              if (f_sort_info.is_sort_arrow_prod(v_sort_domain_elt)) {
+              sort_expression v_sort_domain_elt(ATAgetFirst(l));
+              if (is_function_sort(v_sort_domain_elt)) {
                 throw mcrl2::runtime_error("Function " + pp(v_operator) +
                         " cannot be translated to the SMT-LIB format.");
               }
-              if (f_sort_info.is_sort_int(v_sort_domain_elt)) {
+              if (sort_int::is_int(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (f_sort_info.is_sort_nat(v_sort_domain_elt)) {
+              } else if (sort_nat::is_nat(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (f_sort_info.is_sort_pos(v_sort_domain_elt)) {
+              } else if (sort_pos::is_pos(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (f_sort_info.is_sort_real(v_sort_domain_elt)) {
+              } else if (sort_real::is_real(v_sort_domain_elt)) {
                 f_operators_extrafuns = f_operators_extrafuns + " Real";
               } else {
-                int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) v_sort_domain_elt, 0);
+                int v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
                 char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
                 sprintf(v_sort_string, "sort%d", v_sort_number);
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
@@ -114,7 +114,7 @@ namespace mcrl2 {
                 v_sort_string = 0;
               }
             }
-          } while (v_sort != 0);
+          } while (v_sort != sort_expression());
           f_operators_extrafuns = f_operators_extrafuns + ")";
         }
         f_operators_extrafuns = f_operators_extrafuns + ")\n";
@@ -173,12 +173,12 @@ namespace mcrl2 {
       if (!ATisEmpty(v_sorts)) {
         f_sorts_notes = "  :notes \"";
         while (!ATisEmpty(v_sorts)) {
-          ATermAppl v_sort = ATAgetFirst(v_sorts);
+          sort_expression v_sort(ATAgetFirst(v_sorts));
           v_sorts = ATgetNext(v_sorts);
-          int v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
+          int v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort));
           char* v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%d", v_sort_number);
-          char* v_sort_original_id = f_sort_info.get_sort_id(v_sort);
+          const char* v_sort_original_id = basic_sort(v_sort).name().to_string().c_str();
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
           free(v_sort_string);
           v_sort_string = 0;
@@ -684,9 +684,9 @@ namespace mcrl2 {
       } else if (gsIsDataVarId(a_clause)) {
         if (a_expecting_predicate) {
           add_bool2pred_and_translate_clause(a_clause);
-        } else if (f_sort_info.is_sort_nat(data_expression(a_clause).sort())) {
+        } else if (sort_nat::is_nat(data_expression(a_clause).sort())) {
           translate_nat_variable(a_clause);
-        } else if (f_sort_info.is_sort_pos(data_expression(a_clause).sort())) {
+        } else if (sort_pos::is_pos(data_expression(a_clause).sort())) {
           translate_pos_variable(a_clause);
         } else {
           translate_variable(a_clause);

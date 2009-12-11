@@ -80,7 +80,7 @@ namespace mcrl2 {
 // Class SMT_Solver_CVC_Fast -----------------------------------------------------------------
   // Class SMT_Solver_CVC_Fast - Functions declared private ----------------------------------
 
-    CVC3::Type SMT_Solver_CVC_Fast::translate_sort(ATermAppl a_sort_expression) {
+    CVC3::Type SMT_Solver_CVC_Fast::translate_sort(mcrl2::data::sort_expression a_sort_expression) {
       ATermAppl v_type;
       ATermAppl v_result_type;
       CVC3::Type v_translated_type;
