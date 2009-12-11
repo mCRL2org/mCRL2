@@ -37,6 +37,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 
 static bool remove_bools = true;
 static bool remove_standard_functions = true;
@@ -343,7 +344,7 @@ static ATermList convert_datas(ATermAppl spec, ATermList *ids)
     }
     lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args);
     rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
-    r = ATappend(r,(ATerm) gsMakeDataEqn(args,gsMakeDataExprTrue(),lhs,rhs));
+    r = ATappend(r,(ATerm) gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
   }
 
   return r;
@@ -543,10 +544,6 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
                                                  mcrl2::data::function_sort(s,s,s_bool))),
             (ATerm) static_cast<ATermAppl>(mcrl2::data::equal_to(s))
             ));
-//			substs = ATinsert(substs,(ATerm) gsMakeSubst(
-//						(ATerm) gsMakeOpId(gsString2ATermAppl((std::string("if#Bool#")+sort_name+"#"+sort_name).c_str()),gsMakeSortArrow2(s,s,s_bool)),
-//						(ATerm) gsMakeOpIdIf(s)
-//						));
     }
   }
 

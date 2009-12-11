@@ -206,7 +206,7 @@ namespace mcrl2 {
             f_tautology = answer_yes;
             f_contradiction = answer_no;
           } else {
-            v_original_formula = gsMakeDataExprNot(v_original_formula);
+            v_original_formula = sort_bool::not_(data_expression(v_original_formula));
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
@@ -216,7 +216,7 @@ namespace mcrl2 {
               eliminate_paths();
             }
             if (f_bdd_info.is_true(f_bdd)) {
-              f_bdd = gsMakeDataExprFalse();
+              f_bdd = sort_bool::false_();
               f_tautology = answer_no;
               f_contradiction = answer_yes;
             } else {
@@ -256,15 +256,15 @@ namespace mcrl2 {
           if (v_branch == 0) {
             v_result = 0;
           } else {
-            ATermAppl v_term = gsMakeDataExprNot(v_guard);
-            v_result = gsMakeDataExprAnd(v_branch, v_term);
+            data_expression v_term = sort_bool::not_(data_expression(v_guard));
+            v_result = sort_bool::and_(data_expression(v_branch), v_term);
           }
         } else {
-          v_result = gsMakeDataExprAnd(v_branch, v_guard);
+          v_result = sort_bool::and_(data_expression(v_branch), data_expression(v_guard));
         }
       } else {
         if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity)) {
-          v_result = gsMakeOpIdTrue();
+          v_result = sort_bool::true_();
         } else {
           v_result = 0;
         }
@@ -306,7 +306,7 @@ namespace mcrl2 {
       Prover(data_spec, a_rewrite_strategy, a_time_limit),
       f_data_spec(data_spec),
       f_induction(data_spec)
-    { 
+    {
       f_reverse = true;
       f_full = true;
       f_apply_induction = a_apply_induction;
@@ -329,7 +329,7 @@ namespace mcrl2 {
 
     // --------------------------------------------------------------------------------------------
 
-    BDD_Prover::~BDD_Prover() 
+    BDD_Prover::~BDD_Prover()
     { delete f_bdd_simplifier;
       f_bdd_simplifier = 0;
     }

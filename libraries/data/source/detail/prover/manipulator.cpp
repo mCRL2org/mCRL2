@@ -140,9 +140,9 @@ namespace mcrl2 {
 
     AM_Jitty::AM_Jitty(Rewriter* a_rewriter, ATerm_Info* a_info): ATerm_Manipulator(a_rewriter, a_info) {
       using namespace mcrl2::core::detail;
-      f_true =  a_rewriter->toRewriteFormat(gsMakeOpIdTrue());
-      f_false = a_rewriter->toRewriteFormat(gsMakeOpIdFalse());
-      f_if_then_else = ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool())), 0);
+      f_true =  a_rewriter->toRewriteFormat(sort_bool::true_());
+      f_false = a_rewriter->toRewriteFormat(sort_bool::false_());
+      f_if_then_else = ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -341,9 +341,9 @@ namespace mcrl2 {
 
     AM_Inner::AM_Inner(Rewriter* a_rewriter, ATerm_Info* a_info): ATerm_Manipulator(a_rewriter, a_info) {
       using namespace mcrl2::core::detail;
-      f_true =  a_rewriter->toRewriteFormat(gsMakeOpIdTrue());
-      f_false = a_rewriter->toRewriteFormat(gsMakeOpIdFalse());
-      f_if_then_else = a_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool()));
+      f_true =  a_rewriter->toRewriteFormat(sort_bool::true_());
+      f_false = a_rewriter->toRewriteFormat(sort_bool::false_());
+      f_if_then_else = a_rewriter->toRewriteFormat(if_(sort_bool::bool_()));
     }
 
     // --------------------------------------------------------------------------------------------

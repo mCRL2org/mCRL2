@@ -64,7 +64,7 @@ using namespace mcrl2::core::detail;
   ATermAppl get_subst_equation_from_assignments(
     ATermList a_variables, ATermList a_assignments_1, ATermList a_assignments_2, ATermList a_substitutions_1, ATermList a_substitutions_2
   ) {
-    ATermAppl v_result = gsMakeDataExprTrue();
+    ATermAppl v_result = sort_bool::true_();
     ATermAppl v_variable;
     ATermAppl v_assignment_1, v_assignment_2;
     ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
@@ -92,17 +92,17 @@ using namespace mcrl2::core::detail;
         a_variables = ATgetNext(a_variables);
       }
       if (v_variable_1 == v_variable_2) {
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_1, v_expression_2));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_expression_2)));
         v_next_1 = true;
         v_next_2 = true;
       } else if (v_variable == v_variable_1) {
         v_variable_1 = gsSubstValues_Appl(a_substitutions_1, v_variable_1, true);
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_1, v_variable_1));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_variable_1)));
         v_next_1 = true;
         v_next_2 = false;
       } else if (v_variable == v_variable_2) {
         v_variable_2 = gsSubstValues_Appl(a_substitutions_2, v_variable_2, true);
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_2, v_variable_2));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
         v_next_1 = false;
         v_next_2 = true;
       }
@@ -113,7 +113,7 @@ using namespace mcrl2::core::detail;
   // ----------------------------------------------------------------------------------------------
 
   ATermAppl get_equation_from_assignments(ATermList a_variables, ATermList a_assignments_1, ATermList a_assignments_2) {
-    ATermAppl v_result = gsMakeDataExprTrue();
+    ATermAppl v_result = sort_bool::true_();
     ATermAppl v_variable;
     ATermAppl v_assignment_1, v_assignment_2;
     ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
@@ -140,15 +140,15 @@ using namespace mcrl2::core::detail;
         a_variables = ATgetNext(a_variables);
       }
       if (v_variable_1 == v_variable_2) {
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_1, v_expression_2));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_expression_2)));
         v_next_1 = true;
         v_next_2 = true;
       } else if (v_variable == v_variable_1) {
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_1, v_variable_1));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_variable_1)));
         v_next_1 = true;
         v_next_2 = false;
       } else if (v_variable == v_variable_2) {
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression_2, v_variable_2));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
         v_next_1 = false;
         v_next_2 = true;
       }
@@ -162,7 +162,7 @@ using namespace mcrl2::core::detail;
   // ----------------------------------------------------------------------------------------------
 
   ATermAppl get_subst_equation_from_actions(ATermList a_actions, ATermList a_substitutions) {
-    ATermAppl v_result = gsMakeDataExprTrue();
+    ATermAppl v_result = sort_bool::true_();
     ATermAppl v_action;
     ATermList v_expressions;
     ATermAppl v_expression;
@@ -174,7 +174,7 @@ using namespace mcrl2::core::detail;
       while (!ATisEmpty(v_expressions)) {
         v_expression = ATAgetFirst(v_expressions);
         v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
-        v_result = gsMakeDataExprAnd(v_result, gsMakeDataExprEq(v_expression, v_subst_expression));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression), data_expression(v_subst_expression)));
         v_expressions = ATgetNext(v_expressions);
       }
       a_actions = ATgetNext(a_actions);
@@ -194,8 +194,8 @@ using namespace mcrl2::core::detail;
     ATermList v_assignments_1 = ATLgetArgument(a_summand_1, 4);
     ATermList v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
     ATermAppl v_condition_2 = ATAgetArgument(a_summand_2, 1);
-    ATermAppl v_lhs = gsMakeDataExprAnd(v_condition_1, v_condition_2);
-    v_lhs = gsMakeDataExprAnd(v_lhs, a_invariant);
+    ATermAppl v_lhs = sort_bool::and_(data_expression(v_condition_1), data_expression(v_condition_2));
+    v_lhs = sort_bool::and_(data_expression(v_lhs), data_expression(a_invariant));
     ATermList v_assignments_2 = ATLgetArgument(a_summand_2, 4);
     ATermList v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
     ATermAppl v_subst_condition_1 = gsSubstValues_Appl(v_substitutions_2, v_condition_1, true);
@@ -206,17 +206,17 @@ using namespace mcrl2::core::detail;
     if (ATisEmpty(v_actions)) {
       // tau-summand
       ATermAppl v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
-      v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
-      v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
-      v_rhs = gsMakeDataExprOr(v_equation, v_rhs);
+      v_rhs = sort_bool::and_(data_expression(v_subst_condition_1), data_expression(v_subst_condition_2));
+      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_subst_equation));
+      v_rhs = sort_bool::or_(data_expression(v_equation), data_expression(v_rhs));
     } else {
       // non-tau-summand
       ATermAppl v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
-      v_rhs = gsMakeDataExprAnd(v_subst_condition_1, v_subst_condition_2);
-      v_rhs = gsMakeDataExprAnd(v_rhs, v_actions_equation);
-      v_rhs = gsMakeDataExprAnd(v_rhs, v_subst_equation);
+      v_rhs = sort_bool::and_(data_expression(v_subst_condition_1), data_expression(v_subst_condition_2));
+      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_actions_equation));
+      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_subst_equation));
     }
-    return gsMakeDataExprImp(v_lhs, v_rhs);
+    return sort_bool::implies(data_expression(v_lhs), data_expression(v_rhs));
   }
 
   // --------------------------------------------------------------------------------------------
@@ -404,16 +404,16 @@ using namespace mcrl2::core::detail;
   // Class Confluence_Checker - Functions declared public -----------------------------------------
 
     Confluence_Checker::Confluence_Checker(
-                     mcrl2::lps::specification const& a_lps, 
-                     mcrl2::data::rewriter::strategy a_rewrite_strategy, 
-                     int a_time_limit, 
-                     bool a_path_eliminator, 
+                     mcrl2::lps::specification const& a_lps,
+                     mcrl2::data::rewriter::strategy a_rewrite_strategy,
+                     int a_time_limit,
+                     bool a_path_eliminator,
                      SMT_Solver_Type a_solver_type,
-                     bool a_apply_induction, 
-                     bool a_no_marking, 
-                     bool a_check_all, 
-                     bool a_counter_example, 
-                     bool a_generate_invariants, 
+                     bool a_apply_induction,
+                     bool a_no_marking,
+                     bool a_check_all,
+                     bool a_counter_example,
+                     bool a_generate_invariants,
                      std::string const& a_dot_file_name):
       f_disjointness_checker(lps::linear_process_to_aterm(a_lps.process())),
       f_invariant_checker(a_lps, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, false, false, 0),
@@ -435,7 +435,7 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    Confluence_Checker::~Confluence_Checker() 
+    Confluence_Checker::~Confluence_Checker()
     {}
 
     // --------------------------------------------------------------------------------------------

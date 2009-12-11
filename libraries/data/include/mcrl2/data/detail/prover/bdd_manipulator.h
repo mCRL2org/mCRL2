@@ -13,7 +13,7 @@
 #define BDD_MANIPULATOR_H
 
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/standard.h"
 
 /// The class BDD_Manipulator provides functionality for constructing binary decision diagrams.
 class BDD_Manipulator {
@@ -42,7 +42,7 @@ class BDD_Manipulator {
     /// \param a_false_branch A BDD.
     /// \return A reduced BDD.
     inline ATermAppl make_reduced_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch) {
-      return mcrl2::core::detail::gsMakeDataExprIf(a_guard, a_true_branch, a_false_branch);
+      return mcrl2::data::if_(mcrl2::data::data_expression(a_guard), mcrl2::data::data_expression(a_true_branch), mcrl2::data::data_expression(a_false_branch));
     }
 };
 

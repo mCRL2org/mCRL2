@@ -109,9 +109,9 @@ using namespace mcrl2::core;
       }
 
       ATermAppl v_subst_invariant = gsSubstValues_Appl(v_substitutions, a_invariant, true);
-      ATermAppl v_formula = mcrl2::core::detail::gsMakeDataExprAnd(a_invariant, v_condition);
+      ATermAppl v_formula = mcrl2::data::sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
 
-      v_formula = mcrl2::core::detail::gsMakeDataExprImp(v_formula, v_subst_invariant);
+      v_formula = mcrl2::data::sort_bool::implies(data_expression(v_formula), data_expression(v_subst_invariant));
       f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_tautology() == answer_yes) {
         gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);

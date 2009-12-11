@@ -17,6 +17,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
+//#include "mcrl2/data/real.h"
 
 using namespace mcrl2::core::detail;
 
@@ -1769,7 +1770,24 @@ namespace mcrl2 {
         return ATfalse;
       }
 
-      if(ATLtableGet(gssystem.functions, (ATerm)Name) &&
+      if(ATLtableGet(gssystem.functions, (ATerm)Name) &&/*
+         !ATisEqual(Name,sort_real::maximum_name())&&
+         !ATisEqual(Name,sort_real::minimum_name())&&
+         !ATisEqual(Name,sort_real::abs_name())&&
+         !ATisEqual(Name,sort_real::succ_name())&&
+         !ATisEqual(Name,sort_real::pred_name())&&
+         !ATisEqual(Name,sort_int::div_name())&&
+         !ATisEqual(Name,sort_int::mod_name())&&
+         !ATisEqual(Name,sort_real::exp_name())&&
+         !ATisEqual(Name,sort_real::floor_name())&&
+         !ATisEqual(Name,sort_real::ceil_name())&&
+         !ATisEqual(Name,sort_real::round_name())&&
+         !ATisEqual(Name,sort_list::head_name())&&
+         !ATisEqual(Name,sort_list::tail_name())&&
+         !ATisEqual(Name,sort_list::rhead_name())&&
+         !ATisEqual(Name,sort_list::rtail_name())&&
+         !ATisEqual(Name,sort_list::in_name())&&
+         !ATisEqual(Name,sort_list::count_name())*/
          !ATisEqual(Name,gsMakeOpIdNameMax()) &&
          !ATisEqual(Name,gsMakeOpIdNameMin()) &&
          !ATisEqual(Name,gsMakeOpIdNameAbs()) &&

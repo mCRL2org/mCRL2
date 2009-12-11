@@ -1528,7 +1528,7 @@ void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification &
 
   num_opids = 0;
 
-  true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
+  true_num = ATgetInt((ATermInt) OpId2Int(sort_bool::true_(),true));
 
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const data_specification::equations_const_range l=DataSpec.equations();

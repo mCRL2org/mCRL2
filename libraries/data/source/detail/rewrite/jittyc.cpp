@@ -2845,7 +2845,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification &Data
 
   num_opids = 0;
 
-  true_num = ATgetInt((ATermInt) OpId2Int(gsMakeDataExprTrue(),true));
+  true_num = ATgetInt((ATermInt) OpId2Int(sort_bool::true_(),true));
 
   const data_specification::equations_const_range l=DataSpec.equations();
   for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)

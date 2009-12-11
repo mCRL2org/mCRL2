@@ -25,7 +25,7 @@ using namespace mcrl2::core::detail;
 
     ATermAppl Invariant_Eliminator::simplify_summand(ATermAppl a_summand, ATermAppl a_invariant, int a_summand_number) {
       ATermAppl v_condition = ATAgetArgument(a_summand, 1);
-      ATermAppl v_formula = gsMakeDataExprAnd(a_invariant, v_condition);
+      ATermAppl v_formula = sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
 
       f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_contradiction() == answer_yes) {

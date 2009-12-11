@@ -12,6 +12,7 @@
 #include "mcrl2/data/detail/prover/info.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/data/standard.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -245,10 +246,10 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
   // Class AI_Jitty - Functions declared public ---------------------------------------------------
 
     AI_Jitty::AI_Jitty(Rewriter* a_rewriter): ATerm_Info(a_rewriter) {
-      f_true = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdTrue()), 0);
-      f_false = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdFalse()), 0);
-      f_if_then_else_bool = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool())), 0);
-      f_eq = (ATerm) gsMakeOpIdNameEq();
+      f_true = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(sort_bool::true_()), 0);
+      f_false = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(sort_bool::false_()), 0);
+      f_if_then_else_bool = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0);
+      f_eq = (ATerm) static_cast<ATermAppl>(detail::equal_symbol());
     }
 
     // --------------------------------------------------------------------------------------------
@@ -381,10 +382,10 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
   // Class AM_Inner - Functions declared public ---------------------------------------------------
 
     AI_Inner::AI_Inner(Rewriter* a_rewriter): ATerm_Info(a_rewriter) {
-      f_true = f_rewriter->toRewriteFormat(gsMakeOpIdTrue());
-      f_false = f_rewriter->toRewriteFormat(gsMakeOpIdFalse());
-      f_if_then_else_bool = f_rewriter->toRewriteFormat(gsMakeOpIdIf(gsMakeSortExprBool()));
-      f_eq = (ATerm) gsMakeOpIdNameEq();
+      f_true = f_rewriter->toRewriteFormat(sort_bool::true_());
+      f_false = f_rewriter->toRewriteFormat(sort_bool::false_());
+      f_if_then_else_bool = f_rewriter->toRewriteFormat(if_(sort_bool::bool_()));
+      f_eq = (ATerm) static_cast<ATermAppl>(detail::equal_symbol());
     }
 
     // --------------------------------------------------------------------------------------------

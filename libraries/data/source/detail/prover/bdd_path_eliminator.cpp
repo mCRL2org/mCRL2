@@ -39,7 +39,7 @@ namespace mcrl2 {
       }
 
       ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
-      ATermAppl v_negated_guard = gsMakeDataExprNot(v_guard);
+      ATermAppl v_negated_guard = sort_bool::not_(data_expression(v_guard));
       ATermList v_true_condition = create_condition(a_path, v_guard, true);
       bool v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
       if (!v_true_branch_enabled) {

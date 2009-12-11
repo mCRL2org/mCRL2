@@ -31,6 +31,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/bool.h"
 #include "mcrl2/exception.h"
 
 //Tool framework
@@ -41,7 +42,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-
+using namespace mcrl2::data;
 using namespace mcrl2;
 using utilities::tools::input_output_tool;
 using namespace mcrl2::utilities::tools;
@@ -2244,7 +2245,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     if(error) {
       //add nMaxTockens
       ATermAppl ExtraMap=mcrl2::data::function_symbol(ATAgetArgument(nMaxTokens,0),mcrl2::data::sort_pos::pos());
-      ATermAppl ExtraEqn=gsMakeDataEqn(ATmakeList0(),gsMakeDataExprTrue(),nMaxTokens,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(error))));
+      ATermAppl ExtraEqn=gsMakeDataEqn(ATmakeList0(),sort_bool::true_(),nMaxTokens,gsMakeId(ATmakeAppl0(ATmakeAFunInt0(error))));
       ATermAppl DataSpec=ATAgetArgument(Result,0);
       ATermAppl NewMapSpec=gsMakeMapSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,2),0),(ATerm)ExtraMap));
       ATermAppl NewDataEqnSpec=gsMakeDataEqnSpec(ATinsert(ATLgetArgument(ATAgetArgument(DataSpec,3),0),(ATerm)ExtraEqn));

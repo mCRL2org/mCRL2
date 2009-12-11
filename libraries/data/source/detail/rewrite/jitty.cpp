@@ -106,7 +106,7 @@ static void initialise_common()
   {
     nilAFun = ATgetAFun(gsMakeNil());
     ATprotectAFun(nilAFun);
-    opidAFun = ATgetAFun(gsMakeDataExprTrue());
+    opidAFun = ATgetAFun(static_cast<ATermAppl>(sort_bool::true_()));
     ATprotectAFun(opidAFun);
   }
 
@@ -458,7 +458,7 @@ RewriterJitty::RewriterJitty(const data_specification &DataSpec)
   max_vars = 0;
         need_rebuild = false;
 
-  jitty_true = toInner(gsMakeDataExprTrue(),true);
+  jitty_true = toInner(sort_bool::true_(),true);
   ATprotectAppl(&jitty_true);
 
 /*	l = opid_eqns;
@@ -471,9 +471,9 @@ RewriterJitty::RewriterJitty(const data_specification &DataSpec)
   l = dataappl_eqns;*/
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const data_specification::equations_const_range l = DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin(); 
+  for (atermpp::set< data_equation >::const_iterator j=l.begin();
           j!=l.end(); ++j)
-  { 
+  {
     try
     {
       CheckRewriteRule(*j);
@@ -491,7 +491,7 @@ RewriterJitty::RewriterJitty(const data_specification &DataSpec)
     }
     if ( j->variables().size() > max_vars)
     {
-      max_vars = j->variables().size(); 
+      max_vars = j->variables().size();
     }
     n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
                                        (ATerm) toInner(j->condition(),true),
@@ -997,7 +997,7 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
  // ATfprintf(stderr,"rewrite(%t)\n",fromInner((ATermAppl)Term));
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
  // ATfprintf(stderr,"return(%t)\n",fromInner((ATermAppl)aaa));
-  return aaa; 
+  return aaa;
   // return (ATerm) rewrite_aux((ATermAppl) Term);
 }
 

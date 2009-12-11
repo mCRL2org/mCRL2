@@ -74,7 +74,7 @@ static void initialise_common()
   {
     nilAFun = ATgetAFun(gsMakeNil());
     ATprotectAFun(nilAFun);
-    opidAFun = ATgetAFun(gsMakeDataExprTrue());
+    opidAFun = ATgetAFun(static_cast<ATermAppl>(sort_bool::true_()));
     ATprotectAFun(opidAFun);
     ruleAFun = ATmakeAFun("@RULE@",4,ATfalse);
     ATprotectAFun(ruleAFun);
@@ -1117,7 +1117,7 @@ RewriterInnermost::RewriterInnermost(const data_specification &DataSpec)
   tmp_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
   term2int = ATtableCreate(100,50);
 
-  trueint = (ATermInt) OpId2Int(gsMakeDataExprTrue(),true);
+  trueint = (ATermInt) OpId2Int(sort_bool::true_(),true);
   ATprotectInt(&trueint);
 
   /*l = opid_eqns;
