@@ -9,13 +9,16 @@
     <title>Contents</title>
     <xi:include href="library_structure.xml"/>
     <xi:include href="common_functionality.xml"/>
-    <xi:include href="atermpp_manual.xml"/>
-    <xi:include href="core_manual.xml"/>
-    <xi:include href="data_manual.xml"/>
-    <xi:include href="process_manual.xml"/>
-    <xi:include href="lps_manual.xml"/>
-    <xi:include href="pbes_manual.xml"/>
-    <xi:include href="utilities_manual.xml"/>
+    <xi:include href="terms.xml"/>
+    <xi:include href="atermpp_library.xml"/>
+    <xi:include href="core_library.xml"/>
+    <xi:include href="data_library.xml"/>
+    <xi:include href="lps_library.xml"/>
+    <xi:include href="lts_library.xml"/>
+    <xi:include href="pbes_library.xml"/>
+    <xi:include href="process_library.xml"/>
+    <xi:include href="trace_library.xml"/>
+    <xi:include href="utilities_library.xml"/>
   </part>
 
 </boostbook>

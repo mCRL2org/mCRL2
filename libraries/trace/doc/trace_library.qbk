@@ -1,0 +1,16 @@
+[library Trace Library
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+]
+
+[/  Links   ]
+[def __mcrl2__                 [@http://mcrl2.org mCRL2]]
+[def __mcrl2_primer__          [@http://www.mcrl2.org/wiki/index.php/MCRL2_Primer mCRL2 Primer]]
+[def __trace_library__         [@http://www.mcrl2.org/mcrl2/wiki/index.php/Trace_library Trace Library]]
+
+[section: Introduction]
+The __trace_library__ is a library to store, load and traverse traces. 
+
+[endsect]

@@ -12,34 +12,40 @@ boostbook doc
     :
     ## Build the various generated docs (Doxygen and QuickBook)...
 
-    <dependency>../libraries/atermpp/doc//atermpp_manual
-    <dependency>../libraries/core/doc//core_manual
     <dependency>../libraries/core/doc//library_structure
     <dependency>../libraries/core/doc//common_functionality
-    <dependency>../libraries/data/doc//data_manual
-    <dependency>../libraries/process/doc//process_manual
-    <dependency>../libraries/lps/doc//lps_manual
-    <dependency>../libraries/pbes/doc//pbes_manual
-    <dependency>../libraries/utilities/doc//utilities_manual
+    <dependency>../libraries/core/doc//terms
+    <dependency>../libraries/atermpp/doc//atermpp_library
+    <dependency>../libraries/core/doc//core_library
+    <dependency>../libraries/data/doc//data_library
+    <dependency>../libraries/lps/doc//lps_library
+    <dependency>../libraries/lts/doc//lts_library
+    <dependency>../libraries/pbes/doc//pbes_library
+    <dependency>../libraries/process/doc//process_library
+    <dependency>../libraries/trace/doc//trace_library
+    <dependency>../libraries/utilities/doc//utilities_library
 
     ## Add path references to the QuickBook generated docs...
 
-    <implicit-dependency>../libraries/atermpp/doc//atermpp_manual
-    <implicit-dependency>../libraries/core/doc//core_manual
     <implicit-dependency>../libraries/core/doc//library_structure
     <implicit-dependency>../libraries/core/doc//common_functionality
-    <implicit-dependency>../libraries/data/doc//data_manual
-    <implicit-dependency>../libraries/process/doc//process_manual
-    <implicit-dependency>../libraries/lps/doc//lps_manual
-    <implicit-dependency>../libraries/pbes/doc//pbes_manual
-    <implicit-dependency>../libraries/utilities/doc//utilities_manual
+    <implicit-dependency>../libraries/core/doc//terms
+    <implicit-dependency>../libraries/atermpp/doc//atermpp_library
+    <implicit-dependency>../libraries/core/doc//core_library
+    <implicit-dependency>../libraries/data/doc//data_library
+    <implicit-dependency>../libraries/lps/doc//lps_library
+    <implicit-dependency>../libraries/lts/doc//lts_library
+    <implicit-dependency>../libraries/process/doc//process_library
+    <implicit-dependency>../libraries/pbes/doc//pbes_library
+    <implicit-dependency>../libraries/trace/doc//trace_library
+    <implicit-dependency>../libraries/utilities/doc//utilities_library
 
     <xsl:param>nav.layout=none
     <xsl:param>boost.libraries=../../libs/libraries.htm
     <xsl:param>boost.image.src=images/mcrl2.png
     <xsl:param>boost.image.alt=mCRL2
-    <xsl:param>boost.image.w=294
-    <xsl:param>boost.image.h=70
+    <xsl:param>boost.image.w=293
+    <xsl:param>boost.image.h=100
  
     <dependency>css
     <dependency>images

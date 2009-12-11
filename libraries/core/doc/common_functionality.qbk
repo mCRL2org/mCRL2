@@ -13,7 +13,7 @@ The most prominent example is a traversal framework and a family of find functio
 that has been implemented on top of that. This chapter discusses some of these
 algorithms.
 
-[include algorithms_manual.qbk]
+[include algorithms.qbk]
 
 [section: Generic programming techniques]
 
@@ -36,4 +36,4 @@ other types:
 
 [endsect]
 
-[include concept_manual.qbk]
+[include concepts.qbk]

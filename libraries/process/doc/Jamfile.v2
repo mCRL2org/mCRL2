@@ -1,20 +1,20 @@
 import quickbook ;
 
-xml process_manual
+xml process_library
     :
-        process_manual.qbk
+        process_library.qbk
     ;
 
 boostbook standalone
     :
-        process_manual
+        process_library
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png
         <xsl:param>boost.image.alt=mCRL2
-        <xsl:param>boost.image.w=294
-        <xsl:param>boost.image.h=70
-        <xsl:param>boost.root=../../../mcrl2/process/include
+        <xsl:param>boost.image.w=293
+        <xsl:param>boost.image.h=100
+        <xsl:param>boost.root=../..
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
         <xsl:param>chunk.section.depth=3

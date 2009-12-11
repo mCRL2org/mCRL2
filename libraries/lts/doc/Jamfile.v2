@@ -1,33 +1,13 @@
-import doxygen ;
 import quickbook ;
 
-xml core_library
+xml lts_library
     :
-        core_library.qbk
+        lts_library.qbk
     ;
-
-xml library_structure
-    :
-        library_structure.qbk
-    ;
-
-xml common_functionality
-    :
-        common_functionality.qbk
-    ;
-
-xml terms
-    :
-        terms.qbk
-    ;
-
 
 boostbook standalone
     :
-        core_library
-        library_structure
-        common_functionality
-        terms
+        lts_library
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png

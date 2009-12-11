@@ -1,19 +1,19 @@
 import quickbook ;
 
-xml pbes_manual
+xml pbes_library
     :
-        pbes_manual.qbk
+        pbes_library.qbk
     ;
 
 boostbook standalone
     :
-        pbes_manual
+        pbes_library
     :
         <xsl:param>nav.layout=none
         <xsl:param>boost.image.src=images/mcrl2.png
         <xsl:param>boost.image.alt=mCRL2
-        <xsl:param>boost.image.w=294
-        <xsl:param>boost.image.h=70
+        <xsl:param>boost.image.w=293
+        <xsl:param>boost.image.h=100
         <xsl:param>boost.root=../..
         <xsl:param>toc.max.depth=3
         <xsl:param>toc.section.depth=3
