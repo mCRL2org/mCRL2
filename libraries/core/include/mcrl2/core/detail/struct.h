@@ -31,10 +31,6 @@ namespace mcrl2 {
 // ----------------
 
 ///\pre Term is not NULL
-///\return Term is a sort expression
-bool gsIsSortExpr(ATermAppl Term);
-
-///\pre Term is not NULL
 ///\return Term is either SortUnknown or SortsPossible
 bool gsIsNotInferred(ATermAppl Term);
 
@@ -264,10 +260,6 @@ ATermList gsGetSortExprDomains(ATermAppl SortExpr);
 
 // Data expressions
 // ----------------
-
-///\pre Term is not NULL
-///\return Term is a data expression
-bool gsIsDataExpr(ATermAppl Term);
 
 ///\pre DataExpr is an OpId or a DataVarId
 ///\return The name of the data expression

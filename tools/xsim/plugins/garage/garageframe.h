@@ -27,7 +27,6 @@
 #include "simbase.h"
 #include "aterm2.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/aterm_ext.h"
 

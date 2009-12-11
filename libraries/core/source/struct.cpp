@@ -1092,14 +1092,6 @@ inline ATermAppl initMakeOpIdNameFuncUpdate(ATermAppl &t)
 //Sort expressions
 //----------------
 
-bool gsIsSortExpr(ATermAppl Term)
-{
-  return
-    gsIsSortId(Term)        || gsIsSortCons(Term)     ||
-    gsIsSortStruct(Term)    || gsIsSortArrow(Term) ||
-    gsIsSortUnknown(Term)   || gsIsSortsPossible(Term);
-}
-
 bool gsIsNotInferred(ATermAppl Term)
 {
   return gsIsSortUnknown(Term) || gsIsSortsPossible(Term);
@@ -1498,12 +1490,6 @@ ATermList gsGetSortExprDomains(ATermAppl SortExpr)
 
 //Data expressions
 //----------------
-
-bool gsIsDataExpr(ATermAppl Term)
-{
-  return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
-    gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
-}
 
 ATermAppl gsGetName(ATermAppl DataExpr)
 {

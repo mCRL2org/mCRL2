@@ -12,8 +12,9 @@
 #ifndef BDD_INFO_H
 #define BDD_INFO_H
 
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/standard.h"
 
 /// \brief The class BDD_Info provides information about the structure of binary decision diagrams.
 class BDD_Info {
@@ -46,7 +47,7 @@ class BDD_Info {
     /// \return True, if the BDD equals true.
     ///         False, if the BDD does not equal true.
     inline bool is_true(ATermAppl a_bdd) {
-      return mcrl2::core::detail::gsIsDataExprTrue(a_bdd);
+      return mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(a_bdd));
     }
 
     /// \brief Method that indicates whether or not a BDD equals false.
@@ -54,7 +55,7 @@ class BDD_Info {
     /// \return True, if the BDD equals false.
     ///         False, if the BDD does not equal true.
     inline bool is_false(ATermAppl a_bdd) {
-      return mcrl2::core::detail::gsIsDataExprFalse(a_bdd);;
+      return mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(a_bdd));
     }
 
     /// \brief Method that indicates wether or not the root of a BDD is a guard node.
@@ -62,7 +63,7 @@ class BDD_Info {
     /// \return True, if the root of the BDD is a guard node.
     ///         False, if the BDD equals true or if the BDD equals false.
     inline bool is_if_then_else(ATermAppl a_bdd) {
-      return mcrl2::core::detail::gsIsDataExprIf(a_bdd);
+      return mcrl2::data::is_if_application(mcrl2::data::data_expression(a_bdd));
     }
 };
 

@@ -13,9 +13,6 @@
 #define MCRL2_LPSRTA_COMP_H
 
 #include <iostream>
-#include "mcrl2/core/detail/struct.h"
-// #include "mcrl2/data/data_operation.h"
-// #include "mcrl2/data/data_application.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/structured_sort.h"

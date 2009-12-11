@@ -9,7 +9,6 @@
 #include <cstdlib>
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"

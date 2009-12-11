@@ -13,7 +13,6 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"

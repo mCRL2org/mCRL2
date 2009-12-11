@@ -13,7 +13,6 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "dataexpression.h"
-#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
 
 namespace grape
 {

@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct.h" // for gsIsDataExpr
+#include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
 

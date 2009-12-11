@@ -22,7 +22,6 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/nextstate.h"

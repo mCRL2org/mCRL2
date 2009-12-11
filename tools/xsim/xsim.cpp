@@ -27,7 +27,6 @@
 #include <wx/string.h>
 #include <aterm2.h>
 #include "xsimmain.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"

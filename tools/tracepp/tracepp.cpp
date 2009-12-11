@@ -17,7 +17,7 @@
 #include <fstream>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"

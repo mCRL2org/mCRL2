@@ -21,7 +21,7 @@
 #include <memory.h>
 #include "boost/scoped_array.hpp"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"

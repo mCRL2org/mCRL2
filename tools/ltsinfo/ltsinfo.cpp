@@ -16,7 +16,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/atermpp/aterm_init.h"

@@ -3788,6 +3788,28 @@ ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
 //     "sk" as a quoted ATermAppl constant, where k is the smallest natural
 //     number such that "sk" does not occur in Term, otherwise
 
+// ----------------- gsIsDataExpr and gsIsSortExpr ---------------------- //
+
+///\pre Term is not NULL
+///\return Term is a sort expression
+inline
+bool gsIsSortExpr(ATermAppl Term)
+{
+  return
+    gsIsSortId(Term)        || gsIsSortCons(Term)     ||
+    gsIsSortStruct(Term)    || gsIsSortArrow(Term) ||
+    gsIsSortUnknown(Term)   || gsIsSortsPossible(Term);
+}
+
+///\pre Term is not NULL
+///\return Term is a data expression
+inline
+bool gsIsDataExpr(ATermAppl Term)
+{
+  return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
+    gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
+}
+
     }
   }
 }

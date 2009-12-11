@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/alpha.h"

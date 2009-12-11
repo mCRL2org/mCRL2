@@ -19,7 +19,7 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/struct.h" // for gsIsSortExpr
+#include "mcrl2/core/detail/struct_core.h" // for gsIsSortExpr
 #include "mcrl2/data/detail/convert.h"
 
 namespace mcrl2 {

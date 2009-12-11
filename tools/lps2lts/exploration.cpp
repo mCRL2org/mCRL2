@@ -13,7 +13,6 @@
 #include <time.h>
 #include <sstream>
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/nat.h"

@@ -17,7 +17,7 @@
 #include <iterator>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/soundness_checks.h"

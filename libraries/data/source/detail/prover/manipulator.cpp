@@ -7,7 +7,6 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/info.h"

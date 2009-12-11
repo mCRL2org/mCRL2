@@ -19,7 +19,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <aterm2.h>
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"

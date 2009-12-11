@@ -9,7 +9,6 @@
 /// \file ltsmindata.cpp
 
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/struct.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/standard_utility.h"

@@ -23,7 +23,7 @@
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/exception.h"
 #include "boost/config.hpp"

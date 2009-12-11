@@ -12,7 +12,6 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #include <string>
-#include "mcrl2/core/detail/struct.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
