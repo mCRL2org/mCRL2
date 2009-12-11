@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Thursday, December 03, 2009 16:38:36}
+%TCIDATA{LastRevised=Friday, December 11, 2009 13:13:18}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -489,17 +489,17 @@ l & \mathsf{if\ }Y=X \\
 \mathbf{RHS}}(\varphi ) \\ 
 {\mathbf{RHS}}([\alpha ]\varphi ) & =_{def} & \bigwedge_{i{\in }I}\forall _{y%
 {:}E_{i}}((\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))\mbox{\aap ,}%
-t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
+t_{i}(x_{p},y),\alpha )\ \wedge \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(}c_{i}(x_{p},y)%
-\wedge t_{i}(x_{p},y)>T\ )\Rightarrow  \\ 
+\wedge t_{i}(x_{p},y)>T\ )\Rightarrow \\ 
 &  & \phantom{\bigwedge_{i {\in} I} \forall_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(\langle \alpha \rangle \varphi ) & =_{def} & \bigvee_{i{\in }%
 I}\exists _{y{:}E_{i}}(\mathbf{Sat}_{true}(a_{i}(f_{i}(x_{p},y))%
 \mbox{\aap
-,}t_{i}(x_{p},y),\alpha )\ \wedge  \\ 
+,}t_{i}(x_{p},y),\alpha )\ \wedge \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(}c_{i}(x_{p},y)\wedge
-t_{i}(x_{p},y)>T\ \wedge  \\ 
+t_{i}(x_{p},y)>T\ \wedge \\ 
 &  & \phantom{\bigvee_{i {\in} I} \exists_{y {:} E_i}(} {\mathbf{RHS}}%
 (\varphi )[T,x_{p}:=t_{i}(x_{p},y),g_{i}(x_{p},y)]) \\ 
 {\mathbf{RHS}}(X(d)) & =_{def} & \tilde{X}(T,d,x_{p},\mathbf{Par}%
@@ -1171,15 +1171,14 @@ an equivalent expression $\varphi ^{\prime }$.
 Then we define%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r\text{\textsc{)}}
-\\ 
-\mathcal{E}^{\prime }:=\varepsilon \\ 
+\text{\textsc{Gau\textsc{\ss\ }Elimination(}}\mathcal{E},r,\text{\textsc{%
+solve)}} \\ 
+\mathcal{E}^{\prime }:=\varepsilon  \\ 
 i:=n \\ 
 \text{\textbf{while} \textbf{not} }i=0 \\ 
 \text{\textbf{do}} \\ 
-\qquad (\sigma _{i}X_{i}=\psi _{i}):=\text{\textsc{SolveEquation(}}\sigma
-_{i}X_{i}=\varphi _{i}\text{\textsc{)}} \\ 
-\qquad \varphi _{i}:=\psi _{i} \\ 
+\qquad \varphi _{i}:=\text{\textsc{solve(}}\sigma _{i}X_{i}=\varphi _{i}%
+\text{\textsc{)}} \\ 
 \qquad \mathcal{E}^{\prime }:=\mathcal{E}^{\prime }(\sigma _{i}X_{i}=\varphi
 _{i}) \\ 
 \qquad \text{\textbf{for }}k=1\text{ \textbf{to }}i-1\text{ \textbf{do }}%
@@ -1195,14 +1194,14 @@ in its right hand side. An example of such a solve equation algorithm is
 \textsc{Approximate}.%
 \begin{equation*}
 \begin{array}{l}
-\text{\textsc{Approximate(}}\sigma X=\varphi \text{\textsc{)}} \\ 
+\text{\textsc{Approximate(}}\sigma X=\varphi ,\text{\textsc{compare)}} \\ 
 j:=0 \\ 
-\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true \text{ 
+\text{\textbf{if }}\sigma =\nu \text{ \textbf{then} }\psi _{0}:=true\text{ 
 \textbf{else} }\psi _{0}:=false \\ 
 \text{\textbf{repeat}} \\ 
 \qquad \psi _{j+1}:=\varphi \lbrack \psi _{j}/X] \\ 
 \qquad j:=j+1 \\ 
-\text{\textbf{until }}(\psi _{j}=\psi _{j+1}) \\ 
+\text{\textbf{until }\textsc{compare}}(\psi _{j},\psi _{j+1}) \\ 
 \text{\textbf{return }}\sigma X=\psi _{j}%
 \end{array}%
 \end{equation*}

@@ -19,76 +19,101 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \brief Algorithm class for the Gauss elimination algorithm for solving
-/// systems of pbes equations.
-class gauss_elimination_algorithm
-{
-  protected:
-    /// \brief Pretty print an equation without generating a newline after the equal sign
-    /// \param eq A bes/pbes equation
-    /// \return A pretty printed string
-    template <typename Equation>
-    std::string mypp(Equation eq)
-    {
-      typedef core::term_traits<typename Equation::term_type> tr;
-      //return core::pp(eq.symbol()) + " " + tr::pp(eq.variable()) + " = " + tr::pp(eq.formula());
-      return core::pp(eq.symbol()) + " " + eq.variable().to_string() + " = " + eq.formula().to_string();
-    }
-
-    /// \brief Prints the sequence of pbes equations [first, last) to standard out.
-    /// \param first Start of a range of pbes equations
-    /// \param last End of a range of pbes equations
-    template <typename Iter>
-    void print(Iter first, Iter last)
-    {
-      std::cerr << "pbes\n";
-      for (Iter i = first; i != last; ++i)
+  /// \brief Algorithm class for the Gauss elimination algorithm for solving
+  /// systems of pbes equations.
+  template <typename ExpressionTraits>
+  class gauss_elimination_algorithm
+  {
+    public:
+      typedef typename ExpressionTraits::expression_type expression_type;
+      typedef typename ExpressionTraits::variable_type variable_type;
+      typedef typename ExpressionTraits::equation_type equation_type;
+    
+    protected:
+      /// \brief Prints the sequence of pbes equations [first, last) to standard out.
+      /// \param first Start of a range of pbes equations
+      /// \param last End of a range of pbes equations
+      template <typename Iter>
+      void print(Iter first, Iter last)
       {
-        std::cerr << "  " << mypp(*i) << std::endl;
-      }
-    }
-
-  public:
-
-    /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
-    /// \param first Start of a range of pbes equations
-    /// \param last End of a range of pbes equations
-    /// \param solver An equation solver
-    template <typename Iter, typename EquationSolver>
-    void run(Iter first, Iter last, EquationSolver solver)
-    {
-#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  print(first, last);
-#endif
-      if (first == last)
-      {
-        return;
-      }
-
-      Iter i = last;
-      while (i != first)
-      {
-        --i;
-#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  std::cerr << "solving equation\n";
-  std::cerr << "  before: " << mypp(*i) << std::endl;
-#endif
-        solver.solve(*i);
-#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  std::cerr << "   after: " << mypp(*i) << std::endl;
-#endif
-        // propagate the substitutions
-        for (Iter j = first; j != i; ++j)
+        std::cerr << "equations\n";
+        for (Iter i = first; i != last; ++i)
         {
-          solver.substitute(*j, *i);
+          std::cerr << "  " << ExpressionTraits::print(*i) << std::endl;
         }
       }
-      solver.solve(*i); // TODO: clean the logic of this algorithm up
-#ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
-  print(first, last);
-#endif
+  
+    public:
+  
+      /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
+      /// \param first Start of a range of pbes equations
+      /// \param last End of a range of pbes equations
+      /// \param solver An equation solver
+      template <typename Iter, typename EquationSolver>
+      void run(Iter first, Iter last, EquationSolver solve)
+      {    
+  #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+    print(first, last);
+  #endif
+        if (first == last)
+        {
+          return;
+        }
+  
+        Iter i = last;
+        while (i != first)
+        {
+          --i;
+  #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+    std::cerr << "solving equation\n";
+    std::cerr << "  before: " << ExpressionTraits::print(*i) << std::endl;
+  #endif
+          solve(*i);
+  #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+    std::cerr << "   after: " << ExpressionTraits::print(*i) << std::endl;
+  #endif
+          // propagate the substitutions
+          for (Iter j = first; j != i; ++j)
+          {
+            ExpressionTraits::substitute(*j, *i);
+          }
+        }
+        solve(*i); // TODO: clean the logic of this algorithm up
+  #ifdef MCRL2_GAUSS_ELIMINATION_DEBUG
+    print(first, last);
+  #endif
+      }
+  };
+
+  /// \brief Approximation algorithm
+  template <typename ExpressionTraits, typename Compare>
+  struct approximate
+  {
+    Compare m_compare;
+
+    approximate(Compare compare)
+      : m_compare(compare)
+    {}
+
+    void operator()(typename ExpressionTraits::equation_type& eq) const
+    {
+      typedef typename ExpressionTraits::expression_type expression_type;
+      typedef typename ExpressionTraits::variable_type variable_type;
+      typedef typename ExpressionTraits::equation_type equation_type;
+      
+      const expression_type& phi = eq.formula();
+      const variable_type& X = eq.variable();
+      expression_type next = phi;
+      expression_type prev;
+      do
+      {
+        prev = next;
+        next = ExpressionTraits::substitute(phi, X, prev);
+      }
+      while (!m_compare(prev, next));
+      eq.formula() = next;
     }
-};
+  };
 
 } // namespace pbes_system
 

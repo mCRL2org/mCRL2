@@ -22,7 +22,8 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/gauss_elimination.h"
+#include "mcrl2/pbes/bes_gauss_elimination.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/bes_algorithms.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/linearise.h"
@@ -95,7 +96,7 @@ std::string BES8 =
 void test_bes(std::string bes_spec, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  int result = pbes_system::pbes_gauss_elimination(p);
+  int result = pbes_system::gauss_elimination(p);
   switch (result) {
     case 0: std::cout << "FALSE" << std::endl; break;
     case 1: std::cout << "TRUE" << std::endl; break;
@@ -105,6 +106,8 @@ void test_bes(std::string bes_spec, bool expected_result)
 
   // BOOST_CHECK(pbes2bool(p) == expected_result);
   // this gives assertion failures in pbes2bool
+
+  core::garbage_collect();
 }
 
 void test_bes_examples()
@@ -159,21 +162,22 @@ const std::string ABP_SPECIFICATION =
   "  );                                                                       \n"
   ;
 
-const std::string FORMULA  = "[true*]<true*>true";
-
 void test_abp()
 {
   bool timed = false;
-  lps::specification spec      = lps::linearise(ABP_SPECIFICATION);
+  std::string FORMULA  = "[true*]<true*>true";
+  lps::specification spec = lps::linearise(ABP_SPECIFICATION);
   state_formulas::state_formula formula = state_formulas::detail::mcf2statefrm(FORMULA, spec);
 
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
-  int result = pbes_system::pbes_gauss_elimination(p);
+  int result = pbes_system::gauss_elimination(p);
   switch (result) {
     case 0: std::cout << "FALSE" << std::endl; break;
     case 1: std::cout << "TRUE" << std::endl; break;
     case 2: std::cout << "UNKNOWN" << std::endl; break;
   }
+
+  core::garbage_collect();
 }
 
 void test_bes()
@@ -227,6 +231,39 @@ void test_bes()
   BOOST_CHECK(gauss_elimination(bes2) == true);
   BOOST_CHECK(gauss_elimination(bes3) == false);
   BOOST_CHECK(gauss_elimination(bes4) == true);
+
+  core::garbage_collect();
+}
+
+inline
+bool compare(const pbes_system::pbes_expression& x, const pbes_system::pbes_expression& y)
+{
+  return x == y;
+}
+
+typedef bool (*compare_function)(const pbes_system::pbes_expression& x, const pbes_system::pbes_expression& y);
+
+void test_approximate()
+{
+  using namespace pbes_system;
+  typedef core::term_traits<pbes_expression> tr;
+
+  gauss_elimination_algorithm<pbes_traits> algorithm;
+  pbes_system::pbes<> p = pbes_system::txt2pbes(BES4);
+  algorithm.run(p.equations().begin(), p.equations().end(), approximate<pbes_traits, compare_function>(compare));
+  if (tr::is_false(p.equations().front().formula()))
+  {
+    std::cout << "FALSE" << std::endl;
+  }
+  else if (tr::is_true(p.equations().front().formula()))
+  {
+    std::cout << "TRUE" << std::endl;
+  }
+  else
+  {
+    std::cout << "UNKNOWN" << std::endl;
+  }
+  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
@@ -234,11 +271,9 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_bes();
-  core::garbage_collect();
   test_abp();
-  core::garbage_collect();
   test_bes_examples();
-  core::garbage_collect();
+  test_approximate();
 
   return 0;
 }

@@ -47,7 +47,7 @@ namespace pbes_system {
       /// \brief Rewrites a boolean expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x)
+      term_type operator()(const term_type& x) const
       {
         bes::detail::boolean_simplify_builder<Term> r;
         return r(x);

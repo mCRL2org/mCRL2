@@ -464,21 +464,42 @@ class boolean_equation: public atermpp::aterm_appl
 
     /// \brief Returns the fixpoint symbol of the equation.
     /// \return The fixpoint symbol of the equation.
-    fixpoint_symbol symbol() const
+    const fixpoint_symbol& symbol() const
+    {
+      return m_symbol;
+    }
+
+    /// \brief Returns the fixpoint symbol of the equation.
+    /// \return The fixpoint symbol of the equation.
+    fixpoint_symbol& symbol()
     {
       return m_symbol;
     }
 
     /// \brief Returns the boolean_equation_system variable of the equation.
     /// \return The boolean_equation_system variable of the equation.
-    boolean_variable variable() const
+    const boolean_variable& variable() const
+    {
+      return m_variable;
+    }
+
+    /// \brief Returns the boolean_equation_system variable of the equation.
+    /// \return The boolean_equation_system variable of the equation.
+    boolean_variable& variable()
     {
       return m_variable;
     }
 
     /// \brief Returns the predicate formula on the right hand side of the equation.
     /// \return The predicate formula on the right hand side of the equation.
-    boolean_expression formula() const
+    const boolean_expression& formula() const
+    {
+      return m_formula;
+    }
+
+    /// \brief Returns the predicate formula on the right hand side of the equation.
+    /// \return The predicate formula on the right hand side of the equation.
+    boolean_expression& formula()
     {
       return m_formula;
     }
