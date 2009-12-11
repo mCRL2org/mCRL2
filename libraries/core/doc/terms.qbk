@@ -1,0 +1,21 @@
+[library Terms
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2009 Technische Universiteit Eindhoven]
+    [category string-text]
+    [purpose
+       Describe terms in the mCRL2 toolset
+    ]
+]
+
+[section: Introduction]
+In the mCRL2 toolset terms play an important role. Many data structures are
+internally represented as terms. Let /x/ be a variable, /f/ a function symbol
+and /t/ a term. Terms in the toolset adhere to the following grammar:
+
+[pre
+  t ::= f | x | f(t, ..., t) | lambda x, ..., x.t | exists x, ..., x.t | forall x, ..., x.t
+]
+
+[endsect]
+
