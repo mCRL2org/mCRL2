@@ -14,6 +14,11 @@
 
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/bool.h"
 
 /// \brief Class that provides information on sort expressions.
 class Sort_Info {
@@ -38,21 +43,22 @@ class Sort_Info {
 
     /// \brief Constructor that initializes the fields of the class.
     inline Sort_Info() {
-      f_sort_id_int = mcrl2::core::detail::gsMakeSortIdInt();
-      f_sort_id_nat = mcrl2::core::detail::gsMakeSortIdNat();
-      f_sort_id_pos = mcrl2::core::detail::gsMakeSortIdPos();
-      f_sort_id_real = mcrl2::core::detail::gsMakeSortIdReal();
-      f_sort_id_bool = mcrl2::core::detail::gsMakeSortIdBool();
+      f_sort_id_int = mcrl2::data::sort_int::int_();
+      f_sort_id_nat = mcrl2::data::sort_nat::nat();
+      f_sort_id_pos = mcrl2::data::sort_pos::pos();
+      f_sort_id_real = mcrl2::data::sort_real::real_();
+      f_sort_id_bool = mcrl2::data::sort_bool::bool_();
     }
 
+    ///TODO Remove these trivial functions!
     /// \brief Indicates whether or not a sort expression is a base type.
     inline bool is_sort_id(ATermAppl a_sort_expression) {
-      return mcrl2::core::detail::gsIsSortId(a_sort_expression);
+      return mcrl2::data::is_basic_sort(mcrl2::data::sort_expression(a_sort_expression));
     }
 
     /// \brief Indicates whether or not the main operator of a sort expression is an arrow product.
     inline bool is_sort_arrow_prod(ATermAppl a_sort_expression) {
-      return mcrl2::core::detail::gsIsSortArrow(a_sort_expression);
+      return mcrl2::data::is_function_sort(mcrl2::data::sort_expression(a_sort_expression));
     }
 
     /// \brief Indicates whether or not a sort expression represents the sort Int.

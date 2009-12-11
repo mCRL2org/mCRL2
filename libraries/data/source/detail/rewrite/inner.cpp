@@ -319,7 +319,7 @@ static ATermList create_sequence(ATermAppl rule, int *var_cnt)
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond) */ && gsIsDataExprTrue((ATermAppl) cond)) // JK 15/10/2009 default condition is true
+  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond) */ && sort_bool::is_true_function_symbol(data_expression(cond))) // JK 15/10/2009 default condition is true
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   else
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
@@ -1084,7 +1084,7 @@ ATermAppl RewriterInnermost::fromInner(ATerm Term)
         if(gsIsOpId(a) || gsIsDataVarId(a))
         {
                 ATermAppl sort = ATAgetArgument(a, 1);
-                while(gsIsSortArrow(sort) && !ATisEmpty(l))
+                while(is_function_sort(sort_expression(sort)) && !ATisEmpty(l))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
                         ATermList list = ATmakeList0();

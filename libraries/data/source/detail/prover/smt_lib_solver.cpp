@@ -15,6 +15,7 @@
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/data/bool.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -128,7 +129,7 @@ namespace mcrl2 {
         int v_sort_number;
         char* v_sort_string;
 
-        v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) gsMakeSortIdBool());
+        v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
         v_sort_string = (char*) malloc((NrOfChars(v_sort_number) + 5) * sizeof(char));
         sprintf(v_sort_string, "sort%d", v_sort_number);
         f_extrapreds = "  :extrapreds ((bool2pred ";
@@ -630,62 +631,62 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_clause(ATermAppl a_clause, bool a_expecting_predicate) {
-      if (gsIsDataExprNot(a_clause)) {
+      if (sort_bool::is_not_application(data_expression(a_clause))) {
         translate_not(a_clause);
-      } else if (gsIsDataExprEq(a_clause)) {
+      } else if (is_equal_to_application(data_expression(a_clause))) {
         translate_equality(a_clause);
-      } else if (gsIsDataExprNeq(a_clause)) {
+      } else if (is_not_equal_to_application(data_expression(a_clause))) {
         translate_inequality(a_clause);
-      } else if (gsIsDataExprGT(a_clause)) {
+      } else if (is_greater_application(data_expression(a_clause))) {
         translate_greater_than(a_clause);
-      } else if (gsIsDataExprGTE(a_clause)) {
+      } else if (is_greater_equal_application(data_expression(a_clause))) {
         translate_greater_than_or_equal(a_clause);
-      } else if (gsIsDataExprLT(a_clause)) {
+      } else if (is_less_application(data_expression(a_clause))) {
         translate_less_than(a_clause);
-      } else if (gsIsDataExprLTE(a_clause)) {
+      } else if (is_less_equal_application(data_expression(a_clause))) {
         translate_less_than_or_equal(a_clause);
-      } else if (gsIsDataExprAdd(a_clause)) {
+      } else if (sort_real::is_plus_application(data_expression(a_clause))) {
         translate_plus(a_clause);
-      } else if (gsIsDataExprNeg(a_clause)) {
+      } else if (sort_real::is_negate_application(data_expression(a_clause))) {
         translate_unary_minus(a_clause);
-      } else if (gsIsDataExprSubt(a_clause)) {
+      } else if (sort_real::is_minus_application(data_expression(a_clause))) {
         translate_binary_minus(a_clause);
-      } else if (gsIsDataExprMult(a_clause)) {
+      } else if (sort_real::is_times_application(data_expression(a_clause))) {
         translate_multiplication(a_clause);
-      } else if (gsIsDataExprMax(a_clause)) {
+      } else if (sort_real::is_maximum_application(data_expression(a_clause))) {
         translate_max(a_clause);
-      } else if (gsIsDataExprMin(a_clause)) {
+      } else if (sort_real::is_minimum_application(data_expression(a_clause))) {
         translate_min(a_clause);
-      } else if (gsIsDataExprAbs(a_clause)) {
+      } else if (sort_real::is_abs_application(data_expression(a_clause))) {
         translate_abs(a_clause);
-      } else if (gsIsDataExprSucc(a_clause)) {
+      } else if (sort_real::is_succ_application(data_expression(a_clause))) {
         translate_succ(a_clause);
-      } else if (gsIsDataExprPred(a_clause)) {
+      } else if (sort_real::is_pred_application(data_expression(a_clause))) {
         translate_pred(a_clause);
-      } else if (gsIsDataExprAddC(a_clause)) {
+      } else if (sort_pos::is_add_with_carry_application(data_expression(a_clause))) {
         translate_add_c(a_clause);
-      } else if (gsIsDataExprCNat(a_clause)) {
+      } else if (sort_nat::is_cnat_application(data_expression(a_clause))) {
         translate_c_nat(a_clause);
-      } else if (gsIsDataExprCInt(a_clause)) {
+      } else if (sort_int::is_cint_application(data_expression(a_clause))) {
         translate_c_int(a_clause);
-      //} else if (gsIsDataExprCReal(a_clause)) {
+      //} else if (gsIsDataExprCReal(data_expression(a_clause))) {
       //  translate_c_real(a_clause);
-      } else if (gsIsIntConstant(a_clause)) {
+      } else if (sort_int::is_integer_constant(data_expression(a_clause))) {
         translate_int_constant(a_clause);
-      } else if (gsIsNatConstant(a_clause)) {
+      } else if (sort_nat::is_natural_constant(data_expression(a_clause))) {
         translate_nat_constant(a_clause);
-      } else if (gsIsPosConstant(a_clause)) {
+      } else if (sort_pos::is_positive_constant(data_expression(a_clause))) {
         translate_pos_constant(a_clause);
-      } else if (gsIsDataExprTrue(a_clause) && a_expecting_predicate) {
+      } else if (sort_bool::is_true_function_symbol(data_expression(a_clause)) && a_expecting_predicate) {
         translate_true();
-      } else if (gsIsDataExprFalse(a_clause) && a_expecting_predicate) {
+      } else if (sort_bool::is_false_function_symbol(data_expression(a_clause)) && a_expecting_predicate) {
         translate_false();
       } else if (gsIsDataVarId(a_clause)) {
         if (a_expecting_predicate) {
           add_bool2pred_and_translate_clause(a_clause);
-        } else if (f_sort_info.is_sort_nat(gsGetSort(a_clause))) {
+        } else if (f_sort_info.is_sort_nat(data_expression(a_clause).sort())) {
           translate_nat_variable(a_clause);
-        } else if (f_sort_info.is_sort_pos(gsGetSort(a_clause))) {
+        } else if (f_sort_info.is_sort_pos(data_expression(a_clause).sort())) {
           translate_pos_variable(a_clause);
         } else {
           translate_variable(a_clause);

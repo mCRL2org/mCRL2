@@ -291,7 +291,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 1);
-        return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
+        return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
       }
 
       int v_number_of_arguments;
@@ -303,7 +303,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
         v_term = (ATerm) f_rewriter->fromRewriteFormat(a_term);
         if (gsIsDataVarId((ATermAppl) v_term) || gsIsOpId((ATermAppl) v_term)) {
           v_term = ATgetArgument(v_term, 1);
-          return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
+          return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
         } else {
           return false;
         }
@@ -321,7 +321,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
             v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
           }
-          return (ATisEqual(v_term, (ATerm) gsMakeSortIdBool()));
+          return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
         } else {
           return false;
         }
@@ -428,7 +428,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 1);
-        return (v_term == (ATerm) gsMakeSortIdBool());
+        return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
       }
 
       int v_number_of_arguments;
@@ -440,7 +440,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
         v_term = (ATerm) f_rewriter->fromRewriteFormat(a_term);
         if (gsIsDataVarId((ATermAppl) v_term) || gsIsOpId((ATermAppl) v_term)) {
           v_term = ATgetArgument(v_term, 1);
-          return (v_term == (ATerm) gsMakeSortIdBool());
+          return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
         } else {
           return false;
         }
@@ -455,7 +455,7 @@ inline static Compare_Result compare_address(ATerm a_term1, ATerm a_term2) {
             v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
           }
-          return (v_term == (ATerm) gsMakeSortIdBool());
+          return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
         } else {
           return false;
         }

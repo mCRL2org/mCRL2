@@ -61,7 +61,7 @@ ATerm RewriterProver::rewriteInternal(ATerm Term)
 
 ATermAppl RewriterProver::rewrite(ATermAppl Term)
 {
-  if ( mcrl2::core::detail::gsGetSort(Term) == mcrl2::core::detail::gsMakeSortExprBool() )
+  if ( mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_() )
   {
     prover_obj->set_formula(Term);
     return prover_obj->get_bdd();

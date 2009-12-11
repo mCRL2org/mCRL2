@@ -336,7 +336,7 @@ static int getArity(ATermAppl op)
   ATermAppl sort = ATAgetArgument(op,1);
   int arity = 0;
 
-  while ( gsIsSortArrow(sort) )
+  while ( is_function_sort(sort_expression(sort)) )
   {
     ATermList sort_dom = ATLgetArgument(sort, 0);
     arity += ATgetLength(sort_dom);
@@ -447,7 +447,7 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
         if(gsIsOpId(a) || gsIsDataVarId(a))
         {
                 ATermAppl sort = ATAgetArgument(a, 1);
-                while(gsIsSortArrow(sort) && !ATisEmpty(l))
+                while(is_function_sort(sort_expression(sort)) && !ATisEmpty(l))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
                         ATermList list = ATmakeList0();
@@ -639,7 +639,7 @@ ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm t)
   int i = 1;
   int arity = ATgetArity(ATgetAFun((ATermAppl) t));
   ATermAppl sort = ATAgetArgument(a, 1);
-  while(gsIsSortArrow(sort) && (i < arity))
+  while(is_function_sort(sort_expression(sort)) && (i < arity))
   {
     ATermList sort_dom = ATLgetArgument(sort, 0);
     ATermList list = ATmakeList0();
@@ -873,7 +873,7 @@ static ATermList create_sequence(ATermList rule, int *var_cnt)
     }
   }
   //ATfprintf(stderr,"rseq: %t\n",rseq);
-  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && gsIsDataExprTrue((ATermAppl) cond) ) // JK 15/10/2009 recognise true as condition
+  if ( ATisAppl(cond)/* && gsIsNil((ATermAppl) cond)*/ && sort_bool::is_true_function_symbol(data_expression(cond)) ) // JK 15/10/2009 recognise true as condition
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   else
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl4(afunCRe,cond,rslt,(ATerm) get_used_vars(cond),(ATerm) get_used_vars(rslt)));
@@ -3029,7 +3029,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
 #ifdef USE_VARAFUN_VALUE
       "#define isAppl(x) (ATgetAFun(x) != %li)\n"
-      "\n", (long int) ATgetAFun(gsMakeDataVarId(gsString2ATermAppl("x"),gsMakeSortExprBool()))
+      "\n", (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))
 #else
       "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
       "\n"

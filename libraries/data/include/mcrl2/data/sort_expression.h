@@ -112,19 +112,10 @@ namespace mcrl2 {
         }
 
         /// \brief Returns true iff the expression represents a standard sort.
-        inline
-        bool is_system_defined() const
-        {
-          using namespace core::detail;
-
-          return gsIsSortExprBool(*this) || gsIsSortExprReal(*this) ||
-                 gsIsSortExprInt(*this) || gsIsSortExprNat(*this) ||
-                 gsIsSortExprPos(*this) || is_container_sort() || is_structured_sort();
-        }
+        bool is_system_defined() const;
 
         /// \brief Returns the target sort of this expression.
-        /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort. 
-
+        /// \return For a function sort D->E, return the target sort of E. Otherwise return this sort.
         inline
         sort_expression target_sort() const
         {

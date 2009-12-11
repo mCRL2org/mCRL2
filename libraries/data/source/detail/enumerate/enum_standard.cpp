@@ -376,12 +376,12 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                 ATermAppl var = (ATermAppl) ATgetFirst(e.vars);
                 ATermAppl sort = (ATermAppl) ATgetArgument(var,1);
 
-                if ( gsIsSortArrow(sort) )
+                if ( is_function_sort(sort_expression(sort)) )
                 {
                   fs_reset();
                   throw mcrl2::runtime_error("cannot enumerate all elements of functions sort " + pp(sort));
                         // error = true;
-                } else 
+                } else
                 {
                         ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
                         if (l == NULL)
@@ -455,7 +455,7 @@ bool EnumeratorSolutionsStandard::next(ATermList *solution)
                                                           throw mcrl2::runtime_error(error_message);
                                                          //       error = true;
                                                          //       break;
-                                                        } else 
+                                                        } else
                                                         {
                                                                 ss_push(build_solution(enum_vars,fs_top().vals));
                                                         }
@@ -508,7 +508,7 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
                 fs_pop();
         } else if ( ATisEmpty(fs_bottom().vars) )
         { if ( check_true && !ATisEqual(fs_bottom().expr,info.rewr_true) )
-          { throw mcrl2::runtime_error("term does not evaluate to true or false " + 
+          { throw mcrl2::runtime_error("term does not evaluate to true or false " +
                                 pp(info.rewr_obj->fromRewriteFormat(fs_bottom().expr)));
                   // error = true;
           } else {
@@ -535,12 +535,12 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
         enum_expr = NULL;
         ATprotectList(&enum_vars);
         ATprotect(&enum_expr);
-        
+
         reset(Vars,Expr,true_only);
 }
 
 EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
-	 info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
+   info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
          // check_true(other.check_true), error(other.error), used_vars(other.used_vars),
          check_true(other.check_true), used_vars(other.used_vars),
          fs_stack(0), ss_stack(0)
@@ -652,7 +652,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
           atermpp::aterm_list constructors;
 
           for (data_specification::constructors_const_range rc(data_spec.constructors(r.front())); !rc.empty(); rc.advance_begin(1))
-          { 
+          {
             constructors = atermpp::push_front(constructors,
               atermpp::aterm(ATmakeAppl2(info.tupAFun,
                 reinterpret_cast< ATerm >(static_cast< ATermAppl >(rc.front())),

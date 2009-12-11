@@ -247,7 +247,7 @@ ATermAppl RewriterJitty::fromInner(ATermAppl Term)
         {
                 int i = 1;
                 ATermAppl sort = ATAgetArgument(a, 1);
-                while(gsIsSortArrow(sort) && (i < arity))
+                while(is_function_sort(sort_expression(sort)) && (i < arity))
                 {
                         ATermList sort_dom = ATLgetArgument(sort, 0);
                         ATermList list = ATmakeList0();

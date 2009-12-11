@@ -151,6 +151,14 @@ namespace mcrl2 {
       inline data_expression bool_(bool b) {
         return (b) ? sort_bool::true_() : sort_bool::false_();
       }
+
+      /// \brief Determines whether b is a Boolean constant
+      /// \param b A data expression
+      inline bool is_boolean_constant(data_expression const& b)
+      {
+        return sort_bool::is_true_function_symbol(b) ||
+               sort_bool::is_false_function_symbol(b);
+      }
     }
 
     namespace sort_pos {
@@ -200,6 +208,17 @@ namespace mcrl2 {
 
         return result;
       }
+
+      /// \brief Determines whether n is a positive constant
+      /// \param n A data expression
+      inline bool is_positive_constant(data_expression const& n)
+      {
+        return sort_pos::is_c1_function_symbol(n) ||
+               ( sort_pos::is_cdub_application(n) &&
+                 sort_bool::is_boolean_constant(sort_pos::bit(n)) &&
+                 sort_pos::is_positive_constant(sort_pos::number(n))
+               );
+      }
     }
 
     namespace sort_nat {
@@ -216,6 +235,16 @@ namespace mcrl2 {
       /// \param n A string
       inline data_expression nat(std::string const& n) {
         return (n == "0") ? sort_nat::c0() : static_cast< data_expression const& >(sort_nat::cnat(sort_pos::pos(n)));
+      }
+
+      /// \brief Determines whether n is a natural constant
+      /// \param n A data expression
+      inline bool is_natural_constant(data_expression const& n)
+      {
+        return sort_nat::is_c0_function_symbol(n) ||
+               ( sort_nat::is_cnat_application(n) &&
+                 sort_pos::is_positive_constant(sort_nat::arg(n))
+               );
       }
     }
 
@@ -237,6 +266,17 @@ namespace mcrl2 {
       inline data_expression int_(std::string const& n) {
         return (n[0] == '-') ? sort_int::cneg(sort_pos::pos(n.substr(1))) :
             static_cast< data_expression const& >(sort_int::cint(sort_nat::nat(n)));
+      }
+
+      /// \brief Determines whether n is an integer constant
+      /// \param n A data expression
+      inline bool is_integer_constant(data_expression const& n)
+      {
+        return ( sort_int::is_cint_application(n) &&
+                 sort_nat::is_natural_constant(sort_int::arg(n)) ) ||
+               ( sort_int::is_cneg_application(n) &&
+                 sort_pos::is_positive_constant(sort_int::arg(n))
+               );
       }
     }
 

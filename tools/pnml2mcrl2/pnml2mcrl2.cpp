@@ -456,7 +456,7 @@ class pnml2mcrl2_tool: public squadt_tool< input_output_tool>
     ATermAppl AinitialMarking = gsMakeId(gsString2ATermAppl("0"));
     ATermAppl Atype = gsString2ATermAppl("channel");
 
-    ATermAppl Place_type=Appl0; //gsMakeSortId(gsString2ATermAppl("Unit"));
+    ATermAppl Place_type=Appl0; //basic_sort("Unit");
     ATermAppl Place_mcrl2initialMarking=Appl0;
 
     // this loop goes through all the children of the <place>element
