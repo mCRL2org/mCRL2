@@ -30,6 +30,7 @@ namespace pbes_system {
     typedef pbes_expression expression_type;
     typedef propositional_variable variable_type;
     typedef pbes_equation equation_type;
+    typedef fixpoint_symbol symbol_type;
     
     /// \brief Applies the substitution X := phi to the PBES expression t.
     /// \param t A PBES expression
@@ -112,7 +113,7 @@ namespace pbes_system {
   /// \param p A pbes
   /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
   template <typename Container>
-  int gauss_elimination(pbes<Container>& p)
+  int gauss_elimination(pbes<Container>& p, unsigned int log_level = 0)
   {
     typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
     typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
@@ -123,7 +124,7 @@ namespace pbes_system {
     my_enumerator datae(p.data(), datar, name_generator);
     my_rewriter pbesr(datar, datae);
   
-    gauss_elimination_algorithm<pbes_traits> algorithm;
+    gauss_elimination_algorithm<pbes_traits> algorithm(log_level);
     algorithm.run(p.equations().begin(), p.equations().end(), pbes_equation_solver<my_rewriter>(pbesr));
   
     if (tr::is_false(p.equations().front().formula()))

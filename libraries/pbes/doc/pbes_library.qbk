@@ -60,5 +60,7 @@
 [def __pbes_implementation__   [@http://mcrl2.org/mcrl2/wiki/images/6/6c/Pbes_implementation_notes.pdf PBES implementation notes]]
 [def __pbes_introduction__     [@http://mcrl2.org/mcrl2/wiki/index.php/PBES_library PBES introduction]]
 
+[include concepts.qbk]
+[include algorithms.qbk]
 [include pbes.qbk]
 [include bes.qbk]

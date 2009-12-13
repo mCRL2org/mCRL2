@@ -1,0 +1,18 @@
+[section:algorithms Algorithms]
+
+In this section we define algorithms for boolean equation systems.
+
+[section:gauss_elimination Gauss elimination]
+The class `gauss_elimination_algorithm` in the header file `mcrl2/pbes/gauss_elimination_algorithm.h`
+implements Gauss elimination for fixpoint equation systems.
+
+[import ../test/gauss_elimination_test.cpp]
+[gauss_elimination1a]
+
+[gauss_elimination1b]
+
+[gauss_elimination2]
+
+[endsect]
+
+[endsect]
