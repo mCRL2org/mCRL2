@@ -2408,10 +2408,6 @@ bool gsIsDataExprGGDivMod(ATermAppl DataExpr);
 bool gsIsDataExprEven(ATermAppl DataExpr);
 
 ///\pre DataExpr is a data expression
-///\return the data expression is a number
-bool gsIsDataExprNumber(ATermAppl DataExpr);
-
-///\pre DataExpr is a data expression
 ///\return the data expression is an expression for an empty list
 bool gsIsDataExprEmptyList(ATermAppl DataExpr);
 

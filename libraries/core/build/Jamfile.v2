@@ -20,6 +20,7 @@ mcrl2-library core
        : <library>/libraries//atermpp
          <use>/libraries/utilities//exception
          <include>../include
+         <include>../../data/include # in order to get rid of struct.cpp
        :
        : <toolset>gcc,<link>static:<linkflags>-export-dynamic
          <include>../include

@@ -14,11 +14,13 @@
 #include <cassert>
 #include <sstream>
 #include "aterm2.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/int.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -50,6 +52,15 @@ static ATermTable props;
 static ATermTable deps;
 
 static bool push_comm_through_allow=true; //at some point is set to false to avoid infinite recursion.
+
+  //taken from struct.h/struct.cpp, as this is only used in this file
+  //JK 14/12/2009
+  static inline
+  bool gsIsDataExprNumber(ATermAppl DataExpr)
+  {
+    if (!gsIsOpId(DataExpr)) return false;
+    return gsIsNumericString(data::basic_sort(DataExpr).name().to_string().c_str());
+  }
 
   //from pnml2mcrl2
   //==================================================
@@ -1918,11 +1929,11 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a){
     //determine the value of the parameter.
     ATermAppl par=ATAgetFirst(ATLgetArgument(a,1));
     ATermAppl k=NULL;
-    if(gsIsDataExprNumber(par) && ATisEqual(ATAgetArgument(par,1),gsMakeSortIdPos())){
+    if(gsIsDataExprNumber(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1)))){
       k=ATAgetArgument(par,0);
     }
     else
-      if(gsIsOpId(par) && ATisEqual(ATAgetArgument(par,1),gsMakeSortIdPos())){
+      if(gsIsOpId(par) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(par,1)))){
 	k=ATAtableGet(consts,(ATerm)ATAgetArgument(par,0));
       }
     if(!k){
@@ -1985,7 +1996,7 @@ static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true
 
   do{
     ATermList Params=ExtraParams;
-    if(add_number) Params=ATinsert(Params,(ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),gsMakeSortIdPos()));
+    if(add_number) Params=ATinsert(Params,(ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),data::sort_pos::pos()));
     ATermAppl r1=gsMakeProcess(P,Params);
     if(r)
       r=gsMakeMerge(r,r1);
@@ -2141,7 +2152,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
         int nParsNP=ATgetLength(FormParsNP);
 
         ATermAppl FormPar1=ATAgetFirst(FormParsNP);
-	if(!ATisEqual(ATAgetArgument(FormPar1,1),gsMakeSortIdPos())) goto nP_checked;
+	if(!data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(FormPar1,1)))) goto nP_checked;
         ATermAppl Varp=ATAgetArgument(FormPar1,0);
 
 	ATermAppl Cond=ATAgetArgument(body,0);
@@ -2153,7 +2164,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
 
         //condition expression
         //DataAppl(OpId(">",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("n",SortId("Pos")),OpId("1",SortId("Pos"))])
-        if(!ATisEqual(ATAgetArgument(body,0),gsMakeDataAppl(gsMakeOpIdGT(gsMakeSortIdPos()),ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),(ATerm)gsMakeOpId(Number1,gsMakeSortIdPos()))))) goto nP_checked;
+        if(!ATisEqual(ATAgetArgument(body,0),static_cast<ATermAppl>(data::greater(data::variable(Varp, data::sort_pos::pos()), data::function_symbol(Number1, data::sort_pos::pos()))))) goto nP_checked;
 
         //Else part of the condition
 	ATermAppl Right=ATAgetArgument(body,2);
@@ -2192,18 +2203,18 @@ ATermAppl gsAlpha(ATermAppl Spec){
         ATermAppl Par1=ATAgetFirst(ParsRight);
 
         if(!ATisEqual(Par1,
-                      gsMakeDataAppl(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdPos()),
-                                     ATmakeList2((ATerm)gsMakeDataAppl(gsMakeOpIdSubt(gsMakeSortIdPos()),
-                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),
-                                                                                   (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos()))),
-                                                 (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos())))
+                      gsMakeDataAppl(data::sort_int::maximum(data::sort_int::int_(), data::sort_pos::pos()),
+                                     ATmakeList2((ATerm)gsMakeDataAppl(data::sort_int::minus(data::sort_pos::pos(), data::sort_pos::pos()),
+                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,data::sort_pos::pos()),
+                                                                                   (ATerm)gsMakeOpId(Number1,data::sort_pos::pos()))),
+                                                 (ATerm)gsMakeOpId(Number1,data::sort_pos::pos())))
            )
           &&
            !ATisEqual(Par1,
-                      gsMakeDataAppl(gsMakeOpIdInt2Pos(),
-                                     ATmakeList1((ATerm)gsMakeDataAppl(gsMakeOpIdSubt(gsMakeSortIdPos()),
-                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,gsMakeSortIdPos()),
-                                                                                   (ATerm)gsMakeOpId(Number1,gsMakeSortIdPos())))))
+                      gsMakeDataAppl(data::sort_int::int2pos(),
+                                     ATmakeList1((ATerm)gsMakeDataAppl(data::sort_int::minus(data::sort_pos::pos(), data::sort_pos::pos()),
+                                                                       ATmakeList2((ATerm)gsMakeDataVarId(Varp,data::sort_pos::pos()),
+                                                                                   (ATerm)gsMakeOpId(Number1,data::sort_pos::pos())))))
            )
         ) goto nP_checked;
 
@@ -2235,8 +2246,8 @@ ATermAppl gsAlpha(ATermAppl Spec){
     ATermAppl eq=ATAgetFirst(l);
     ATermAppl left=ATAgetArgument(eq,2);
     ATermAppl right=ATAgetArgument(eq,3);
-    if(gsIsOpId(left) && ATisEqual(ATAgetArgument(left,1),gsMakeSortIdPos()) &&
-       gsIsDataExprNumber(right) && ATisEqual(ATAgetArgument(right,1),gsMakeSortIdPos())){
+    if(gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))) &&
+       gsIsDataExprNumber(right) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(right,1)))){
       ATtablePut(consts,(ATerm)ATAgetArgument(left,0),(ATerm)ATAgetArgument(right,0));
     }
   }

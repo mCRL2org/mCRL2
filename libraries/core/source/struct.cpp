@@ -6291,15 +6291,6 @@ bool gsIsDataExprEven(ATermAppl DataExpr)
   return false;
 }
 
-bool gsIsDataExprNumber(ATermAppl DataExpr)
-{
-  if (!gsIsOpId(DataExpr)) return false;
-  ATermAppl Name = gsGetName(DataExpr);
-  char* s = gsATermAppl2String(Name);
-  if (s == NULL) return false;
-  return gsIsNumericString(s);
-}
-
 bool gsIsDataExprEmptyList(ATermAppl DataExpr)
 {
   return gsIsOpIdEmptyList(DataExpr);
