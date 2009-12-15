@@ -56,6 +56,16 @@ namespace mcrl2 {
       return core::detail::gsIsSortStruct(p);
     }
 
+    /// \brief Returns true if the term t is the unknown sort
+    inline bool is_unknown_sort(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortUnknown(p);
+    }
+
+    /// \brief Returns true if the term t is an expression for multiple possible sorts
+    inline bool is_multiple_possible_sorts(atermpp::aterm_appl p) {
+      return core::detail::gsIsSortsPossible(p);
+    }
+
     /// \brief sort expression.
     ///
     /// A sort expression can be any of:
@@ -64,6 +74,9 @@ namespace mcrl2 {
     /// - container sort
     /// - function sort
     /// - alias
+    /// In the type checker also the following expressions can be used:
+    /// - unknown sort
+    /// - multiple possible sorts
     class sort_expression: public atermpp::aterm_appl
     {
       public:
@@ -109,6 +122,20 @@ namespace mcrl2 {
         bool is_function_sort() const
         {
           return data::is_function_sort(*this);
+        }
+
+        /// \brief Returns true iff this expression is an unknown sort.
+        inline
+        bool is_unknown_sort() const
+        {
+          return data::is_unknown_sort(*this);
+        }
+
+        /// \brief Returns true iff this expression is an expression representing multiple possible sorts.
+        inline
+        bool is_multiple_possible_sorts() const
+        {
+          return data::is_multiple_possible_sorts(*this);
         }
 
         /// \brief Returns true iff the expression represents a standard sort.
@@ -158,6 +185,40 @@ namespace mcrl2 {
     inline sort_expression_list make_sort_expresion_list(atermpp::vector< Expression >const& r) {
       return convert< sort_expression_list >(r);
     }
+
+    /// \brief Unknown sort.
+    ///
+    /// An unknown sort expresses a sort expression that represents the unknown
+    /// sort expression.
+    class unknown_sort: public sort_expression
+    {
+      /// \brief Default constructor for the unknown sort expression.
+      /// \details This should only be used before and during type checking!
+      public:
+        unknown_sort()
+          : sort_expression(mcrl2::core::detail::gsMakeSortUnknown())
+        {}
+     };
+
+     /// \brief Multiple possible sorts.
+     ///
+     /// An expression that expresses that one of multiple sorts is possible.
+     /// \details Only for use in the type checker!
+     class multiple_possible_sorts: public sort_expression
+     {
+       public:
+         /// \brief Default constructor. Denoting that no sorts are possible.
+         multiple_possible_sorts()
+          : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(sort_expression_list()))
+         {}
+
+         /// \brief Constructor that denotes that the sorts in s are possible.
+         /// \param s A container of possible sorts.
+         template <typename Container>
+         multiple_possible_sorts(Container const& s)
+           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert(s)))
+         {}
+     };
 
   } // namespace data
 

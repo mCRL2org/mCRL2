@@ -60,6 +60,11 @@ namespace mcrl2 {
       return core::detail::gsIsWhr(p);
     }
 
+    /// \brief Returns true if the term t is an identifier
+    inline bool is_identifier(atermpp::aterm_appl p) {
+      return core::detail::gsIsId(p);
+    }
+
     /// \brief data expression.
     ///
     /// A data expression can be any of:
@@ -173,7 +178,40 @@ namespace mcrl2 {
           return data::is_where_clause(*this);
         }
 
+        /// \brief Returns true iff the expression is an identifier
+        inline
+        bool is_identifier() const
+        {
+          return data::is_identifier(*this);
+        }
+
     }; // class data_expression
+
+    /// \brief identifier
+    /// \details This class should only be used up to and including
+    ///          the type checking phase, as it yields an untyped,
+    ///          unstructured data expression!
+    class identifier : public data_expression
+    {
+      /// \brief Default constructor for identifier. This does not yield
+      ///        a valid expression.
+      identifier()
+        : data_expression()
+      {}
+
+      /// \brief Constructor for an identifier with name s
+      /// \param s A string
+      identifier(const mcrl2::core::identifier_string& s)
+        : data_expression(mcrl2::core::detail::gsMakeId(s))
+      {}
+
+      /// \brief Constructor for an identifier with name s
+      /// \param s A string
+      identifier(const std::string& s)
+        : data_expression(mcrl2::core::detail::gsMakeId(mcrl2::core::identifier_string(s)))
+      {}
+
+    }; // class identifier
 
     /// \brief list of data expressions
     ///
