@@ -9,6 +9,7 @@
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbes2bes.h"
 #include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -109,7 +110,7 @@ int main(int argc, char* argv[])
       case 0: q = do_lazy_algorithm(p, pbesr); break;
       case 1: q = do_finite_algorithm(p, pbesr); break;
     }
-    int result = pbes_gauss_elimination(q);
+    int result = gauss_elimination(q);
     if (result == 0)
     {
       std::cout << "FALSE" << std::endl;

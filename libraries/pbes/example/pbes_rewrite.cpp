@@ -25,7 +25,6 @@
 using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::data;
-using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 namespace po = boost::program_options;
 
