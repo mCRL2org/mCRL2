@@ -44,3 +44,10 @@ verti LinearLiftingStrategy::next(verti prev_vertex, bool prev_lifted)
         return prev_vertex == last_vertex ? 0 : prev_vertex + 1;
     }
 }
+
+LiftingStrategy *LinearLiftingStrategyFactory::create(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+{
+    (void)spm;  // unused
+    return new LinearLiftingStrategy(game, backward_);
+}

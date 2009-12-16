@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <assert.h>
+#include <tr1/unordered_map>
+
+typedef std::tr1::unordered_map<verti, verti> vertex_map_t;
 
 ParityGame::ParityGame()
     : d_(0), vertex_(NULL), cardinality_(NULL)
@@ -59,7 +62,7 @@ void ParityGame::make_random( verti V, unsigned out_deg,
 
 void ParityGame::make_subgame( const ParityGame &game,
                                const verti *vertices, verti num_vertices,
-                               const Player *winners )
+                               const Strategy &strategy )
 {
     const StaticGraph &graph = game.graph();
     reset(num_vertices + 2, game.d());
@@ -75,8 +78,7 @@ void ParityGame::make_subgame( const ParityGame &game,
     vertex_[v_odd].priority = 1;
 
     // Create a map of old->new vertex indices
-    // TODO: replace this with a hash map for better performance?
-    std::map<verti, verti> vertex_map;
+    vertex_map_t vertex_map;
     for (verti n = 0; n < num_vertices; ++n)
     {
         vertex_[n] = game.vertex_[vertices[n]];
@@ -91,16 +93,14 @@ void ParityGame::make_subgame( const ParityGame &game,
               it != graph.succ_end(vertices[v]); ++it )
         {
             verti w;
-            std::map<verti, verti>::const_iterator map_it = vertex_map.find(*it);
+            vertex_map_t::const_iterator map_it = vertex_map.find(*it);
             if (map_it != vertex_map.end())
             {
                 w = map_it->second;
             }
             else
             {
-                Player winner = winners[*it];
-                assert(winner == PLAYER_EVEN || winner == PLAYER_ODD);
-                w = (winner == PLAYER_EVEN) ? v_even : v_odd;
+                w = (winner(strategy, *it) == PLAYER_EVEN) ? v_even : v_odd;
             }
             edges.push_back(std::make_pair(v, w));
         }
@@ -111,6 +111,37 @@ void ParityGame::make_subgame( const ParityGame &game,
     recalculate_cardinalities(num_vertices + 2);
 }
 
+void ParityGame::make_subgame( const ParityGame &game,
+                               const verti *vertices, verti num_vertices )
+{
+    const StaticGraph &graph = game.graph();
+    reset(num_vertices, game.d());
+
+    // Create a map of old->new vertex indices
+    vertex_map_t vertex_map;
+    for (verti n = 0; n < num_vertices; ++n)
+    {
+        vertex_[n] = game.vertex_[vertices[n]];
+        vertex_map[vertices[n]] = n;
+    }
+
+    // Create new edge list
+    StaticGraph::edge_list edges;
+    for (verti v = 0; v < num_vertices; ++v)
+    {
+        for ( StaticGraph::const_iterator it = graph.succ_begin(vertices[v]);
+              it != graph.succ_end(vertices[v]); ++it )
+        {
+            vertex_map_t::const_iterator map_it = vertex_map.find(*it);
+            if (map_it != vertex_map.end())
+            {
+                edges.push_back(std::make_pair(v, map_it->second));
+            }
+        }
+    }
+    graph_.assign(edges, graph.edge_dir());
+    recalculate_cardinalities(num_vertices);
+}
 
 void ParityGame::make_dual()
 {
@@ -209,4 +240,10 @@ size_t ParityGame::memory_use() const
     res += sizeof(ParityGameVertex)*graph_.V();     // vertex info
     res += sizeof(verti)*d_;                        // priority frequencies
     return res;
+}
+
+ParityGame::Player ParityGame::winner(const Strategy &s, verti v) const
+{
+    /* A vertex is won by its player iff the player has a strategy for it: */
+    return (s[v] != NO_VERTEX) ? player(v) : ParityGame::Player(1 - player(v));
 }

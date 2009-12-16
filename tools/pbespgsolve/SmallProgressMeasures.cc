@@ -8,44 +8,56 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "SmallProgressMeasures.h"
-#include "logging.h"
 #include <algorithm>
+#include <memory>
 #include <assert.h>
 #include <string.h>
 
 LiftingStatistics::LiftingStatistics(const ParityGame &game)
     : lifts_attempted_(0), lifts_succeeded_(0)
 {
-    /* HACK: the +2 is to allow subgames to use te same statistics object
-             even though they may add two extra vertices. */
-    vertex_stats_.resize(game.graph().V() + 2);
+    vertex_stats_.resize(game.graph().V());
 }
 
 void LiftingStatistics::record_lift(verti v, bool success)
 {
+    assert(v == NO_VERTEX || v < vertex_stats_.size());
+
     ++lifts_attempted_;
-    ++vertex_stats_[v].first;
+    if (v != NO_VERTEX) ++vertex_stats_[v].first;
     if (success)
     {
         ++lifts_succeeded_;
-        ++vertex_stats_[v].second;
+        if (v != NO_VERTEX) ++vertex_stats_[v].second;
     }
 }
 
-SmallProgressMeasures::SmallProgressMeasures( const ParityGame &game,
-    LiftingStrategy &strategy, LiftingStatistics *stats )
-    : ParityGameSolver(game), preprocessed_(false), strategy_(strategy),
-      len_(game.d()/2), stats_(stats)
+#if 0  // Commented out because this isn't necessary anymore
+void LiftingStatistics::merge( const LiftingStatistics &other,
+                               const verti *mapping )
 {
-    /* Claim strategy */
-    assert(strategy_.spm() == NULL);
-    strategy_.spm(this);
+    for (size_t v = 0; v < other.vertex_stats_.size(); ++v)
+    {
+        size_t w = mapping ? mapping[v] : v;
+        vertex_stats_[w].first  += other.vertex_stats_[v].first;
+        vertex_stats_[w].second += other.vertex_stats_[v].second;
+    }
+    lifts_attempted_ += other.lifts_attempted_;
+    lifts_succeeded_ += other.lifts_succeeded_;
+}
+#endif
 
-    /* Initialize SPM vector bounds */
+SmallProgressMeasures::SmallProgressMeasures(
+    const ParityGame &game, LiftingStrategyFactory &lsf,
+    LiftingStatistics *stats, const verti *vmap, const verti vmap_size )
+        : ParityGameSolver(game), lsf_(lsf), len_(game.d()/2),
+          stats_(stats), vmap_(vmap), vmap_size_(vmap_size)
+{
+    // Initialize SPM vector bounds
     M_ = new verti[len_];
     for (int n = 0; n < len_; ++n) M_[n] = game_.cardinality(2*n + 1) + 1;
 
-    /* Initialize SPM vector data */
+    // Initialize SPM vector data
     size_t n = (size_t)len_*game.graph().V();
     spm_ = new verti[n];
     std::fill_n(spm_, n, 0);
@@ -53,9 +65,6 @@ SmallProgressMeasures::SmallProgressMeasures( const ParityGame &game,
 
 SmallProgressMeasures::~SmallProgressMeasures()
 {
-    assert(strategy_.spm() == this);
-    strategy_.spm(NULL);
-
     delete[] spm_;
     delete[] M_;
 }
@@ -79,7 +88,7 @@ inline verti SmallProgressMeasures::get_ext_succ(verti v, bool take_max)
 
 verti SmallProgressMeasures::get_min_succ(verti v)
 {
-    return get_ext_succ(v, false); 
+    return get_ext_succ(v, false);
 }
 
 verti SmallProgressMeasures::get_max_succ(verti v)
@@ -131,31 +140,98 @@ bool SmallProgressMeasures::lift(verti v)
     return true;
 }
 
-bool SmallProgressMeasures::solve()
+ParityGame::Strategy SmallProgressMeasures::solve()
 {
     // Preprocess the graph to speed up some corner cases.
-    if (!preprocessed_)
-    {
-        preprocess_graph();
-        preprocessed_ = true;
-    }
+    preprocess_graph();
 
     verti vertex = NO_VERTEX;
     bool lifted = false;
 
-    while ((vertex = strategy_.next(vertex, lifted)) != NO_VERTEX)
+    std::auto_ptr<LiftingStrategy> ls(lsf_.create(game(), *this));
+    assert(ls.get() != NULL);
+
+    while ((vertex = ls->next(vertex, lifted)) != NO_VERTEX)
     {
         lifted = lift(vertex);
-        if (stats_ != NULL) stats_->record_lift(vertex, lifted);
-        if (aborted()) return false;
+        if (stats_ != NULL) stats_->record_lift(map_vertex(vertex), lifted);
+        if (aborted()) return ParityGame::Strategy();
     }
 
-    return true;
-}
+    // Construct strategy for player even:
+    ParityGame::Strategy strategy(game_.graph().V(), NO_VERTEX);
+    std::vector<verti> won_by_odd;
+    for (verti v = 0; v < game_.graph().V(); ++v)
+    {
+        if (is_top(v))
+            won_by_odd.push_back(v);
+        else
+        if (game_.player(v) == ParityGame::PLAYER_EVEN)
+            strategy[v] = get_min_succ(v);
+    }
 
-ParityGame::Player SmallProgressMeasures::winner(verti v) const
-{
-    return is_top(v) ? ParityGame::PLAYER_ODD : ParityGame::PLAYER_EVEN;
+    size_t mem = sizeof(verti)*len_*(game_.graph().V() + 1) +
+                 sizeof(game_.d())*sizeof(verti) + ls->memory_use();
+
+    if (!won_by_odd.empty())
+    {
+        // Make a dual subgame of the vertices won by player Odd
+        ParityGame subgame;
+        info("Constructing subgame to solve for opponent...");
+        subgame.make_subgame(game_, &won_by_odd[0], (verti)won_by_odd.size());
+        info("Making subgame dual to the main game...");
+        subgame.make_dual();
+
+        // NB: submap is declared here, because it must outlive the solver
+        std::vector<verti> submap;
+
+        // Solve the subgame with SPM:
+        std::auto_ptr<SmallProgressMeasures> subsolver;
+
+        if (stats_ == NULL)
+        {
+            subsolver.reset(new SmallProgressMeasures(subgame, lsf_));
+        }
+        else
+        {
+            if (vmap_size_ > 0)
+            {
+                submap.assign(won_by_odd.begin(), won_by_odd.end());
+                for (std::vector<verti>::iterator it = submap.begin();
+                     it != submap.end(); ++it) *it = map_vertex(*it);
+
+                subsolver.reset(new SmallProgressMeasures(
+                    subgame, lsf_, stats_, &submap[0], submap.size() ));
+            }
+            else
+            {
+                subsolver.reset(new SmallProgressMeasures(
+                    subgame, lsf_, stats_, &won_by_odd[0], won_by_odd.size() ));
+            }
+        }
+
+        ParityGame::Strategy substrat = subsolver->solve();
+        if (substrat.empty()) return ParityGame::Strategy();
+        assert(substrat.size() == won_by_odd.size());
+
+        // Add substrategy for Odd to result:
+        // FIXME: use merge_strategies() from RecursiveSolver instead
+        for (size_t n = 0; n < won_by_odd.size(); ++n)
+        {
+            if (substrat[n] != NO_VERTEX)
+            {
+                strategy[won_by_odd[n]] = won_by_odd[substrat[n]];
+            }
+        }
+
+        // Account for memory used by submap & subsolver:
+        mem += sizeof(verti)*submap.size();
+        mem += subsolver->memory_use();
+    }
+
+    update_memory_use(mem);
+
+    return strategy;
 }
 
 
@@ -245,13 +321,6 @@ bool SmallProgressMeasures::verify_solution()
     return true;
 }
 
-size_t SmallProgressMeasures::memory_use() const
-{
-    return sizeof(verti)*len_*(game_.graph().V() + 1) +
-           sizeof(game_.d())*sizeof(verti) +
-           strategy_.memory_use();
-}
-
 void SmallProgressMeasures::preprocess_graph()
 {
     /* Preprocess the graph for more efficient processing of nodes with self-
@@ -321,4 +390,10 @@ void SmallProgressMeasures::preprocess_graph()
     info("SPM preprocessing removed %d of %d edges", graph.E_ - pos, graph.E_);
 
     graph.E_ = pos;  // hack! avoids unreachable edges being counted
+}
+
+ParityGameSolver *SmallProgressMeasuresFactory::create(
+    const ParityGame &game, const verti *vmap, verti vmap_size )
+{
+    return new SmallProgressMeasures(game, lsf_, stats_, vmap,vmap_size);
 }

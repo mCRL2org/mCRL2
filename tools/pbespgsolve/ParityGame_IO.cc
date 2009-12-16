@@ -8,11 +8,17 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ParityGame.h"
+#include "Logger.h"
 #include <assert.h>
 #ifdef WITH_MCRL2
 #include <mcrl2/pbes/pbes.h>
 #include <mcrl2/pbes/parity_game_generator.h>
 #endif
+
+/* N.B. The PGSolver I/O functions reverse the priorities when reading/writing
+   the game description. This is done to preserve solutions, since PGSolver
+   considers higher values to dominate lower values, while I assume the opposite
+   (i.e. 0 is the `highest' priority) throughout the rest of the code. */
 
 void ParityGame::read_pgsolver( std::istream &is,
                                 StaticGraph::EdgeDirection edge_dir )
@@ -74,12 +80,16 @@ void ParityGame::read_pgsolver( std::istream &is,
         } while (ch == ',');
     }
 
+    // Ensure max_prio is even, so max_prio - p preserves parity:
+    if (max_prio%2 == 1) ++max_prio;
+
     // Assign vertex info and recount cardinalities
     reset((verti)vertices.size(), max_prio + 1);
     for (size_t n = 0; n < vertices.size(); ++n)
     {
         assert(vertices[n] != invalid);
-        vertex_[n] = vertices[n];
+        vertex_[n].player   = vertices[n].player;
+        vertex_[n].priority = max_prio - vertices[n].priority;
     }
     recalculate_cardinalities(vertices.size());
     vertices.clear();
@@ -90,10 +100,15 @@ void ParityGame::read_pgsolver( std::istream &is,
 
 void ParityGame::write_pgsolver(std::ostream &os) const
 {
+    // Get max priority and make it even so max_prio - p preserves parity:
+    int max_prio = d();
+    if (max_prio%2 == 1) ++max_prio;
+
+    // Write out graph
     os << "parity " << graph_.V() - 1 << ";\n";
     for (verti v = 0; v < graph_.V(); ++v)
     {
-        os << v << ' ' << priority(v) << ' ' << player(v);
+        os << v << ' ' << (max_prio - priority(v)) << ' ' << player(v);
         StaticGraph::const_iterator it  = graph_.succ_begin(v),
                                     end = graph_.succ_end(v);
         assert(it != end);
@@ -103,7 +118,7 @@ void ParityGame::write_pgsolver(std::ostream &os) const
     }
 }
 
-void ParityGame::read_pbes( const std::string &file_path,
+void ParityGame::read_pbes( const std::string &file_path, verti *goal_vertex,
                             StaticGraph::EdgeDirection edge_dir )
 {
 #ifdef WITH_MCRL2
@@ -111,6 +126,8 @@ void ParityGame::read_pbes( const std::string &file_path,
              are numbered from 2 to num_vertices-1 with no gaps, with 0 and 1
              representing true and false (respectively) and 2 representing the
              initial condition. */
+
+    if (goal_vertex) *goal_vertex = 2;
 
     mcrl2::pbes_system::pbes<> pbes;
     pbes.load(file_path);  // TODO: handle exceptions raised here?
@@ -120,42 +137,46 @@ void ParityGame::read_pbes( const std::string &file_path,
 
     // Build the edge list
     StaticGraph::edge_list edges;
-    verti num_vertices = 3;
-    for (verti v = 2; v < num_vertices; ++v)
+    verti begin = 0, end = 3;
+    for (verti v = begin; v < end; ++v)
     {
         std::set<unsigned> deps = pgg.get_dependencies(v);
         for ( std::set<unsigned>::const_iterator it = deps.begin();
               it != deps.end(); ++it )
         {
             verti w = (verti)*it;
-            assert(w >= 2);
-            if (w >= num_vertices) num_vertices = w + 1;
-            edges.push_back(std::make_pair(v - 2, w - 2));
+            assert(w >= begin);
+            if (w >= end) end = w + 1;
+            edges.push_back(std::make_pair(v - begin, w - begin));
         }
     }
 
     // Determine maximum prioirity
     int max_prio = 0;
-    for (verti v = 2; v < num_vertices; ++v)
+    for (verti v = begin; v < end; ++v)
     {
         max_prio = std::max(max_prio, (int)pgg.get_priority(v));
     }
 
     // Assign vertex info and recount cardinalities
-    reset(num_vertices - 2, max_prio + 1);
-    for (verti v = 2; v < num_vertices; ++v)
+    reset(end - begin, max_prio + 1);
+    for (verti v = begin; v < end; ++v)
     {
         bool and_op = pgg.get_operation(v) ==
                       mcrl2::pbes_system::parity_game_generator::PGAME_AND;
-        vertex_[v - 2].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
-        vertex_[v - 2].priority = pgg.get_priority(v);
+        vertex_[v - begin].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
+        vertex_[v - begin].priority = pgg.get_priority(v);
     }
-    recalculate_cardinalities(num_vertices - 2);
+    recalculate_cardinalities(end - begin);
 
     // Assign graph
     graph_.assign(edges, edge_dir);
 #else /* ifdef WITH_MCRL2 */
-    assert(0);
+    (void)file_path;    // unused
+    (void)edge_dir;     // unused
+    (void)goal_vertex;  // unused
+    Logger::fatal( "ParityGame::read_pbes() called, but "
+                   "compiled without mCRL2 support!\n" );
 #endif /* def WITH_MCRL2 */
 }
 
@@ -207,4 +228,29 @@ void ParityGame::write_dot(std::ostream &os) const
         }
     }
     os << "}\n";
+}
+
+void ParityGame::write_debug(std::ostream &os) const
+{
+    for (verti v = 0; v < graph_.V(); ++v)
+    {
+        os << v << ' ';
+
+        // Print controlling player and vertex priority:
+        char l = ' ', r = ' ';
+        if (player(v) == PLAYER_EVEN) l = '<', r = '>';
+        if (player(v) == PLAYER_ODD)  l = '[', r = ']';
+        os << l << priority(v) << r;
+
+        // Print outgoing edges:
+        char sep = ' ';
+        for (StaticGraph::const_iterator it = graph_.succ_begin(v);
+             it != graph_.succ_end(v); ++it)
+        {
+            os << sep << *it;
+            sep = ',';
+        }
+        os << '\n';
+    }
+    os << std::flush;
 }

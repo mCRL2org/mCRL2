@@ -79,3 +79,11 @@ size_t PredecessorLiftingStrategy::memory_use() const
 {
     return queue_capacity_*(sizeof(verti) + sizeof(char));
 }
+
+LiftingStrategy *PredecessorLiftingStrategyFactory::create(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+{
+    (void)spm;  // unused
+
+    return new PredecessorLiftingStrategy(game, backward_, stack_);
+}

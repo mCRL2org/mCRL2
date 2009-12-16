@@ -31,4 +31,18 @@ private:
     verti failed_lifts_;        //!< number of consecutive failed lift attempts
 };
 
+
+class LinearLiftingStrategyFactory : public LiftingStrategyFactory
+{
+public:
+    LinearLiftingStrategyFactory(bool backward = false)
+        : backward_(backward) { };
+
+    LiftingStrategy *create( const ParityGame &game,
+                             const SmallProgressMeasures &spm );
+
+private:
+    const bool backward_;
+};
+
 #endif /* ndef LINEAR_LIFTING_STRATEGY_H_INCLUDED */

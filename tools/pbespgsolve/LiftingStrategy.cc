@@ -16,11 +16,15 @@
 
 #include <stdlib.h>
 
-#include "Compatibility.h"
+#include "compatibility.h"
 #define strcasecmp compat_strcasecmp
 
-LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
-                                          const std::string description )
+LiftingStrategyFactory::~LiftingStrategyFactory()
+{
+}
+
+LiftingStrategyFactory *
+    LiftingStrategyFactory::create(const std::string &description)
 {
     if (description.empty()) return NULL;
 
@@ -36,7 +40,7 @@ LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
     if (strcasecmp(parts[0].c_str(), "linear") == 0)
     {
         int backward = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
-        return new LinearLiftingStrategy(game, backward);
+        return new LinearLiftingStrategyFactory(backward);
     }
     else
     if ( strcasecmp(parts[0].c_str(), "predecessor") == 0 ||
@@ -44,7 +48,7 @@ LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
     {
         int backward = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
         int stack    = (parts.size() > 2 ? atoi(parts[2].c_str()) : 0);
-        return new PredecessorLiftingStrategy(game, backward, stack);
+        return new PredecessorLiftingStrategyFactory(backward, stack);
     }
     else
     if ( strcasecmp(parts[0].c_str(), "focuslist") == 0 ||
@@ -52,22 +56,17 @@ LiftingStrategy *LiftingStrategy::create( const ParityGame &game,
     {
         int backward = (parts.size() > 1 ? atoi(parts[1].c_str()) : 0);
         double ratio = (parts.size() > 2 ? atof(parts[2].c_str()) : 0);
-        size_t V = game.graph().V();
-        if (ratio <= 0) ratio = 0.1;
-        size_t max_size = (size_t)(ratio > 1 ? ratio : ratio*V);
-        if (max_size == 0) max_size = 1;
-        if (max_size >  V) max_size = V;
-        return new FocusListLiftingStrategy(game, backward, max_size);
+        return new FocusListLiftingStrategyFactory(backward, ratio);
     }
     else
     if (strcasecmp(parts[0].c_str(), "maxmeasure") == 0)
     {
-        return new MaxMeasureLiftingStrategy(game);
+        return new MaxMeasureLiftingStrategyFactory();
     }
     else
     if (strcasecmp(parts[0].c_str(), "oldmaxmeasure") == 0)
     {
-        return new OldMaxMeasureLiftingStrategy(game);
+        return new OldMaxMeasureLiftingStrategyFactory();
     }
     else
     {

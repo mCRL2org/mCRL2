@@ -11,24 +11,21 @@
 #define COMPONENT_SOLVER_H_INCLUDED
 
 #include "SmallProgressMeasures.h"
+#include "Logger.h"
 #include "SCC.h"
 #include <string>
 #include <vector>
 
 /*! A solver that breaks down the game graph into strongly connected components,
     and uses the SPM algorithm to solve independent subgames. */
-class ComponentSolver : public ParityGameSolver
+class ComponentSolver : public ParityGameSolver, public virtual Logger
 {
 public:
     ComponentSolver( const ParityGame &game,
-                     const std::string &strategy,
-                     LiftingStatistics *stats );
+                     ParityGameSolverFactory &pgsf );
     ~ComponentSolver();
 
-    bool solve();
-    ParityGame::Player winner(verti v) const { return winners_[v]; }
-    const ParityGame &game() const { return game_; }
-    size_t memory_use() const { return memory_used_; }
+    ParityGame::Strategy solve();
 
 private:
     // SCC callback
@@ -36,10 +33,21 @@ private:
     friend class SCC<ComponentSolver>;
 
 protected:
-    std::string                         strategy_;
-    std::vector<ParityGame::Player>     winners_;
-    LiftingStatistics                   *stats_;
-    size_t                              memory_used_;
+    ParityGameSolverFactory &pgsf_;     //!< Solver factory to use
+    ParityGame::Strategy    strategy_;  //!< The resulting strategy
+};
+
+class ComponentSolverFactory : public ParityGameSolverFactory
+{
+public:
+    ComponentSolverFactory(ParityGameSolverFactory &pgsf)
+        : pgsf_(pgsf) { };
+
+    ParityGameSolver *create( const ParityGame &game,
+        const verti *vertex_map, verti vertex_map_size );
+
+protected:
+    ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
 };
 
 #endif /* ndef COMPONENT_SOLVER_H_INCLUDED */

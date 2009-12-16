@@ -57,4 +57,18 @@ private:
     size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
+
+class PredecessorLiftingStrategyFactory : public LiftingStrategyFactory
+{
+public:
+    PredecessorLiftingStrategyFactory(bool backward = false, bool stack = false)
+        : backward_(backward), stack_(stack) { };
+
+    LiftingStrategy *create( const ParityGame &game,
+                             const SmallProgressMeasures &spm );
+
+private:
+    const bool backward_, stack_;
+};
+
 #endif /* ndef PREDECESSOR_LIFTING_STRATEGY_H_INCLUDED */

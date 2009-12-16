@@ -6,26 +6,31 @@ project toolset/pbespgsolve
     <source>/libraries//pbes
   ;
 
-SOURCES = Compatibility.cc
-          ComponentSolver.cpp
+SOURCES = Abortable.cpp
+          Compatibility.cc
+          ComponentSolver.cc
           FocusListLiftingStrategy.cc
           Graph.cc
           GraphOrdering.cpp
           LiftingStrategy.cc
           LinearLiftingStrategy.cc
+          Logger.cc
           MaxMeasureLiftingStrategy.cc
           OldMaxMeasureLiftingStrategy.cc
           ParityGame.cc
+          ParityGame_verify.cc
           ParityGame_IO.cc
           PredecessorLiftingStrategy.cc
+          RecursiveSolver.cc
           SmallProgressMeasures.cc
-          logging.c
         ;
 
 lib pg
   : $(SOURCES)
-  : <toolset>gcc:<source>timing.c
-    <toolset>msvc:<source>timing_msvc.c
+    #timing.c
+  :
+   # <toolset>gcc:<source>timing.c
+   # <toolset>msvc:<source>timing_msvc.c
     <use>/site-config//boost
   ;
 

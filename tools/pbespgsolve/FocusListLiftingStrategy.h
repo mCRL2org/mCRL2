@@ -66,4 +66,19 @@ private:
     focus_list::iterator focus_pos_;    //!< current position in the focus list
 };
 
+
+class FocusListLiftingStrategyFactory : public LiftingStrategyFactory
+{
+public:
+    FocusListLiftingStrategyFactory(bool backward, double ratio)
+        : backward_(backward), ratio_(ratio > 0 ? ratio : 0.1) { };
+
+    LiftingStrategy *create( const ParityGame &game,
+                             const SmallProgressMeasures &spm );
+
+private:
+    const bool      backward_;
+    const double    ratio_;
+};
+
 #endif /* ndef FOCUS_LIST_LIFTING_STRATEGY_H_INCLUDED */

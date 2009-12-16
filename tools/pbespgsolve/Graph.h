@@ -10,14 +10,17 @@
 #ifndef GRAPH_H_INCLUDED
 #define GRAPH_H_INCLUDED
 
-#include <vector>
-#include <utility>
+#include <algorithm>
 #include <iostream>
+#include <utility>
+#include <vector>
 
-#include "Compatibility.h"
+#include "compatibility.h"
 
 typedef uint32_t verti;    /*!< type used to number vertices */
 typedef uint32_t edgei;    /*!< type used to number edges */
+
+#define NO_VERTEX ((verti)-1)
 
 /*! A static graph consists of V vertices (numbered from 0 to V, exclusive)
     and E edges, and can store either edge successors, predecessors, or both. */
@@ -90,6 +93,31 @@ public:
     /*! Returns an iterator pointing past the last predecessor of vertex `v`. */
     const_iterator pred_end(verti v) const {
         return &predecessors_[predecessor_index_[v + 1]];
+    }
+
+    /*! Returns whether `v' has a successor `w'. */
+    bool has_succ(verti v, verti w) const {
+        return std::binary_search(succ_begin(v), succ_end(v), w);
+    }
+
+    /*! Returns whether `w' has a predecessor `v'. */
+    bool has_pred(verti w, verti v) const {
+        return std::binary_search(pred_begin(w), pred_end(w), v);
+    }
+
+    /*! Returns the degree for vertex `v'. */
+    edgei degree(verti v) const {
+        return indegree(v) + outdegree(v);
+    }
+
+    /*! Returns the outdegree for vertex `v'. */
+    edgei outdegree(verti v) const {
+        return succ_end(v) - succ_begin(v);
+    }
+
+    /*! Returns the indegree for vertex `v'. */
+    edgei indegree(verti v) const {
+        return pred_end(v) - pred_begin(v);
     }
 
 protected:

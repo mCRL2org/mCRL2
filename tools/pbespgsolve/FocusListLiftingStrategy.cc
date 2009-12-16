@@ -123,3 +123,20 @@ size_t FocusListLiftingStrategy::memory_use() const
 {
     return max_size_*sizeof(focus_list::value_type);
 }
+
+LiftingStrategy *FocusListLiftingStrategyFactory::create(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+{
+    (void)spm;  // unused
+
+    /* Ratio is absolute value if >1, or a fraction of the size of the game's
+       vertex set if <= 1. */
+    size_t V = game.graph().V();
+    size_t max_size = (size_t)(ratio_ > 1 ? ratio_ : ratio_*V);
+
+    // Fix rounding errors:
+    if (max_size == 0) max_size = 1;
+    if (max_size >  V) max_size = V;
+
+    return new FocusListLiftingStrategy(game, backward_, max_size);
+}

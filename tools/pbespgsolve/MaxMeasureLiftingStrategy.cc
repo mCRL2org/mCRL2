@@ -28,9 +28,10 @@
     marked candidates for lifting.)
 */
 
-MaxMeasureLiftingStrategy::MaxMeasureLiftingStrategy(const ParityGame &game)
-    : LiftingStrategy(game), queued_(new bool[graph_.V()]),
-      pq_pos_(new verti[graph_.V()]), pq_(new verti[graph_.V()])
+MaxMeasureLiftingStrategy::MaxMeasureLiftingStrategy(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+        : LiftingStrategy(game), spm_(spm), queued_(new bool[graph_.V()]),
+          pq_pos_(new verti[graph_.V()]), pq_(new verti[graph_.V()])
 {
 }
 
@@ -127,7 +128,7 @@ void MaxMeasureLiftingStrategy::pop()
 
 int MaxMeasureLiftingStrategy::cmp(verti i, verti j)
 {
-    return spm_->vector_cmp(pq_[i], pq_[j], spm_->len_);
+    return spm_.vector_cmp(pq_[i], pq_[j], spm_.len_);
 }
 
 bool MaxMeasureLiftingStrategy::check()
@@ -211,4 +212,10 @@ verti MaxMeasureLiftingStrategy::next(verti prev_vertex, bool prev_lifted)
 size_t MaxMeasureLiftingStrategy::memory_use() const
 {
     return graph_.V()*(sizeof(bool) + 2*sizeof(verti));
+}
+
+LiftingStrategy *MaxMeasureLiftingStrategyFactory::create(
+    const ParityGame &game, const SmallProgressMeasures &spm )
+{
+    return new MaxMeasureLiftingStrategy(game, spm);
 }

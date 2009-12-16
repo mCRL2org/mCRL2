@@ -12,29 +12,38 @@
 
 #include "ParityGameSolver.h"
 #include "LiftingStrategy.h"
+#include "Logger.h"
 #include <vector>
 #include <utility>
 
-#define NO_VERTEX ((verti)-1)
-
-/*! Used to collect statistics when solving using the SPM algorithm */
+/*! Object used to collect statistics when solving using the SPM algorithm */
 class LiftingStatistics
 {
 public:
+    /*! Construct a statistics object for the given game. */
     LiftingStatistics(const ParityGame &game);
-    boost::int64_t lifts_attempted() const { return lifts_attempted_; }
-    boost::int64_t lifts_succeeded() const { return lifts_succeeded_; }
-    boost::int64_t lifts_attempted(verti v) const { return vertex_stats_[v].first; }
-    boost::int64_t lifts_succeeded(verti v) const { return vertex_stats_[v].second; }
+
+#if 0
+    /*! Merge statistics from a given object into this object, using the given
+        vertex mapping to map vertex indices (vertex v in `other' has index
+        mapping[v] in this object). */
+    void merge(const LiftingStatistics &other, const verti *mapping = NULL);
+#endif
+
+    long long lifts_attempted() const { return lifts_attempted_; }
+    long long lifts_succeeded() const { return lifts_succeeded_; }
+    long long lifts_attempted(verti v) const { return vertex_stats_[v].first; }
+    long long lifts_succeeded(verti v) const { return vertex_stats_[v].second; }
 
 private:
     void record_lift(verti v, bool success);
     friend class SmallProgressMeasures;
 
 private:
-    boost::int64_t lifts_attempted_, lifts_succeeded_;
-    std::vector<std::pair<boost::int64_t, boost::int64_t> > vertex_stats_;
+    long long lifts_attempted_, lifts_succeeded_;
+    std::vector<std::pair<long long, long long> > vertex_stats_;
 };
+
 
 /*! A parity game solver based on Marcin Jurdzinski's small progress measures
     algorithm, with pluggable lifting heuristics.
@@ -43,24 +52,23 @@ private:
     However, since all components with even indices (zero-based) are fixed at 0,
     we only store values for the odd indices.
 */
-class SmallProgressMeasures : public ParityGameSolver
+class SmallProgressMeasures : public ParityGameSolver, public virtual Logger
 {
 public:
-    SmallProgressMeasures( const ParityGame &game, LiftingStrategy &strategy,
-                           LiftingStatistics *stats );
+    SmallProgressMeasures( const ParityGame &game,
+                           LiftingStrategyFactory &lsf,
+                           LiftingStatistics *stats = 0,
+                           const verti *vertex_map = 0,
+                           verti vertex_map_size = 0 );
     ~SmallProgressMeasures();
 
-    bool solve();
-    ParityGame::Player winner(verti v) const;
+    ParityGame::Strategy solve();
 
     /*! For debugging: print current state to stdout */
     void debug_print();
 
     /*! For debugging: verify that the current state describes a valid SPM */
     bool verify_solution();
-
-    /*! Returns the peak memory used to solve. */
-    size_t memory_use() const;
 
 protected:
 
@@ -86,14 +94,19 @@ protected:
     /*! Set the SPM vector for vertex `v` to top value. */
     void set_top(verti v) { vec(v)[0] = (verti)-1; }
 
+    /*! Translate local into global vertex index: */
+    verti map_vertex(verti v) {
+        return vmap_ ? (v < vmap_size_ ? vmap_[v] : NO_VERTEX) : v;
+    }
+
  private:
     /*! Compares the first `N` elements of the SPM vectors for the given
         vertices and returns -1, 0 or 1 to indicate that v is smaller, equal to,
         r larger than w (respectively). */
-    inline int vector_cmp(verti v, verti w, int N);
+    inline int vector_cmp(verti v, verti w, int N) const;
 
     /*! Returns the minimum or maximum successor for vertex `v`,
-        depending on whether take_max is false or true (respectively). */
+        depending on whether take_max is false or true (vertex_map_size_respectively). */
     verti get_ext_succ(verti v, bool take_max);
 
     /*! Returns the minimum successor for vertex `v`. */
@@ -102,25 +115,42 @@ protected:
     /*! Returns the maximum successor for vertex `v`. */
     verti get_max_succ(verti v);
 
-    // Allow lifting strategy to access the SPM  internals:
-    friend class LiftingStrategy;
+    // Allow selected lifting strategies to access the SPM  internals:
     friend class MaxMeasureLiftingStrategy;
     friend class OldMaxMeasureLiftingStrategy;
 
 protected:
-    bool preprocessed_;         /*!< set if the graph has been preprocessed */
-    LiftingStrategy &strategy_; /*!< the lifting strategy to use */
-    int len_;                   /*!< length of SPM vectors */
-    verti *M_;                  /*!< bounds on the SPM vector components */
-    verti *spm_;                /*!< array storing the SPM vector data */
-    LiftingStatistics *stats_;  /*!< object to record lifting statistics */
+    LiftingStrategyFactory &lsf_;   //!< factory used to create lifting strategy
+    int len_;                       //!< length of SPM vectors
+    verti *M_;                      //!< bounds on the SPM vector components
+    verti *spm_;                    //!< array storing the SPM vector data
+    LiftingStatistics *stats_;      //!< object to record lifting statistics
+    const verti *vmap_;             //!< current vertex map
+    const verti vmap_size_;         //!< size of vertex map
 };
 
 
-int SmallProgressMeasures::vector_cmp(verti v, verti w, int N)
+class SmallProgressMeasuresFactory : public ParityGameSolverFactory
 {
-    if (is_top(v)) return is_top(w) ? 0 : +1;   /* v is top */
-    if (is_top(w)) return -1;                   /* w is top, but v isn't */
+public:
+    SmallProgressMeasuresFactory( LiftingStrategyFactory &lsf,
+                                  LiftingStatistics *stats = 0 )
+        : lsf_(lsf), stats_(stats) { };
+
+    ParityGameSolver *create( const ParityGame &game,
+                              const verti *vertex_map,
+                              verti vertex_map_size );
+
+private:
+    LiftingStrategyFactory  &lsf_;
+    LiftingStatistics       *stats_;
+};
+
+
+int SmallProgressMeasures::vector_cmp(verti v, verti w, int N) const
+{
+    if (is_top(v)) return is_top(w) ? 0 : +1;   // v is top
+    if (is_top(w)) return -1;                   // w is top, but v isn't
 
     for (int n = 0; n < N; ++n)
     {
