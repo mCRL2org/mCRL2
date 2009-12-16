@@ -19,10 +19,10 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-    /** \brief     Type check a parsed mCRL2 process specification.
+    /** \brief     Type check a parsed mCRL2 pbes specification.
      *  Throws an exception if something went wrong.
-     *  \param[in] proc_spec A process specification  that has not been type checked.
-     *  \post      proc_spec is type checked.
+     *  \param[in] pbes_spec A process specification  that has not been type checked.
+     *  \post      pbes_spec is type checked.
      **/
 
   template <typename Container>
@@ -30,13 +30,12 @@ namespace pbes_system {
     {
       // TODO: replace all this nonsense code by a proper type check implementation
       ATermAppl t = pbes_to_aterm(pbes_spec);
-      t = core::type_check_pbes_spec(pbes_spec);
+      t = core::type_check_pbes_spec(t);
       if (!t)
       {
         throw mcrl2::runtime_error("could not type check " + core::pp(pbes_spec));
       }
-      pbes<Container> result(t);
-      pbes_spec = result;
+      pbes_spec = pbes<Container>(t);
     }
 
 } // namespace pbes_system

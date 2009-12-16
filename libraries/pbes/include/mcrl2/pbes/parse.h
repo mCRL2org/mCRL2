@@ -26,10 +26,20 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/typecheck.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+  template <typename Container>
+  void apply_internal_format_conversion(pbes<Container>& p)
+  {
+    // TODO: make proper internal_format_conversion function for pbes
+    ATermAppl t = pbes_to_aterm(p);
+    t = data::detail::internal_format_conversion(t);
+    p = pbes<Container>(t);
+  }
 
   /// \brief Reads a PBES from an input stream.
   /// \param from An input stream
@@ -43,6 +53,12 @@ namespace pbes_system {
       throw mcrl2::runtime_error("parsing failed");
     }
 
+#ifdef MCRL2_NEW_TYPECHECKER
+    std::cout << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
+    p = pbes<Container>(result);
+    type_check(p);
+    apply_internal_format_conversion(p);
+#else
     result = core::type_check_pbes_spec(result);
     if (result == NULL) {
       throw mcrl2::runtime_error("type checking failed");
@@ -50,6 +66,7 @@ namespace pbes_system {
     result = data::detail::internal_format_conversion(result);
 
     p = pbes<Container>(result);
+#endif
     complete_data_specification(p);
     return from;
   }
