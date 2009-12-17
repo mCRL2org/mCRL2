@@ -495,7 +495,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for minimum with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol minimum(minimum_name(), function_sort(s0, s1, target_sort));
@@ -599,7 +599,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for maximum with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol maximum(maximum_name(), function_sort(s0, s1, target_sort));
@@ -678,7 +678,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts" + s0.to_string());
         }
 
         function_symbol abs(abs_name(), function_sort(s0, target_sort));
@@ -756,7 +756,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for negate with domain sorts" + s0.to_string());
         }
 
         function_symbol negate(negate_name(), function_sort(s0, target_sort));
@@ -834,7 +834,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for succ with domain sorts" + s0.to_string());
         }
 
         function_symbol succ(succ_name(), function_sort(s0, target_sort));
@@ -912,7 +912,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for pred with domain sorts" + s0.to_string());
         }
 
         function_symbol pred(pred_name(), function_sort(s0, target_sort));
@@ -999,7 +999,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for plus with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol plus(plus_name(), function_sort(s0, s1, target_sort));
@@ -1079,7 +1079,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for minus with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol minus(minus_name(), function_sort(s0, s1, target_sort));
@@ -1159,7 +1159,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for times with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol times(times_name(), function_sort(s0, s1, target_sort));
@@ -1239,7 +1239,7 @@ namespace mcrl2 {
         }
         else
         {
-          assert(false);
+          throw mcrl2::runtime_error("cannot compute target sort for exp with domain sorts" + s0.to_string() + ", " + s1.to_string());
         }
 
         function_symbol exp(exp_name(), function_sort(s0, s1, target_sort));

@@ -507,7 +507,7 @@ class function_declaration_list():
               target_sort += "        }\n"
             target_sort += "        else\n"
             target_sort += "        {\n"
-            target_sort += "          assert(false);\n"
+            target_sort += "          throw mcrl2::runtime_error(\"cannot compute target sort for %s with domain sorts \" + %s);\n" % (self.label.to_string(), string.join([("%s.to_string()" % new_domain_sorts[j].code(sort_spec)) for j in range(len(sort.domain.elements))], " + \", \" + "))
             target_sort += "        }\n"
           target_sort_id = sort_identifier(identifier("target_sort"))
           new_sort = sort_arrow(domain(False, new_domain_sorts), target_sort_id)
