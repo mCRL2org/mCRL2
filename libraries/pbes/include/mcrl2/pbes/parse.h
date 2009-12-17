@@ -28,6 +28,12 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
 
+//#define MCRL2_LOG_PARSER_OUTPUT
+#ifdef MCRL2_LOG_PARSER_OUTPUT
+#include <fstream>
+#include "mcrl2/core/file_utility.h"
+#endif
+
 namespace mcrl2 {
 
 namespace pbes_system {
@@ -52,6 +58,14 @@ namespace pbes_system {
     if (result == NULL) {
       throw mcrl2::runtime_error("parsing failed");
     }
+
+#ifdef MCRL2_LOG_PARSER_OUTPUT
+    std::string filename = core::create_filename("pbes", ".txt");
+    std::ofstream out(filename.c_str());
+    out << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
+    out << core::pp(result) << std::endl << std::endl;
+    out << atermpp::aterm_appl(result).to_string() << std::endl;
+#endif
 
 #ifdef MCRL2_NEW_TYPECHECKER
     std::cout << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
