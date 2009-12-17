@@ -6,6 +6,8 @@ project libraries/pbes/test
        <library>/libraries//pbes
        <library>/site-config//boost_filesystem
        <library>/site-config//boost_system
+       <library>../../../tools/pbespgsolve//pg
+       <include>../../../tools/pbespgsolve
        #<define>MCRL2_WITH_GARBAGE_COLLECTION
    ;
 

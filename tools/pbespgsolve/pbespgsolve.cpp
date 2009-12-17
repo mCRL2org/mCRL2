@@ -106,7 +106,8 @@ public:
     p.load(input_filename());
     unsigned int log_level = mcrl2::core::gsVerbose ? 1 : 0;
     pbespgsolve_algorithm algorithm(log_level, m_options);
-    algorithm.run(p);
+    bool result = algorithm.run(p);
+    std::clog << (result ? "Property holds.\n" : "Property DOES NOT hold.\n");
     return true;
   }
 };

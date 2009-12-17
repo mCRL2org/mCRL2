@@ -94,7 +94,7 @@ namespace mcrl2 {
 
     public:
 
-      pbespgsolve_algorithm(unsigned int log_level, pbespgsolve_options options = pbespgsolve_options())
+      pbespgsolve_algorithm(unsigned int log_level = 0, pbespgsolve_options options = pbespgsolve_options())
       : core::algorithm(log_level), m_options(options)
       {
         if (options.solver_type == spm_solver)
@@ -150,13 +150,7 @@ namespace mcrl2 {
           throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
         }
 
-        // Print winner:
-        if (pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN)
-          std::clog << "Property holds.\n";
-        else
-          std::clog << "Property DOES NOT hold.\n";
-
-        return true;
+        return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
       }
     };
 
