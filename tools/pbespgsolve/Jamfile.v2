@@ -7,11 +7,11 @@ project toolset/pbespgsolve
   ;
 
 SOURCES = Abortable.cpp
-          Compatibility.cc
+          compatibility.cc
           ComponentSolver.cc
           FocusListLiftingStrategy.cc
           Graph.cc
-          GraphOrdering.cpp
+          GraphOrdering.cc
           LiftingStrategy.cc
           LinearLiftingStrategy.cc
           Logger.cc
