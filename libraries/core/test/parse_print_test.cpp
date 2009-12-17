@@ -135,12 +135,14 @@ int test_main(int argc, char** argv)
   mcrl2::core::garbage_collect();
 
   //test function updates
+  /*
   test_data_expression("(lambda x: Bool. x)[true -> false]", false);
   mcrl2::core::garbage_collect();
   test_data_expression("(lambda x: Bool. x)[true -> false][false -> true]", false);
   mcrl2::core::garbage_collect();
   test_data_expression("(lambda n: Nat. n mod 2 == 0)[0 -> false]", false);
   mcrl2::core::garbage_collect();
+  */
 
   //test data specification involving structured sorts
   //in which projection functions are reused

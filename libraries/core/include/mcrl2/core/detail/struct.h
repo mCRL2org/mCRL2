@@ -2529,22 +2529,6 @@ ATermAppl gsSortMultAct(ATermAppl MultAct);
 ///\return Term is a process expression
 bool gsIsProcExpr(ATermAppl Term);
 
-
-// Mu-calculus formulas
-// --------------------
-
-///\return Term is a state formula
-bool gsIsStateFrm(ATermAppl Term);
-
-///\pre Term is not NULL
-///\return Term is a regular formula
-bool gsIsRegFrm(ATermAppl Term);
-
-///\pre Term is not NULL
-///\return Term is a action formula
-bool gsIsActFrm(ATermAppl Term);
-
-
 // Data specifications
 // -------------------
 

@@ -372,6 +372,204 @@ namespace mcrl2 {
 
         return static_cast< application >(list_expression);
       }
+
+      /// \brief Generate identifier list_enumeration
+      /// \return Identifier list_enumeration
+      inline
+      core::identifier_string const& list_enumeration_name()
+      {
+        static core::identifier_string list_enumeration_name = data::detail::initialise_static_expression(list_enumeration_name, core::identifier_string("@ListEnum"));
+        return list_enumeration_name;
+      }
+
+      /// \brief Constructor for function symbol list_enumeration
+      /// \param s A sort expression
+      /// \return Function symbol list_enumeration
+      inline
+      function_symbol list_enumeration(const sort_expression& s)
+      {
+        function_symbol list_enumeration(list_enumeration_name(), s);
+        return list_enumeration;
+      }
+
+      /// \brief Recogniser for function list_enumeration
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching list_enumeration
+      inline
+      bool is_list_enumeration_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == list_enumeration_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol list_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of list_enum to the data expressions in range.
+      template <typename Sequence>
+      inline
+      data_expression list_enumeration(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      {
+        if(range.empty())
+        {
+          return list_enumeration(s);
+        }
+        else
+        {
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.count(); ++i)
+          {
+            v.push_back(t);
+          }
+
+          return application(list_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Application of function symbol list_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of list_enum to the data expressions in range.
+      inline
+      data_expression list_enumeration(const sort_expression& s, data_expression_list const& range)
+      {
+        if(range.empty())
+        {
+          return list_enumeration(s);
+        }
+        else
+        {
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.size(); ++i)
+          {
+            v.push_back(t);
+          }
+
+          return application(list_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Recogniser for application of list_enumeration
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol
+      ///         list_enumeration to a number of arguments
+      inline
+      bool is_list_enumeration_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_list_enumeration_function_symbol(application(e).head());
+        }
+        return false;
+      }
+    }
+
+    namespace sort_set {
+      /// \brief Generate identifier set_enumeration
+      /// \return Identifier set_enumeration
+      inline
+      core::identifier_string const& set_enumeration_name()
+      {
+        static core::identifier_string set_enumeration_name = data::detail::initialise_static_expression(set_enumeration_name, core::identifier_string("@SetEnum"));
+        return set_enumeration_name;
+      }
+
+      /// \brief Constructor for function symbol set_enumeration
+      /// \param s A sort expression
+      /// \return Function symbol set_enumeration
+      inline
+      function_symbol set_enumeration(const sort_expression& s)
+      {
+        function_symbol set_enumeration(set_enumeration_name(), s);
+        return set_enumeration;
+      }
+
+      /// \brief Recogniser for function set_enumeration
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching set_enumeration
+      inline
+      bool is_set_enumeration_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == set_enumeration_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol set_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of set_enum to the data expressions in range.
+      template <typename Sequence>
+      inline
+      data_expression set_enumeration(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      {
+        if(range.empty())
+        {
+          return set_enumeration(s);
+        }
+        else
+        {
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.count(); ++i)
+          {
+            v.push_back(t);
+          }
+
+          return application(set_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Application of function symbol set_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of set_enum to the data expressions in range.
+      inline
+      data_expression set_enumeration(const sort_expression& s, data_expression_list const& range)
+      {
+        if(range.empty())
+        {
+          return set_enumeration(s);
+        }
+        else
+        {
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.size(); ++i)
+          {
+            v.push_back(t);
+          }
+
+          return application(set_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Recogniser for application of set_enumeration
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol
+      ///         set_enumeration to a number of arguments
+      inline
+      bool is_set_enumeration_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_set_enumeration_function_symbol(application(e).head());
+        }
+        return false;
+      }
     }
 
     namespace sort_fset {
@@ -397,6 +595,111 @@ namespace mcrl2 {
 
         return static_cast< application >(fset_expression);
       }
+    }
+
+    namespace sort_bag {
+      /// \brief Generate identifier bag_enumeration
+      /// \return Identifier bag_enumeration
+      inline
+      core::identifier_string const& bag_enumeration_name()
+      {
+        static core::identifier_string bag_enumeration_name = data::detail::initialise_static_expression(bag_enumeration_name, core::identifier_string("@BagEnum"));
+        return bag_enumeration_name;
+      }
+
+      /// \brief Constructor for function symbol bag_enumeration
+      /// \param s A sort expression
+      /// \return Function symbol bag_enumeration
+      inline
+      function_symbol bag_enumeration(const sort_expression& s)
+      {
+        function_symbol bag_enumeration(bag_enumeration_name(), s);
+        return bag_enumeration;
+      }
+
+      /// \brief Recogniser for function bag_enumeration
+      /// \param e A data expression
+      /// \return true iff e is the function symbol matching bag_enumeration
+      inline
+      bool is_bag_enumeration_function_symbol(const atermpp::aterm_appl& e)
+      {
+        if (is_function_symbol(e))
+        {
+          return function_symbol(e).name() == bag_enumeration_name();
+        }
+        return false;
+      }
+
+      /// \brief Application of function symbol bag_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of bag_enum to the data expressions in range.
+      template <typename Sequence>
+      inline
+      data_expression bag_enumeration(const sort_expression& s, Sequence const& range,
+                       typename data::detail::enable_if_container< Sequence, data_expression >::type* = 0)
+      {
+        if(range.empty())
+        {
+          return bag_enumeration(s);
+        }
+        else
+        {
+          assert(range.count() % 2 == 0);
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.count() / 2; ++i)
+          {
+            v.push_back(t);
+            v.push_back(sort_nat::nat());
+          }
+
+          return application(bag_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Application of function symbol bag_enumeration
+      /// \param s A sort expression
+      /// \param range A range of data expressions
+      /// \return Application of bag_enum to the data expressions in range.
+      inline
+      data_expression bag_enumeration(const sort_expression& s, data_expression_list const& range)
+      {
+        if(range.empty())
+        {
+          return bag_enumeration(s);
+        }
+        else
+        {
+          assert(range.size() % 2 == 0);
+          sort_expression_vector v;
+          sort_expression t(range.begin()->sort());
+
+          for(size_t i = 0; i < range.size() / 2; ++i)
+          {
+            v.push_back(t);
+            v.push_back(sort_nat::nat());
+          }
+
+          return application(bag_enumeration(function_sort(v,s)), range);
+        }
+      }
+
+      /// \brief Recogniser for application of bag_enumeration
+      /// \param e A data expression
+      /// \return true iff e is an application of function symbol
+      ///         bag_enumeration to a number of arguments
+      inline
+      bool is_bag_enumeration_application(const atermpp::aterm_appl& e)
+      {
+        if (is_application(e))
+        {
+          return is_bag_enumeration_function_symbol(application(e).head());
+        }
+        return false;
+      }
+
     }
 
     namespace sort_fbag {

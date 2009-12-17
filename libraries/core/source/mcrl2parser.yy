@@ -23,7 +23,8 @@
 #include <aterm2.h>
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -463,15 +464,15 @@ sort_constant:
 sort_constructor:
   LIST LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprList($3));
+      safe_assign($$, mcrl2::data::sort_list::list(mcrl2::data::sort_expression($3)));
     }
   | SET LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprSet($3));
+      safe_assign($$, mcrl2::data::sort_set::set_(mcrl2::data::sort_expression($3)));
     }
   | BAG LPAR sort_expr RPAR
     {
-      safe_assign($$, gsMakeSortExprBag($3));
+      safe_assign($$, mcrl2::data::sort_bag::bag(mcrl2::data::sort_expression($3)));
     }
   ;
 
@@ -885,12 +886,12 @@ data_expr_postfix:
       safe_assign($$, gsMakeDataAppl($1, ATreverse($3)));
       gsDebugMsg("parsed postfix data expression (function application)\n  %T\n", $$);
     }
-  | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
+/*  | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId(gsMakeOpIdNameFuncUpdate()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
       gsDebugMsg("parsed postfix data expression (function update)\n  %T\n", $$);
-    }
+    } */
   ;
 
 //one or more data expressions, separated by comma's
@@ -956,12 +957,12 @@ data_constant:
     }
   | LBRACK RBRACK
     {
-      safe_assign($$, gsMakeId(gsMakeOpIdNameEmptyList()));
+      safe_assign($$, gsMakeId(mcrl2::data::sort_list::nil_name()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   | LBRACE RBRACE
     {
-      safe_assign($$, gsMakeId(gsMakeOpIdNameEmptySet()));
+      safe_assign($$, gsMakeId(mcrl2::data::sort_set::emptyset_name()));
       gsDebugMsg("parsed data constant\n  %T\n", $$);
     }
   ;
@@ -970,17 +971,17 @@ data_constant:
 data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameListEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_list::list_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE data_exprs_cs RBRACE
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameSetEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_set::set_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
-      safe_assign($$, gsMakeDataAppl(gsMakeId(gsMakeOpIdNameBagEnum()), ATreverse($2)));
+      safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_bag::bag_enumeration_name()), ATreverse($2)));
       gsDebugMsg("parsed data enumeration\n  %T\n", $$);
     }
   ;
@@ -1239,7 +1240,7 @@ data_eqn_decls_scs:
 data_eqn_decl:
   data_expr EQUALS data_expr
     {
-      safe_assign($$, gsMakeDataEqn(ATmakeList0(), gsMakeDataExprTrue(), $1, $3));
+      safe_assign($$, gsMakeDataEqn(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
       gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
     }
   | data_expr ARROW data_expr EQUALS data_expr
@@ -2652,7 +2653,7 @@ action_rename_rule:
     }
   | param_id IMP action_rename_rule_rhs
     {
-      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), gsMakeDataExprTrue(), $1, $3));
+      safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
       gsDebugMsg("parsed action rename rule\n %T\n", $$);
     }
   ;

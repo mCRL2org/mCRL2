@@ -13,7 +13,6 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
@@ -27,6 +26,7 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/bag.h"
 #include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -169,7 +169,7 @@ namespace mcrl2 {
     static ATermAppl gstcMatchSetOpSetCompl(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBag2Set(ATermAppl Type);
     static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type);
-    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
+//    static ATermAppl gstcMatchFuncUpdate(ATermAppl Type);
 
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes);
@@ -1192,7 +1192,7 @@ namespace mcrl2 {
       gstcAddSystemFunction(sort_bag::bagintersect(data::unknown_sort()));
 
       //function update
-      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(data::unknown_sort(),data::unknown_sort()));
+//      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(data::unknown_sort(),data::unknown_sort()));
     }
 
     void gstcDataDestroy(void){
@@ -2549,7 +2549,7 @@ namespace mcrl2 {
         ATermAppl Arg0 = ATAgetArgument(*DataTerm,0);
         if(gsIsOpId(Arg0) || gsIsId(Arg0)) {
           ATermAppl Name = ATAgetArgument(Arg0,0);
-          if(Name == gsMakeOpIdNameListEnum()) {
+          if(Name == sort_list::list_enumeration_name()) {
             ATermAppl Type=gstcUnList(PosType);
             if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "list", PosType,Arguments);  return NULL;}
 
@@ -2578,10 +2578,10 @@ namespace mcrl2 {
             Arguments=ATreverse(NewArguments);
 
             Type=sort_list::list(sort_expression(Type));
-            *DataTerm=gsMakeDataExprListEnum(Arguments,Type);
+            *DataTerm=sort_list::list_enumeration(sort_expression(Type), atermpp::aterm_list(Arguments));
             return Type;
           }
-          if(Name == gsMakeOpIdNameSetEnum()) {
+          if(Name == sort_set::set_enumeration_name()) {
             ATermAppl Type=gstcUnSet(PosType);
             if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "set", PosType,Arguments);  return NULL;}
 
@@ -2609,10 +2609,10 @@ namespace mcrl2 {
             }
             Arguments=ATreverse(NewArguments);
             Type=sort_set::set_(sort_expression(Type));
-            *DataTerm=gsMakeDataExprSetEnum(Arguments,Type);
+            *DataTerm=sort_set::set_enumeration(sort_expression(Type),atermpp::aterm_list(Arguments));
             return Type;
           }
-          if(Name == gsMakeOpIdNameBagEnum()) {
+          if(Name == sort_bag::bag_enumeration_name()) {
             ATermAppl Type=gstcUnBag(PosType);
             if(!Type) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "bag", PosType,Arguments);  return NULL;}
 
@@ -2650,7 +2650,7 @@ namespace mcrl2 {
             }
             Arguments=ATreverse(NewArguments);
             Type=sort_bag::bag(sort_expression(Type));
-            *DataTerm=gsMakeDataExprBagEnum(Arguments,Type);
+            *DataTerm=sort_bag::bag_enumeration(sort_expression(Type), atermpp::aterm_list(Arguments));
             return Type;
           }
         }
@@ -3206,6 +3206,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
+/*
           if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing FuncUpdate matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
@@ -3215,6 +3216,7 @@ namespace mcrl2 {
             }
             Type=NewType;
           }
+*/
 
           *DataTerm=gsMakeOpId(Name,Type);
           if(variable) *DataTerm=gsMakeDataVarId(Name,Type);
@@ -4148,6 +4150,7 @@ namespace mcrl2 {
       return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)static_cast<ATermAppl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
     }
 
+/*
     static ATermAppl gstcMatchFuncUpdate(ATermAppl Type){
       //tries to sort out the types of FuncUpdate ((A->B)xAxB->(A->B))
       //If some of the parameters are Pos,Nat, or Int do upcasting.
@@ -4178,6 +4181,7 @@ namespace mcrl2 {
 
       return gsMakeSortArrow(ATmakeList3((ATerm)Arg1,(ATerm)A,(ATerm)B),Arg1);
     }
+*/
 
     static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments, ATermList ArgumentTypes){
       //prints more information about impossible cast.

@@ -145,7 +145,8 @@
 #include <aterm2.h>
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/standard_utility.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -200,14 +201,14 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE 
-#line 79 "mcrl2parser.yy"
+#line 80 "mcrl2parser.yy"
 {
   ATerm term;
   ATermAppl appl;
   ATermList list;
 }
 /* Line 2604 of glr.c.  */
-#line 211 "../include/mcrl2/core/detail/mcrl2parser.h"
+#line 212 "../include/mcrl2/core/detail/mcrl2parser.h"
 	YYSTYPE;
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1

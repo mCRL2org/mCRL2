@@ -6561,47 +6561,6 @@ bool gsIsProcExpr(ATermAppl Term)
 }
 
 
-//Mu-calculus formulas
-//--------------------
-
-bool gsIsStateFrm(ATermAppl Term)
-{
-  return gsIsDataExpr(Term)
-      || gsIsStateTrue(Term)
-      || gsIsStateFalse(Term)
-      || gsIsStateNot(Term)
-      || gsIsStateAnd(Term)
-      || gsIsStateOr(Term)
-      || gsIsStateImp(Term)
-      || gsIsStateForall(Term)
-      || gsIsStateExists(Term)
-      || gsIsStateMust(Term)
-      || gsIsStateMay(Term)
-      || gsIsStateYaled(Term)
-      || gsIsStateYaledTimed(Term)
-      || gsIsStateDelay(Term)
-      || gsIsStateDelayTimed(Term)
-      || gsIsStateVar(Term)
-      || gsIsStateNu(Term)
-      || gsIsStateMu(Term);
-}
-
-bool gsIsRegFrm(ATermAppl Term)
-{
-  return
-    gsIsActFrm(Term) || gsIsRegNil(Term) || gsIsRegSeq(Term) ||
-    gsIsRegAlt(Term) || gsIsRegTrans(Term) || gsIsRegTransOrNil(Term);
-}
-
-bool gsIsActFrm(ATermAppl Term)
-{
-  return
-    gsIsMultAct(Term) || gsIsDataExpr(Term) || gsIsActTrue(Term) ||
-    gsIsActFalse(Term) || gsIsActNot(Term) || gsIsActAnd(Term) ||
-    gsIsActOr(Term) || gsIsActImp(Term) || gsIsActForall(Term) ||
-    gsIsActExists(Term) || gsIsActAt(Term);
-}
-
 // Data specifications
 // -------------------
 
