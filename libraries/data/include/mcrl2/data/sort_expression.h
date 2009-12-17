@@ -32,8 +32,7 @@ namespace mcrl2 {
     inline
     bool is_sort_expression(atermpp::aterm_appl t)
     {
-      return core::detail::gsIsSortId(t) || core::detail::gsIsSortArrow(t) ||
-             core::detail::gsIsSortStruct(t) || core::detail::gsIsSortCons(t);
+      return core::detail::gsIsSortExpr(t);
     }
 
     /// \brief Returns true if the term t is a basic sort
@@ -216,7 +215,7 @@ namespace mcrl2 {
          /// \param s A container of possible sorts.
          template <typename Container>
          multiple_possible_sorts(Container const& s)
-           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert(s)))
+           : sort_expression(mcrl2::core::detail::gsMakeSortsPossible(convert<atermpp::aterm_list>(s)))
          {}
      };
 

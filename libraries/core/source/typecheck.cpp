@@ -12,14 +12,24 @@
 #include <ctype.h>
 
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
-//#include "mcrl2/data/real.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/standard.h"
 
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 
 namespace mcrl2 {
   namespace core {
@@ -348,7 +358,7 @@ namespace mcrl2 {
       if(gstcReadInSorts(sorts)){
         gsDebugMsg ("type checking of sort expressions read-in phase finished\n");
 
-        if(!gsIsNotInferred(sort_expr)){
+        if(!is_unknown_sort(sort_expr) && !is_multiple_possible_sorts(sort_expr)){
           if(gstcIsSortExprDeclared(sort_expr)) Result=sort_expr;
         }
         else {
@@ -399,15 +409,15 @@ namespace mcrl2 {
       {
         gsDebugMsg ("type checking of data expression read-in phase finished\n");
 
-        if( (sort_expr != NULL) && gsIsNotInferred(sort_expr)){
+        if( (sort_expr != NULL) && (is_unknown_sort(sort_expr) || is_multiple_possible_sorts(sort_expr))){
           gsErrorMsg("type checking of data expression failed (%T is not a sort expression)\n",sort_expr);
         } else if( (sort_expr == NULL) || gstcIsSortExprDeclared(sort_expr)) {
           bool destroy_vars=(Vars == NULL);
           if(destroy_vars) Vars=ATtableCreate(63,50);
           ATermAppl data=data_expr;
-          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?gsMakeSortUnknown():sort_expr);
+          ATermAppl Type=gstcTraverseVarConsTypeD(Vars,Vars,&data,sort_expr==NULL?data::unknown_sort():sort_expr);
           if(destroy_vars) ATtableDestroy(Vars);
-          if(Type && !gsIsSortUnknown(Type)) Result=data;
+          if(Type && !data::is_unknown_sort(data::sort_expression(Type))) Result=data;
           else gsErrorMsg("type checking of data expression failed\n");
         }
       } else {
@@ -652,7 +662,7 @@ namespace mcrl2 {
               }
 
               ATermAppl Cond=ATAgetArgument(Rule,1);
-              if(!(gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,gsMakeSortIdBool()))){ b = false; break; } // JK 15/10/2009 remove gsIsNil check
+              if(!(gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Cond,sort_bool::bool_()))){ b = false; break; } // JK 15/10/2009 remove gsIsNil check
 
               ATermAppl Right=ATAgetArgument(Rule,3);
               assert(gsIsParamId(Right) || gsIsTau(Right) || gsIsDelta(Right));
@@ -1011,7 +1021,7 @@ namespace mcrl2 {
         ATermList fp_var_type = ATmakeList0();
         while (!ATisEmpty(args)) {
           fp_var_type = ATinsert(fp_var_type,
-                                 (ATerm) gsGetSort(ATAgetFirst(args))
+                                 (ATerm) static_cast<ATermAppl>(data_expression(ATAgetFirst(args)).sort())
                                  );
           args = ATgetNext(args);
         }
@@ -1026,7 +1036,7 @@ namespace mcrl2 {
         ATermList fp_var_type = ATmakeList0();
         while (!ATisEmpty(data_var_id_inits)) {
           fp_var_type = ATinsert(fp_var_type,
-                                 (ATerm) gsGetSort(ATAgetArgument(ATAgetFirst(data_var_id_inits), 0))
+                                 (ATerm) static_cast<ATermAppl>(data_expression(ATAgetArgument(ATAgetFirst(data_var_id_inits), 0)).sort())
                                  );
           data_var_id_inits = ATgetNext(data_var_id_inits);
         }
@@ -1058,132 +1068,131 @@ namespace mcrl2 {
 
       //Creation of operation identifiers for system defined operations.
       //Bool
-      gstcAddSystemConstant(gsMakeOpIdTrue());
-      gstcAddSystemConstant(gsMakeOpIdFalse());
-      gstcAddSystemFunction(gsMakeOpIdNot());
-      gstcAddSystemFunction(gsMakeOpIdAnd());
-      gstcAddSystemFunction(gsMakeOpIdOr());
-      gstcAddSystemFunction(gsMakeOpIdImp());
-      gstcAddSystemFunction(gsMakeOpIdEq(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdNeq(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdIf(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdLT(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdLTE(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdGTE(gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdGT(gsMakeSortUnknown()));
+      gstcAddSystemConstant(sort_bool::true_());
+      gstcAddSystemConstant(sort_bool::false_());
+      gstcAddSystemFunction(sort_bool::not_());
+      gstcAddSystemFunction(sort_bool::and_());
+      gstcAddSystemFunction(sort_bool::or_());
+      gstcAddSystemFunction(sort_bool::implies());
+      gstcAddSystemFunction(equal_to(data::unknown_sort()));
+      gstcAddSystemFunction(not_equal_to(data::unknown_sort()));
+      gstcAddSystemFunction(if_(data::unknown_sort()));
+      gstcAddSystemFunction(less(data::unknown_sort()));
+      gstcAddSystemFunction(less_equal(data::unknown_sort()));
+      gstcAddSystemFunction(greater_equal(data::unknown_sort()));
+      gstcAddSystemFunction(greater(data::unknown_sort()));
       //Numbers
-      gstcAddSystemFunction(gsMakeOpIdPos2Nat());
-      gstcAddSystemFunction(gsMakeOpIdPos2Int());
-      gstcAddSystemFunction(gsMakeOpIdPos2Real());
-      gstcAddSystemFunction(gsMakeOpIdNat2Pos());
-      gstcAddSystemFunction(gsMakeOpIdNat2Int());
-      gstcAddSystemFunction(gsMakeOpIdNat2Real());
-      gstcAddSystemFunction(gsMakeOpIdInt2Pos());
-      gstcAddSystemFunction(gsMakeOpIdInt2Nat());
-      gstcAddSystemFunction(gsMakeOpIdInt2Real());
-      gstcAddSystemFunction(gsMakeOpIdReal2Pos());
-      gstcAddSystemFunction(gsMakeOpIdReal2Nat());
-      gstcAddSystemFunction(gsMakeOpIdReal2Int());
+      gstcAddSystemFunction(sort_nat::pos2nat());
+      gstcAddSystemFunction(sort_int::pos2int());
+      gstcAddSystemFunction(sort_real::pos2real());
+      gstcAddSystemFunction(sort_nat::nat2pos());
+      gstcAddSystemFunction(sort_int::nat2int());
+      gstcAddSystemFunction(sort_real::nat2real());
+      gstcAddSystemFunction(sort_int::int2pos());
+      gstcAddSystemFunction(sort_int::int2nat());
+      gstcAddSystemFunction(sort_real::int2real());
+      gstcAddSystemFunction(sort_real::real2pos());
+      gstcAddSystemFunction(sort_real::real2nat());
+      gstcAddSystemFunction(sort_real::real2int());
       //more
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos(),gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos(),gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdNat(),gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdNat(),gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdPos(),gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdNat(),gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdInt(),gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMax(gsMakeSortIdReal(),gsMakeSortIdReal()));
+      gstcAddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::maximum(sort_pos::pos(),sort_int::int_()));
+      gstcAddSystemFunction(sort_real::maximum(sort_int::int_(),sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::maximum(sort_nat::nat(),sort_int::int_()));
+      gstcAddSystemFunction(sort_real::maximum(sort_int::int_(),sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::maximum(sort_int::int_(),sort_int::int_()));
+      gstcAddSystemFunction(sort_real::maximum(sort_real::real_(),sort_real::real_()));
       //more
-      gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMin(gsMakeSortIdReal()));
+      gstcAddSystemFunction(sort_real::minimum(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::minimum(sort_nat::nat(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::minimum(sort_int::int_(), sort_int::int_()));
+      gstcAddSystemFunction(sort_real::minimum(sort_real::real_(), sort_real::real_()));
       //more
-      gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdAbs(gsMakeSortIdReal()));
+      gstcAddSystemFunction(sort_real::abs(sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::abs(sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::abs(sort_int::int_()));
+      gstcAddSystemFunction(sort_real::abs(sort_real::real_()));
       //more
-      gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdNeg(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdSucc(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdPred(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdPos(),gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdPos(),gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdNat(),gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdNat(),gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdInt(),gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdAdd(gsMakeSortIdReal(),gsMakeSortIdReal()));
+      gstcAddSystemFunction(sort_real::negate(sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::negate(sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::negate(sort_int::int_()));
+      gstcAddSystemFunction(sort_real::negate(sort_real::real_()));
+      gstcAddSystemFunction(sort_real::succ(sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::succ(sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::succ(sort_int::int_()));
+      gstcAddSystemFunction(sort_real::succ(sort_real::real_()));
+      gstcAddSystemFunction(sort_real::pred(sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::pred(sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::pred(sort_int::int_()));
+      gstcAddSystemFunction(sort_real::pred(sort_real::real_()));
+      gstcAddSystemFunction(sort_real::plus(sort_pos::pos(),sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::plus(sort_pos::pos(),sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::plus(sort_nat::nat(),sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::plus(sort_nat::nat(),sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::plus(sort_int::int_(),sort_int::int_()));
+      gstcAddSystemFunction(sort_real::plus(sort_real::real_(),sort_real::real_()));
       //more
-      gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdSubt(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMult(gsMakeSortIdReal()));
+      gstcAddSystemFunction(sort_real::minus(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::minus(sort_nat::nat(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::minus(sort_int::int_(), sort_int::int_()));
+      gstcAddSystemFunction(sort_real::minus(sort_real::real_(), sort_real::real_()));
+      gstcAddSystemFunction(sort_real::times(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::times(sort_nat::nat(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::times(sort_int::int_(), sort_int::int_()));
+      gstcAddSystemFunction(sort_real::times(sort_real::real_(), sort_real::real_()));
       //more
-      gstcAddSystemFunction(gsMakeOpIdDiv(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdDiv(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdDiv(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdMod(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdDivide(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdPos()));
-      gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdNat()));
-      gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdInt()));
-      gstcAddSystemFunction(gsMakeOpIdExp(gsMakeSortIdReal()));
-      gstcAddSystemFunction(gsMakeOpIdFloor());
-      gstcAddSystemFunction(gsMakeOpIdCeil());
-      gstcAddSystemFunction(gsMakeOpIdRound());
+      gstcAddSystemFunction(sort_int::div(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_int::div(sort_nat::nat(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_int::div(sort_int::int_(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_int::mod(sort_int::int_(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::divides(sort_pos::pos(), sort_pos::pos()));
+      gstcAddSystemFunction(sort_real::divides(sort_nat::nat(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::divides(sort_int::int_(), sort_int::int_()));
+      gstcAddSystemFunction(sort_real::divides(sort_real::real_(), sort_real::real_()));
+      gstcAddSystemFunction(sort_real::exp(sort_pos::pos(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::exp(sort_nat::nat(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::exp(sort_int::int_(), sort_nat::nat()));
+      gstcAddSystemFunction(sort_real::exp(sort_real::real_(), sort_int::int_()));
+      gstcAddSystemFunction(sort_real::floor());
+      gstcAddSystemFunction(sort_real::ceil());
+      gstcAddSystemFunction(sort_real::round());
       //Lists
-      gstcAddSystemConstant(gsMakeOpIdEmptyList(gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdCons(gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdListSize(gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdSnoc(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdConcat(gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdEltAt(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdHead(gsMakeSortExprList(gsMakeSortUnknown()), gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdTail(gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdRHead(gsMakeSortExprList(gsMakeSortUnknown()),gsMakeSortUnknown()));
-      gstcAddSystemFunction(gsMakeOpIdRTail(gsMakeSortExprList(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprList(gsMakeSortUnknown())));
+      gstcAddSystemConstant(sort_list::nil(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::cons_(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::count(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::snoc(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::concat(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::element_at(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::head(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::tail(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::rhead(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::rtail(data::unknown_sort()));
+      gstcAddSystemFunction(sort_list::in(data::unknown_sort()));
       //Sets
-      gstcAddSystemFunction(gsMakeOpIdSet2Bag(gsMakeSortExprSet(gsMakeSortUnknown()),gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemConstant(gsMakeOpIdEmptySet(gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdSetUnion(gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdSetDiff(gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdSetIntersect(gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdSetCompl(gsMakeSortExprSet(gsMakeSortUnknown())));
-
+      gstcAddSystemFunction(sort_bag::set2bag(data::unknown_sort()));
+      gstcAddSystemConstant(sort_set::emptyset(data::unknown_sort()));
+      gstcAddSystemFunction(sort_set::setin(data::unknown_sort()));
+      gstcAddSystemFunction(sort_set::setunion_(data::unknown_sort()));
+      gstcAddSystemFunction(sort_set::setdifference(data::unknown_sort()));
+      gstcAddSystemFunction(sort_set::setintersection(data::unknown_sort()));
+      gstcAddSystemFunction(sort_set::setcomplement(data::unknown_sort()));
 
       //Bags
-      gstcAddSystemFunction(gsMakeOpIdBag2Set(gsMakeSortExprBag(gsMakeSortUnknown()),gsMakeSortExprSet(gsMakeSortUnknown())));
-      gstcAddSystemConstant(gsMakeOpIdEmptyBag(gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdEltIn(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdCount(gsMakeSortUnknown(),gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdBagJoin(gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdBagDiff(gsMakeSortExprBag(gsMakeSortUnknown())));
-      gstcAddSystemFunction(gsMakeOpIdBagIntersect(gsMakeSortExprBag(gsMakeSortUnknown())));
+      gstcAddSystemFunction(sort_bag::bag2set(data::unknown_sort()));
+      gstcAddSystemConstant(sort_bag::emptybag(data::unknown_sort()));
+      gstcAddSystemFunction(sort_bag::bagin(data::unknown_sort()));
+      gstcAddSystemFunction(sort_bag::bagcount(data::unknown_sort()));
+      gstcAddSystemFunction(sort_bag::bagjoin(data::unknown_sort()));
+      gstcAddSystemFunction(sort_bag::bagdifference(data::unknown_sort()));
+      gstcAddSystemFunction(sort_bag::bagintersect(data::unknown_sort()));
 
       //function update
-      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(gsMakeSortUnknown(),gsMakeSortUnknown()));
+      gstcAddSystemFunction(gsMakeOpIdFuncUpdate(data::unknown_sort(),data::unknown_sort()));
     }
 
     void gstcDataDestroy(void){
@@ -1208,23 +1217,23 @@ namespace mcrl2 {
       for(;!ATisEmpty(Sorts);Sorts=ATgetNext(Sorts)){
         ATermAppl Sort=ATAgetFirst(Sorts);
         ATermAppl SortName=ATAgetArgument(Sort,0);
-        if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))){
+        if(sort_bool::is_bool(basic_sort(SortName))){
           gsErrorMsg("attempt to redeclare sort Bool\n");
           return ATfalse;
         }
-        if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))){
+        if(sort_pos::is_pos(basic_sort(SortName))){
           gsErrorMsg("attempt to redeclare sort Pos\n");
           return ATfalse;
         }
-        if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))){
+        if(sort_nat::is_nat(basic_sort(SortName))){
           gsErrorMsg("attempt to redeclare sort Nat\n");
           return ATfalse;
         }
-        if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))){
+        if(sort_int::is_int(basic_sort(SortName))){
           gsErrorMsg("attempt to redeclare sort Int\n");
           return ATfalse;
         }
-        if(ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))){
+        if(sort_real::is_real(basic_sort(SortName))){
           gsErrorMsg("attempt to redeclare sort Real\n");
           return ATfalse;
         }
@@ -1298,11 +1307,11 @@ namespace mcrl2 {
           if(gsIsSortArrow(ConstructorType)) ConstructorType=ATAgetArgument(ConstructorType,1);
           ConstructorType=gstcUnwindType(ConstructorType);
           if(!gsIsSortId(ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(ATisEqual(gsMakeSortIdBool(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(ATisEqual(gsMakeSortIdPos(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(ATisEqual(gsMakeSortIdNat(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(ATisEqual(gsMakeSortIdInt(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
-          if(ATisEqual(gsMakeSortIdReal(),ConstructorType)) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if(sort_bool::is_bool(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if(sort_pos::is_pos(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if(sort_nat::is_nat(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if(sort_int::is_int(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
+          if(sort_real::is_real(sort_expression(ConstructorType))) { gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType); return ATfalse; }
         }
 
         gsDebugMsg("Read-in Func %T, Types %T\n",FuncName,FuncType);
@@ -1501,12 +1510,12 @@ namespace mcrl2 {
         else DeclaredVars=NewDeclaredVars;
 
         ATermAppl Left=ATAgetArgument(Eqn,2);
-        ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,gsMakeSortUnknown(),FreeVars,false,true);
+        ATermAppl LeftType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Left,data::unknown_sort(),FreeVars,false,true);
         if(!LeftType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn); break;}
         if(was_warning_upcasting){ was_warning_upcasting=false; gsWarningMsg("the previous warning occurred while typechecking %P as left hand side of equation %P\n",Left,Eqn);}
 
         ATermAppl Cond=ATAgetArgument(Eqn,1);
-        if(/*!gsIsNil(Cond) && */!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,gsMakeSortIdBool())){ b = false; break; } // JK 15/10/2009 Remove gsIsNil check
+        if(/*!gsIsNil(Cond) && */!gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Cond,sort_bool::bool_())){ b = false; break; } // JK 15/10/2009 Remove gsIsNil check
         ATermAppl Right=ATAgetArgument(Eqn,3);
         ATermAppl RightType=gstcTraverseVarConsTypeD(DeclaredVars,FreeVars,&Right,LeftType,NULL,false);
         if(!RightType){ b = false; gsErrorMsg("the previous error occurred while typechecking %P as right hand side of equation %P\n",Right,Eqn); break; }
@@ -1619,11 +1628,14 @@ namespace mcrl2 {
 
       gsDebugMsg("gstcIsSortDeclared: SortName %P\n",SortName);
 
-      if(ATisEqual(gsMakeSortIdBool(),gsMakeSortId(SortName))) return ATtrue;
-      if(ATisEqual(gsMakeSortIdPos(),gsMakeSortId(SortName))) return ATtrue;
-      if(ATisEqual(gsMakeSortIdNat(),gsMakeSortId(SortName))) return ATtrue;
-      if(ATisEqual(gsMakeSortIdInt(),gsMakeSortId(SortName))) return ATtrue;
-      if(ATisEqual(gsMakeSortIdReal(),gsMakeSortId(SortName))) return ATtrue;
+      if(sort_bool::is_bool(basic_sort(SortName)) ||
+         sort_pos::is_pos(basic_sort(SortName)) ||
+         sort_nat::is_nat(basic_sort(SortName)) ||
+         sort_int::is_int(basic_sort(SortName)) ||
+         sort_real::is_real(basic_sort(SortName)))
+      {
+        return ATtrue;
+      }
       if(ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0) return ATtrue;
       if(ATAtableGet(context.defined_sorts,(ATerm)SortName)) return ATtrue;
       return ATfalse;
@@ -1701,7 +1713,7 @@ namespace mcrl2 {
           // recognizer -- if present -- a function from SortExpr to Bool
           ATermAppl Name=ATAgetArgument(Constr,2);
           if(!gsIsNil(Name) &&
-             !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),gsMakeSortExprBool())),"recognizer")) {return ATfalse;}
+             !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),sort_bool::bool_())),"recognizer")) {return ATfalse;}
 
           // constructor type and projections
           ATermList Projs=ATLgetArgument(Constr,1);
@@ -1737,8 +1749,8 @@ namespace mcrl2 {
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
 
-      ATermAppl Name = gsGetName(OpId);
-      ATermAppl Sort = gsGetSort(OpId);
+      ATermAppl Name = function_symbol(OpId).name();
+      ATermAppl Sort = function_symbol(OpId).sort();
 
       if(ATAtableGet(context.constants, (ATerm)Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/){
         gsErrorMsg("double declaration of %s %P\n", msg, Name);
@@ -1757,8 +1769,8 @@ namespace mcrl2 {
     static ATbool gstcAddFunction(ATermAppl OpId, const char *msg, bool allow_double_decls){
       assert(gsIsOpId(OpId));
       ATbool Result=ATtrue;
-      ATermAppl Name = gsGetName(OpId);
-      ATermAppl Sort = gsGetSort(OpId);
+      ATermAppl Name = function_symbol(OpId).name();
+      ATermAppl Sort = function_symbol(OpId).sort();
 
       //constants and functions can have the same names
       //  if(ATAtableGet(context.constants, (ATerm)Name)){
@@ -1770,41 +1782,24 @@ namespace mcrl2 {
         return ATfalse;
       }
 
-      if(ATLtableGet(gssystem.functions, (ATerm)Name) &&/*
-         !ATisEqual(Name,sort_real::maximum_name())&&
-         !ATisEqual(Name,sort_real::minimum_name())&&
-         !ATisEqual(Name,sort_real::abs_name())&&
-         !ATisEqual(Name,sort_real::succ_name())&&
-         !ATisEqual(Name,sort_real::pred_name())&&
-         !ATisEqual(Name,sort_int::div_name())&&
-         !ATisEqual(Name,sort_int::mod_name())&&
-         !ATisEqual(Name,sort_real::exp_name())&&
-         !ATisEqual(Name,sort_real::floor_name())&&
-         !ATisEqual(Name,sort_real::ceil_name())&&
-         !ATisEqual(Name,sort_real::round_name())&&
-         !ATisEqual(Name,sort_list::head_name())&&
-         !ATisEqual(Name,sort_list::tail_name())&&
-         !ATisEqual(Name,sort_list::rhead_name())&&
-         !ATisEqual(Name,sort_list::rtail_name())&&
-         !ATisEqual(Name,sort_list::in_name())&&
-         !ATisEqual(Name,sort_list::count_name())*/
-         !ATisEqual(Name,gsMakeOpIdNameMax()) &&
-         !ATisEqual(Name,gsMakeOpIdNameMin()) &&
-         !ATisEqual(Name,gsMakeOpIdNameAbs()) &&
-         !ATisEqual(Name,gsMakeOpIdNameSucc()) &&
-         !ATisEqual(Name,gsMakeOpIdNamePred()) &&
-         !ATisEqual(Name,gsMakeOpIdNameDiv()) &&
-         !ATisEqual(Name,gsMakeOpIdNameMod()) &&
-         !ATisEqual(Name,gsMakeOpIdNameExp()) &&
-         !ATisEqual(Name,gsMakeOpIdNameFloor()) &&
-         !ATisEqual(Name,gsMakeOpIdNameCeil()) &&
-         !ATisEqual(Name,gsMakeOpIdNameRound()) &&
-         !ATisEqual(Name,gsMakeOpIdNameHead()) &&
-         !ATisEqual(Name,gsMakeOpIdNameTail()) &&
-         !ATisEqual(Name,gsMakeOpIdNameRHead()) &&
-         !ATisEqual(Name,gsMakeOpIdNameRTail()) &&
-         !ATisEqual(Name,gsMakeOpIdNameEltIn()) &&
-         !ATisEqual(Name,gsMakeOpIdNameCount())
+      if(ATLtableGet(gssystem.functions, (ATerm)Name) &&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::maximum_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::minimum_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::abs_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::succ_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::pred_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_int::div_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_int::mod_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::exp_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::floor_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::ceil_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_real::round_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::head_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::tail_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rhead_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::rtail_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::in_name()))&&
+         !ATisEqual(Name,static_cast<ATermAppl>(sort_list::count_name()))
         ){
         gsErrorMsg("attempt to redeclare the system function with %s %P\n", msg, Name);
         assert(0);
@@ -1831,8 +1826,8 @@ namespace mcrl2 {
       //Pre: OpId is an OpId
       // append the Type to the entry of the Name of the OpId in gssystem.constants table
       assert(gsIsOpId(OpId));
-      ATermAppl OpIdName = gsGetName(OpId);
-      ATermAppl Type = gsGetSort(OpId);
+      ATermAppl OpIdName = function_symbol(OpId).name();
+      ATermAppl Type = function_symbol(OpId).sort();
 
       ATermList Types=ATLtableGet(gssystem.constants, (ATerm)OpIdName);
 
@@ -1845,8 +1840,8 @@ namespace mcrl2 {
     { //Pre: OpId is an OpId
       // append the Type to the entry of the Name of the OpId in gssystem.functions table
       assert(gsIsOpId(OpId));
-      ATermAppl OpIdName = gsGetName(OpId);
-      ATermAppl Type = gsGetSort(OpId);
+      ATermAppl OpIdName = function_symbol(OpId).name();
+      ATermAppl Type = function_symbol(OpId).sort();
       assert(gsIsSortArrow(Type));
 
       ATermList Types=ATLtableGet(gssystem.functions, (ATerm)OpIdName);
@@ -2289,12 +2284,12 @@ namespace mcrl2 {
         ATermAppl NewProc=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,0));
         if(!NewProc) {return NULL;}
         ATermAppl Time=ATAgetArgument(ProcTerm,1);
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
         if(!NewType) {return NULL;}
 
-        if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
+        if(!gstcTypeMatchA(sort_real::real_(),NewType)){
           //upcasting
-          ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
+          ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
           if(!CastedNewType)
           {gsErrorMsg("cannot (up)cast time value %P to type Real\n",Time);return NULL;}
         }
@@ -2304,7 +2299,7 @@ namespace mcrl2 {
 
       if(gsIsIfThen(ProcTerm)){
         ATermAppl Cond=ATAgetArgument(ProcTerm,0);
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,gsMakeSortIdBool());
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,sort_bool::bool_());
         if(!NewType) {return NULL;}
         ATermAppl NewThen=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
         if(!NewThen) {return NULL;}
@@ -2313,7 +2308,7 @@ namespace mcrl2 {
 
       if(gsIsIfThenElse(ProcTerm)){
         ATermAppl Cond=ATAgetArgument(ProcTerm,0);
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,gsMakeSortIdBool());
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Cond,sort_bool::bool_());
         if(!NewType) {return NULL;}
         ATermAppl NewThen=gstcTraverseActProcVarConstP(Vars,ATAgetArgument(ProcTerm,1));
         if(!NewThen) {return NULL;}
@@ -2346,7 +2341,7 @@ namespace mcrl2 {
       ATermAppl Result=NULL;
 
       if(gsIsDataExpr(PBESTerm)){
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&PBESTerm,gsMakeSortIdBool());
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&PBESTerm,sort_bool::bool_());
         if(!NewType) {return NULL;}
         return PBESTerm;
       }
@@ -2434,16 +2429,16 @@ namespace mcrl2 {
           if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
           ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
-          ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortUnknown(),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl ResType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting);
           ATtableDestroy(CopyAllowedVars);
           ATtableDestroy(CopyDeclaredVars);
 
           if(!ResType) return NULL;
-          if(gstcTypeMatchA(gsMakeSortIdBool(),ResType)) {
-            NewType=gsMakeSortExprSet(NewType);
+          if(gstcTypeMatchA(sort_bool::bool_(),ResType)) {
+            NewType=sort_set::set_(sort_expression(NewType));
             *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeSetComp(), 0);
-          } else if(gstcTypeMatchA(gsMakeSortIdNat(),ResType)) {
-            NewType=gsMakeSortExprBag(NewType);
+          } else if(gstcTypeMatchA(sort_nat::nat(),ResType)) {
+            NewType=sort_bag::bag(sort_expression(NewType));
             *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeBagComp(), 0);
           } else return NULL;
 
@@ -2466,18 +2461,18 @@ namespace mcrl2 {
           if(!NewDeclaredVars) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
 
           ATermAppl Data=ATAgetArgument(*DataTerm,2);
-          if(!gstcTypeMatchA(gsMakeSortIdBool(),PosType)) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
-          ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,gsMakeSortIdBool(),FreeVars,strict_ambiguous,warn_upcasting);
+          if(!gstcTypeMatchA(sort_bool::bool_(),PosType)) {ATtableDestroy(CopyAllowedVars); ATtableDestroy(CopyDeclaredVars); return NULL;}
+          ATermAppl NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,sort_bool::bool_(),FreeVars,strict_ambiguous,warn_upcasting);
           ATtableDestroy(CopyAllowedVars);
           ATtableDestroy(CopyDeclaredVars);
 
           if(!NewType) {return NULL;}
-          if(!gstcTypeMatchA(gsMakeSortIdBool(),NewType)) {return NULL;}
+          if(!gstcTypeMatchA(sort_bool::bool_(),NewType)) {return NULL;}
 
           if(FreeVars)
             gstcRemoveVars(FreeVars,VarList);
           *DataTerm=ATsetArgument(*DataTerm,(ATerm)Data,2);
-          return gsMakeSortIdBool();
+          return sort_bool::bool_();
         }
 
         if(gsIsLambda(BindingOperator)){
@@ -2513,7 +2508,7 @@ namespace mcrl2 {
         for(ATermList WhereList=ATLgetArgument(*DataTerm,1);!ATisEmpty(WhereList);WhereList=ATgetNext(WhereList)){
           ATermAppl WhereElem=ATAgetFirst(WhereList);
           ATermAppl WhereTerm=ATAgetArgument(WhereElem,1);
-          ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,gsMakeSortUnknown(),FreeVars,strict_ambiguous,warn_upcasting);
+          ATermAppl WhereType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&WhereTerm,data::unknown_sort(),FreeVars,strict_ambiguous,warn_upcasting);
           if(!WhereType) {return NULL;}
           ATermAppl NewWhereVar=gsMakeDataVarId(ATAgetArgument(WhereElem,0),WhereType);
           WhereVarList=ATinsert(WhereVarList,(ATerm)NewWhereVar);
@@ -2582,7 +2577,7 @@ namespace mcrl2 {
             }
             Arguments=ATreverse(NewArguments);
 
-            Type=gsMakeSortExprList(Type);
+            Type=sort_list::list(sort_expression(Type));
             *DataTerm=gsMakeDataExprListEnum(Arguments,Type);
             return Type;
           }
@@ -2613,7 +2608,7 @@ namespace mcrl2 {
               Type=Type0;
             }
             Arguments=ATreverse(NewArguments);
-            Type=gsMakeSortExprSet(Type);
+            Type=sort_set::set_(sort_expression(Type));
             *DataTerm=gsMakeDataExprSetEnum(Arguments,Type);
             return Type;
           }
@@ -2631,8 +2626,8 @@ namespace mcrl2 {
               ATermAppl Argument1=ATAgetFirst(Arguments);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
               if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
-              ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+              ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
+              if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", static_cast<ATermAppl>(sort_nat::nat()),Argument1);  return NULL;}
               NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
               NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
               Type=Type0;
@@ -2647,14 +2642,14 @@ namespace mcrl2 {
               ATermAppl Argument1=ATAgetFirst(Arguments);
               ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
               if(!Type0) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "element", Type,Argument0);  return NULL;}
-              ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,gsMakeSortIdNat(),FreeVars,strict_ambiguous,warn_upcasting);
-              if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", gsMakeSortIdNat(),Argument1);  return NULL;}
+              ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
+              if(!Type1) {gsErrorMsg("not possible to cast %s to %P (while typechecking %P)\n", "number", static_cast<ATermAppl>(sort_nat::nat()),Argument1);  return NULL;}
               NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
               NewArguments=ATinsert(NewArguments,(ATerm)Argument1);
               Type=Type0;
             }
             Arguments=ATreverse(NewArguments);
-            Type=gsMakeSortExprBag(Type);
+            Type=sort_bag::bag(sort_expression(Type));
             *DataTerm=gsMakeDataExprBagEnum(Arguments,Type);
             return Type;
           }
@@ -2665,7 +2660,7 @@ namespace mcrl2 {
 
         for(;!ATisEmpty(Arguments);Arguments=ATgetNext(Arguments)){
           ATermAppl Arg=ATAgetFirst(Arguments);
-          ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,gsMakeSortUnknown(),FreeVars,false,warn_upcasting);
+          ATermAppl Type=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,data::unknown_sort(),FreeVars,false,warn_upcasting);
           if(!Type) {return NULL;}
           NewArguments=ATinsert(NewArguments,(ATerm)Arg);
           NewArgumentTypes=ATinsert(NewArgumentTypes,(ATerm)Type);
@@ -2676,7 +2671,7 @@ namespace mcrl2 {
         //function
         ATermAppl Data=ATAgetArgument(*DataTerm,0);
         ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
-                                                    &Data,gsMakeSortUnknown()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments,warn_upcasting);
+                                                    &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,FreeVars,false,nArguments,warn_upcasting);
 
         gsDebugMsg("Result of gstcTraverseVarConsTypeDN: DataTerm %T\n",Data);
 
@@ -2793,9 +2788,9 @@ namespace mcrl2 {
         ATermAppl Name=ATAgetArgument(*DataTerm,0);
         if(gsIsNumericString(gsATermAppl2String(Name)))
         {
-          ATermAppl Sort=gsMakeSortIdInt();
-          if(gstcIsPos(Name)) Sort=gsMakeSortIdPos();
-          else if(gstcIsNat(Name)) Sort=gsMakeSortIdNat();
+          ATermAppl Sort=sort_int::int_();
+          if(gstcIsPos(Name)) Sort=sort_pos::pos();
+          else if(gstcIsNat(Name)) Sort=sort_nat::nat();
           *DataTerm=gsMakeOpId(Name,Sort);
 
           if(gstcTypeMatchA(Sort,PosType)) return Sort;
@@ -2859,8 +2854,8 @@ namespace mcrl2 {
           }
           else{
             //gsWarningMsg("ambiguous system constant %T\n",Name);
-            *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-            return gsMakeSortUnknown();
+            *DataTerm=gsMakeOpId(Name,data::unknown_sort());
+            return data::unknown_sort();
           }
         }
 
@@ -2938,7 +2933,7 @@ namespace mcrl2 {
               }
               else{
                 gsWarningMsg("ambiguous system constant %P\n",Name);
-                *DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
+                *DataTerm=gsMakeOpId(Name,data::unknown_sort());
                 return Type;
               }
             }
@@ -3043,7 +3038,7 @@ namespace mcrl2 {
         if(ATisEmpty(ParList)) {
           //provide some information to the upper layer for a better error message
           ATermAppl Sort;
-          if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=gsMakeSortsPossible(CandidateParList);
+          if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
           *DataTerm=gsMakeOpId(Name,Sort);
           if(nFactPars>=0) gsErrorMsg("unknown operation/variable %P with %d argument%s that matches type %P\n",
                                       Name, nFactPars, (nFactPars != 1)?"s":"", PosType);
@@ -3061,7 +3056,7 @@ namespace mcrl2 {
             Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
           }
 
-          if(ATisEqual(gsMakeOpIdNameIf(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(data::detail::if_symbol()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing if matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchIf(Type);
             if(!NewType){
@@ -3071,12 +3066,12 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if ( ATisEqual(gsMakeOpIdNameEq(),ATAgetArgument(*DataTerm,0))
-            || ATisEqual(gsMakeOpIdNameNeq(),ATAgetArgument(*DataTerm,0))
-            || ATisEqual(gsMakeOpIdNameLT(),ATAgetArgument(*DataTerm,0))
-            || ATisEqual(gsMakeOpIdNameLTE(),ATAgetArgument(*DataTerm,0))
-            || ATisEqual(gsMakeOpIdNameGTE(),ATAgetArgument(*DataTerm,0))
-            || ATisEqual(gsMakeOpIdNameGT(),ATAgetArgument(*DataTerm,0))
+          if ( ATisEqual(static_cast<ATermAppl>(data::detail::equal_symbol()),ATAgetArgument(*DataTerm,0))
+            || ATisEqual(static_cast<ATermAppl>(data::detail::not_equal_symbol()),ATAgetArgument(*DataTerm,0))
+            || ATisEqual(static_cast<ATermAppl>(data::detail::less_symbol()),ATAgetArgument(*DataTerm,0))
+            || ATisEqual(static_cast<ATermAppl>(data::detail::less_equal_symbol()),ATAgetArgument(*DataTerm,0))
+            || ATisEqual(static_cast<ATermAppl>(data::detail::greater_symbol()),ATAgetArgument(*DataTerm,0))
+            || ATisEqual(static_cast<ATermAppl>(data::detail::greater_equal_symbol()),ATAgetArgument(*DataTerm,0))
             ) {
             gsDebugMsg("Doing ==, !=, <, <=, >= or > matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchEqNeqComparison(Type);
@@ -3087,7 +3082,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameCons(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::cons_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing |> matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListOpCons(Type);
             if(!NewType){
@@ -3097,7 +3092,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameSnoc(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::snoc_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing <| matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListOpSnoc(Type);
             if(!NewType){
@@ -3107,8 +3102,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameConcat(),ATAgetArgument(*DataTerm,0))){
-            gsDebugMsg("Doing |> matching Type %T, PosType %T\n",Type,PosType);
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::concat_name()),ATAgetArgument(*DataTerm,0))){
+            gsDebugMsg("Doing ++ matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListOpConcat(Type);
             if(!NewType){
               gsErrorMsg("the function |> has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
@@ -3117,7 +3112,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameEltAt(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::element_at_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing @ matching Type %T, PosType %T, DataTerm: %T\n",Type,PosType,*DataTerm);
             ATermAppl NewType=gstcMatchListOpEltAt(Type);
             if(!NewType){
@@ -3127,8 +3122,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameHead(),ATAgetArgument(*DataTerm,0))||
-             ATisEqual(gsMakeOpIdNameRHead(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::head_name()),ATAgetArgument(*DataTerm,0))||
+             ATisEqual(static_cast<ATermAppl>(sort_list::rhead_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing {R,L}head matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListOpHead(Type);
             if(!NewType){
@@ -3138,8 +3133,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameTail(),ATAgetArgument(*DataTerm,0))||
-             ATisEqual(gsMakeOpIdNameRTail(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::tail_name()),ATAgetArgument(*DataTerm,0))||
+             ATisEqual(static_cast<ATermAppl>(sort_list::rtail_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing {R,L}tail matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListOpTail(Type);
             if(!NewType){
@@ -3149,7 +3144,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameSet2Bag(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_bag::set2bag_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing Set2Bag matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchSetOpSet2Bag(Type);
             if(!NewType){
@@ -3159,7 +3154,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameEltIn(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::in_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing {List,Set,Bag} matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
             if(!NewType){
@@ -3169,9 +3164,9 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameSetUnion(),ATAgetArgument(*DataTerm,0))||
-             ATisEqual(gsMakeOpIdNameSetDiff(),ATAgetArgument(*DataTerm,0))||
-             ATisEqual(gsMakeOpIdNameSetIntersect(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_set::setunion_name()),ATAgetArgument(*DataTerm,0))||
+             ATisEqual(static_cast<ATermAppl>(sort_set::setdifference_name()),ATAgetArgument(*DataTerm,0))||
+             ATisEqual(static_cast<ATermAppl>(sort_set::setintersection_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing {Set,Bag}{Union,Difference,Intersect} matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
             if(!NewType){
@@ -3181,7 +3176,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameSetCompl(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_set::setcomplement_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing SetCompl matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
             if(!NewType){
@@ -3191,7 +3186,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameBag2Set(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_bag::bag2set_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing Bag2Set matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchBagOpBag2Set(Type);
             if(!NewType){
@@ -3201,7 +3196,7 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(gsMakeOpIdNameCount(),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_bag::bagcount_name()),ATAgetArgument(*DataTerm,0))){
             gsDebugMsg("Doing BagCount matching Type %T, PosType %T\n",Type,PosType);
             ATermAppl NewType=gstcMatchBagOpBagCount(Type);
             if(!NewType){
@@ -3236,9 +3231,9 @@ namespace mcrl2 {
             return NULL;
           }
           else{
-            //*DataTerm=gsMakeOpId(Name,gsMakeSortUnknown());
-            //if(variable) *DataTerm=gsMakeDataVarId(Name,gsMakeSortUnknown());
-            return gsMakeSortUnknown();
+            //*DataTerm=gsMakeOpId(Name,data::unknown_sort());
+            //if(variable) *DataTerm=gsMakeDataVarId(Name,data::unknown_sort());
+            return data::unknown_sort();
           }
         }
       }
@@ -3277,7 +3272,7 @@ namespace mcrl2 {
 
       for(int i=nFormPars-1;i>=0;i--){
         ATermAppl Sort;
-        if(ATgetLength(Pars[i])==1) Sort=ATAgetFirst(Pars[i]); else Sort=gsMakeSortsPossible(ATreverse(Pars[i]));
+        if(ATgetLength(Pars[i])==1) Sort=ATAgetFirst(Pars[i]); else Sort=multiple_possible_sorts(atermpp::aterm_list(ATreverse(Pars[i])));
         Result=ATinsert(Result,(ATerm)Sort);
       }
       free(Pars);
@@ -3287,8 +3282,8 @@ namespace mcrl2 {
     static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATermAppl *Par, bool warn_upcasting){
       // Makes upcasting from Type to Needed Type for Par. Returns the resulting type
 
-      if(gsIsSortUnknown(Type)) return Type;
-      if(gsIsSortUnknown(NeededType)) return Type;
+      if(data::is_unknown_sort(data::sort_expression(Type))) return Type;
+      if(data::is_unknown_sort(data::sort_expression(NeededType))) return Type;
       if(gstcEqTypesA(NeededType,Type)) return Type;
 
       if(warn_upcasting && gsIsOpId(*Par) && gsIsNumericString(gsATermAppl2String(ATAgetArgument(*Par,0)))) {
@@ -3296,59 +3291,59 @@ namespace mcrl2 {
       }
 
       // Try Upcasting to Pos
-      if(gstcTypeMatchA(NeededType,gsMakeSortIdPos())){
-        if(gstcTypeMatchA(Type,gsMakeSortIdPos())) return gsMakeSortIdPos();
+      if(gstcTypeMatchA(NeededType,sort_pos::pos())){
+        if(gstcTypeMatchA(Type,sort_pos::pos())) return sort_pos::pos();
       }
 
       // Try Upcasting to Nat
-      if(gstcTypeMatchA(NeededType,gsMakeSortIdNat())){
-        if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
+      if(gstcTypeMatchA(NeededType,sort_nat::nat())){
+        if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdPos2Nat(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_nat::pos2nat(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting){ was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Nat by applying Pos2Nat to it.\n",OldPar);}
-          return gsMakeSortIdNat();
+          return sort_nat::nat();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdNat())) return gsMakeSortIdNat();
+        if(gstcTypeMatchA(Type,sort_nat::nat())) return sort_nat::nat();
       }
 
       // Try Upcasting to Int
-      if(gstcTypeMatchA(NeededType,gsMakeSortIdInt())){
-        if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
+      if(gstcTypeMatchA(NeededType,sort_int::int_())){
+        if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdPos2Int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::pos2int(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Pos2Int to it.\n",OldPar);}
-          return gsMakeSortIdInt();
+          return sort_int::int_();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdNat())){
+        if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdNat2Int(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_int::nat2int(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Int by applying Nat2Int to it.\n",OldPar);}
-          return gsMakeSortIdInt();
+          return sort_int::int_();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdInt())) return gsMakeSortIdInt();
+        if(gstcTypeMatchA(Type,sort_int::int_())) return sort_int::int_();
       }
 
       // Try Upcasting to Real
-      if(gstcTypeMatchA(NeededType,gsMakeSortIdReal())){
-        if(gstcTypeMatchA(Type,gsMakeSortIdPos())){
+      if(gstcTypeMatchA(NeededType,sort_real::real_())){
+        if(gstcTypeMatchA(Type,sort_pos::pos())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdPos2Real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::pos2real(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Pos2Real to it.\n",OldPar);}
-          return gsMakeSortIdReal();
+          return sort_real::real_();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdNat())){
+        if(gstcTypeMatchA(Type,sort_nat::nat())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdNat2Real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::nat2real(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Nat2Real to it.",OldPar);}
-          return gsMakeSortIdReal();
+          return sort_real::real_();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdInt())){
+        if(gstcTypeMatchA(Type,sort_int::int_())){
           ATermAppl OldPar=*Par;
-          *Par=gsMakeDataAppl(gsMakeOpIdInt2Real(),ATmakeList1((ATerm)*Par));
+          *Par=gsMakeDataAppl(sort_real::int2real(),ATmakeList1((ATerm)*Par));
           if(warn_upcasting) { was_warning_upcasting=true; gsWarningMsg("Upcasting %P to sort Real by applying Int2Real to it.\n",OldPar);}
-          return gsMakeSortIdReal();
+          return sort_real::real_();
         }
-        if(gstcTypeMatchA(Type,gsMakeSortIdReal())) return gsMakeSortIdReal();
+        if(gstcTypeMatchA(Type,sort_real::real_())) return sort_real::real_();
       }
 
       return NULL;
@@ -3416,7 +3411,7 @@ namespace mcrl2 {
 
     static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType){
       //Checks if Type is allowed by PosType
-      if(gsIsSortUnknown(PosType)) return ATtrue;
+      if(data::is_unknown_sort(data::sort_expression(PosType))) return ATtrue;
       if(gsIsSortsPossible(PosType))
         return gstcInTypesA(Type,ATLgetArgument(PosType,0));
 
@@ -3429,8 +3424,8 @@ namespace mcrl2 {
 
       gsDebugMsg("gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
 
-      if(gsIsSortUnknown(Type)) return PosType;
-      if(gsIsSortUnknown(PosType) || gstcEqTypesA(Type,PosType)) return Type;
+      if(data::is_unknown_sort(Type)) return PosType;
+      if(data::is_unknown_sort(PosType) || gstcEqTypesA(Type,PosType)) return Type;
       if(gsIsSortsPossible(Type) && !gsIsSortsPossible(PosType)) {ATermAppl TmpType=PosType; PosType=Type; Type=TmpType; }
       if(gsIsSortsPossible(PosType)){
         ATermList NewTypeList=ATmakeList0();
@@ -3450,7 +3445,7 @@ namespace mcrl2 {
 
         if(ATisEmpty(ATgetNext(NewTypeList))) return ATAgetFirst(NewTypeList);
 
-        return gsMakeSortsPossible(ATreverse(NewTypeList));
+        return multiple_possible_sorts(atermpp::aterm_list(ATreverse(NewTypeList)));
       }
 
       //PosType is a normal type
@@ -3464,29 +3459,29 @@ namespace mcrl2 {
         ATermAppl ConsType = ATAgetArgument(Type, 0);
         if(gsIsSortList(ConsType))
         {
-          if(!gsIsSortExprList(PosType)) return NULL;
+          if(!sort_list::is_list(sort_expression(PosType))) return NULL;
           ATermAppl Res=gstcTypeMatchA(ATAgetArgument(Type,1),ATAgetArgument(PosType,1));
           if(!Res) return NULL;
-          return gsMakeSortExprList(Res);
+          return sort_list::list(sort_expression(Res));
         }
 
         if(gsIsSortSet(ConsType))
         {
-          if(!gsIsSortExprSet(PosType)) return NULL;
+          if(!sort_set::is_set(sort_expression(PosType))) return NULL;
           else {
             ATermAppl Res=gstcTypeMatchA(ATAgetArgument(Type,1),ATAgetArgument(PosType,1));
             if(!Res) return NULL;
-            return gsMakeSortExprSet(Res);
+            return sort_set::set_(sort_expression(Res));
           }
         }
 
         if(gsIsSortBag(ConsType))
         {
-          if(!gsIsSortExprBag(PosType)) return NULL;
+          if(!sort_bag::is_bag(sort_expression(PosType))) return NULL;
           else {
             ATermAppl Res=gstcTypeMatchA(ATAgetArgument(Type,1),ATAgetArgument(PosType,1));
             if(!Res) return NULL;
-            return gsMakeSortExprBag(Res);
+            return sort_bag::bag(sort_expression(Res));
           }
         }
       }
@@ -3524,7 +3519,7 @@ namespace mcrl2 {
     static ATbool gstcIsNotInferredL(ATermList TypeList){
       for(;!ATisEmpty(TypeList);TypeList=ATgetNext(TypeList)){
         ATermAppl Type=ATAgetFirst(TypeList);
-        if(gsIsNotInferred(Type)) return ATtrue;
+        if(is_unknown_sort(Type) || is_multiple_possible_sorts(Type)) return ATtrue;
       }
       return ATfalse;
     }
@@ -3557,20 +3552,20 @@ namespace mcrl2 {
     static ATermAppl gstcUnSet(ATermAppl PosType){
       //select Set(Type), elements, return their list of arguments.
       if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
-      if(gsIsSortExprSet(PosType)) return ATAgetArgument(PosType,1);
-      if(gsIsSortUnknown(PosType)) return PosType;
+      if(sort_set::is_set(sort_expression(PosType))) return ATAgetArgument(PosType,1);
+      if(data::is_unknown_sort(data::sort_expression(PosType))) return PosType;
 
       ATermList NewPosTypes=ATmakeList0();
       if(gsIsSortsPossible(PosType)){
         for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
           ATermAppl NewPosType=ATAgetFirst(PosTypes);
           if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
-          if(gsIsSortExprSet(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-          else if(!gsIsSortUnknown(NewPosType)) continue;
+          if(sort_set::is_set(sort_expression(NewPosType))) NewPosType=ATAgetArgument(NewPosType,1);
+          else if(!data::is_unknown_sort(data::sort_expression(NewPosType))) continue;
           NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
         }
         NewPosTypes=ATreverse(NewPosTypes);
-        return gsMakeSortsPossible(NewPosTypes);
+        return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
       }
       return NULL;
     }
@@ -3578,20 +3573,20 @@ namespace mcrl2 {
     static ATermAppl gstcUnBag(ATermAppl PosType){
       //select Bag(Type), elements, return their list of arguments.
       if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
-      if(gsIsSortExprBag(PosType)) return ATAgetArgument(PosType,1);
-      if(gsIsSortUnknown(PosType)) return PosType;
+      if(sort_bag::is_bag(sort_expression(PosType))) return ATAgetArgument(PosType,1);
+      if(data::is_unknown_sort(data::sort_expression(PosType))) return PosType;
 
       ATermList NewPosTypes=ATmakeList0();
       if(gsIsSortsPossible(PosType)){
         for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
           ATermAppl NewPosType=ATAgetFirst(PosTypes);
           if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
-          if(gsIsSortExprBag(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-          else if(!gsIsSortUnknown(NewPosType)) continue;
+          if(sort_bag::is_bag(sort_expression(NewPosType))) NewPosType=ATAgetArgument(NewPosType,1);
+          else if(!data::is_unknown_sort(data::sort_expression(NewPosType))) continue;
           NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
         }
         NewPosTypes=ATreverse(NewPosTypes);
-        return gsMakeSortsPossible(NewPosTypes);
+        return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
       }
       return NULL;
     }
@@ -3599,20 +3594,20 @@ namespace mcrl2 {
     static ATermAppl gstcUnList(ATermAppl PosType){
       //select List(Type), elements, return their list of arguments.
       if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
-      if(gsIsSortExprList(PosType)) return ATAgetArgument(PosType,1);
-      if(gsIsSortUnknown(PosType)) return PosType;
+      if(sort_list::is_list(sort_expression(PosType))) return ATAgetArgument(PosType,1);
+      if(data::is_unknown_sort(data::sort_expression(PosType))) return PosType;
 
       ATermList NewPosTypes=ATmakeList0();
       if(gsIsSortsPossible(PosType)){
         for(ATermList PosTypes=ATLgetArgument(PosType,0);!ATisEmpty(PosTypes);PosTypes=ATgetNext(PosTypes)){
           ATermAppl NewPosType=ATAgetFirst(PosTypes);
           if(gsIsSortId(NewPosType)) NewPosType=gstcUnwindType(NewPosType);
-          if(gsIsSortExprList(NewPosType)) NewPosType=ATAgetArgument(NewPosType,1);
-          else if(!gsIsSortUnknown(NewPosType)) continue;
+          if(sort_list::is_list(sort_expression(NewPosType))) NewPosType=ATAgetArgument(NewPosType,1);
+          else if(!data::is_unknown_sort(data::sort_expression(NewPosType))) continue;
           NewPosTypes=ATinsert(NewPosTypes,(ATerm)NewPosType);
         }
         NewPosTypes=ATreverse(NewPosTypes);
-        return gsMakeSortsPossible(NewPosTypes);
+        return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
       }
       return NULL;
     }
@@ -3632,7 +3627,7 @@ namespace mcrl2 {
         if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) return NULL;
         if(gstcTypeMatchL(PosArgTypes,ArgTypes)) return ATAgetArgument(PosType,1);
       }
-      if(gsIsSortUnknown(PosType)) return PosType;
+      if(data::is_unknown_sort(data::sort_expression(PosType))) return PosType;
 
       ATermList NewPosTypes=ATmakeList0();
       if(gsIsSortsPossible(PosType)){
@@ -3644,11 +3639,11 @@ namespace mcrl2 {
             if(ATgetLength(PosArgTypes)!=ATgetLength(ArgTypes)) continue;
             if(gstcTypeMatchL(PosArgTypes,ArgTypes)) NewPosType=ATAgetArgument(NewPosType,1);
           }
-          else if(!gsIsSortUnknown(NewPosType)) continue;
+          else if(!data::is_unknown_sort(data::sort_expression(NewPosType))) continue;
           NewPosTypes=ATinsertUnique(NewPosTypes,(ATerm)NewPosType);
         }
         NewPosTypes=ATreverse(NewPosTypes);
-        return gsMakeSortsPossible(NewPosTypes);
+        return multiple_possible_sorts(atermpp::aterm_list(NewPosTypes));
       }
       return NULL;
     }
@@ -3661,7 +3656,7 @@ namespace mcrl2 {
     }
 
     static ATbool gstcHasUnknown(ATermAppl Type){
-      if(gsIsSortUnknown(Type)) return ATtrue;
+      if(data::is_unknown_sort(data::sort_expression(Type))) return ATtrue;
       if(gsIsSortId(Type)) return ATfalse;
       if(gsIsSortCons(Type)) return gstcHasUnknown(ATAgetArgument(Type,1));
       if(gsIsSortStruct(Type)) return ATfalse;
@@ -3678,16 +3673,20 @@ namespace mcrl2 {
     static ATbool gstcIsNumericType(ATermAppl Type){
       //returns true if Type is Bool,Pos,Nat,Int or Real
       //otherwise return fase
-      if(gsIsSortUnknown(Type)) return ATfalse;
-      return (ATbool)(ATisEqual(gsMakeSortIdBool(),Type)||ATisEqual(gsMakeSortIdPos(),Type)||ATisEqual(gsMakeSortIdNat(),Type)||ATisEqual(gsMakeSortIdInt(),Type)||ATisEqual(gsMakeSortIdReal(),Type));
+      if(data::is_unknown_sort(data::sort_expression(Type))) return ATfalse;
+      return (ATbool)(sort_bool::is_bool(sort_expression(Type))||
+                      sort_pos::is_pos(sort_expression(Type))||
+                      sort_nat::is_nat(sort_expression(Type))||
+                      sort_int::is_int(sort_expression(Type))||
+                      sort_real::is_real(sort_expression(Type)));
     }
 
     static ATermAppl gstcExpandNumTypesUp(ATermAppl Type){
       //Expand Pos.. to possible bigger types.
-      if(gsIsSortUnknown(Type)) return Type;
-      if(gstcEqTypesA(gsMakeSortIdPos(),Type)) return gsMakeSortsPossible(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-      if(gstcEqTypesA(gsMakeSortIdNat(),Type)) return gsMakeSortsPossible(ATmakeList3((ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-      if(gstcEqTypesA(gsMakeSortIdInt(),Type)) return gsMakeSortsPossible(ATmakeList2((ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
+      if(data::is_unknown_sort(data::sort_expression(Type))) return Type;
+      if(gstcEqTypesA(sort_pos::pos(),Type)) return multiple_possible_sorts(atermpp::make_list(sort_pos::pos(), sort_nat::nat(), sort_int::int_(),sort_real::real_()));
+      if(gstcEqTypesA(sort_nat::nat(),Type)) return multiple_possible_sorts(atermpp::make_list(sort_nat::nat(), sort_int::int_(),sort_real::real_()));
+      if(gstcEqTypesA(sort_int::int_(),Type)) return multiple_possible_sorts(atermpp::make_list(sort_int::int_(), sort_real::real_()));
       if(gsIsSortId(Type)) return Type;
       if(gsIsSortCons(Type)) return ATsetArgument(Type,(ATerm)gstcExpandNumTypesUp(ATAgetArgument(Type,1)),1);
       if(gsIsSortStruct(Type)) return Type;
@@ -3709,7 +3708,7 @@ namespace mcrl2 {
 
     static ATermAppl gstcExpandNumTypesDown(ATermAppl Type){
       // Expand Numeric types down
-      if(gsIsSortUnknown(Type)) return Type;
+      if(data::is_unknown_sort(data::sort_expression(Type))) return Type;
       if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
 
       ATbool function=ATfalse;
@@ -3720,9 +3719,9 @@ namespace mcrl2 {
         Type=ATAgetArgument(Type,1);
       }
 
-      if(gstcEqTypesA(gsMakeSortIdReal(),Type)) Type=gsMakeSortsPossible(ATmakeList4((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt(),(ATerm)gsMakeSortIdReal()));
-      if(gstcEqTypesA(gsMakeSortIdInt(),Type)) Type=gsMakeSortsPossible(ATmakeList3((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat(),(ATerm)gsMakeSortIdInt()));
-      if(gstcEqTypesA(gsMakeSortIdNat(),Type)) Type=gsMakeSortsPossible(ATmakeList2((ATerm)gsMakeSortIdPos(),(ATerm)gsMakeSortIdNat()));
+      if(gstcEqTypesA(sort_real::real_(),Type)) Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat(),sort_int::int_(),sort_real::real_()));
+      if(gstcEqTypesA(sort_int::int_(),Type)) Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat(),sort_int::int_()));
+      if(gstcEqTypesA(sort_nat::nat(),Type)) Type=multiple_possible_sorts(atermpp::make_list(sort_pos::pos(),sort_nat::nat()));
 
       return (function)?gsMakeSortArrow(Args,Type):Type;
     }
@@ -3816,7 +3815,7 @@ namespace mcrl2 {
       Args=ATgetNext(Args);
       if(!(Res=gstcUnifyMinType(Res,ATAgetFirst(Args)))) return NULL;
 
-      return gsMakeSortArrow(ATmakeList3((ATerm)gsMakeSortIdBool(),(ATerm)Res,(ATerm)Res),Res);
+      return gsMakeSortArrow(ATmakeList3((ATerm)static_cast<ATermAppl>(sort_bool::bool_()),(ATerm)Res,(ATerm)Res),Res);
     }
 
     static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type){
@@ -3833,7 +3832,7 @@ namespace mcrl2 {
       ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
       if(!Arg) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)Arg),gsMakeSortIdBool());
+      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)Arg),sort_bool::bool_());
     }
 
     static ATermAppl gstcMatchListOpCons(ATermAppl Type){
@@ -3845,7 +3844,7 @@ namespace mcrl2 {
       assert(gsIsSortArrow(Type));
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprList(gstcUnwindType(Res)));
+      assert(sort_list::is_list(sort_expression(gstcUnwindType(Res))));
       Res=ATAgetArgument(Res,1);
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==2));
@@ -3853,7 +3852,7 @@ namespace mcrl2 {
       Args=ATgetNext(Args);
       ATermAppl Arg2=ATAgetFirst(Args);
       if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-      assert(gsIsSortExprList(Arg2));
+      assert(sort_list::is_list(sort_expression(Arg2)));
       Arg2=ATAgetArgument(Arg2,1);
 
       Res=gstcUnifyMinType(Res,Arg1);
@@ -3862,7 +3861,7 @@ namespace mcrl2 {
       Res=gstcUnifyMinType(Res,Arg2);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)Res,(ATerm)gsMakeSortExprList(Res)),gsMakeSortExprList(Res));
+      return gsMakeSortArrow(ATmakeList2((ATerm)Res,(ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
     }
 
     static ATermAppl gstcMatchListOpSnoc(ATermAppl Type){
@@ -3872,13 +3871,13 @@ namespace mcrl2 {
       assert(gsIsSortArrow(Type));
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprList(Res));
+      assert(sort_list::is_list(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==2));
       ATermAppl Arg1=ATAgetFirst(Args);
       if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
-      assert(gsIsSortExprList(Arg1));
+      assert(sort_list::is_list(sort_expression(Arg1)));
       Arg1=ATAgetArgument(Arg1,1);
 
       Args=ATgetNext(Args);
@@ -3890,7 +3889,7 @@ namespace mcrl2 {
       Res=gstcUnifyMinType(Res,Arg2);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)gsMakeSortExprList(Res),(ATerm)Res),gsMakeSortExprList(Res));
+      return gsMakeSortArrow(ATmakeList2((ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res))),(ATerm)Res),sort_list::list(sort_expression(Res)));
     }
 
     static ATermAppl gstcMatchListOpConcat(ATermAppl Type){
@@ -3900,21 +3899,21 @@ namespace mcrl2 {
       assert(gsIsSortArrow(Type));
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprList(Res));
+      assert(sort_list::is_list(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==2));
 
       ATermAppl Arg1=ATAgetFirst(Args);
       if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
-      assert(gsIsSortExprList(Arg1));
+      assert(sort_list::is_list(sort_expression(Arg1)));
       Arg1=ATAgetArgument(Arg1,1);
 
       Args=ATgetNext(Args);
 
       ATermAppl Arg2=ATAgetFirst(Args);
       if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-      assert(gsIsSortExprList(Arg2));
+      assert(sort_list::is_list(sort_expression(Arg2)));
       Arg2=ATAgetArgument(Arg2,1);
 
       Res=gstcUnifyMinType(Res,Arg1);
@@ -3923,7 +3922,7 @@ namespace mcrl2 {
       Res=gstcUnifyMinType(Res,Arg2);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)gsMakeSortExprList(Res),(ATerm)gsMakeSortExprList(Res)),gsMakeSortExprList(Res));
+      return gsMakeSortArrow(ATmakeList2((ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res))),(ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
     }
 
     static ATermAppl gstcMatchListOpEltAt(ATermAppl Type){
@@ -3937,7 +3936,7 @@ namespace mcrl2 {
 
       ATermAppl Arg1=ATAgetFirst(Args);
       if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
-      assert(gsIsSortExprList(Arg1));
+      assert(sort_list::is_list(sort_expression(Arg1)));
       Arg1=ATAgetArgument(Arg1,1);
 
       Res=gstcUnifyMinType(Res,Arg1);
@@ -3945,7 +3944,7 @@ namespace mcrl2 {
 
       //assert((gsIsSortNat(ATAgetFirst(ATgetNext(Args))));
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)gsMakeSortExprList(Res),(ATerm)gsMakeSortIdNat()),Res);
+      return gsMakeSortArrow(ATmakeList2((ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res))),(ATerm)static_cast<ATermAppl>(sort_nat::nat())),Res);
     }
 
     static ATermAppl gstcMatchListOpHead(ATermAppl Type){
@@ -3958,13 +3957,13 @@ namespace mcrl2 {
       assert((ATgetLength(Args)==1));
       ATermAppl Arg=ATAgetFirst(Args);
       if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
-      assert(gsIsSortExprList(Arg));
+      assert(sort_list::is_list(sort_expression(Arg)));
       Arg=ATAgetArgument(Arg,1);
 
       Res=gstcUnifyMinType(Res,Arg);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList1((ATerm)gsMakeSortExprList(Res)),Res);
+      return gsMakeSortArrow(ATmakeList1((ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res)))),Res);
     }
 
     static ATermAppl gstcMatchListOpTail(ATermAppl Type){
@@ -3974,19 +3973,19 @@ namespace mcrl2 {
       assert(gsIsSortArrow(Type));
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprList(Res));
+      assert(sort_list::is_list(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==1));
       ATermAppl Arg=ATAgetFirst(Args);
       if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
-      assert(gsIsSortExprList(Arg));
+      assert(sort_list::is_list(sort_expression(Arg)));
       Arg=ATAgetArgument(Arg,1);
 
       Res=gstcUnifyMinType(Res,Arg);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList1((ATerm)gsMakeSortExprList(Res)),gsMakeSortExprList(Res));
+      return gsMakeSortArrow(ATmakeList1((ATerm)static_cast<ATermAppl>(sort_list::list(sort_expression(Res)))),sort_list::list(sort_expression(Res)));
     }
 
     //Sets
@@ -3998,7 +3997,7 @@ namespace mcrl2 {
 
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprBag(Res));
+      assert(sort_bag::is_bag(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
 
       ATermList Args=ATLgetArgument(Type,0);
@@ -4006,13 +4005,13 @@ namespace mcrl2 {
 
       ATermAppl Arg=ATAgetFirst(Args);
       if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
-      assert(gsIsSortExprSet(Arg));
+      assert(sort_set::is_set(sort_expression(Arg)));
       Arg=ATAgetArgument(Arg,1);
 
       Arg=gstcUnifyMinType(Arg,Res);
       if(!Arg) return NULL;
 
-      return gsMakeSortArrow(ATmakeList1((ATerm)gsMakeSortExprSet(Arg)),gsMakeSortExprBag(Arg));
+      return gsMakeSortArrow(ATmakeList1((ATerm)static_cast<ATermAppl>(sort_set::set_(sort_expression(Arg)))),sort_bag::bag(sort_expression(Arg)));
     }
 
     static ATermAppl gstcMatchListSetBagOpIn(ATermAppl Type){
@@ -4035,7 +4034,7 @@ namespace mcrl2 {
       ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2s);
       if(!Arg) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)ATsetArgument(Arg2,(ATerm)Arg,1)),gsMakeSortIdBool());
+      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)ATsetArgument(Arg2,(ATerm)Arg,1)),sort_bool::bool_());
     }
 
     static ATermAppl gstcMatchSetBagOpUnionDiffIntersect(ATermAppl Type){
@@ -4048,21 +4047,21 @@ namespace mcrl2 {
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
       if(gstcIsNumericType(Res)) return Type;
-      assert(gsIsSortExprSet(Res)||gsIsSortExprBag(Res));
+      assert(sort_set::is_set(sort_expression(Res))||sort_bag::is_bag(sort_expression(Res)));
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==2));
 
       ATermAppl Arg1=ATAgetFirst(Args);
       if(gsIsSortId(Arg1)) Arg1=gstcUnwindType(Arg1);
       if(gstcIsNumericType(Arg1)) return Type;
-      assert(gsIsSortExprSet(Arg1)||gsIsSortExprBag(Arg1));
+      assert(sort_set::is_set(sort_expression(Arg1))||sort_bag::is_bag(sort_expression(Arg1)));
 
       Args=ATgetNext(Args);
 
       ATermAppl Arg2=ATAgetFirst(Args);
       if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
       if(gstcIsNumericType(Arg2)) return Type;
-      assert(gsIsSortExprSet(Arg2)||gsIsSortExprBag(Arg2));
+      assert(sort_set::is_set(sort_expression(Arg2))||sort_bag::is_bag(sort_expression(Arg2)));
 
       Res=gstcUnifyMinType(Res,Arg1);
       if(!Res) return NULL;
@@ -4081,7 +4080,7 @@ namespace mcrl2 {
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
       if(gstcIsNumericType(Res)) return Type;
-      assert(gsIsSortExprSet(Res));
+      assert(sort_set::is_set(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
       ATermList Args=ATLgetArgument(Type,0);
       assert((ATgetLength(Args)==1));
@@ -4089,13 +4088,13 @@ namespace mcrl2 {
       ATermAppl Arg=ATAgetFirst(Args);
       if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
       if(gstcIsNumericType(Arg)) return Type;
-      assert(gsIsSortExprSet(Arg));
+      assert(sort_set::is_set(sort_expression(Arg)));
       Arg=ATAgetArgument(Arg,1);
 
       Res=gstcUnifyMinType(Res,Arg);
       if(!Res) return NULL;
 
-      return gsMakeSortArrow(ATmakeList1((ATerm)gsMakeSortExprSet(Res)),gsMakeSortExprSet(Res));
+      return gsMakeSortArrow(ATmakeList1((ATerm)static_cast<ATermAppl>(sort_set::set_(sort_expression(Res)))),sort_set::set_(sort_expression(Res)));
     }
 
     //Bags
@@ -4107,7 +4106,7 @@ namespace mcrl2 {
 
       ATermAppl Res=ATAgetArgument(Type,1);
       if(gsIsSortId(Res)) Res=gstcUnwindType(Res);
-      assert(gsIsSortExprSet(Res));
+      assert(sort_set::is_set(sort_expression(Res)));
       Res=ATAgetArgument(Res,1);
 
       ATermList Args=ATLgetArgument(Type,0);
@@ -4115,13 +4114,13 @@ namespace mcrl2 {
 
       ATermAppl Arg=ATAgetFirst(Args);
       if(gsIsSortId(Arg)) Arg=gstcUnwindType(Arg);
-      assert(gsIsSortExprBag(Arg));
+      assert(sort_bag::is_bag(sort_expression(Arg)));
       Arg=ATAgetArgument(Arg,1);
 
       Arg=gstcUnifyMinType(Arg,Res);
       if(!Arg) return NULL;
 
-      return gsMakeSortArrow(ATmakeList1((ATerm)gsMakeSortExprBag(Arg)),gsMakeSortExprSet(Arg));
+      return gsMakeSortArrow(ATmakeList1((ATerm)static_cast<ATermAppl>(sort_bag::bag(sort_expression(Arg)))),sort_set::set_(sort_expression(Arg)));
     }
 
     static ATermAppl gstcMatchBagOpBagCount(ATermAppl Type){
@@ -4140,13 +4139,13 @@ namespace mcrl2 {
       Args=ATgetNext(Args);
       ATermAppl Arg2=ATAgetFirst(Args);
       if(gsIsSortId(Arg2)) Arg2=gstcUnwindType(Arg2);
-      if(!gsIsSortExprBag(Arg2)) return Type;
+      if(!sort_bag::is_bag(sort_expression(Arg2))) return Type;
       Arg2=ATAgetArgument(Arg2,1);
 
       ATermAppl Arg=gstcUnifyMinType(Arg1,Arg2);
       if(!Arg) return NULL;
 
-      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)gsMakeSortExprBag(Arg)),gsMakeSortIdNat());
+      return gsMakeSortArrow(ATmakeList2((ATerm)Arg,(ATerm)static_cast<ATermAppl>(sort_bag::bag(sort_expression(Arg)))),sort_nat::nat());
     }
 
     static ATermAppl gstcMatchFuncUpdate(ATermAppl Type){
@@ -4235,7 +4234,7 @@ namespace mcrl2 {
         }
         if(found) {
           ATermAppl Sort;
-          if(ATgetLength(PosTypes)==1) Sort=ATAgetFirst(PosTypes); else Sort=gsMakeSortsPossible(PosTypes);
+          if(ATgetLength(PosTypes)==1) Sort=ATAgetFirst(PosTypes); else Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
           gsErrorMsg("this is, for instance, because cannot cast %P to type %P\n",ATAgetFirst(l),Sort);
           break;
         }
@@ -4291,12 +4290,12 @@ namespace mcrl2 {
 
       if(gsIsStateDelayTimed(StateFrm) || gsIsStateYaledTimed(StateFrm)){
         ATermAppl Time=ATAgetArgument(StateFrm,0);
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
         if(!NewType) {return NULL;}
 
-        if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
+        if(!gstcTypeMatchA(sort_real::real_(),NewType)){
           //upcasting
-          ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
+          ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
           if(!CastedNewType)
           {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking state formula %P)\n",Time,StateFrm);return NULL;}
         }
@@ -4419,7 +4418,7 @@ namespace mcrl2 {
       }
 
       if(gsIsDataExpr(StateFrm)){
-        ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &StateFrm, gsMakeSortIdBool());
+        ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &StateFrm, sort_bool::bool_());
         if(!Type) return NULL;
         return StateFrm;
       }
@@ -4497,12 +4496,12 @@ namespace mcrl2 {
         if(!NewArg1) return NULL;
 
         ATermAppl Time=ATAgetArgument(ActFrm,1);
-        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(gsMakeSortIdReal()));
+        ATermAppl NewType=gstcTraverseVarConsTypeD(Vars,Vars,&Time,gstcExpandNumTypesDown(sort_real::real_()));
         if(!NewType) {return NULL;}
 
-        if(!gstcTypeMatchA(gsMakeSortIdReal(),NewType)){
+        if(!gstcTypeMatchA(sort_real::real_(),NewType)){
           //upcasting
-          ATermAppl CastedNewType=gstcUpCastNumericType(gsMakeSortIdReal(),NewType,&Time);
+          ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
           if(!CastedNewType)
           {gsErrorMsg("cannot (up)cast time value %P to type Real (typechecking action formula %P)\n",Time,ActFrm);return NULL;}
         }
@@ -4522,7 +4521,7 @@ namespace mcrl2 {
       }
 
       if(gsIsDataExpr(ActFrm)){
-        ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &ActFrm, gsMakeSortIdBool());
+        ATermAppl Type=gstcTraverseVarConsTypeD(Vars, Vars, &ActFrm, sort_bool::bool_());
         if(!Type) return NULL;
         return ActFrm;
       }
