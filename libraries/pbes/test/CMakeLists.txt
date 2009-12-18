@@ -48,6 +48,9 @@ foreach( OBJ ${TERM_OBJS} )
       ) 
     endif(USE_BOOST_INTERNAL)
   endif( MONO_LIB )
+  target_link_libraries(${PROJECT_NAME}
+    mcrl2_pbespgsolve
+  )
   add_test("${PREFIX}_${result}" "${pbes_tests_BINARY_DIR}/${PREFIX}_${result}" )
   set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 

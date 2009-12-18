@@ -14,9 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 
 add_definitions(-DWITH_MCRL2)
 
-# Sources:
-add_executable(${PROJECT_NAME}
-  #compatibility.cc
+add_library(mcrl2_${PROJECT_NAME}
   compatibility.cc
   ComponentSolver.cc
   FocusListLiftingStrategy.cc
@@ -36,8 +34,11 @@ add_executable(${PROJECT_NAME}
   SmallProgressMeasures.cc
 
   Abortable.cpp
-  pbespgsolve.cpp
+)
 
+# Sources:
+add_executable(${PROJECT_NAME}
+  pbespgsolve.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -51,15 +52,19 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 
 if( MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
+  target_link_libraries(mcrl2_${PROJECT_NAME}
     mcrl2_monolib
   )
 else( MONO_LIB )
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
   mcrl2_utilities_command_line
 )
 endif( MONO_LIB )
+
+target_link_libraries(${PROJECT_NAME}
+  mcrl2_${PROJECT_NAME}
+)
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
