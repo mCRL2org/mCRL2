@@ -31,7 +31,7 @@ namespace pbes_system {
     typedef propositional_variable variable_type;
     typedef pbes_equation equation_type;
     typedef fixpoint_symbol symbol_type;
-    
+
     /// \brief Applies the substitution X := phi to the PBES expression t.
     /// \param t A PBES expression
     /// \param X A propositional variable
@@ -43,6 +43,7 @@ namespace pbes_system {
       return substitute_propositional_variable(t, X, phi);
     }
 
+/*
     /// \brief Applies the substitution X := phi to the pbes equation eq.
     /// \param eq A PBES equation
     /// \param X A propositional variable
@@ -53,7 +54,7 @@ namespace pbes_system {
     {
       eq.formula() = pbes_traits::substitute(eq.formula(), X, phi);
     }
-  
+    
     /// \brief Applies the substitution from a solved pbes equation e2 to the pbes equation e1.
     /// \param e1 A PBES equation
     /// \param e2 A PBES equation
@@ -61,6 +62,35 @@ namespace pbes_system {
     void substitute(equation_type& e1, const equation_type& e2)
     {
       pbes_traits::substitute(e1, e2.variable(), e2.formula());
+    }
+*/
+
+    /// \brief Returns the value true
+    static inline
+    expression_type true_()
+    {
+      return core::term_traits<expression_type>::true_();
+    }
+
+    /// \brief Returns the value false
+    static inline
+    expression_type false_()
+    {
+      return core::term_traits<expression_type>::false_();
+    }
+
+    /// \brief Returns the fixpoint symbol mu
+    static inline
+    symbol_type mu()
+    {
+      return fixpoint_symbol::mu();
+    }
+
+    /// \brief Returns the fixpoint symbol nu
+    static inline
+    symbol_type nu()
+    {
+      return fixpoint_symbol::nu();
     }
 
     /// \brief Pretty print an equation without generating a newline after the equal sign
@@ -96,7 +126,7 @@ namespace pbes_system {
     /// \brief Solves the equation e
     void operator()(pbes_equation& e)
     {
-      pbes_traits::substitute(e, e.variable(), sigma(e));
+      e.formula() = pbes_traits::substitute(e.formula(), e.variable(), sigma(e));
       e.formula() = m_rewriter(e.formula());
     }
   };

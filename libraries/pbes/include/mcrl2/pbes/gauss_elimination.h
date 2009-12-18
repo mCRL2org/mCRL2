@@ -101,7 +101,7 @@ namespace mcrl2 {
 
     /// \brief Approximation algorithm
 
-    template <typename ExpressionTraits, typename Compare>
+    template <typename BooleanExpressionTraits, typename Compare>
     struct approximate
     {
       Compare m_compare;
@@ -111,20 +111,21 @@ namespace mcrl2 {
       {
       }
 
-      void operator()(typename ExpressionTraits::equation_type & eq) const
+      void operator()(typename BooleanExpressionTraits::equation_type & eq) const
       {
-        typedef typename ExpressionTraits::expression_type expression_type;
-        typedef typename ExpressionTraits::variable_type variable_type;
-        typedef typename ExpressionTraits::equation_type equation_type;
+        typedef BooleanExpressionTraits tr;
+        typedef typename BooleanExpressionTraits::expression_type expression_type;
+        typedef typename BooleanExpressionTraits::variable_type variable_type;
+        typedef typename BooleanExpressionTraits::equation_type equation_type;
 
         const expression_type& phi = eq.formula();
         const variable_type& X = eq.variable();
-        expression_type next = phi;
+        expression_type next = eq.symbol() == tr::nu() ? tr::true_() : tr::false_();
         expression_type prev;
         do
         {
           prev = next;
-          next = ExpressionTraits::substitute(phi, X, prev);
+          next = tr::substitute(phi, X, prev);
         }
         while (!m_compare(prev, next));
         eq.formula() = next;

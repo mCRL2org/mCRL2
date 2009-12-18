@@ -41,6 +41,35 @@ namespace bes {
       return atermpp::replace(t, X, phi);
     }
 
+    /// \brief Returns the value true
+    static inline
+    expression_type true_()
+    {
+      return core::term_traits<expression_type>::true_();
+    }
+
+    /// \brief Returns the value false
+    static inline
+    expression_type false_()
+    {
+      return core::term_traits<expression_type>::false_();
+    }
+
+    /// \brief Returns the fixpoint symbol mu
+    static inline
+    symbol_type mu()
+    {
+      return fixpoint_symbol::mu();
+    }
+
+    /// \brief Returns the fixpoint symbol nu
+    static inline
+    symbol_type nu()
+    {
+      return fixpoint_symbol::nu();
+    }
+
+/*
     /// \brief Applies the substitution X := phi to the boolean equation eq.
     /// \param eq A boolean equation
     /// \param X A boolean variable
@@ -60,7 +89,7 @@ namespace bes {
     {
       bes_traits::substitute(e1, e2.variable(), e2.formula());
     }
-
+*/
     /// \brief Pretty print an equation without generating a newline after the equal sign
     /// \param eq An equation
     /// \return A pretty printed string
@@ -94,7 +123,7 @@ namespace bes {
     /// \brief Solves the equation e
     void operator()(boolean_equation& e)
     {
-      bes_traits::substitute(e, e.variable(), sigma(e));
+      e.formula() = bes_traits::substitute(e.formula(), e.variable(), sigma(e));
       e.formula() = m_rewriter(e.formula());
     }
   };
