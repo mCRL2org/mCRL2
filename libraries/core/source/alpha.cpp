@@ -886,7 +886,7 @@ static ATermList filter_rename_list(ATermList l, ATermList R){
 }
 
 static ATermAppl PushBlock(ATermList H, ATermAppl a){
-  gsDebugMsg("push block: H: %T; a: %T\n\n",H,a);
+  // gsDebugMsg("push block: H: %T; a: %T\n\n",H,a);
   if ( gsIsDelta(a) || gsIsTau(a) ){
     return a;
   }
@@ -1345,7 +1345,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 
 static ATermAppl PushComm(ATermList C, ATermAppl a){
   C=sort_multiactions_comm(C);
-  gsDebugMsg("push comm: C: %P; a:%P\n",C,a);
+  // gsDebugMsg("push comm: C: %P; a:%P\n",C,a);
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return a;
   }
@@ -1543,7 +1543,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
   //
   // XXX ignore parameter not implemented yet
 
-  gsDebugMsg("gsaGetAlpha begin: a: %P; length: %d\n\n", a, length);
+  // gsDebugMsg("gsaGetAlpha begin: a: %P; length: %d\n\n", a, length);
 
   ATermList l=NULL; //result
 
@@ -1668,7 +1668,7 @@ static ATermList gsaGetAlpha(ATermAppl a, unsigned length, ATermList allowed, AT
 
       //l = ATindexedSetElements(m);
       //ATindexedSetDestroy(m);
-      gsDebugMsg("len(l): %d\n\n", ATgetLength(l));
+      // gsDebugMsg("len(l): %d\n\n", ATgetLength(l));
     }
   }
   else {
@@ -1687,7 +1687,7 @@ l_ok:
     }
   }
 
-  gsDebugMsg("gsaGetAlpha done: a: %P; l:%T, length: %d\n\n", a, l, length);
+  // gsDebugMsg("gsaGetAlpha done: a: %P; l:%T, length: %d\n\n", a, l, length);
   return l;
 }
 
@@ -1735,7 +1735,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
   }
 
-  gsDebugMsg("gsaGetSyncAlpha end: a: %P; l:%d\n\n", a, ATgetLength(l));
+  // gsDebugMsg("gsaGetSyncAlpha end: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
@@ -1835,7 +1835,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a){
 
 ATermList gsaGetDeps(ATermAppl a){
   //returns process names that a depends to (should be applied iteratevly).
-  gsDebugMsg("gsaGetDeps: a: %T\n",a);
+  // gsDebugMsg("gsaGetDeps: a: %T\n",a);
   ATermList r=ATmakeList0();
   if ( gsIsDelta(a) || gsIsTau(a) || gsIsAction(a) ){
     return r;
@@ -2049,7 +2049,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
       ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-      gsDebugMsg("Phase 1: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      // gsDebugMsg("Phase 1: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
@@ -2321,7 +2321,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
       ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-      gsDebugMsg("Phase 2: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      // gsDebugMsg("Phase 2: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
@@ -2399,7 +2399,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
 	ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
       ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-      gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
+      // gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if(!ATisEqual(dep,old_dep)){
 	stable=false;
 	ATtablePut(deps,(ATerm)pn,(ATerm)dep);
@@ -2441,7 +2441,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
   }
   new_pr=ATreverse(new_pr);
 
-  gsDebugMsg("init: l:%T\n\n", ATLtableGet(alphas,(ATerm)ATAtableGet(procs,(ATerm)INIT_KEY())));
+  // gsDebugMsg("init: l:%T\n\n", ATLtableGet(alphas,(ATerm)ATAtableGet(procs,(ATerm)INIT_KEY())));
 
   Spec = ATsetArgument(Spec,(ATerm) gsMakeProcEqnSpec(new_pr),3);
   Spec = ATsetArgument(Spec,(ATerm) gsMakeProcessInit(ATAtableGet(procs,(ATerm)INIT_KEY())),4);

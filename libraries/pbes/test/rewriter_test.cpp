@@ -368,7 +368,7 @@ void test_substitutions3()
   sigma[data::parse_variable("bst3_L:Bool")]         = data::parse_data_expression("false");
   sigma[data::parse_variable("k_L:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("l'_R:Nat")]            = data::parse_data_expression("0");
-  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data::parse_data_expression("[false, false]");
+  sigma[data::parse_variable("b_R:BBuf", data_spec)] = data_spec.normalise_sorts(data::parse_data_expression("[false, false]"));
 
   std::string var_decl =
     "datavar                                                     \n"

@@ -66,7 +66,7 @@ namespace mcrl2 {
           { 
             // Add rewrite rules (needed only for lambda expressions)
             for (typename Sequence::const_iterator i = s.begin(); i != s.end(); ++i)
-            { // std::cerr << "ADD REWRITE RULE AT A LATER MOMENT: " << *i << "\n";
+            { 
               if (!m_rewriter->addRewriteRule(implement(*i)))
               {
                 throw mcrl2::runtime_error("Could not add rewrite rule!");
@@ -104,8 +104,11 @@ namespace mcrl2 {
 
           // For normalising sort expressions
           sort_expression implement(sort_expression const& expression)
-          {
-            return m_data_specification->normalise_sorts(expression);
+          { const sort_expression normalised_sort=m_data_specification->normalise_sorts(expression);
+            if (expression!=normalised_sort)
+            { std::cerr << "WARNING: SORT " << expression << " should be equal to the normalised sort " << m_data_specification->normalise_sorts(expression) << ".\nThis shows that the sorts in the input have not properly been normalised\n";
+            }
+            return normalised_sort; // m_data_specification->normalise_sorts(expression);
           }
 
           function_symbol implement(function_symbol const& f)

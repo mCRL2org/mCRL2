@@ -335,32 +335,32 @@ void set_rewrite_test() {
 
   sort_expression set_nat(sort_set::set_(nat()));
 
-  data_expression empty(R(emptyset(nat())));
+  data_expression empty(R(specification.normalise_sorts(emptyset(nat()))));
 
   data_expression p0(nat(0));
   data_expression p1(nat(1));
   data_expression p2(nat(2));
 
-  data_expression s1(R(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat())))));
-  data_expression s2(R(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat())))));
-  data_expression s(R(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat()))))));
+  data_expression s1(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat()))))));
+  data_expression s2(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat()))))));
+  data_expression s(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat())))))));
 
-  data_rewrite_test(R, setin(nat(), p0, s), false_());
-  data_rewrite_test(R, setin(nat(), p1, s), true_());
-  data_rewrite_test(R, setin(nat(), p2, s), true_());
+  data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p0, s)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p1, s)), true_());
+  data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p2, s)), true_());
 
-  data_rewrite_test(R, setunion_(nat(), s, empty), s);
-  data_rewrite_test(R, setunion_(nat(), s1, s2), s);
+  data_rewrite_test(R, specification.normalise_sorts(setunion_(nat(), s, empty)), s);
+  data_rewrite_test(R, specification.normalise_sorts(setunion_(nat(), s1, s2)), s);
 
-  data_rewrite_test(R, setintersection(nat(), s, empty), empty);
-  data_rewrite_test(R, setintersection(nat(), s, s1), s1);
-  data_rewrite_test(R, setintersection(nat(), s, s2), s2);
+  data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, empty)), empty);
+  data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, s1)), s1);
+  data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, s2)), s2);
 
-  data_rewrite_test(R, setdifference(nat(), s, empty), s);
-  data_rewrite_test(R, setdifference(nat(), s, s1), s2);
-  data_rewrite_test(R, setdifference(nat(), s, s2), s1);
+  data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, empty)), s);
+  data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, s1)), s2);
+  data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, s2)), s1);
 
-  data_rewrite_test(R, setin(nat(), p0, setcomplement(nat(), s)), true_());
+  data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p0, setcomplement(nat(), s))), true_());
 }
 
 void bag_rewrite_test() {
@@ -380,34 +380,34 @@ void bag_rewrite_test() {
 
   sort_expression bag_nat(sort_bag::bag(nat()));
 
-  data_expression empty(R(emptybag(nat())));
+  data_expression empty(R(specification.normalise_sorts(emptybag(nat()))));
 
   data_expression p0(nat(0));
   data_expression p1(nat(1));
   data_expression p2(nat(2));
 
-  data_expression s1(R(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat())))));
-  data_expression s2(R(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))));
-  data_expression s(R(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))))));
+  data_expression s1(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat()))))));
+  data_expression s2(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))))));
+  data_expression s(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))))));
 
-  data_rewrite_test(R, bagin(nat(), p0, s), false_());
-  data_rewrite_test(R, bagin(nat(), p1, s), true_());
-  data_rewrite_test(R, bagin(nat(), p2, s), true_());
+  data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p0, s)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p1, s)), true_());
+  data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p2, s)), true_());
 
-  data_rewrite_test(R, bagcount(nat(), p0, s), p0);
-  data_rewrite_test(R, bagcount(nat(), p1, s), p1);
-  data_rewrite_test(R, bagcount(nat(), p2, s), p2);
+  data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p0, s)), p0);
+  data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p1, s)), p1);
+  data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p2, s)), p2);
 
-  data_rewrite_test(R, bagjoin(nat(), s, empty), s);
-  data_rewrite_test(R, bagjoin(nat(), s1, s2), s);
+  data_rewrite_test(R, specification.normalise_sorts(bagjoin(nat(), s, empty)), s);
+  data_rewrite_test(R, specification.normalise_sorts(bagjoin(nat(), s1, s2)), s);
 
-  data_rewrite_test(R, bagintersect(nat(), s, empty), empty);
-  data_rewrite_test(R, bagintersect(nat(), s, s1), s1);
-  data_rewrite_test(R, bagintersect(nat(), s, s2), s2);
+  data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, empty)), empty);
+  data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, s1)), s1);
+  data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, s2)), s2);
 
-  data_rewrite_test(R, bagdifference(nat(), s, empty), s);
-  data_rewrite_test(R, bagdifference(nat(), s, s1), s2);
-  data_rewrite_test(R, bagdifference(nat(), s, s2), s1);
+  data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, empty)), s);
+  data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s1)), s2);
+  data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s2)), s1);
 }
 
 void structured_sort_rewrite_test() {
@@ -458,26 +458,26 @@ void structured_sort_rewrite_test() {
   data_expression c(application(constructors[4].constructor_function(ls), n0, n1));
 
   // recogniser tests
-  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c0), false_());
-  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c0), false_());
-  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c0), false_());
-  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c1), true_());
-  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c1), false_());
-  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c1), false_());
-  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), a),  false_());
-  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), a),  false_());
-  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), a),  false_());
-  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), b),  false_());
-  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), b),  true_());
-  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), b),  false_());
-  data_rewrite_test(R, application(constructors[1].recogniser_function(ls), c),  false_());
-  data_rewrite_test(R, application(constructors[3].recogniser_function(ls), c),  false_());
-  data_rewrite_test(R, application(constructors[4].recogniser_function(ls), c),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c0)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c1)), true_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c1)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c1)), false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), a)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), b)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), b)),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), b)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[1].recogniser_function(ls), c)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[3].recogniser_function(ls), c)),  false_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].recogniser_function(ls), c)),  true_());
 
   // projection tests
-  data_rewrite_test(R, application(constructors[2].projection_functions(ls)[0], a),  true_());
-  data_rewrite_test(R, application(constructors[4].projection_functions(ls)[0], c),  R(n0));
-  data_rewrite_test(R, application(constructors[4].projection_functions(ls)[1], c),  R(n1));
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[2].projection_functions(ls)[0], a)),  true_());
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].projection_functions(ls)[0], c)),  R(n0));
+  data_rewrite_test(R, specification.normalise_sorts(application(constructors[4].projection_functions(ls)[1], c)),  R(n1));
 }
 
 int test_main(int argc, char** argv)
