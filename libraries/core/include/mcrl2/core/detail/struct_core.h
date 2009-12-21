@@ -3856,6 +3856,63 @@ bool gsIsRegFrm(ATermAppl Term)
     gsIsRegAlt(Term) || gsIsRegTrans(Term) || gsIsRegTransOrNil(Term);
 }
 
+///\pre Term is not NULL
+///\return Term is a process expression
+inline
+bool gsIsProcExpr(ATermAppl Term)
+{
+  return gsIsParamId(Term)
+      || gsIsIdAssignment(Term)
+      || gsIsAction(Term)
+      || gsIsProcess(Term)
+      || gsIsProcessAssignment(Term)
+      || gsIsDelta(Term)
+      || gsIsTau (Term)
+      || gsIsSum(Term)
+      || gsIsBlock(Term)
+      || gsIsHide(Term)
+      || gsIsRename(Term)
+      || gsIsComm(Term)
+      || gsIsAllow(Term)
+      || gsIsSync(Term)
+      || gsIsAtTime(Term)
+      || gsIsSeq(Term)
+      || gsIsIfThen(Term)
+      || gsIsIfThenElse(Term)
+      || gsIsBInit(Term)
+      || gsIsMerge(Term)
+      || gsIsLMerge(Term)
+      || gsIsChoice(Term);
+}
+
+// PBES's
+// ------
+
+///\pre Term is not NULL
+///\return Term is a Parameterised Boolean Expression
+inline
+bool gsIsPBExpr(ATermAppl Term)
+{
+  return gsIsDataExpr(Term)
+      || gsIsPBESTrue(Term)
+      || gsIsPBESFalse(Term)
+      || gsIsPBESNot(Term)
+      || gsIsPBESAnd(Term)
+      || gsIsPBESOr(Term)
+      || gsIsPBESImp(Term)
+      || gsIsPBESForall(Term)
+      || gsIsPBESExists(Term)
+      || gsIsPropVarInst(Term)
+  ;
+}
+
+///\pre Term is not NULL
+///\return Term is a fixpoint
+inline
+bool gsIsFixpoint(ATermAppl Term)
+{
+  return gsIsMu(Term) || gsIsNu(Term);
+}
     }
   }
 }

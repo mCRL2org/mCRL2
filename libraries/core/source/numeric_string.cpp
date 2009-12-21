@@ -13,6 +13,8 @@
 #include <ctype.h>
 
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/data/standard_utility.h"
+
 #include "workarounds.h"
 
 namespace mcrl2 {
@@ -103,6 +105,83 @@ namespace mcrl2 {
         else //n < 0
           return (int) floor(log10((double) abs(n))) + 2;
       }
+
+      char *gsPosValue(const ATermAppl PosConstant)
+      {
+        assert(data::sort_pos::is_positive_constant(data::data_expression(PosConstant)));
+        char *Result = 0;
+        if (data::is_function_symbol(PosConstant)) {
+          //PosConstant is 1
+          Result = (char *) malloc(2 * sizeof(char));
+          Result = strcpy(Result, "1");
+        } else {
+          //PosConstant is of the form cDub(b)(p), where b and p are boolean and
+          //positive constants, respectively
+          int Inc = (data::sort_bool::is_true_function_symbol(data::sort_pos::bit(data::data_expression(PosConstant))))?1:0;
+          char *PosValue = gsPosValue(data::sort_pos::number(data::data_expression(PosConstant)));
+          Result = gsStringDub(PosValue, Inc);
+          free(PosValue);
+        }
+        return Result;
+      }
+      
+      int gsPosValue_int(const ATermAppl PosConstant)
+      {
+        char *s = gsPosValue(PosConstant);
+        int n = strtol(s, NULL, 10);
+        free(s);
+        return n;
+      }
+      
+      char *gsNatValue(const ATermAppl NatConstant)
+      {
+        assert(data::sort_nat::is_natural_constant(data::data_expression(NatConstant)));
+        char *Result = 0;
+        if (data::is_function_symbol(NatConstant)) {
+          //NatConstant is 0
+          Result = (char *) malloc(2 * sizeof(char));
+          Result = strcpy(Result, "0");
+        } else {
+          //NatConstant is a positive constant
+          Result = gsPosValue(data::sort_nat::arg(data::data_expression(NatConstant)));
+        }
+        return Result;
+      }
+      
+      int gsNatValue_int(const ATermAppl NatConstant)
+      {
+        char *s = gsNatValue(NatConstant);
+        int n = strtol(s, NULL, 10);
+        free(s);
+        return n;
+      }
+      
+      char *gsIntValue(const ATermAppl IntConstant)
+      {
+        assert(data::sort_int::is_integer_constant(data::data_expression(IntConstant)));
+        char *Result = 0;
+        if (data::sort_int::is_cint_application(data::data_expression(IntConstant))) {
+          //IntExpr is a natural number
+          Result = gsNatValue(data::sort_int::arg(data::data_expression(IntConstant)));
+        } else {
+          //IntExpr is the negation of a positive number
+          char *PosValue = gsPosValue(data::sort_int::arg(data::data_expression(IntConstant)));
+          Result = (char *) malloc((strlen(PosValue)+2) * sizeof(char));
+          Result = strcpy(Result, "-");
+          Result = strcat(Result, PosValue);
+          free(PosValue);
+        }
+        return Result;
+      }
+      
+      int gsIntValue_int(const ATermAppl IntConstant)
+      {
+        char *s = gsIntValue(IntConstant);
+        int n = strtol(s, NULL, 10);
+        free(s);
+        return n;
+      }
+
 
   }
 }

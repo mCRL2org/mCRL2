@@ -10,11 +10,11 @@
 
 #include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/list.h"
+#include "mcrl2/data/application.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -34,11 +34,10 @@ namespace mcrl2 {
           ATindexedSetPut(f_list_variables, (ATerm) a_expression, 0);
         }
       } else if (f_expression_info.is_operator(a_expression)) {
-        ATermList v_arguments = gsGetDataExprArgs(a_expression);
-        while (!ATisEmpty(v_arguments)) {
-          ATermAppl v_argument = ATAgetFirst(v_arguments);
-          v_arguments = ATgetNext(v_arguments);
-          recurse_expression_for_lists(v_argument);
+        data::application a = data::application(data::data_expression(a_expression));
+        for(data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        {
+          recurse_expression_for_lists(*i);
         }
       }
     }

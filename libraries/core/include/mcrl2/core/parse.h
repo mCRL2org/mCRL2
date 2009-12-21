@@ -123,6 +123,13 @@ ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
 **/
 ATermList parse_data_vars(std::istream &sf_stream);
 
+/** \brief  Returns wheter s is a valid user identifier
+ *  \param[in] s An input string
+ *  \return true iff s is a user identifier, i.e. if s is not a reserved
+ *          identifer.
+**/
+bool is_user_identifier(std::string const& s);
+
   }
 }
 

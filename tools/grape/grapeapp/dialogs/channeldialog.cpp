@@ -107,8 +107,8 @@ bool grape_channel_dlg::update_validation()
 // TODO: use other lines
   bool is_valid = !m_name_input->GetValue().IsEmpty() && is_identifier(m_name_input->GetValue());
   is_valid &= (m_rename_input->GetValue().IsEmpty() || is_identifier(m_rename_input->GetValue()));
-//  bool is_valid = !m_name_input->GetValue().IsEmpty() && mcrl2::core::detail::gsIsUserIdentifier(m_name_input->GetValue().fn_str());
-//  is_valid &= (m_rename_input->GetValue().IsEmpty() || mcrl2::core::detail::gsIsUserIdentifier(m_rename_input->GetValue().fn_str()));
+//  bool is_valid = !m_name_input->GetValue().IsEmpty() && mcrl2::core::is_user_identifier(m_name_input->GetValue().fn_str());
+//  is_valid &= (m_rename_input->GetValue().IsEmpty() || mcrl2::core::is_user_identifier(m_rename_input->GetValue().fn_str()));
   return is_valid;
 }
 void grape_channel_dlg::event_update_validation( wxCommandEvent &p_event )

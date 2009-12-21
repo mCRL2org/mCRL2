@@ -285,8 +285,17 @@ ATermAppl GarageFrame::MakeSortId( std::string name )
   return mcrl2::data::basic_sort(name);
 }
 
-
-
+/// FIXME: the following should be removed!
+static
+ATermList gsGetDataExprArgs(ATermAppl DataExpr)
+{
+  ATermList l = ATmakeList0();
+  while (gsIsDataAppl(DataExpr)) {
+    l = ATconcat(ATLgetArgument(DataExpr, 1), l);
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return l;
+}
 
 // ---------------------------------------------
 void GarageFrame::UpdateState( ATerm State )

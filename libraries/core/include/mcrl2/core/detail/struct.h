@@ -275,14 +275,6 @@ ATermAppl gsGetSort(ATermAppl DataExpr);
 ///\return the list of sorts belonging to DataExprs
 ATermList gsGetSorts(ATermList DataExprs);
 
-///\pre DataExpr is a data expression
-///\return the head of the data expression
-ATermAppl gsGetDataExprHead(ATermAppl DataExpr);
-
-///\pre DataExpr is a data expression
-///\return the arguments of the data expression
-ATermList gsGetDataExprArgs(ATermAppl DataExpr);
-
 ///Creation of name for the system operation identifier "True"
 ATermAppl gsMakeOpIdNameTrue();
 ///Creation of name for the system operation identifier "False"
@@ -1840,45 +1832,6 @@ ATermAppl gsMakeDataExprReal(const char *z);
 ///\return data expression of sort Real that is a representation of z
 ATermAppl gsMakeDataExprReal_int(const int z);
 
-///\pre PosExpr is a data expression of sort Pos
-///\return PosExpr is built from constructors only
-bool gsIsPosConstant(const ATermAppl PosExpr);
-
-///\pre PosConstant is a data expression of sort Pos built from constructors only
-///\return The value of PosExpr
-///     Note that the result is created with malloc, so it has to be freed
-char *gsPosValue(const ATermAppl PosConstant);
-
-///\pre PosConstant is a data expression of sort Pos built from constructors only
-///\return The value of PosExpr
-int gsPosValue_int(const ATermAppl PosConstant);
-
-///\pre NatExpr is a data expression of sort Nat
-///\return NatExpr is built from constructors only
-bool gsIsNatConstant(const ATermAppl NatExpr);
-
-///\pre NatConstant is a data expression of sort Nat built from constructors only
-///\return The value of NatExpr
-///     Note that the result is created with malloc, so it has to be freed
-char *gsNatValue(const ATermAppl NatConstant);
-
-///\pre NatConstant is a data expression of sort Nat built from constructors only
-///\return The value of NatExpr
-int gsNatValue_int(const ATermAppl NatConstant);
-
-///\pre IntExpr is a data expression of sort Int
-///\return IntExpr is built from constructors only
-bool gsIsIntConstant(const ATermAppl IntExpr);
-
-///\pre IntConstant is a data expression of sort Int built from constructors only
-///\return The value of IntExpr
-///     Note that the result is created with malloc, so it has to be freed
-char *gsIntValue(const ATermAppl IntConstant);
-
-///\pre IntConstant is a data expression of sort Int built from constructors only
-///\return The value of IntExpr
-int gsIntValue_int(const ATermAppl IntConstant);
-
 ///\pre DataExpr is a data expression
 ///\return DataExpr is an equality function
 bool gsIsOpIdEq(ATermAppl DataExpr);
@@ -2520,33 +2473,6 @@ bool gsIsDataExprFBagCInsert(ATermAppl DataExpr);
 ///\pre MultAct is a multiaction
 ///\return the sorted variant of the argument
 ATermAppl gsSortMultAct(ATermAppl MultAct);
-
-
-// Process expressions
-// -------------------
-
-///\pre Term is not NULL
-///\return Term is a process expression
-bool gsIsProcExpr(ATermAppl Term);
-
-// Data specifications
-// -------------------
-
-///\return An empty data specification.
-ATermAppl gsMakeEmptyDataSpec();
-
-
-// PBES's
-// ------
-
-///\pre Term is not NULL
-///\return Term is a Parameterised Boolean Expression
-bool gsIsPBExpr(ATermAppl Term);
-
-///\pre Term is not NULL
-///\return Term is a fixpoint
-bool gsIsFixpoint(ATermAppl Term);
-
 
 // Misc.
 // -----

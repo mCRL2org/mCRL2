@@ -9,7 +9,6 @@
 #include <ctime>
 #include <cstdlib>
 
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/detail/prover/bdd_path_eliminator.h"
@@ -114,13 +113,16 @@ namespace mcrl2 {
       } else if (gsIsDataVarId(a_expression_1)) {
         return gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
       } else {
-        int v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_expression_1));
-        bool v_result = false;
-        for (int i = 0; (i < v_number_of_arguments) && !v_result; i++) {
-          ATermAppl v_subexpression = f_expression_info.get_argument(a_expression_1, i);
-          v_result = variables_overlap(v_subexpression, a_expression_2);
+        assert (data::is_application(a_expression_1));
+        data::application a = data::application(data::data_expression(a_expression_1));
+        for (data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        {
+          if(variables_overlap(*i, a_expression_2))
+          {
+            return true;
+          }
         }
-        return v_result;
+        return false;
       }
     }
 

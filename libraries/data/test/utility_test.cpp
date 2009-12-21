@@ -48,6 +48,35 @@ void number_test() {
   using namespace sort_int;
   using namespace sort_real;
 
+/*
+  // Test character array arithmetic
+  std::vector<char> numbers;
+  numbers = detail::string_to_vector_number("1");
+  numbers[0] = '1';
+  BOOST_CHECK(numbers[0] == '1');
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "1");
+  std::cerr << std::string(numbers.begin(), numbers.end()) << std::endl;
+  BOOST_CHECK(detail::as_decimal_string(1) == "1");
+  detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "2");
+  BOOST_CHECK(numbers[0] == '2');
+  detail::decimal_number_increment(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "3");
+  BOOST_CHECK(numbers[0] == '3');
+  detail::decimal_number_increment(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "4");
+  BOOST_CHECK(numbers[0] == '4');
+  detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "8");
+  BOOST_CHECK(numbers[0] == '8');
+  detail::decimal_number_multiply_by_two(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "16");
+  BOOST_CHECK(numbers[0] == '1');
+  BOOST_CHECK(numbers[1] == '6');
+  detail::decimal_number_divide_by_two(numbers);
+  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "8");
+  BOOST_CHECK(numbers[0] == '8');
+*/
   data_specification specification = parse_data_specification("sort A = Real;");
 
   mcrl2::data::rewriter R(specification);
@@ -67,6 +96,7 @@ void number_test() {
   representation_check(R, real_("0"), R(nat2real(c0())));
   representation_check(R, real_("-1"), R(int2real(cneg(c1()))));
   representation_check(R, real_(-2), R(int2real(cneg(cdub(false_(), c1())))));
+
 }
 
 void list_construction_test() {

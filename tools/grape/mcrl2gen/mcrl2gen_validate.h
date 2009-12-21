@@ -151,7 +151,7 @@ namespace grape
     ATermList convert_numeric_sorts_to_real(ATermList sort_exprs);
 
     /**
-     * TODO: is to be removed when gsIsUserIdentifier is working properly.
+     * TODO: is to be removed when is_user_identfier is working properly.
      * Workaround function to test if a string is a valid identifier
      * @param p_identifier A string which should be an identifier
      * @return bool representing whether the string was a valid identifier or not

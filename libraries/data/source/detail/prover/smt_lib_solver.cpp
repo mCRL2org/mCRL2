@@ -10,12 +10,12 @@
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/application.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -497,11 +497,9 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_unknown_operator(ATermAppl a_clause) {
-      int v_number_of_arguments;
       int v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
-      ATermAppl v_clause;
 
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
@@ -511,11 +509,14 @@ namespace mcrl2 {
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;
-      v_number_of_arguments = ATgetLength(gsGetDataExprArgs(a_clause));
-      for (int i = 0; i < v_number_of_arguments; i++) {
-        v_clause = f_expression_info.get_argument(a_clause, i);
-        f_formula = f_formula + " ";
-        translate_clause(v_clause, false);
+      if(data::is_application(a_clause))
+      {
+        data::application a = data::application(data::data_expression(a_clause));
+        for(data_expression_list::iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        {
+          f_formula = f_formula + " ";
+          translate_clause(*i, false);
+        }
       }
       f_formula = f_formula + ")";
     }
@@ -558,36 +559,33 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_int_constant(ATermAppl a_clause) {
-      char* v_value;
-      v_value = gsIntValue(a_clause);
-      if (strncmp(v_value, "-", 1) == 0) {
-        string v_string = "~";
-        v_string = v_string + (v_value + 1);
-        f_formula = f_formula + "(" + v_string + ")";
+      char* s = core::gsIntValue(a_clause);
+      std::string v_value(s);
+      free(s);
+      if (v_value[0] == '-') {
+        v_value[0] = '~';
+        f_formula = f_formula + "(" + v_value + ")";
       } else {
         f_formula = f_formula + v_value;
       }
-      free(v_value);
     }
 
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_nat_constant(ATermAppl a_clause) {
-      char* v_value;
-
-      v_value = gsNatValue(a_clause);
+      char* s = core::gsNatValue(a_clause);
+      std::string v_value(s);
+      free(s);
       f_formula = f_formula + v_value;
-      free(v_value);
     }
 
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_pos_constant(ATermAppl a_clause) {
-      char* v_value;
-
-      v_value = gsPosValue(a_clause);
+      char* s = core::gsPosValue(a_clause);
+      std::string v_value(s);
+      free(s);
       f_formula = f_formula + v_value;
-      free(v_value);
     }
 
     // --------------------------------------------------------------------------------------------

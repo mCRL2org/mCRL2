@@ -27,11 +27,21 @@
 
 #include <assert.h>
 #include <aterm2.h>
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/int.h"
+#include "mcrl2/data/real.h"
+#include "mcrl2/data/list.h"
+#include "mcrl2/data/set.h"
+#include "mcrl2/data/bag.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
 
 namespace mcrl2 {
   namespace core {
@@ -40,12 +50,21 @@ namespace mcrl2 {
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
 /// \return if(BoolExpr, 1, 0) of sort SortExpr
-inline ATermAppl bool_to_numeric(ATermAppl BoolExpr, ATermAppl SortExpr)
+inline data::data_expression bool_to_numeric(data::data_expression const& e, data::sort_expression const& s)
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
-  return gsMakeDataExprIf(BoolExpr,
-           gsMakeOpId(gsString2ATermAppl("1"), SortExpr),
-           gsMakeOpId(gsString2ATermAppl("0"), SortExpr));
+  return data::if_(e, data::function_symbol("1", s), data::function_symbol("0", s));
+}
+
+static inline
+ATermAppl gsMakeEmptyDataSpec()
+{
+  return gsMakeDataSpec(
+    gsMakeSortSpec(ATmakeList0()),
+    gsMakeConsSpec(ATmakeList0()),
+    gsMakeMapSpec(ATmakeList0()),
+    gsMakeDataEqnSpec(ATmakeList0())
+  );
 }
 
 //declarations
@@ -332,8 +351,10 @@ static bool gsIsIdSetEnum(ATermAppl DataExpr);
 static bool gsIsIdBagEnum(ATermAppl DataExpr);
 //Ret: DataExpr is a bag enumeration identifier
 
+/*
 static bool gsIsIdFuncUpdate(ATermAppl DataExpr);
 //Ret: DataExpr is a function update identifier
+*/
 
 static bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength);
 //Ret: DataExpr is a prefix identifier and ArgsLength == 1
@@ -694,7 +715,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print data equation (without variables)
     PRINT_FUNC(dbg_prints)("printing data equation\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
-    if (/*!gsIsNil(Condition) && */!gsIsDataExprTrue(Condition)) {
+    if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition))) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, Condition,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, "  ->  ");
@@ -904,7 +925,7 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
     //print action rename rule (without variables)
     PRINT_FUNC(dbg_prints)("printing action rename rule\n");
     ATermAppl Condition = ATAgetArgument(Part, 1);
-    if (/*!gsIsNil(Condition) && */!gsIsDataExprTrue(Condition)) {
+    if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition))) {
       PRINT_FUNC(PrintPart_Appl)(OutStream, Condition,
         pp_format, ShowSorts, 0);
       PRINT_FUNC(fprints)(OutStream, "  ->  ");
@@ -1130,21 +1151,21 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
     PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     if (PrecLevel > 0) PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortExprList(SortExpr)) {
+  } else if (data::sort_list::is_list(data::sort_expression(SortExpr))) {
     //print list sort
     PRINT_FUNC(dbg_prints)("printing list sort\n");
     PRINT_FUNC(fprints)(OutStream, "List(");
     PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortExprSet(SortExpr)) {
+  } else if (data::sort_set::is_set(data::sort_expression(SortExpr))) {
     //print set sort
     PRINT_FUNC(dbg_prints)("printing set sort\n");
     PRINT_FUNC(fprints)(OutStream, "Set(");
     PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
       pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
-  } else if (gsIsSortExprBag(SortExpr)) {
+  } else if (data::sort_bag::is_bag(data::sort_expression(SortExpr))) {
     //print bag sort
     PRINT_FUNC(dbg_prints)("printing bag sort\n");
     PRINT_FUNC(fprints)(OutStream, "Bag(");
@@ -1173,122 +1194,142 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
   }
 }
 
+static
+ATermAppl gsGetDataExprHead(ATermAppl DataExpr)
+{
+  while (gsIsDataAppl(DataExpr)) {
+   DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return DataExpr;
+}
+
+static
+ATermList gsGetDataExprArgs(ATermAppl DataExpr)
+{
+  ATermList l = ATmakeList0();
+  while (gsIsDataAppl(DataExpr)) {
+    l = ATconcat(ATLgetArgument(DataExpr, 1), l);
+    DataExpr = ATAgetArgument(DataExpr, 0);
+  }
+  return l;
+}
+
 // Copied from data reconstruction
 static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
 {
   ATermAppl Head = gsGetDataExprHead(PosExpr);
   ATermList Args = gsGetDataExprArgs(PosExpr);
-  if (ATisEqual(PosExpr, gsMakeOpIdC1())) {
+  if (data::sort_pos::is_c1_function_symbol(data::data_expression(PosExpr))) {
     //PosExpr is 1; return Mult
-    return gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos());
-  } else if (ATisEqual(Head, gsMakeOpIdCDub())) {
+    return data::function_symbol(Mult, data::sort_pos::pos());
+  } else if (data::sort_pos::is_cdub_function_symbol(data::data_expression(Head))) {
     //PosExpr is of the form cDub(b,p); return (Mult*2)*v(p) + Mult*v(b)
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl PosArg = ATAelementAt(Args, 1);
     char* NewMult = gsStringDub(Mult, 0);
     PosArg = reconstruct_pos_mult(PosArg, NewMult);
     free(NewMult);
-    if (ATisEqual(BoolArg, gsMakeDataExprFalse())) {
+    if (data::sort_bool::is_false_function_symbol(data::data_expression(BoolArg))) {
       //Mult*v(b) = 0
       return PosArg;
-    } else if (ATisEqual(BoolArg, gsMakeDataExprTrue())) {
+    } else if (data::sort_bool::is_true_function_symbol(data::data_expression(BoolArg))) {
       //Mult*v(b) = Mult
-      return gsMakeDataExprAdd(PosArg,
-               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()));
+      return data::sort_real::plus(data::data_expression(PosArg),
+                                  data::function_symbol(Mult, data::sort_pos::pos()));
     } else if (strcmp(Mult, "1") == 0) {
       //Mult*v(b) = v(b)
-      return gsMakeDataExprAdd(PosArg, bool_to_numeric(BoolArg, gsMakeSortExprNat()));
+      return data::sort_real::plus(data::data_expression(PosArg), bool_to_numeric(data::data_expression(BoolArg), data::sort_nat::nat()));
     } else {
       //Mult*v(b)
-      return gsMakeDataExprAdd(PosArg,
-               gsMakeDataExprMult(gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprNat()),
-                                  bool_to_numeric(BoolArg, gsMakeSortExprNat())));
+      return data::sort_real::plus(data::data_expression(PosArg),
+                                  data::sort_real::times(data::function_symbol(Mult, data::sort_nat::nat()),
+                                                        bool_to_numeric(data::data_expression(BoolArg), data::sort_nat::nat())));
     }
   } else {
     //PosExpr is not a Pos constructor
     if (strcmp(Mult, "1") == 0) {
       return PosExpr;
     } else {
-      return gsMakeDataExprMult(
-               gsMakeOpId(gsString2ATermAppl(Mult), gsMakeSortExprPos()),
-               PosExpr);
+      return data::sort_real::times(data::function_symbol(Mult, data::sort_pos::pos()), data::data_expression(PosExpr));
     }
   }
 }
 
 static ATermAppl reconstruct_numeric_expression(ATermAppl Part) {
-  if (gsIsDataExprC1(Part) || gsIsDataExprCDub(Part)) {
+  if (data::sort_pos::is_c1_function_symbol(data::data_expression(Part)) || data::sort_pos::is_cdub_application(data::data_expression(Part))) {
   //  gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
-    if (gsIsPosConstant(Part)) {
-      char* PosValue = gsPosValue(Part);
-      Part = gsMakeOpId(gsString2ATermAppl(PosValue), gsMakeSortExprPos());
-      free(PosValue);
+    if (data::sort_pos::is_positive_constant(data::data_expression(Part))) {
+      char* positive_value = gsPosValue(Part);
+      Part = data::function_symbol(positive_value, data::sort_pos::pos());
+      free(positive_value);
     } else {
       Part = reconstruct_pos_mult(Part, "1");
     }
-  } else if (gsIsDataExprC0(Part)) {
+  } else if (data::sort_nat::is_c0_function_symbol(data::data_expression(Part))) {
   //    gsDebugMsg("Reconstructing implementation of %T\n", Part);
-    Part = gsMakeOpId(gsString2ATermAppl("0"), gsMakeSortExprNat());
-  } else if ((gsIsDataExprCNat(Part) || gsIsDataExprPos2Nat(Part))
-            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprPos()))) {
+    Part = data::function_symbol("0", data::sort_nat::nat());
+  } else if ((data::sort_nat::is_cnat_application(data::data_expression(Part)) || data::sort_nat::is_pos2nat_application(data::data_expression(Part)))
+            && (data::sort_pos::is_pos(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort()))) {
   //    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
-    Part = gsMakeDataExprPos2Nat(value);
+    Part = data::sort_nat::pos2nat(data::data_expression(value));
     if (gsIsOpId(value)) {
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name))) {
-        Part = gsMakeOpId(name, gsMakeSortExprNat());
+        Part = data::function_symbol(name, data::sort_nat::nat());
       }
     }
-  } else if (gsIsDataExprCPair(Part)) {
+  } else if (data::sort_nat::is_cpair_application(data::data_expression(Part))) {
   //    gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
-  } else if (gsIsDataExprCNeg(Part)) {
+  } else if (data::sort_int::is_cneg_application(data::data_expression(Part))) {
   //    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
-    Part = gsMakeDataExprNeg(ATAgetFirst(ATLgetArgument(Part, 1)));
-  } else if ((gsIsDataExprCInt(Part) || gsIsDataExprNat2Int(Part))
-            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprNat()))) {
+    Part = data::sort_int::negate(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))));
+  } else if ((data::sort_int::is_cint_application(data::data_expression(Part)) || data::sort_int::is_nat2int_application(data::data_expression(Part)))
+            && (data::sort_nat::is_nat(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort()))) {
   //    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
-    Part = gsMakeDataExprNat2Int(value);
+    Part = data::sort_int::nat2int(data::data_expression(value));
     if (gsIsOpId(value)) {
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name))) {
-        Part = gsMakeOpId(name, gsMakeSortExprInt());
+        Part = data::function_symbol(name, data::sort_int::int_());
       }
     }
-  } else if (gsIsDataExprInt2Real(Part)
-            && (ATisEqual(gsGetSort(ATAgetFirst(ATLgetArgument(Part, 1))), gsMakeSortExprInt()))) {
+  } else if (data::sort_real::is_int2real_application(data::data_expression(Part))
+            && (data::sort_int::is_int(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort()))) {
   //    gsDebugMsg("Reconstructing implementation of Int2Real (%T)\n", Part);
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
-    Part = gsMakeDataExprInt2Real(value);
+    Part = data::sort_real::int2real(data::data_expression(value));
     if (gsIsOpId(value)) {
       ATermAppl name = ATAgetArgument(value, 0);
       if (gsIsNumericString(gsATermAppl2String(name))) {
-        Part = gsMakeOpId(name, gsMakeSortExprReal());
+        Part = data::function_symbol(name, data::sort_real::real_());
       }
     }
-  } else if (gsIsDataExprCReal(Part)) {
+  } else if (data::sort_real::is_creal_application(data::data_expression(Part))) {
 //    gsDebugMsg("Reconstructing implementation of CReal (%T)\n", Part);
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
     ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
-    if (ATisEqual(ArgDenominator, gsMakeOpId(gsString2ATermAppl("1"), gsMakeSortExprPos()))) {
-      Part = gsMakeDataExprInt2Real(ArgNumerator);
+    if (ATisEqual(ArgDenominator, static_cast<ATermAppl>(data::function_symbol("1", data::sort_pos::pos())))) {
+      Part = data::sort_real::int2real(data::data_expression(ArgNumerator));
       if (gsIsOpId(ArgNumerator)) {
         ATermAppl name = ATAgetArgument(ArgNumerator, 0);
         if (gsIsNumericString(gsATermAppl2String(name))) {
-          Part = gsMakeOpId(name, gsMakeSortExprReal());
+          Part = data::function_symbol(name, data::sort_real::real_());
         }
       }
     } else {
-      Part = gsMakeDataExprDivide(ArgNumerator, gsMakeDataExprPos2Int(ArgDenominator));
+      Part = data::sort_real::divides(data::data_expression(ArgNumerator),
+                                      data::sort_int::pos2int(data::data_expression(ArgDenominator)));
       if (gsIsOpId(ArgDenominator)) {
         ATermAppl name = ATAgetArgument(ArgDenominator, 0);
         if (gsIsNumericString(gsATermAppl2String(name))) {
-          Part = gsMakeDataExprDivide(ArgNumerator, gsMakeOpId(name, gsMakeSortExprInt()));
+          Part = data::sort_real::divides(data::data_expression(ArgNumerator),
+                                          data::function_symbol(name, data::sort_int::int_()));
         }
       }
     }
@@ -1350,6 +1391,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintPart_BagEnum)(OutStream, Args,
           pp_format, ShowSorts, 0, NULL, ", ");
         PRINT_FUNC(fprints)(OutStream, "}");
+/*
       } else if (gsIsIdFuncUpdate(Head)) {
         //print function update
         PRINT_FUNC(dbg_prints)("printing function update\n");
@@ -1362,6 +1404,7 @@ void PRINT_FUNC(PrintDataExpr)(PRINT_OUTTYPE OutStream,
         PRINT_FUNC(PrintDataExpr)(OutStream, ATAelementAt(Args, 2),
           pp_format, ShowSorts, 0);
         PRINT_FUNC(fprints)(OutStream, "]");
+*/
       } else if (gsIsIdPrefix(Head, ArgsLength)) {
         //print prefix expression
         PRINT_FUNC(dbg_prints)("printing prefix expression\n");
@@ -1985,7 +2028,7 @@ void PRINT_FUNC(PrintLinearProcessSummand)(PRINT_OUTTYPE OutStream,
   }
   //print condition
   ATermAppl Cond = ATAgetArgument(Summand, 1);
-  if (/*!gsIsNil(Cond) && */!gsIsDataExprTrue(Cond)) { // JK 15/10/2009 condition is always a data expression
+  if (/*!gsIsNil(Cond) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Cond))) { // JK 15/10/2009 condition is always a data expression
     PRINT_FUNC(PrintDataExpr)(OutStream, Cond, pp_format, ShowSorts, gsPrecIdPrefix());
     PRINT_FUNC(fprints)(OutStream, " ->\n         ");
   }
@@ -2113,12 +2156,12 @@ bool gsIsOpIdNumericUpCast(ATermAppl DataExpr)
     return false;
   }
   return
-    (DataExpr == gsMakeOpIdPos2Nat())  ||
-    (DataExpr == gsMakeOpIdPos2Int())  ||
-    (DataExpr == gsMakeOpIdPos2Real()) ||
-    (DataExpr == gsMakeOpIdNat2Int())  ||
-    (DataExpr == gsMakeOpIdNat2Real()) ||
-    (DataExpr == gsMakeOpIdInt2Real())
+    data::sort_nat::is_pos2nat_function_symbol(data::data_expression(DataExpr)) ||
+    data::sort_int::is_pos2int_function_symbol(data::data_expression(DataExpr)) ||
+    data::sort_real::is_pos2real_function_symbol(data::data_expression(DataExpr)) ||
+    data::sort_int::is_nat2int_function_symbol(data::data_expression(DataExpr)) ||
+    data::sort_real::is_nat2real_function_symbol(data::data_expression(DataExpr)) ||
+    data::sort_real::is_int2real_function_symbol(data::data_expression(DataExpr))
     ;
 }
 
@@ -2127,7 +2170,7 @@ bool gsIsIdListEnum(ATermAppl DataExpr)
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameListEnum();
+  return ATAgetArgument(DataExpr, 0) == data::sort_list::list_enumeration_name();
 }
 
 bool gsIsIdSetEnum(ATermAppl DataExpr)
@@ -2135,7 +2178,7 @@ bool gsIsIdSetEnum(ATermAppl DataExpr)
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameSetEnum();
+  return ATAgetArgument(DataExpr, 0) == data::sort_set::set_enumeration_name();
 }
 
 bool gsIsIdBagEnum(ATermAppl DataExpr)
@@ -2143,9 +2186,10 @@ bool gsIsIdBagEnum(ATermAppl DataExpr)
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
     return false;
   }
-  return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameBagEnum();
+  return ATAgetArgument(DataExpr, 0) == data::sort_bag::bag_enumeration_name();
 }
 
+/*
 bool gsIsIdFuncUpdate(ATermAppl DataExpr)
 {
   if (!(gsIsId(DataExpr) || gsIsOpId(DataExpr))) {
@@ -2153,6 +2197,7 @@ bool gsIsIdFuncUpdate(ATermAppl DataExpr)
   }
   return ATAgetArgument(DataExpr, 0) == gsMakeOpIdNameFuncUpdate();
 }
+*/
 
 bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
 {
@@ -2164,10 +2209,10 @@ bool gsIsIdPrefix(ATermAppl DataExpr, int ArgsLength)
   }
   ATermAppl IdName = ATAgetArgument(DataExpr, 0);
   return
-     (IdName == gsMakeOpIdNameNot())      ||
-     (IdName == gsMakeOpIdNameNeg())      ||
-     (IdName == gsMakeOpIdNameListSize()) ||
-     (IdName == gsMakeOpIdNameSetCompl());
+     (IdName == data::sort_bool::not_name())      ||
+     (IdName == data::sort_int::negate_name())      ||
+     (IdName == data::sort_list::count_name()) ||
+     (IdName == data::sort_set::setcomplement_name());
 }
 
 bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength)
@@ -2180,36 +2225,32 @@ bool gsIsIdInfix(ATermAppl DataExpr, int ArgsLength)
   }
   ATermAppl IdName = ATAgetArgument(DataExpr, 0);
   return
-     (IdName == gsMakeOpIdNameImp())          ||
-     (IdName == gsMakeOpIdNameAnd())          ||
-     (IdName == gsMakeOpIdNameOr())           ||
-     (IdName == gsMakeOpIdNameEq())           ||
-     (IdName == gsMakeOpIdNameNeq())          ||
-     (IdName == gsMakeOpIdNameLT())           ||
-     (IdName == gsMakeOpIdNameLTE())          ||
-     (IdName == gsMakeOpIdNameGT())           ||
-     (IdName == gsMakeOpIdNameGTE())          ||
-     (IdName == gsMakeOpIdNameEltIn())        ||
-     (IdName == gsMakeOpIdNameSubSetEq())     ||
-     (IdName == gsMakeOpIdNameSubSet())       ||
-     (IdName == gsMakeOpIdNameSubBagEq())     ||
-     (IdName == gsMakeOpIdNameSubBag())       ||
-     (IdName == gsMakeOpIdNameCons())         ||
-     (IdName == gsMakeOpIdNameSnoc())         ||
-     (IdName == gsMakeOpIdNameConcat())       ||
-     (IdName == gsMakeOpIdNameAdd())          ||
-     (IdName == gsMakeOpIdNameSubt())         ||
-     (IdName == gsMakeOpIdNameSetUnion())     ||
-     (IdName == gsMakeOpIdNameSetDiff())      ||
-     (IdName == gsMakeOpIdNameBagJoin())      ||
-     (IdName == gsMakeOpIdNameBagDiff())      ||
-     (IdName == gsMakeOpIdNameDiv())          ||
-     (IdName == gsMakeOpIdNameMod())          ||
-     (IdName == gsMakeOpIdNameDivide())       ||
-     (IdName == gsMakeOpIdNameMult())         ||
-     (IdName == gsMakeOpIdNameEltAt())        ||
-     (IdName == gsMakeOpIdNameSetIntersect()) ||
-     (IdName == gsMakeOpIdNameBagIntersect());
+     (IdName == data::sort_bool::implies_name())          ||
+     (IdName == data::sort_bool::and_name())          ||
+     (IdName == data::sort_bool::or_name())           ||
+     (IdName == data::detail::equal_symbol())           ||
+     (IdName == data::detail::not_equal_symbol())          ||
+     (IdName == data::detail::less_symbol())           ||
+     (IdName == data::detail::less_equal_symbol())          ||
+     (IdName == data::detail::greater_symbol())           ||
+     (IdName == data::detail::greater_equal_symbol())          ||
+     (IdName == data::sort_list::in_name())        ||
+     (IdName == data::sort_list::cons_name())         ||
+     (IdName == data::sort_list::snoc_name())         ||
+     (IdName == data::sort_list::concat_name())       ||
+     (IdName == data::sort_real::plus_name())          ||
+     (IdName == data::sort_real::minus_name())         ||
+     (IdName == data::sort_set::setunion_name())     ||
+     (IdName == data::sort_set::setdifference_name())      ||
+     (IdName == data::sort_bag::bagjoin_name())      ||
+     (IdName == data::sort_bag::bagdifference_name())      ||
+     (IdName == data::sort_int::div_name())          ||
+     (IdName == data::sort_int::mod_name())          ||
+     (IdName == data::sort_real::divides_name())       ||
+     (IdName == data::sort_int::times_name())         ||
+     (IdName == data::sort_list::element_at_name())        ||
+     (IdName == data::sort_set::setintersection_name()) ||
+     (IdName == data::sort_bag::bagintersect_name());
 }
 
 int gsPrecIdPrefix()
@@ -2219,39 +2260,37 @@ int gsPrecIdPrefix()
 
 int gsPrecIdInfix(ATermAppl IdName)
 {
-  if (IdName == gsMakeOpIdNameImp()) {
+  if (IdName == data::sort_bool::implies_name()) {
     return 2;
-  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == data::sort_bool::and_name()) || (IdName == data::sort_bool::or_name())) {
     return 3;
-  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == data::detail::equal_symbol()) || (IdName == data::detail::not_equal_symbol())) {
     return 4;
   } else if (
-      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
-      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
-      (IdName == gsMakeOpIdNameEltIn()) ||
-      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
-      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
+      (IdName == data::detail::less_symbol()) || (IdName == data::detail::less_equal_symbol()) ||
+      (IdName == data::detail::greater_symbol()) || (IdName == data::detail::greater_equal_symbol()) ||
+      (IdName == data::sort_list::in_name())
       ) {
     return 5;
-  } else if ((IdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == data::sort_list::cons_name())) {
     return 6;
-  } else if ((IdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == data::sort_list::snoc_name())) {
     return 7;
-  } else if ((IdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == data::sort_list::concat_name())) {
     return 8;
   } else if (
-      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
-      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
-      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
+      (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
+      (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
+      (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
       ) {
     return 9;
-  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
-      (IdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == data::sort_int::div_name()) || (IdName == data::sort_int::mod_name()) ||
+      (IdName == data::sort_real::divides_name())) {
     return 10;
   } else if (
-      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
-      (IdName == gsMakeOpIdNameSetIntersect()) ||
-      (IdName == gsMakeOpIdNameBagIntersect())
+      (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
+      (IdName == data::sort_set::setintersection_name()) ||
+      (IdName == data::sort_bag::bagintersect_name())
       ){
     return 11;
   } else {
@@ -2262,39 +2301,37 @@ int gsPrecIdInfix(ATermAppl IdName)
 
 int gsPrecIdInfixLeft(ATermAppl IdName)
 {
-  if (IdName == gsMakeOpIdNameImp()) {
+  if (IdName == data::sort_bool::implies_name()) {
     return 3;
-  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == data::sort_bool::and_name()) || (IdName == data::sort_bool::or_name())) {
     return 4;
-  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == data::detail::equal_symbol()) || (IdName == data::detail::not_equal_symbol())) {
     return 5;
   } else if (
-      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
-      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
-      (IdName == gsMakeOpIdNameEltIn()) ||
-      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
-      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
+      (IdName == data::detail::less_symbol()) || (IdName == data::detail::less_equal_symbol()) ||
+      (IdName == data::detail::greater_symbol()) || (IdName == data::detail::greater_equal_symbol()) ||
+      (IdName == data::sort_list::in_name())
       ) {
     return 6;
-  } else if ((IdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == data::sort_list::cons_name())) {
     return 9;
-  } else if ((IdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == data::sort_list::snoc_name())) {
     return 7;
-  } else if ((IdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == data::sort_list::concat_name())) {
     return 8;
   } else if (
-      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
-      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
-      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
+      (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
+      (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
+      (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
       ) {
     return 9;
-  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
-      (IdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == data::sort_int::div_name()) || (IdName == data::sort_int::mod_name()) ||
+      (IdName == data::sort_real::divides_name())) {
     return 10;
   } else if (
-      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
-      (IdName == gsMakeOpIdNameSetIntersect()) ||
-      (IdName == gsMakeOpIdNameBagIntersect())
+      (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
+      (IdName == data::sort_set::setintersection_name()) ||
+      (IdName == data::sort_bag::bagintersect_name())
       ){
     return 11;
   } else {
@@ -2305,39 +2342,37 @@ int gsPrecIdInfixLeft(ATermAppl IdName)
 
 int gsPrecIdInfixRight(ATermAppl IdName)
 {
-  if (IdName == gsMakeOpIdNameImp()) {
+  if (IdName == data::sort_bool::implies_name()) {
     return 2;
-  } else if ((IdName == gsMakeOpIdNameAnd()) || (IdName == gsMakeOpIdNameOr())) {
+  } else if ((IdName == data::sort_bool::and_name()) || (IdName == data::sort_bool::or_name())) {
     return 3;
-  } else if ((IdName == gsMakeOpIdNameEq()) || (IdName == gsMakeOpIdNameNeq())) {
+  } else if ((IdName == data::detail::equal_symbol()) || (IdName == data::detail::not_equal_symbol())) {
     return 4;
   } else if (
-      (IdName == gsMakeOpIdNameLT()) || (IdName == gsMakeOpIdNameLTE()) ||
-      (IdName == gsMakeOpIdNameGT()) || (IdName == gsMakeOpIdNameGTE()) ||
-      (IdName == gsMakeOpIdNameEltIn()) ||
-      (IdName == gsMakeOpIdNameSubSetEq()) || (IdName == gsMakeOpIdNameSubSet()) ||
-      (IdName == gsMakeOpIdNameSubBagEq()) || (IdName == gsMakeOpIdNameSubBag())
+      (IdName == data::detail::less_symbol()) || (IdName == data::detail::less_equal_symbol()) ||
+      (IdName == data::detail::greater_symbol()) || (IdName == data::detail::greater_equal_symbol()) ||
+      (IdName == data::sort_list::in_name())
       ) {
     return 6;
-  } else if ((IdName == gsMakeOpIdNameCons())) {
+  } else if ((IdName == data::sort_list::cons_name())) {
     return 6;
-  } else if ((IdName == gsMakeOpIdNameSnoc())) {
+  } else if ((IdName == data::sort_list::snoc_name())) {
     return 9;
-  } else if ((IdName == gsMakeOpIdNameConcat())) {
+  } else if ((IdName == data::sort_list::concat_name())) {
     return 9;
   } else if (
-      (IdName == gsMakeOpIdNameAdd()) || (IdName == gsMakeOpIdNameSubt()) ||
-      (IdName == gsMakeOpIdNameSetUnion()) || (IdName == gsMakeOpIdNameSetDiff()) ||
-      (IdName == gsMakeOpIdNameBagJoin()) || (IdName == gsMakeOpIdNameBagDiff())
+      (IdName == data::sort_real::plus_name()) || (IdName == data::sort_real::minus_name()) ||
+      (IdName == data::sort_set::setunion_name()) || (IdName == data::sort_set::setdifference_name()) ||
+      (IdName == data::sort_bag::bagjoin_name()) || (IdName == data::sort_bag::bagdifference_name())
       ) {
     return 10;
-  } else if ((IdName == gsMakeOpIdNameDiv()) || (IdName == gsMakeOpIdNameMod()) ||
-      (IdName == gsMakeOpIdNameDivide())) {
+  } else if ((IdName == data::sort_int::div_name()) || (IdName == data::sort_int::mod_name()) ||
+      (IdName == data::sort_real::divides_name())) {
     return 11;
   } else if (
-      (IdName == gsMakeOpIdNameMult()) || (IdName == gsMakeOpIdNameEltAt()) ||
-      (IdName == gsMakeOpIdNameSetIntersect()) ||
-      (IdName == gsMakeOpIdNameBagIntersect())
+      (IdName == data::sort_int::times_name()) || (IdName == data::sort_list::element_at_name()) ||
+      (IdName == data::sort_set::setintersection_name()) ||
+      (IdName == data::sort_bag::bagintersect_name())
       ){
     return 12;
   } else {

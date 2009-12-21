@@ -54,8 +54,6 @@ static ATermTable deps;
 
 static bool push_comm_through_allow=true; //at some point is set to false to avoid infinite recursion.
 
-  //taken from struct.h/struct.cpp, as this is only used in this file
-  //JK 14/12/2009
   static inline
   bool gsIsDataExprNumber(ATermAppl DataExpr)
   {

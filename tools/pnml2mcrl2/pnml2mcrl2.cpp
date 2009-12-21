@@ -23,7 +23,7 @@
 #include <cassert>
 #include <ticpp.h>
 #include <aterm2.h>
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/parse.h"
@@ -32,6 +32,7 @@
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/exception.h"
 
 //Tool framework
@@ -1763,7 +1764,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     // used for Places, Transitions and Arcs!!!
     ATerm CurrentKey;
     ATermAppl Prelude=ATAgetArgument(Spec,4);
-    if(ATisEqual(Prelude,Appl0)) Prelude=gsMakeEmptyDataSpec(); //NULL;
+    if(ATisEqual(Prelude,Appl0)) Prelude=mcrl2::data::detail::data_specification_to_aterm_data_spec(mcrl2::data::data_specification()); //NULL;
     assert(gsIsDataSpec(Prelude));
 
     gsDebugMsg("> Insert the data of places that will be translated into tables...  \n");
@@ -1786,7 +1787,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
         //typechecking of the place-related data and putting it into the tables:
         ATermAppl Value=ATAgetArgument(ATAgetFirst(APlaces), 2);
-        ATermAppl Type=type_check_data_expr(Value, static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()), gsMakeEmptyDataSpec());
+        ATermAppl Type=type_check_data_expr(Value, static_cast<ATermAppl>(mcrl2::data::sort_nat::nat()), mcrl2::data::detail::data_specification_to_aterm_data_spec(mcrl2::data::data_specification()));
         if(!Type) {gsErrorMsg("Type-checking of the initial marking of place %T failed (%T is not a natural number)\n",CurrentKey,Value); return NULL;}
   ATtablePut(context.place_mark, CurrentKey, (ATerm)Value);
 
@@ -1816,7 +1817,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     gsDebugMsg("> Insert the the data of transitions that will be translated into tables...  \n");
     while (ATisEmpty(ATransitions) == ATfalse) {
-      // this loop itterates all transitions that will be translated
+      // this loop iterates all transitions that will be translated
       gsDebugMsg("    examining %T\n", ATgetFirst(ATransitions));
       CurrentKey = ATgetArgument(ATgetFirst(ATransitions), 0);
       if (ATtableGet(context.place_name, CurrentKey)) {
@@ -1846,7 +1847,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
 
     gsDebugMsg("> Insert the data of the arcs that will be translated into tables...  \n");
     while (ATisEmpty(AArcs) == ATfalse) {
-      // this loop itterates all arcs that will be translated
+      // this loop iterates all arcs that will be translated
       gsDebugMsg("    examining %T\n", ATgetFirst(AArcs));
       CurrentKey = ATgetArgument(ATgetFirst(AArcs), 0);
       if (ATtableGet(context.place_name, CurrentKey)) {
@@ -2323,7 +2324,7 @@ static ATermAppl pn2gsPlaceParameter(ATermAppl Place) {
     OpEq=gsMakeId(mcrl2::data::equal_to(mcrl2::data::sort_pos::pos()).name());
     OpInt2Nat=gsMakeId(mcrl2::data::sort_int::int2nat().name());
     EmptyBag=gsMakeId(mcrl2::data::sort_bag::emptybag(mcrl2::data::sort_pos::pos()).name());
-    OpBagEnum=gsMakeId(gsMakeOpIdNameBagEnum());
+    OpBagEnum=gsMakeId(mcrl2::data::sort_bag::bag_enumeration_name());
     nMaxTokens=gsMakeId(gsString2ATermAppl("nMaxTokens"));
     ErrorAction=gsMakeParamId(ATmakeAppl0(ATmakeAFunId("_error")), ATmakeList0());
 

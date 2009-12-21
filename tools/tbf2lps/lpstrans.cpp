@@ -29,7 +29,8 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/parse.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/bool.h"
@@ -230,7 +231,7 @@ static ATermList get_substs(ATermList ids)
 
     unsigned int i = 0;
     ATermAppl new_id = 0;
-    while ( !gsIsUserIdentifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
+    while ( !is_user_identifier(s) || ATindexedSetGetIndex(used,(ATerm) (new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >= 0 )
     {
       sprintf(t,"%i",i);
       i++;

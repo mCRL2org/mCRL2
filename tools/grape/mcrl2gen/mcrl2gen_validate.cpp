@@ -15,24 +15,31 @@
 #include "mcrl2gen_validate.h"
 
 #include <sstream>
-#include "mcrl2/core/detail/struct.h"        // ATerm building blocks.
+#include "mcrl2/core/detail/struct_core.h"        // ATerm building blocks.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/pos.h"
+#include "mcrl2/data/nat.h"
+#include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/data_specification.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
 
 ATermAppl grape::mcrl2gen::convert_numeric_sorts_to_real(ATermAppl sort_expr) {
-  assert(gsIsSortExpr(sort_expr)); 
-  if (gsIsSortExprPos(sort_expr) || gsIsSortExprNat(sort_expr) || gsIsSortExprInt(sort_expr)) {
-    return gsMakeSortExprReal();
+  assert(gsIsSortExpr(sort_expr));
+  if (data::sort_pos::is_pos(data::sort_expression(sort_expr)) ||
+      data::sort_nat::is_nat(data::sort_expression(sort_expr)) ||
+      data::sort_int::is_int(data::sort_expression(sort_expr))) {
+    return data::sort_real::real_();
   } else if (gsIsSortId(sort_expr)) {
     return sort_expr;
   } else if (gsIsSortCons(sort_expr)) {
@@ -107,8 +114,8 @@ ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
  return mcrl2::core::parse_proc_spec(r);
 }
 
-// TODO: when gsIsUserIdentifier is working properly. This function can be removed.
-// The problem at the moment 1-9-2009 is that gsIsUserIdentifier does not return NULL when an unknown character is found.
+// TODO: when is_user_identifier is working properly. This function can be removed.
+// The problem at the moment 1-9-2009 is that is_user_identifier does not return NULL when an unknown character is found.
 bool grape::mcrl2gen::is_identifier(wxString p_identifier)
 {
   ATermAppl a_parsed_identifier = parse_identifier(p_identifier);
@@ -778,7 +785,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlDocument &p_spec)
 bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode *p_doc_root, ATermAppl &datatype_spec)
 {
   // initialise variables
-  datatype_spec = gsMakeEmptyDataSpec();
+  datatype_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(mcrl2::data::data_specification());
 
   // get datatype specification list
   wxXmlNode *datatype_specification_list = get_child(p_doc_root, _T("datatypespecificationlist"));
@@ -860,7 +867,7 @@ bool grape::mcrl2gen::validate_process_diagram(wxXmlNode *p_doc_root, wxXmlNode 
   // parse process diagram name
 // TODO: use commented line
   if (!is_identifier(diagram_name))
-//  if (!gsIsUserIdentifier(diagram_name.fn_str()))
+//  if (!is_user_identifier(diagram_name.fn_str()))
   {
     // ERROR: process name is not an identifier
     cerr << "Process diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
@@ -1517,7 +1524,7 @@ bool grape::mcrl2gen::validate_state_list(wxXmlNode *p_process_diagram, wxXmlNod
     wxString state_full_name = state_name + _T("_") + state_id;
 // TODO: use commented line
   if (!is_identifier(state_full_name))
-//    if (!gsIsUserIdentifier(state_full_name.fn_str()))
+//    if (!is_user_identifier(state_full_name.fn_str()))
     {
       // ERROR: state name is not a valid identifier
       cerr << "Process diagram " << diagram_name.ToAscii()
@@ -2098,7 +2105,7 @@ bool grape::mcrl2gen::validate_architecture_diagram(wxXmlNode *p_doc_root, wxXml
   // parse architecture diagram name
 // TODO: use the commented line instead of the workaround in between to check if a string is a valid identifier
   if (!is_identifier(diagram_name))
-//  if (!gsIsUserIdentifier(diagram_name.fn_str()))
+//  if (!is_user_identifier(diagram_name.fn_str()))
   {
     // ERROR: architecture name is not an identifier
     cerr << "Architecture diagram name " << diagram_name.ToAscii() << " is not a valid identifier." << endl;
@@ -2403,7 +2410,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_doc_root,
       // parse channel communication name
 // TODO: use commented line
   if (!is_identifier(channel_communication_visible_name))
-//      if (!gsIsUserIdentifier(channel_communication_visible_name.fn_str()))
+//      if (!is_user_identifier(channel_communication_visible_name.fn_str()))
       {
         // ERROR: channel communication name is not an identifier
         cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2483,7 +2490,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_doc_root,
             // parse channel name
 // TODO: use commented line
             if (!is_identifier(channel_name))
-//            if (!gsIsUserIdentifier(channel_name.fn_str()))
+//            if (!is_user_identifier(channel_name.fn_str()))
             {
               // ERROR: channel communication name is not an identifier
               cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2500,7 +2507,7 @@ bool grape::mcrl2gen::validate_channel_communication_list(wxXmlNode *p_doc_root,
               // parse channel name
 // TODO: use commented line
               if (!is_identifier(channel_visible_name))
-//              if (!gsIsUserIdentifier(channel_visible_name.fn_str()))
+//              if (!is_user_identifier(channel_visible_name.fn_str()))
               {
                 // ERROR: channel communication name is not an identifier
                 cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2710,7 +2717,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
       // parse channel name
 // TODO: use commented line
       if (!is_identifier(channel_name))
-//      if (!gsIsUserIdentifier(channel_name.fn_str()))
+//      if (!is_user_identifier(channel_name.fn_str()))
       {
         // ERROR: channel communication name is not an identifier
         cerr << "Architecture diagram " << diagram_name.ToAscii()
@@ -2727,7 +2734,7 @@ bool grape::mcrl2gen::validate_channel_list(wxXmlNode *p_doc_root, wxXmlNode *p_
         // parse channel name
 // TODO: use commented line
         if (!is_identifier(channel_rename))
-//        if (!gsIsUserIdentifier(channel_rename.fn_str()))
+//        if (!is_user_identifier(channel_rename.fn_str()))
         {
           // ERROR: channel rename is not an identifier
           cerr << "Architecture diagram " << diagram_name.ToAscii()

@@ -587,7 +587,7 @@ static yyconst flex_int16_t yy_chk[362] =
 #include <cstdio>
 #include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/mcrl2parser.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 
 //fix for the broken cygwin versions of flex
@@ -1311,7 +1311,7 @@ YY_RULE_SETUP
 {
              col_nr += YYLeng(); yyerror("unknown character");
              /* remaining characters */
-	   }
+     }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP

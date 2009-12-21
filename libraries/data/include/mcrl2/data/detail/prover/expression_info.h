@@ -12,8 +12,8 @@
 #ifndef EXPRESSION_INFO_H
 #define EXPRESSION_INFO_H
 
-#include "mcrl2/core/detail/struct.h"
 #include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/data/application.h"
 
 
 /// \brief Extracts information from data expressions.
@@ -24,30 +24,27 @@ class Expression_Info {
 
     /// \brief Indicates whether or not the expression has a main operator.
     inline bool is_operator(ATermAppl a_expression) {
-      return (mcrl2::core::detail::gsIsOpId(mcrl2::core::ATAgetArgument(a_expression, 0)) &&
-                  (ATgetLength(mcrl2::core::detail::gsGetDataExprArgs(a_expression)) != 0));
+      mcrl2::data::data_expression a(a_expression);
+      return mcrl2::data::is_application(a);
     }
 
     /// \brief Returns an argument of the main operator of an expression.
     inline ATermAppl get_argument(ATermAppl a_expression, const size_t a_number) {
-      ATermList v_arguments = mcrl2::core::detail::gsGetDataExprArgs(a_expression);
-
-      for (size_t i = 0; i < a_number; ++i) {
-        v_arguments = ATgetNext(v_arguments);
+      mcrl2::data::data_expression a(a_expression);
+      assert(a.is_application());
+      mcrl2::data::data_expression_list::const_iterator i = mcrl2::data::application(a).arguments().begin();
+      for(size_t j = 0; j < a_number; ++j)
+      {
+        ++i;
       }
 
-      return mcrl2::core::ATAgetFirst(v_arguments);
+      return *i;
     }
 
     /// \brief Returns the main operator of an expression.
     inline ATermAppl get_operator(ATermAppl a_expression) {
-      ATermAppl v_result = a_expression;
-
-      while (!mcrl2::core::detail::gsIsOpId(v_result)) {
-        v_result = mcrl2::core::ATAgetArgument(v_result, 0);
-      }
-
-      return v_result;
+      assert(mcrl2::data::is_application(a_expression));
+      return mcrl2::data::application(mcrl2::data::data_expression(a_expression)).head();
     }
 };
 

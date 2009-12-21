@@ -95,7 +95,7 @@ bool grape_channel_communication_dlg::update_validation()
 {
 // TODO: use other line
   return is_identifier(m_name_input->GetValue());
-//  return mcr2::core::detail::gsIsUserIdentifier(m_name_input->GetValue().fn_str());
+//  return mcr2::core::is_user_identifier(m_name_input->GetValue().fn_str());
 }
 
 void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &p_event )

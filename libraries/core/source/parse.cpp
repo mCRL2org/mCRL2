@@ -95,6 +95,12 @@ ATerm parse_tagged_stream(const string &tag, istream &stream) {
   return result;
 }
 
+bool is_user_identifier(std::string const& s)
+{
+  std::istringstream stream(s);
+  return parse_identifier(stream) != NULL;
+}
+
   }
 }
 

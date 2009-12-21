@@ -88,7 +88,7 @@ bool grape_text_dlg::update_validation()
   m_input_altered.Replace(_T(" "), _T("_"));
 // TODO: use other line
   return is_identifier(m_input_altered);
-//  return mcrl2::core::detail::gsIsUserIdentifier(m_input_altered.fn_str());
+//  return mcrl2::core::is_user_identifier(m_input_altered.fn_str());
 }
 
 void grape_text_dlg::event_update_validation( wxCommandEvent &p_event )

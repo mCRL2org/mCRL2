@@ -33,6 +33,7 @@ if( MONO_LIB )
   )
 else( MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
+  mcrl2_data
   mcrl2_core
   ticpp
   mcrl2_utilities_command_line

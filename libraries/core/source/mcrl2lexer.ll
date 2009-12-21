@@ -11,7 +11,7 @@
 #include <cstdio>
 #include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/mcrl2parser.h"
-#include "mcrl2/core/detail/struct.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 
 //fix for the broken cygwin versions of flex
@@ -183,7 +183,7 @@ nil        { process_string(); return NIL; }
 .          {
              col_nr += YYLeng(); yyerror("unknown character");
              /* remaining characters */
-	   }
+     }
 
 %%
 

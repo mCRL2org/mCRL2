@@ -51,6 +51,33 @@ namespace mcrl2 {
      * \return the number of characters of the decimal representation of n
      **/
     int NrOfChars(const int n);
+
+    ///\pre PosConstant is a data expression of sort Pos built from constructors only
+    ///\return The value of PosExpr
+    ///     Note that the result is created with malloc, so it has to be freed
+    char *gsPosValue(const ATermAppl PosConstant);
+    
+    ///\pre PosConstant is a data expression of sort Pos built from constructors only
+    ///\return The value of PosExpr
+    int gsPosValue_int(const ATermAppl PosConstant);
+
+    ///\pre NatConstant is a data expression of sort Nat built from constructors only
+    ///\return The value of NatExpr
+    ///     Note that the result is created with malloc, so it has to be freed
+    char *gsNatValue(const ATermAppl NatConstant);
+    
+    ///\pre NatConstant is a data expression of sort Nat built from constructors only
+    ///\return The value of NatExpr
+    int gsNatValue_int(const ATermAppl NatConstant);
+
+    ///\pre IntConstant is a data expression of sort Int built from constructors only
+    ///\return The value of IntExpr
+    ///     Note that the result is created with malloc, so it has to be freed
+    char *gsIntValue(const ATermAppl IntConstant);
+    
+    ///\pre IntConstant is a data expression of sort Int built from constructors only
+    ///\return The value of IntExpr
+    int gsIntValue_int(const ATermAppl IntConstant);
   }
 }
 
