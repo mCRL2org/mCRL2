@@ -597,6 +597,32 @@ static ATermList map_ATreverse(ATermList l)
   }
 }
 
+///\pre    SortExpr is a sort expression
+///\return The domains of the sort expression, in the following sense:
+///        \li if SortExpr is not an arrow sort, then the domains is the empty list []
+///        \li if SortExpr is an arrow sort, i.e. an expression of the form <tt>SortArrow([S0,...,Sn], S)</tt>,
+///            then the domains is the list <tt>[S0,...,Sn]</tt> inserted at the head of the domains of <tt>S</tt>
+///
+///\detail Some example arguments and return values,
+///        where <tt>A</tt>,<tt>B</tt>,<tt>C</tt>,<tt>A0</tt>,...,<tt>An</tt> and <tt>B0</tt>,...,<tt>Bm</tt> are all non-arrow sorts:
+///        \li <tt>A</tt>: returns <tt>[]</tt>
+///        \li <tt>SortArrow([A0,...An], B)</tt>: returns <tt>[[A0,...,An]]</tt>
+///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>[[A0,...,An],[B0,...,Bm]]</tt>
+// For backwards compatibility, copied with struct.h removal
+static
+ATermList gsGetSortExprDomains(ATermAppl SortExpr)
+{
+  assert(gsIsSortExpr(SortExpr));
+  ATermList l = ATmakeList0();
+  while (gsIsSortArrow(SortExpr)) {
+    ATermList dom = ATLgetArgument(SortExpr,0);
+    l = ATinsert(l, (ATerm) dom);
+    SortExpr = ATAgetArgument(SortExpr,1);
+  }
+  l = ATreverse(l);
+  return l;
+}
+
 EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter)
 {
         info.rewr_obj = r;

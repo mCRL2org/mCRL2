@@ -384,7 +384,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     data_vars = atermpp::push_front(data_vars, new_variable);
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(rf.front(), data::convert< data::variable_list >(function_arguments)));
+                  pbes_expression d(data::application(rf.front(), function_arguments));
                   sigma[*i]=d;
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma));
                   sigma[*i] = *i; // erase *i
@@ -495,7 +495,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     data_vars = atermpp::push_front(data_vars, new_variable);
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d(core::detail::gsMakeDataApplList(rf.front(),data::convert< data::variable_list >(function_arguments)));
+                  pbes_expression d(data::application(rf.front(),function_arguments));
                   // r.setSubstitution(*i,d);
                   sigma[*i]=d;
                   // std::cerr << "SETVARIABLE " << pp(*i) << ":=" << pp(d) << "\n";

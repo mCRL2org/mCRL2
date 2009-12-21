@@ -11,6 +11,7 @@
 #include "mcrl2/core/print.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/lps/multi_action.h"
 

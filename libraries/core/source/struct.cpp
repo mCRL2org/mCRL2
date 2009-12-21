@@ -1474,20 +1474,6 @@ ATermList gsGetSortExprDomain(ATermAppl SortExpr)
   return l;
 }
 
-ATermList gsGetSortExprDomains(ATermAppl SortExpr)
-{
-  assert(gsIsSortExpr(SortExpr));
-  ATermList l = ATmakeList0();
-  while (gsIsSortArrow(SortExpr)) {
-    ATermList dom = ATLgetArgument(SortExpr,0);
-    l = ATinsert(l, (ATerm) dom);
-    SortExpr = ATAgetArgument(SortExpr,1);
-  }
-  l = ATreverse(l);
-  return l;
-}
-
-
 //Data expressions
 //----------------
 
@@ -6352,42 +6338,6 @@ bool gsIsDataExprSwapZero(ATermAppl DataExpr)
     return gsIsOpIdSwapZero(t);
   }
   return false;
-}
-
-//Multiactions
-//------------
-
-ATermAppl gsSortMultAct(ATermAppl MultAct)
-{
-  assert(gsIsMultAct(MultAct));
-  ATermList l = ATLgetArgument(MultAct,0);
-  unsigned int len = ATgetLength(l);
-  boost::scoped_array< ATerm > acts(new ATerm[len]);
-  for (unsigned int i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
-  {
-    acts[i] = ATgetFirst(l);
-  }
-  //l is empty
-
-  for (unsigned int i=1; i<len; i++)
-  {
-    unsigned int j = i;
-    // XXX comparison is fast but does not define a unique result (i.e. the
-    // result is dependent on the specific run of a program)
-    while ( acts[j] < acts[j-1] )
-    {
-      ATerm t = acts[j];
-      acts[j] = acts[j-1];
-      acts[j-1] = t;
-    }
-  }
-
-  //l is empty
-  for (unsigned int i=0; i<len; i++)
-  {
-    l = ATinsert(l,acts[len-i-1]);
-  }
-  return gsMakeMultAct(l);
 }
 
 //Local declarations

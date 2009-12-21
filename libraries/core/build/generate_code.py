@@ -415,7 +415,7 @@ def main():
     rules = parse_ebnf(filename)
 
     if options.soundness_checks:
-        ignored_phases = ['-tc', '-lin', '-di', '-rft', '.tc']
+        ignored_phases = ['-lin', '-di', '-rft']
         filename = '../include/mcrl2/core/detail/soundness_checks.h'
         generate_soundness_check_functions(rules, filename, ignored_phases)
         print 'updated %s' % filename

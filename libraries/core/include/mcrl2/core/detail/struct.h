@@ -245,19 +245,6 @@ ATermAppl gsGetSortExprResult(ATermAppl SortExpr);
 ///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>[A0,...,An,B0,...,Bm]</tt>
 ATermList gsGetSortExprDomain(ATermAppl SortExpr);
 
-///\pre    SortExpr is a sort expression
-///\return The domains of the sort expression, in the following sense:
-///        \li if SortExpr is not an arrow sort, then the domains is the empty list []
-///        \li if SortExpr is an arrow sort, i.e. an expression of the form <tt>SortArrow([S0,...,Sn], S)</tt>,
-///            then the domains is the list <tt>[S0,...,Sn]</tt> inserted at the head of the domains of <tt>S</tt>
-///
-///\detail Some example arguments and return values,
-///        where <tt>A</tt>,<tt>B</tt>,<tt>C</tt>,<tt>A0</tt>,...,<tt>An</tt> and <tt>B0</tt>,...,<tt>Bm</tt> are all non-arrow sorts:
-///        \li <tt>A</tt>: returns <tt>[]</tt>
-///        \li <tt>SortArrow([A0,...An], B)</tt>: returns <tt>[[A0,...,An]]</tt>
-///        \li <tt>SortArrow([A0,...An], SortArrow([B0,...,Bm], C))</tt>: returns <tt>[[A0,...,An],[B0,...,Bm]]</tt>
-ATermList gsGetSortExprDomains(ATermAppl SortExpr);
-
 // Data expressions
 // ----------------
 
@@ -2466,13 +2453,6 @@ bool gsIsDataExprFBagInsert(ATermAppl DataExpr);
 ///\pre DataExpr is a data expression
 ///\return the data expression is an fbag cinsert
 bool gsIsDataExprFBagCInsert(ATermAppl DataExpr);
-
-// Multiactions
-// ------------
-
-///\pre MultAct is a multiaction
-///\return the sorted variant of the argument
-ATermAppl gsSortMultAct(ATermAppl MultAct);
 
 // Misc.
 // -----

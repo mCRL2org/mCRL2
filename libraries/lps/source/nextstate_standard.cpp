@@ -256,7 +256,7 @@ ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
                 for (int i=0; i<info.statelen; i++)
                 {
                         stateargs[i] = ATgetArgument(state,i);
-                        if ( !ATisEqual(gsGetSort((ATermAppl) stateargs[i]),gsGetSort(ATAgetFirst(l))) )
+                        if ( data::data_expression((ATermAppl) stateargs[i]).sort() != data::data_expression(ATAgetFirst(l)).sort())
                         {
                                 valid = false;
                                 break;
