@@ -80,7 +80,6 @@ add_library( ${PROJECT_NAME}
   ${CMAKE_SOURCE_DIR}/libraries/core/source/numeric_string.cpp
   ${CMAKE_SOURCE_DIR}/libraries/core/source/alpha.cpp
   ${CMAKE_SOURCE_DIR}/libraries/core/source/print_c.cpp
-  ${CMAKE_SOURCE_DIR}/libraries/core/source/struct.cpp
   ${CMAKE_SOURCE_DIR}/libraries/core/source/text_utility.cpp
   ${CMAKE_SOURCE_DIR}/libraries/data/source/implementations.cpp
   ${CMAKE_SOURCE_DIR}/libraries/data/source/detail/rewrite/with_prover.cpp

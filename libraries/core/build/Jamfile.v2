@@ -4,7 +4,6 @@ project core
 
 mcrl2-library core
        : source/mcrl2parser.cpp/<include>../include/mcrl2/core/detail
-         source/struct.cpp
          source/struct_core.cpp
          source/mcrl2lexer.cpp
          source/parse.cpp

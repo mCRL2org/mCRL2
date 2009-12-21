@@ -43,7 +43,6 @@ add_library(${PROJECT_NAME}
   source/numeric_string.cpp
   source/alpha.cpp
   source/print_c.cpp
-  source/struct.cpp
   source/text_utility.cpp
 )
 
