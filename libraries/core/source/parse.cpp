@@ -11,8 +11,10 @@
 #include <istream>
 #include <string>
 #include <sstream>
+#include <stdlib.h>
 #include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/print.h"
 
 using namespace std;
 
@@ -33,52 +35,52 @@ ATermAppl parse_identifier(istream &se_stream) {
 }
 
 ATermAppl parse_sort_expr(istream &se_stream) {
-  gsVerboseMsg("parsing sort expression...\n");
+  if (gsVerbose) std::cerr << "parsing sort expression...\n";
   return (ATermAppl) parse_tagged_stream("sort_expr", se_stream);
 }
 
 ATermAppl parse_data_expr(istream &de_stream) {
-  gsVerboseMsg("parsing data expression...\n");
+  if (gsVerbose) std::cerr << "parsing data expression...\n";
   return (ATermAppl) parse_tagged_stream("data_expr", de_stream);
 }
 
 ATermAppl parse_data_spec(istream &ps_stream) {
-  gsVerboseMsg("parsing data specification...\n");
+  if (gsVerbose) std::cerr << "parsing data specification...\n";
   return (ATermAppl) parse_tagged_stream("data_spec", ps_stream);
 }
 
 ATermAppl parse_mult_act(istream &pe_stream) {
-  gsVerboseMsg("parsing multiaction...\n");
+  if (gsVerbose) std::cerr << "parsing multiaction...\n";
   return (ATermAppl) parse_tagged_stream("mult_act", pe_stream);
 }
 
 ATermAppl parse_proc_expr(istream &pe_stream) {
-  gsVerboseMsg("parsing process expression...\n");
+  if (gsVerbose) std::cerr << "parsing process expression...\n";
   return (ATermAppl) parse_tagged_stream("proc_expr", pe_stream);
 }
 
 ATermAppl parse_proc_spec(istream &ps_stream) {
-  gsVerboseMsg("parsing process specification...\n");
+  if (gsVerbose) std::cerr << "parsing process specification...\n";
   return (ATermAppl) parse_tagged_stream("proc_spec", ps_stream);
 }
 
 ATermAppl parse_state_frm(istream &pe_stream) {
-  gsVerboseMsg("parsing state formula...\n");
+  if (gsVerbose) std::cerr << "parsing state formula...\n";
   return (ATermAppl) parse_tagged_stream("state_frm", pe_stream);
 }
 
 ATermAppl parse_action_rename_spec(istream &pe_stream) {
-  gsVerboseMsg("parsing action rename specification...\n");
+  if (gsVerbose) std::cerr << "parsing action rename specification...\n";
   return (ATermAppl) parse_tagged_stream("action_rename", pe_stream);
 }
 
 ATermAppl parse_pbes_spec(istream &pbes_spec_stream) {
-  gsVerboseMsg("parsing BPES specification...\n");
+  if (gsVerbose) std::cerr << "parsing BPES specification...\n";
   return (ATermAppl) parse_tagged_stream("pbes_spec", pbes_spec_stream);
 }
 
 ATermList parse_data_vars(istream &pe_stream) {
-  gsVerboseMsg("parsing data variables...\n");
+  if (gsVerbose) std::cerr << "parsing data variables...\n";
   return (ATermList) parse_tagged_stream("data_vars", pe_stream);
 }
 

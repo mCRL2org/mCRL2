@@ -17,6 +17,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/alpha.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/print.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/data/pos.h"
@@ -1141,7 +1142,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a){
 	  i++;
 	} while(ATAtableGet(procs,(ATerm)new_pn));
 
-	gsVerboseMsg("- created process %P\n", new_pn);
+	if (gsVerbose) std::cerr << "- created process " << pp(new_pn) << "\n";
 	ATermAppl p=ATAtableGet(procs,(ATerm)pn);
 	assert(p);
 	p=PushAllow(V,p);
@@ -1742,7 +1743,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, unsigned length, ATermList allowed
 static ATermAppl gsApplyAlpha(ATermAppl a){
   // apply the alpha reductions to a.
   // makes sure that the alphabet of a is in the table alphas after the function returns its value
-  //gsVerboseMsg("gsApplyAlpha: a: %T\n\n", a);
+  //if (gsVerbose) std::cerr << "gsApplyAlpha: a: %T\n\n", a);
   assert(all_stable);
   if ( gsIsDelta (a) || gsIsTau(a) ){
   }
@@ -1907,7 +1908,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context){
         }
       }
     }
-    //gsVerboseMsg("Trying to see if parallelism is really recursive:\n a: %P\n gsaGetDeps(a): %P\n context: %P\n r:%P\n\n",a,gsaGetDeps(a),context,r);
+    //if (gsVerbose) std::cerr << "Trying to see if parallelism is really recursive:\n a: %P\n gsaGetDeps(a): %P\n context: %P\n r:%P\n\n",a,gsaGetDeps(a),context,r);
   }
   else
     assert(0);
@@ -2009,7 +2010,7 @@ static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true
 }
 
 ATermAppl gsAlpha(ATermAppl Spec){
-  gsVerboseMsg("applying alphabet reductions...\n");
+  if (gsVerbose) std::cerr << "applying alphabet reductions...\n";
   //create the tables
   afunPair=ATmakeAFun("p",2,ATfalse);
   ATprotectAFun(afunPair);
@@ -2224,7 +2225,7 @@ ATermAppl gsAlpha(ATermAppl Spec){
       nP_checked:
 
       if(good){
-        gsVerboseMsg("- process %P is a recursive parallel process in n-parallel pCRL format\n", p);
+        if (gsVerbose) std::cerr << "- process " << pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
 	ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
 	ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }
