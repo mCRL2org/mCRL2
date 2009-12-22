@@ -119,18 +119,16 @@ void structured_sort_test()
   structured_sort_constructor_argument_vector a1;
   a1.push_back(p0);
   a1.push_back(p1);
-  boost::iterator_range<structured_sort_constructor_argument_vector::const_iterator> a1_range(a1);
   structured_sort_constructor_argument_vector a2;
   a2.push_back(p0);
-  boost::iterator_range<structured_sort_constructor_argument_vector::const_iterator> a2_range(a2);
 
-  structured_sort_constructor c1("c1", a1_range, "is_c1");
-  structured_sort_constructor c2("c2", a2_range);
+  structured_sort_constructor c1("c1", a1, "is_c1");
+  structured_sort_constructor c2("c2", a2);
   BOOST_CHECK(c1.name() == "c1");
-  BOOST_CHECK(c1.arguments() == a1_range);
+  BOOST_CHECK(c1.arguments() == a1);
   BOOST_CHECK(c1.recogniser() == "is_c1");
   BOOST_CHECK(c2.name() == "c2");
-  BOOST_CHECK(c2.arguments() == a2_range);
+  BOOST_CHECK(c2.arguments() == a2);
   BOOST_CHECK(c2.recogniser() == data::no_identifier());
 
   structured_sort_constructor_vector cs;

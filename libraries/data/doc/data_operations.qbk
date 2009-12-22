@@ -1,80 +1,245 @@
 [section: Operations on data expressions]
 
-Let =m= and =n= be data expressions of type =Nat=, =Pos=, =Int= or =Real=,
-let =b= and =c= be data expressions of type =Bool=, and let =x=
+For all sorts, a number of operations is available by default. The corresponding
+functions can be found in `standard.h`.
+
+Let =b= be a data expressions of sort =Bool=, and let =x=
 and =y= be two data expressions with the same sort. Then the following
 operations are supported:
 
 [table Operations on all data types
-    [[Expression] [Meaning]]
-    [ [ `equal_to(x, y)    ` or [^ x == y ]            ] [equality                  ]]
-    [ [ `not_equal_to(x, y)` or [^ x != y ]            ] [inequality                ]]
-    [ [ `if_(b, x, y)      `                           ] [conditional expression    ]]
+    [[Expression] [Syntax] [Meaning]]
+    [ [ `equal_to(x, y)    `] [[^ x == y ]    ] [equality                  ]]
+    [ [ `not_equal_to(x, y)`] [[^ x != y ]    ] [inequality                ]]
+    [ [ `if_(b, x, y)      `] [[^ if(b,x,y)]  ] [conditional expression    ]]
+    [ [ `less(x,y)         `] [[^ x < y ]     ] [less than                 ]]
+    [ [ `less_equal(x,y)   `] [[^ x <= y ]    ] [less than or equal to     ]]
+    [ [ `greater(x,y)      `] [[^ x > y ]     ] [greater than              ]]
+    [ [ `greater_equal(x,y)`] [[^ x >= y ]    ] [greater than or equal to  ]]
 ]
 
-[table Operations on boolean types
-    [[Expression] [Meaning]]
-    [ [ `not_(b)     ` or [^ !b          ]       ] [negation                  ]]
-    [ [ `and_(b, c)  ` or [^ b && c      ]       ] [conjunction               ]]
-    [ [ `or_(b, c)   ` or [^ b || c      ]       ] [disjunction               ]]
-    [ [ `imp(b, c)   `                           ] [implication               ]]
-    [ [ `forall(x, b)`                           ] [universal quantification  ]]
-    [ [ `exists(x, b)`                           ] [existential quantification]]
+For the predefined sorts, the most important operations are also available
+by default.
+
+[section: Booleans]
+All standard operations for the Booleans are available in `bool.h`, and can be
+found in the namespace =data::sort_bool=. First of all
+the two constants =true= and =false= can be constructed.
+
+[table Constructors for sort Bool
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`true()  `] [ [^ true  ] ]   [ true  ] ]
+  [ [`false() `] [ [^ false ] ]   [ false ] ]
 ]
 
-[table Operations on numbers
-    [[Expression] [Meaning]]
-    [ [ `less_equal(m, n)   ` or [^ m <= n ]           ] [ less than or equal     ]]
-    [ [ `less(m, n)         ` or [^ m < n ]            ] [ less than              ]]
-    [ [ `greater_equal(m, n)` or [^ m > n ]            ] [ greater than or equal  ]]
-    [ [ `greater(m, n)      ` or [^ m >= n ]           ] [ greater than           ]]
-    [ [ `abs(m)             `                          ] [ absolute value         ]]
-    [ [ `min_(m, n)         `                          ] [ minimum                ]]
-    [ [ `max_(m, n)         `                          ] [ maximum                ]]
-    [ [ `negate(m)          ` or [^ -m ]               ] [ negation               ]]
-    [ [ `succ(m)            `                          ] [ successor              ]]
-    [ [ `pred(m)            `                          ] [ predecessor            ]]
-    [ [ `plus(m, n)         ` or [^ m + n ]            ] [ addition               ]]
-    [ [ `minus(m, n)        ` or [^ m - n ]            ] [ subtraction            ]]
-    [ [ `multiplies(m, n)   ` or [^ m * n ]            ] [ multiplication         ]]
-    [ [ `divides(m, n)      ` or [^ m / n ]            ] [ integer div            ]]
-    [ [ `modulus(m, n)      ` or [^ m % n ]            ] [ integer mod            ]]
-    [ [ `exp(m, n)          `                          ] [ exponentiation         ]]
+Furthermore the following functions are available on Booleans (for details
+about the allowed types also see bool.spec). Let =b= and =c= be Boolean expressions.
+[table Functions for sort Bool
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`not_(b,c)  `] [ [^ !b  ] ]   [ negation  ] ]
+  [ [`and_(b,c) `]  [ [^ b && c] ]   [ conjunction ] ]
+  [ [`or_(b,c) `]  [ [^ b || c ] ]   [ disjunction ] ]
+  [ [`implies(b,c) `]  [ [^ b => c] ]   [ implication ] ]
 ]
 
-Note that many names of the operations match those of similar operations in the standard
-=C++= header `<functional>`. For example =negate=, =plus=, =minus= etc.
+[endsect] [/ Booleans]
 
-[table Operations on lists
-    [[Expression] [Meaning]]
-    [ [ not yet available ] [ construction               ]]
-    [ [ not yet available ] [ element test               ]]
-    [ [ not yet available ] [ length                     ]]
-    [ [ not yet available ] [ cons                       ]]
-    [ [ not yet available ] [ snoc                       ]]
-    [ [ not yet available ] [ concatenation              ]]
-    [ [ not yet available ] [ element at position        ]]
-    [ [ not yet available ] [ first element              ]]
-    [ [ not yet available ] [ list without first element ]]
-    [ [ not yet available ] [ last element               ]]
-    [ [ not yet available ] [ list without last element  ]]
+[section: Positive numbers]
+All standard operations for positive numbers are available in `pos.h`, and can
+be found in the namespace =data::sort_pos=. The positive numbers have two
+constructors, facilitating an encoding with size logarithmic in the number
+that is represented.
+Let =b= be a Boolean expression, and =p= be a positive expression.
+
+[table Constructors for sort Pos
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`c1()  `] [ [^ @1  ] ]   [ 1  ] ]
+  [ [`cdub(b,p) `] [ [^ @cDub(b,p) ] ]   [ 2*p + b ] ]
 ]
 
-[table Operations on sets and bags
-    [[Expression] [Meaning]]
-    [ [ not yet available ] [ set enumeration            ]]
-    [ [ not yet available ] [ bag enumeration            ]]
-    [ [ not yet available ] [ comprehension              ]]
-    [ [ not yet available ] [ element test               ]]
-    [ [ not yet available ] [ bag multiplicity           ]]
-    [ [ not yet available ] [ subset / subbag            ]]
-    [ [ not yet available ] [ proper subset / subbag     ]]
-    [ [ not yet available ] [ union                      ]]
-    [ [ not yet available ] [ difference                 ]]
-    [ [ not yet available ] [ intersection               ]]
-    [ [ not yet available ] [ set complement             ]]
-    [ [ not yet available ] [ convert set to bag         ]]
-    [ [ not yet available ] [ convert bag to set         ]]
+Furthermore the standard operations are available on Positive numbers.
+Let =b= and =c= be Boolean expressions, and =p=, =q=, and =r= be positive
+numbers.
+[table Functions for sort Pos
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`max(p,q)  `] [ [^ max(p,q)  ] ]   [ maximum  ] ]
+  [ [`min(p,q) `]  [ [^ min(p,q) ] ]   [ minimum ] ]
+  [ [`abs(p) `]  [ [^ abs(p) ] ]   [ absolute value ] ]
+  [ [`succ(p) `]  [ [^ succ(p)] ]   [ successor ] ]
+  [ [`plus(p,q) `]  [ [^ p+q ] ]   [ addition ] ]
+  [ [`add_with_carry(b,p,q) `]  [ [^ @addc(b,p,q) ] ]   [ addition with carry (p + q + b) ] ]
+  [ [`multir(b,p,q,r) `]  [ [^ @multir(b,p,q,r) ] ]   [ multiplication with intermediate result ] ]
 ]
+
+[endsect] [/ Positive numbers]
+
+[section: Natural numbers]
+All standard operations for natural numbers are available in `nat.h`, and can
+be found in the namespace =data::sort_nat=. The natural numbers have two
+constructors, representing =0= and a positive number interpreted as a
+natural number.
+
+Let =p= be a positive expression.
+
+[table Constructors for sort Nat
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`c0()  `] [ [^ @0  ] ]   [ 0  ] ]
+  [ [`cnat(p) `] [ [^ @cNat(p) ] ]   [ p interpreted as natural number ] ]
+]
+
+Furthermore the standard operations are available on Natural numbers.
+Let =b= and =c= be Boolean expressions, =p=, =q= be positive numbers,
+and =n=, =m=, =u=, =v= be natural numbers.
+[table Functions for sort Nat
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`Pos2Nat(p)  `] [ [^ Pos2Nat(p) ] ]   [ explicit conversion of =p= to sort Nat ] ]
+  [ [`Nat2Pos(n)  `] [ [^ Nat2Pos(n) ] ]   [ explicit conversion of =n= to sort Pos ] ]
+  [ [`max(p,n) `]  [ [^ max(p,n) ] ]   [ maximum ] ]
+  [ [`max(n,p) `]  [ [^ max(n,p) ] ]   [ maximum ] ]
+  [ [`max(m,n) `]  [ [^ max(m,n) ] ]   [ maximum ] ]
+  [ [`min(m,n) `]  [ [^ min(m,n) ] ]   [ minimum ] ]
+  [ [ [`abs(n) `]  [ [^ abs(n) ] ]   [ absolute value ] ]
+  [ [`succ(n) `]  [ [^ succ(n)] ]   [ successor ] ]
+  [ [`pred(n) `]  [ [^ pred(n)] ]   [ predecessor ] ]
+  [ [`dub(b,n) `]  [ [^ @dub(b,n)] ]   [ ??? ] ]
+  [ [`plus(p,n) `]  [ [^ p+n ] ]   [ addition ] ]
+  [ [`plus(n,p) `]  [ [^ n+p ] ]   [ addition ] ]
+  [ [`plus(m,n) `]  [ [^ m+n ] ]   [ addition ] ]
+  [ [`gtesubt(p,q) `] [ [^ @gtesubt(p,q) ] ] [ =p - q=, if =p >= q= ] ]
+  [ [`gtesubt(m,n) `] [ [^ @gtesubt(m,n) ] ] [ =m - n=, if =m >= n= ] ]
+  [ [`gtesubtb(b,p,q) `] [ [^ @gtesubtb(b,p,q) ] ] [ substraction with borrow ] ]
+  [ [`times(m,n) `]  [ [^ m*n ] ]   [ multiplication ] ]
+  [ [`div(p,q) `]  [ [^ p div q ] ]   [ integer division ] ]
+  [ [`div(m,p) `]  [ [^ m div p ] ]   [ integer division ] ]
+  [ [`mod(p,q) `]  [ [^ p mod q ] ]   [ modulus ] ]
+  [ [`mod(m,p) `]  [ [^ m mod p ] ]   [ modulus ] ]
+  [ [`exp(p,n) `]  [ [^ p^n ] ]   [ exponentiation ] ]
+  [ [`exp(m,n) `]  [ [^ m^n ] ]   [ exponentiation ] ]
+  [ [`even(n) `]  [ [^ @even(n)] ]   [ predicate to indicate =n= is even ] ]
+  [ [`monus(m,n) `]  [ [^ @monus(m,n) ] ]   [ =(m-n) max 0= ] ]
+  [ [`swap_zero(m,n) `]  [ [^ @swap_zero(m,n) ] ]   [ ??? ] ]
+  [ [`swap_zero_add(m,n,u,v) `]  [ [^ @swap_zero_add(m,n,u,v) ] ]   [ ??? ] ]
+  [ [`swap_zero_min(m,n,u,v) `]  [ [^ @swap_zero_min(m,n,u,v) ] ]   [ ??? ] ]
+  [ [`swap_zero_monus(m,n,u,v) `]  [ [^ @swap_zero_monus(m,n,u,v) ] ]   [ ??? ] ]
+  [ [`swap_zero_lte(m,n,u,v) `]  [ [^ @swap_zero_lte(m,n,u,v) ] ]   [ ??? ] ]
+]
+
+To facilitate efficient rewriting, also a sort =@NatPair= is available. Code
+for this is also present in =nat.h=, in namespace =data::sort_nat=.
+
+Let =m=, =n= be expressions of sort Nat.
+[table Constructors for sort @NatPair
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`cpair(m,n) `] [ [^ @cPair(m,n) ] ]   [ tuple (m,n) ] ]
+]
+
+Also functions for these pairs are available.
+Let =b= be a Boolean expression, =p=, =q= be positive numbers,
+and =n=, =m=, =u=, =v= be natural numbers.
+[table Functions for sort @NatPair
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`first(cpair(m,n)) `] [ [^ @first(@cPair(m,n)) ] ]   [ projection of first argument ] ]
+  [ [`second(cpair(m,n)) `] [ [^ @second(@cPair(m,n)) ] ]   [ projection of second argument ] ]
+  [ [`divmod(p,q) `] [ [^ @divmod(p,q) ] ]   [ simultaneous division and modulus ] ]
+  [ [`gdivmod(pair(m,n), b, p) `] [ [^ @gdivmod(@pair(m,n), b, p) ] ]   [ generalised simultaneous division and modulus ] ]
+  [ [`ggdivmod(m, n, p) `] [ [^ @ggdivmod(m ,n, p) ] ]   [ doubly generalised simultaneous division and modulus ] ]
+]
+
+[endsect] [/ Natural numbers]
+
+[section: Integers]
+All standard operations for integers are available in `int.h`, and can
+be found in the namespace =data::sort_int=. The integers have two
+constructors, one interpreting a natural number as integer, and one
+interpreting a positive number as a negative integer.
+
+Let =p= be a positive expression, and =n= be a natural number.
+
+[table Constructors for sort Int
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`cint(n)  `] [ [^ @cInt(n)  ] ]   [ =n= interpreted as an integer ] ]
+  [ [`cneg(p) `] [ [^ @cNeg(p) ] ]   [ =p= interpreted as the integer =-p= ] ]
+]
+
+Furthermore the standard operations are available on Natural numbers.
+Let =b= be a Boolean expression, =p=, =q= be positive numbers,
+=n=, =m= be natural numbers, and =x=, =y= be integers.
+[table Functions for sort Int
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`Nat2Int(n)  `] [ [^ Nat2Int(n) ] ]   [ explicit conversion of =n= to sort Int ] ]
+  [ [`Int2Nat(x)  `] [ [^ Int2Nat(x) ] ]   [ explicit conversion of =x= to sort Nat ] ]
+  [ [`Pos2Int(p)  `] [ [^ Pos2Int(p) ] ]   [ explicit conversion of =p= to sort Int ] ]
+  [ [`Int2Pos(x)  `] [ [^ Int2Pos(x) ] ]   [ explicit conversion of =x= to sort Pos ] ]
+  [ [`max(p,x) `]  [ [^ max(p,x) ] ]   [ maximum ] ]
+  [ [`max(x,p) `]  [ [^ max(x,p) ] ]   [ maximum ] ]
+  [ [`max(n,x) `]  [ [^ max(n,x) ] ]   [ maximum ] ]
+  [ [`max(x,n) `]  [ [^ max(x,n) ] ]   [ maximum ] ]
+  [ [`max(x,y) `]  [ [^ max(x,y) ] ]   [ maximum ] ]
+  [ [`min(x,y) `]  [ [^ min(x,y) ] ]   [ minimum ] ]
+  [ [ [`abs(x) `]  [ [^ abs(x) ] ]   [ absolute value ] ]
+  [ [ [`negate(p) `]  [ [^ -p ] ]   [ unary minus ] ]
+  [ [ [`negate(n) `]  [ [^ -n ] ]   [ unary minus ] ]
+  [ [ [`negate(x) `]  [ [^ -x ] ]   [ unary minus ] ]
+  [ [`succ(x) `]  [ [^ succ(x)] ]   [ successor ] ]
+  [ [`pred(n) `]  [ [^ pred(n)] ]   [ predecessor ] ]
+  [ [`pred(x) `]  [ [^ pred(x)] ]   [ predecessor ] ]
+  [ [`dub(b,x) `]  [ [^ @dub(b,x)] ]   [ ??? ] ]
+  [ [`plus(x,y) `]  [ [^ x+y ] ]   [ addition ] ]
+  [ [`minus(p,q) `]  [ [^ p-q ] ]   [ subtraction ] ]
+  [ [`minus(n,m) `]  [ [^ n-m ] ]   [ subtraction ] ]
+  [ [`minus(x,y) `]  [ [^ x-y ] ]   [ subtraction ] ]
+  [ [`times(x,y) `]  [ [^ x*y ] ]   [ multiplication ] ]
+  [ [`div(x,p) `]  [ [^ x div p ] ]   [ integer division ] ]
+  [ [`mod(x,p) `]  [ [^ x mod p ] ]   [ modulus ] ]
+  [ [`exp(x,n) `]  [ [^ x^n ] ]   [ exponentiation ] ]
+]
+
+[endsect] [/ Integers]
+
+[section: Real numbers]
+All standard operations for real numbers are available in `real.h`, and can
+be found in the namespace =data::sort_real=. The real numbers do not have
+any constructors, because they cannot be finitely enumerated.
+
+Standard functions for real are available however.
+Let =p=, =q= be positive numbers,=n=, =m= be natural numbers, =x=, =y= be integers,
+and =r=, =s= be real numbers.
+[table Functions for sort Real
+  [ [Expression] [Syntax]         [Meaning] ]
+  [ [`Pos2Real(p)  `] [ [^ Pos2Real(p) ] ]   [ explicit conversion of =p= to sort Real ] ]
+  [ [`Nat2Real(n)  `] [ [^ Nat2Real(n) ] ]   [ explicit conversion of =n= to sort Real ] ]
+  [ [`Int2Real(x)  `] [ [^ Int2Real(x) ] ]   [ explicit conversion of =x= to sort Real ] ]
+  [ [`Real2Pos(r)  `] [ [^ Real2Pos(r) ] ]   [ explicit conversion of =r= to sort Pos ] ]
+  [ [`Real2Nat(r)  `] [ [^ Real2Nat(r) ] ]   [ explicit conversion of =r= to sort Nat ] ]
+  [ [`Real2Int(r)  `] [ [^ Real2Int(r) ] ]   [ explicit conversion of =r= to sort Int ] ]
+  [ [`max(r,s) `]  [ [^ max(r,s) ] ]   [ maximum ] ]
+  [ [`min(r,s) `]  [ [^ min(r,s) ] ]   [ minimum ] ]
+  [ [`abs(r) `]  [ [^ abs(r) ] ]   [ absolute value ] ]
+  [ [`negate(r) `]  [ [^ -r ] ]   [ unary minus ] ]
+  [ [`succ(r) `]  [ [^ succ(r)] ]   [ successor ] ]
+  [ [`pred(r) `]  [ [^ pred(r)] ]   [ predecessor ] ]
+  [ [`plus(r,s) `]  [ [^ r+s ] ]   [ addition ] ]
+  [ [`minus(r,s) `]  [ [^ r-s ] ]   [ subtraction ] ]
+  [ [`times(r,s) `]  [ [^ r*s ] ]   [ multiplication ] ]
+  [ [`divides(p,q) `]  [ [^ p / q ] ]   [ division ] ]
+  [ [`divides(m,n) `]  [ [^ m / n ] ]   [ division ] ]
+  [ [`divides(x,y) `]  [ [^ x / y ] ]   [ division ] ]
+  [ [`divides(r,s) `]  [ [^ r / s ] ]   [ division ] ]
+  [ [`floor(r) `]  [ [^ floor(r)] ]   [ floor ] ]
+  [ [`ceil(r) `]  [ [^ ceil(r)] ]   [ ceil ] ]
+  [ [`round(r) `]  [ [^ round(r)] ]   [ round ] ]
+  [ [`redfrac(x,y) `]  [ [^ @redfrac(x,y)] ]   [ reduce fraction x/y w.r.t. lowest common multiple ] ]
+  [ [`redfracwhr(p,x,n) `]  [ [^ @redfracwhr(p,x,n)] ]   [ ??? ] ]
+  [ [`redfrachlp(r,x) `]  [ [^ @redfrachlp(r,x)] ]   [ ??? ] ]
+]
+
+[important The sorts that are allowed as arguments to the functions for numeric sorts
+are exactly the ones that correspond to the sorts of the variables in the tables
+with functions. Note that e.g. `sort_real::max(p,q)` is also allowed, and the
+correct result sort of =Pos= will automatically be inferred.]
+
+[endsect] [/ Real numbers]
+
+Real, List(S), Set(S), Bag(S), FSet(S), FBag(S)
 
 [endsect] [/ Operations on data expressions]

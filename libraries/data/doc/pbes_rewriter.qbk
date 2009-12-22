@@ -85,4 +85,4 @@ example.
 functions with a map interface (as provided by =data::rewriter_map=).
 ]
 
-[endsect] [/ Data rewriters]
+[endsect] [/ PBES rewriters]

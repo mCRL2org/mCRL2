@@ -3,29 +3,27 @@
 The mCRL2 language has a number of predefined sorts, given in the table below:
 
 [table Predefined sorts
-    [ [Expression]             [Type]             ]
-    [ [`sort_expr::bool_()`] [booleans        ] ]
-    [ [`sort_expr::pos()`  ] [positive numbers] ]
-    [ [`sort_expr::nat()`  ] [natural numbers ] ]
-    [ [`sort_expr::int_()` ] [integers        ] ]
-    [ [`sort_expr::real()` ] [real numbers    ] ]
+    [ [Expression]           [Sort]             ]
+    [ [`sort_bool::bool_()`] [booleans        ] ]
+    [ [`sort_pos::pos()`  ]  [positive numbers] ]
+    [ [`sort_nat::nat()`  ]  [natural numbers ] ]
+    [ [`sort_int::int_()` ]  [integers        ] ]
+    [ [`sort_real::real()` ] [real numbers    ] ]
 ]
 
-To create expressions with one of the predefined sorts, the following functions
-can be used:
+Furthermore, a number of container sorts is predefined. Assuming that `s` is
+a sort expression, all container sorts are given in the table below:
 
-[table Creating data expressions with predefined sorts
-    [ [Expression]             [Value]                 ]
-    [ [`data_expr::true_()` ] [boolean value true  ] ]
-    [ [`data_expr::false_()`] [boolean value false ] ]
-    [ [`data_expr::pos(p)`  ] [positive number p   ] ]
-    [ [`data_expr::nat(n)`  ] [natural number n    ] ]
-    [ [`data_expr::int_(i)` ] [integer i           ] ]
-    [ [`data_expr::real(r)` ] [real number r       ] ]
+[table Container sorts
+    [ [Expression]           [Type] ]
+    [ [`sort_list::list(s)`] [lists] ]
+    [ [`sort_set::set_(s)`]  [sets] ]
+    [ [`sort_fset::fset(s)`] [finite sets] ]
+    [ [`sort_bag::bag(s)`]   [bags] ]
+    [ [`sort_fbag::fbag(s)`] [finite bags] ]
 ]
 
-To explicitly convert between numerical expressions of different type,
-there are conversion functions available named =A2B=, with =A= and =B=
-in =bool=, =pos=, =nat=, =int= or =real=.
+Note that the source code for all predefined sorts is generated from
+specification files.
 
 [endsect] [/Predefined sorts]
