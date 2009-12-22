@@ -40,9 +40,10 @@ namespace mcrl2 {
 
     /// \cond INTERNAL_DOCS
     namespace detail {
-
-      // Convert to number represented as character array where each character represents a decimal digit
+      // Convert to number represented as character array where each character
+      // represents a decimal digit
       inline std::vector< char > string_to_vector_number(std::string const& s) {
+        assert(s.size() > 0);
         std::vector< char > result;
 
         result.reserve(s.size());
@@ -51,6 +52,21 @@ namespace mcrl2 {
           BOOST_ASSERT('0' <= *i && *i <= '9');
 
           result.push_back(*i - '0');
+        }
+
+        return result;
+      }
+
+      // Convert from number represented as character array where each character
+      // represents a decimal digit
+      inline std::string vector_number_to_string(std::vector< char > const& v) {
+        assert(v.size() > 0);
+        std::string result;
+
+        result.reserve(v.size());
+
+        for (std::vector< char >::const_iterator i = v.begin(); i != v.end(); ++i) {
+          result.push_back(*i + '0');
         }
 
         return result;
@@ -99,11 +115,11 @@ namespace mcrl2 {
       }
 
       /// \brief Multiplies a number in decimal notation represented by an array by two
-      /// \param[in,out] s the number
+      /// \param[in,out] number the number
       /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
       inline void decimal_number_multiply_by_two(std::vector< char >& number)
       {
-        BOOST_ASSERT(0 < number.size());
+        assert(0 < number.size());
 
         std::vector< char >           result(number.size() + 2, 0);
         std::vector< char >::iterator j(result.begin());
@@ -112,9 +128,16 @@ namespace mcrl2 {
           *(j++) = number[0] / 5;
         }
 
-        for (std::vector< char >::const_iterator i = number.begin() + 1; i != number.end(); ++i, ++j) {
-          // result[a] = 5*(number[b - 1] mod 2) + number[b] div 2   where result[a] = *j and number[b - 1] = *(i - 1)
-          *j = 2 * (*(i - 1) % 5) + *i / 5;
+        for (std::vector< char >::const_iterator i = number.begin(); i < number.end(); ++i, ++j) {
+          // result[a] = 2*(number[b] mod 5) + number[b+1] div 5   where result[a] = *j and number[b] = *(i)
+          if (i == number.end() - 1)
+          {
+            *j = 2 * (*i % 5);
+          }
+          else
+          {
+            *j = 2 * (*i % 5) + *(i+1) / 5;
+          }
         }
 
         result.resize(j - result.begin());
@@ -122,8 +145,8 @@ namespace mcrl2 {
         number.swap(result);
       }
 
-      /// \brief Adds one to a number in decimal notation represented by an array by two
-      /// \param[in,out] s the number
+      /// \brief Adds one to a number in decimal notation represented by an array
+      /// \param[in,out] number the number
       /// A number d0 d1 ... dn is represented as s[0] s[1] ... s[n]
       inline void decimal_number_increment(std::vector< char >& number) {
         BOOST_ASSERT(0 < number.size());
@@ -219,6 +242,39 @@ namespace mcrl2 {
                  sort_pos::is_positive_constant(sort_pos::number(n))
                );
       }
+
+      /// \brief Return the string representation of a positive number
+      /// \param n A data expression
+      /// \pre is_positive_constant(n)
+      /// \ret String representation of n
+      /// Transforms a positive constant n into a character array containing
+      /// the decimal representation of n.
+      inline
+      std::string positive_constant_as_string(data_expression n)
+      {
+        std::vector<bool> bits;
+
+        while(sort_pos::is_cdub_application(n))
+        {
+          bits.push_back(sort_bool::is_true_function_symbol(sort_pos::bit(n)));
+          n = sort_pos::number(n);
+        }
+
+        assert(sort_pos::is_c1_function_symbol(n));
+
+        std::vector< char > result = detail::string_to_vector_number("1");
+
+        for(std::vector<bool>::reverse_iterator i = bits.rbegin(); i != bits.rend(); ++i)
+        {
+          detail::decimal_number_multiply_by_two(result);
+          if(*i)
+          {
+            detail::decimal_number_increment(result);
+          }
+        }
+
+        return detail::vector_number_to_string(result);
+      }
     }
 
     namespace sort_nat {
@@ -245,6 +301,23 @@ namespace mcrl2 {
                ( sort_nat::is_cnat_application(n) &&
                  sort_pos::is_positive_constant(sort_nat::arg(n))
                );
+      }
+
+      /// \brief Return the string representation of a natural number
+      /// \param n A data expression
+      /// \pre is_natural_constant(n)
+      /// \ret String representation of n
+      inline std::string natural_constant_as_string(data_expression const& n)
+      {
+        assert(is_natural_constant(n));
+        if(sort_nat::is_c0_function_symbol(n))
+        {
+          return "0";
+        }
+        else
+        {
+          return sort_pos::positive_constant_as_string(sort_nat::arg(n));
+        }
       }
     }
 
@@ -277,6 +350,23 @@ namespace mcrl2 {
                ( sort_int::is_cneg_application(n) &&
                  sort_pos::is_positive_constant(sort_int::arg(n))
                );
+      }
+
+      /// \brief Return the string representation of an integer number
+      /// \param n A data expression
+      /// \pre is_integer_constant(n)
+      /// \ret String representation of n
+      inline std::string integer_constant_as_string(data_expression const& n)
+      {
+        assert(is_integer_constant(n));
+        if(sort_int::is_cint_application(n))
+        {
+          return sort_nat::natural_constant_as_string(sort_int::arg(n));
+        }
+        else
+        {
+          return "-" + sort_pos::positive_constant_as_string(sort_int::arg(n));
+        }
       }
     }
 

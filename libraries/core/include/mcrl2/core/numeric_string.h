@@ -12,6 +12,8 @@
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__
 #define __NUMERIC_STRING_FUNCTIONS_H__
 
+#include <math.h>
+
 namespace mcrl2 {
   namespace core {
 
@@ -19,65 +21,20 @@ namespace mcrl2 {
     //---------------------------------
 
     /**
-     * \brief Divides by two in decimal string representation
-     * \param[in] n an arbitrary integer in decimal representation
-     * \pre n is of the form "0 | [1-9][0-9]*"
-     * \return the smallest string representation of n div 2
-     * \note The result is created with malloc, so it has to be freed
-     **/
-    char *gsStringDiv2(const char *n);
-
-    /**
-     * \brief Computes remainder of division by two in decimal string representation
-     * \param[in] n an arbitrary integer in decimal representation
-     * \pre n is of the form "0 | [1-9][0-9]*"
-     * \return  the value of n mod 2
-     **/
-    int gsStringMod2(const char *n);
-
-    /**
-     * \brief Computes modulo 2 in decimal string representation
-     * \param[in] n a string that represents a number
-     * \param[in] inc a displacement (+0 or +1)
-     * \pre n is of the form "0 | [1-9][0-9]*" and 0 <= inc <= 1
-     * \return the smallest string representation of 2*n + inc,
-     * \note The result is created with malloc, so it has to be freed
-     **/
-    char *gsStringDub(const char *n, const int inc);
-
-    /**
      * \brief Computes number of characters of the decimal representation
      * \param[in] n an integer number
      * \return the number of characters of the decimal representation of n
      **/
-    int NrOfChars(const int n);
-
-    ///\pre PosConstant is a data expression of sort Pos built from constructors only
-    ///\return The value of PosExpr
-    ///     Note that the result is created with malloc, so it has to be freed
-    char *gsPosValue(const ATermAppl PosConstant);
-    
-    ///\pre PosConstant is a data expression of sort Pos built from constructors only
-    ///\return The value of PosExpr
-    int gsPosValue_int(const ATermAppl PosConstant);
-
-    ///\pre NatConstant is a data expression of sort Nat built from constructors only
-    ///\return The value of NatExpr
-    ///     Note that the result is created with malloc, so it has to be freed
-    char *gsNatValue(const ATermAppl NatConstant);
-    
-    ///\pre NatConstant is a data expression of sort Nat built from constructors only
-    ///\return The value of NatExpr
-    int gsNatValue_int(const ATermAppl NatConstant);
-
-    ///\pre IntConstant is a data expression of sort Int built from constructors only
-    ///\return The value of IntExpr
-    ///     Note that the result is created with malloc, so it has to be freed
-    char *gsIntValue(const ATermAppl IntConstant);
-    
-    ///\pre IntConstant is a data expression of sort Int built from constructors only
-    ///\return The value of IntExpr
-    int gsIntValue_int(const ATermAppl IntConstant);
+    inline
+    int NrOfChars(const int n)
+    {
+      if (n > 0)
+        return (int) floor(log10((double) n)) + 1;
+      else if (n == 0)
+        return 1;
+      else //n < 0
+        return (int) floor(log10((double) abs(n))) + 2;
+    }
   }
 }
 

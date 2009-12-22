@@ -559,9 +559,7 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_int_constant(ATermAppl a_clause) {
-      char* s = core::gsIntValue(a_clause);
-      std::string v_value(s);
-      free(s);
+      std::string v_value(data::sort_int::integer_constant_as_string(data::data_expression(a_clause)));
       if (v_value[0] == '-') {
         v_value[0] = '~';
         f_formula = f_formula + "(" + v_value + ")";
@@ -573,18 +571,14 @@ namespace mcrl2 {
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_nat_constant(ATermAppl a_clause) {
-      char* s = core::gsNatValue(a_clause);
-      std::string v_value(s);
-      free(s);
+      std::string v_value(data::sort_nat::natural_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 
     // --------------------------------------------------------------------------------------------
 
     void SMT_LIB_Solver::translate_pos_constant(ATermAppl a_clause) {
-      char* s = core::gsPosValue(a_clause);
-      std::string v_value(s);
-      free(s);
+      std::string v_value(data::sort_pos::positive_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 

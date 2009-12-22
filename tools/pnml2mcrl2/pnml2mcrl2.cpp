@@ -29,7 +29,6 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h"

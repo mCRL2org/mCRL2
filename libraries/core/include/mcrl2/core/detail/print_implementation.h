@@ -29,7 +29,6 @@
 #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/numeric_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/bool.h"
@@ -1215,42 +1214,41 @@ ATermList gsGetDataExprArgs(ATermAppl DataExpr)
 }
 
 // Copied from data reconstruction
-static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, char const* Mult)
+static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, std::vector<char>& Mult)
 {
   ATermAppl Head = gsGetDataExprHead(PosExpr);
   ATermList Args = gsGetDataExprArgs(PosExpr);
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(PosExpr))) {
     //PosExpr is 1; return Mult
-    return data::function_symbol(Mult, data::sort_pos::pos());
+    return data::function_symbol(data::detail::vector_number_to_string(Mult), data::sort_pos::pos());
   } else if (data::sort_pos::is_cdub_function_symbol(data::data_expression(Head))) {
     //PosExpr is of the form cDub(b,p); return (Mult*2)*v(p) + Mult*v(b)
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl PosArg = ATAelementAt(Args, 1);
-    char* NewMult = gsStringDub(Mult, 0);
-    PosArg = reconstruct_pos_mult(PosArg, NewMult);
-    free(NewMult);
+    data::detail::decimal_number_multiply_by_two(Mult);
+    PosArg = reconstruct_pos_mult(data::data_expression(PosArg), Mult);
     if (data::sort_bool::is_false_function_symbol(data::data_expression(BoolArg))) {
       //Mult*v(b) = 0
       return PosArg;
     } else if (data::sort_bool::is_true_function_symbol(data::data_expression(BoolArg))) {
       //Mult*v(b) = Mult
-      return data::sort_real::plus(data::data_expression(PosArg),
-                                  data::function_symbol(Mult, data::sort_pos::pos()));
-    } else if (strcmp(Mult, "1") == 0) {
+      return data::sort_real::plus(data::data_expression(data::data_expression(PosArg)),
+                                  data::function_symbol(data::detail::vector_number_to_string(Mult), data::sort_pos::pos()));
+    } else if (data::detail::vector_number_to_string(Mult) == "1") {
       //Mult*v(b) = v(b)
       return data::sort_real::plus(data::data_expression(PosArg), bool_to_numeric(data::data_expression(BoolArg), data::sort_nat::nat()));
     } else {
       //Mult*v(b)
       return data::sort_real::plus(data::data_expression(PosArg),
-                                  data::sort_real::times(data::function_symbol(Mult, data::sort_nat::nat()),
+                                  data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(Mult), data::sort_nat::nat()),
                                                         bool_to_numeric(data::data_expression(BoolArg), data::sort_nat::nat())));
     }
   } else {
     //PosExpr is not a Pos constructor
-    if (strcmp(Mult, "1") == 0) {
+    if (data::detail::vector_number_to_string(Mult) == "1") {
       return PosExpr;
     } else {
-      return data::sort_real::times(data::function_symbol(Mult, data::sort_pos::pos()), data::data_expression(PosExpr));
+      return data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(Mult), data::sort_pos::pos()), data::data_expression(PosExpr));
     }
   }
 }
@@ -1259,11 +1257,11 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part) {
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(Part)) || data::sort_pos::is_cdub_application(data::data_expression(Part))) {
   //  gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
     if (data::sort_pos::is_positive_constant(data::data_expression(Part))) {
-      char* positive_value = gsPosValue(Part);
+      std::string positive_value(data::sort_pos::positive_constant_as_string(data::data_expression(Part)));
       Part = data::function_symbol(positive_value, data::sort_pos::pos());
-      free(positive_value);
     } else {
-      Part = reconstruct_pos_mult(Part, "1");
+      std::vector< char > number = data::detail::string_to_vector_number("1");
+      Part = reconstruct_pos_mult(Part, number);
     }
   } else if (data::sort_nat::is_c0_function_symbol(data::data_expression(Part))) {
   //    gsDebugMsg("Reconstructing implementation of %T\n", Part);

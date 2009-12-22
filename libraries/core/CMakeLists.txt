@@ -40,7 +40,6 @@ add_library(${PROJECT_NAME}
   source/print.cpp
   source/messaging.cpp
   source/aterm_ext.cpp
-  source/numeric_string.cpp
   source/alpha.cpp
   source/print_c.cpp
   source/text_utility.cpp

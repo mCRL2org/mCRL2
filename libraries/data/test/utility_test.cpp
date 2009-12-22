@@ -48,35 +48,43 @@ void number_test() {
   using namespace sort_int;
   using namespace sort_real;
 
-/*
-  // Test character array arithmetic
-  std::vector<char> numbers;
-  numbers = detail::string_to_vector_number("1");
-  numbers[0] = '1';
-  BOOST_CHECK(numbers[0] == '1');
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "1");
-  std::cerr << std::string(numbers.begin(), numbers.end()) << std::endl;
   BOOST_CHECK(detail::as_decimal_string(1) == "1");
+  BOOST_CHECK(detail::as_decimal_string(2) == "2");
+  BOOST_CHECK(detail::as_decimal_string(3) == "3");
+  BOOST_CHECK(detail::as_decimal_string(4) == "4");
+  BOOST_CHECK(detail::as_decimal_string(144) == "144");
+
+  // Test character array arithmetic
+  std::vector< char > numbers;
+  numbers = detail::string_to_vector_number("1");
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "1");
+
   detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "2");
-  BOOST_CHECK(numbers[0] == '2');
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "2");
+
   detail::decimal_number_increment(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "3");
-  BOOST_CHECK(numbers[0] == '3');
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "3");
+
   detail::decimal_number_increment(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "4");
-  BOOST_CHECK(numbers[0] == '4');
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "4");
+
   detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "8");
-  BOOST_CHECK(numbers[0] == '8');
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "8");
+
   detail::decimal_number_multiply_by_two(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "16");
-  BOOST_CHECK(numbers[0] == '1');
-  BOOST_CHECK(numbers[1] == '6');
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "16");
+
   detail::decimal_number_divide_by_two(numbers);
-  BOOST_CHECK(std::string(numbers.begin(), numbers.end()) == "8");
-  BOOST_CHECK(numbers[0] == '8');
-*/
+  BOOST_CHECK(detail::vector_number_to_string(numbers) == "8");
+
+  BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "1")) == "1");
+  BOOST_CHECK(sort_pos::positive_constant_as_string(number(sort_pos::pos(), "10")) == "10");
+  BOOST_CHECK(sort_nat::natural_constant_as_string(number(sort_nat::nat(), "0")) == "0");
+  BOOST_CHECK(sort_nat::natural_constant_as_string(number(sort_nat::nat(), "1")) == "1");
+  BOOST_CHECK(sort_nat::natural_constant_as_string(number(sort_nat::nat(), "10")) == "10");
+  BOOST_CHECK(sort_int::integer_constant_as_string(number(sort_int::int_(), "-10")) == "-10");
+  BOOST_CHECK(sort_int::integer_constant_as_string(number(sort_int::int_(), "10")) == "10");
+
   data_specification specification = parse_data_specification("sort A = Real;");
 
   mcrl2::data::rewriter R(specification);
