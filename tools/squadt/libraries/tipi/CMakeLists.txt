@@ -17,8 +17,8 @@ set(squadt_tipi_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/controller/communicator.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tool/communicator.cpp
-  PARENT_SCOPE
 )
+set(squadt_tipi_src ${squadt_tipi_src} PARENT_SCOPE)
 
 if (NOT MONO_LIB )
 

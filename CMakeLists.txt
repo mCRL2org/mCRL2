@@ -541,10 +541,9 @@ add_subdirectory ( 3rd-party/ticpp )
   add_subdirectory ( libraries/lts )
   add_subdirectory ( libraries/trace )
   add_subdirectory ( tools/squadt/libraries/tipi )
-
-if( MONO_LIB )
-  add_subdirectory ( libraries/ )
-endif( MONO_LIB)
+  if( MONO_LIB )
+    add_subdirectory ( libraries/ )
+  endif( MONO_LIB)
 
 ##---------------------------------------------------
 ## Tool dependencies

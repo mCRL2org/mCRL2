@@ -42,8 +42,9 @@ set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/alpha.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/print_c.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
-  PARENT_SCOPE
 )
+
+set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
 if( NOT MONO_LIB)
   include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )

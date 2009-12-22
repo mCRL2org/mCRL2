@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 2.6)
 
 set(mcrl2_trace_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/trace.cpp
-  PARENT_SCOPE
 )
+set(mcrl2_trace_src ${mcrl2_trace_src} PARENT_SCOPE)
 
 if( NOT MONO_LIB )
   include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)

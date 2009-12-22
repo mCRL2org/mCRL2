@@ -39,8 +39,8 @@ set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_dotlexer.h
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.ll
-  PARENT_SCOPE
 )
+set(mcrl2_lts_src ${mcrl2_lts_src} PARENT_SCOPE)
 
 if(NOT MONO_LIB)
   # actual target:

@@ -24,8 +24,8 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
-  PARENT_SCOPE
 )
+set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 
 if( NOT MONO_LIB )
 

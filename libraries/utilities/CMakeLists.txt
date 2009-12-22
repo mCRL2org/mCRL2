@@ -16,8 +16,9 @@ cmake_minimum_required(VERSION 2.6)
 set(mcrl2_utilities_command_line_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
-  PARENT_SCOPE
 )
+
+set(mcrl2_utilities_command_line_src ${mcrl2_utilities_command_line_src}  PARENT_SCOPE)
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
   PROPERTIES COMPILE_DEFINITIONS MCRL2_REVISION="${SVN_REV} - ${CMAKE_BUILD_TYPE}"
@@ -54,9 +55,10 @@ if(SQUADT_CONNECTIVITY)
   
   set(mcrl2_utilities_squadt_src
     ${CMAKE_CURRENT_SOURCE_DIR}/source/squadt_interface.cpp
-    PARENT_SCOPE
   )
   
+  set(mcrl2_utilities_squadt_src ${mcrl2_utilities_squadt_src} PARENT_SCOPE)  
+
   if( NOT MONO_LIB )
   
     include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
@@ -106,8 +108,9 @@ set(mcrl2_utilities_wx_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/spinctrlfloat.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/colorbutton.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/font_renderer.cpp
-  PARENT_SCOPE
 )
+
+set(mcrl2_utilities_wx_src ${mcrl2_utilities_wx_src} PARENT_SCOPE)
 
 if( NOT MONO_LIB )
 
