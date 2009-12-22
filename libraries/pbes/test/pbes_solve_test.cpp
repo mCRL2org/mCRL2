@@ -104,10 +104,11 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
   core::garbage_collect();
 }
 
-void test_pbespgsolve(const std::string& pbes_spec, bool expected_result)
+void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  pbespgsolve_algorithm algorithm;
+  unsigned int log_level = 0;
+  pbespgsolve_algorithm algorithm(log_level, options);
   bool result;
   try
   {
@@ -134,7 +135,12 @@ void test_pbespgsolve(const std::string& pbes_spec, bool expected_result)
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
   test_pbes2bool(pbes_spec, expected_result);
-  test_pbespgsolve(pbes_spec, expected_result);
+
+  // test with and without scc decomposition
+  pbespgsolve_options options;
+  test_pbespgsolve(pbes_spec, options, expected_result);
+  options.use_scc_decomposition = false;
+  test_pbespgsolve(pbes_spec, options, expected_result);
 }
 
 void test_all()
