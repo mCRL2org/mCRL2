@@ -14,14 +14,14 @@
 
 static struct CompatibilityChecks {
     CompatibilityChecks() {
-        assert(sizeof(int8_t)   == 1);
-        assert(sizeof(uint8_t)  == 1);
-        assert(sizeof(int16_t)  == 2);
-        assert(sizeof(uint16_t) == 2);
-        assert(sizeof(int32_t)  == 4);
-        assert(sizeof(uint32_t) == 4);
-        assert(sizeof(int64_t)  == 8);
-        assert(sizeof(uint64_t) == 8);
+        assert(sizeof(compat_int8_t)   == 1);
+        assert(sizeof(compat_uint8_t)  == 1);
+        assert(sizeof(compat_int16_t)  == 2);
+        assert(sizeof(compat_uint16_t) == 2);
+        assert(sizeof(compat_int32_t)  == 4);
+        assert(sizeof(compat_uint32_t) == 4);
+        assert(sizeof(compat_int64_t)  == 8);
+        assert(sizeof(compat_uint64_t) == 8);
     }
 } checks;
 

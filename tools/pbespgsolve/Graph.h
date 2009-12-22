@@ -17,8 +17,8 @@
 
 #include "compatibility.h"
 
-typedef uint32_t verti;    /*!< type used to number vertices */
-typedef uint32_t edgei;    /*!< type used to number edges */
+typedef compat_uint32_t verti;    //!< type used to number vertices
+typedef compat_uint32_t edgei;    //!< type used to number edges
 
 #define NO_VERTEX ((verti)-1)
 

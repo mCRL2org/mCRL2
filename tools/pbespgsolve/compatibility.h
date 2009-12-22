@@ -10,8 +10,6 @@
 #ifndef COMPATIBILITY_H_INCLUDED
 #define COMPATIBILITY_H_INCLUDED
 
-#include <boost/cstdint.hpp>
-
 /*! \file Compatibility.h
     \brief Compatibility functions.
 
@@ -32,21 +30,15 @@
          which is true on IA-32 and x84_64 architectures.
 */
 
-#ifndef __int8_t_defined
-#define __int8_t_defined
-typedef signed char             int8_t;
-typedef signed short int        int16_t;
-typedef signed int              int32_t;
-typedef signed long long int    int64_t;
-#endif
+typedef signed char             compat_int8_t;
+typedef signed short            compat_int16_t;
+typedef signed int              compat_int32_t;
+typedef signed long long        compat_int64_t;
 
-#ifndef _STDINT_H
-typedef unsigned char           uint8_t;
-typedef unsigned short int      uint16_t;
-typedef unsigned int            uint32_t;
-typedef unsigned long long int  uint64_t;
-#endif
-
+typedef unsigned char           compat_uint8_t;
+typedef unsigned short          compat_uint16_t;
+typedef unsigned int            compat_uint32_t;
+typedef unsigned long long      compat_uint64_t;
 
 /* Case-insensitive string comparison functions.
    redefined here to support non-POSIX platforms. */
