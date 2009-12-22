@@ -13,52 +13,45 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 add_definitions(-DTIXML_USE_TICPP)
 
-add_library(${PROJECT_NAME}
-  #the following files are all included by the file implementations.cpp:
-  #source/basic_datatype.cpp
-  #source/command_line_interface.cpp
-  #source/common.cpp
-  #source/configuration.cpp
-  #source/display.cpp
-  #source/mime_type.cpp
-  #source/restore_visitor.cpp
-  #source/store_visitor.cpp
-  #source/detail/event_handlers.cpp
-  #source/transport/socket_listener.cpp
-  #source/transport/socket_transceiver.cpp
-  #source/transport/transporter.cpp
-  #source/controller/capabilities.cpp
-  #source/tool/capabilities.cpp
-  source/implementations.cpp
-  source/controller/communicator.cpp
-  source/tool/communicator.cpp
-
+set(squadt_tipi_src
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/controller/communicator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/tool/communicator.cpp
+  PARENT_SCOPE
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
+if (NOT MONO_LIB )
 
-target_link_libraries(${PROJECT_NAME}
-  ticpp
-)
+  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
+  include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+  include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
 
-if(MINGW OR CYGWIN OR MSYS)
+  add_library(${PROJECT_NAME}
+    ${squadt_tipi_src}  
+  )
+
   target_link_libraries(${PROJECT_NAME}
-    wsock32
-    ws2_32)
-endif(MINGW OR CYGWIN OR MSYS)
+    ticpp
+  )
+  
+  if(MINGW OR CYGWIN OR MSYS)
+    target_link_libraries(${PROJECT_NAME}
+      wsock32
+      ws2_32)
+  endif(MINGW OR CYGWIN OR MSYS)
+  
+  if(USE_BOOST_INTERNAL)
+    target_link_libraries(${PROJECT_NAME}
+      boost
+    ) 
+  else(USE_BOOST_INTERNAL)
+    target_link_libraries(${PROJECT_NAME}
+      ${Boost_LIBRARIES}     
+    ) 
+  endif(USE_BOOST_INTERNAL)
+  
+  # add install target:
+  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-if(USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-    boost
-  ) 
-else(USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-    ${Boost_LIBRARIES}     
-  ) 
-endif(USE_BOOST_INTERNAL)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+endif(NOT MONO_LIB)

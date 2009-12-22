@@ -22,23 +22,22 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
-add_library(${PROJECT_NAME}
-# The following files are included in source/implementations.cpp:
-# source/sumelm.cpp
-# source/invariant_eliminator.cpp
-# source/nextstate_standard.cpp
-# source/confluence_checker.cpp
-# source/disjointness_checker.cpp
-# source/invariant_checker.cpp
-# source/suminst.cpp
-# source/linearise.cpp
-  source/implementations.cpp
+set(mcrl2_lps_src
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
+  PARENT_SCOPE
 )
 
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_data
-)
+if( NOT MONO_LIB )
 
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+  add_library(${PROJECT_NAME}
+    ${mcrl2_lps_src}
+  )
+
+  target_link_libraries(${PROJECT_NAME}
+    mcrl2_data
+  )
+
+  # add install target:
+  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+endif( NOT MONO_LIB )
 

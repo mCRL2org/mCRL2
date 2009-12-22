@@ -29,33 +29,40 @@ endif(COMMAND cmake_policy)
 
 # ######### General setup ##########
 
-# actual target:
-add_library(${PROJECT_NAME}
-  source/typecheck.cpp
-  source/parse.cpp
-  source/struct_core.cpp
-  source/mcrl2parser.cpp
-  source/mcrl2lexer.cpp
-  source/regfrmtrans.cpp
-  source/print.cpp
-  source/messaging.cpp
-  source/aterm_ext.cpp
-  source/alpha.cpp
-  source/print_c.cpp
-  source/text_utility.cpp
+set(mcrl2_core_src
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2parser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/messaging.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/aterm_ext.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/alpha.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/print_c.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
+  PARENT_SCOPE
 )
 
-include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
+if( NOT MONO_LIB)
+  include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
+  include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
+  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+  include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+  include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
+  
+  # actual target:
+  add_library(${PROJECT_NAME}
+    ${mcrl2_core_src}
+  )
+  
+  target_link_libraries(${PROJECT_NAME}
+    aterm
+  )
+  
+  # add install target:
+  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-target_link_libraries(${PROJECT_NAME}
-  aterm
-)
-
-# add install target:
-install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-
+endif( NOT MONO_LIB)
