@@ -274,17 +274,15 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_proc_spec(ATermAppl proc_spec)
-    {
+    { 
       if (gsVerbose)
       { std::cerr << "type checking process specification...\n";
       }
 
       ATermAppl Result=NULL;
 
-      if (gsDebug) { std::cerr << "type checking phase started\n"; }
+      if (gsDebug) { std::cerr << "type checking phase started: " << pp(proc_spec) << "\n"; }
       gstcDataInit();
-
-      if (gsDebug) { std::cerr << "type checking read-in phase started\n"; }
 
       ATermAppl data_spec = ATAgetArgument(proc_spec, 0);
       if(gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0))) {
@@ -2794,7 +2792,8 @@ namespace mcrl2 {
         return gstcUnArrowProd(ArgumentTypes,NewType);
       }
 
-      if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm)){
+      if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)||gsIsDataVarId(*DataTerm))
+      {
         ATermAppl Name=ATAgetArgument(*DataTerm,0);
         if(gsIsNumericString(gsATermAppl2String(Name)))
         {
@@ -2813,8 +2812,9 @@ namespace mcrl2 {
         }
 
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
-        if(Type){
-          // if (gsDebug) { std::cerr << "Recognised declared variable %P, Type: %P\n",Name,Type);
+        if(Type)
+        {
+          if (gsDebug) { std::cerr << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "\n"; }
           *DataTerm=gsMakeDataVarId(Name,Type);
 
           if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
@@ -2840,15 +2840,16 @@ namespace mcrl2 {
           return Type;
         }
 
-        if((Type=ATAtableGet(context.constants,(ATerm)Name))){
+        if((Type=ATAtableGet(context.constants,(ATerm)Name)))
+        {
           if(!(Type=gstcTypeMatchA(Type,PosType))) {gsErrorMsg("no constant %P with type %P\n",*DataTerm,PosType);return NULL;}
           *DataTerm=gsMakeOpId(Name,Type);
           return Type;
         }
 
         ATermList ParList=ATLtableGet(gssystem.constants,(ATerm)Name);
-        if(ParList){
-          ATermList NewParList=ATmakeList0();
+        if(ParList)
+        { ATermList NewParList=ATmakeList0();
           for(;!ATisEmpty(ParList);ParList=ATgetNext(ParList)){
             ATermAppl Par=ATAgetFirst(ParList);
             if((Par=gstcTypeMatchA(Par,PosType)))
@@ -2874,17 +2875,20 @@ namespace mcrl2 {
         if(!ParList) ParList=ParListS;
         else if(ParListS) ParList=ATconcat(ParListS,ParList);
 
-        if(!ParList){
+        if(!ParList)
+        {
           gsErrorMsg("unknown operation %P\n",Name);
           return NULL;
         }
 
-        if(ATgetLength(ParList)==1){
+        if(ATgetLength(ParList)==1)
+        {
           ATermAppl Type=ATAgetFirst(ParList);
           *DataTerm=gsMakeOpId(Name,Type);
           return Type;
         }
-        else{
+        else
+        {
           return gstcTraverseVarConsTypeDN(DeclaredVars, AllowedVars, DataTerm, PosType, FreeVars, strict_ambiguous, -1, warn_upcasting);
         }
       }
@@ -2897,16 +2901,23 @@ namespace mcrl2 {
       return Result;
     }
 
-    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous, int nFactPars, bool warn_upcasting){
+    static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl *DataTerm, ATermAppl PosType, ATermTable FreeVars, bool strict_ambiguous, int nFactPars, bool warn_upcasting)
+    {
       // -1 means the number of arguments is not known.
-      // if (gsDebug) { std::cerr << "gstcTraverseVarConsTypeDN: DataTerm %T with PosType %T, nFactPars %d\n",*DataTerm,PosType,nFactPars);
-      if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm)){
+      if (gsDebug) 
+      { std::cerr << "gstcTraverseVarConsTypeDN: DataTerm " << pp(*DataTerm) << " with PosType " << pp(PosType) << 
+                  ", nFactPars " << nFactPars << "\n";
+      }
+      if(gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
+      {
         ATermAppl Name=ATAgetArgument(*DataTerm,0);
         bool variable=false;
         ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
-        if(Type){
+        if(Type)
+        {
           variable=true;
-          if(!ATAtableGet(AllowedVars,(ATerm)Name)) {
+          if(!ATAtableGet(AllowedVars,(ATerm)Name)) 
+          {
             gsErrorMsg("variable %P occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side\n", Name);
             return NULL;
           }
@@ -2917,7 +2928,8 @@ namespace mcrl2 {
         }
         ATermList ParList;
 
-        if(nFactPars==0){
+        if(nFactPars==0)
+        {
           if((Type=ATAtableGet(DeclaredVars,(ATerm)Name))) {
             if(!gstcTypeMatchA(Type,PosType)){
               gsErrorMsg("the type %P of variable %P is incompatible with %P (typechecking %P)\n",Type,Name,PosType,*DataTerm);
@@ -2954,17 +2966,20 @@ namespace mcrl2 {
           }
         }
 
-        if(Type) {
+        if(Type) 
+        { 
           ParList=ATmakeList1((ATerm)gstcUnwindType(Type));
         }
-        else {
+        else 
+        {
           ATermList ParListS=ATLtableGet(gssystem.functions,(ATerm)Name);
           ParList=ATLtableGet(context.functions,(ATerm)Name);
           if(!ParList) ParList=ParListS;
           else if(ParListS) ParList=ATconcat(ParListS,ParList);
         }
 
-        if(!ParList) {
+        if(!ParList) 
+        {
           if(nFactPars>=0) gsErrorMsg("unknown operation %P with %d parameter%s\n",Name, nFactPars, (nFactPars != 1)?"s":"");
           else gsErrorMsg("unknown operation %P\n",Name);
           return NULL;
@@ -3047,7 +3062,8 @@ namespace mcrl2 {
           ParList=NewParList;
         }
 
-        if(ATisEmpty(ParList)) {
+        if(ATisEmpty(ParList)) 
+        {
           //provide some information to the upper layer for a better error message
           ATermAppl Sort;
           if(ATgetLength(CandidateParList)==1) Sort=ATAgetFirst(CandidateParList); else Sort=multiple_possible_sorts(atermpp::aterm_list(CandidateParList));
@@ -3059,16 +3075,26 @@ namespace mcrl2 {
           return NULL;
         }
 
-        if(ATgetLength(ParList)==1){
+        if(ATgetLength(ParList)==1)
+        {
           ATermAppl Type=ATAgetFirst(ParList);
-          if(gstcHasUnknown(Type)){
+          ATermAppl OldType=Type;
+          if(gstcHasUnknown(Type))
+          {
             Type=gstcTypeMatchA(Type,PosType);
           }
-          if(gstcHasUnknown(Type) && gsIsOpId(*DataTerm)){
+         
+          if(gstcHasUnknown(Type) && gsIsOpId(*DataTerm))
+          {
             Type=gstcTypeMatchA(Type,ATAgetArgument(*DataTerm,1));
           }
+          if (Type==NULL)
+          { gsErrorMsg("fail to match sort %P with %P\n",OldType,PosType);
+            return NULL;
+          }
 
-          if(ATisEqual(static_cast<ATermAppl>(data::detail::if_symbol()),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(data::detail::if_symbol()),ATAgetArgument(*DataTerm,0)))
+          {
             if (gsDebug) { std::cerr << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchIf(Type);
             if(!NewType){
@@ -3084,7 +3110,8 @@ namespace mcrl2 {
             || ATisEqual(static_cast<ATermAppl>(data::detail::less_equal_symbol()),ATAgetArgument(*DataTerm,0))
             || ATisEqual(static_cast<ATermAppl>(data::detail::greater_symbol()),ATAgetArgument(*DataTerm,0))
             || ATisEqual(static_cast<ATermAppl>(data::detail::greater_equal_symbol()),ATAgetArgument(*DataTerm,0))
-            ) {
+            ) 
+          {
             if (gsDebug) { std::cerr << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchEqNeqComparison(Type);
             if(!NewType){
@@ -3094,7 +3121,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(static_cast<ATermAppl>(sort_list::cons_name()),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::cons_name()),ATAgetArgument(*DataTerm,0)))
+          {
             if (gsDebug) { std::cerr << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchListOpCons(Type);
             if(!NewType){
@@ -3104,7 +3132,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(static_cast<ATermAppl>(sort_list::snoc_name()),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::snoc_name()),ATAgetArgument(*DataTerm,0)))
+          {
             if (gsDebug) { std::cerr << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchListOpSnoc(Type);
             if(!NewType){
@@ -3114,7 +3143,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(static_cast<ATermAppl>(sort_list::concat_name()),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::concat_name()),ATAgetArgument(*DataTerm,0)))
+          {
             if (gsDebug) { std::cerr << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchListOpConcat(Type);
             if(!NewType){
@@ -3124,7 +3154,8 @@ namespace mcrl2 {
             Type=NewType;
           }
 
-          if(ATisEqual(static_cast<ATermAppl>(sort_list::element_at_name()),ATAgetArgument(*DataTerm,0))){
+          if(ATisEqual(static_cast<ATermAppl>(sort_list::element_at_name()),ATAgetArgument(*DataTerm,0)))
+          { 
             if (gsDebug) { std::cerr << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(*DataTerm) << "\n"; }
             ATermAppl NewType=gstcMatchListOpEltAt(Type);
             if(!NewType){
@@ -3135,8 +3166,10 @@ namespace mcrl2 {
           }
 
           if(ATisEqual(static_cast<ATermAppl>(sort_list::head_name()),ATAgetArgument(*DataTerm,0))||
-             ATisEqual(static_cast<ATermAppl>(sort_list::rhead_name()),ATAgetArgument(*DataTerm,0))){
+             ATisEqual(static_cast<ATermAppl>(sort_list::rhead_name()),ATAgetArgument(*DataTerm,0)))
+          {
             if (gsDebug) { std::cerr << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
+// Type==NULL
             ATermAppl NewType=gstcMatchListOpHead(Type);
             if(!NewType){
               gsErrorMsg("the function {R,L}head has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
@@ -3219,10 +3252,12 @@ namespace mcrl2 {
           }
 
 /*
-          if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0))){
-            // if (gsDebug) { std::cerr << "Doing FuncUpdate matching Type %T, PosType %T\n",Type,PosType);
+          if(ATisEqual(gsMakeOpIdNameFuncUpdate(),ATAgetArgument(*DataTerm,0)))
+          {
+            if (gsDebug) { std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "\n"; }
             ATermAppl NewType=gstcMatchFuncUpdate(Type);
-            if(!NewType){
+            if(!NewType)
+            {
               gsErrorMsg("the function FuncUpdate has incompatible argument types %P (while typechecking %P)\n",Type,*DataTerm);
               return NULL;
             }
@@ -3236,22 +3271,26 @@ namespace mcrl2 {
           assert(Type);
           return Type;
         }
-        else{
+        else
+        {
           was_ambiguous=true;
-          if(strict_ambiguous){
-            // if (gsDebug) { std::cerr << "ambiguous operation %P (ParList %T)\n",Name,ParList);
+          if(strict_ambiguous)
+          {
+            if (gsDebug) { std::cerr << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")\n"; }
             if(nFactPars>=0) gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
             else gsErrorMsg("ambiguous operation %P\n", Name);
             return NULL;
           }
-          else{
+          else
+          {
             //*DataTerm=gsMakeOpId(Name,data::unknown_sort());
             //if(variable) *DataTerm=gsMakeDataVarId(Name,data::unknown_sort());
             return data::unknown_sort();
           }
         }
       }
-      else {
+      else 
+      {
         return gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,DataTerm,PosType,FreeVars,strict_ambiguous,warn_upcasting);
       }
     }
@@ -3434,27 +3473,40 @@ namespace mcrl2 {
       return gstcEqTypesA(Type,PosType);
     }
 
-    static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType){
+    static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
+    {
       //Checks if Type is allowed by PosType and returns the matching subtype of Type
 
-      // if (gsDebug) { std::cerr << "gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
+      if (gsDebug) { std::cerr << "gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " \n"; }
 
       if(data::is_unknown_sort(Type)) return PosType;
       if(data::is_unknown_sort(PosType) || gstcEqTypesA(Type,PosType)) return Type;
       if(gsIsSortsPossible(Type) && !gsIsSortsPossible(PosType)) {ATermAppl TmpType=PosType; PosType=Type; Type=TmpType; }
-      if(gsIsSortsPossible(PosType)){
+      if(gsIsSortsPossible(PosType))
+      {
         ATermList NewTypeList=ATmakeList0();
-        for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList)){
+        for(ATermList PosTypeList=ATLgetArgument(PosType,0);!ATisEmpty(PosTypeList);PosTypeList=ATgetNext(PosTypeList))
+        {
           ATermAppl NewPosType=ATAgetFirst(PosTypeList);
-          // if (gsDebug) { std::cerr << "Matching candidate gstcTypeMatchA Type: %T;    PosType: %T New Type: %T\n",Type,PosType,NewPosType);
+          if (gsDebug) 
+          { std::cerr << "Matching candidate gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " 
+                            << pp(PosType) << " New Type: " << pp(NewPosType) << "\n";
+          }
 
-          if((NewPosType=gstcTypeMatchA(Type,NewPosType))){
-            // if (gsDebug) { std::cerr << "Match gstcTypeMatchA Type: %T;    PosType: %T New Type: %T\n",Type,PosType,NewPosType);
+          if((NewPosType=gstcTypeMatchA(Type,NewPosType)))
+          {
+            if (gsDebug) 
+            { std::cerr << "Match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << 
+              " New Type: " << pp(NewPosType) << "\n";
+            }
             NewTypeList=ATinsert(NewTypeList,(ATerm)NewPosType);
           }
         }
-        if(ATisEmpty(NewTypeList)){
-          // if (gsDebug) { std::cerr << "No match gstcTypeMatchA Type: %T;    PosType: %T \n",Type,PosType);
+        if(ATisEmpty(NewTypeList))
+        {
+          if (gsDebug) 
+          { std::cerr << "No match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " \n";
+          }
           return NULL;
         }
 
@@ -3468,7 +3520,6 @@ namespace mcrl2 {
 
       if(gsIsSortId(Type)) Type=gstcUnwindType(Type);
       if(gsIsSortId(PosType)) PosType=gstcUnwindType(PosType);
-
       if(gsIsSortCons(Type))
       {
         ATermAppl ConsType = ATAgetArgument(Type, 0);
@@ -3501,7 +3552,8 @@ namespace mcrl2 {
         }
       }
 
-      if(gsIsSortArrow(Type)){
+      if(gsIsSortArrow(Type))
+      {
         if(!gsIsSortArrow(PosType)) return NULL;
         else{
           ATermList ArgTypes=gstcTypeMatchL(ATLgetArgument(Type,0),ATLgetArgument(PosType,0));
@@ -3509,7 +3561,9 @@ namespace mcrl2 {
           ATermAppl ResType=gstcTypeMatchA(ATAgetArgument(Type,1),ATAgetArgument(PosType,1));
           if(!ResType) return NULL;
           Type=gsMakeSortArrow(ArgTypes,ResType);
-          // if (gsDebug) { std::cerr << "gstcTypeMatchA Done: Type: %T;    PosType: %T \n",Type,PosType);
+          if (gsDebug) 
+          { std::cerr << "gstcTypeMatchA Done: Type: " << pp(Type) << ";    PosType: " << pp(PosType) << "\n";
+          }
           return Type;
         }
       }
@@ -3518,7 +3572,7 @@ namespace mcrl2 {
     }
 
     static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList){
-      // if (gsDebug) { std::cerr << "gstcTypeMatchL TypeList: %T;    PosTypeList: %T \n",TypeList,PosTypeList);
+      // if (gsDebug) { std::cerr << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: %T \n",TypeList,PosTypeList);
 
       if(ATgetLength(TypeList)!=ATgetLength(PosTypeList)) return NULL;
 
