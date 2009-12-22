@@ -94,7 +94,6 @@ namespace mcrl2 {
             LOG_EQUATIONS(3, "equations after substitution\n", first, last);
           }
         }
-        solve(*i);
         LOG_EQUATIONS(2, "equations after solving\n", first, last);
       }
     };
@@ -128,7 +127,7 @@ namespace mcrl2 {
           next = tr::substitute(phi, X, prev);
         }
         while (!m_compare(prev, next));
-        eq.formula() = next;
+        eq.formula() = prev;
       }
     };
 
