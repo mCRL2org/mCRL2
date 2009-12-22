@@ -20,6 +20,7 @@ SOURCES = Abortable.cpp
           ParityGame.cc
           ParityGame_verify.cc
           ParityGame_IO.cc
+          ParityGameSolver.cc
           PredecessorLiftingStrategy.cc
           RecursiveSolver.cc
           SmallProgressMeasures.cc

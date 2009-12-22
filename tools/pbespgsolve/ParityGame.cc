@@ -60,6 +60,7 @@ void ParityGame::make_random( verti V, unsigned out_deg,
     recalculate_cardinalities(V);
 }
 
+#if 0  // FIXME: remove this permanently if I don't need it anymore
 void ParityGame::make_subgame( const ParityGame &game,
                                const verti *vertices, verti num_vertices,
                                const Strategy &strategy )
@@ -110,6 +111,7 @@ void ParityGame::make_subgame( const ParityGame &game,
     graph_.assign(edges, graph.edge_dir());
     recalculate_cardinalities(num_vertices + 2);
 }
+#endif
 
 void ParityGame::make_subgame( const ParityGame &game,
                                const verti *vertices, verti num_vertices )

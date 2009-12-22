@@ -99,7 +99,11 @@ protected:
         return vmap_ ? (v < vmap_size_ ? vmap_[v] : NO_VERTEX) : v;
     }
 
- private:
+private:
+    SmallProgressMeasures(const SmallProgressMeasures &);
+    SmallProgressMeasures &operator=(const SmallProgressMeasures &);
+
+private:
     /*! Compares the first `N` elements of the SPM vectors for the given
         vertices and returns -1, 0 or 1 to indicate that v is smaller, equal to,
         r larger than w (respectively). */

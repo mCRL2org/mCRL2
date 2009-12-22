@@ -29,6 +29,7 @@ add_library(mcrl2_${PROJECT_NAME}
   ParityGame.cc
   ParityGame_IO.cc
   ParityGame_verify.cc
+  ParityGameSolver.cc
   PredecessorLiftingStrategy.cc
   RecursiveSolver.cc
   SmallProgressMeasures.cc

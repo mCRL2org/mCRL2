@@ -51,8 +51,12 @@ protected:
     bool check();
 
 private:
+    MaxMeasureLiftingStrategy(const MaxMeasureLiftingStrategy &);
+    MaxMeasureLiftingStrategy &operator=(const MaxMeasureLiftingStrategy &);
+
+private:
     //! the SPM instance using this strategy
-    const SmallProgressMeasures spm_;
+    const SmallProgressMeasures &spm_;
 
     bool * const queued_;       //!< for each vertex: is it queued?
 

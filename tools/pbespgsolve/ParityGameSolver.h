@@ -14,6 +14,13 @@
 #include "Abortable.h"
 #include <vector>
 
+/*! Merges a substrategy into a main strategy, overwriting the existing strategy
+    for all vertices with indices in vertex_map. */
+void merge_strategies( std::vector<verti> &strategy,
+                       const std::vector<verti> &substrat,
+                       const std::vector<verti> &vertex_map );
+
+
 /*! Abstract base class for parity game solvers: classes that encapsulate
     algorithms to compute the winning set and optimal strategies in a game. */
 class ParityGameSolver : public Abortable

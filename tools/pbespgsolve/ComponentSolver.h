@@ -35,6 +35,7 @@ private:
 protected:
     ParityGameSolverFactory &pgsf_;     //!< Solver factory to use
     ParityGame::Strategy    strategy_;  //!< The resulting strategy
+    std::vector<bool>       solved_;    //!< Which vertices are solved?
 };
 
 class ComponentSolverFactory : public ParityGameSolverFactory

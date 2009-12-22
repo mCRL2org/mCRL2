@@ -212,17 +212,7 @@ ParityGame::Strategy SmallProgressMeasures::solve()
 
         ParityGame::Strategy substrat = subsolver->solve();
         if (substrat.empty()) return ParityGame::Strategy();
-        assert(substrat.size() == won_by_odd.size());
-
-        // Add substrategy for Odd to result:
-        // FIXME: use merge_strategies() from RecursiveSolver instead
-        for (size_t n = 0; n < won_by_odd.size(); ++n)
-        {
-            if (substrat[n] != NO_VERTEX)
-            {
-                strategy[won_by_odd[n]] = won_by_odd[substrat[n]];
-            }
-        }
+        merge_strategies(strategy, substrat, won_by_odd);
 
         // Account for memory used by submap & subsolver:
         mem += sizeof(verti)*submap.size();

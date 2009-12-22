@@ -31,6 +31,10 @@ protected:
     }
 
 private:
+    OldMaxMeasureLiftingStrategy(const OldMaxMeasureLiftingStrategy &);
+    OldMaxMeasureLiftingStrategy operator=(const OldMaxMeasureLiftingStrategy &);
+
+private:
     const SmallProgressMeasures &spm_;
     typedef std::set<std::pair<std::vector<verti>, verti> > queue_t;
     queue_t queue_;

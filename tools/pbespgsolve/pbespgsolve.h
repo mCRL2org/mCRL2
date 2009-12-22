@@ -132,7 +132,7 @@ namespace mcrl2 {
         // Generate the game from a PBES:
         verti goal_v;
         ParityGame pg;
-        pg.read_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
+        pg.assign_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
 
         // Create a solver:
         std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
