@@ -10,6 +10,8 @@
 #ifndef COMPATIBILITY_H_INCLUDED
 #define COMPATIBILITY_H_INCLUDED
 
+#include <boost/cstdint.hpp>
+
 /*! \file Compatibility.h
     \brief Compatibility functions.
 
