@@ -274,7 +274,7 @@ namespace mcrl2 {
     }
 
     ATermAppl type_check_proc_spec(ATermAppl proc_spec)
-    { 
+    { // gsDebug=true;
       if (gsVerbose)
       { std::cerr << "type checking process specification...\n";
       }
